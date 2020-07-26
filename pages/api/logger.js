@@ -1,4 +1,4 @@
-import { handle } from "util/logger";
+import { handle } from "@/util/logger";
 
 export default (req, res) => {
     handle({ ...req.body, throwError: false });
