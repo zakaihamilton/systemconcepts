@@ -10,16 +10,7 @@ export function setProperty(name, value) {
 
 export function toggleProperty(name, values) {
     const current = (getProperty(name) || "").trim();
-    let index = (values || []).findIndex(value => (typeof value === "string" && value.trim()) === current);
-    console.log("current", current, "values", values, "index", index);
-    if (index === -1) {
-        index = 0;
-    }
-    else {
-        index = (index + 1) % values.length;
-    }
-    const value = values[index];
-    console.log("index", index, "name", name, "value", value);
+    const value = nextTrimmedString(values, name);
     setProperty(name, value);
     return value;
 }
