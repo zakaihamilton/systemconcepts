@@ -9,7 +9,7 @@ import { useSlot } from "@/util/slots";
 export default function Main() {
     const [slot] = useSlot({
         key: "main",
-        menu: "WithMenuList"
+        menu: "MenuList"
     });
 
     const className = clsx(styles.root, styles["rootWith" + slot.menu]);
