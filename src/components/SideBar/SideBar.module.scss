@@ -1,0 +1,10 @@
+.root {
+    background: var(--side-bar-background);
+    border-right: var(--border-color);
+    grid-column: 1 / 2;
+    box-shadow: 10px 0 10px -10px var(--box-shadow-color);
+
+    :dir(rtl) {
+        box-shadow: -10px 0 10px -10px var(--box-shadow-color);
+    }
+}

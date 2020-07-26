@@ -1,0 +1,9 @@
+.root {
+    background: var(--app-bar-background);
+    border-bottom: var(--border-color);
+    padding: 0.5em;
+    grid-column: 1 / 3;
+    box-shadow: 0 2px 2px -2px var(--box-shadow-color);
+    display: flex;
+    align-items: center;
+}

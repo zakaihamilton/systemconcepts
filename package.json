@@ -8,8 +8,15 @@
     "start": "next start"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "bcrypt": "^5.0.0",
+    "fontsource-roboto": "^2.2.6",
+    "include-media": "^1.4.9",
     "next": "9.4.4",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "sass": "^1.26.10",
+    "swr": "^0.2.3"
   }
 }
