@@ -3,7 +3,7 @@ import IconButton from "@/components/Widgets/IconButton";
 import AppsIcon from '@material-ui/icons/Apps';
 import Tooltip from '@material-ui/core/Tooltip';
 import { nextTrimmedString } from "@/util/array";
-import { MainStore } from "./Main";
+import { MainStore } from "../Main";
 
 export default function AppIcon() {
 

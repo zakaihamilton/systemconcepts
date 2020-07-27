@@ -5,6 +5,7 @@ import SideBar from "./SideBar";
 import styles from "./Main/Main.module.scss";
 import { Store } from "pullstate";
 import { useStyles } from "@/util/styles";
+import { useImportMedia } from "@/util/styles";
 
 export const MainStore = new Store({
     isDarkMode: true,
@@ -14,11 +15,12 @@ export const MainStore = new Store({
 });
 
 export default function Main() {
+    const isMobile = useImportMedia(im => im.lessThan('tablet'));
     const { showSideBar, menuViewList } = MainStore.useState();
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar,
+        sidebar: showSideBar && !isMobile && menuViewList === "List",
         list: menuViewList === "List",
         iconList: menuViewList === "IconList"
     });
