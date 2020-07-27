@@ -57,7 +57,8 @@ export default function ListWidget({ items, onClick, state, viewType }) {
     });
 
     const elements = (items || []).map(item => {
-        return <ListItemWidget key={item.id} onClick={onItemClick} viewType={viewType} selected={selected === item.id} {...item} />
+        const { id, ...props } = item;
+        return <ListItemWidget key={item.id} onClick={onItemClick} viewType={viewType} selected={selected === item.id} {...props} />
     });
 
     return <List className={className} component="nav">

@@ -6,6 +6,7 @@ import styles from "./Main/Main.module.scss";
 import { Store } from "pullstate";
 import { useStyles } from "@/util/styles";
 import { useImportMedia } from "@/util/styles";
+import Breadcrumbs from "./Breadcrumbs";
 
 export const MainStore = new Store({
     isDarkMode: true,
@@ -33,7 +34,9 @@ export default function Main() {
         <div className={className}>
             <AppBar />
             <SideBar />
-            <main className={styles.main}></main>
+            <main className={styles.main}>
+                <Breadcrumbs />
+            </main>
             <StatusBar />
         </div>
     </>;

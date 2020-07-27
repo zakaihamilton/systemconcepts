@@ -29,12 +29,6 @@
 .main {
     background: var(--main-background);
     grid-column: 2 / 2;
-    margin: 0.5em;
-    border: 1px solid var(--main-border);
     display: grid;
-    grid-template: 4em auto 3em / 0em auto;
-
-    @include media("<=tablet") {
-        grid-template: 3em auto 3em / 0em auto;
-    }
+    grid-template-rows: 4em auto;
 }
