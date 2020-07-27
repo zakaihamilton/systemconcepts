@@ -3,33 +3,26 @@
 .root {
     display: grid;
     height: 100vh;
-}
-
-.rootWithNoMenu {
     grid-template: 4em auto 3em / 0em auto;
 
-    @include media(">phone", "<=tablet") {
+    @include media("<=tablet") {
         grid-template: 3em auto 3em / 0em auto;
     }
 }
 
-.rootWithMenuList {
-    display: grid;
-    height: 100vh;
+.root.sidebar.list {
     grid-template: 4em auto 3em / 15em auto;
 
-    @include media(">phone", "<=tablet") {
-        grid-template: 3em auto 3em / auto 0em;
+    @include media("<=tablet") {
+        grid-template: 3em auto 3em / auto;
     }
 }
 
-.rootWithMenuIconList {
-    display: grid;
-    height: 100vh;
-    grid-template: 4em auto 3em / 30em auto;
+.root.sidebar.iconList {
+    grid-template: 4em auto 3em / auto;
 
-    @include media(">phone", "<=tablet") {
-        grid-template: 3em auto 3em / auto 0em;
+    @include media("<=tablet") {
+        grid-template: 3em auto 3em / auto;
     }
 }
 
@@ -37,4 +30,5 @@
     background: var(--main-background);
     grid-column: 2 / 2;
     margin: 0.5em;
+    border: 1px solid var(--main-border);
 }

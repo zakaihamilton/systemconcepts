@@ -10,6 +10,9 @@
             ],
             "@/util/*": [
                 "src/util/*"
+            ],
+            "@/data/*": [
+                "src/data/*"
             ]
         }
     }

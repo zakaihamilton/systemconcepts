@@ -1,0 +1,65 @@
+import React from 'react';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Divider from '@material-ui/core/Divider';
+import styles from "./List/List.module.scss";
+import Avatar from '@material-ui/core/Avatar';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { useStyles } from "@/util/styles";
+
+export function ListItemWidget({ viewType, onClick, name, selected, description, icon: Icon, avatar, action }) {
+    const { icon: ActionIcon, label: actionLabel, callback: actionCallback } = action || {};
+    const itemClassName = useStyles(styles, {
+        itemList: viewType === "List",
+        itemIconList: viewType === "IconList"
+    });
+    const iconContainerClassName = useStyles(styles, {
+        iconContainerList: viewType === "List",
+        iconContainerIconList: viewType === "IconList"
+    });
+    const iconClassName = useStyles(styles, {
+        iconList: viewType === "List",
+        iconIconList: viewType === "IconList"
+    });
+    return <ListItem className={itemClassName} button selected={selected} onClick={onClick}>
+        {!!avatar && Icon && <ListItemAvatar>
+            <Avatar className={iconContainerClassName}>
+                <Icon fontSize="inherit" className={iconClassName} />
+            </Avatar>
+        </ListItemAvatar>}
+        {!avatar && Icon && <ListItemIcon className={iconContainerClassName}>
+            <Icon fontSize="inherit" className={iconClassName} />
+        </ListItemIcon>}
+        <ListItemText primary={name} secondary={description} />
+        {ActionIcon && <ListItemSecondaryAction>
+            <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback}>
+                <ActionIcon />
+            </IconButton>
+        </ListItemSecondaryAction>}
+    </ListItem>;
+
+}
+
+export default function ListWidget({ items, state, viewType }) {
+    const [selected, setSelected] = state || [];
+
+    const onItemClick = (event, index) => {
+        setSelected && setSelected(index);
+    };
+
+    const className = useStyles(styles, {
+        root: true,
+        iconList: viewType === "IconList",
+        list: viewType === "List"
+    });
+
+    const elements = (items || []).map(item => {
+        return <ListItemWidget key={item.id} onClick={onItemClick} viewType={viewType} selected={selected === item.id} {...item} />
+    });
+
+    return <List className={className} component="nav">
+        {elements}
+    </List>
+}

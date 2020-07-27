@@ -1,0 +1,35 @@
+.root {
+    display: flex;
+    flex: 1;
+}
+
+.iconList {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    flex: 1;
+    margin: 0.5em !important;
+    padding: 0em !important;
+}
+
+.list {
+    flex-direction: column;
+}
+
+.itemList {
+    flex-direction: row;
+}
+
+.itemIconList {
+    border-radius: 1em !important;
+    padding: 1em !important;
+    flex: 0;
+    flex-direction: column;
+}
+
+.iconList {
+    font-size: 24px !important;
+}
+
+.iconIconList {
+    font-size: 48px !important;
+}
