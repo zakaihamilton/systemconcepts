@@ -18,20 +18,28 @@ export default function SideBar() {
 
     const closeDrawer = () => {
         MainStore.update(s => {
-            s.showSideBar = false;
+            if (isMobile) {
+                s.showSideBar = false;
+            }
+            else {
+                s.menuViewList = "List";
+            }
         });
     };
 
-    if (isMobile || menuViewList === "IconList") {
+    if (isMobile) {
         return <Drawer
             anchor={direction === 'rtl' ? 'right' : 'left'}
             open={showSideBar}
             ModalProps={{
                 keepMounted: true
             }}
+            PaperProps={{
+                className: styles.popupDrawer
+            }}
             onClose={closeDrawer}
         >
-            <ListWidget items={pages} viewType={menuViewList} />
+            <ListWidget onClick={closeDrawer} items={pages} viewType={menuViewList} />
         </Drawer>;
     }
 

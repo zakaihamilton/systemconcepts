@@ -19,7 +19,7 @@
 }
 
 .root.sidebar.iconList {
-    grid-template: 4em auto 3em / auto;
+    grid-template: 4em auto 3em / 30em auto;
 
     @include media("<=tablet") {
         grid-template: 3em auto 3em / auto;
@@ -31,4 +31,10 @@
     grid-column: 2 / 2;
     margin: 0.5em;
     border: 1px solid var(--main-border);
+    display: grid;
+    grid-template: 4em auto 3em / 0em auto;
+
+    @include media("<=tablet") {
+        grid-template: 3em auto 3em / 0em auto;
+    }
 }

@@ -20,7 +20,7 @@ export default function Main() {
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar && !isMobile && menuViewList === "List",
+        sidebar: showSideBar && !isMobile,
         list: menuViewList === "List",
         iconList: menuViewList === "IconList"
     });

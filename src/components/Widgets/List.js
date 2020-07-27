@@ -42,11 +42,12 @@ export function ListItemWidget({ viewType, onClick, name, selected, description,
 
 }
 
-export default function ListWidget({ items, state, viewType }) {
+export default function ListWidget({ items, onClick, state, viewType }) {
     const [selected, setSelected] = state || [];
 
     const onItemClick = (event, index) => {
         setSelected && setSelected(index);
+        onClick && onClick();
     };
 
     const className = useStyles(styles, {
