@@ -63,7 +63,7 @@ export default function BreadcrumbsWidget({ items }) {
 
     return (
         <div className={classes.root}>
-            <Breadcrumbs className={classes.breadcrumbs} eparator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
+            <Breadcrumbs className={classes.breadcrumbs} separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
                 {breadcrumbItems}
             </Breadcrumbs>
             <Divider />
