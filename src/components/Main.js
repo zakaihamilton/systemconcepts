@@ -21,6 +21,8 @@ export default function Main() {
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
     const { showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = getPagesFromHash(hash);
+    const activePage = pages[pages.length - 1];
+    const { Page } = activePage;
 
     useEffect(() => {
         MainStore.update(s => {
@@ -48,9 +50,14 @@ export default function Main() {
         <div className={className}>
             <AppBar />
             <SideBar />
-            <main className={styles.main}>
+            <div className={styles.main}>
                 <Breadcrumbs items={pages} />
-            </main>
+                <div className={styles.pageContainer}>
+                    <main className={styles.page}>
+                        {Page && <Page />}
+                    </main>
+                </div>
+            </div>
             <StatusBar />
         </div>
     </>;

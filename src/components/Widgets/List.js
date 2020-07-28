@@ -9,7 +9,7 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { useStyles } from "@/util/styles";
 
-export function ListItemWidget({ viewType, onClick, name, selected, description, icon: Icon, avatar, action }) {
+export function ListItemWidget({ viewType, onClick, name, selected, description, Icon, avatar, action }) {
     const { icon: ActionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const itemClassName = useStyles(styles, {
         itemList: viewType === "List",

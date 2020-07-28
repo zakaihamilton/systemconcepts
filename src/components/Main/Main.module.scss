@@ -31,4 +31,16 @@
     grid-column: 2 / 2;
     display: grid;
     grid-template-rows: 4em auto;
+    overflow: hidden;
+}
+
+.pageContainer {
+    display: grid;
+    grid-template-rows: auto;
+    overflow: auto;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
 }

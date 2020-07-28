@@ -28,9 +28,8 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export function BreadcrumbItem({ name, icon, href, isLink }) {
+export function BreadcrumbItem({ name, Icon, href, isLink }) {
     const classes = useStyles();
-    const Icon = icon;
     if (!isLink) {
         return <Typography className={classes.link} color="textPrimary">
             {Icon && <Icon className={classes.icon} />}

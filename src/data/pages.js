@@ -1,31 +1,38 @@
-import PeopleIcon from '@material-ui/icons/People';
-import RecentActorsIcon from '@material-ui/icons/RecentActors';
-import SettingsIcon from '@material-ui/icons/Settings';
+import Apps from "@/pages/Apps";
 import AppsIcon from '@material-ui/icons/Apps';
+
+import PeopleIcon from '@material-ui/icons/People';
+
+import RecentActorsIcon from '@material-ui/icons/RecentActors';
+
+import Settings from "@/pages/Settings";
+import SettingsIcon from '@material-ui/icons/Settings';
 
 export default [
     {
         id: "Apps",
         name: "Apps",
         root: true,
-        icon: AppsIcon
+        Icon: AppsIcon,
+        Page: Apps
     },
     {
         sidebar: true,
         id: "users",
         name: "Users",
-        icon: PeopleIcon
+        Icon: PeopleIcon
     },
     {
         sidebar: true,
         id: "roles",
         name: "Roles",
-        icon: RecentActorsIcon
+        Icon: RecentActorsIcon
     },
     {
         sidebar: true,
         id: "settings",
         name: "Settings",
-        icon: SettingsIcon
+        Icon: SettingsIcon,
+        Page: Settings
     }
 ];
