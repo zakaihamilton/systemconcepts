@@ -11,7 +11,7 @@ export function getPagesFromHash(hash = "") {
         if (items[0] && items[0].startsWith("?")) {
             items[0] = root.id + items[0];
         }
-        else {
+        else if (!items[0] || !items[0].startsWith(root.id)) {
             items.unshift(root.id);
         }
     }
