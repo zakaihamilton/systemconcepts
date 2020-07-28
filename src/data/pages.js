@@ -14,7 +14,9 @@ export default [
         name: "Apps",
         root: true,
         Icon: AppsIcon,
-        Page: Apps
+        Page: Apps,
+        sidebar: true,
+        separator: true
     },
     {
         sidebar: true,
