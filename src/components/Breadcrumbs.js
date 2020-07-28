@@ -9,8 +9,8 @@ const useStyles = makeStyles((theme) => ({
     root: {
         display: "flex",
         alignItems: "center",
-        marginLeft: "0.5em",
-        marginRight: "0.5em",
+        paddingLeft: "0.5em",
+        paddingRight: "0.5em",
         borderBottom: "1px solid var(--main-border)",
         '& > * + *': {
             marginTop: theme.spacing(2),
