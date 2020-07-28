@@ -40,7 +40,7 @@ export function ListItemWidget({ separator, viewType, onClick, name, selected, d
                 </IconButton>
             </ListItemSecondaryAction>}
         </ListItem>
-        {separator && <Divider />}
+        {viewType === "List" && separator && <Divider />}
     </>;
 }
 

@@ -33,14 +33,3 @@
     grid-template-rows: 4.05em auto;
     overflow: hidden;
 }
-
-.pageContainer {
-    display: grid;
-    grid-template-rows: auto;
-    overflow: auto;
-}
-
-.page {
-    display: flex;
-    flex-direction: column;
-}

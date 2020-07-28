@@ -14,7 +14,7 @@ export default [
         name: "Apps",
         root: true,
         Icon: AppsIcon,
-        Page: Apps,
+        Component: Apps,
         sidebar: true,
         separator: true
     },
@@ -35,6 +35,6 @@ export default [
         id: "settings",
         name: "Settings",
         Icon: SettingsIcon,
-        Page: Settings
+        Component: Settings
     }
 ];

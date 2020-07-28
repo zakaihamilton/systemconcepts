@@ -1,0 +1,10 @@
+.pageContainer {
+    display: grid;
+    grid-template-rows: auto;
+    overflow: auto;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+}

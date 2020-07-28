@@ -9,6 +9,7 @@ import { useStyles } from "@/util/styles";
 import { useImportMedia } from "@/util/styles";
 import { getPagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
+import Page from "./Page";
 
 export const MainStore = new Store({
     isDarkMode: true,
@@ -22,7 +23,6 @@ export default function Main() {
     const { showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = getPagesFromHash(hash);
     const activePage = pages[pages.length - 1];
-    const { Page } = activePage;
 
     useEffect(() => {
         MainStore.update(s => {
@@ -52,11 +52,7 @@ export default function Main() {
             <SideBar />
             <div className={styles.main}>
                 <Breadcrumbs items={pages} />
-                <div className={styles.pageContainer}>
-                    <main className={styles.page}>
-                        {Page && <Page />}
-                    </main>
-                </div>
+                <Page page={activePage} />
             </div>
             <StatusBar />
         </div>
