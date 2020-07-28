@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import Head from "next/head"
 import AppBar from "./AppBar";
 import StatusBar from "./StatusBar";
@@ -6,6 +7,7 @@ import styles from "./Main/Main.module.scss";
 import { Store } from "pullstate";
 import { useStyles } from "@/util/styles";
 import { useImportMedia } from "@/util/styles";
+import { getPagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
 
 export const MainStore = new Store({
@@ -17,7 +19,19 @@ export const MainStore = new Store({
 
 export default function Main() {
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
-    const { showSideBar, menuViewList } = MainStore.useState();
+    const { showSideBar, menuViewList, hash } = MainStore.useState();
+    const pages = getPagesFromHash(hash);
+
+    useEffect(() => {
+        MainStore.update(s => {
+            s.hash = window.location.hash;
+        });
+        window.onhashchange = function () {
+            MainStore.update(s => {
+                s.hash = window.location.hash;
+            });
+        };
+    }, []);
 
     const className = useStyles(styles, {
         root: true,
@@ -35,7 +49,7 @@ export default function Main() {
             <AppBar />
             <SideBar />
             <main className={styles.main}>
-                <Breadcrumbs />
+                <Breadcrumbs items={pages} />
             </main>
             <StatusBar />
         </div>

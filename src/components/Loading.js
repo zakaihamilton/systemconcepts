@@ -1,23 +1,10 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
-
-const useStyles = makeStyles({
-    root: {
-        display: "flex",
-        flexDirection: "column",
-        marginTop: "500px",
-        backgroundColor: "red",
-        width: '100%',
-        height: '100%'
-    }
-});
+import styles from "./Loading/Loading.module.scss";
 
 export default function Loading() {
-    const classes = useStyles();
-
     return (
-        <div className={classes.root}>
+        <div className={styles.root}>
             <LinearProgress />
         </div>
     );

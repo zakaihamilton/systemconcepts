@@ -45,9 +45,9 @@ export function ListItemWidget({ viewType, onClick, name, selected, description,
 export default function ListWidget({ items, onClick, state, viewType }) {
     const [selected, setSelected] = state || [];
 
-    const onItemClick = (event, index) => {
-        setSelected && setSelected(index);
-        onClick && onClick();
+    const onItemClick = (id) => {
+        setSelected && setSelected(id);
+        onClick && onClick(id);
     };
 
     const className = useStyles(styles, {
@@ -58,7 +58,7 @@ export default function ListWidget({ items, onClick, state, viewType }) {
 
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget key={item.id} onClick={onItemClick} viewType={viewType} selected={selected === item.id} {...props} />
+        return <ListItemWidget key={item.id} onClick={() => onItemClick(id)} viewType={viewType} selected={selected === item.id} {...props} />
     });
 
     return <List className={className} component="nav">
