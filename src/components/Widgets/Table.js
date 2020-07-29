@@ -1,42 +1,20 @@
 import React, { useContext } from "react";
 import clsx from "clsx";
-import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
-
-const useStyles = makeStyles({
-    root: {
-        margin: "18px",
-        width: "97%"
-    },
-    container: {
-    },
-    table: {
-
-    },
-    head: {
-
-    },
-    cell: {
-        cursor: "pointer",
-        userSelect: "none",
-        fontSize: "16px"
-    },
-    body: {
-    }
-});
+import { useImportMedia } from "@/util/styles";
+import styles from "./Table.module.scss";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
 export default function TableWidget({ columns, items, empty, className, hideColumns, rowClick, ...props }) {
-    const classes = useStyles();
+    const isMobile = useImportMedia(im => im.lessThan('tablet'));
     const [order, setOrder] = React.useState("asc");
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState((columns[0] && columns[0].id) || 0);
@@ -75,7 +53,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
         const sortId = typeof sortable === "string" ? sortable : id;
         return <TableCell
             key={id}
-            className={classes.cell}
+            className={styles.cell}
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
             {sortable && <TableSortLabel
@@ -97,7 +75,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
         const cells = (columns || []).filter(Boolean).map(column => {
             const { id: columnId, rowProps = {} } = column;
             const value = values[columnId];
-            return (<TableCell className={classes.cell} key={columnId} {...rowProps}>{value}</TableCell>);
+            return (<TableCell className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
         });
         const onClick = rowClick ? event => rowClick(event, id || idx) : null;
         return <TableRow hover onClick={onClick} key={id || idx}>
@@ -105,7 +83,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
         </TableRow>;
     });
 
-    className = clsx(classes.root, className);
+    className = clsx(styles.root, className);
 
     if (!size.height) {
         return null;
@@ -116,14 +94,14 @@ export default function TableWidget({ columns, items, empty, className, hideColu
         maxHeight: height
     };
 
-    return (<TableContainer className={className} style={style} component={Paper} {...props}>
-        <Table stickyHeader style={style} className={classes.table}>
-            {!hideColumns && <TableHead className={classes.head}>
+    return (<TableContainer className={className} style={style} {...props}>
+        <Table stickyHeader style={style} className={styles.table}>
+            {!hideColumns && <TableHead className={styles.head}>
                 <TableRow>
                     {tableColumns}
                 </TableRow>
             </TableHead>}
-            <TableBody className={classes.body}>
+            <TableBody className={styles.body}>
                 {tableRows}
             </TableBody>
         </Table>

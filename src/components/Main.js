@@ -20,7 +20,7 @@ export const MainStore = new Store({
 
 export default function Main() {
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
-    const { showSideBar, menuViewList, hash } = MainStore.useState();
+    const { direction, showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = getPagesFromHash(hash);
     const activePage = pages[pages.length - 1];
 
@@ -39,7 +39,8 @@ export default function Main() {
         root: true,
         sidebar: showSideBar && !isMobile,
         list: menuViewList === "List",
-        iconList: menuViewList === "IconList"
+        iconList: menuViewList === "IconList",
+        rtl: direction === "rtl"
     });
 
     return <>
