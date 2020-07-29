@@ -25,7 +25,6 @@ export default function InputWidget({ helperText, variant = "filled", style, sel
     const textField = params => <TextField
         classes={classes}
         style={style}
-        helperText={helperText || " "}
         SelectProps={{
             multiple,
             renderValue,

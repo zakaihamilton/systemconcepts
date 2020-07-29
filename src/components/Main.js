@@ -33,6 +33,15 @@ export default function Main() {
         createMuiTheme({
             palette: {
                 type: darkMode ? 'dark' : 'light',
+                primary: {
+                    main: "#1e88e5",
+                    light: "#4b9fea",
+                    dark: "#155fa0"
+                },
+                secondary: {
+                    main: '#0044ff',
+                    contrastText: '#ffcc00',
+                },
                 contrastThreshold: 2,
                 tonalOffset: 0.2,
             },
