@@ -1,5 +1,5 @@
 import Table from "@/widgets/Table";
-import languages from "@/data/languages";
+import data from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionLToR';
 import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
@@ -34,7 +34,7 @@ export default function Languages() {
         }
     ];
 
-    const items = languages.map(item => {
+    const items = data.map(item => {
         let { direction } = item;
         direction = directions.find(item => item.id === direction);
         return {

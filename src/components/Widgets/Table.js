@@ -72,10 +72,10 @@ export default function TableWidget({ columns, items, empty, className, hideColu
     const isEmpty = !items || !items.length;
 
     const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((row, idx) => {
-        const { id, ...values } = row;
+        const { id } = row;
         const cells = (columns || []).filter(Boolean).map(column => {
             const { id: columnId, rowProps = {} } = column;
-            const value = values[columnId];
+            const value = row[columnId];
             return (<TableCell className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
         });
         const onClick = rowClick ? event => rowClick(event, id || idx) : null;

@@ -11,6 +11,9 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import Languages from "@/pages/Languages";
 import LanguageIcon from '@material-ui/icons/Language';
 
+import TranslateIcon from '@material-ui/icons/Translate';
+import Translations from "@/pages/Translations";
+
 export default [
     {
         id: "Apps",
@@ -39,6 +42,13 @@ export default [
         name: "LANGUAGES_NAME",
         Icon: LanguageIcon,
         Component: Languages
+    },
+    {
+        sidebar: true,
+        id: "translations",
+        name: "TRANSLATIONS_NAME",
+        Icon: TranslateIcon,
+        Component: Translations
     },
     {
         sidebar: true,

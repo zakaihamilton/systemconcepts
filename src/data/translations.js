@@ -60,6 +60,16 @@ export default [
         value: "הגדרות"
     },
     {
+        id: "TRANSLATIONS_NAME",
+        language: "eng",
+        value: "Translations"
+    },
+    {
+        id: "TRANSLATIONS_NAME",
+        language: "heb",
+        value: "תרגומים"
+    },
+    {
         id: "COLUMN_NAME",
         language: "eng",
         value: "Name"
@@ -128,5 +138,15 @@ export default [
         id: "RIGHT_TO_LEFT",
         language: "heb",
         value: "מימין לשמאל"
+    },
+    {
+        id: "COLUMN_ID",
+        language: "eng",
+        value: "ID"
+    },
+    {
+        id: "COLUMN_ID",
+        language: "heb",
+        value: "מזהה"
     },
 ];
