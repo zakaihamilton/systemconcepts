@@ -19,7 +19,7 @@ export default function Languages() {
             id,
             title: name,
             sortable: true,
-            direction
+            dir: direction
         }))
     ];
 

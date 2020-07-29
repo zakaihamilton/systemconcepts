@@ -49,11 +49,12 @@ export default function TableWidget({ columns, items, empty, className, hideColu
     }
 
     const tableColumns = (columns || []).map(item => {
-        const { id, title, sortable, columnProps = {}, labelProps = {} } = item;
+        const { id, title, dir, sortable, columnProps = {}, labelProps = {} } = item;
         const sortId = typeof sortable === "string" ? sortable : id;
         return <TableCell
             key={id}
             className={styles.cell}
+            dir={dir}
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
             {sortable && <TableSortLabel
@@ -62,6 +63,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
                 direction={orderBy === sortId ? order : "asc"}
                 onClick={createSortHandler(sortId)}
                 {...labelProps}
+                dir={dir}
             >
                 {title}
             </TableSortLabel>}
@@ -74,9 +76,9 @@ export default function TableWidget({ columns, items, empty, className, hideColu
     const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((row, idx) => {
         const { id } = row;
         const cells = (columns || []).filter(Boolean).map(column => {
-            const { id: columnId, rowProps = {} } = column;
+            const { id: columnId, dir, rowProps = {} } = column;
             const value = row[columnId];
-            return (<TableCell className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
+            return (<TableCell dir={dir} className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
         });
         const onClick = rowClick ? event => rowClick(event, id || idx) : null;
         return <TableRow hover onClick={onClick} key={id || idx}>

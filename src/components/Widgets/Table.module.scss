@@ -16,6 +16,10 @@
     }
 }
 
+.cell[dir=rtl] {
+    text-align: right;
+}
+
 .sortLabel {
     [dir=rtl] & {
         justify-content: flex-end;
