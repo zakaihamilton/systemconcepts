@@ -10,7 +10,7 @@ export default function Menu() {
     const toggleMenu = () => {
         MainStore.update(s => {
             if (s.showSideBar) {
-                const menuViewList = nextTrimmedString(["None", "List", "IconList"], s.menuViewList);
+                const menuViewList = nextTrimmedString(["None", "List"], s.menuViewList);
                 if (menuViewList === "None") {
                     s.menuViewList = "List";
                     s.showSideBar = false;
