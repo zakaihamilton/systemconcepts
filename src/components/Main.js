@@ -12,7 +12,6 @@ import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
 import Theme from "./Theme";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { createMuiTheme } from "@material-ui/core/styles";
 import { useTranslations } from "@/util/translations";
 
 export const MainStore = new Store({
@@ -30,27 +29,6 @@ export default function Main() {
     const { darkMode, direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = usePagesFromHash(hash);
     const activePage = pages[pages.length - 1];
-
-    const theme = React.useMemo(() =>
-        createMuiTheme({
-            palette: {
-                type: darkMode ? 'dark' : 'light',
-                primary: {
-                    main: "#1e88e5",
-                    light: "#4b9fea",
-                    dark: "#155fa0"
-                },
-                secondary: {
-                    main: '#0044ff',
-                    contrastText: '#ffcc00',
-                },
-                tonalOffset: 0.2,
-            },
-        }), [darkMode]);
-
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-    }, [darkMode]);
 
     useEffect(() => {
         MainStore.update(s => {
@@ -89,7 +67,7 @@ export default function Main() {
             <title>{APP_NAME}</title>
             <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Theme theme={theme}>
+        <Theme>
             <div className={className}>
                 <AppBar />
                 <SideBar />
