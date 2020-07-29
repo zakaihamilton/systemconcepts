@@ -13,6 +13,7 @@ import Page from "./Page";
 import Theme from "./Theme";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { createMuiTheme } from "@material-ui/core/styles";
+import { useTranslations } from "@/util/translations";
 
 export const MainStore = new Store({
     darkMode: false,
@@ -23,6 +24,7 @@ export const MainStore = new Store({
 });
 
 export default function Main() {
+    const { APP_NAME } = useTranslations();
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
     const { darkMode, direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
@@ -84,7 +86,7 @@ export default function Main() {
 
     return <>
         <Head>
-            <title>System Concepts</title>
+            <title>{APP_NAME}</title>
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <Theme theme={theme}>
