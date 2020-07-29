@@ -1,5 +1,4 @@
 import Table from "@/widgets/Table";
-import Fab from "@/widgets/Fab";
 import Input from "@/widgets/Input";
 import Switch from "@/widgets/Switch";
 import { useStoreState } from "@/util/store";
@@ -40,8 +39,7 @@ export default function Settings() {
         }
     ];
 
-    return <div>
+    return <>
         <Table columns={columns} items={items} />
-        <Fab />
-    </div>;
+    </>;
 }
