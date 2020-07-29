@@ -81,7 +81,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
             return (<TableCell dir={dir} className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
         });
         const onClick = rowClick ? event => rowClick(event, id || idx) : null;
-        return <TableRow {...onClick && { hover: true, onClick }} key={id || idx}>
+        return <TableRow {...onClick && { hover: true, onClick, className: styles.rowHover }} key={id || idx}>
             {cells}
         </TableRow>;
     });

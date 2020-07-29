@@ -9,18 +9,35 @@
 .cell {
     font-size: 16px;
 
+    [dir=ltr] & {
+        text-align: left;
+    }
+
     [dir=rtl] & {
         text-align: right;
     }
+}
+
+.cell[dir=ltr] {
+    text-align: left;
 }
 
 .cell[dir=rtl] {
     text-align: right;
 }
 
+.rowHover {
+    cursor: pointer;
+    user-select: none;
+}
+
 .sortLabel {
     [dir=rtl] & {
         justify-content: flex-end;
+    }
+
+    [dir=ltr] & {
+        justify-content: flex-start;
     }
 }
 

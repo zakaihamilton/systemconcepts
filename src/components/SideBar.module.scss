@@ -1,7 +1,7 @@
 .root {
     background: var(--side-bar-background);
     grid-column: 1 / 2;
-    overflow: hidden;
+    overflow: auto;
 
     [dir=ltr] & {
         border-right: var(--border-color);
