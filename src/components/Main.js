@@ -42,7 +42,6 @@ export default function Main() {
                     main: '#0044ff',
                     contrastText: '#ffcc00',
                 },
-                contrastThreshold: 2,
                 tonalOffset: 0.2,
             },
         }), [darkMode]);
