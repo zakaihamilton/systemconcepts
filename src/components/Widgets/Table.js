@@ -21,8 +21,8 @@ export default function TableWidget({ columns, items, empty, className, hideColu
     const size = useContext(PageSize);
 
     const createSortHandler = (property) => () => {
-        const isAsc = orderBy === property && order === "asc";
-        setOrder(isAsc ? "desc" : "asc");
+        const isDesc = orderBy === property && order === "desc";
+        setOrder(isDesc ? "asc" : "desc");
         setOrderBy(property);
     };
 
@@ -60,7 +60,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
             {sortable && <TableSortLabel
                 className={styles.sortLabel}
                 active={orderBy === sortId}
-                direction={orderBy === sortId ? order : "asc"}
+                direction={orderBy === sortId ? order : "desc"}
                 onClick={createSortHandler(sortId)}
                 {...labelProps}
                 dir={dir}
