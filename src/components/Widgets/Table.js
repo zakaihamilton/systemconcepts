@@ -27,8 +27,8 @@ export default function TableWidget({ columns, items, empty, className, hideColu
     };
 
     function descendingComparator(a, b, orderBy) {
-        const aText = a[orderBy] || "";
-        const bText = b[orderBy] || "";
+        const aText = a && a[orderBy] || "";
+        const bText = b && b[orderBy] || "";
         return collator.compare(aText, bText);
     }
 
@@ -57,6 +57,7 @@ export default function TableWidget({ columns, items, empty, className, hideColu
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
             {sortable && <TableSortLabel
+                className={styles.sortLabel}
                 active={orderBy === sortId}
                 direction={orderBy === sortId ? order : "asc"}
                 onClick={createSortHandler(sortId)}

@@ -10,10 +10,16 @@
     cursor: pointer;
     user-select: none;
     font-size: 16px;
+
+    [dir=rtl] & {
+        text-align: right;
+    }
 }
 
-.cell[dir="rtl"] {
-    text-align: right;
+.sortLabel {
+    [dir=rtl] & {
+        justify-content: flex-end;
+    }
 }
 
 .body {}
