@@ -8,7 +8,6 @@ export default function SwitchWidget({ label, state, off = false, on = true }) {
     const [checked, setChecked] = useState(value);
     const handleChange = (event) => {
         const { checked } = event.target;
-        console.log("checked", checked);
         const value = checked ? on : off;
         setValue(value);
     };
@@ -16,8 +15,6 @@ export default function SwitchWidget({ label, state, off = false, on = true }) {
     useEffect(() => {
         setChecked(value);
     }, [value]);
-
-    console.log("value", value, "checked", checked);
 
     return (
         <FormGroup row>

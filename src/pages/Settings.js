@@ -1,8 +1,10 @@
 import Table from "@/widgets/Table";
 import Fab from "@/widgets/Fab";
+import Input from "@/widgets/Input";
 import Switch from "@/widgets/Switch";
 import { useStoreState } from "@/util/store";
 import { MainStore } from "../components/Main";
+import MenuItem from '@material-ui/core/MenuItem';
 
 export default function Settings() {
     const states = useStoreState(MainStore);
@@ -15,21 +17,30 @@ export default function Settings() {
         },
         {
             id: "widget",
-            title: "Value",
+            title: "Setting",
             sortable: "value"
         }
     ];
 
     const items = [
         {
-            id: "direction",
-            name: "Direction",
-            value: false,
-            widget: <Switch state={states.direction} off="ltr" on="rtl" />
+            id: "language",
+            name: "Language",
+            value: states.language[0],
+            widget: <Input variant="outlined" state={states.language} select={true}>
+                <MenuItem value="eng">English</MenuItem>
+                <MenuItem value="heb">עברית</MenuItem>
+            </Input>
+        },
+        {
+            id: "darkMode",
+            name: "Dark Mode",
+            value: states.darkMode[0],
+            widget: <Switch state={states.darkMode} />
         }
     ];
 
-    return <div style={{ height: "1000px" }}>
+    return <div>
         <Table columns={columns} items={items} />
         <Fab />
     </div>;

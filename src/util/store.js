@@ -19,6 +19,5 @@ export function useStoreState(store) {
         }
         state[0] = value;
     });
-    console.log(states);
     return states;
 }

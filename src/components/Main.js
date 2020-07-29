@@ -10,19 +10,37 @@ import { useImportMedia } from "@/util/styles";
 import { getPagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
+import Theme from "./Theme";
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { createMuiTheme } from "@material-ui/core/styles";
 
 export const MainStore = new Store({
-    isDarkMode: true,
+    darkMode: false,
     direction: "ltr",
+    language: "eng",
     menuViewList: "List",
     showSideBar: true
 });
 
 export default function Main() {
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
-    const { direction, showSideBar, menuViewList, hash } = MainStore.useState();
+    const { darkMode, direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = getPagesFromHash(hash);
     const activePage = pages[pages.length - 1];
+
+    const theme = React.useMemo(() =>
+        createMuiTheme({
+            palette: {
+                type: darkMode ? 'dark' : 'light',
+                contrastThreshold: 2,
+                tonalOffset: 0.2,
+            },
+        }), [darkMode]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
 
     useEffect(() => {
         MainStore.update(s => {
@@ -34,6 +52,19 @@ export default function Main() {
             });
         };
     }, []);
+
+    useEffect(() => {
+        MainStore.update(s => {
+            s.darkMode = prefersDarkMode;
+        });
+    }, [prefersDarkMode]);
+
+    useEffect(() => {
+        MainStore.update(s => {
+            s.direction = language === "heb" ? "rtl" : "ltr";
+            document.getElementsByTagName('html')[0].setAttribute("dir", s.direction);
+        });
+    }, [language]);
 
     const className = useStyles(styles, {
         root: true,
@@ -48,14 +79,16 @@ export default function Main() {
             <title>System Concepts</title>
             <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div className={className}>
-            <AppBar />
-            <SideBar />
-            <div className={styles.main}>
-                <Breadcrumbs items={pages} />
-                <Page page={activePage} />
+        <Theme theme={theme}>
+            <div className={className}>
+                <AppBar />
+                <SideBar />
+                <div className={styles.main}>
+                    <Breadcrumbs items={pages} />
+                    <Page page={activePage} />
+                </div>
+                <StatusBar />
             </div>
-            <StatusBar />
-        </div>
+        </Theme>
     </>;
 }

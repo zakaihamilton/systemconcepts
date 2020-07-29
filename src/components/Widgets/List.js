@@ -33,7 +33,7 @@ export function ListItemWidget({ separator, viewType, onClick, name, selected, d
             {!avatar && Icon && <ListItemIcon className={iconContainerClassName}>
                 <Icon fontSize="inherit" className={iconClassName} />
             </ListItemIcon>}
-            <ListItemText primary={name} secondary={description} />
+            <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
             {ActionIcon && <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback}>
                     <ActionIcon />

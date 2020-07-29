@@ -6,4 +6,16 @@
     --app-bar-background: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
     --status-bar-background: radial-gradient(circle farthest-corner at 10% 20%, rgba(234, 249, 249, 0.67) 0.1%, rgba(239, 249, 251, 0.63) 90.1%);
     --side-bar-background: #fafafa;
+    --text-color: black;
+}
+
+[data-theme="dark"] {
+    --border-color: 1px solid darkgray;
+    --box-shadow-color: darkgray;
+    --main-background: #161625;
+    --main-border: darkgray;
+    --app-bar-background: radial-gradient(circle farthest-corner at 10% 20%, rgba(0, 52, 89, 1) 0%, rgba(0, 168, 232, 1) 90%);
+    --status-bar-background: linear-gradient(110.3deg, rgba(72, 85, 99, 1) 8.8%, rgba(127, 146, 166, 1) 95.1%);
+    --side-bar-background: #161625;
+    --text-color: white;
 }

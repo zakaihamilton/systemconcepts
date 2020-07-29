@@ -5,7 +5,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const useStyles = makeStyles({});
 
-export default function InputWidget({ helperText, style, select, multiple, options, state, children, onChange, renderValue, ...props }) {
+export default function InputWidget({ helperText, variant = "filled", style, select, multiple, options, state, children, onChange, renderValue, ...props }) {
     const classes = useStyles();
     style = style || {};
     let [value, setValue] = state;
@@ -43,10 +43,8 @@ export default function InputWidget({ helperText, style, select, multiple, optio
         }}
         value={value || ""}
         onChange={onChangeText}
-        size="medium"
-        fullWidth={true}
         select={select}
-        variant="filled"
+        variant={variant}
         {...params}
         {...props}
     >
@@ -62,8 +60,8 @@ export default function InputWidget({ helperText, style, select, multiple, optio
         value={value || ""}
         getOptionSelected={(option, value) => option === value}
         onChange={(event, newValue) => {
-            event.target = {...event.target};
-            if(typeof event.target.value === "undefined") {
+            event.target = { ...event.target };
+            if (typeof event.target.value === "undefined") {
                 event.target.value = newValue;
             }
             else {
