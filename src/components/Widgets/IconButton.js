@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import styles from "./IconButton/IconButton.module.scss";
+import styles from "./IconButton.module.scss";
 import IconButton from '@material-ui/core/IconButton';
 
 export default function IconButtonWidget({ children, ...props }) {

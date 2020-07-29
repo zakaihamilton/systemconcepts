@@ -1,6 +1,6 @@
 import React from "react";
 import Typography from '@material-ui/core/Typography';
-import styles from "./AppTitle/AppTitle.module.scss";
+import styles from "./AppTitle.module.scss";
 
 export default function AppTitle() {
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from "react";
-import styles from "./SideBar/SideBar.module.scss"
+import styles from "./SideBar.module.scss"
 import pages from "@/data/pages";
 import ListWidget from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';

@@ -1,4 +1,5 @@
 import Table from "@/widgets/Table";
+import Fab from "@/widgets/Fab";
 
 export default function Settings() {
 
@@ -11,5 +12,6 @@ export default function Settings() {
 
     return <div style={{ height: "1000px" }}>
         <Table columns={columns} />
+        <Fab />
     </div>;
 }

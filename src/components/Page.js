@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import styles from "./Page/Page.module.scss";
+import styles from "./Page.module.scss";
 import { useResize } from "@/util/size";
 
 export const PageSize = React.createContext();

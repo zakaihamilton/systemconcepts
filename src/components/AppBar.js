@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./AppBar/AppBar.module.scss"
+import styles from "./AppBar.module.scss"
 import MenuIcon from "./AppBar/MenuIcon";
 import AppTitle from "./AppBar/AppTitle";
 

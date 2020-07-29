@@ -3,7 +3,7 @@ import Head from "next/head"
 import AppBar from "./AppBar";
 import StatusBar from "./StatusBar";
 import SideBar from "./SideBar";
-import styles from "./Main/Main.module.scss";
+import styles from "./Main.module.scss";
 import { Store } from "pullstate";
 import { useStyles } from "@/util/styles";
 import { useImportMedia } from "@/util/styles";
