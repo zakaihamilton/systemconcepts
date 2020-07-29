@@ -4,7 +4,9 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import { Divider } from "@material-ui/core";
+import { MainStore } from "@/components/Main";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,6 +50,7 @@ export function BreadcrumbItem({ name, Icon, href, isLink }) {
 }
 
 export default function BreadcrumbsWidget({ items }) {
+    const { direction } = MainStore.useState();
     const classes = useStyles();
     let href = "#";
 
@@ -61,9 +64,11 @@ export default function BreadcrumbsWidget({ items }) {
         return <BreadcrumbItem key={id} isLink={isLink} href={href} {...props} />
     });
 
+    const Icon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
+
     return (
         <div className={classes.root}>
-            <Breadcrumbs className={classes.breadcrumbs} separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
+            <Breadcrumbs className={classes.breadcrumbs} separator={<Icon fontSize="small" />} aria-label="breadcrumb">
                 {breadcrumbItems}
             </Breadcrumbs>
             <Divider />
