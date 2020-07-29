@@ -1,10 +1,10 @@
-.title {
+.root {
     display: flex;
     align-items: center;
 
 }
 
-.title>* {
+.root>* {
     [dir=rtl] & {
         margin-left: 0.5em;
     }

@@ -14,7 +14,7 @@ import LanguageIcon from '@material-ui/icons/Language';
 export default [
     {
         id: "Apps",
-        name: "Apps",
+        name: "APPS_NAME",
         root: true,
         Icon: AppsIcon,
         Component: Apps,
@@ -24,26 +24,26 @@ export default [
     {
         sidebar: true,
         id: "users",
-        name: "Users",
+        name: "USERS_NAME",
         Icon: PeopleIcon
     },
     {
         sidebar: true,
         id: "roles",
-        name: "Roles",
+        name: "ROLES_NAME",
         Icon: RecentActorsIcon
     },
     {
         sidebar: true,
         id: "languages",
-        name: "Languages",
+        name: "LANGUAGES_NAME",
         Icon: LanguageIcon,
         Component: Languages
     },
     {
         sidebar: true,
         id: "settings",
-        name: "Settings",
+        name: "SETTINGS_NAME",
         Icon: SettingsIcon,
         Component: Settings
     }

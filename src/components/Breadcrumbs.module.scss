@@ -1,0 +1,35 @@
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+
+    &>*+* {
+        margin-top: 0.5em;
+    }
+}
+
+.link {
+    display: flex;
+    align-items: center
+}
+
+.icon {
+    margin-bottom: 0.1em;
+    width: 24px;
+    height: 24px;
+
+    [dir=ltr] & {
+        margin-right: 0.5em;
+    }
+
+    [dir=rtl] & {
+        margin-left: 0.5em;
+    }
+}

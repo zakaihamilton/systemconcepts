@@ -7,7 +7,7 @@ import styles from "./Main.module.scss";
 import { Store } from "pullstate";
 import { useStyles } from "@/util/styles";
 import { useImportMedia } from "@/util/styles";
-import { getPagesFromHash } from "@/util/pages";
+import { usePagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
 import Theme from "./Theme";
@@ -26,7 +26,7 @@ export default function Main() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
     const { darkMode, direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
-    const pages = getPagesFromHash(hash);
+    const pages = usePagesFromHash(hash);
     const activePage = pages[pages.length - 1];
 
     const theme = React.useMemo(() =>

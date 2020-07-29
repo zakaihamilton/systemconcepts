@@ -1,6 +1,8 @@
-import pages from "@/data/pages";
+import pageList from "@/data/pages";
+import { useTranslations } from "@/util/translations";
 
-export function getPagesFromHash(hash = "") {
+export function usePagesFromHash(hash = "") {
+    const pages = usePages();
     let results = [];
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
@@ -33,4 +35,14 @@ export function getPagesFromHash(hash = "") {
         return { ...page, url, ...params };
     }).filter(Boolean);
     return results;
+}
+
+export function usePages() {
+    const translations = useTranslations();
+    const pages = pageList.map(page => {
+        const { name, ...props } = page;
+        const text = translations[name] || name;
+        return { ...props, name: text };
+    });
+    return pages;
 }

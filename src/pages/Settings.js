@@ -3,24 +3,26 @@ import Input from "@/widgets/Input";
 import Switch from "@/widgets/Switch";
 import { useStoreState } from "@/util/store";
 import { MainStore } from "../components/Main";
-import styles from "./Settings.module.scss";
 import MenuItem from '@material-ui/core/MenuItem';
 import LanguageIcon from '@material-ui/icons/Language';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import languages from "@/data/languages";
+import { useTranslations } from "@/util/translations";
+import Label from "@/widgets/Label";
 
 export default function Settings() {
+    const translations = useTranslations();
     const states = useStoreState(MainStore);
 
     const columns = [
         {
             id: "title",
-            title: "Name",
+            title: translations.COLUMN_NAME,
             sortable: "name"
         },
         {
             id: "widget",
-            title: "Setting",
+            title: translations.COLUMN_SETTING,
             sortable: "value"
         }
     ];
@@ -31,7 +33,7 @@ export default function Settings() {
         {
             id: "language",
             icon: LanguageIcon,
-            name: "Language",
+            name: translations.LANGUAGE,
             value: states.language[0],
             widget: <Input variant="outlined" state={states.language} select={true}>
                 {languageItems}
@@ -40,13 +42,13 @@ export default function Settings() {
         {
             id: "darkMode",
             icon: Brightness4Icon,
-            name: "Dark Mode",
+            name: translations.DARK_MODE,
             value: states.darkMode[0],
             widget: <Switch state={states.darkMode} />
         }
     ].map(item => {
-        const { icon: Icon, ...props } = item;
-        props.title = <div className={styles.title}>{Icon && <Icon />}{item.name}</div>;
+        const { icon, ...props } = item;
+        props.title = <Label icon={icon} name={item.name} />;
         return props;
     });
 

@@ -37,4 +37,8 @@
 
 .itemLabel {
     color: var(--text-color);
+
+    [dir=rtl] & {
+        text-align: right;
+    }
 }
