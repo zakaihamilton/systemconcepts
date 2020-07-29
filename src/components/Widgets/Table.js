@@ -15,7 +15,7 @@ const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
 
 export default function TableWidget({ columns, items, empty, className, hideColumns, rowClick, ...props }) {
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
-    const [order, setOrder] = React.useState("asc");
+    const [order, setOrder] = React.useState("desc");
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState((columns[0] && columns[0].id) || 0);
     const size = useContext(PageSize);

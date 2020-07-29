@@ -2,9 +2,6 @@ import Table from "@/widgets/Table";
 import data from "@/data/translations";
 import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
-import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionLToR';
-import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
-import Label from "@/widgets/Label";
 
 export default function Languages() {
     const translations = useTranslations();
