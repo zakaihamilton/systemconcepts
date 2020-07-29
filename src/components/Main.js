@@ -11,7 +11,6 @@ import { usePagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
 import Theme from "./Theme";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTranslations } from "@/util/translations";
 
 export const MainStore = new Store({
@@ -24,9 +23,8 @@ export const MainStore = new Store({
 
 export default function Main() {
     const { APP_NAME } = useTranslations();
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const isMobile = useImportMedia(im => im.lessThan('tablet'));
-    const { darkMode, direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
+    const { direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = usePagesFromHash(hash);
     const activePage = pages[pages.length - 1];
 
@@ -40,12 +38,6 @@ export default function Main() {
             });
         };
     }, []);
-
-    useEffect(() => {
-        MainStore.update(s => {
-            s.darkMode = prefersDarkMode;
-        });
-    }, [prefersDarkMode]);
 
     useEffect(() => {
         MainStore.update(s => {
