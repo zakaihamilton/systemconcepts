@@ -1,13 +1,17 @@
 .root {
     background: var(--side-bar-background);
-    border-right: var(--border-color);
     grid-column: 1 / 2;
     overflow: hidden;
-    box-shadow: 10px 0 10px -10px var(--box-shadow-color);
-}
 
-.root:dir(rtl) {
-    box-shadow: -10px 0 10px -10px var(--box-shadow-color);
+    [dir=ltr] & {
+        border-right: var(--border-color);
+        box-shadow: 10px 0 10px -10px var(--box-shadow-color);
+    }
+
+    [dir=rtl] & {
+        border-left: var(--border-color);
+        box-shadow: -10px 0 10px -10px var(--box-shadow-color);
+    }
 }
 
 .popupDrawer {
