@@ -10,11 +10,13 @@ import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useImportMedia } from "@/util/styles";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const translations = useTranslations();
     const states = useStoreState(MainStore);
+    const isDesktop = useImportMedia(im => im.greaterThan('desktop'));
     let darkModeSelected = "off";
     if (states.autoDetectDarkMode[0]) {
         darkModeSelected = "auto";
@@ -59,7 +61,8 @@ export default function Settings() {
         }
     ];
 
-    const fontSizeItems = ["10", "12", "14", "16", "18", "22", "24", "26"].map(fontSize => ({
+    const deskopSizes = ["22", "24", "26"];
+    const fontSizeItems = ["10", "12", "14", "16", "18", ...((isDesktop && deskopSizes) || [])].map(fontSize => ({
         id: fontSize,
         name: fontSize
     }));
