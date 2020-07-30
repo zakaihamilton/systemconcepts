@@ -14,7 +14,7 @@ import styles from "./Table.module.scss";
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
 export default function TableWidget({ columns, sortColumn, items, empty, className, hideColumns, rowClick, ...props }) {
-    const isPhone = useDeviceType() === "phone";
+    const isMobile = useDeviceType() === "phone";
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
@@ -53,7 +53,7 @@ export default function TableWidget({ columns, sortColumn, items, empty, classNa
         const sortId = typeof sortable === "string" ? sortable : id;
         return <TableCell
             key={id}
-            className={styles.cell}
+            className={clsx(styles.cell, styles.head)}
             dir={dir}
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
@@ -86,8 +86,6 @@ export default function TableWidget({ columns, sortColumn, items, empty, classNa
         </TableRow>;
     });
 
-    className = clsx(styles.root, className);
-
     if (!size.height) {
         return null;
     }
@@ -98,13 +96,13 @@ export default function TableWidget({ columns, sortColumn, items, empty, classNa
     };
 
     return (<TableContainer className={className} style={style} {...props}>
-        <Table stickyHeader style={style} className={styles.table}>
-            {!hideColumns && <TableHead className={styles.head}>
+        <Table stickyHeader style={style}>
+            {!hideColumns && <TableHead>
                 <TableRow>
                     {tableColumns}
                 </TableRow>
             </TableHead>}
-            <TableBody className={styles.body}>
+            <TableBody>
                 {tableRows}
             </TableBody>
         </Table>

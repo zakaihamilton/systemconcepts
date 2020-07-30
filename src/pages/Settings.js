@@ -68,7 +68,7 @@ export default function Settings() {
     }));
 
     const navigate = id => {
-        window.location.hash = encodeURI("settings/" + id);
+        window.location.hash += encodeURI("/" + id);
     };
 
     const items = [

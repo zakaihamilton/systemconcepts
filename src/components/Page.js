@@ -11,7 +11,7 @@ export default function Page({ page }) {
     return <div className={styles.pageContainer}>
         <main ref={ref} className={styles.page}>
             <PageSize.Provider value={size}>
-                {Component && <Component />}
+                {Component && <Component {...page} />}
             </PageSize.Provider>
         </main>
     </div>;

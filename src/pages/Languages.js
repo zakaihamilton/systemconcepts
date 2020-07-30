@@ -38,11 +38,17 @@ export default function Languages() {
         let { direction } = item;
         direction = directions.find(item => item.id === direction);
         return {
-            ...item, direction: direction.name, directionWidget: <Label icon={direction.icon} name={direction.name} />
+            ...item,
+            direction: direction.name,
+            directionWidget: <Label icon={direction.icon} name={direction.name} />
         };
     });
 
+    const rowClick = (_, id) => {
+        window.location.hash += encodeURI("/translations?language=" + id);
+    };
+
     return <>
-        <Table columns={columns} items={items} />
+        <Table rowClick={rowClick} columns={columns} items={items} />
     </>;
 }

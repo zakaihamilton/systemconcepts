@@ -46,7 +46,6 @@ export default [
         Component: Languages
     },
     {
-        sidebar: true,
         id: "translations",
         name: "TRANSLATIONS_NAME",
         Icon: TranslateIcon,
