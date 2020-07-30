@@ -7,6 +7,7 @@ import { MainStore } from "../Main";
 
 const useStyles = makeStyles((theme) => ({
     search: {
+        display: 'flex',
         position: 'relative',
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
@@ -21,9 +22,7 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     searchIcon: {
-        padding: theme.spacing(0, 2),
-        height: '100%',
-        position: 'absolute',
+        padding: theme.spacing(0, 1),
         pointerEvents: 'none',
         display: 'flex',
         alignItems: 'center',
@@ -34,7 +33,8 @@ const useStyles = makeStyles((theme) => ({
     },
     inputInput: {
         padding: theme.spacing(1, 1, 1, 0),
-        paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
+        paddingLeft: "0.5em",
+        paddingRight: "0.5em",
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('sm')]: {
