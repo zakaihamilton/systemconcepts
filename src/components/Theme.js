@@ -10,7 +10,7 @@ const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
 export default function Theme({ children }) {
     const { darkMode, fontSize, autoDetectDarkMode } = MainStore.useState();
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', {noSsr:true});
 
     const theme = useMemo(() =>
         createMuiTheme({

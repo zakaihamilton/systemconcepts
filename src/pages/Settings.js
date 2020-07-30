@@ -10,11 +10,9 @@ import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
 import Dynamic from "@/widgets/Dynamic";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useDeviceType } from "@/util/styles";
 
 export default function Settings() {
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const translations = useTranslations();
     const states = useStoreState(MainStore);
     const deviceType = useDeviceType();
@@ -30,9 +28,11 @@ export default function Settings() {
         const darkMode = darkModeState[0];
         MainStore.update(s => {
             s.autoDetectDarkMode = darkMode === "auto";
-            s.darkMode = darkMode === "on" || (darkMode === "auto" && prefersDarkMode);
+            if (darkMode !== "auto") {
+                s.darkMode = darkMode === "on"
+            }
         });
-    }, [darkModeState[0], prefersDarkMode]);
+    }, [darkModeState[0]]);
 
     const columns = [
         {
