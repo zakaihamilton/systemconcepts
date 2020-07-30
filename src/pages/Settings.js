@@ -8,7 +8,7 @@ import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
-import Dynamic from "@/widgets/dynamic";
+import Dynamic from "@/widgets/Dynamic";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 export default function Settings() {
