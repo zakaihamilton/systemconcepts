@@ -1,3 +1,5 @@
+@import "~include-media/dist/_include-media.scss";
+
 .cell.head {
     background-color: var(--main-background) !important;
 }
@@ -34,5 +36,29 @@
 
     [dir=ltr] & {
         justify-content: flex-start;
+    }
+}
+
+.search {
+    position: absolute;
+    right: 1em;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    margin-top: 0.5em;
+
+    @include media("<=desktop") {
+        display: none;
+    }
+}
+
+.search>* {
+    [dir=rtl] & {
+        margin-left: 0.5em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 0.5em;
     }
 }

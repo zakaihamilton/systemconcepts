@@ -3,13 +3,13 @@ import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import MenuItem from '@material-ui/core/MenuItem';
 import styles from "./Input.module.scss";
+import clsx from "clsx";
 
 export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default function InputWidget({ items, style, select, multiple, autocomplete, state, onChange, renderValue, ...props }) {
-    style = style || {};
+export default function InputWidget({ items, className, select, multiple, autocomplete, state, onChange, renderValue, ...props }) {
     let [value, setValue] = state;
     const onChangeText = event => {
         const { value } = event.target;
@@ -25,9 +25,11 @@ export default function InputWidget({ items, style, select, multiple, autocomple
         renderValue = renderValue || (selected => selected.filter(Boolean).join(", "));
     }
     const textField = ({ children, ...params }) => <TextField
-        style={style}
+        InputProps={{
+            className: clsx(className, styles.root)
+        }}
         SelectProps={{
-            className: styles.root,
+            className: clsx(className, styles.root),
             multiple,
             renderValue,
             MenuProps: {
@@ -53,7 +55,7 @@ export default function InputWidget({ items, style, select, multiple, autocomple
     </TextField>;
 
     if (!autocomplete) {
-        const children = arrayToMenuItems(items);
+        const children = items && arrayToMenuItems(items);
         return textField({ children });
     }
 
@@ -74,6 +76,7 @@ export default function InputWidget({ items, style, select, multiple, autocomple
             onChangeText(event);
         }}
         renderInput={params => textField(params)}
+        {...props}
     />;
 
 }
