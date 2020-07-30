@@ -1,3 +1,7 @@
+.root button {
+    text-transform: none;
+}
+
 .root button:not(:last-child) {
     [dir=rtl] & {
         border-top-left-radius: 0px !important;
