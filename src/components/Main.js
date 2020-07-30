@@ -20,7 +20,8 @@ export const MainStore = new Store({
     direction: "ltr",
     language: "eng",
     menuViewList: "List",
-    showSideBar: true
+    showSideBar: true,
+    search: ""
 });
 
 export default function Main() {

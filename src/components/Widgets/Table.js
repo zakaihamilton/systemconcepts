@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -10,8 +10,7 @@ import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
 import { useDeviceType } from "@/util/styles";
 import styles from "./Table.module.scss";
-import Input from "@/widgets/Input";
-import SearchIcon from '@material-ui/icons/Search';
+import { MainStore } from "../Main";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -21,8 +20,7 @@ export default function TableWidget({ columns, sortColumn, items = [], empty, cl
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
     const size = useContext(PageSize);
-    const searchState = useState("");
-    const [search] = searchState;
+    const { search } = MainStore.useState();
     const hasIdColumn = columns.find(item => item.id === "id");
 
     items = items.filter(item => {
@@ -121,10 +119,6 @@ export default function TableWidget({ columns, sortColumn, items = [], empty, cl
     return (<TableContainer className={className} style={style} {...props}>
         <Table stickyHeader style={style}>
             {!hideColumns && <TableHead>
-                <div className={styles.search}>
-                    <SearchIcon />
-                    <Input size="small" state={searchState} type="search" />
-                </div>
                 <TableRow>
                     {tableColumns}
                 </TableRow>

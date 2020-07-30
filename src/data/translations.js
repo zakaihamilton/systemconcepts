@@ -238,5 +238,15 @@ export default [
         id: "DESKTOP",
         language: "heb",
         value: "מחשב"
+    },
+    {
+        id: "SEARCH",
+        language: "eng",
+        value: "Search"
+    },
+    {
+        id: "SEARCH",
+        language: "heb",
+        value: "חיפוש"
     }
 ];
