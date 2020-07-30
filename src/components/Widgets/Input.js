@@ -1,17 +1,14 @@
 import React from "react";
 import TextField from "@material-ui/core/TextField";
-import { makeStyles } from "@material-ui/core/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import MenuItem from '@material-ui/core/MenuItem';
-
-const useStyles = makeStyles({});
+import styles from "./Input.module.scss";
 
 export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
 export default function InputWidget({ helperText, variant = "filled", style, select, multiple, options, state, children, onChange, renderValue, ...props }) {
-    const classes = useStyles();
     style = style || {};
     let [value, setValue] = state;
     const onChangeText = event => {
@@ -28,9 +25,9 @@ export default function InputWidget({ helperText, variant = "filled", style, sel
         renderValue = renderValue || (selected => selected.filter(Boolean).join(", "));
     }
     const textField = params => <TextField
-        classes={classes}
         style={style}
         SelectProps={{
+            className: styles.root,
             multiple,
             renderValue,
             MenuProps: {

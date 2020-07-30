@@ -5,6 +5,7 @@ import { useStoreState } from "@/util/store";
 import { MainStore } from "../components/Main";
 import LanguageIcon from '@material-ui/icons/Language';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
+import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
@@ -57,6 +58,11 @@ export default function Settings() {
         }
     ]);
 
+    const fontSizeItems = arrayToMenuItems(["10", "12", "14", "16", "18", "22", "24", "26"].map(fontSize => ({
+        id: fontSize,
+        name: fontSize
+    })));
+
     const languageItems = arrayToMenuItems(languages);
 
     const items = [
@@ -76,6 +82,15 @@ export default function Settings() {
             value: darkModeState[0],
             widget: <Input variant="outlined" state={darkModeState} select={true}>
                 {darkModeItems}
+            </Input>
+        },
+        {
+            id: "fontSize",
+            icon: FormatSizeIcon,
+            name: translations.FONT_SIZE,
+            value: states.fontSize[0],
+            widget: <Input variant="outlined" state={states.fontSize} select={true}>
+                {fontSizeItems}
             </Input>
         }
     ].map(item => {

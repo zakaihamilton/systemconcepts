@@ -9,11 +9,14 @@ import rtl from "jss-rtl";
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
 export default function Theme({ children }) {
-    const { darkMode, autoDetectDarkMode } = MainStore.useState();
+    const { darkMode, fontSize, autoDetectDarkMode } = MainStore.useState();
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
     const theme = useMemo(() =>
         createMuiTheme({
+            typography: {
+                fontSize: parseInt(fontSize)
+            },
             palette: {
                 type: darkMode ? 'dark' : 'light',
                 primary: {
@@ -27,7 +30,12 @@ export default function Theme({ children }) {
                 },
                 tonalOffset: 0.2,
             },
-        }), [darkMode]);
+        }), [darkMode, fontSize]);
+
+    useEffect(() => {
+        const body = document.getElementsByTagName('body');
+        body[0].style.fontSize = fontSize + "px";
+    }, [fontSize]);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');

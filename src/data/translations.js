@@ -178,5 +178,15 @@ export default [
         id: "ON",
         language: "heb",
         value: "דלוק"
+    },
+    {
+        id: "FONT_SIZE",
+        language: "eng",
+        value: "Font Size"
+    },
+    {
+        id: "FONT_SIZE",
+        language: "heb",
+        value: "גודל גופן"
     }
 ];

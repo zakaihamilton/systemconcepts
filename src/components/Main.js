@@ -16,6 +16,7 @@ import { useTranslations } from "@/util/translations";
 export const MainStore = new Store({
     autoDetectDarkMode: true,
     darkMode: false,
+    fontSize: "16",
     direction: "ltr",
     language: "eng",
     menuViewList: "List",

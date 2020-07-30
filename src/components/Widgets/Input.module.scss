@@ -1,0 +1,12 @@
+.root svg {
+    top: calc(50% - 0.45em);
+    right: 0.1em;
+}
+
+.root div {
+    padding-right: 2em !important;
+}
+
+.root:focus svg {
+    background-color: rgba(0, 0, 0, 0.5);
+}
