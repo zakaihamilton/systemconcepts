@@ -4,12 +4,12 @@
     overflow: auto;
 
     [dir=ltr] & {
-        border-right: var(--border-color);
+        border-right: var(--border);
         box-shadow: 10px 0 10px -10px var(--box-shadow-color);
     }
 
     [dir=rtl] & {
-        border-left: var(--border-color);
+        border-left: var(--border);
         box-shadow: -10px 0 10px -10px var(--box-shadow-color);
     }
 }

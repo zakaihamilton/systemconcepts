@@ -40,7 +40,6 @@ export default [
         Icon: RecentActorsIcon
     },
     {
-        sidebar: true,
         id: "languages",
         name: "LANGUAGES_NAME",
         Icon: LanguageIcon,
@@ -54,7 +53,6 @@ export default [
         Component: Translations
     },
     {
-        sidebar: true,
         id: "fontSizes",
         name: "FONTSIZES_NAME",
         Icon: FormatSizeIcon,

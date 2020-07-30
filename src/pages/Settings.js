@@ -67,13 +67,18 @@ export default function Settings() {
         name: item.name
     }));
 
+    const navigate = id => {
+        window.location.hash = encodeURI("settings/" + id);
+    };
+
     const items = [
         {
             id: "language",
             icon: LanguageIcon,
             name: translations.LANGUAGE,
             value: states.language[0],
-            widget: <Dynamic items={languages} state={states.language} />
+            widget: <Dynamic items={languages} state={states.language} />,
+            onClick: () => navigate("languages")
         },
         {
             id: "darkMode",
@@ -87,11 +92,12 @@ export default function Settings() {
             icon: FormatSizeIcon,
             name: translations.FONT_SIZE,
             value: states.fontSize[0],
-            widget: <Dynamic items={fontSizeItems} state={states.fontSize} />
+            widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
+            onClick: () => navigate("fontSizes")
         }
     ].map(item => {
-        const { icon, ...props } = item;
-        props.title = <Label key={item.id} icon={icon} name={item.name} />;
+        const { icon, onClick, ...props } = item;
+        props.title = <Label key={item.id} icon={icon} name={item.name} onClick={onClick} />;
         return props;
     });
 
