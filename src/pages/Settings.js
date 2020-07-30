@@ -31,7 +31,7 @@ export default function Settings() {
             s.autoDetectDarkMode = darkMode === "auto";
             s.darkMode = darkMode === "on" || (darkMode === "auto" && prefersDarkMode);
         });
-    }, [darkModeState[0]]);
+    }, [darkModeState[0], prefersDarkMode]);
 
     const columns = [
         {
