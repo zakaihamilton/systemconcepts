@@ -14,6 +14,9 @@ import LanguageIcon from '@material-ui/icons/Language';
 import TranslateIcon from '@material-ui/icons/Translate';
 import Translations from "@/pages/Translations";
 
+import FormatSizeIcon from '@material-ui/icons/FormatSize';
+import FontSizes from "@/pages/FontSizes";
+
 export default [
     {
         id: "Apps",
@@ -49,6 +52,13 @@ export default [
         name: "TRANSLATIONS_NAME",
         Icon: TranslateIcon,
         Component: Translations
+    },
+    {
+        sidebar: true,
+        id: "fontSizes",
+        name: "FONTSIZES_NAME",
+        Icon: FormatSizeIcon,
+        Component: FontSizes
     },
     {
         sidebar: true,

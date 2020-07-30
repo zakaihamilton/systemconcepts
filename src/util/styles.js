@@ -42,11 +42,16 @@ export function useImportMedia(callback) {
     return value;
 }
 
-export function useImportMediaTypes() {
+export function useDeviceType() {
     return useImportMedia(im => {
-        const isDesktop = im.greaterThan('desktop');
         const isPhone = im.lessThan('tablet');
         const isTablet = im.greaterThan('tablet') && im.lessThan('desktop');
-        return [isPhone, isTablet, isDesktop];
+        if (isTablet) {
+            return "tablet";
+        }
+        if (isPhone) {
+            return "phone";
+        }
+        return "desktop";
     });
 }

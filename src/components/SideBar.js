@@ -2,12 +2,12 @@ import React, { useEffect, useCallback } from "react";
 import styles from "./SideBar.module.scss"
 import ListWidget from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
-import { useImportMediaTypes } from "@/util/styles";
+import { useDeviceType } from "@/util/styles";
 import { MainStore } from "./Main";
 import { usePagesFromHash, usePages } from "@/util/pages";
 
 export default function SideBar() {
-    const [isMobile] = useImportMediaTypes();
+    const isPhone = useDeviceType() === "phone";
     const { menuViewList, direction, showSideBar, hash } = MainStore.useState();
     const activePages = usePagesFromHash(hash);
     const pages = usePages();
@@ -22,13 +22,13 @@ export default function SideBar() {
 
     useEffect(() => {
         MainStore.update(s => {
-            s.showSideBar = !isMobile && menuViewList === "List";
+            s.showSideBar = !isPhone && menuViewList === "List";
         });
-    }, [isMobile]);
+    }, [isPhone]);
 
     const closeDrawer = () => {
         MainStore.update(s => {
-            if (isMobile) {
+            if (isPhone) {
                 s.showSideBar = false;
             }
             else {
@@ -39,7 +39,7 @@ export default function SideBar() {
 
     const pageItems = pages.filter(page => page.sidebar);
 
-    if (isMobile) {
+    if (isPhone) {
         return <Drawer
             anchor={direction === 'rtl' ? 'right' : 'left'}
             open={showSideBar}

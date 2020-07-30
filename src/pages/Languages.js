@@ -11,12 +11,12 @@ export default function Languages() {
     const columns = [
         {
             id: "name",
-            title: translations.COLUMN_NAME,
+            title: translations.NAME,
             sortable: true
         },
         {
             id: "directionWidget",
-            title: translations.COLUMN_DIRECTION,
+            title: translations.DIRECTION,
             sortable: "direction"
         }
     ];

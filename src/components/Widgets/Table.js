@@ -8,16 +8,16 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
-import { useImportMediaTypes } from "@/util/styles";
+import { useDeviceType } from "@/util/styles";
 import styles from "./Table.module.scss";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-export default function TableWidget({ columns, items, empty, className, hideColumns, rowClick, ...props }) {
-    const [isMobile] = useImportMediaTypes();
+export default function TableWidget({ columns, sortColumn, items, empty, className, hideColumns, rowClick, ...props }) {
+    const isPhone = useDeviceType() === "phone";
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
-    const [orderBy, setOrderBy] = React.useState((columns[0] && columns[0].id) || 0);
+    const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
     const size = useContext(PageSize);
 
     const createSortHandler = (property) => () => {

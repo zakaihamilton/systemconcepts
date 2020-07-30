@@ -5,18 +5,19 @@ import LanguageIcon from '@material-ui/icons/Language';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import languages from "@/data/languages";
+import fontSizes from "@/data/fontSizes";
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { useImportMediaTypes } from "@/util/styles";
+import { useDeviceType } from "@/util/styles";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const translations = useTranslations();
     const states = useStoreState(MainStore);
-    const [, , isDesktop] = useImportMediaTypes();
+    const deviceType = useDeviceType();
     let darkModeSelected = "off";
     if (states.autoDetectDarkMode[0]) {
         darkModeSelected = "auto";
@@ -36,12 +37,12 @@ export default function Settings() {
     const columns = [
         {
             id: "title",
-            title: translations.COLUMN_NAME,
+            title: translations.NAME,
             sortable: "name"
         },
         {
             id: "widget",
-            title: translations.COLUMN_SETTING,
+            title: translations.SETTING,
             sortable: "value"
         }
     ];
@@ -61,10 +62,9 @@ export default function Settings() {
         }
     ];
 
-    const deskopSizes = ["22", "24", "26"];
-    const fontSizeItems = ["10", "12", "14", "16", "18", ...((isDesktop && deskopSizes) || [])].map(fontSize => ({
-        id: fontSize,
-        name: fontSize
+    const fontSizeItems = fontSizes.filter(item => item.devices.includes(deviceType)).map(item => ({
+        id: item.id,
+        name: item.name
     }));
 
     const items = [

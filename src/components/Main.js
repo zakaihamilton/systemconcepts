@@ -6,7 +6,7 @@ import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@/util/store";
-import { useStyles, useImportMediaTypes } from "@/util/styles";
+import { useStyles, useDeviceType } from "@/util/styles";
 import { usePagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
@@ -25,7 +25,7 @@ export const MainStore = new Store({
 
 export default function Main() {
     const { APP_NAME } = useTranslations();
-    const [isMobile] = useImportMediaTypes();
+    const isPhone = useDeviceType() === "phone";
     useLocalStorage("MainStore", MainStore);
     const { direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = usePagesFromHash(hash);
@@ -51,7 +51,7 @@ export default function Main() {
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar && !isMobile,
+        sidebar: showSideBar && !isPhone,
         list: menuViewList === "List",
         iconList: menuViewList === "IconList",
         rtl: direction === "rtl"

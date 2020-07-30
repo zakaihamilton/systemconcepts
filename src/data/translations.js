@@ -50,6 +50,16 @@ export default [
         value: "שפות"
     },
     {
+        id: "FONTSIZES_NAME",
+        language: "eng",
+        value: "Font Sizes"
+    },
+    {
+        id: "FONTSIZES_NAME",
+        language: "heb",
+        value: "גודל גופנים"
+    },
+    {
         id: "SETTINGS_NAME",
         language: "eng",
         value: "Settings"
@@ -70,22 +80,22 @@ export default [
         value: "תרגומים"
     },
     {
-        id: "COLUMN_NAME",
+        id: "NAME",
         language: "eng",
         value: "Name"
     },
     {
-        id: "COLUMN_NAME",
+        id: "NAME",
         language: "heb",
         value: "שם"
     },
     {
-        id: "COLUMN_SETTING",
+        id: "SETTING",
         language: "eng",
         value: "Setting"
     },
     {
-        id: "COLUMN_SETTING",
+        id: "SETTING",
         language: "heb",
         value: "הגדרה"
     },
@@ -110,12 +120,12 @@ export default [
         value: "מצב חשוך"
     },
     {
-        id: "COLUMN_DIRECTION",
+        id: "DIRECTION",
         language: "eng",
         value: "Direction"
     },
     {
-        id: "COLUMN_DIRECTION",
+        id: "DIRECTION",
         language: "heb",
         value: "כיוון"
     },
@@ -140,12 +150,12 @@ export default [
         value: "מימין לשמאל"
     },
     {
-        id: "COLUMN_ID",
+        id: "ID",
         language: "eng",
         value: "ID"
     },
     {
-        id: "COLUMN_ID",
+        id: "ID",
         language: "heb",
         value: "מזהה"
     },
@@ -188,5 +198,45 @@ export default [
         id: "FONT_SIZE",
         language: "heb",
         value: "גודל גופן"
+    },
+    {
+        id: "DEVICES",
+        language: "eng",
+        value: "Devices"
+    },
+    {
+        id: "DEVICES",
+        language: "heb",
+        value: "מכשירים"
+    },
+    {
+        id: "MOBILE",
+        language: "eng",
+        value: "Phone"
+    },
+    {
+        id: "MOBILE",
+        language: "heb",
+        value: "טלפון"
+    },
+    {
+        id: "TABLET",
+        language: "eng",
+        value: "Tablet"
+    },
+    {
+        id: "TABLET",
+        language: "heb",
+        value: "טבלט"
+    },
+    {
+        id: "DESKTOP",
+        language: "eng",
+        value: "Desktop"
+    },
+    {
+        id: "DESKTOP",
+        language: "heb",
+        value: "מחשב"
     }
 ];
