@@ -1,6 +1,4 @@
 import Table from "@/widgets/Table";
-import Input, { arrayToMenuItems } from "@/widgets/Input";
-import Switch from "@/widgets/Switch";
 import { useStoreState } from "@/util/store";
 import { MainStore } from "../components/Main";
 import LanguageIcon from '@material-ui/icons/Language';
@@ -10,8 +8,11 @@ import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
+import Dynamic from "@/widgets/dynamic";
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 export default function Settings() {
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const translations = useTranslations();
     const states = useStoreState(MainStore);
     let darkModeSelected = "off";
@@ -26,7 +27,7 @@ export default function Settings() {
         const darkMode = darkModeState[0];
         MainStore.update(s => {
             s.autoDetectDarkMode = darkMode === "auto";
-            s.darkMode = darkMode === "on";
+            s.darkMode = darkMode === "on" || (darkMode === "auto" && prefersDarkMode);
         });
     }, [darkModeState[0]]);
 
@@ -43,7 +44,7 @@ export default function Settings() {
         }
     ];
 
-    const darkModeItems = arrayToMenuItems([
+    const darkModeItems = [
         {
             id: "auto",
             name: translations.AUTO
@@ -56,14 +57,12 @@ export default function Settings() {
             id: "on",
             name: translations.ON
         }
-    ]);
+    ];
 
-    const fontSizeItems = arrayToMenuItems(["10", "12", "14", "16", "18", "22", "24", "26"].map(fontSize => ({
+    const fontSizeItems = ["10", "12", "14", "16", "18", "22", "24", "26"].map(fontSize => ({
         id: fontSize,
         name: fontSize
-    })));
-
-    const languageItems = arrayToMenuItems(languages);
+    }));
 
     const items = [
         {
@@ -71,27 +70,21 @@ export default function Settings() {
             icon: LanguageIcon,
             name: translations.LANGUAGE,
             value: states.language[0],
-            widget: <Input variant="outlined" state={states.language} select={true}>
-                {languageItems}
-            </Input>
+            widget: <Dynamic items={languages} state={states.language} />
         },
         {
             id: "darkMode",
             icon: Brightness4Icon,
             name: translations.DARK_MODE,
             value: darkModeState[0],
-            widget: <Input variant="outlined" state={darkModeState} select={true}>
-                {darkModeItems}
-            </Input>
+            widget: <Dynamic items={darkModeItems} state={darkModeState} />
         },
         {
             id: "fontSize",
             icon: FormatSizeIcon,
             name: translations.FONT_SIZE,
             value: states.fontSize[0],
-            widget: <Input variant="outlined" state={states.fontSize} select={true}>
-                {fontSizeItems}
-            </Input>
+            widget: <Dynamic items={fontSizeItems} state={states.fontSize} />
         }
     ].map(item => {
         const { icon, ...props } = item;

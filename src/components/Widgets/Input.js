@@ -8,7 +8,7 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default function InputWidget({ helperText, variant = "filled", style, select, multiple, options, state, children, onChange, renderValue, ...props }) {
+export default function InputWidget({ items, style, select, multiple, autocomplete, state, onChange, renderValue, ...props }) {
     style = style || {};
     let [value, setValue] = state;
     const onChangeText = event => {
@@ -24,7 +24,7 @@ export default function InputWidget({ helperText, variant = "filled", style, sel
     if (multiple) {
         renderValue = renderValue || (selected => selected.filter(Boolean).join(", "));
     }
-    const textField = params => <TextField
+    const textField = ({ children, ...params }) => <TextField
         style={style}
         SelectProps={{
             className: styles.root,
@@ -45,16 +45,19 @@ export default function InputWidget({ helperText, variant = "filled", style, sel
         value={value || ""}
         onChange={onChangeText}
         select={select}
-        variant={variant}
+        variant="outlined"
         {...params}
         {...props}
     >
         {children}
     </TextField>;
 
-    if (!options) {
-        return textField();
+    if (!autocomplete) {
+        const children = arrayToMenuItems(items);
+        return textField({ children });
     }
+
+    const options = (items || []).map(item => item.name);
 
     return <Autocomplete
         options={options}
