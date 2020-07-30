@@ -11,8 +11,10 @@ import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import { useDeviceType } from "@/util/styles";
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 export default function Settings() {
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
     const translations = useTranslations();
     const states = useStoreState(MainStore);
     const deviceType = useDeviceType();
@@ -50,7 +52,8 @@ export default function Settings() {
     const darkModeItems = [
         {
             id: "auto",
-            name: translations.AUTO
+            name: translations.AUTO,
+            tooltip: prefersDarkMode ? "Dark Mode Preferred" : "Light Mode Preferred"
         },
         {
             id: "off",

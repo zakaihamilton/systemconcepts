@@ -14,10 +14,9 @@ export default function ToggleButtonGroupWidget({ items, state, ...props }) {
     };
 
     const buttonItems = items.map(button => {
-        const { icon, id, name, ...props } = button;
-        const title = icon && name || "";
+        const { icon, id, name, tooltip = "", ...props } = button;
         return (
-            <Tooltip key={id} title={title} arrow>
+            <Tooltip key={id} title={tooltip} arrow>
                 <ToggleButton selected={selected === id} value={id} {...props}>
                     {icon || name}
                 </ToggleButton>
