@@ -9,7 +9,7 @@ import rtl from "jss-rtl";
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
 export default function Theme({ children }) {
-    const { darkMode } = MainStore.useState();
+    const { darkMode, autoDetectDarkMode } = MainStore.useState();
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
     const theme = useMemo(() =>
@@ -34,10 +34,12 @@ export default function Theme({ children }) {
     }, [darkMode]);
 
     useEffect(() => {
-        MainStore.update(s => {
-            s.darkMode = prefersDarkMode;
-        });
-    }, [prefersDarkMode]);
+        if (autoDetectDarkMode) {
+            MainStore.update(s => {
+                s.darkMode = prefersDarkMode;
+            });
+        }
+    }, [prefersDarkMode, autoDetectDarkMode]);
 
     return <StylesProvider jss={jss}>
         <ThemeProvider theme={theme}>

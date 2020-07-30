@@ -149,4 +149,34 @@ export default [
         language: "heb",
         value: "מזהה"
     },
+    {
+        id: "AUTO",
+        language: "eng",
+        value: "Auto"
+    },
+    {
+        id: "AUTO",
+        language: "heb",
+        value: "אוטומטי"
+    },
+    {
+        id: "OFF",
+        language: "eng",
+        value: "Off"
+    },
+    {
+        id: "OFF",
+        language: "heb",
+        value: "כבוי"
+    },
+    {
+        id: "ON",
+        language: "eng",
+        value: "On"
+    },
+    {
+        id: "ON",
+        language: "heb",
+        value: "דלוק"
+    }
 ];

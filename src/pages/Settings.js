@@ -1,18 +1,33 @@
 import Table from "@/widgets/Table";
-import Input from "@/widgets/Input";
+import Input, { arrayToMenuItems } from "@/widgets/Input";
 import Switch from "@/widgets/Switch";
 import { useStoreState } from "@/util/store";
 import { MainStore } from "../components/Main";
-import MenuItem from '@material-ui/core/MenuItem';
 import LanguageIcon from '@material-ui/icons/Language';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
+import { useState, useEffect } from "react";
 
 export default function Settings() {
     const translations = useTranslations();
     const states = useStoreState(MainStore);
+    let darkModeSelected = "off";
+    if (states.autoDetectDarkMode[0]) {
+        darkModeSelected = "auto";
+    }
+    else if (states.darkMode[0]) {
+        darkModeSelected = "on";
+    }
+    const darkModeState = useState(darkModeSelected);
+    useEffect(() => {
+        const darkMode = darkModeState[0];
+        MainStore.update(s => {
+            s.autoDetectDarkMode = darkMode === "auto";
+            s.darkMode = darkMode === "on";
+        });
+    }, [darkModeState[0]]);
 
     const columns = [
         {
@@ -27,7 +42,22 @@ export default function Settings() {
         }
     ];
 
-    const languageItems = languages.map(({ id, name }) => (<MenuItem value={id}>{name}</MenuItem>));
+    const darkModeItems = arrayToMenuItems([
+        {
+            id: "auto",
+            name: translations.AUTO
+        },
+        {
+            id: "off",
+            name: translations.OFF
+        },
+        {
+            id: "on",
+            name: translations.ON
+        }
+    ]);
+
+    const languageItems = arrayToMenuItems(languages);
 
     const items = [
         {
@@ -43,12 +73,14 @@ export default function Settings() {
             id: "darkMode",
             icon: Brightness4Icon,
             name: translations.DARK_MODE,
-            value: states.darkMode[0],
-            widget: <Switch state={states.darkMode} />
+            value: darkModeState[0],
+            widget: <Input variant="outlined" state={darkModeState} select={true}>
+                {darkModeItems}
+            </Input>
         }
     ].map(item => {
         const { icon, ...props } = item;
-        props.title = <Label icon={icon} name={item.name} />;
+        props.title = <Label key={item.id} icon={icon} name={item.name} />;
         return props;
     });
 

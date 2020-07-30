@@ -2,8 +2,13 @@ import React from "react";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import MenuItem from '@material-ui/core/MenuItem';
 
 const useStyles = makeStyles({});
+
+export function arrayToMenuItems(list) {
+    return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
+}
 
 export default function InputWidget({ helperText, variant = "filled", style, select, multiple, options, state, children, onChange, renderValue, ...props }) {
     const classes = useStyles();
