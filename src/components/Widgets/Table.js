@@ -8,13 +8,13 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
-import { useImportMedia } from "@/util/styles";
+import { useImportMediaTypes } from "@/util/styles";
 import styles from "./Table.module.scss";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
 export default function TableWidget({ columns, items, empty, className, hideColumns, rowClick, ...props }) {
-    const isMobile = useImportMedia(im => im.lessThan('tablet'));
+    const [isMobile] = useImportMediaTypes();
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState((columns[0] && columns[0].id) || 0);

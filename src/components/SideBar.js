@@ -2,12 +2,12 @@ import React, { useEffect, useCallback } from "react";
 import styles from "./SideBar.module.scss"
 import ListWidget from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
-import { useImportMedia } from "@/util/styles";
+import { useImportMediaTypes } from "@/util/styles";
 import { MainStore } from "./Main";
 import { usePagesFromHash, usePages } from "@/util/pages";
 
 export default function SideBar() {
-    const isMobile = useImportMedia(im => im.lessThan('tablet'));
+    const [isMobile] = useImportMediaTypes();
     const { menuViewList, direction, showSideBar, hash } = MainStore.useState();
     const activePages = usePagesFromHash(hash);
     const pages = usePages();

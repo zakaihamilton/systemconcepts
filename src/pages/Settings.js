@@ -10,13 +10,13 @@ import Label from "@/widgets/Label";
 import { useState, useEffect } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { useImportMedia } from "@/util/styles";
+import { useImportMediaTypes } from "@/util/styles";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const translations = useTranslations();
     const states = useStoreState(MainStore);
-    const isDesktop = useImportMedia(im => im.greaterThan('desktop'));
+    const [, , isDesktop] = useImportMediaTypes();
     let darkModeSelected = "off";
     if (states.autoDetectDarkMode[0]) {
         darkModeSelected = "auto";
