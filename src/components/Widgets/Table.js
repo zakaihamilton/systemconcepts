@@ -15,7 +15,7 @@ import SearchIcon from '@material-ui/icons/Search';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-export default function TableWidget({ columns, sortColumn, items, empty, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ columns, sortColumn, items = [], empty, className, hideColumns, rowClick, ...props }) {
     const isMobile = useDeviceType() === "phone";
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
@@ -23,6 +23,25 @@ export default function TableWidget({ columns, sortColumn, items, empty, classNa
     const size = useContext(PageSize);
     const searchState = useState("");
     const [search] = searchState;
+    const hasIdColumn = columns.find(item => item.id === "id");
+
+    items = items.filter(item => {
+        if (!search) {
+            return true;
+        }
+        for (const key in item) {
+            if (key === "id" && !hasIdColumn) {
+                continue;
+            }
+            if (typeof item[key] === "string") {
+                const match = item[key].toLowerCase().includes(search.toLowerCase());
+                if (match) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    });
 
     const createSortHandler = (property) => () => {
         const isDesc = orderBy === property && order === "desc";
