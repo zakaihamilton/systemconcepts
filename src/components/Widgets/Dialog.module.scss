@@ -9,8 +9,6 @@
     align-self: center;
     border-radius: 10px;
     display: flex;
-    width: 50vw;
-    height: 50vh;
     flex-direction: column;
     margin: 1em;
     background: var(--action-background);
@@ -21,6 +19,7 @@
 .content {
     display: flex;
     flex: 1;
+    padding: 1em;
     align-items: center;
     flex-direction: column;
     justify-content: space-around;
