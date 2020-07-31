@@ -13,7 +13,7 @@
 .background {
     margin: 1em;
     box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
-    border-radius: 5px;
+    border-radius: 8px;
     position: relative;
     z-index: 1;
     background: inherit;
@@ -35,8 +35,7 @@
 }
 
 .dialog {
-    border-radius: 1em;
-    overflow: hidden;
+    border-radius: 8px;    overflow: hidden;
     align-self: center;
     display: flex;
     flex-direction: column;
