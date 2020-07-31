@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import im from "node_modules/include-media-export/include-media.js";
 import { useCounter } from "./hooks";
 

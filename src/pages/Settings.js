@@ -17,6 +17,7 @@ import ActionBar from "@/widgets/ActionBar";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
+    const prefferedLanguage = languages.find(item => navigator.language.includes(item.code)) || languages[0];
     const translations = useTranslations();
     const states = useStoreState(MainStore);
     const deviceType = useDeviceType();
@@ -51,6 +52,15 @@ export default function Settings() {
         }
     ];
 
+    const languageItems = [
+        {
+            id: "auto",
+            name: translations.AUTO,
+            tooltip: prefferedLanguage.name
+        },
+        ...languages
+    ]
+
     const darkModeItems = [
         {
             id: "auto",
@@ -69,7 +79,7 @@ export default function Settings() {
 
     const fontSizeItems = fontSizes.filter(item => item.devices.includes(deviceType)).map(item => ({
         id: item.id,
-        name: item.name
+        name: translations[item.name]
     }));
 
     const navigate = id => {
@@ -82,7 +92,7 @@ export default function Settings() {
             icon: LanguageIcon,
             name: translations.LANGUAGE,
             value: states.language[0],
-            widget: <Dynamic items={languages} state={states.language} />,
+            widget: <Dynamic items={languageItems} state={states.language} />,
             onClick: () => navigate("languages")
         },
         {

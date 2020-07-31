@@ -2,11 +2,13 @@ export default [
     {
         id: "eng",
         name: "English",
-        direction: "ltr"
+        direction: "ltr",
+        code: "en"
     },
     {
         id: "heb",
         name: "עברית",
-        direction: "rtl"
+        direction: "rtl",
+        code: "he"
     }
 ];

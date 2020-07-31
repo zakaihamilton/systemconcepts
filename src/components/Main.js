@@ -17,7 +17,7 @@ export const MainStoreDefaults = {
     darkMode: false,
     fontSize: "16",
     direction: "ltr",
-    language: "eng",
+    language: "auto",
     menuViewList: "List",
     showSideBar: true,
     search: ""

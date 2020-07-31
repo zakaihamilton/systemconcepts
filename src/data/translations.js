@@ -298,5 +298,55 @@ export default [
         id: "RESET_MESSAGE",
         language: "heb",
         value: "האם לאפס את ההגדרות לנתונים הראשוניים?"
+    },
+    {
+        id: "VERY_SMALL",
+        language: "eng",
+        value: "Very Small"
+    },
+    {
+        id: "VERY_SMALL",
+        language: "heb",
+        value: "קטן מאוד"
+    },
+    {
+        id: "SMALL",
+        language: "eng",
+        value: "Small"
+    },
+    {
+        id: "SMALL",
+        language: "heb",
+        value: "קטן"
+    },
+    {
+        id: "NORMAL",
+        language: "eng",
+        value: "Normal"
+    },
+    {
+        id: "NORMAL",
+        language: "heb",
+        value: "רגיל"
+    },
+    {
+        id: "LARGE",
+        language: "eng",
+        value: "Large"
+    },
+    {
+        id: "LARGE",
+        language: "heb",
+        value: "גדול"
+    },
+    {
+        id: "VERY_LARGE",
+        language: "eng",
+        value: "Very Large"
+    },
+    {
+        id: "VERY_LARGE",
+        language: "heb",
+        value: "גדול מאוד"
     }
 ];

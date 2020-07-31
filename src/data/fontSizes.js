@@ -1,27 +1,27 @@
 export default [
     {
         id: "10",
-        name: "Very Small",
+        name: "VERY_SMALL",
         devices: ["phone", "tablet", "desktop"]
     },
     {
         id: "13",
-        name: "Small",
+        name: "SMALL",
         devices: ["phone", "tablet", "desktop"]
     },
     {
         id: "16",
-        name: "Normal",
+        name: "NORMAL",
         devices: ["phone", "tablet", "desktop"]
     },
     {
         id: "19",
-        name: "Large",
+        name: "LARGE",
         devices: ["phone", "tablet", "desktop"]
     },
     {
         id: "22",
-        name: "Very Large",
+        name: "VERY_LARGE",
         devices: ["tablet", "desktop"]
     }
 ];
