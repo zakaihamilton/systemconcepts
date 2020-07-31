@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Head from "next/head"
 import AppBar from "./AppBar";
-import StatusBar from "./StatusBar";
 import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
 import { Store } from "pullstate";
@@ -71,7 +70,6 @@ export default function Main() {
                     <Breadcrumbs items={pages} />
                     <Page page={activePage} />
                 </div>
-                <StatusBar />
             </div>
         </Theme>
     </>;
