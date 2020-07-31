@@ -4,6 +4,7 @@ import { MainStore } from "../components/Main";
 import LanguageIcon from '@material-ui/icons/Language';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
+import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import languages from "@/data/languages";
 import fontSizes from "@/data/fontSizes";
 import { useTranslations } from "@/util/translations";
@@ -13,7 +14,6 @@ import Dynamic from "@/widgets/Dynamic";
 import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@/widgets/Button";
-import ActionBar from "@/widgets/ActionBar";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
@@ -109,6 +109,14 @@ export default function Settings() {
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
             onClick: () => navigate("fontSizes")
+        },
+        {
+            id: "reset",
+            icon: SettingsBackupRestoreIcon,
+            name: translations.RESET_SETTINGS,
+            widget: <Button onClick={() => window.location.hash += encodeURI("/reset")}>
+                {translations.RESET}
+            </Button>
         }
     ].map(item => {
         const { icon, onClick, ...props } = item;
@@ -118,10 +126,5 @@ export default function Settings() {
 
     return <>
         <Table columns={columns} items={items} />
-        <ActionBar>
-            <Button onClick={() => window.location.hash += encodeURI("/reset")}>
-                {translations.RESET}
-            </Button>
-        </ActionBar>
     </>;
 }
