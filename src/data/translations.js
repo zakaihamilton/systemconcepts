@@ -248,5 +248,55 @@ export default [
         id: "SEARCH",
         language: "heb",
         value: "חיפוש"
+    },
+    {
+        id: "RESET",
+        language: "eng",
+        value: "Reset"
+    },
+    {
+        id: "RESET",
+        language: "heb",
+        value: "איפוס"
+    },
+    {
+        id: "RESET_SETTINGS",
+        language: "eng",
+        value: "Reset Settings"
+    },
+    {
+        id: "RESET_SETTINGS",
+        language: "heb",
+        value: "איפוס הגדרות"
+    },
+    {
+        id: "CANCEL",
+        language: "eng",
+        value: "Cancel"
+    },
+    {
+        id: "CANCEL",
+        language: "heb",
+        value: "ביטול"
+    },
+    {
+        id: "CLOSE",
+        language: "eng",
+        value: "Close"
+    },
+    {
+        id: "CLOSE",
+        language: "heb",
+        value: "סגור"
+    },
+    {
+        id: "RESET_MESSAGE",
+        language: "eng",
+        value: "Do you want to reset the settings to their original values?"
+    },
+    {
+        id: "RESET_MESSAGE",
+        language: "heb",
+        value: "האם לאפס את ההגדרות לנתונים הראשוניים?"
     }
 ];

@@ -17,10 +17,15 @@ export function usePagesFromHash(hash = "") {
             items.unshift(root.id);
         }
     }
+    let path = "";
     results = items.map(url => {
         url = decodeURI(url);
         const [id, query] = url.split("?");
-        const page = pages.find(page => page.id === id);
+        path += (path ? "/" + id : id);
+        let page = pages.find(page => page.id === path);
+        if (!page) {
+            page = pages.find(page => page.id === id);
+        }
         if (!page) {
             return null;
         }

@@ -17,9 +17,12 @@ import Translations from "@/pages/Translations";
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import FontSizes from "@/pages/FontSizes";
 
+import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
+import Reset from "@/pages/Settings/Reset";
+
 export default [
     {
-        id: "Apps",
+        id: "apps",
         name: "APPS_NAME",
         root: true,
         Icon: AppsIcon,
@@ -63,5 +66,11 @@ export default [
         name: "SETTINGS_NAME",
         Icon: SettingsIcon,
         Component: Settings
+    },
+    {
+        id: "apps/settings/reset",
+        name: "RESET",
+        Icon: SettingsBackupRestoreIcon,
+        Component: Reset
     }
 ];

@@ -12,6 +12,8 @@ import { useState, useEffect } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import Button from "@/widgets/Button";
+import ActionBar from "@/widgets/ActionBar";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
@@ -106,5 +108,10 @@ export default function Settings() {
 
     return <>
         <Table columns={columns} items={items} />
+        <ActionBar>
+            <Button onClick={() => window.location.hash += encodeURI("/reset")}>
+                {translations.RESET}
+            </Button>
+        </ActionBar>
     </>;
 }

@@ -12,7 +12,7 @@ import Page from "./Page";
 import Theme from "./Theme";
 import { useTranslations } from "@/util/translations";
 
-export const MainStore = new Store({
+export const MainStoreDefaults = {
     autoDetectDarkMode: true,
     darkMode: false,
     fontSize: "16",
@@ -21,7 +21,9 @@ export const MainStore = new Store({
     menuViewList: "List",
     showSideBar: true,
     search: ""
-});
+};
+
+export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
     const { APP_NAME } = useTranslations();
