@@ -111,7 +111,7 @@ export default function TableWidget({ columns, sortColumn, items = [], empty, cl
         return null;
     }
 
-    const height = size.height - 36 + "px";
+    const height = size.height + "px";
     const style = {
         maxHeight: height
     };

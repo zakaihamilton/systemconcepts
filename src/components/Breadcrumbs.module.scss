@@ -6,30 +6,42 @@
 .breadcrumbs {
     display: flex;
     align-items: center;
+    padding: 0.25em;
     flex: 1;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    color: var(--text-color);
+}
 
-    &>*+* {
-        margin-top: 0.5em;
-    }
+.separator {
+    margin-left: 0.1em;
+    margin-right: 0.1em;
 }
 
 .link {
     display: flex;
-    align-items: center
+    align-items: center;
+}
+
+.name {
+    padding-left: 0.1em;
+    padding-right: 0.1em;
+}
+
+.link.last {
+    pointer-events: none;
 }
 
 .icon {
     margin-bottom: 0.1em;
     width: 24px;
     height: 24px;
+}
 
+.iconButton {
     [dir=ltr] & {
-        margin-right: 0.5em;
+        margin-right: 0.1em;
     }
 
     [dir=rtl] & {
-        margin-left: 0.5em;
+        margin-left: 0.1em;
     }
 }
