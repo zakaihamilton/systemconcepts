@@ -50,7 +50,9 @@ export default function Languages() {
 
         const deviceItems = deviceTypes.filter(item => devices.includes(item.id));
         return {
-            ...item, devices: deviceItems.map(device => device.name).join(", "), devicesWidget: deviceItems.map(device => {
+            ...item,
+            name: translations[item.name],
+            devices: deviceItems.map(device => device.name).join(", "), devicesWidget: deviceItems.map(device => {
                 return <Label key={device.id} icon={device.icon} name={device.name} />;
             })
         };
