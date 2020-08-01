@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import styles from "./SideBar.module.scss"
 import ListWidget from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
@@ -8,7 +8,7 @@ import { usePagesFromHash, usePages } from "@/util/pages";
 
 export default function SideBar() {
     const isPhone = useDeviceType() === "phone";
-    const { menuViewList, direction, showSideBar, hash } = MainStore.useState();
+    const { menuViewList, direction, showDrawer, hash } = MainStore.useState();
     const activePages = usePagesFromHash(hash);
     const pages = usePages();
     const selected = activePages[activePages.length - 1].id;
@@ -20,20 +20,9 @@ export default function SideBar() {
     }, []);
     const state = [selected, setSelected];
 
-    useEffect(() => {
-        MainStore.update(s => {
-            s.showSideBar = !isPhone && menuViewList === "List";
-        });
-    }, [isPhone]);
-
     const closeDrawer = () => {
         MainStore.update(s => {
-            if (isPhone) {
-                s.showSideBar = false;
-            }
-            else {
-                s.menuViewList = "List";
-            }
+            s.showDrawer = false;
         });
     };
 
@@ -42,7 +31,7 @@ export default function SideBar() {
     if (isPhone) {
         return <Drawer
             anchor={direction === 'rtl' ? 'right' : 'left'}
-            open={showSideBar}
+            open={showDrawer}
             ModalProps={{
                 keepMounted: true
             }}

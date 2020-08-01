@@ -2,25 +2,19 @@ import React from "react";
 import IconButton from "@/components/Widgets/IconButton";
 import MenuIcon from '@material-ui/icons/Menu';
 import Tooltip from '@material-ui/core/Tooltip';
-import { nextTrimmedString } from "@/util/array";
 import { MainStore } from "../Main";
+import { useDeviceType } from "@/util/styles";
 
 export default function Menu() {
+    const isPhone = useDeviceType() === "phone";
 
     const toggleMenu = () => {
         MainStore.update(s => {
-            if (s.showSideBar) {
-                const menuViewList = nextTrimmedString(["None", "List"], s.menuViewList);
-                if (menuViewList === "None") {
-                    s.menuViewList = "List";
-                    s.showSideBar = false;
-                }
-                else {
-                    s.menuViewList = menuViewList;
-                }
+            if (isPhone) {
+                s.showDrawer = true;
             }
             else {
-                s.showSideBar = true;
+                s.showSideBar = !s.showSideBar;
             }
         });
     };

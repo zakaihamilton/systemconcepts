@@ -19,7 +19,8 @@ export const MainStoreDefaults = {
     direction: "ltr",
     language: "auto",
     menuViewList: "List",
-    showSideBar: false,
+    showSideBar: true,
+    showDrawer: false,
     search: ""
 };
 
