@@ -7,15 +7,19 @@ import Dialog from "@/widgets/Dialog";
 export default function Reset() {
     const translations = useTranslations();
 
+    const goBack = () => {
+        window.location.hash = encodeURI("/settings");
+    };
+
     const reset = () => {
         MainStore.update(s => {
             Object.assign(s, MainStoreDefaults);
         });
-        window.location.hash = encodeURI("/settings");
+        goBack();
     };
 
     const cancel = () => {
-        window.location.hash = encodeURI("/settings");
+        goBack();
     };
 
     const actions = (<>
