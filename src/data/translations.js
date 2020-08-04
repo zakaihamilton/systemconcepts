@@ -348,5 +348,35 @@ export default [
         id: "VERY_LARGE",
         language: "heb",
         value: "גדול מאוד"
+    },
+    {
+        id: "STORAGE_NAME",
+        language: "eng",
+        value: "Storage"
+    },
+    {
+        id: "STORAGE_NAME",
+        language: "heb",
+        value: "אחסון"
+    },
+    {
+        id: "LOCAL_STORAGE",
+        language: "eng",
+        value: "Local Storage"
+    },
+    {
+        id: "LOCAL_STORAGE",
+        language: "heb",
+        value: "אחסון מקומי"
+    },
+    {
+        id: "REMOTE_STORAGE",
+        language: "eng",
+        value: "Remote Storage"
+    },
+    {
+        id: "REMOTE_STORAGE",
+        language: "heb",
+        value: "אחסון מרחוק"
     }
 ];

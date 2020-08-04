@@ -16,6 +16,9 @@
             ],
             "@/pages/*": [
                 "src/pages/*"
+            ],
+            "@/storage/*": [
+                "src/storage/*"
             ]
         }
     }

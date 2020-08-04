@@ -1,5 +1,10 @@
 .root {
     position: absolute !important;
     right: 2.5em;
-    bottom: 6em;
+    bottom: 2.5em;
+    display: none !important;
+}
+
+.visible {
+    display: flex !important;
 }

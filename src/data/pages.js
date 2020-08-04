@@ -17,6 +17,9 @@ import Translations from "@/pages/Translations";
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import FontSizes from "@/pages/FontSizes";
 
+import StorageIcon from '@material-ui/icons/Storage';
+import Storage from "@/pages/Storage";
+
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import Reset from "@/pages/Settings/Reset";
 
@@ -59,6 +62,13 @@ export default [
         name: "FONTSIZES_NAME",
         Icon: FormatSizeIcon,
         Component: FontSizes
+    },
+    {
+        id: "storage",
+        name: "STORAGE_NAME",
+        Icon: StorageIcon,
+        Component: Storage,
+        sidebar: true
     },
     {
         sidebar: true,

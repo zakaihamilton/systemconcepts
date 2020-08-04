@@ -1,10 +1,5 @@
 export default [
     {
-        id: "10",
-        name: "VERY_SMALL",
-        devices: ["phone", "tablet", "desktop"]
-    },
-    {
         id: "13",
         name: "SMALL",
         devices: ["phone", "tablet", "desktop"]
