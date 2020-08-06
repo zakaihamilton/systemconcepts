@@ -378,5 +378,45 @@ export default [
         id: "REMOTE_STORAGE",
         language: "heb",
         value: "אחסון מרחוק"
+    },
+    {
+        id: "NEW_FILE",
+        language: "eng",
+        value: "New File"
+    },
+    {
+        id: "NEW_FILE",
+        language: "heb",
+        value: "קובץ חדש"
+    },
+    {
+        id: "NEW_FOLDER",
+        language: "eng",
+        value: "New Folder"
+    },
+    {
+        id: "NEW_FOLDER",
+        language: "heb",
+        value: "תיקייה חדש"
+    },
+    {
+        id: "FILE_NAME_PLACEHOLDER",
+        language: "eng",
+        value: "Enter new file name here..."
+    },
+    {
+        id: "FILE_NAME_PLACEHOLDER",
+        language: "heb",
+        value: "כתוב שם לקובץ החדש..."
+    },
+    {
+        id: "FOLDER_NAME_PLACEHOLDER",
+        language: "eng",
+        value: "Enter new folder name here..."
+    },
+    {
+        id: "FOLDER_NAME_PLACEHOLDER",
+        language: "heb",
+        value: "כתוב שם לתיקייה החדשה..."
     }
 ];

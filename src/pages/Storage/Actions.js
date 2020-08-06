@@ -11,6 +11,7 @@ import { useStoreState } from "@/util/store";
 const EditStoreDefaults = {
     type: "",
     name: "",
+    placeholder: "",
     icon: null,
     visible: false
 };
@@ -18,7 +19,7 @@ const EditStoreDefaults = {
 export const EditStore = new Store(EditStoreDefaults);
 
 export function useActions(items) {
-    const { visible, icon, type, onDone } = EditStore.useState();
+    const { visible, icon, type, onDone, placeholder } = EditStore.useState();
     const { name } = useStoreState(EditStore, s => ({ name: s.name }));
     if (visible) {
         const onBlur = () => {
@@ -48,6 +49,7 @@ export function useActions(items) {
             nameWidget: <Input
                 onBlur={onBlur}
                 onKeyDown={keyDown}
+                placeholder={placeholder}
                 autoFocus
                 key={type}
                 icon={icon}
@@ -71,25 +73,29 @@ export default function Actions() {
     const addItems = [
         {
             id: "file",
-            name: "New File",
-            icon: <InsertDriveFileIcon />
+            name: "NEW_FILE",
+            icon: <InsertDriveFileIcon />,
+            placeholder: "FILE_NAME_PLACEHOLDER"
         },
         {
             id: "folder",
-            name: "New Folder",
-            icon: <FolderIcon />
+            name: "NEW_FOLDER",
+            icon: <FolderIcon />,
+            placeholder: "FOLDER_NAME_PLACEHOLDER"
         }
     ].map(item => {
         return {
             onClick: () => {
                 EditStore.update(s => {
                     s.type = item.id;
-                    s.name = translations[item.name];
+                    s.name = "";
                     s.icon = item.icon;
+                    s.placeholder = translations[item.placeholder];
                     s.visible = true;
                 });
             },
-            ...item
+            ...item,
+            name: translations[item.name]
         }
     });
 
