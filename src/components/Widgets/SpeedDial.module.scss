@@ -1,0 +1,35 @@
+.root {
+    height: 380px;
+    transform: translateZ(0px);
+    flex-grow: 1;
+}
+
+.speedDial {
+    position: absolute;
+    bottom: 2em;
+    right: 2em;
+}
+
+.speedDialRtl {
+    position: absolute;
+    bottom: 2em;
+    left: 2em;
+}
+
+
+.tooltip {
+    width: 10em;
+}
+
+.fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3em;
+    height: 3em;
+}
+
+.icon {
+    width: 3.5em;
+    height: 3.5em;
+}
