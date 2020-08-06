@@ -68,6 +68,7 @@ export function useActions(items) {
 }
 
 export default function Actions() {
+    const { visible } = EditStore.useState();
     const translations = useTranslations();
 
     const addItems = [
@@ -100,6 +101,6 @@ export default function Actions() {
     });
 
     return (
-        <SpeedDial items={addItems} icon={<AddIcon />} />
+        <SpeedDial visible={!visible} items={addItems} icon={<AddIcon />} />
     );
 }

@@ -27,7 +27,7 @@ export default function InputWidget({ items, icon, className, select, multiple, 
     }
     const textField = ({ children, ...params }) => <TextField
         InputProps={{
-            className: clsx(className, styles.root),
+            className: clsx(className, styles.root, styles.input),
             ...icon && {
                 startAdornment: (
                     <InputAdornment position="start">
@@ -37,7 +37,7 @@ export default function InputWidget({ items, icon, className, select, multiple, 
             }
         }}
         SelectProps={{
-            className: clsx(className, styles.root),
+            className: clsx(className, styles.root, styles.select),
             multiple,
             renderValue,
             MenuProps: {
