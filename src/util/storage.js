@@ -1,7 +1,7 @@
 import storage from "@/data/storage";
 import { useState, useEffect, useRef } from "react";
 
-export async function createObject(url) {
+export async function callMethod(methodName, url, ...params) {
     const [deviceId, ...path] = url.split("/");
     if (!deviceId) {
         return storage;
@@ -10,26 +10,39 @@ export async function createObject(url) {
     if (!device) {
         return null;
     }
-    const object = new Proxy(() => { }, device.handler(path));
+    let listing = null;
+    const method = device[methodName];
+    if (!method) {
+        return null;
+    }
     try {
-        await device.init(path, object);
+        listing = await method(path, ...params);
     }
     catch (err) {
         console.error(err);
-        return null;
     }
-    return object;
+    return listing;
 }
 
+export async function getListing(url) {
+    return callMethod("listing", url);
+}
 
-export function useObject(url) {
-    const [object, setObject] = useState(null);
+export async function createFolder(url) {
+    return callMethod("createFolder", url);
+}
+
+export function useListing(url) {
+    const [listing, setListing] = useState(null);
+    const [loading, setLoading] = useState(null);
     const active = useRef(true);
     useEffect(() => {
-        createObject(url).then(object => {
+        setLoading(true);
+        getListing(url).then(listing => {
             if (active.current) {
-                setObject(object);
+                setListing(listing);
             }
+            setLoading(false);
         });
     }, [url]);
     useEffect(() => {
@@ -37,5 +50,5 @@ export function useObject(url) {
             active.current = false;
         };
     }, []);
-    return object;
+    return [listing, loading];
 }

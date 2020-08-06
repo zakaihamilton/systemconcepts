@@ -2,32 +2,11 @@ import FS from '@isomorphic-git/lightning-fs';
 
 const fs = new FS("systemconcepts-fs");
 
-const handler = path => ({
-    apply: (target, thisArg, argumentsList) => {
-
-    },
-    get: (target, prop, receiver) => {
-        if (prop !== "/") {
-            const listing = object["/"];
-            if (listing) {
-                const item = listing.find(item => item.name === prop);
-                return item;
-            }
-        }
-    },
-    has: (target, key) => {
-        return key in target;
-    },
-    set: (obj, prop, value) => {
-
-    }
-});
-
-const init = async (path, object) => {
+async function listing(path) {
+    let listing = [];
     const stat = await fs.promises.stat(path);
     if (stat.isDirectory) {
         const names = await fs.readdir(path);
-        const listing = object["/"] = [];
         for (const name of names) {
             const item = {};
             const filePath = [path, name].filter(Boolean).join("/");
@@ -44,9 +23,14 @@ const init = async (path, object) => {
             }
         }
     }
-};
+    return listing;
+}
+
+async function createFolder(path) {
+    await fs.promises.mkdir(path);
+}
 
 export default {
-    handler,
-    init
+    listing,
+    createFolder
 };

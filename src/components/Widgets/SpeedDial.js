@@ -44,20 +44,26 @@ export default function SpeedDialWidget({ visible = true, items }) {
         setOpen(false);
     };
 
-    const speedDialItems = items.map(item => (
-        <SpeedDialAction
+    const speedDialItems = items.map(item => {
+        const { onClick } = item;
+        const itemHandler = event => {
+            event.target = { ...event.target };
+            event.target.value = item.id;
+            onClick && onClick(event);
+            handleClose();
+        };
+        return <SpeedDialAction
             key={item.id}
             icon={item.icon}
             tooltipTitle={item.name}
             tooltipOpen
-            onClick={handleClose}
-            arrow
+            onClick={itemHandler}
             classes={{
                 fab: classes.icon,
                 staticTooltipLabel: classes.tooltip
             }}
-        />
-    ));
+        />;
+    });
 
     return (
         <div className={classes.root}>

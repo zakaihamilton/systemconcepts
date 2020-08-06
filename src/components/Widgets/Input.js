@@ -1,6 +1,7 @@
 import React from "react";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import InputAdornment from '@material-ui/core/InputAdornment';
 import MenuItem from '@material-ui/core/MenuItem';
 import styles from "./Input.module.scss";
 import clsx from "clsx";
@@ -9,7 +10,7 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default function InputWidget({ items, className, select, multiple, autocomplete, state, onChange, renderValue, ...props }) {
+export default function InputWidget({ items, icon, className, select, multiple, autocomplete, state, onChange, renderValue, ...props }) {
     let [value, setValue] = state;
     const onChangeText = event => {
         const { value } = event.target;
@@ -26,7 +27,14 @@ export default function InputWidget({ items, className, select, multiple, autoco
     }
     const textField = ({ children, ...params }) => <TextField
         InputProps={{
-            className: clsx(className, styles.root)
+            className: clsx(className, styles.root),
+            ...icon && {
+                startAdornment: (
+                    <InputAdornment position="start">
+                        {icon}
+                    </InputAdornment>
+                )
+            }
         }}
         SelectProps={{
             className: clsx(className, styles.root),
