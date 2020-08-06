@@ -4,12 +4,12 @@ import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useListing } from "@/util/storage";
 import Progress from "@/widgets/Progress";
-import Actions, { useActions, EditStore } from "./Storage/Actions";
+import Actions, { useActions, ActionStore } from "./Storage/Actions";
 
 export default function Storage({ path = "" }) {
     const translations = useTranslations();
     const [listing, loading] = useListing(path);
-    const { visible } = EditStore.useState();
+    const { editing } = ActionStore.useState();
 
     const columns = [
         {
@@ -35,7 +35,7 @@ export default function Storage({ path = "" }) {
     };
 
     return <>
-        <Table rowClick={!visible && rowClick} columns={columns} items={items} />
+        <Table rowClick={!editing && rowClick} columns={columns} items={items} />
         {loading && <Progress />}
         <Actions />
     </>;
