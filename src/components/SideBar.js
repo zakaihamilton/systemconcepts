@@ -4,7 +4,7 @@ import ListWidget from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
 import { useDeviceType } from "@/util/styles";
 import { MainStore } from "./Main";
-import { usePagesFromHash, usePages } from "@/util/pages";
+import { usePagesFromHash, usePages, setPath } from "@/util/pages";
 
 export default function SideBar() {
     const isPhone = useDeviceType() === "phone";
@@ -15,7 +15,7 @@ export default function SideBar() {
     const setSelected = useCallback(id => {
         const page = pages.find(page => page.id === id);
         if (page) {
-            window.location.hash = encodeURI(page.id);
+            setPath(page.id);
         }
     }, []);
     const state = [selected, setSelected];

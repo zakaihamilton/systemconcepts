@@ -14,6 +14,7 @@ import Dynamic from "@/widgets/Dynamic";
 import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@/widgets/Button";
+import { addPath } from "@/util/pages";
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
@@ -83,13 +84,13 @@ export default function Settings() {
     }));
 
     const navigate = id => {
-        window.location.hash += encodeURI("/" + id);
+        addPath(id);
     };
 
     const items = [
         {
             id: "language",
-            icon: LanguageIcon,
+            icon: <LanguageIcon />,
             name: translations.LANGUAGE,
             value: states.language[0],
             widget: <Dynamic items={languageItems} state={states.language} />,
@@ -97,14 +98,14 @@ export default function Settings() {
         },
         {
             id: "darkMode",
-            icon: Brightness4Icon,
+            icon: <Brightness4Icon />,
             name: translations.DARK_MODE,
             value: darkModeState[0],
             widget: <Dynamic items={darkModeItems} state={darkModeState} />
         },
         {
             id: "fontSize",
-            icon: FormatSizeIcon,
+            icon: <FormatSizeIcon />,
             name: translations.FONT_SIZE,
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
@@ -112,9 +113,9 @@ export default function Settings() {
         },
         {
             id: "reset",
-            icon: SettingsBackupRestoreIcon,
+            icon: <SettingsBackupRestoreIcon />,
             name: translations.RESET_SETTINGS,
-            widget: <Button onClick={() => window.location.hash += encodeURI("/reset")}>
+            widget: <Button onClick={() => addPath("reset")}>
                 {translations.RESET}
             </Button>
         }

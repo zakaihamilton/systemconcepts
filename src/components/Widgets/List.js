@@ -9,8 +9,8 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { useStyles } from "@/util/styles";
 
-export function ListItemWidget({ separator, viewType, onClick, name, selected, description, Icon, avatar, action }) {
-    const { icon: ActionIcon, label: actionLabel, callback: actionCallback } = action || {};
+export function ListItemWidget({ separator, viewType, onClick, name, selected, description, icon, avatar, action }) {
+    const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const itemClassName = useStyles(styles, {
         itemList: viewType === "List",
         itemIconList: viewType === "IconList"
@@ -25,18 +25,18 @@ export function ListItemWidget({ separator, viewType, onClick, name, selected, d
     });
     return <>
         <ListItem className={itemClassName} button selected={selected} onClick={onClick}>
-            {!!avatar && Icon && <ListItemAvatar>
+            {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
-                    <Icon fontSize="inherit" className={iconClassName} />
+                    {actionIcon}
                 </Avatar>
             </ListItemAvatar>}
-            {!avatar && Icon && <ListItemIcon className={iconContainerClassName}>
-                <Icon fontSize="inherit" className={iconClassName} />
+            {!avatar && icon && <ListItemIcon className={iconContainerClassName}>
+                {icon}
             </ListItemIcon>}
             <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
-            {ActionIcon && <ListItemSecondaryAction>
+            {actionIcon && <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback}>
-                    <ActionIcon />
+                    {actionIcon}
                 </IconButton>
             </ListItemSecondaryAction>}
         </ListItem>

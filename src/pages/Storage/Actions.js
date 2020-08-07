@@ -7,39 +7,50 @@ import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useStoreState } from "@/util/store";
+import { createFolder } from "@/util/storage";
 
 const ActionStoreDefaults = {
     type: "",
     name: "",
     placeholder: "",
     icon: null,
-    editing: false
+    editing: false,
+    counter: 1,
+    onDone: null,
+    onValidate: null
 };
 
 export const ActionStore = new Store(ActionStoreDefaults);
 
 export function useActions(items) {
-    const { editing, icon, type, onDone, placeholder } = ActionStore.useState();
+    const { editing, icon, type, onDone, onValidate, placeholder } = ActionStore.useState();
     const { name } = useStoreState(ActionStore, s => ({ name: s.name }));
     if (editing) {
-        const onBlur = () => {
+        const complete = async () => {
+            let result = undefined;
             if (onDone) {
-                onDone();
+                result = await onDone(name[0]);
             }
             ActionStore.update(s => {
                 s.editing = false;
+                s.counter++;
             });
+            return result;
+        };
+        const onBlur = () => {
+            complete();
         }
-        const keyDown = event => {
+        const keyDown = async event => {
             if (event.keyCode == 13) {
-                let result = true;
-                if (onDone) {
-                    result = onDone();
+                const valid = true;
+                if (onValidate) {
+                    valid = onValidate();
                 }
-                if (result) {
+                if (valid) {
                     ActionStore.update(s => {
                         s.editing = false;
                     });
+                    await complete();
                 }
             }
         };
@@ -67,7 +78,7 @@ export function useActions(items) {
     }, []);
 }
 
-export default function Actions() {
+export default function Actions({ path }) {
     const { editing } = ActionStore.useState();
     const translations = useTranslations();
 
@@ -82,7 +93,10 @@ export default function Actions() {
             id: "folder",
             name: "NEW_FOLDER",
             icon: <FolderIcon />,
-            placeholder: "FOLDER_NAME_PLACEHOLDER"
+            placeholder: "FOLDER_NAME_PLACEHOLDER",
+            onDone: async name => {
+                await createFolder(path + "/" + name);
+            }
         }
     ].map(item => {
         return {
@@ -93,6 +107,8 @@ export default function Actions() {
                     s.icon = item.icon;
                     s.placeholder = translations[item.placeholder];
                     s.editing = true;
+                    s.onDone = item.onDone;
+                    s.onValidate = item.onValidate;
                 });
             },
             ...item,
@@ -101,6 +117,6 @@ export default function Actions() {
     });
 
     return (
-        <SpeedDial visible={!editing} items={addItems} icon={<AddIcon />} />
+        <SpeedDial visible={!editing && path} items={addItems} icon={<AddIcon />} />
     );
 }

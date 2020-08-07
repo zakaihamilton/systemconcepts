@@ -10,7 +10,7 @@ import clsx from "clsx";
 import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 
-export function BreadcrumbItem({ index, count, name, Icon, href, isLast }) {
+export function BreadcrumbItem({ index, count, name, icon, href, isLast }) {
     const { direction } = MainStore.useState();
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
@@ -21,9 +21,9 @@ export function BreadcrumbItem({ index, count, name, Icon, href, isLast }) {
         deviceType === "desktop" && (count <= 5 || index === count - 1);
     return <>
         <Link className={className} color="inherit" href={href}>
-            {Icon && <IconButton className={styles.iconButton}>
+            {icon && <IconButton className={styles.iconButton}>
                 <Tooltip arrow title={showName ? "" : name}>
-                    <Icon className={styles.icon} />
+                    {icon}
                 </Tooltip>
             </IconButton>}
             {showName && <div className={styles.name}>

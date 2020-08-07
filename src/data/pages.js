@@ -18,7 +18,7 @@ import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import FontSizes from "@/pages/FontSizes";
 
 import StorageIcon from '@material-ui/icons/Storage';
-import Storage from "@/pages/Storage";
+import Storage, { getStorageSection } from "@/pages/Storage";
 
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import Reset from "@/pages/Settings/Reset";
@@ -28,7 +28,7 @@ export default [
         id: "apps",
         name: "APPS_NAME",
         root: true,
-        Icon: AppsIcon,
+        icon: <AppsIcon />,
         Component: Apps,
         sidebar: true,
         separator: true
@@ -37,50 +37,51 @@ export default [
         sidebar: true,
         id: "users",
         name: "USERS_NAME",
-        Icon: PeopleIcon
+        icon: <PeopleIcon />
     },
     {
         sidebar: true,
         id: "roles",
         name: "ROLES_NAME",
-        Icon: RecentActorsIcon
+        icon: <RecentActorsIcon />
     },
     {
         id: "languages",
         name: "LANGUAGES_NAME",
-        Icon: LanguageIcon,
+        icon: <LanguageIcon />,
         Component: Languages
     },
     {
         id: "translations",
         name: "TRANSLATIONS_NAME",
-        Icon: TranslateIcon,
+        icon: <TranslateIcon />,
         Component: Translations
     },
     {
         id: "fontSizes",
         name: "FONTSIZES_NAME",
-        Icon: FormatSizeIcon,
+        icon: <FormatSizeIcon />,
         Component: FontSizes
     },
     {
         id: "storage",
         name: "STORAGE_NAME",
-        Icon: StorageIcon,
+        icon: <StorageIcon />,
         Component: Storage,
+        section: getStorageSection,
         sidebar: true
     },
     {
         sidebar: true,
         id: "settings",
         name: "SETTINGS_NAME",
-        Icon: SettingsIcon,
+        icon: <SettingsIcon />,
         Component: Settings
     },
     {
         id: "apps/settings/reset",
         name: "RESET",
-        Icon: SettingsBackupRestoreIcon,
+        icon: <SettingsBackupRestoreIcon />,
         Component: Reset
     }
 ];

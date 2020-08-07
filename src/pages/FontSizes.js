@@ -31,17 +31,17 @@ export default function Languages() {
         {
             id: "phone",
             name: translations.MOBILE,
-            icon: SmartphoneIcon
+            icon: <SmartphoneIcon />
         },
         {
             id: "tablet",
             name: translations.TABLET,
-            icon: TabletIcon
+            icon: <TabletIcon />
         },
         {
             id: "desktop",
             name: translations.DESKTOP,
-            icon: DesktopMacIcon
+            icon: <DesktopMacIcon />
         }
     ];
 

@@ -4,6 +4,7 @@ import { useTranslations } from "@/util/translations";
 import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionLToR';
 import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
 import Label from "@/widgets/Label";
+import { addPath } from "@/util/pages";
 
 export default function Languages() {
     const translations = useTranslations();
@@ -25,12 +26,12 @@ export default function Languages() {
         {
             id: "ltr",
             name: translations.LEFT_TO_RIGHT,
-            icon: FormatTextdirectionLToRIcon
+            icon: <FormatTextdirectionLToRIcon />
         },
         {
             id: "rtl",
             name: translations.RIGHT_TO_LEFT,
-            icon: FormatTextdirectionRToLIcon
+            icon: <FormatTextdirectionRToLIcon />
         }
     ];
 
@@ -45,7 +46,7 @@ export default function Languages() {
     });
 
     const rowClick = (_, id) => {
-        window.location.hash += encodeURI("/translations?language=" + id);
+        addPath("/translations?language=" + id);
     };
 
     return <>

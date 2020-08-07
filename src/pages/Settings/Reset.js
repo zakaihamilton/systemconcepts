@@ -8,7 +8,7 @@ export default function Reset() {
     const translations = useTranslations();
 
     const goBack = () => {
-        window.location.hash = encodeURI("/settings");
+        setPath("settings");
     };
 
     const reset = () => {

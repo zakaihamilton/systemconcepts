@@ -1,15 +1,15 @@
 import styles from "./Label.module.scss";
 import clsx from "clsx";
 
-export default function LabelWidget({ icon: Icon, onClick, name }) {
+export default function LabelWidget({ icon, onClick, name }) {
     if (onClick) {
         return <button onClick={onClick} className={clsx(styles.root, styles.button)}>
-            {Icon && <Icon />}
+            {icon}
             {name}
         </button>;
     }
     return <div className={styles.root}>
-        {Icon && <Icon />}
+        {icon}
         {name}
     </div>;
 }

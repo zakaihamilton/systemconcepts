@@ -1,13 +1,22 @@
 import pageList from "@/data/pages";
 import { useTranslations } from "@/util/translations";
 
+export function addPath(...path) {
+    window.location.hash += "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+}
+
+export function setPath(...path) {
+    window.location.hash = encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+}
+
 export function usePagesFromHash(hash = "") {
+    const translations = useTranslations();
     const pages = usePages();
     let results = [];
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
     }
-    const items = hash.split("/").filter(Boolean);
+    const items = decodeURI(hash).split("/").filter(Boolean);
     const root = pages.find(page => page.root);
     if (root) {
         if (items[0] && items[0].startsWith("?")) {
@@ -18,26 +27,51 @@ export function usePagesFromHash(hash = "") {
         }
     }
     let path = "";
-    results = items.map(url => {
-        url = decodeURI(url);
-        const [id, query] = url.split("?");
-        path += (path ? "/" + id : id);
-        let page = pages.find(page => page.id === path);
-        if (!page) {
-            page = pages.find(page => page.id === id);
-        }
-        if (!page) {
-            return null;
-        }
-        let params = {};
-        if (query) {
-            params = Object.fromEntries(new URLSearchParams(query));
-        }
-        if (page.root) {
-            url = url.substring(id.length);
-        }
-        url = encodeURI(url);
-        return { ...page, url, ...params };
+    items.map(item => {
+        item = decodeURIComponent(item);
+        const [pageId, ...names] = item.split("/");
+        let sectionPath = "";
+        [pageId, ...names].map((section, index) => {
+            const [sectionId, query] = section.split("?");
+            console.log("index", index, "sectionId", sectionId);
+            if (path) {
+                path += "/";
+            }
+            console.log("path", path);
+            if (index) {
+                if (sectionPath) {
+                    sectionPath += "/";
+                }
+                sectionPath += sectionId;
+            }
+            let page = pages.find(page => page.id === path);
+            if (!page) {
+                page = pages.find(page => page.id === pageId);
+            }
+            if (!page) {
+                return null;
+            }
+            let params = {};
+            if (query) {
+                params = Object.fromEntries(new URLSearchParams(query));
+            }
+            path += sectionId;
+            if (page.root) {
+                path = path.substring(pageId.length);
+            }
+            const url = encodeURI(encodeURIComponent(path));
+            let icon = page.icon;
+            let name = page.name;
+            if (index) {
+                if (typeof page.section === "function") {
+                    page = Object.assign({}, page, page.section({ index, id: sectionId, translations }));
+                }
+                else {
+                    name = section;
+                }
+            }
+            results.push({ ...page, name, icon, url, ...params, path: sectionPath });
+        });
     }).filter(Boolean);
     return results;
 }

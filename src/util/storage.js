@@ -2,7 +2,7 @@ import storage from "@/data/storage";
 import { useState, useEffect, useRef } from "react";
 
 export async function callMethod(methodName, url, ...params) {
-    const [deviceId, ...path] = url.split("/");
+    const [deviceId, ...path] = url.split("/").filter(Boolean);
     if (!deviceId) {
         return storage;
     }
@@ -10,18 +10,18 @@ export async function callMethod(methodName, url, ...params) {
     if (!device) {
         return null;
     }
-    let listing = null;
+    let result = null;
     const method = device[methodName];
     if (!method) {
         return null;
     }
     try {
-        listing = await method(path, ...params);
+        result = await method("/" + path.join("/"), ...params);
     }
     catch (err) {
         console.error(err);
     }
-    return listing;
+    return result;
 }
 
 export async function getListing(url) {
@@ -32,7 +32,7 @@ export async function createFolder(url) {
     return callMethod("createFolder", url);
 }
 
-export function useListing(url) {
+export function useListing(url, depends = []) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(null);
     const active = useRef(true);
@@ -44,7 +44,7 @@ export function useListing(url) {
             }
             setLoading(false);
         });
-    }, [url]);
+    }, [url, ...depends]);
     useEffect(() => {
         return () => {
             active.current = false;
