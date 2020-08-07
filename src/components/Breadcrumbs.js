@@ -35,15 +35,10 @@ export function BreadcrumbItem({ index, count, name, icon, href, isLast }) {
 }
 
 export default function BreadcrumbsWidget({ items }) {
-    let href = "#";
-
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const isLast = index === list.length - 1;
         const { id, url, ...props } = item;
-        if (href.length > 1) {
-            href += "/";
-        }
-        href += url;
+        const href = "#" + url;
         return <BreadcrumbItem key={id} index={index} count={list.length} isLast={isLast} href={href} {...props} />
     });
 

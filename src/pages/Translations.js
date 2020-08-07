@@ -4,7 +4,6 @@ import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 
 export default function Languages({ language: languageId }) {
-    console.log(languageId);
     const translations = useTranslations();
 
     const columns = [

@@ -33,11 +33,9 @@ export function usePagesFromHash(hash = "") {
         let sectionPath = "";
         [pageId, ...names].map((section, index) => {
             const [sectionId, query] = section.split("?");
-            console.log("index", index, "sectionId", sectionId);
             if (path) {
                 path += "/";
             }
-            console.log("path", path);
             if (index) {
                 if (sectionPath) {
                     sectionPath += "/";
@@ -60,17 +58,12 @@ export function usePagesFromHash(hash = "") {
                 path = path.substring(pageId.length);
             }
             const url = encodeURI(encodeURIComponent(path));
-            let icon = page.icon;
-            let name = page.name;
             if (index) {
                 if (typeof page.section === "function") {
                     page = Object.assign({}, page, page.section({ index, id: sectionId, translations }));
                 }
-                else {
-                    name = section;
-                }
             }
-            results.push({ ...page, name, icon, url, ...params, path: sectionPath });
+            results.push({ ...page, url, ...params, path: sectionPath });
         });
     }).filter(Boolean);
     return results;

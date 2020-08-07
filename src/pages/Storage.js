@@ -11,7 +11,7 @@ import { setPath } from "@/util/pages";
 import storage from "@/data/storage";
 
 export function getStorageSection({ index, id, translations }) {
-    const icon = index ? <FolderIcon /> : <StorageIcon />;
+    const icon = index > 1 ? <FolderIcon /> : <StorageIcon />;
     let name = id;
     if (index) {
         const item = storage.find(item => item.id === id);
@@ -19,7 +19,7 @@ export function getStorageSection({ index, id, translations }) {
             name = translations[item.name];
         }
     }
-    return icon;
+    return { icon, name, id: name };
 }
 
 export default function Storage({ path = "" }) {
