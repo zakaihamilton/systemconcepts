@@ -26,13 +26,14 @@ const StyledMenuItem = withStyles((theme) => ({
     },
 }))(MenuItem);
 
-export default function MenuWidget({ items, children, onClick, selected, ...props }) {
+export default function MenuWidget({ items, children, onClick, selected, onVisible, ...props }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const clickEnabled = items && items.length || onClick;
 
     const handleClick = (event) => {
         if (items && items.length) {
+            onVisible && onVisible(true);
             setAnchorEl(event.currentTarget);
         }
         else if (onClick) {
@@ -41,6 +42,7 @@ export default function MenuWidget({ items, children, onClick, selected, ...prop
     };
 
     const handleClose = () => {
+        onVisible && onVisible(false);
         setAnchorEl(null);
     };
 

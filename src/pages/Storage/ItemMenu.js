@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from "@/widgets/IconButton";
 import { ActionStore } from "./Actions";
@@ -8,6 +8,7 @@ import { useTranslations } from "@/util/translations";
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
+    const isVisible = useRef();
     const translations = useTranslations();
 
     const items = [
@@ -18,14 +19,25 @@ export default function ItemMenuWidget({ item }) {
         }
     ];
 
+    const updateHover = () => {
+        if (!isVisible.current) {
+            ActionStore.update(s => {
+                s.enableItemClick = !isHover;
+            });
+        }
+    };
+
+    const onMenuVisible = visible => {
+        isVisible.current = visible;
+        updateHover();
+    };
+
     useEffect(() => {
-        ActionStore.update(s => {
-            s.enableItemClick = !isHover;
-        });
+        updateHover();
     }, [isHover]);
 
     return (<>
-        <Menu items={items}>
+        <Menu items={items} onVisible={onMenuVisible}>
             <IconButton ref={ref}>
                 <MoreVertIcon />
             </IconButton>
