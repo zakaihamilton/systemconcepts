@@ -32,6 +32,10 @@ export async function createFolder(url) {
     return callMethod("createFolder", url);
 }
 
+export async function createFile(url) {
+    return callMethod("createFile", url);
+}
+
 export function useListing(url, depends = []) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(null);

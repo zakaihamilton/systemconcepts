@@ -9,7 +9,7 @@ async function listing(path) {
         const names = await fs.promises.readdir(path);
         for (const name of names) {
             const item = {};
-            const filePath = [path, name].filter(Boolean).join("");
+            const filePath = [path, name].filter(Boolean).join("/");
             try {
                 const fileStat = await fs.promises.stat(filePath);
                 Object.assign(item, fileStat);
@@ -30,7 +30,12 @@ async function createFolder(path) {
     await fs.promises.mkdir(path);
 }
 
+async function createFile(path) {
+    await fs.promises.writeFile(path, "", "utf8");
+}
+
 export default {
     listing,
-    createFolder
+    createFolder,
+    createFile
 };
