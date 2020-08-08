@@ -101,8 +101,10 @@ export default function TableWidget({ columns, sortColumn, items = [], empty, cl
             const value = row[columnId];
             return (<TableCell dir={dir} className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
         });
-        const onClick = rowClick ? event => rowClick(event, id || idx) : null;
-        return <TableRow {...onClick && { hover: true, onClick, className: styles.rowHover }} key={id || idx}>
+        const onClick = event => {
+            rowClick(event, id || idx);
+        };
+        return <TableRow {...rowClick && { hover: true, onClick, className: styles.rowHover }} key={id || idx}>
             {cells}
         </TableRow>;
     });

@@ -418,5 +418,15 @@ export default [
         id: "FOLDER_NAME_PLACEHOLDER",
         language: "heb",
         value: "כתוב שם לתיקייה החדשה..."
+    },
+    {
+        id: "RENAME",
+        language: "eng",
+        value: "Rename"
+    },
+    {
+        id: "RENAME",
+        language: "heb",
+        value: "שינוי שם"
     }
 ];
