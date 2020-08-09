@@ -18,7 +18,7 @@ const ActionStoreDefaults = {
     counter: 1,
     onDone: null,
     onValidate: null,
-    enableItemClick: false
+    enableItemClick: true
 };
 
 export const ActionStore = new Store(ActionStoreDefaults);

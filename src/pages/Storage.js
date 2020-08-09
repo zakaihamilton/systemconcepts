@@ -56,7 +56,7 @@ export default function Storage({ path = "" }) {
             id: item.id || item.name,
             icon,
             nameWidget: <Label key={item.id} icon={<>
-                <ItemMenu item={item} />
+                {path && <ItemMenu item={item} />}
                 {icon}
             </>} name={name} />
         };
