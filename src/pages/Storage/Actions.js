@@ -7,7 +7,7 @@ import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useStoreState } from "@/util/store";
-import { createFolder, createFile } from "@/util/storage";
+import storage from "@/util/storage";
 
 const ActionStoreDefaults = {
     type: "",
@@ -90,7 +90,7 @@ export default function Actions({ path }) {
             icon: <InsertDriveFileIcon />,
             placeholder: "FILE_NAME_PLACEHOLDER",
             onDone: async name => {
-                await createFile(path + "/" + name);
+                await storage.createFile(path + "/" + name);
             }
         },
         {
@@ -99,7 +99,7 @@ export default function Actions({ path }) {
             icon: <FolderIcon />,
             placeholder: "FOLDER_NAME_PLACEHOLDER",
             onDone: async name => {
-                await createFolder(path + "/" + name);
+                await storage.createFolder(path + "/" + name);
             }
         }
     ].map(item => {

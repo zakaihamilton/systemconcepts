@@ -1,7 +1,8 @@
 import storage from "@/data/storage";
 import { useState, useEffect, useRef } from "react";
 
-export async function callMethod(methodName, url, ...params) {
+export async function callMethod(item, url = "", ...params) {
+    const { name, types } = item;
     const [deviceId, ...path] = url.split("/").filter(Boolean);
     if (!deviceId) {
         return storage;
@@ -11,10 +12,18 @@ export async function callMethod(methodName, url, ...params) {
         return null;
     }
     let result = null;
-    const method = device[methodName];
+    const method = device[name];
     if (!method) {
         return null;
     }
+    params.map((param, index) => {
+        const type = types[index];
+        if (type === "path") {
+            const [, ...path] = url.split("/").filter(Boolean);
+            return "/" + path.join("/");
+        }
+        return param;
+    });
     try {
         result = await method("/" + path.join("/"), ...params);
     }
@@ -24,17 +33,32 @@ export async function callMethod(methodName, url, ...params) {
     return result;
 }
 
-export async function getListing(url) {
-    return callMethod("listing", url);
-}
-
-export async function createFolder(url) {
-    return callMethod("createFolder", url);
-}
-
-export async function createFile(url) {
-    return callMethod("createFile", url);
-}
+const storageMethods = Object.fromEntries([
+    {
+        name: "getListing"
+    },
+    {
+        name: "createFolder"
+    },
+    {
+        name: "createFile"
+    },
+    {
+        name: "deleteFolder"
+    },
+    {
+        name: "deleteFile"
+    },
+    {
+        name: "rename",
+        types: ["path"]
+    }
+].map(item => {
+    const { name } = item;
+    return [name, (...args) => {
+        return callMethod(item, ...args);
+    }]
+}));
 
 export function useListing(url, depends = []) {
     const [listing, setListing] = useState(null);
@@ -42,7 +66,7 @@ export function useListing(url, depends = []) {
     const active = useRef(true);
     useEffect(() => {
         setLoading(true);
-        getListing(url).then(listing => {
+        storageMethods.getListing(url).then(listing => {
             if (active.current) {
                 setListing(listing);
             }
@@ -56,3 +80,5 @@ export function useListing(url, depends = []) {
     }, []);
     return [listing, loading];
 }
+
+export default storageMethods;

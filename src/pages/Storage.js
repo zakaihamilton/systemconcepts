@@ -54,6 +54,7 @@ export default function Storage({ path = "" }) {
             ...item,
             name,
             id: item.id || item.name,
+            icon,
             nameWidget: <Label key={item.id} icon={<>
                 <ItemMenu item={item} />
                 {icon}
@@ -64,7 +65,6 @@ export default function Storage({ path = "" }) {
     useActions(items);
 
     const rowClick = (_, id) => {
-        console.log("rowClick");
         setPath("storage/" + [path, id].filter(Boolean).join("/"));
     };
 

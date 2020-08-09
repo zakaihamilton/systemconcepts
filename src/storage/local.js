@@ -2,7 +2,7 @@ import FS from '@isomorphic-git/lightning-fs';
 
 const fs = new FS("systemconcepts-fs");
 
-async function listing(path) {
+async function getListing(path) {
     let listing = [];
     const stat = await fs.promises.stat(path);
     if (stat.isDirectory) {
@@ -13,9 +13,9 @@ async function listing(path) {
             try {
                 const fileStat = await fs.promises.stat(filePath);
                 Object.assign(item, fileStat);
-                item.filePath = filePath;
+                item.filePath = "local/" + filePath;
                 item.name = name;
-                item.folder = path;
+                item.folder = "local/" + path;
                 listing.push(item);
             }
             catch (err) {
@@ -34,8 +34,18 @@ async function createFile(path) {
     await fs.promises.writeFile(path, "", "utf8");
 }
 
+async function deleteFolder(path) {
+    await fs.promises.rmdir(path);
+}
+
+async function deleteFile(path) {
+    await fs.promises.unlink(path);
+}
+
 export default {
-    listing,
+    getListing,
     createFolder,
-    createFile
+    createFile,
+    deleteFolder,
+    deleteFile
 };

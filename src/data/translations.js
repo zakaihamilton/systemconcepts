@@ -402,22 +402,22 @@ export default [
     {
         id: "FILE_NAME_PLACEHOLDER",
         language: "eng",
-        value: "Enter new file name here..."
+        value: "Enter file name here..."
     },
     {
         id: "FILE_NAME_PLACEHOLDER",
         language: "heb",
-        value: "כתוב שם לקובץ החדש..."
+        value: "כתוב שם לקובץ..."
     },
     {
         id: "FOLDER_NAME_PLACEHOLDER",
         language: "eng",
-        value: "Enter new folder name here..."
+        value: "Enter folder name here..."
     },
     {
         id: "FOLDER_NAME_PLACEHOLDER",
         language: "heb",
-        value: "כתוב שם לתיקייה החדשה..."
+        value: "כתוב שם לתיקייה..."
     },
     {
         id: "RENAME",
@@ -428,5 +428,15 @@ export default [
         id: "RENAME",
         language: "heb",
         value: "שינוי שם"
+    },
+    {
+        id: "DELETE",
+        language: "eng",
+        value: "Delete"
+    },
+    {
+        id: "DELETE",
+        language: "heb",
+        value: "מחיקה"
     }
 ];
