@@ -7,7 +7,6 @@ import MuiAlert from '@material-ui/lab/Alert';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import Row from "@/widgets/Row";
-import Tooltip from '@material-ui/core/Tooltip';
 import storage from "@/util/storage";
 
 export default function StatusBar() {
@@ -18,13 +17,13 @@ export default function StatusBar() {
     const open = select !== null;
     const count = select && select.length;
 
-    const deleteItems = () => {
+    const deleteItems = async () => {
         for (const item of select) {
             if (item.type === "dir") {
-                storage.deleteFolder(item.path);
+                await storage.deleteFolder(item.path);
             }
             else {
-                storage.deleteFile(item.path);
+                await storage.deleteFile(item.path);
             }
         }
         ActionStore.update(s => {
@@ -67,11 +66,9 @@ export default function StatusBar() {
         >
             <MuiAlert variant="standard" icon={<div />} onClose={handleClose} severity="error" >
                 <Row>
-                    <Tooltip title={title} arrow>
-                        <Button disabled={!count} variant="contained" size="small" onClick={deleteItems}>
-                            {translations.DELETE}
-                        </Button>
-                    </Tooltip>
+                    <Button disabled={!count} variant="contained" size="small" onClick={deleteItems}>
+                        {translations.DELETE}
+                    </Button>
                     <Typography>
                         {message}
                     </Typography>

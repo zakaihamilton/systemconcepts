@@ -34,8 +34,19 @@ async function createFile(path) {
     await fs.promises.writeFile(path, "", "utf8");
 }
 
-async function deleteFolder(path) {
-    await fs.promises.rmdir(path);
+async function deleteFolder(root) {
+    const names = await fs.promises.readdir(root);
+    for (const name of names) {
+        const path = [root, name].filter(Boolean).join("/");
+        const stat = await fs.promises.stat(path);
+        if (stat.type === "dir") {
+            await deleteFolder(path);
+        }
+        else {
+            await deleteFile(path);
+        }
+    }
+    await fs.promises.rmdir(root);
 }
 
 async function deleteFile(path) {
