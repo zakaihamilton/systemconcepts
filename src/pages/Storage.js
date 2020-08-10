@@ -116,7 +116,7 @@ export default function Storage({ path = "" }) {
             nameWidget = <Edit />;
         } else {
             nameWidget = <Label key={id} icon={<>
-                {!select && item.type && <ItemMenu item={result} />}
+                {!select && item.type && !mode && <ItemMenu item={result} />}
                 {select && <Checkbox
                     classes={{ root: styles.checkbox }}
                     color="default"
