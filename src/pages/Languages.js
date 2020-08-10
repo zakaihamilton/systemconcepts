@@ -46,7 +46,7 @@ export default function Languages() {
     });
 
     const rowClick = (_, id) => {
-        addPath("/translations?language=" + id);
+        addPath("translations?language=" + id);
     };
 
     return <>

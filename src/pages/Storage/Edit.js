@@ -3,7 +3,7 @@ import Input from "@/widgets/Input";
 import { ActionStore } from "./Actions";
 
 export default function EditWidget() {
-    const { mode, icon, type, onDone, onValidate, placeholder } = ActionStore.useState();
+    const { icon, type, onDone, onValidate, placeholder } = ActionStore.useState();
     const { name } = useStoreState(ActionStore, s => ({ name: s.name }));
     const complete = async () => {
         let result = undefined;

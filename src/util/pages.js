@@ -46,11 +46,13 @@ export function usePagesFromHash(hash = "") {
         }
     }
     let path = "";
-    items.map(item => {
+    items.forEach(item => {
         item = decodeURIComponent(item);
-        const [pageId, ...names] = item.split("/");
+        const sections = item.split("/");
         let sectionPath = "";
-        [pageId, ...names].map((section, index) => {
+        const pageId = (sections[0] || "").split("?")[0];
+        let subPath = "";
+        sections.map((section, index) => {
             const [sectionId, query] = section.split("?");
             if (path) {
                 path += "/";
@@ -61,12 +63,12 @@ export function usePagesFromHash(hash = "") {
                 }
                 sectionPath += sectionId;
             }
-            path += sectionId;
+            subPath += section;
             let page = pages.find(page => {
                 if (!isRegEx(page.id)) {
                     return false;
                 }
-                const match = path.match(page.id);
+                const match = subPath.match(page.id);
                 return match;
             });
             if (!page) {
@@ -80,17 +82,23 @@ export function usePagesFromHash(hash = "") {
                 params = Object.fromEntries(new URLSearchParams(query));
             }
             if (page.root) {
-                path = path.substring(pageId.length);
+                subPath = subPath.substring(pageId.length);
             }
-            const url = encodeURI(encodeURIComponent(path));
+            const url = encodeURI(path + encodeURIComponent(subPath));
             if (index) {
                 if (typeof page.section === "function") {
                     page = Object.assign({}, page, page.section({ index, id: sectionId, translations }));
                 }
+                else {
+                    return;
+                }
             }
             results.push({ ...page, url, ...params, path: sectionPath });
         });
-    }).filter(Boolean);
+        if (subPath) {
+            path += encodeURIComponent(subPath);
+        }
+    });
     return results;
 }
 
