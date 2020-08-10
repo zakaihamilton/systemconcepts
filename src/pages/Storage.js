@@ -30,7 +30,7 @@ export function getStorageSection({ index, id, translations }) {
 
 export default function Storage({ path = "" }) {
     const translations = useTranslations();
-    const { editing, select, counter, enableItemClick } = ActionStore.useState();
+    const { mode, select, counter, enableItemClick } = ActionStore.useState();
     const [listing, loading] = useListing(path, [counter]);
 
     const columns = [
@@ -95,7 +95,7 @@ export default function Storage({ path = "" }) {
         setPath("storage/" + [path, id].filter(Boolean).join("/"));
     };
 
-    const onRowClick = enableItemClick && !select && !editing && rowClick;
+    const onRowClick = enableItemClick && !select && mode && rowClick;
 
     return <>
         <Table rowClick={onRowClick} rowHeight="6em" columns={columns} items={items} />

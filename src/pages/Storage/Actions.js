@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import { useTranslations } from "@/util/translations";
 import { Store } from "pullstate";
+import storage from "@/util/storage";
 import SpeedDial from "@/widgets/SpeedDial";
-import Input from "@/widgets/Input";
 import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import { useStoreState } from "@/util/store";
-import storage from "@/util/storage";
 import StatusBar from "./StatusBar";
+import Edit from "./Edit";
 
 const ActionStoreDefaults = {
     type: "",
@@ -26,49 +25,12 @@ const ActionStoreDefaults = {
 export const ActionStore = new Store(ActionStoreDefaults);
 
 export function useActions(items) {
-    const { editing, icon, type, onDone, onValidate, placeholder } = ActionStore.useState();
-    const { name } = useStoreState(ActionStore, s => ({ name: s.name }));
-    if (editing) {
-        const complete = async () => {
-            let result = undefined;
-            if (onDone) {
-                result = await onDone(name[0]);
-            }
-            ActionStore.update(s => {
-                s.editing = false;
-                s.counter++;
-            });
-            return result;
-        };
-        const onBlur = () => {
-            complete();
-        }
-        const keyDown = async event => {
-            if (event.keyCode == 13) {
-                const valid = true;
-                if (onValidate) {
-                    valid = onValidate();
-                }
-                if (valid) {
-                    ActionStore.update(s => {
-                        s.editing = false;
-                    });
-                    await complete();
-                }
-            }
-        };
+    const { name, mode, type } = ActionStore.useState();
+    if (mode === "create") {
         items.unshift({
             id: type,
             name: name[0],
-            nameWidget: <Input
-                onBlur={onBlur}
-                onKeyDown={keyDown}
-                placeholder={placeholder}
-                autoFocus
-                key={type}
-                icon={icon}
-                fullWidth={true}
-                state={name} />
+            nameWidget: <Edit />
         });
     }
 
@@ -112,7 +74,7 @@ export default function Actions({ path }) {
                     s.name = "";
                     s.icon = item.icon;
                     s.placeholder = translations[item.placeholder];
-                    s.editing = true;
+                    s.mode = "create";
                     s.onDone = item.onDone;
                     s.onValidate = item.onValidate;
                 });
