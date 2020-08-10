@@ -360,24 +360,24 @@ export default [
         value: "אחסון"
     },
     {
-        id: "LOCAL_STORAGE",
+        id: "LOCAL",
         language: "eng",
-        value: "Local Storage"
+        value: "Local"
     },
     {
-        id: "LOCAL_STORAGE",
+        id: "LOCAL",
         language: "heb",
-        value: "אחסון מקומי"
+        value: "מקומי"
     },
     {
-        id: "REMOTE_STORAGE",
+        id: "REMOTE",
         language: "eng",
         value: "Remote Storage"
     },
     {
-        id: "REMOTE_STORAGE",
+        id: "REMOTE",
         language: "heb",
-        value: "אחסון מרחוק"
+        value: "מרחוק"
     },
     {
         id: "NEW_FILE",
@@ -488,5 +488,45 @@ export default [
         id: "ITEMS_SELECTED",
         language: "heb",
         value: "${count} פריטים נבחרו"
+    },
+    {
+        id: "EDITOR_NAME",
+        language: "eng",
+        value: "Editor"
+    },
+    {
+        id: "EDITOR_NAME",
+        language: "heb",
+        value: "עורך"
+    },
+    {
+        id: "FILE",
+        language: "eng",
+        value: "File"
+    },
+    {
+        id: "FILE",
+        language: "heb",
+        value: "קובץ"
+    },
+    {
+        id: "FOLDER",
+        language: "eng",
+        value: "Folder"
+    },
+    {
+        id: "FOLDER",
+        language: "heb",
+        value: "תיקייה"
+    },
+    {
+        id: "STORAGE",
+        language: "eng",
+        value: "Storage"
+    },
+    {
+        id: "STORAGE",
+        language: "heb",
+        value: "אחסון"
     }
 ];

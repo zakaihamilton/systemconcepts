@@ -4,12 +4,12 @@ import remote from "@/storage/remote";
 export default [
     {
         id: "local",
-        name: "LOCAL_STORAGE",
+        name: "LOCAL",
         ...local
     },
     {
         id: "remote",
-        name: "REMOTE_STORAGE",
+        name: "REMOTE",
         ...remote
     }
 ];

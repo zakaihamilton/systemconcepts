@@ -87,15 +87,21 @@ export function usePagesFromHash(hash = "") {
                 subPath = subPath.substring(pageId.length);
             }
             const url = encodeURI(path + encodeURIComponent(subPath));
+            const name = page.name;
             if (index) {
                 if (typeof page.section === "function") {
                     page = Object.assign({}, page, page.section({ index, id: sectionId, translations }));
+                    console.log("name", name, "page.name", page.name);
                 }
                 else {
                     return;
                 }
             }
-            results.push({ ...page, url, ...params, path: sectionPath });
+            const result = { ...page, url, ...params, path: sectionPath };
+            if (name !== result.name && !result.tooltip) {
+                result.tooltip = name;
+            }
+            results.push(result);
         });
         if (subPath) {
             path += encodeURIComponent(subPath);

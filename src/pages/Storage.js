@@ -1,4 +1,5 @@
 import Table from "@/widgets/Table";
+import Tooltip from '@material-ui/core/Tooltip';
 import StorageIcon from '@material-ui/icons/Storage';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
@@ -7,7 +8,7 @@ import Label from "@/widgets/Label";
 import { useListing } from "@/util/storage";
 import Progress from "@/widgets/Progress";
 import Actions, { useActions, ActionStore } from "./Storage/Actions";
-import { setPath } from "@/util/pages";
+import { setPath, addPath } from "@/util/pages";
 import storage from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
 import Checkbox from '@material-ui/core/Checkbox';
@@ -16,7 +17,9 @@ import Edit from "./Storage/Edit";
 
 export function getStorageSection({ index, id, translations }) {
     let icon = <FolderIcon />;
+    let tooltip = translations.FOLDER;
     if (index <= 1) {
+        tooltip = translations.STORAGE;
         icon = <StorageIcon />;
     }
     let name = id;
@@ -26,7 +29,7 @@ export function getStorageSection({ index, id, translations }) {
             name = translations[item.name];
         }
     }
-    return { icon, name, id: name };
+    return { icon, name, id: name, tooltip };
 }
 
 export default function Storage({ path = "" }) {
@@ -44,15 +47,17 @@ export default function Storage({ path = "" }) {
 
     let items = (listing || []).map(item => {
         const id = item.id || item.name;
-        const itemPath = item.path || item.name;
         const name = translations[item.name] || item.name;
+        let tooltip = translations.STORAGE;
         let icon = <StorageIcon />;
         if (path) {
             if (item.type === "dir") {
                 icon = <FolderIcon />;
+                tooltip = translations.FOLDER;
             }
             else {
                 icon = <InsertDriveFileIcon />;
+                tooltip = translations.FILE;
             }
         }
 
@@ -86,7 +91,9 @@ export default function Storage({ path = "" }) {
                     color="default"
                     checked={select.find(item => item.id === id)}
                     onClick={selectItem} />}
-                {icon}
+                <Tooltip title={tooltip} arrow>
+                    {icon}
+                </Tooltip>
             </>} name={name} />;
         }
 
@@ -100,7 +107,13 @@ export default function Storage({ path = "" }) {
     useActions(items);
 
     const rowClick = (_, id) => {
-        setPath("storage/" + [path, id].filter(Boolean).join("/"));
+        const item = items.find(item => item.id === id);
+        if (item.type === "file") {
+            addPath(`editor?name=${item.name}`);
+        }
+        else {
+            setPath("storage/" + [path, id].filter(Boolean).join("/"));
+        }
     };
 
     const onRowClick = enableItemClick && !select && !mode && rowClick;

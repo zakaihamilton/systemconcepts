@@ -16,7 +16,7 @@
     margin-right: 0.1em;
 }
 
-.link {
+.item {
     display: flex;
     align-items: center;
 }
@@ -26,14 +26,18 @@
     padding-right: 0.1em;
 }
 
-.link.last {
-    pointer-events: none;
-}
-
 .icon {
-    margin-bottom: 0.1em;
-    width: 24px;
-    height: 24px;
+    margin-top: 0.2em;
+
+    [dir=ltr] & {
+        margin-left: 0.75em;
+        margin-right: 0.95em;
+    }
+
+    [dir=rtl] & {
+        margin-left: 0.95em;
+        margin-right: 0.75em;
+    }
 }
 
 .iconButton {

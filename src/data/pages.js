@@ -23,6 +23,10 @@ import Storage, { getStorageSection } from "@/pages/Storage";
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import Reset from "@/pages/Settings/Reset";
 
+import EditIcon from '@material-ui/icons/Edit';
+import Editor from "@/pages/Editor";
+import translations from "./translations";
+
 export default [
     {
         id: "apps",
@@ -83,5 +87,12 @@ export default [
         name: "RESET",
         icon: <SettingsBackupRestoreIcon />,
         Component: Reset
+    },
+    {
+        id: "editor",
+        name: "EDITOR_NAME",
+        icon: <EditIcon />,
+        Component: Editor,
+        showTooltip: true
     }
 ];
