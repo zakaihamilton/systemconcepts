@@ -65,10 +65,11 @@ export function usePagesFromHash(hash = "") {
             }
             subPath += section;
             let page = pages.find(page => {
+                const matchId = path + subPath;
                 if (!isRegEx(page.id)) {
-                    return false;
+                    return page.id === matchId;
                 }
-                const match = subPath.match(page.id);
+                const match = matchId.match(page.id);
                 return match;
             });
             if (!page) {
