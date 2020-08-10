@@ -25,7 +25,7 @@ export default function ItemMenuWidget({ item }) {
                     s.placeholder = translations[placeholder];
                     s.editing = true;
                     s.onDone = async name => {
-                        await storage.rename(item.filePath, [item.folder, name].filter(Boolean).join("/"));
+                        await storage.rename(item.path, [item.folder, name].filter(Boolean).join("/"));
                     };
                 });
             }
@@ -35,7 +35,7 @@ export default function ItemMenuWidget({ item }) {
             name: translations.DELETE,
             onClick: () => {
                 ActionStore.update(s => {
-                    s.select = [item.id || item.name];
+                    s.select = [item];
                 });
             }
         }

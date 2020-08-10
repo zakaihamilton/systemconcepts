@@ -7,6 +7,8 @@ import MuiAlert from '@material-ui/lab/Alert';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import Row from "@/widgets/Row";
+import Tooltip from '@material-ui/core/Tooltip';
+import storage from "@/util/storage";
 
 export default function StatusBar() {
     const translations = useTranslations();
@@ -15,6 +17,21 @@ export default function StatusBar() {
 
     const open = select !== null;
     const count = select && select.length;
+
+    const deleteItems = () => {
+        for (const item of select) {
+            if (item.type === "dir") {
+                storage.deleteFolder(item.path);
+            }
+            else {
+                storage.deleteFile(item.path);
+            }
+        }
+        ActionStore.update(s => {
+            s.counter++;
+            s.select = null;
+        });
+    };
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -37,6 +54,8 @@ export default function StatusBar() {
         message = translations.ITEM_SELECTED;
     }
 
+    const title = select && <>{select.map(item => <div>{item.name}</div>)}</>;
+
     return (
         <Snackbar
             anchorOrigin={{
@@ -48,9 +67,11 @@ export default function StatusBar() {
         >
             <MuiAlert variant="standard" icon={<div />} onClose={handleClose} severity="error" >
                 <Row>
-                    <Button disabled={!count} variant="contained" size="small" onClick={handleClose}>
-                        {translations.DELETE}
-                    </Button>
+                    <Tooltip title={title} arrow>
+                        <Button disabled={!count} variant="contained" size="small" onClick={deleteItems}>
+                            {translations.DELETE}
+                        </Button>
+                    </Tooltip>
                     <Typography>
                         {message}
                     </Typography>

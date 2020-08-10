@@ -43,6 +43,7 @@ export default function Storage({ path = "" }) {
 
     let items = (listing || []).map(item => {
         const id = item.id || item.name;
+        const path = item.path || item.name;
         const name = translations[item.name] || item.name;
         let icon = <StorageIcon />;
         if (path) {
@@ -53,33 +54,39 @@ export default function Storage({ path = "" }) {
                 icon = <InsertDriveFileIcon />;
             }
         }
+
+        let result = {
+            ...item,
+            name,
+            id,
+            icon
+        };
+
         const selectItem = () => {
-            const index = select.indexOf(id);
+            const exists = select.find(item => item.id === id);
             ActionStore.update(s => {
-                if (index === -1) {
-                    s.select = [...select, id];
+                if (exists) {
+                    s.select = select.filter(item => item.id !== id);
                 }
                 else {
-                    s.select = select.filter(item => item !== id);
+                    s.select = [...select, result];
                 }
             });
         };
 
-        return {
-            ...item,
-            name,
-            id,
-            icon,
+        Object.assign(result, {
             nameWidget: <Label key={id} icon={<>
-                {path && !select && <ItemMenu item={item} />}
+                {path && !select && <ItemMenu item={result} />}
                 {select && <Checkbox
                     classes={{ root: styles.checkbox }}
                     color="default"
-                    checked={select.includes(id)}
+                    checked={select.find(item => item.id === id)}
                     onClick={selectItem} />}
                 {icon}
             </>} name={name} />
-        };
+        });
+
+        return result;
     });
 
     useActions(items);
