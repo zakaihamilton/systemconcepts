@@ -91,7 +91,6 @@ export function usePagesFromHash(hash = "") {
             if (index) {
                 if (typeof page.section === "function") {
                     page = Object.assign({}, page, page.section({ index, id: sectionId, translations }));
-                    console.log("name", name, "page.name", page.name);
                 }
                 else {
                     return;

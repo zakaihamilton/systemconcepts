@@ -7,13 +7,29 @@ import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useListing } from "@/util/storage";
 import Progress from "@/widgets/Progress";
-import Actions, { useActions, ActionStore } from "./Storage/Actions";
+import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@/util/pages";
 import storage from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
 import Checkbox from '@material-ui/core/Checkbox';
 import styles from "./Storage.module.scss";
 import Edit from "./Storage/Edit";
+import { Store } from "pullstate";
+
+export const StorageStoreDefaults = {
+    type: "",
+    name: "",
+    placeholder: "",
+    icon: null,
+    editing: false,
+    select: null,
+    counter: 1,
+    onDone: null,
+    onValidate: null,
+    enableItemClick: true
+};
+
+export const StorageStore = new Store(StorageStoreDefaults);
 
 export function getStorageSection({ index, id, translations }) {
     let icon = <FolderIcon />;
@@ -34,7 +50,7 @@ export function getStorageSection({ index, id, translations }) {
 
 export default function Storage({ path = "" }) {
     const translations = useTranslations();
-    const { mode, select, counter, enableItemClick } = ActionStore.useState();
+    const { mode, select, counter, enableItemClick } = StorageStore.useState();
     const [listing, loading] = useListing(path, [counter]);
 
     const columns = [
@@ -70,7 +86,7 @@ export default function Storage({ path = "" }) {
 
         const selectItem = () => {
             const exists = select.find(item => item.id === id);
-            ActionStore.update(s => {
+            StorageStore.update(s => {
                 if (exists) {
                     s.select = select.filter(item => item.id !== id);
                 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from "@/widgets/IconButton";
-import { ActionStore } from "./Actions";
+import { StorageStore } from "../Storage";
 import { useHover } from "@/util/hooks";
 import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
@@ -19,7 +19,7 @@ export default function ItemMenuWidget({ item }) {
             name: translations.RENAME,
             onClick: () => {
                 const placeholder = item.type === "dir" ? "FOLDER_NAME_PLACEHOLDER" : "FILE_NAME_PLACEHOLDER";
-                ActionStore.update(s => {
+                StorageStore.update(s => {
                     s.mode = "rename";
                     s.type = item.type;
                     s.name = item.name;
@@ -36,7 +36,7 @@ export default function ItemMenuWidget({ item }) {
             id: "delete",
             name: translations.DELETE,
             onClick: () => {
-                ActionStore.update(s => {
+                StorageStore.update(s => {
                     s.select = [item];
                 });
             }
@@ -45,7 +45,7 @@ export default function ItemMenuWidget({ item }) {
 
     const updateHover = () => {
         if (!isVisible.current) {
-            ActionStore.update(s => {
+            StorageStore.update(s => {
                 s.enableItemClick = !isHover;
             });
         }

@@ -16,14 +16,16 @@ export async function callMethod(item, url = "", ...params) {
     if (!method) {
         return null;
     }
-    params = params.map((param, index) => {
-        const type = types[index];
-        if (type === "path") {
-            const [, ...path] = param.split("/").filter(Boolean);
-            return "/" + path.join("/");
-        }
-        return param;
-    });
+    if (types) {
+        params = params.map((param, index) => {
+            const type = types[index];
+            if (type === "path") {
+                const [, ...path] = param.split("/").filter(Boolean);
+                return "/" + path.join("/");
+            }
+            return param;
+        });
+    }
     try {
         result = await method("/" + path.join("/"), ...params);
     }
@@ -52,6 +54,12 @@ const storageMethods = Object.fromEntries([
     {
         name: "rename",
         types: ["path"]
+    },
+    {
+        name: "readFile"
+    },
+    {
+        name: "writeFile"
     }
 ].map(item => {
     const { name } = item;

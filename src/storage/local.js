@@ -54,10 +54,17 @@ async function deleteFile(path) {
 }
 
 async function rename(from, to) {
-    console.log("from", from, "to", to);
     if (from !== to) {
         await fs.promises.rename(from, to);
     }
+}
+
+async function readFile(path, encoding = "utf8") {
+    return await fs.promises.readFile(path, encoding);
+}
+
+async function writeFile(path, body, encoding = "utf8") {
+    return await fs.promises.writeFile(path, body, encoding);
 }
 
 export default {
@@ -66,5 +73,7 @@ export default {
     createFile,
     deleteFolder,
     deleteFile,
-    rename
+    rename,
+    readFile,
+    writeFile
 };

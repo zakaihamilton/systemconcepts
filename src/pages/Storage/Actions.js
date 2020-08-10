@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useTranslations } from "@/util/translations";
-import { Store } from "pullstate";
 import storage from "@/util/storage";
 import SpeedDial from "@/widgets/SpeedDial";
 import AddIcon from '@material-ui/icons/Add';
@@ -8,24 +7,10 @@ import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import StatusBar from "./StatusBar";
 import Edit from "./Edit";
-
-const ActionStoreDefaults = {
-    type: "",
-    name: "",
-    placeholder: "",
-    icon: null,
-    editing: false,
-    select: null,
-    counter: 1,
-    onDone: null,
-    onValidate: null,
-    enableItemClick: true
-};
-
-export const ActionStore = new Store(ActionStoreDefaults);
+import { StorageStore, StorageStoreDefaults } from "../Storage";
 
 export function useActions(items) {
-    const { name, mode, type } = ActionStore.useState();
+    const { name, mode, type } = StorageStore.useState();
     if (mode === "create") {
         items.unshift({
             id: type,
@@ -36,15 +21,15 @@ export function useActions(items) {
 
     useEffect(() => {
         return () => {
-            ActionStore.update(s => {
-                Object.assign(s, ActionStoreDefaults);
+            StorageStore.update(s => {
+                Object.assign(s, StorageStoreDefaults);
             });
         }
     }, []);
 }
 
 export default function Actions({ path }) {
-    const { mode } = ActionStore.useState();
+    const { mode } = StorageStore.useState();
     const translations = useTranslations();
 
     const addItems = [
@@ -69,7 +54,7 @@ export default function Actions({ path }) {
     ].map(item => {
         return {
             onClick: () => {
-                ActionStore.update(s => {
+                StorageStore.update(s => {
                     s.type = item.id;
                     s.name = "";
                     s.icon = item.icon;

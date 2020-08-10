@@ -1,16 +1,16 @@
 import { useStoreState } from "@/util/store";
 import Input from "@/widgets/Input";
-import { ActionStore } from "./Actions";
+import { StorageStore } from "../Storage";
 
 export default function EditWidget() {
-    const { icon, type, onDone, onValidate, placeholder } = ActionStore.useState();
-    const { name } = useStoreState(ActionStore, s => ({ name: s.name }));
+    const { icon, type, onDone, onValidate, placeholder } = StorageStore.useState();
+    const { name } = useStoreState(StorageStore, s => ({ name: s.name }));
     const complete = async () => {
         let result = undefined;
         if (onDone) {
             result = await onDone(name[0]);
         }
-        ActionStore.update(s => {
+        StorageStore.update(s => {
             s.mode = "";
             s.counter++;
         });
@@ -26,7 +26,7 @@ export default function EditWidget() {
                 valid = onValidate();
             }
             if (valid) {
-                ActionStore.update(s => {
+                StorageStore.update(s => {
                     s.editing = false;
                 });
                 await complete();
