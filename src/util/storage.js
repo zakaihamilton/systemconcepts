@@ -16,10 +16,10 @@ export async function callMethod(item, url = "", ...params) {
     if (!method) {
         return null;
     }
-    params.map((param, index) => {
+    params = params.map((param, index) => {
         const type = types[index];
         if (type === "path") {
-            const [, ...path] = url.split("/").filter(Boolean);
+            const [, ...path] = param.split("/").filter(Boolean);
             return "/" + path.join("/");
         }
         return param;

@@ -12,6 +12,7 @@ import storage from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
 import Checkbox from '@material-ui/core/Checkbox';
 import styles from "./Storage.module.scss";
+import Edit from "./Storage/Edit";
 
 export function getStorageSection({ index, id, translations }) {
     let icon = <FolderIcon />;
@@ -74,8 +75,11 @@ export default function Storage({ path = "" }) {
             });
         };
 
-        Object.assign(result, {
-            nameWidget: <Label key={id} icon={<>
+        let nameWidget = null;
+        if (mode === "rename") {
+            nameWidget = <Edit />;
+        } else {
+            nameWidget = <Label key={id} icon={<>
                 {!select && <ItemMenu item={result} />}
                 {select && <Checkbox
                     classes={{ root: styles.checkbox }}
@@ -83,7 +87,11 @@ export default function Storage({ path = "" }) {
                     checked={select.find(item => item.id === id)}
                     onClick={selectItem} />}
                 {icon}
-            </>} name={name} />
+            </>} name={name} />;
+        }
+
+        Object.assign(result, {
+            nameWidget
         });
 
         return result;
@@ -95,7 +103,7 @@ export default function Storage({ path = "" }) {
         setPath("storage/" + [path, id].filter(Boolean).join("/"));
     };
 
-    const onRowClick = enableItemClick && !select && mode && rowClick;
+    const onRowClick = enableItemClick && !select && !mode && rowClick;
 
     return <>
         <Table rowClick={onRowClick} rowHeight="6em" columns={columns} items={items} />

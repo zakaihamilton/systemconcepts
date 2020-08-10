@@ -44,7 +44,7 @@ export function useActions(items) {
 }
 
 export default function Actions({ path }) {
-    const { editing } = ActionStore.useState();
+    const { mode } = ActionStore.useState();
     const translations = useTranslations();
 
     const addItems = [
@@ -87,7 +87,7 @@ export default function Actions({ path }) {
     return (
         <>
             <StatusBar />
-            <SpeedDial visible={!editing && path} items={addItems} icon={<AddIcon />} />
+            <SpeedDial visible={!mode && path} items={addItems} icon={<AddIcon />} />
         </>
     );
 }

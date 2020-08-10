@@ -20,6 +20,7 @@ export default function ItemMenuWidget({ item }) {
             onClick: () => {
                 const placeholder = item.type === "dir" ? "FOLDER_NAME_PLACEHOLDER" : "FILE_NAME_PLACEHOLDER";
                 ActionStore.update(s => {
+                    s.mode = "rename";
                     s.type = item.type;
                     s.name = item.name;
                     s.icon = item.icon;
@@ -59,9 +60,11 @@ export default function ItemMenuWidget({ item }) {
         updateHover();
     }, [isHover]);
 
+    const className = !item.type && styles.hide || undefined;
+
     return (<>
         <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref} className={!item.type && styles.hide}>
+            <IconButton ref={ref} className={className}>
                 <MoreVertIcon />
             </IconButton>
         </Menu>

@@ -75,7 +75,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
         <>
             {children}
             <StyledMenu
-                id="customized-menu"
+                id="menu"
                 anchorEl={anchorEl}
                 keepMounted
                 open={Boolean(anchorEl)}

@@ -53,10 +53,18 @@ async function deleteFile(path) {
     await fs.promises.unlink(path);
 }
 
+async function rename(from, to) {
+    console.log("from", from, "to", to);
+    if (from !== to) {
+        await fs.promises.rename(from, to);
+    }
+}
+
 export default {
     getListing,
     createFolder,
     createFile,
     deleteFolder,
-    deleteFile
+    deleteFile,
+    rename
 };
