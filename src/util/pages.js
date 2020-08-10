@@ -62,6 +62,7 @@ export function usePagesFromHash(hash = "") {
                     sectionPath += "/";
                 }
                 sectionPath += sectionId;
+                subPath += "/";
             }
             subPath += section;
             let page = pages.find(page => {
