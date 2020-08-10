@@ -6,6 +6,7 @@ import { useHover } from "@/util/hooks";
 import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import storage from "@/util/storage";
+import styles from "./ItemMenu.module.scss";
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
@@ -60,7 +61,7 @@ export default function ItemMenuWidget({ item }) {
 
     return (<>
         <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref}>
+            <IconButton ref={ref} className={!item.type && styles.hide}>
                 <MoreVertIcon />
             </IconButton>
         </Menu>

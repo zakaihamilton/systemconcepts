@@ -43,7 +43,7 @@ export default function Storage({ path = "" }) {
 
     let items = (listing || []).map(item => {
         const id = item.id || item.name;
-        const path = item.path || item.name;
+        const itemPath = item.path || item.name;
         const name = translations[item.name] || item.name;
         let icon = <StorageIcon />;
         if (path) {
@@ -76,7 +76,7 @@ export default function Storage({ path = "" }) {
 
         Object.assign(result, {
             nameWidget: <Label key={id} icon={<>
-                {path && !select && <ItemMenu item={result} />}
+                {!select && <ItemMenu item={result} />}
                 {select && <Checkbox
                     classes={{ root: styles.checkbox }}
                     color="default"

@@ -61,6 +61,9 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
     });
 
     children = React.Children.map(children, child => {
+        if (!child) {
+            return null;
+        }
         const props = {};
         if (clickEnabled) {
             props.onClick = handleClick;

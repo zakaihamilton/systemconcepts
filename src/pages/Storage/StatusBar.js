@@ -53,8 +53,6 @@ export default function StatusBar() {
         message = translations.ITEM_SELECTED;
     }
 
-    const title = select && <>{select.map(item => <div>{item.name}</div>)}</>;
-
     return (
         <Snackbar
             anchorOrigin={{
