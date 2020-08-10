@@ -14,7 +14,7 @@ import { MainStore } from "../Main";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-export default function TableWidget({ columns, sortColumn, items = [], empty, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ rowHeight, columns, sortColumn, items = [], empty, className, hideColumns, rowClick, ...props }) {
     const isMobile = useDeviceType() === "phone";
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
@@ -104,7 +104,7 @@ export default function TableWidget({ columns, sortColumn, items = [], empty, cl
         const onClick = event => {
             rowClick(event, id || idx);
         };
-        return <TableRow {...rowClick && { hover: true, onClick, className: styles.rowHover }} key={id || idx}>
+        return <TableRow style={{ height: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }} key={id || idx}>
             {cells}
         </TableRow>;
     });

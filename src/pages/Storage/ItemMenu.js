@@ -17,7 +17,7 @@ export default function ItemMenuWidget({ item }) {
             id: "rename",
             name: translations.RENAME,
             onClick: () => {
-                const placeholder = item.type === "dir" ? FOLDER_NAME_PLACEHOLDER : FILE_NAME_PLACEHOLDER;
+                const placeholder = item.type === "dir" ? "FOLDER_NAME_PLACEHOLDER" : "FILE_NAME_PLACEHOLDER";
                 ActionStore.update(s => {
                     s.type = item.type;
                     s.name = item.name;
@@ -34,9 +34,8 @@ export default function ItemMenuWidget({ item }) {
             id: "delete",
             name: translations.DELETE,
             onClick: () => {
-                storage.deleteFile(item.filePath);
                 ActionStore.update(s => {
-                    s.counter++;
+                    s.select = [item.id || item.name];
                 });
             }
         }

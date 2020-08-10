@@ -27,3 +27,7 @@ export function abbreviateNumber(number) {
     // format number and add suffix
     return scaled.toFixed(1) + suffix;
 }
+
+export function isRegEx(string) {
+    return Object.prototype.toString.call(string) === '[object RegExp]';
+}

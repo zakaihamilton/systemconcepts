@@ -13,7 +13,7 @@ async function getListing(path) {
             try {
                 const fileStat = await fs.promises.stat(filePath);
                 Object.assign(item, fileStat);
-                item.filePath = "local/" + filePath;
+                item.filePath = "local" + filePath;
                 item.name = name;
                 item.folder = "local/" + path;
                 listing.push(item);

@@ -8,6 +8,7 @@ import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useStoreState } from "@/util/store";
 import storage from "@/util/storage";
+import StatusBar from "./StatusBar";
 
 const ActionStoreDefaults = {
     type: "",
@@ -15,6 +16,7 @@ const ActionStoreDefaults = {
     placeholder: "",
     icon: null,
     editing: false,
+    select: null,
     counter: 1,
     onDone: null,
     onValidate: null,
@@ -121,6 +123,9 @@ export default function Actions({ path }) {
     });
 
     return (
-        <SpeedDial visible={!editing && path} items={addItems} icon={<AddIcon />} />
+        <>
+            <StatusBar />
+            <SpeedDial visible={!editing && path} items={addItems} icon={<AddIcon />} />
+        </>
     );
 }

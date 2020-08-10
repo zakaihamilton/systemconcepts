@@ -79,7 +79,7 @@ export default [
         Component: Settings
     },
     {
-        id: "apps/settings/reset",
+        id: "settings/reset",
         name: "RESET",
         icon: <SettingsBackupRestoreIcon />,
         Component: Reset

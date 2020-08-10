@@ -3,23 +3,20 @@ import Typography from '@material-ui/core/Typography';
 import Button from "@/widgets/Button";
 import { MainStore, MainStoreDefaults } from "@/components/Main";
 import Dialog from "@/widgets/Dialog";
+import { goBackPage } from "@/util/pages";
 
 export default function Reset() {
     const translations = useTranslations();
-
-    const goBack = () => {
-        setPath("settings");
-    };
 
     const reset = () => {
         MainStore.update(s => {
             Object.assign(s, MainStoreDefaults);
         });
-        goBack();
+        goBackPage();
     };
 
     const cancel = () => {
-        goBack();
+        goBackPage();
     };
 
     const actions = (<>

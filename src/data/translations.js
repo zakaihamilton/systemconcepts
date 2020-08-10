@@ -438,5 +438,55 @@ export default [
         id: "DELETE",
         language: "heb",
         value: "מחיקה"
+    },
+    {
+        id: "DELETE_FOLDER",
+        language: "eng",
+        value: "Delete Folder"
+    },
+    {
+        id: "DELETE_FOLDER",
+        language: "heb",
+        value: "מחיקת תיקייה"
+    },
+    {
+        id: "DELETE_FILE",
+        language: "eng",
+        value: "Delete File"
+    },
+    {
+        id: "DELETE_FILE",
+        language: "heb",
+        value: "מחיקת קובץ"
+    },
+    {
+        id: "ITEMS_NONE_SELECTED",
+        language: "eng",
+        value: "No Items Selected"
+    },
+    {
+        id: "ITEMS_NONE_SELECTED",
+        language: "heb",
+        value: "לא נבחר פריטים"
+    },
+    {
+        id: "ITEM_SELECTED",
+        language: "eng",
+        value: "One Item Selected"
+    },
+    {
+        id: "ITEM_SELECTED",
+        language: "heb",
+        value: "פריט אחד נבחר"
+    },
+    {
+        id: "ITEMS_SELECTED",
+        language: "eng",
+        value: "${count} Items selected"
+    },
+    {
+        id: "ITEMS_SELECTED",
+        language: "heb",
+        value: "${count} פריטים נבחרו"
     }
 ];

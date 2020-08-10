@@ -1,0 +1,14 @@
+.root {
+    display: flex;
+    align-items: center;
+}
+
+.root>* {
+    [dir=rtl] & {
+        margin-left: 1em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 1em;
+    }
+}

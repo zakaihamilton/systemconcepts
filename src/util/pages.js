@@ -1,5 +1,6 @@
 import pageList from "@/data/pages";
 import { useTranslations } from "@/util/translations";
+import { isRegEx } from "@/util/string";
 
 export function addPath(...path) {
     window.location.hash += "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
@@ -7,6 +8,24 @@ export function addPath(...path) {
 
 export function setPath(...path) {
     window.location.hash = encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+}
+
+export function goBackPage() {
+    let hash = window.location.hash;
+    if (hash.startsWith("#")) {
+        hash = hash.substring(1);
+    }
+    window.location.hash = encodeURI(decodeURI(hash).split("/").filter(Boolean).slice(0, -1).join("/"));
+}
+
+export function getPreviousPath() {
+    let hash = window.location.hash;
+    if (hash.startsWith("#")) {
+        hash = hash.substring(1);
+    }
+    const items = decodeURI(hash).split("/").filter(Boolean);
+    const previousItem = items[items.length - 2] || "";
+    return decodeURIComponent(previousItem);
 }
 
 export function usePagesFromHash(hash = "") {
@@ -42,7 +61,14 @@ export function usePagesFromHash(hash = "") {
                 }
                 sectionPath += sectionId;
             }
-            let page = pages.find(page => page.id === path);
+            path += sectionId;
+            let page = pages.find(page => {
+                if (!isRegEx(page.id)) {
+                    return false;
+                }
+                const match = path.match(page.id);
+                return match;
+            });
             if (!page) {
                 page = pages.find(page => page.id === pageId);
             }
@@ -53,7 +79,6 @@ export function usePagesFromHash(hash = "") {
             if (query) {
                 params = Object.fromEntries(new URLSearchParams(query));
             }
-            path += sectionId;
             if (page.root) {
                 path = path.substring(pageId.length);
             }

@@ -10,6 +10,8 @@ import Actions, { useActions, ActionStore } from "./Storage/Actions";
 import { setPath } from "@/util/pages";
 import storage from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
+import Checkbox from '@material-ui/core/Checkbox';
+import styles from "./Storage.module.scss";
 
 export function getStorageSection({ index, id, translations }) {
     let icon = <FolderIcon />;
@@ -28,7 +30,7 @@ export function getStorageSection({ index, id, translations }) {
 
 export default function Storage({ path = "" }) {
     const translations = useTranslations();
-    const { editing, counter, enableItemClick } = ActionStore.useState();
+    const { editing, select, counter, enableItemClick } = ActionStore.useState();
     const [listing, loading] = useListing(path, [counter]);
 
     const columns = [
@@ -40,6 +42,7 @@ export default function Storage({ path = "" }) {
     ];
 
     let items = (listing || []).map(item => {
+        const id = item.id || item.name;
         const name = translations[item.name] || item.name;
         let icon = <StorageIcon />;
         if (path) {
@@ -50,13 +53,30 @@ export default function Storage({ path = "" }) {
                 icon = <InsertDriveFileIcon />;
             }
         }
+        const selectItem = () => {
+            const index = select.indexOf(id);
+            ActionStore.update(s => {
+                if (index === -1) {
+                    s.select = [...select, id];
+                }
+                else {
+                    s.select = select.filter(item => item !== id);
+                }
+            });
+        };
+
         return {
             ...item,
             name,
-            id: item.id || item.name,
+            id,
             icon,
-            nameWidget: <Label key={item.id} icon={<>
-                {path && <ItemMenu item={item} />}
+            nameWidget: <Label key={id} icon={<>
+                {path && !select && <ItemMenu item={item} />}
+                {select && <Checkbox
+                    classes={{ root: styles.checkbox }}
+                    color="default"
+                    checked={select.includes(id)}
+                    onClick={selectItem} />}
                 {icon}
             </>} name={name} />
         };
@@ -68,8 +88,10 @@ export default function Storage({ path = "" }) {
         setPath("storage/" + [path, id].filter(Boolean).join("/"));
     };
 
+    const onRowClick = enableItemClick && !select && !editing && rowClick;
+
     return <>
-        <Table rowClick={enableItemClick && !editing && rowClick} columns={columns} items={items} />
+        <Table rowClick={onRowClick} rowHeight="6em" columns={columns} items={items} />
         {loading && <Progress />}
         <Actions path={path} />
     </>;
