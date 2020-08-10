@@ -15,6 +15,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import styles from "./Storage.module.scss";
 import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
+import { abbreviateSize } from "@/util/string";
+import Typography from '@material-ui/core/Typography';
 
 export const StorageStoreDefaults = {
     type: "",
@@ -26,7 +28,8 @@ export const StorageStoreDefaults = {
     counter: 1,
     onDone: null,
     onValidate: null,
-    enableItemClick: true
+    enableItemClick: true,
+    item: null
 };
 
 export const StorageStore = new Store(StorageStoreDefaults);
@@ -50,7 +53,7 @@ export function getStorageSection({ index, id, translations }) {
 
 export default function Storage({ path = "" }) {
     const translations = useTranslations();
-    const { mode, select, counter, enableItemClick } = StorageStore.useState();
+    const { item: editedItem, mode, select, counter, enableItemClick } = StorageStore.useState();
     const [listing, loading] = useListing(path, [counter]);
 
     const columns = [
@@ -58,6 +61,11 @@ export default function Storage({ path = "" }) {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name"
+        },
+        {
+            id: "sizeWidget",
+            title: translations.SIZE,
+            sortable: "size"
         }
     ];
 
@@ -81,7 +89,14 @@ export default function Storage({ path = "" }) {
             ...item,
             name,
             id,
-            icon
+            icon,
+            sizeWidget: item.type === "file" && <Tooltip
+                title={item.size + " " + translations.BYTES}
+                arrow>
+                <Typography style={{ display: "inline-block" }}>
+                    {abbreviateSize(item.size)}
+                </Typography>
+            </Tooltip>
         };
 
         const selectItem = () => {
@@ -97,11 +112,11 @@ export default function Storage({ path = "" }) {
         };
 
         let nameWidget = null;
-        if (mode === "rename") {
+        if (mode === "rename" && editedItem.id === id) {
             nameWidget = <Edit />;
         } else {
             nameWidget = <Label key={id} icon={<>
-                {!select && <ItemMenu item={result} />}
+                {!select && item.type && <ItemMenu item={result} />}
                 {select && <Checkbox
                     classes={{ root: styles.checkbox }}
                     color="default"

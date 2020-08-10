@@ -70,11 +70,12 @@ export default function TableWidget({ rowHeight, columns, sortColumn, items = []
     }
 
     const tableColumns = (columns || []).map(item => {
-        const { id, title, dir, sortable, columnProps = {}, labelProps = {} } = item;
+        const { id, title, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
         const sortId = typeof sortable === "string" ? sortable : id;
         return <TableCell
             key={id}
-            className={clsx(styles.cell, styles.head)}
+            align={align}
+            className={clsx(styles.cell, !align && styles.defaultAlign, styles.head)}
             dir={dir}
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
@@ -97,9 +98,16 @@ export default function TableWidget({ rowHeight, columns, sortColumn, items = []
     const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((row, idx) => {
         const { id } = row;
         const cells = (columns || []).filter(Boolean).map(column => {
-            const { id: columnId, dir, rowProps = {} } = column;
+            const { id: columnId, dir, align, rowProps = {} } = column;
             const value = row[columnId];
-            return (<TableCell dir={dir} className={styles.cell} key={columnId} {...rowProps}>{value}</TableCell>);
+            return (<TableCell
+                dir={dir}
+                align={align}
+                className={clsx(styles.cell, !align && styles.defaultAlign)}
+                key={columnId}
+                {...rowProps}>
+                {value}
+            </TableCell>);
         });
         const onClick = event => {
             rowClick(event, id || idx);

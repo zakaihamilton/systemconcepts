@@ -528,5 +528,25 @@ export default [
         id: "STORAGE",
         language: "heb",
         value: "אחסון"
+    },
+    {
+        id: "SIZE",
+        language: "eng",
+        value: "Size"
+    },
+    {
+        id: "SIZE",
+        language: "heb",
+        value: "גודל"
+    },
+    {
+        id: "BYTES",
+        language: "eng",
+        value: "Bytes"
+    },
+    {
+        id: "BYTES",
+        language: "heb",
+        value: "בתים"
     }
 ];

@@ -6,7 +6,9 @@
 
 .cell {
     font-size: 16px;
+}
 
+.cell.defaultAlign {
     [dir=ltr] & {
         text-align: left;
     }
@@ -14,14 +16,6 @@
     [dir=rtl] & {
         text-align: right;
     }
-}
-
-.cell[dir=ltr] {
-    text-align: left;
-}
-
-.cell[dir=rtl] {
-    text-align: right;
 }
 
 .rowHover {

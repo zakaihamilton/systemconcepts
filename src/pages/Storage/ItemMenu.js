@@ -6,7 +6,6 @@ import { useHover } from "@/util/hooks";
 import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import storage from "@/util/storage";
-import styles from "./ItemMenu.module.scss";
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
@@ -23,6 +22,7 @@ export default function ItemMenuWidget({ item }) {
                     s.mode = "rename";
                     s.type = item.type;
                     s.name = item.name;
+                    s.item = item;
                     s.icon = item.icon;
                     s.placeholder = translations[placeholder];
                     s.editing = true;
@@ -60,11 +60,9 @@ export default function ItemMenuWidget({ item }) {
         updateHover();
     }, [isHover]);
 
-    const className = !item.type && styles.hide || undefined;
-
     return (<>
         <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref} className={className}>
+            <IconButton ref={ref}>
                 <MoreVertIcon />
             </IconButton>
         </Menu>

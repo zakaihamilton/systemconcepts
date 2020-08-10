@@ -12,6 +12,7 @@ export default function EditWidget() {
         }
         StorageStore.update(s => {
             s.mode = "";
+            s.item = null;
             s.counter++;
         });
         return result;
