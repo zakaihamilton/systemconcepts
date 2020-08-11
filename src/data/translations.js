@@ -10,6 +10,11 @@ export default [
         value: "עקרונות המערכת"
     },
     {
+        id: "APP_NAME",
+        language: "pt-br",
+        value: "System Concepts"
+    },
+    {
         id: "APPS_NAME",
         language: "eng",
         value: "Apps"
@@ -18,6 +23,11 @@ export default [
         id: "APPS_NAME",
         language: "heb",
         value: "אפליקציות"
+    },
+    {
+        id: "APPS_NAME",
+        language: "pt-br",
+        value: "Apps"
     },
     {
         id: "USERS_NAME",
@@ -30,6 +40,11 @@ export default [
         value: "משתמשים"
     },
     {
+        id: "USERS_NAME",
+        language: "pt-br",
+        value: "Usuários"
+    },
+    {
         id: "ROLES_NAME",
         language: "eng",
         value: "Roles"
@@ -38,6 +53,11 @@ export default [
         id: "ROLES_NAME",
         language: "heb",
         value: "תפקידים"
+    },
+    {
+        id: "ROLES_NAME",
+        language: "pt-br",
+        value: "Perfis"
     },
     {
         id: "LANGUAGES_NAME",
@@ -50,6 +70,11 @@ export default [
         value: "שפות"
     },
     {
+        id: "LANGUAGES_NAME",
+        language: "pt-br",
+        value: "Idiomas"
+    },
+    {
         id: "FONTSIZES_NAME",
         language: "eng",
         value: "Font Sizes"
@@ -58,6 +83,11 @@ export default [
         id: "FONTSIZES_NAME",
         language: "heb",
         value: "גודל גופנים"
+    },
+    {
+        id: "FONTSIZES_NAME",
+        language: "pt-br",
+        value: "Tamanhos Fonte"
     },
     {
         id: "SETTINGS_NAME",
@@ -70,6 +100,11 @@ export default [
         value: "הגדרות"
     },
     {
+        id: "SETTINGS_NAME",
+        language: "pt-br",
+        value: "Configurações"
+    },
+    {
         id: "TRANSLATIONS_NAME",
         language: "eng",
         value: "Translations"
@@ -78,6 +113,11 @@ export default [
         id: "TRANSLATIONS_NAME",
         language: "heb",
         value: "תרגומים"
+    },
+    {
+        id: "TRANSLATIONS_NAME",
+        language: "pt-br",
+        value: "Traduções"
     },
     {
         id: "NAME",
@@ -90,6 +130,11 @@ export default [
         value: "שם"
     },
     {
+        id: "NAME",
+        language: "pt-br",
+        value: "Nome"
+    },
+    {
         id: "SETTING",
         language: "eng",
         value: "Setting"
@@ -98,6 +143,11 @@ export default [
         id: "SETTING",
         language: "heb",
         value: "הגדרה"
+    },
+    {
+        id: "SETTING",
+        language: "pt-br",
+        value: "Configuração"
     },
     {
         id: "LANGUAGE",
@@ -110,6 +160,11 @@ export default [
         value: "שפה"
     },
     {
+        id: "LANGUAGE",
+        language: "pt-br",
+        value: "Idioma"
+    },
+    {
         id: "DARK_MODE",
         language: "eng",
         value: "Dark Mode"
@@ -118,6 +173,11 @@ export default [
         id: "DARK_MODE",
         language: "heb",
         value: "מצב חשוך"
+    },
+    {
+        id: "DARK_MODE",
+        language: "pt-br",
+        value: "Modo Escuro"
     },
     {
         id: "DIRECTION",
@@ -130,6 +190,11 @@ export default [
         value: "כיוון"
     },
     {
+        id: "DIRECTION",
+        language: "pt-br",
+        value: "Direção"
+    },
+    {
         id: "LEFT_TO_RIGHT",
         language: "eng",
         value: "Left to Right"
@@ -138,6 +203,11 @@ export default [
         id: "LEFT_TO_RIGHT",
         language: "heb",
         value: "משמאל לימין"
+    },
+    {
+        id: "LEFT_TO_RIGHT",
+        language: "pt-br",
+        value: "Esquerda para Direita"
     },
     {
         id: "RIGHT_TO_LEFT",
@@ -150,6 +220,11 @@ export default [
         value: "מימין לשמאל"
     },
     {
+        id: "RIGHT_TO_LEFT",
+        language: "pt-br",
+        value: "Direita para Esquerda"
+    },
+    {
         id: "ID",
         language: "eng",
         value: "ID"
@@ -158,6 +233,11 @@ export default [
         id: "ID",
         language: "heb",
         value: "מזהה"
+    },
+    {
+        id: "ID",
+        language: "pt-br",
+        value: "ID"
     },
     {
         id: "AUTO",
@@ -170,6 +250,11 @@ export default [
         value: "אוטומטי"
     },
     {
+        id: "AUTO",
+        language: "pt-br",
+        value: "Auto"
+    },
+    {
         id: "OFF",
         language: "eng",
         value: "Off"
@@ -178,6 +263,11 @@ export default [
         id: "OFF",
         language: "heb",
         value: "כבוי"
+    },
+    {
+        id: "OFF",
+        language: "pt-br",
+        value: "Desligado"
     },
     {
         id: "ON",
@@ -190,6 +280,11 @@ export default [
         value: "דלוק"
     },
     {
+        id: "ON",
+        language: "pt-br",
+        value: "Ligado"
+    },
+    {
         id: "FONT_SIZE",
         language: "eng",
         value: "Font Size"
@@ -198,6 +293,11 @@ export default [
         id: "FONT_SIZE",
         language: "heb",
         value: "גודל גופן"
+    },
+    {
+        id: "FONT_SIZE",
+        language: "pt-br",
+        value: "Tamanho Fonte"
     },
     {
         id: "DEVICES",
@@ -210,6 +310,11 @@ export default [
         value: "מכשירים"
     },
     {
+        id: "DEVICES",
+        language: "pt-br",
+        value: "Dispositivos"
+    },
+    {
         id: "MOBILE",
         language: "eng",
         value: "Phone"
@@ -218,6 +323,11 @@ export default [
         id: "MOBILE",
         language: "heb",
         value: "טלפון"
+    },
+    {
+        id: "MOBILE",
+        language: "pt-br",
+        value: "Celular"
     },
     {
         id: "TABLET",
@@ -230,6 +340,11 @@ export default [
         value: "טבלט"
     },
     {
+        id: "TABLET",
+        language: "pt-br",
+        value: "Tablet"
+    },
+    {
         id: "DESKTOP",
         language: "eng",
         value: "Desktop"
@@ -238,6 +353,11 @@ export default [
         id: "DESKTOP",
         language: "heb",
         value: "מחשב"
+    },
+    {
+        id: "DESKTOP",
+        language: "pt-br",
+        value: "Computador"
     },
     {
         id: "SEARCH",
@@ -250,6 +370,11 @@ export default [
         value: "חיפוש"
     },
     {
+        id: "SEARCH",
+        language: "pt-br",
+        value: "Pesquisar"
+    },
+    {
         id: "RESET",
         language: "eng",
         value: "Reset"
@@ -258,6 +383,11 @@ export default [
         id: "RESET",
         language: "heb",
         value: "איפוס"
+    },
+    {
+        id: "RESET",
+        language: "pt-br",
+        value: "Restaurar"
     },
     {
         id: "RESET_SETTINGS",
@@ -270,6 +400,11 @@ export default [
         value: "איפוס הגדרות"
     },
     {
+        id: "RESET_SETTINGS",
+        language: "pt-br",
+        value: "Restaurar Configurações"
+    },
+    {
         id: "CANCEL",
         language: "eng",
         value: "Cancel"
@@ -278,6 +413,11 @@ export default [
         id: "CANCEL",
         language: "heb",
         value: "ביטול"
+    },
+    {
+        id: "CANCEL",
+        language: "pt-br",
+        value: "Cancelar"
     },
     {
         id: "CLOSE",
@@ -290,6 +430,11 @@ export default [
         value: "סגור"
     },
     {
+        id: "CLOSE",
+        language: "pt-br",
+        value: "Fechar"
+    },
+    {
         id: "RESET_MESSAGE",
         language: "eng",
         value: "Do you want to reset the settings to their original values?"
@@ -298,6 +443,11 @@ export default [
         id: "RESET_MESSAGE",
         language: "heb",
         value: "האם לאפס את ההגדרות לנתונים הראשוניים?"
+    },
+    {
+        id: "RESET_MESSAGE",
+        language: "pt-br",
+        value: "Você deseja voltar as configurações para os valores originais?"
     },
     {
         id: "VERY_SMALL",
@@ -310,6 +460,11 @@ export default [
         value: "קטן מאוד"
     },
     {
+        id: "VERY_SMALL",
+        language: "pt-br",
+        value: "Muito Pequena"
+    },
+    {
         id: "SMALL",
         language: "eng",
         value: "Small"
@@ -318,6 +473,11 @@ export default [
         id: "SMALL",
         language: "heb",
         value: "קטן"
+    },
+    {
+        id: "SMALL",
+        language: "pt-br",
+        value: "Pequena"
     },
     {
         id: "NORMAL",
@@ -330,6 +490,11 @@ export default [
         value: "רגיל"
     },
     {
+        id: "NORMAL",
+        language: "pt-br",
+        value: "Normal"
+    },
+    {
         id: "LARGE",
         language: "eng",
         value: "Large"
@@ -338,6 +503,11 @@ export default [
         id: "LARGE",
         language: "heb",
         value: "גדול"
+    },
+    {
+        id: "LARGE",
+        language: "pt-br",
+        value: "Grande"
     },
     {
         id: "VERY_LARGE",
@@ -350,6 +520,11 @@ export default [
         value: "גדול מאוד"
     },
     {
+        id: "VERY_LARGE",
+        language: "pt-br",
+        value: "Muito Grande"
+    },
+    {
         id: "STORAGE_NAME",
         language: "eng",
         value: "Storage"
@@ -358,6 +533,11 @@ export default [
         id: "STORAGE_NAME",
         language: "heb",
         value: "אחסון"
+    },
+    {
+        id: "STORAGE_NAME",
+        language: "pt-br",
+        value: "Armazenamento"
     },
     {
         id: "LOCAL",
@@ -370,14 +550,24 @@ export default [
         value: "מקומי"
     },
     {
+        id: "LOCAL",
+        language: "pt-br",
+        value: "Local"
+    },
+    {
         id: "REMOTE",
         language: "eng",
-        value: "Remote Storage"
+        value: "Remote"
     },
     {
         id: "REMOTE",
         language: "heb",
         value: "מרחוק"
+    },
+    {
+        id: "REMOTE",
+        language: "pt-br",
+        value: "Remoto"
     },
     {
         id: "NEW_FILE",
@@ -390,6 +580,11 @@ export default [
         value: "קובץ חדש"
     },
     {
+        id: "NEW_FILE",
+        language: "pt-br",
+        value: "Novo Arquivo"
+    },
+    {
         id: "NEW_FOLDER",
         language: "eng",
         value: "New Folder"
@@ -398,6 +593,11 @@ export default [
         id: "NEW_FOLDER",
         language: "heb",
         value: "תיקייה חדש"
+    },
+    {
+        id: "NEW_FOLDER",
+        language: "pt-br",
+        value: "Nova Pasta"
     },
     {
         id: "FILE_NAME_PLACEHOLDER",
@@ -410,6 +610,11 @@ export default [
         value: "כתוב שם לקובץ..."
     },
     {
+        id: "FILE_NAME_PLACEHOLDER",
+        language: "pt-br",
+        value: "Digite o nome do arquivo.."
+    },
+    {
         id: "FOLDER_NAME_PLACEHOLDER",
         language: "eng",
         value: "Enter folder name here..."
@@ -418,6 +623,11 @@ export default [
         id: "FOLDER_NAME_PLACEHOLDER",
         language: "heb",
         value: "כתוב שם לתיקייה..."
+    },
+    {
+        id: "FOLDER_NAME_PLACEHOLDER",
+        language: "pt-br",
+        value: "Digite o nome da pasta..."
     },
     {
         id: "RENAME",
@@ -430,6 +640,11 @@ export default [
         value: "שינוי שם"
     },
     {
+        id: "RENAME",
+        language: "pt-br",
+        value: "Renomear"
+    },
+    {
         id: "DELETE",
         language: "eng",
         value: "Delete"
@@ -438,6 +653,11 @@ export default [
         id: "DELETE",
         language: "heb",
         value: "מחיקה"
+    },
+    {
+        id: "DELETE",
+        language: "pt-br",
+        value: "Excluir"
     },
     {
         id: "DELETE_FOLDER",
@@ -450,6 +670,11 @@ export default [
         value: "מחיקת תיקייה"
     },
     {
+        id: "DELETE_FOLDER",
+        language: "pt-br",
+        value: "Excluir Pasta"
+    },
+    {
         id: "DELETE_FILE",
         language: "eng",
         value: "Delete File"
@@ -458,6 +683,11 @@ export default [
         id: "DELETE_FILE",
         language: "heb",
         value: "מחיקת קובץ"
+    },
+    {
+        id: "DELETE_FILE",
+        language: "pt-br",
+        value: "Excluir Arquivo"
     },
     {
         id: "ITEMS_NONE_SELECTED",
@@ -470,6 +700,11 @@ export default [
         value: "לא נבחר פריטים"
     },
     {
+        id: "ITEMS_NONE_SELECTED",
+        language: "pt-br",
+        value: "Nenhum Item Selecionado"
+    },
+    {
         id: "ITEM_SELECTED",
         language: "eng",
         value: "One Item Selected"
@@ -478,6 +713,11 @@ export default [
         id: "ITEM_SELECTED",
         language: "heb",
         value: "פריט אחד נבחר"
+    },
+    {
+        id: "ITEM_SELECTED",
+        language: "pt-br",
+        value: "Um Item Selecionado"
     },
     {
         id: "ITEMS_SELECTED",
@@ -490,6 +730,11 @@ export default [
         value: "${count} פריטים נבחרו"
     },
     {
+        id: "ITEMS_SELECTED",
+        language: "pt-br",
+        value: "${count} Items selecionados"
+    },
+    {
         id: "EDITOR_NAME",
         language: "eng",
         value: "Editor"
@@ -498,6 +743,11 @@ export default [
         id: "EDITOR_NAME",
         language: "heb",
         value: "עורך"
+    },
+    {
+        id: "EDITOR_NAME",
+        language: "pt-br",
+        value: "Editor"
     },
     {
         id: "FILE",
@@ -510,6 +760,11 @@ export default [
         value: "קובץ"
     },
     {
+        id: "FILE",
+        language: "pt-br",
+        value: "Arquivo"
+    },
+    {
         id: "FOLDER",
         language: "eng",
         value: "Folder"
@@ -518,6 +773,11 @@ export default [
         id: "FOLDER",
         language: "heb",
         value: "תיקייה"
+    },
+    {
+        id: "FOLDER",
+        language: "pt-br",
+        value: "Pasta"
     },
     {
         id: "STORAGE",
@@ -530,6 +790,11 @@ export default [
         value: "אחסון"
     },
     {
+        id: "STORAGE",
+        language: "pt-br",
+        value: "Armazenamento"
+    },
+    {
         id: "SIZE",
         language: "eng",
         value: "Size"
@@ -538,6 +803,11 @@ export default [
         id: "SIZE",
         language: "heb",
         value: "גודל"
+    },
+    {
+        id: "SIZE",
+        language: "pt-br",
+        value: "Tamanho"
     },
     {
         id: "BYTES",
@@ -550,6 +820,11 @@ export default [
         value: "בתים"
     },
     {
+        id: "BYTES",
+        language: "pt-br",
+        value: "Bytes"
+    },
+    {
         id: "ALREADY_EXISTS",
         language: "eng",
         value: "${name} already exists!"
@@ -558,5 +833,10 @@ export default [
         id: "ALREADY_EXISTS",
         language: "heb",
         value: "${name} כבר קיים!"
+    },
+    {
+        id: "ALREADY_EXISTS",
+        language: "pt-br",
+        value: "${name} já existe!"
     },
 ];
