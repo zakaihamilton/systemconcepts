@@ -27,7 +27,22 @@ export default function ItemMenuWidget({ item }) {
                     s.placeholder = translations[placeholder];
                     s.editing = true;
                     s.onDone = async name => {
-                        await storage.rename(item.path, [item.folder, name].filter(Boolean).join("/"));
+                        name = name.replace(/\//, " ");
+                        const target = [item.folder, name].filter(Boolean).join("/");
+                        if (item.path !== target) {
+                            try {
+                                if (await storage.exists(target)) {
+                                    throw translations.ALREADY_EXISTS.replace("${name}", name);
+                                }
+                                await storage.rename(item.path, target);
+                            }
+                            catch (err) {
+                                StorageStore.update(s => {
+                                    s.message = err;
+                                    s.severity = "error";
+                                });
+                            }
+                        }
                     };
                 });
             }
@@ -38,6 +53,18 @@ export default function ItemMenuWidget({ item }) {
             onClick: () => {
                 StorageStore.update(s => {
                     s.select = [item];
+                    s.mode = "delete";
+                    s.severity = "error";
+                    s.onDone = async select => {
+                        for (const item of select) {
+                            if (item.type === "dir") {
+                                await storage.deleteFolder(item.path);
+                            }
+                            else {
+                                await storage.deleteFile(item.path);
+                            }
+                        }
+                    }
                 });
             }
         }

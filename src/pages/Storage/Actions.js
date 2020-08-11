@@ -39,7 +39,19 @@ export default function Actions({ path }) {
             icon: <InsertDriveFileIcon />,
             placeholder: "FILE_NAME_PLACEHOLDER",
             onDone: async name => {
-                await storage.createFile(path + "/" + name);
+                const target = path + "/" + name;
+                try {
+                    if (await storage.exists(target)) {
+                        throw translations.ALREADY_EXISTS.replace("${name}", name);
+                    }
+                    await storage.createFile(target);
+                }
+                catch (err) {
+                    StorageStore.update(s => {
+                        s.message = err;
+                        s.severity = "error";
+                    });
+                }
             }
         },
         {
@@ -48,7 +60,19 @@ export default function Actions({ path }) {
             icon: <FolderIcon />,
             placeholder: "FOLDER_NAME_PLACEHOLDER",
             onDone: async name => {
-                await storage.createFolder(path + "/" + name);
+                const target = path + "/" + name;
+                try {
+                    if (await storage.exists(target)) {
+                        throw translations.ALREADY_EXISTS.replace("${name}", name);
+                    }
+                    await storage.createFolder(target);
+                }
+                catch (err) {
+                    StorageStore.update(s => {
+                        s.message = err;
+                        s.severity = "error";
+                    });
+                }
             }
         }
     ].map(item => {

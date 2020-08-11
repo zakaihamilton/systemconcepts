@@ -15,7 +15,7 @@ async function getListing(path) {
                 Object.assign(item, fileStat);
                 item.path = "local" + filePath;
                 item.name = name;
-                item.folder = "local/" + path;
+                item.folder = "local" + path;
                 listing.push(item);
             }
             catch (err) {
@@ -54,9 +54,7 @@ async function deleteFile(path) {
 }
 
 async function rename(from, to) {
-    if (from !== to) {
-        await fs.promises.rename(from, to);
-    }
+    await fs.promises.rename(from, to);
 }
 
 async function readFile(path, encoding = "utf8") {
@@ -67,6 +65,18 @@ async function writeFile(path, body, encoding = "utf8") {
     return await fs.promises.writeFile(path, body, encoding);
 }
 
+async function exists(path) {
+    let exists = false;
+    try {
+        const stat = await fs.promises.stat(path);
+        exists = stat !== null;
+    }
+    catch (err) {
+
+    }
+    return exists;
+}
+
 export default {
     getListing,
     createFolder,
@@ -75,5 +85,6 @@ export default {
     deleteFile,
     rename,
     readFile,
-    writeFile
+    writeFile,
+    exists
 };

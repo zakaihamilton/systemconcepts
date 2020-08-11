@@ -60,6 +60,9 @@ const storageMethods = Object.fromEntries([
     },
     {
         name: "writeFile"
+    },
+    {
+        name: "exists"
     }
 ].map(item => {
     const { name } = item;

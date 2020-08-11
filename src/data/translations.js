@@ -548,5 +548,15 @@ export default [
         id: "BYTES",
         language: "heb",
         value: "בתים"
-    }
+    },
+    {
+        id: "ALREADY_EXISTS",
+        language: "eng",
+        value: "${name} already exists!"
+    },
+    {
+        id: "ALREADY_EXISTS",
+        language: "heb",
+        value: "${name} כבר קיים!"
+    },
 ];
