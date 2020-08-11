@@ -10,5 +10,11 @@ export default [
         name: "עברית",
         direction: "rtl",
         code: "he"
+    },
+    {
+        id: "pt-br",
+        name: "Português Brasil",
+        direction: "ltr",
+        code: "pt-br"
     }
 ];
