@@ -64,7 +64,7 @@ export default function StatusBar() {
         >
             <MuiAlert variant="standard" icon={<div />} onClose={handleClose} severity={severity} >
                 <Row>
-                    {mode === "delete" && <Button disabled={!count} variant="contained" size="small" onClick={onClick}>
+                    {mode === "delete" && <Button disabled={!count} variant="contained" onClick={onClick}>
                         {translations.DELETE}
                     </Button>}
                     <Typography>
