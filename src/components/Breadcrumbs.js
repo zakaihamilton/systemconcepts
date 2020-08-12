@@ -6,7 +6,6 @@ import { Divider } from "@material-ui/core";
 import IconButton from "@/components/Widgets/IconButton";
 import { MainStore } from "@/components/Main";
 import styles from "./Breadcrumbs.module.scss";
-import clsx from "clsx";
 import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 

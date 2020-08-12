@@ -23,6 +23,7 @@ export const StorageStoreDefaults = {
     name: "",
     placeholder: "",
     icon: null,
+    tooltip: null,
     editing: false,
     select: null,
     counter: 1,
@@ -89,6 +90,7 @@ export default function Storage({ path = "" }) {
             ...item,
             name,
             id,
+            tooltip,
             icon,
             sizeWidget: item.type === "file" && <Tooltip
                 title={item.size + " " + translations.BYTES}

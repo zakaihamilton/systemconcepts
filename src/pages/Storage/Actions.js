@@ -37,8 +37,12 @@ export default function Actions({ path }) {
             id: "file",
             name: "NEW_FILE",
             icon: <InsertDriveFileIcon />,
-            placeholder: "FILE_NAME_PLACEHOLDER",
+            tooltip: translations.FILE,
+            placeholder: translations.FILE_NAME_PLACEHOLDER,
             onDone: async name => {
+                if (!name) {
+                    return;
+                }
                 const target = path + "/" + name;
                 try {
                     if (await storage.exists(target)) {
@@ -58,8 +62,12 @@ export default function Actions({ path }) {
             id: "folder",
             name: "NEW_FOLDER",
             icon: <FolderIcon />,
-            placeholder: "FOLDER_NAME_PLACEHOLDER",
+            tooltip: translations.FOLDER,
+            placeholder: translations.FOLDER_NAME_PLACEHOLDER,
             onDone: async name => {
+                if (!name) {
+                    return;
+                }
                 const target = path + "/" + name;
                 try {
                     if (await storage.exists(target)) {
@@ -82,7 +90,8 @@ export default function Actions({ path }) {
                     s.type = item.id;
                     s.name = "";
                     s.icon = item.icon;
-                    s.placeholder = translations[item.placeholder];
+                    s.tooltip = item.tooltip;
+                    s.placeholder = item.placeholder;
                     s.mode = "create";
                     s.onDone = item.onDone;
                     s.onValidate = item.onValidate;

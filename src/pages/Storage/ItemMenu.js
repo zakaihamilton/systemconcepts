@@ -24,9 +24,13 @@ export default function ItemMenuWidget({ item }) {
                     s.name = item.name;
                     s.item = item;
                     s.icon = item.icon;
+                    s.tooltip = item.tooltip;
                     s.placeholder = translations[placeholder];
                     s.editing = true;
                     s.onDone = async name => {
+                        if (!name) {
+                            return;
+                        }
                         name = name.replace(/\//, " ");
                         const target = [item.folder, name].filter(Boolean).join("/");
                         if (item.path !== target) {
