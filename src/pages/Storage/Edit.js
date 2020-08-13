@@ -1,13 +1,12 @@
 import { useStoreState } from "@/util/store";
 import Input from "@/widgets/Input";
 import { StorageStore } from "../Storage";
-import { useOnBlur } from "@/util/hooks";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 export default function EditWidget() {
     const { icon, type, tooltip, onDone, onValidate, placeholder } = StorageStore.useState();
     const { name } = useStoreState(StorageStore, s => ({ name: s.name }));
-    const ref = useRef();
     const complete = useCallback(async () => {
         let result = undefined;
         if (onDone) {
@@ -20,7 +19,6 @@ export default function EditWidget() {
         });
         return result;
     }, [name[0]]);
-    useOnBlur(ref, complete);
     const keyDown = async event => {
         if (event.keyCode == 13) {
             const valid = true;
@@ -36,14 +34,15 @@ export default function EditWidget() {
         }
     };
 
-    return <Input
-        ref={ref}
-        onKeyDown={keyDown}
-        placeholder={placeholder}
-        autoFocus
-        key={type}
-        icon={icon}
-        tooltip={tooltip}
-        fullWidth={true}
-        state={name} />
+    return <ClickAwayListener onClickAway={complete}>
+        <Input
+            onKeyDown={keyDown}
+            placeholder={placeholder}
+            autoFocus
+            key={type}
+            icon={icon}
+            tooltip={tooltip}
+            fullWidth={true}
+            state={name} />
+    </ClickAwayListener>;
 }

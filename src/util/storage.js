@@ -80,8 +80,8 @@ export function useListing(url, depends = []) {
         storageMethods.getListing(url).then(listing => {
             if (active.current) {
                 setListing(listing);
+                setLoading(false);
             }
-            setLoading(false);
         });
     }, [url, ...depends]);
     useEffect(() => {

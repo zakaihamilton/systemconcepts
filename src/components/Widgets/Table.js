@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -13,6 +13,28 @@ import styles from "./Table.module.scss";
 import { MainStore } from "../Main";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+
+export function TableRowWidget({ rowHeight, columns, rowClick, row, idx }) {
+    const { id } = row;
+    const cells = (columns || []).filter(Boolean).map(column => {
+        const { id: columnId, dir, align, rowProps = {} } = column;
+        const value = row[columnId];
+        return (<TableCell
+            dir={dir}
+            align={align}
+            className={clsx(styles.cell, !align && styles.defaultAlign)}
+            key={columnId}
+            {...rowProps}>
+            {value}
+        </TableCell>);
+    });
+    const onClick = event => {
+        rowClick(event, id || idx);
+    };
+    return <TableRow style={{ height: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }}>
+        {cells}
+    </TableRow>;
+}
 
 export default function TableWidget({ rowHeight, columns, sortColumn, items = [], empty, className, hideColumns, rowClick, ...props }) {
     const isMobile = useDeviceType() === "phone";
@@ -97,24 +119,7 @@ export default function TableWidget({ rowHeight, columns, sortColumn, items = []
 
     const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((row, idx) => {
         const { id } = row;
-        const cells = (columns || []).filter(Boolean).map(column => {
-            const { id: columnId, dir, align, rowProps = {} } = column;
-            const value = row[columnId];
-            return (<TableCell
-                dir={dir}
-                align={align}
-                className={clsx(styles.cell, !align && styles.defaultAlign)}
-                key={columnId}
-                {...rowProps}>
-                {value}
-            </TableCell>);
-        });
-        const onClick = event => {
-            rowClick(event, id || idx);
-        };
-        return <TableRow style={{ height: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }} key={id || idx}>
-            {cells}
-        </TableRow>;
+        return <TableRowWidget key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} row={row} idx={idx} />;
     });
 
     if (!size.height) {
