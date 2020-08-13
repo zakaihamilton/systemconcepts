@@ -858,5 +858,10 @@ export default [
         id: "EXPORT",
         language: "heb",
         value: "יצוא"
+    },
+    {
+        id: "EXPORT",
+        language: "pt-br",
+        value: "Exportar"
     }
 ];
