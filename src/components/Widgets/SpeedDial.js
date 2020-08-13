@@ -42,7 +42,6 @@ export default function SpeedDialWidget({ visible = true, items }) {
 
     return (
         <div className={styles.root}>
-            <Backdrop open={open} />
             <SpeedDial
                 ariaLabel=""
                 classes={{
