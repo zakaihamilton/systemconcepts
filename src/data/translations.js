@@ -849,4 +849,14 @@ export default [
         language: "pt-br",
         value: "${name} já existe!"
     },
+    {
+        id: "EXPORT",
+        language: "eng",
+        value: "Export"
+    },
+    {
+        id: "EXPORT",
+        language: "heb",
+        value: "יצוא"
+    }
 ];

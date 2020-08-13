@@ -4,23 +4,20 @@ const fs = new FS("systemconcepts-fs");
 
 async function getListing(path) {
     let listing = [];
-    const stat = await fs.promises.stat(path);
-    if (stat.isDirectory) {
-        const names = await fs.promises.readdir(path);
-        for (const name of names) {
-            const item = {};
-            const filePath = [path, name].filter(Boolean).join("/");
-            try {
-                const fileStat = await fs.promises.stat(filePath);
-                Object.assign(item, fileStat);
-                item.path = "local" + filePath;
-                item.name = name;
-                item.folder = "local" + path;
-                listing.push(item);
-            }
-            catch (err) {
-                console.error(err);
-            }
+    const names = await fs.promises.readdir(path);
+    for (const name of names) {
+        const item = {};
+        const itemPath = [path, name].filter(Boolean).join("/");
+        try {
+            const itemStat = await fs.promises.stat(itemPath);
+            Object.assign(item, itemStat);
+            item.path = "local" + itemPath;
+            item.name = name;
+            item.folder = "local" + path;
+            listing.push(item);
+        }
+        catch (err) {
+            console.error(err);
         }
     }
     return listing;
@@ -71,10 +68,39 @@ async function exists(path) {
         const stat = await fs.promises.stat(path);
         exists = stat !== null;
     }
-    catch (err) {
-
-    }
+    catch (err) { }
     return exists;
+}
+
+async function exportFile(path) {
+    const data = await fs.promises.readFile(path, "utf8");
+    return data;
+}
+
+async function exportFolder(path) {
+    const toData = async path => {
+        const data = {};
+        const names = await fs.promises.readdir(path);
+        for (const name of names) {
+            try {
+                const itemPath = [path, name].filter(Boolean).join("/");
+                const itemStat = await fs.promises.stat(itemPath);
+                if (itemStat.isDirectory()) {
+                    const result = await toData(itemPath);
+                    data[name] = result;
+                }
+                else {
+                    data[name] = await fs.promises.readFile(itemPath, "utf8");
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }
+        return data;
+    }
+    const data = await toData(path);
+    return data;
 }
 
 export default {
@@ -86,5 +112,7 @@ export default {
     rename,
     readFile,
     writeFile,
-    exists
+    exists,
+    exportFile,
+    exportFolder
 };

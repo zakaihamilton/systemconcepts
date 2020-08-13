@@ -6,6 +6,7 @@ import { useHover } from "@/util/hooks";
 import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import storage from "@/util/storage";
+import { exportData } from "@/util/importExport";
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
@@ -70,6 +71,20 @@ export default function ItemMenuWidget({ item }) {
                         }
                     }
                 });
+            }
+        },
+        {
+            id: "export",
+            name: translations.EXPORT,
+            onClick: async () => {
+                let data = null;
+                if (item.type === "dir") {
+                    data = JSON.stringify(await storage.exportFolder(item.path), null, 4);
+                }
+                else {
+                    data = await storage.exportFile(item.path);
+                }
+                exportData(data, item.name, "application/json");
             }
         }
     ];

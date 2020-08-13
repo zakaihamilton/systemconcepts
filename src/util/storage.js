@@ -63,6 +63,12 @@ const storageMethods = Object.fromEntries([
     },
     {
         name: "exists"
+    },
+    {
+        name: "exportFolder"
+    },
+    {
+        name: "exportFile"
     }
 ].map(item => {
     const { name } = item;
