@@ -12,13 +12,14 @@ export default function Settings() {
     const toggleDarkMode = () => {
         MainStore.update(s => {
             s.darkMode = !s.darkMode;
+            s.autoDetectDarkMode = false;
         });
     };
 
     const Icon = darkMode ? Brightness7Icon : Brightness4Icon;
     const title = darkMode ? translations.LIGHT_MODE : translations.DARK_MODE;
 
-    return <IconButton color="red" onClick={toggleDarkMode}>
+    return <IconButton onClick={toggleDarkMode}>
         <Tooltip title={title} arrow>
             <Icon />
         </Tooltip>

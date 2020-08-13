@@ -9,7 +9,7 @@ import languages from "@/data/languages";
 import fontSizes from "@/data/fontSizes";
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
-import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
@@ -29,16 +29,15 @@ export default function Settings() {
     else if (states.darkMode[0]) {
         darkModeSelected = "on";
     }
-    const darkModeState = useState(darkModeSelected);
-    useEffect(() => {
-        const darkMode = darkModeState[0];
+    const setDarkMode = useCallback(darkMode => {
         MainStore.update(s => {
             s.autoDetectDarkMode = darkMode === "auto";
             if (darkMode !== "auto") {
                 s.darkMode = darkMode === "on"
             }
         });
-    }, [darkModeState[0]]);
+    });
+    const darkModeState = [darkModeSelected, setDarkMode];
 
     const columns = [
         {
@@ -100,7 +99,7 @@ export default function Settings() {
             id: "darkMode",
             icon: <InvertColorsIcon />,
             name: translations.DARK_MODE,
-            value: darkModeState[0],
+            value: darkModeSelected,
             widget: <Dynamic items={darkModeItems} state={darkModeState} />
         },
         {
