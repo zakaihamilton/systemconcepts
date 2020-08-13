@@ -18,9 +18,10 @@ export function BreadcrumbItem({ index, count, name, tooltip, icon, href, isLast
         deviceType === "tablet" && (count <= 3 || index === count - 1) ||
         deviceType === "desktop" && (count <= 5 || index === count - 1);
     const showTooltip = !showName || tooltip;
+    const title = !showName ? name : tooltip;
     return <>
         {isLast && <div className={styles.item}>
-            <Tooltip arrow title={showTooltip ? (tooltip || name) : ""}>
+            <Tooltip arrow title={showTooltip ? title : ""}>
                 <div className={styles.icon}>
                     {icon}
                 </div>
@@ -31,7 +32,7 @@ export function BreadcrumbItem({ index, count, name, tooltip, icon, href, isLast
         </div>}
         {!isLast && <Link className={styles.item} color="inherit" href={href}>
             {icon && <IconButton className={styles.iconButton}>
-                <Tooltip arrow title={showTooltip ? (tooltip || name) : ""}>
+                <Tooltip arrow title={showTooltip ? title : ""}>
                     {icon}
                 </Tooltip>
             </IconButton>}
