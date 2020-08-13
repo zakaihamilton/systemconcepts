@@ -1,5 +1,5 @@
 import React from "react";
-import IconButton from "@/components/Widgets/IconButton";
+import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Tooltip from '@material-ui/core/Tooltip';
 import { MainStore } from "../Main";

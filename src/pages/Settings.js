@@ -2,7 +2,7 @@ import Table from "@/widgets/Table";
 import { useStoreState } from "@/util/store";
 import { MainStore } from "../components/Main";
 import LanguageIcon from '@material-ui/icons/Language';
-import Brightness4Icon from '@material-ui/icons/Brightness4';
+import InvertColorsIcon from '@material-ui/icons/InvertColors';
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import languages from "@/data/languages";
@@ -98,7 +98,7 @@ export default function Settings() {
         },
         {
             id: "darkMode",
-            icon: <Brightness4Icon />,
+            icon: <InvertColorsIcon />,
             name: translations.DARK_MODE,
             value: darkModeState[0],
             widget: <Dynamic items={darkModeItems} state={darkModeState} />

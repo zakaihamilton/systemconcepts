@@ -3,7 +3,7 @@ import Link from '@material-ui/core/Link';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import { Divider } from "@material-ui/core";
-import IconButton from "@/components/Widgets/IconButton";
+import IconButton from '@material-ui/core/IconButton';
 import { MainStore } from "@/components/Main";
 import styles from "./Breadcrumbs.module.scss";
 import { useDeviceType } from "@/util/styles";

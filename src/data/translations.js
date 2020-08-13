@@ -180,6 +180,16 @@ export default [
         value: "Modo Escuro"
     },
     {
+        id: "LIGHT_MODE",
+        language: "eng",
+        value: "Light Mode"
+    },
+    {
+        id: "LIGHT_MODE",
+        language: "heb",
+        value: "מצב מואר"
+    },
+    {
         id: "DIRECTION",
         language: "eng",
         value: "Direction"

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import IconButton from "@/widgets/IconButton";
+import IconButton from '@material-ui/core/IconButton';
 import { StorageStore } from "../Storage";
 import { useHover } from "@/util/hooks";
 import Menu from "@/widgets/Menu";
