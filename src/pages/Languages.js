@@ -50,6 +50,6 @@ export default function Languages() {
     };
 
     return <>
-        <Table rowClick={rowClick} columns={columns} items={items} />
+        <Table name="languages" rowClick={rowClick} columns={columns} items={items} data={data} />
     </>;
 }

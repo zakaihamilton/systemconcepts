@@ -1,10 +1,11 @@
 import Table from "@/widgets/Table";
-import data from "@/data/translations";
 import languages from "@/data/languages";
 import { useTranslations } from "@/util/translations";
 
 export default function Languages({ language: languageId }) {
     const translations = useTranslations();
+    const language = languageId && languages.find(item => item.id === languageId);
+    const items = language && language.translations;
 
     const columns = [
         {
@@ -12,29 +13,15 @@ export default function Languages({ language: languageId }) {
             title: translations.ID,
             sortable: true
         },
-        ...languages.filter(({ id }) => !languageId || languageId === id).map(({ id, name, direction }) => ({
-            id,
-            title: name,
+        language && {
+            id: "value",
+            title: language.name,
             sortable: true,
-            dir: direction
-        }))
-    ];
-
-    const items = [];
-    data.forEach(({ id, value, language }) => {
-        if (languageId && languageId !== language) {
-            return;
+            dir: language.direction
         }
-        const item = items.find(item => item.id === id);
-        if (item) {
-            item[language] = value;
-        }
-        else {
-            items.push({ id, [language]: value });
-        }
-    });
+    ].filter(Boolean);
 
     return <>
-        <Table columns={columns} items={items} />
+        <Table name="translations" columns={columns} items={items} />
     </>;
 }

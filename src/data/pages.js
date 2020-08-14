@@ -25,7 +25,6 @@ import Reset from "@/pages/Settings/Reset";
 
 import EditIcon from '@material-ui/icons/Edit';
 import Editor from "@/pages/Editor";
-import translations from "./translations";
 
 export default [
     {

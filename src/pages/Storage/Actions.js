@@ -4,6 +4,7 @@ import storage from "@/util/storage";
 import SpeedDial from "@/widgets/SpeedDial";
 import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
+import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import StatusBar from "./StatusBar";
 import Edit from "./Edit";
@@ -35,7 +36,7 @@ export default function Actions({ path }) {
     const addItems = [
         {
             id: "file",
-            name: "NEW_FILE",
+            name: translations.NEW_FILE,
             icon: <InsertDriveFileIcon />,
             tooltip: translations.FILE,
             placeholder: translations.FILE_NAME_PLACEHOLDER,
@@ -60,8 +61,8 @@ export default function Actions({ path }) {
         },
         {
             id: "folder",
-            name: "NEW_FOLDER",
-            icon: <FolderIcon />,
+            name: translations.NEW_FOLDER,
+            icon: <CreateNewFolderIcon />,
             tooltip: translations.FOLDER,
             placeholder: translations.FOLDER_NAME_PLACEHOLDER,
             onDone: async name => {
@@ -97,10 +98,43 @@ export default function Actions({ path }) {
                     s.onValidate = item.onValidate;
                 });
             },
-            ...item,
-            name: translations[item.name]
+            ...item
         }
     });
+
+    addItems.push(...[
+        {
+            id: "importFolder",
+            name: translations.IMPORT_FOLDER,
+            icon: <FolderIcon />,
+            tooltip: translations.FOLDER,
+            onClick: () => {
+                var input = document.createElement("input");
+                input.type = "file";
+                input.onchange = e => {
+                    var file = e.target.files[0];
+                    var reader = new FileReader();
+                    reader.readAsText(file, "UTF-8");
+                    reader.onload = async readerEvent => {
+                        var body = readerEvent.target.result;
+                        try {
+                            await storage.importFolder(path, JSON.parse(body));
+                            StorageStore.update(s => {
+                                s.counter++;
+                            });
+                        }
+                        catch (err) {
+                            StorageStore.update(s => {
+                                s.message = err;
+                                s.severity = "error";
+                            });
+                        }
+                    };
+                };
+                input.click();
+            }
+        }
+    ]);
 
     return (
         <>

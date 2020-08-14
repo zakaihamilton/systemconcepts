@@ -40,7 +40,7 @@ export default function StatusBar() {
         })
     };
 
-    let messageText = message;
+    let messageText = message && message.toString();
     if (!message && select) {
         if (!count) {
             messageText = translations.ITEMS_NONE_SELECTED;

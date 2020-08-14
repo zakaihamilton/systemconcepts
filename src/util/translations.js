@@ -1,7 +1,6 @@
 import { useMemo } from "react";
-import translations from "@/data/translations";
-import { MainStore } from "@/components/Main";
 import languages from "@/data/languages";
+import { MainStore } from "@/components/Main";
 
 export function useTranslations() {
     let { language } = MainStore.useState();
@@ -9,8 +8,9 @@ export function useTranslations() {
         language = (languages.find(item => navigator.language.includes(item.code)) || languages[0]).id;
     }
     const items = useMemo(() => {
+        const { translations } = languages.find(item => item.id === language) || {};
         const obj = {};
-        (translations || []).filter(item => item.language === language).map(({ id, value }) => {
+        (translations || []).map(({ id, value }) => {
             obj[id] = value;
         });
         return obj;

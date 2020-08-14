@@ -2,6 +2,8 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
 const StyledMenu = withStyles({
     paper: {
@@ -14,17 +16,6 @@ const StyledMenu = withStyles({
         {...props}
     />
 ));
-
-const StyledMenuItem = withStyles((theme) => ({
-    root: {
-        '&:focus': {
-            backgroundColor: theme.palette.primary.main,
-            '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-                color: theme.palette.common.white,
-            },
-        },
-    },
-}))(MenuItem);
 
 export default function MenuWidget({ items, children, onClick, selected, onVisible, ...props }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -47,7 +38,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
     };
 
     const menuItems = (items || []).map(item => {
-        const { name, onClick, id, ...props } = item;
+        const { name, icon, onClick, id, ...props } = item;
         const handleClick = event => {
             handleClose();
             if (onClick) {
@@ -57,7 +48,12 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
                 onClick(event);
             }
         };
-        return <StyledMenuItem key={id} selected={selected === id} onClick={handleClick} {...props}>{name}</StyledMenuItem>;
+        return <MenuItem key={id} selected={selected === id} onClick={handleClick} {...props}>
+            <ListItemIcon>
+                {icon}
+            </ListItemIcon>
+            <ListItemText primary={name} />
+        </MenuItem>;
     });
 
     children = React.Children.map(children, child => {

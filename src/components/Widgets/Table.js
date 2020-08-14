@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext } from "react";
 import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -8,9 +8,14 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
-import { useDeviceType } from "@/util/styles";
 import styles from "./Table.module.scss";
 import { MainStore } from "../Main";
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import IconButton from '@material-ui/core/IconButton';
+import Menu from "@/widgets/Menu";
+import { useTranslations } from "@/util/translations";
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import { exportData } from "@/util/importExport";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -36,8 +41,8 @@ export function TableRowWidget({ rowHeight, columns, rowClick, row, idx }) {
     </TableRow>;
 }
 
-export default function TableWidget({ rowHeight, columns, sortColumn, items = [], empty, className, hideColumns, rowClick, ...props }) {
-    const isMobile = useDeviceType() === "phone";
+export default function TableWidget({ name, rowHeight, columns, sortColumn, data, items = [], empty, className, hideColumns, rowClick, ...props }) {
+    const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
@@ -131,7 +136,24 @@ export default function TableWidget({ rowHeight, columns, sortColumn, items = []
         maxHeight: height
     };
 
+    const menuItems = [
+        data && name && {
+            id: "export",
+            name: translations.EXPORT,
+            icon: <ImportExportIcon />,
+            onClick: () => {
+                const body = JSON.stringify({ [name]: data }, null, 4);
+                exportData(body, name, "application/json");
+            }
+        }
+    ].filter(Boolean);
+
     return (<TableContainer className={className} style={style} {...props}>
+        {!!menuItems.length && <Menu items={menuItems}>
+            <IconButton className={styles.menuButton}>
+                <MoreVertIcon />
+            </IconButton>
+        </Menu>}
         <Table stickyHeader style={style}>
             {!hideColumns && <TableHead>
                 <TableRow>

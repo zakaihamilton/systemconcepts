@@ -24,7 +24,9 @@ async function getListing(path) {
 }
 
 async function createFolder(path) {
-    await fs.promises.mkdir(path);
+    if (!await exists(path)) {
+        await fs.promises.mkdir(path);
+    }
 }
 
 async function createFile(path) {
@@ -72,11 +74,6 @@ async function exists(path) {
     return exists;
 }
 
-async function exportFile(path) {
-    const data = await fs.promises.readFile(path, "utf8");
-    return data;
-}
-
 async function exportFolder(path) {
     const toData = async path => {
         const data = {};
@@ -103,6 +100,34 @@ async function exportFolder(path) {
     return data;
 }
 
+async function importFolder(path, data) {
+    const fromData = async (root, data) => {
+        const keys = Object.keys(data);
+        for (const key of keys) {
+            const path = root + "/" + key;
+            const value = data[key];
+            if (typeof value === "object") {
+                await fs.promises.mkdir(path);
+                if (Array.isArray(value)) {
+                    for (const item of value) {
+                        if (typeof item === "object") {
+                            const name = item.id || item.name;
+                            await fs.promises.writeFile(path + "/" + name, JSON.stringify(item), "utf8");
+                        }
+                    }
+                }
+                else {
+                    await fromData(path, value);
+                }
+            }
+            else if (typeof value === "string") {
+                await fs.promises.writeFile(path, value, "utf8");
+            }
+        }
+    };
+    await fromData(path, data);
+}
+
 export default {
     getListing,
     createFolder,
@@ -113,6 +138,6 @@ export default {
     readFile,
     writeFile,
     exists,
-    exportFile,
-    exportFolder
+    exportFolder,
+    importFolder
 };

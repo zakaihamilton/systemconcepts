@@ -7,6 +7,8 @@ import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import storage from "@/util/storage";
 import { exportData } from "@/util/importExport";
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
@@ -55,6 +57,7 @@ export default function ItemMenuWidget({ item }) {
         {
             id: "delete",
             name: translations.DELETE,
+            icon: <DeleteIcon />,
             onClick: () => {
                 StorageStore.update(s => {
                     s.select = [item];
@@ -76,13 +79,15 @@ export default function ItemMenuWidget({ item }) {
         {
             id: "export",
             name: translations.EXPORT,
+            icon: <ImportExportIcon />,
             onClick: async () => {
                 let data = null;
                 if (item.type === "dir") {
-                    data = JSON.stringify(await storage.exportFolder(item.path), null, 4);
+                    const object = await storage.exportFolder(item.path);
+                    data = JSON.stringify({ [item.name]: object }, null, 4);
                 }
                 else {
-                    data = await storage.exportFile(item.path);
+                    data = await storage.readFile(item.path, "utf8");
                 }
                 exportData(data, item.name, "application/json");
             }
