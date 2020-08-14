@@ -72,7 +72,7 @@ export default function Storage({ path = "" }) {
 
     let items = (listing || []).map(item => {
         const id = item.id || item.name;
-        const name = translations[item.name] || item.name;
+        let name = item.name;
         let tooltip = translations.STORAGE;
         let icon = <StorageIcon />;
         if (path) {
@@ -84,6 +84,9 @@ export default function Storage({ path = "" }) {
                 icon = <InsertDriveFileIcon />;
                 tooltip = translations.FILE;
             }
+        }
+        else {
+            name = translations[item.name];
         }
 
         let result = {

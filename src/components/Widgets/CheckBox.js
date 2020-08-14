@@ -24,7 +24,7 @@ export default function CheckBox({ state, label }) {
     className={classes.root}
     control={
       <Checkbox
-        checked={value || false}
+        checked={!!value || false}
         onChange={onChange}
         color="primary"
       />

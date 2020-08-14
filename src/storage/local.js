@@ -102,17 +102,18 @@ async function exportFolder(path) {
 
 async function importFolder(path, data) {
     const fromData = async (root, data) => {
+        await createFolder(root);
         const keys = Object.keys(data);
         for (const key of keys) {
             const path = root + "/" + key;
             const value = data[key];
             if (typeof value === "object") {
-                await fs.promises.mkdir(path);
+                await createFolder(path);
                 if (Array.isArray(value)) {
                     for (const item of value) {
                         if (typeof item === "object") {
                             const name = item.id || item.name;
-                            await fs.promises.writeFile(path + "/" + name, JSON.stringify(item), "utf8");
+                            await fromData(path + "/" + name, item);
                         }
                     }
                 }
