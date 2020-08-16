@@ -16,29 +16,9 @@ import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import { exportData } from "@/util/importExport";
+import Row from "./Table/Row";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
-
-export function TableRowWidget({ rowHeight, columns, rowClick, row }) {
-    const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, rowProps = {} } = column;
-        const value = row[columnId];
-        return (<TableCell
-            dir={dir}
-            align={align}
-            className={clsx(styles.cell, !align && styles.defaultAlign)}
-            key={columnId}
-            {...rowProps}>
-            {value}
-        </TableCell>);
-    });
-    const onClick = event => {
-        rowClick(event, row);
-    };
-    return <TableRow style={{ height: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }}>
-        {cells}
-    </TableRow>;
-}
 
 export default function TableWidget({ name, rowHeight, columns, sortColumn, data, mapper, empty, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
@@ -126,9 +106,9 @@ export default function TableWidget({ name, rowHeight, columns, sortColumn, data
 
     const isEmpty = !items || !items.length;
 
-    const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((row, idx) => {
-        const { id } = row;
-        return <TableRowWidget key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} row={row} idx={idx} />;
+    const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((item, idx) => {
+        const { id } = item;
+        return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
     });
 
     if (!size.height) {
