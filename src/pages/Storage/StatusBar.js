@@ -3,13 +3,15 @@ import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
 import { StorageStore } from "../Storage";
 import { MainStore } from "@/components/Main";
-import MuiAlert from '@material-ui/lab/Alert';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import Row from "@/widgets/Row";
 import SelectAllIcon from '@material-ui/icons/SelectAll';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import styles from "./StatusBar.module.scss";
+import CancelIcon from '@material-ui/icons/Cancel';
+import clsx from "clsx";
 
 export default function StatusBar({ items }) {
     const translations = useTranslations();
@@ -21,7 +23,7 @@ export default function StatusBar({ items }) {
 
     const onClick = async () => {
         if (onDone) {
-            result = await onDone(select);
+            await onDone(select);
         }
         StorageStore.update(s => {
             s.counter++;
@@ -77,22 +79,25 @@ export default function StatusBar({ items }) {
             open={open}
             onClose={handleClose}
         >
-            <MuiAlert variant="standard" icon={<div />} onClose={handleClose} severity={severity} >
-                <Row style={{ minWidth: "25em" }}>
-                    {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
-                        {translations[mode.toUpperCase()]}
-                    </Button>}
-                    <Typography>
-                        {messageText}
-                    </Typography>
-                    <div style={{ flex: 1 }} />
-                    {mode && <IconButton variant="contained" onClick={selectClick}>
-                        <Tooltip title={selectTitle} arrow>
-                            <SelectAllIcon />
-                        </Tooltip>
-                    </IconButton>}
-                </Row>
-            </MuiAlert >
+            <Row className={clsx(styles.root, styles[severity])}>
+                {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
+                    {translations[mode.toUpperCase()]}
+                </Button>}
+                <Typography>
+                    {messageText}
+                </Typography>
+                <div style={{ flex: 1 }} />
+                {mode && <IconButton variant="contained" onClick={selectClick}>
+                    <Tooltip title={selectTitle} arrow>
+                        <SelectAllIcon />
+                    </Tooltip>
+                </IconButton>}
+                <IconButton variant="contained" onClick={handleClose}>
+                    <Tooltip title={translations.CLOSE} arrow>
+                        <CancelIcon />
+                    </Tooltip>
+                </IconButton>
+            </Row>
         </Snackbar >
     );
 }

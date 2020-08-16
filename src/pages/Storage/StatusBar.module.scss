@@ -1,0 +1,14 @@
+.root {
+    min-width: 25em;
+    padding: 1em;
+}
+
+.error {
+    color: var(--error-color);
+    background-color: var(--error-background);
+}
+
+.info {
+    color: var(--info-color);
+    background-color: var(--info-background);
+}
