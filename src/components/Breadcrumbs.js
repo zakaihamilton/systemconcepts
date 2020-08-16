@@ -19,12 +19,12 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
         deviceType === "phone" && (count <= 2 || index === count - 1) ||
         deviceType === "tablet" && (count <= 3 || index === count - 1) ||
         deviceType === "desktop" && (count <= 5 || index === count - 1);
-    const collapse = deviceType === "phone" && count >= 4 ||
-        deviceType === "tablet" && count >= 5 ||
+    const collapse = deviceType === "phone" && count >= 6 ||
+        deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
     const showTooltip = !showName || tooltip;
     const title = !showName ? name : tooltip;
-    if (collapse && index > 1 && index <= count - 3) {
+    if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
             const path = items.slice(2, -2).map(item => item.name).join("/");
             return <Link className={styles.item} color="inherit" href={href}>
