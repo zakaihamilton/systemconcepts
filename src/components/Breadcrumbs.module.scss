@@ -1,6 +1,7 @@
 .root {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .breadcrumbs {
@@ -19,11 +20,15 @@
 .item {
     display: flex;
     align-items: center;
+    overflow: hidden;
 }
 
 .name {
     padding-left: 0.1em;
     padding-right: 0.1em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .icon {

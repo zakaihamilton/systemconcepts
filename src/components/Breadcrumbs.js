@@ -8,17 +8,36 @@ import { MainStore } from "@/components/Main";
 import styles from "./Breadcrumbs.module.scss";
 import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 
-export function BreadcrumbItem({ index, count, name, tooltip, icon, href, isLast }) {
+export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href }) {
     const { direction } = MainStore.useState();
+    const isLast = index === count - 1;
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
     const showName =
         deviceType === "phone" && (count <= 2 || index === count - 1) ||
         deviceType === "tablet" && (count <= 3 || index === count - 1) ||
         deviceType === "desktop" && (count <= 5 || index === count - 1);
+    const collapse = deviceType === "phone" && count >= 4 ||
+        deviceType === "tablet" && count >= 5 ||
+        deviceType === "desktop" && count >= 10;
     const showTooltip = !showName || tooltip;
     const title = !showName ? name : tooltip;
+    if (collapse && index > 1 && index <= count - 3) {
+        if (index === count - 3) {
+            const path = items.slice(2, -2).map(item => item.name).join("/");
+            return <Link className={styles.item} color="inherit" href={href}>
+                <IconButton className={styles.iconButton}>
+                    <Tooltip arrow title={path}>
+                        <MoreHorizIcon />
+                    </Tooltip>
+                </IconButton>
+                <SeparatorIcon className={styles.separator} fontSize="small" />
+            </Link>;
+        }
+        return null;
+    }
     return <>
         {isLast && <div className={styles.item}>
             <Tooltip arrow title={showTooltip ? title : ""}>
@@ -26,9 +45,11 @@ export function BreadcrumbItem({ index, count, name, tooltip, icon, href, isLast
                     {icon}
                 </div>
             </Tooltip>
-            <div className={styles.name}>
-                {name}
-            </div>
+            <Tooltip arrow title={name}>
+                <div className={styles.name}>
+                    {name}
+                </div>
+            </Tooltip>
         </div>}
         {!isLast && <Link className={styles.item} color="inherit" href={href}>
             {icon && <IconButton className={styles.iconButton}>
@@ -46,10 +67,9 @@ export function BreadcrumbItem({ index, count, name, tooltip, icon, href, isLast
 
 export default function BreadcrumbsWidget({ items }) {
     const breadcrumbItems = (items || []).map((item, index, list) => {
-        const isLast = index === list.length - 1;
         const { id, url, ...props } = item;
         const href = "#" + url;
-        return <BreadcrumbItem key={id} index={index} count={list.length} isLast={isLast} href={href} {...props} />
+        return <BreadcrumbItem key={id} items={items} index={index} count={list.length} href={href} {...props} />
     });
 
 

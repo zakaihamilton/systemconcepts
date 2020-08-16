@@ -57,7 +57,7 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
             </Typography>
         </Tooltip>
         <Typography className={clsx(styles.pageSeparator, isVertical && styles.vertical)}>
-            /
+            {isVertical ? "|" : "/"}
         </Typography>
         <Tooltip title={translations.PAGE_COUNT} placement={tooltipPlacement} arrow>
             <Typography className={styles.pageCount}>
