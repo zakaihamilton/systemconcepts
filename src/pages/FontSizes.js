@@ -45,7 +45,7 @@ export default function Languages() {
         }
     ];
 
-    const items = data.map(item => {
+    const mapper = item => {
         let { devices } = item;
 
         const deviceItems = deviceTypes.filter(item => devices.includes(item.id));
@@ -56,9 +56,9 @@ export default function Languages() {
                 return <Label key={device.id} icon={device.icon} name={device.name} />;
             })
         };
-    });
+    };
 
     return <>
-        <Table sortColumn="id" columns={columns} items={items} />
+        <Table sortColumn="id" columns={columns} data={data} mapper={mapper} />
     </>;
 }

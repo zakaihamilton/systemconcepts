@@ -5,7 +5,7 @@ import { useTranslations } from "@/util/translations";
 export default function Languages({ language: languageId }) {
     const translations = useTranslations();
     const language = languageId && languages.find(item => item.id === languageId);
-    const items = language && language.translations;
+    const data = language && language.translations;
 
     const columns = [
         {
@@ -22,6 +22,6 @@ export default function Languages({ language: languageId }) {
     ].filter(Boolean);
 
     return <>
-        <Table name="translations" columns={columns} items={items} />
+        <Table name="translations" columns={columns} data={data} />
     </>;
 }

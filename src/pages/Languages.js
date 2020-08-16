@@ -35,7 +35,7 @@ export default function Languages() {
         }
     ];
 
-    const items = data.map(item => {
+    const mapper = item => {
         let { direction } = item;
         direction = directions.find(item => item.id === direction);
         return {
@@ -43,13 +43,13 @@ export default function Languages() {
             direction: direction.name,
             directionWidget: <Label icon={direction.icon} name={direction.name} />
         };
-    });
+    };
 
-    const rowClick = (_, id) => {
-        addPath("translations?language=" + id);
+    const rowClick = (_, item) => {
+        addPath("translations?language=" + item.id);
     };
 
     return <>
-        <Table name="languages" rowClick={rowClick} columns={columns} items={items} data={data} />
+        <Table name="languages" rowClick={rowClick} columns={columns} mapper={mapper} data={data} />
     </>;
 }

@@ -19,8 +19,7 @@ import { exportData } from "@/util/importExport";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-export function TableRowWidget({ rowHeight, columns, rowClick, row, idx }) {
-    const { id } = row;
+export function TableRowWidget({ rowHeight, columns, rowClick, row }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, rowProps = {} } = column;
         const value = row[columnId];
@@ -34,14 +33,14 @@ export function TableRowWidget({ rowHeight, columns, rowClick, row, idx }) {
         </TableCell>);
     });
     const onClick = event => {
-        rowClick(event, id || idx);
+        rowClick(event, row);
     };
     return <TableRow style={{ height: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }}>
         {cells}
     </TableRow>;
 }
 
-export default function TableWidget({ name, rowHeight, columns, sortColumn, data, items = [], empty, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight, columns, sortColumn, data, mapper, empty, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     columns = columns || [];
@@ -49,6 +48,11 @@ export default function TableWidget({ name, rowHeight, columns, sortColumn, data
     const size = useContext(PageSize);
     const { search } = MainStore.useState();
     const hasIdColumn = columns.find(item => item.id === "id");
+
+    let items = data || [];
+    if (mapper) {
+        items = items.map(mapper);
+    }
 
     items = items.filter(item => {
         if (!search) {

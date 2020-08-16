@@ -6,16 +6,14 @@ import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import Edit from "./Edit";
 import { StorageStore, StorageStoreDefaults } from "../Storage";
 
-export function useActions(items) {
+export function useActions(data) {
     const { name, mode, type } = StorageStore.useState();
-    if (mode === "create") {
+    if (data === "create") {
         items.unshift({
             id: type,
-            name: name[0],
-            nameWidget: <Edit />
+            name: name[0]
         });
     }
 

@@ -86,7 +86,7 @@ export default function Settings() {
         addPath(id);
     };
 
-    const items = [
+    const data = [
         {
             id: "language",
             icon: <LanguageIcon />,
@@ -118,13 +118,15 @@ export default function Settings() {
                 {translations.RESET}
             </Button>
         }
-    ].map(item => {
+    ];
+
+    const mapper = item => {
         const { icon, onClick, ...props } = item;
         props.title = <Label key={item.id} icon={icon} name={item.name} onClick={onClick} />;
         return props;
-    });
+    };
 
     return <>
-        <Table columns={columns} items={items} />
+        <Table columns={columns} data={data} mapper={mapper} />
     </>;
 }

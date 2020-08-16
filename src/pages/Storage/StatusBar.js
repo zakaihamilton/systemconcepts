@@ -13,7 +13,7 @@ import styles from "./StatusBar.module.scss";
 import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
 
-export default function StatusBar({ items }) {
+export default function StatusBar({ data, mapper }) {
     const translations = useTranslations();
     const { mode, select, message, onDone, severity } = StorageStore.useState();
     const { direction } = MainStore.useState();
@@ -65,6 +65,7 @@ export default function StatusBar({ items }) {
                 s.select.length = 0;
             }
             else {
+                const items = mapper ? data.map(mapper) : data;
                 s.select = [...items];
             }
         });
