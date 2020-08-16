@@ -6,7 +6,6 @@ import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import StatusBar from "./StatusBar";
 import Edit from "./Edit";
 import { StorageStore, StorageStoreDefaults } from "../Storage";
 
@@ -137,9 +136,6 @@ export default function Actions({ path }) {
     ]);
 
     return (
-        <>
-            <StatusBar />
-            <SpeedDial visible={!mode && path} items={addItems} icon={<AddIcon />} />
-        </>
+        <SpeedDial visible={!mode && path} items={addItems} icon={<AddIcon />} />
     );
 }

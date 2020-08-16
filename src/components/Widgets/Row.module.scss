@@ -3,7 +3,7 @@
     align-items: center;
 }
 
-.root>* {
+.root>*:not(:last-child) {
     [dir=rtl] & {
         margin-left: 1em;
     }

@@ -17,6 +17,7 @@ import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
 import { abbreviateSize } from "@/util/string";
 import Typography from '@material-ui/core/Typography';
+import StatusBar from "./Storage/StatusBar";
 
 export const StorageStoreDefaults = {
     type: "",
@@ -104,14 +105,14 @@ export default function Storage({ path = "" }) {
             </Tooltip>
         };
 
-        const selectItem = () => {
-            const exists = select.find(item => item.id === id);
+        const selectItem = (event) => {
+            const { checked } = event.target;
             StorageStore.update(s => {
-                if (exists) {
-                    s.select = select.filter(item => item.id !== id);
+                if (checked) {
+                    s.select = [...select, result];
                 }
                 else {
-                    s.select = [...select, result];
+                    s.select = select.filter(item => item.id !== id);
                 }
             });
         };
@@ -125,8 +126,8 @@ export default function Storage({ path = "" }) {
                 {select && <Checkbox
                     classes={{ root: styles.checkbox }}
                     color="default"
-                    checked={select.find(item => item.id === id)}
-                    onClick={selectItem} />}
+                    checked={select.find(item => item.id === id) ? true : false}
+                    onChange={selectItem} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}
                 </Tooltip>
@@ -144,6 +145,18 @@ export default function Storage({ path = "" }) {
 
     const rowClick = (_, id) => {
         const item = items.find(item => item.id === id);
+        if (select) {
+            const exists = select.find(item => item.id === id);
+            StorageStore.update(s => {
+                if (exists) {
+                    s.select = select.filter(item => item.id !== id);
+                }
+                else {
+                    s.select = [...select, item];
+                }
+            });
+            return;
+        }
         if (item.type === "file") {
             addPath(`editor?name=${item.name}`);
         }
@@ -152,11 +165,12 @@ export default function Storage({ path = "" }) {
         }
     };
 
-    const onRowClick = enableItemClick && !select && !mode && rowClick;
+    const onRowClick = enableItemClick && rowClick;
 
     return <>
         <Table rowClick={onRowClick} rowHeight="6em" columns={columns} items={items} />
         {loading && <Progress />}
         <Actions path={path} />
+        <StatusBar items={items} />
     </>;
 }

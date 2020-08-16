@@ -240,6 +240,22 @@ export default [
             {
                 "id": "IMPORT_FOLDER",
                 "value": "Import Folder"
+            },
+            {
+                "id": "MOVE",
+                "value": "Move"
+            },
+            {
+                "id": "COPY",
+                "value": "Copy"
+            },
+            {
+                "id": "SELECT_NONE",
+                "value": "Select None"
+            },
+            {
+                "id": "SELECT_ALL",
+                "value": "Select All"
             }
         ]
     },
@@ -484,6 +500,22 @@ export default [
             {
                 "id": "IMPORT_FOLDER",
                 "value": "יבוא תיקייה"
+            },
+            {
+                "id": "MOVE",
+                "value": "העבר"
+            },
+            {
+                "id": "COPY",
+                "value": "העתק"
+            },
+            {
+                "id": "SELECT_NONE",
+                "value": "בטל בחירה"
+            },
+            {
+                "id": "SELECT_ALL",
+                "value": "בחר הכל"
             }
         ]
     },

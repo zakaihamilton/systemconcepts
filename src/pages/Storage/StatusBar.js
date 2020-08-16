@@ -7,8 +7,11 @@ import MuiAlert from '@material-ui/lab/Alert';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import Row from "@/widgets/Row";
+import SelectAllIcon from '@material-ui/icons/SelectAll';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 
-export default function StatusBar() {
+export default function StatusBar({ items }) {
     const translations = useTranslations();
     const { mode, select, message, onDone, severity } = StorageStore.useState();
     const { direction } = MainStore.useState();
@@ -17,7 +20,6 @@ export default function StatusBar() {
     const count = select && select.length;
 
     const onClick = async () => {
-        let result = undefined;
         if (onDone) {
             result = await onDone(select);
         }
@@ -53,6 +55,19 @@ export default function StatusBar() {
         }
     }
 
+    const selectTitle = select && select.length ? translations.SELECT_NONE : translations.SELECT_ALL;
+
+    const selectClick = () => {
+        StorageStore.update(s => {
+            if (select.length) {
+                s.select.length = 0;
+            }
+            else {
+                s.select = [...items];
+            }
+        });
+    };
+
     return (
         <Snackbar
             anchorOrigin={{
@@ -63,13 +78,19 @@ export default function StatusBar() {
             onClose={handleClose}
         >
             <MuiAlert variant="standard" icon={<div />} onClose={handleClose} severity={severity} >
-                <Row>
-                    {mode === "delete" && <Button disabled={!count} variant="contained" onClick={onClick}>
-                        {translations.DELETE}
+                <Row style={{ minWidth: "25em" }}>
+                    {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
+                        {translations[mode.toUpperCase()]}
                     </Button>}
                     <Typography>
                         {messageText}
                     </Typography>
+                    <div style={{ flex: 1 }} />
+                    {mode && <IconButton variant="contained" onClick={selectClick}>
+                        <Tooltip title={selectTitle} arrow>
+                            <SelectAllIcon />
+                        </Tooltip>
+                    </IconButton>}
                 </Row>
             </MuiAlert >
         </Snackbar >

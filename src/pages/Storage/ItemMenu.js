@@ -9,6 +9,8 @@ import storage from "@/util/storage";
 import { exportData } from "@/util/importExport";
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
@@ -51,6 +53,40 @@ export default function ItemMenuWidget({ item }) {
                             }
                         }
                     };
+                });
+            }
+        },
+        {
+            id: "move",
+            name: translations.MOVE,
+            icon: <TrendingFlatIcon />,
+            onClick: () => {
+                StorageStore.update(s => {
+                    s.select = [item];
+                    s.mode = "move";
+                    s.severity = "info";
+                    s.onDone = async select => {
+                        for (const item of select) {
+
+                        }
+                    }
+                });
+            }
+        },
+        {
+            id: "copy",
+            name: translations.COPY,
+            icon: <FileCopyIcon />,
+            onClick: () => {
+                StorageStore.update(s => {
+                    s.select = [item];
+                    s.mode = "copy";
+                    s.severity = "info";
+                    s.onDone = async select => {
+                        for (const item of select) {
+
+                        }
+                    }
                 });
             }
         },
