@@ -2,19 +2,26 @@
     border: 1px solid var(--main-border);
     border-radius: 0.5em;
     margin: 0.5em;
-    padding: 1em;
+    padding: 0.5em;
     background-color: var(--info-background);
     color: var(--info-color);
-    position: absolute;
-    bottom: 1em;
-    min-width: 10em;
     opacity: 0.8;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    left: 50%;
-    transform: translate(-50%, 0);
-    z-index: 100;
+}
+
+.root.vertical {
+    flex-direction: column;
+    position: fixed;
+    right: 1em;
+    top: 25%;
+    min-height: 10em;
+}
+
+.root.horizontal {
+    flex-direction: row;
+    min-width: 10em;
 }
 
 .pageIndex {
@@ -32,9 +39,17 @@
     user-select: none;
 }
 
+.pageSeparator.vertical {
+    transform: rotate(90deg);
+}
+
 .pageCount {
     cursor: default;
     user-select: none;
     padding-left: 0.5em;
     padding-right: 0.5em;
+}
+
+.verticalIcon {
+    transform: rotate(90deg);
 }

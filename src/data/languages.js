@@ -203,7 +203,7 @@ export default [
             },
             {
                 "id": "ITEMS_SELECTED",
-                "value": "${count} Items selected"
+                "value": "${count} Items Selected"
             },
             {
                 "id": "EDITOR_NAME",
@@ -767,7 +767,7 @@ export default [
             },
             {
                 "id": "ITEMS_SELECTED",
-                "value": "${count} Items selecionados"
+                "value": "${count} Items Selecionados"
             },
             {
                 "id": "EDITOR_NAME",

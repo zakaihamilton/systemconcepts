@@ -19,7 +19,7 @@ export default function RowWidget({ rowHeight, columns, rowClick, item }) {
     const onClick = event => {
         rowClick(event, item);
     };
-    return <TableRow style={{ height: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }}>
+    return <TableRow style={{ height: rowHeight, maxHeight: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }}>
         {cells}
     </TableRow>;
 }

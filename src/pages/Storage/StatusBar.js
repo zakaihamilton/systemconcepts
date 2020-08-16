@@ -72,33 +72,23 @@ export default function StatusBar({ data, mapper }) {
     };
 
     return (
-        <Snackbar
-            anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: direction === "rtl" ? 'right' : 'left',
-            }}
-            open={open}
-            onClose={handleClose}
-        >
-            <Row className={clsx(styles.root, styles[severity])}>
-                {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
-                    {translations[mode.toUpperCase()]}
-                </Button>}
-                <Typography>
-                    {messageText}
-                </Typography>
-                <div style={{ flex: 1 }} />
-                {mode && <IconButton variant="contained" onClick={selectClick}>
-                    <Tooltip title={selectTitle} arrow>
-                        <SelectAllIcon />
-                    </Tooltip>
-                </IconButton>}
-                <IconButton variant="contained" onClick={handleClose}>
-                    <Tooltip title={translations.CLOSE} arrow>
-                        <CancelIcon />
-                    </Tooltip>
-                </IconButton>
-            </Row>
-        </Snackbar >
+        <div className={clsx(styles.root, styles[severity], open && styles.open)}>
+            {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
+                {translations[mode.toUpperCase()]}
+            </Button>}
+            <Typography className={styles.message}>
+                {messageText}
+            </Typography>
+            {mode && <IconButton variant="contained" onClick={selectClick}>
+                <Tooltip title={selectTitle} arrow>
+                    <SelectAllIcon />
+                </Tooltip>
+            </IconButton>}
+            <IconButton variant="contained" onClick={handleClose}>
+                <Tooltip title={translations.CLOSE} arrow>
+                    <CancelIcon />
+                </Tooltip>
+            </IconButton>
+        </div>
     );
 }

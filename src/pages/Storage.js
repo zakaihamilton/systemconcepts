@@ -169,11 +169,17 @@ export default function Storage({ path = "" }) {
     }, [select, path]);
 
     const onRowClick = enableItemClick && rowClick;
+    const statusBar = <StatusBar data={data} mapper={mapper} />;
 
     return <>
-        <Table rowClick={onRowClick} rowHeight="6em" columns={columns} data={data} mapper={mapper} />
+        <Table
+            rowClick={onRowClick}
+            rowHeight="6em"
+            columns={columns}
+            data={data}
+            mapper={mapper}
+            statusBar={statusBar} />
         {loading && <Progress />}
         <Actions path={path} />
-        <StatusBar data={data} mapper={mapper} />
     </>;
 }

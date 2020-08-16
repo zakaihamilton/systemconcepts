@@ -9,12 +9,12 @@ const useStyles = makeStyles({
         alignItems: "center",
         justifyItems: "center",
         flex: "1",
-        marginLeft:"0.3em",
-        marginRight:"0.3em"
+        marginLeft: "0.3em",
+        marginRight: "0.3em"
     },
 });
 
-export default function Progress({size}) {
+export default function Progress({ size }) {
     const classes = useStyles();
 
     return (<div className={classes.progress}>

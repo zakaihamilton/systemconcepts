@@ -21,7 +21,7 @@ import Navigator from "./Table/Navigator";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-export default function TableWidget({ name, rowHeight = "3em", columns, sortColumn, data, mapper, empty, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "4em", columns, sortColumn, data, mapper, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -166,6 +166,9 @@ export default function TableWidget({ name, rowHeight = "3em", columns, sortColu
             </TableBody>
         </Table>
         {!!isEmpty && empty}
-        <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
+        <div className={styles.footer}>
+            {statusBar}
+            <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
+        </div>
     </TableContainer>);
 }

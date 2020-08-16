@@ -1,8 +1,19 @@
 .root {
-    min-width: 30em;
-    padding: 1em;
+    padding: 0.5em;
     border: 1px solid var(--main-border);
     border-radius: 0.5em;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.root>*:not(:last-child) {
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+}
+
+.root.open {
+    visibility: visible;
 }
 
 .error {
@@ -13,4 +24,11 @@
 .info {
     color: var(--info-color);
     background-color: var(--info-background);
+}
+
+.message {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    flex: 1;
 }
