@@ -258,6 +258,14 @@ export default [
                 "value": "Select All"
             },
             {
+                "id": "FIRST_PAGE",
+                "value": "First Page"
+            },
+            {
+                "id": "LAST_PAGE",
+                "value": "Last Page"
+            },
+            {
                 "id": "PREVIOUS_PAGE",
                 "value": "Previous Page"
             },
@@ -532,6 +540,14 @@ export default [
             {
                 "id": "SELECT_ALL",
                 "value": "בחר הכל"
+            },
+            {
+                "id": "FIRST_PAGE",
+                "value": "עמוד ראשון"
+            },
+            {
+                "id": "LAST_PAGE",
+                "value": "עמוד אחרון"
             },
             {
                 "id": "PREVIOUS_PAGE",
