@@ -29,11 +29,10 @@ export default function TableWidget({ name, rowHeight = "3em", columns, sortColu
     const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
     const size = useContext(PageSize);
     const { search } = MainStore.useState();
-    const hasIdColumn = columns.find(item => item.id === "id");
 
     useEffect(() => {
         setOffset(0);
-    }, [data]);
+    }, [data, search]);
 
     let items = data || [];
     if (mapper) {
@@ -44,10 +43,8 @@ export default function TableWidget({ name, rowHeight = "3em", columns, sortColu
         if (!search) {
             return true;
         }
-        for (const key in item) {
-            if (key === "id" && !hasIdColumn) {
-                continue;
-            }
+        const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => item.searchable || item.sortable || item.id);
+        for (const key of keys) {
             if (typeof item[key] === "string") {
                 const match = item[key].toLowerCase().includes(search.toLowerCase());
                 if (match) {
@@ -124,7 +121,7 @@ export default function TableWidget({ name, rowHeight = "3em", columns, sortColu
     const rowHeightNum = parseFloat(rowHeight);
     const rowHeightInPixels = rowHeight.trim().endsWith("em") ? rowHeightNum * size.emPixels : rowHeightNum;
     const itemsPerPage = parseInt(size.height / rowHeightInPixels) - 1;
-    const pageCount = parseInt((items.length / itemsPerPage) + 1);
+    const pageCount = parseInt((items.length / itemsPerPage) + ((items.length % itemsPerPage) > 0 ? 1 : 0));
     const startIdx = offset;
     const endIdx = startIdx + itemsPerPage;
     const pageIndex = parseInt(startIdx / itemsPerPage);
