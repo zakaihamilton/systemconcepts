@@ -1,9 +1,9 @@
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
-import Tooltip from '@material-ui/core/Tooltip';
 import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export default function Settings() {
     const { darkMode } = MainStore.useState();

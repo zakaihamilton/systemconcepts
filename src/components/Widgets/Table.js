@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -17,17 +17,23 @@ import { useTranslations } from "@/util/translations";
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import { exportData } from "@/util/importExport";
 import Row from "./Table/Row";
+import Navigator from "./Table/Navigator";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-export default function TableWidget({ name, rowHeight, columns, sortColumn, data, mapper, empty, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "3em", columns, sortColumn, data, mapper, empty, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
+    const [pageIndex, setPageIndex] = React.useState(0);
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
     const size = useContext(PageSize);
     const { search } = MainStore.useState();
     const hasIdColumn = columns.find(item => item.id === "id");
+
+    useEffect(() => {
+        setPageIndex(0);
+    }, [data]);
 
     let items = data || [];
     if (mapper) {
@@ -106,11 +112,6 @@ export default function TableWidget({ name, rowHeight, columns, sortColumn, data
 
     const isEmpty = !items || !items.length;
 
-    const tableRows = stableSort(items || [], getComparator(order, orderBy)).map((item, idx) => {
-        const { id } = item;
-        return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
-    });
-
     if (!size.height) {
         return null;
     }
@@ -119,6 +120,20 @@ export default function TableWidget({ name, rowHeight, columns, sortColumn, data
     const style = {
         maxHeight: height
     };
+
+    const rowHeightNum = parseFloat(rowHeight);
+    const rowHeightInPixels = rowHeight.trim().endsWith("em") ? rowHeightNum * size.emPixels : rowHeightNum;
+    const itemsPerPage = parseInt(size.height / rowHeightInPixels) - 1;
+    const pageCount = parseInt((items.length / itemsPerPage) + 1);
+    const startIdx = pageIndex * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+
+    const itemsOnPage = items.slice(startIdx, endIdx);
+
+    const tableRows = stableSort(itemsOnPage || [], getComparator(order, orderBy)).map((item, idx) => {
+        const { id } = item;
+        return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
+    });
 
     const menuItems = [
         data && name && {
@@ -149,5 +164,6 @@ export default function TableWidget({ name, rowHeight, columns, sortColumn, data
             </TableBody>
         </Table>
         {!!isEmpty && empty}
+        <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
     </TableContainer>);
 }

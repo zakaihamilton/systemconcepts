@@ -256,6 +256,22 @@ export default [
             {
                 "id": "SELECT_ALL",
                 "value": "Select All"
+            },
+            {
+                "id": "PREVIOUS_PAGE",
+                "value": "Previous Page"
+            },
+            {
+                "id": "NEXT_PAGE",
+                "value": "Next Page"
+            },
+            {
+                "id": "PAGE_INDEX",
+                "value": "Page No."
+            },
+            {
+                "id": "PAGE_COUNT",
+                "value": "Number of Pages"
             }
         ]
     },
@@ -516,6 +532,22 @@ export default [
             {
                 "id": "SELECT_ALL",
                 "value": "בחר הכל"
+            },
+            {
+                "id": "PREVIOUS_PAGE",
+                "value": "עמוד קודם"
+            },
+            {
+                "id": "NEXT_PAGE",
+                "value": "עמוד הבא"
+            },
+            {
+                "id": "PAGE_INDEX",
+                "value": "מספר עמוד"
+            },
+            {
+                "id": "PAGE_COUNT",
+                "value": "כמות עמודים"
             }
         ]
     },

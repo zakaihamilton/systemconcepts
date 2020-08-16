@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
 
+function getEmValueFromElement(element) {
+    if (element.parentNode) {
+        var parentFontSize = parseFloat(window.getComputedStyle(element.parentNode).fontSize);
+        var elementFontSize = parseFloat(window.getComputedStyle(element).fontSize);
+        var pixelValueOfOneEm = (elementFontSize / parentFontSize) * elementFontSize;
+        return pixelValueOfOneEm;
+    }
+};
+
 export function useResize(ref, depends = []) {
     const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -10,7 +19,8 @@ export function useResize(ref, depends = []) {
                     return;
                 }
                 const { clientWidth, clientHeight } = ref.current;
-                setSize({ width: clientWidth, height: clientHeight });
+                const emPixels = getEmValueFromElement(ref.current);
+                setSize({ width: clientWidth, height: clientHeight, emPixels });
             });
         }, 0);
     };
