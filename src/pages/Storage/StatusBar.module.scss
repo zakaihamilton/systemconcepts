@@ -5,6 +5,7 @@
     visibility: hidden;
     display: flex;
     align-items: center;
+    min-width: 24em;
 }
 
 .root>*:not(:last-child) {
