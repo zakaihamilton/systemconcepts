@@ -24,7 +24,7 @@ const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
 export default function TableWidget({ name, rowHeight = "3em", columns, sortColumn, data, mapper, empty, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
-    const [pageIndex, setPageIndex] = React.useState(0);
+    const [offset, setOffset] = React.useState(0);
     columns = columns || [];
     const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
     const size = useContext(PageSize);
@@ -32,7 +32,7 @@ export default function TableWidget({ name, rowHeight = "3em", columns, sortColu
     const hasIdColumn = columns.find(item => item.id === "id");
 
     useEffect(() => {
-        setPageIndex(0);
+        setOffset(0);
     }, [data]);
 
     let items = data || [];
@@ -125,8 +125,13 @@ export default function TableWidget({ name, rowHeight = "3em", columns, sortColu
     const rowHeightInPixels = rowHeight.trim().endsWith("em") ? rowHeightNum * size.emPixels : rowHeightNum;
     const itemsPerPage = parseInt(size.height / rowHeightInPixels) - 1;
     const pageCount = parseInt((items.length / itemsPerPage) + 1);
-    const startIdx = pageIndex * itemsPerPage;
+    const startIdx = offset;
     const endIdx = startIdx + itemsPerPage;
+    const pageIndex = parseInt(startIdx / itemsPerPage);
+
+    const setPageIndex = (index) => {
+        setOffset(index * itemsPerPage);
+    };
 
     const itemsOnPage = items.slice(startIdx, endIdx);
 
