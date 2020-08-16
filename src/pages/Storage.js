@@ -1,3 +1,4 @@
+import react, { useCallback, useMemo } from "react";
 import Table from "@/widgets/Table";
 import Tooltip from '@material-ui/core/Tooltip';
 import StorageIcon from '@material-ui/icons/Storage';
@@ -71,79 +72,81 @@ export default function Storage({ path = "" }) {
         }
     ];
 
-    let items = (listing || []).map(item => {
-        const id = item.id || item.name;
-        let name = item.name;
-        let tooltip = translations.STORAGE;
-        let icon = <StorageIcon />;
-        if (path) {
-            if (item.type === "dir") {
-                icon = <FolderIcon />;
-                tooltip = translations.FOLDER;
-            }
-            else {
-                icon = <InsertDriveFileIcon />;
-                tooltip = translations.FILE;
-            }
-        }
-        else {
-            name = translations[item.name];
-        }
-
-        let result = {
-            ...item,
-            name,
-            id,
-            tooltip,
-            icon,
-            sizeWidget: item.type === "file" && <Tooltip
-                title={item.size + " " + translations.BYTES}
-                arrow>
-                <Typography style={{ display: "inline-block" }}>
-                    {abbreviateSize(item.size)}
-                </Typography>
-            </Tooltip>
-        };
-
-        const selectItem = (event) => {
-            const { checked } = event.target;
-            StorageStore.update(s => {
-                if (checked) {
-                    s.select = [...select, result];
+    const items = useMemo(() => {
+        return (listing || []).map(item => {
+            const id = item.id || item.name;
+            let name = item.name;
+            let tooltip = translations.STORAGE;
+            let icon = <StorageIcon />;
+            if (path) {
+                if (item.type === "dir") {
+                    icon = <FolderIcon />;
+                    tooltip = translations.FOLDER;
                 }
                 else {
-                    s.select = select.filter(item => item.id !== id);
+                    icon = <InsertDriveFileIcon />;
+                    tooltip = translations.FILE;
                 }
-            });
-        };
+            }
+            else {
+                name = translations[item.name];
+            }
 
-        let nameWidget = null;
-        if (mode === "rename" && editedItem.id === id) {
-            nameWidget = <Edit />;
-        } else {
-            nameWidget = <Label key={id} icon={<>
-                {!select && item.type && !mode && <ItemMenu item={result} />}
-                {select && <Checkbox
-                    classes={{ root: styles.checkbox }}
-                    color="default"
-                    checked={select.find(item => item.id === id) ? true : false}
-                    onChange={selectItem} />}
-                <Tooltip title={tooltip} arrow>
-                    {icon}
+            let result = {
+                ...item,
+                name,
+                id,
+                tooltip,
+                icon,
+                sizeWidget: item.type === "file" && <Tooltip
+                    title={item.size + " " + translations.BYTES}
+                    arrow>
+                    <Typography style={{ display: "inline-block" }}>
+                        {abbreviateSize(item.size)}
+                    </Typography>
                 </Tooltip>
-            </>} name={name} />;
-        }
+            };
 
-        Object.assign(result, {
-            nameWidget
+            const selectItem = (event) => {
+                const { checked } = event.target;
+                StorageStore.update(s => {
+                    if (checked) {
+                        s.select = [...select, result];
+                    }
+                    else {
+                        s.select = select.filter(item => item.id !== id);
+                    }
+                });
+            };
+
+            let nameWidget = null;
+            if (mode === "rename" && editedItem.id === id) {
+                nameWidget = <Edit />;
+            } else {
+                nameWidget = <Label key={id} icon={<>
+                    {!select && item.type && !mode && <ItemMenu item={result} />}
+                    {select && <Checkbox
+                        classes={{ root: styles.checkbox }}
+                        color="default"
+                        checked={select.find(item => item.id === id) ? true : false}
+                        onChange={selectItem} />}
+                    <Tooltip title={tooltip} arrow>
+                        {icon}
+                    </Tooltip>
+                </>} name={name} />;
+            }
+
+            Object.assign(result, {
+                nameWidget
+            });
+
+            return result;
         });
-
-        return result;
-    });
+    }, [listing]);
 
     useActions(items);
 
-    const rowClick = (_, id) => {
+    const rowClick = useCallback((_, id) => {
         const item = items.find(item => item.id === id);
         if (select) {
             const exists = select.find(item => item.id === id);
@@ -163,7 +166,7 @@ export default function Storage({ path = "" }) {
         else {
             setPath("storage/" + [path, id].filter(Boolean).join("/"));
         }
-    };
+    }, [items, select, path]);
 
     const onRowClick = enableItemClick && rowClick;
 
