@@ -174,6 +174,6 @@ export default function Storage({ path = "" }) {
         <Table rowClick={onRowClick} rowHeight="6em" columns={columns} data={data} mapper={mapper} />
         {loading && <Progress />}
         <Actions path={path} />
-        <StatusBar data={data} />
+        <StatusBar data={data} mapper={mapper} />
     </>;
 }

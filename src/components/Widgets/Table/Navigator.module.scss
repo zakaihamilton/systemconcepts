@@ -1,7 +1,8 @@
 .root {
+    border: 1px solid var(--main-border);
     border-radius: 0.5em;
     margin: 0.5em;
-    padding: 0.5em;
+    padding: 1em;
     background-color: var(--info-background);
     color: var(--info-color);
     position: absolute;
@@ -13,7 +14,6 @@
     align-items: center;
     left: 50%;
     transform: translate(-50%, 0);
-    border: 1px solid var(--main-border);
     z-index: 100;
 }
 

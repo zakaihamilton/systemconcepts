@@ -1,6 +1,8 @@
 .root {
     min-width: 30em;
     padding: 1em;
+    border: 1px solid var(--main-border);
+    border-radius: 0.5em;
 }
 
 .error {
