@@ -816,6 +816,58 @@ export default [
             {
                 "id": "EXPORT",
                 "value": "Exportar"
+            },
+            {
+                "id": "IMPORT_FOLDER",
+                "value": "Importar Pasta"
+            },
+            {
+                "id": "MOVE",
+                "value": "Mover"
+            },
+            {
+                "id": "COPY",
+                "value": "Copiar"
+            },
+            {
+                "id": "SELECT_NONE",
+                "value": "Desmarcar Todos"
+            },
+            {
+                "id": "SELECT_ALL",
+                "value": "Selecionar Todos"
+            },
+            {
+                "id": "FIRST_PAGE",
+                "value": "Primeira Página"
+            },
+            {
+                "id": "LAST_PAGE",
+                "value": "Última Pagina"
+            },
+            {
+                "id": "PREVIOUS_PAGE",
+                "value": "Página Anterior"
+            },
+            {
+                "id": "NEXT_PAGE",
+                "value": "Próxima Página"
+            },
+            {
+                "id": "PAGE_INDEX",
+                "value": "No. Página"
+            },
+            {
+                "id": "PAGE_COUNT",
+                "value": "Número de Páginas"
+            },
+            {
+                "id": "DESTINATION",
+                "value": "Destino"
+            },
+            {
+                "id": "TO",
+                "value": "Para"
             }
         ]
     }
