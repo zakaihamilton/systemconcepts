@@ -19,6 +19,7 @@ import { Store } from "pullstate";
 import { abbreviateSize } from "@/util/string";
 import Typography from '@material-ui/core/Typography';
 import StatusBar from "./Storage/StatusBar";
+import { useDeviceType } from "@/util/styles";
 
 export const StorageStoreDefaults = {
     type: "",
@@ -58,6 +59,7 @@ export default function Storage({ path = "" }) {
     const translations = useTranslations();
     const { item: editedItem, mode, select, counter, enableItemClick } = StorageStore.useState();
     const [data, loading] = useListing(path, [counter]);
+    const isPhone = useDeviceType() === "phone";
 
     const columns = [
         {
@@ -65,7 +67,7 @@ export default function Storage({ path = "" }) {
             title: translations.NAME,
             sortable: "name"
         },
-        {
+        !isPhone && {
             id: "sizeWidget",
             title: translations.SIZE,
             sortable: "size"

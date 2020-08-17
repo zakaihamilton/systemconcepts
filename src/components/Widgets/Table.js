@@ -48,13 +48,22 @@ export default function TableWidget({ name, rowHeight = "4em", columns, sortColu
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
     columns = columns || [];
-    const [orderBy, setOrderBy] = React.useState(sortColumn || (columns[0] && columns[0].id) || 0);
+    const firstColumn = columns[0];
+    const defaultSort = sortColumn || (firstColumn && (firstColumn.sortable || firstColumn.id));
+    const [orderBy, setOrderBy] = React.useState(defaultSort);
     const size = useContext(PageSize);
     const { search } = MainStore.useState();
 
     useEffect(() => {
         setOffset(0);
     }, [data, search]);
+
+    useEffect(() => {
+        const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
+        if (!hasColumn) {
+            setOrderBy(defaultSort);
+        }
+    });
 
     const createSortHandler = (property) => () => {
         const isDesc = orderBy === property && order === "desc";
@@ -88,11 +97,11 @@ export default function TableWidget({ name, rowHeight = "4em", columns, sortColu
         return items;
     }, [search, data, order, orderBy]);
 
-    const tableColumns = (columns || []).map(item => {
+    const tableColumns = (columns || []).map((item, idx) => {
         const { id, title, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
         const sortId = typeof sortable === "string" ? sortable : id;
         return <TableCell
-            key={id}
+            key={id || idx}
             align={align}
             className={clsx(styles.cell, !align && styles.defaultAlign, styles.head)}
             dir={dir}

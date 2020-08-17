@@ -18,7 +18,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     const showName =
         deviceType === "phone" && (count <= 2 || index === count - 1) ||
         deviceType === "tablet" && (count <= 3 || index === count - 1) ||
-        deviceType === "desktop" && (count <= 5 || index === count - 1);
+        deviceType === "desktop" && (count <= 6 || index === count - 1);
     const collapse = deviceType === "phone" && count >= 6 ||
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
@@ -69,7 +69,7 @@ export default function BreadcrumbsWidget({ items }) {
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
-        return <BreadcrumbItem key={id} items={items} index={index} count={list.length} href={href} {...props} />
+        return <BreadcrumbItem key={href} items={items} index={index} count={list.length} href={href} {...props} />
     });
 
 
