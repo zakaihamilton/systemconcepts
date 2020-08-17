@@ -2,7 +2,6 @@
     padding: 0.5em;
     border: 1px solid var(--main-border);
     border-radius: 0.5em;
-    visibility: hidden;
     display: flex;
     align-items: center;
     min-width: 24em;
@@ -11,10 +10,6 @@
 .root>*:not(:last-child) {
     margin-left: 0.25em;
     margin-right: 0.25em;
-}
-
-.root.open {
-    visibility: visible;
 }
 
 .error {

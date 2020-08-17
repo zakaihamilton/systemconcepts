@@ -1,11 +1,8 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Snackbar from '@material-ui/core/Snackbar';
 import { StorageStore } from "../Storage";
-import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
-import Row from "@/widgets/Row";
 import SelectAllIcon from '@material-ui/icons/SelectAll';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -16,9 +13,13 @@ import clsx from "clsx";
 export default function StatusBar({ data, mapper }) {
     const translations = useTranslations();
     const { mode, select, message, onDone, severity } = StorageStore.useState();
-    const { direction } = MainStore.useState();
 
     const open = !!(select || message);
+
+    if (!open) {
+        return null;
+    }
+
     const count = select && select.length;
 
     const onClick = async () => {
@@ -72,7 +73,7 @@ export default function StatusBar({ data, mapper }) {
     };
 
     return (
-        <div className={clsx(styles.root, styles[severity], open && styles.open)}>
+        <div className={clsx(styles.root, styles[severity])}>
             {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
             </Button>}
