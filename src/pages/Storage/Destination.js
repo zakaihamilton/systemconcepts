@@ -24,7 +24,7 @@ export default function Destination({ state }) {
             {translations.TO}:
         </Typography>
         <Menu selected={destination} items={items}>
-            <Button variant="contained" color="primary">
+            <Button variant="outlined" color="primary">
                 {destinationText}
             </Button>
         </Menu>
