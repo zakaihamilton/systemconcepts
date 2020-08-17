@@ -9,10 +9,11 @@ import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./StatusBar.module.scss";
 import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
+import Destination from "./Destination";
 
 export default function StatusBar({ data, mapper }) {
     const translations = useTranslations();
-    const { mode, select, message, onDone, severity } = StorageStore.useState();
+    const { mode, select, message, onDone, severity, destination } = StorageStore.useState();
 
     const open = !!(select || message);
 
@@ -51,10 +52,10 @@ export default function StatusBar({ data, mapper }) {
             messageText = translations.ITEMS_NONE_SELECTED;
         }
         else if (count > 1) {
-            messageText = translations.ITEMS_SELECTED.replace("${count}", count);
+            messageText = translations.SELECTED_ITEMS.replace("${count}", count);
         }
         else {
-            messageText = translations.ITEM_SELECTED;
+            messageText = translations.SELECTED_ITEM;
         }
     }
 
@@ -72,9 +73,19 @@ export default function StatusBar({ data, mapper }) {
         });
     };
 
+    const showDestination = mode === "copy" || mode == "move";
+
+    const setDestination = (destination) => {
+        StorageStore.update(s => {
+            s.destination = destination;
+        });
+    };
+
+    const actionDisabled = !count || (showDestination && !destination);
+
     return (
         <div className={clsx(styles.root, styles[severity])}>
-            {mode && <Button disabled={!count} variant="contained" onClick={onClick}>
+            {mode && <Button disabled={actionDisabled} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
             </Button>}
             <Typography className={styles.message}>
@@ -85,6 +96,7 @@ export default function StatusBar({ data, mapper }) {
                     <SelectAllIcon />
                 </Tooltip>
             </IconButton>}
+            {showDestination && <Destination state={[destination, setDestination]} />}
             <IconButton variant="contained" onClick={handleClose}>
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />

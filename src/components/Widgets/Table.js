@@ -43,7 +43,7 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TableWidget({ name, rowHeight = "4em", columns, sortColumn, data, mapper, empty, statusBar, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "4em", columns, depends, sortColumn, data, mapper, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -95,7 +95,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, sortColu
 
         items = stableSort(items || [], getComparator(order, orderBy));
         return items;
-    }, [search, data, order, orderBy]);
+    }, [search, data, order, orderBy, ...depends]);
 
     const tableColumns = (columns || []).map((item, idx) => {
         const { id, title, dir, align, sortable, columnProps = {}, labelProps = {} } = item;

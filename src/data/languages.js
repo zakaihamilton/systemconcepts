@@ -195,15 +195,15 @@ export default [
             },
             {
                 "id": "ITEMS_NONE_SELECTED",
-                "value": "No Items Selected"
+                "value": "No Selected Items"
             },
             {
-                "id": "ITEM_SELECTED",
-                "value": "One Item Selected"
+                "id": "SELECTED_ITEM",
+                "value": "One Selected Item"
             },
             {
-                "id": "ITEMS_SELECTED",
-                "value": "${count} Items Selected"
+                "id": "SELECTED_ITEMS",
+                "value": "${count} Selected Items"
             },
             {
                 "id": "EDITOR_NAME",
@@ -280,6 +280,14 @@ export default [
             {
                 "id": "PAGE_COUNT",
                 "value": "Number of Pages"
+            },
+            {
+                "id": "DESTINATION",
+                "value": "Destination"
+            },
+            {
+                "id": "TO",
+                "value": "To"
             }
         ]
     },
@@ -482,12 +490,12 @@ export default [
                 "value": "לא נבחר פריטים"
             },
             {
-                "id": "ITEM_SELECTED",
-                "value": "פריט אחד נבחר"
+                "id": "SELECTED_ITEM",
+                "value": "פריט אחד שנבחר"
             },
             {
-                "id": "ITEMS_SELECTED",
-                "value": "${count} פריטים נבחרו"
+                "id": "SELECTED_ITEMS",
+                "value": "${count} פריטים שנבחרו"
             },
             {
                 "id": "EDITOR_NAME",
@@ -564,6 +572,14 @@ export default [
             {
                 "id": "PAGE_COUNT",
                 "value": "כמות עמודים"
+            },
+            {
+                "id": "DESTINATION",
+                "value": "יעד"
+            },
+            {
+                "id": "TO",
+                "value": "אל"
             }
         ]
     },
@@ -762,12 +778,12 @@ export default [
                 "value": "Nenhum Item Selecionado"
             },
             {
-                "id": "ITEM_SELECTED",
-                "value": "Um Item Selecionado"
+                "id": "SELECTED_ITEM",
+                "value": "Um Selecionado Item"
             },
             {
-                "id": "ITEMS_SELECTED",
-                "value": "${count} Items Selecionados"
+                "id": "SELECTED_ITEMS",
+                "value": "${count} Selecionados Items"
             },
             {
                 "id": "EDITOR_NAME",

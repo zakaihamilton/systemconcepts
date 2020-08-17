@@ -33,7 +33,8 @@ export const StorageStoreDefaults = {
     onDone: null,
     onValidate: null,
     enableItemClick: true,
-    item: null
+    item: null,
+    destination: ""
 };
 
 export const StorageStore = new Store(StorageStoreDefaults);
@@ -180,6 +181,7 @@ export default function Storage({ path = "" }) {
             columns={columns}
             data={data}
             mapper={mapper}
+            depends={[mode, select, path]}
             statusBar={statusBar} />
         {loading && <Progress />}
         <Actions path={path} />

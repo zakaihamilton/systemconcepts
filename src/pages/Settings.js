@@ -13,7 +13,7 @@ import { useCallback } from "react";
 import Dynamic from "@/widgets/Dynamic";
 import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import Button from "@/widgets/Button";
+import Button from "@material-ui/core/Button";
 import { addPath } from "@/util/pages";
 
 export default function Settings() {
@@ -114,7 +114,7 @@ export default function Settings() {
             id: "reset",
             icon: <SettingsBackupRestoreIcon />,
             name: translations.RESET_SETTINGS,
-            widget: <Button onClick={() => addPath("reset")}>
+            widget: <Button variant="contained" onClick={() => addPath("reset")}>
                 {translations.RESET}
             </Button>
         }
