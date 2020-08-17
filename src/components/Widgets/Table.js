@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -21,6 +21,28 @@ import Navigator from "./Table/Navigator";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
+function descendingComparator(a, b, orderBy) {
+    const aText = a && a[orderBy] || "";
+    const bText = b && b[orderBy] || "";
+    return collator.compare(aText, bText);
+}
+
+function getComparator(order, orderBy) {
+    return order === "desc"
+        ? (a, b) => descendingComparator(a, b, orderBy)
+        : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort(array, comparator) {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+        const order = comparator(a[0], b[0]);
+        if (order !== 0) return order;
+        return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+}
+
 export default function TableWidget({ name, rowHeight = "4em", columns, sortColumn, data, mapper, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
@@ -34,54 +56,37 @@ export default function TableWidget({ name, rowHeight = "4em", columns, sortColu
         setOffset(0);
     }, [data, search]);
 
-    let items = data || [];
-    if (mapper) {
-        items = items.map(mapper);
-    }
-
-    items = items.filter(item => {
-        if (!search) {
-            return true;
-        }
-        const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => item.searchable || item.sortable || item.id);
-        for (const key of keys) {
-            if (typeof item[key] === "string") {
-                const match = item[key].toLowerCase().includes(search.toLowerCase());
-                if (match) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    });
-
     const createSortHandler = (property) => () => {
         const isDesc = orderBy === property && order === "desc";
         setOrder(isDesc ? "asc" : "desc");
         setOrderBy(property);
     };
 
-    function descendingComparator(a, b, orderBy) {
-        const aText = a && a[orderBy] || "";
-        const bText = b && b[orderBy] || "";
-        return collator.compare(aText, bText);
-    }
+    const items = useMemo(() => {
+        let items = data || [];
+        if (mapper) {
+            items = items.map(mapper);
+        }
 
-    function getComparator(order, orderBy) {
-        return order === "desc"
-            ? (a, b) => descendingComparator(a, b, orderBy)
-            : (a, b) => -descendingComparator(a, b, orderBy);
-    }
-
-    function stableSort(array, comparator) {
-        const stabilizedThis = array.map((el, index) => [el, index]);
-        stabilizedThis.sort((a, b) => {
-            const order = comparator(a[0], b[0]);
-            if (order !== 0) return order;
-            return a[1] - b[1];
+        items = items.filter(item => {
+            if (!search) {
+                return true;
+            }
+            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => item.searchable || item.sortable || item.id);
+            for (const key of keys) {
+                if (typeof item[key] === "string") {
+                    const match = item[key].toLowerCase().includes(search.toLowerCase());
+                    if (match) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         });
-        return stabilizedThis.map((el) => el[0]);
-    }
+
+        items = stableSort(items || [], getComparator(order, orderBy));
+        return items;
+    }, [search, data, order, orderBy]);
 
     const tableColumns = (columns || []).map(item => {
         const { id, title, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
@@ -132,7 +137,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, sortColu
 
     const itemsOnPage = items.slice(startIdx, endIdx);
 
-    const tableRows = stableSort(itemsOnPage || [], getComparator(order, orderBy)).map((item, idx) => {
+    const tableRows = itemsOnPage.map((item, idx) => {
         const { id } = item;
         return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
     });
