@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import Table from "@/widgets/Table";
 import Tooltip from '@material-ui/core/Tooltip';
 import StorageIcon from '@material-ui/icons/Storage';
@@ -22,6 +22,7 @@ import StatusBar from "./Storage/StatusBar";
 import { useDeviceType } from "@/util/styles";
 
 export const StorageStoreDefaults = {
+    mode: "",
     type: "",
     name: "",
     placeholder: "",
@@ -61,6 +62,12 @@ export default function Storage({ path = "" }) {
     const { item: editedItem, mode, select, counter, enableItemClick } = StorageStore.useState();
     const [data, loading] = useListing(path, [counter]);
     const isPhone = useDeviceType() === "phone";
+
+    useEffect(() => {
+        StorageStore.update(s => {
+            Object.assign(s, StorageStoreDefaults);
+        });
+    }, [path]);
 
     const columns = [
         {

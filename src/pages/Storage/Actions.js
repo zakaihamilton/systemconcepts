@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useTranslations } from "@/util/translations";
 import storage from "@/util/storage";
 import SpeedDial from "@/widgets/SpeedDial";
@@ -6,7 +5,7 @@ import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import { StorageStore, StorageStoreDefaults } from "../Storage";
+import { StorageStore } from "../Storage";
 
 export function useActions(data) {
     const { name, mode, type } = StorageStore.useState();
@@ -16,14 +15,6 @@ export function useActions(data) {
             name: name[0]
         });
     }
-
-    useEffect(() => {
-        return () => {
-            StorageStore.update(s => {
-                Object.assign(s, StorageStoreDefaults);
-            });
-        }
-    }, []);
 }
 
 export default function Actions({ path }) {
