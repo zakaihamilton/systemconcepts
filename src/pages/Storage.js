@@ -189,7 +189,7 @@ export default function Storage({ path = "" }) {
             columns={columns}
             data={dataEx}
             mapper={mapper}
-            depends={[mode, select, path]}
+            depends={[mode, select, path, onRowClick]}
             statusBar={statusBar} />
         {loading && <Progress />}
         <Actions path={path} />
