@@ -73,7 +73,19 @@ export default function Destination({ path }) {
     const clickAction = async () => {
         for (const item of select) {
             if (mode === "move") {
-                await storage.rename(item.path, selectedState[0] + item.name);
+                const target = [selectedState[0], name].filter(Boolean).join("/");
+                try {
+                    if (await storage.exists(target)) {
+                        throw translations.ALREADY_EXISTS.replace("${name}", name);
+                    }
+                    await storage.rename(item.path, target);
+                }
+                catch (err) {
+                    StorageStore.update(s => {
+                        s.message = err;
+                        s.severity = "error";
+                    });
+                }
             }
             else {
 

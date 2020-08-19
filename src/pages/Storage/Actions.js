@@ -12,7 +12,7 @@ export function useActions(data) {
     if (mode === "create") {
         data = [{
             id: type,
-            name: name,
+            name: "",
             create: true
         }, ...data];
     }

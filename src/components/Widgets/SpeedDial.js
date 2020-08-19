@@ -41,21 +41,19 @@ export default function SpeedDialWidget({ visible = true, items }) {
     });
 
     return (
-        <div className={styles.root}>
-            <SpeedDial
-                ariaLabel=""
-                classes={{
-                    root: direction === "rtl" ? styles.speedDialRtl : styles.speedDial,
-                    fab: styles.fab
-                }}
-                hidden={!visible}
-                icon={<SpeedDialIcon classes={{ root: styles.fab }} />}
-                onClose={handleClose}
-                onOpen={handleOpen}
-                open={open}
-            >
-                {speedDialItems}
-            </SpeedDial>
-        </div>
+        <SpeedDial
+            ariaLabel=""
+            classes={{
+                root: direction === "rtl" ? styles.speedDialRtl : styles.speedDial,
+                fab: styles.fab
+            }}
+            hidden={!visible}
+            icon={<SpeedDialIcon classes={{ root: styles.fab }} />}
+            onClose={handleClose}
+            onOpen={handleOpen}
+            open={open}
+        >
+            {speedDialItems}
+        </SpeedDial>
     );
 }
