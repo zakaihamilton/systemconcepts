@@ -9,12 +9,14 @@ import { StorageStore } from "../Storage";
 
 export function useActions(data) {
     const { name, mode, type } = StorageStore.useState();
-    if (data === "create") {
-        items.unshift({
+    if (mode === "create") {
+        data = [{
             id: type,
-            name: name[0]
-        });
+            name: name,
+            create: true
+        }, ...data];
     }
+    return data;
 }
 
 export default function Actions({ path }) {

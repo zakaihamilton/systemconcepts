@@ -130,10 +130,10 @@ export default function Storage({ path = "" }) {
         };
 
         let nameWidget = null;
-        if (mode === "create" && !name) {
-            nameWidget = <Edit />;
+        if (mode === "create" && item.create) {
+            nameWidget = <Edit key={id} />;
         } else if (mode === "rename" && editedItem.id === id) {
-            nameWidget = <Edit />;
+            nameWidget = <Edit key={id} />;
         } else {
             nameWidget = <Label key={id} icon={<>
                 {!select && item.type && !mode && <ItemMenu item={result} />}
@@ -155,7 +155,7 @@ export default function Storage({ path = "" }) {
         return result;
     };
 
-    useActions(data);
+    let dataEx = useActions(data);
 
     const rowClick = useCallback((_, item) => {
         const { id } = item;
@@ -180,14 +180,14 @@ export default function Storage({ path = "" }) {
     }, [select, path]);
 
     const onRowClick = enableItemClick && rowClick;
-    const statusBar = <StatusBar data={data} mapper={mapper} />;
+    const statusBar = <StatusBar data={dataEx} mapper={mapper} />;
 
     return <>
         <Table
             rowClick={onRowClick}
             rowHeight="6em"
             columns={columns}
-            data={data}
+            data={dataEx}
             mapper={mapper}
             depends={[mode, select, path]}
             statusBar={statusBar} />
