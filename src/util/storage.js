@@ -81,6 +81,14 @@ const storageMethods = Object.fromEntries([
     },
     {
         name: "importFolder"
+    },
+    {
+        name: "copyFolder",
+        types: ["path"]
+    },
+    {
+        name: "copyFile",
+        types: ["path"]
     }
 ].map(item => {
     const { name } = item;

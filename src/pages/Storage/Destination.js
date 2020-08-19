@@ -91,8 +91,25 @@ export default function Destination({ path }) {
                     });
                 }
             }
-            else {
-
+            else if (mode === "copy") {
+                const target = [destination, item.name].filter(Boolean).join("/");
+                try {
+                    if (await storage.exists(target)) {
+                        throw translations.ALREADY_EXISTS.replace("${name}", item.name);
+                    }
+                    if (item.type === "dir") {
+                        await storage.copyFolder(item.path, target);
+                    }
+                    else {
+                        await storage.copyFile(item.path, target);
+                    }
+                }
+                catch (err) {
+                    StorageStore.update(s => {
+                        s.message = err;
+                        s.severity = "error";
+                    });
+                }
             }
         }
         handleClose(true);
@@ -113,7 +130,7 @@ export default function Destination({ path }) {
     const disableAction = destination === path;
 
     return (
-        <Dialog fullScreen open={destination} onClose={handleClose} TransitionComponent={Transition}>
+        <Dialog fullScreen open={destination !== ""} onClose={handleClose} TransitionComponent={Transition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={handleClose}>

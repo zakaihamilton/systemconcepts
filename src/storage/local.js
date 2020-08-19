@@ -143,6 +143,32 @@ async function importFolder(path, data) {
     await fromData(path, data);
 }
 
+async function copyFolder(from, to) {
+    const names = await fs.promises.readdir(from);
+    await createFolder(to);
+    for (const name of names) {
+        try {
+            const fromPath = [from, name].filter(Boolean).join("/");
+            const toPath = [to, name].filter(Boolean).join("/");
+            const itemStat = await fs.promises.stat(itemPath);
+            if (itemStat.isDirectory()) {
+                await copyFolder(fromPath, toPath);
+            }
+            else {
+                await copyFile(fromPath, toPath);
+            }
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+}
+
+async function copyFile(from, to) {
+    const data = await readFile(from, "utf8");
+    await writeFile(to, data, "utf8");
+}
+
 export default {
     getListing,
     createFolder,
@@ -154,5 +180,7 @@ export default {
     writeFile,
     exists,
     exportFolder,
-    importFolder
+    importFolder,
+    copyFolder,
+    copyFile
 };
