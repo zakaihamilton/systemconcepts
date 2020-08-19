@@ -4,8 +4,10 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Tooltip from '@material-ui/core/Tooltip';
 import { MainStore } from "../Main";
 import { useDeviceType } from "@/util/styles";
+import { useTranslations } from "@/util/translations";
 
 export default function Menu() {
+    const translations = useTranslations();
     const isPhone = useDeviceType() === "phone";
 
     const toggleMenu = () => {
@@ -20,7 +22,7 @@ export default function Menu() {
     };
 
     return <IconButton onClick={toggleMenu}>
-        <Tooltip arrow title="Menu">
+        <Tooltip arrow title={translations.MENU}>
             <MenuIcon />
         </Tooltip>
     </IconButton>;

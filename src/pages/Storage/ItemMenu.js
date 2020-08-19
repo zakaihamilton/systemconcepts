@@ -11,6 +11,7 @@ import ImportExportIcon from '@material-ui/icons/ImportExport';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();
@@ -65,10 +66,11 @@ export default function ItemMenuWidget({ item }) {
                     s.select = [item];
                     s.mode = "move";
                     s.severity = "info";
-                    s.onDone = async select => {
-                        for (const item of select) {
-
-                        }
+                    s.onDone = () => {
+                        StorageStore.update(s => {
+                            s.destination = true;
+                        });
+                        return true;
                     }
                 });
             }
@@ -82,10 +84,11 @@ export default function ItemMenuWidget({ item }) {
                     s.select = [item];
                     s.mode = "copy";
                     s.severity = "info";
-                    s.onDone = async select => {
-                        for (const item of select) {
-
-                        }
+                    s.onDone = () => {
+                        StorageStore.update(s => {
+                            s.destination = true;
+                        });
+                        return true;
                     }
                 });
             }
@@ -150,7 +153,9 @@ export default function ItemMenuWidget({ item }) {
     return (<>
         <Menu items={items} onVisible={onMenuVisible}>
             <IconButton ref={ref}>
-                <MoreVertIcon />
+                <Tooltip title={translations.MENU}>
+                    <MoreVertIcon />
+                </Tooltip>
             </IconButton>
         </Menu>
     </>);

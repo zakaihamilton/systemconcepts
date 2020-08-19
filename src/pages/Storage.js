@@ -20,6 +20,7 @@ import { abbreviateSize } from "@/util/string";
 import Typography from '@material-ui/core/Typography';
 import StatusBar from "./Storage/StatusBar";
 import { useDeviceType } from "@/util/styles";
+import Destination from "./Storage/Destination";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -35,7 +36,7 @@ export const StorageStoreDefaults = {
     onValidate: null,
     enableItemClick: true,
     item: null,
-    destination: ""
+    destination: false
 };
 
 export const StorageStore = new Store(StorageStoreDefaults);
@@ -192,5 +193,6 @@ export default function Storage({ path = "" }) {
             statusBar={statusBar} />
         {loading && <Progress />}
         <Actions path={path} />
+        <Destination path={path} />
     </>;
 }

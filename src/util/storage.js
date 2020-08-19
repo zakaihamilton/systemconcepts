@@ -5,7 +5,19 @@ export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;
     const [deviceId, ...path] = url.split("/").filter(Boolean);
     if (!deviceId) {
-        return storage;
+        if (name === "getListing") {
+            const results = [];
+            const options = params[0] || {};
+            for (const device of storage) {
+                const result = Object.assign({}, device);
+                if (options.browse) {
+                    const items = await storageMethods.getListing(device.id, ...params) || [];
+                    result.count = items.length;
+                }
+                results.push(result);
+            }
+            return results;
+        }
     }
     const device = storage.find(device => device.id === deviceId);
     if (!device) {
@@ -77,13 +89,13 @@ const storageMethods = Object.fromEntries([
     }]
 }));
 
-export function useListing(url, depends = []) {
+export function useListing(url, depends = [], options) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(null);
     const active = useRef(true);
     useEffect(() => {
         setLoading(true);
-        storageMethods.getListing(url).then(listing => {
+        storageMethods.getListing(url, options).then(listing => {
             if (active.current) {
                 setListing(listing);
                 setLoading(false);

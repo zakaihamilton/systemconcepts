@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
 import { StorageStore } from "../Storage";
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
@@ -13,7 +12,7 @@ import ButtonSelector from "@/components/Widgets/ButtonSelector";
 
 export default function StatusBar({ data, mapper }) {
     const translations = useTranslations();
-    const { mode, select, message, onDone, severity, destination } = StorageStore.useState();
+    const { mode, select, message, onDone, severity } = StorageStore.useState();
 
     const open = !!(select || message);
 
@@ -24,14 +23,17 @@ export default function StatusBar({ data, mapper }) {
     const count = select && select.length;
 
     const onClick = async () => {
+        let result = false;
         if (onDone) {
-            await onDone(select);
+            result = await onDone(select);
         }
-        StorageStore.update(s => {
-            s.counter++;
-            s.select = null;
-            s.mode = null;
-        });
+        if (!result) {
+            StorageStore.update(s => {
+                s.counter++;
+                s.select = null;
+                s.mode = null;
+            });
+        }
     };
 
     const handleClose = (event, reason) => {

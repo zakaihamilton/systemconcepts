@@ -288,6 +288,14 @@ export default [
             {
                 "id": "TO",
                 "value": "To"
+            },
+            {
+                "id": "SELECT_DESTINATION",
+                "value": "Select Destination"
+            },
+            {
+                "id": "MENU",
+                "value": "Menu"
             }
         ]
     },
@@ -580,6 +588,14 @@ export default [
             {
                 "id": "TO",
                 "value": "אל"
+            },
+            {
+                "id": "SELECT_DESTINATION",
+                "value": "בחר יעד"
+            },
+            {
+                "id": "MENU",
+                "value": "תפריט"
             }
         ]
     },
@@ -868,6 +884,14 @@ export default [
             {
                 "id": "TO",
                 "value": "Para"
+            },
+            {
+                "id": "SELECT_DESTINATION",
+                "value": "Selecione o Destino"
+            },
+            {
+                "id": "MENU",
+                "value": "Cardápio"
             }
         ]
     }
