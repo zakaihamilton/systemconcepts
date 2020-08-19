@@ -60,7 +60,7 @@ export function getStorageSection({ index, id, translations }) {
 
 export default function Storage({ path = "" }) {
     const translations = useTranslations();
-    const { item: editedItem, mode, select, counter, enableItemClick } = StorageStore.useState();
+    const { item: editedItem, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
     const [data, loading] = useListing(path, [counter]);
     const isPhone = useDeviceType() === "phone";
 
@@ -179,7 +179,7 @@ export default function Storage({ path = "" }) {
         }
     }, [select, path]);
 
-    const onRowClick = enableItemClick && rowClick;
+    const onRowClick = enableItemClick && !editing && rowClick;
     const statusBar = <StatusBar data={dataEx} mapper={mapper} />;
 
     return <>
