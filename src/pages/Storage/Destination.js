@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         marginLeft: theme.spacing(2),
-        flex: 1,
+        marginRight: theme.spacing(4),
     },
     path: {
         position: 'relative',
