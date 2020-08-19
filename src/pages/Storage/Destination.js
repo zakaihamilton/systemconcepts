@@ -57,11 +57,15 @@ export default function Destination({ path }) {
     const translations = useTranslations();
     const classes = useStyles();
     const { destination, mode, select } = StorageStore.useState();
-    const selectedState = useState(path);
+    const destinationState = [destination, destination => {
+        StorageStore.update(s => {
+            s.destination = destination;
+        });
+    }];
 
     const handleClose = (counter) => {
         StorageStore.update(s => {
-            s.destination = false;
+            s.destination = "";
             s.mode = "";
             s.select = null;
             if (counter) {
@@ -73,10 +77,10 @@ export default function Destination({ path }) {
     const clickAction = async () => {
         for (const item of select) {
             if (mode === "move") {
-                const target = [selectedState[0], name].filter(Boolean).join("/");
+                const target = [destination, item.name].filter(Boolean).join("/");
                 try {
                     if (await storage.exists(target)) {
-                        throw translations.ALREADY_EXISTS.replace("${name}", name);
+                        throw translations.ALREADY_EXISTS.replace("${name}", item.name);
                     }
                     await storage.rename(item.path, target);
                 }
@@ -106,41 +110,39 @@ export default function Destination({ path }) {
     ];
 
     const modeName = (modes.find(item => item.id === mode) || {}).name;
-    const disableAction = selectedState[0] === path;
+    const disableAction = destination === path;
 
     return (
-        <div>
-            <Dialog fullScreen open={destination} onClose={handleClose} TransitionComponent={Transition}>
-                <AppBar className={classes.appBar}>
-                    <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={handleClose}>
-                            <Tooltip arrow title={translations.CLOSE}>
-                                <CloseIcon />
-                            </Tooltip>
-                        </IconButton>
-                        <Typography variant="h6" className={classes.title}>
-                            {translations.SELECT_DESTINATION}
-                        </Typography>
-                        <div className={classes.path}>
-                            <InputBase
-                                readOnly={true}
-                                value={selectedState[0]}
-                                classes={{
-                                    root: classes.inputRoot,
-                                    input: classes.inputInput,
-                                }}
-                            />
-                        </div>
-                        <div style={{ flex: 1 }} />
-                        <Button autoFocus color="inherit" disabled={disableAction} onClick={clickAction}>
-                            {modeName}
-                        </Button>
-                    </Toolbar>
-                </AppBar>
-                <DialogContent dividers={true}>
-                    {destination && <StorageList state={selectedState} />}
-                </DialogContent>
-            </Dialog>
-        </div>
+        <Dialog fullScreen open={destination} onClose={handleClose} TransitionComponent={Transition}>
+            <AppBar className={classes.appBar}>
+                <Toolbar>
+                    <IconButton edge="start" color="inherit" onClick={handleClose}>
+                        <Tooltip arrow title={translations.CLOSE}>
+                            <CloseIcon />
+                        </Tooltip>
+                    </IconButton>
+                    <Typography variant="h6" className={classes.title}>
+                        {translations.SELECT_DESTINATION}
+                    </Typography>
+                    <div className={classes.path}>
+                        <InputBase
+                            readOnly={true}
+                            value={destination}
+                            classes={{
+                                root: classes.inputRoot,
+                                input: classes.inputInput,
+                            }}
+                        />
+                    </div>
+                    <div style={{ flex: 1 }} />
+                    <Button autoFocus color="inherit" disabled={disableAction} onClick={clickAction}>
+                        {modeName}
+                    </Button>
+                </Toolbar>
+            </AppBar>
+            <DialogContent dividers={true}>
+                {destination && <StorageList state={destinationState} />}
+            </DialogContent>
+        </Dialog>
     );
 }

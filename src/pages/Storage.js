@@ -36,7 +36,7 @@ export const StorageStoreDefaults = {
     onValidate: null,
     enableItemClick: true,
     item: null,
-    destination: false
+    destination: ""
 };
 
 export const StorageStore = new Store(StorageStoreDefaults);

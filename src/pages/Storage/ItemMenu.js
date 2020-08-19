@@ -68,7 +68,7 @@ export default function ItemMenuWidget({ item }) {
                     s.severity = "info";
                     s.onDone = () => {
                         StorageStore.update(s => {
-                            s.destination = true;
+                            s.destination = item.path;
                         });
                         return true;
                     }
@@ -86,7 +86,7 @@ export default function ItemMenuWidget({ item }) {
                     s.severity = "info";
                     s.onDone = () => {
                         StorageStore.update(s => {
-                            s.destination = true;
+                            s.destination = item.path;
                         });
                         return true;
                     }
