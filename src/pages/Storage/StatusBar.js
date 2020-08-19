@@ -9,7 +9,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./StatusBar.module.scss";
 import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
-import Destination from "./Destination";
+import ButtonSelector from "@/components/Widgets/ButtonSelector";
 
 export default function StatusBar({ data, mapper }) {
     const translations = useTranslations();
@@ -73,21 +73,29 @@ export default function StatusBar({ data, mapper }) {
         });
     };
 
-    const showDestination = mode === "copy" || mode == "move";
+    const modeItems = mode !== "delete" && [
+        {
+            id: "move",
+            name: translations.MOVE
+        },
+        {
+            id: "copy",
+            name: translations.COPY
+        }
+    ];
 
-    const setDestination = (destination) => {
+    const setMode = (mode) => {
         StorageStore.update(s => {
-            s.destination = destination;
+            s.mode = mode;
         });
     };
 
-    const actionDisabled = !count || (showDestination && !destination);
-
     return (
         <div className={clsx(styles.root, styles[severity])}>
-            {mode && <Button disabled={actionDisabled} variant="contained" onClick={onClick}>
+            {mode && <ButtonSelector items={modeItems} state={[mode, setMode]} color="primary" disabled={!count} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
-            </Button>}
+                {modeItems && "\u2026"}
+            </ButtonSelector>}
             <Typography className={styles.message}>
                 {messageText}
             </Typography>
@@ -96,7 +104,6 @@ export default function StatusBar({ data, mapper }) {
                     <SelectAllIcon />
                 </Tooltip>
             </IconButton>}
-            {showDestination && <Destination state={[destination, setDestination]} />}
             <IconButton variant="contained" onClick={handleClose}>
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />
