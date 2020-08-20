@@ -355,6 +355,10 @@ export default {
         {
             "id": "EMPTY_PASSWORD",
             "value": "שדה הסיסמה הוא ריק!"
+        },
+        {
+            "id": "EMPTY_FIELD",
+            "value": "השדה הזה הוא ריק!"
         }
     ]
 };

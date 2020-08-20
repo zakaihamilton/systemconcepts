@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -10,8 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useTranslations } from "@/util/translations";
-import { MainStore } from "@/components/Main";
-import clsx from "clsx";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -34,9 +32,67 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignUp() {
-    const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
+
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [firstNameError, setFirstNameError] = useState("");
+    const [lastNameError, setLastNameError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [validate, setValidate] = useState(false);
+
+    const changeFirstName = event => setFirstName(event.target.value);
+    const changeLastName = event => setLastName(event.target.value);
+    const changeEmail = event => setEmail(event.target.value);
+    const changePassword = event => setPassword(event.target.value);
+
+    const actionDisabled = firstNameError || lastNameError || emailError || passwordError;
+
+    useEffect(() => {
+        if (!validate) {
+            setEmailError("");
+            setPasswordError("");
+            setFirstNameError("");
+            setLastNameError("");
+            return;
+        }
+        if (!firstName) {
+            setFirstNameError(translations.EMPTY_FIELD);
+        }
+        else {
+            setFirstNameError("");
+        }
+        if (!lastName) {
+            setLastNameError(translations.EMPTY_FIELD);
+        }
+        else {
+            setLastNameError("");
+        }
+        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
+        if (!email) {
+            setEmailError(translations.EMPTY_EMAIL);
+        }
+        else if (!emailPattern.test(email)) {
+            setEmailError(translations.BAD_EMAIL);
+        }
+        else {
+            setEmailError("");
+        }
+        if (!password) {
+            setPasswordError(translations.EMPTY_PASSWORD);
+        }
+        else {
+            setPasswordError("");
+        }
+    }, [firstName, lastName, password, email, validate]);
+
+    const onSubmit = () => {
+        setValidate(true);
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -60,6 +116,10 @@ export default function SignUp() {
                                 id="firstName"
                                 label={translations.FIRST_NAME}
                                 autoFocus
+                                value={firstName}
+                                onChange={changeFirstName}
+                                error={firstNameError !== ""}
+                                helperText={firstNameError}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -71,6 +131,10 @@ export default function SignUp() {
                                 label={translations.LAST_NAME}
                                 name="lastName"
                                 autoComplete="lname"
+                                value={lastName}
+                                onChange={changeLastName}
+                                error={lastNameError !== ""}
+                                helperText={lastNameError}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -82,6 +146,10 @@ export default function SignUp() {
                                 label={translations.EMAIL_ADDRESS}
                                 name="email"
                                 autoComplete="email"
+                                value={email}
+                                onChange={changeEmail}
+                                error={emailError !== ""}
+                                helperText={emailError}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -94,15 +162,20 @@ export default function SignUp() {
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
+                                value={password}
+                                onChange={changePassword}
+                                error={passwordError !== ""}
+                                helperText={passwordError}
                             />
                         </Grid>
                     </Grid>
                     <Button
-                        type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"
                         className={classes.submit}
+                        onClick={onSubmit}
+                        disabled={actionDisabled}
                     >
                         {translations.SIGN_UP}
                     </Button>

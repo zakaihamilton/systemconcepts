@@ -354,7 +354,11 @@ export default {
         },
         {
             "id": "EMPTY_PASSWORD",
-            "value":"The password field is empty!"
+            "value": "The password field is empty!"
+        },
+        {
+            "id": "EMPTY_FIELD",
+            "value": "This field is empty!"
         }
     ]
 };
