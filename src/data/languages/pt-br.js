@@ -290,23 +290,23 @@ export default {
         },
         {
             "id": "MENU",
-            "value": "Cardápio"
+            "value": "Menu"
         },
         {
             "id": "LOGIN_NAME",
-            "value": "Conecte-se"
+            "value": "Login"
         },
         {
             "id": "SIGN_UP_NAME",
-            "value": "Inscrever-se"
+            "value": "Inscreva-se"
         },
         {
             "id": "SIGN_IN",
-            "value": "Assinar Em"
+            "value": "Entrar"
         },
         {
             "id": "SIGN_UP",
-            "value": "Inscrever-se"
+            "value": "Inscreva-se"
         },
         {
             "id": "EMAIL_ADDRESS",
@@ -318,7 +318,7 @@ export default {
         },
         {
             "id": "REMEMBER_ME",
-            "value": "Lembre de mim"
+            "value": "Lembrar-me"
         },
         {
             "id": "FORGET_PASSWORD",
@@ -326,7 +326,7 @@ export default {
         },
         {
             "id": "SIGN_UP_TEXT",
-            "value": "Não tem conta? Inscrever-se"
+            "value": "Não tem conta? Inscreva-se"
         },
         {
             "id": "FIRST_NAME",
@@ -338,11 +338,11 @@ export default {
         },
         {
             "id": "HAVE_ACCOUNT",
-            "value": "Já tem uma conta? assinar em"
+            "value": "Já tem uma conta? Entrar"
         },
         {
             "id": "EMPTY_EMAIL",
-            "value": "O campo do email está vazio!"
+            "value": "O campo email está vazio!"
         },
         {
             "id": "BAD_EMAIL",
@@ -350,7 +350,7 @@ export default {
         },
         {
             "id": "EMPTY_PASSWORD",
-            "value": "O campo de senha está vazio!"
+            "value": "O campo senha está vazio!"
         }
     ]
 };
