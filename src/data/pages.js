@@ -26,6 +26,12 @@ import Reset from "@/pages/Settings/Reset";
 import EditIcon from '@material-ui/icons/Edit';
 import Editor from "@/pages/Editor";
 
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import Login from "@/pages/Login";
+
+import CreateIcon from '@material-ui/icons/Create';
+import SignUp from "@/pages/SignUp";
+
 export default [
     {
         id: "apps",
@@ -93,5 +99,18 @@ export default [
         icon: <EditIcon />,
         Component: Editor,
         showTooltip: true
+    },
+    {
+        sidebar: true,
+        id: "login",
+        name: "LOGIN_NAME",
+        icon: <VpnKeyIcon />,
+        Component: Login
+    },
+    {
+        id: "signup",
+        name: "SIGN_UP_NAME",
+        icon: <CreateIcon />,
+        Component: SignUp
     }
 ];

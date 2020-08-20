@@ -296,6 +296,38 @@ export default [
             {
                 "id": "MENU",
                 "value": "Menu"
+            },
+            {
+                "id": "LOGIN_NAME",
+                "value": "Login"
+            },
+            {
+                "id": "SIGN_UP_NAME",
+                "value": "Sign Up"
+            },
+            {
+                "id": "SIGN_IN",
+                "value": "Sign In"
+            },
+            {
+                "id": "EMAIL_ADDRESS",
+                "value": "Email Address"
+            },
+            {
+                "id": "PASSWORD",
+                "value": "Password"
+            },
+            {
+                "id": "REMEMBER_ME",
+                "value": "Remember me"
+            },
+            {
+                "id": "FORGET_PASSWORD",
+                "value": "Forgot password?"
+            },
+            {
+                "id": "SIGN_UP_TEXT",
+                "value": "Don't have an account? Sign Up"
             }
         ]
     },
@@ -596,6 +628,38 @@ export default [
             {
                 "id": "MENU",
                 "value": "תפריט"
+            },
+            {
+                "id": "LOGIN_NAME",
+                "value": "התחברות"
+            },
+            {
+                "id": "SIGN_UP_NAME",
+                "value": "הרשם"
+            },
+            {
+                "id": "SIGN_IN",
+                "value": "התחברות"
+            },
+            {
+                "id": "EMAIL_ADDRESS",
+                "value": "כתובת אימייל"
+            },
+            {
+                "id": "PASSWORD",
+                "value": "סיסמה"
+            },
+            {
+                "id": "REMEMBER_ME",
+                "value": "תזכור אותי"
+            },
+            {
+                "id": "FORGET_PASSWORD",
+                "value": "שכחת סיסמה?"
+            },
+            {
+                "id": "SIGN_UP_TEXT",
+                "value": "אין לך חשבון? הרשם"
             }
         ]
     },
@@ -892,6 +956,38 @@ export default [
             {
                 "id": "MENU",
                 "value": "Cardápio"
+            },
+            {
+                "id": "LOGIN_NAME",
+                "value": "Conecte-se"
+            },
+            {
+                "id": "SIGN_UP_NAME",
+                "value": "Inscrever-se"
+            },
+            {
+                "id": "SIGN_IN",
+                "value": "Assinar Em"
+            },
+            {
+                "id": "EMAIL_ADDRESS",
+                "value": "Endereço de E-mail"
+            },
+            {
+                "id": "PASSWORD",
+                "value": "Senha"
+            },
+            {
+                "id": "REMEMBER_ME",
+                "value": "Lembre de mim"
+            },
+            {
+                "id": "FORGET_PASSWORD",
+                "value": "Esqueceu a senha?"
+            },
+            {
+                "id": "SIGN_UP_TEXT",
+                "value": "Não tem conta? Inscrever-se"
             }
         ]
     }
