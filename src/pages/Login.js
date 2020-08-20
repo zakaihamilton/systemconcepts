@@ -98,7 +98,7 @@ export default function Login() {
                             </Link>
                         </Grid>
                         <Grid item>
-                            <Link href="#/signup" variant="body2">
+                            <Link href="#signup" variant="body2">
                                 {translations.SIGN_UP_TEXT}
                             </Link>
                         </Grid>

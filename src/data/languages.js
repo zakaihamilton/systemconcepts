@@ -310,6 +310,10 @@ export default [
                 "value": "Sign In"
             },
             {
+                "id": "SIGN_UP",
+                "value": "Sign Up"
+            },
+            {
                 "id": "EMAIL_ADDRESS",
                 "value": "Email Address"
             },
@@ -328,6 +332,18 @@ export default [
             {
                 "id": "SIGN_UP_TEXT",
                 "value": "Don't have an account? Sign Up"
+            },
+            {
+                "id": "FIRST_NAME",
+                "value": "First Name"
+            },
+            {
+                "id": "LAST_NAME",
+                "value": "Last Name"
+            },
+            {
+                "id": "HAVE_ACCOUNT",
+                "value": "Already have an account? Sign in"
             }
         ]
     },
@@ -642,6 +658,10 @@ export default [
                 "value": "התחברות"
             },
             {
+                "id": "SIGN_UP",
+                "value": "הרשם"
+            },
+            {
                 "id": "EMAIL_ADDRESS",
                 "value": "כתובת אימייל"
             },
@@ -660,6 +680,18 @@ export default [
             {
                 "id": "SIGN_UP_TEXT",
                 "value": "אין לך חשבון? הרשם"
+            },
+            {
+                "id": "FIRST_NAME",
+                "value": "שם פרטי"
+            },
+            {
+                "id": "LAST_NAME",
+                "value": "שם משפחה"
+            },
+            {
+                "id": "HAVE_ACCOUNT",
+                "value": "כבר יש לך חשבון? תתחבר"
             }
         ]
     },
@@ -970,6 +1002,10 @@ export default [
                 "value": "Assinar Em"
             },
             {
+                "id": "SIGN_UP",
+                "value": "Inscrever-se"
+            },
+            {
                 "id": "EMAIL_ADDRESS",
                 "value": "Endereço de E-mail"
             },
@@ -988,6 +1024,18 @@ export default [
             {
                 "id": "SIGN_UP_TEXT",
                 "value": "Não tem conta? Inscrever-se"
+            },
+            {
+                "id": "FIRST_NAME",
+                "value": "Primeiro nome"
+            },
+            {
+                "id": "LAST_NAME",
+                "value": "Último nome"
+            },
+            {
+                "id": "HAVE_ACCOUNT",
+                "value": "Já tem uma conta? assinar em"
             }
         ]
     }
