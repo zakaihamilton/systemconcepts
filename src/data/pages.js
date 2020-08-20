@@ -27,7 +27,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import Editor from "@/pages/Editor";
 
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import Login from "@/pages/Login";
+import SignIn from "@/pages/SignIn";
 
 import CreateIcon from '@material-ui/icons/Create';
 import SignUp from "@/pages/SignUp";
@@ -102,10 +102,10 @@ export default [
     },
     {
         sidebar: true,
-        id: "login",
-        name: "LOGIN_NAME",
+        id: "signin",
+        name: "SIGN_IN_NAME",
         icon: <VpnKeyIcon />,
-        Component: Login
+        Component: SignIn
     },
     {
         id: "signup",

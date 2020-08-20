@@ -297,7 +297,7 @@ export default {
             "value": "תפריט"
         },
         {
-            "id": "LOGIN_NAME",
+            "id": "SIGN_IN_NAME",
             "value": "התחברות"
         },
         {

@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function Login() {
+export default function SignIn() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();

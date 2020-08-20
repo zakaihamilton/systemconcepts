@@ -293,8 +293,8 @@ export default {
             "value": "Cardápio"
         },
         {
-            "id": "LOGIN_NAME",
-            "value": "Conecte-se"
+            "id": "SIGN_IN_NAME",
+            "value": "Assinar Em"
         },
         {
             "id": "SIGN_UP_NAME",

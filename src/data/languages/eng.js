@@ -297,8 +297,8 @@ export default {
             "value": "Menu"
         },
         {
-            "id": "LOGIN_NAME",
-            "value": "Login"
+            "id": "SIGN_IN_NAME",
+            "value": "Sign In"
         },
         {
             "id": "SIGN_UP_NAME",
