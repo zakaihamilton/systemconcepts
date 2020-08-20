@@ -127,6 +127,6 @@ export default function Settings() {
     };
 
     return <>
-        <Table columns={columns} data={data} mapper={mapper} />
+        <Table sortColumn="index" columns={columns} data={data} mapper={mapper} />
     </>;
 }
