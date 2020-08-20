@@ -14,6 +14,9 @@ import Container from '@material-ui/core/Container';
 import { useTranslations } from "@/util/translations";
 import { MainStore } from "@/components/Main";
 import clsx from "clsx";
+import EmailIcon from '@material-ui/icons/Email';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { InputAdornment } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -36,6 +39,9 @@ const useStyles = makeStyles((theme) => ({
     rtlLabel: {
         marginRight: "-11px",
         marginLeft: "16px"
+    },
+    adornment: {
+        pointerEvents: "none"
     }
 }));
 
@@ -111,6 +117,13 @@ export default function SignIn() {
                         onChange={changeEmail}
                         error={emailError !== ""}
                         helperText={emailError}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <EmailIcon className={classes.adornment} />
+                                </InputAdornment>
+                            )
+                        }}
                     />
                     <TextField
                         variant="outlined"
@@ -127,6 +140,13 @@ export default function SignIn() {
                         onChange={changePassword}
                         error={passwordError !== ""}
                         helperText={passwordError}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <VpnKeyIcon className={classes.adornment} />
+                                </InputAdornment>
+                            )
+                        }}
                     />
                     <FormControlLabel
                         className={clsx(direction === "rtl" && classes.rtlLabel)}

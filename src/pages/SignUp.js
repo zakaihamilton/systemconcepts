@@ -10,6 +10,9 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useTranslations } from "@/util/translations";
+import EmailIcon from '@material-ui/icons/Email';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { InputAdornment } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -29,6 +32,9 @@ const useStyles = makeStyles((theme) => ({
     submit: {
         margin: theme.spacing(3, 0, 2),
     },
+    adornment: {
+        pointerEvents: "none"
+    }
 }));
 
 export default function SignUp() {
@@ -150,6 +156,13 @@ export default function SignUp() {
                                 onChange={changeEmail}
                                 error={emailError !== ""}
                                 helperText={emailError}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailIcon className={classes.adornment} />
+                                        </InputAdornment>
+                                    )
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -166,6 +179,13 @@ export default function SignUp() {
                                 onChange={changePassword}
                                 error={passwordError !== ""}
                                 helperText={passwordError}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <VpnKeyIcon className={classes.adornment} />
+                                        </InputAdornment>
+                                    )
+                                }}
                             />
                         </Grid>
                     </Grid>
