@@ -343,6 +343,18 @@ export default {
         {
             "id": "HAVE_ACCOUNT",
             "value": "Already have an account? Sign in"
+        },
+        {
+            "id": "EMPTY_EMAIL",
+            "value": "The email field is empty!"
+        },
+        {
+            "id": "BAD_EMAIL",
+            "value": "The email address is invalid!"
+        },
+        {
+            "id": "EMPTY_PASSWORD",
+            "value":"The password field is empty!"
         }
     ]
 };

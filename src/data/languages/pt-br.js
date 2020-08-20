@@ -339,6 +339,18 @@ export default {
         {
             "id": "HAVE_ACCOUNT",
             "value": "Já tem uma conta? assinar em"
+        },
+        {
+            "id": "EMPTY_EMAIL",
+            "value": "O campo do email está vazio!"
+        },
+        {
+            "id": "BAD_EMAIL",
+            "value": "O endereço de email é inválido!"
+        },
+        {
+            "id": "EMPTY_PASSWORD",
+            "value": "O campo de senha está vazio!"
         }
     ]
 };

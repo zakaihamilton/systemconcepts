@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -43,6 +43,46 @@ export default function Login() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [remember, setRemember] = useState(true);
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [validate, setValidate] = useState(false);
+
+    const changeEmail = event => setEmail(event.target.value);
+    const changePassword = event => setPassword(event.target.value);
+    const changeRemember = event => setRemember(event.target.value);
+
+    const actionDisabled = emailError || passwordError;
+
+    useEffect(() => {
+        if (!validate) {
+            setEmailError("");
+            setPasswordError("");
+            return;
+        }
+        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
+        if (!email) {
+            setEmailError(translations.EMPTY_EMAIL);
+        }
+        else if (!emailPattern.test(email)) {
+            setEmailError(translations.BAD_EMAIL);
+        }
+        else {
+            setEmailError("");
+        }
+        if (!password) {
+            setPasswordError(translations.EMPTY_PASSWORD);
+        }
+        else {
+            setPasswordError("");
+        }
+    }, [password, email, validate]);
+
+    const onSubmit = () => {
+        setValidate(true);
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -63,8 +103,14 @@ export default function Login() {
                         id="email"
                         label={translations.EMAIL_ADDRESS}
                         name="email"
+                        type="email"
                         autoComplete="email"
+                        required
                         autoFocus
+                        value={email}
+                        onChange={changeEmail}
+                        error={emailError !== ""}
+                        helperText={emailError}
                     />
                     <TextField
                         variant="outlined"
@@ -74,20 +120,26 @@ export default function Login() {
                         name="password"
                         label={translations.PASSWORD}
                         type="password"
+                        required
                         id="password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={changePassword}
+                        error={passwordError !== ""}
+                        helperText={passwordError}
                     />
                     <FormControlLabel
                         className={clsx(direction === "rtl" && classes.rtlLabel)}
-                        control={<Checkbox value="remember" color="primary" />}
+                        control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
                         label={translations.REMEMBER_ME}
                     />
                     <Button
-                        type="submit"
+                        onClick={onSubmit}
                         fullWidth
                         variant="contained"
                         color="primary"
                         className={classes.submit}
+                        disabled={actionDisabled}
                     >
                         {translations.SIGN_IN}
                     </Button>

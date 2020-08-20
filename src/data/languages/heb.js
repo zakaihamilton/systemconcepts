@@ -343,6 +343,18 @@ export default {
         {
             "id": "HAVE_ACCOUNT",
             "value": "כבר יש לך חשבון? תתחבר"
+        },
+        {
+            "id": "EMPTY_EMAIL",
+            "value": "שדה האימייל הוא ריק!"
+        },
+        {
+            "id": "BAD_EMAIL",
+            "value": "כתובת האימייל הוא לא תקיו!"
+        },
+        {
+            "id": "EMPTY_PASSWORD",
+            "value": "שדה הסיסמה הוא ריק!"
         }
     ]
 };

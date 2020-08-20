@@ -40,4 +40,5 @@ export function register({ userId, password, salt = 10 }) {
     catch (err) {
         console.error(err);
     }
+    return { hash: result, userId };
 }
