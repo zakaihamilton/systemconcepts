@@ -297,8 +297,8 @@ export default {
             "value": "Menu"
         },
         {
-            "id": "LOGIN_NAME",
-            "value": "Login"
+            "id": "SIGN_IN_NAME",
+            "value": "Sign In"
         },
         {
             "id": "SIGN_UP_NAME",
@@ -354,7 +354,11 @@ export default {
         },
         {
             "id": "EMPTY_PASSWORD",
-            "value":"The password field is empty!"
+            "value": "The password field is empty!"
+        },
+        {
+            "id": "EMPTY_FIELD",
+            "value": "This field is empty!"
         }
     ]
 };

@@ -351,6 +351,10 @@ export default {
         {
             "id": "EMPTY_PASSWORD",
             "value": "O campo senha está vazio!"
+        },
+        {
+            "id": "EMPTY_FIELD",
+            "value": "Este campo está vazio!"
         }
     ]
 };

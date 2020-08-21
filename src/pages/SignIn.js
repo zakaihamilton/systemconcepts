@@ -14,6 +14,9 @@ import Container from '@material-ui/core/Container';
 import { useTranslations } from "@/util/translations";
 import { MainStore } from "@/components/Main";
 import clsx from "clsx";
+import EmailIcon from '@material-ui/icons/Email';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { InputAdornment } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -36,10 +39,16 @@ const useStyles = makeStyles((theme) => ({
     rtlLabel: {
         marginRight: "-11px",
         marginLeft: "16px"
+    },
+    adornment: {
+        pointerEvents: "none"
+    },
+    input: {
+        paddingLeft: "0.5em"
     }
 }));
 
-export default function Login() {
+export default function SignIn() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
@@ -111,6 +120,14 @@ export default function Login() {
                         onChange={changeEmail}
                         error={emailError !== ""}
                         helperText={emailError}
+                        InputProps={{
+                            classes: { input: classes.input },
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <EmailIcon className={classes.adornment} />
+                                </InputAdornment>
+                            )
+                        }}
                     />
                     <TextField
                         variant="outlined"
@@ -127,6 +144,14 @@ export default function Login() {
                         onChange={changePassword}
                         error={passwordError !== ""}
                         helperText={passwordError}
+                        InputProps={{
+                            classes: { input: classes.input },
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <VpnKeyIcon className={classes.adornment} />
+                                </InputAdornment>
+                            )
+                        }}
                     />
                     <FormControlLabel
                         className={clsx(direction === "rtl" && classes.rtlLabel)}
