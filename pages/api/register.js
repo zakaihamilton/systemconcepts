@@ -2,21 +2,14 @@ const { register } = require("../../src/util/login");
 
 module.exports = async (req, res) => {
     if (req.method === "GET") {
-        let error = null;
-        let params = {};
         try {
-            const { user: userId, password, hash } = req.headers || {};
-            params = await register({ userId, password, hash });
+            const { email, firstName, lastName, password } = req.headers || {};
+            const hash = await register({ email, firstName, lastName, password });
+            res.status(200).json({ hash });
         }
         catch (err) {
-            error = err;
+            console.error("login error: ", err);
+            res.status(200).json({ err });
         }
-        if (error) {
-            console.error("login error: ", error);
-        }
-        else {
-            console.log("login success", params);
-        }
-        res.status(200).json({ ...error && { error }, ...params });
     }
 };

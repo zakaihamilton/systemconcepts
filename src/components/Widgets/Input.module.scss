@@ -11,11 +11,6 @@
     padding-right: 2em !important;
 }
 
-.input {
-    padding-left: 0.4em !important;
-    padding-right: 0.4em !important;
-}
-
 .input div {
     cursor: default;
     padding-left: 0.3em !important;
@@ -24,13 +19,15 @@
 }
 
 .input input {
+    margin: 0.6em;
+
     [dir=ltr] & {
-        padding-left: 0em !important;
+        padding-left: 0.5em !important;
         padding-right: 2em !important;
     }
 
     [dir=rtl] & {
         padding-left: 2em !important;
-        padding-right: 0.1em !important;
+        padding-right: 0.5em !important;
     }
 }

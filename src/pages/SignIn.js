@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
@@ -16,11 +15,11 @@ import { MainStore } from "@/components/Main";
 import clsx from "clsx";
 import EmailIcon from '@material-ui/icons/Email';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import { InputAdornment } from "@material-ui/core";
+import Input from "@/widgets/Input";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
-        marginTop: theme.spacing(8),
+        marginTop: theme.spacing(4),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -31,20 +30,14 @@ const useStyles = makeStyles((theme) => ({
     },
     form: {
         width: '100%',
-        marginTop: theme.spacing(1),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
+        marginTop: theme.spacing(2),
     },
     rtlLabel: {
         marginRight: "-11px",
         marginLeft: "16px"
     },
-    adornment: {
-        pointerEvents: "none"
-    },
-    input: {
-        paddingLeft: "0.5em"
+    link: {
+        whiteSpace: "nowrap"
     }
 }));
 
@@ -52,46 +45,38 @@ export default function SignIn() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const emailState = useState("");
+    const passwordState = useState("");
     const [remember, setRemember] = useState(true);
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
     const [validate, setValidate] = useState(false);
 
-    const changeEmail = event => setEmail(event.target.value);
-    const changePassword = event => setPassword(event.target.value);
     const changeRemember = event => setRemember(event.target.value);
-
-    const actionDisabled = emailError || passwordError;
-
-    useEffect(() => {
-        if (!validate) {
-            setEmailError("");
-            setPasswordError("");
-            return;
-        }
-        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
-        if (!email) {
-            setEmailError(translations.EMPTY_EMAIL);
-        }
-        else if (!emailPattern.test(email)) {
-            setEmailError(translations.BAD_EMAIL);
-        }
-        else {
-            setEmailError("");
-        }
-        if (!password) {
-            setPasswordError(translations.EMPTY_PASSWORD);
-        }
-        else {
-            setPasswordError("");
-        }
-    }, [password, email, validate]);
 
     const onSubmit = () => {
         setValidate(true);
     };
+
+    const onValidateEmail = text => {
+        let error = "";
+        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
+        if (!text) {
+            error = translations.EMPTY_EMAIL;
+        }
+        else if (!emailPattern.test(text)) {
+            error = translations.BAD_EMAIL;
+        }
+        return error;
+    };
+
+    const onValidatePassword = text => {
+        let error = "";
+        if (!text) {
+            error = translations.EMPTY_PASSWORD;
+        }
+        return error;
+    };
+
+    const isInvalid = validate && (onValidateEmail(emailState[0]) || onValidatePassword(passwordState[0]));
 
     return (
         <Container component="main" maxWidth="xs">
@@ -104,78 +89,62 @@ export default function SignIn() {
                     {translations.SIGN_IN}
                 </Typography>
                 <form className={classes.form} noValidate>
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="email"
-                        label={translations.EMAIL_ADDRESS}
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        autoFocus
-                        value={email}
-                        onChange={changeEmail}
-                        error={emailError !== ""}
-                        helperText={emailError}
-                        InputProps={{
-                            classes: { input: classes.input },
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <EmailIcon className={classes.adornment} />
-                                </InputAdornment>
-                            )
-                        }}
-                    />
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label={translations.PASSWORD}
-                        type="password"
-                        required
-                        id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={changePassword}
-                        error={passwordError !== ""}
-                        helperText={passwordError}
-                        InputProps={{
-                            classes: { input: classes.input },
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <VpnKeyIcon className={classes.adornment} />
-                                </InputAdornment>
-                            )
-                        }}
-                    />
-                    <FormControlLabel
-                        className={clsx(direction === "rtl" && classes.rtlLabel)}
-                        control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
-                        label={translations.REMEMBER_ME}
-                    />
-                    <Button
-                        onClick={onSubmit}
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}
-                        disabled={actionDisabled}
-                    >
-                        {translations.SIGN_IN}
-                    </Button>
-                    <Grid container>
-                        <Grid item xs>
-                            <Link href="#" variant="body2">
+                    <Grid container spacing={1}>
+                        <Grid item xs={12}>
+                            <Input
+                                state={emailState}
+                                required
+                                id="email"
+                                label={translations.EMAIL_ADDRESS}
+                                name="email"
+                                type="email"
+                                autoComplete="email"
+                                validate={validate}
+                                onValidate={onValidateEmail}
+                                autoFocus
+                                icon={<EmailIcon />}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Input
+                                state={passwordState}
+                                required
+                                name="password"
+                                label={translations.PASSWORD}
+                                type="password"
+                                id="password"
+                                autoComplete="current-password"
+                                validate={validate}
+                                onValidate={onValidatePassword}
+                                icon={<VpnKeyIcon />}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControlLabel
+                                className={clsx(direction === "rtl" && classes.rtlLabel)}
+                                control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
+                                label={translations.REMEMBER_ME}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button
+                                onClick={onSubmit}
+                                disabled={isInvalid}
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                className={classes.submit}
+                            >
+                                {translations.SIGN_IN}
+                            </Button>
+                        </Grid>
+                        <Grid item xs={5}>
+                            <Link className={classes.link} href="#" variant="body2">
                                 {translations.FORGET_PASSWORD}
                             </Link>
                         </Grid>
-                        <Grid item>
-                            <Link href="#signup" variant="body2">
+                        <Grid item xs={7}>
+                            <Link className={classes.link} href="#signup" variant="body2">
                                 {translations.SIGN_UP_TEXT}
                             </Link>
                         </Grid>
