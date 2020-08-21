@@ -34,6 +34,9 @@ const useStyles = makeStyles((theme) => ({
     },
     adornment: {
         pointerEvents: "none"
+    },
+    input: {
+        paddingLeft: "0.5em"
     }
 }));
 
@@ -157,6 +160,7 @@ export default function SignUp() {
                                 error={emailError !== ""}
                                 helperText={emailError}
                                 InputProps={{
+                                    classes: { input: classes.input },
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <EmailIcon className={classes.adornment} />
@@ -180,6 +184,7 @@ export default function SignUp() {
                                 error={passwordError !== ""}
                                 helperText={passwordError}
                                 InputProps={{
+                                    classes: { input: classes.input },
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <VpnKeyIcon className={classes.adornment} />
