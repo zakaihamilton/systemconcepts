@@ -15,6 +15,7 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { InputAdornment } from "@material-ui/core";
 import { fetchJSON } from "@/util/fetch";
 import Cookies from 'js-cookie';
+import Input from "@/widgets/Input";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -55,64 +56,54 @@ export default function SignUp() {
     const classes = useStyles();
     const translations = useTranslations();
 
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [firstNameError, setFirstNameError] = useState("");
-    const [lastNameError, setLastNameError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
+    const firstNameState = useState("");
+    const lastNameState = useState("");
+    const emailState = useState("");
+    const passwordState = useState("");
+
     const [validate, setValidate] = useState(false);
-    const [submit, setSubmit] = useState(false);
     const [error, setError] = useState(false);
 
-    const changeFirstName = event => setFirstName(event.target.value);
-    const changeLastName = event => setLastName(event.target.value);
-    const changeEmail = event => setEmail(event.target.value);
-    const changePassword = event => setPassword(event.target.value);
+    const onSubmit = () => {
+        setValidate(true);
+    };
 
-    const actionDisabled = firstNameError || lastNameError || emailError || passwordError;
-
-    useEffect(() => {
-        if (!validate) {
-            setEmailError("");
-            setPasswordError("");
-            setFirstNameError("");
-            setLastNameError("");
-            return;
-        }
-        if (!firstName) {
-            setFirstNameError(translations.EMPTY_FIELD);
-        }
-        else {
-            setFirstNameError("");
-        }
-        if (!lastName) {
-            setLastNameError(translations.EMPTY_FIELD);
-        }
-        else {
-            setLastNameError("");
-        }
+    const onValidateEmail = text => {
+        let error = "";
         const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
-        if (!email) {
-            setEmailError(translations.EMPTY_EMAIL);
+        if (!text) {
+            error = translations.EMPTY_EMAIL;
         }
-        else if (!emailPattern.test(email)) {
-            setEmailError(translations.BAD_EMAIL);
+        else if (!emailPattern.test(text)) {
+            error = translations.BAD_EMAIL;
         }
-        else {
-            setEmailError("");
-        }
-        if (!password) {
-            setPasswordError(translations.EMPTY_PASSWORD);
-        }
-        else {
-            setPasswordError("");
-        }
-    }, [firstName, lastName, password, email, validate, submit]);
+        return error;
+    };
 
-    useEffect(() => {
+    const onValidatePassword = text => {
+        let error = "";
+        if (!text) {
+            error = translations.EMPTY_PASSWORD;
+        }
+        return error;
+    };
+
+    const onValidateName = text => {
+        let error = "";
+        if (!text) {
+            error = translations.EMPTY_FIELD;
+        }
+        return error;
+    };
+
+    const isInvalid = validate && (
+        onValidateEmail(emailState[0]) ||
+        onValidatePassword(passwordState[0]) ||
+        onValidateName(firstNameState[0]) ||
+        onValidateName(lastNameState[0])
+    );
+
+    /*useEffect(() => {
         if (!firstNameError && !lastNameError && !emailError && !passwordError && submit) {
             setSubmit(false);
             fetchJSON("/register", {
@@ -133,12 +124,7 @@ export default function SignUp() {
                 setError(translations[err] || err);
             });
         }
-    }, [firstNameError, lastNameError, emailError, passwordError, submit]);
-
-    const onSubmit = () => {
-        setValidate(true);
-        setSubmit(true);
-    };
+    }, [firstNameError, lastNameError, emailError, passwordError, submit]);*/
 
     return (
         <Container component="main" maxWidth="xs">
@@ -156,82 +142,58 @@ export default function SignUp() {
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                autoComplete="fname"
-                                name="firstName"
-                                variant="outlined"
+                            <Input
+                                state={firstNameState}
                                 required
-                                fullWidth
-                                id="firstName"
+                                name="fname"
                                 label={translations.FIRST_NAME}
-                                autoFocus
-                                value={firstName}
-                                onChange={changeFirstName}
-                                error={firstNameError !== ""}
-                                helperText={firstNameError}
+                                id="fname"
+                                autoComplete="fname"
+                                validate={validate}
+                                onValidate={onValidateName}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                variant="outlined"
+                            <Input
+                                state={lastNameState}
                                 required
-                                fullWidth
-                                id="lastName"
+                                name="lname"
                                 label={translations.LAST_NAME}
-                                name="lastName"
+                                id="lname"
                                 autoComplete="lname"
-                                value={lastName}
-                                onChange={changeLastName}
-                                error={lastNameError !== ""}
-                                helperText={lastNameError}
+                                validate={validate}
+                                onValidate={onValidateName}
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
+                            <Input
+                                state={emailState}
                                 required
-                                fullWidth
                                 id="email"
                                 label={translations.EMAIL_ADDRESS}
                                 name="email"
+                                type="email"
                                 autoComplete="email"
-                                value={email}
-                                onChange={changeEmail}
-                                error={emailError !== ""}
-                                helperText={emailError}
-                                InputProps={{
-                                    classes: { input: classes.input },
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <EmailIcon className={classes.adornment} />
-                                        </InputAdornment>
-                                    )
-                                }}
+                                validate={validate}
+                                onValidate={onValidateEmail}
+                                autoFocus
+                                icon={<EmailIcon />}
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
+                            <Input
+                                state={passwordState}
                                 required
-                                fullWidth
                                 name="password"
                                 label={translations.PASSWORD}
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
-                                value={password}
-                                onChange={changePassword}
-                                error={passwordError !== ""}
-                                helperText={passwordError}
-                                InputProps={{
-                                    classes: { input: classes.input },
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <VpnKeyIcon className={classes.adornment} />
-                                        </InputAdornment>
-                                    )
-                                }}
+                                validate={validate}
+                                onValidate={onValidatePassword}
+                                icon={<VpnKeyIcon />}
                             />
+
                         </Grid>
                     </Grid>
                     <Button
@@ -239,8 +201,8 @@ export default function SignUp() {
                         variant="contained"
                         color="primary"
                         className={classes.submit}
+                        disabled={isInvalid}
                         onClick={onSubmit}
-                        disabled={actionDisabled}
                     >
                         {translations.SIGN_UP}
                     </Button>
