@@ -19,6 +19,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import clsx from "clsx";
 import { MainStore } from "@/components/Main";
 import Checkbox from '@material-ui/core/Checkbox';
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -34,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
     form: {
         width: '100%', // Fix IE 11 issue.
         marginTop: theme.spacing(3),
+    },
+    progress: {
+        width: "100%"
     },
     submit: {
         margin: theme.spacing(0.5, 0, 2),
@@ -217,6 +221,7 @@ export default function SignUp() {
                             label={translations.REMEMBER_ME}
                         />
                     </Grid>
+                    {inProgress && <LinearProgress className={classes.progress} />}
                     <Button
                         fullWidth
                         variant="contained"

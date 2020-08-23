@@ -19,6 +19,7 @@ import Input from "@/widgets/Input";
 import Cookies from 'js-cookie';
 import { fetchJSON } from "@/util/fetch";
 import { setPath } from "@/util/pages";
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -41,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
     },
     submit: {
         margin: theme.spacing(0.5, 0, 2),
+        display: "flex"
+    },
+    progress: {
+        width: "100%"
     },
     link: {
         whiteSpace: "nowrap"
@@ -195,6 +200,7 @@ export default function SignIn() {
                                 label={translations.REMEMBER_ME}
                             />
                         </Grid>}
+                        {inProgress && <LinearProgress className={classes.progress} />}
                         <Grid item xs={12}>
                             <Button
                                 onClick={onSubmit}
