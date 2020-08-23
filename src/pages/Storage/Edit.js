@@ -43,7 +43,6 @@ export default function EditWidget() {
             key={type}
             icon={icon}
             tooltip={tooltip}
-            fullWidth={true}
             state={name} />
     </ClickAwayListener>;
 }

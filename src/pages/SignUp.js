@@ -13,6 +13,8 @@ import { useTranslations } from "@/util/translations";
 import EmailIcon from '@material-ui/icons/Email';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { InputAdornment } from "@material-ui/core";
+import { fetchJSON } from "@/util/fetch";
+import Cookies from 'js-cookie';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -37,6 +39,15 @@ const useStyles = makeStyles((theme) => ({
     },
     input: {
         paddingLeft: "0.5em"
+    },
+    error: {
+        color: "var(--error-color)",
+        backgroundColor: "var(--error-background)",
+        borderRadius: "0.3em",
+        padding: "0.5em",
+        margin: "0.5em",
+        width: "100%",
+        textAlign: "center"
     }
 }));
 
@@ -53,6 +64,8 @@ export default function SignUp() {
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [validate, setValidate] = useState(false);
+    const [submit, setSubmit] = useState(false);
+    const [error, setError] = useState(false);
 
     const changeFirstName = event => setFirstName(event.target.value);
     const changeLastName = event => setLastName(event.target.value);
@@ -97,10 +110,34 @@ export default function SignUp() {
         else {
             setPasswordError("");
         }
-    }, [firstName, lastName, password, email, validate]);
+    }, [firstName, lastName, password, email, validate, submit]);
+
+    useEffect(() => {
+        if (!firstNameError && !lastNameError && !emailError && !passwordError && submit) {
+            setSubmit(false);
+            fetchJSON("/register", {
+                headers: {
+                    firstName,
+                    lastName,
+                    email,
+                    password
+                }
+            }).then(({ hash }) => {
+                Cookies.set("email", email);
+                Cookies.set("hash", hash);
+                Cookies.set("firstName", firstName);
+                Cookies.set("lastName", lastName);
+            }).catch(err => {
+                Cookies.set("email", "");
+                Cookies.set("hash", "");
+                setError(translations[err] || err);
+            });
+        }
+    }, [firstNameError, lastNameError, emailError, passwordError, submit]);
 
     const onSubmit = () => {
         setValidate(true);
+        setSubmit(true);
     };
 
     return (
@@ -113,6 +150,9 @@ export default function SignUp() {
                 <Typography component="h1" variant="h5">
                     {translations.SIGN_UP}
                 </Typography>
+                {error && <Typography variant="h6" className={classes.error}>
+                    {error}
+                </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>

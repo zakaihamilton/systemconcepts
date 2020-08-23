@@ -359,6 +359,10 @@ export default {
         {
             "id": "EMPTY_FIELD",
             "value": "This field is empty!"
+        },
+        {
+            "id": 404,
+            "value": "Cannot access server!"
         }
     ]
 };

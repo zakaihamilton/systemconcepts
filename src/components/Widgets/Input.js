@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -11,21 +11,37 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default React.forwardRef(function InputWidget({ items, icon, tooltip, className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
+export default React.forwardRef(function InputWidget({ validate, onValidate, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
     let [value, setValue] = state;
+    const [error, setError] = useState("");
     const onChangeText = event => {
         const { value } = event.target;
         setValue(value);
+        if (validate && onValidate) {
+            setError(onValidate(value));
+        }
+        else {
+            setError("");
+        }
         if (onChange) {
             onChange(event);
         }
     };
+    useEffect(() => {
+        if (validate && onValidate) {
+            setError(onValidate(value));
+        }
+        else {
+            setError("");
+        }
+    }, [validate]);
     if (select && multiple && !Array.isArray(value)) {
         value = [value];
     }
     if (multiple) {
         renderValue = renderValue || (selected => selected.filter(Boolean).join(", "));
     }
+
     if (!autocomplete) {
         const children = items && arrayToMenuItems(items);
         return <TextField
@@ -61,7 +77,10 @@ export default React.forwardRef(function InputWidget({ items, icon, tooltip, cla
             value={value || ""}
             onChange={onChangeText}
             select={select}
+            error={!!error}
+            helperText={error || " "}
             variant="outlined"
+            fullWidth={fullWidth}
             {...props}
         >
             {children}

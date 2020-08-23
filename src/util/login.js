@@ -33,12 +33,14 @@ export async function login({ userId, password, hash }) {
     return { roleId: user.roleId, hash: user.hash, userId: user.userId };
 }
 
-export function register({ userId, password, salt = 10 }) {
+export function register({ firstName, lastName, email, password, salt = 10 }) {
+    let hash = undefined;
     try {
-        result = await hash(password, salt);
+        hash = await hash(password, salt);
     }
     catch (err) {
         console.error(err);
+        throw err;
     }
-    return { hash: result, userId };
+    return hash;
 }
