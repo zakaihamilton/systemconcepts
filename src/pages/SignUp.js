@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -12,10 +11,10 @@ import Container from '@material-ui/core/Container';
 import { useTranslations } from "@/util/translations";
 import EmailIcon from '@material-ui/icons/Email';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import { InputAdornment } from "@material-ui/core";
 import { fetchJSON } from "@/util/fetch";
 import Cookies from 'js-cookie';
 import Input from "@/widgets/Input";
+import { setPath } from "@/util/pages";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -33,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(3),
     },
     submit: {
-        margin: theme.spacing(3, 0, 2),
+        margin: theme.spacing(0.5, 0, 2),
     },
     adornment: {
         pointerEvents: "none"
@@ -62,11 +61,8 @@ export default function SignUp() {
     const passwordState = useState("");
 
     const [validate, setValidate] = useState(false);
+    const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
-
-    const onSubmit = () => {
-        setValidate(true);
-    };
 
     const onValidateEmail = text => {
         let error = "";
@@ -96,17 +92,22 @@ export default function SignUp() {
         return error;
     };
 
-    const isInvalid = validate && (
+    const invalidFields =
         onValidateEmail(emailState[0]) ||
         onValidatePassword(passwordState[0]) ||
         onValidateName(firstNameState[0]) ||
-        onValidateName(lastNameState[0])
-    );
+        onValidateName(lastNameState[0]);
+    const isInvalid = validate && invalidFields;
 
-    /*useEffect(() => {
-        if (!firstNameError && !lastNameError && !emailError && !passwordError && submit) {
-            setSubmit(false);
-            fetchJSON("/register", {
+    const onSubmit = () => {
+        setValidate(true);
+        if (!invalidFields && !inProgress) {
+            const [firstName] = firstNameState;
+            const [lastName] = lastNameState;
+            const [email] = emailState;
+            const [password] = passwordState;
+            setProgress(true);
+            fetchJSON("/api/register", {
                 headers: {
                     firstName,
                     lastName,
@@ -118,13 +119,22 @@ export default function SignUp() {
                 Cookies.set("hash", hash);
                 Cookies.set("firstName", firstName);
                 Cookies.set("lastName", lastName);
+                setProgress(false);
+                setPath("");
             }).catch(err => {
                 Cookies.set("email", "");
                 Cookies.set("hash", "");
                 setError(translations[err] || err);
+                setProgress(false);
             });
         }
-    }, [firstNameError, lastNameError, emailError, passwordError, submit]);*/
+    };
+
+    const onKeyDown = async event => {
+        if (event.keyCode == 13) {
+            onSubmit();
+        }
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -192,6 +202,7 @@ export default function SignUp() {
                                 validate={validate}
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
+                                onKeyDown={onKeyDown}
                             />
 
                         </Grid>
@@ -201,7 +212,7 @@ export default function SignUp() {
                         variant="contained"
                         color="primary"
                         className={classes.submit}
-                        disabled={isInvalid}
+                        disabled={isInvalid || inProgress}
                         onClick={onSubmit}
                     >
                         {translations.SIGN_UP}

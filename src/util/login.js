@@ -1,4 +1,4 @@
-const { listCollection } = require("./mongodb");
+const { listCollection } = require("./mongo");
 const { compare, hash } = require("bcrypt");
 const { error } = require("./logger");
 
@@ -33,14 +33,14 @@ export async function login({ userId, password, hash }) {
     return { roleId: user.roleId, hash: user.hash, userId: user.userId };
 }
 
-export function register({ firstName, lastName, email, password, salt = 10 }) {
-    let hash = undefined;
+export async function register({ firstName, lastName, email, password, salt = 10 }) {
+    let result = undefined;
     try {
-        hash = await hash(password, salt);
+        result = await hash(password, salt);
     }
     catch (err) {
         console.error(err);
         throw err;
     }
-    return hash;
+    return result;
 }
