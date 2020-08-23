@@ -15,6 +15,10 @@ import { fetchJSON } from "@/util/fetch";
 import Cookies from 'js-cookie';
 import Input from "@/widgets/Input";
 import { setPath } from "@/util/pages";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import clsx from "clsx";
+import { MainStore } from "@/components/Main";
+import Checkbox from '@material-ui/core/Checkbox';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -46,17 +50,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignUp() {
+    const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
-
     const firstNameState = useState("");
     const lastNameState = useState("");
     const emailState = useState("");
     const passwordState = useState("");
-
+    const [remember, setRemember] = useState(true);
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
+
+    const changeRemember = event => setRemember(event.target.value);
 
     const onValidateEmail = text => {
         let error = "";
@@ -109,8 +115,8 @@ export default function SignUp() {
                     password
                 }
             }).then(({ hash }) => {
-                Cookies.set("email", email);
-                Cookies.set("hash", hash);
+                Cookies.set("email", email, remember && { expires: 365 });
+                Cookies.set("hash", hash, remember && { expires: 365 });
                 setProgress(false);
                 setPath("");
             }).catch(err => {
@@ -198,6 +204,13 @@ export default function SignUp() {
                             />
 
                         </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControlLabel
+                            className={clsx(direction === "rtl" && classes.rtlLabel)}
+                            control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
+                            label={translations.REMEMBER_ME}
+                        />
                     </Grid>
                     <Button
                         fullWidth

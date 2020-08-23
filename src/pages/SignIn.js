@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -92,8 +92,8 @@ export default function SignIn() {
                         password
                     }
                 }).then(({ hash }) => {
-                    Cookies.set("email", email);
-                    Cookies.set("hash", hash);
+                    Cookies.set("email", email, remember && { expires: 365 });
+                    Cookies.set("hash", hash, remember && { expires: 365 });
                     setProgress(false);
                     setPath("");
                 }).catch(err => {
