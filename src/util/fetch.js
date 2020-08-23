@@ -24,7 +24,7 @@ export function fetchJSON(url, options) {
     });
 }
 
-export function useFetchJSON(url, options, depends = [], cond, delay = 0) {
+export function useFetchJSON(url, options, depends = [], cond = true, delay = 0) {
     const [inProgress, setProgress] = useState(false);
     const [result, setResult] = useState(null);
     const [, setTimeoutHandle] = useState(null);

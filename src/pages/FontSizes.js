@@ -6,7 +6,7 @@ import TabletIcon from '@material-ui/icons/Tablet';
 import DesktopMacIcon from '@material-ui/icons/DesktopMac';
 import Label from "@/widgets/Label";
 
-export default function Languages() {
+export default function FontSizes() {
     const translations = useTranslations();
 
     const columns = [

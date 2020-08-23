@@ -1,15 +1,16 @@
-import Apps from "@/pages/Apps";
 import AppsIcon from '@material-ui/icons/Apps';
+import Apps from "@/pages/Apps";
 
 import PeopleIcon from '@material-ui/icons/People';
+import Users from "@/pages/Users";
 
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 
-import Settings from "@/pages/Settings";
 import SettingsIcon from '@material-ui/icons/Settings';
+import Settings from "@/pages/Settings";
 
-import Languages from "@/pages/Languages";
 import LanguageIcon from '@material-ui/icons/Language';
+import Languages from "@/pages/Languages";
 
 import TranslateIcon from '@material-ui/icons/Translate';
 import Translations from "@/pages/Translations";
@@ -46,7 +47,8 @@ export default [
         sidebar: true,
         id: "users",
         name: "USERS_NAME",
-        icon: <PeopleIcon />
+        icon: <PeopleIcon />,
+        Component: Users
     },
     {
         sidebar: true,
