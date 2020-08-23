@@ -18,7 +18,7 @@ import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
 import { abbreviateSize } from "@/util/string";
 import Typography from '@material-ui/core/Typography';
-import StatusBar from "./Storage/StatusBar";
+import StatusBar from "@/widgets/StatusBar";
 import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
 
@@ -180,7 +180,7 @@ export default function Storage({ path = "" }) {
     }, [select, path]);
 
     const onRowClick = enableItemClick && !editing && rowClick;
-    const statusBar = <StatusBar data={dataEx} mapper={mapper} />;
+    const statusBar = <StatusBar data={dataEx} mapper={mapper} store={StorageStore} />;
 
     return <>
         <Table

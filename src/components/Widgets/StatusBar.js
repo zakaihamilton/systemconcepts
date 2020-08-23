@@ -1,5 +1,4 @@
 import React from 'react';
-import { StorageStore } from "../Storage";
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import SelectAllIcon from '@material-ui/icons/SelectAll';
@@ -10,9 +9,9 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
 import ButtonSelector from "@/components/Widgets/ButtonSelector";
 
-export default function StatusBar({ data, mapper }) {
+export default function StatusBar({ data, mapper, store }) {
     const translations = useTranslations();
-    const { mode, select, message, onDone, severity } = StorageStore.useState();
+    const { mode, select, message, onDone, severity } = store.useState();
 
     const open = !!(select || message);
 
@@ -28,7 +27,7 @@ export default function StatusBar({ data, mapper }) {
             result = await onDone(select);
         }
         if (!result) {
-            StorageStore.update(s => {
+            store.update(s => {
                 s.counter++;
                 s.select = null;
                 s.mode = null;
@@ -41,7 +40,7 @@ export default function StatusBar({ data, mapper }) {
             return;
         }
 
-        StorageStore.update(s => {
+        store.update(s => {
             s.select = null;
             s.message = null;
             s.mode = null;
@@ -64,7 +63,7 @@ export default function StatusBar({ data, mapper }) {
     const selectTitle = select && select.length ? translations.SELECT_NONE : translations.SELECT_ALL;
 
     const selectClick = () => {
-        StorageStore.update(s => {
+        store.update(s => {
             if (select.length) {
                 s.select.length = 0;
             }
@@ -87,7 +86,7 @@ export default function StatusBar({ data, mapper }) {
     ];
 
     const setMode = (mode) => {
-        StorageStore.update(s => {
+        store.update(s => {
             s.mode = mode;
         });
     };

@@ -55,3 +55,8 @@ export async function findRecord({ query, ...params }) {
     const collection = await getCollection(params);
     return await collection.findOne(query);
 }
+
+export async function deleteRecord({ query, ...params }) {
+    const collection = await getCollection(params);
+    await collection.deleteOne(query);
+}
