@@ -387,6 +387,10 @@ export default {
         {
             "id": "USER_ALREADY_EXISTS",
             "value": "User already exists!"
+        },
+        {
+            "id": "ACCOUNT",
+            "value":"Account"
         }
     ]
 };

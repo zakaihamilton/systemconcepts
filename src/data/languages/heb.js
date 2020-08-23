@@ -383,6 +383,10 @@ export default {
         {
             "id": "USER_ALREADY_EXISTS",
             "value": "משתמש כבר קיים!"
+        },
+        {
+            "id": "ACCOUNT",
+            "value": "חשבון"
         }
     ]
 };
