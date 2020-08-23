@@ -371,6 +371,14 @@ export default {
         {
             "id": "NOT_SIGNED_IN",
             "value": "לא רשום"
+        },
+        {
+            "id": "USER_NOT_FOUND",
+            "value": "לא ניתן למצוא משתמש!"
+        },
+        {
+            "id": "WRONG_PASSWORD",
+            "value": "סיסמה שגויה!"
         }
     ]
 };

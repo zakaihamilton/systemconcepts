@@ -1,16 +1,19 @@
 const MongoClient = require("mongodb").MongoClient;
 const { lockMutex } = require("./mutex");
 
-let clusters = null;
+const _clusters = [];
 
 export async function getCluster({ url = process.env.MONGO_URL }) {
     if (!url) {
         throw "Empty URI";
     }
-    let cluster = clusters[url];
+    let cluster = _clusters[url];
     if (!cluster) {
-        const unlock = await lockMutex();
-        cluster = clusters[url] = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
+        const unlock = await lockMutex({ id: _clusters });
+        cluster = _clusters[url] = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
+        if (!cluster) {
+            throw "Cannot connect to database, url: " + url;
+        }
         console.log("connected to database: " + url);
         unlock();
     }
@@ -19,19 +22,19 @@ export async function getCluster({ url = process.env.MONGO_URL }) {
 }
 
 export async function getDatabase({ dbName = process.env.MONGO_DB, ...params }) {
-    const cluster = getCluster({ ...params });
-    const db = await cluster.db(dbName);
+    const cluster = await getCluster({ ...params });
+    const db = cluster.db(dbName);
     return db;
 }
 
-export async function getCollection({ dbName, ...params }) {
+export async function getCollection({ dbName, collectionName, ...params }) {
     const db = await getDatabase({ dbName, ...params });
-    const collection = await db.collection(collectionName);
+    const collection = db.collection(collectionName);
     return collection;
 }
 
 export async function listCollection({ collectionName, ...params }) {
-    const collection = await getDatabase({ collectionName, ...params });
+    const collection = await getCollection({ collectionName, ...params });
     const results = await collection.find({}).sort({ title: 1 }).toArray();
     return results;
 }

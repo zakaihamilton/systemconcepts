@@ -57,7 +57,7 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, rea
                         </InputAdornment>
                     )
                 },
-                readOnly
+                readOnly: Boolean(readOnly)
             }}
             SelectProps={{
                 className: clsx(className, styles.root, styles.select),

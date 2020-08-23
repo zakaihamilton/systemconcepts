@@ -5,8 +5,8 @@ module.exports = async (req, res) => {
         let error = null;
         let params = {};
         try {
-            const { user: userId, password, hash } = req.headers || {};
-            params = await login({ userId, password, hash });
+            const { email, password, hash } = req.headers || {};
+            params = await login({ email, password, hash });
         }
         catch (err) {
             error = err;
@@ -17,6 +17,6 @@ module.exports = async (req, res) => {
         else {
             console.log("login success", params);
         }
-        res.status(200).json({ ...error && { error }, ...params });
+        res.status(200).json({ ...error && { err: error.toString() }, ...params });
     }
 };

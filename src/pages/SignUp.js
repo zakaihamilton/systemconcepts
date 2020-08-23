@@ -114,7 +114,11 @@ export default function SignUp() {
                     email,
                     password
                 }
-            }).then(({ hash }) => {
+            }).then(({ err, hash }) => {
+                if (err) {
+                    console.error(err);
+                    throw err;
+                }
                 Cookies.set("email", email, remember && { expires: 365 });
                 Cookies.set("hash", hash, remember && { expires: 365 });
                 setProgress(false);

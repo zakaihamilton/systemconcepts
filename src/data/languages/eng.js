@@ -375,6 +375,14 @@ export default {
         {
             "id": "NOT_SIGNED_IN",
             "value": "Not Signed In"
+        },
+        {
+            "id": "USER_NOT_FOUND",
+            "value": "Cannot find user!"
+        },
+        {
+            "id": "WRONG_PASSWORD",
+            "value": "Wrong Password!"
         }
     ]
 };

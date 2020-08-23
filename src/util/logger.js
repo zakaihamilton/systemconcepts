@@ -16,7 +16,7 @@ export function log(props) {
 
 export function error({ throwError = true, ...props }) {
     const args = format({ type: "error", ...props });
-    console.errror(...args);
+    console.error(...args);
     if (throwError) {
         throw props;
     }

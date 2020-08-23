@@ -7,7 +7,7 @@ export function useMutex({ id }) {
         lock._locking = Promise.resolve();
         lock._locks = 0;
         lock._disabled = false;
-        lockMutex(id).then(unlock => {
+        lockMutex({ id }).then(unlock => {
             if (lock._disabled) {
                 lock._disabled = unlock;
             } else {

@@ -2,9 +2,9 @@ const { listCollection } = require("./mongo");
 const { compare, hash } = require("bcrypt");
 const { error } = require("./logger");
 
-export async function login({ userId, password, hash }) {
-    if (!userId) {
-        throw `No userId passed in header`;
+export async function login({ email, password, hash }) {
+    if (!email) {
+        throw `No email passed in header`;
     }
     if (!password && !hash) {
         throw `No password or hash passed in header`;
@@ -14,23 +14,24 @@ export async function login({ userId, password, hash }) {
         users = await listCollection({ collectionName: "users" }) || [];
     }
     catch (err) {
-        error(err);
+        console.error(err);
         throw "Cannnot access list of users";
     }
-    const user = users.find(user => user.userId === userId);
+    const user = users.find(user => user.email === email);
     if (!user) {
-        throw `Cannot find user ${userId}`;
+        console.error("Cannot find user: " + email);
+        throw "USER_NOT_FOUND";
     }
     if (password) {
         const result = await compare(password, user.hash);
         if (!result) {
-            throw `Password does not match`;
+            throw "WRONG_PASSWORD";
         }
     }
     else if (hash !== user.hash) {
-        throw `Hash does not match`;
+        throw "WRONG_PASSWORD";
     }
-    return { roleId: user.roleId, hash: user.hash, userId: user.userId };
+    return { roleId: user.roleId, hash: user.hash, email: user.email };
 }
 
 export async function register({ firstName, lastName, email, password, salt = 10 }) {

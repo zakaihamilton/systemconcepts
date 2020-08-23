@@ -297,6 +297,10 @@ export default {
             "value": "Login"
         },
         {
+            "id": "SIGN_IN_NAME",
+            "value": "Entrar"
+        },
+        {
             "id": "SIGN_UP_NAME",
             "value": "Inscreva-se"
         },
@@ -367,6 +371,14 @@ export default {
         {
             "id": "NOT_SIGNED_IN",
             "value": "não conectado"
+        },
+        {
+            "id": "USER_NOT_FOUND",
+            "value": "Não foi possível encontrar o usuário!"
+        },
+        {
+            "id": "WRONG_PASSWORD",
+            "value": "Senha incorreta!"
         }
     ]
 };
