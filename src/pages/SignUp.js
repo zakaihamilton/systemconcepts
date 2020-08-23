@@ -34,12 +34,6 @@ const useStyles = makeStyles((theme) => ({
     submit: {
         margin: theme.spacing(0.5, 0, 2),
     },
-    adornment: {
-        pointerEvents: "none"
-    },
-    input: {
-        paddingLeft: "0.5em"
-    },
     error: {
         color: "var(--error-color)",
         backgroundColor: "var(--error-background)",
@@ -117,14 +111,12 @@ export default function SignUp() {
             }).then(({ hash }) => {
                 Cookies.set("email", email);
                 Cookies.set("hash", hash);
-                Cookies.set("firstName", firstName);
-                Cookies.set("lastName", lastName);
                 setProgress(false);
                 setPath("");
             }).catch(err => {
                 Cookies.set("email", "");
                 Cookies.set("hash", "");
-                setError(translations[err] || err);
+                setError(translations[err] || String(err));
                 setProgress(false);
             });
         }
@@ -219,7 +211,7 @@ export default function SignUp() {
                     </Button>
                     <Grid container justify="flex-end">
                         <Grid item>
-                            <Link href="#signin" variant="body2">
+                            <Link href="#settings/signin" variant="body2">
                                 {translations.HAVE_ACCOUNT}
                             </Link>
                         </Grid>

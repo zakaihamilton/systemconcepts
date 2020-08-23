@@ -15,6 +15,12 @@ import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@material-ui/core/Button";
 import { addPath } from "@/util/pages";
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import Cookies from 'js-cookie';
+import Typography from '@material-ui/core/Typography';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import LockIcon from '@material-ui/icons/Lock';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
@@ -82,6 +88,9 @@ export default function Settings() {
         name: translations[item.name]
     }));
 
+    const isSignedIn = Cookies.get("email") && Cookies.get("hash");
+    const signedInText = isSignedIn ? translations.SIGNED_IN : translations.NOT_SIGNED_IN;
+
     const navigate = id => {
         addPath(id);
     };
@@ -109,6 +118,17 @@ export default function Settings() {
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
             onClick: () => navigate("fontSizes")
+        },
+        {
+            id: "signin",
+            icon: <VpnKeyIcon />,
+            name: translations.SIGN_IN,
+            value: signedInText,
+            widget: <Label icon={<Tooltip title={signedInText}>
+                {isSignedIn ? <LockOpenIcon /> : <LockIcon />}
+            </Tooltip>
+            } name={signedInText} />,
+            onClick: () => navigate("signin")
         },
         {
             id: "reset",

@@ -11,7 +11,7 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default React.forwardRef(function InputWidget({ validate, onValidate, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
+export default React.forwardRef(function InputWidget({ validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
     let [value, setValue] = state;
     const [error, setError] = useState("");
     const onChangeText = event => {
@@ -56,7 +56,8 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, ite
                             </Tooltip>
                         </InputAdornment>
                     )
-                }
+                },
+                readOnly
             }}
             SelectProps={{
                 className: clsx(className, styles.root, styles.select),

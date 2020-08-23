@@ -16,6 +16,9 @@ import clsx from "clsx";
 import EmailIcon from '@material-ui/icons/Email';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import Input from "@/widgets/Input";
+import Cookies from 'js-cookie';
+import { fetchJSON } from "@/util/fetch";
+import { setPath } from "@/util/pages";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -36,24 +39,77 @@ const useStyles = makeStyles((theme) => ({
         marginRight: "-11px",
         marginLeft: "16px"
     },
+    submit: {
+        margin: theme.spacing(0.5, 0, 2),
+    },
     link: {
         whiteSpace: "nowrap"
+    },
+    error: {
+        color: "var(--error-color)",
+        backgroundColor: "var(--error-background)",
+        borderRadius: "0.3em",
+        padding: "0.5em",
+        margin: "0.5em",
+        width: "100%",
+        textAlign: "center"
     }
+
 }));
 
 export default function SignIn() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
-    const emailState = useState("");
+    const emailState = useState(Cookies.get("email"));
     const passwordState = useState("");
     const [remember, setRemember] = useState(true);
     const [validate, setValidate] = useState(false);
+    const [counter, setCounter] = useState(0);
+    const [error, setError] = useState(false);
+    const [inProgress, setProgress] = useState(false);
+
+    const isSignedIn = Cookies.get("email") && Cookies.get("hash");
 
     const changeRemember = event => setRemember(event.target.value);
 
     const onSubmit = () => {
-        setValidate(true);
+        if (isSignedIn) {
+            Cookies.set("email", "");
+            Cookies.set("hash", "");
+            emailState[1]("");
+            setCounter(counter => counter + 1);
+        }
+        else {
+            setValidate(true);
+            if (!invalidFields && !inProgress) {
+                const [email] = emailState;
+                const [password] = passwordState;
+                setProgress(true);
+                fetchJSON("/api/login", {
+                    headers: {
+                        email,
+                        password
+                    }
+                }).then(({ hash }) => {
+                    Cookies.set("email", email);
+                    Cookies.set("hash", hash);
+                    setProgress(false);
+                    setPath("");
+                }).catch(err => {
+                    Cookies.set("email", "");
+                    Cookies.set("hash", "");
+                    setError(translations[err] || String(err));
+                    setProgress(false);
+                });
+            }
+        }
+    };
+
+    const onKeyDown = async event => {
+        if (event.keyCode == 13) {
+            onSubmit();
+        }
     };
 
     const onValidateEmail = text => {
@@ -76,7 +132,10 @@ export default function SignIn() {
         return error;
     };
 
-    const isInvalid = validate && (onValidateEmail(emailState[0]) || onValidatePassword(passwordState[0]));
+    const invalidFields =
+        onValidateEmail(emailState[0]) ||
+        onValidatePassword(passwordState[0]);
+    const isInvalid = validate && invalidFields;
 
     return (
         <Container component="main" maxWidth="xs">
@@ -86,8 +145,11 @@ export default function SignIn() {
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
-                    {translations.SIGN_IN}
+                    {translations[isSignedIn ? "SIGNED_IN" : "SIGN_IN"]}
                 </Typography>
+                {error && <Typography variant="h6" className={classes.error}>
+                    {error}
+                </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
@@ -100,12 +162,13 @@ export default function SignIn() {
                                 type="email"
                                 autoComplete="email"
                                 validate={validate}
+                                readOnly={isSignedIn}
                                 onValidate={onValidateEmail}
                                 autoFocus
                                 icon={<EmailIcon />}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        {!isSignedIn && <Grid item xs={12}>
                             <Input
                                 state={passwordState}
                                 required
@@ -117,37 +180,38 @@ export default function SignIn() {
                                 validate={validate}
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
+                                onKeyDown={onKeyDown}
                             />
-                        </Grid>
-                        <Grid item xs={12}>
+                        </Grid>}
+                        {!isSignedIn && <Grid item xs={12}>
                             <FormControlLabel
                                 className={clsx(direction === "rtl" && classes.rtlLabel)}
                                 control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
                                 label={translations.REMEMBER_ME}
                             />
-                        </Grid>
+                        </Grid>}
                         <Grid item xs={12}>
                             <Button
                                 onClick={onSubmit}
-                                disabled={isInvalid}
+                                disabled={isInvalid || inProgress}
                                 fullWidth
                                 variant="contained"
                                 color="primary"
                                 className={classes.submit}
                             >
-                                {translations.SIGN_IN}
+                                {translations[isSignedIn ? "SIGN_OUT" : "SIGN_IN"]}
                             </Button>
                         </Grid>
-                        <Grid item xs={5}>
+                        {!isSignedIn && <Grid item xs={5}>
                             <Link className={classes.link} href="#" variant="body2">
                                 {translations.FORGET_PASSWORD}
                             </Link>
-                        </Grid>
-                        <Grid item xs={7}>
-                            <Link className={classes.link} href="#signup" variant="body2">
+                        </Grid>}
+                        {!isSignedIn && <Grid item xs={7}>
+                            <Link className={classes.link} href="#settings/signup" variant="body2">
                                 {translations.SIGN_UP_TEXT}
                             </Link>
-                        </Grid>
+                        </Grid>}
                     </Grid>
                 </form>
             </div>

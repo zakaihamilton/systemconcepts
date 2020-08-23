@@ -305,6 +305,10 @@ export default {
             "value": "Entrar"
         },
         {
+            "id": "SIGN_OUT",
+            "value": "Sair"
+        },
+        {
             "id": "SIGN_UP",
             "value": "Inscreva-se"
         },
@@ -355,6 +359,14 @@ export default {
         {
             "id": "EMPTY_FIELD",
             "value": "Este campo está vazio!"
+        },
+        {
+            "id": "SIGNED_IN",
+            "value": "Assinado"
+        },
+        {
+            "id": "NOT_SIGNED_IN",
+            "value": "não conectado"
         }
     ]
 };

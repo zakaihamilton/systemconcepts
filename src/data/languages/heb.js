@@ -309,6 +309,10 @@ export default {
             "value": "התחברות"
         },
         {
+            "id": "SIGN_OUT",
+            "value": "ניתוק"
+        },
+        {
             "id": "SIGN_UP",
             "value": "הרשם"
         },
@@ -359,6 +363,14 @@ export default {
         {
             "id": "EMPTY_FIELD",
             "value": "השדה הזה הוא ריק!"
+        },
+        {
+            "id": "SIGNED_IN",
+            "value": "רשום"
+        },
+        {
+            "id": "NOT_SIGNED_IN",
+            "value": "לא רשום"
         }
     ]
 };

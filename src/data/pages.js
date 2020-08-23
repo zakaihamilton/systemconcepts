@@ -101,7 +101,6 @@ export default [
         showTooltip: true
     },
     {
-        sidebar: true,
         id: "signin",
         name: "SIGN_IN_NAME",
         icon: <VpnKeyIcon />,

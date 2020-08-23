@@ -309,6 +309,10 @@ export default {
             "value": "Sign In"
         },
         {
+            "id": "SIGN_OUT",
+            "value": "Sign Out"
+        },
+        {
             "id": "SIGN_UP",
             "value": "Sign Up"
         },
@@ -363,6 +367,14 @@ export default {
         {
             "id": 404,
             "value": "Cannot access server!"
+        },
+        {
+            "id": "SIGNED_IN",
+            "value": "Signed In"
+        },
+        {
+            "id": "NOT_SIGNED_IN",
+            "value": "Not Signed In"
         }
     ]
 };
