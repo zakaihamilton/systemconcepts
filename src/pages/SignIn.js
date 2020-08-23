@@ -96,8 +96,8 @@ export default function SignIn() {
                         console.error(err);
                         throw err;
                     }
-                    Cookies.set("email", email, remember && { expires: 365 });
-                    Cookies.set("hash", hash, remember && { expires: 365 });
+                    Cookies.set("email", email, remember && { expires: 60 });
+                    Cookies.set("hash", hash, remember && { expires: 60 });
                     setProgress(false);
                     setError("");
                     setPath("");
