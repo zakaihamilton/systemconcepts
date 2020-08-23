@@ -383,6 +383,10 @@ export default {
         {
             "id": "WRONG_PASSWORD",
             "value": "Wrong Password!"
+        },
+        {
+            "id": "USER_ALREADY_EXISTS",
+            "value": "User already exists!"
         }
     ]
 };

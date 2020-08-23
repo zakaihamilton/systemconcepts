@@ -1,6 +1,5 @@
-const { listCollection } = require("./mongo");
+const { findRecord, addRecord } = require("./mongo");
 const { compare, hash } = require("bcrypt");
-const { error } = require("./logger");
 
 export async function login({ email, password, hash }) {
     if (!email) {
@@ -9,17 +8,15 @@ export async function login({ email, password, hash }) {
     if (!password && !hash) {
         throw `No password or hash passed in header`;
     }
-    let users = null;
+    let user = null;
     try {
-        users = await listCollection({ collectionName: "users" }) || [];
+        user = await findRecord({ collectionName: "users", query: { email } });
     }
     catch (err) {
         console.error(err);
-        throw "Cannnot access list of users";
+        throw "USER_NOT_FOUND";
     }
-    const user = users.find(user => user.email === email);
     if (!user) {
-        console.error("Cannot find user: " + email);
         throw "USER_NOT_FOUND";
     }
     if (password) {
@@ -36,6 +33,10 @@ export async function login({ email, password, hash }) {
 
 export async function register({ firstName, lastName, email, password, salt = 10 }) {
     let result = undefined;
+    const user = await findRecord({ collectionName: "users", query: { email } });
+    if (user) {
+        throw "USER_ALREADY_EXISTS";
+    }
     try {
         result = await hash(password, salt);
     }
@@ -43,5 +44,9 @@ export async function register({ firstName, lastName, email, password, salt = 10
         console.error(err);
         throw err;
     }
+    const dateObj = new Date();
+    const date = dateObj.toString();
+    const utc = dateObj.getTime();
+    await addRecord({ collectionName: "users", record: { firstName, lastName, email, hash: result, date, utc } });
     return result;
 }

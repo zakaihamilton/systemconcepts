@@ -379,6 +379,10 @@ export default {
         {
             "id": "WRONG_PASSWORD",
             "value": "סיסמה שגויה!"
+        },
+        {
+            "id": "USER_ALREADY_EXISTS",
+            "value": "משתמש כבר קיים!"
         }
     ]
 };

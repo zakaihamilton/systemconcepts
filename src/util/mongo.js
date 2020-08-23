@@ -45,3 +45,13 @@ export async function listCollections({ ...params }) {
     const names = collections.map(collection => collection.name);
     return names;
 }
+
+export async function addRecord({ record, ...params }) {
+    const collection = await getCollection(params);
+    await collection.insert(record);
+}
+
+export async function findRecord({ query, ...params }) {
+    const collection = await getCollection(params);
+    return await collection.findOne(query);
+}

@@ -379,6 +379,10 @@ export default {
         {
             "id": "WRONG_PASSWORD",
             "value": "Senha incorreta!"
+        },
+        {
+            "id": "USER_ALREADY_EXISTS",
+            "value": "Usuário já existe!"
         }
     ]
 };

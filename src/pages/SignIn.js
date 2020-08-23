@@ -99,6 +99,7 @@ export default function SignIn() {
                     Cookies.set("email", email, remember && { expires: 365 });
                     Cookies.set("hash", hash, remember && { expires: 365 });
                     setProgress(false);
+                    setError("");
                     setPath("");
                 }).catch(err => {
                     Cookies.set("email", "");

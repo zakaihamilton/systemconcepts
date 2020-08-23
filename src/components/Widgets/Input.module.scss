@@ -7,6 +7,10 @@
     background-color: rgba(0, 0, 0, 0.5);
 }
 
+.root label {
+    transform: translate(1em, 1.8em) scale(1);
+}
+
 .select div {
     padding-right: 2em !important;
 }

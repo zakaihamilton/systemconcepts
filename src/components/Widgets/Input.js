@@ -46,8 +46,9 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, rea
         const children = items && arrayToMenuItems(items);
         return <TextField
             ref={ref}
+            className={styles.root}
             InputProps={{
-                className: clsx(className, styles.root, styles.input),
+                className: clsx(className, styles.input),
                 ...icon && {
                     startAdornment: (
                         <InputAdornment position="start">
