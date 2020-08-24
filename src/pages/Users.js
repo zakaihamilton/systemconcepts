@@ -102,7 +102,10 @@ export default function Users() {
             ...item,
             id,
             name,
-            nameWidget: <Label name={name} icon={select ? selectIcon : menuIcon} />
+            nameWidget: <Label name={<>
+                <b>{firstName}</b>
+                {lastName}
+            </>} icon={select ? selectIcon : menuIcon} />
         };
     };
 
