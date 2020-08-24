@@ -45,6 +45,11 @@ export default function Users() {
             id: "email",
             title: translations.EMAIL_ADDRESS,
             sortable: true
+        },
+        {
+            id: "roleWidget",
+            title: translations.ROLE,
+            sortable: "role"
         }
     ];
 

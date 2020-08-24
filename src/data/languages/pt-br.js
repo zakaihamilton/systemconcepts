@@ -387,6 +387,10 @@ export default {
         {
             "id": "ACCOUNT",
             "value": "Conta"
+        },
+        {
+            "id": "ROLE",
+            "value": "Função"
         }
     ]
 };

@@ -390,7 +390,11 @@ export default {
         },
         {
             "id": "ACCOUNT",
-            "value":"Account"
+            "value": "Account"
+        },
+        {
+            "id": "ROLE",
+            "value": "Role"
         }
     ]
 };

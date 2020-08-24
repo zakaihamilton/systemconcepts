@@ -387,6 +387,10 @@ export default {
         {
             "id": "ACCOUNT",
             "value": "חשבון"
+        },
+        {
+            "id": "ROLE",
+            "value": "תפקיד"
         }
     ]
 };
