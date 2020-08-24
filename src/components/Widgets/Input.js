@@ -11,7 +11,7 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default React.forwardRef(function InputWidget({ validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
+export default React.forwardRef(function InputWidget({ mapping, validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
     let [value, setValue] = state;
     const [error, setError] = useState("");
     const onChangeText = event => {
@@ -43,6 +43,9 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, rea
     }
 
     if (!autocomplete) {
+        if (mapping) {
+            items = items.map(mapping);
+        }
         const children = items && arrayToMenuItems(items);
         return <TextField
             ref={ref}

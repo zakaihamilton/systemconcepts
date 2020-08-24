@@ -1,0 +1,10 @@
+.form {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.item {
+    display: flex;
+    margin: 1em;
+    min-width: 300px;
+}

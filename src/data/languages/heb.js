@@ -403,6 +403,22 @@ export default {
         {
             "id": "NEW_ROLE",
             "value": "תפקיד חדש"
+        },
+        {
+            "id": "ADMIN",
+            "value": "מנהל"
+        },
+        {
+            "id": "STUDENT",
+            "value": "תלמיד"
+        },
+        {
+            "id": "UPPER",
+            "value": "עליון"
+        },
+        {
+            "id": "TEACHER",
+            "value": "מורה"
         }
     ]
 };

@@ -403,6 +403,22 @@ export default {
         {
             "id": "NEW_ROLE",
             "value": "Novo função"
+        },
+        {
+            "id": "ADMIN",
+            "value": "Administrador"
+        },
+        {
+            "id": "STUDENT",
+            "value": "Aluno"
+        },
+        {
+            "id": "UPPER",
+            "value": "Superior"
+        },
+        {
+            "id": "TEACHER",
+            "value": "Professor"
         }
     ]
 };

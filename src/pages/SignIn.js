@@ -13,7 +13,6 @@ import Container from '@material-ui/core/Container';
 import { useTranslations } from "@/util/translations";
 import { MainStore } from "@/components/Main";
 import clsx from "clsx";
-import EmailIcon from '@material-ui/icons/Email';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import Input from "@/widgets/Input";
 import Cookies from 'js-cookie';
@@ -163,11 +162,10 @@ export default function SignIn() {
                             <Input
                                 state={idState}
                                 required
-                                id="id"
+                                id="userid"
                                 label={translations.ID}
-                                name="id"
-                                type="id"
-                                autoComplete="id"
+                                name="userid"
+                                autoComplete="userid"
                                 validate={validate}
                                 readOnly={isSignedIn}
                                 onValidate={onValidateField}
