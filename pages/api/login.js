@@ -5,8 +5,8 @@ module.exports = async (req, res) => {
         let error = null;
         let params = {};
         try {
-            const { email, password, hash } = req.headers || {};
-            params = await login({ email, password, hash });
+            const { id, password, hash } = req.headers || {};
+            params = await login({ id, password, hash });
         }
         catch (err) {
             error = err;

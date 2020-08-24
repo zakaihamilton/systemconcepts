@@ -46,7 +46,7 @@ export async function listCollections({ ...params }) {
     return names;
 }
 
-export async function addRecord({ record, ...params }) {
+export async function insertRecord({ record, ...params }) {
     const collection = await getCollection(params);
     await collection.insert(record);
 }
@@ -59,4 +59,55 @@ export async function findRecord({ query, ...params }) {
 export async function deleteRecord({ query, ...params }) {
     const collection = await getCollection(params);
     await collection.deleteOne(query);
+}
+
+export async function replaceRecord({ query, record, ...params }) {
+    const collection = await getCollection(params);
+    await collection.replaceOne(query, record, {
+        upsert: true
+    });
+}
+
+export async function handleRequest({ collectionName, req, res }) {
+    if (req.method === "GET") {
+        try {
+            const result = await listCollection({ collectionName });
+            res.status(200).json(result);
+        }
+        catch (err) {
+            console.error("roles error: ", err);
+            res.status(200).json({ err: err.toString() });
+        }
+    } else if (req.method === "DELETE") {
+        try {
+            let { ids } = req.headers || {};
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (const id of ids) {
+                await deleteRecord({ query: { id }, collectionName });
+            }
+            res.status(200).json({});
+        }
+        catch (err) {
+            console.error("roles error: ", err);
+            res.status(200).json({ err: err.toString() });
+        }
+    } else if (req.method === "PUT") {
+        try {
+            const result = JSON.parse(req.body);
+            let records = result;
+            if (!Array.isArray(records)) {
+                records = [result];
+            }
+            for (const record of records) {
+                const { id } = record;
+                await replaceRecord({ collectionName, recordId: id, record });
+            }
+        }
+        catch (err) {
+            console.error("roles error: ", err);
+            res.status(200).json({ err: err.toString() });
+        }
+    }
 }

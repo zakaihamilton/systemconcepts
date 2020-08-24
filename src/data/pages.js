@@ -5,6 +5,7 @@ import PeopleIcon from '@material-ui/icons/People';
 import Users from "@/pages/Users";
 
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
+import Roles from "@/pages/Roles";
 
 import SettingsIcon from '@material-ui/icons/Settings';
 import Settings from "@/pages/Settings";
@@ -54,7 +55,8 @@ export default [
         sidebar: true,
         id: "roles",
         name: "ROLES_NAME",
-        icon: <RecentActorsIcon />
+        icon: <RecentActorsIcon />,
+        Component: Roles
     },
     {
         id: "languages",

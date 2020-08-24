@@ -391,6 +391,14 @@ export default {
         {
             "id": "ROLE",
             "value": "Função"
+        },
+        {
+            "id": "TYPE",
+            "value": "Tipo"
+        },
+        {
+            "id": "ADD_ROLE",
+            "value": "Adicionar função"
         }
     ]
 };

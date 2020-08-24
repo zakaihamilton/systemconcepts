@@ -20,6 +20,7 @@ import Cookies from 'js-cookie';
 import { fetchJSON } from "@/util/fetch";
 import { setPath } from "@/util/pages";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -66,7 +67,7 @@ export default function SignIn() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
-    const emailState = useState(Cookies.get("email"));
+    const idState = useState(Cookies.get("id"));
     const passwordState = useState("");
     const [remember, setRemember] = useState(true);
     const [validate, setValidate] = useState(false);
@@ -74,26 +75,26 @@ export default function SignIn() {
     const [error, setError] = useState(false);
     const [inProgress, setProgress] = useState(false);
 
-    const isSignedIn = Cookies.get("email") && Cookies.get("hash");
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
 
     const changeRemember = event => setRemember(event.target.value);
 
     const onSubmit = () => {
         if (isSignedIn) {
-            Cookies.set("email", "");
+            Cookies.set("id", "");
             Cookies.set("hash", "");
-            emailState[1]("");
+            idState[1]("");
             setCounter(counter => counter + 1);
         }
         else {
             setValidate(true);
             if (!invalidFields && !inProgress) {
-                const [email] = emailState;
+                const [id] = idState;
                 const [password] = passwordState;
                 setProgress(true);
                 fetchJSON("/api/login", {
                     headers: {
-                        email,
+                        id,
                         password
                     }
                 }).then(({ err, hash }) => {
@@ -101,13 +102,13 @@ export default function SignIn() {
                         console.error(err);
                         throw err;
                     }
-                    Cookies.set("email", email, remember && { expires: 60 });
+                    Cookies.set("id", id, remember && { expires: 60 });
                     Cookies.set("hash", hash, remember && { expires: 60 });
                     setProgress(false);
                     setError("");
                     setPath("");
                 }).catch(err => {
-                    Cookies.set("email", "");
+                    Cookies.set("id", "");
                     Cookies.set("hash", "");
                     setError(translations[err] || String(err));
                     setProgress(false);
@@ -122,14 +123,10 @@ export default function SignIn() {
         }
     };
 
-    const onValidateEmail = text => {
+    const onValidateField = text => {
         let error = "";
-        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
         if (!text) {
-            error = translations.EMPTY_EMAIL;
-        }
-        else if (!emailPattern.test(text)) {
-            error = translations.BAD_EMAIL;
+            error = translations.EMPTY_FIELD;
         }
         return error;
     };
@@ -143,7 +140,7 @@ export default function SignIn() {
     };
 
     const invalidFields =
-        onValidateEmail(emailState[0]) ||
+        onValidateField(idState[0]) ||
         onValidatePassword(passwordState[0]);
     const isInvalid = validate && invalidFields;
 
@@ -164,18 +161,18 @@ export default function SignIn() {
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
                             <Input
-                                state={emailState}
+                                state={idState}
                                 required
-                                id="email"
-                                label={translations.EMAIL_ADDRESS}
-                                name="email"
-                                type="email"
-                                autoComplete="email"
+                                id="id"
+                                label={translations.ID}
+                                name="id"
+                                type="id"
+                                autoComplete="id"
                                 validate={validate}
                                 readOnly={isSignedIn}
-                                onValidate={onValidateEmail}
+                                onValidate={onValidateField}
                                 autoFocus
-                                icon={<EmailIcon />}
+                                icon={<AccountCircleIcon />}
                             />
                         </Grid>
                         {!isSignedIn && <Grid item xs={12}>

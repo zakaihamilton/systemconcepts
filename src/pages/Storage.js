@@ -12,8 +12,7 @@ import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@/util/pages";
 import storage from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
-import Checkbox from '@material-ui/core/Checkbox';
-import styles from "./Storage.module.scss";
+import Checkbox from '@/components/Widgets/Checkbox';
 import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
 import { abbreviateSize } from "@/util/string";
@@ -117,18 +116,6 @@ export default function Storage({ path = "" }) {
             </Tooltip>
         };
 
-        const selectItem = (event) => {
-            const { checked } = event.target;
-            StorageStore.update(s => {
-                if (checked) {
-                    s.select = [...select, result];
-                }
-                else {
-                    s.select = select.filter(item => item.id !== id);
-                }
-            });
-        };
-
         let nameWidget = null;
         if (mode === "create" && item.create) {
             nameWidget = <Edit key={id} />;
@@ -137,11 +124,7 @@ export default function Storage({ path = "" }) {
         } else {
             nameWidget = <Label key={id} icon={<>
                 {!select && item.type && !mode && <ItemMenu item={result} />}
-                {select && <Checkbox
-                    classes={{ root: styles.checkbox }}
-                    color="default"
-                    checked={select.find(item => item.id === id) ? true : false}
-                    onChange={selectItem} />}
+                {select && <Checkbox select={select} item={result} store={StorageStore} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}
                 </Tooltip>

@@ -1,34 +1,26 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import styles from "./CheckBox.module.scss";
 
-const useStyles = makeStyles({
-  root: {
-    display: "flex",
-    paddingBottom: "1em",
-    alignItems: "center",
-    marginLeft: "0.8em"
-  },
-});
-
-export default function CheckBox({ state, label }) {
-  const classes = useStyles();
-  const [value, setValue] = state;
-  const onChange = event => {
+export default function CheckboxWidget({ item, store, select }) {
+  const { id } = item;
+  const selectItem = (event) => {
     const { checked } = event.target;
-    setValue(checked);
+    store.update(s => {
+      if (checked) {
+        s.select = [...select, item];
+      }
+      else {
+        s.select = select.filter(item => item.id !== id);
+      }
+    });
   };
 
-  return (<FormControlLabel
-    className={classes.root}
-    control={
-      <Checkbox
-        checked={!!value || false}
-        onChange={onChange}
-        color="primary"
-      />
-    }
-    label={label}
-  />);
+  const checked = select.find(item => item.id === id) ? true : false;
+  console.log("checked", checked, "id", id);
+
+  return (<Checkbox
+    classes={{ root: styles.root }}
+    checked={checked}
+    onChange={selectItem} />);
 }

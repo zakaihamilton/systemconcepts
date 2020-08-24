@@ -88,7 +88,7 @@ export default function Settings() {
         name: translations[item.name]
     }));
 
-    const isSignedIn = Cookies.get("email") && Cookies.get("hash");
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const signedInText = isSignedIn ? translations.SIGNED_IN : translations.NOT_SIGNED_IN;
 
     const navigate = id => {

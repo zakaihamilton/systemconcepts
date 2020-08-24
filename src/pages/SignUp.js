@@ -20,6 +20,7 @@ import clsx from "clsx";
 import { MainStore } from "@/components/Main";
 import Checkbox from '@material-ui/core/Checkbox';
 import LinearProgress from "@material-ui/core/LinearProgress";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -57,6 +58,7 @@ export default function SignUp() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
+    const idState = useState("");
     const firstNameState = useState("");
     const lastNameState = useState("");
     const emailState = useState("");
@@ -88,7 +90,7 @@ export default function SignUp() {
         return error;
     };
 
-    const onValidateName = text => {
+    const onValidateField = text => {
         let error = "";
         if (!text) {
             error = translations.EMPTY_FIELD;
@@ -99,13 +101,15 @@ export default function SignUp() {
     const invalidFields =
         onValidateEmail(emailState[0]) ||
         onValidatePassword(passwordState[0]) ||
-        onValidateName(firstNameState[0]) ||
-        onValidateName(lastNameState[0]);
+        onValidateField(firstNameState[0]) ||
+        onValidateField(lastNameState[0]) ||
+        onValidateField(idState[0]);
     const isInvalid = validate && invalidFields;
 
     const onSubmit = () => {
         setValidate(true);
         if (!invalidFields && !inProgress) {
+            const [id] = idState;
             const [firstName] = firstNameState;
             const [lastName] = lastNameState;
             const [email] = emailState;
@@ -113,6 +117,7 @@ export default function SignUp() {
             setProgress(true);
             fetchJSON("/api/register", {
                 headers: {
+                    id,
                     first_name: firstName,
                     last_name: lastName,
                     email,
@@ -123,13 +128,13 @@ export default function SignUp() {
                     console.error(err);
                     throw err;
                 }
-                Cookies.set("email", email, remember && { expires: 60 });
+                Cookies.set("id", id, remember && { expires: 60 });
                 Cookies.set("hash", hash, remember && { expires: 60 });
                 setProgress(false);
                 setError("");
                 setPath("");
             }).catch(err => {
-                Cookies.set("email", "");
+                Cookies.set("id", "");
                 Cookies.set("hash", "");
                 setError(translations[err] || String(err));
                 setProgress(false);
@@ -158,6 +163,20 @@ export default function SignUp() {
                 </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Input
+                                state={idState}
+                                required
+                                id="id"
+                                label={translations.ID}
+                                name="id"
+                                autoComplete="id"
+                                validate={validate}
+                                onValidate={onValidateField}
+                                autoFocus
+                                icon={<AccountCircleIcon />}
+                            />
+                        </Grid>
                         <Grid item xs={12} sm={6}>
                             <Input
                                 state={firstNameState}
@@ -167,7 +186,7 @@ export default function SignUp() {
                                 id="fname"
                                 autoComplete="fname"
                                 validate={validate}
-                                onValidate={onValidateName}
+                                onValidate={onValidateField}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -179,7 +198,7 @@ export default function SignUp() {
                                 id="lname"
                                 autoComplete="lname"
                                 validate={validate}
-                                onValidate={onValidateName}
+                                onValidate={onValidateField}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -193,7 +212,6 @@ export default function SignUp() {
                                 autoComplete="email"
                                 validate={validate}
                                 onValidate={onValidateEmail}
-                                autoFocus
                                 icon={<EmailIcon />}
                             />
                         </Grid>

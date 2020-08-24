@@ -1,16 +1,10 @@
-const { findRecord, addRecord } = require("./mongo");
+const { findRecord, insertRecord } = require("./mongo");
 const { compare, hash } = require("bcrypt");
 
-export async function login({ email, password, hash }) {
-    if (!email) {
-        throw `No email passed in header`;
-    }
-    if (!password && !hash) {
-        throw `No password or hash passed in header`;
-    }
+export async function login({ id, password, hash }) {
     let user = null;
     try {
-        user = await findRecord({ collectionName: "users", query: { email } });
+        user = await findRecord({ collectionName: "users", query: { id } });
     }
     catch (err) {
         console.error(err);
@@ -28,10 +22,10 @@ export async function login({ email, password, hash }) {
     else if (hash !== user.hash) {
         throw "WRONG_PASSWORD";
     }
-    return { roleId: user.roleId, hash: user.hash, email: user.email };
+    return { roleId: user.roleId, hash: user.hash };
 }
 
-export async function register({ firstName, lastName, email, password, salt = 10 }) {
+export async function register({ id, firstName, lastName, email, password, salt = 10 }) {
     let result = undefined;
     const user = await findRecord({ collectionName: "users", query: { email } });
     if (user) {
@@ -47,6 +41,17 @@ export async function register({ firstName, lastName, email, password, salt = 10
     const dateObj = new Date();
     const date = dateObj.toString();
     const utc = dateObj.getTime();
-    await addRecord({ collectionName: "users", record: { firstName, lastName, email, hash: result, date, utc } });
+    await insertRecord({
+        collectionName: "users",
+        record: {
+            id,
+            firstName,
+            lastName,
+            email,
+            hash: result,
+            date,
+            utc
+        }
+    });
     return result;
 }

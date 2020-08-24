@@ -12,8 +12,10 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
 import Checkbox from '@/components/Widgets/Checkbox';
+import Fab from "@/widgets/Fab";
+import AddIcon from '@material-ui/icons/Add';
 
-export const UsersStoreDefaults = {
+export const RolesStoreDefaults = {
     mode: "",
     name: "",
     select: null,
@@ -21,16 +23,17 @@ export const UsersStoreDefaults = {
     onDone: null
 };
 
-export const UsersStore = new Store(UsersStoreDefaults);
+export const RolesStore = new Store(RolesStoreDefaults);
 
-export default function Users() {
+export default function Roles() {
+    const apiPath = "/api/roles";
     const translations = useTranslations();
-    const { mode, select, counter } = UsersStore.useState();
-    const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
+    const { mode, select, counter } = RolesStore.useState();
+    const [data, , loading] = useFetchJSON(apiPath, {}, [counter]);
 
     useEffect(() => {
-        UsersStore.update(s => {
-            Object.assign(s, UsersStoreDefaults);
+        RolesStore.update(s => {
+            Object.assign(s, RolesStoreDefaults);
         });
     }, []);
 
@@ -41,24 +44,15 @@ export default function Users() {
             sortable: "name"
         },
         {
-            id: "id",
-            title: translations.ID,
+            id: "type",
+            title: translations.TYPE,
             sortable: true
         },
-        {
-            id: "email",
-            title: translations.EMAIL_ADDRESS,
-            sortable: true
-        },
-        {
-            id: "roleWidget",
-            title: translations.ROLE,
-            sortable: "role"
-        }
     ];
 
     const mapper = item => {
         let { firstName, lastName } = item;
+        const id = item.email;
         const name = [firstName, lastName].filter(Boolean).join(" ");
 
         const items = [
@@ -67,13 +61,13 @@ export default function Users() {
                 name: translations.DELETE,
                 icon: <DeleteIcon />,
                 onClick: () => {
-                    UsersStore.update(s => {
-                        s.select = [item];
+                    RolesStore.update(s => {
+                        s.select = [{ ...item, id }];
                         s.mode = "delete";
                         s.severity = "info";
                         s.onDone = async select => {
                             const ids = select.map(item => item.id);
-                            await fetchJSON("/api/users", { headers: { ids }, method: "DELETE" });
+                            await fetchJSON(apiPath, { headers: { ids }, method: "DELETE" });
                         }
                     });
                 }
@@ -87,10 +81,11 @@ export default function Users() {
                 </Tooltip>
             </IconButton>
         </Menu>;
-        const selectIcon = select && <Checkbox select={select} item={item} store={UsersStore} />;
+        const selectIcon = select && <Checkbox select={select} item={item} store={RolesStore} />;
 
         return {
             ...item,
+            id,
             name,
             nameWidget: <Label name={<>
                 <b>{firstName}</b>
@@ -99,7 +94,11 @@ export default function Users() {
         };
     };
 
-    const statusBar = <StatusBar data={data} mapper={mapper} store={UsersStore} />;
+    const statusBar = <StatusBar data={data} mapper={mapper} store={RolesStore} />;
+
+    const createRole = () => {
+
+    };
 
     return <>
         <Table
@@ -111,5 +110,6 @@ export default function Users() {
             rowHeight="6em"
         />
         {loading && <Progress />}
+        <Fab onClick={!mode && createRole} icon={<AddIcon />} title={translations.ADD_ROLE} />
     </>;
 }
