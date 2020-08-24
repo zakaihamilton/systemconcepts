@@ -1,6 +1,7 @@
 import { useTranslations } from "@/util/translations";
 import Form from "@/widgets/Form";
 import Input from "@/widgets/Input";
+import Button from '@material-ui/core/Button';
 
 export function getRoleSection({ translations, index, path }) {
     if (index) {
@@ -40,7 +41,20 @@ export default function Role({ path = "" }) {
         }
     };
 
-    return <Form>
+    const onSubmit = () => {
+
+    };
+
+    const actions = (<Button
+        onClick={onSubmit}
+        variant="contained"
+        color="primary"
+        size="large"
+    >
+        {translations.SAVE}
+    </Button>)
+
+    return <Form actions={actions}>
         <Input
             id="id"
             label={translations.ID}

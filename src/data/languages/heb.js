@@ -419,6 +419,14 @@ export default {
         {
             "id": "TEACHER",
             "value": "מורה"
+        },
+        {
+            "id": "SAVE",
+            "value": "שמור"
+        },
+        {
+            "id": "CANCEL",
+            "value": "ביטול"
         }
     ]
 };

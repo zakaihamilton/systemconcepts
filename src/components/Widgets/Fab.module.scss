@@ -1,7 +1,16 @@
 .root {
     position: absolute !important;
-    right: 2.5em;
-    bottom: 2.5em;
+
+    [dir=rtl] & {
+        left: 2.5em;
+        bottom: 2.5em;
+    }
+
+    [dir=ltr] & {
+        right: 2.5em;
+        bottom: 2.5em;
+    }
+
     display: none !important;
 }
 

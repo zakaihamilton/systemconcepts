@@ -423,6 +423,14 @@ export default {
         {
             "id": "TEACHER",
             "value": "Teacher"
+        },
+        {
+            "id": "SAVE",
+            "value": "Save"
+        },
+        {
+            "id": "CANCEL",
+            "value": "Cancel"
         }
     ]
 };

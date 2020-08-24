@@ -9,5 +9,5 @@ export default function DynamicWidget({ state, items, ...props }) {
         Component = Input;
         props.select = true;
     }
-    return <Component state={state} items={items} {...props} />;
+    return <Component margins={false} state={state} items={items} {...props} />;
 }

@@ -16,11 +16,16 @@ function FormItem({ child }) {
     </div>;
 }
 
-export default function Form({ children }) {
+export default function Form({ children, actions }) {
     const elements = React.Children.map(children, child => {
         return <FormItem child={child} />;
     });
-    return <form className={styles.form} noValidate>
-        {elements}
-    </form>;
+    return <div className={styles.root}>
+        <form className={styles.form} noValidate>
+            {elements}
+        </form>
+        <div className={styles.actions}>
+            {actions}
+        </div>
+    </div>;
 }

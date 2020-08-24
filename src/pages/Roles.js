@@ -8,7 +8,6 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from "@/widgets/Menu";
 import Tooltip from '@material-ui/core/Tooltip';
-import DeleteIcon from '@material-ui/icons/Delete';
 import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
 import Checkbox from '@/components/Widgets/Checkbox';
