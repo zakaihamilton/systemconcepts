@@ -403,6 +403,10 @@ export default {
         {
             "id": "ADD_ROLE",
             "value": "Add Role"
+        },
+        {
+            "id": "NEW_ROLE",
+            "value": "New Role"
         }
     ]
 };

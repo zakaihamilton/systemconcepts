@@ -399,6 +399,10 @@ export default {
         {
             "id": "ADD_ROLE",
             "value": "Adicionar função"
+        },
+        {
+            "id": "NEW_ROLE",
+            "value": "Novo função"
         }
     ]
 };

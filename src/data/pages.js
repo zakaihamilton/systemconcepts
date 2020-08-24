@@ -6,6 +6,7 @@ import Users from "@/pages/Users";
 
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import Roles from "@/pages/Roles";
+import Role, { getRoleSection } from "@/pages/Role";
 
 import SettingsIcon from '@material-ui/icons/Settings';
 import Settings from "@/pages/Settings";
@@ -57,6 +58,13 @@ export default [
         name: "ROLES_NAME",
         icon: <RecentActorsIcon />,
         Component: Roles
+    },
+    {
+        id: "role",
+        name: "ROLE",
+        section: getRoleSection,
+        icon: <RecentActorsIcon />,
+        Component: Role
     },
     {
         id: "languages",
