@@ -4,14 +4,11 @@ import Input from "@/widgets/Input";
 import Button from '@material-ui/core/Button';
 import { goBackPage } from "@/util/pages";
 import roles from "@/data/roles";
-import { useFetchJSON } from "@/util/fetch";
+import { useFetchJSON, fetchJSON } from "@/util/fetch";
 
 export function getUserSection({ translations, index, path }) {
     if (index) {
         return { name: path };
-    }
-    else if (!path) {
-        return { name: translations.NEW_ROLE };
     }
 }
 
@@ -27,17 +24,31 @@ export default function User({ path = "" }) {
     };
 
     const onSubmit = () => {
+        fetchJSON("/api/users", { method: "PUT", headers: { id: path }, body: JSON.stringify(data) });
         goBackPage();
     };
 
-    const actions = (<Button
-        onClick={onSubmit}
-        variant="contained"
-        color="primary"
-        size="large"
-    >
-        {translations.SAVE}
-    </Button>)
+    const onCancel = () => {
+        goBackPage();
+    };
+
+    const actions = [
+        <Button
+            onClick={onSubmit}
+            variant="contained"
+            color="primary"
+            size="large"
+        >
+            {translations.SAVE}
+        </Button>,
+        <Button
+            onClick={onCancel}
+            variant="contained"
+            color="primary"
+            size="large"
+        >
+            {translations.CANCEL}
+        </Button>];
 
     return <Form actions={actions} loading={loading}>
         <FormGroup record={data}>
@@ -59,7 +70,7 @@ export default function User({ path = "" }) {
                 label={translations.LAST_NAME}
             />
             <Input
-                id="roleType"
+                id="role"
                 label={translations.ROLE}
                 items={roles}
                 mapping={roleTypeMapping}

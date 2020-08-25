@@ -8,7 +8,8 @@ import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
 import Checkbox from '@/components/Widgets/Checkbox';
 import ItemMenu from "./Users/ItemMenu";
-import { setPath } from "@/util/pages";
+import { addPath } from "@/util/pages";
+import roles from "@/data/roles";
 
 export const UsersStoreDefaults = {
     mode: "",
@@ -61,6 +62,7 @@ export default function Users() {
 
         const menuIcon = !select && <ItemMenu item={item} />;
         const selectIcon = select && <Checkbox select={select} item={item} store={UsersStore} />;
+        const roleItem = roles.find(role => role.id === item.role);
 
         return {
             ...item,
@@ -68,7 +70,8 @@ export default function Users() {
             nameWidget: <Label name={<>
                 <b>{firstName}</b>
                 {lastName}
-            </>} icon={select ? selectIcon : menuIcon} />
+            </>} icon={select ? selectIcon : menuIcon} />,
+            roleWidget: roleItem && translations[roleItem.name]
         };
     };
 
@@ -88,7 +91,7 @@ export default function Users() {
             });
             return;
         }
-        setPath("user/" + id);
+        addPath("user/" + id);
     }, [select]);
 
     const onRowClick = enableItemClick && rowClick;

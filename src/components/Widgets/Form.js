@@ -6,13 +6,20 @@ function FormItem({ child, record }) {
     const { props } = child;
     const { id } = props;
     const state = useState();
-    const [, setValue] = state;
+    const [value, setValue] = state;
 
     useEffect(() => {
         if (record) {
             setValue(record[id]);
         }
     }, [record]);
+
+    useEffect(() => {
+        if (record && !Object.is(record[id], value)) {
+            record[id] = value;
+            console.log(record);
+        }
+    }, [value]);
 
     const element = React.cloneElement(child, {
         state

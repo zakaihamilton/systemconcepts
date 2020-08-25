@@ -75,7 +75,6 @@ export async function handleRequest({ collectionName, req, res }) {
             let result = null;
             if (id) {
                 result = await findRecord({ query: { id }, collectionName });
-                console.log("result", result);
             }
             else {
                 result = await listCollection({ collectionName });
@@ -83,7 +82,7 @@ export async function handleRequest({ collectionName, req, res }) {
             res.status(200).json(result);
         }
         catch (err) {
-            console.error("roles error: ", err);
+            console.error("get error: ", err);
             res.status(200).json({ err: err.toString() });
         }
     } else if (req.method === "DELETE") {
@@ -98,23 +97,25 @@ export async function handleRequest({ collectionName, req, res }) {
             res.status(200).json({});
         }
         catch (err) {
-            console.error("roles error: ", err);
+            console.error("delete error: ", err);
             res.status(200).json({ err: err.toString() });
         }
     } else if (req.method === "PUT") {
         try {
-            const result = JSON.parse(req.body);
+            const result = req.body;
             let records = result;
             if (!Array.isArray(records)) {
                 records = [result];
             }
             for (const record of records) {
                 const { id } = record;
-                await replaceRecord({ collectionName, recordId: id, record });
+                delete record._id;
+                await replaceRecord({ collectionName, query: { id }, record });
             }
+            res.status(200).json({});
         }
         catch (err) {
-            console.error("roles error: ", err);
+            console.error("put error: ", err);
             res.status(200).json({ err: err.toString() });
         }
     }
