@@ -9,15 +9,16 @@
     flex-direction: column;
     flex-wrap: wrap;
     flex: 1;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin: 1em;
 }
 
 .group {
     display: flex;
     flex-wrap: wrap;
-    flex: 1;
     align-items: flex-start;
     align-content: flex-start;
-    margin: 1em;
 }
 
 .item {
