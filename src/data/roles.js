@@ -1,5 +1,9 @@
 export default [
     {
+        id: "visitor",
+        name: "VISITOR"
+    },
+    {
         id: "admin",
         name: "ADMIN"
     },

@@ -431,6 +431,10 @@ export default {
         {
             "id": "CANCEL",
             "value": "Cancel"
+        },
+        {
+            "id": "VISITOR",
+            "value": "Visitor"
         }
     ]
 };

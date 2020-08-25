@@ -41,6 +41,7 @@ export async function register({ id, firstName, lastName, email, password, salt 
     const dateObj = new Date();
     const date = dateObj.toString();
     const utc = dateObj.getTime();
+    const roleType = "visitor";
     await insertRecord({
         collectionName: "users",
         record: {
@@ -50,7 +51,8 @@ export async function register({ id, firstName, lastName, email, password, salt 
             email,
             hash: result,
             date,
-            utc
+            utc,
+            roleType
         }
     });
     return result;

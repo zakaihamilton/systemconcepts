@@ -427,6 +427,10 @@ export default {
         {
             "id": "CANCEL",
             "value": "ביטול"
+        },
+        {
+            "id": "VISITOR",
+            "value": "אורח"
         }
     ]
 };

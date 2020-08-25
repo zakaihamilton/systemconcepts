@@ -427,6 +427,10 @@ export default {
         {
             "id": "CANCEL",
             "value": "Cancelar"
+        },
+        {
+            "id": "VISITOR",
+            "value": "Visitante"
         }
     ]
 };
