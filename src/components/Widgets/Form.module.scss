@@ -6,6 +6,13 @@
 
 .form {
     display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.group {
+    display: flex;
     flex-wrap: wrap;
     flex: 1;
     align-items: flex-start;
@@ -19,6 +26,10 @@
 }
 
 .form>*:not(:last-child) {
+    margin-bottom: 1em;
+}
+
+.group>*:not(:last-child) {
     [dir=rtl] & {
         margin-left: 1em;
     }

@@ -16,13 +16,19 @@ function FormItem({ child }) {
     </div>;
 }
 
-export default function Form({ children, actions }) {
+export function FormGroup({ children }) {
     const elements = React.Children.map(children, child => {
         return <FormItem child={child} />;
     });
+    return <div className={styles.group}>
+        {elements}
+    </div>;
+}
+
+export default function Form({ children, actions }) {
     return <div className={styles.root}>
         <form className={styles.form} noValidate>
-            {elements}
+            {children}
         </form>
         <div className={styles.actions}>
             {actions}

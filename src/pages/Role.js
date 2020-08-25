@@ -1,5 +1,5 @@
 import { useTranslations } from "@/util/translations";
-import Form from "@/widgets/Form";
+import Form, { FormGroup } from "@/widgets/Form";
 import Input from "@/widgets/Input";
 import Button from '@material-ui/core/Button';
 
@@ -55,15 +55,17 @@ export default function Role({ path = "" }) {
     </Button>)
 
     return <Form actions={actions}>
-        <Input
-            id="id"
-            label={translations.ID}
-            autoFocus />
-        <Input
-            id="type"
-            label={translations.TYPE}
-            items={roleTypes}
-            mapping={roleTypeMapping}
-            select={true} />
+        <FormGroup>
+            <Input
+                id="id"
+                label={translations.ID}
+                autoFocus />
+            <Input
+                id="type"
+                label={translations.TYPE}
+                items={roleTypes}
+                mapping={roleTypeMapping}
+                select={true} />
+        </FormGroup>
     </Form>;
 }
