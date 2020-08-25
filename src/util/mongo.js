@@ -71,7 +71,15 @@ export async function replaceRecord({ query, record, ...params }) {
 export async function handleRequest({ collectionName, req, res }) {
     if (req.method === "GET") {
         try {
-            const result = await listCollection({ collectionName });
+            const { id } = req.headers;
+            let result = null;
+            if (id) {
+                result = await findRecord({ query: { id }, collectionName });
+                console.log("result", result);
+            }
+            else {
+                result = await listCollection({ collectionName });
+            }
             res.status(200).json(result);
         }
         catch (err) {

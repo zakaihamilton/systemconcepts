@@ -3,8 +3,10 @@ import Form, { FormGroup } from "@/widgets/Form";
 import Input from "@/widgets/Input";
 import Button from '@material-ui/core/Button';
 import { goBackPage } from "@/util/pages";
+import roles from "@/data/roles";
+import { useFetchJSON } from "@/util/fetch";
 
-export function getRoleSection({ translations, index, path }) {
+export function getUserSection({ translations, index, path }) {
     if (index) {
         return { name: path };
     }
@@ -13,27 +15,9 @@ export function getRoleSection({ translations, index, path }) {
     }
 }
 
-export const roleTypes = [
-    {
-        id: "admin",
-        name: "ADMIN"
-    },
-    {
-        id: "student",
-        name: "STUDENT"
-    },
-    {
-        id: "upper",
-        name: "UPPER"
-    },
-    {
-        id: "teacher",
-        name: "TEACHER"
-    }
-];
-
-export default function Role({ path = "" }) {
+export default function User({ path = "" }) {
     const translations = useTranslations();
+    const [data, , loading] = useFetchJSON("/api/users", { headers: { id: path } });
 
     const roleTypeMapping = item => {
         return {
@@ -55,16 +39,29 @@ export default function Role({ path = "" }) {
         {translations.SAVE}
     </Button>)
 
-    return <Form actions={actions}>
-        <FormGroup>
+    return <Form actions={actions} loading={loading}>
+        <FormGroup record={data}>
             <Input
                 id="id"
                 label={translations.ID}
-                autoFocus />
+                autoFocus
+            />
             <Input
-                id="type"
-                label={translations.TYPE}
-                items={roleTypes}
+                id="email"
+                label={translations.EMAIL_ADDRESS}
+            />
+            <Input
+                id="firstName"
+                label={translations.FIRST_NAME}
+            />
+            <Input
+                id="lastName"
+                label={translations.LAST_NAME}
+            />
+            <Input
+                id="roleType"
+                label={translations.ROLE}
+                items={roles}
                 mapping={roleTypeMapping}
                 select={true} />
         </FormGroup>

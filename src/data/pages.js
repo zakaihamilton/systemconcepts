@@ -3,6 +3,7 @@ import Apps from "@/pages/Apps";
 
 import PeopleIcon from '@material-ui/icons/People';
 import Users from "@/pages/Users";
+import User, { getUserSection } from "@/pages/User";
 
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import Roles from "@/pages/Roles";
@@ -51,6 +52,13 @@ export default [
         name: "USERS_NAME",
         icon: <PeopleIcon />,
         Component: Users
+    },
+    {
+        id: "user",
+        name: "USER",
+        section: getUserSection,
+        icon: <PeopleIcon />,
+        Component: User
     },
     {
         sidebar: true,
