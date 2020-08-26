@@ -1,0 +1,22 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    align-content: stretch;
+    flex: 1;
+    flex-wrap: wrap;
+    margin-bottom: 1em
+}
+
+.label {
+    margin-left: 1em;
+    margin-bottom: 0.2em;
+}
+
+.container {
+    border-radius: 16px;
+    padding: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    margin: 1em;
+}

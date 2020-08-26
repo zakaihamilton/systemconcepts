@@ -199,7 +199,7 @@ export default function SignIn() {
                         <Grid item xs={12}>
                             <Button
                                 onClick={onSubmit}
-                                disabled={isInvalid || inProgress}
+                                disabled={!(isInvalid || inProgress)}
                                 fullWidth
                                 variant="contained"
                                 color="primary"

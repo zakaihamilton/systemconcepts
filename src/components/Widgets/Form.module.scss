@@ -19,11 +19,13 @@
     flex-wrap: wrap;
     align-items: flex-start;
     align-content: flex-start;
+    margin: -0.5em -0.5em;
 }
 
 .item {
     display: flex;
     min-width: 300px;
+    margin: 0.5em;
 }
 
 .form>*:not(:last-child) {

@@ -4,7 +4,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import Tooltip from "@material-ui/core/Tooltip";
 import styles from "./ToggleButtonGroup.module.scss";
 
-export default function ToggleButtonGroupWidget({ margins, items, state, ...props }) {
+export default function ToggleButtonGroupWidget({ items, state, ...props }) {
     const [selected, setSelected] = state;
 
     const handleSelected = (event, selected) => {

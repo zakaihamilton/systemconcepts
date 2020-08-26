@@ -1,10 +1,13 @@
 import { useTranslations } from "@/util/translations";
 import Form, { FormGroup } from "@/widgets/Form";
+import EmailIcon from '@material-ui/icons/Email';
 import Input from "@/widgets/Input";
 import Button from '@material-ui/core/Button';
 import { goBackPage } from "@/util/pages";
 import roles from "@/data/roles";
 import { useFetchJSON, fetchJSON } from "@/util/fetch";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import RecentActorsIcon from '@material-ui/icons/RecentActors';
 
 export function getUserSection({ translations, index, path }) {
     if (index) {
@@ -56,10 +59,12 @@ export default function User({ path = "" }) {
                 id="id"
                 label={translations.ID}
                 autoFocus
+                icon={<AccountCircleIcon />}
             />
             <Input
                 id="email"
                 label={translations.EMAIL_ADDRESS}
+                icon={<EmailIcon />}
             />
             <Input
                 id="firstName"
@@ -71,6 +76,7 @@ export default function User({ path = "" }) {
             />
             <Input
                 id="role"
+                icon={<RecentActorsIcon />}
                 label={translations.ROLE}
                 items={roles}
                 mapping={roleTypeMapping}

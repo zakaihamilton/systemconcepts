@@ -245,7 +245,7 @@ export default function SignUp() {
                         variant="contained"
                         color="primary"
                         className={classes.submit}
-                        disabled={isInvalid || inProgress}
+                        disabled={!!(isInvalid || inProgress)}
                         onClick={onSubmit}
                     >
                         {translations.SIGN_UP}
