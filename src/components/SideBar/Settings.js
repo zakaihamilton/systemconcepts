@@ -29,7 +29,7 @@ export default function Settings() {
     ];
 
     return <>
-        <Divider />
+        <Divider style={{ color: "var(--border", marginTop: "0.5em", marginBottom: "0.5em" }} />
         <ListWidget items={items} viewType={menuViewList} />
     </>;
 }
