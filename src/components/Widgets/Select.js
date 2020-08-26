@@ -20,6 +20,7 @@ export default function SelectWidget({ item, store, select }) {
   console.log("checked", checked, "id", id);
 
   return (<Checkbox
+    color="default"
     classes={{ root: styles.root }}
     checked={checked}
     onChange={selectItem} />);
