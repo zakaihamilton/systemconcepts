@@ -366,7 +366,7 @@ export default {
         },
         {
             "id": "SIGNED_IN",
-            "value": "Assinado"
+            "value": "Logado"
         },
         {
             "id": "NOT_SIGNED_IN",
