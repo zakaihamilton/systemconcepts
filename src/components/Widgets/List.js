@@ -44,7 +44,7 @@ export function ListItemWidget({ separator, viewType, onClick, name, selected, d
     </>;
 }
 
-export default function ListWidget({ items, onClick, state, viewType }) {
+export default function ListWidget({ reverse, items, onClick, state, viewType }) {
     const [selected, setSelected] = state || [];
 
     const onItemClick = (id) => {
@@ -55,7 +55,8 @@ export default function ListWidget({ items, onClick, state, viewType }) {
     const className = useStyles(styles, {
         root: true,
         iconList: viewType === "IconList",
-        list: viewType === "List"
+        list: viewType === "List",
+        reverse
     });
 
     const elements = (items || []).map(item => {

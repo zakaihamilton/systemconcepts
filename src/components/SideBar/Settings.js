@@ -29,7 +29,8 @@ export default function Settings() {
     ];
 
     return <>
-        <Divider style={{ color: "var(--border", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <ListWidget items={items} viewType={menuViewList} />
+        <div style={{ flex: "1" }} />
+        <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
+        <ListWidget reverse={true} items={items} viewType={menuViewList} />
     </>;
 }

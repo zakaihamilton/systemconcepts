@@ -1,6 +1,5 @@
 .root {
     display: flex;
-    flex: 1;
 }
 
 .iconList {
@@ -41,4 +40,8 @@
     [dir=rtl] & {
         text-align: right;
     }
+}
+
+.reverse {
+    flex-direction: column-reverse;
 }

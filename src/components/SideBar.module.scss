@@ -2,6 +2,8 @@
     background: var(--side-bar-background);
     grid-column: 1 / 2;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 
     [dir=ltr] & {
         border-right: var(--border);
