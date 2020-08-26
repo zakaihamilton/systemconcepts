@@ -5,6 +5,7 @@ import Drawer from '@material-ui/core/Drawer';
 import { useDeviceType } from "@/util/styles";
 import { MainStore } from "./Main";
 import { usePagesFromHash, usePages, setPath } from "@/util/pages";
+import Settings from "./SideBar/Settings";
 
 export default function SideBar() {
     const isPhone = useDeviceType() === "phone";
@@ -26,7 +27,7 @@ export default function SideBar() {
         });
     };
 
-    const pageItems = pages.filter(page => page.sidebar);
+    const items = pages.filter(page => page.sidebar);
 
     if (isPhone) {
         return <Drawer
@@ -40,11 +41,13 @@ export default function SideBar() {
             }}
             onClose={closeDrawer}
         >
-            <ListWidget onClick={closeDrawer} items={pageItems} state={state} viewType={menuViewList} />
+            <ListWidget onClick={closeDrawer} items={items} state={state} viewType={menuViewList} />
+            <Settings />
         </Drawer>;
     }
 
     return <div className={styles.root}>
-        <ListWidget items={pageItems} state={state} viewType={menuViewList} />
+        <ListWidget items={items} state={state} viewType={menuViewList} />
+        <Settings />
     </div>;
 }
