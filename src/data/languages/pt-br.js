@@ -399,6 +399,38 @@ export default {
         {
             "id": "ADD_ROLE",
             "value": "Adicionar função"
+        },
+        {
+            "id": "NEW_ROLE",
+            "value": "Novo função"
+        },
+        {
+            "id": "ADMIN",
+            "value": "Administrador"
+        },
+        {
+            "id": "STUDENT",
+            "value": "Aluno"
+        },
+        {
+            "id": "UPPER",
+            "value": "Superior"
+        },
+        {
+            "id": "TEACHER",
+            "value": "Professor"
+        },
+        {
+            "id": "SAVE",
+            "value": "Guardar"
+        },
+        {
+            "id": "CANCEL",
+            "value": "Cancelar"
+        },
+        {
+            "id": "VISITOR",
+            "value": "Visitante"
         }
     ]
 };

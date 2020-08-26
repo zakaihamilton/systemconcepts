@@ -167,10 +167,10 @@ export default function SignUp() {
                             <Input
                                 state={idState}
                                 required
-                                id="id"
+                                id="userid"
                                 label={translations.ID}
-                                name="id"
-                                autoComplete="id"
+                                name="userid"
+                                autoComplete="userid"
                                 validate={validate}
                                 onValidate={onValidateField}
                                 autoFocus

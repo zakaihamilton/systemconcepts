@@ -88,13 +88,15 @@ export function usePagesFromHash(hash = "") {
             }
             const url = encodeURI(path + encodeURIComponent(subPath));
             const name = page.name;
-            if (index) {
-                if (typeof page.section === "function") {
-                    page = Object.assign({}, page, page.section({ index, id: sectionId, translations }));
+            if (typeof page.section === "function") {
+                const result = page.section({ index, id: sectionId, translations, path: sectionPath });
+                if (!result) {
+                    return null;
                 }
-                else {
-                    return;
-                }
+                page = Object.assign({}, page, result);
+            }
+            else if (index) {
+                return;
             }
             const result = { ...page, url, ...params, path: sectionPath };
             if (name !== result.name && !result.tooltip) {

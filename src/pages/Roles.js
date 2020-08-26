@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
 import { useFetchJSON, fetchJSON } from "@/util/fetch";
@@ -8,19 +8,20 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from "@/widgets/Menu";
 import Tooltip from '@material-ui/core/Tooltip';
-import DeleteIcon from '@material-ui/icons/Delete';
 import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
 import Checkbox from '@/components/Widgets/Checkbox';
 import Fab from "@/widgets/Fab";
 import AddIcon from '@material-ui/icons/Add';
+import { addPath } from "@/util/pages";
 
 export const RolesStoreDefaults = {
     mode: "",
     name: "",
     select: null,
     counter: 1,
-    onDone: null
+    onDone: null,
+    enableItemClick: true
 };
 
 export const RolesStore = new Store(RolesStoreDefaults);
@@ -28,7 +29,7 @@ export const RolesStore = new Store(RolesStoreDefaults);
 export default function Roles() {
     const apiPath = "/api/roles";
     const translations = useTranslations();
-    const { mode, select, counter } = RolesStore.useState();
+    const { mode, select, counter, enableItemClick } = RolesStore.useState();
     const [data, , loading] = useFetchJSON(apiPath, {}, [counter]);
 
     useEffect(() => {
@@ -55,25 +56,6 @@ export default function Roles() {
         const id = item.email;
         const name = [firstName, lastName].filter(Boolean).join(" ");
 
-        const items = [
-            {
-                id: "delete",
-                name: translations.DELETE,
-                icon: <DeleteIcon />,
-                onClick: () => {
-                    RolesStore.update(s => {
-                        s.select = [{ ...item, id }];
-                        s.mode = "delete";
-                        s.severity = "info";
-                        s.onDone = async select => {
-                            const ids = select.map(item => item.id);
-                            await fetchJSON(apiPath, { headers: { ids }, method: "DELETE" });
-                        }
-                    });
-                }
-            }
-        ];
-
         const menuIcon = !select && <Menu items={items}>
             <IconButton>
                 <Tooltip title={translations.MENU}>
@@ -97,11 +79,31 @@ export default function Roles() {
     const statusBar = <StatusBar data={data} mapper={mapper} store={RolesStore} />;
 
     const createRole = () => {
-
+        addPath("role");
     };
+
+    const rowClick = useCallback((_, item) => {
+        const { id } = item;
+        if (select) {
+            const exists = select.find(item => item.id === id);
+            UsersStore.update(s => {
+                if (exists) {
+                    s.select = select.filter(item => item.id !== id);
+                }
+                else {
+                    s.select = [...select, item];
+                }
+            });
+            return;
+        }
+        setPath("role/" + id);
+    }, [select]);
+
+    const onRowClick = enableItemClick && rowClick;
 
     return <>
         <Table
+            rowClick={onRowClick}
             columns={columns}
             data={data}
             mapper={mapper}

@@ -11,7 +11,7 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default React.forwardRef(function InputWidget({ validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
+export default React.forwardRef(function InputWidget({ margins = true, mapping, validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
     let [value, setValue] = state;
     const [error, setError] = useState("");
     const onChangeText = event => {
@@ -43,12 +43,15 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, rea
     }
 
     if (!autocomplete) {
+        if (mapping) {
+            items = items.map(mapping);
+        }
         const children = items && arrayToMenuItems(items);
         return <TextField
             ref={ref}
             className={styles.root}
             InputProps={{
-                className: clsx(className, styles.input),
+                className: clsx(className, styles.input, margins && styles.margins),
                 ...icon && {
                     startAdornment: (
                         <InputAdornment position="start">
@@ -61,7 +64,7 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, rea
                 readOnly: Boolean(readOnly)
             }}
             SelectProps={{
-                className: clsx(className, styles.root, styles.select),
+                className: clsx(className, styles.root, styles.select, margins && styles.margins),
                 multiple,
                 renderValue,
                 MenuProps: {
@@ -80,7 +83,7 @@ export default React.forwardRef(function InputWidget({ validate, onValidate, rea
             onChange={onChangeText}
             select={select}
             error={!!error}
-            helperText={error || " "}
+            helperText={error || (margins ? " " : "")}
             variant="outlined"
             fullWidth={fullWidth}
             {...props}

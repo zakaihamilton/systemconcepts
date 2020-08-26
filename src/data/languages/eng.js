@@ -403,6 +403,38 @@ export default {
         {
             "id": "ADD_ROLE",
             "value": "Add Role"
+        },
+        {
+            "id": "NEW_ROLE",
+            "value": "New Role"
+        },
+        {
+            "id": "ADMIN",
+            "value": "Administrator"
+        },
+        {
+            "id": "STUDENT",
+            "value": "Student"
+        },
+        {
+            "id": "UPPER",
+            "value": "Upper"
+        },
+        {
+            "id": "TEACHER",
+            "value": "Teacher"
+        },
+        {
+            "id": "SAVE",
+            "value": "Save"
+        },
+        {
+            "id": "CANCEL",
+            "value": "Cancel"
+        },
+        {
+            "id": "VISITOR",
+            "value": "Visitor"
         }
     ]
 };

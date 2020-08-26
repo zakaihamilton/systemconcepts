@@ -3,9 +3,11 @@ import Apps from "@/pages/Apps";
 
 import PeopleIcon from '@material-ui/icons/People';
 import Users from "@/pages/Users";
+import User, { getUserSection } from "@/pages/User";
 
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import Roles from "@/pages/Roles";
+import Role, { getRoleSection } from "@/pages/Role";
 
 import SettingsIcon from '@material-ui/icons/Settings';
 import Settings from "@/pages/Settings";
@@ -52,11 +54,25 @@ export default [
         Component: Users
     },
     {
+        id: "user",
+        name: "USER",
+        section: getUserSection,
+        icon: <PeopleIcon />,
+        Component: User
+    },
+    {
         sidebar: true,
         id: "roles",
         name: "ROLES_NAME",
         icon: <RecentActorsIcon />,
         Component: Roles
+    },
+    {
+        id: "role",
+        name: "ROLE",
+        section: getRoleSection,
+        icon: <RecentActorsIcon />,
+        Component: Role
     },
     {
         id: "languages",
