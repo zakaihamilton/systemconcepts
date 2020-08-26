@@ -103,7 +103,7 @@ export default function Users() {
             data={data}
             mapper={mapper}
             statusBar={statusBar}
-            depends={[mode, select, onRowClick]}
+            depends={[mode, select, onRowClick, translations]}
             rowHeight="6em"
         />
         {loading && <Progress />}

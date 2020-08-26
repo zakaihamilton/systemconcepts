@@ -28,7 +28,7 @@ export function ListItemWidget({ id, separator, viewType, depth, onClick, name, 
     let expandIcon = null;
     let rootItemClick = onClick;
     if (items && items.length) {
-        expandIcon = open ? <ExpandLess /> : <ExpandMore />;
+        expandIcon = open ? <ExpandLess className={styles.expandIcon} /> : <ExpandMore className={styles.expandIcon} />;
         rootItemClick = () => {
             setOpen(!open);
         };
