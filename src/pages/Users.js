@@ -10,6 +10,9 @@ import Select from '@/components/Widgets/Select';
 import ItemMenu from "./Users/ItemMenu";
 import { addPath } from "@/util/pages";
 import roles from "@/data/roles";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import RecentActorsIcon from '@material-ui/icons/RecentActors';
+import EmailIcon from '@material-ui/icons/Email';
 
 export const UsersStoreDefaults = {
     mode: "",
@@ -42,17 +45,20 @@ export default function Users() {
         {
             id: "id",
             title: translations.ID,
-            sortable: true
+            sortable: true,
+            icon: <AccountCircleIcon />
         },
         {
             id: "email",
             title: translations.EMAIL_ADDRESS,
-            sortable: true
+            sortable: true,
+            icon: <EmailIcon />
         },
         {
             id: "roleWidget",
             title: translations.ROLE,
-            sortable: "role"
+            sortable: "role",
+            icon: <RecentActorsIcon />
         }
     ];
 

@@ -18,6 +18,7 @@ import ImportExportIcon from '@material-ui/icons/ImportExport';
 import { exportData } from "@/util/importExport";
 import Row from "./Table/Row";
 import Navigator from "./Table/Navigator";
+import Label from "@/widgets/Label";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -98,8 +99,9 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
     }, [search, data, order, orderBy, ...depends]);
 
     const tableColumns = (columns || []).map((item, idx) => {
-        const { id, title, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
+        const { id, title, icon, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
         const sortId = typeof sortable === "string" ? sortable : id;
+        const label = <Label icon={icon} name={title} />;
         return <TableCell
             key={id || idx}
             align={align}
@@ -115,9 +117,9 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
                 {...labelProps}
                 dir={dir}
             >
-                {title}
+                {label}
             </TableSortLabel>}
-            {!sortable && title}
+            {!sortable && label}
         </TableCell>;
     });
 
