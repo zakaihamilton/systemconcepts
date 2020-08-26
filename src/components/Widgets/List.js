@@ -13,7 +13,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { MainStore } from "@/components/Main";
 
-export function ListItemWidget({ separator, viewType, depth, onClick, name, items, selected, description, icon, avatar, action }) {
+export function ListItemWidget({ id, separator, viewType, depth, onClick, name, items, selected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const itemClassName = useStyles(styles, {
@@ -35,7 +35,7 @@ export function ListItemWidget({ separator, viewType, depth, onClick, name, item
     }
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget depth={depth + 1} key={item.id} onClick={() => onClick(id)} viewType={viewType} selected={selected === item.id} {...props} />
+        return <ListItemWidget id={id} depth={depth + 1} key={item.id} onClick={() => onClick(id)} viewType={viewType} selected={selected} {...props} />
     });
     const style = {};
     if (direction === "rtl") {
@@ -45,7 +45,7 @@ export function ListItemWidget({ separator, viewType, depth, onClick, name, item
         style.paddingLeft = (depth * 1.5) + "em";
     }
     return <>
-        <ListItem style={style} className={itemClassName} button selected={selected} onClick={rootItemClick}>
+        <ListItem style={style} className={itemClassName} button selected={selected === id} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
                     {actionIcon}
@@ -88,7 +88,7 @@ export default function ListWidget({ reverse, items, onClick, state, viewType })
 
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget key={item.id} onClick={() => onItemClick(id)} depth={1} viewType={viewType} selected={selected === item.id} {...props} />
+        return <ListItemWidget id={id} key={item.id} onClick={() => onItemClick(id)} depth={1} viewType={viewType} selected={selected} {...props} />
     });
 
     return <List className={className} component="nav">

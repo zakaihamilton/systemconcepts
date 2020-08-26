@@ -53,6 +53,10 @@ export default {
             "value": "Modo Escuro"
         },
         {
+            "id": "LIGHT_MODE",
+            "value": "Modo de Luz"
+        },
+        {
             "id": "DIRECTION",
             "value": "Direção"
         },

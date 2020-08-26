@@ -8,7 +8,7 @@ import LanguageIcon from '@material-ui/icons/Language';
 import languages from "@/data/languages";
 
 export default function Settings() {
-    const { darkMode, menuViewList } = MainStore.useState();
+    const { language, darkMode, menuViewList } = MainStore.useState();
     const translations = useTranslations();
 
     const toggleDarkMode = () => {
@@ -43,7 +43,8 @@ export default function Settings() {
                     ...language,
                     onClick: () => setLanguage(language.id)
                 }
-            })
+            }),
+            selected: language
         }
     ];
 
