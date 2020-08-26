@@ -10,7 +10,7 @@ import Menu from "@/widgets/Menu";
 import Tooltip from '@material-ui/core/Tooltip';
 import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
-import Checkbox from '@/components/Widgets/Checkbox';
+import Select from '@/components/Widgets/Select';
 import Fab from "@/widgets/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import { addPath } from "@/util/pages";
@@ -63,7 +63,7 @@ export default function Roles() {
                 </Tooltip>
             </IconButton>
         </Menu>;
-        const selectIcon = select && <Checkbox select={select} item={item} store={RolesStore} />;
+        const selectIcon = select && <Select select={select} item={item} store={RolesStore} />;
 
         return {
             ...item,

@@ -1,8 +1,8 @@
 import React from "react";
 import Checkbox from "@material-ui/core/Checkbox";
-import styles from "./CheckBox.module.scss";
+import styles from "./Select.module.scss";
 
-export default function CheckboxWidget({ item, store, select }) {
+export default function SelectWidget({ item, store, select }) {
   const { id } = item;
   const selectItem = (event) => {
     const { checked } = event.target;

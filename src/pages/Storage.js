@@ -12,7 +12,7 @@ import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@/util/pages";
 import storage from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
-import Checkbox from '@/components/Widgets/Checkbox';
+import Select from '@/components/Widgets/Select';
 import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
 import { abbreviateSize } from "@/util/string";
@@ -124,7 +124,7 @@ export default function Storage({ path = "" }) {
         } else {
             nameWidget = <Label key={id} icon={<>
                 {!select && item.type && !mode && <ItemMenu item={result} />}
-                {select && <Checkbox select={select} item={result} store={StorageStore} />}
+                {select && <Select select={select} item={result} store={StorageStore} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}
                 </Tooltip>

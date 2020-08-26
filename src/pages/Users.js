@@ -6,7 +6,7 @@ import Progress from "@/widgets/Progress";
 import Label from "@/widgets/Label";
 import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
-import Checkbox from '@/components/Widgets/Checkbox';
+import Select from '@/components/Widgets/Select';
 import ItemMenu from "./Users/ItemMenu";
 import { addPath } from "@/util/pages";
 import roles from "@/data/roles";
@@ -61,7 +61,7 @@ export default function Users() {
         const name = [firstName, lastName].filter(Boolean).join(" ");
 
         const menuIcon = !select && <ItemMenu item={item} />;
-        const selectIcon = select && <Checkbox select={select} item={item} store={UsersStore} />;
+        const selectIcon = select && <Select select={select} item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
 
         return {
