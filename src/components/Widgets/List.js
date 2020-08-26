@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -8,8 +8,13 @@ import styles from "./List.module.scss";
 import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { useStyles } from "@/util/styles";
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import { MainStore } from "@/components/Main";
 
-export function ListItemWidget({ separator, viewType, onClick, name, selected, description, icon, avatar, action }) {
+export function ListItemWidget({ separator, viewType, depth, onClick, name, items, selected, description, icon, avatar, action }) {
+    const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const itemClassName = useStyles(styles, {
         itemList: viewType === "List",
@@ -19,12 +24,28 @@ export function ListItemWidget({ separator, viewType, onClick, name, selected, d
         iconContainerList: viewType === "List",
         iconContainerIconList: viewType === "IconList"
     });
-    const iconClassName = useStyles(styles, {
-        iconList: viewType === "List",
-        iconIconList: viewType === "IconList"
+    const [open, setOpen] = useState(false);
+    let expandIcon = null;
+    let rootItemClick = onClick;
+    if (items && items.length) {
+        expandIcon = open ? <ExpandLess /> : <ExpandMore />;
+        rootItemClick = () => {
+            setOpen(!open);
+        };
+    }
+    const elements = (items || []).map(item => {
+        const { id, ...props } = item;
+        return <ListItemWidget depth={depth + 1} key={item.id} onClick={() => onClick(id)} viewType={viewType} selected={selected === item.id} {...props} />
     });
+    const style = {};
+    if (direction === "rtl") {
+        style.paddingRight = (depth * 1.5) + "em";
+    }
+    else {
+        style.paddingLeft = (depth * 1.5) + "em";
+    }
     return <>
-        <ListItem className={itemClassName} button selected={selected} onClick={onClick}>
+        <ListItem style={style} className={itemClassName} button selected={selected} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
                     {actionIcon}
@@ -39,7 +60,13 @@ export function ListItemWidget({ separator, viewType, onClick, name, selected, d
                     {actionIcon}
                 </IconButton>
             </ListItemSecondaryAction>}
+            {expandIcon}
         </ListItem>
+        {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+                {open && elements}
+            </List>
+        </Collapse>}
         {viewType === "List" && separator && <Divider />}
     </>;
 }
@@ -61,7 +88,7 @@ export default function ListWidget({ reverse, items, onClick, state, viewType })
 
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget key={item.id} onClick={() => onItemClick(id)} viewType={viewType} selected={selected === item.id} {...props} />
+        return <ListItemWidget key={item.id} onClick={() => onItemClick(id)} depth={1} viewType={viewType} selected={selected === item.id} {...props} />
     });
 
     return <List className={className} component="nav">
