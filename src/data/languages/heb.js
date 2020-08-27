@@ -354,7 +354,7 @@ export default {
         },
         {
             "id": "HAVE_ACCOUNT",
-            "value": "כבר יש לך חשבון? תתחבר"
+            "value": "כבר יש לך חשבון? התחבר"
         },
         {
             "id": "EMPTY_EMAIL",

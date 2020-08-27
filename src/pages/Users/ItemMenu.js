@@ -7,6 +7,7 @@ import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
+import { fetchJSON } from "@/util/fetch";
 
 export default function ItemMenuWidget({ item }) {
     const [ref, isHover] = useHover();

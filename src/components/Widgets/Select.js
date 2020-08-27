@@ -17,7 +17,6 @@ export default function SelectWidget({ item, store, select }) {
   };
 
   const checked = select.find(item => item.id === id) ? true : false;
-  console.log("checked", checked, "id", id);
 
   return (<Checkbox
     color="default"

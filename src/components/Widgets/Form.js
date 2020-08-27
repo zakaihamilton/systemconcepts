@@ -17,7 +17,6 @@ function FormItem({ child, record }) {
     useEffect(() => {
         if (record && !Object.is(record[id], value)) {
             record[id] = value;
-            console.log(record);
         }
     }, [value]);
 
