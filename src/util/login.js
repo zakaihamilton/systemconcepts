@@ -1,5 +1,13 @@
 const { findRecord, insertRecord, replaceRecord } = require("./mongo");
 const { compare, hash } = require("bcrypt");
+const fs = require("fs");
+
+const sendResetMail = require('gmail-send')({
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASSWORD,
+    to: process.env.GMAIL_USER,
+    subject: 'Reset Password',
+});
 
 export async function login({ id, password, hash }) {
     let user = null;
@@ -77,4 +85,45 @@ export async function changePassword({ id, oldPassword, newPassword, salt = 10 }
         }
     });
     return result;
+}
+
+export async function resetPassword({ id, code, newPassword, salt = 10 }) {
+    let user = await login({ id, hash: code });
+    let result = null;
+    try {
+        result = await hash(newPassword, salt);
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+    }
+    await replaceRecord({
+        collectionName: "users",
+        query: { id },
+        record: {
+            ...user,
+            hash: result
+        }
+    });
+    return result;
+}
+
+export async function sendResetEmail({ id }) {
+    let user = null;
+    try {
+        user = await findRecord({ collectionName: "users", query: { id } });
+    }
+    catch (err) {
+        console.error(err);
+        throw "USER_NOT_FOUND";
+    }
+    if (!user) {
+        throw "USER_NOT_FOUND";
+    }
+    let emailText = await fs.promises.readFile("src/data/resetPasswordTemplate.txt", "utf8");
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+    emailText = emailText.replace(/{{name}}/g, fullName);
+    emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "/resetpassword%252F" + user.hash);
+    console.log(emailText);
+    //const result = await sendResetMail({ text: emailText });
 }

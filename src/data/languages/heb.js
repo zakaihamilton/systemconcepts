@@ -341,6 +341,10 @@ export default {
             "value": "שכחת סיסמה?"
         },
         {
+            "id": "RESET_PASSWORD",
+            "value": "איפוס סיסמה"
+        },
+        {
             "id": "SIGN_UP_TEXT",
             "value": "אין לך חשבון? הרשם"
         },

@@ -341,6 +341,10 @@ export default {
             "value": "Forgot password?"
         },
         {
+            "id": "RESET_PASSWORD",
+            "value": "Reset Password"
+        },
+        {
             "id": "SIGN_UP_TEXT",
             "value": "Don't have an account? Sign Up"
         },

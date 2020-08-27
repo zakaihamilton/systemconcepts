@@ -1,4 +1,4 @@
-const { login, register, changePassword } = require("../../src/util/login");
+const { login, register, changePassword, resetPassword, sendResetEmail } = require("../../src/util/login");
 
 module.exports = async (req, res) => {
     if (req.method === "GET") {
@@ -21,7 +21,29 @@ module.exports = async (req, res) => {
     }
     else if (req.method === "PUT") {
         const headers = req.headers || {};
-        if (headers.oldpassword && headers.newpassword) {
+        if (headers.reset) {
+            try {
+                const { id } = headers;
+                await sendResetEmail({ id });
+                res.status(200).json({ });
+            }
+            catch (err) {
+                console.error("login error: ", err);
+                res.status(200).json({ err: err.toString() });
+            }
+        }
+        else if (headers.newpassword && headers.code) {
+            try {
+                const { id, code, newpassword } = headers;
+                const hash = await resetPassword({ id, code, newPassword: newpassword });
+                res.status(200).json({ hash });
+            }
+            catch (err) {
+                console.error("login error: ", err);
+                res.status(200).json({ err: err.toString() });
+            }
+        }
+        else if (headers.oldpassword && headers.newpassword) {
             try {
                 const { id, oldpassword, newpassword } = headers;
                 const hash = await changePassword({ id, oldPassword: oldpassword, newPassword: newpassword });

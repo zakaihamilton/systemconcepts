@@ -33,6 +33,7 @@ import CreateIcon from '@material-ui/icons/Create';
 import SignUp from "@/pages/SignUp";
 
 import ChangePassword from "@/pages/ChangePassword";
+import ResetPassword, { getResetSection } from "@/pages/ResetPassword";
 
 export default [
     {
@@ -121,5 +122,12 @@ export default [
         name: "CHANGE_PASSWORD",
         icon: <VpnKeyIcon />,
         Component: ChangePassword
+    },
+    {
+        id: "resetpassword",
+        name: "RESET_PASSWORD",
+        icon: <VpnKeyIcon />,
+        Component: ResetPassword,
+        section: getResetSection
     }
 ];

@@ -209,7 +209,7 @@ export default function SignIn() {
                             </Button>
                         </Grid>
                         {!isSignedIn && <Grid item xs={5}>
-                            <Link className={classes.link} href="#" variant="body2">
+                            <Link className={classes.link} href="#settings/resetpassword" variant="body2">
                                 {translations.FORGET_PASSWORD}
                             </Link>
                         </Grid>}

@@ -345,6 +345,10 @@ export default {
             "value": "Esqueceu a senha?"
         },
         {
+            "id": "RESET_PASSWORD",
+            "value": "Redefinir senha"
+        },
+        {
             "id": "SIGN_UP_TEXT",
             "value": "Não tem conta? Inscreva-se"
         },
