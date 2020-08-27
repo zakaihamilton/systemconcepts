@@ -69,9 +69,10 @@ export async function replaceRecord({ query, record, ...params }) {
 }
 
 export async function handleRequest({ collectionName, req, res }) {
+    const headers = req.headers || {};
     if (req.method === "GET") {
         try {
-            const { id } = req.headers;
+            const { id } = headers;
             let result = null;
             if (id) {
                 result = await findRecord({ query: { id }, collectionName });
@@ -87,7 +88,7 @@ export async function handleRequest({ collectionName, req, res }) {
         }
     } else if (req.method === "DELETE") {
         try {
-            let { ids } = req.headers || {};
+            let { ids } = headers;
             if (!Array.isArray(ids)) {
                 ids = [ids];
             }

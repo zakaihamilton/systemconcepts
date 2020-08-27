@@ -22,7 +22,7 @@ export async function login({ id, password, hash }) {
     else if (hash !== user.hash) {
         throw "WRONG_PASSWORD";
     }
-    return { roleId: user.roleId, hash: user.hash };
+    return user;
 }
 
 export async function register({ id, firstName, lastName, email, password, salt = 10 }) {
@@ -59,21 +59,8 @@ export async function register({ id, firstName, lastName, email, password, salt 
 }
 
 export async function changePassword({ id, oldPassword, newPassword, salt = 10 }) {
-    let user = null;
-    try {
-        user = await findRecord({ collectionName: "users", query: { id } });
-    }
-    catch (err) {
-        console.error(err);
-        throw "USER_NOT_FOUND";
-    }
-    if (!user) {
-        throw "USER_NOT_FOUND";
-    }
-    let result = await compare(oldPassword, user.hash);
-    if (!result) {
-        throw "WRONG_PASSWORD";
-    }
+    let user = await login({ id, password: oldPassword });
+    let result = null;
     try {
         result = await hash(newPassword, salt);
     }
