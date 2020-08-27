@@ -447,6 +447,10 @@ export default {
         {
             "id": "CHANGE_PASSWORD",
             "value": "שינוי סיסמה"
+        },
+        {
+            "id": "RESET_EMAIL_SENT",
+            "value": "אימייל נשלח לחשבון שלך כדי שתוכל לאפס את הסיסמה."
         }
     ]
 };

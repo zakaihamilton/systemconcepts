@@ -451,6 +451,10 @@ export default {
         {
             "id": "CHANGE_PASSWORD",
             "value": "Mudar senha"
+        },
+        {
+            "id": "RESET_EMAIL_SENT",
+            "value": "Um e-mail foi enviado para sua conta para redefinir sua senha."
         }
     ]
 };

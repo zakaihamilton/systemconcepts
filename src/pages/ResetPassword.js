@@ -58,6 +58,13 @@ const useStyles = makeStyles((theme) => ({
         margin: "0.5em",
         width: "100%",
         textAlign: "center"
+    },
+    notification: {
+        borderRadius: "0.3em",
+        padding: "0.5em",
+        margin: "0.5em",
+        width: "100%",
+        textAlign: "center"
     }
 }));
 
@@ -154,6 +161,9 @@ export default function ResetPassword({ path = "" }) {
                 </Typography>
                 {error && <Typography variant="h6" className={classes.error}>
                     {error}
+                </Typography>}
+                {emailSent && !hasCode && <Typography variant="h6" className={classes.notification}>
+                    {translations.RESET_EMAIL_SENT}
                 </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>

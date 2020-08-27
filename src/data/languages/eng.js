@@ -451,6 +451,10 @@ export default {
         {
             "id": "CHANGE_PASSWORD",
             "value": "Change Password"
+        },
+        {
+            "id": "RESET_EMAIL_SENT",
+            "value": "An email has been sent to your account to reset your password."
         }
     ]
 };

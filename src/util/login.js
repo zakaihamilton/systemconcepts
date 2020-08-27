@@ -5,7 +5,7 @@ const fs = require("fs");
 const sendResetMail = require('gmail-send')({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASSWORD,
-    to: process.env.GMAIL_USER,
+    from: process.env.GMAIL_FROM,
     subject: 'Reset Password',
 });
 
@@ -124,6 +124,5 @@ export async function sendResetEmail({ id }) {
     const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
     emailText = emailText.replace(/{{name}}/g, fullName);
     emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "/resetpassword%252F" + user.hash);
-    console.log(emailText);
-    //const result = await sendResetMail({ text: emailText });
+    await sendResetMail({ to: user.email, text: emailText });
 }
