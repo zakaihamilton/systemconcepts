@@ -362,7 +362,7 @@ export default {
         },
         {
             "id": "BAD_EMAIL",
-            "value": "כתובת האימייל הוא לא תקיו!"
+            "value": "כתובת האימייל אינה תקינה!"
         },
         {
             "id": "EMPTY_PASSWORD",
