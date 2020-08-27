@@ -162,10 +162,10 @@ export default function SignIn() {
                             <Input
                                 state={idState}
                                 required
-                                id="userid"
+                                id="username"
                                 label={translations.ID}
-                                name="userid"
-                                autoComplete="userid"
+                                name="username"
+                                autoComplete="username"
                                 validate={validate}
                                 readOnly={isSignedIn}
                                 onValidate={onValidateField}

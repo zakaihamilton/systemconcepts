@@ -35,7 +35,7 @@ export default function User({ path = "" }) {
         goBackPage();
     };
 
-    const actions = [
+    const actions = <>
         <Button
             onClick={onSubmit}
             variant="contained"
@@ -43,7 +43,7 @@ export default function User({ path = "" }) {
             size="large"
         >
             {translations.SAVE}
-        </Button>,
+        </Button>
         <Button
             onClick={onCancel}
             variant="contained"
@@ -51,7 +51,8 @@ export default function User({ path = "" }) {
             size="large"
         >
             {translations.CANCEL}
-        </Button>];
+        </Button>
+    </>;
 
     return <Form actions={actions} loading={loading}>
         <FormGroup record={data}>
