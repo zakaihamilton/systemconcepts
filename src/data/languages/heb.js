@@ -9,31 +9,31 @@ export default {
             "value": "עקרונות המערכת"
         },
         {
-            "id": "APPS_NAME",
+            "id": "APPS",
             "value": "אפליקציות"
         },
         {
-            "id": "USERS_NAME",
+            "id": "USERS",
             "value": "משתמשים"
         },
         {
-            "id": "ROLES_NAME",
+            "id": "ROLES",
             "value": "תפקידים"
         },
         {
-            "id": "LANGUAGES_NAME",
+            "id": "LANGUAGES",
             "value": "שפות"
         },
         {
-            "id": "FONTSIZES_NAME",
+            "id": "FONTSIZES",
             "value": "גודל גופנים"
         },
         {
-            "id": "SETTINGS_NAME",
+            "id": "SETTINGS",
             "value": "הגדרות"
         },
         {
-            "id": "TRANSLATIONS_NAME",
+            "id": "TRANSLATIONS",
             "value": "תרגומים"
         },
         {
@@ -149,7 +149,7 @@ export default {
             "value": "גדול מאוד"
         },
         {
-            "id": "STORAGE_NAME",
+            "id": "STORAGE",
             "value": "אחסון"
         },
         {
@@ -205,7 +205,7 @@ export default {
             "value": "${count} פריטים שנבחרו"
         },
         {
-            "id": "EDITOR_NAME",
+            "id": "EDITOR",
             "value": "עורך"
         },
         {
@@ -297,11 +297,11 @@ export default {
             "value": "תפריט"
         },
         {
-            "id": "SIGN_IN_NAME",
+            "id": "SIGN_IN",
             "value": "התחברות"
         },
         {
-            "id": "SIGN_UP_NAME",
+            "id": "SIGN_UP",
             "value": "הרשם"
         },
         {
@@ -323,6 +323,14 @@ export default {
         {
             "id": "PASSWORD",
             "value": "סיסמה"
+        },
+        {
+            "id": "OLD_PASSWORD",
+            "value": "סיסמה ישנה"
+        },
+        {
+            "id": "NEW_PASSWORD",
+            "value": "סיסמה חדשה"
         },
         {
             "id": "REMEMBER_ME",
@@ -431,6 +439,10 @@ export default {
         {
             "id": "VISITOR",
             "value": "אורח"
+        },
+        {
+            "id": "CHANGE_PASSWORD",
+            "value": "שינוי סיסמה"
         }
     ]
 };

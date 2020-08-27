@@ -9,31 +9,31 @@ export default {
             "value": "System Concepts"
         },
         {
-            "id": "APPS_NAME",
+            "id": "APPS",
             "value": "Apps"
         },
         {
-            "id": "USERS_NAME",
+            "id": "USERS",
             "value": "Users"
         },
         {
-            "id": "ROLES_NAME",
+            "id": "ROLES",
             "value": "Roles"
         },
         {
-            "id": "LANGUAGES_NAME",
+            "id": "LANGUAGES",
             "value": "Languages"
         },
         {
-            "id": "FONTSIZES_NAME",
+            "id": "FONTSIZES",
             "value": "Font Sizes"
         },
         {
-            "id": "SETTINGS_NAME",
+            "id": "SETTINGS",
             "value": "Settings"
         },
         {
-            "id": "TRANSLATIONS_NAME",
+            "id": "TRANSLATIONS",
             "value": "Translations"
         },
         {
@@ -149,7 +149,7 @@ export default {
             "value": "Very Large"
         },
         {
-            "id": "STORAGE_NAME",
+            "id": "STORAGE",
             "value": "Storage"
         },
         {
@@ -205,7 +205,7 @@ export default {
             "value": "${count} Selected Items"
         },
         {
-            "id": "EDITOR_NAME",
+            "id": "EDITOR",
             "value": "Editor"
         },
         {
@@ -297,11 +297,11 @@ export default {
             "value": "Menu"
         },
         {
-            "id": "SIGN_IN_NAME",
+            "id": "SIGN_IN",
             "value": "Sign In"
         },
         {
-            "id": "SIGN_UP_NAME",
+            "id": "SIGN_UP",
             "value": "Sign Up"
         },
         {
@@ -323,6 +323,14 @@ export default {
         {
             "id": "PASSWORD",
             "value": "Password"
+        },
+        {
+            "id": "OLD_PASSWORD",
+            "value": "Old Password"
+        },
+        {
+            "id": "NEW_PASSWORD",
+            "value": "New Password"
         },
         {
             "id": "REMEMBER_ME",
@@ -435,6 +443,10 @@ export default {
         {
             "id": "VISITOR",
             "value": "Visitor"
+        },
+        {
+            "id": "CHANGE_PASSWORD",
+            "value": "Change Password"
         }
     ]
 };

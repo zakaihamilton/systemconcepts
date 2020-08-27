@@ -199,7 +199,7 @@ export default function SignIn() {
                         <Grid item xs={12}>
                             <Button
                                 onClick={onSubmit}
-                                disabled={!(isInvalid || inProgress)}
+                                disabled={isInvalid || inProgress}
                                 fullWidth
                                 variant="contained"
                                 color="primary"
@@ -216,6 +216,11 @@ export default function SignIn() {
                         {!isSignedIn && <Grid item xs={7}>
                             <Link className={classes.link} href="#settings/signup" variant="body2">
                                 {translations.SIGN_UP_TEXT}
+                            </Link>
+                        </Grid>}
+                        {isSignedIn && <Grid item xs={5}>
+                            <Link className={classes.link} href="#settings/changepassword" variant="body2">
+                                {translations.CHANGE_PASSWORD}
                             </Link>
                         </Grid>}
                     </Grid>

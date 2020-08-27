@@ -32,10 +32,12 @@ import SignIn from "@/pages/SignIn";
 import CreateIcon from '@material-ui/icons/Create';
 import SignUp from "@/pages/SignUp";
 
+import ChangePassword from "@/pages/ChangePassword";
+
 export default [
     {
         id: "apps",
-        name: "APPS_NAME",
+        name: "APPS",
         root: true,
         icon: <AppsIcon />,
         Component: Apps,
@@ -45,7 +47,7 @@ export default [
     {
         sidebar: true,
         id: "users",
-        name: "USERS_NAME",
+        name: "USERS",
         icon: <PeopleIcon />,
         Component: Users
     },
@@ -58,25 +60,25 @@ export default [
     },
     {
         id: "languages",
-        name: "LANGUAGES_NAME",
+        name: "LANGUAGES",
         icon: <LanguageIcon />,
         Component: Languages
     },
     {
         id: "translations",
-        name: "TRANSLATIONS_NAME",
+        name: "TRANSLATIONS",
         icon: <TranslateIcon />,
         Component: Translations
     },
     {
         id: "fontSizes",
-        name: "FONTSIZES_NAME",
+        name: "FONTSIZES",
         icon: <FormatSizeIcon />,
         Component: FontSizes
     },
     {
         id: "storage",
-        name: "STORAGE_NAME",
+        name: "STORAGE",
         icon: <StorageIcon />,
         Component: Storage,
         section: getStorageSection,
@@ -85,7 +87,7 @@ export default [
     {
         sidebar: true,
         id: "settings",
-        name: "SETTINGS_NAME",
+        name: "SETTINGS",
         icon: <SettingsIcon />,
         Component: Settings
     },
@@ -97,21 +99,27 @@ export default [
     },
     {
         id: "editor",
-        name: "EDITOR_NAME",
+        name: "EDITOR",
         icon: <EditIcon />,
         Component: Editor,
         showTooltip: true
     },
     {
         id: "signin",
-        name: "SIGN_IN_NAME",
+        name: "SIGN_IN",
         icon: <VpnKeyIcon />,
         Component: SignIn
     },
     {
         id: "signup",
-        name: "SIGN_UP_NAME",
+        name: "SIGN_UP",
         icon: <CreateIcon />,
         Component: SignUp
+    },
+    {
+        id: "changepassword",
+        name: "CHANGE_PASSWORD",
+        icon: <VpnKeyIcon />,
+        Component: ChangePassword
     }
 ];

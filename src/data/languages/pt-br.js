@@ -9,31 +9,31 @@ export default {
             "value": "System Concepts"
         },
         {
-            "id": "APPS_NAME",
+            "id": "APPS",
             "value": "Apps"
         },
         {
-            "id": "USERS_NAME",
+            "id": "USERS",
             "value": "Usuários"
         },
         {
-            "id": "ROLES_NAME",
+            "id": "ROLES",
             "value": "Perfis"
         },
         {
-            "id": "LANGUAGES_NAME",
+            "id": "LANGUAGES",
             "value": "Idiomas"
         },
         {
-            "id": "FONTSIZES_NAME",
+            "id": "FONTSIZES",
             "value": "Tamanhos Fonte"
         },
         {
-            "id": "SETTINGS_NAME",
+            "id": "SETTINGS",
             "value": "Configurações"
         },
         {
-            "id": "TRANSLATIONS_NAME",
+            "id": "TRANSLATIONS",
             "value": "Traduções"
         },
         {
@@ -149,7 +149,7 @@ export default {
             "value": "Muito Grande"
         },
         {
-            "id": "STORAGE_NAME",
+            "id": "STORAGE",
             "value": "Armazenamento"
         },
         {
@@ -205,7 +205,7 @@ export default {
             "value": "${count} Selecionados Items"
         },
         {
-            "id": "EDITOR_NAME",
+            "id": "EDITOR",
             "value": "Editor"
         },
         {
@@ -297,15 +297,15 @@ export default {
             "value": "Menu"
         },
         {
-            "id": "LOGIN_NAME",
+            "id": "LOGIN",
             "value": "Login"
         },
         {
-            "id": "SIGN_IN_NAME",
+            "id": "SIGN_IN",
             "value": "Entrar"
         },
         {
-            "id": "SIGN_UP_NAME",
+            "id": "SIGN_UP",
             "value": "Inscreva-se"
         },
         {
@@ -329,6 +329,14 @@ export default {
             "value": "Senha"
         },
         {
+            "id": "OLD_PASSWORD",
+            "value": "Senha Antiga"
+        },
+        {
+            "id": "NEW_PASSWORD",
+            "value": "Nova senha"
+        },
+        {
             "id": "REMEMBER_ME",
             "value": "Lembrar-me"
         },
@@ -345,7 +353,7 @@ export default {
             "value": "Primeiro nome"
         },
         {
-            "id": "LAST_NAME",
+            "id": "LAST",
             "value": "Último nome"
         },
         {
@@ -435,6 +443,10 @@ export default {
         {
             "id": "VISITOR",
             "value": "Visitante"
+        },
+        {
+            "id": "CHANGE_PASSWORD",
+            "value": "Mudar senha"
         }
     ]
 };

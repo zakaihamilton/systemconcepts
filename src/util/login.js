@@ -1,4 +1,4 @@
-const { findRecord, insertRecord } = require("./mongo");
+const { findRecord, insertRecord, replaceRecord } = require("./mongo");
 const { compare, hash } = require("bcrypt");
 
 export async function login({ id, password, hash }) {
@@ -53,6 +53,40 @@ export async function register({ id, firstName, lastName, email, password, salt 
             date,
             utc,
             role
+        }
+    });
+    return result;
+}
+
+export async function changePassword({ id, oldPassword, newPassword, salt = 10 }) {
+    let user = null;
+    try {
+        user = await findRecord({ collectionName: "users", query: { id } });
+    }
+    catch (err) {
+        console.error(err);
+        throw "USER_NOT_FOUND";
+    }
+    if (!user) {
+        throw "USER_NOT_FOUND";
+    }
+    let result = await compare(oldPassword, user.hash);
+    if (!result) {
+        throw "WRONG_PASSWORD";
+    }
+    try {
+        result = await hash(newPassword, salt);
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+    }
+    await replaceRecord({
+        collectionName: "users",
+        query: { id },
+        record: {
+            ...user,
+            hash: result
         }
     });
     return result;

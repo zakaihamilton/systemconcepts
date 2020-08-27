@@ -54,33 +54,19 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function SignUp() {
+export default function ChangePassword() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();
-    const idState = useState("");
-    const firstNameState = useState("");
-    const lastNameState = useState("");
-    const emailState = useState("");
-    const passwordState = useState("");
+    const idState = useState(Cookies.get("id"));
+    const oldPasswordState = useState("");
+    const newPasswordState = useState("");
     const [remember, setRemember] = useState(true);
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
 
     const changeRemember = event => setRemember(event.target.value);
-
-    const onValidateEmail = text => {
-        let error = "";
-        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
-        if (!text) {
-            error = translations.EMPTY_EMAIL;
-        }
-        else if (!emailPattern.test(text)) {
-            error = translations.BAD_EMAIL;
-        }
-        return error;
-    };
 
     const onValidatePassword = text => {
         let error = "";
@@ -99,10 +85,8 @@ export default function SignUp() {
     };
 
     const invalidFields =
-        onValidateEmail(emailState[0]) ||
-        onValidatePassword(passwordState[0]) ||
-        onValidateField(firstNameState[0]) ||
-        onValidateField(lastNameState[0]) ||
+        onValidatePassword(oldPasswordState[0]) ||
+        onValidatePassword(newPasswordState[0]) ||
         onValidateField(idState[0]);
     const isInvalid = validate && invalidFields;
 
@@ -110,33 +94,26 @@ export default function SignUp() {
         setValidate(true);
         if (!invalidFields && !inProgress) {
             const [id] = idState;
-            const [firstName] = firstNameState;
-            const [lastName] = lastNameState;
-            const [email] = emailState;
-            const [password] = passwordState;
+            const [oldPassword] = oldPasswordState;
+            const [newPassword] = newPasswordState;
             setProgress(true);
             fetchJSON("/api/login", {
                 method: "PUT",
                 headers: {
                     id,
-                    first_name: firstName,
-                    last_name: lastName,
-                    email,
-                    password
+                    oldpassword: oldPassword,
+                    newpassword: newPassword
                 }
             }).then(({ err, hash }) => {
                 if (err) {
                     console.error(err);
                     throw err;
                 }
-                Cookies.set("id", id, remember && { expires: 60 });
                 Cookies.set("hash", hash, remember && { expires: 60 });
                 setProgress(false);
                 setError("");
                 setPath("");
             }).catch(err => {
-                Cookies.set("id", "");
-                Cookies.set("hash", "");
                 setError(translations[err] || String(err));
                 setProgress(false);
             });
@@ -157,7 +134,7 @@ export default function SignUp() {
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
-                    {translations.SIGN_UP}
+                    {translations.CHANGE_PASSWORD}
                 </Typography>
                 {error && <Typography variant="h6" className={classes.error}>
                     {error}
@@ -168,6 +145,7 @@ export default function SignUp() {
                             <Input
                                 state={idState}
                                 required
+                                readOnly={Cookies.get("id")}
                                 id="userid"
                                 label={translations.ID}
                                 name="userid"
@@ -178,53 +156,31 @@ export default function SignUp() {
                                 icon={<AccountCircleIcon />}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Input
-                                state={firstNameState}
-                                required
-                                name="fname"
-                                label={translations.FIRST_NAME}
-                                id="fname"
-                                autoComplete="fname"
-                                validate={validate}
-                                onValidate={onValidateField}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Input
-                                state={lastNameState}
-                                required
-                                name="lname"
-                                label={translations.LAST_NAME}
-                                id="lname"
-                                autoComplete="lname"
-                                validate={validate}
-                                onValidate={onValidateField}
-                            />
-                        </Grid>
                         <Grid item xs={12}>
                             <Input
-                                state={emailState}
+                                state={oldPasswordState}
                                 required
-                                id="email"
-                                label={translations.EMAIL_ADDRESS}
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                validate={validate}
-                                onValidate={onValidateEmail}
-                                icon={<EmailIcon />}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Input
-                                state={passwordState}
-                                required
-                                name="password"
-                                label={translations.PASSWORD}
+                                name="oldpassword"
+                                label={translations.OLD_PASSWORD}
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
+                                validate={validate}
+                                onValidate={onValidatePassword}
+                                icon={<VpnKeyIcon />}
+                                onKeyDown={onKeyDown}
+                            />
+
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Input
+                                state={newPasswordState}
+                                required
+                                name="newpassword"
+                                label={translations.NEW_PASSWORD}
+                                type="password"
+                                id="newpassword"
+                                autoComplete="new-password"
                                 validate={validate}
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
@@ -249,15 +205,8 @@ export default function SignUp() {
                         disabled={!!(isInvalid || inProgress)}
                         onClick={onSubmit}
                     >
-                        {translations.SIGN_UP}
+                        {translations.CHANGE_PASSWORD}
                     </Button>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Link href="#settings/signin" variant="body2">
-                                {translations.HAVE_ACCOUNT}
-                            </Link>
-                        </Grid>
-                    </Grid>
                 </form>
             </div>
         </Container>
