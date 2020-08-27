@@ -139,7 +139,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
     const itemsPerPage = parseInt(size.height / rowHeightInPixels) - 1;
     const pageCount = parseInt((items.length / itemsPerPage) + ((items.length % itemsPerPage) > 0 ? 1 : 0));
     const startIdx = offset;
-    const endIdx = startIdx + itemsPerPage;
+    const endIdx = startIdx + itemsPerPage - 1;
     const pageIndex = parseInt(startIdx / itemsPerPage);
 
     const setPageIndex = (index) => {
