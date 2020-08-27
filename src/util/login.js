@@ -123,6 +123,6 @@ export async function sendResetEmail({ id }) {
     let emailText = await fs.promises.readFile("src/data/resetPasswordTemplate.txt", "utf8");
     const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
     emailText = emailText.replace(/{{name}}/g, fullName);
-    emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/resetpassword%252F" + user.hash);
+    emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/" + encodeURIComponent("resetpassword/" + user.hash));
     await sendResetMail({ to: user.email, text: emailText });
 }
