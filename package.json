@@ -13,6 +13,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "bcrypt": "^5.0.0",
+    "cookie": "^0.4.1",
     "eslint": "^7.5.0",
     "fontsource-roboto": "^2.2.6",
     "gmail-send": "^1.8.10",

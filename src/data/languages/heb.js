@@ -451,6 +451,10 @@ export default {
         {
             "id": "RESET_EMAIL_SENT",
             "value": "אימייל נשלח לחשבון שלך כדי שתוכל לאפס את הסיסמה."
+        },
+        {
+            "id": "ACCESS_DENIED",
+            "value": "גישה חסום"
         }
     ]
 };

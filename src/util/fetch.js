@@ -28,9 +28,11 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const [inProgress, setProgress] = useState(false);
     const [result, setResult] = useState(null);
     const [, setTimeoutHandle] = useState(null);
+    const [error, setError] = useState("");
     useEffect(() => {
         if (cond) {
             setResult(null);
+            setError("");
             setProgress(true);
             setTimeoutHandle(handle => {
                 if (handle) {
@@ -42,6 +44,9 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
                     fetchJSON(url, options).then(data => {
                         setResult(data);
                         setProgress(false);
+                    }).catch(err => {
+                        setProgress(false);
+                        setError(err);
                     });
                 }, delay);
                 return handle;
@@ -57,5 +62,5 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
             });
         }
     }, depends);
-    return [result, setResult, inProgress];
+    return [result, setResult, inProgress, error];
 }

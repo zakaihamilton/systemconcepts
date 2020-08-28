@@ -455,6 +455,10 @@ export default {
         {
             "id": "RESET_EMAIL_SENT",
             "value": "Um e-mail foi enviado para sua conta para redefinir sua senha."
+        },
+        {
+            "id": "ACCESS_DENIED",
+            "value": "Acesso negado"
         }
     ]
 };

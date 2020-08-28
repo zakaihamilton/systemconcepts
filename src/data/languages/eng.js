@@ -455,6 +455,10 @@ export default {
         {
             "id": "RESET_EMAIL_SENT",
             "value": "An email has been sent to your account to reset your password."
+        },
+        {
+            "id": "ACCESS_DENIED",
+            "value": "Acess Denied"
         }
     ]
 };
