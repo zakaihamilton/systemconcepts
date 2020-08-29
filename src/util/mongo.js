@@ -33,9 +33,9 @@ export async function getCollection({ dbName, collectionName, ...params }) {
     return collection;
 }
 
-export async function listCollection({ collectionName, ...params }) {
+export async function listCollection({ collectionName, query = {}, ...params }) {
     const collection = await getCollection({ collectionName, ...params });
-    const results = await collection.find({}).sort({ title: 1 }).toArray();
+    const results = await collection.find(query).sort({ title: 1 }).toArray();
     return results;
 }
 

@@ -98,12 +98,23 @@ export default function SignUp() {
         return error;
     };
 
+    const onValidateId = text => {
+        let error = "";
+        if (!text) {
+            error = translations.EMPTY_FIELD;
+        }
+        if (!text.match(/^[a-z0-9]+$/i)) {
+            error = translations.BAD_ID;
+        }
+        return error;
+    };
+
     const invalidFields =
         onValidateEmail(emailState[0]) ||
         onValidatePassword(passwordState[0]) ||
         onValidateField(firstNameState[0]) ||
         onValidateField(lastNameState[0]) ||
-        onValidateField(idState[0]);
+        onValidateId(idState[0]);
     const isInvalid = validate && invalidFields;
 
     const onSubmit = () => {

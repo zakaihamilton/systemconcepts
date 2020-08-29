@@ -459,6 +459,10 @@ export default {
         {
             "id": "ACCESS_DENIED",
             "value": "Acesso negado"
+        },
+        {
+            "id": "BAD_ID",
+            "value": "O ID pode conter apenas caracteres alfanuméricos"
         }
     ]
 };

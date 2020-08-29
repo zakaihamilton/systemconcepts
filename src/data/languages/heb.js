@@ -455,6 +455,10 @@ export default {
         {
             "id": "ACCESS_DENIED",
             "value": "גישה חסום"
+        },
+        {
+            "id": "BAD_ID",
+            "value": "המזהה יכול להכיל תווים אלפא-נומריים בלבד"
         }
     ]
 };
