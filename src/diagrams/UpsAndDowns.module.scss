@@ -1,10 +1,11 @@
 .root {
     display: grid;
     margin: 0.5em;
-    grid-template-columns: auto;
+    grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(12, 1fr);
     flex: 1;
     color: var(--text-color);
+    column-gap: 1em;
 }
 
 .world {
@@ -15,6 +16,14 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.worldInfo {
+    padding-left: 1.5em;
+    padding-top: 0.5em;
+    padding-right: 1.5em;
+    display: flex;
+    flex-direction: column;
 }
 
 .worldName {
@@ -42,6 +51,24 @@
     padding-left: 1em;
     margin-left: 1em;
     margin-right: 1em;
+}
+
+.dividerInfo {
+    flex: 1;
+
+    [dir=ltr] & {
+        text-align: right;
+    }
+
+    [dir=rtl] & {
+        text-align: left;
+    }
+
+    line-height: 0.1em;
+    padding-right: 1em;
+    padding-left: 1em;
+    margin-left: 1em;
+    margin-right: 1em;
     font-weight: bold;
 }
 
@@ -53,6 +80,7 @@
     display: flex;
     flex: 1;
     font-weight: bold;
+    padding-right: 0.5em;
 }
 
 .itemDescription {
