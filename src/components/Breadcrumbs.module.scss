@@ -7,12 +7,13 @@
 .row {
     display: flex;
     align-items: center;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
 }
 
 .breadcrumbs {
     display: flex;
     align-items: center;
-    padding: 0.25em;
     flex: 1;
     color: var(--text-color);
 }

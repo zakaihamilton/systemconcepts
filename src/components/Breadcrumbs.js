@@ -91,7 +91,7 @@ export default function BreadcrumbsWidget({ items }) {
                 </div>
                 <Tooltip arrow title={fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN}>
                     <IconButton onClick={toggleFullscreen}>
-                        {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                        {fullscreen ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
                     </IconButton>
                 </Tooltip>
             </div>
