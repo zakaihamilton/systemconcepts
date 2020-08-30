@@ -63,14 +63,13 @@ function Item({ className, style, start, end, column, label, subHeading, type })
     </div>;
 }
 
-function Face({ id, start, end = start + 1, column }) {
+function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bodyEnd = bodyStart + 1, column }) {
     const terms = useTerms();
-    const half = parseInt((end - start) / 2) + 1;
     return <>
         <Item
             id={terms.faceHead}
-            start={start}
-            end={start + half}
+            start={headStart}
+            end={headEnd}
             column={column}
             label={terms[id].name}
             type={terms.faceHead.name}
@@ -79,8 +78,8 @@ function Face({ id, start, end = start + 1, column }) {
         />
         <Item
             id={terms.faceBody}
-            start={start + half}
-            end={end + 1}
+            start={bodyStart}
+            end={bodyEnd}
             column={column}
             type={terms.faceBody.name}
             className={styles.body}
@@ -99,10 +98,11 @@ export default function UpsAndDowns() {
         <World id="world_thisworld" total={total} />
         <Divider id="chest" row={4} total={total} />
         <Divider id="chest" row={8} total={total} />
-        <Face id="face_creator" start={2} column={11} />
-        <Face id="face_israel" start={3} end={4} column={9} />
-        <Face id="face_gentiles" start={4} end={9} column={7} />
-        <Face id="face_animal" start={8} end={10} column={5} />
-        <Face id="face_body" start={10} end={11} column={3} />
+        <Divider id="chest" row={12} total={total} />
+        <Face id="face_creator" headStart={2} bodyEnd={3} column={11} />
+        <Face id="face_israel" headStart={3} bodyStart={4} bodyEnd={7} column={9} />
+        <Face id="face_gentiles" headStart={4} headEnd={7} bodyEnd={10} column={7} />
+        <Face id="face_animal" headStart={7} headEnd={10} bodyEnd={11} column={5} />
+        <Face id="face_body" headStart={10} headEnd={11} bodyStart={11} column={3} />
     </Worlds >
 }
