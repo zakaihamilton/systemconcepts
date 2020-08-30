@@ -26,7 +26,7 @@
 }
 
 .divider {
-    width: calc(100%-2em);
+    flex: 1;
 
     [dir=ltr] & {
         text-align: right;
