@@ -1,6 +1,6 @@
 .root {
     display: grid;
-    margin: 0.5em;
+    margin-bottom: 0.5em;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(12, 1fr);
     flex: 1;
