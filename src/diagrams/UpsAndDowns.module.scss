@@ -7,6 +7,7 @@
     grid-template-columns: auto;
     grid-template-rows: repeat(12, 1fr);
     flex: 1;
+    color: var(--text-color);
 }
 
 .world {
@@ -40,15 +41,15 @@
 }
 
 .head {
-    border: var(--border-focus);
+    border: var(--border-highlight);
     padding: 1em;
     display: flex;
 }
 
 .body {
-    border-left: var(--border-focus);
-    border-right: var(--border-focus);
-    border-bottom: var(--border-focus);
+    border-left: var(--border-highlight);
+    border-right: var(--border-highlight);
+    border-bottom: var(--border-highlight);
     padding: 1em;
     display: flex;
 }

@@ -106,5 +106,5 @@ export default function UpsAndDowns() {
         <Face id="face_gentiles" start={4} end={9} column={7} />
         <Face id="face_animal" start={8} end={10} column={5} />
         <Face id="face_body" start={10} end={11} column={3} />
-    </Worlds>
+    </Worlds >
 }
