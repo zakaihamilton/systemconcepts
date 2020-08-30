@@ -22,7 +22,8 @@ export const MainStoreDefaults = {
     menuViewList: "List",
     showSideBar: true,
     showDrawer: false,
-    search: ""
+    search: "",
+    fullscreen: false
 };
 
 export const MainStore = new Store(MainStoreDefaults);
@@ -32,7 +33,7 @@ export default function Main() {
     const language = useLanguage();
     const isPhone = useDeviceType() === "phone";
     useLocalStorage("MainStore", MainStore);
-    const { direction, showSideBar, menuViewList, hash } = MainStore.useState();
+    const { direction, showSideBar, menuViewList, hash, fullscreen } = MainStore.useState();
     const pages = usePagesFromHash(hash);
     const activePage = pages[pages.length - 1];
 
@@ -56,10 +57,10 @@ export default function Main() {
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar && !isPhone,
+        sidebar: showSideBar && !isPhone && !fullscreen,
         list: menuViewList === "List",
-        iconList: menuViewList === "IconList",
-        rtl: direction === "rtl"
+        rtl: direction === "rtl",
+        fullscreen
     });
 
     return <>
@@ -69,7 +70,7 @@ export default function Main() {
         </Head>
         <Theme>
             <div className={className}>
-                <AppBar />
+                {!fullscreen && <AppBar />}
                 <SideBar />
                 <div className={styles.main}>
                     <Breadcrumbs items={pages} />

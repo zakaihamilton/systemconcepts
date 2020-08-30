@@ -467,6 +467,14 @@ export default {
         {
             "id": "DIAGRAMS",
             "value": "Diagrams"
+        },
+        {
+            "id": "FULLSCREEN",
+            "value": "Fullscreen"
+        },
+        {
+            "id": "EXIT_FULLSCREEN",
+            "value": "Exit Fullscreen"
         }
     ]
 };

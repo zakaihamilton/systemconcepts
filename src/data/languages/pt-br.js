@@ -463,6 +463,14 @@ export default {
         {
             "id": "BAD_ID",
             "value": "O ID pode conter apenas caracteres alfanuméricos"
+        },
+        {
+            "id": "FULLSCREEN",
+            "value": "Tela cheia"
+        },
+        {
+            "id": "EXIT_FULLSCREEN",
+            "value": "Sair da tela inteira"
         }
     ]
 };

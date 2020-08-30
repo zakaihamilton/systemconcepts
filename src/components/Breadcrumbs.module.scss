@@ -4,6 +4,10 @@
     overflow: hidden;
 }
 
+.row {
+    display: flex;
+}
+
 .breadcrumbs {
     display: flex;
     align-items: center;
