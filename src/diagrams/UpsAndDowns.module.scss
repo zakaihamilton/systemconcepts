@@ -1,9 +1,6 @@
 .root {
     display: grid;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+    margin: 0.5em;
     grid-template-columns: auto;
     grid-template-rows: repeat(12, 1fr);
     flex: 1;
@@ -15,12 +12,29 @@
     padding: 0.5em;
     margin-left: 0.5em;
     margin-right: 0.5em;
+    display: flex;
+    flex-direction: column;
+}
+
+.worldName {
     font-weight: bold;
+}
+
+.worldExplanation {
+    margin-top: 0.5em;
 }
 
 .divider {
     width: calc(100%-2em);
-    text-align: right;
+
+    [dir=ltr] & {
+        text-align: right;
+    }
+
+    [dir=rtl] & {
+        text-align: left;
+    }
+
     border-top: 1px dashed var(--border-color);
     line-height: 0.1em;
     padding-right: 1em;
@@ -30,26 +44,50 @@
     font-weight: bold;
 }
 
+.itemRow {
+    display: flex;
+}
+
 .itemLabel {
     display: flex;
     flex: 1;
     font-weight: bold;
 }
 
-.itemContent {
+.itemDescription {
+    display: flex;
+    flex: 1;
+    margin-top: 0.5em;
+}
+
+.itemType {
     display: flex;
 }
 
 .head {
     border: var(--border-highlight);
-    padding: 1em;
+    padding: 0.5em;
     display: flex;
+    flex-direction: column;
+}
+
+.head:hover {
+    border: 1px solid var(--hover-color);
+    background-color: var(--hover-fill);
+    box-shadow: var(--blur-shadow);
 }
 
 .body {
     border-left: var(--border-highlight);
     border-right: var(--border-highlight);
     border-bottom: var(--border-highlight);
-    padding: 1em;
+    padding: 0.5em;
     display: flex;
+    flex-direction: column;
+}
+
+.body:hover {
+    border: 1px solid var(--hover-color);
+    background-color: var(--hover-fill);
+    box-shadow: var(--blur-shadow);
 }

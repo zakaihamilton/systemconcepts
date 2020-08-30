@@ -16,6 +16,8 @@
     --error-background: rgb(253, 236, 234);
     --info-color: rgb(13, 60, 97);
     --info-background: rgb(232, 244, 253);
+    --hover-color: #8EC5FC;
+    --hover-fill: rgba(0, 168, 232, 1);
 }
 
 [data-theme="dark"] {
@@ -36,4 +38,6 @@
     --error-background: rgb(24, 6, 5);
     --info-color: rgb(166, 213, 250);
     --info-background: rgb(3, 14, 24);
+    --hover-color: rgba(0, 168, 232, 1);
+    --hover-fill: #8EC5FC;
 }

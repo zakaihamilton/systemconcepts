@@ -4,6 +4,10 @@ export default [
         name: {
             eng: "Creator",
             heb: "בורא"
+        },
+        explanation: {
+            eng: "Control",
+            heb: "שליטה"
         }
     },
     {
@@ -11,13 +15,21 @@ export default [
         name: {
             eng: "Israel",
             heb: "ישראל"
+        },
+        explanation: {
+            eng: "Advancement",
+            heb: "התקדמות"
         }
     },
     {
         id: "face_gentiles",
         name: {
             eng: "Gentiles",
-            heb: "אומות העולם"
+            heb: "אומות העולם",
+        },
+        explanation: {
+            eng: "Business",
+            heb: "עסקים"
         }
     },
     {
@@ -25,6 +37,10 @@ export default [
         name: {
             eng: "Animal",
             heb: "בהמה"
+        },
+        explanation: {
+            eng: "Family",
+            heb: "משפחה"
         }
     },
     {
@@ -32,6 +48,10 @@ export default [
         name: {
             eng: "Body",
             heb: "גוף"
+        },
+        explanation: {
+            eng: "Health",
+            heb: "בריאות"
         }
     }
 ];

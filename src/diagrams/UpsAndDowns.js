@@ -15,10 +15,7 @@ function Worlds({ children }) {
     </div>
 }
 
-function World({ id, children, total, row, style = {} }) {
-    const elements = React.Children.map(children, (child, index) => {
-        return React.cloneElement(child, { row, index });
-    });
+function World({ id, total, row, style = {} }) {
     const terms = useTerms();
     const term = terms[id];
     const size = 2;
@@ -27,8 +24,12 @@ function World({ id, children, total, row, style = {} }) {
     const gridColumn = `1/${total}`;
     style = { gridRow, gridColumn, ...style };
     return <div className={styles.world} style={style}>
-        {term.name}
-        {elements}
+        <div className={styles.worldName}>
+            {term.name}
+        </div>
+        <div className={styles.worldExplanation}>
+            {term.explanation}
+        </div>
     </div>
 }
 
@@ -43,17 +44,22 @@ function Divider({ id, row, style, total }) {
     </div>
 }
 
-function Item({ className, style, start, end, column, label, content }) {
+function Item({ className, style, start, end, column, label, subHeading, type }) {
     const gridRow = `${start + 1}/${end + 1}`;
     const gridColumn = `${column + 1}/${column + 2}`;
     style = { gridRow, gridColumn, ...style };
     return <div className={className} style={style}>
-        {<div className={styles.itemLabel}>
-            {label}
-        </div>}
-        <div className={styles.itemContent}>
-            {content}
+        <div className={styles.itemRow}>
+            <div className={styles.itemLabel}>
+                {label}
+            </div>
+            <div className={styles.itemType}>
+                {type}
+            </div>
         </div>
+        {subHeading && <div className={styles.itemDescription}>
+            {subHeading}
+        </div>}
     </div>;
 }
 
@@ -67,7 +73,8 @@ function Face({ id, start, end = start + 1, column }) {
             end={start + half}
             column={column}
             label={terms[id].name}
-            content={terms.faceHead.name}
+            type={terms.faceHead.name}
+            subHeading={terms[id].explanation}
             className={styles.head}
         />
         <Item
@@ -75,7 +82,7 @@ function Face({ id, start, end = start + 1, column }) {
             start={start + half}
             end={end + 1}
             column={column}
-            content={terms.faceBody.name}
+            type={terms.faceBody.name}
             className={styles.body}
         />
     </>;
@@ -84,21 +91,12 @@ function Face({ id, start, end = start + 1, column }) {
 export default function UpsAndDowns() {
     const total = 16;
     return <Worlds>
-        <World id="world_primordialman" total={total}>
-
-        </World>
-        <World id="world_emanation" total={total}>
-        </World>
-        <World id="world_creation" total={total}>
-        </World>
-        <World id="world_formation" total={total}>
-        </World>
-        <World id="world_action" total={total}>
-
-        </World>
-        <World id="world_thisworld" total={total}>
-
-        </World>
+        <World id="world_primordialman" total={total} />
+        <World id="world_emanation" total={total} />
+        <World id="world_creation" total={total} />
+        <World id="world_formation" total={total} />
+        <World id="world_action" total={total} />
+        <World id="world_thisworld" total={total} />
         <Divider id="chest" row={4} total={total} />
         <Divider id="chest" row={8} total={total} />
         <Face id="face_creator" start={2} column={11} />

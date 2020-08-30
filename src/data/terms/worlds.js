@@ -4,6 +4,10 @@ export default [
         name: {
             eng: "Primordial Man",
             heb: "אדם קדמון"
+        },
+        explanation: {
+            eng: "Attitude",
+            heb: "גישה"
         }
     },
     {
@@ -11,6 +15,10 @@ export default [
         name: {
             eng: "Emanation",
             heb: "אצילות"
+        },
+        explanation: {
+            eng: "Control",
+            heb: "שליטה"
         }
     },
     {
@@ -18,6 +26,10 @@ export default [
         name: {
             eng: "Creation",
             heb: "בריאה"
+        },
+        explanation: {
+            eng: "Affinity",
+            heb: "אהדה"
         }
     },
     {
@@ -25,6 +37,10 @@ export default [
         name: {
             eng: "Formation",
             heb: "יצירה"
+        },
+        explanation: {
+            eng: "Communication",
+            heb: "תקשורת"
         }
     },
     {
@@ -32,6 +48,10 @@ export default [
         name: {
             eng: "Action",
             heb: "עשייה"
+        },
+        explanation: {
+            eng: "Agreement",
+            heb: "ממשות"
         }
     },
     {
@@ -39,6 +59,10 @@ export default [
         name: {
             eng: "This World",
             heb: "עולם הזה"
+        },
+        explanation: {
+            eng: "Reality",
+            heb: "מציאות"
         }
     }
 ];
