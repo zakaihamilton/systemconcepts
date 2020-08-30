@@ -35,6 +35,11 @@ import SignUp from "@/pages/SignUp";
 import ChangePassword from "@/pages/ChangePassword";
 import ResetPassword, { getResetSection } from "@/pages/ResetPassword";
 
+import TableChartIcon from '@material-ui/icons/TableChart';
+import Diagrams from "@/pages/diagrams";
+
+import diagrams from "@/data/diagrams";
+
 export default [
     {
         id: "apps",
@@ -129,5 +134,22 @@ export default [
         icon: <VpnKeyIcon />,
         Component: ResetPassword,
         section: getResetSection
-    }
+    },
+    {
+        sidebar: true,
+        id: "diagrams",
+        name: "DIAGRAMS",
+        icon: <TableChartIcon />,
+        Component: Diagrams
+    },
+    ...diagrams.map(diagram => {
+        let { icon } = diagram;
+        if (!icon) {
+            icon = <TableChartIcon />;
+        }
+        return {
+            ...diagram,
+            icon
+        };
+    })
 ];

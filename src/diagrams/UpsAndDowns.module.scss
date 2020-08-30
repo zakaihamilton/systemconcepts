@@ -1,0 +1,54 @@
+.root {
+    display: grid;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    grid-template-columns: auto;
+    grid-template-rows: repeat(12, 1fr);
+    flex: 1;
+}
+
+.world {
+    border: var(--border);
+    padding: 0.5em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    font-weight: bold;
+}
+
+.divider {
+    width: calc(100%-2em);
+    text-align: right;
+    border-top: 1px dashed var(--border-color);
+    line-height: 0.1em;
+    padding-right: 1em;
+    padding-left: 1em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    font-weight: bold;
+}
+
+.itemLabel {
+    display: flex;
+    flex: 1;
+    font-weight: bold;
+}
+
+.itemContent {
+    display: flex;
+}
+
+.head {
+    border: var(--border-focus);
+    padding: 1em;
+    display: flex;
+}
+
+.body {
+    border-left: var(--border-focus);
+    border-right: var(--border-focus);
+    border-bottom: var(--border-focus);
+    padding: 1em;
+    display: flex;
+}

@@ -17,7 +17,6 @@ import Button from "@material-ui/core/Button";
 import { addPath } from "@/util/pages";
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import Cookies from 'js-cookie';
-import Typography from '@material-ui/core/Typography';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
 import Tooltip from '@material-ui/core/Tooltip';

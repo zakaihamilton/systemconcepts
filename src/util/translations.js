@@ -1,12 +1,9 @@
 import { useMemo } from "react";
 import languages from "@/data/languages";
-import { MainStore } from "@/components/Main";
+import { useLanguage } from "@/util/language";
 
 export function useTranslations() {
-    let { language } = MainStore.useState();
-    if (language === "auto") {
-        language = (languages.find(item => navigator.language.includes(item.code)) || languages[0]).id;
-    }
+    const language = useLanguage();
     const items = useMemo(() => {
         const { translations } = languages.find(item => item.id === language) || {};
         const obj = {};
@@ -16,4 +13,4 @@ export function useTranslations() {
         return obj;
     }, [language]);
     return items;
-};
+}

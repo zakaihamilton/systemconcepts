@@ -1,6 +1,7 @@
 import pageList from "@/data/pages";
 import { useTranslations } from "@/util/translations";
 import { isRegEx } from "@/util/string";
+import { useLanguage } from "@/util/language";
 
 export function addPath(...path) {
     window.location.hash += "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
@@ -113,9 +114,16 @@ export function usePagesFromHash(hash = "") {
 
 export function usePages() {
     const translations = useTranslations();
+    const language = useLanguage();
     const pages = pageList.map(page => {
         const { name, ...props } = page;
-        const text = translations[name] || name;
+        let text = name;
+        if (typeof text === "object") {
+            text = text[language];
+        }
+        else if (typeof text === "string") {
+            text = translations[text] || text;
+        }
         return { ...props, name: text };
     });
     return pages;

@@ -11,6 +11,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
 import Theme from "./Theme";
 import { useTranslations } from "@/util/translations";
+import { useLanguage } from "@/util/language";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -28,9 +29,10 @@ export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
     const { APP_NAME } = useTranslations();
+    const language = useLanguage();
     const isPhone = useDeviceType() === "phone";
     useLocalStorage("MainStore", MainStore);
-    const { direction, language, showSideBar, menuViewList, hash } = MainStore.useState();
+    const { direction, showSideBar, menuViewList, hash } = MainStore.useState();
     const pages = usePagesFromHash(hash);
     const activePage = pages[pages.length - 1];
 

@@ -1,5 +1,6 @@
 :root {
     --border: 1px solid lightgray;
+    --border-color: lightgray;
     --border-highlight: 1px solid black;
     --border-focus: 2px solid black;
     --box-shadow-color: rgba(0, 0, 0, .2);
@@ -19,6 +20,7 @@
 
 [data-theme="dark"] {
     --border: 1px solid rgba(255, 255, 255, 0.12);
+    --border-color: rgba(255, 255, 255, 0.12);
     --border-highlight: 1px solid white;
     --border-focus: 2px solid white;
     --box-shadow-color: darkgray;

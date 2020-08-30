@@ -463,6 +463,10 @@ export default {
         {
             "id": "BAD_ID",
             "value": "The ID can only contain alphanumeric characters"
+        },
+        {
+            "id": "DIAGRAMS",
+            "value": "Diagrams"
         }
     ]
 };

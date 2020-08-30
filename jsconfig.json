@@ -19,7 +19,10 @@
             ],
             "@/storage/*": [
                 "src/storage/*"
-            ]
+            ],
+            "@/diagrams/*": [
+                "src/diagrams/*"
+            ],
         }
     }
 }
