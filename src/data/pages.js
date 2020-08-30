@@ -36,7 +36,7 @@ import ChangePassword from "@/pages/ChangePassword";
 import ResetPassword, { getResetSection } from "@/pages/ResetPassword";
 
 import TableChartIcon from '@material-ui/icons/TableChart';
-import Diagrams from "@/pages/diagrams";
+import Diagrams from "@/pages/Diagrams";
 
 import diagrams from "@/data/diagrams";
 
