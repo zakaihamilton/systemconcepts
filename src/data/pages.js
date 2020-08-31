@@ -47,7 +47,6 @@ export default [
         root: true,
         icon: <AppsIcon />,
         Component: Apps,
-        sidebar: true,
         separator: true
     },
     {
