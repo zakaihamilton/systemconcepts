@@ -1,8 +1,11 @@
 import { useMemo } from "react";
 import { useLanguage } from "@/util/language";
 import terms from "@/data/terms";
+import { MainStore } from "@/components/Main";
 
 export function useTerms() {
+    const { darkMode } = MainStore.useState();
+    const darkModeKey = darkMode ? "dark" : "light";
     const language = useLanguage();
     const items = useMemo(() => {
         const obj = {};
@@ -11,7 +14,12 @@ export function useTerms() {
             Object.keys(term).map(key => {
                 const value = term[key];
                 if (typeof value === "object") {
-                    term[key] = value[language];
+                    if ("dark" in value || "light" in value) {
+                        term[key] = value[darkModeKey];
+                    }
+                    else {
+                        term[key] = value[language];
+                    }
                 }
             });
             obj[term.id] = term;

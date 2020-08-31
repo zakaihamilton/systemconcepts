@@ -1,5 +1,9 @@
 import styles from "./UpsAndDowns.module.scss";
 import { useTerms } from "@/util/terms";
+import PublicIcon from '@material-ui/icons/Public';
+import FaceIcon from '@material-ui/icons/Face';
+import Tooltip from '@material-ui/core/Tooltip';
+import clsx from "clsx";
 
 function Worlds({ children }) {
     let offset = 0;
@@ -22,15 +26,21 @@ function World({ id, total, row, style = {} }) {
     const start = row * size;
     const gridRow = `${start + 1}/${start + size + 1}`;
     const gridColumn = `1/${total}`;
+    const backgroundColor = term.fill;
     style = { gridRow, gridColumn, ...style };
     return <>
-        <div className={styles.world} style={style} />
+        <div className={styles.world} style={{ ...style, backgroundColor }} />
         <div className={styles.worldInfo} style={{ ...style, gridColumn: 1 }} >
-            <div className={styles.worldName}>
-                {term.name}
-            </div>
-            <div className={styles.worldExplanation}>
-                {term.explanation}
+            <Tooltip arrow title={terms.world.name}>
+                <PublicIcon />
+            </Tooltip>
+            <div className={styles.worldLabel}>
+                <div className={styles.worldName}>
+                    <span>{term.name}</span>
+                </div>
+                <div className={styles.worldExplanation}>
+                    {term.explanation}
+                </div>
             </div>
         </div>
     </>
@@ -50,21 +60,26 @@ function Divider({ id, row, style, total }) {
     </>
 }
 
-function Item({ className, style, start, end, column, label, subHeading, type }) {
+function Item({ className, style, start, end, column, icon, name, tooltip, subHeading, type }) {
     const gridRow = `${start + 1}/${end + 1}`;
     const gridColumn = `${column + 1}/${column + 2}`;
     style = { gridRow, gridColumn, ...style };
-    return <div className={className} style={style}>
-        <div className={styles.itemRow}>
-            <div className={styles.itemLabel}>
-                {label}
+    return <div className={clsx(styles.face, className)} style={style}>
+        {name && <div className={styles.itemRow}>
+            {icon && <Tooltip arrow title={tooltip}>
+                {icon}
+            </Tooltip>}
+            <div className={style.itemLabel}>
+                <div className={styles.itemName}>
+                    {name}
+                </div>
+                {subHeading && <div className={styles.itemSubHeading}>
+                    {subHeading}
+                </div>}
             </div>
-            <div className={styles.itemType}>
-                {type}
-            </div>
-        </div>
-        {subHeading && <div className={styles.itemDescription}>
-            {subHeading}
+        </div>}
+        {type && <div className={styles.itemType}>
+            {type}
         </div>}
     </div>;
 }
@@ -77,7 +92,9 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
             start={headStart}
             end={headEnd}
             column={column}
-            label={terms[id].name}
+            icon={<FaceIcon />}
+            tooltip={terms.face.name}
+            name={terms[id].name}
             type={terms.faceHead.name}
             subHeading={terms[id].explanation}
             className={styles.head}
