@@ -9,7 +9,7 @@ export default [
         explanation: {
             eng: "Control",
             heb: "שליטה",
-            "pt-bt": "Controle"
+            "pt-br": "Controle"
         }
     },
     {
