@@ -1,17 +1,15 @@
 .root {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: 0.5em repeat(11, 1fr);
-    flex: 1;
+    grid-template-rows: 0.5em repeat(12, 1fr);
     color: var(--text-color);
     column-gap: 1em;
 }
 
 .world {
-    padding: 0.5em;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    justify-content: center;
 }
 
 .world:not(:last-child) {
@@ -19,15 +17,34 @@
 }
 
 .worldInfo {
+    margin-top: 0.5em;
     padding-left: 1.5em;
-    padding-top: 0.5em;
     padding-right: 1.5em;
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+}
+
+.worldInfo>*:not(:last-child) {
+    [dir=rtl] & {
+        margin-left: 0.5em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 0.5em;
+    }
+}
+
+.worldLabel {
     display: flex;
     flex-direction: column;
 }
 
 .worldName {
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .worldExplanation {
@@ -49,8 +66,6 @@
     line-height: 0.1em;
     padding-right: 1em;
     padding-left: 1em;
-    margin-left: 1em;
-    margin-right: 1em;
 }
 
 .dividerInfo {
@@ -67,37 +82,63 @@
     line-height: 0.1em;
     padding-right: 1em;
     padding-left: 1em;
-    margin-left: 1em;
-    margin-right: 1em;
     font-weight: bold;
 }
 
 .itemRow {
     display: flex;
+    align-items: center;
+    align-self: flex-start;
 }
 
 .itemLabel {
+    display: flex;
+    flex-direction: column;
+}
+
+.itemRow>*:not(:last-child) {
+    [dir=rtl] & {
+        margin-left: 0.5em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 0.5em;
+    }
+}
+
+.itemName {
     display: flex;
     flex: 1;
     font-weight: bold;
     padding-right: 0.5em;
 }
 
-.itemDescription {
+.itemSubHeading {
     display: flex;
-    flex: 1;
     margin-top: 0.5em;
 }
 
 .itemType {
     display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    flex: 1;
 }
 
-.head {
-    border: var(--border-highlight);
+.face {
     padding: 0.5em;
     display: flex;
     flex-direction: column;
+    background-color: rgb(0, 0, 0, 0.25);
+}
+
+.head {
+    margin-top: 0.5em;
+    border-left: var(--border-highlight);
+    border-right: var(--border-highlight);
+    border-top: var(--border-highlight);
+    border-bottom: 1px dashed var(--text-color);
+    border-radius: 0.5em 0.5em 0em 0em;
 }
 
 .head:hover {
@@ -110,9 +151,8 @@
     border-left: var(--border-highlight);
     border-right: var(--border-highlight);
     border-bottom: var(--border-highlight);
-    padding: 0.5em;
-    display: flex;
-    flex-direction: column;
+    border-radius: 0em 0em 0.5em 0.5em;
+    margin-bottom: 0.5em;
 }
 
 .body:hover {
