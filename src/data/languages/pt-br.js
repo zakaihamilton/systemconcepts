@@ -418,7 +418,7 @@ export default {
         },
         {
             "id": "NEW_ROLE",
-            "value": "Novo função"
+            "value": "Nova função"
         },
         {
             "id": "ADMIN",
@@ -430,7 +430,7 @@ export default {
         },
         {
             "id": "UPPER",
-            "value": "Superior"
+            "value": "Upper"
         },
         {
             "id": "TEACHER",
@@ -438,7 +438,7 @@ export default {
         },
         {
             "id": "SAVE",
-            "value": "Guardar"
+            "value": "Salvar"
         },
         {
             "id": "CANCEL",
@@ -463,6 +463,10 @@ export default {
         {
             "id": "BAD_ID",
             "value": "O ID pode conter apenas caracteres alfanuméricos"
+        },
+        {
+            "id": "DIAGRAMS",
+            "value": "Diagramas"
         },
         {
             "id": "FULLSCREEN",

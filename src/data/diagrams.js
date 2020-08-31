@@ -5,7 +5,8 @@ export default [
         id: "upsanddowns",
         name: {
             eng: "Ups and Downs",
-            heb: "עליות וירידות"
+            heb: "עליות וירידות",
+            "pt-br": "Subidas e Descidas"
         },
         Component: UpsAndDowns
     }

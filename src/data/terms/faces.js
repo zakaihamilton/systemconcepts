@@ -3,22 +3,26 @@ export default [
         id: "face_creator",
         name: {
             eng: "Creator",
-            heb: "בורא"
+            heb: "בורא",
+            "pt-br": "Criador"
         },
         explanation: {
             eng: "Control",
-            heb: "שליטה"
+            heb: "שליטה",
+            "pt-bt": "Controle"
         }
     },
     {
         id: "face_israel",
         name: {
             eng: "Israel",
-            heb: "ישראל"
+            heb: "ישראל",
+            "pt-br": "Israel"
         },
         explanation: {
             eng: "Advancement",
-            heb: "התקדמות"
+            heb: "התקדמות",
+            "pt-br": "Avanço"
         }
     },
     {
@@ -26,32 +30,38 @@ export default [
         name: {
             eng: "Gentiles",
             heb: "אומות העולם",
+            "pt-br": "Gentios"
         },
         explanation: {
             eng: "Business",
-            heb: "עסקים"
+            heb: "עסקים",
+            "pt-br": "Negócios"
         }
     },
     {
         id: "face_animal",
         name: {
             eng: "Animal",
-            heb: "בהמה"
+            heb: "בהמה",
+            "pt-br": "Animal"
         },
         explanation: {
             eng: "Family",
-            heb: "משפחה"
+            heb: "משפחה",
+            "pt-br": "Família"
         }
     },
     {
         id: "face_body",
         name: {
             eng: "Body",
-            heb: "גוף"
+            heb: "גוף",
+            "pt-br": "Corpo"
         },
         explanation: {
             eng: "Health",
-            heb: "בריאות"
+            heb: "בריאות",
+            "pt-br": "Saúde"
         }
     }
 ];
