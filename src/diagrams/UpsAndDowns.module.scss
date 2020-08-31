@@ -1,21 +1,21 @@
 .root {
     display: grid;
-    margin-bottom: 0.5em;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(12, 1fr);
+    grid-template-rows: 0.5em repeat(11, 1fr);
     flex: 1;
     color: var(--text-color);
     column-gap: 1em;
 }
 
 .world {
-    border: var(--border);
     padding: 0.5em;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.world:not(:last-child) {
+    border-bottom: var(--border);
 }
 
 .worldInfo {
