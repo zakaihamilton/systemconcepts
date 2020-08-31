@@ -3,7 +3,8 @@ export default [
         id: "world",
         name: {
             eng: "World",
-            heb: "עולם"
+            heb: "עולם",
+            "pt-br": "Mundo"
         }
     },
     {

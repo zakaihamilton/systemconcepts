@@ -3,7 +3,8 @@ export default [
         id: "face",
         name: {
             eng: "Face",
-            heb: "פרצוף"
+            heb: "פרצוף",
+            "pt-br": "Face"
         }
     },
     {
