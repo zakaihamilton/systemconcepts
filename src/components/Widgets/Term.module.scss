@@ -2,6 +2,7 @@
     display: flex;
     align-items: center;
     align-self: flex-start;
+    padding-top: 0.2em;
 }
 
 .label {
@@ -11,11 +12,11 @@
 
 .row>*:not(:last-child) {
     [dir=rtl] & {
-        margin-left: 0.5em;
+        margin-left: 1em;
     }
 
     [dir=ltr] & {
-        margin-right: 0.5em;
+        margin-right: 1em;
     }
 }
 
@@ -23,9 +24,11 @@
     display: flex;
     flex: 1;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .explanation {
     display: flex;
     font-size: 75%;
+    white-space: nowrap;
 }

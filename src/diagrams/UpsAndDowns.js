@@ -23,11 +23,15 @@ function Worlds({ children }) {
 function World({ id, total, row, style = {} }) {
     const terms = useTerms();
     const term = terms[id];
+    let phase = null;
+    if (typeof term.phase !== "undefined") {
+        phase = terms["phase." + term.phase];
+    }
     const size = 2;
     const start = row * size;
     const gridRow = `${start + 1}/${start + size + 1}`;
     const gridColumn = `1/${total}`;
-    const backgroundColor = term && term.fill;
+    const backgroundColor = phase && phase.fill;
     style = { gridRow, gridColumn, ...style };
     return <>
         <div className={styles.world} style={{ ...style, backgroundColor }} />

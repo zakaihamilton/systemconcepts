@@ -1,6 +1,7 @@
 export default [
     {
         id: "creator",
+        phase: 0,
         type: "face",
         name: {
             eng: "Creator",
@@ -15,6 +16,7 @@ export default [
     },
     {
         id: "israel",
+        phase: 1,
         type: "face",
         name: {
             eng: "Israel",
@@ -29,6 +31,7 @@ export default [
     },
     {
         id: "gentiles",
+        phase: 2,
         type: "face",
         name: {
             eng: "Gentiles",
@@ -43,6 +46,7 @@ export default [
     },
     {
         id: "animal",
+        phase: 3,
         type: "face",
         name: {
             eng: "Animal",
@@ -57,6 +61,7 @@ export default [
     },
     {
         id: "body",
+        phase: 4,
         type: "face",
         name: {
             eng: "Body",

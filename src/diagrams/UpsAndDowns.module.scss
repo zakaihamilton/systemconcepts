@@ -25,32 +25,6 @@
     align-self: flex-start;
 }
 
-.worldInfo>*:not(:last-child) {
-    [dir=rtl] & {
-        margin-left: 0.5em;
-    }
-
-    [dir=ltr] & {
-        margin-right: 0.5em;
-    }
-}
-
-.worldLabel {
-    display: flex;
-    flex-direction: column;
-}
-
-.worldName {
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-}
-
-.worldExplanation {
-    margin-top: 0.5em;
-}
-
 .divider {
     flex: 1;
 

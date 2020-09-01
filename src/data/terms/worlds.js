@@ -13,6 +13,7 @@ export default [
     {
         id: "primordialman",
         type: "world",
+        phase: 0,
         name: {
             eng: "Primordial Man",
             heb: "אדם קדמון",
@@ -26,6 +27,7 @@ export default [
     },
     {
         id: "emanation",
+        phase: 1,
         type: "world",
         name: {
             eng: "Emanation",
@@ -36,14 +38,11 @@ export default [
             eng: "Control",
             heb: "שליטה",
             "pt-br": "Controle"
-        },
-        fill: {
-            light: "rgb(235, 211, 124, 0.5)",
-            dark: "rgb(168, 138, 27,0.5)"
         }
     },
     {
         id: "creation",
+        phase: 2,
         type: "world",
         name: {
             eng: "Creation",
@@ -54,14 +53,11 @@ export default [
             eng: "Affinity",
             heb: "אהדה",
             "pt-br": "Afinidade"
-        },
-        fill: {
-            light: "rgb(101, 165, 214,0.5)",
-            dark: "rgb(24, 91, 143,0.5)"
         }
     },
     {
         id: "formation",
+        phase: 3,
         type: "world",
         name: {
             eng: "Formation",
@@ -72,14 +68,11 @@ export default [
             eng: "Communication",
             heb: "תקשורת",
             "pt-br": "Comunicação"
-        },
-        fill: {
-            light: "rgb(235, 150, 124, 0.5)",
-            dark: "rgb(128, 56, 34, 0.5)"
         }
     },
     {
         id: "action",
+        phase: 4,
         type: "world",
         name: {
             eng: "Action",
@@ -90,15 +83,12 @@ export default [
             eng: "Agreement",
             heb: "ממשות",
             "pt-br": "Acordo"
-        },
-        fill: {
-            light: "rgb(131, 184, 114, 0.5)",
-            dark: "rgb(50, 102, 34, 0.5)"
         }
     },
     {
         id: "thisworld",
         type: "world",
+        phase: 4,
         name: {
             eng: "This World",
             heb: "עולם הזה",
