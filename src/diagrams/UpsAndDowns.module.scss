@@ -62,7 +62,7 @@
         text-align: left;
     }
 
-    border-top: 1px dashed var(--border-color);
+    border-top: 2px dashed var(--border-color);
     line-height: 0.1em;
     padding-right: 1em;
     padding-left: 1em;
@@ -123,11 +123,6 @@
     justify-content: flex-end;
     flex: 1;
     font-size: 75%;
-    opacity: 0.5;
-}
-
-.itemType.selected {
-    opacity: 1.0;
 }
 
 .face {
@@ -136,33 +131,27 @@
     flex-direction: column;
     background-color: rgb(128, 128, 128, 0.2);
     color: var(--text-color);
+    box-shadow: var(--blur-shadow);
 }
 
 .face.selected {
-    box-shadow: var(--blur-shadow);
+    border: 1px solid var(--border-highlight);
 }
 
 .head {
     margin-top: 0.5em;
-    border-left: var(--border-highlight);
-    border-right: var(--border-highlight);
-    border-top: var(--border-highlight);
-    border-bottom: 1px dashed var(--text-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
     border-radius: 0.5em 0.5em 0em 0em;
 }
 
-.head:hover {
-    box-shadow: var(--blur-shadow);
-}
-
 .body {
-    border-left: var(--border-highlight);
-    border-right: var(--border-highlight);
-    border-bottom: var(--border-highlight);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--border-color);
     border-radius: 0em 0em 0.5em 0.5em;
     margin-bottom: 0.5em;
-}
-
-.body:hover {
-    box-shadow: var(--blur-shadow);
 }
