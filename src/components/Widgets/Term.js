@@ -38,6 +38,11 @@ export default function Term({ id }) {
     else {
         tooltip = name;
     }
+    if (phase) {
+        tooltip = <>
+            <b>{tooltip}</b><div>{phase.name}</div>
+        </>;
+    }
     return <div className={styles.row}>
         {icon && <Tooltip arrow title={tooltip}>
             <Badge
