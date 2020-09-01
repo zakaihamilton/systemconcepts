@@ -17,6 +17,13 @@
 
 .itemList {
     flex-direction: row;
+    border-bottom: 1px solid transparent;
+}
+
+.itemList.selected {
+    background-color: var(--hover-color) !important;
+    border-bottom: 1px solid var(--hover-fill);
+    box-shadow: var(--blur-shadow);
 }
 
 .itemIconList {

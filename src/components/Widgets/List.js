@@ -18,7 +18,8 @@ export function ListItemWidget({ id, separator, viewType, depth, onClick, name, 
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const itemClassName = useStyles(styles, {
         itemList: viewType === "List",
-        itemIconList: viewType === "IconList"
+        itemIconList: viewType === "IconList",
+        selected: selected === id
     });
     const iconContainerClassName = useStyles(styles, {
         iconContainerList: viewType === "List",
