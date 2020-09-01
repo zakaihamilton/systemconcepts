@@ -12,7 +12,8 @@ export default [
         },
         name: {
             eng: "Root Phase",
-            heb: "בחינת שורש"
+            heb: "בחינת שורש",
+            "pt-br": "Fase Raiz"
         }
     },
     {
@@ -28,7 +29,8 @@ export default [
         },
         name: {
             eng: "Phase One",
-            heb: "בחינה א׳"
+            heb: "בחינה א׳",
+            "pt-br": "Fase Um"
         }
     },
     {
@@ -44,7 +46,8 @@ export default [
         },
         name: {
             eng: "Phase Two",
-            heb: "בחינה ב׳"
+            heb: "בחינה ב׳",
+            "pt-br": "Fase Dois"
         }
     },
     {
@@ -60,7 +63,8 @@ export default [
         },
         name: {
             eng: "Phase Three",
-            heb: "בחינה ג׳"
+            heb: "בחינה ג׳",
+            "pt-br": "Fase Três"
         }
     },
     {
@@ -76,7 +80,8 @@ export default [
         },
         name: {
             eng: "Phase Four",
-            heb: "בחינה ד׳"
+            heb: "בחינה ד׳",
+            "pt-br": "Fase Quatro"
         }
     }
 ];
