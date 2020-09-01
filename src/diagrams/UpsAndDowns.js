@@ -81,7 +81,7 @@ function Item({ className, style, start, end, column, icon, name, tooltip, subHe
                 </div>}
             </div>
         </div>}
-        {type && <div className={styles.itemType}>
+        {type && <div className={clsx(styles.itemType, selected && styles.selected)}>
             {type}
         </div>}
     </div>;

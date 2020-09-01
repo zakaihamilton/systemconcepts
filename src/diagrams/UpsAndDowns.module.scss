@@ -123,9 +123,12 @@
     justify-content: flex-end;
     flex: 1;
     font-size: 75%;
+    opacity: 0.5;
 }
 
-
+.itemType.selected {
+    opacity: 1.0;
+}
 
 .face {
     padding: 0.5em;
