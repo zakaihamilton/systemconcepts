@@ -25,7 +25,6 @@ const useStyles = makeStyles({
     }
 });
 
-
 export default function Term({ id }) {
     const { direction } = MainStore.useState();
     const terms = useTerms();
@@ -50,7 +49,7 @@ export default function Term({ id }) {
     else {
         tooltip = name;
     }
-    if (phase) {
+    if (phase && phase.name) {
         tooltip = <>
             <div className={classes.tooltip}>{tooltip}</div><div className={clsx(classes.phase, classes.phaseTooltip)}>{phase.name}</div>
         </>;

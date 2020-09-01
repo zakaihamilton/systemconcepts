@@ -17,7 +17,7 @@ export function useTerms() {
                     if ("dark" in value || "light" in value) {
                         term[key] = value[darkModeKey];
                     }
-                    else if (typeof value[language] === "string") {
+                    else if ("eng" in value) {
                         term[key] = value[language];
                     }
                 }
