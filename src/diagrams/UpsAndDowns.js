@@ -1,9 +1,11 @@
+import { useState } from "react";
 import styles from "./UpsAndDowns.module.scss";
 import { useTerms } from "@/util/terms";
 import PublicIcon from '@material-ui/icons/Public';
 import FaceIcon from '@material-ui/icons/Face';
 import Tooltip from '@material-ui/core/Tooltip';
 import clsx from "clsx";
+import { MainStore } from "@/components/Main";
 
 function Worlds({ children }) {
     let offset = 0;
@@ -60,11 +62,12 @@ function Divider({ id, row, style, total }) {
     </>
 }
 
-function Item({ className, style, start, end, column, icon, name, tooltip, subHeading, type }) {
+function Item({ className, style, start, end, column, icon, name, tooltip, subHeading, type, selected, ...props }) {
+    const { darkMode } = MainStore.useState();
     const gridRow = `${start + 1}/${end + 1}`;
     const gridColumn = `${column + 1}/${column + 2}`;
     style = { gridRow, gridColumn, ...style };
-    return <div className={clsx(styles.face, className)} style={style}>
+    return <div className={clsx(styles.face, className, selected && styles.selected, darkMode && styles.darkMode)} style={style} {...props}>
         {name && <div className={styles.itemRow}>
             {icon && <Tooltip arrow title={tooltip}>
                 {icon}
@@ -86,6 +89,16 @@ function Item({ className, style, start, end, column, icon, name, tooltip, subHe
 
 function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bodyEnd = bodyStart + 1, column }) {
     const terms = useTerms();
+    const [selected, setSelected] = useState(0);
+
+    const onClickHead = () => {
+        setSelected(0);
+    };
+
+    const onClickBody = () => {
+        setSelected(1);
+    };
+
     return <>
         <Item
             id={terms.faceHead}
@@ -98,6 +111,8 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
             type={terms.faceHead.name}
             subHeading={terms[id].explanation}
             className={styles.head}
+            onClick={onClickHead}
+            selected={selected === 0}
         />
         <Item
             id={terms.faceBody}
@@ -106,6 +121,8 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
             column={column}
             type={terms.faceBody.name}
             className={styles.body}
+            onClick={onClickBody}
+            selected={selected === 1}
         />
     </>;
 }
