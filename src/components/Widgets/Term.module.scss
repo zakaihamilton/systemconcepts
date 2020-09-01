@@ -1,0 +1,31 @@
+.row {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+}
+
+.label {
+    display: flex;
+    flex-direction: column;
+}
+
+.row>*:not(:last-child) {
+    [dir=rtl] & {
+        margin-left: 0.5em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 0.5em;
+    }
+}
+
+.name {
+    display: flex;
+    flex: 1;
+    font-weight: bold;
+}
+
+.explanation {
+    display: flex;
+    font-size: 75%;
+}

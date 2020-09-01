@@ -1,6 +1,9 @@
+import PublicIcon from '@material-ui/icons/Public';
+
 export default [
     {
         id: "world",
+        icon: <PublicIcon />,
         name: {
             eng: "World",
             heb: "עולם",
@@ -8,7 +11,8 @@ export default [
         }
     },
     {
-        id: "world_primordialman",
+        id: "primordialman",
+        type: "world",
         name: {
             eng: "Primordial Man",
             heb: "אדם קדמון",
@@ -21,7 +25,8 @@ export default [
         }
     },
     {
-        id: "world_emanation",
+        id: "emanation",
+        type: "world",
         name: {
             eng: "Emanation",
             heb: "אצילות",
@@ -38,7 +43,8 @@ export default [
         }
     },
     {
-        id: "world_creation",
+        id: "creation",
+        type: "world",
         name: {
             eng: "Creation",
             heb: "בריאה",
@@ -55,7 +61,8 @@ export default [
         }
     },
     {
-        id: "world_formation",
+        id: "formation",
+        type: "world",
         name: {
             eng: "Formation",
             heb: "יצירה",
@@ -72,7 +79,8 @@ export default [
         }
     },
     {
-        id: "world_action",
+        id: "action",
+        type: "world",
         name: {
             eng: "Action",
             heb: "עשייה",
@@ -89,7 +97,8 @@ export default [
         }
     },
     {
-        id: "world_thisworld",
+        id: "thisworld",
+        type: "world",
         name: {
             eng: "This World",
             heb: "עולם הזה",

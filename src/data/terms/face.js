@@ -1,10 +1,13 @@
+import FaceIcon from '@material-ui/icons/Face';
+
 export default [
     {
         id: "face",
+        icon: <FaceIcon />,
         name: {
             eng: "Face",
             heb: "פרצוף",
-            "pt-br": "Face"
+            "pt-br": "Face",
         }
     },
     {

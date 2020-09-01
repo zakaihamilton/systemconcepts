@@ -1,6 +1,7 @@
 export default [
     {
-        id: "face_creator",
+        id: "creator",
+        type: "face",
         name: {
             eng: "Creator",
             heb: "בורא",
@@ -13,7 +14,8 @@ export default [
         }
     },
     {
-        id: "face_israel",
+        id: "israel",
+        type: "face",
         name: {
             eng: "Israel",
             heb: "ישראל",
@@ -26,7 +28,8 @@ export default [
         }
     },
     {
-        id: "face_gentiles",
+        id: "gentiles",
+        type: "face",
         name: {
             eng: "Gentiles",
             heb: "אומות העולם",
@@ -39,7 +42,8 @@ export default [
         }
     },
     {
-        id: "face_animal",
+        id: "animal",
+        type: "face",
         name: {
             eng: "Animal",
             heb: "בהמה",
@@ -52,7 +56,8 @@ export default [
         }
     },
     {
-        id: "face_body",
+        id: "body",
+        type: "face",
         name: {
             eng: "Body",
             heb: "גוף",

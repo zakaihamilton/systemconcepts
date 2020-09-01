@@ -17,14 +17,18 @@ export function useTerms() {
                     if ("dark" in value || "light" in value) {
                         term[key] = value[darkModeKey];
                     }
-                    else {
+                    else if (typeof value[language] === "string") {
                         term[key] = value[language];
                     }
                 }
             });
-            obj[term.id] = term;
+            let id = term.id;
+            if (term.type) {
+                id = term.type + "." + id;
+            }
+            obj[id] = term;
         });
         return obj;
-    }, [language]);
+    }, [language, darkModeKey]);
     return items;
 }

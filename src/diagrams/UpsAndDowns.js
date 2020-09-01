@@ -1,11 +1,10 @@
 import { useState } from "react";
 import styles from "./UpsAndDowns.module.scss";
 import { useTerms } from "@/util/terms";
-import PublicIcon from '@material-ui/icons/Public';
-import FaceIcon from '@material-ui/icons/Face';
 import Tooltip from '@material-ui/core/Tooltip';
 import clsx from "clsx";
 import { MainStore } from "@/components/Main";
+import Term from "@/widgets/Term";
 
 function Worlds({ children }) {
     let offset = 0;
@@ -28,22 +27,12 @@ function World({ id, total, row, style = {} }) {
     const start = row * size;
     const gridRow = `${start + 1}/${start + size + 1}`;
     const gridColumn = `1/${total}`;
-    const backgroundColor = term.fill;
+    const backgroundColor = term && term.fill;
     style = { gridRow, gridColumn, ...style };
     return <>
         <div className={styles.world} style={{ ...style, backgroundColor }} />
         <div className={styles.worldInfo} style={{ ...style, gridColumn: 1 }} >
-            <Tooltip arrow title={terms.world.name}>
-                <PublicIcon />
-            </Tooltip>
-            <div className={styles.worldLabel}>
-                <div className={styles.worldName}>
-                    <span>{term.name}</span>
-                </div>
-                <div className={styles.worldExplanation}>
-                    {term.explanation}
-                </div>
-            </div>
+            <Term id={id} />
         </div>
     </>
 }
@@ -62,25 +51,13 @@ function Divider({ id, row, style, total }) {
     </>
 }
 
-function Item({ className, style, start, end, column, icon, name, tooltip, subHeading, type, selected, ...props }) {
+function Item({ className, style, start, end, column, term, type, selected, ...props }) {
     const { darkMode } = MainStore.useState();
     const gridRow = `${start + 1}/${end + 1}`;
     const gridColumn = `${column + 1}/${column + 2}`;
     style = { gridRow, gridColumn, ...style };
     return <div className={clsx(styles.face, className, selected && styles.selected, darkMode && styles.darkMode)} style={style} {...props}>
-        {name && <div className={styles.itemRow}>
-            {icon && <Tooltip arrow title={tooltip}>
-                {icon}
-            </Tooltip>}
-            <div className={style.itemLabel}>
-                <div className={styles.itemName}>
-                    {name}
-                </div>
-                {subHeading && <div className={styles.itemSubHeading}>
-                    {subHeading}
-                </div>}
-            </div>
-        </div>}
+        {term && <Term id={term} />}
         {type && <div className={clsx(styles.itemType, selected && styles.selected)}>
             {type}
         </div>}
@@ -105,11 +82,9 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
             start={headStart}
             end={headEnd}
             column={column}
-            icon={<FaceIcon />}
+            term={id}
             tooltip={terms.face.name}
-            name={terms[id].name}
             type={terms.faceHead.name}
-            subHeading={terms[id].explanation}
             className={styles.head}
             onClick={onClickHead}
             selected={selected === 0}
@@ -130,19 +105,19 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
 export default function UpsAndDowns() {
     const total = 8;
     return <Worlds>
-        <World id="world_primordialman" total={total} />
-        <World id="world_emanation" total={total} />
-        <World id="world_creation" total={total} />
-        <World id="world_formation" total={total} />
-        <World id="world_action" total={total} />
-        <World id="world_thisworld" total={total} />
+        <World id="world.primordialman" total={total} />
+        <World id="world.emanation" total={total} />
+        <World id="world.creation" total={total} />
+        <World id="world.formation" total={total} />
+        <World id="world.action" total={total} />
+        <World id="world.thisworld" total={total} />
         <Divider id="chest" row={4} total={total} />
         <Divider id="chest" row={8} total={total} />
         <Divider id="chest" row={12} total={total} />
-        <Face id="face_creator" headStart={2} bodyEnd={3} column={5} />
-        <Face id="face_israel" headStart={3} bodyStart={4} bodyEnd={7} column={4} />
-        <Face id="face_gentiles" headStart={4} headEnd={7} bodyEnd={10} column={3} />
-        <Face id="face_animal" headStart={7} headEnd={10} bodyEnd={11} column={2} />
-        <Face id="face_body" headStart={10} headEnd={11} bodyStart={11} column={1} />
+        <Face id="face.creator" headStart={2} bodyEnd={3} column={5} />
+        <Face id="face.israel" headStart={3} bodyStart={4} bodyEnd={7} column={4} />
+        <Face id="face.gentiles" headStart={4} headEnd={7} bodyEnd={10} column={3} />
+        <Face id="face.animal" headStart={7} headEnd={10} bodyEnd={11} column={2} />
+        <Face id="face.body" headStart={10} headEnd={11} bodyStart={11} column={1} />
     </Worlds >
 }
