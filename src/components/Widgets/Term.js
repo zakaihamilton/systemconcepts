@@ -12,7 +12,6 @@ export default function Term({ id }) {
     }
     const { name = "", explanation = "" } = term;
     let { icon, tooltip = "" } = term;
-    console.log(type);
     if (!icon && type) {
         icon = type.icon;
     }
