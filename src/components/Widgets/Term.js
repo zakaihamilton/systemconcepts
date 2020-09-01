@@ -4,12 +4,24 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
 import { MainStore } from "@/components/Main";
+import clsx from "clsx";
 
 const useStyles = makeStyles({
-    badge: {
+    phase: {
         backgroundColor: ({ fill }) => fill,
         color: "var(--text-color)",
         border: ({ border }) => border
+    },
+    phaseTooltip: {
+        borderRadius: "1em",
+        padding: "0.5em",
+        marginBottom: "0.5em"
+    },
+    tooltip: {
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "1.5em",
+        padding: "0.5em"
     }
 });
 
@@ -40,13 +52,13 @@ export default function Term({ id }) {
     }
     if (phase) {
         tooltip = <>
-            <b>{tooltip}</b><div>{phase.name}</div>
+            <div className={classes.tooltip}>{tooltip}</div><div className={clsx(classes.phase, classes.phaseTooltip)}>{phase.name}</div>
         </>;
     }
     return <div className={styles.row}>
         {icon && <Tooltip arrow title={tooltip}>
             <Badge
-                classes={{ badge: classes.badge }}
+                classes={{ badge: classes.phase }}
                 badgeContent={phase && phase.id}
                 invisible={typeof phase === "undefined"}
                 anchorOrigin={{
