@@ -13,6 +13,12 @@ const useStyles = makeStyles({
         color: "var(--text-color)",
         border: ({ border }) => border
     },
+    phaseTooltip: {
+        borderRadius: "0.5em",
+        padding: "0.5em",
+        backgroundColor: ({ fill }) => fill,
+        border: ({ border }) => border
+    },
     hover: {
         borderRadius: "0.5em",
         padding: "0.5em",
@@ -70,7 +76,7 @@ export default function Term({ id }) {
     if (phase && phase.name) {
         iconTooltip = <Typography className={styles.tooltip}>
             <span className={styles.label}>{iconTooltip}</span>
-            <span className={clsx(classes.phase, styles.phaseTooltip)}>{phase.name}</span>
+            <span className={clsx(classes.phaseTooltip)}>{phase.name}</span>
             {toLines(iconDescription, styles.description)}
         </Typography>;
     }
