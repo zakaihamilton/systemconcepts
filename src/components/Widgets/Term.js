@@ -12,6 +12,16 @@ const useStyles = makeStyles({
         color: "var(--text-color)",
         border: ({ border }) => border
     },
+    hover: {
+        borderRadius: "0.5em",
+        padding: "0.5em",
+        border: "1px solid transparent",
+        "&:hover": {
+            backgroundColor: ({ fill }) => fill,
+            color: "var(--text-color)",
+            border: ({ border }) => border
+        }
+    },
     phaseTooltip: {
         borderRadius: "1em",
         padding: "0.5em",
@@ -54,7 +64,7 @@ export default function Term({ id }) {
             <div className={classes.tooltip}>{tooltip}</div><div className={clsx(classes.phase, classes.phaseTooltip)}>{phase.name}</div>
         </>;
     }
-    return <div className={styles.row}>
+    return <div className={clsx(styles.root, classes.hover)}>
         {icon && <Tooltip arrow title={tooltip}>
             <Badge
                 classes={{ badge: classes.phase }}

@@ -1,8 +1,7 @@
-.row {
+.root {
     display: flex;
     align-items: center;
     align-self: flex-start;
-    padding-top: 0.2em;
 }
 
 .label {
@@ -10,7 +9,7 @@
     flex-direction: column;
 }
 
-.row>*:not(:last-child) {
+.root>*:not(:last-child) {
     [dir=rtl] & {
         margin-left: 1em;
     }

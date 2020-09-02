@@ -19,9 +19,9 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
     const showName =
-        deviceType === "phone" && (count <= 2 || index === count - 1) ||
-        deviceType === "tablet" && (count <= 3 || index === count - 1) ||
-        deviceType === "desktop" && (count <= 6 || index === count - 1);
+        deviceType === "phone" && index && (count <= 2 || index === count - 1) ||
+        deviceType === "tablet" && index && (count <= 3 || index === count - 1) ||
+        deviceType === "desktop" && index && (count <= 6 || index === count - 1);
     const collapse = deviceType === "phone" && count >= 6 ||
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
@@ -60,7 +60,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
                     {icon}
                 </Tooltip>
             </IconButton>}
-            {showName && <div className={styles.name}>
+            {!!showName && <div className={styles.name}>
                 {name}
             </div>}
         </Link>}
