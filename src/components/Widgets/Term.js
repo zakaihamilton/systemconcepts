@@ -45,6 +45,9 @@ export default function Term({ id }) {
     if (typeof term.phase !== "undefined") {
         phase = terms["phase." + term.phase];
     }
+    else if (term.type === "phase") {
+        phase = terms["phase." + term.id];
+    }
     let iconTooltip = "";
     let nameTooltip = "";
     let explanationTooltip = "";

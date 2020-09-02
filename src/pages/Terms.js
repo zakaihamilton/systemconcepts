@@ -13,6 +13,11 @@ export default function Terms() {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name"
+        },
+        {
+            id: "typeWidget",
+            title: translations.TYPE,
+            sortable: "type"
         }
     ];
 
@@ -30,7 +35,8 @@ export default function Terms() {
         return {
             ...item,
             name,
-            nameWidget: <Term id={id} />
+            nameWidget: <Term id={id} />,
+            typeWidget: <Term id={type} />
         };
     };
 
