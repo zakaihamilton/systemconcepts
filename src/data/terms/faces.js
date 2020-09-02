@@ -50,7 +50,7 @@ export default [
             "pt-br": "Negócios"
         },
         transliteration: {
-            eng: "Umot HaOlam"
+            eng: "Umot Haolam"
         }
     },
     {
