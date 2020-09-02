@@ -24,7 +24,6 @@ export default function Diagrams() {
         else if (typeof name === "string") {
             name = translations[name];
         }
-        console.log(name);
         return {
             ...item,
             name
