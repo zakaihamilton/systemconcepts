@@ -8,7 +8,7 @@ export default [
             heb: "בורא",
             "pt-br": "Criador"
         },
-        explanation: {
+        concept: {
             eng: "Control",
             heb: "שליטה",
             "pt-br": "Controle"
@@ -23,7 +23,7 @@ export default [
             heb: "ישראל",
             "pt-br": "Israel"
         },
-        explanation: {
+        concept: {
             eng: "Advancement",
             heb: "התקדמות",
             "pt-br": "Avanço"
@@ -38,7 +38,7 @@ export default [
             heb: "אומות העולם",
             "pt-br": "Gentios"
         },
-        explanation: {
+        concept: {
             eng: "Business",
             heb: "עסקים",
             "pt-br": "Negócios"
@@ -53,7 +53,7 @@ export default [
             heb: "בהמה",
             "pt-br": "Animal"
         },
-        explanation: {
+        concept: {
             eng: "Family",
             heb: "משפחה",
             "pt-br": "Família"
@@ -68,7 +68,7 @@ export default [
             heb: "גוף",
             "pt-br": "Corpo"
         },
-        explanation: {
+        concept: {
             eng: "Health",
             heb: "בריאות",
             "pt-br": "Saúde"

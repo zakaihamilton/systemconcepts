@@ -4,7 +4,7 @@
     align-self: flex-start;
 }
 
-.label {
+.fields {
     display: flex;
     flex-direction: column;
 }
@@ -26,8 +26,35 @@
     white-space: nowrap;
 }
 
-.explanation {
+.concept {
     display: flex;
     font-size: 75%;
     white-space: nowrap;
+}
+
+.label {
+    font-weight: bold;
+    white-space: nowrap;
+
+    [dir=rtl] & {
+        margin-left: 1em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 1em;
+    }
+}
+
+.label:after {
+    content: ":"
+}
+
+.phaseTooltip {
+    border-radius: 0.5em;
+    padding: 0.5em;
+}
+
+.tooltip {
+    font-size: initial !important;
+    padding: 0.5em;
 }
