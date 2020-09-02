@@ -68,7 +68,7 @@ export default [
             "pt-br": "Família"
         },
         transliteration: {
-            eng: "Mishpacha"
+            eng: "Behemah"
         }
     },
     {

@@ -53,7 +53,7 @@ export default function Term({ id }) {
     const classes = useStyles({ ...phase });
     const { name = "", explanation = "", description = "", concept = "", transliteration = "" } = term;
     let { icon } = term;
-    const toLines = (text, ...props) => (text || "").split("\n").map((line, index) => <><span {...props} key={index}>{line}</span><br /></>);
+    const toLines = (text, ...props) => (text || "").split("\n").map((line, index) => <React.Fragment key={index}><span {...props}>{line}</span><br /></React.Fragment>);
     if (!icon && type) {
         icon = type.icon;
     }
