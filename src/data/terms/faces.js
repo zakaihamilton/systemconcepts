@@ -12,6 +12,9 @@ export default [
             eng: "Control",
             heb: "שליטה",
             "pt-br": "Controle"
+        },
+        transliteration: {
+            eng: "Boreh"
         }
     },
     {
@@ -27,6 +30,9 @@ export default [
             eng: "Advancement",
             heb: "התקדמות",
             "pt-br": "Avanço"
+        },
+        transliteration: {
+            eng: "Yisrael"
         }
     },
     {
@@ -42,6 +48,9 @@ export default [
             eng: "Business",
             heb: "עסקים",
             "pt-br": "Negócios"
+        },
+        transliteration: {
+            eng: "Umot HaOlam"
         }
     },
     {
@@ -57,6 +66,9 @@ export default [
             eng: "Family",
             heb: "משפחה",
             "pt-br": "Família"
+        },
+        transliteration: {
+            eng: "Mishpacha"
         }
     },
     {
@@ -72,6 +84,9 @@ export default [
             eng: "Health",
             heb: "בריאות",
             "pt-br": "Saúde"
+        },
+        transliteration: {
+            eng: "Guf"
         }
     }
 ];

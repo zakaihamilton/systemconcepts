@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { MainStore } from "@/components/Main";
 import clsx from "clsx";
 import Typography from '@material-ui/core/Typography';
+import { useLanguage } from "@/util/language";
 
 const useStyles = makeStyles({
     phase: {
@@ -33,8 +34,9 @@ const useStyles = makeStyles({
 
 export default function Term({ id }) {
     const { direction } = MainStore.useState();
+    const language = useLanguage();
     const terms = useTerms();
-    const term = terms[id] || {};
+    const term = terms[id] || { original: {} };
     let type = null;
     let phase = null;
     if (term.type) {
@@ -47,10 +49,11 @@ export default function Term({ id }) {
     let nameTooltip = "";
     let explanationTooltip = "";
     let iconDescription = "";
+    const hebrew = language !== "heb" && term.original.name && term.original.name.heb;
     const classes = useStyles({ ...phase });
-    const { name = "", explanation = "", description = "", concept = "" } = term;
+    const { name = "", explanation = "", description = "", concept = "", transliteration = "" } = term;
     let { icon } = term;
-    const toLines = (text, className) => (text || "").split("\n").map((line, index) => <><span className={className} key={index}>{line}</span><br /></>);
+    const toLines = (text, ...props) => (text || "").split("\n").map((line, index) => <><span {...props} key={index}>{line}</span><br /></>);
     if (!icon && type) {
         icon = type.icon;
     }
@@ -61,23 +64,24 @@ export default function Term({ id }) {
     else {
         iconTooltip = name;
     }
-    if (description) {
+    if (description || transliteration || hebrew) {
         nameTooltip = <Typography className={styles.tooltip}>
-            <span className={styles.label}>{name}</span>
-            {toLines(description, styles.description)}
+            {transliteration && <span className={styles.field}>{transliteration}</span>}
+            {hebrew && <span className={styles.field}>{hebrew}</span>}
+            {toLines(description)}
         </Typography>
     }
     if (explanation) {
         explanationTooltip = <Typography className={styles.tooltip}>
             <span className={styles.label}>{concept}</span>
-            {toLines(explanation, styles.explanation)}
+            {toLines(explanation)}
         </Typography>
     }
     if (phase && phase.name) {
         iconTooltip = <Typography className={styles.tooltip}>
             <span className={styles.label}>{iconTooltip}</span>
             <span className={clsx(classes.phaseTooltip)}>{phase.name}</span>
-            {toLines(iconDescription, styles.description)}
+            {toLines(iconDescription)}
         </Typography>;
     }
     return <div className={clsx(styles.root, classes.hover)}>

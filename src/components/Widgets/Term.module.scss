@@ -45,11 +45,12 @@
     }
 }
 
-.label:after {
-    content: ":"
-}
-
 .tooltip {
     font-size: initial !important;
+    padding: 0.5em;
+}
+
+.field {
+    white-space: nowrap;
     padding: 0.5em;
 }

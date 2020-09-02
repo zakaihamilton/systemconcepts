@@ -23,6 +23,9 @@ export default [
             eng: "Attitude",
             heb: "גישה",
             "pt-br": "Atitude"
+        },
+        transliteration: {
+            eng: "Adam Kadmon"
         }
     },
     {
@@ -38,6 +41,9 @@ export default [
             eng: "Control",
             heb: "שליטה",
             "pt-br": "Controle"
+        },
+        transliteration: {
+            eng: "Atzilut"
         }
     },
     {
@@ -53,6 +59,9 @@ export default [
             eng: "Affinity",
             heb: "אהדה",
             "pt-br": "Afinidade"
+        },
+        transliteration: {
+            eng: "Beriah"
         }
     },
     {
@@ -68,6 +77,9 @@ export default [
             eng: "Communication",
             heb: "תקשורת",
             "pt-br": "Comunicação"
+        },
+        transliteration: {
+            eng: "Yetzirah"
         }
     },
     {
@@ -83,6 +95,9 @@ export default [
             eng: "Agreement",
             heb: "ממשות",
             "pt-br": "Acordo"
+        },
+        transliteration: {
+            eng: "Assiyah"
         }
     },
     {
@@ -98,6 +113,9 @@ export default [
             eng: "Reality",
             heb: "מציאות",
             "pt-br": "Realidade"
+        },
+        transliteration: {
+            eng: "Olam Hazeh"
         }
     }
 ];
