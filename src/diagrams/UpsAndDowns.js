@@ -6,14 +6,14 @@ import clsx from "clsx";
 import { MainStore } from "@/components/Main";
 import Term from "@/widgets/Term";
 
-function Worlds({ children }) {
+function Worlds({ children, total }) {
     let offset = 0;
     const elements = React.Children.map(children, child => {
         const { props = {} } = child;
         const row = props.row || offset;
         const size = props.size || 1;
         offset += size;
-        return React.cloneElement(child, { row });
+        return React.cloneElement(child, { row, total });
     });
     return <div className={styles.root}>
         {elements}
@@ -108,16 +108,16 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
 
 export default function UpsAndDowns() {
     const total = 8;
-    return <Worlds>
-        <World id="world.primordialman" total={total} />
-        <World id="world.emanation" total={total} />
-        <World id="world.creation" total={total} />
-        <World id="world.formation" total={total} />
-        <World id="world.action" total={total} />
-        <World id="world.thisworld" total={total} />
-        <Divider id="chest" row={4} total={total} />
-        <Divider id="chest" row={8} total={total} />
-        <Divider id="chest" row={12} total={total} />
+    return <Worlds total={total}>
+        <World id="world.primordialman" />
+        <World id="world.emanation" />
+        <World id="world.creation" />
+        <World id="world.formation" />
+        <World id="world.action" />
+        <World id="world.thisworld" />
+        <Divider id="chest" row={4} />
+        <Divider id="chest" row={8} />
+        <Divider id="chest" row={12} />
         <Face id="face.creator" headStart={2} bodyEnd={3} column={5} />
         <Face id="face.israel" headStart={3} bodyStart={4} bodyEnd={7} column={4} />
         <Face id="face.gentiles" headStart={4} headEnd={7} bodyEnd={10} column={3} />
