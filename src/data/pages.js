@@ -38,6 +38,9 @@ import ResetPassword, { getResetSection } from "@/pages/ResetPassword";
 import TableChartIcon from '@material-ui/icons/TableChart';
 import Diagrams from "@/pages/Diagrams";
 
+import LabelIcon from '@material-ui/icons/Label';
+import Terms from "@/pages/Terms";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -140,6 +143,13 @@ export default [
         name: "DIAGRAMS",
         icon: <TableChartIcon />,
         Component: Diagrams
+    },
+    {
+        sidebar: true,
+        id: "terms",
+        name: "TERMS",
+        icon: <LabelIcon />,
+        Component: Terms
     },
     ...diagrams.map(diagram => {
         let { icon } = diagram;

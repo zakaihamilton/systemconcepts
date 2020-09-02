@@ -479,6 +479,10 @@ export default {
         {
             "id": "EXIT_FULLSCREEN",
             "value": "Sair da tela inteira"
+        },
+        {
+            "id": "TERMS",
+            "value": "Termos"
         }
     ]
 };

@@ -479,6 +479,10 @@ export default {
         {
             "id": "EXIT_FULLSCREEN",
             "value": "Exit Fullscreen"
+        },
+        {
+            "id": "TERMS",
+            "value": "Terms"
         }
     ]
 };

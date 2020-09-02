@@ -475,6 +475,10 @@ export default {
         {
             "id": "EXIT_FULLSCREEN",
             "value": "יציאה ממסך מלא"
+        },
+        {
+            "id": "TERMS",
+            "value": "מושגים"
         }
     ]
 };
