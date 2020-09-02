@@ -148,6 +148,7 @@ export default [
         }
         return {
             ...diagram,
+            tooltip: "DIAGRAM",
             icon
         };
     })

@@ -469,6 +469,10 @@ export default {
             "value": "Diagramas"
         },
         {
+            "id": "DIAGRAM",
+            "value": "Diagrama"
+        },
+        {
             "id": "FULLSCREEN",
             "value": "Tela cheia"
         },

@@ -469,6 +469,10 @@ export default {
             "value": "Diagrams"
         },
         {
+            "id": "DIAGRAM",
+            "value": "Diagram"
+        },
+        {
             "id": "FULLSCREEN",
             "value": "Fullscreen"
         },

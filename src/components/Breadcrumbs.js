@@ -25,8 +25,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     const collapse = deviceType === "phone" && count >= 6 ||
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
-    const showTooltip = !showName || tooltip;
-    const title = !showName ? name : tooltip;
+    const title = !showName ? name : tooltip || name;
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
             const path = items.slice(2, -2).map(item => item.name).join("/");
@@ -43,7 +42,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     }
     return <>
         {isLast && <div className={styles.item}>
-            <Tooltip arrow title={showTooltip ? title : ""}>
+            <Tooltip arrow title={title}>
                 <div className={styles.icon}>
                     {icon}
                 </div>
@@ -56,7 +55,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
         </div>}
         {!isLast && <Link className={styles.item} color="inherit" href={href}>
             {icon && <IconButton className={styles.iconButton}>
-                <Tooltip arrow title={showTooltip ? title : ""}>
+                <Tooltip arrow title={title}>
                     {icon}
                 </Tooltip>
             </IconButton>}

@@ -462,7 +462,11 @@ export default {
         },
         {
             "id": "DIAGRAMS",
-            "value": "דיאגרמה"
+            "value": "תרשימים"
+        },
+        {
+            "id": "DIAGRAM",
+            "value": "תרשים"
         },
         {
             "id": "FULLSCREEN",
