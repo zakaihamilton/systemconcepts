@@ -13,6 +13,7 @@ import roles from "@/data/roles";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import EmailIcon from '@material-ui/icons/Email';
+import { isRTL } from "@/util/string";
 
 export const UsersStoreDefaults = {
     mode: "",
@@ -69,14 +70,20 @@ export default function Users() {
         const menuIcon = !select && <ItemMenu item={item} />;
         const selectIcon = select && <Select select={select} item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
+        const rtl = isRTL(name);
+
+        const labelName = rtl ? <>
+            <span>{lastName}</span>
+            <b>{firstName}</b>
+        </> : <>
+                <b>{firstName}</b>
+                <span>{lastName}</span>
+            </>;
 
         return {
             ...item,
             name,
-            nameWidget: <Label name={<>
-                <b>{firstName}</b>
-                {lastName}
-            </>} icon={select ? selectIcon : menuIcon} />,
+            nameWidget: <Label name={labelName} icon={select ? selectIcon : menuIcon} />,
             roleWidget: roleItem && translations[roleItem.name]
         };
     };

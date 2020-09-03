@@ -31,3 +31,8 @@ export function abbreviateSize(number) {
 export function isRegEx(string) {
     return Object.prototype.toString.call(string) === '[object RegExp]';
 }
+
+export function isRTL(string) {
+    var rtlRegex = /[\u0591-\u07FF]/;
+    return rtlRegex.test(string);
+}
