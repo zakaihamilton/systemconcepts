@@ -486,7 +486,7 @@ export default {
         },
         {
             "id": "TRANSLITERATION",
-            "value": "transliteração"
+            "value": "Transliteração"
         },
         {
             "id": "HEBREW",
