@@ -6,7 +6,11 @@ module.exports = async (req, res) => {
         let params = {};
         try {
             const { id, password, hash } = req.headers || {};
-            params = await login({ id, password, hash });
+            params = await login({
+                id,
+                password: decodeURIComponent(password),
+                hash
+            });
         }
         catch (err) {
             error = err;
@@ -25,7 +29,7 @@ module.exports = async (req, res) => {
             try {
                 const { id } = headers;
                 await sendResetEmail({ id });
-                res.status(200).json({ });
+                res.status(200).json({});
             }
             catch (err) {
                 console.error("login error: ", err);
@@ -35,7 +39,11 @@ module.exports = async (req, res) => {
         else if (headers.newpassword && headers.code) {
             try {
                 const { id, code, newpassword } = headers;
-                const hash = await resetPassword({ id, code, newPassword: newpassword });
+                const hash = await resetPassword({
+                    id,
+                    code,
+                    newPassword: decodeURIComponent(newpassword)
+                });
                 res.status(200).json({ hash });
             }
             catch (err) {
@@ -46,7 +54,11 @@ module.exports = async (req, res) => {
         else if (headers.oldpassword && headers.newpassword) {
             try {
                 const { id, oldpassword, newpassword } = headers;
-                const hash = await changePassword({ id, oldPassword: oldpassword, newPassword: newpassword });
+                const hash = await changePassword({
+                    id,
+                    oldPassword: decodeURIComponent(oldpassword),
+                    newPassword: decodeURIComponent(newpassword)
+                });
                 res.status(200).json({ hash });
             }
             catch (err) {
@@ -57,7 +69,13 @@ module.exports = async (req, res) => {
         else {
             try {
                 const { id, email, first_name, last_name, password } = headers;
-                const hash = await register({ id, email, firstName: first_name, lastName: last_name, password });
+                const hash = await register({
+                    id,
+                    email,
+                    firstName: decodeURIComponent(first_name),
+                    lastName: decodeURIComponent(last_name),
+                    password: decodeURIComponent(password)
+                });
                 res.status(200).json({ hash });
             }
             catch (err) {

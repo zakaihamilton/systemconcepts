@@ -130,10 +130,10 @@ export default function SignUp() {
                 method: "PUT",
                 headers: {
                     id,
-                    first_name: firstName,
-                    last_name: lastName,
+                    first_name: encodeURIComponent(firstName),
+                    last_name: encodeURIComponent(lastName),
                     email,
-                    password
+                    password: encodeURIComponent(password)
                 }
             }).then(({ err, hash }) => {
                 if (err) {

@@ -101,8 +101,8 @@ export default function ChangePassword() {
                 method: "PUT",
                 headers: {
                     id,
-                    oldpassword: oldPassword,
-                    newpassword: newPassword
+                    oldpassword: encodeURIComponent(oldPassword),
+                    newpassword: encodeURIComponent(newPassword)
                 }
             }).then(({ err, hash }) => {
                 if (err) {

@@ -116,7 +116,10 @@ export default function ResetPassword({ path = "" }) {
                 headers: {
                     id,
                     ...!hasCode && { reset: true },
-                    ...hasCode && { newpassword: newPassword, code }
+                    ...hasCode && {
+                        newpassword: encodeURIComponent(newPassword),
+                        code
+                    }
                 }
             }).then(({ err, hash }) => {
                 if (err) {

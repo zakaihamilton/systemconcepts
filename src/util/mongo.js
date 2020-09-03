@@ -48,7 +48,7 @@ export async function listCollections({ ...params }) {
 
 export async function insertRecord({ record, ...params }) {
     const collection = await getCollection(params);
-    await collection.insert(record);
+    await collection.insertOne(record);
 }
 
 export async function findRecord({ query, ...params }) {

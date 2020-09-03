@@ -94,7 +94,7 @@ export default function SignIn() {
                 fetchJSON("/api/login", {
                     headers: {
                         id,
-                        password
+                        password: encodeURIComponent(password)
                     }
                 }).then(({ err, hash }) => {
                     if (err) {
