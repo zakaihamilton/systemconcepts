@@ -19,6 +19,7 @@ import { exportData } from "@/util/importExport";
 import Row from "./Table/Row";
 import Navigator from "./Table/Navigator";
 import Label from "@/widgets/Label";
+import { useSearch } from "@/components/AppBar/Search";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -53,7 +54,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
     const defaultSort = sortColumn || (firstColumn && (firstColumn.sortable || firstColumn.id));
     const [orderBy, setOrderBy] = React.useState(defaultSort);
     const size = useContext(PageSize);
-    const { search } = MainStore.useState();
+    const { search } = useSearch();
 
     useEffect(() => {
         setOffset(0);
