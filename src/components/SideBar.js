@@ -27,7 +27,7 @@ export default function SideBar() {
         });
     };
 
-    const items = pages.filter(page => page.sidebar);
+    const items = pages.filter(page => page.sidebar && !page.settings);
 
     if (isPhone) {
         return <Drawer
@@ -42,12 +42,12 @@ export default function SideBar() {
             onClose={closeDrawer}
         >
             <ListWidget onClick={closeDrawer} items={items} state={state} viewType={menuViewList} />
-            <Settings />
+            <Settings closeDrawer={closeDrawer} state={state} />
         </Drawer>;
     }
 
     return <div className={styles.root}>
         <ListWidget items={items} state={state} viewType={menuViewList} />
-        <Settings />
+        <Settings closeDrawer={closeDrawer} state={state} />
     </div>;
 }

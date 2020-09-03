@@ -6,10 +6,12 @@ import ListWidget from "@/widgets/List";
 import { Divider } from "@material-ui/core";
 import LanguageIcon from '@material-ui/icons/Language';
 import languages from "@/data/languages";
+import { usePages } from "@/util/pages";
 
-export default function Settings() {
+export default function Settings({ closeDrawer, state }) {
     const { language, darkMode, menuViewList } = MainStore.useState();
     const translations = useTranslations();
+    const pages = usePages();
 
     const toggleDarkMode = () => {
         MainStore.update(s => {
@@ -27,7 +29,8 @@ export default function Settings() {
     const Icon = darkMode ? Brightness7Icon : Brightness4Icon;
     const title = darkMode ? translations.LIGHT_MODE : translations.DARK_MODE;
 
-    const items = [
+    const settingsItems = pages.filter(page => page.sidebar && page.settings);
+    const quickAccessItems = [
         {
             id: "toggleDarkMode",
             name: title,
@@ -51,6 +54,8 @@ export default function Settings() {
     return <>
         <div style={{ flex: "1" }} />
         <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <ListWidget reverse={true} items={items} viewType={menuViewList} />
+        <ListWidget onClick={closeDrawer} state={state} reverse={true} items={settingsItems} viewType={menuViewList} />
+        <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
+        <ListWidget reverse={true} items={quickAccessItems} viewType={menuViewList} />
     </>;
 }
