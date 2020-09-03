@@ -25,7 +25,8 @@ export default [
             "pt-br": "Atitude"
         },
         transliteration: {
-            eng: "Adam Kadmon"
+            eng: "Adam Kadmon",
+            "pt-br": "Adam Kadmon"
         }
     },
     {
@@ -43,7 +44,8 @@ export default [
             "pt-br": "Controle"
         },
         transliteration: {
-            eng: "Atzilut"
+            eng: "Atzilut",
+            "pt-br": "Atzilut"
         }
     },
     {
@@ -61,7 +63,8 @@ export default [
             "pt-br": "Afinidade"
         },
         transliteration: {
-            eng: "Beriah"
+            eng: "Beriah",
+            "pt-br": "Beriah"
         }
     },
     {
@@ -79,7 +82,8 @@ export default [
             "pt-br": "Comunicação"
         },
         transliteration: {
-            eng: "Yetzirah"
+            eng: "Yetzirah",
+            "pt-br": "Yetzirah"
         }
     },
     {
@@ -97,7 +101,8 @@ export default [
             "pt-br": "Acordo"
         },
         transliteration: {
-            eng: "Assiyah"
+            eng: "Assiyah",
+            "pt-br": "Assiyah"
         }
     },
     {
@@ -115,7 +120,8 @@ export default [
             "pt-br": "Realidade"
         },
         transliteration: {
-            eng: "Olam Hazeh"
+            eng: "Olam Hazeh",
+            "pt-br": "Olam Hazeh"
         }
     }
 ];
