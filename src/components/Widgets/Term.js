@@ -70,7 +70,7 @@ export default function Term({ id }) {
         iconTooltip = name;
     }
     if (description || transliteration || hebrew) {
-        nameTooltip = <Typography className={styles.tooltip}>
+        nameTooltip = <div className={styles.tooltip}>
             {transliteration && <div className={styles.field}>
                 <div className={styles.fieldLabel}>
                     {translations.TRANSLITERATION}
@@ -88,16 +88,16 @@ export default function Term({ id }) {
                 </div>
             </div>}
             {toLines(description)}
-        </Typography>
+        </div>
     }
     if (explanation) {
-        explanationTooltip = <Typography className={styles.tooltip}>
+        explanationTooltip = <div className={styles.tooltip}>
             <span className={styles.label}>{concept}</span>
             {toLines(explanation)}
-        </Typography>
+        </div>
     }
     if (phase && phase.name) {
-        iconTooltip = <Typography className={styles.tooltip}>
+        iconTooltip = <div className={styles.tooltip}>
             <div className={styles.field}>
                 <div className={styles.fieldLabel}>
                     {translations.TYPE}
@@ -115,7 +115,7 @@ export default function Term({ id }) {
                 </div>
             </div>
             {toLines(iconDescription)}
-        </Typography >;
+        </div >;
     }
     return <div className={clsx(styles.root, classes.hover)}>
         {icon && <Tooltip arrow title={iconTooltip}>
