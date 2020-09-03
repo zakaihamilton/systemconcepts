@@ -479,6 +479,18 @@ export default {
         {
             "id": "TERMS",
             "value": "מושגים"
+        },
+        {
+            "id": "TRANSLITERATION",
+            "value": "תַעתִיק"
+        },
+        {
+            "id": "HEBREW",
+            "value": "עִברִית"
+        },
+        {
+            "id": "PHASE",
+            "value": "בחינה"
         }
     ]
 };

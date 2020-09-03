@@ -483,6 +483,18 @@ export default {
         {
             "id": "TERMS",
             "value": "Terms"
+        },
+        {
+            "id": "TRANSLITERATION",
+            "value": "Transliteration"
+        },
+        {
+            "id": "HEBREW",
+            "value": "Hebrew"
+        },
+        {
+            "id": "PHASE",
+            "value": "Phase"
         }
     ]
 };

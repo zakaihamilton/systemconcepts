@@ -7,6 +7,7 @@ import { MainStore } from "@/components/Main";
 import clsx from "clsx";
 import Typography from '@material-ui/core/Typography';
 import { useLanguage } from "@/util/language";
+import { useTranslations } from "@/util/translations";
 
 const useStyles = makeStyles({
     phase: {
@@ -36,6 +37,7 @@ export default function Term({ id }) {
     const { direction } = MainStore.useState();
     const language = useLanguage();
     const terms = useTerms();
+    const translations = useTranslations();
     const term = terms[id] || { original: {} };
     let type = null;
     let phase = null;
@@ -69,8 +71,22 @@ export default function Term({ id }) {
     }
     if (description || transliteration || hebrew) {
         nameTooltip = <Typography className={styles.tooltip}>
-            {transliteration && <span className={styles.field}>{transliteration}</span>}
-            {hebrew && <span className={styles.field}>{hebrew}</span>}
+            {transliteration && <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                    {translations.TRANSLITERATION}
+                </div>
+                <div className={styles.fieldValue}>
+                    {transliteration}
+                </div>
+            </div>}
+            {hebrew && <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                    {translations.HEBREW}
+                </div>
+                <div className={styles.fieldValue}>
+                    {hebrew}
+                </div>
+            </div>}
             {toLines(description)}
         </Typography>
     }
@@ -82,10 +98,24 @@ export default function Term({ id }) {
     }
     if (phase && phase.name) {
         iconTooltip = <Typography className={styles.tooltip}>
-            <span className={styles.label}>{iconTooltip}</span>
-            <span className={clsx(classes.phaseTooltip)}>{phase.name}</span>
+            <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                    {translations.TYPE}
+                </div>
+                <div className={styles.fieldValue}>
+                    {type ? type.name : name}
+                </div>
+            </div>
+            <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                    {translations.PHASE}
+                </div>
+                <div className={styles.fieldValue}>
+                    {phase.name}
+                </div>
+            </div>
             {toLines(iconDescription)}
-        </Typography>;
+        </Typography >;
     }
     return <div className={clsx(styles.root, classes.hover)}>
         {icon && <Tooltip arrow title={iconTooltip}>
