@@ -50,7 +50,7 @@ function Divider({ id, row, style, total }) {
     return <>
         <div className={styles.divider} style={style} />
         <div className={styles.dividerInfo} style={{ ...style, gridColumn: total - 1 }}>
-            {term.name}
+            <Term id={id} />
         </div>
     </>
 }

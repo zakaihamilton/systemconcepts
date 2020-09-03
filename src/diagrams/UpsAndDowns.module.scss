@@ -44,19 +44,9 @@
 
 .dividerInfo {
     flex: 1;
-
-    [dir=ltr] & {
-        text-align: right;
-    }
-
-    [dir=rtl] & {
-        text-align: left;
-    }
-
-    line-height: 0.1em;
     padding-right: 1em;
     padding-left: 1em;
-    font-weight: bold;
+    margin-top: -1.6em;
 }
 
 .itemType {
