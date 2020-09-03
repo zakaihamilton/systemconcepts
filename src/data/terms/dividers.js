@@ -5,6 +5,10 @@ export default [
             eng: "Chest",
             heb: "חזה",
             "pt-br": "Peito"
+        },
+        transliteration: {
+            eng: "Chazeh",
+            "pt-br": "Chazeh"
         }
     }
 ];

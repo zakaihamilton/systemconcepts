@@ -8,6 +8,10 @@ export default [
             eng: "Face",
             heb: "פרצוף",
             "pt-br": "Face",
+        },
+        transliteration: {
+            eng: "Partzuf",
+            "pt-br": "Partzuf"
         }
     },
     {
@@ -16,6 +20,10 @@ export default [
             eng: "Head",
             heb: "ראש",
             "pt-br": "Cabeça"
+        },
+        transliteration: {
+            eng: "Rosh",
+            "pt-br": "Rosh"
         }
     },
     {
@@ -24,6 +32,10 @@ export default [
             eng: "Body",
             heb: "גוף",
             "pt-br": "Corpo"
+        },
+        transliteration: {
+            eng: "Guf",
+            "pt-br": "Guf"
         }
     }
 ];
