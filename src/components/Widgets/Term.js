@@ -5,7 +5,6 @@ import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
 import { MainStore } from "@/components/Main";
 import clsx from "clsx";
-import Typography from '@material-ui/core/Typography';
 import { useLanguage } from "@/util/language";
 import { useTranslations } from "@/util/translations";
 
