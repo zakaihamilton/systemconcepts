@@ -14,7 +14,8 @@ export default [
             "pt-br": "Controle"
         },
         transliteration: {
-            eng: "Boreh"
+            eng: "Boreh",
+            "pt-br": "Boreh"
         }
     },
     {
@@ -32,7 +33,8 @@ export default [
             "pt-br": "Avanço"
         },
         transliteration: {
-            eng: "Yisrael"
+            eng: "Yisrael",
+            "pt-br": "Yisrael"
         }
     },
     {
@@ -50,7 +52,8 @@ export default [
             "pt-br": "Negócios"
         },
         transliteration: {
-            eng: "Umot Haolam"
+            eng: "Umot Haolam",
+            "pt-br": "Umot Haolam"
         }
     },
     {
@@ -68,7 +71,8 @@ export default [
             "pt-br": "Família"
         },
         transliteration: {
-            eng: "Behemah"
+            eng: "Behemah",
+            "pt-br": "Behemah"
         }
     },
     {
@@ -86,7 +90,8 @@ export default [
             "pt-br": "Saúde"
         },
         transliteration: {
-            eng: "Guf"
+            eng: "Guf",
+            "pt-br": "Guf"
         }
     }
 ];

@@ -7,7 +7,7 @@ export default [
         name: {
             eng: "Phase",
             heb: "בחינה",
-            "ptr-br": "Fase"
+            "pt-br": "Fase"
         }
     },
     {
