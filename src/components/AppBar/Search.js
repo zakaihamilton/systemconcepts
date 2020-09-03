@@ -1,9 +1,29 @@
-import React from 'react';
+import { useEffect } from 'react';
 import InputBase from '@material-ui/core/InputBase';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import { useTranslations } from "@/util/translations";
-import { MainStore } from "../Main";
+import { Store } from "pullstate";
+
+export const SearchStore = new Store({
+    search: "",
+    show: 0
+});
+
+export function useSearch() {
+    const { search } = SearchStore.useState();
+    useEffect(() => {
+        SearchStore.update(s => {
+            s.show++;
+        });
+        return () => {
+            SearchStore.update(s => {
+                s.show--;
+            });
+        };
+    }, []);
+    return { search };
+}
 
 const useStyles = makeStyles((theme) => ({
     search: {
@@ -47,17 +67,20 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SearchAppBar() {
-    const { search } = MainStore.useState();
+    const { search, show } = SearchStore.useState();
     const { SEARCH } = useTranslations();
     const classes = useStyles();
 
     const onChangeText = event => {
         const { value } = event.target;
-        MainStore.update(s => {
+        SearchStore.update(s => {
             s.search = value;
         });
     };
 
+    if (show <= 0) {
+        return null;
+    }
     return (
         <div className={classes.search}>
             <div className={classes.searchIcon}>

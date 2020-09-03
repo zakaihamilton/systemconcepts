@@ -19,10 +19,13 @@ export default [
             heb: "אדם קדמון",
             "pt-br": "Homem Primordial"
         },
-        explanation: {
+        concept: {
             eng: "Attitude",
             heb: "גישה",
             "pt-br": "Atitude"
+        },
+        transliteration: {
+            eng: "Adam Kadmon"
         }
     },
     {
@@ -34,10 +37,13 @@ export default [
             heb: "אצילות",
             "pt-br": "Emanação"
         },
-        explanation: {
+        concept: {
             eng: "Control",
             heb: "שליטה",
             "pt-br": "Controle"
+        },
+        transliteration: {
+            eng: "Atzilut"
         }
     },
     {
@@ -49,10 +55,13 @@ export default [
             heb: "בריאה",
             "pt-br": "Criação"
         },
-        explanation: {
+        concept: {
             eng: "Affinity",
             heb: "אהדה",
             "pt-br": "Afinidade"
+        },
+        transliteration: {
+            eng: "Beriah"
         }
     },
     {
@@ -64,10 +73,13 @@ export default [
             heb: "יצירה",
             "pt-br": "Formação"
         },
-        explanation: {
+        concept: {
             eng: "Communication",
             heb: "תקשורת",
             "pt-br": "Comunicação"
+        },
+        transliteration: {
+            eng: "Yetzirah"
         }
     },
     {
@@ -79,10 +91,13 @@ export default [
             heb: "עשייה",
             "pt-br": "Ação"
         },
-        explanation: {
+        concept: {
             eng: "Agreement",
             heb: "ממשות",
             "pt-br": "Acordo"
+        },
+        transliteration: {
+            eng: "Assiyah"
         }
     },
     {
@@ -94,10 +109,13 @@ export default [
             heb: "עולם הזה",
             "pt-br": "Este Mundo"
         },
-        explanation: {
+        concept: {
             eng: "Reality",
             heb: "מציאות",
             "pt-br": "Realidade"
+        },
+        transliteration: {
+            eng: "Olam Hazeh"
         }
     }
 ];

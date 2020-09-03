@@ -462,7 +462,11 @@ export default {
         },
         {
             "id": "DIAGRAMS",
-            "value": "דיאגרמה"
+            "value": "תרשימים"
+        },
+        {
+            "id": "DIAGRAM",
+            "value": "תרשים"
         },
         {
             "id": "FULLSCREEN",
@@ -471,6 +475,10 @@ export default {
         {
             "id": "EXIT_FULLSCREEN",
             "value": "יציאה ממסך מלא"
+        },
+        {
+            "id": "TERMS",
+            "value": "מושגים"
         }
     ]
 };

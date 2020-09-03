@@ -9,8 +9,8 @@ export function useTerms() {
     const language = useLanguage();
     const items = useMemo(() => {
         const obj = {};
-        terms.map(term => {
-            term = { ...term };
+        terms.map(object => {
+            const term = { ...object, original: object };
             Object.keys(term).map(key => {
                 const value = term[key];
                 if (typeof value === "object") {

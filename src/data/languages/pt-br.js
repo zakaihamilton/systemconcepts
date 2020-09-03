@@ -469,12 +469,20 @@ export default {
             "value": "Diagramas"
         },
         {
+            "id": "DIAGRAM",
+            "value": "Diagrama"
+        },
+        {
             "id": "FULLSCREEN",
             "value": "Tela cheia"
         },
         {
             "id": "EXIT_FULLSCREEN",
             "value": "Sair da tela inteira"
+        },
+        {
+            "id": "TERMS",
+            "value": "Termos"
         }
     ]
 };

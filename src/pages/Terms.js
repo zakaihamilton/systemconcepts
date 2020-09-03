@@ -1,40 +1,46 @@
 import Table from "@/widgets/Table";
-import data from "@/data/diagrams";
+import data from "@/data/terms";
 import { useTranslations } from "@/util/translations";
-import { addPath } from "@/util/pages";
 import { useLanguage } from "@/util/language";
+import Term from "@/widgets/Term";
 
-export default function Diagrams() {
+export default function Terms() {
     const translations = useTranslations();
     const language = useLanguage();
 
     const columns = [
         {
-            id: "name",
+            id: "nameWidget",
             title: translations.NAME,
-            sortable: true
+            sortable: "name"
+        },
+        {
+            id: "typeWidget",
+            title: translations.TYPE,
+            sortable: "type"
         }
     ];
 
     const mapper = item => {
-        let { name } = item;
+        let { id, name, type } = item;
         if (typeof name === "object") {
             name = name[language];
         }
         else if (typeof name === "string") {
             name = translations[name];
         }
+        if (type) {
+            id = type + "." + id;
+        }
         return {
             ...item,
-            name
+            name,
+            nameWidget: <Term id={id} />,
+            typeWidget: <Term id={type} />
         };
     };
 
-    const rowClick = (_, item) => {
-        addPath(item.id);
-    };
-
     return <>
-        <Table name="diagrams" rowClick={rowClick} columns={columns} mapper={mapper} data={data} />
+        <Table name="terms" columns={columns} mapper={mapper} data={data} rowHeight="5em" />
     </>;
 }

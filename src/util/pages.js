@@ -115,16 +115,18 @@ export function usePagesFromHash(hash = "") {
 export function usePages() {
     const translations = useTranslations();
     const language = useLanguage();
-    const pages = pageList.map(page => {
-        const { name, ...props } = page;
-        let text = name;
+    const mapText = text => {
         if (typeof text === "object") {
             text = text[language];
         }
         else if (typeof text === "string") {
             text = translations[text] || text;
         }
-        return { ...props, name: text };
+        return text;
+    };
+    const pages = pageList.map(page => {
+        const { name, tooltip, ...props } = page;
+        return { ...props, name: mapText(name), tooltip: mapText(tooltip) };
     });
     return pages;
 }

@@ -8,10 +8,13 @@ export default [
             heb: "בורא",
             "pt-br": "Criador"
         },
-        explanation: {
+        concept: {
             eng: "Control",
             heb: "שליטה",
             "pt-br": "Controle"
+        },
+        transliteration: {
+            eng: "Boreh"
         }
     },
     {
@@ -23,10 +26,13 @@ export default [
             heb: "ישראל",
             "pt-br": "Israel"
         },
-        explanation: {
+        concept: {
             eng: "Advancement",
             heb: "התקדמות",
             "pt-br": "Avanço"
+        },
+        transliteration: {
+            eng: "Yisrael"
         }
     },
     {
@@ -38,10 +44,13 @@ export default [
             heb: "אומות העולם",
             "pt-br": "Gentios"
         },
-        explanation: {
+        concept: {
             eng: "Business",
             heb: "עסקים",
             "pt-br": "Negócios"
+        },
+        transliteration: {
+            eng: "Umot Haolam"
         }
     },
     {
@@ -53,10 +62,13 @@ export default [
             heb: "בהמה",
             "pt-br": "Animal"
         },
-        explanation: {
+        concept: {
             eng: "Family",
             heb: "משפחה",
             "pt-br": "Família"
+        },
+        transliteration: {
+            eng: "Behemah"
         }
     },
     {
@@ -68,10 +80,13 @@ export default [
             heb: "גוף",
             "pt-br": "Corpo"
         },
-        explanation: {
+        concept: {
             eng: "Health",
             heb: "בריאות",
             "pt-br": "Saúde"
+        },
+        transliteration: {
+            eng: "Guf"
         }
     }
 ];

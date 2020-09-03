@@ -1,4 +1,15 @@
+import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
+
 export default [
+    {
+        id: "phase",
+        icon: <RadioButtonCheckedIcon />,
+        name: {
+            eng: "Phase",
+            heb: "בחינה",
+            "ptr-br": "Fase"
+        }
+    },
     {
         id: "0",
         type: "phase",

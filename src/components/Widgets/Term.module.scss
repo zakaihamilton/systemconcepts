@@ -1,16 +1,16 @@
-.row {
+.root {
     display: flex;
     align-items: center;
-    align-self: flex-start;
-    padding-top: 0.2em;
+    height: 2em;
+    width: fit-content;
 }
 
-.label {
+.fields {
     display: flex;
     flex-direction: column;
 }
 
-.row>*:not(:last-child) {
+.root>*:not(:last-child) {
     [dir=rtl] & {
         margin-left: 1em;
     }
@@ -27,8 +27,31 @@
     white-space: nowrap;
 }
 
-.explanation {
+.concept {
     display: flex;
     font-size: 75%;
     white-space: nowrap;
+}
+
+.label {
+    font-weight: bold;
+    white-space: nowrap;
+
+    [dir=rtl] & {
+        margin-left: 1em;
+    }
+
+    [dir=ltr] & {
+        margin-right: 1em;
+    }
+}
+
+.tooltip {
+    font-size: initial !important;
+    padding: 0.5em;
+}
+
+.field {
+    white-space: nowrap;
+    padding: 0.5em;
 }

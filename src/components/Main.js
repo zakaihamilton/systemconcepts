@@ -22,7 +22,6 @@ export const MainStoreDefaults = {
     menuViewList: "List",
     showSideBar: true,
     showDrawer: false,
-    search: "",
     fullscreen: false
 };
 

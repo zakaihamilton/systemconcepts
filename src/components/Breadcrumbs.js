@@ -19,14 +19,13 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
     const showName =
-        deviceType === "phone" && (count <= 2 || index === count - 1) ||
-        deviceType === "tablet" && (count <= 3 || index === count - 1) ||
-        deviceType === "desktop" && (count <= 6 || index === count - 1);
+        deviceType === "phone" && index && (count <= 2 || index === count - 1) ||
+        deviceType === "tablet" && index && (count <= 3 || index === count - 1) ||
+        deviceType === "desktop" && index && (count <= 6 || index === count - 1);
     const collapse = deviceType === "phone" && count >= 6 ||
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
-    const showTooltip = !showName || tooltip;
-    const title = !showName ? name : tooltip;
+    const title = !showName ? name : tooltip || name;
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
             const path = items.slice(2, -2).map(item => item.name).join("/");
@@ -43,7 +42,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     }
     return <>
         {isLast && <div className={styles.item}>
-            <Tooltip arrow title={showTooltip ? title : ""}>
+            <Tooltip arrow title={title}>
                 <div className={styles.icon}>
                     {icon}
                 </div>
@@ -56,11 +55,11 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
         </div>}
         {!isLast && <Link className={styles.item} color="inherit" href={href}>
             {icon && <IconButton className={styles.iconButton}>
-                <Tooltip arrow title={showTooltip ? title : ""}>
+                <Tooltip arrow title={title}>
                     {icon}
                 </Tooltip>
             </IconButton>}
-            {showName && <div className={styles.name}>
+            {!!showName && <div className={styles.name}>
                 {name}
             </div>}
         </Link>}
