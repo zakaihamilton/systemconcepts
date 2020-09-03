@@ -63,7 +63,7 @@ function Item({ className, style, start, end, column, term, type, selected, ...p
     return <div className={clsx(styles.face, className, selected && styles.selected, darkMode && styles.darkMode)} style={style} {...props}>
         {term && <Term id={term} />}
         {type && <div className={clsx(styles.itemType, selected && styles.selected)}>
-            {type}
+            <Term id={type} />
         </div>}
     </div>;
 }
@@ -87,8 +87,7 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
             end={headEnd}
             column={column}
             term={id}
-            tooltip={terms.face.name}
-            type={terms.faceHead.name}
+            type={"faceHead"}
             className={styles.head}
             onClick={onClickHead}
             selected={selected === 0}
@@ -98,7 +97,7 @@ function Face({ id, headStart, headEnd = headStart + 1, bodyStart = headEnd, bod
             start={bodyStart}
             end={bodyEnd}
             column={column}
-            type={terms.faceBody.name}
+            type={"faceBody"}
             className={styles.body}
             onClick={onClickBody}
             selected={selected === 1}

@@ -1,7 +1,8 @@
 .root {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: 0.5em repeat(11, 1fr);
+    grid-auto-columns: auto;
+    grid-template-rows: 1fr;
+    grid-auto-rows: minmax(3.5em, max-content);
     color: var(--text-color);
     column-gap: 1em;
 }
@@ -17,7 +18,7 @@
 }
 
 .worldInfo {
-    margin-top: 0.25em;
+    margin: 0.25em;
     padding-left: 0.25em;
     padding-right: 0.25em;
     display: flex;
@@ -54,16 +55,15 @@
     align-items: flex-end;
     justify-content: flex-end;
     flex: 1;
-    font-size: 75%;
 }
 
 .face {
-    padding: 0.25em;
     display: flex;
     flex-direction: column;
     background-color: rgb(128, 128, 128, 0.2);
     color: var(--text-color);
     box-shadow: var(--blur-shadow);
+    padding: 0.25em;
 }
 
 .face.selected {
