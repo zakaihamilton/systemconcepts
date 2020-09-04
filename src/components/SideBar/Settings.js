@@ -41,7 +41,7 @@ export default function Settings({ closeDrawer, state }) {
             items: languages.map(language => {
                 return {
                     ...language,
-                    onClick: () => setLanguage(language.id)
+                    setSelected: setLanguage
                 }
             }),
             selected: language
