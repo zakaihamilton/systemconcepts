@@ -39,7 +39,15 @@ export function ListItemWidget({ id, separator, viewType, depth, clickHandler, n
     }
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget id={id} depth={depth + 1} key={item.id} clickHandler={clickHandler} viewType={viewType} selected={selected} {...props} />
+        return <ListItemWidget
+            id={id}
+            depth={depth + 1}
+            key={item.id}
+            clickHandler={clickHandler}
+            viewType={viewType}
+            selected={selected}
+            setSelected={setSelected}
+            {...props} />
     });
     const style = {};
     if (direction === "rtl") {
