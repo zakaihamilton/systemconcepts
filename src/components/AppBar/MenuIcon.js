@@ -9,11 +9,12 @@ import { useTranslations } from "@/util/translations";
 export default function Menu() {
     const translations = useTranslations();
     const isPhone = useDeviceType() === "phone";
+    const { fullscreen } = MainStore.useState();
 
     const toggleMenu = () => {
         MainStore.update(s => {
-            if (isPhone) {
-                s.showDrawer = true;
+            if (isPhone || fullscreen) {
+                s.showSlider = true;
             }
             else {
                 s.showSideBar = !s.showSideBar;

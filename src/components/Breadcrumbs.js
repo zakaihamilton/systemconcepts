@@ -10,6 +10,7 @@ import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Toolbar from "@/components/Toolbar";
+import MenuIcon from "./AppBar/MenuIcon";
 
 export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href }) {
     const { direction } = MainStore.useState();
@@ -66,6 +67,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
 }
 
 export default function BreadcrumbsWidget({ items }) {
+    const { fullscreen } = MainStore.useState();
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
@@ -75,6 +77,8 @@ export default function BreadcrumbsWidget({ items }) {
     return (
         <div className={styles.root}>
             <div className={styles.row}>
+                {fullscreen && <MenuIcon />}
+                {fullscreen && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
                 <div className={styles.breadcrumbs}>
                     {breadcrumbItems}
                 </div>
