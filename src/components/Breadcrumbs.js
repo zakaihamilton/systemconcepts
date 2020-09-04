@@ -9,9 +9,7 @@ import styles from "./Breadcrumbs.module.scss";
 import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import { useTranslations } from "@/util/translations";
-import FullscreenIcon from '@material-ui/icons/Fullscreen';
-import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
+import Toolbar from "@/components/Toolbar";
 
 export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href }) {
     const { direction } = MainStore.useState();
@@ -68,19 +66,11 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
 }
 
 export default function BreadcrumbsWidget({ items }) {
-    const { fullscreen } = MainStore.useState();
-    const translations = useTranslations();
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
         return <BreadcrumbItem key={href} items={items} index={index} count={list.length} href={href} {...props} />
     });
-
-    const toggleFullscreen = () => {
-        MainStore.update(s => {
-            s.fullscreen = !s.fullscreen;
-        });
-    };
 
     return (
         <div className={styles.root}>
@@ -88,11 +78,7 @@ export default function BreadcrumbsWidget({ items }) {
                 <div className={styles.breadcrumbs}>
                     {breadcrumbItems}
                 </div>
-                <Tooltip arrow title={fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN}>
-                    <IconButton onClick={toggleFullscreen}>
-                        {fullscreen ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
-                    </IconButton>
-                </Tooltip>
+                <Toolbar />
             </div>
             <Divider />
         </div>
