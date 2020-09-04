@@ -63,8 +63,6 @@ export default function Toolbar() {
         ...Object.values(sections).flat()
     ].filter(Boolean);
 
-    console.log("menuItems", menuItems);
-
     return <Menu items={menuItems}>
         <Tooltip arrow title={translations.MENU}>
             <IconButton>
