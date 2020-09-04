@@ -38,7 +38,8 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
         setAnchorEl(null);
     };
 
-    const menuItems = (items || []).map(item => {
+    const menuItems = (items || []).flatMap((item, index, list) => {
+        const isLast = list.length - 1 === index;
         const { divider, name, icon, onClick, id, ...props } = item;
         const handleClick = event => {
             handleClose();
@@ -49,12 +50,14 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
                 onClick(event);
             }
         };
-        return <MenuItem key={id} selected={selected === id} onClick={handleClick} {...props}>
+        return [<MenuItem key={id} selected={selected === id} onClick={handleClick} {...props}>
             <ListItemIcon>
                 {icon}
             </ListItemIcon>
             <ListItemText primary={name} />
-        </MenuItem>;
+        </MenuItem>,
+        divider && !isLast && <Divider />
+        ];
     });
 
     children = React.Children.map(children, child => {

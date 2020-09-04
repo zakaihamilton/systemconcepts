@@ -52,13 +52,15 @@ export default function Toolbar() {
             id: "fullscreen",
             name: translations.FULLSCREEN,
             icon: <FullscreenIcon />,
-            onClick: toggleFullscreen
+            onClick: toggleFullscreen,
+            divider: true
         },
         fullscreen && {
             id: "exitFullscreen",
             name: translations.EXIT_FULLSCREEN,
             icon: <FullscreenExitIcon />,
-            onClick: toggleFullscreen
+            onClick: toggleFullscreen,
+            divider: true
         },
         ...Object.values(sections).flat()
     ].filter(Boolean);
