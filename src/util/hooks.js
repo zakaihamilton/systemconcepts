@@ -32,3 +32,13 @@ export function useHover() {
 
     return [ref, value];
 }
+
+let uniqueId = 0;
+
+export function useUnique() {
+    const idRef = useRef(null);
+    if (idRef.current === null) {
+        idRef.current = uniqueId++;
+    }
+    return idRef.current;
+}

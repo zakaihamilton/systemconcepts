@@ -4,6 +4,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Divider from '@material-ui/core/Divider';
 
 const StyledMenu = withStyles({
     paper: {
@@ -38,7 +39,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
     };
 
     const menuItems = (items || []).map(item => {
-        const { name, icon, onClick, id, ...props } = item;
+        const { divider, name, icon, onClick, id, ...props } = item;
         const handleClick = event => {
             handleClose();
             if (onClick) {
@@ -64,7 +65,8 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
         if (clickEnabled) {
             props.onClick = handleClick;
         }
-        return React.cloneElement(child, props);
+        const element = React.cloneElement(child, props);
+        return element;
     });
 
     return (

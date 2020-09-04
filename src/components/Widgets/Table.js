@@ -9,10 +9,6 @@ import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
 import styles from "./Table.module.scss";
-import { MainStore } from "../Main";
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import { exportData } from "@/util/importExport";
@@ -20,6 +16,7 @@ import Row from "./Table/Row";
 import Navigator from "./Table/Navigator";
 import Label from "@/widgets/Label";
 import { useSearch } from "@/components/AppBar/Search";
+import { useToolbar } from "@/components/Toolbar";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -55,6 +52,20 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
     const [orderBy, setOrderBy] = React.useState(defaultSort);
     const size = useContext(PageSize);
     const { search } = useSearch();
+
+    const menuItems = [
+        data && name && {
+            id: "export",
+            name: translations.EXPORT,
+            icon: <ImportExportIcon />,
+            onClick: () => {
+                const body = JSON.stringify({ [name]: data }, null, 4);
+                exportData(body, name, "application/json");
+            }
+        }
+    ].filter(Boolean);
+
+    useToolbar(menuItems, [data, name]);
 
     useEffect(() => {
         setOffset(0);
@@ -154,24 +165,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
         return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
     });
 
-    const menuItems = [
-        data && name && {
-            id: "export",
-            name: translations.EXPORT,
-            icon: <ImportExportIcon />,
-            onClick: () => {
-                const body = JSON.stringify({ [name]: data }, null, 4);
-                exportData(body, name, "application/json");
-            }
-        }
-    ].filter(Boolean);
-
     return (<TableContainer className={className} style={style} {...props}>
-        {!!menuItems.length && <Menu items={menuItems}>
-            <IconButton className={styles.menuButton}>
-                <MoreVertIcon />
-            </IconButton>
-        </Menu>}
         <Table stickyHeader style={style}>
             {!hideColumns && <TableHead>
                 <TableRow>
