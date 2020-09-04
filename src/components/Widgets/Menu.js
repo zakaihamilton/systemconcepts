@@ -56,7 +56,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
             </ListItemIcon>
             <ListItemText primary={name} />
         </MenuItem>,
-        divider && !isLast && <Divider />
+        divider && !isLast && <Divider key={"_" + id + "_"} />
         ];
     });
 

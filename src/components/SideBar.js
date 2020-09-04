@@ -32,7 +32,7 @@ export default function SideBar() {
         });
     };
 
-    const items = pages.filter(page => page.sidebar && !page.settings);
+    const items = pages.filter(page => page.sidebar && !page.category);
 
     if (isPhone || fullscreen) {
         return <Drawer

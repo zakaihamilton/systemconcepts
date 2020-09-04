@@ -495,6 +495,10 @@ export default {
         {
             "id": "PHASE",
             "value": "Fase"
+        },
+        {
+            "id": "TOOLS",
+            "value": "Ferramentas"
         }
     ]
 };

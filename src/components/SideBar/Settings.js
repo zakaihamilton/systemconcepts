@@ -1,5 +1,3 @@
-import Brightness7Icon from '@material-ui/icons/Brightness7';
-import Brightness4Icon from '@material-ui/icons/Brightness4';
 import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
 import ListWidget from "@/widgets/List";
@@ -7,6 +5,9 @@ import { Divider } from "@material-ui/core";
 import LanguageIcon from '@material-ui/icons/Language';
 import languages from "@/data/languages";
 import { usePages } from "@/util/pages";
+import Brightness7Icon from '@material-ui/icons/Brightness7';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
+import BuildIcon from '@material-ui/icons/Build';
 
 export default function Settings({ closeDrawer, state }) {
     const { language, darkMode, menuViewList } = MainStore.useState();
@@ -26,15 +27,11 @@ export default function Settings({ closeDrawer, state }) {
         });
     };
 
-    const Icon = darkMode ? Brightness7Icon : Brightness4Icon;
-    const title = darkMode ? translations.LIGHT_MODE : translations.DARK_MODE;
-
-    const settingsItems = pages.filter(page => page.sidebar && page.settings);
     const quickAccessItems = [
         {
             id: "toggleDarkMode",
-            name: title,
-            icon: <Icon />,
+            name: darkMode ? translations.LIGHT_MODE : translations.DARK_MODE,
+            icon: darkMode ? <Brightness7Icon /> : <Brightness4Icon />,
             onClick: toggleDarkMode
         },
         {
@@ -48,14 +45,18 @@ export default function Settings({ closeDrawer, state }) {
                 }
             }),
             selected: language
+        },
+        {
+            id: "tools",
+            name: translations.TOOLS,
+            icon: <BuildIcon />,
+            items: pages.filter(page => page.sidebar && page.category === "tools")
         }
     ];
 
     return <>
         <div style={{ flex: "1" }} />
         <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <ListWidget onClick={closeDrawer} state={state} reverse={true} items={settingsItems} viewType={menuViewList} />
-        <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <ListWidget reverse={true} items={quickAccessItems} viewType={menuViewList} />
+        <ListWidget reverse={true} items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
     </>;
 }

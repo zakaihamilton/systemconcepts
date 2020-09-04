@@ -54,7 +54,7 @@ export default [
     },
     {
         sidebar: true,
-        settings: true,
+        category: "tools",
         id: "users",
         name: "USERS",
         icon: <PeopleIcon />,
@@ -92,11 +92,11 @@ export default [
         Component: Storage,
         section: getStorageSection,
         sidebar: true,
-        settings: true
+        category: "tools"
     },
     {
         sidebar: true,
-        settings: true,
+        category: "tools",
         id: "settings",
         name: "SETTINGS",
         icon: <SettingsIcon />,

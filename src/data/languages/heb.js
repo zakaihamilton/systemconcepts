@@ -491,6 +491,10 @@ export default {
         {
             "id": "PHASE",
             "value": "בחינה"
+        },
+        {
+            "id": "TOOLS",
+            "value": "כלים"
         }
     ]
 };
