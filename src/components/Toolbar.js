@@ -1,3 +1,5 @@
+import { Divider } from "@material-ui/core";
+import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
@@ -9,6 +11,7 @@ import Menu from "@/widgets/Menu";
 import { useEffect } from "react";
 import { useUnique } from "@/util/hooks";
 import { Store } from "pullstate";
+import styles from "./Toolbar.module.scss";
 
 export const ToolbarStore = new Store({
     sections: {}
@@ -37,6 +40,7 @@ export function useToolbar(items, depends = []) {
 }
 
 export default function Toolbar() {
+    const isDesktop = useDeviceType() === "desktop";
     const { fullscreen } = MainStore.useState();
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
@@ -47,7 +51,8 @@ export default function Toolbar() {
         });
     };
 
-    const menuItems = [
+    const items = [
+        ...Object.values(sections).flat(),
         !fullscreen && {
             id: "fullscreen",
             name: translations.FULLSCREEN,
@@ -61,11 +66,25 @@ export default function Toolbar() {
             icon: <FullscreenExitIcon />,
             onClick: toggleFullscreen,
             divider: true
-        },
-        ...Object.values(sections).flat()
+        }
     ].filter(Boolean);
 
-    return <Menu items={menuItems}>
+    if (isDesktop) {
+        return <div className={styles.toolbar}>
+            {items.map(item => {
+                return <React.Fragment key={item.id}>
+                    {item.divider && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                    <Tooltip arrow title={item.name}>
+                        <IconButton onClick={item.onClick}>
+                            {item.icon}
+                        </IconButton>
+                    </Tooltip>
+                </React.Fragment>;
+            })}
+        </div>
+    }
+
+    return <Menu items={items}>
         <Tooltip arrow title={translations.MENU}>
             <IconButton>
                 <MoreVertIcon />
