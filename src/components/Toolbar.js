@@ -71,9 +71,9 @@ export default function Toolbar() {
 
     if (isDesktop) {
         return <div className={styles.toolbar}>
-            {items.map(item => {
+            {items.map((item, idx) => {
                 return <React.Fragment key={item.id}>
-                    {item.divider && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                    {item.divider && idx && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
                     <Tooltip arrow title={item.name}>
                         <IconButton onClick={item.onClick}>
                             {item.icon}
