@@ -96,7 +96,7 @@ export default [
     },
     {
         sidebar: true,
-        category: "tools",
+        category: "quickaccess",
         id: "settings",
         name: "SETTINGS",
         icon: <SettingsIcon />,

@@ -51,7 +51,8 @@ export default function Settings({ closeDrawer, state }) {
             name: translations.TOOLS,
             icon: <BuildIcon />,
             items: pages.filter(page => page.sidebar && page.category === "tools")
-        }
+        },
+        ...pages.filter(page => page.sidebar && page.category === "quickaccess")
     ];
 
     return <>
