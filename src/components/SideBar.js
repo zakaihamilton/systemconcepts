@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import styles from "./SideBar.module.scss"
-import ListWidget from "@/widgets/List";
+import List from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
 import { useDeviceType } from "@/util/styles";
 import { MainStore } from "./Main";
@@ -46,13 +46,13 @@ export default function SideBar() {
             }}
             onClose={closeDrawer}
         >
-            <ListWidget onClick={closeDrawer} items={items} state={state} viewType={menuViewList} />
+            <List onClick={closeDrawer} items={items} state={state} viewType={menuViewList} />
             <QuickAccess closeDrawer={closeDrawer} state={state} />
         </Drawer>;
     }
 
     return <div className={styles.root}>
-        <ListWidget items={items} state={state} viewType={menuViewList} />
+        <List items={items} state={state} viewType={menuViewList} />
         <QuickAccess closeDrawer={closeDrawer} state={state} />
     </div>;
 }
