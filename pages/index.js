@@ -1,3 +1,4 @@
+import Head from "next/head"
 import dynamic from "next/dynamic";
 import Loading from "@/components/Loading";
 
@@ -7,5 +8,10 @@ const Main = dynamic(() => import("@/components/Main"), {
 });
 
 export default function Home() {
-  return <Main />;
+  return <>
+    <Head>
+      <link rel='manifest' href='/manifest.json' />
+    </Head>
+    <Main />
+  </>;
 }

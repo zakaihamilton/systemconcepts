@@ -1,0 +1,18 @@
+{
+    "dir": "ltr",
+    "lang": "en",
+    "name": "System Concepts",
+    "short_name": "System Concepts",
+    "scope": "/",
+    "display": "browser",
+    "start_url": "https://systemconcepts.app/",
+    "background_color": "transparent",
+    "theme_color": "transparent",
+    "description": "",
+    "orientation": "any",
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "icons": [],
+    "url": "https://systemconcepts.app/",
+    "screenshots": []
+}
