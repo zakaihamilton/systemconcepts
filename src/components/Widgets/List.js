@@ -13,7 +13,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { MainStore } from "@/components/Main";
 
-export function ListItemWidget({ id, separator, viewType, depth, clickHandler, name, items, selected, setSelected, description, icon, avatar, action }) {
+export function ListItemWidget({ id, separator, viewType, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const itemClassName = useStyles(styles, {
@@ -28,7 +28,12 @@ export function ListItemWidget({ id, separator, viewType, depth, clickHandler, n
     const [open, setOpen] = useState(false);
     let expandIcon = null;
     let rootItemClick = () => {
-        setSelected && setSelected(id);
+        if (onClick) {
+            onClick(id);
+        }
+        else if (setSelected) {
+            setSelected(id);
+        }
         clickHandler && clickHandler(id);
     }
     if (items && items.length) {

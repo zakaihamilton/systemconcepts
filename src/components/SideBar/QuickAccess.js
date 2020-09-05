@@ -1,6 +1,6 @@
 import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
-import ListWidget from "@/widgets/List";
+import List from "@/widgets/List";
 import { Divider } from "@material-ui/core";
 import LanguageIcon from '@material-ui/icons/Language';
 import languages from "@/data/languages";
@@ -57,6 +57,6 @@ export default function Settings({ closeDrawer, state }) {
     return <>
         <div style={{ flex: "1" }} />
         <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <ListWidget reverse={true} items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
+        <List reverse={true} items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
     </>;
 }

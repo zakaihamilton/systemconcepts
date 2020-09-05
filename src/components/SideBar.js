@@ -5,7 +5,7 @@ import Drawer from '@material-ui/core/Drawer';
 import { useDeviceType } from "@/util/styles";
 import { MainStore } from "./Main";
 import { usePagesFromHash, usePages, setPath } from "@/util/pages";
-import Settings from "./SideBar/Settings";
+import QuickAccess from "./SideBar/QuickAccess";
 
 export default function SideBar() {
     const isPhone = useDeviceType() === "phone";
@@ -47,12 +47,12 @@ export default function SideBar() {
             onClose={closeDrawer}
         >
             <ListWidget onClick={closeDrawer} items={items} state={state} viewType={menuViewList} />
-            <Settings closeDrawer={closeDrawer} state={state} />
+            <QuickAccess closeDrawer={closeDrawer} state={state} />
         </Drawer>;
     }
 
     return <div className={styles.root}>
         <ListWidget items={items} state={state} viewType={menuViewList} />
-        <Settings closeDrawer={closeDrawer} state={state} />
+        <QuickAccess closeDrawer={closeDrawer} state={state} />
     </div>;
 }
