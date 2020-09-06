@@ -10,8 +10,7 @@ import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
 import styles from "./Table.module.scss";
 import { useTranslations } from "@/util/translations";
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import { exportData } from "@/util/importExport";
+import { importData, exportData } from "@/util/importExport";
 import Row from "./Table/Row";
 import Navigator from "./Table/Navigator";
 import Label from "@/widgets/Label";
@@ -20,6 +19,9 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import Chip from '@material-ui/core/Chip';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Tooltip from '@material-ui/core/Tooltip';
+import GetAppIcon from '@material-ui/icons/GetApp';
+import PublishIcon from '@material-ui/icons/Publish';
+import Progress from "@/widgets/Progress";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -47,7 +49,7 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8em", columns, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8em", loading, columns, onImport, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -59,10 +61,33 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
     const { search } = useSearch();
 
     const menuItems = [
+        data && name && onImport && {
+            id: "import",
+            name: translations.IMPORT,
+            icon: <PublishIcon />,
+            onClick: async () => {
+                let body = "";
+                try {
+                    body = await importData();
+                }
+                catch (err) {
+                    if (err) {
+                        console.error(err);
+                    }
+                    return;
+                }
+                try {
+                    await onImport(JSON.parse(body));
+                }
+                catch (err) {
+                    console.error(err);
+                }
+            }
+        },
         data && name && {
             id: "export",
             name: translations.EXPORT,
-            icon: <ImportExportIcon />,
+            icon: <GetAppIcon />,
             onClick: () => {
                 const body = JSON.stringify({ [name]: data }, null, 4);
                 exportData(body, name, "application/json");
@@ -197,21 +222,24 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
         return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
     });
 
-    return (<TableContainer className={className} style={style} {...props}>
-        <Table stickyHeader style={style}>
-            {!hideColumns && <TableHead>
-                <TableRow>
-                    {tableColumns}
-                </TableRow>
-            </TableHead>}
-            <TableBody>
-                {tableRows}
-            </TableBody>
-        </Table>
-        {!!isEmpty && empty}
-        <div className={styles.footer}>
-            {statusBar}
-            <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
-        </div>
-    </TableContainer>);
+    return (<>
+        <TableContainer className={className} style={style} {...props}>
+            {!loading && <Table stickyHeader style={style}>
+                {!hideColumns && <TableHead>
+                    <TableRow>
+                        {tableColumns}
+                    </TableRow>
+                </TableHead>}
+                <TableBody>
+                    {tableRows}
+                </TableBody>
+            </Table>}
+            {!!isEmpty && empty}
+            {!loading && <div className={styles.footer}>
+                {statusBar}
+                <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
+            </div>}
+        </TableContainer>
+        {loading && <Progress />}
+    </>);
 }

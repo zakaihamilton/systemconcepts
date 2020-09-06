@@ -1,8 +1,7 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
-import { useFetchJSON } from "@/util/fetch";
-import Progress from "@/widgets/Progress";
+import { useFetchJSON, fetchJSON } from "@/util/fetch";
 import Label from "@/widgets/Label";
 import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
@@ -30,6 +29,8 @@ export default function Users() {
     const translations = useTranslations();
     const { mode, select, counter, enableItemClick } = UsersStore.useState();
     const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
+    const [inProgress, setProgress] = useState(false);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         UsersStore.update(s => {
@@ -109,17 +110,39 @@ export default function Users() {
 
     const onRowClick = enableItemClick && rowClick;
 
+    const onImport = data => {
+        const body = JSON.stringify(data);
+        setProgress(true);
+        fetchJSON("/api/users", {
+            method: "PUT",
+            body
+        }).then(({ err }) => {
+            if (err) {
+                console.error(err);
+                throw err;
+            }
+            setProgress(false);
+            UsersStore.update(s => {
+                s.counter++;
+            })
+        }).catch(err => {
+            setError(translations[err] || String(err));
+            setProgress(false);
+        });
+    };
+
     return <>
         <Table
             name="users"
+            onImport={onImport}
             rowClick={onRowClick}
             columns={columns}
             data={data}
             mapper={mapper}
             statusBar={statusBar}
+            loading={loading || inProgress}
             depends={[mode, select, onRowClick, translations]}
             rowHeight="6em"
         />
-        {loading && <Progress />}
     </>;
 }

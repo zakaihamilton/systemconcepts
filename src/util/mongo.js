@@ -106,7 +106,12 @@ export async function handleRequest({ collectionName, req, res }) {
             const result = req.body;
             let records = result;
             if (!Array.isArray(records)) {
-                records = [result];
+                if (typeof records === "object" && records[collectionName]) {
+                    records = records[collectionName];
+                }
+                else {
+                    records = [result];
+                }
             }
             for (const record of records) {
                 const { id } = record;

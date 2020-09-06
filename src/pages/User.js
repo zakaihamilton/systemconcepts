@@ -74,9 +74,6 @@ export default function User({ path = "" }) {
             setProgress(true);
             fetchJSON("/api/users", {
                 method: "PUT",
-                headers: {
-                    id: path
-                },
                 body: JSON.stringify(data)
             }).then(({ err }) => {
                 if (err) {
