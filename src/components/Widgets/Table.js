@@ -68,7 +68,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
         }
     ].filter(Boolean);
 
-    useToolbar(menuItems, [data, name]);
+    useToolbar({ items: menuItems, depends: [data, name] });
 
     useEffect(() => {
         setOffset(0);

@@ -17,8 +17,11 @@ export const ToolbarStore = new Store({
     sections: {}
 });
 
-export function useToolbar(items, depends = []) {
-    const id = useUnique();
+export function useToolbar({ id, items, depends = [] }) {
+    const unique = useUnique();
+    if (!id) {
+        id = unique;
+    }
     const { sections } = MainStore.useState();
     useEffect(() => {
         ToolbarStore.update(s => {

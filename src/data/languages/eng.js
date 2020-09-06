@@ -499,6 +499,14 @@ export default {
         {
             "id": "TOOLS",
             "value": "Tools"
+        },
+        {
+            "id": "SHOW_CONCEPTS",
+            "value": "Show Concepts"
+        },
+        {
+            "id": "HIDE_CONCEPTS",
+            "value": "Hide Concepts"
         }
     ]
 };

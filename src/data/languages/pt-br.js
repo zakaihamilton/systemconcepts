@@ -499,6 +499,14 @@ export default {
         {
             "id": "TOOLS",
             "value": "Ferramentas"
+        },
+        {
+            "id": "SHOW_CONCEPTS",
+            "value": "Mostrar conceitos"
+        },
+        {
+            "id": "HIDE_CONCEPTS",
+            "value": "Esconder Conceitos"
         }
     ]
 };

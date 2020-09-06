@@ -7,6 +7,15 @@ import { MainStore } from "@/components/Main";
 import clsx from "clsx";
 import { useLanguage } from "@/util/language";
 import { useTranslations } from "@/util/translations";
+import { Store } from "pullstate";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { useToolbar } from "@/components/Toolbar";
+import { useLocalStorage } from "@/util/store";
+
+export const TermStore = new Store({
+    showConcepts: true
+});
 
 const useStyles = makeStyles({
     phase: {
@@ -33,10 +42,26 @@ const useStyles = makeStyles({
 });
 
 export default function Term({ id, onClick, ...props }) {
+    const translations = useTranslations();
+    const { showConcepts } = TermStore.useState();
     const { direction } = MainStore.useState();
+    const toggleShowConcepts = () => {
+        TermStore.update(s => {
+            s.showConcepts = !s.showConcepts;
+        });
+    };
+    const toolbarItems = [
+        {
+            id: "showconcepts",
+            name: showConcepts ? translations.HIDE_CONCEPTS : translations.SHOW_CONCEPTS,
+            icon: showConcepts ? <VisibilityOffIcon /> : <VisibilityIcon />,
+            onClick: toggleShowConcepts
+        }
+    ];
+    useToolbar({ id: "term", items: toolbarItems, depends: [showConcepts] });
+    useLocalStorage("TermStore", TermStore);
     const language = useLanguage();
     const terms = useTerms();
-    const translations = useTranslations();
     const term = terms[id] || { original: {} };
     let type = null;
     let phase = null;
@@ -134,11 +159,11 @@ export default function Term({ id, onClick, ...props }) {
                     {name}
                 </div>
             </Tooltip>
-            <Tooltip arrow title={explanationTooltip}>
+            {showConcepts && <Tooltip arrow title={explanationTooltip}>
                 <div className={styles.concept}>
                     {concept}
                 </div>
-            </Tooltip>
+            </Tooltip>}
         </div>
     </div>
 }

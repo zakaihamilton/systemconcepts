@@ -495,6 +495,14 @@ export default {
         {
             "id": "TOOLS",
             "value": "כלים"
+        },
+        {
+            "id": "SHOW_CONCEPTS",
+            "value": "הראה מושגים"
+        },
+        {
+            "id": "HIDE_CONCEPTS",
+            "value": "הסתר מושגים"
         }
     ]
 };
