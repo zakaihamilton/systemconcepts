@@ -6,6 +6,7 @@ import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { StorageStore } from "../Storage";
+import { importData } from "@/util/importExport";
 
 export function useActions(data) {
     const { name, mode, type } = StorageStore.useState();
@@ -98,30 +99,31 @@ export default function Actions({ path }) {
             name: translations.IMPORT_FOLDER,
             icon: <FolderIcon />,
             tooltip: translations.FOLDER,
-            onClick: () => {
-                var input = document.createElement("input");
-                input.type = "file";
-                input.onchange = e => {
-                    var file = e.target.files[0];
-                    var reader = new FileReader();
-                    reader.readAsText(file, "UTF-8");
-                    reader.onload = async readerEvent => {
-                        var body = readerEvent.target.result;
-                        try {
-                            await storage.importFolder(path, JSON.parse(body));
-                            StorageStore.update(s => {
-                                s.counter++;
-                            });
-                        }
-                        catch (err) {
-                            StorageStore.update(s => {
-                                s.message = err;
-                                s.severity = "error";
-                            });
-                        }
-                    };
-                };
-                input.click();
+            onClick: async () => {
+                let body = "";
+                try {
+                    body = await importData();
+                }
+                catch (err) {
+                    if (err) {
+                        StorageStore.update(s => {
+                            s.message = err;
+                            s.severity = "error";
+                        });
+                    }
+                }
+                try {
+                    await storage.importFolder(path, JSON.parse(body));
+                    StorageStore.update(s => {
+                        s.counter++;
+                    });
+                }
+                catch (err) {
+                    StorageStore.update(s => {
+                        s.message = err;
+                        s.severity = "error";
+                    });
+                }
             }
         }
     ]);
