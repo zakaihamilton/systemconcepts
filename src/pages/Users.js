@@ -94,7 +94,7 @@ export default function Users() {
         const { id } = item;
         if (select) {
             const exists = select.find(item => item.id === id);
-            RolesStore.update(s => {
+            UsersStore.update(s => {
                 if (exists) {
                     s.select = select.filter(item => item.id !== id);
                 }
@@ -111,6 +111,7 @@ export default function Users() {
 
     return <>
         <Table
+            name="users"
             rowClick={onRowClick}
             columns={columns}
             data={data}
