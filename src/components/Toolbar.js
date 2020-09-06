@@ -14,7 +14,8 @@ import { Store } from "pullstate";
 import styles from "./Toolbar.module.scss";
 
 export const ToolbarStore = new Store({
-    sections: {}
+    sectionItems: {},
+    refCount: {}
 });
 
 export function useToolbar({ id, items, depends = [] }) {
@@ -22,22 +23,26 @@ export function useToolbar({ id, items, depends = [] }) {
     if (!id) {
         id = unique;
     }
-    const { sections } = MainStore.useState();
+    const { sectionItems } = MainStore.useState();
     useEffect(() => {
         ToolbarStore.update(s => {
-            s.sections = { [id]: items, sections };
+            s.sectionItems = { [id]: items, ...s.sectionItems };
+            s.refCount[id] = (s.refCount[id] || 0) + 1;
         });
         return () => {
             ToolbarStore.update(s => {
-                const { [id]: section, ...sections } = s.sections;
-                s.sections = { ...sections };
+                const { [id]: items, ...other } = s.sectionItems;
+                s.refCount[id] = (s.refCount[id] || 0) - 1;
+                if (s.refCount[id] <= 0) {
+                    s.items = { ...other };
+                }
             });
         };
     }, []);
     useEffect(() => {
         ToolbarStore.update(s => {
-            const { [id]: section, ...sections } = s.sections;
-            s.sections = { [id]: items, ...sections };
+            const { [id]: section, ...other } = s.sectionItems;
+            s.sectionItems = { [id]: items, ...other };
         });
     }, depends);
 }
@@ -45,7 +50,7 @@ export function useToolbar({ id, items, depends = [] }) {
 export default function Toolbar() {
     const isDesktop = useDeviceType() === "desktop";
     const { fullscreen } = MainStore.useState();
-    const { sections } = ToolbarStore.useState();
+    const { sectionItems } = ToolbarStore.useState();
     const translations = useTranslations();
 
     const toggleFullscreen = () => {
@@ -55,18 +60,11 @@ export default function Toolbar() {
     };
 
     const items = [
-        ...Object.values(sections).flat(),
-        !fullscreen && {
+        ...Object.values(sectionItems).flat(),
+        {
             id: "fullscreen",
-            name: translations.FULLSCREEN,
-            icon: <FullscreenIcon />,
-            onClick: toggleFullscreen,
-            divider: true
-        },
-        fullscreen && {
-            id: "exitFullscreen",
-            name: translations.EXIT_FULLSCREEN,
-            icon: <FullscreenExitIcon />,
+            name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
+            icon: fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />,
             onClick: toggleFullscreen,
             divider: true
         }
