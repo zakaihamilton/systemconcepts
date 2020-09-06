@@ -14,8 +14,7 @@ import { Store } from "pullstate";
 import styles from "./Toolbar.module.scss";
 
 export const ToolbarStore = new Store({
-    sectionItems: {},
-    refCount: {}
+    sections: [],
 });
 
 export function useToolbar({ id, items, depends = [] }) {
@@ -23,26 +22,35 @@ export function useToolbar({ id, items, depends = [] }) {
     if (!id) {
         id = unique;
     }
-    const { sectionItems } = MainStore.useState();
     useEffect(() => {
         ToolbarStore.update(s => {
-            s.sectionItems = { [id]: items, ...s.sectionItems };
-            s.refCount[id] = (s.refCount[id] || 0) + 1;
+            const section = s.sections.find(item => item.id === id);
+            if (section) {
+                section.used++;
+                section.items = items;
+            }
+            else {
+                s.sections = [{ id, used: 1, items }, ...s.sections];
+            }
         });
         return () => {
             ToolbarStore.update(s => {
-                const { [id]: items, ...other } = s.sectionItems;
-                s.refCount[id] = (s.refCount[id] || 0) - 1;
-                if (s.refCount[id] <= 0) {
-                    s.items = { ...other };
+                const section = s.sections.find(item => item.id === id);
+                if (section) {
+                    section.used--;
+                    if (section.used <= 0) {
+                        s.sections = s.sections.filter(item => item.id !== id);
+                    }
                 }
             });
         };
     }, []);
     useEffect(() => {
         ToolbarStore.update(s => {
-            const { [id]: section, ...other } = s.sectionItems;
-            s.sectionItems = { [id]: items, ...other };
+            const section = s.sections.find(item => item.id === id);
+            if (section) {
+                section.items = items;
+            }
         });
     }, depends);
 }
@@ -50,7 +58,7 @@ export function useToolbar({ id, items, depends = [] }) {
 export default function Toolbar() {
     const isDesktop = useDeviceType() === "desktop";
     const { fullscreen } = MainStore.useState();
-    const { sectionItems } = ToolbarStore.useState();
+    const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
 
     const toggleFullscreen = () => {
@@ -60,7 +68,7 @@ export default function Toolbar() {
     };
 
     const items = [
-        ...Object.values(sectionItems).flat(),
+        ...sections.map(section => section.items).flat(),
         {
             id: "fullscreen",
             name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
