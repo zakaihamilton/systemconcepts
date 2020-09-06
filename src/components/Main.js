@@ -41,9 +41,11 @@ export default function Main() {
             s.hash = window.location.hash;
         });
         window.onhashchange = function () {
-            MainStore.update(s => {
-                s.hash = window.location.hash;
-            });
+            setTimeout(() => {
+                MainStore.update(s => {
+                    s.hash = window.location.hash;
+                });
+            }, 0);
         };
     }, []);
 

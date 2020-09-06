@@ -16,12 +16,14 @@ import Row from "./Table/Row";
 import Navigator from "./Table/Navigator";
 import Label from "@/widgets/Label";
 import { useSearch } from "@/components/AppBar/Search";
-import { useToolbar } from "@/components/Toolbar";
+import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import Chip from '@material-ui/core/Chip';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+
+registerToolbar("Table");
 
 function descendingComparator(a, b, orderBy) {
     const aText = a && a[orderBy] || "";
@@ -68,7 +70,7 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
         }
     ].filter(Boolean);
 
-    useToolbar({ items: menuItems, depends: [data, name] });
+    useToolbar({ id: "Table", items: menuItems, depends: [data, name] });
 
     useEffect(() => {
         setOffset(0);

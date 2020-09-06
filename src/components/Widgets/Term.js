@@ -10,7 +10,7 @@ import { useTranslations } from "@/util/translations";
 import { Store } from "pullstate";
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import { useToolbar } from "@/components/Toolbar";
+import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { useLocalStorage } from "@/util/store";
 
 export const TermStore = new Store({
@@ -41,6 +41,8 @@ const useStyles = makeStyles({
     }
 });
 
+registerToolbar("Term");
+
 export default function Term({ id, onClick, ...props }) {
     const translations = useTranslations();
     const { showConcepts } = TermStore.useState();
@@ -58,7 +60,7 @@ export default function Term({ id, onClick, ...props }) {
             onClick: toggleShowConcepts
         }
     ];
-    useToolbar({ id: "term", items: toolbarItems, depends: [showConcepts] });
+    useToolbar({ id: "Term", items: toolbarItems, depends: [showConcepts] });
     useLocalStorage("TermStore", TermStore);
     const language = useLanguage();
     const terms = useTerms();

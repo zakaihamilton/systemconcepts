@@ -17,11 +17,13 @@ export const ToolbarStore = new Store({
     sections: [],
 });
 
+export function registerToolbar(id) {
+    ToolbarStore.update(s => {
+        s.sections = [...s.sections, { items: [], used: 0, id }];
+    });
+}
+
 export function useToolbar({ id, items, depends = [] }) {
-    const unique = useUnique();
-    if (!id) {
-        id = unique;
-    }
     useEffect(() => {
         ToolbarStore.update(s => {
             const section = s.sections.find(item => item.id === id);
@@ -29,18 +31,12 @@ export function useToolbar({ id, items, depends = [] }) {
                 section.used++;
                 section.items = items;
             }
-            else {
-                s.sections = [{ id, used: 1, items }, ...s.sections];
-            }
         });
         return () => {
             ToolbarStore.update(s => {
                 const section = s.sections.find(item => item.id === id);
                 if (section) {
                     section.used--;
-                    if (section.used <= 0) {
-                        s.sections = s.sections.filter(item => item.id !== id);
-                    }
                 }
             });
         };
@@ -68,7 +64,7 @@ export default function Toolbar() {
     };
 
     const items = [
-        ...sections.map(section => section.items).flat(),
+        ...sections.filter(section => section.used).map(section => section.items).flat(),
         {
             id: "fullscreen",
             name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
