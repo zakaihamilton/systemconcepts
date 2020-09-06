@@ -46,9 +46,6 @@ export default function Term({ id, onClick, ...props }) {
     if (typeof term.phase !== "undefined") {
         phase = terms["phase." + term.phase];
     }
-    else if (term.type === "phase") {
-        phase = terms["phase." + term.id];
-    }
     let iconTooltip = "";
     let nameTooltip = "";
     let explanationTooltip = "";
@@ -116,7 +113,7 @@ export default function Term({ id, onClick, ...props }) {
             {toLines(iconDescription)}
         </div >;
     }
-    return <div className={clsx(styles.root, classes.hover, onClick && styles.selectable)} onClick={onClick ? onClick : undefined} {...props}>
+    return <div className={clsx(styles.root, classes.hover)} onClick={onClick ? onClick : undefined} {...props}>
         {icon && <Tooltip arrow title={iconTooltip}>
             <Badge
                 classes={{ badge: classes.phase }}

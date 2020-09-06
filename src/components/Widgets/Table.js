@@ -141,20 +141,22 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
             dir={dir}
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
-            {sortable && <TableSortLabel
-                className={styles.sortLabel}
-                active={orderBy === sortId}
-                direction={orderBy === sortId ? order : "desc"}
-                onClick={createSortHandler(sortId)}
-                {...labelProps}
-                dir={dir}
-            >
-                {label}
+            <div className={styles.headerRow}>
+                {sortable && <TableSortLabel
+                    className={styles.sortLabel}
+                    active={orderBy === sortId}
+                    direction={orderBy === sortId ? order : "desc"}
+                    onClick={createSortHandler(sortId)}
+                    {...labelProps}
+                    dir={dir}
+                >
+                    {label}
+                </TableSortLabel>}
+                {!sortable && label}
                 {!!tagItems.length && <div className={styles.tags}>
                     {tagItems}
                 </div>}
-            </TableSortLabel>}
-            {!sortable && label}
+            </div>
         </TableCell>;
     });
 

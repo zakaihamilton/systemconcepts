@@ -12,6 +12,7 @@ export default [
     },
     {
         id: "0",
+        phase: "0",
         type: "phase",
         fill: {
             light: "rgb(255, 255, 255,0.5)",
@@ -29,6 +30,7 @@ export default [
     },
     {
         id: "1",
+        phase: "1",
         type: "phase",
         fill: {
             light: "rgb(235, 211, 124, 0.5)",
@@ -46,6 +48,7 @@ export default [
     },
     {
         id: "2",
+        phase: "2",
         type: "phase",
         fill: {
             light: "rgb(101, 165, 214,0.5)",
@@ -63,6 +66,7 @@ export default [
     },
     {
         id: "3",
+        phase: "3",
         type: "phase",
         fill: {
             light: "rgb(235, 150, 124, 0.5)",
@@ -80,6 +84,7 @@ export default [
     },
     {
         id: "4",
+        phase: "4",
         type: "phase",
         fill: {
             light: "rgb(131, 184, 114, 0.5)",
