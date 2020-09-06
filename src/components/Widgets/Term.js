@@ -122,6 +122,7 @@ export default function Term({ id, onClick, ...props }) {
                 classes={{ badge: classes.phase }}
                 badgeContent={phase && phase.id}
                 invisible={typeof phase === "undefined"}
+                overlap="circle"
                 anchorOrigin={{
                     vertical: 'top',
                     horizontal: direction === "rtl" ? 'left' : 'right',

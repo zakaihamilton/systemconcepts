@@ -9,12 +9,23 @@ export default function Terms() {
     const translations = useTranslations();
     const language = useLanguage();
     const [typeFilter, setTypeFilter] = useState("");
+    const [phaseFilter, setPhaseFilter] = useState("");
 
     const columns = [
         {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name"
+        },
+        {
+            id: "phaseWidget",
+            title: translations.PHASE,
+            sortable: "phase",
+            tags: [phaseFilter && {
+                id: phaseFilter,
+                name: <Term id={phaseFilter} />,
+                onDelete: () => setPhaseFilter("")
+            }]
         },
         {
             id: "typeWidget",
@@ -40,26 +51,21 @@ export default function Terms() {
         if (type) {
             id = type + "." + id;
         }
-        const typeClick = () => {
-            setTypeFilter(filter => {
-                if (filter !== type) {
-                    return type;
-                }
-                return "";
-            });
-        };
         return {
             ...item,
             sortId,
             name,
             nameWidget: <Term id={id} />,
-            typeWidget: <Term id={type} onClick={!typeFilter && typeClick} />
+            phaseWidget: <Term id={"phase." + phase} onClick={!phaseFilter && (() => setPhaseFilter("phase." + phase))} />,
+            typeWidget: <Term id={type} onClick={!typeFilter && (() => setTypeFilter(type))} />
         };
     };
 
     const filter = item => {
-        let { type } = item;
-        return !typeFilter || typeFilter === type;
+        let { type, phase } = item;
+        let show = !typeFilter || typeFilter === type;
+        show = show && (!phaseFilter || phaseFilter === "phase." + phase);
+        return show;
     };
 
     return <>
@@ -71,7 +77,7 @@ export default function Terms() {
             data={data}
             rowHeight="5em"
             sortColumn="sortId"
-            reset={[typeFilter]}
-            depends={[typeFilter]} />
+            reset={[typeFilter, phaseFilter]}
+            depends={[typeFilter, phaseFilter]} />
     </>;
 }
