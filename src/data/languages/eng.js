@@ -305,16 +305,8 @@ export default {
             "value": "Sign Up"
         },
         {
-            "id": "SIGN_IN",
-            "value": "Sign In"
-        },
-        {
             "id": "SIGN_OUT",
             "value": "Sign Out"
-        },
-        {
-            "id": "SIGN_UP",
-            "value": "Sign Up"
         },
         {
             "id": "EMAIL_ADDRESS",

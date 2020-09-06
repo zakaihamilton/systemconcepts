@@ -305,14 +305,6 @@ export default {
             "value": "Entrar"
         },
         {
-            "id": "SIGN_UP",
-            "value": "Inscreva-se"
-        },
-        {
-            "id": "SIGN_IN",
-            "value": "Entrar"
-        },
-        {
             "id": "SIGN_OUT",
             "value": "Sair"
         },

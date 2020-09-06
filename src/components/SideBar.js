@@ -9,10 +9,12 @@ import QuickAccess from "./SideBar/QuickAccess";
 
 export default function SideBar() {
     const isPhone = useDeviceType() === "phone";
-    const { menuViewList, direction, showDrawer, hash, fullscreen, showSlider } = MainStore.useState();
+    const { menuViewList, direction, hash, fullscreen, showSlider } = MainStore.useState();
     const activePages = usePagesFromHash(hash);
     const pages = usePages();
-    const selected = activePages[activePages.length - 1].id;
+    const selected = id => {
+        return !!activePages.find(page => page.id === id);
+    };
     const setSelected = useCallback(id => {
         const page = pages.find(page => page.id === id);
         if (page) {

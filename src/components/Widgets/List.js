@@ -16,10 +16,11 @@ import { MainStore } from "@/components/Main";
 export function ListItemWidget({ id, separator, viewType, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
+    const isSelected = typeof selected === "function" ? selected(id) : selected === id;
     const itemClassName = useStyles(styles, {
         itemList: viewType === "List",
         itemIconList: viewType === "IconList",
-        selected: selected === id
+        selected: isSelected
     });
     const iconContainerClassName = useStyles(styles, {
         iconContainerList: viewType === "List",
@@ -62,7 +63,7 @@ export function ListItemWidget({ id, separator, viewType, depth, clickHandler, o
         style.paddingLeft = (depth * 1.5) + "em";
     }
     return <>
-        <ListItem style={style} className={itemClassName} button selected={selected === id} onClick={rootItemClick}>
+        <ListItem style={style} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
                     {actionIcon}

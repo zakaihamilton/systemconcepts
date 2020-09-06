@@ -301,14 +301,6 @@ export default {
             "value": "התחברות"
         },
         {
-            "id": "SIGN_UP",
-            "value": "הרשם"
-        },
-        {
-            "id": "SIGN_IN",
-            "value": "התחברות"
-        },
-        {
             "id": "SIGN_OUT",
             "value": "ניתוק"
         },

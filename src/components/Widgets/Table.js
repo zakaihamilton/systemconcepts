@@ -45,7 +45,7 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TableWidget({ name, rowHeight = "4em", columns, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8em", columns, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -171,12 +171,17 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
         maxHeight: height
     };
 
-    const rowHeightNum = parseFloat(rowHeight);
-    const rowHeightInPixels = rowHeight.trim().endsWith("em") ? rowHeightNum * size.emPixels : rowHeightNum;
-    const itemsPerPage = parseInt(size.height / rowHeightInPixels) - 1;
+    const sizeToPixels = text => {
+        const number = parseFloat(text);
+        const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
+        return sizeInPixels;
+    }
+    const marginBottomInPixels = sizeToPixels(marginBottom);
+    const rowHeightInPixels = sizeToPixels(rowHeight);
+    const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
     const pageCount = parseInt((items.length / itemsPerPage) + ((items.length % itemsPerPage) > 0 ? 1 : 0));
     const startIdx = offset;
-    const endIdx = startIdx + itemsPerPage - 1;
+    const endIdx = startIdx + itemsPerPage;
     const pageIndex = parseInt(startIdx / itemsPerPage);
 
     const setPageIndex = (index) => {
