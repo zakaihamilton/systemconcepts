@@ -79,7 +79,7 @@ export default function Terms() {
             mapper={mapper}
             filter={filter}
             data={data}
-            rowHeight="5em"
+            rowHeight="5.5em"
             sortColumn="sortId"
             reset={[typeFilter, phaseFilter]}
             depends={[typeFilter, phaseFilter]} />
