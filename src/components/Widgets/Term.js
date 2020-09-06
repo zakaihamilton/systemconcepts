@@ -32,7 +32,7 @@ const useStyles = makeStyles({
     }
 });
 
-export default function Term({ id }) {
+export default function Term({ id, onClick, ...props }) {
     const { direction } = MainStore.useState();
     const language = useLanguage();
     const terms = useTerms();
@@ -116,7 +116,7 @@ export default function Term({ id }) {
             {toLines(iconDescription)}
         </div >;
     }
-    return <div className={clsx(styles.root, classes.hover)}>
+    return <div className={clsx(styles.root, classes.hover, onClick && styles.selectable)} onClick={onClick ? onClick : undefined} {...props}>
         {icon && <Tooltip arrow title={iconTooltip}>
             <Badge
                 classes={{ badge: classes.phase }}

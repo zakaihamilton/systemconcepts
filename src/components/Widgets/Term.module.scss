@@ -5,6 +5,10 @@
     width: fit-content;
 }
 
+.root.selectable:hover {
+    outline: 1px solid var(--hover-fill);
+}
+
 .fields {
     display: flex;
     flex-direction: column;

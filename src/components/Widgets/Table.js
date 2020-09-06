@@ -17,6 +17,9 @@ import Navigator from "./Table/Navigator";
 import Label from "@/widgets/Label";
 import { useSearch } from "@/components/AppBar/Search";
 import { useToolbar } from "@/components/Toolbar";
+import Chip from '@material-ui/core/Chip';
+import CancelIcon from '@material-ui/icons/Cancel';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -42,7 +45,7 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TableWidget({ name, rowHeight = "4em", columns, depends = [], sortColumn, data, mapper, empty, statusBar, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "4em", columns, depends = [], reset, sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -69,7 +72,7 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
 
     useEffect(() => {
         setOffset(0);
-    }, [data, search]);
+    }, [data, search, ...reset]);
 
     useEffect(() => {
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
@@ -86,6 +89,9 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
 
     const items = useMemo(() => {
         let items = data || [];
+        if (filter) {
+            items = items.filter(filter);
+        }
         if (mapper) {
             items = items.map(mapper);
         }
@@ -111,9 +117,23 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
     }, [search, data, order, orderBy, ...depends]);
 
     const tableColumns = (columns || []).map((item, idx) => {
-        const { id, title, icon, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
+        const { id, title, icon, dir, align, sortable, tags, columnProps = {}, labelProps = {} } = item;
         const sortId = typeof sortable === "string" ? sortable : id;
         const label = <Label icon={icon} name={title} />;
+        const tagItems = (tags || []).filter(Boolean).map(tag => {
+            return <Chip
+                key={tag.id}
+                color="primary"
+                className={styles.tag}
+                icon={tag.icon}
+                label={tag.name}
+                deleteIcon={
+                    <Tooltip arrow title={translations.CLOSE}>
+                        <CancelIcon />
+                    </Tooltip>
+                }
+                onDelete={tag.onDelete} />;
+        });
         return <TableCell
             key={id || idx}
             align={align}
@@ -130,6 +150,9 @@ export default function TableWidget({ name, rowHeight = "4em", columns, depends 
                 dir={dir}
             >
                 {label}
+                {!!tagItems.length && <div className={styles.tags}>
+                    {tagItems}
+                </div>}
             </TableSortLabel>}
             {!sortable && label}
         </TableCell>;
