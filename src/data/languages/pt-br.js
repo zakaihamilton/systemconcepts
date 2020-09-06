@@ -237,6 +237,10 @@ export default {
             "value": "Exportar"
         },
         {
+            "id": "IMPORT",
+            "value": "Importar"
+        },
+        {
             "id": "IMPORT_FOLDER",
             "value": "Importar Pasta"
         },

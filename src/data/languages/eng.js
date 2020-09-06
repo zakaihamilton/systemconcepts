@@ -237,6 +237,10 @@ export default {
             "value": "Export"
         },
         {
+            "id": "IMPORT",
+            "value": "Import"
+        },
+        {
             "id": "IMPORT_FOLDER",
             "value": "Import Folder"
         },

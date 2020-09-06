@@ -237,6 +237,10 @@ export default {
             "value": "יצוא"
         },
         {
+            "id": "IMPORT",
+            "value": "ייבוא"
+        },
+        {
             "id": "IMPORT_FOLDER",
             "value": "יבוא תיקייה"
         },
