@@ -21,7 +21,7 @@ export default function Terms() {
             id: "phaseWidget",
             title: translations.PHASE,
             sortable: "phase",
-            onSelectable: item => typeof item.phase !== "undefined",
+            onSelectable: item => typeof item.phase !== "undefined" && !phaseFilter,
             tags: [phaseFilter && {
                 id: phaseFilter,
                 name: <Term id={phaseFilter} />,
@@ -33,7 +33,7 @@ export default function Terms() {
             id: "typeWidget",
             title: translations.TYPE,
             sortable: "type",
-            onSelectable: item => item.type,
+            onSelectable: item => item.type && !typeFilter,
             tags: [typeFilter && {
                 id: typeFilter,
                 name: <Term id={typeFilter} />,
