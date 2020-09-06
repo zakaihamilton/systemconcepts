@@ -5,12 +5,13 @@ import clsx from "clsx";
 
 export default function RowWidget({ rowHeight, columns, rowClick, item }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, rowProps = {} } = column;
+        const { id: columnId, dir, align, onSelectable, rowProps = {}, onClick } = column;
         const value = item[columnId];
         return (<TableCell
             dir={dir}
             align={align}
-            className={clsx(styles.cell, !align && styles.defaultAlign)}
+            onClick={onClick ? () => onClick(item) : undefined}
+            className={clsx(styles.cell, !align && styles.defaultAlign, onSelectable && onSelectable(item) && styles.selectable)}
             key={columnId}
             {...rowProps}>
             {value}

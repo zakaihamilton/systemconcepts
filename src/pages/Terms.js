@@ -21,21 +21,25 @@ export default function Terms() {
             id: "phaseWidget",
             title: translations.PHASE,
             sortable: "phase",
+            onSelectable: item => typeof item.phase !== "undefined",
             tags: [phaseFilter && {
                 id: phaseFilter,
                 name: <Term id={phaseFilter} />,
                 onDelete: () => setPhaseFilter("")
-            }]
+            }],
+            onClick: !phaseFilter && (item => setPhaseFilter(typeof item.phase !== "undefined" && "phase." + item.phase))
         },
         {
             id: "typeWidget",
             title: translations.TYPE,
             sortable: "type",
+            onSelectable: item => item.type,
             tags: [typeFilter && {
                 id: typeFilter,
                 name: <Term id={typeFilter} />,
                 onDelete: () => setTypeFilter("")
-            }]
+            }],
+            onClick: !typeFilter && (item => setTypeFilter(item.type))
         }
     ];
 
@@ -56,8 +60,8 @@ export default function Terms() {
             sortId,
             name,
             nameWidget: <Term id={id} />,
-            phaseWidget: <Term id={"phase." + phase} onClick={!phaseFilter && (() => setPhaseFilter("phase." + phase))} />,
-            typeWidget: <Term id={type} onClick={!typeFilter && (() => setTypeFilter(type))} />
+            phaseWidget: <Term id={"phase." + phase} />,
+            typeWidget: <Term id={type} />
         };
     };
 

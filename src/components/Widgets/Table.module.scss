@@ -10,6 +10,10 @@
     font-size: 16px;
 }
 
+.selectable:hover {
+    background: var(--info-background) !important;
+}
+
 .cell.defaultAlign {
     [dir=ltr] & {
         text-align: left;
