@@ -73,38 +73,26 @@ export async function handleRequest({ dbName, collectionName, readOnly, req, res
     if (req.method === "GET") {
         try {
             const { id, query, fields } = headers;
-            const parsedId = id && JSON.parse(decodeURIComponent(id));
+            const parsedId = id && decodeURIComponent(id);
             const parsedQuery = query && JSON.parse(decodeURIComponent(query));
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
-            let result = null;
             if (id) {
-                result = await findRecord({ query: { parsedId }, fields: parsedFields, dbName, collectionName });
+                const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
+                res.status(200).json(result);
             }
             else {
-                result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
+                let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
+                if (!result) {
+                    result = [];
+                }
+                res.status(200).json(result);
             }
-            res.status(200).json(result);
         }
         catch (err) {
             console.error("get error: ", err);
             res.status(200).json({ err: err.toString() });
         }
-    } else if (!readOnly && req.method === "DELETE") {
-        try {
-            let { ids } = headers;
-            if (!Array.isArray(ids)) {
-                ids = [ids];
-            }
-            for (const id of ids) {
-                await deleteRecord({ query: { id }, dbName, collectionName });
-            }
-            res.status(200).json({});
-        }
-        catch (err) {
-            console.error("delete error: ", err);
-            res.status(200).json({ err: err.toString() });
-        }
-    } else if (!readOnly && req.method === "PUT" || req.method === "DELETE") {
+    } else if (!readOnly && (req.method === "PUT" || req.method === "DELETE")) {
         try {
             const result = req.body;
             let records = result;

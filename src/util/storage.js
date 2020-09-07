@@ -7,13 +7,10 @@ export async function callMethod(item, url = "", ...params) {
     if (!deviceId) {
         if (name === "getListing") {
             const results = [];
-            const options = params[0] || {};
             for (const device of storage) {
                 const result = Object.assign({}, device);
-                if (options.browse) {
-                    const items = await storageMethods.getListing(device.id, ...params) || [];
-                    result.count = items.length;
-                }
+                const items = await storageMethods.getListing(device.id, ...params) || [];
+                result.count = items.length;
                 results.push(result);
             }
             return results;

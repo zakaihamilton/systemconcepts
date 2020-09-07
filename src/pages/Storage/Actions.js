@@ -9,7 +9,7 @@ import { StorageStore } from "../Storage";
 import { importData } from "@/util/importExport";
 
 export function useActions(data) {
-    const { name, mode, type } = StorageStore.useState();
+    const { mode, type } = StorageStore.useState();
     if (mode === "create") {
         data = [{
             id: type,
@@ -20,7 +20,7 @@ export function useActions(data) {
     return data;
 }
 
-export default function Actions({ path }) {
+export default function Actions({ data, path }) {
     const { mode } = StorageStore.useState();
     const translations = useTranslations();
 
@@ -129,6 +129,6 @@ export default function Actions({ path }) {
     ]);
 
     return (
-        <SpeedDial visible={!mode && path} items={addItems} icon={<AddIcon />} />
+        <SpeedDial visible={!mode && path && data} items={addItems} icon={<AddIcon />} />
     );
 }

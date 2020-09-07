@@ -12,25 +12,24 @@ async function getListing(path) {
     for (const item of items) {
         const { name, stat } = item;
         const itemPath = [path, name].filter(Boolean).join("/");
-        if (stat.type !== "dir") {
-            continue;
-        }
-        const children = await fetchJSON("/api/fs", {
-            method: "GET",
-            headers: {
-                query: encodeURIComponent(JSON.stringify({ folder: itemPath })),
-                fields: encodeURIComponent(JSON.stringify({ folder: true, name: true, stat: true })),
+        if (stat.type === "dir") {
+            const children = await fetchJSON("/api/fs", {
+                method: "GET",
+                headers: {
+                    query: encodeURIComponent(JSON.stringify({ folder: itemPath })),
+                    fields: encodeURIComponent(JSON.stringify({ folder: true, name: true, stat: true })),
+                }
+            });
+            let count = 0;
+            for (const item of children) {
+                if (item.type === "dir") {
+                    count++;
+                }
             }
-        });
-        let count = 0;
-        for (const item of children) {
-            if (item.type === "dir") {
-                count++;
-            }
+            item.count = count;
         }
-        item.count = count;
         Object.assign(item, stat);
-        item.path = "remote" + itemPath;
+        item.id = item.path = "remote" + itemPath;
         item.name = name;
         item.folder = "remote" + path;
         listing.push(item);
@@ -44,7 +43,8 @@ async function createFolder(path) {
             method: "PUT",
             body: JSON.stringify([{
                 id: path,
-                folder: path.split("/").slice(0, -1),
+                name: path.split("/").filter(Boolean).pop(),
+                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
                 stat: {
                     type: "dir"
                 }
@@ -54,17 +54,21 @@ async function createFolder(path) {
 }
 
 async function createFile(path) {
-    await fetchJSON("/api/fs", {
-        method: "PUT",
-        body: JSON.stringify([{
-            id: path,
-            folder: path.split("/").slice(0, -1),
-            stat: {
-                type: "file",
-                size: 0
-            }
-        }])
-    });
+    if (!await exists(path)) {
+        await fetchJSON("/api/fs", {
+            method: "PUT",
+            body: JSON.stringify([{
+                id: path,
+                name: path.split("/").filter(Boolean).pop(),
+                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+                stat: {
+                    type: "file",
+                    size: 0
+                },
+                body: ""
+            }])
+        });
+    }
 }
 
 async function deleteFolder(root) {
@@ -99,8 +103,8 @@ async function rename(from, to) {
         }
     });
     item.id = to;
-    item.name = to.split("/").pop();
-    item.folder = to.split("/").slice(0, -1);
+    item.name = to.split("/").filter(Boolean).pop();
+    item.folder = to.split("/").filter(Boolean).slice(0, -1);
     await fetchJSON("/api/fs", {
         method: "PUT",
         body: JSON.stringify([item])
@@ -119,10 +123,10 @@ async function readFile(path, encoding = "utf8") {
     const item = await fetchJSON("/api/fs", {
         method: "GET",
         headers: {
-            id: from
+            id: encodeURIComponent(path)
         }
     });
-    return item.body;
+    return item && item.body;
 }
 
 async function writeFile(path, body, encoding = "utf8") {
@@ -130,7 +134,8 @@ async function writeFile(path, body, encoding = "utf8") {
         method: "PUT",
         body: JSON.stringify([{
             id: path,
-            folder: path.split("/").slice(0, -1),
+            name: path.split("/").filter(Boolean).pop(),
+            folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
             stat: {
                 type: "file",
                 size: body.length,
@@ -143,13 +148,13 @@ async function writeFile(path, body, encoding = "utf8") {
 async function exists(path) {
     let exists = false;
     try {
-        await fetchJSON("/api/fs", {
+        const item = await fetchJSON("/api/fs", {
             method: "GET",
             headers: {
-                id: from
+                id: encodeURIComponent(path)
             }
         });
-        exists = true;
+        exists = !!item;
     }
     catch (err) {
 

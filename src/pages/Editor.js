@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useTranslations } from "@/util/translations";
 import { useStoreState } from "@/util/store";
 import EditorWidget from "@/widgets/Editor";
 import { Store } from "pullstate";
@@ -16,17 +15,18 @@ export const EditorStore = new Store(EditorStoreDefaults);
 export default function Editor({ name }) {
     const timerRef = useRef();
     const path = (getPreviousPath() + "/" + name).split("/").slice(1).join("/");
-    const translations = useTranslations();
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
 
     useEffect(() => {
         storage.readFile(path).then(content => {
-            EditorStore.update(s => {
-                s.content = content || "";
-            });
-            EditorStore.update(s => {
-                s.autoSave = true;
-            });
+            if (content !== null) {
+                EditorStore.update(s => {
+                    s.content = content || "";
+                });
+                EditorStore.update(s => {
+                    s.autoSave = true;
+                });
+            }
         });
         const unsubscribe = EditorStore.subscribe(s => s.content, (data, s) => {
             if (s.autoSave && content !== data) {

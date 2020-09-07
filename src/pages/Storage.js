@@ -7,7 +7,6 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
 import { useListing } from "@/util/storage";
-import Progress from "@/widgets/Progress";
 import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@/util/pages";
 import storage from "@/data/storage";
@@ -53,6 +52,9 @@ export function getStorageSection({ index, id, translations }) {
         if (item) {
             name = translations[item.name];
         }
+    }
+    else {
+        name = translations.STORAGE;
     }
     return { icon, name, id: name, tooltip };
 }
@@ -158,7 +160,7 @@ export default function Storage({ path = "" }) {
             addPath(`editor?name=${item.name}`);
         }
         else {
-            setPath("storage/" + [path, id].filter(Boolean).join("/"));
+            setPath("storage/" + id.split("/").filter(Boolean).join("/"));
         }
     }, [select, path]);
 
@@ -172,10 +174,10 @@ export default function Storage({ path = "" }) {
             columns={columns}
             data={dataEx}
             mapper={mapper}
+            loading={loading}
             depends={[mode, select, path, onRowClick]}
             statusBar={statusBar} />
-        {loading && <Progress />}
-        <Actions path={path} />
+        <Actions path={path} data={dataEx} />
         <Destination path={path} />
     </>;
 }
