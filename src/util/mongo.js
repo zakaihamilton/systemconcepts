@@ -35,7 +35,7 @@ export async function getCollection({ dbName, collectionName, ...params }) {
 
 export async function listCollection({ collectionName, query = {}, ...params }) {
     const collection = await getCollection({ collectionName, ...params });
-    const results = await collection.find(query).sort({ title: 1 }).toArray();
+    const results = await collection.find(query).toArray();
     return results;
 }
 
@@ -68,17 +68,17 @@ export async function replaceRecord({ query, record, ...params }) {
     });
 }
 
-export async function handleRequest({ collectionName, req, res }) {
+export async function handleRequest({ dbName, collectionName, req, res }) {
     const headers = req.headers || {};
     if (req.method === "GET") {
         try {
-            const { id } = headers;
+            const { id, query } = headers;
             let result = null;
             if (id) {
-                result = await findRecord({ query: { id }, collectionName });
+                result = await findRecord({ query: { id }, dbName, collectionName });
             }
             else {
-                result = await listCollection({ collectionName });
+                result = await listCollection({ dbName, collectionName, query: query && decodeURIComponent(query) });
             }
             res.status(200).json(result);
         }
@@ -93,7 +93,7 @@ export async function handleRequest({ collectionName, req, res }) {
                 ids = [ids];
             }
             for (const id of ids) {
-                await deleteRecord({ query: { id }, collectionName });
+                await deleteRecord({ query: { id }, dbName, collectionName });
             }
             res.status(200).json({});
         }
@@ -116,7 +116,7 @@ export async function handleRequest({ collectionName, req, res }) {
             for (const record of records) {
                 const { id } = record;
                 delete record._id;
-                await replaceRecord({ collectionName, query: { id }, record });
+                await replaceRecord({ dbName, collectionName, query: { id }, record });
             }
             res.status(200).json({});
         }
