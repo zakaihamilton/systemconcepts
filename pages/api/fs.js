@@ -9,11 +9,13 @@ module.exports = async (req, res) => {
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
         let collectionName = "fs";
+        let readOnly = true;
         if (id && hash) {
             await login({ id, hash });
             collectionName += "_" + id;
+            readOnly = false;
         }
-        await handleRequest({ collectionName, req, res });
+        await handleRequest({ collectionName, req, res, readOnly });
     }
     catch (err) {
         console.error("login error: ", err);

@@ -33,9 +33,9 @@ export async function getCollection({ dbName, collectionName, ...params }) {
     return collection;
 }
 
-export async function listCollection({ collectionName, query = {}, ...params }) {
+export async function listCollection({ collectionName, query = {}, fields, ...params }) {
     const collection = await getCollection({ collectionName, ...params });
-    const results = await collection.find(query).toArray();
+    const results = await collection.find(query, fields).toArray();
     return results;
 }
 
@@ -51,9 +51,9 @@ export async function insertRecord({ record, ...params }) {
     await collection.insertOne(record);
 }
 
-export async function findRecord({ query, ...params }) {
+export async function findRecord({ query, fields, ...params }) {
     const collection = await getCollection(params);
-    return await collection.findOne(query);
+    return await collection.findOne(query, fields);
 }
 
 export async function deleteRecord({ query, ...params }) {
@@ -68,17 +68,20 @@ export async function replaceRecord({ query, record, ...params }) {
     });
 }
 
-export async function handleRequest({ dbName, collectionName, req, res }) {
+export async function handleRequest({ dbName, collectionName, readOnly, req, res }) {
     const headers = req.headers || {};
     if (req.method === "GET") {
         try {
-            const { id, query } = headers;
+            const { id, query, fields } = headers;
+            const parsedId = id && JSON.parse(decodeURIComponent(id));
+            const parsedQuery = query && JSON.parse(decodeURIComponent(query));
+            const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
             let result = null;
             if (id) {
-                result = await findRecord({ query: { id }, dbName, collectionName });
+                result = await findRecord({ query: { parsedId }, fields: parsedFields, dbName, collectionName });
             }
             else {
-                result = await listCollection({ dbName, collectionName, query: query && decodeURIComponent(query) });
+                result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
             }
             res.status(200).json(result);
         }
@@ -86,7 +89,7 @@ export async function handleRequest({ dbName, collectionName, req, res }) {
             console.error("get error: ", err);
             res.status(200).json({ err: err.toString() });
         }
-    } else if (req.method === "DELETE") {
+    } else if (!readOnly && req.method === "DELETE") {
         try {
             let { ids } = headers;
             if (!Array.isArray(ids)) {
@@ -101,7 +104,7 @@ export async function handleRequest({ dbName, collectionName, req, res }) {
             console.error("delete error: ", err);
             res.status(200).json({ err: err.toString() });
         }
-    } else if (req.method === "PUT") {
+    } else if (!readOnly && req.method === "PUT" || req.method === "DELETE") {
         try {
             const result = req.body;
             let records = result;
@@ -116,7 +119,12 @@ export async function handleRequest({ dbName, collectionName, req, res }) {
             for (const record of records) {
                 const { id } = record;
                 delete record._id;
-                await replaceRecord({ dbName, collectionName, query: { id }, record });
+                if (req.method === "DELETE") {
+                    await deleteRecord({ dbName, collectionName, query: { id } });
+                }
+                else {
+                    await replaceRecord({ dbName, collectionName, query: { id }, record });
+                }
             }
             res.status(200).json({});
         }

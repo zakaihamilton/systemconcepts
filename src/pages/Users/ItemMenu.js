@@ -25,8 +25,8 @@ export default function ItemMenuWidget({ item }) {
                     s.mode = "delete";
                     s.severity = "info";
                     s.onDone = async select => {
-                        const ids = select.map(item => item.id);
-                        await fetchJSON("/api/users", { headers: { ids }, method: "DELETE" });
+                        const records = select.map(item => ({ id: item.id }));
+                        await fetchJSON("/api/users", { body: JSON.stringify(records), method: "DELETE" });
                     }
                 });
             }

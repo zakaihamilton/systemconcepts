@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 const StorageList = React.forwardRef(({ path = "", state }, ref) => {
     const classes = useStyles();
     const translations = useTranslations();
-    const [data] = useListing(path, [], { browse: true });
+    const [data] = useListing(path, []);
     const paddingLeft = (path.split("/").length * 2) + "em";
     const [destination, setDestination] = state;
 
