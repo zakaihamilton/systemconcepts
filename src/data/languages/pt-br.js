@@ -3,6 +3,7 @@ export default {
     "name": "Português Brasil",
     "direction": "ltr",
     "code": "pt-br",
+    "locale": "pt-BR",
     "translations": [
         {
             "id": "APP_NAME",
@@ -223,6 +224,10 @@ export default {
         {
             "id": "SIZE",
             "value": "Tamanho"
+        },
+        {
+            "id": "DATE",
+            "value": "Encontro"
         },
         {
             "id": "BYTES",

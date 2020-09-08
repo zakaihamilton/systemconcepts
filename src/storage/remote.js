@@ -46,7 +46,8 @@ async function createFolder(path) {
                 name: path.split("/").filter(Boolean).pop(),
                 folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
                 stat: {
-                    type: "dir"
+                    type: "dir",
+                    mtimeMs: new Date().getTime()
                 }
             }])
         });
@@ -63,7 +64,8 @@ async function createFile(path) {
                 folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
                 stat: {
                     type: "file",
-                    size: 0
+                    size: 0,
+                    mtimeMs: new Date().getTime()
                 },
                 body: ""
             }])
@@ -105,6 +107,7 @@ async function rename(from, to) {
     item.id = to;
     item.name = to.split("/").filter(Boolean).pop();
     item.folder = to.split("/").filter(Boolean).slice(0, -1);
+    item.mtimeMs = new Date().getTime();
     await fetchJSON("/api/fs", {
         method: "PUT",
         body: JSON.stringify([item])
@@ -139,6 +142,7 @@ async function writeFile(path, body, encoding = "utf8") {
             stat: {
                 type: "file",
                 size: body.length,
+                mtimeMs: new Date().getTime()
             },
             body
         }])
@@ -254,7 +258,6 @@ async function copyFile(from, to) {
     const data = await readFile(from, "utf8");
     await writeFile(to, data, "utf8");
 }
-
 export default {
     getListing,
     createFolder,

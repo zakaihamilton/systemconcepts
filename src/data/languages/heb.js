@@ -3,6 +3,7 @@ export default {
     "name": "עברית",
     "direction": "rtl",
     "code": "he",
+    "locale": "he-IL",
     "translations": [
         {
             "id": "APP_NAME",
@@ -223,6 +224,10 @@ export default {
         {
             "id": "SIZE",
             "value": "גודל"
+        },
+        {
+            "id": "DATE",
+            "value": "תאריך"
         },
         {
             "id": "BYTES",

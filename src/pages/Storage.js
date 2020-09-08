@@ -19,6 +19,7 @@ import Typography from '@material-ui/core/Typography';
 import StatusBar from "@/widgets/StatusBar";
 import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
+import { useDateLocale } from "@/util/locale";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -64,6 +65,14 @@ export default function Storage({ path = "" }) {
     const { item: editedItem, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
     const [data, loading] = useListing(path, [counter]);
     const isPhone = useDeviceType() === "phone";
+    const dateFormatter = useDateLocale({
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 
     useEffect(() => {
         StorageStore.update(s => {
@@ -81,6 +90,11 @@ export default function Storage({ path = "" }) {
             id: "sizeWidget",
             title: translations.SIZE,
             sortable: "size"
+        },
+        !isPhone && {
+            id: "dateWidget",
+            title: translations.DATE,
+            sortable: "mtimeMs"
         }
     ];
 
@@ -115,7 +129,8 @@ export default function Storage({ path = "" }) {
                 <Typography style={{ display: "inline-block" }}>
                     {abbreviateSize(item.size)}
                 </Typography>
-            </Tooltip>
+            </Tooltip>,
+            dateWidget: item.mtimeMs && dateFormatter.format(item.mtimeMs)
         };
 
         let nameWidget = null;
@@ -133,10 +148,7 @@ export default function Storage({ path = "" }) {
             </>} name={name} />;
         }
 
-        Object.assign(result, {
-            nameWidget
-        });
-
+        result.nameWidget = nameWidget;
         return result;
     };
 
@@ -175,7 +187,7 @@ export default function Storage({ path = "" }) {
             data={dataEx}
             mapper={mapper}
             loading={loading}
-            depends={[mode, select, path, onRowClick]}
+            depends={[mode, select, path, onRowClick, dateFormatter]}
             statusBar={statusBar} />
         <Actions path={path} data={dataEx} />
         <Destination path={path} />

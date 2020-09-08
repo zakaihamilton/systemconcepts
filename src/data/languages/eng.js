@@ -3,6 +3,7 @@ export default {
     "name": "English",
     "direction": "ltr",
     "code": "en",
+    "locale": "en-US",
     "translations": [
         {
             "id": "APP_NAME",
@@ -223,6 +224,10 @@ export default {
         {
             "id": "SIZE",
             "value": "Size"
+        },
+        {
+            "id": "DATE",
+            "value": "Date"
         },
         {
             "id": "BYTES",
