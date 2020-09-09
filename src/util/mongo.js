@@ -68,7 +68,7 @@ export async function replaceRecord({ query, record, ...params }) {
     });
 }
 
-export async function handleRequest({ dbName, collectionName, readOnly, req, res }) {
+export async function handleRequest({ dbName, collectionName, readOnly, req }) {
     const headers = req.headers || {};
     if (req.method === "GET") {
         try {
@@ -78,19 +78,19 @@ export async function handleRequest({ dbName, collectionName, readOnly, req, res
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
             if (id) {
                 const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
-                res.status(200).json(result);
+                return result;
             }
             else {
                 let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
                 if (!result) {
                     result = [];
                 }
-                res.status(200).json(result);
+                return result;
             }
         }
         catch (err) {
             console.error("get error: ", err);
-            res.status(200).json({ err: err.toString() });
+            return { err: err.toString() };
         }
     } else if (!readOnly && (req.method === "PUT" || req.method === "DELETE")) {
         try {
@@ -114,11 +114,11 @@ export async function handleRequest({ dbName, collectionName, readOnly, req, res
                     await replaceRecord({ dbName, collectionName, query: { id }, record });
                 }
             }
-            res.status(200).json({});
+            return {};
         }
         catch (err) {
             console.error("put error: ", err);
-            res.status(200).json({ err: err.toString() });
+            return { err: err.toString() };
         }
     }
 }

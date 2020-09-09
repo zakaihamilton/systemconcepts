@@ -17,7 +17,8 @@ module.exports = async (req, res) => {
         if (!user || user.role !== "admin") {
             throw "ACCESS_DENIED";
         }
-        await handleRequest({ collectionName, req, res });
+        const result = await handleRequest({ collectionName, req });
+        res.status(200).json(result);
     }
     catch (err) {
         console.error("login error: ", err);

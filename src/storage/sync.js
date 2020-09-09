@@ -15,19 +15,22 @@ export async function fetchUpdated(start, end) {
     const items = await fetchJSON("/api/fs", {
         method: "GET",
         headers: {
+            sync: true,
             query: encodeURIComponent(JSON.stringify({ "stat.mtimeMs": { $gte: start, $lte: end } })),
             fields: encodeURIComponent(JSON.stringify({})),
         }
     });
-    for (const item of items) {
-        const { name, stat, folder } = item;
-        const itemPath = [folder, name].filter(Boolean).join("/");
-        Object.assign(item, stat);
-        item.id = item.path = "remote" + itemPath;
-        item.name = name;
-        item.folder = ["remote", folder].filter(Boolean).join("/");
-        item.local = ["local", itemPath].filter(Boolean).join("/");
-        listing.push(item);
+    if (items) {
+        for (const item of items) {
+            const { name, stat, folder } = item;
+            const itemPath = [folder, name].filter(Boolean).join("/");
+            Object.assign(item, stat);
+            item.id = item.path = "remote" + itemPath;
+            item.name = name;
+            item.folder = ["remote", folder].filter(Boolean).join("/");
+            item.local = ["local", itemPath].filter(Boolean).join("/");
+            listing.push(item);
+        }
     }
     return listing;
 }

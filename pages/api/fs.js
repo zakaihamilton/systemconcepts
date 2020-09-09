@@ -5,7 +5,7 @@ var Cookie = require('cookie');
 module.exports = async (req, res) => {
     try {
         const { headers } = req || {};
-        const { cookie } = headers || {};
+        const { cookie, sync } = headers || {};
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
         let collectionName = "fs";
@@ -15,7 +15,15 @@ module.exports = async (req, res) => {
             collectionName += "_" + id;
             readOnly = false;
         }
-        await handleRequest({ collectionName, req, res, readOnly });
+        if (sync && req.method === "GET") {
+            const shared = await handleRequest({ collectionName: "fs", req, readOnly });
+            const private = await handleRequest({ collectionName, req, readOnly });
+            res.status(200).json([...shared, ...private]);
+        }
+        else {
+            const result = await handleRequest({ collectionName, req, readOnly });
+            res.status(200).json(result);
+        }
     }
     catch (err) {
         console.error("login error: ", err);
