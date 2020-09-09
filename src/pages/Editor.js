@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStoreState } from "@/util/store";
 import EditorWidget from "@/widgets/Editor";
 import { Store } from "pullstate";
 import { getPreviousPath } from "@/util/pages";
 import storage from "@/util/storage";
+import Progress from "@/widgets/Progress";
 
 const EditorStoreDefaults = {
     content: "",
@@ -16,8 +17,10 @@ export default function Editor({ name }) {
     const timerRef = useRef();
     const path = (getPreviousPath() + "/" + name).split("/").slice(1).join("/");
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         storage.readFile(path).then(content => {
             if (content !== null) {
                 EditorStore.update(s => {
@@ -27,6 +30,7 @@ export default function Editor({ name }) {
                     s.autoSave = true;
                 });
             }
+            setLoading(false);
         });
         const unsubscribe = EditorStore.subscribe(s => s.content, (data, s) => {
             if (s.autoSave && content !== data) {
@@ -45,6 +49,7 @@ export default function Editor({ name }) {
     }, []);
 
     return <>
-        <EditorWidget state={content} />
+        {!loading && <EditorWidget state={content} />}
+        {loading && <Progress />}
     </>;
 }
