@@ -43,10 +43,6 @@ export function useSync() {
         busyRef.current = true;
         const currentTime = new Date().getTime();
         const listing = (await fetchUpdated(lastUpdated, currentTime)) || [];
-        SyncStore.update(s => {
-            s.lastUpdated = currentTime;
-            s.listing = listing;
-        });
         for (const item of listing) {
             if (item.type === "file") {
                 const buffer = await storage.readFile(item.path);
@@ -58,6 +54,10 @@ export function useSync() {
                 await storage.createFolder(item.local);
             }
         }
+        SyncStore.update(s => {
+            s.lastUpdated = currentTime;
+            s.listing = listing;
+        });
         busyRef.current = false;
     }, 5000, [lastUpdated]);
 }
