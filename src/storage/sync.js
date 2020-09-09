@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import Cookies from 'js-cookie';
+import { useRef } from "react";
 import { Store } from "pullstate";
 import { fetchJSON } from "@/util/fetch";
 import { useLocalStorage } from "@/util/store";
@@ -32,12 +31,11 @@ export async function fetchUpdated(start, end) {
 }
 
 export function useSync() {
-    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const busyRef = useRef(false);
     const { lastUpdated } = SyncStore.useState();
     useLocalStorage("SyncStore", SyncStore);
     useInterval(async () => {
-        if (busyRef.current || !isSignedIn) {
+        if (busyRef.current) {
             return;
         }
         busyRef.current = true;
@@ -48,5 +46,5 @@ export function useSync() {
             s.listing = listing || [];
         });
         busyRef.current = false;
-    }, 5000, [lastUpdated, isSignedIn]);
+    }, 5000, [lastUpdated]);
 }
