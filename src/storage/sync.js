@@ -6,7 +6,8 @@ import { useLocalStorage } from "@/util/store";
 import { useInterval } from "@/util/timers";
 
 export const SyncStore = new Store({
-    lastUpdated: 0
+    lastUpdated: 0,
+    listing: []
 });
 
 export async function fetchUpdated(start, end) {
@@ -30,32 +31,22 @@ export async function fetchUpdated(start, end) {
     return listing;
 }
 
-export function useFetchUpdated(enabled) {
+export function useSync() {
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const busyRef = useRef(false);
     const { lastUpdated } = SyncStore.useState();
-    const [listing, setListing] = useState([]);
     useLocalStorage("SyncStore", SyncStore);
     useInterval(async () => {
-        if (busyRef.current || !enabled) {
+        if (busyRef.current || !isSignedIn) {
             return;
         }
         busyRef.current = true;
         const currentTime = new Date().getTime();
         const listing = await fetchUpdated(lastUpdated, currentTime);
-        setListing(listing);
         SyncStore.update(s => {
             s.lastUpdated = currentTime;
+            s.listing = listing || [];
         });
         busyRef.current = false;
-    }, 5000, [lastUpdated, enabled]);
-
-    return listing;
-}
-
-export function useSync() {
-    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-    const listing = useFetchUpdated(isSignedIn);
-    useEffect(() => {
-        console.log(listing);
-    }, [listing]);
+    }, 5000, [lastUpdated, isSignedIn]);
 }

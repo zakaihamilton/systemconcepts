@@ -12,7 +12,7 @@ import Page from "./Page";
 import Theme from "./Theme";
 import { useTranslations } from "@/util/translations";
 import { useLanguage } from "@/util/language";
-import { useSync } from "@/storage/sync";
+import Sync from "./Sync";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -35,7 +35,6 @@ export default function Main() {
     useLocalStorage("MainStore", MainStore);
     const { direction, showSideBar, menuViewList, hash, fullscreen } = MainStore.useState();
     const pages = usePagesFromHash(hash);
-    useSync();
     const activePage = pages[pages.length - 1];
 
     useEffect(() => {
@@ -73,6 +72,7 @@ export default function Main() {
         </Head>
         <Theme>
             <div className={className}>
+                <Sync />
                 {!fullscreen && <AppBar />}
                 <SideBar />
                 <div className={styles.main}>
