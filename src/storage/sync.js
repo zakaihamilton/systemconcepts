@@ -3,6 +3,7 @@ import { Store } from "pullstate";
 import { fetchJSON } from "@/util/fetch";
 import { useLocalStorage } from "@/util/store";
 import { useInterval } from "@/util/timers";
+import storage from "@/util/storage";
 
 export const SyncStore = new Store({
     lastUpdated: 0,
@@ -25,6 +26,7 @@ export async function fetchUpdated(start, end) {
         item.id = item.path = "remote" + itemPath;
         item.name = name;
         item.folder = ["remote", folder].filter(Boolean).join("/");
+        item.local = ["local", itemPath].filter(Boolean).join("/");
         listing.push(item);
     }
     return listing;
@@ -40,11 +42,22 @@ export function useSync() {
         }
         busyRef.current = true;
         const currentTime = new Date().getTime();
-        const listing = await fetchUpdated(lastUpdated, currentTime);
+        const listing = (await fetchUpdated(lastUpdated, currentTime)) || [];
         SyncStore.update(s => {
             s.lastUpdated = currentTime;
-            s.listing = listing || [];
+            s.listing = listing;
         });
+        for (const item of listing) {
+            if (item.type === "file") {
+                const buffer = await storage.readFile(item.path);
+                if (buffer) {
+                    await storage.writeFile(item.local, buffer, "utf8");
+                }
+            }
+            else if (item.type === "dir") {
+                await storage.createFolder(item.local);
+            }
+        }
         busyRef.current = false;
     }, 5000, [lastUpdated]);
 }
