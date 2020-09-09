@@ -4,15 +4,16 @@ import { fetchJSON } from "@/util/fetch";
 import { useLocalStorage } from "@/util/store";
 import { useInterval } from "@/util/timers";
 import storage from "@/util/storage";
+import Cookies from 'js-cookie';
 
 export const SyncStore = new Store({
     lastUpdated: 0,
     listing: []
 });
 
-export async function fetchUpdated(start, end) {
+export async function fetchUpdated(endPoint, start, end) {
     const listing = [];
-    const items = await fetchJSON("/api/fs", {
+    const items = await fetchJSON("/api/" + endPoint, {
         method: "GET",
         headers: {
             sync: true,
@@ -25,9 +26,9 @@ export async function fetchUpdated(start, end) {
             const { name, stat, folder } = item;
             const itemPath = [folder, name].filter(Boolean).join("/");
             Object.assign(item, stat);
-            item.id = item.path = "remote" + itemPath;
+            item.id = item.path = endPoint + itemPath;
             item.name = name;
-            item.folder = ["remote", folder].filter(Boolean).join("/");
+            item.folder = [endPoint, folder].filter(Boolean).join("/");
             item.local = ["local", itemPath].filter(Boolean).join("/");
             listing.push(item);
         }
@@ -45,7 +46,10 @@ export function useSync() {
         }
         busyRef.current = true;
         const currentTime = new Date().getTime();
-        const listing = (await fetchUpdated(lastUpdated, currentTime)) || [];
+        const isSignedIn = Cookies.get("id") && Cookies.get("hash");
+        const remote = (await fetchUpdated("remote", lastUpdated, currentTime)) || [];
+        const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
+        const listing = [...remote, ...personal];
         for (const item of listing) {
             if (item.type === "file") {
                 const buffer = await storage.readFile(item.path);

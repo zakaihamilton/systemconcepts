@@ -162,6 +162,10 @@ export default {
             "value": "מרחוק"
         },
         {
+            "id": "PERSONAL",
+            "value": "אישי",
+        },
+        {
             "id": "NEW_FILE",
             "value": "קובץ חדש"
         },

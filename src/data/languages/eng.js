@@ -162,6 +162,10 @@ export default {
             "value": "Remote"
         },
         {
+            "id": "PERSONAL",
+            "value": "Personal",
+        },
+        {
             "id": "NEW_FILE",
             "value": "New File"
         },

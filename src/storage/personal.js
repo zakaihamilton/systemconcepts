@@ -1,6 +1,6 @@
 import { fetchJSON } from "@/util/fetch";
 
-const fsEndPoint = "/api/remote";
+const fsEndPoint = "/api/personal";
 
 async function getListing(path) {
     const listing = [];
