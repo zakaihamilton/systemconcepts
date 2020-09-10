@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Store } from "pullstate";
 import { fetchJSON } from "@/util/fetch";
 import { useLocalStorage } from "@/util/store";
@@ -37,10 +37,11 @@ export async function fetchUpdated(endPoint, start, end) {
 }
 
 export function useSync() {
-    const busyRef = useRef(false);
+    const busyRef = useRef(null);
+    const [isBusy, setBusy] = useState(false);
     const { lastUpdated } = SyncStore.useState();
     useLocalStorage("SyncStore", SyncStore);
-    useInterval(async () => {
+    const updateSync = useCallback(async () => {
         if (busyRef.current) {
             return;
         }
@@ -50,6 +51,9 @@ export function useSync() {
         const remote = (await fetchUpdated("remote", lastUpdated, currentTime)) || [];
         const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
         const listing = [...remote, ...personal];
+        if (listing.length) {
+            setBusy(true);
+        }
         for (const item of listing) {
             if (item.type === "file") {
                 const buffer = await storage.readFile(item.path);
@@ -66,5 +70,8 @@ export function useSync() {
             s.listing = listing;
         });
         busyRef.current = false;
-    }, 5000, [lastUpdated]);
+        setBusy(false);
+    }, [lastUpdated]);
+    useInterval(updateSync, 60000, [lastUpdated]);
+    return [updateSync, isBusy];
 }

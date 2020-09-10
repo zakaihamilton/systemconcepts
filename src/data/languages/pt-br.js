@@ -512,6 +512,10 @@ export default {
         {
             "id": "HIDE_CONCEPTS",
             "value": "Esconder Conceitos"
+        },
+        {
+            "id": "SYNC",
+            "value": "Sincronizar"
         }
     ]
 };

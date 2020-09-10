@@ -512,6 +512,10 @@ export default {
         {
             "id": "HIDE_CONCEPTS",
             "value": "Hide Concepts"
+        },
+        {
+            "id": "SYNC",
+            "value": "Sync"
         }
     ]
 };

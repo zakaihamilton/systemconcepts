@@ -508,6 +508,10 @@ export default {
         {
             "id": "HIDE_CONCEPTS",
             "value": "הסתר מושגים"
+        },
+        {
+            "id": "SYNC",
+            "value": "סינכרון"
         }
     ]
 };
