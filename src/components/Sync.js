@@ -1,6 +1,6 @@
 import styles from "./Sync.module.scss";
 import { useStyles } from "@/util/styles";
-import { useSync } from "@/storage/sync";
+import { useSync } from "@/util/sync";
 import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import SyncIcon from '@material-ui/icons/Sync';
