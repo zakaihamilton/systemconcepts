@@ -7,7 +7,7 @@ async function getListing(path) {
     const names = await fs.promises.readdir(path);
     for (const name of names) {
         const item = {};
-        const itemPath = [path, name].filter(Boolean).join("/");
+        const itemPath = (path.endsWith("/") ? path : path + "/") + name;
         try {
             const itemStat = await fs.promises.stat(itemPath);
             if (itemStat.type === "dir") {
@@ -38,10 +38,6 @@ async function createFolder(path) {
     if (!await exists(path)) {
         await fs.promises.mkdir(path);
     }
-}
-
-async function createFile(path) {
-    await fs.promises.writeFile(path, "", "utf8");
 }
 
 async function deleteFolder(root) {
@@ -169,7 +165,6 @@ async function copyFile(from, to) {
 export default {
     getListing,
     createFolder,
-    createFile,
     deleteFolder,
     deleteFile,
     rename,

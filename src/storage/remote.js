@@ -13,7 +13,7 @@ async function getListing(path) {
     });
     for (const item of items) {
         const { name, stat } = item;
-        const itemPath = [path, name].filter(Boolean).join("/");
+        const itemPath = (path.endsWith("/") ? path : path + "/") + name;
         if (stat.type === "dir") {
             const children = await fetchJSON(fsEndPoint, {
                 method: "GET",
@@ -51,25 +51,6 @@ async function createFolder(path) {
                     type: "dir",
                     mtimeMs: new Date().getTime()
                 }
-            }])
-        });
-    }
-}
-
-async function createFile(path) {
-    if (!await exists(path)) {
-        await fetchJSON(fsEndPoint, {
-            method: "PUT",
-            body: JSON.stringify([{
-                id: path,
-                name: path.split("/").filter(Boolean).pop(),
-                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
-                stat: {
-                    type: "file",
-                    size: 0,
-                    mtimeMs: new Date().getTime()
-                },
-                body: ""
             }])
         });
     }
@@ -146,7 +127,8 @@ async function writeFile(path, body, encoding = "utf8") {
                 size: body.length,
                 mtimeMs: new Date().getTime()
             },
-            body
+            body,
+            encoding
         }])
     });
 }
@@ -263,7 +245,6 @@ async function copyFile(from, to) {
 export default {
     getListing,
     createFolder,
-    createFile,
     deleteFolder,
     deleteFile,
     rename,

@@ -19,24 +19,24 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const StorageList = React.forwardRef(({ path = "", state }, ref) => {
+export default function StorageList({ path = "", state }) {
     const classes = useStyles();
     const translations = useTranslations();
     const [data] = useListing(path, []);
-    const paddingLeft = (path.split("/").length * 2) + "em";
+    const depth = path ? path.split("/").length : 0;
+    const paddingLeft = (depth * 2) + "em";
     const [destination, setDestination] = state;
 
     const items = (data || []).map(item => {
         const id = item.id || item.name;
-        const itemPath = [path, id].filter(Boolean).join("/");
         let name = item.name;
         let tooltip = translations.STORAGE;
         let icon = <StorageIcon />;
         const isFolder = item.type === "dir";
         let expandIcon = null;
         let onClick = undefined;
-        const selected = destination == itemPath;
-        const open = destination.startsWith(itemPath);
+        const selected = destination == id;
+        const open = destination.startsWith(id);
         if (path) {
             if (isFolder) {
                 icon = <FolderIcon />;
@@ -44,7 +44,7 @@ const StorageList = React.forwardRef(({ path = "", state }, ref) => {
                 if (item.count) {
                     expandIcon = open ? <ExpandLess /> : <ExpandMore />;
                 }
-                onClick = () => setDestination(itemPath);
+                onClick = () => setDestination(id);
             }
             else {
                 return;
@@ -55,7 +55,7 @@ const StorageList = React.forwardRef(({ path = "", state }, ref) => {
             if (item.count) {
                 expandIcon = open ? <ExpandLess /> : <ExpandMore />;
             }
-            onClick = () => setDestination(itemPath);
+            onClick = () => setDestination(id);
         }
 
         return <React.Fragment key={id}>
@@ -70,7 +70,7 @@ const StorageList = React.forwardRef(({ path = "", state }, ref) => {
             </ListItem>
             {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                    {open && <StorageList path={itemPath} state={state} />}
+                    {open && <StorageList path={id} state={state} />}
                 </List>
             </Collapse>}
         </React.Fragment>
@@ -84,6 +84,4 @@ const StorageList = React.forwardRef(({ path = "", state }, ref) => {
             {items}
         </List>
     );
-});
-
-export default StorageList;
+}

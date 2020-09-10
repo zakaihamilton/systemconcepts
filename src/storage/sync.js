@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { Store } from "pullstate";
 import { fetchJSON } from "@/util/fetch";
 import { useLocalStorage } from "@/util/store";
@@ -79,5 +79,8 @@ export function useSync() {
         setBusy(false);
     }, [lastUpdated]);
     useInterval(updateSync, 60000, [lastUpdated]);
+    useEffect(() => {
+        updateSync();
+    }, []);
     return [updateSync, isBusy, error];
 }

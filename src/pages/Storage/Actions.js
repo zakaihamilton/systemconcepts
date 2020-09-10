@@ -40,7 +40,7 @@ export default function Actions({ data, path }) {
                     if (await storage.exists(target)) {
                         throw translations.ALREADY_EXISTS.replace("${name}", name);
                     }
-                    await storage.createFile(target);
+                    await storage.writeFile(target, "");
                 }
                 catch (err) {
                     StorageStore.update(s => {
