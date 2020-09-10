@@ -516,6 +516,14 @@ export default {
         {
             "id": "SYNC",
             "value": "Sincronizar"
+        },
+        {
+            "id": "SYNC_FAILED",
+            "value": "Sincronização falhou"
+        },
+        {
+            "id": "SYNCING",
+            "value": "Sincronizando"
         }
     ]
 };

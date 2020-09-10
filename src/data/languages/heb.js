@@ -512,6 +512,14 @@ export default {
         {
             "id": "SYNC",
             "value": "סינכרון"
+        },
+        {
+            "id": "SYNC_FAILED",
+            "value": "סינכרון נכשל"
+        },
+        {
+            "id": "SYNCING",
+            "value": "סינכרון"
         }
     ]
 };

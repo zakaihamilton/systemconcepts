@@ -39,6 +39,7 @@ export async function fetchUpdated(endPoint, start, end) {
 export function useSync() {
     const busyRef = useRef(null);
     const [isBusy, setBusy] = useState(false);
+    const [error, setError] = useState(null);
     const { lastUpdated } = SyncStore.useState();
     useLocalStorage("SyncStore", SyncStore);
     const updateSync = useCallback(async () => {
@@ -46,32 +47,37 @@ export function useSync() {
             return;
         }
         busyRef.current = true;
+        setError(null);
+        setBusy(true);
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
         const remote = (await fetchUpdated("remote", lastUpdated, currentTime)) || [];
-        const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
-        const listing = [...remote, ...personal];
-        if (listing.length) {
-            setBusy(true);
-        }
-        for (const item of listing) {
-            if (item.type === "file") {
-                const buffer = await storage.readFile(item.path);
-                if (buffer) {
-                    await storage.writeFile(item.local, buffer, "utf8");
+        try {
+            const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
+            const listing = [...remote, ...personal];
+            for (const item of listing) {
+                if (item.type === "file") {
+                    const buffer = await storage.readFile(item.path);
+                    if (buffer) {
+                        await storage.writeFile(item.local, buffer, "utf8");
+                    }
+                }
+                else if (item.type === "dir") {
+                    await storage.createFolder(item.local);
                 }
             }
-            else if (item.type === "dir") {
-                await storage.createFolder(item.local);
-            }
+            SyncStore.update(s => {
+                s.lastUpdated = currentTime;
+                s.listing = listing;
+            });
         }
-        SyncStore.update(s => {
-            s.lastUpdated = currentTime;
-            s.listing = listing;
-        });
+        catch (err) {
+            console.error(err);
+            setError(err);
+        }
         busyRef.current = false;
         setBusy(false);
     }, [lastUpdated]);
     useInterval(updateSync, 60000, [lastUpdated]);
-    return [updateSync, isBusy];
+    return [updateSync, isBusy, error];
 }
