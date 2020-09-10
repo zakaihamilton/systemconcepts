@@ -20,6 +20,7 @@ import StatusBar from "@/widgets/StatusBar";
 import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
 import { useDateLocale } from "@/util/locale";
+import { useSync } from "@/util/sync";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -61,9 +62,10 @@ export function getStorageSection({ index, id, translations }) {
 }
 
 export default function Storage({ path = "" }) {
+    const [syncCounter] = useSync();
     const translations = useTranslations();
     const { item: editedItem, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
-    const [data, loading] = useListing(path, [counter]);
+    const [data, loading] = useListing(path, [counter, syncCounter]);
     const isPhone = useDeviceType() === "phone";
     const dateFormatter = useDateLocale({
         weekday: 'long',

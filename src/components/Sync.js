@@ -1,6 +1,6 @@
 import styles from "./Sync.module.scss";
 import { useStyles } from "@/util/styles";
-import { useSync } from "@/util/sync";
+import { useSyncFeature } from "@/util/sync";
 import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import SyncIcon from '@material-ui/icons/Sync';
@@ -10,7 +10,7 @@ registerToolbar("Sync");
 
 export default function Sync() {
     const translations = useTranslations();
-    const [updateSync, isBusy, error] = useSync();
+    const [updateSync, isBusy, error] = useSyncFeature();
     const className = useStyles(styles, {
         animated: isBusy
     });

@@ -8,8 +8,19 @@ import Cookies from 'js-cookie';
 
 export const SyncStore = new Store({
     lastUpdated: 0,
-    listing: []
+    counter: 0,
+    listing: [],
 });
+
+export function useSync() {
+    const { counter, listing } = SyncStore.useState(s => {
+        return {
+            counter: s.counter,
+            listing: s.listing
+        };
+    });
+    return [counter, listing];
+}
 
 export async function fetchUpdated(endPoint, start, end) {
     const listing = [];
@@ -36,7 +47,7 @@ export async function fetchUpdated(endPoint, start, end) {
     return listing;
 }
 
-export function useSync() {
+export function useSyncFeature() {
     const busyRef = useRef(null);
     const [isBusy, setBusy] = useState(false);
     const [error, setError] = useState(null);
@@ -69,7 +80,10 @@ export function useSync() {
             }
             SyncStore.update(s => {
                 s.lastUpdated = currentTime;
-                s.listing = listing;
+                if (listing.length) {
+                    s.listing = listing;
+                    s.counter++;
+                }
             });
         }
         catch (err) {
