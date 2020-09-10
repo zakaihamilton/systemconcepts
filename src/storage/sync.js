@@ -56,6 +56,7 @@ export function useSync() {
             const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
             const listing = [...remote, ...personal];
             for (const item of listing) {
+                await storage.createFolders(item.local);
                 if (item.type === "file") {
                     const buffer = await storage.readFile(item.path);
                     if (buffer) {

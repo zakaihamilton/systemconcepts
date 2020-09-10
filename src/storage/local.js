@@ -40,6 +40,21 @@ async function createFolder(path) {
     }
 }
 
+async function createFolders(path) {
+    const parts = path.split("/");
+    let partIndex = parts.length - 1;
+    for (; partIndex > 1; partIndex--) {
+        const subPath = parts.slice(0, partIndex).join("/");
+        if (await exists(subPath)) {
+            break;
+        }
+    }
+    for (partIndex++; partIndex < parts.length; partIndex++) {
+        const subPath = parts.slice(0, partIndex).join("/");
+        createFolder(subPath);
+    }
+}
+
 async function deleteFolder(root) {
     const names = await fs.promises.readdir(root);
     for (const name of names) {
@@ -165,6 +180,7 @@ async function copyFile(from, to) {
 export default {
     getListing,
     createFolder,
+    createFolders,
     deleteFolder,
     deleteFile,
     rename,

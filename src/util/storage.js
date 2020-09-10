@@ -59,6 +59,9 @@ const storageMethods = Object.fromEntries([
         name: "createFolder"
     },
     {
+        name: "createFolders"
+    },
+    {
         name: "deleteFolder"
     },
     {
