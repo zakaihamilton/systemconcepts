@@ -104,11 +104,15 @@ async function rename(from, to) {
     });
     item.id = to;
     item.name = to.split("/").filter(Boolean).pop();
-    item.folder = to.split("/").filter(Boolean).slice(0, -1);
+    item.folder = to.split("/").filter(Boolean).slice(0, -1).join("/");
     item.mtimeMs = new Date().getTime();
     await fetchJSON(fsEndPoint, {
         method: "PUT",
         body: JSON.stringify([item])
+    });
+    await fetchJSON(fsEndPoint, {
+        method: "DELETE",
+        body: JSON.stringify([{ id: from }])
     });
     if (item.stat.type === "dir") {
         const listing = await getListing(root);
@@ -165,98 +169,6 @@ async function exists(path) {
     return exists;
 }
 
-async function exportFolder(path) {
-    const toData = async path => {
-        const data = {};
-        const items = await fetchJSON(fsEndPoint, {
-            method: "GET",
-            headers: {
-                query: encodeURIComponent(JSON.stringify({ folder: path })),
-                fields: encodeURIComponent(JSON.stringify({ folder: true, name: true, stat: true })),
-            }
-        });
-        for (const item of items) {
-            const { name, stat } = item;
-            const itemPath = [path, name].filter(Boolean).join("/");
-            try {
-                if (stat.type === "dir") {
-                    const result = await toData(itemPath);
-                    data[name] = result;
-                }
-                else {
-                    data[name] = await readFile(itemPath, "utf8");
-                }
-            }
-            catch (err) {
-                console.error(err);
-            }
-        }
-        return data;
-    }
-    const data = await toData(path);
-    return data;
-}
-
-async function importFolder(path, data) {
-    const fromData = async (root, data) => {
-        await createFolder(root);
-        const keys = Object.keys(data);
-        for (const key of keys) {
-            const path = root + "/" + key;
-            const value = data[key];
-            if (typeof value === "object") {
-                await createFolder(path);
-                if (Array.isArray(value)) {
-                    for (const item of value) {
-                        if (typeof item === "object") {
-                            const name = item.id || item.name;
-                            await fromData(path + "/" + name, item);
-                        }
-                    }
-                }
-                else {
-                    await fromData(path, value);
-                }
-            }
-            else if (typeof value === "string") {
-                await writeFile(path, value, "utf8");
-            }
-        }
-    };
-    await fromData(path, data);
-}
-
-async function copyFolder(from, to) {
-    await createFolder(to);
-    const items = await fetchJSON(fsEndPoint, {
-        method: "GET",
-        headers: {
-            query: encodeURIComponent(JSON.stringify({ folder: from })),
-            fields: encodeURIComponent(JSON.stringify({ folder: true, name: true, stat: true })),
-        }
-    });
-    for (const item of items) {
-        const { name, stat } = item;
-        const itemPath = [path, name].filter(Boolean).join("/"); try {
-            const fromPath = [from, name].filter(Boolean).join("/");
-            const toPath = [to, name].filter(Boolean).join("/");
-            if (stat.type === "dir") {
-                await copyFolder(fromPath, toPath);
-            }
-            else {
-                await copyFile(fromPath, toPath);
-            }
-        }
-        catch (err) {
-            console.error(err);
-        }
-    }
-}
-
-async function copyFile(from, to) {
-    const data = await readFile(from, "utf8");
-    await writeFile(to, data, "utf8");
-}
 export default {
     getListing,
     createFolder,
@@ -266,9 +178,5 @@ export default {
     rename,
     readFile,
     writeFile,
-    exists,
-    exportFolder,
-    importFolder,
-    copyFolder,
-    copyFile
+    exists
 };

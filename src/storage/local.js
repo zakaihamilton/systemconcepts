@@ -96,87 +96,6 @@ async function exists(path) {
     return exists;
 }
 
-async function exportFolder(path) {
-    const toData = async path => {
-        const data = {};
-        const names = await fs.promises.readdir(path);
-        for (const name of names) {
-            try {
-                const itemPath = [path, name].filter(Boolean).join("/");
-                const itemStat = await fs.promises.stat(itemPath);
-                if (itemStat.isDirectory()) {
-                    const result = await toData(itemPath);
-                    data[name] = result;
-                }
-                else {
-                    data[name] = await fs.promises.readFile(itemPath, "utf8");
-                }
-            }
-            catch (err) {
-                console.error(err);
-            }
-        }
-        return data;
-    }
-    const data = await toData(path);
-    return data;
-}
-
-async function importFolder(path, data) {
-    const fromData = async (root, data) => {
-        await createFolder(root);
-        const keys = Object.keys(data);
-        for (const key of keys) {
-            const path = root + "/" + key;
-            const value = data[key];
-            if (typeof value === "object") {
-                await createFolder(path);
-                if (Array.isArray(value)) {
-                    for (const item of value) {
-                        if (typeof item === "object") {
-                            const name = item.id || item.name;
-                            await fromData(path + "/" + name, item);
-                        }
-                    }
-                }
-                else {
-                    await fromData(path, value);
-                }
-            }
-            else if (typeof value === "string") {
-                await fs.promises.writeFile(path, value, "utf8");
-            }
-        }
-    };
-    await fromData(path, data);
-}
-
-async function copyFolder(from, to) {
-    const names = await fs.promises.readdir(from);
-    await createFolder(to);
-    for (const name of names) {
-        try {
-            const fromPath = [from, name].filter(Boolean).join("/");
-            const toPath = [to, name].filter(Boolean).join("/");
-            const itemStat = await fs.promises.stat(itemPath);
-            if (itemStat.isDirectory()) {
-                await copyFolder(fromPath, toPath);
-            }
-            else {
-                await copyFile(fromPath, toPath);
-            }
-        }
-        catch (err) {
-            console.error(err);
-        }
-    }
-}
-
-async function copyFile(from, to) {
-    const data = await readFile(from, "utf8");
-    await writeFile(to, data, "utf8");
-}
-
 export default {
     getListing,
     createFolder,
@@ -186,9 +105,5 @@ export default {
     rename,
     readFile,
     writeFile,
-    exists,
-    exportFolder,
-    importFolder,
-    copyFolder,
-    copyFile
+    exists
 };

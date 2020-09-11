@@ -82,7 +82,12 @@ export default function Destination({ path }) {
                     if (await storage.exists(target)) {
                         throw translations.ALREADY_EXISTS.replace("${name}", item.name);
                     }
-                    await storage.rename(item.path, target);
+                    if (item.type === "dir") {
+                        await storage.moveFolder(item.path, target);
+                    }
+                    else {
+                        await storage.moveFile(item.path, target);
+                    }
                 }
                 catch (err) {
                     StorageStore.update(s => {

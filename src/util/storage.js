@@ -68,10 +68,6 @@ const storageMethods = Object.fromEntries([
         name: "deleteFile"
     },
     {
-        name: "rename",
-        types: ["path"]
-    },
-    {
         name: "readFile"
     },
     {
@@ -85,6 +81,10 @@ const storageMethods = Object.fromEntries([
     },
     {
         name: "importFolder"
+    },
+    {
+        name: "rename",
+        types: ["path"]
     },
     {
         name: "copyFolder",
@@ -122,4 +122,111 @@ export function useListing(url, depends = [], options) {
     return [listing, loading];
 }
 
-export default storageMethods;
+async function exportFolder(path) {
+    const toData = async path => {
+        const data = {};
+        const items = await storageMethods.getListing(path);
+        for (const item of items) {
+            const { name, stat, path } = item;
+            try {
+                if (stat.type === "dir") {
+                    const result = await toData(path);
+                    data[name] = result;
+                }
+                else {
+                    data[name] = await storageMethods.readFile(path, "utf8");
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }
+        return data;
+    }
+    const data = await toData(path);
+    return data;
+}
+
+async function importFolder(path, data) {
+    const fromData = async (root, data) => {
+        await storageMethods.createFolder(root);
+        const keys = Object.keys(data);
+        for (const key of keys) {
+            const path = root + "/" + key;
+            const value = data[key];
+            if (typeof value === "object") {
+                await storageMethods.createFolder(path);
+                if (Array.isArray(value)) {
+                    for (const item of value) {
+                        if (typeof item === "object") {
+                            const name = item.id || item.name;
+                            await fromData(path + "/" + name, item);
+                        }
+                    }
+                }
+                else {
+                    await fromData(path, value);
+                }
+            }
+            else if (typeof value === "string") {
+                await storageMethods.writeFile(path, value, "utf8");
+            }
+        }
+    };
+    await fromData(path, data);
+}
+
+async function copyFolder(from, to) {
+    await storageMethods.createFolder(to);
+    const items = await storageMethods.getListing(from);
+    for (const item of items) {
+        const { name, stat } = item;
+        const fromPath = [from, name].filter(Boolean).join("/");
+        const toPath = [to, name].filter(Boolean).join("/");
+        if (stat.type === "dir") {
+            await storageMethods.copyFolder(fromPath, toPath);
+        }
+        else {
+            await storageMethods.copyFile(fromPath, toPath);
+        }
+    }
+}
+
+async function copyFile(from, to) {
+    const data = await storageMethods.readFile(from, "utf8");
+    await storageMethods.writeFile(to, data, "utf8");
+}
+
+async function moveFolder(from, to) {
+    const [fromDeviceId] = from.split("/").filter(Boolean);
+    const [toDeviceId] = to.split("/").filter(Boolean);
+    if (fromDeviceId === toDeviceId) {
+        await storageMethods.rename(from, to);
+    }
+    else {
+        await storageMethods.copyFolder(from, to);
+        await storageMethods.deleteFolder(from);
+    }
+}
+
+async function moveFile(from, to) {
+    const [fromDeviceId] = from.split("/").filter(Boolean);
+    const [toDeviceId] = to.split("/").filter(Boolean);
+    if (fromDeviceId === toDeviceId) {
+        await storageMethods.rename(from, to);
+    }
+    else {
+        await storageMethods.copyFile(from, to);
+        await storageMethods.deleteFile(from);
+    }
+}
+
+export default {
+    ...storageMethods,
+    exportFolder,
+    importFolder,
+    copyFolder,
+    copyFile,
+    moveFile,
+    moveFolder
+};
