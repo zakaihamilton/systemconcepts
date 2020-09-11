@@ -11,6 +11,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import FolderIcon from '@material-ui/icons/Folder';
 import { useListing } from "@/util/storage";
 import Tooltip from '@material-ui/core/Tooltip';
+import Progress from "@/widgets/Progress";
 
 const useStyles = makeStyles((theme) => ({
     list: {
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 export default function StorageList({ path = "", state }) {
     const classes = useStyles();
     const translations = useTranslations();
-    const [data] = useListing(path, []);
+    const [data, loading] = useListing(path, []);
     const depth = path ? path.split("/").length : 0;
     const paddingLeft = (depth * 2) + "em";
     const [destination, setDestination] = state;
@@ -81,7 +82,8 @@ export default function StorageList({ path = "", state }) {
             component="nav"
             className={classes.list}
         >
-            {items}
+            {!!loading && <Progress />}
+            {!loading && items}
         </List>
     );
 }
