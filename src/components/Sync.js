@@ -10,7 +10,7 @@ registerToolbar("Sync");
 
 export default function Sync() {
     const translations = useTranslations();
-    const [updateSync, isBusy, error] = useSyncFeature();
+    const [updateSync, isBusy, error, active] = useSyncFeature();
     const className = useStyles(styles, {
         animated: isBusy
     });
@@ -24,7 +24,7 @@ export default function Sync() {
     }
 
     const menuItems = [
-        updateSync && {
+        active && updateSync && {
             id: "sync",
             name,
             icon: error ? <SyncProblemIcon /> : <SyncIcon className={className} />,
@@ -33,6 +33,6 @@ export default function Sync() {
         }
     ];
 
-    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy] });
+    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, updateSync, active] });
     return null;
 }

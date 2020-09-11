@@ -94,6 +94,7 @@ export default function Destination({ path }) {
                         s.message = err;
                         s.severity = "error";
                     });
+                    console.error(err);
                 }
             }
             else if (mode === "copy") {
@@ -114,6 +115,7 @@ export default function Destination({ path }) {
                         s.message = err;
                         s.severity = "error";
                     });
+                    console.error(err);
                 }
             }
         }

@@ -127,9 +127,9 @@ async function exportFolder(path) {
         const data = {};
         const items = await storageMethods.getListing(path);
         for (const item of items) {
-            const { name, stat, path } = item;
+            const { name, type, path } = item;
             try {
-                if (stat.type === "dir") {
+                if (type === "dir") {
                     const result = await toData(path);
                     data[name] = result;
                 }
@@ -177,17 +177,18 @@ async function importFolder(path, data) {
 }
 
 async function copyFolder(from, to) {
+    await storageMethods.createFolders(to);
     await storageMethods.createFolder(to);
     const items = await storageMethods.getListing(from);
     for (const item of items) {
-        const { name, stat } = item;
+        const { name, type } = item;
         const fromPath = [from, name].filter(Boolean).join("/");
         const toPath = [to, name].filter(Boolean).join("/");
-        if (stat.type === "dir") {
-            await storageMethods.copyFolder(fromPath, toPath);
+        if (type === "dir") {
+            await copyFolder(fromPath, toPath);
         }
         else {
-            await storageMethods.copyFile(fromPath, toPath);
+            await copyFile(fromPath, toPath);
         }
     }
 }
@@ -204,7 +205,7 @@ async function moveFolder(from, to) {
         await storageMethods.rename(from, to);
     }
     else {
-        await storageMethods.copyFolder(from, to);
+        await copyFolder(from, to);
         await storageMethods.deleteFolder(from);
     }
 }

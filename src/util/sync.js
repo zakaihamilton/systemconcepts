@@ -10,7 +10,11 @@ import { useOnline } from "./online";
 export const SyncStore = new Store({
     lastUpdated: 0,
     counter: 0,
-    listing: [],
+    listing: []
+});
+
+export const SyncActiveStore = new Store({
+    active: 0
 });
 
 export function useSync() {
@@ -20,6 +24,16 @@ export function useSync() {
             listing: s.listing
         };
     });
+    useEffect(() => {
+        SyncActiveStore.update(s => {
+            s.active++;
+        });
+        return () => {
+            SyncActiveStore.update(s => {
+                s.active--;
+            });
+        };
+    }, []);
     return [counter, listing];
 }
 
@@ -54,6 +68,7 @@ export function useSyncFeature() {
     const [isBusy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const { lastUpdated } = SyncStore.useState();
+    const { active } = SyncActiveStore.useState();
     useLocalStorage("SyncStore", SyncStore);
     const updateSync = useCallback(async () => {
         if (busyRef.current) {
@@ -99,5 +114,5 @@ export function useSyncFeature() {
     useEffect(() => {
         updateSync();
     }, [online]);
-    return [online && updateSync, isBusy, error];
+    return [online && updateSync, isBusy, error, active];
 }
