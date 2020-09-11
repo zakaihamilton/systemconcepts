@@ -5,6 +5,7 @@ import { useLocalStorage } from "@/util/store";
 import { useInterval } from "@/util/timers";
 import storage from "@/util/storage";
 import Cookies from 'js-cookie';
+import { useOnline } from "./online";
 
 export const SyncStore = new Store({
     lastUpdated: 0,
@@ -49,6 +50,7 @@ export async function fetchUpdated(endPoint, start, end) {
 
 export function useSyncFeature() {
     const busyRef = useRef(null);
+    const online = useOnline();
     const [isBusy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const { lastUpdated } = SyncStore.useState();
@@ -96,6 +98,6 @@ export function useSyncFeature() {
     useInterval(updateSync, 60000, [lastUpdated]);
     useEffect(() => {
         updateSync();
-    }, []);
-    return [updateSync, isBusy, error];
+    }, [online]);
+    return [online && updateSync, isBusy, error];
 }

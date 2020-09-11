@@ -24,7 +24,7 @@ export default function Sync() {
     }
 
     const menuItems = [
-        {
+        updateSync && {
             id: "sync",
             name,
             icon: error ? <SyncProblemIcon /> : <SyncIcon className={className} />,

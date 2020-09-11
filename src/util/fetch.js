@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useOnline } from "@/util/online";
 
 export function fetchJSON(url, options) {
     options = Object.assign({}, options);
@@ -31,12 +32,13 @@ export function fetchJSON(url, options) {
 }
 
 export function useFetchJSON(url, options, depends = [], cond = true, delay = 0) {
+    const [isOnline] = useOnline();
     const [inProgress, setProgress] = useState(false);
     const [result, setResult] = useState(null);
     const [, setTimeoutHandle] = useState(null);
     const [error, setError] = useState("");
     useEffect(() => {
-        if (cond) {
+        if (cond && isOnline) {
             setResult(null);
             setError("");
             setProgress(true);
