@@ -24,7 +24,7 @@ async function getListing(path) {
             });
             let count = 0;
             for (const item of children) {
-                if (item.type === "dir") {
+                if (item.stat.type === "dir") {
                     count++;
                 }
             }
