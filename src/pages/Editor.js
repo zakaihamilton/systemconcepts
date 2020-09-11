@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useStoreState } from "@/util/store";
 import EditorWidget from "@/widgets/Editor";
 import { Store } from "pullstate";
 import { getPreviousPath } from "@/util/pages";
 import storage from "@/util/storage";
 import Progress from "@/widgets/Progress";
+import { useSync } from "@/util/sync";
 
 const EditorStoreDefaults = {
     content: "",
@@ -14,13 +15,12 @@ const EditorStoreDefaults = {
 export const EditorStore = new Store(EditorStoreDefaults);
 
 export default function Editor({ name }) {
+    const [syncCounter] = useSync();
     const timerRef = useRef();
     const path = (getPreviousPath() + "/" + name).split("/").slice(1).join("/");
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        setLoading(true);
+    const readFile = useCallback(() => {
         storage.readFile(path).then(content => {
             if (content !== null) {
                 EditorStore.update(s => {
@@ -32,6 +32,10 @@ export default function Editor({ name }) {
             }
             setLoading(false);
         });
+    }, []);
+    useEffect(() => {
+        setLoading(true);
+        readFile();
         const unsubscribe = EditorStore.subscribe(s => s.content, (data, s) => {
             if (s.autoSave && content !== data) {
                 if (timerRef.current) {
@@ -47,6 +51,10 @@ export default function Editor({ name }) {
             unsubscribe();
         }
     }, []);
+
+    useEffect(() => {
+        readFile();
+    }, [syncCounter]);
 
     return <>
         {!loading && <EditorWidget state={content} />}
