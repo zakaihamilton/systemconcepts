@@ -158,7 +158,7 @@ export default function Destination({ path }) {
                 </Toolbar>
             </AppBar>
             <DialogContent dividers={true}>
-                {destination && <StorageList path={path.split("/").slice(0, 1)[0]} state={destinationState} />}
+                {destination && <StorageList state={destinationState} />}
             </DialogContent>
         </Dialog>
     );
