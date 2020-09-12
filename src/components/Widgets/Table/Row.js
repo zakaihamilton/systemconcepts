@@ -2,6 +2,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import styles from "../Table.module.scss";
 import clsx from "clsx";
+import { useStyles } from "@/util/styles";
 
 export default function RowWidget({ rowHeight, columns, rowClick, item }) {
     const cells = (columns || []).filter(Boolean).map(column => {
@@ -11,7 +12,8 @@ export default function RowWidget({ rowHeight, columns, rowClick, item }) {
             dir={dir}
             align={align}
             onClick={onClick ? () => onClick(item) : undefined}
-            className={clsx(styles.cell, !align && styles.defaultAlign, onSelectable && onSelectable(item) && styles.selectable)}
+            padding="none"
+            classes={{ root: clsx(styles.cell, !align && styles.defaultAlign, onSelectable && onSelectable(item) && styles.selectable) }}
             key={columnId}
             {...rowProps}>
             {value}
@@ -20,7 +22,11 @@ export default function RowWidget({ rowHeight, columns, rowClick, item }) {
     const onClick = event => {
         rowClick(event, item);
     };
-    return <TableRow style={{ minHeight: rowHeight, height: rowHeight, maxHeight: rowHeight }} {...rowClick && { hover: true, onClick, className: styles.rowHover }}>
+    const className = useStyles(styles, {
+        row: true,
+        hover: !!rowClick
+    });
+    return <TableRow className={className} style={{ minHeight: rowHeight, height: rowHeight, maxHeight: rowHeight }} {...rowClick && { hover: true, onClick }}>
         {cells}
     </TableRow>;
 }

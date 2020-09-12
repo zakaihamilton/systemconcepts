@@ -164,8 +164,9 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
         return <TableCell
             key={id || idx}
             align={align}
-            className={clsx(styles.cell, !align && styles.defaultAlign, styles.head)}
+            classes={{ root: clsx(styles.cell, !align && styles.defaultAlign, styles.head) }}
             dir={dir}
+            padding="none"
             sortDirection={orderBy === sortId ? order : false}
             {...columnProps}>
             <div className={styles.headerRow}>
