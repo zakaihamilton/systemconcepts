@@ -6,6 +6,8 @@ export async function callMethod(item, url = "", ...params) {
     const [deviceId, ...path] = url.split("/").filter(Boolean);
     if (!deviceId) {
         if (name === "getListing") {
+            const options = params[0] || {};
+            const { useCount } = options;
             const results = [];
             for (const device of storage) {
                 let enabled = device.enabled;
@@ -16,8 +18,10 @@ export async function callMethod(item, url = "", ...params) {
                     continue;
                 }
                 const result = Object.assign({}, device);
-                const items = await storageMethods.getListing(device.id, ...params) || [];
-                result.count = items.length;
+                if (useCount) {
+                    const items = await storageMethods.getListing(device.id, ...params) || [];
+                    result.count = items.length;
+                }
                 results.push(result);
             }
             return results;

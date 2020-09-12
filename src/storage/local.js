@@ -2,7 +2,8 @@ import FS from '@isomorphic-git/lightning-fs';
 
 const fs = new FS("systemconcepts-fs");
 
-async function getListing(path) {
+async function getListing(path, options = {}) {
+    const { useCount } = options;
     let listing = [];
     const names = await fs.promises.readdir(path);
     for (const name of names) {
@@ -10,7 +11,7 @@ async function getListing(path) {
         const itemPath = (path.endsWith("/") ? path : path + "/") + name;
         try {
             const itemStat = await fs.promises.stat(itemPath);
-            if (itemStat.type === "dir") {
+            if (useCount && itemStat.type === "dir") {
                 const children = await fs.promises.readdir(itemPath);
                 let count = 0;
                 for (const name of children) {

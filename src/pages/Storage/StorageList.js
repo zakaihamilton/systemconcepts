@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 export default function StorageList({ path = "", state }) {
     const classes = useStyles();
     const translations = useTranslations();
-    const [data, loading] = useListing(path, []);
+    const [data, loading] = useListing(path, [], { useCount: true });
     const depth = path ? path.split("/").length : 0;
     const paddingLeft = (depth * 2) + "em";
     const [destination, setDestination] = state;

@@ -2,7 +2,8 @@ import { fetchJSON } from "@/util/fetch";
 
 const fsEndPoint = "/api/remote";
 
-async function getListing(path) {
+async function getListing(path, options = {}) {
+    const { useCount } = options;
     const listing = [];
     const items = await fetchJSON(fsEndPoint, {
         method: "GET",
@@ -14,7 +15,7 @@ async function getListing(path) {
     for (const item of items) {
         const { name, stat } = item;
         const itemPath = (path.endsWith("/") ? path : path + "/") + name;
-        if (stat.type === "dir") {
+        if (useCount && stat.type === "dir") {
             const children = await fetchJSON(fsEndPoint, {
                 method: "GET",
                 headers: {
