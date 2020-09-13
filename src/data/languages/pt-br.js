@@ -162,6 +162,10 @@ export default {
             "value": "Remoto"
         },
         {
+            "id": "SHARED",
+            "value": "Compartilhado"
+        },
+        {
             "id": "PERSONAL",
             "value": "Pessoal",
         },

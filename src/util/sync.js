@@ -79,10 +79,10 @@ export function useSyncFeature() {
         setBusy(true);
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-        const remote = (await fetchUpdated("remote", lastUpdated, currentTime)) || [];
         try {
+            const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
             const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
-            const listing = [...remote, ...personal];
+            const listing = [...shared, ...personal];
             for (const item of listing) {
                 await storage.createFolders(item.local);
                 if (item.type === "file") {
@@ -110,7 +110,7 @@ export function useSyncFeature() {
         busyRef.current = false;
         setBusy(false);
     }, [lastUpdated]);
-    useInterval(updateSync, 60000, [lastUpdated]);
+    useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
         updateSync();
     }, [online]);

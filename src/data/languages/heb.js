@@ -162,6 +162,10 @@ export default {
             "value": "מרחוק"
         },
         {
+            "id": "SHARED",
+            "value": "משותף"
+        },
+        {
             "id": "PERSONAL",
             "value": "אישי",
         },

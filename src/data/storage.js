@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie';
 import local from "@/storage/local";
 import remote from "@/storage/remote";
-import personal from "@/storage/personal";
 
 export default [
     {
@@ -11,10 +10,10 @@ export default [
         ...local
     },
     {
-        id: "remote",
-        name: "REMOTE",
+        id: "shared",
+        name: "SHARED",
         enabled: true,
-        ...remote
+        ...remote({ fsEndPoint: "/api/shared", deviceId: "shared" })
     },
     {
         id: "personal",
@@ -22,6 +21,6 @@ export default [
         enabled: () => {
             return Cookies.get("id") && Cookies.get("hash");
         },
-        ...personal
+        ...remote({ fsEndPoint: "/api/personal", deviceId: "personal" })
     }
 ];
