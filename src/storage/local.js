@@ -1,4 +1,5 @@
 import FS from '@isomorphic-git/lightning-fs';
+import { makePath } from "@/util/path";
 
 const fs = new FS("systemconcepts-fs");
 
@@ -8,14 +9,14 @@ async function getListing(path, options = {}) {
     const names = await fs.promises.readdir(path);
     for (const name of names) {
         const item = {};
-        const itemPath = (path.endsWith("/") ? path : path + "/") + name;
+        const itemPath = makePath(path, name);
         try {
             const itemStat = await fs.promises.stat(itemPath);
             if (useCount && itemStat.type === "dir") {
                 const children = await fs.promises.readdir(itemPath);
                 let count = 0;
                 for (const name of children) {
-                    const itemStat = await fs.promises.stat(itemPath + "/" + name);
+                    const itemStat = await fs.promises.stat(makePath(itemPath, name));
                     if (itemStat.type === "dir") {
                         count++;
                     }
@@ -23,9 +24,9 @@ async function getListing(path, options = {}) {
                 item.count = count;
             }
             Object.assign(item, itemStat);
-            item.id = item.path = "local" + itemPath;
+            item.id = item.path = makePath("local", itemPath);
             item.name = name;
-            item.folder = "local" + path;
+            item.folder = makePath("local", path);
             listing.push(item);
         }
         catch (err) {
@@ -36,12 +37,14 @@ async function getListing(path, options = {}) {
 }
 
 async function createFolder(path) {
+    path = makePath(path);
     if (!await exists(path)) {
         await fs.promises.mkdir(path);
     }
 }
 
 async function createFolders(path) {
+    path = makePath(path);
     const parts = path.split("/");
     let partIndex = parts.length - 1;
     for (; partIndex > 1; partIndex--) {
@@ -57,6 +60,7 @@ async function createFolders(path) {
 }
 
 async function deleteFolder(root) {
+    root = makePath(root);
     const names = await fs.promises.readdir(root);
     for (const name of names) {
         const path = [root, name].filter(Boolean).join("/");
@@ -72,18 +76,22 @@ async function deleteFolder(root) {
 }
 
 async function deleteFile(path) {
+    path = makePath(path);
     await fs.promises.unlink(path);
 }
 
 async function readFile(path, encoding = "utf8") {
+    path = makePath(path);
     return await fs.promises.readFile(path, encoding);
 }
 
 async function writeFile(path, body, encoding = "utf8") {
+    path = makePath(path);
     return await fs.promises.writeFile(path, body, encoding);
 }
 
 async function exists(path) {
+    path = makePath(path);
     let exists = false;
     try {
         const stat = await fs.promises.stat(path);

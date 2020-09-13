@@ -7,6 +7,7 @@ import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { StorageStore } from "../Storage";
 import { importData } from "@/util/importExport";
+import { makePath } from "@/util/path";
 
 export function useActions(data) {
     const { mode, type } = StorageStore.useState();
@@ -35,7 +36,7 @@ export default function Actions({ data, path }) {
                 if (!name) {
                     return;
                 }
-                const target = path + "/" + name;
+                const target = makePath(path, name);
                 try {
                     if (await storage.exists(target)) {
                         throw translations.ALREADY_EXISTS.replace("${name}", name);
@@ -60,7 +61,7 @@ export default function Actions({ data, path }) {
                 if (!name) {
                     return;
                 }
-                const target = path + "/" + name;
+                const target = makePath(path, name);
                 try {
                     if (await storage.exists(target)) {
                         throw translations.ALREADY_EXISTS.replace("${name}", name);

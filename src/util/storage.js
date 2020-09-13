@@ -1,9 +1,11 @@
 import storage from "@/data/storage";
 import { useState, useEffect, useRef } from "react";
+import { makePath } from "@/util/path";
 
 export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;
-    const [deviceId, ...path] = url.split("/").filter(Boolean);
+    const [deviceId, ...other] = url.split("/").filter(Boolean);
+    const path = other.join("/");
     if (!deviceId) {
         if (name === "getListing") {
             const options = params[0] || {};
@@ -40,14 +42,15 @@ export async function callMethod(item, url = "", ...params) {
         params = params.map((param, index) => {
             const type = types[index];
             if (type === "path") {
-                const [, ...path] = param.split("/").filter(Boolean);
-                return "/" + path.join("/");
+                const [, ...other] = param.split("/").filter(Boolean);
+                const path = other.join("/");
+                return makePath(path);
             }
             return param;
         });
     }
     try {
-        result = await method("/" + path.join("/"), ...params);
+        result = await method(makePath(path), ...params);
     }
     catch (err) {
         console.error(err);
@@ -152,7 +155,7 @@ async function importFolder(path, data) {
         await storageMethods.createFolder(root);
         const keys = Object.keys(data);
         for (const key of keys) {
-            const path = root + "/" + key;
+            const path = makePath(root, key);
             const value = data[key];
             if (typeof value === "object") {
                 await storageMethods.createFolder(path);
@@ -160,7 +163,7 @@ async function importFolder(path, data) {
                     for (const item of value) {
                         if (typeof item === "object") {
                             const name = item.id || item.name;
-                            await fromData(path + "/" + name, item);
+                            await fromData(makePath(path, name), item);
                         }
                     }
                 }
@@ -182,8 +185,8 @@ async function copyFolder(from, to) {
     const items = await storageMethods.getListing(from);
     for (const item of items) {
         const { name, type } = item;
-        const fromPath = [from, name].filter(Boolean).join("/");
-        const toPath = [to, name].filter(Boolean).join("/");
+        const fromPath = makePath(from, name);
+        const toPath = makePath(to, name);
         if (type === "dir") {
             await copyFolder(fromPath, toPath);
         }
