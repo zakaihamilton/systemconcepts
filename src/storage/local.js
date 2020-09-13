@@ -75,10 +75,6 @@ async function deleteFile(path) {
     await fs.promises.unlink(path);
 }
 
-async function rename(from, to) {
-    await fs.promises.rename(from, to);
-}
-
 async function readFile(path, encoding = "utf8") {
     return await fs.promises.readFile(path, encoding);
 }
@@ -103,7 +99,6 @@ export default {
     createFolders,
     deleteFolder,
     deleteFile,
-    rename,
     readFile,
     writeFile,
     exists

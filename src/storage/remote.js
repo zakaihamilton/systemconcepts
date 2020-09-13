@@ -13,8 +13,11 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             }
         });
         for (const item of items) {
-            const { name, stat } = item;
+            const { name, stat, deleted } = item;
             const itemPath = (path.endsWith("/") ? path : path + "/") + name;
+            if (deleted) {
+                continue;
+            }
             if (useCount && stat.type === "dir") {
                 const children = await fetchJSON(fsEndPoint, {
                     method: "GET",
@@ -84,45 +87,37 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             }
         }
         await fetchJSON(fsEndPoint, {
-            method: "DELETE",
-            body: JSON.stringify([{ id: root }])
+            method: "PUT",
+            body: JSON.stringify([{
+                id: root,
+                name: root.split("/").filter(Boolean).pop(),
+                folder: "/" + root.split("/").filter(Boolean).slice(0, -1).join("/"),
+                stat: {
+                    type: "dir",
+                    mtimeMs: new Date().getTime()
+                },
+                deleted: true
+            }])
         });
     }
 
     async function deleteFile(path) {
         await fetchJSON(fsEndPoint, {
-            method: "DELETE",
-            body: JSON.stringify([{ id: path }])
-        });
-    }
-
-    async function rename(from, to) {
-        const item = await fetchJSON(fsEndPoint, {
-            method: "GET",
-            headers: {
-                id: from
-            }
-        });
-        item.id = to;
-        item.name = to.split("/").filter(Boolean).pop();
-        item.folder = to.split("/").filter(Boolean).slice(0, -1).join("/");
-        item.mtimeMs = new Date().getTime();
-        await fetchJSON(fsEndPoint, {
             method: "PUT",
-            body: JSON.stringify([item])
+            body: JSON.stringify([{
+                id: path,
+                name: path.split("/").filter(Boolean).pop(),
+                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+                stat: {
+                    type: "file",
+                    size: 0,
+                    mtimeMs: new Date().getTime()
+                },
+                body: "",
+                encoding: "",
+                deleted: true
+            }])
         });
-        await fetchJSON(fsEndPoint, {
-            method: "DELETE",
-            body: JSON.stringify([{ id: from }])
-        });
-        if (item.stat.type === "dir") {
-            const listing = await getListing(root);
-            for (const item of listing) {
-                const source = [from, item.name].filter(Boolean).join("/");
-                const target = [to, item.name].filter(Boolean).join("/");
-                rename(source, target);
-            }
-        }
     }
 
     async function readFile(path, encoding = "utf8") {
@@ -176,7 +171,6 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         createFolders,
         deleteFolder,
         deleteFile,
-        rename,
         readFile,
         writeFile,
         exists

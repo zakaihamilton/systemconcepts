@@ -87,10 +87,6 @@ const storageMethods = Object.fromEntries([
         name: "importFolder"
     },
     {
-        name: "rename",
-        types: ["path"]
-    },
-    {
         name: "copyFolder",
         types: ["path"]
     },
@@ -203,27 +199,13 @@ async function copyFile(from, to) {
 }
 
 async function moveFolder(from, to) {
-    const [fromDeviceId] = from.split("/").filter(Boolean);
-    const [toDeviceId] = to.split("/").filter(Boolean);
-    if (fromDeviceId === toDeviceId) {
-        await storageMethods.rename(from, to);
-    }
-    else {
-        await copyFolder(from, to);
-        await storageMethods.deleteFolder(from);
-    }
+    await copyFolder(from, to);
+    await storageMethods.deleteFolder(from);
 }
 
 async function moveFile(from, to) {
-    const [fromDeviceId] = from.split("/").filter(Boolean);
-    const [toDeviceId] = to.split("/").filter(Boolean);
-    if (fromDeviceId === toDeviceId) {
-        await storageMethods.rename(from, to);
-    }
-    else {
-        await storageMethods.copyFile(from, to);
-        await storageMethods.deleteFile(from);
-    }
+    await copyFile(from, to);
+    await storageMethods.deleteFile(from);
 }
 
 export default {
