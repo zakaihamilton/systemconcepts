@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie';
+
 import AppsIcon from '@material-ui/icons/Apps';
 import Apps from "@/pages/Apps";
 
@@ -58,7 +60,8 @@ export default [
         id: "users",
         name: "USERS",
         icon: <PeopleIcon />,
-        Component: Users
+        Component: Users,
+        visible: () => Cookies.get("id") && Cookies.get("hash")
     },
     {
         id: "user",

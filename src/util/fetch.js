@@ -32,7 +32,7 @@ export function fetchJSON(url, options) {
 }
 
 export function useFetchJSON(url, options, depends = [], cond = true, delay = 0) {
-    const [isOnline] = useOnline();
+    const isOnline = useOnline();
     const [inProgress, setProgress] = useState(false);
     const [result, setResult] = useState(null);
     const [, setTimeoutHandle] = useState(null);
@@ -69,6 +69,6 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
                 return handle;
             });
         }
-    }, depends);
+    }, [...depends]);
     return [result, setResult, inProgress, error];
 }

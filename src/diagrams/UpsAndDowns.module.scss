@@ -14,7 +14,7 @@
 }
 
 .world:not(:last-child) {
-    border-bottom: var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .worldInfo {

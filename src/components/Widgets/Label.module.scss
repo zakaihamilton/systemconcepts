@@ -6,7 +6,7 @@
 }
 
 .root.button {
-    border: var(--border);
+    border: 1px solid var(--border);
     font: inherit;
     color: inherit;
     background-color: transparent;
@@ -14,7 +14,7 @@
 }
 
 .root.button:hover {
-    border: var(--border-highlight);
+    border: 1px solid var(--border-highlight);
 }
 
 .root>* {

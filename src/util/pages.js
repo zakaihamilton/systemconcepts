@@ -124,7 +124,16 @@ export function usePages() {
         }
         return text;
     };
-    const pages = pageList.map(page => {
+    const pages = pageList.filter(page => {
+        let visible = page.visible;
+        if (typeof visible === "function") {
+            visible = visible(page);
+        }
+        if (typeof visible === "undefined") {
+            visible = true;
+        }
+        return visible;
+    }).map(page => {
         const { name, tooltip, ...props } = page;
         return { ...props, name: mapText(name), tooltip: mapText(tooltip) };
     });

@@ -57,7 +57,7 @@ export default function Settings({ closeDrawer, state }) {
 
     return <>
         <div style={{ flex: "1" }} />
-        <Divider style={{ color: "var(--border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
+        <Divider style={{ color: "var(1px solid --border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
         <List reverse={true} items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
     </>;
 }
