@@ -6,10 +6,10 @@ import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useTranslations } from "@/util/translations";
 import Label from "@/widgets/Label";
-import { useListing } from "@/util/storage";
+import storage, { useListing } from "@/util/storage";
 import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@/util/pages";
-import storage from "@/data/storage";
+import devices from "@/data/storage";
 import ItemMenu from "./Storage/ItemMenu";
 import Select from '@/components/Widgets/Select';
 import Edit from "./Storage/Edit";
@@ -50,7 +50,7 @@ export function getStorageSection({ index, id, translations }) {
     }
     let name = id;
     if (index) {
-        const item = storage.find(item => item.id === id);
+        const item = devices.find(item => item.id === id);
         if (item) {
             name = translations[item.name];
         }
@@ -181,8 +181,33 @@ export default function Storage({ path = "" }) {
     const onRowClick = enableItemClick && !editing && rowClick;
     const statusBar = <StatusBar data={dataEx} mapper={mapper} store={StorageStore} />;
 
+    const onImport = async (data) => {
+        try {
+            await storage.importFolder(path, data);
+            StorageStore.update(s => {
+                s.counter++;
+            });
+        }
+        catch (err) {
+            console.error(err);
+            StorageStore.update(s => {
+                s.message = err;
+                s.severity = "error";
+            });
+        }
+    };
+
+    const name = path.split("/").pop();
+
+    const onExport = async () => {
+        const object = await storage.exportFolder(path);
+        const data = JSON.stringify(object, null, 4);
+        return data;
+    };
+
     return <>
         <Table
+            name={name}
             rowClick={onRowClick}
             rowHeight="6em"
             columns={columns}
@@ -190,7 +215,10 @@ export default function Storage({ path = "" }) {
             mapper={mapper}
             loading={loading}
             depends={[mode, select, path, onRowClick, dateFormatter]}
-            statusBar={statusBar} />
+            onExport={onExport}
+            onImport={onImport}
+            statusBar={statusBar}
+        />
         <Actions path={path} data={dataEx} />
         <Destination path={path} />
     </>;

@@ -49,7 +49,7 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8em", loading, columns, onImport, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8em", loading, columns, onImport, onExport, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -88,8 +88,14 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
             id: "export",
             name: translations.EXPORT,
             icon: <GetAppIcon />,
-            onClick: () => {
-                const body = JSON.stringify({ [name]: data }, null, 4);
+            onClick: async () => {
+                let body = null;
+                if (onExport) {
+                    body = await onExport();
+                }
+                else {
+                    body = JSON.stringify({ [name]: data }, null, 4);
+                }
                 exportData(body, name, "application/json");
             }
         }
