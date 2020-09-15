@@ -2,7 +2,7 @@ const AWS = require("aws-sdk");
 const { lockMutex } = require("./mutex");
 const fs = require("fs");
 
-let s3 = null;
+let s3Object = null;
 
 const bufferSize = 10 * 1024 * 1024;
 
@@ -17,16 +17,16 @@ export async function getS3({ accessKeyId = process.env.AWS_ID, secretAccessKey 
         throw "No End Point";
     }
     const unlock = await lockMutex({ id: "aws" });
-    if (!s3) {
+    if (!s3Object) {
         const endpoint = new AWS.Endpoint(endpointUrl);
-        s3 = new AWS.S3({
+        s3Object = new AWS.S3({
             endpoint,
             accessKeyId,
             secretAccessKey
         });
     }
     unlock();
-    return s3;
+    return s3Object;
 }
 
 export function parseUrl(path) {
@@ -39,7 +39,7 @@ export function parseUrl(path) {
     return [bucketName, path];
 };
 
-export function uplodFile(from, to) {
+export async function uplodFile(from, to) {
     const [bucketName, path] = parseUrl(to);
     var params = {
         Bucket: bucketName,
@@ -51,25 +51,18 @@ export function uplodFile(from, to) {
         partSize: bufferSize,
         queueSize: 10
     };
-    return new Promise((resolve, reject) => {
-        s3.upload(params, options, function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(data);
-            }
-        });
-    });
+    const s3 = await getS3();
+    return await s3.upload(params, options).promise();
 };
 
-export function downloadFile(from, to) {
+export async function downloadFile(from, to) {
     const [bucketName, path] = parseUrl(from);
     var params = {
         Bucket: bucketName,
         Key: path
     };
     const writeStream = fs.createWriteStream(to);
+    const s3 = await getS3();
     return new Promise((resolve, reject) => {
         let readStream = s3.getObject(params).createReadStream({ bufferSize: bufferSize });
         readStream.on("error", reject);
@@ -78,7 +71,7 @@ export function downloadFile(from, to) {
     });
 };
 
-export function uploadData(url, data) {
+export async function uploadData(url, data) {
     const [bucketName, path] = parseUrl(url);
     var params = {
         Bucket: bucketName,
@@ -90,37 +83,23 @@ export function uploadData(url, data) {
         partSize: bufferSize,
         queueSize: 10
     };
-    return new Promise((resolve, reject) => {
-        s3.upload(params, options, function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(data);
-            }
-        });
-    });
+    const s3 = await getS3();
+    const data = await s3.upload(params, options).promise();
+    return data;
 };
 
-export function downloadData(url) {
+export async function downloadData(url) {
     const [bucketName, path] = parseUrl(url);
     var params = {
         Bucket: bucketName,
         Key: path
     };
-    return new Promise((resolve, reject) => {
-        s3.getObject(params, function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(data.Body.toString());
-            }
-        });
-    });
+    const s3 = await getS3();
+    const data = await s3.getObject(params).promise();
+    return data.Body.toString();
 };
 
-export function copyFile(from, to) {
+export async function copyFile(from, to) {
     const [fromBucketName, fromPath] = parseUrl(from);
     const [toBucketName, toPath] = parseUrl(to);
     var params = {
@@ -128,19 +107,12 @@ export function copyFile(from, to) {
         CopySource: fromBucketName + "/" + fromPath,
         Key: toPath
     };
-    return new Promise((resolve, reject) => {
-        s3.copyObject(params, function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(data);
-            }
-        });
-    });
+    const s3 = await getS3();
+    const data = await s3.copyObject(params).promise();
+    return data;
 };
 
-export function moveFile(from, to) {
+export async function moveFile(from, to) {
     const [fromBucketName, fromPath] = parseUrl(from);
     const [toBucketName, toPath] = parseUrl(to);
     var params = {
@@ -148,35 +120,21 @@ export function moveFile(from, to) {
         CopySource: encodeURIComponent(fromBucketName + "/" + fromPath),
         Key: toPath
     };
-    return new Promise((resolve, reject) => {
-        s3.copyObject(params, async function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                await deleteFile(from);
-                resolve(data);
-            }
-        });
-    });
+    const s3 = await getS3();
+    const data = await s3.copyObject(params).promise();
+    await deleteFile(from);
+    return data;
 };
 
-export function deleteFile(url) {
+export async function deleteFile(url) {
     const [bucketName, path] = parseUrl(url);
     var params = {
         Bucket: bucketName,
         Key: path
     };
-    return new Promise((resolve, reject) => {
-        s3.deleteObject(params, function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(data);
-            }
-        });
-    });
+    const s3 = await getS3();
+    const data = await s3.deleteObject(params).promise();
+    return data;
 };
 
 export async function metadata(url) {
@@ -192,6 +150,7 @@ export async function metadata(url) {
         Bucket: bucketName,
         Key: path
     };
+    const s3 = await getS3();
     try {
         const data = await s3.headObject(params).promise();
         return {
@@ -225,6 +184,7 @@ export async function list(url) {
         Delimiter: "/",
         ...path && { Prefix: path + "/" }
     };
+    const s3 = await getS3();
     if (!bucketName) {
         const result = await s3.listBuckets({}).promise();
         var buckets = [];
