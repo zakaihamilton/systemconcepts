@@ -72,7 +72,7 @@ export function useSyncFeature() {
     const { active } = SyncActiveStore.useState();
     useLocalStorage("SyncStore", SyncStore);
     const updateSync = useCallback(async () => {
-        if (busyRef.current) {
+        if (busyRef.current || !online) {
             return;
         }
         busyRef.current = true;
