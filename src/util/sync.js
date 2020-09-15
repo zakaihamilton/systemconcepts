@@ -88,12 +88,14 @@ export function useSyncFeature() {
         catch (err) {
             console.error(err);
         }
-        try {
-            const personal = (isSignedIn && (await fetchUpdated("personal", lastUpdated, currentTime))) || [];
-            listing.push(...personal);
-        }
-        catch (err) {
-            console.error(err);
+        if (isSignedIn) {
+            try {
+                const personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
+                listing.push(...personal);
+            }
+            catch (err) {
+                console.error(err);
+            }
         }
         for (const item of listing) {
             try {
