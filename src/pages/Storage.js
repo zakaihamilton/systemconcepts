@@ -53,12 +53,13 @@ export function getStorageSection({ index, id, translations }) {
         const item = devices.find(item => item.id === id);
         if (item) {
             name = translations[item.name];
+            id = name;
         }
     }
     else {
         name = translations.STORAGE;
     }
-    return { icon, name, id: name, tooltip };
+    return { icon, name, id, tooltip };
 }
 
 export default function Storage({ path = "" }) {
