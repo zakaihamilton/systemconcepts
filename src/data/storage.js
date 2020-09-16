@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import local from "@/storage/local";
 import remote from "@/storage/remote";
+import aws from "@/storage/aws";
 
 export default [
     {
@@ -22,5 +23,11 @@ export default [
             return Cookies.get("id") && Cookies.get("hash");
         },
         ...remote({ fsEndPoint: "/api/personal", deviceId: "personal" })
+    },
+    {
+        "id": "aws",
+        name: "AWS",
+        enabled: true,
+        ...aws
     }
 ];

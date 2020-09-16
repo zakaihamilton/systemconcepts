@@ -52,7 +52,7 @@ export function getStorageSection({ index, id, translations }) {
     if (index) {
         const item = devices.find(item => item.id === id);
         if (item) {
-            name = translations[item.name];
+            name = translations[item.name] || item.name;
             id = name;
         }
     }
@@ -117,7 +117,7 @@ export default function Storage({ path = "" }) {
             }
         }
         else {
-            name = translations[item.name];
+            name = translations[item.name] || name;
         }
 
         let result = {
