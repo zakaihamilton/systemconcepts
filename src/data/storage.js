@@ -27,7 +27,9 @@ export default [
     {
         "id": "aws",
         name: "AWS",
-        enabled: true,
+        enabled: () => {
+            return Cookies.get("id") && Cookies.get("hash");
+        },
         ...aws
     }
 ];
