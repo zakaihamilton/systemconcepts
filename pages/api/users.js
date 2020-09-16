@@ -1,5 +1,6 @@
 const { handleRequest } = require("@/util/mongo");
-const { login } = require("../../src/util/login");
+const { login } = require("@/util/login");
+const { roleAuth } = require("@/util/roles");
 var Cookie = require('cookie');
 
 const collectionName = "users";
@@ -14,7 +15,7 @@ module.exports = async (req, res) => {
             throw "ACCESS_DENIED";
         }
         user = await login({ id, hash });
-        if (!user || user.role !== "admin") {
+        if (!roleAuth(user && user.role, "admin")) {
             throw "ACCESS_DENIED";
         }
         const result = await handleRequest({ collectionName, req });

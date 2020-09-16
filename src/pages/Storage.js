@@ -21,6 +21,7 @@ import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
 import { useDateLocale } from "@/util/locale";
 import { useSync } from "@/util/sync";
+import { isBinaryFile } from "@/util/path";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -68,6 +69,8 @@ export default function Storage({ path = "" }) {
     const { item: editedItem, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
     const [data, loading] = useListing(path, [counter, syncCounter]);
     const isPhone = useDeviceType() === "phone";
+    const device = devices.find(item => item.id === path.split("/")[0]);
+    const { readOnly } = device || {};
     const dateFormatter = useDateLocale({
         weekday: 'long',
         year: 'numeric',
@@ -143,7 +146,7 @@ export default function Storage({ path = "" }) {
             nameWidget = <Edit key={id} />;
         } else {
             nameWidget = <Label key={id} icon={<>
-                {!select && item.type && !mode && <ItemMenu item={result} />}
+                {!select && item.type && !mode && <ItemMenu readOnly={readOnly} item={result} />}
                 {select && <Select select={select} item={result} store={StorageStore} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}
@@ -172,7 +175,12 @@ export default function Storage({ path = "" }) {
             return;
         }
         if (item.type === "file") {
-            addPath(`editor?name=${item.name}`);
+            if (isBinaryFile(item.name)) {
+                /* add picture viewer and media player here */
+            }
+            else {
+                addPath(`editor?name=${item.name}`);
+            }
         }
         else {
             setPath("storage/" + id.split("/").filter(Boolean).join("/"));
@@ -217,10 +225,10 @@ export default function Storage({ path = "" }) {
             loading={loading}
             depends={[mode, select, path, onRowClick, dateFormatter]}
             onExport={onExport}
-            onImport={onImport}
+            onImport={!readOnly && onImport}
             statusBar={statusBar}
         />
-        <Actions path={path} data={dataEx} />
+        <Actions path={path} data={dataEx} readOnly={readOnly} />
         <Destination path={path} />
     </>;
 }

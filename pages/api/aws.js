@@ -1,5 +1,6 @@
 const { handleRequest } = require("@/util/aws");
 const { login } = require("@/util/login");
+const { roleAuth } = require("@/util/roles");
 var Cookie = require('cookie');
 
 module.exports = async (req, res) => {
@@ -16,7 +17,7 @@ module.exports = async (req, res) => {
         if (!user) {
             throw "ACCESS_DENIED";
         }
-        if (user.role === "admin") {
+        if (roleAuth(user.role, "admin")) {
             readOnly = false;
         }
         const result = await handleRequest({ req, readOnly });
