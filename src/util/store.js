@@ -45,5 +45,5 @@ export function useLocalStorage(id, store) {
             unsubscribe();
         }
     }, []);
-    return store;
+    return isLoaded.current;
 }
