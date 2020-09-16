@@ -1,12 +1,12 @@
 .speedDial {
-    position: absolute;
+    position: fixed;
     bottom: 2em;
     right: 2em;
     z-index: 200;
 }
 
 .speedDialRtl {
-    position: absolute;
+    position: fixed;
     bottom: 2em;
     left: 2em;
 }
