@@ -1,4 +1,4 @@
-import { fetchJSON, fetchText } from "@/util/fetch";
+import { fetchJSON, fetchText, fetchBlob } from "@/util/fetch";
 import { makePath } from "@/util/path";
 
 const fsEndPoint = "/api/aws";
@@ -78,15 +78,27 @@ async function deleteFile(path) {
     });
 }
 
-async function readFile(path) {
+async function readFile(path, encoding = "utf8") {
     path = makePath(path);
-    const body = await fetchText(fsEndPoint, {
-        method: "GET",
-        headers: {
-            path: encodeURIComponent(path.slice(1))
-        }
-    });
-    return body;
+    if (encoding === "utf8") {
+        const body = await fetchText(fsEndPoint, {
+            method: "GET",
+            headers: {
+                path: encodeURIComponent(path.slice(1))
+            }
+        });
+        return body;
+    }
+    else if (encoding === "image") {
+        const body = await fetchBlob(fsEndPoint, {
+            method: "GET",
+            headers: {
+                binary: true,
+                path: encodeURIComponent(path.slice(1))
+            }
+        });
+        return body;
+    }
 }
 
 async function writeFile(path, body) {

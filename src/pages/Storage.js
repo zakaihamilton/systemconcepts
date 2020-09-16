@@ -21,7 +21,7 @@ import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
 import { useDateLocale } from "@/util/locale";
 import { useSync } from "@/util/sync";
-import { isBinaryFile } from "@/util/path";
+import { isBinaryFile, isImageFile } from "@/util/path";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -175,8 +175,11 @@ export default function Storage({ path = "" }) {
             return;
         }
         if (item.type === "file") {
-            if (isBinaryFile(item.name)) {
-                /* add picture viewer and media player here */
+            if (isImageFile(item.name)) {
+                addPath(`image?name=${item.name}`);
+            }
+            else if (isBinaryFile(item.name)) {
+                /* add media player here */
             }
             else {
                 addPath(`editor?name=${item.name}`);

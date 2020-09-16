@@ -1,6 +1,30 @@
 import { useState, useEffect } from "react";
 import { useOnline } from "@/util/online";
 
+export function fetchBlob(url, options) {
+    options = Object.assign({}, options);
+    options.headers = Object.assign({}, options.headers);
+    return new Promise((resolve, reject) => {
+        window.fetch(url, options).then(response => {
+            if (response.status !== 200) {
+                console.log("Status Code: " +
+                    response.status);
+                reject(response.status);
+                return;
+            }
+            response.blob().then(function (data) {
+                resolve(data);
+            }).catch(err => {
+                console.log("Fetch parse error :", err);
+                reject(err);
+            });
+        }).catch(err => {
+            console.log("Fetch error :", err);
+            reject(err);
+        });
+    });
+}
+
 export function fetchText(url, options) {
     options = Object.assign({}, options);
     options.headers = Object.assign({}, { "Content-Type": "text/plain", charset: "UTF-8" }, options.headers);

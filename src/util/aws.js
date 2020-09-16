@@ -75,13 +75,16 @@ export async function uploadData({ path, data, bucketName = process.env.AWS_BUCK
     return result;
 };
 
-export async function downloadData({ path, bucketName = process.env.AWS_BUCKET }) {
+export async function downloadData({ path, binary, bucketName = process.env.AWS_BUCKET }) {
     var params = {
         Bucket: bucketName,
         Key: path
     };
     const s3 = await getS3({});
     const data = await s3.getObject(params).promise();
+    if (binary) {
+        return Buffer.from(data.Body);
+    }
     return data.Body.toString();
 };
 
@@ -223,7 +226,7 @@ export async function handleRequest({ readOnly, req }) {
         return {};
     } else if (req.method === "GET") {
         try {
-            let { path } = headers;
+            let { path, binary } = headers;
             path = decodeURIComponent(path);
             const metadata = await metadataInfo({ path });
             if (metadata) {
@@ -233,7 +236,7 @@ export async function handleRequest({ readOnly, req }) {
                     return items;
                 }
                 else {
-                    return await downloadData({ path });
+                    return await downloadData({ path, binary });
                 }
             }
             else {
