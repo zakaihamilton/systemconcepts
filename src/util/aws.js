@@ -178,11 +178,11 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
             const type = content.ContentType === "application/x-directory" ? "dir" : "file";
             const stat = {
                 type,
-                size: content.ContentLength,
-                mtimeMs: item.date && new Date(content.LastModified.valueOf()).getTime()
+                size: content.Size,
+                mtimeMs: content.LastModified && content.LastModified.valueOf()
             };
             items.push({
-                name: item.name,
+                name,
                 stat
             });
         });
