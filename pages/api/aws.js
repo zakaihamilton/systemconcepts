@@ -9,8 +9,14 @@ module.exports = async (req, res) => {
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
         let readOnly = true;
-        if (id && hash) {
-            await login({ id, hash });
+        if (!id || !hash) {
+            throw "ACCESS_DENIED";
+        }
+        user = await login({ id, hash });
+        if (!user) {
+            throw "ACCESS_DENIED";
+        }
+        if (user.role === "admin") {
             readOnly = false;
         }
         const result = await handleRequest({ req, readOnly });

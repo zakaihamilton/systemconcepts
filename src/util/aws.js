@@ -165,6 +165,9 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
         const result = await s3.listObjects(params).promise();
         result.CommonPrefixes.forEach(prefix => {
             const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1).split("/").pop();
+            if (name === "private") {
+                return;
+            }
             items.push({
                 type: "dir",
                 name

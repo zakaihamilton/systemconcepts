@@ -68,9 +68,9 @@ export function useSyncFeature() {
     const online = useOnline();
     const [isBusy, setBusy] = useState(false);
     const [error, setError] = useState(null);
+    const isLoaded = useLocalStorage("SyncStore", SyncStore);
     const { lastUpdated } = SyncStore.useState();
     const { active } = SyncActiveStore.useState();
-    useLocalStorage("SyncStore", SyncStore);
     const updateSync = useCallback(async () => {
         if (busyRef.current || !online) {
             return;
@@ -138,7 +138,9 @@ export function useSyncFeature() {
     }, [lastUpdated]);
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
-        updateSync();
-    }, [online]);
-    return [online && updateSync, isBusy, error, active];
+        if (online && isLoaded) {
+            updateSync();
+        }
+    }, [online, isLoaded]);
+    return [online && isLoaded && updateSync, isBusy, error, active];
 }
