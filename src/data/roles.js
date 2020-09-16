@@ -1,22 +1,27 @@
 export default [
     {
         id: "visitor",
-        name: "VISITOR"
-    },
-    {
-        id: "admin",
-        name: "ADMIN"
+        name: "VISITOR",
+        level: 1
     },
     {
         id: "student",
-        name: "STUDENT"
+        name: "STUDENT",
+        level: 2
     },
     {
         id: "upper",
-        name: "UPPER"
+        name: "UPPER",
+        level: 3
     },
     {
         id: "teacher",
-        name: "TEACHER"
+        name: "TEACHER",
+        level: 4
+    },
+    {
+        id: "admin",
+        name: "ADMIN",
+        level: 5
     }
 ];

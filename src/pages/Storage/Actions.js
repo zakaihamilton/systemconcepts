@@ -21,7 +21,7 @@ export function useActions(data) {
     return data;
 }
 
-export default function Actions({ data, path }) {
+export default function Actions({ data, path, readOnly }) {
     const { mode } = StorageStore.useState();
     const translations = useTranslations();
 
@@ -76,7 +76,7 @@ export default function Actions({ data, path }) {
                 }
             }
         }
-    ].map(item => {
+    ].filter(Boolean).map(item => {
         return {
             onClick: () => {
                 StorageStore.update(s => {
@@ -130,6 +130,6 @@ export default function Actions({ data, path }) {
     ]);
 
     return (
-        <SpeedDial visible={!mode && path && data} items={addItems} icon={<AddIcon />} />
+        <SpeedDial visible={!mode && path && data && !readOnly} items={addItems} icon={<AddIcon />} />
     );
 }

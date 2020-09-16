@@ -12,14 +12,15 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
 import Tooltip from '@material-ui/core/Tooltip';
+import { isBinaryFile } from "@/util/path";
 
-export default function ItemMenuWidget({ item }) {
+export default function ItemMenuWidget({ item, readOnly }) {
     const [ref, isHover] = useHover();
     const isVisible = useRef();
     const translations = useTranslations();
 
     const items = [
-        {
+        !readOnly && {
             id: "rename",
             name: translations.RENAME,
             onClick: () => {
@@ -62,7 +63,7 @@ export default function ItemMenuWidget({ item }) {
                 });
             }
         },
-        {
+        !readOnly && {
             id: "move",
             name: translations.MOVE,
             icon: <TrendingFlatIcon />,
@@ -80,7 +81,7 @@ export default function ItemMenuWidget({ item }) {
                 });
             }
         },
-        {
+        !readOnly && {
             id: "copy",
             name: translations.COPY,
             icon: <FileCopyIcon />,
@@ -98,7 +99,7 @@ export default function ItemMenuWidget({ item }) {
                 });
             }
         },
-        {
+        !readOnly && {
             id: "delete",
             name: translations.DELETE,
             icon: <DeleteIcon />,
@@ -120,7 +121,7 @@ export default function ItemMenuWidget({ item }) {
                 });
             }
         },
-        {
+        !isBinaryFile(item.name) && {
             id: "export",
             name: translations.EXPORT,
             icon: <ImportExportIcon />,
@@ -136,7 +137,7 @@ export default function ItemMenuWidget({ item }) {
                 exportData(data, item.name, "application/json");
             }
         }
-    ];
+    ].filter(Boolean);
 
     const updateHover = () => {
         if (!isVisible.current) {
@@ -154,6 +155,10 @@ export default function ItemMenuWidget({ item }) {
     useEffect(() => {
         updateHover();
     }, [isHover]);
+
+    if (!items.length) {
+        return null;
+    }
 
     return (<>
         <Menu items={items} onVisible={onMenuVisible}>

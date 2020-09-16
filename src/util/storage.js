@@ -1,6 +1,6 @@
 import storage from "@/data/storage";
 import { useState, useEffect, useRef } from "react";
-import { makePath } from "@/util/path";
+import { makePath, isBinaryFile } from "@/util/path";
 
 export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;
@@ -136,7 +136,7 @@ async function exportFolder(path) {
                     const result = await toData(path);
                     data[name] = result;
                 }
-                else {
+                else if (!isBinaryFile(path)) {
                     data[name] = await storageMethods.readFile(path, "utf8");
                 }
             }
