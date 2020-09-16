@@ -1,5 +1,5 @@
 export function exportData(data, filename, type) {
-    var file = new Blob([data], { type: type });
+    var file = type ? new Blob([data], { type: type }) : data;
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
     else { // Others

@@ -524,6 +524,10 @@ export default {
         {
             "id": "SYNCING",
             "value": "סינכרון"
+        },
+        {
+            "id": "IMAGE",
+            "value": "תמונה"
         }
     ]
 };

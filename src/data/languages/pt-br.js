@@ -528,6 +528,10 @@ export default {
         {
             "id": "SYNCING",
             "value": "Sincronizando"
+        },
+        {
+            "id": "IMAGE",
+            "value": "Imagem"
         }
     ]
 };
