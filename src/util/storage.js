@@ -107,14 +107,19 @@ const storageMethods = Object.fromEntries([
 export function useListing(url, depends = [], options) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(null);
+    const [error, setError] = useState(null);
     const active = useRef(true);
     useEffect(() => {
+        setError(null);
         setLoading(true);
         storageMethods.getListing(url, options).then(listing => {
             if (active.current) {
                 setListing(listing);
                 setLoading(false);
             }
+        }).catch(err => {
+            setError(err);
+            setLoading(false);
         });
     }, [url, ...depends]);
     useEffect(() => {
@@ -122,7 +127,7 @@ export function useListing(url, depends = [], options) {
             active.current = false;
         };
     }, []);
-    return [listing, loading];
+    return [listing, loading, error];
 }
 
 async function exportFolder(path) {

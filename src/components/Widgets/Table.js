@@ -22,6 +22,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
 import Progress from "@/widgets/Progress";
+import Error from "./Table/Error";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -49,7 +50,29 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8em", loading, columns, onImport, onExport, depends = [], reset = [], sortColumn, data, mapper, filter, empty, statusBar, className, hideColumns, rowClick, ...props }) {
+export default function TableWidget(props) {
+    let {
+        name,
+        rowHeight = "4em",
+        marginBottom = "8em",
+        loading,
+        columns,
+        onImport,
+        onExport,
+        depends = [],
+        reset = [],
+        sortColumn,
+        data,
+        mapper,
+        filter,
+        empty,
+        statusBar,
+        className,
+        hideColumns,
+        rowClick,
+        error,
+        ...otherProps
+    } = props;
     const translations = useTranslations();
     const [order, setOrder] = React.useState("desc");
     const [offset, setOffset] = React.useState(0);
@@ -230,8 +253,8 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
     });
 
     return (<>
-        <TableContainer className={className} style={style} {...props}>
-            {!loading && <Table stickyHeader style={style}>
+        <TableContainer className={className} style={style} {...otherProps}>
+            {!loading && !error && <Table stickyHeader style={style}>
                 {!hideColumns && <TableHead>
                     <TableRow>
                         {tableColumns}
@@ -242,11 +265,12 @@ export default function TableWidget({ name, rowHeight = "4em", marginBottom = "8
                 </TableBody>
             </Table>}
             {!!isEmpty && empty}
-            {!loading && <div className={styles.footer}>
+            {!loading && !error && <div className={styles.footer}>
                 {statusBar}
                 <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
             </div>}
         </TableContainer>
-        {loading && <Progress />}
+        {!!loading && <Progress />}
+        {!!error && <Error error={error} />}
     </>);
 }

@@ -532,6 +532,10 @@ export default {
         {
             "id": "IMAGE",
             "value": "Imagem"
+        },
+        {
+            "id": "ERROR",
+            "value": "Erro"
         }
     ]
 };

@@ -528,6 +528,10 @@ export default {
         {
             "id": "IMAGE",
             "value": "תמונה"
+        },
+        {
+            "id": "ERROR",
+            "value": "שגיאה"
         }
     ]
 };
