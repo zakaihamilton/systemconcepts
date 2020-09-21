@@ -536,6 +536,26 @@ export default {
         {
             "id": "ERROR",
             "value": "Erro"
+        },
+        {
+            "id": "FOLDER",
+            "value": "Pasta"
+        },
+        {
+            "id": "STATUS",
+            "value": "Status"
+        },
+        {
+            "id": "SESSIONS",
+            "value": "Sessions"
+        },
+        {
+            "id": "YEARS",
+            "value": "Anos"
+        },
+        {
+            "id": "PROGRESS",
+            "value": "Progresso"
         }
     ]
 };

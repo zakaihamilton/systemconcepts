@@ -532,6 +532,26 @@ export default {
         {
             "id": "ERROR",
             "value": "שגיאה"
+        },
+        {
+            "id": "FOLDER",
+            "value": "תיקייה"
+        },
+        {
+            "id": "STATUS",
+            "value": "מצב"
+        },
+        {
+            "id": "SESSIONS",
+            "value": "שיעורים"
+        },
+        {
+            "id": "YEARS",
+            "value": "שנים"
+        },
+        {
+            "id": "PROGRESS",
+            "value": "התקדמות"
         }
     ]
 };

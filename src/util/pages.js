@@ -99,7 +99,7 @@ export function usePagesFromHash(hash = "") {
             else if (index) {
                 return;
             }
-            const result = { ...page, url, ...params, path: sectionPath };
+            const result = { ...page, url, ...params, path: sectionPath, index };
             if (name !== result.name && !result.tooltip) {
                 result.tooltip = name;
             }

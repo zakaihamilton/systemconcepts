@@ -5,7 +5,7 @@ import { useLocalStorage } from "@/util/store";
 import { useInterval } from "@/util/timers";
 import storage from "@/util/storage";
 import Cookies from 'js-cookie';
-import { useOnline } from "./online";
+import { useOnline } from "@/util/online";
 import { makePath } from "@/util/path";
 
 export const SyncStore = new Store({

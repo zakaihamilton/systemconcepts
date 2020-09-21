@@ -12,6 +12,13 @@ export function isBinaryFile(path) {
     return hasMediaExt;
 }
 
+export function isMediaFile(path) {
+    path = makePath(path);
+    const mediaExtensions = [".mp4", ".m4a"];
+    const hasMediaExt = mediaExtensions.find(ext => path.endsWith(ext));
+    return hasMediaExt;
+}
+
 export function isImageFile(path) {
     path = makePath(path);
     const imageExtensions = [".png", ".jpg", ".jpeg"];

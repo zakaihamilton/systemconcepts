@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import styles from "./SideBar.module.scss"
 import List from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
@@ -13,7 +13,7 @@ export default function SideBar() {
     const activePages = usePagesFromHash(hash);
     const pages = usePages();
     const selected = id => {
-        return !!activePages.find(page => page.id === id);
+        return !!activePages.find(page => page.id === id && !page.index);
     };
     const setSelected = useCallback(id => {
         const page = pages.find(page => page.id === id);
