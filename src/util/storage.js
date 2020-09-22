@@ -185,6 +185,9 @@ async function importFolder(path, data) {
 }
 
 async function copyFolder(from, to) {
+    if (makePath(from) === makePath(to)) {
+        return;
+    }
     await storageMethods.createFolders(to);
     await storageMethods.createFolder(to);
     const items = await storageMethods.getListing(from);
@@ -202,16 +205,25 @@ async function copyFolder(from, to) {
 }
 
 async function copyFile(from, to) {
-    const data = await storageMethods.readFile(from, "utf8");
-    await storageMethods.writeFile(to, data, "utf8");
+    if (makePath(from) === makePath(to)) {
+        return;
+    }
+    const data = await storageMethods.readFile(from);
+    await storageMethods.writeFile(to, data);
 }
 
 async function moveFolder(from, to) {
+    if (makePath(from) === makePath(to)) {
+        return;
+    }
     await copyFolder(from, to);
     await storageMethods.deleteFolder(from);
 }
 
 async function moveFile(from, to) {
+    if (makePath(from) === makePath(to)) {
+        return;
+    }
     await copyFile(from, to);
     await storageMethods.deleteFile(from);
 }

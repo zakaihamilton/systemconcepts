@@ -126,18 +126,22 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         });
     }
 
-    async function readFile(path, encoding = "utf8") {
+    async function readFile(path, encoding) {
         path = makePath(path);
         const item = await fetchJSON(fsEndPoint, {
             method: "GET",
             headers: {
-                id: encodeURIComponent(path)
+                id: encodeURIComponent(path),
+                encoding
             }
         });
         return item && item.body;
     }
 
-    async function writeFile(path, body, encoding = "utf8") {
+    async function writeFile(path, body = "", encoding) {
+        if (body && body.arrayBuffer) {
+            body = await body.arrayBuffer();
+        }
         path = makePath(path);
         await fetchJSON(fsEndPoint, {
             method: "PUT",
@@ -166,7 +170,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                     id: encodeURIComponent(path)
                 }
             });
-            exists = !!item;
+            exists = item && !item.deleted;
         }
         catch (err) {
 

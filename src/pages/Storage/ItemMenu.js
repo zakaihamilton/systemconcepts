@@ -12,7 +12,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
 import Tooltip from '@material-ui/core/Tooltip';
-import { isBinaryFile } from "@/util/path";
+import { isBinaryFile, makePath } from "@/util/path";
 
 export default function ItemMenuWidget({ item, readOnly }) {
     const [ref, isHover] = useHover();
@@ -34,32 +34,38 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.tooltip = item.tooltip;
                     s.placeholder = translations[placeholder];
                     s.editing = true;
-                    s.onDone = async name => {
+                    s.onValidate = async name => {
                         if (!name) {
-                            return;
+                            return false;
                         }
                         name = name.replace(/\//, " ");
-                        const target = item.folder + name;
-                        if (item.path !== target) {
-                            try {
-                                if (await storage.exists(target)) {
-                                    throw translations.ALREADY_EXISTS.replace("${name}", name);
-                                }
-                                if (item.type === "dir") {
-                                    await storage.moveFolder(item.path, target);
-                                }
-                                else {
-                                    await storage.moveFile(item.path, target);
-                                }
+                        const target = makePath(item.folder, name);
+                        if (makePath(item.path) === makePath(target)) {
+                            return false;
+                        }
+                        return true;
+                    };
+                    s.onDone = async name => {
+                        name = name.replace(/\//, " ");
+                        const target = makePath(item.folder, name);
+                        try {
+                            if (await storage.exists(target)) {
+                                throw translations.ALREADY_EXISTS.replace("${name}", name);
                             }
-                            catch (err) {
-                                StorageStore.update(s => {
-                                    s.message = err;
-                                    s.severity = "error";
-                                });
+                            if (item.type === "dir") {
+                                await storage.moveFolder(item.path, target);
+                            }
+                            else {
+                                await storage.moveFile(item.path, target);
                             }
                         }
-                    };
+                        catch (err) {
+                            StorageStore.update(s => {
+                                s.message = err;
+                                s.severity = "error";
+                            });
+                        }
+                    }
                 });
             }
         },

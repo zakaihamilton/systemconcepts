@@ -78,7 +78,7 @@ async function deleteFile(path) {
     });
 }
 
-async function readFile(path, encoding = "utf8") {
+async function readFile(path, encoding) {
     path = makePath(path);
     if (encoding === "utf8") {
         const body = await fetchText(fsEndPoint, {
@@ -89,7 +89,7 @@ async function readFile(path, encoding = "utf8") {
         });
         return body;
     }
-    else if (encoding === "image") {
+    else {
         const body = await fetchBlob(fsEndPoint, {
             method: "GET",
             headers: {

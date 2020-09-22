@@ -53,12 +53,12 @@ export function usePagesFromHash(hash = "") {
         let sectionPath = "";
         const pageId = (sections[0] || "").split("?")[0];
         let subPath = "";
-        sections.map((section, index) => {
+        sections.map((section, sectionIndex) => {
             const [sectionId, query] = section.split("?");
             if (path) {
                 path += "/";
             }
-            if (index) {
+            if (sectionIndex) {
                 if (sectionPath) {
                     sectionPath += "/";
                 }
@@ -90,16 +90,16 @@ export function usePagesFromHash(hash = "") {
             const url = encodeURI(path + encodeURIComponent(subPath));
             const name = page.name;
             if (typeof page.section === "function") {
-                const result = page.section({ index, id: sectionId, translations, path: sectionPath });
+                const result = page.section({ sectionIndex, id: sectionId, translations, path: sectionPath });
                 if (!result) {
                     return null;
                 }
                 page = Object.assign({}, page, result);
             }
-            else if (index) {
+            else if (sectionIndex) {
                 return;
             }
-            const result = { ...page, url, ...params, path: sectionPath, index };
+            const result = { ...page, url, ...params, path: sectionPath, sectionIndex };
             if (name !== result.name && !result.tooltip) {
                 result.tooltip = name;
             }

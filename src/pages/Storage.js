@@ -42,15 +42,15 @@ export const StorageStoreDefaults = {
 
 export const StorageStore = new Store(StorageStoreDefaults);
 
-export function getStorageSection({ index, id, translations }) {
+export function getStorageSection({ sectionIndex, id, translations }) {
     let icon = <FolderIcon />;
     let tooltip = translations.FOLDER;
-    if (index <= 1) {
+    if (sectionIndex <= 1) {
         tooltip = translations.STORAGE;
         icon = <StorageIcon />;
     }
     let name = id;
-    if (index) {
+    if (sectionIndex) {
         const item = devices.find(item => item.id === id);
         if (item) {
             name = translations[item.name] || item.name;

@@ -1,5 +1,5 @@
 import storage from "@/util/storage";
-import { isMediaFile, isImageFile } from "@/util/path";
+import { isMediaFile, isImageFile, makePath } from "@/util/path";
 import { Store } from "pullstate";
 
 export const SessionsStore = new Store({
@@ -18,7 +18,7 @@ export function useStatus() {
             s.busy = true;
         });
         let items = [];
-        const prefix = "aws/sessions";
+        const prefix = makePath("aws/sessions") + "/";
         try {
             items = await storage.getListing(prefix);
         }
@@ -80,6 +80,10 @@ export function useStatus() {
                         s.status = [...s.status];
                     });
                 }
+                SessionsStore.update(s => {
+                    s.status[itemIndex].progress = 0;
+                    s.status = [...s.status];
+                });
             }
         }
         SessionsStore.update(s => {

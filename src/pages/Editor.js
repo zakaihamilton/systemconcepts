@@ -21,7 +21,7 @@ export default function Editor({ name }) {
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
     const [loading, setLoading] = useState(false);
     const readFile = useCallback(() => {
-        storage.readFile(path).then(content => {
+        storage.readFile(path, "utf8").then(content => {
             if (content !== null) {
                 EditorStore.update(s => {
                     s.content = content || "";
@@ -43,7 +43,7 @@ export default function Editor({ name }) {
                     timerRef.current = null;
                 }
                 timerRef.current = setTimeout(() => {
-                    storage.writeFile(path, data);
+                    storage.writeFile(path, data, "utf8");
                 }, 1000);
             }
         });

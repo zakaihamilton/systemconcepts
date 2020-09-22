@@ -10,8 +10,8 @@ import { useFetchJSON, fetchJSON } from "@/util/fetch";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 
-export function getUserSection({ index, path }) {
-    if (index) {
+export function getUserSection({ sectionIndex, path }) {
+    if (sectionIndex) {
         return { name: path };
     }
 }

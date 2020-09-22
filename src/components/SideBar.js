@@ -13,7 +13,7 @@ export default function SideBar() {
     const activePages = usePagesFromHash(hash);
     const pages = usePages();
     const selected = id => {
-        return !!activePages.find(page => page.id === id && !page.index);
+        return !!activePages.find(page => page.id === id && !page.sectionIndex);
     };
     const setSelected = useCallback(id => {
         const page = pages.find(page => page.id === id);

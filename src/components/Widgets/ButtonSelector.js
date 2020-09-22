@@ -1,5 +1,4 @@
 import React from 'react';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -9,8 +8,6 @@ import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-
-const options = ['Create a merge commit', 'Squash and merge', 'Rebase and merge'];
 
 export default function ButtonSelector({ state, items, onClick, children, ...props }) {
   const [open, setOpen] = React.useState(false);
@@ -54,7 +51,7 @@ export default function ButtonSelector({ state, items, onClick, children, ...pro
           >
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
-                <MenuList id="split-button-menu">
+                <MenuList>
                   {items.map(item => (
                     <MenuItem
                       key={item.id}

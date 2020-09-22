@@ -115,7 +115,7 @@ export function useSyncFeature() {
                 if (stat.type === "file") {
                     const buffer = await storage.readFile(path);
                     if (buffer) {
-                        await storage.writeFile(local, buffer, "utf8");
+                        await storage.writeFile(local, buffer);
                     }
                 }
                 else if (stat.type === "dir") {

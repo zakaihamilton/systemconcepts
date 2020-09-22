@@ -22,9 +22,9 @@ export default function EditWidget() {
     }, [name[0]]);
     const keyDown = async event => {
         if (event.keyCode == 13) {
-            const valid = true;
+            let valid = true;
             if (onValidate) {
-                valid = onValidate();
+                valid = onValidate(name[0]);
             }
             if (valid) {
                 StorageStore.update(s => {
@@ -34,8 +34,24 @@ export default function EditWidget() {
             }
         }
     };
+    const onClickAway = async () => {
+        let valid = true;
+        if (onValidate) {
+            valid = await onValidate(name[0]);
+        }
+        if (valid) {
+            await complete();
+        }
+        else {
+            StorageStore.update(s => {
+                s.mode = "";
+                s.item = null;
+                s.editing = false;
+            });
+        }
+    };
 
-    return <ClickAwayListener onClickAway={complete}>
+    return <ClickAwayListener onClickAway={onClickAway}>
         <Input
             onKeyDown={keyDown}
             placeholder={placeholder}

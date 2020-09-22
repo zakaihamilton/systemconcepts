@@ -29,7 +29,7 @@ export default function ImagePage({ name }) {
         busyRef.current = true;
         setLoading(true);
         try {
-            const content = await storage.readFile(path, "image");
+            const content = await storage.readFile(path);
             setContent(content);
             setLoading(false);
         }

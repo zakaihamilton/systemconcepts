@@ -20,8 +20,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import LinearProgress from "@material-ui/core/LinearProgress";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
-export function getResetSection({ index, id, translations }) {
-    if (index) {
+export function getResetSection({ sectionIndex, id, translations }) {
+    if (sectionIndex) {
         return { name: translations.CHANGE_PASSWORD, tooltip: translations.CHANGE_PASSWORD };
     }
     return {};
