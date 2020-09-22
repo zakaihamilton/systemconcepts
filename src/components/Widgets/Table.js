@@ -61,6 +61,7 @@ export default function TableWidget(props) {
         onExport,
         depends = [],
         reset = [],
+        resetOnDataChange = true,
         sortColumn,
         data,
         mapper,
@@ -128,7 +129,7 @@ export default function TableWidget(props) {
 
     useEffect(() => {
         setOffset(0);
-    }, [data, search, ...reset]);
+    }, [resetOnDataChange && data, search, ...reset]);
 
     useEffect(() => {
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);

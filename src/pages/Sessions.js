@@ -9,6 +9,8 @@ import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
 import Chip from "@material-ui/core/Chip";
 import Row from "@/widgets/Row";
+import Label from "@/widgets/Label";
+import Progress from "@/widgets/Progress";
 
 registerToolbar("Sessions");
 
@@ -64,17 +66,18 @@ export default function Sessions({ }) {
                 label={year}
             />;
         });
+        const showProgress = parseInt(item.progress) !== 100;
         return {
             ...item,
             name,
             years: <Row>
                 {tags}
             </Row>,
-            progress: !!item.progress && (item.progress + "%")
+            progress: !!item.progress && <Progress variant="static" size={48} style={{ flex: 0 }} value={item.progress} />
         }
     };
 
     return <>
-        <Table name="sessions" columns={columns} data={data} mapper={mapper} />
+        <Table rowHeight="5em" resetOnDataChange={false} name="sessions" columns={columns} data={data} mapper={mapper} />
     </>;
 }
