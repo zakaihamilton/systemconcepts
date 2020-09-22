@@ -73,7 +73,7 @@ export default function Sessions({ }) {
             years: <Row>
                 {tags}
             </Row>,
-            progress: !!item.progress && <Progress variant="static" size={48} style={{ flex: 0 }} value={item.progress} />
+            progress: !!item.progress && <Progress variant="static" size={48} style={{ flex: 0, justifyContent: "initial" }} value={item.progress} />
         }
     };
 

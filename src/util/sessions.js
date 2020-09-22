@@ -49,26 +49,34 @@ export function useStatus() {
                     s.status[itemIndex].years.push(year.name);
                     s.status = [...s.status];
                 });
-                let sessions = [];
+                let from_sessions = [];
+                let to_sessions = [];
                 try {
-                    sessions = await storage.getListing(year.path);
+                    from_sessions = await storage.getListing(year.path);
+                    const to_path = "shared/sessions/" + year.path.substring(prefix.length);
+                    to_sessions = await storage.getListing(to_path);
+                    await storage.createFolders(to_path);
+                    await storage.createFolder(to_path);
                 }
                 catch (err) {
                     console.error(err);
                 }
-                for (let sessionIndex = 0; sessionIndex < sessions.length; sessionIndex++) {
-                    const session = sessions[sessionIndex];
+                if (!to_sessions || !from_sessions) {
+                    continue;
+                }
+                for (let sessionIndex = 0; sessionIndex < from_sessions.length; sessionIndex++) {
+                    const session = from_sessions[sessionIndex];
                     const path = "shared/sessions/" + session.path.substring(prefix.length);
-                    const percentage = parseInt((sessionIndex / sessions.length) * 100);
+                    const percentage = parseInt((sessionIndex / from_sessions.length) * 100);
                     SessionsStore.update(s => {
                         s.status[itemIndex].progress = percentage;
                         s.status = [...s.status];
                     });
-                    if (await storage.exists(path)) {
+                    const match = to_sessions.find(item => item.name === session.name);
+                    if (match) {
                         continue;
                     }
                     try {
-                        await storage.createFolders(path);
                         if (isImageFile(path)) {
                             await storage.copyFile(session.path, path);
                         }
