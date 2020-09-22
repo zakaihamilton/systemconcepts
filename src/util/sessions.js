@@ -59,6 +59,11 @@ export function useStatus() {
                 for (let sessionIndex = 0; sessionIndex < sessions.length; sessionIndex++) {
                     const session = sessions[sessionIndex];
                     const path = "shared/sessions/" + session.path.substring(prefix.length);
+                    const percentage = parseInt((sessionIndex / sessions.length) * 100);
+                    SessionsStore.update(s => {
+                        s.status[itemIndex].progress = percentage;
+                        s.status = [...s.status];
+                    });
                     if (await storage.exists(path)) {
                         continue;
                     }
@@ -74,14 +79,9 @@ export function useStatus() {
                     catch (err) {
                         console.error(err);
                     }
-                    const percentage = parseInt((sessionIndex / sessions.length) * 100);
-                    SessionsStore.update(s => {
-                        s.status[itemIndex].progress = percentage;
-                        s.status = [...s.status];
-                    });
                 }
                 SessionsStore.update(s => {
-                    s.status[itemIndex].progress = 0;
+                    s.status[itemIndex].progress = 100;
                     s.status = [...s.status];
                 });
             }

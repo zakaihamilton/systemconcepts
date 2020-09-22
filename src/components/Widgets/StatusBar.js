@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import SelectAllIcon from '@material-ui/icons/SelectAll';
@@ -12,6 +12,7 @@ import ButtonSelector from "@/components/Widgets/ButtonSelector";
 export default function StatusBar({ data, mapper, store }) {
     const translations = useTranslations();
     const { mode, select, message, onDone, severity } = store.useState();
+    const [busy, setBusy] = useState(false);
 
     const open = !!(select || message);
 
@@ -20,11 +21,14 @@ export default function StatusBar({ data, mapper, store }) {
     }
 
     const count = select && select.length;
+    const disabled = busy || !count;
 
     const onClick = async () => {
         let result = false;
         if (onDone) {
+            setBusy(true);
             result = await onDone(select);
+            setBusy(false);
         }
         if (!result) {
             store.update(s => {
@@ -36,7 +40,7 @@ export default function StatusBar({ data, mapper, store }) {
     };
 
     const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
+        if (reason === 'clickaway' || busy) {
             return;
         }
 
@@ -93,7 +97,7 @@ export default function StatusBar({ data, mapper, store }) {
 
     return (
         <div className={clsx(styles.root, styles[severity])}>
-            {mode && <ButtonSelector items={modeItems} state={[mode, setMode]} color="primary" disabled={!count} variant="contained" onClick={onClick}>
+            {mode && <ButtonSelector items={modeItems} state={[mode, setMode]} color="primary" disabled={disabled} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
                 {modeItems && "\u2026"}
             </ButtonSelector>}

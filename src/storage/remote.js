@@ -1,5 +1,6 @@
 import { fetchJSON } from "@/util/fetch";
 import { makePath } from "@/util/path";
+import { encode, decode } from "base64-arraybuffer-es6";
 
 export default function remoteStorage({ fsEndPoint, deviceId }) {
 
@@ -131,16 +132,22 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         const item = await fetchJSON(fsEndPoint, {
             method: "GET",
             headers: {
-                id: encodeURIComponent(path),
-                encoding
+                id: encodeURIComponent(path)
             }
         });
+        if (item && item.encoding === "base64") {
+            const buffer = decode(item.body);
+            const blob = new Blob([new Uint8Array(buffer)]);
+            return blob;
+        }
         return item && item.body;
     }
 
     async function writeFile(path, body = "", encoding) {
         if (body && body.arrayBuffer) {
             body = await body.arrayBuffer();
+            body = encode(body);
+            encoding = "base64";
         }
         path = makePath(path);
         await fetchJSON(fsEndPoint, {
