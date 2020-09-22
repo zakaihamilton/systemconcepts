@@ -10,8 +10,7 @@ import { makePath } from "@/util/path";
 
 export const SyncStore = new Store({
     lastUpdated: 0,
-    counter: 0,
-    listing: []
+    counter: 0
 });
 
 export const SyncActiveStore = new Store({
@@ -19,10 +18,9 @@ export const SyncActiveStore = new Store({
 });
 
 export function useSync() {
-    const { counter, listing } = SyncStore.useState(s => {
+    const { counter } = SyncStore.useState(s => {
         return {
-            counter: s.counter,
-            listing: s.listing
+            counter: s.counter
         };
     });
     useEffect(() => {
@@ -35,7 +33,7 @@ export function useSync() {
             });
         };
     }, []);
-    return [counter, listing];
+    return [counter];
 }
 
 export async function fetchUpdated(endPoint, start, end) {
@@ -129,7 +127,6 @@ export function useSyncFeature() {
         SyncStore.update(s => {
             s.lastUpdated = currentTime;
             if (listing.length) {
-                s.listing = listing;
                 s.counter++;
             }
         });
