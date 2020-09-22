@@ -78,6 +78,6 @@ export default function Sessions({ }) {
     };
 
     return <>
-        <Table rowHeight="5em" resetOnDataChange={false} name="sessions" columns={columns} data={data} mapper={mapper} />
+        <Table rowHeight="5.5em" resetOnDataChange={false} name="sessions" columns={columns} data={data} mapper={mapper} />
     </>;
 }
