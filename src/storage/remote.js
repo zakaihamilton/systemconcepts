@@ -127,7 +127,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         });
     }
 
-    async function readFile(path, encoding) {
+    async function readFile(path) {
         path = makePath(path);
         const item = await fetchJSON(fsEndPoint, {
             method: "GET",
