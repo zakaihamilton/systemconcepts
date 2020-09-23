@@ -78,10 +78,44 @@ export function useSyncFeature() {
         setBusy(true);
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-        const listing = [];
+        const syncItems = async items => {
+            for (const item of items) {
+                try {
+                    const { deleted, stat, local, path } = item;
+                    if (deleted) {
+                        if (await storage.exists(local)) {
+                            if (stat.type === "dir") {
+                                await storage.deleteFolder(local);
+                            }
+                            else {
+                                await storage.deleteFile(local);
+                            }
+                        }
+                        continue;
+                    }
+                    if (stat.type === "file") {
+                        const buffer = await storage.readFile(path);
+                        if (buffer) {
+                            await storage.writeFile(local, buffer);
+                        }
+                    }
+                    else if (stat.type === "dir") {
+                        await storage.createFolder(local);
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                }
+            }
+        };
+        let updateCounter = false;
         try {
             const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
-            listing.push(...shared);
+            if (shared.length) {
+                await storage.createFolders(makePath("local", "shared"));
+                await syncItems(shared);
+                updateCounter++;
+            }
         }
         catch (err) {
             console.error(err);
@@ -89,35 +123,10 @@ export function useSyncFeature() {
         if (isSignedIn) {
             try {
                 const personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
-                listing.push(...personal);
-            }
-            catch (err) {
-                console.error(err);
-            }
-        }
-        for (const item of listing) {
-            try {
-                const { deleted, stat, local, path } = item;
-                if (deleted) {
-                    if (await storage.exists(local)) {
-                        if (stat.type === "dir") {
-                            await storage.deleteFolder(local);
-                        }
-                        else {
-                            await storage.deleteFile(local);
-                        }
-                    }
-                    continue;
-                }
-                await storage.createFolders(local);
-                if (stat.type === "file") {
-                    const buffer = await storage.readFile(path);
-                    if (buffer) {
-                        await storage.writeFile(local, buffer);
-                    }
-                }
-                else if (stat.type === "dir") {
-                    await storage.createFolder(local);
+                if (personal.length) {
+                    await storage.createFolders(makePath("local", "personal"));
+                    await syncItems(personal);
+                    updateCounter++;
                 }
             }
             catch (err) {
@@ -126,7 +135,7 @@ export function useSyncFeature() {
         }
         SyncStore.update(s => {
             s.lastUpdated = currentTime;
-            if (listing.length) {
+            if (updateCounter) {
                 s.counter++;
             }
         });

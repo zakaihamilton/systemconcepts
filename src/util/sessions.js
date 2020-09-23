@@ -86,16 +86,16 @@ export function useSessions() {
                     const session = from_sessions[sessionIndex];
                     const path = "shared/sessions/" + session.path.substring(prefix.length);
                     const percentage = parseInt((sessionIndex / from_sessions.length) * 100);
+                    const match = to_sessions.find(item => item.name === session.name);
+                    if (match) {
+                        continue;
+                    }
                     SessionsStore.update(s => {
                         s.status[itemIndex].progress = percentage;
                         s.status[itemIndex].index = sessionIndex;
                         s.status[itemIndex].count = from_sessions.length;
                         s.status = [...s.status];
                     });
-                    const match = to_sessions.find(item => item.name === session.name);
-                    if (match) {
-                        continue;
-                    }
                     try {
                         if (isImageFile(path)) {
                             await storage.copyFile(session.path, path);
@@ -113,7 +113,7 @@ export function useSessions() {
                     }
                 }
                 SessionsStore.update(s => {
-                    s.status[itemIndex].index = -1;
+                    s.status[itemIndex].index = from_sessions.length;
                     s.status[itemIndex].progress = 100;
                     s.status = [...s.status];
                 });

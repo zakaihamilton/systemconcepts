@@ -25,18 +25,13 @@ export default function Sessions({ }) {
         animated: busy
     });
 
-    let name = translations.SYNC;
     const duration = start && new Date().getTime() - start;
-    if (busy) {
-        const formattedDuration = formatDuration(duration);
-        name = <>
-            <span>
-                {translations.SYNCING}
-                <br />
-                {formattedDuration}
-            </span>
-        </>;
-    }
+    const formattedDuration = formatDuration(duration);
+    const name = <span>
+        {busy ? translations.SYNCING : translations.SYNC}
+        <br />
+        {!!duration && formattedDuration}
+    </span>;
 
     const menuItems = [
         syncEnabled && {
@@ -82,7 +77,7 @@ export default function Sessions({ }) {
             />;
         });
         const variant = item.progress !== -1 ? "static" : undefined;
-        const tooltip = item.index === -1 ? item.count : item.index + " / " + item.count;
+        const tooltip = item.index + " / " + item.count;
         return {
             ...item,
             name,
