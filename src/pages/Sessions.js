@@ -63,6 +63,9 @@ export default function Sessions({ }) {
     ].filter(Boolean);
 
     const mapper = item => {
+        if (!item) {
+            return null;
+        }
         const name = item.name[0].toUpperCase() + item.name.substring(1);
         const tags = item.years && item.years.map(year => {
             return <Chip
@@ -78,7 +81,7 @@ export default function Sessions({ }) {
                 {tags}
             </Row>,
             progress: !!item.progress && <Progress variant={variant} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? item.progress : undefined} />,
-            errorCount: item.errors.length > 0 && item.errors.length
+            errorCount: item.errors && item.errors.length > 0 && item.errors.length
         }
     };
 
