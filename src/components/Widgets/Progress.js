@@ -2,6 +2,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles({
     progress: {
@@ -16,7 +17,7 @@ const useStyles = makeStyles({
     },
 });
 
-export default function Progress({ size, value, variant, ...props }) {
+export default function Progress({ size, value, tooltip = "", variant, ...props }) {
     const text = typeof value !== "undefined" && `${Math.round(value)}%`;
     const classes = useStyles();
 
@@ -33,7 +34,9 @@ export default function Progress({ size, value, variant, ...props }) {
                 alignItems="center"
                 justifyContent="center"
             >
-                {text && <Typography variant="caption" component="div" color="textSecondary">{text}</Typography>}
+                {text && <Tooltip title={tooltip}>
+                    <Typography variant="caption" component="div" color="textSecondary">{text}</Typography>
+                </Tooltip>}
             </Box>
         </Box>
     </div>);

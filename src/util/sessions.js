@@ -4,11 +4,12 @@ import { Store } from "pullstate";
 
 export const SessionsStore = new Store({
     busy: false,
-    status: []
+    status: [],
+    start: 0
 });
 
-export function useStatus() {
-    const { busy, status } = SessionsStore.useState();
+export function useSessions() {
+    const { busy, status, start } = SessionsStore.useState();
     const updateSessions = async () => {
         if (busy) {
             return;
@@ -16,6 +17,7 @@ export function useStatus() {
         const status = [];
         SessionsStore.update(s => {
             s.busy = true;
+            s.start = new Date().getTime()
         });
         let items = [];
         const prefix = makePath("aws/sessions") + "/";
@@ -86,6 +88,8 @@ export function useStatus() {
                     const percentage = parseInt((sessionIndex / from_sessions.length) * 100);
                     SessionsStore.update(s => {
                         s.status[itemIndex].progress = percentage;
+                        s.status[itemIndex].index = sessionIndex;
+                        s.status[itemIndex].count = from_sessions.length;
                         s.status = [...s.status];
                     });
                     const match = to_sessions.find(item => item.name === session.name);
@@ -109,6 +113,7 @@ export function useStatus() {
                     }
                 }
                 SessionsStore.update(s => {
+                    s.status[itemIndex].index = -1;
                     s.status[itemIndex].progress = 100;
                     s.status = [...s.status];
                 });
@@ -118,5 +123,5 @@ export function useStatus() {
             s.busy = false;
         });
     };
-    return [status, busy, updateSessions];
+    return [status, busy, start, updateSessions];
 }

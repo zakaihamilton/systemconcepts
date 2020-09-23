@@ -1,6 +1,6 @@
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
-import { useStatus } from "@/util/sessions";
+import { useSessions } from "@/util/sessions";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import UpdateIcon from "@material-ui/icons/Update";
 import styles from "./Sessions.module.scss";
@@ -9,7 +9,7 @@ import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
 import Chip from "@material-ui/core/Chip";
 import Row from "@/widgets/Row";
-import Label from "@/widgets/Label";
+import { formatDuration } from "@/util/string";
 import Progress from "@/widgets/Progress";
 
 registerToolbar("Sessions");
@@ -17,7 +17,7 @@ registerToolbar("Sessions");
 export default function Sessions({ }) {
     const translations = useTranslations();
     const online = useOnline();
-    const [data, busy, updateSessions] = useStatus();
+    const [data, busy, start, updateSessions] = useSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -26,8 +26,16 @@ export default function Sessions({ }) {
     });
 
     let name = translations.SYNC;
+    const duration = start && new Date().getTime() - start;
     if (busy) {
-        name = translations.SYNCING;
+        const formattedDuration = formatDuration(duration);
+        name = <>
+            <span>
+                {translations.SYNCING}
+                <br />
+                {formattedDuration}
+            </span>
+        </>;
     }
 
     const menuItems = [
@@ -40,7 +48,7 @@ export default function Sessions({ }) {
         }
     ];
 
-    useToolbar({ id: "Sessions", items: menuItems, depends: [syncEnabled, busy] });
+    useToolbar({ id: "Sessions", items: menuItems, depends: [syncEnabled, busy, parseInt(duration / 1000)] });
 
     const columns = [
         {
@@ -74,13 +82,14 @@ export default function Sessions({ }) {
             />;
         });
         const variant = item.progress !== -1 ? "static" : undefined;
+        const tooltip = item.index === -1 ? item.count : item.index + " / " + item.count;
         return {
             ...item,
             name,
             years: <Row>
                 {tags}
             </Row>,
-            progress: !!item.progress && <Progress variant={variant} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? item.progress : undefined} />,
+            progress: !!item.progress && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? item.progress : undefined} />,
             errorCount: item.errors && item.errors.length > 0 && item.errors.length
         }
     };
