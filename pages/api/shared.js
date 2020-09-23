@@ -1,8 +1,8 @@
-const { handleRequest } = require("@/util/mongo");
-const { login } = require("../../src/util/login");
-var Cookie = require('cookie');
+import { handleRequest } from "@/util/mongo";
+import { login } from "../../src/util/login";
+import Cookie from "cookie";
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     try {
         const { headers } = req || {};
         const { cookie } = headers || {};
@@ -22,3 +22,11 @@ module.exports = async (req, res) => {
         res.status(401).json({ err: err.toString() });
     }
 };
+
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '5mb',
+        }
+    }
+}

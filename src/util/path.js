@@ -8,20 +8,20 @@ export function makePath(...components) {
 export function isBinaryFile(path) {
     path = makePath(path);
     const mediaExtensions = [".m4a", ".mp4", ".png", ".jpg", ".jpeg"];
-    const hasMediaExt = mediaExtensions.find(ext => path.endsWith(ext));
+    const hasMediaExt = !!mediaExtensions.find(ext => path.endsWith(ext));
     return hasMediaExt;
 }
 
 export function isMediaFile(path) {
     path = makePath(path);
     const mediaExtensions = [".mp4", ".m4a"];
-    const hasMediaExt = mediaExtensions.find(ext => path.endsWith(ext));
+    const hasMediaExt = !!mediaExtensions.find(ext => path.endsWith(ext));
     return hasMediaExt;
 }
 
 export function isImageFile(path) {
     path = makePath(path);
     const imageExtensions = [".png", ".jpg", ".jpeg"];
-    const hasImageExt = imageExtensions.find(ext => path.endsWith(ext));
+    const hasImageExt = !!imageExtensions.find(ext => path.endsWith(ext));
     return hasImageExt;
 }

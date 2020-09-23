@@ -138,7 +138,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     data = JSON.stringify({ [item.name]: object }, null, 4);
                 }
                 else {
-                    data = await storage.readFile(item.path, "utf8");
+                    data = await storage.readFile(item.path);
                 }
                 exportData(data, item.name, "application/json");
             }

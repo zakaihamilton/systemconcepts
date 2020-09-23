@@ -1,11 +1,11 @@
-const { handleRequest } = require("@/util/mongo");
-const { login } = require("@/util/login");
-const { roleAuth } = require("@/util/roles");
-var Cookie = require('cookie');
+import { handleRequest } from "@/util/mongo";
+import { login } from "@/util/login";
+import { roleAuth } from "@/util/roles";
+import Cookie from "cookie";
 
 const collectionName = "users";
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     try {
         const { headers } = req || {};
         const { cookie } = headers || {};

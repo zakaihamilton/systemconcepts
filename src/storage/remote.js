@@ -1,6 +1,5 @@
 import { fetchJSON } from "@/util/fetch";
 import { makePath } from "@/util/path";
-import { encode, decode } from "base64-arraybuffer-es6";
 
 export default function remoteStorage({ fsEndPoint, deviceId }) {
 
@@ -12,7 +11,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             method: "GET",
             headers: {
                 query: encodeURIComponent(JSON.stringify({ folder: path })),
-                fields: encodeURIComponent(JSON.stringify({ folder: true, name: true, stat: true })),
+                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 })),
             }
         });
         for (const item of items) {
@@ -26,7 +25,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                     method: "GET",
                     headers: {
                         query: encodeURIComponent(JSON.stringify({ folder: itemPath })),
-                        fields: encodeURIComponent(JSON.stringify({ folder: true, name: true, stat: true })),
+                        fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 })),
                     }
                 });
                 let count = 0;
@@ -121,7 +120,6 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                     mtimeMs: new Date().getTime()
                 },
                 body: "",
-                encoding: "",
                 deleted: true
             }])
         });
@@ -135,20 +133,10 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 id: encodeURIComponent(path)
             }
         });
-        if (item && item.encoding === "base64") {
-            const buffer = decode(item.body);
-            const blob = new Blob([new Uint8Array(buffer)]);
-            return blob;
-        }
         return item && item.body;
     }
 
-    async function writeFile(path, body = "", encoding) {
-        if (body && body.arrayBuffer) {
-            body = await body.arrayBuffer();
-            body = encode(body);
-            encoding = "base64";
-        }
+    async function writeFile(path, body = "") {
         path = makePath(path);
         await fetchJSON(fsEndPoint, {
             method: "PUT",
@@ -158,11 +146,10 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
                 stat: {
                     type: "file",
-                    size: body.length,
+                    size: body && body.length,
                     mtimeMs: new Date().getTime()
                 },
-                body,
-                encoding
+                body
             }])
         });
     }

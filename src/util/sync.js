@@ -43,7 +43,7 @@ export async function fetchUpdated(endPoint, start, end) {
         headers: {
             sync: true,
             query: encodeURIComponent(JSON.stringify({ "stat.mtimeMs": { $gte: start, $lte: end } })),
-            fields: encodeURIComponent(JSON.stringify({})),
+            fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 }))
         }
     });
     if (items) {

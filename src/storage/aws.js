@@ -1,5 +1,7 @@
 import { fetchJSON, fetchText, fetchBlob } from "@/util/fetch";
 import { makePath } from "@/util/path";
+import { isBinaryFile } from "@/util/path";
+import { binaryToString } from "@/util/binary";
 
 const fsEndPoint = "/api/aws";
 
@@ -10,6 +12,7 @@ async function getListing(path, options = {}) {
     const items = await fetchJSON(fsEndPoint, {
         method: "GET",
         headers: {
+            type: "dir",
             path: encodeURIComponent(path.slice(1))
         }
     });
@@ -20,6 +23,7 @@ async function getListing(path, options = {}) {
             const children = await fetchJSON(fsEndPoint, {
                 method: "GET",
                 headers: {
+                    type: "dir",
                     path: encodeURIComponent(path.slice(1))
                 }
             });
@@ -78,27 +82,31 @@ async function deleteFile(path) {
     });
 }
 
-async function readFile(path, encoding) {
+async function readFile(path) {
     path = makePath(path);
-    if (encoding === "utf8") {
-        const body = await fetchText(fsEndPoint, {
-            method: "GET",
-            headers: {
-                path: encodeURIComponent(path.slice(1))
-            }
-        });
-        return body;
-    }
-    else {
-        const body = await fetchBlob(fsEndPoint, {
+    const binary = isBinaryFile(path);
+    let body = null;
+    if (binary) {
+        body = await fetchBlob(fsEndPoint, {
             method: "GET",
             headers: {
                 binary: true,
                 path: encodeURIComponent(path.slice(1))
             }
         });
+        body = binaryToString(body);
         return body;
     }
+    else {
+        body = await fetchText(fsEndPoint, {
+            method: "GET",
+            headers: {
+                type: "file",
+                path: encodeURIComponent(path.slice(1))
+            }
+        });
+    }
+    return body;
 }
 
 async function writeFile(path, body) {

@@ -1,9 +1,9 @@
-const { handleRequest } = require("@/util/aws");
-const { login } = require("@/util/login");
-const { roleAuth } = require("@/util/roles");
-var Cookie = require('cookie');
+import { handleRequest } from "@/util/aws";
+import { login } from "../../src/util/login";
+import Cookie from "cookie";
+import { roleAuth } from "@/util/roles";
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     try {
         const { headers } = req || {};
         const { cookie } = headers || {};
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
-        user = await login({ id, hash });
+        const user = await login({ id, hash });
         if (!user) {
             throw "ACCESS_DENIED";
         }
@@ -33,3 +33,11 @@ module.exports = async (req, res) => {
         res.status(401).json({ err: err.toString() });
     }
 };
+
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '5mb',
+        }
+    }
+}

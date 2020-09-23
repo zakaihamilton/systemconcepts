@@ -25,6 +25,9 @@ export function useStatus() {
         catch (err) {
             console.error(err);
         }
+        if (!items) {
+            return;
+        }
         SessionsStore.update(s => {
             status.push(...items.map(item => {
                 return {

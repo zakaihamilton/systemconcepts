@@ -226,21 +226,14 @@ export async function handleRequest({ readOnly, req }) {
         return {};
     } else if (req.method === "GET") {
         try {
-            let { path, binary } = headers;
+            let { path, binary, type } = headers;
             path = decodeURIComponent(path);
-            const metadata = await metadataInfo({ path });
-            if (metadata) {
-                const type = metadata.type === "application/x-directory" ? "dir" : "file";
-                if (type === "dir") {
-                    const items = await list({ path, useCount: true });
-                    return items;
-                }
-                else {
-                    return await downloadData({ path, binary });
-                }
+            if (type === "dir") {
+                const items = await list({ path, useCount: true });
+                return items;
             }
             else {
-                return "";
+                return await downloadData({ path, binary });
             }
         }
         catch (err) {

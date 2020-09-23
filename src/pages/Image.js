@@ -1,7 +1,7 @@
 import styles from "./Image.module.scss";
 import { useEffect, useState, useCallback, useContext, useRef } from "react";
 import { getPreviousPath } from "@/util/pages";
-import storage from "@/util/storage";
+import { readBinary } from "@/util/binary";
 import Progress from "@/widgets/Progress";
 import { useSync } from "@/util/sync";
 import { PageSize } from "@/components/Page";
@@ -29,7 +29,7 @@ export default function ImagePage({ name }) {
         busyRef.current = true;
         setLoading(true);
         try {
-            const content = await storage.readFile(path);
+            const content = await readBinary(path);
             setContent(content);
             setLoading(false);
         }

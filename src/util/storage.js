@@ -142,7 +142,7 @@ async function exportFolder(path) {
                     data[name] = result;
                 }
                 else if (!isBinaryFile(path)) {
-                    data[name] = await storageMethods.readFile(path, "utf8");
+                    data[name] = await storageMethods.readFile(path);
                 }
             }
             catch (err) {
@@ -177,7 +177,7 @@ async function importFolder(path, data) {
                 }
             }
             else if (typeof value === "string") {
-                await storageMethods.writeFile(path, value, "utf8");
+                await storageMethods.writeFile(path, value);
             }
         }
     };

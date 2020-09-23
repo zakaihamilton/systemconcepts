@@ -34,7 +34,11 @@ export async function getCollection({ dbName, collectionName, ...params }) {
 
 export async function listCollection({ collectionName, query = {}, fields, ...params }) {
     const collection = await getCollection({ collectionName, ...params });
-    const results = await collection.find(query, fields).toArray();
+    let cursor = collection.find(query, fields);
+    if (fields) {
+        cursor = cursor.project(fields);
+    }
+    const results = await cursor.toArray();
     return results;
 }
 

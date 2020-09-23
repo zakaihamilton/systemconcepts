@@ -1,6 +1,6 @@
 const { login, register, changePassword, resetPassword, sendResetEmail } = require("../../src/util/login");
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     if (req.method === "GET") {
         let error = null;
         let params = {};
