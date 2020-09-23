@@ -30,7 +30,8 @@ export function useStatus() {
                 return {
                     name: item.name,
                     years: [],
-                    progress: 0
+                    progress: 0,
+                    errors: []
                 };
             }));
             s.status = [...status];
@@ -43,6 +44,10 @@ export function useStatus() {
             }
             catch (err) {
                 console.error(err);
+                SessionsStore.update(s => {
+                    s.status[itemIndex].errors.push(err);
+                    s.status = [...s.status];
+                });
             }
             for (const year of years) {
                 SessionsStore.update(s => {
@@ -52,6 +57,10 @@ export function useStatus() {
                 let from_sessions = [];
                 let to_sessions = [];
                 try {
+                    SessionsStore.update(s => {
+                        s.status[itemIndex].progress = -1;
+                        s.status = [...s.status];
+                    });
                     from_sessions = await storage.getListing(year.path);
                     const to_path = "shared/sessions/" + year.path.substring(prefix.length);
                     to_sessions = await storage.getListing(to_path);
@@ -60,6 +69,10 @@ export function useStatus() {
                 }
                 catch (err) {
                     console.error(err);
+                    SessionsStore.update(s => {
+                        s.status[itemIndex].errors.push(err);
+                        s.status = [...s.status];
+                    });
                 }
                 if (!to_sessions || !from_sessions) {
                     continue;
@@ -86,6 +99,10 @@ export function useStatus() {
                     }
                     catch (err) {
                         console.error(err);
+                        SessionsStore.update(s => {
+                            s.status[itemIndex].errors.push(err);
+                            s.status = [...s.status];
+                        });
                     }
                 }
                 SessionsStore.update(s => {

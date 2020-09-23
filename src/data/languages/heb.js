@@ -552,6 +552,10 @@ export default {
         {
             "id": "PROGRESS",
             "value": "התקדמות"
+        },
+        {
+            "id": "ERRORS",
+            "value": "שגיאות"
         }
     ]
 };

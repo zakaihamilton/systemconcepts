@@ -556,6 +556,10 @@ export default {
         {
             "id": "PROGRESS",
             "value": "Progresso"
+        },
+        {
+            "id": "ERRORS",
+            "value": "Erros"
         }
     ]
 };

@@ -55,6 +55,10 @@ export default function Sessions({ }) {
         {
             id: "progress",
             title: translations.PROGRESS
+        },
+        {
+            id: "errorCount",
+            title: translations.ERRORS
         }
     ].filter(Boolean);
 
@@ -66,14 +70,15 @@ export default function Sessions({ }) {
                 label={year}
             />;
         });
-        const showProgress = parseInt(item.progress) !== 100;
+        const variant = item.progress !== -1 ? "static" : undefined;
         return {
             ...item,
             name,
             years: <Row>
                 {tags}
             </Row>,
-            progress: !!item.progress && <Progress variant="static" size={48} style={{ flex: 0, justifyContent: "initial" }} value={item.progress} />
+            progress: !!item.progress && <Progress variant={variant} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? item.progress : undefined} />,
+            errorCount: item.errors.length > 0 && item.errors.length
         }
     };
 
