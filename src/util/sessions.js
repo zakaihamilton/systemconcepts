@@ -71,6 +71,11 @@ export function useSessions() {
                     to_sessions = await storage.getListing(to_path);
                     await storage.createFolders(to_path);
                     await storage.createFolder(to_path);
+                    SessionsStore.update(s => {
+                        s.status[itemIndex].progress = -1;
+                        s.status[itemIndex].count = from_sessions.length;
+                        s.status = [...s.status];
+                    });
                 }
                 catch (err) {
                     console.error(err);
@@ -93,7 +98,6 @@ export function useSessions() {
                     SessionsStore.update(s => {
                         s.status[itemIndex].progress = percentage;
                         s.status[itemIndex].index = sessionIndex;
-                        s.status[itemIndex].count = from_sessions.length;
                         s.status = [...s.status];
                     });
                     try {
