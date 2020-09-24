@@ -11,7 +11,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             method: "GET",
             headers: {
                 query: encodeURIComponent(JSON.stringify({ folder: path })),
-                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 })),
+                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1 }))
             }
         });
         for (const item of items) {
@@ -146,7 +146,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
                 stat: {
                     type: "file",
-                    size: body && body.length,
+                    size: body.length,
                     mtimeMs: new Date().getTime()
                 },
                 body

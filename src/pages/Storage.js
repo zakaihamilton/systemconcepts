@@ -123,6 +123,8 @@ export default function Storage({ path = "" }) {
             name = translations[item.name] || name;
         }
 
+        const size = item.size || 0;
+
         let result = {
             ...item,
             name,
@@ -130,10 +132,10 @@ export default function Storage({ path = "" }) {
             tooltip,
             icon,
             sizeWidget: item.type === "file" && <Tooltip
-                title={item.size + " " + translations.BYTES}
+                title={size + " " + translations.BYTES}
                 arrow>
                 <Typography style={{ display: "inline-block" }}>
-                    {abbreviateSize(item.size)}
+                    {abbreviateSize(size)}
                 </Typography>
             </Tooltip>,
             dateWidget: item.mtimeMs && dateFormatter.format(item.mtimeMs)

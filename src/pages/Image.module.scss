@@ -1,3 +1,10 @@
+.root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
 .img {
     margin: 10px;
     object-fit: contain;

@@ -18,7 +18,7 @@ export async function readBinary(path) {
     return await stringToBinary(buffer);
 }
 
-export async function writeBinary(blob, path) {
+export async function writeBinary(path, blob) {
     const body = await binaryToString(blob);
     await storage.writeFile(path, body);
 }

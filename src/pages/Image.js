@@ -74,8 +74,8 @@ export default function ImagePage({ name }) {
 
     const style = { height: size.height - 22, width: size.width - 22 };
 
-    return <>
-        {!loading && <img className={styles.img} style={style} src={src} />}
+    return <div className={styles.root}>
+        {!loading && <img className={styles.img} src={src} />}
         {loading && <Progress />}
-    </>;
+    </div>;
 }
