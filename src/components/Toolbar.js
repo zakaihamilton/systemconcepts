@@ -88,12 +88,12 @@ export default function Toolbar() {
     return <div className={styles.toolbar}>
         {items.map((item, idx) => {
             return <React.Fragment key={item.id}>
-                {item.divider && !!idx && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
                 <Tooltip arrow title={item.name}>
                     <IconButton onClick={item.onClick}>
                         {item.icon}
                     </IconButton>
                 </Tooltip>
+                {item.divider && idx !== items.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             </React.Fragment>
         })}
         {menuItems.length && <>

@@ -112,6 +112,7 @@ export default function TableWidget(props) {
             id: "export",
             name: translations.EXPORT,
             icon: <GetAppIcon />,
+            divider: true,
             onClick: async () => {
                 let body = null;
                 if (onExport) {

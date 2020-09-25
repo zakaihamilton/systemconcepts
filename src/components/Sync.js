@@ -1,5 +1,5 @@
 import styles from "./Sync.module.scss";
-import { useStyles } from "@/util/styles";
+import { useDeviceType, useStyles } from "@/util/styles";
 import { useSyncFeature } from "@/util/sync";
 import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
@@ -11,6 +11,7 @@ import { formatDuration } from "@/util/string";
 registerToolbar("Sync");
 
 export default function Sync() {
+    const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
     const [updateSync, resetSync, isBusy, error, active, duration] = useSyncFeature();
     const className = useStyles(styles, {
@@ -30,7 +31,7 @@ export default function Sync() {
             name,
             icon: error ? <SyncProblemIcon /> : <SyncIcon className={className} />,
             onClick: updateSync,
-            divider: true
+            divider: isDesktop
         },
         active && resetSync && {
             id: "resetSync",
@@ -42,6 +43,6 @@ export default function Sync() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, updateSync, resetSync, active, duration] });
+    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, updateSync, resetSync, active, duration, isDesktop] });
     return null;
 }

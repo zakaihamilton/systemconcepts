@@ -80,6 +80,7 @@ export function useSyncFeature() {
             return;
         }
         startRef.current = new Date().getTime();
+        setDuration(0);
         setError(null);
         setBusy(true);
         const currentTime = new Date().getTime();
