@@ -518,6 +518,10 @@ export default {
             "value": "סינכרון"
         },
         {
+            "id": "RESET_SYNC",
+            "value": "איפוס סינכרון",
+        },
+        {
             "id": "SYNC_FAILED",
             "value": "סינכרון נכשל"
         },

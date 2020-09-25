@@ -522,6 +522,10 @@ export default {
             "value": "Sync"
         },
         {
+            "id": "RESET_SYNC",
+            "value": "Reset Sync",
+        },
+        {
             "id": "SYNC_FAILED",
             "value": "Sync Failed"
         },

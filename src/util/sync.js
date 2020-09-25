@@ -69,6 +69,11 @@ export function useSyncFeature() {
     const isLoaded = useLocalStorage("SyncStore", SyncStore);
     const { lastUpdated } = SyncStore.useState();
     const { active } = SyncActiveStore.useState();
+    const resetSync = useCallback(async () => {
+        SyncStore.update(s => {
+            s.lastUpdated = 0;
+        });
+    }, []);
     const updateSync = useCallback(async () => {
         if (busyRef.current || !online) {
             return;
@@ -96,6 +101,7 @@ export function useSyncFeature() {
                     if (stat.type === "file") {
                         const buffer = await storage.readFile(path);
                         if (buffer) {
+                            await storage.createFolders(local);
                             await storage.writeFile(local, buffer);
                         }
                     }
@@ -148,5 +154,5 @@ export function useSyncFeature() {
             updateSync();
         }
     }, [online, isLoaded]);
-    return [online && isLoaded && updateSync, isBusy, error, active];
+    return [online && isLoaded && updateSync, resetSync, isBusy, error, active];
 }

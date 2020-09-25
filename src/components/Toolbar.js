@@ -65,35 +65,47 @@ export default function Toolbar() {
 
     const items = [
         ...sections.filter(section => section.used).map(section => section.items).flat(),
-        {
+        isDesktop && {
             id: "fullscreen",
             name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
             icon: fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />,
             onClick: toggleFullscreen,
             divider: true
         }
-    ].filter(Boolean);
+    ].filter(item => item && !item.menu && isDesktop);
 
-    if (isDesktop) {
-        return <div className={styles.toolbar}>
-            {items.map((item, idx) => {
-                return <React.Fragment key={item.id}>
-                    {item.divider && !!idx && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-                    <Tooltip arrow title={item.name}>
-                        <IconButton onClick={item.onClick}>
-                            {item.icon}
-                        </IconButton>
-                    </Tooltip>
-                </React.Fragment>;
-            })}
-        </div>
-    }
+    const menuItems = [
+        ...sections.filter(section => section.used).map(section => section.items).flat(),
+        !isDesktop && {
+            id: "fullscreen",
+            name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
+            icon: fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />,
+            onClick: toggleFullscreen,
+            divider: true
+        }
+    ].filter(item => item && (item.menu || !isDesktop));
 
-    return <Menu items={items}>
-        <Tooltip arrow title={translations.MENU}>
-            <IconButton>
-                <MoreVertIcon />
-            </IconButton>
-        </Tooltip>
-    </Menu>;
+    return <div className={styles.toolbar}>
+        {items.map((item, idx) => {
+            return <React.Fragment key={item.id}>
+                {item.divider && !!idx && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                <Tooltip arrow title={item.name}>
+                    <IconButton onClick={item.onClick}>
+                        {item.icon}
+                    </IconButton>
+                </Tooltip>
+            </React.Fragment>
+        })}
+        {menuItems.length && <>
+            {items.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+            <Menu items={menuItems}>
+                <Tooltip arrow title={translations.MENU}>
+                    <IconButton>
+                        <MoreVertIcon />
+                    </IconButton>
+                </Tooltip>
+            </Menu>
+        </>
+        }
+    </div>
 }

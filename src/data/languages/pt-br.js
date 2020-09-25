@@ -522,6 +522,10 @@ export default {
             "value": "Sincronizar"
         },
         {
+            "id": "RESET_SYNC",
+            "value": "Reiniciar sincronização",
+        },
+        {
             "id": "SYNC_FAILED",
             "value": "Sincronização falhou"
         },
