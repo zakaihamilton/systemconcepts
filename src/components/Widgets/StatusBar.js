@@ -104,16 +104,16 @@ export default function StatusBar({ data, mapper, store }) {
             <Typography className={styles.message}>
                 {messageText}
             </Typography>
-            {mode && <IconButton variant="contained" onClick={selectClick}>
+            {mode && !busy && <IconButton variant="contained" onClick={selectClick}>
                 <Tooltip title={selectTitle} arrow>
                     <SelectAllIcon />
                 </Tooltip>
             </IconButton>}
-            <IconButton variant="contained" onClick={handleClose}>
+            {!busy && <IconButton variant="contained" onClick={handleClose}>
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />
                 </Tooltip>
-            </IconButton>
-        </div>
+            </IconButton>}
+        </div >
     );
 }
