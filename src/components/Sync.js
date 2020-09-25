@@ -6,23 +6,23 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import SyncIcon from '@material-ui/icons/Sync';
 import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { formatDuration } from "@/util/string";
 
 registerToolbar("Sync");
 
 export default function Sync() {
     const translations = useTranslations();
-    const [updateSync, resetSync, isBusy, error, active] = useSyncFeature();
+    const [updateSync, resetSync, isBusy, error, active, duration] = useSyncFeature();
     const className = useStyles(styles, {
         animated: isBusy
     });
 
-    let name = translations.SYNC;
-    if (isBusy) {
-        name = translations.SYNCING;
-    }
-    else if (error) {
-        name = translations.SYNC_FAILED;
-    }
+    const formattedDuration = formatDuration(duration);
+    const name = <span>
+        {isBusy ? translations.SYNCING : translations.SYNC}
+        <br />
+        {!!duration && formattedDuration}
+    </span>;
 
     const menuItems = [
         active && updateSync && {
@@ -40,8 +40,8 @@ export default function Sync() {
             menu: true,
             divider: true
         }
-    ];
+    ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, updateSync, resetSync, active] });
+    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, updateSync, resetSync, active, duration] });
     return null;
 }

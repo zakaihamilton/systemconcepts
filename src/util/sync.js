@@ -9,16 +9,16 @@ import { useOnline } from "@/util/online";
 import { makePath } from "@/util/path";
 
 export const SyncStore = new Store({
-    lastUpdated: 0,
-    counter: 0
+    lastUpdated: 0
 });
 
 export const SyncActiveStore = new Store({
-    active: 0
+    active: 0,
+    counter: 0
 });
 
 export function useSync() {
-    const { counter } = SyncStore.useState(s => {
+    const { counter } = SyncActiveStore.useState(s => {
         return {
             counter: s.counter
         };
@@ -62,7 +62,8 @@ export async function fetchUpdated(endPoint, start, end) {
 }
 
 export function useSyncFeature() {
-    const busyRef = useRef(null);
+    const startRef = useRef(null);
+    const [duration, setDuration] = useState(0);
     const online = useOnline();
     const [isBusy, setBusy] = useState(false);
     const [error, setError] = useState(null);
@@ -75,16 +76,18 @@ export function useSyncFeature() {
         });
     }, []);
     const updateSync = useCallback(async () => {
-        if (busyRef.current || !online) {
+        if (startRef.current || !online) {
             return;
         }
-        busyRef.current = true;
+        startRef.current = new Date().getTime();
         setError(null);
         setBusy(true);
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
         const syncItems = async items => {
             for (const item of items) {
+                const duration = new Date().getTime() - startRef.current;
+                setDuration(parseInt(duration / 1000) * 1000);
                 try {
                     const { deleted, stat, local, path } = item;
                     if (deleted) {
@@ -141,11 +144,13 @@ export function useSyncFeature() {
         }
         SyncStore.update(s => {
             s.lastUpdated = currentTime;
-            if (updateCounter) {
-                s.counter++;
-            }
         });
-        busyRef.current = false;
+        if (updateCounter) {
+            SyncActiveStore.update(s => {
+                s.counter++;
+            });
+        }
+        startRef.current = 0;
         setBusy(false);
     }, [lastUpdated]);
     useInterval(updateSync, 0, [lastUpdated]);
@@ -154,5 +159,6 @@ export function useSyncFeature() {
             updateSync();
         }
     }, [online, isLoaded]);
-    return [online && isLoaded && updateSync, resetSync, isBusy, error, active];
+
+    return [online && isLoaded && updateSync, !isBusy && resetSync, isBusy, error, active, duration];
 }
