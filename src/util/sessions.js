@@ -1,7 +1,7 @@
 import storage from "@/util/storage";
 import { isMediaFile, isImageFile, makePath } from "@/util/path";
 import { Store } from "pullstate";
-import { resizeImage } from "@/util/image";
+import { shrinkImage } from "@/util/image";
 import { readBinary, writeBinary } from "@/util/binary";
 
 export const SessionsStore = new Store({
@@ -105,7 +105,7 @@ export function useSessions() {
                     try {
                         if (isImageFile(path)) {
                             let data = await readBinary(session.path);
-                            data = await resizeImage(data, 256);
+                            data = await shrinkImage(data, 2);
                             await writeBinary(path, data);
                         }
                         if (isMediaFile(path)) {

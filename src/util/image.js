@@ -1,4 +1,4 @@
-export async function thumbnailify(base64Image, targetSize) {
+export async function thumbnailify(base64Image, by) {
     var img = new Image();
 
     return new Promise((resolve, reject) => {
@@ -8,16 +8,15 @@ export async function thumbnailify(base64Image, targetSize) {
                 canvas = document.createElement('canvas'),
                 ctx = canvas.getContext("2d");
 
-            canvas.width = canvas.height = targetSize;
+            canvas.width = width / by;
+            canvas.height = height / by;
 
             ctx.drawImage(
                 img,
-                width > height ? (width - height) / 2 : 0,
-                height > width ? (height - width) / 2 : 0,
-                width > height ? height : width,
-                width > height ? height : width,
-                0, 0,
-                targetSize, targetSize
+                0,
+                0,
+                width / by,
+                height / by
             );
 
             canvas.toBlob(resolve);
@@ -31,11 +30,11 @@ export async function thumbnailify(base64Image, targetSize) {
     });
 }
 
-export function resizeImage(buffer, targetSize) {
+export function shrinkImage(buffer, by) {
     return new Promise((resolve, reject) => {
         var reader = new FileReader();
         reader.addEventListener("load", async () => {
-            const content = await thumbnailify(reader.result, targetSize);
+            const content = await thumbnailify(reader.result, by);
             resolve(content);
         }, false);
         reader.readAsDataURL(buffer);
