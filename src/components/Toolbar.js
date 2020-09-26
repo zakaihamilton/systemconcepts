@@ -52,7 +52,6 @@ export default function Toolbar() {
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
 
-    console.log(sections);
     const sectionItems = sections.filter(section => section.used).map(section => section.items.map((item, idx, list) => {
         item = { ...item };
         if (idx === list.length - 1) {
