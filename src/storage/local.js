@@ -82,12 +82,12 @@ async function deleteFile(path) {
 
 async function readFile(path) {
     path = makePath(path);
-    return await fs.promises.readFile(path);
+    return await fs.promises.readFile(path, "utf8");
 }
 
 async function writeFile(path, body) {
     path = makePath(path);
-    return await fs.promises.writeFile(path, body);
+    return await fs.promises.writeFile(path, body, "utf8");
 }
 
 async function exists(path) {

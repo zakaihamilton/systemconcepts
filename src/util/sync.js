@@ -104,10 +104,8 @@ export function useSyncFeature() {
                     }
                     if (stat.type === "file") {
                         const buffer = await storage.readFile(path);
-                        if (buffer) {
-                            await storage.createFolders(local);
-                            await storage.writeFile(local, buffer);
-                        }
+                        await storage.createFolders(local);
+                        await storage.writeFile(local, buffer);
                     }
                     else if (stat.type === "dir") {
                         await storage.createFolder(local);
