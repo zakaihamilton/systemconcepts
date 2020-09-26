@@ -75,7 +75,7 @@ export default function Toolbar() {
             </React.Fragment>
         })}
         {!!menuItems.length && <>
-            {items.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+            {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             <Menu items={menuItems}>
                 <Tooltip arrow title={translations.MENU}>
                     <IconButton>
