@@ -38,8 +38,7 @@ export default function Sync() {
             name: translations.RESET_SYNC,
             icon: <HighlightOffIcon />,
             onClick: resetSync,
-            menu: true,
-            divider: true
+            menu: true
         }
     ].filter(Boolean);
 

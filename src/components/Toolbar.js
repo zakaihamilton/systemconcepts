@@ -1,15 +1,11 @@
 import { Divider } from "@material-ui/core";
 import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
-import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
-import FullscreenIcon from '@material-ui/icons/Fullscreen';
-import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from "@/widgets/Menu";
 import { useEffect } from "react";
-import { useUnique } from "@/util/hooks";
 import { Store } from "pullstate";
 import styles from "./Toolbar.module.scss";
 
@@ -53,50 +49,33 @@ export function useToolbar({ id, items, depends = [] }) {
 
 export default function Toolbar() {
     const isDesktop = useDeviceType() === "desktop";
-    const { fullscreen } = MainStore.useState();
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
 
-    const toggleFullscreen = () => {
-        MainStore.update(s => {
-            s.fullscreen = !s.fullscreen;
-        });
-    };
-
-    const items = [
-        ...sections.filter(section => section.used).map(section => section.items).flat(),
-        isDesktop && {
-            id: "fullscreen",
-            name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
-            icon: fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />,
-            onClick: toggleFullscreen,
-            divider: true
+    console.log(sections);
+    const sectionItems = sections.filter(section => section.used).map(section => section.items.map((item, idx, list) => {
+        item = { ...item };
+        if (idx === list.length - 1) {
+            item.divider = true;
         }
-    ].filter(item => item && !item.menu && isDesktop);
+        return item;
+    })).flat();
 
-    const menuItems = [
-        ...sections.filter(section => section.used).map(section => section.items).flat(),
-        !isDesktop && {
-            id: "fullscreen",
-            name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
-            icon: fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />,
-            onClick: toggleFullscreen,
-            divider: true
-        }
-    ].filter(item => item && (item.menu || !isDesktop));
+    const toolbarItems = sectionItems.filter(item => item && !item.menu && isDesktop);
+    const menuItems = sectionItems.filter(item => item && (item.menu || !isDesktop));
 
     return <div className={styles.toolbar}>
-        {items.map((item, idx) => {
+        {toolbarItems.map((item, idx) => {
             return <React.Fragment key={item.id}>
                 <Tooltip arrow title={item.name}>
                     <IconButton onClick={item.onClick}>
                         {item.icon}
                     </IconButton>
                 </Tooltip>
-                {item.divider && idx !== items.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                {item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             </React.Fragment>
         })}
-        {menuItems.length && <>
+        {!!menuItems.length && <>
             {items.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             <Menu items={menuItems}>
                 <Tooltip arrow title={translations.MENU}>

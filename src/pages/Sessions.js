@@ -38,8 +38,7 @@ export default function Sessions({ }) {
             id: "sessions",
             name,
             icon: <UpdateIcon className={className} />,
-            onClick: updateSessions,
-            divider: true
+            onClick: updateSessions
         }
     ];
 
