@@ -56,28 +56,25 @@ export function useSessions() {
                     s.status = [...s.status];
                 });
             }
-            for (const year of years) {
+            for (let yearIndex = 0; yearIndex < years.length; yearIndex++) {
+                const year = years[yearIndex];
                 SessionsStore.update(s => {
                     s.status[itemIndex].years.push(year.name);
+                    s.status[itemIndex].count = years.length;
                     s.status = [...s.status];
                 });
-                let from_sessions = [];
-                let to_sessions = [];
+                const percentage = parseInt((yearIndex / years.length) * 100);
+                SessionsStore.update(s => {
+                    s.status[itemIndex].progress = percentage;
+                    s.status[itemIndex].index = yearIndex;
+                    s.status = [...s.status];
+                });
                 try {
-                    SessionsStore.update(s => {
-                        s.status[itemIndex].progress = -1;
-                        s.status = [...s.status];
-                    });
-                    from_sessions = await storage.getListing(year.path);
-                    const to_path = "shared/sessions/" + year.path.substring(prefix.length);
-                    to_sessions = await storage.getListing(to_path);
-                    await storage.createFolders(to_path);
-                    await storage.createFolder(to_path);
-                    SessionsStore.update(s => {
-                        s.status[itemIndex].progress = -1;
-                        s.status[itemIndex].count = from_sessions.length;
-                        s.status = [...s.status];
-                    });
+                    const listing = await storage.getListing(year.path);
+                    const path = "shared/sessions/" + year.path.substring(prefix.length) + "/listing.json";
+                    await storage.createFolders(path);
+                    const listingBody = JSON.stringify(listing, null, 4);
+                    await storage.writeFile(path, listingBody);
                 }
                 catch (err) {
                     console.error(err);
@@ -86,46 +83,12 @@ export function useSessions() {
                         s.status = [...s.status];
                     });
                 }
-                if (!to_sessions || !from_sessions) {
-                    continue;
-                }
-                for (let sessionIndex = 0; sessionIndex < from_sessions.length; sessionIndex++) {
-                    const session = from_sessions[sessionIndex];
-                    const path = "shared/sessions/" + session.path.substring(prefix.length);
-                    const percentage = parseInt((sessionIndex / from_sessions.length) * 100);
-                    const match = to_sessions.find(item => item.name === session.name);
-                    if (match) {
-                        continue;
-                    }
-                    SessionsStore.update(s => {
-                        s.status[itemIndex].progress = percentage;
-                        s.status[itemIndex].index = sessionIndex;
-                        s.status = [...s.status];
-                    });
-                    try {
-                        if (isImageFile(path)) {
-                            let data = await readBinary(session.path);
-                            data = await shrinkImage(data, 2);
-                            await writeBinary(path, data);
-                        }
-                        if (isMediaFile(path)) {
-                            await storage.writeFile(path, "");
-                        }
-                    }
-                    catch (err) {
-                        console.error(err);
-                        SessionsStore.update(s => {
-                            s.status[itemIndex].errors.push(err);
-                            s.status = [...s.status];
-                        });
-                    }
-                }
-                SessionsStore.update(s => {
-                    s.status[itemIndex].index = from_sessions.length;
-                    s.status[itemIndex].progress = 100;
-                    s.status = [...s.status];
-                });
             }
+            SessionsStore.update(s => {
+                s.status[itemIndex].index = years.length;
+                s.status[itemIndex].progress = 100;
+                s.status = [...s.status];
+            });
         }
         SessionsStore.update(s => {
             s.busy = false;

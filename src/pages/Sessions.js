@@ -51,10 +51,6 @@ export default function Sessions({ }) {
             sortable: true
         },
         {
-            id: "years",
-            title: translations.YEARS
-        },
-        {
             id: "progress",
             title: translations.PROGRESS
         },
@@ -69,20 +65,11 @@ export default function Sessions({ }) {
             return null;
         }
         const name = item.name[0].toUpperCase() + item.name.substring(1);
-        const tags = item.years && item.years.map(year => {
-            return <Chip
-                key={year}
-                label={year}
-            />;
-        });
         const variant = item.progress !== -1 ? "static" : undefined;
         const tooltip = item.index + " / " + item.count;
         return {
             ...item,
             name,
-            years: <Row>
-                {tags}
-            </Row>,
             progress: !!item.progress && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? item.progress : undefined} />,
             errorCount: item.errors && item.errors.length > 0 && item.errors.length
         }

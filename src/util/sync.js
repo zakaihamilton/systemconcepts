@@ -88,7 +88,6 @@ export function useSyncFeature() {
         const syncItems = async items => {
             for (const item of items) {
                 const duration = new Date().getTime() - startRef.current;
-                setDuration(parseInt(duration / 1000) * 1000);
                 try {
                     const { deleted, stat, local, path } = item;
                     if (deleted) {
@@ -114,6 +113,7 @@ export function useSyncFeature() {
                 catch (err) {
                     console.error(err);
                 }
+                setDuration(parseInt(duration / 1000) * 1000);
             }
         };
         let updateCounter = false;
