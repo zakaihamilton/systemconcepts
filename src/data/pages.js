@@ -49,6 +49,9 @@ import Diagrams from "@/pages/Diagrams";
 import LabelIcon from '@material-ui/icons/Label';
 import Terms from "@/pages/Terms";
 
+import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
+import Player from "@/pages/Player";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -177,6 +180,13 @@ export default [
         name: "TERMS",
         icon: <LabelIcon />,
         Component: Terms
+    },
+    {
+        sidebar: true,
+        id: "player",
+        name: "Player",
+        icon: <VideoLibraryIcon />,
+        Component: Player
     },
     ...diagrams.map(diagram => {
         let { icon } = diagram;
