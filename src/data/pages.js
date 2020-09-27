@@ -182,7 +182,6 @@ export default [
         Component: Terms
     },
     {
-        sidebar: true,
         id: "player",
         name: "Player",
         icon: <VideoLibraryIcon />,

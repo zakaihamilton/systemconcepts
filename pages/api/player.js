@@ -6,9 +6,9 @@ import { roleAuth } from "@/util/roles";
 export default async (req, res) => {
     try {
         const { headers } = req || {};
-        const { cookie } = headers || {};
+        const { cookie, path } = headers || {};
         const cookies = Cookie.parse(cookie);
-        const { id, hash, group, year, name } = cookies || {};
+        const { id, hash } = cookies || {};
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
@@ -19,8 +19,7 @@ export default async (req, res) => {
         if (roleAuth(user.role, "student")) {
             throw "ACCESS_DENIED";
         }
-        const path = "sessions/" + decodeURIComponent(group) + "/" + year + "/" + decodeURIComponent(name);
-        res.status(200).json({ path: cdnUrl(path) });
+        res.status(200).json({ path: cdnUrl(decodeURIComponent(path)) });
     }
     catch (err) {
         console.error("login error: ", err);

@@ -19,6 +19,13 @@ export function isMediaFile(path) {
     return hasMediaExt;
 }
 
+export function isVideoFile(path) {
+    path = makePath(path);
+    const videoExtensions = [".mp4"];
+    const hasVideoExt = !!videoExtensions.find(ext => path.endsWith(ext));
+    return hasVideoExt;
+}
+
 export function isImageFile(path) {
     path = makePath(path);
     const imageExtensions = [".png", ".jpg", ".jpeg"];

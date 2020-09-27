@@ -1,6 +1,7 @@
-const AWS = require("aws-sdk");
-const { lockMutex } = require("./mutex");
-const fs = require("fs");
+import AWS from "aws-sdk";
+import { lockMutex } from "./mutex";
+import fs from "fs";
+import { makePath } from "@/util/path";
 
 let s3Object = null;
 
@@ -203,11 +204,11 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
 };
 
 export function cdnUrl(path) {
-    let tokens = path.split("/");
+    let tokens = makePath(path).split("/");
     tokens.shift();
     let fileName = tokens.pop();
     path = tokens.join("/");
-    var url = "https://" + process.env.AWS_CDN + "/" + path + "/" + encodeURIComponent(fileName);
+    var url = "https:/" + makePath(process.env.AWS_CDN, path, encodeURIComponent(fileName));
     return url;
 };
 
