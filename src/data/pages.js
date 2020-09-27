@@ -50,7 +50,7 @@ import LabelIcon from '@material-ui/icons/Label';
 import Terms from "@/pages/Terms";
 
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
-import Player from "@/pages/Player";
+import Video from "@/pages/Video";
 
 import diagrams from "@/data/diagrams";
 
@@ -182,10 +182,10 @@ export default [
         Component: Terms
     },
     {
-        id: "player",
-        name: "Player",
+        id: "video",
+        name: "VIDEO",
         icon: <VideoLibraryIcon />,
-        Component: Player
+        Component: Video
     },
     ...diagrams.map(diagram => {
         let { icon } = diagram;

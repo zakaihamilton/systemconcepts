@@ -564,6 +564,10 @@ export default {
         {
             "id": "ERRORS",
             "value": "Erros"
+        },
+        {
+            "id": "VIDEO",
+            "value": "Vídeo"
         }
     ]
 };

@@ -560,6 +560,10 @@ export default {
         {
             "id": "ERRORS",
             "value": "שגיאות"
+        },
+        {
+            "id": "VIDEO",
+            "value": "וידאו"
         }
     ]
 };

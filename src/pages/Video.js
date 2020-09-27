@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import styles from "./Player.module.scss";
 import { getPreviousPath } from "@/util/pages";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import Download from "./Player/Download";
 import Progress from "@/widgets/Progress";
 import { PageSize } from "@/components/Page";
@@ -17,17 +16,10 @@ import {
     VolumeMenuButton
 } from 'video-react';
 
-registerToolbar("Player");
-
-export default function PlayerPage({ name }) {
+export default function VideoPage({ name }) {
     const size = useContext(PageSize);
     const path = (getPreviousPath() + "/" + name).split("/").slice(2).join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
-
-    const menuItems = [
-    ].filter(Boolean);
-
-    useToolbar({ id: "Player", items: menuItems, depends: [] });
 
     const style = { height: size.height, width: size.width };
 

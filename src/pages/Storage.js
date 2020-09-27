@@ -181,7 +181,7 @@ export default function Storage({ path = "" }) {
                 addPath(`image?name=${item.name}`);
             }
             else if (isVideoFile(item.name)) {
-                addPath(`player?name=${item.name}`);
+                addPath(`video?name=${item.name}`);
             }
             else if (isBinaryFile(item.name)) {
                 /* add media player here */
