@@ -98,7 +98,10 @@ export default function Tooolbar({ }) {
                 <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />
                 {!audioPlayer.playing && <Button icon={<PlayArrowIcon />} name={translations.PLAY} onClick={() => audioPlayer.play()} />}
                 {audioPlayer.playing && <Button icon={<PauseIcon />} name={translations.PAUSE} onClick={() => audioPlayer.pause()} />}
-                <Button icon={<StopIcon />} name={translations.STOP} onClick={() => audioPlayer.stop()} />
+                <Button icon={<StopIcon />} name={translations.STOP} onClick={() => {
+                    audioPlayer.stop()
+                    audioPosition.seek(0);
+                }} />
                 <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />
             </div>
         </div>
