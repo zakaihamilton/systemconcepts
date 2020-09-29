@@ -40,7 +40,8 @@ export default function Tooolbar({ }) {
         audioPosition.seek(position);
     };
     const left = audioPosition.position / audioPosition.duration * 100;
-    const progressText = formatDuration(audioPosition.position * 1000) + " / " + formatDuration(audioPosition.duration * 1000);
+    const audioPos = isNaN(audioPosition.position) ? 0 : audioPosition.position;
+    const progressText = formatDuration(audioPos * 1000) + " / " + formatDuration(audioPosition.duration * 1000);
     const progressPosition = `calc(${left}%)`;
     const handlePosEvent = useCallback(e => {
         const { clientX } = e;
