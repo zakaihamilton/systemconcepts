@@ -1,0 +1,71 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+}
+
+.progress {
+    justify-content: center;
+    display: flex;
+}
+
+.progressLine {
+    display: flex;
+    height: 2em;
+    border: 1px solid var(--border);
+    margin-bottom: 0.5em;
+    background-color: var(--main-background);
+    color: var(--text-color);
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.progressPlayed {
+    display: flex;
+    height: 2em;
+    position: absolute;
+    background-color: var(--hover-color);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.progressPosition {
+    display: flex;
+    width: 0.2em;
+    height: 2em;
+    position: absolute;
+    background-color: var(--hover-fill);
+    border: 1px solid var(--hover-color);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.progressText {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    user-select: none;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.buttons * {
+    min-width: 3em;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function getEmValueFromElement(element) {
+export function getEmValueFromElement(element) {
     if (element.parentNode) {
         var parentFontSize = parseFloat(window.getComputedStyle(element.parentNode).fontSize);
         var elementFontSize = parseFloat(window.getComputedStyle(element).fontSize);

@@ -13,7 +13,9 @@ import Theme from "./Theme";
 import { useTranslations } from "@/util/translations";
 import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
+import Audio from "@/widgets/Audio";
 import Fullscreen from "./Fullscreen";
+import { AudioPlayerProvider } from "react-use-audio-player";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -72,16 +74,19 @@ export default function Main() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <Theme>
-            <div className={className}>
-                <Sync />
-                <Fullscreen />
-                {!fullscreen && <AppBar />}
-                <SideBar />
-                <div className={styles.main}>
-                    <Breadcrumbs items={pages} />
-                    <Page page={activePage} />
+            <AudioPlayerProvider>
+                <div className={className}>
+                    <Sync />
+                    <Audio />
+                    <Fullscreen />
+                    {!fullscreen && <AppBar />}
+                    <SideBar />
+                    <div className={styles.main}>
+                        <Breadcrumbs items={pages} />
+                        <Page page={activePage} />
+                    </div>
                 </div>
-            </div>
+            </AudioPlayerProvider>
         </Theme>
     </>;
 }

@@ -1,0 +1,13 @@
+.root {
+    overflow: hidden;
+    display: flex;
+}
+
+.player {
+    display: flex;
+    flex: 1;
+}
+
+.toolbar {
+    display: flex;
+}

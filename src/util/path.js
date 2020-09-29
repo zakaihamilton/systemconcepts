@@ -26,9 +26,22 @@ export function isVideoFile(path) {
     return hasVideoExt;
 }
 
+export function isAudioFile(path) {
+    path = makePath(path);
+    const audioExtensions = [".m4a"];
+    const hasAudioExt = !!audioExtensions.find(ext => path.endsWith(ext));
+    return hasAudioExt;
+}
+
 export function isImageFile(path) {
     path = makePath(path);
     const imageExtensions = [".png", ".jpg", ".jpeg"];
     const hasImageExt = !!imageExtensions.find(ext => path.endsWith(ext));
     return hasImageExt;
+}
+
+export function fileExtension(path) {
+    path = makePath(path);
+    const components = path.split(".");
+    return components[components.length - 1];
 }

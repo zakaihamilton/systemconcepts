@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import styles from "./Player.module.scss";
+import styles from "./Video.module.scss";
 import { getPreviousPath } from "@/util/pages";
 import Download from "./Player/Download";
 import Progress from "@/widgets/Progress";
@@ -32,8 +32,8 @@ export default function VideoPage({ name }) {
                 <ForwardControl seconds={30} order={1.2} />
                 <CurrentTimeDisplay order={4.1} />
                 <TimeDivider order={4.2} />
-                <Download order={7} />
-                <PlaybackRateMenuButton rates={[5, 2, 1, 0.5, 0.1]} order={7.1} />
+                <PlaybackRateMenuButton rates={[5, 2, 1, 0.5, 0.1]} order={7} />
+                <Download order={7.1} />
                 <VolumeMenuButton enabled />
             </ControlBar>
         </Player>}

@@ -568,6 +568,14 @@ export default {
         {
             "id": "VIDEO",
             "value": "Vídeo"
+        },
+        {
+            "id": "AUDIO",
+            "value": "Áudio"
+        },
+        {
+            "id": "AUDIO_PLAYER",
+            "value": "Tocador de Áudio"
         }
     ]
 };

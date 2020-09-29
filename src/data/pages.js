@@ -52,6 +52,9 @@ import Terms from "@/pages/Terms";
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
 import Video from "@/pages/Video";
 
+import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import Audio from "@/pages/Audio";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -186,6 +189,12 @@ export default [
         name: "VIDEO",
         icon: <VideoLibraryIcon />,
         Component: Video
+    },
+    {
+        id: "audio",
+        name: "AUDIO",
+        icon: <AudiotrackIcon />,
+        Component: Audio
     },
     ...diagrams.map(diagram => {
         let { icon } = diagram;

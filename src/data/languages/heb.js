@@ -564,6 +564,14 @@ export default {
         {
             "id": "VIDEO",
             "value": "וידאו"
+        },
+        {
+            "id": "AUDIO",
+            "value": "שמע"
+        },
+        {
+            "id": "AUDIO_PLAYER",
+            "value": "נגן שמע"
         }
     ]
 };

@@ -31,6 +31,7 @@
     "pullstate": "^1.16.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-use-audio-player": "^1.2.2",
     "sass": "^1.26.10",
     "swr": "^0.3.2",
     "video-react": "^0.14.1"

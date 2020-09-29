@@ -568,6 +568,34 @@ export default {
         {
             "id": "VIDEO",
             "value": "Video"
+        },
+        {
+            "id": "AUDIO",
+            "value": "Audio"
+        },
+        {
+            "id": "AUDIO_PLAYER",
+            "value": "Audio Player"
+        },
+        {
+            "id": "REWIND",
+            "value": "Rewind"
+        },
+        {
+            "id": "FAST_FORWARD",
+            "value": "Fast Forward"
+        },
+        {
+            "id": "PLAY",
+            "value": "Play"
+        },
+        {
+            "id": "PAUSE",
+            "value": "Pause"
+        },
+        {
+            "id": "STOP",
+            "value": "Stop"
         }
     ]
 };

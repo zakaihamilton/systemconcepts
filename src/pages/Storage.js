@@ -21,7 +21,7 @@ import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
 import { useDateLocale } from "@/util/locale";
 import { useSync } from "@/util/sync";
-import { isBinaryFile, isImageFile, isVideoFile } from "@/util/path";
+import { isBinaryFile, isImageFile, isVideoFile, isAudioFile } from "@/util/path";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -182,6 +182,9 @@ export default function Storage({ path = "" }) {
             }
             else if (isVideoFile(item.name)) {
                 addPath(`video?name=${item.name}`);
+            }
+            else if (isAudioFile(item.name)) {
+                addPath(`audio?name=${item.name}`);
             }
             else if (isBinaryFile(item.name)) {
                 /* add media player here */
