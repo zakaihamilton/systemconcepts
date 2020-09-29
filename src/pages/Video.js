@@ -13,7 +13,8 @@ import {
     CurrentTimeDisplay,
     TimeDivider,
     PlaybackRateMenuButton,
-    VolumeMenuButton
+    VolumeMenuButton,
+    BigPlayButton
 } from 'video-react';
 
 export default function VideoPage({ name }) {
@@ -25,6 +26,7 @@ export default function VideoPage({ name }) {
 
     return <div className={styles.root} style={style}>
         {!loading && <Player fluid={false} width={style.width} height={style.height} autoPlay={true} playsInline src={data && data.path}>
+            <BigPlayButton position="center" />
             <ControlBar>
                 <ReplayControl seconds={10} order={1.1} />
                 <ForwardControl seconds={30} order={1.2} />
