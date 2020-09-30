@@ -45,3 +45,17 @@ export function fileExtension(path) {
     const components = path.split(".");
     return components[components.length - 1];
 }
+
+export function fileName(path) {
+    path = makePath(path);
+    const last = path.split("/").pop();
+    const components = last.split(".");
+    const extension = components[components.length - 1];
+    return last.slice(0, last.length - extension.length - 1);
+}
+
+export function fileFolder(path) {
+    path = makePath(path);
+    const components = path.split("/");
+    return components.slice(0, -1).join("/");
+}

@@ -20,7 +20,7 @@
 
 .progressLine {
     display: flex;
-    height: 2em;
+    height: 4em;
     border: 1px solid var(--border);
     margin-bottom: 0.5em;
     background-color: var(--main-background);
@@ -32,7 +32,7 @@
 
 .progressPlayed {
     display: flex;
-    height: 2em;
+    height: 4em;
     position: absolute;
     background-color: var(--hover-color);
     opacity: 0.5;
@@ -41,8 +41,8 @@
 
 .progressPosition {
     display: flex;
-    width: 0.2em;
-    height: 2em;
+    width: 0.4em;
+    height: 4em;
     position: absolute;
     background-color: var(--hover-fill);
     border: 1px solid var(--hover-color);

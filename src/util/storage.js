@@ -1,5 +1,5 @@
 import storage from "@/data/storage";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { makePath, isBinaryFile } from "@/util/path";
 
 export async function callMethod(item, url = "", ...params) {
@@ -128,6 +128,75 @@ export function useListing(url, depends = [], options) {
         };
     }, []);
     return [listing, loading, error];
+}
+
+export function useFile(url, depends = [], mapping) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(null);
+    const [error, setError] = useState(null);
+    const active = useRef(true);
+    const write = useCallback(async data => {
+        if (typeof data === "function") {
+            let updatedData = await new Promise((resolve) => {
+                setData(currentData => {
+                    const updatedData = data(currentData);
+                    resolve(updatedData);
+                    return updatedData;
+                });
+            });
+            if (typeof updatedData !== "string") {
+                updatedData = JSON.stringify(updatedData, null, 4);
+            }
+            await storageMethods.createFolders(url);
+            await storageMethods.writeFile(url, updatedData);
+        }
+        else {
+            await storageMethods.createFolders(url);
+            await storageMethods.writeFile(url, data);
+            setData(data);
+        }
+    }, [url]);
+    useEffect(() => {
+        setError(null);
+        if (!url) {
+            return;
+        }
+        setLoading(true);
+        storageMethods.exists(url).then(exists => {
+            if (!exists) {
+                let data = null;
+                if (active.current) {
+                    if (mapping) {
+                        data = mapping(data, url);
+                    }
+                    setData(data);
+                    setLoading(false);
+                }
+                return;
+            }
+            storageMethods.readFile(url).then(data => {
+                if (active.current) {
+                    if (mapping) {
+                        data = mapping(data, url);
+                    }
+                    setData(data);
+                    setLoading(false);
+                }
+            }).catch(err => {
+                setError(err);
+                setLoading(false);
+            });
+        }).catch(err => {
+            setError(err);
+            setLoading(false);
+        });
+    }, [url, ...depends]);
+    useEffect(() => {
+        return () => {
+            active.current = false;
+        };
+    }, []);
+    return [data, loading, error, write];
 }
 
 async function exportFolder(path) {

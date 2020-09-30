@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import styles from "./Toolbar.module.scss";
+import styles from "./Controls.module.scss";
 import { useTranslations } from "@/util/translations";
 import Button from "./Button";
 import FastRewindIcon from '@material-ui/icons/FastRewind';
@@ -9,9 +9,10 @@ import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import { useAudioPlayer, useAudioPosition } from "react-use-audio-player"
 import { formatDuration } from "@/util/string";
-import { getEmValueFromElement } from "@/util/size";
 
-export default function Tooolbar({ }) {
+const skipPoints = 10;
+
+export default function Tooolbar({ setMetadata }) {
     const progressRef = useRef(null);
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
@@ -19,25 +20,34 @@ export default function Tooolbar({ }) {
     const [dragging, setDragging] = useState(false);
     const [pos, setPos] = useState(0);
     const [width, setWidth] = useState(0);
+    const seekPosition = useCallback(position => {
+        setMetadata(data => {
+            if (data) {
+                data.position = parseInt(position);
+            }
+            return data;
+        });
+        audioPosition.seek(position);
+    }, []);
     const rewind = () => {
         let position = audioPosition.position;
-        if (position > 30) {
-            position -= 30;
+        if (position > skipPoints) {
+            position -= skipPoints;
         }
         else {
             position = 0;
         }
-        audioPosition.seek(position);
+        seekPosition(position);
     };
     const fastforward = () => {
         let position = audioPosition.position;
-        if (position > audioPosition.duration - 30) {
+        if (position > audioPosition.duration - skipPoints) {
             position = audioPosition.duration;
         }
         else {
-            position += 30;
+            position += skipPoints;
         }
-        audioPosition.seek(position);
+        seekPosition(position);
     };
     const left = audioPosition.position / audioPosition.duration * 100;
     const audioPos = isNaN(audioPosition.position) ? 0 : audioPosition.position;
@@ -71,7 +81,7 @@ export default function Tooolbar({ }) {
             position = audioPosition.duration;
         }
         if (!isNaN(position)) {
-            audioPosition.seek(position);
+            seekPosition(position);
         }
     }, [audioPosition, pos, width]);
     useEffect(() => {
@@ -79,6 +89,16 @@ export default function Tooolbar({ }) {
             seek(pos);
         }
     }, [pos, dragging]);
+    useEffect(() => {
+        if (audioPosition.position && !isNaN(audioPosition.position)) {
+            setMetadata(data => {
+                if (data) {
+                    data.position = parseInt(audioPosition.position);
+                }
+                return data;
+            });
+        }
+    }, [audioPosition.position]);
     const events = {
         onMouseDown(e) {
             setDragging(true);
@@ -100,7 +120,7 @@ export default function Tooolbar({ }) {
                 {audioPlayer.playing && <Button icon={<PauseIcon />} name={translations.PAUSE} onClick={() => audioPlayer.pause()} />}
                 <Button icon={<StopIcon />} name={translations.STOP} onClick={() => {
                     audioPlayer.stop()
-                    audioPosition.seek(0);
+                    seekPosition(0);
                 }} />
                 <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />
             </div>
