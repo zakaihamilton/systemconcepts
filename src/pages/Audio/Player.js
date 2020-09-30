@@ -155,6 +155,7 @@ export default function Tooolbar({ setMetadata, group, year, name }) {
                 }} />
                 {direction === "ltr" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
                 {direction === "rtl" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
+                <div style={{ flex: 1 }} />
                 <Menu items={rateMenuItems} selected={speed}>
                     <Button icon={<SpeedIcon />} name={translations.SPEED} subHeading={speedName} />
                 </Menu>
