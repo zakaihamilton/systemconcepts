@@ -72,8 +72,9 @@
     min-width: 3em;
 }
 
-.rateAvatar {
+.avatar {
     font-size: 100% !important;
+    background-color: var(--hover-fill) !important;
 }
 
 .metadata {

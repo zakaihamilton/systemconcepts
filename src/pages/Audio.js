@@ -1,5 +1,5 @@
 import { fileExtension, fileFolder, fileName } from "@/util/path";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import styles from "./Audio.module.scss";
 import { getPreviousPath } from "@/util/pages";
 import Progress from "@/widgets/Progress";
@@ -13,9 +13,8 @@ import { useFile } from "@/util/storage";
 export default function AudioPage({ name }) {
     const size = useContext(PageSize);
     const path = (getPreviousPath() + "/" + name).split("/").slice(2).join("/");
-    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
-    const { path: audioPath } = AudioStore.useState();
-    const [loaded, setLoaded] = useState(false);
+    const { path: audioPath, loaded } = AudioStore.useState();
+    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== audioPath);
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
     const folder = fileFolder(path);
@@ -26,22 +25,28 @@ export default function AudioPage({ name }) {
         return data ? JSON.parse(data) : {};
     });
     useEffect(() => {
-        if (data && path !== audioPath) {
+        if (data && data.path && path !== audioPath) {
             const extension = fileExtension(path);
+            AudioStore.update(s => {
+                s.hash = window.location.hash;
+                s.path = path;
+                s.loaded = false;
+            });
             audioPlayer.load({
                 src: data.path,
                 format: extension,
                 autoplay: false,
-                onload: () => setLoaded(true)
-            });
-            AudioStore.update(s => {
-                s.path = path;
+                onload: () => {
+                    AudioStore.update(s => {
+                        s.loaded = true;
+                    });
+                }
             });
         }
     }, [data && data.path]);
 
     useEffect(() => {
-        if (loaded && metadata.position) {
+        if (loaded && metadata && metadata.position) {
             audioPosition.seek(metadata.position);
         }
     }, [loaded]);

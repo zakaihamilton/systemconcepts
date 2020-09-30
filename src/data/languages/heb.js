@@ -624,6 +624,22 @@ export default {
         {
             "id": "YEAR",
             "value": "שנה"
+        },
+        {
+            "id": "VOLUME",
+            "value": "עוצמה"
+        },
+        {
+            "id": "LOW_VOLUME",
+            "value": "נמוכה"
+        },
+        {
+            "id": "MEDIUM_VOLUME",
+            "value": "בינונית"
+        },
+        {
+            "id": "HIGH_VOLUME",
+            "value": "גבוהה"
         }
     ]
 };

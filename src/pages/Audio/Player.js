@@ -14,10 +14,11 @@ import Menu from "@/widgets/Menu";
 import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
 import Field from "./Field";
+import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 
 const skipPoints = 10;
 
-export default function Tooolbar({ setMetadata, group, year, name }) {
+export default function Tooolbar({ setMetadata, group = "", year = "", name = "" }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const audioPlayer = useAudioPlayer({});
@@ -121,18 +122,33 @@ export default function Tooolbar({ setMetadata, group, year, name }) {
     const rateMenuItems = Object.entries(rateItems).map(([name, rate]) => {
         return {
             id: rate,
-            icon: <Avatar className={styles.rateAvatar} variant="square">{rate}</Avatar>,
+            icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
             name: translations[name],
             onClick: () => audioPlayer.player.rate(rate)
         }
     });
+    const volumeItems = {
+        LOW_VOLUME: 0.5,
+        MEDIUM_VOLUME: 0.75,
+        HIGH_VOLUME: 1.0
+    };
+    const volumeMenuItems = Object.entries(volumeItems).map(([name, level]) => {
+        return {
+            id: level,
+            icon: <Avatar className={styles.avatar} variant="square">{level.toFixed(2)}</Avatar>,
+            name: translations[name],
+            onClick: () => audioPlayer.volume(level)
+        }
+    });
     const speed = audioPlayer.player.rate();
+    const volume = audioPlayer.volume();
     const speedName = translations[Object.entries(rateItems).find(([, rate]) => rate === speed)[0]];
+    const volumeName = translations[Object.entries(volumeItems).find(([, level]) => level === volume)[0]];
     let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
     const date = [year, month, day].join("-");
     return <div className={styles.root}>
         <div className={styles.metadata}>
-            <Field name={translations.GROUP} value={group[0].toUpperCase() + group.slice(1)} />
+            <Field name={translations.GROUP} value={group && (group[0].toUpperCase() + group.slice(1))} />
             <Field name={translations.DATE} value={date} />
             <Field name={translations.NAME} value={sessionName} />
         </div>
@@ -158,6 +174,9 @@ export default function Tooolbar({ setMetadata, group, year, name }) {
                 <div style={{ flex: 1 }} />
                 <Menu items={rateMenuItems} selected={speed}>
                     <Button icon={<SpeedIcon />} name={translations.SPEED} subHeading={speedName} />
+                </Menu>
+                <Menu items={volumeMenuItems} selected={volume}>
+                    <Button icon={<VolumeDownIcon />} name={translations.VOLUME} subHeading={volumeName} />
                 </Menu>
             </div>
         </div>

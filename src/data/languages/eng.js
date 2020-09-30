@@ -628,6 +628,22 @@ export default {
         {
             "id": "YEAR",
             "value": "Year"
+        },
+        {
+            "id": "VOLUME",
+            "value": "Volume"
+        },
+        {
+            "id": "LOW_VOLUME",
+            "value": "Low"
+        },
+        {
+            "id": "MEDIUM_VOLUME",
+            "value": "Medium"
+        },
+        {
+            "id": "HIGH_VOLUME",
+            "value": "High"
         }
     ]
 };
