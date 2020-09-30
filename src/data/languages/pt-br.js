@@ -576,6 +576,50 @@ export default {
         {
             "id": "AUDIO_PLAYER",
             "value": "Tocador de Áudio"
+        },
+        {
+            "id": "REWIND",
+            "value": "Rebobinar"
+        },
+        {
+            "id": "FAST_FORWARD",
+            "value": "Avanço rápido"
+        },
+        {
+            "id": "PLAY",
+            "value": "Tocar"
+        },
+        {
+            "id": "PAUSE",
+            "value": "Pausar"
+        },
+        {
+            "id": "STOP",
+            "value": "Parar"
+        },
+        {
+            "id": "SPEED",
+            "value": "Rapidez"
+        },
+        {
+            "id": "SPEED_SLOW",
+            "value": "Mais Lenta"
+        },
+        {
+            "id": "SPEED_SLOWER",
+            "value": "Lenta"
+        },
+        {
+            "id": "SPEED_NORMAL",
+            "value": "Normal"
+        },
+        {
+            "id": "SPEED_FASTER",
+            "value": "Rápida"
+        },
+        {
+            "id": "SPEED_FAST",
+            "value": "Mais Rápida"
         }
     ]
 };

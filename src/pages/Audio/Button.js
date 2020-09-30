@@ -1,6 +1,6 @@
 import styles from "./Button.module.scss";
 
-export default function Button({ id, name, icon, onClick, ...props }) {
+export default function Button({ id, name, icon, subHeading, onClick, ...props }) {
     return <button className={styles.root} onClick={onClick} {...props}>
         <div className={styles.icon}>
             {icon}
@@ -8,5 +8,8 @@ export default function Button({ id, name, icon, onClick, ...props }) {
         <div className={styles.label}>
             {name}
         </div>
+        {subHeading && <div className={styles.subHeading}>
+            {subHeading}
+        </div>}
     </button>
 }

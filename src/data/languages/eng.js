@@ -596,6 +596,30 @@ export default {
         {
             "id": "STOP",
             "value": "Stop"
+        },
+        {
+            "id": "SPEED",
+            "value": "Speed"
+        },
+        {
+            "id": "SPEED_SLOW",
+            "value": "Slow"
+        },
+        {
+            "id": "SPEED_SLOWER",
+            "value": "Slower"
+        },
+        {
+            "id": "SPEED_NORMAL",
+            "value": "Normal"
+        },
+        {
+            "id": "SPEED_FASTER",
+            "value": "Faster"
+        },
+        {
+            "id": "SPEED_FAST",
+            "value": "Fast"
         }
     ]
 };

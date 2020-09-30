@@ -572,6 +572,50 @@ export default {
         {
             "id": "AUDIO_PLAYER",
             "value": "נגן שמע"
+        },
+        {
+            "id": "REWIND",
+            "value": "אחורה"
+        },
+        {
+            "id": "FAST_FORWARD",
+            "value": "קדימה"
+        },
+        {
+            "id": "PLAY",
+            "value": "נגן"
+        },
+        {
+            "id": "PAUSE",
+            "value": "השהה"
+        },
+        {
+            "id": "STOP",
+            "value": "עצור"
+        },
+        {
+            "id": "SPEED",
+            "value": "מהירות"
+        },
+        {
+            "id": "SPEED_SLOW",
+            "value": "הכי לאט"
+        },
+        {
+            "id": "SPEED_SLOWER",
+            "value": "לאט"
+        },
+        {
+            "id": "SPEED_NORMAL",
+            "value": "רגיל"
+        },
+        {
+            "id": "SPEED_FASTER",
+            "value": "מהר"
+        },
+        {
+            "id": "SPEED_FAST",
+            "value": "הכי מהר"
         }
     ]
 };

@@ -28,6 +28,7 @@
     overflow: hidden;
     position: relative;
     width: 100%;
+    direction: ltr;
 }
 
 .progressPlayed {
@@ -68,4 +69,8 @@
 
 .buttons * {
     min-width: 3em;
+}
+
+.rateAvatar {
+    font-size: 100% !important;
 }
