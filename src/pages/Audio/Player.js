@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import styles from "./Controls.module.scss";
+import styles from "./Player.module.scss";
 import { useTranslations } from "@/util/translations";
 import Button from "./Button";
 import FastRewindIcon from '@material-ui/icons/FastRewind';
@@ -13,10 +13,11 @@ import { formatDuration } from "@/util/string";
 import Menu from "@/widgets/Menu";
 import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
+import Field from "./Field";
 
 const skipPoints = 10;
 
-export default function Tooolbar({ setMetadata }) {
+export default function Tooolbar({ setMetadata, group, year, name }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const audioPlayer = useAudioPlayer({});
@@ -127,7 +128,14 @@ export default function Tooolbar({ setMetadata }) {
     });
     const speed = audioPlayer.player.rate();
     const speedName = translations[Object.entries(rateItems).find(([, rate]) => rate === speed)[0]];
+    let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
+    const date = [year, month, day].join("-");
     return <div className={styles.root}>
+        <div className={styles.metadata}>
+            <Field name={translations.GROUP} value={group[0].toUpperCase() + group.slice(1)} />
+            <Field name={translations.DATE} value={date} />
+            <Field name={translations.NAME} value={sessionName} />
+        </div>
         <div className={styles.toolbar}>
             <div className={styles.progress}>
                 <div className={styles.progressLine} ref={progressRef} {...events}>

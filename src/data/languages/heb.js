@@ -616,6 +616,14 @@ export default {
         {
             "id": "SPEED_FAST",
             "value": "הכי מהר"
+        },
+        {
+            "id": "GROUP",
+            "value": "קבוצה"
+        },
+        {
+            "id": "YEAR",
+            "value": "שנה"
         }
     ]
 };

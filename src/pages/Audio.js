@@ -7,7 +7,7 @@ import { PageSize } from "@/components/Page";
 import { useFetchJSON } from "@/util/fetch";
 import { useAudioPlayer, useAudioPosition } from "react-use-audio-player";
 import { AudioStore } from "@/widgets/Audio";
-import Controls from "./Audio/Controls";
+import Player from "./Audio/Player";
 import { useFile } from "@/util/storage";
 
 export default function AudioPage({ name }) {
@@ -18,7 +18,10 @@ export default function AudioPage({ name }) {
     const [loaded, setLoaded] = useState(false);
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
-    const metadataPath = "local/personal/metadata/" + fileFolder(path) + "/" + fileName(path) + ".json";
+    const folder = fileFolder(path);
+    const [, , group, year] = folder.split("/");
+    const sessionName = fileName(path);
+    const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
     const [metadata, , , setMetadata] = useFile(metadataPath, [], data => {
         return data ? JSON.parse(data) : {};
     });
@@ -47,7 +50,11 @@ export default function AudioPage({ name }) {
 
     return <div className={styles.root} style={style}>
         {!loading && audioPlayer.ready && <div className={styles.player}>
-            <Controls setMetadata={setMetadata} />
+            <Player
+                setMetadata={setMetadata}
+                group={group}
+                year={year}
+                name={sessionName} />
         </div>}
         {(loading || !audioPlayer.ready) && <Progress />}
     </div>;

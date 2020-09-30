@@ -1,0 +1,14 @@
+.root {
+    display: flex;
+    margin: 0.5em;
+}
+
+.name {
+    font-weight: bold;
+    min-width: 5em;
+}
+
+.value {
+    margin-right: 1em;
+    margin-left: 1em;
+}

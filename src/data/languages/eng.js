@@ -620,6 +620,14 @@ export default {
         {
             "id": "SPEED_FAST",
             "value": "Fast"
+        },
+        {
+            "id": "GROUP",
+            "value": "Group"
+        },
+        {
+            "id": "YEAR",
+            "value": "Year"
         }
     ]
 };
