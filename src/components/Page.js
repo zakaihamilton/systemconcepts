@@ -7,8 +7,8 @@ export const PageSize = React.createContext();
 
 export default function Page({ page }) {
     const ref = useRef();
-    const { fullscreen } = MainStore.useState();
-    const size = useResize(ref, [fullscreen]);
+    const { fullscreen, showSideBar } = MainStore.useState();
+    const size = useResize(ref, [fullscreen, showSideBar]);
     const { Component } = page;
     return <div className={styles.pageContainer}>
         <main ref={ref} className={styles.page}>
