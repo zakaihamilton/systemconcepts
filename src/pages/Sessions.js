@@ -42,7 +42,7 @@ export default function Sessions({ }) {
         }
     ];
 
-    useToolbar({ id: "Sessions", items: menuItems, depends: [syncEnabled, busy, parseInt(duration / 1000)] });
+    useToolbar({ id: "Sessions", items: menuItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
 
     const columns = [
         {

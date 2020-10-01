@@ -32,6 +32,6 @@ export default function AudioWidget() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Audio", items: menuItems, depends: [hash] });
+    useToolbar({ id: "Audio", items: menuItems, depends: [hash, translations] });
     return null;
 }

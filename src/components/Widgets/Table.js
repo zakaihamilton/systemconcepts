@@ -125,7 +125,7 @@ export default function TableWidget(props) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Table", items: menuItems, depends: [data, name] });
+    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations] });
 
     useEffect(() => {
         setOffset(0);

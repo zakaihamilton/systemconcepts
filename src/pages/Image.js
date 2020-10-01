@@ -70,7 +70,7 @@ export default function ImagePage({ name }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Image", items: menuItems, depends: [loading] });
+    useToolbar({ id: "Image", items: menuItems, depends: [loading, translations] });
 
     const style = { height: size.height - 22, width: size.width - 22 };
 

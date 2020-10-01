@@ -60,7 +60,7 @@ export default function Term({ id, onClick, ...props }) {
             onClick: toggleShowConcepts
         }
     ];
-    useToolbar({ id: "Term", items: toolbarItems, depends: [showConcepts] });
+    useToolbar({ id: "Term", items: toolbarItems, depends: [showConcepts, translations] });
     useLocalStorage("TermStore", TermStore);
     const language = useLanguage();
     const terms = useTerms();

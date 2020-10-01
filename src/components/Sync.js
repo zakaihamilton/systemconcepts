@@ -42,6 +42,6 @@ export default function Sync() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, updateSync, resetSync, active, duration, isDesktop] });
+    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, translations, updateSync, resetSync, active, duration, isDesktop] });
     return null;
 }

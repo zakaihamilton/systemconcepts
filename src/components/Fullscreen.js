@@ -25,6 +25,6 @@ export default function Fullscreen() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Fullscreen", items: menuItems, depends: [fullscreen] });
+    useToolbar({ id: "Fullscreen", items: menuItems, depends: [translations, fullscreen] });
     return null;
 }
