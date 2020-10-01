@@ -44,7 +44,6 @@ export function useSessions() {
                     for (const file of files) {
                         const id = fileName(file.name);
                         const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
-                        console.log("name", name, "date", date);
                         if (isAudioFile(file.name)) {
                             let item = sessions.find(session => session.id === id);
                             if (!item) {
@@ -84,7 +83,6 @@ export function useSessions() {
         catch (err) {
             console.error(err);
         }
-        console.log("sessions", sessions);
         SessionsStore.update(s => {
             s.sessions = sessions;
             s.busy = false;

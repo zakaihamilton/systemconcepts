@@ -644,6 +644,10 @@ export default {
         {
             "id": "HIGH_VOLUME",
             "value": "גבוהה"
+        },
+        {
+            "id": "MEDIA",
+            "value": "מדיה"
         }
     ]
 };

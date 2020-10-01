@@ -8,6 +8,11 @@ import { useOnline } from "@/util/online";
 import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
 import { formatDuration } from "@/util/string";
+import MovieIcon from '@material-ui/icons/Movie';
+import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import { IconButton } from "@material-ui/core";
+import Tooltip from "@material-ui/core/Tooltip";
+import { addPath } from "@/util/pages";
 
 registerToolbar("Sessions");
 
@@ -48,6 +53,11 @@ export default function Sessions() {
             sortable: true
         },
         {
+            id: "mediaWidget",
+            title: translations.MEDIA,
+            sortable: "media"
+        },
+        {
             id: "date",
             title: translations.DATE,
             sortable: true
@@ -63,13 +73,50 @@ export default function Sessions() {
         if (!item) {
             return null;
         }
+        const media = [];
+        if (item.audio) {
+            media.push({
+                name: translations.AUDIO,
+                icon: <AudiotrackIcon />,
+                link: `audio?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.audio.name}`
+            });
+        }
+        if (item.video) {
+            media.push({
+                name: translations.VIDEO,
+                icon: <MovieIcon />,
+                link: `video?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.video.name}`
+            });
+        }
         return {
             ...item,
-            group: item.group[0].toUpperCase() + item.group.slice(1)
-        }
+            group: item.group[0].toUpperCase() + item.group.slice(1),
+            media: media.map(element => element.id).join(" "),
+            mediaWidget: (<div className={styles.mediaLinks}>
+                {media.map(element => {
+                    const gotoLink = () => {
+                        addPath(element.link);
+                    };
+                    return <IconButton key={element.name} onClick={gotoLink}>
+                        <Tooltip arrow title={element.name}>
+                            {element.icon}
+                        </Tooltip>
+                    </IconButton>
+                })}
+            </div>)
+        };
     };
 
     return <>
-        <Table rowHeight="5.5em" name="sessions" sortColumn="date" sortDirection="asc" columns={columns} data={sessions} mapper={mapper} />
+        <Table
+            rowHeight="5.5em"
+            name="sessions"
+            sortColumn="date"
+            sortDirection="asc"
+            columns={columns}
+            data={sessions}
+            mapper={mapper}
+            depends={[translations]}
+        />
     </>;
 }

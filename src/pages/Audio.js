@@ -9,16 +9,18 @@ import { useAudioPlayer, useAudioPosition } from "react-use-audio-player";
 import { AudioStore } from "@/widgets/Audio";
 import Player from "./Audio/Player";
 import { useFile } from "@/util/storage";
+import { makePath } from "@/util/path";
 
-export default function AudioPage({ name }) {
+export default function AudioPage({ prefix = "", group = "", year = "", name }) {
     const size = useContext(PageSize);
-    const path = (useParentPath() + "/" + name).split("/").slice(2).join("/");
+    let components = [useParentPath(), prefix, group, year, name].filter(Boolean).join("/");
+    const path = makePath(components).split("/").slice(2).join("/");
     const { path: audioPath, loaded } = AudioStore.useState();
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== audioPath);
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
     const folder = fileFolder(path);
-    const [, , group, year] = folder.split("/");
+    const [, , groupName, yearName] = folder.split("/");
     const sessionName = fileName(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
     const [metadata, , , setMetadata] = useFile(metadataPath, [], data => {
@@ -57,8 +59,8 @@ export default function AudioPage({ name }) {
         {!loading && audioPlayer.ready && <div className={styles.player}>
             <Player
                 setMetadata={setMetadata}
-                group={group}
-                year={year}
+                group={groupName}
+                year={yearName}
                 name={sessionName} />
         </div>}
         {(loading || !audioPlayer.ready) && <Progress />}
