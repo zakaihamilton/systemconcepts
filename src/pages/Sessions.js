@@ -1,12 +1,13 @@
+import Table from "@/widgets/Table";
+import { useTranslations } from "@/util/translations";
 import { useSessions } from "@/util/sessions";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { useTranslations } from "@/util/translations";
 import UpdateIcon from "@material-ui/icons/Update";
-import styles from "./Sessions.module.scss";
+import styles from "./UpdateSessions.module.scss";
 import { useOnline } from "@/util/online";
-import { formatDuration } from "@/util/string";
 import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
+import { formatDuration } from "@/util/string";
 
 registerToolbar("Sessions");
 
@@ -40,5 +41,35 @@ export default function Sessions() {
 
     useToolbar({ id: "Sessions", items: menuItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
 
-    return null;
+    const columns = [
+        {
+            id: "name",
+            title: translations.NAME,
+            sortable: true
+        },
+        {
+            id: "date",
+            title: translations.DATE,
+            sortable: true
+        },
+        {
+            id: "group",
+            title: translations.GROUP,
+            sortable: true
+        }
+    ].filter(Boolean);
+
+    const mapper = item => {
+        if (!item) {
+            return null;
+        }
+        return {
+            ...item,
+            group: item.group[0].toUpperCase() + item.group.slice(1)
+        }
+    };
+
+    return <>
+        <Table rowHeight="5.5em" name="sessions" sortColumn="date" sortDirection="asc" columns={columns} data={sessions} mapper={mapper} />
+    </>;
 }

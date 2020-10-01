@@ -17,7 +17,7 @@ export function useSessions() {
             s.sessions = [];
             s.start = new Date().getTime()
         });
-        const sessions = {};
+        const sessions = [];
         const getListing = async path => {
             const localUrl = "local/" + path + "/listing.json";
             const exists = storage.exists(localUrl);
@@ -42,21 +42,26 @@ export function useSessions() {
                     const files = await getListing(makePath(basePath, group.name, year.name));
                     files.sort((a, b) => a.name.localeCompare(b.name));
                     for (const file of files) {
-                        const name = fileName(file.name);
+                        const id = fileName(file.name);
+                        const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
+                        console.log("name", name, "date", date);
                         if (isAudioFile(file.name)) {
-                            let item = sessions[name];
+                            let item = sessions.find(session => session.id === id);
                             if (!item) {
-                                item = sessions[name] = {};
+                                item = { id, name, date, year: year.name, group: group.name };
+                                sessions.push(item);
                             }
                             item.audio = file;
                         }
                         else if (isVideoFile(file.name)) {
-                            const isResolution = file.name.match(/(.*)_(\d+x\d+)\.mp4/);
+                            const isResolution = id.match(/(.*)_(\d+x\d+)/);
                             if (isResolution) {
-                                const [, name, resolution] = isResolution;
-                                let item = sessions[name];
+                                const [, id, resolution] = isResolution;
+                                const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
+                                let item = sessions.find(session => session.id === id);
                                 if (!item) {
-                                    item = sessions[name] = {};
+                                    item = { id, name, date, year: year.name, group: group.name };
+                                    sessions.push(item);
                                 }
                                 if (!item.resolutions) {
                                     item.resolutions = {};
@@ -64,9 +69,10 @@ export function useSessions() {
                                 item.resolutions[resolution] = file;
                             }
                             else {
-                                let item = sessions[name];
+                                let item = sessions.find(session => session.id === id);
                                 if (!item) {
-                                    item = sessions[name] = {};
+                                    item = { id, name, date, year: year.name, group: group.name };
+                                    sessions.push(item);
                                 }
                                 item.video = file;
                             }
@@ -78,6 +84,7 @@ export function useSessions() {
         catch (err) {
             console.error(err);
         }
+        console.log("sessions", sessions);
         SessionsStore.update(s => {
             s.sessions = sessions;
             s.busy = false;

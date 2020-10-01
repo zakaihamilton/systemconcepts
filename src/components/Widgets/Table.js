@@ -63,6 +63,7 @@ export default function TableWidget(props) {
         reset = [],
         resetOnDataChange = true,
         sortColumn,
+        sortDirection = "desc",
         data,
         mapper,
         filter,
@@ -75,7 +76,7 @@ export default function TableWidget(props) {
         ...otherProps
     } = props;
     const translations = useTranslations();
-    const [order, setOrder] = React.useState("desc");
+    const [order, setOrder] = React.useState(sortDirection);
     const [offset, setOffset] = React.useState(0);
     columns = columns || [];
     const firstColumn = columns[0];
@@ -157,7 +158,15 @@ export default function TableWidget(props) {
             if (!search) {
                 return true;
             }
-            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => item.searchable || item.sortable || item.id);
+            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
+                if (typeof item.searchable === "string") {
+                    return item.searchable;
+                }
+                if (typeof item.sortable === "string") {
+                    return item.sortable;
+                }
+                return item.id;
+            });
             for (const key of keys) {
                 if (typeof item[key] === "string") {
                     const match = item[key].toLowerCase().includes(search.toLowerCase());
