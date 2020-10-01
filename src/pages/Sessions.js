@@ -7,8 +7,6 @@ import styles from "./Sessions.module.scss";
 import { useOnline } from "@/util/online";
 import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
-import Chip from "@material-ui/core/Chip";
-import Row from "@/widgets/Row";
 import { formatDuration } from "@/util/string";
 import Progress from "@/widgets/Progress";
 
