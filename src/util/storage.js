@@ -130,6 +130,48 @@ export function useListing(url, depends = [], options) {
     return [listing, loading, error];
 }
 
+export function useCacheFile(url, depends = [], mapping) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(null);
+    const [error, setError] = useState(null);
+    const active = useRef(true);
+    useEffect(() => {
+        setError(null);
+        if (!url) {
+            return;
+        }
+        setLoading(true);
+        const localUrl = "local/" + url;
+        storageMethods.exists(localUrl).then(async exists => {
+            let data = null;
+            if (exists) {
+                data = await storageMethods.readFile(localUrl);
+            }
+            else {
+                data = await storageMethods.readFile(url);
+                await storageMethods.createFolders(localUrl);
+                await storageMethods.writeFile(localUrl, data);
+            }
+            if (active.current) {
+                if (mapping) {
+                    data = mapping(data, url);
+                }
+                setData(data);
+                setLoading(false);
+            }
+        }).catch(err => {
+            setError(err);
+            setLoading(false);
+        });
+    }, [url, ...depends]);
+    useEffect(() => {
+        return () => {
+            active.current = false;
+        };
+    }, []);
+    return [data, loading, error];
+}
+
 export function useFile(url, depends = [], mapping) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(null);

@@ -23,7 +23,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import Storage, { getStorageSection } from "@/pages/Storage";
 
 import UpdateIcon from "@material-ui/icons/Update";
-import Sessions from "@/pages/Sessions";
+import UpdateSessions from "@/pages/UpdateSessions";
 
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import Reset from "@/pages/Settings/Reset";
@@ -49,11 +49,14 @@ import Diagrams from "@/pages/Diagrams";
 import LabelIcon from '@material-ui/icons/Label';
 import Terms from "@/pages/Terms";
 
-import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
+import MovieIcon from '@material-ui/icons/Movie';
 import Video from "@/pages/Video";
 
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import Audio from "@/pages/Audio";
+
+import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
+import Sessions from "@/pages/sessions";
 
 import diagrams from "@/data/diagrams";
 
@@ -113,7 +116,7 @@ export default [
         id: "update_sessions",
         name: "UPDATE_SESSIONS",
         icon: <UpdateIcon />,
-        Component: Sessions,
+        Component: UpdateSessions,
         sidebar: true,
         category: "tools"
     },
@@ -187,7 +190,7 @@ export default [
     {
         id: "video",
         name: "VIDEO",
-        icon: <VideoLibraryIcon />,
+        icon: <MovieIcon />,
         Component: Video
     },
     {
@@ -195,6 +198,13 @@ export default [
         name: "AUDIO",
         icon: <AudiotrackIcon />,
         Component: Audio
+    },
+    {
+        sidebar: true,
+        id: "sessions",
+        name: "SESSIONS",
+        icon: <VideoLibraryIcon />,
+        Component: Sessions
     },
     ...diagrams.map(diagram => {
         let { icon } = diagram;
