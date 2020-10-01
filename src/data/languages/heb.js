@@ -550,6 +550,10 @@ export default {
             "value": "שיעורים"
         },
         {
+            "id": "UPDATE_SESSIONS",
+            "value": "עדכון שיעורים"
+        },
+        {
             "id": "YEARS",
             "value": "שנים"
         },

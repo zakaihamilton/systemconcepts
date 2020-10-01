@@ -110,8 +110,8 @@ export default [
         category: "tools"
     },
     {
-        id: "sessions",
-        name: "SESSIONS",
+        id: "update_sessions",
+        name: "UPDATE_SESSIONS",
         icon: <UpdateIcon />,
         Component: Sessions,
         sidebar: true,

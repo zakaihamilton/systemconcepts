@@ -551,7 +551,11 @@ export default {
         },
         {
             "id": "SESSIONS",
-            "value": "Sessions"
+            "value": "Sessões"
+        },
+        {
+            "id": "UPDATE_SESSIONS",
+            "value": "Sessões de atualização"
         },
         {
             "id": "YEARS",

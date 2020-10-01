@@ -554,6 +554,10 @@ export default {
             "value": "Sessions"
         },
         {
+            "id": "UPDATE_SESSIONS",
+            "value": "Update Sessions"
+        },
+        {
             "id": "YEARS",
             "value": "Years"
         },

@@ -19,7 +19,7 @@
 }
 
 .root.sidebar.list:not(.fullscreen) {
-    grid-template: 4em auto / 15em auto;
+    grid-template: 4em auto / 20em auto;
 
     @include media("<=tablet") {
         grid-template: 4em auto / auto;
