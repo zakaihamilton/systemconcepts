@@ -1,21 +1,18 @@
 import React, { useEffect } from "react";
-import Head from "next/head"
 import AppBar from "./AppBar";
 import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@/util/store";
 import { useStyles, useDeviceType } from "@/util/styles";
-import { usePagesFromHash } from "@/util/pages";
-import Breadcrumbs from "./Breadcrumbs";
 import Page from "./Page";
 import Theme from "./Theme";
-import { useTranslations } from "@/util/translations";
 import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
 import Audio from "@/widgets/Audio";
 import Fullscreen from "./Fullscreen";
 import { AudioPlayerProvider } from "react-use-audio-player";
+import Header from "./Header";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -32,25 +29,23 @@ export const MainStoreDefaults = {
 export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
-    const { APP_NAME } = useTranslations();
     const language = useLanguage();
     const isPhone = useDeviceType() === "phone";
     useLocalStorage("MainStore", MainStore);
     const { direction, showSideBar, menuViewList, hash, fullscreen } = MainStore.useState();
-    const pages = usePagesFromHash(hash);
-    const activePage = pages[pages.length - 1];
 
     useEffect(() => {
         MainStore.update(s => {
             s.hash = window.location.hash;
         });
         window.onhashchange = function () {
-            setTimeout(() => {
-                MainStore.update(s => {
-                    s.hash = window.location.hash;
-                });
-            }, 0);
+            MainStore.update(s => {
+                s.hash = window.location.hash;
+            });
         };
+        return () => {
+            window.onhashchange = null;
+        }
     }, []);
 
     useEffect(() => {
@@ -69,10 +64,7 @@ export default function Main() {
     });
 
     return <>
-        <Head>
-            <title>{APP_NAME}</title>
-            <link rel="icon" href="/favicon.ico" />
-        </Head>
+        <Header />
         <Theme>
             <AudioPlayerProvider>
                 <div className={className}>
@@ -82,8 +74,7 @@ export default function Main() {
                     {!fullscreen && <AppBar />}
                     <SideBar />
                     <div className={styles.main}>
-                        <Breadcrumbs items={pages} />
-                        <Page page={activePage} />
+                        <Page />
                     </div>
                 </div>
             </AudioPlayerProvider>

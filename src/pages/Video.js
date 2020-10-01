@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import styles from "./Video.module.scss";
-import { getPreviousPath } from "@/util/pages";
+import { useParentPath } from "@/util/pages";
 import Download from "./Player/Download";
 import Progress from "@/widgets/Progress";
 import { PageSize } from "@/components/Page";
@@ -19,7 +19,7 @@ import {
 
 export default function VideoPage({ name }) {
     const size = useContext(PageSize);
-    const path = (getPreviousPath() + "/" + name).split("/").slice(2).join("/");
+    const path = (useParentPath() + "/" + name).split("/").slice(2).join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
 
     const style = { height: size.height, width: size.width };

@@ -1,7 +1,7 @@
 import { fileExtension, fileFolder, fileName } from "@/util/path";
 import { useContext, useEffect } from "react";
 import styles from "./Audio.module.scss";
-import { getPreviousPath } from "@/util/pages";
+import { useParentPath } from "@/util/pages";
 import Progress from "@/widgets/Progress";
 import { PageSize } from "@/components/Page";
 import { useFetchJSON } from "@/util/fetch";
@@ -12,7 +12,7 @@ import { useFile } from "@/util/storage";
 
 export default function AudioPage({ name }) {
     const size = useContext(PageSize);
-    const path = (getPreviousPath() + "/" + name).split("/").slice(2).join("/");
+    const path = (useParentPath() + "/" + name).split("/").slice(2).join("/");
     const { path: audioPath, loaded } = AudioStore.useState();
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== audioPath);
     const audioPlayer = useAudioPlayer({});

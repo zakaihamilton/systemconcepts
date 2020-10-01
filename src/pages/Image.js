@@ -1,6 +1,6 @@
 import styles from "./Image.module.scss";
 import { useEffect, useState, useCallback, useContext, useRef } from "react";
-import { getPreviousPath } from "@/util/pages";
+import { useParentPath } from "@/util/pages";
 import { readBinary } from "@/util/binary";
 import Progress from "@/widgets/Progress";
 import { useSync } from "@/util/sync";
@@ -16,7 +16,7 @@ export default function ImagePage({ name }) {
     const translations = useTranslations();
     const size = useContext(PageSize);
     const [syncCounter] = useSync();
-    const path = (getPreviousPath() + "/" + name).split("/").slice(1).join("/");
+    const path = (useParentPath() + "/" + name).split("/").slice(1).join("/");
     const busyRef = useRef(false);
     const [loading, setLoading] = useState(false);
     const [content, setContent] = useState(null);

@@ -13,20 +13,16 @@ export function useResize(ref, depends = []) {
     const [size, setSize] = useState({ width: 0, height: 0 });
 
     const handleResize = () => {
-        setTimeout(() => {
-            requestAnimationFrame(() => {
-                if (!ref.current) {
-                    return;
-                }
-                const { clientWidth, clientHeight } = ref.current.parentElement;
-                const emPixels = getEmValueFromElement(ref.current);
-                setSize({ width: clientWidth, height: clientHeight, emPixels });
-            });
-        }, 0);
+        if (!ref.current) {
+            return;
+        }
+        const { clientWidth, clientHeight } = ref.current.parentElement;
+        const emPixels = getEmValueFromElement(ref.current);
+        setSize({ width: clientWidth, height: clientHeight, emPixels });
     };
 
     useEffect(() => {
-        const handler = () => handleResize(true);
+        const handler = () => handleResize();
         ref && ref.current && handleResize();
         ref && ref.current && window.addEventListener("resize", handler);
 

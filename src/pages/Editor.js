@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useStoreState } from "@/util/store";
 import EditorWidget from "@/widgets/Editor";
 import { Store } from "pullstate";
-import { getPreviousPath } from "@/util/pages";
+import { useParentPath } from "@/util/pages";
 import storage from "@/util/storage";
 import Progress from "@/widgets/Progress";
 import { useSync } from "@/util/sync";
@@ -17,7 +17,7 @@ export const EditorStore = new Store(EditorStoreDefaults);
 export default function Editor({ name }) {
     const [syncCounter] = useSync();
     const timerRef = useRef();
-    const path = (getPreviousPath() + "/" + name).split("/").slice(1).join("/");
+    const path = (useParentPath() + "/" + name).split("/").slice(1).join("/");
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
     const [loading, setLoading] = useState(false);
     const readFile = useCallback(() => {

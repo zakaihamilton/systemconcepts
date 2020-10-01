@@ -2,13 +2,22 @@ import pageList from "@/data/pages";
 import { useTranslations } from "@/util/translations";
 import { isRegEx } from "@/util/string";
 import { useLanguage } from "@/util/language";
+import { MainStore } from "@/components/Main";
 
 export function addPath(...path) {
-    window.location.hash += "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+    const hash = window.location.hash + "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+    MainStore.update(s => {
+        s.hash = hash;
+    });
+    window.location.hash = hash;
 }
 
 export function setPath(...path) {
-    window.location.hash = encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+    const hash = encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+    MainStore.update(s => {
+        s.hash = hash;
+    });
+    window.location.hash = hash;
 }
 
 export function goBackPage() {
@@ -16,14 +25,15 @@ export function goBackPage() {
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
     }
-    window.location.hash = encodeURI(decodeURI(hash).split("/").filter(Boolean).slice(0, -1).join("/"));
+    hash = encodeURI(decodeURI(hash).split("/").filter(Boolean).slice(0, -1).join("/"));
+    MainStore.update(s => {
+        s.hash = hash;
+    });
+    window.location.hash = hash;
 }
 
-export function getPreviousPath() {
-    let hash = window.location.hash;
-    if (hash.startsWith("#")) {
-        hash = hash.substring(1);
-    }
+export function useParentPath() {
+    const { hash } = MainStore.useState();
     const items = decodeURI(hash).split("/").filter(Boolean);
     const previousItem = items[items.length - 2] || "";
     return decodeURIComponent(previousItem);

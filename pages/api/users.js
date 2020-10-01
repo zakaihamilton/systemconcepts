@@ -14,7 +14,7 @@ export default async (req, res) => {
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
-        user = await login({ id, hash });
+        const user = await login({ id, hash });
         if (!roleAuth(user && user.role, "admin")) {
             throw "ACCESS_DENIED";
         }
