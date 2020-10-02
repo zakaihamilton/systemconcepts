@@ -6,27 +6,31 @@ import { useCallback, useEffect } from "react";
 export const SessionsStore = new Store({
     busy: false,
     sessions: [],
-    start: 0
+    start: 0,
+    counter: 0
 });
 
 export function useSessions() {
     const { busy, sessions, start } = SessionsStore.useState();
-    const updateSessions = useCallback(async () => {
+    const updateSessions = useCallback(async (fetch) => {
         SessionsStore.update(s => {
             s.busy = true;
-            s.sessions = [];
             s.start = new Date().getTime()
         });
         const sessions = [];
         const getListing = async path => {
+            SessionsStore.update(s => {
+                s.counter++;
+            });
+            const sharedUrl = path + "/listing.json";
             const localUrl = "local/" + path + "/listing.json";
-            const exists = storage.exists(localUrl);
+            const exists = !fetch && storage.exists(localUrl);
             let data = null;
             if (exists) {
                 data = await storage.readFile(localUrl);
             }
             else {
-                data = await storage.readFile(url);
+                data = await storage.readFile(sharedUrl);
                 await storage.createFolders(localUrl);
                 await storage.writeFile(localUrl, data);
             }
@@ -90,7 +94,7 @@ export function useSessions() {
     }, []);
     useEffect(() => {
         if (!busy && (!sessions || !sessions.length)) {
-            updateSessions();
+            updateSessions(false);
         }
     }, []);
     return [sessions, busy, start, !busy && updateSessions];

@@ -43,7 +43,7 @@ export default function Sessions() {
             id: "sessions",
             name,
             icon: <UpdateIcon className={className} />,
-            onClick: () => updateSessions && updateSessions()
+            onClick: () => updateSessions && updateSessions(true)
         }
     ].filter(Boolean);
 
