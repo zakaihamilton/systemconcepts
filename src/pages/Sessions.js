@@ -114,8 +114,8 @@ export default function Sessions() {
                     const gotoLink = () => {
                         addPath(element.link);
                     };
-                    return <div className={styles.mediaLink}>
-                        <IconButton key={element.name} onClick={gotoLink}>
+                    return <div key={element.name} className={styles.mediaLink}>
+                        <IconButton onClick={gotoLink}>
                             <Tooltip arrow title={element.name}>
                                 {element.icon}
                             </Tooltip>
