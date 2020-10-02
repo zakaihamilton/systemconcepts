@@ -3,7 +3,7 @@ import { useTranslations } from "@/util/translations";
 import { useSessions } from "@/util/sessions";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import UpdateIcon from "@material-ui/icons/Update";
-import styles from "./UpdateSessions.module.scss";
+import styles from "./Sessions.module.scss";
 import { useOnline } from "@/util/online";
 import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
@@ -114,11 +114,13 @@ export default function Sessions() {
                     const gotoLink = () => {
                         addPath(element.link);
                     };
-                    return <IconButton key={element.name} onClick={gotoLink}>
-                        <Tooltip arrow title={element.name}>
-                            {element.icon}
-                        </Tooltip>
-                    </IconButton>
+                    return <div className={styles.mediaLink}>
+                        <IconButton key={element.name} onClick={gotoLink}>
+                            <Tooltip arrow title={element.name}>
+                                {element.icon}
+                            </Tooltip>
+                        </IconButton>
+                    </div>
                 })}
             </div>)
         };
