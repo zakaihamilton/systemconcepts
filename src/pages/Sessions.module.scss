@@ -6,3 +6,17 @@
     margin-left: 0.5em;
     margin-right: 0.5em;
 }
+
+.animated {
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
