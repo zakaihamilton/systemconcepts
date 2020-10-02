@@ -17,8 +17,8 @@ export default async (req, res) => {
         if (!user) {
             throw "ACCESS_DENIED";
         }
-        if (roleAuth(user.role, "admin")) {
-            readOnly = false;
+        if (!roleAuth(user.role, "admin")) {
+            throw "ACCESS_DENIED";
         }
         const result = await handleRequest({ req, readOnly });
         if (typeof result === "object") {
