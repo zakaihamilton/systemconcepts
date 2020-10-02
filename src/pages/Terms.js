@@ -82,6 +82,6 @@ export default function Terms() {
             rowHeight="5.5em"
             sortColumn="sortId"
             reset={[typeFilter, phaseFilter]}
-            depends={[typeFilter, phaseFilter]} />
+            depends={[typeFilter, phaseFilter, translations]} />
     </>;
 }

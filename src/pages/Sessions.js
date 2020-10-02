@@ -13,6 +13,7 @@ import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import { IconButton } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
+import { useState } from "react";
 
 registerToolbar("Sessions");
 
@@ -22,6 +23,8 @@ export default function Sessions() {
     const [sessions, busy, start, updateSessions] = useSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
+    const [groupFilter, setGroupFilter] = useState("");
+    const [dateFilter, setDateFilter] = useState("");
 
     const duration = start && new Date().getTime() - start;
     const formattedDuration = formatDuration(duration);
@@ -60,12 +63,26 @@ export default function Sessions() {
         {
             id: "date",
             title: translations.DATE,
-            sortable: true
+            sortable: true,
+            onSelectable: item => typeof item.date !== "undefined" && !dateFilter,
+            tags: [dateFilter && {
+                id: dateFilter,
+                name: dateFilter,
+                onDelete: () => setDateFilter("")
+            }],
+            onClick: !dateFilter && (item => setDateFilter(typeof item.date !== "undefined" && item.date))
         },
         {
             id: "group",
             title: translations.GROUP,
-            sortable: true
+            sortable: true,
+            onSelectable: item => typeof item.group !== "undefined" && !groupFilter,
+            tags: [groupFilter && {
+                id: groupFilter,
+                name: groupFilter,
+                onDelete: () => setGroupFilter("")
+            }],
+            onClick: !groupFilter && (item => setGroupFilter(typeof item.group !== "undefined" && item.group))
         }
     ].filter(Boolean);
 
@@ -107,6 +124,13 @@ export default function Sessions() {
         };
     };
 
+    const filter = item => {
+        let { date, group } = item;
+        let show = !dateFilter || dateFilter === date;
+        show = show && (!groupFilter || groupFilter === (item.group[0].toUpperCase() + item.group.slice(1)));
+        return show;
+    };
+
     return <>
         <Table
             rowHeight="5.5em"
@@ -116,7 +140,9 @@ export default function Sessions() {
             columns={columns}
             data={sessions}
             mapper={mapper}
-            depends={[translations]}
+            filter={filter}
+            reset={[groupFilter, dateFilter]}
+            depends={[groupFilter, dateFilter, translations]}
         />
     </>;
 }
