@@ -652,6 +652,10 @@ export default {
         {
             "id": "MEDIA",
             "value": "Mídia"
+        },
+        {
+            "id": "DOWNLOAD",
+            "value": "Baixar"
         }
     ]
 };

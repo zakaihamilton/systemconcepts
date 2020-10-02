@@ -1,4 +1,4 @@
-import { fileExtension, fileFolder, fileName } from "@/util/path";
+import { fileExtension, fileFolder, fileTitle, fileName } from "@/util/path";
 import { useContext, useEffect } from "react";
 import styles from "./Audio.module.scss";
 import { useParentPath } from "@/util/pages";
@@ -10,18 +10,20 @@ import { AudioStore } from "@/widgets/Audio";
 import Player from "./Audio/Player";
 import { useFile } from "@/util/storage";
 import { makePath } from "@/util/path";
+import Download from "@/widgets/Download";
+import { exportFile } from "@/util/importExport";
 
 export default function AudioPage({ prefix = "", group = "", year = "", name }) {
     const size = useContext(PageSize);
     let components = [useParentPath(), prefix, group, year, name].filter(Boolean).join("/");
     const path = makePath(components).split("/").slice(2).join("/");
-    const { path: audioPath, loaded } = AudioStore.useState();
+    const { path: audioPath, loaded, url } = AudioStore.useState();
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== audioPath);
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
     const folder = fileFolder(path);
     const [, , groupName, yearName] = folder.split("/");
-    const sessionName = fileName(path);
+    const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
     const [metadata, , , setMetadata] = useFile(metadataPath, [], data => {
         return data ? JSON.parse(data) : {};
@@ -33,6 +35,7 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
                 s.hash = window.location.hash;
                 s.path = path;
                 s.loaded = false;
+                s.url = data.path;
             });
             audioPlayer.load({
                 src: data.path,
@@ -54,8 +57,12 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
     }, [loaded]);
 
     const style = { height: size.height, width: size.width };
+    const downloadFile = () => {
+        exportFile(url, fileName(path));
+    }
 
     return <div className={styles.root} style={style}>
+        <Download loading={loading} onClick={downloadFile} />
         {!loading && audioPlayer.ready && <div className={styles.player}>
             <Player
                 setMetadata={setMetadata}

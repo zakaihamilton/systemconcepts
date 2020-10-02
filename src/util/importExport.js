@@ -16,6 +16,17 @@ export function exportData(data, filename, type) {
     }
 }
 
+export function exportFile(url, filename) {
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+        document.body.removeChild(a);
+    }, 0);
+}
+
 export function importData() {
     var input = document.createElement("input");
     input.type = "file";

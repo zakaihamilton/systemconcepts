@@ -1,5 +1,5 @@
 import storage from "@/util/storage";
-import { makePath, fileName, isAudioFile, isVideoFile } from "@/util/path";
+import { makePath, fileTitle, isAudioFile, isVideoFile } from "@/util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect } from "react";
 
@@ -42,7 +42,7 @@ export function useSessions() {
                     const files = await getListing(makePath(basePath, group.name, year.name));
                     files.sort((a, b) => a.name.localeCompare(b.name));
                     for (const file of files) {
-                        const id = fileName(file.name);
+                        const id = fileTitle(file.name);
                         const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                         if (isAudioFile(file.name)) {
                             let item = sessions.find(session => session.id === id);

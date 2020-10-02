@@ -46,7 +46,7 @@ export function fileExtension(path) {
     return components[components.length - 1];
 }
 
-export function fileName(path) {
+export function fileTitle(path) {
     path = makePath(path);
     const last = path.split("/").pop();
     const components = last.split(".");
@@ -54,6 +54,11 @@ export function fileName(path) {
     return last.slice(0, last.length - extension.length - 1);
 }
 
+export function fileName(path) {
+    path = makePath(path);
+    const last = path.split("/").pop();
+    return last;
+}
 export function fileFolder(path) {
     path = makePath(path);
     const components = path.split("/");

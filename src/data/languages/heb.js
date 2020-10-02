@@ -648,6 +648,10 @@ export default {
         {
             "id": "MEDIA",
             "value": "מדיה"
+        },
+        {
+            "id": "DOWNLOAD",
+            "value": "הורדה"
         }
     ]
 };

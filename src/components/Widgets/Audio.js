@@ -6,7 +6,8 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 export const AudioStore = new Store({
     path: "",
     hash: "",
-    loaded: false
+    loaded: false,
+    url: ""
 });
 
 registerToolbar("Audio");
