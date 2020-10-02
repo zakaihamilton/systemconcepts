@@ -56,7 +56,7 @@ import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import Audio from "@/pages/Audio";
 
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
-import Sessions from "@/pages/sessions";
+import Sessions from "@/pages/Sessions";
 
 import diagrams from "@/data/diagrams";
 
