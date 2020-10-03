@@ -53,7 +53,6 @@ export async function fetchUpdated(endPoint, start, end) {
             Object.assign(item, stat);
             item.id = item.path = makePath(endPoint, itemPath);
             item.name = name;
-            item.folder = makePath(endPoint, folder);
             item.local = makePath("local", endPoint, itemPath);
             listing.push(item);
         }

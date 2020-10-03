@@ -26,7 +26,6 @@ async function getListing(path, options = {}) {
             Object.assign(item, itemStat);
             item.id = item.path = makePath("local", itemPath);
             item.name = name;
-            item.folder = makePath("local", path);
             listing.push(item);
         }
         catch (err) {

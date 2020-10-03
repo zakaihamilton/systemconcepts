@@ -39,7 +39,6 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             Object.assign(item, stat);
             item.id = item.path = makePath(deviceId, itemPath);
             item.name = name;
-            item.folder = makePath(deviceId, path);
             listing.push(item);
         }
         return listing;

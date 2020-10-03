@@ -12,7 +12,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
 import Tooltip from '@material-ui/core/Tooltip';
-import { isBinaryFile, makePath } from "@/util/path";
+import { isBinaryFile, makePath, fileFolder } from "@/util/path";
 
 export default function ItemMenuWidget({ item, readOnly }) {
     const [ref, isHover] = useHover();
@@ -39,7 +39,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                             return false;
                         }
                         name = name.replace(/\//, " ");
-                        const target = makePath(item.folder, name);
+                        const target = makePath(fileFolder(item), name);
                         if (makePath(item.path) === makePath(target)) {
                             return false;
                         }
@@ -47,7 +47,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     };
                     s.onDone = async name => {
                         name = name.replace(/\//, " ");
-                        const target = makePath(item.folder, name);
+                        const target = makePath(fileFolder(item), name);
                         try {
                             if (await storage.exists(target)) {
                                 throw translations.ALREADY_EXISTS.replace("${name}", name);
@@ -80,7 +80,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.severity = "info";
                     s.onDone = () => {
                         StorageStore.update(s => {
-                            s.destination = item.folder;
+                            s.destination = fileFolder(item);
                         });
                         return true;
                     }
@@ -98,7 +98,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.severity = "info";
                     s.onDone = () => {
                         StorageStore.update(s => {
-                            s.destination = item.folder;
+                            s.destination = fileFolder(item);
                         });
                         return true;
                     }

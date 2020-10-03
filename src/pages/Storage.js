@@ -68,7 +68,6 @@ export default function Storage({ path = "" }) {
     const translations = useTranslations();
     const { item: editedItem, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
     const [data, loading, error] = useListing(path, [counter, syncCounter]);
-    const isPhone = useDeviceType() === "phone";
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
     const dateFormatter = useDateLocale({
@@ -92,12 +91,12 @@ export default function Storage({ path = "" }) {
             title: translations.NAME,
             sortable: "name"
         },
-        !isPhone && {
+        {
             id: "sizeWidget",
             title: translations.SIZE,
             sortable: "size"
         },
-        !isPhone && {
+        {
             id: "dateWidget",
             title: translations.DATE,
             sortable: "mtimeMs"

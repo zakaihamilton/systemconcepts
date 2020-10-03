@@ -38,7 +38,6 @@ async function getListing(path, options = {}) {
         Object.assign(item, stat);
         item.id = item.path = makePath("aws", itemPath);
         item.name = name;
-        item.folder = makePath("aws", path);
         listing.push(item);
     }
     return listing;
