@@ -1,0 +1,33 @@
+.cell {
+    font-size: 16px;
+    border: 1px solid transparent;
+    padding: 1em !important;
+}
+
+.cell.head {
+    background: var(--main-background) !important;
+}
+
+.cell.defaultAlign {
+    [dir=ltr] & {
+        text-align: left;
+    }
+
+    [dir=rtl] & {
+        text-align: right;
+    }
+}
+
+.selectable {
+    cursor: pointer !important;
+}
+
+.selectable:hover {
+    background: var(--info-background) !important;
+    border: 1px solid var(--border-highlight);
+}
+
+.row.hover {
+    cursor: pointer;
+    user-select: none;
+}

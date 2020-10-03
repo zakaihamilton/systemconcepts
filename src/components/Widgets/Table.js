@@ -1,28 +1,22 @@
 import React, { useContext, useEffect, useMemo } from "react";
-import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import TableSortLabel from "@material-ui/core/TableSortLabel";
 import { PageSize } from "../Page";
 import styles from "./Table.module.scss";
 import { useTranslations } from "@/util/translations";
 import { importData, exportData } from "@/util/importExport";
 import Row from "./Table/Row";
 import Navigator from "./Table/Navigator";
-import Label from "@/widgets/Label";
 import { useSearch } from "@/components/AppBar/Search";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import Chip from '@material-ui/core/Chip';
-import CancelIcon from '@material-ui/icons/Cancel';
-import Tooltip from '@material-ui/core/Tooltip';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
 import Progress from "@/widgets/Progress";
 import Error from "./Table/Error";
+import Column from "./Table/Column";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -183,48 +177,12 @@ export default function TableWidget(props) {
     }, [search, data, order, orderBy, ...depends]);
 
     const tableColumns = (columns || []).map((item, idx) => {
-        const { id, title, icon, dir, align, sortable, tags, columnProps = {}, labelProps = {} } = item;
-        const sortId = typeof sortable === "string" ? sortable : id;
-        const label = <Label icon={icon} name={title} />;
-        const tagItems = (tags || []).filter(Boolean).map(tag => {
-            return <Chip
-                key={tag.id}
-                color="primary"
-                className={styles.tag}
-                icon={tag.icon}
-                label={tag.name}
-                deleteIcon={
-                    <Tooltip arrow title={translations.CLOSE}>
-                        <CancelIcon />
-                    </Tooltip>
-                }
-                onDelete={tag.onDelete} />;
-        });
-        return <TableCell
-            key={id || idx}
-            align={align}
-            classes={{ root: clsx(styles.cell, !align && styles.defaultAlign, styles.head) }}
-            dir={dir}
-            padding="none"
-            sortDirection={orderBy === sortId ? order : false}
-            {...columnProps}>
-            <div className={styles.headerRow}>
-                {sortable && <TableSortLabel
-                    className={styles.sortLabel}
-                    active={orderBy === sortId}
-                    direction={orderBy === sortId ? order : "desc"}
-                    onClick={createSortHandler(sortId)}
-                    {...labelProps}
-                    dir={dir}
-                >
-                    {label}
-                </TableSortLabel>}
-                {!sortable && label}
-                {!!tagItems.length && <div className={styles.tags}>
-                    {tagItems}
-                </div>}
-            </div>
-        </TableCell>;
+        return <Column
+            key={item.id || idx}
+            item={item}
+            order={order}
+            orderBy={orderBy}
+            createSortHandler={createSortHandler} />
     });
 
     const isEmpty = !items || !items.length;

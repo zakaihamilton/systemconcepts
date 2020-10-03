@@ -1,6 +1,6 @@
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
-import styles from "../Table.module.scss";
+import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@/util/styles";
 
