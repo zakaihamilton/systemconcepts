@@ -4,37 +4,24 @@ import { Store } from "pullstate";
 import { useCallback, useEffect } from "react";
 
 export const SessionsStore = new Store({
-    busy: false,
-    sessions: [],
-    start: 0,
-    counter: 0
+    sessions: []
 });
 
-export function useSessions() {
-    const { busy, sessions, start } = SessionsStore.useState();
+export function useSessions(depends = []) {
+    const { sessions } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
-        SessionsStore.update(s => {
-            s.busy = true;
-            s.start = new Date().getTime()
-        });
         const sessions = [];
         const getListing = async path => {
             SessionsStore.update(s => {
                 s.counter++;
             });
-            const sharedUrl = path + "/listing.json";
             const localUrl = "local/" + path + "/listing.json";
             const exists = !fetch && storage.exists(localUrl);
-            let data = null;
+            let data = [];
             if (exists) {
                 data = await storage.readFile(localUrl);
+                data = JSON.parse(data);
             }
-            else {
-                data = await storage.readFile(sharedUrl);
-                await storage.createFolders(localUrl);
-                await storage.writeFile(localUrl, data);
-            }
-            data = JSON.parse(data);
             return data;
         }
         try {
@@ -89,13 +76,10 @@ export function useSessions() {
         }
         SessionsStore.update(s => {
             s.sessions = sessions;
-            s.busy = false;
         });
     }, []);
     useEffect(() => {
-        if (!busy && (!sessions || !sessions.length)) {
-            updateSessions(false);
-        }
-    }, []);
-    return [sessions, busy, start, !busy && updateSessions];
+        updateSessions();
+    }, [depends]);
+    return sessions;
 }

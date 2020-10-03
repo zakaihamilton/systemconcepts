@@ -1,53 +1,21 @@
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
 import { useSessions } from "@/util/sessions";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import UpdateIcon from "@material-ui/icons/Update";
 import styles from "./Sessions.module.scss";
-import { useOnline } from "@/util/online";
-import Cookies from 'js-cookie';
-import { useStyles } from "@/util/styles";
-import { formatDuration } from "@/util/string";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import { IconButton } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
 import { useState } from "react";
-
-registerToolbar("Sessions");
+import { useSync } from "@/util/sync";
 
 export default function Sessions() {
     const translations = useTranslations();
-    const online = useOnline();
-    const [sessions, busy, start, updateSessions] = useSessions();
-    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-    const syncEnabled = online && isSignedIn;
+    const [syncCounter] = useSync();
+    const sessions = useSessions([syncCounter]);
     const [groupFilter, setGroupFilter] = useState("");
     const [dateFilter, setDateFilter] = useState("");
-
-    const duration = start && new Date().getTime() - start;
-    const formattedDuration = formatDuration(duration);
-    const name = <span>
-        {busy ? translations.SYNCING : translations.SYNC}
-        <br />
-        {!!duration && formattedDuration}
-    </span>;
-
-    const className = useStyles(styles, {
-        animated: busy
-    });
-
-    const menuItems = [
-        syncEnabled && {
-            id: "sessions",
-            name,
-            icon: <UpdateIcon className={className} />,
-            onClick: () => updateSessions && updateSessions(true)
-        }
-    ].filter(Boolean);
-
-    useToolbar({ id: "Sessions", items: menuItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
 
     const columns = [
         {
@@ -129,7 +97,7 @@ export default function Sessions() {
     const filter = item => {
         let { date, group } = item;
         let show = !dateFilter || dateFilter === date;
-        show = show && (!groupFilter || groupFilter === (item.group[0].toUpperCase() + item.group.slice(1)));
+        show = show && (!groupFilter || groupFilter === (group[0].toUpperCase() + group.slice(1)));
         return show;
     };
 
