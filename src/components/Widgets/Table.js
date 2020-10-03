@@ -17,6 +17,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import Progress from "@/widgets/Progress";
 import Error from "./Table/Error";
 import Column from "./Table/Column";
+import { useDeviceType } from "@/util/styles";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -69,6 +70,7 @@ export default function TableWidget(props) {
         error,
         ...otherProps
     } = props;
+    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [order, setOrder] = React.useState(sortDirection);
     const [offset, setOffset] = React.useState(0);
@@ -78,6 +80,12 @@ export default function TableWidget(props) {
     const [orderBy, setOrderBy] = React.useState(defaultSort);
     const size = useContext(PageSize);
     const { search } = useSearch();
+
+    if (isPhone) {
+        hideColumns = true;
+        columns = [...columns.filter((_, idx) => !idx)];
+        marginBottom = "4em";
+    }
 
     const menuItems = [
         data && name && onImport && {
@@ -176,7 +184,7 @@ export default function TableWidget(props) {
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
-    const tableColumns = (columns || []).map((item, idx) => {
+    const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
         return <Column
             key={item.id || idx}
             item={item}
