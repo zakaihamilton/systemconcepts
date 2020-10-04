@@ -1,5 +1,5 @@
 import { fileExtension, fileFolder, fileTitle, fileName } from "@/util/path";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import styles from "./Audio.module.scss";
 import { useParentPath } from "@/util/pages";
 import Progress from "@/widgets/Progress";
@@ -21,6 +21,8 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== audioPath);
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
+    const audioPositionRef = useRef(audioPosition);
+    audioPositionRef.current = audioPosition;
     const folder = fileFolder(path);
     const [, , groupName, yearName] = folder.split("/");
     const sessionName = fileTitle(path);
@@ -34,9 +36,6 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
             AudioStore.update(s => {
                 s.hash = window.location.hash;
                 s.path = path;
-                if (s.loaded && audioPlayer.player) {
-                    audioPlayer.player.unload();
-                }
                 s.loaded = false;
                 s.url = data.path;
             });
@@ -56,8 +55,8 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
     }, [data && data.path]);
 
     useEffect(() => {
-        if (loaded && metadata && metadata.position) {
-            audioPosition.seek(metadata.position);
+        if (loaded && metadata && metadata.position && audioPositionRef.current) {
+            audioPositionRef.current.seek(metadata.position);
         }
     }, [loaded]);
 
