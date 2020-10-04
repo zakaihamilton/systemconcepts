@@ -39,7 +39,7 @@ export default function VideoPage({ prefix = "", group = "", year = "", name }) 
                 <ForwardControl seconds={30} order={1.2} />
                 <CurrentTimeDisplay order={4.1} />
                 <TimeDivider order={4.2} />
-                <PlaybackRateMenuButton rates={[5, 2, 1, 0.5, 0.1]} order={7} />
+                <PlaybackRateMenuButton rates={[5, 2, 1.25, 1, 0.75, 0.5, 0.1]} order={7} />
                 <VolumeMenuButton enabled />
             </ControlBar>
         </Player>}
