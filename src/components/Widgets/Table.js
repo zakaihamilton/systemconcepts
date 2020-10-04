@@ -216,7 +216,7 @@ export default function TableWidget(props) {
     const endIdx = startIdx + itemsPerPage;
     const pageIndex = parseInt(startIdx / itemsPerPage);
 
-    const setPageIndex = (index) => {
+    const setPageIndex = index => {
         setOffset(index * itemsPerPage);
     };
 

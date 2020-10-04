@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
 import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
+import TextField from '@material-ui/core/TextField';
 
 export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
     const deviceType = useDeviceType();
@@ -33,6 +34,17 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
         setPageIndex && setPageIndex(pageCount - 1);
     };
 
+    const handlePageChange = event => {
+        let pageIndex = event.target.value - 1;
+        if (pageIndex < 0) {
+            pageIndex = 0;
+        }
+        else if (pageIndex > pageCount - 1) {
+            pageIndex = pageCount - 1;
+        }
+        setPageIndex && setPageIndex(pageIndex);
+    };
+
     if (pageCount <= 1) {
         return null;
     }
@@ -52,9 +64,7 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
             </Tooltip>
         </IconButton>
         <Tooltip title={translations.PAGE_INDEX} placement={tooltipPlacement} arrow>
-            <Typography className={styles.pageIndex}>
-                {pageIndex + 1}
-            </Typography>
+            <TextField className={styles.pageIndex} onChange={handlePageChange} value={pageIndex + 1} />
         </Tooltip>
         <Typography className={clsx(styles.pageSeparator, isVertical && styles.vertical)}>
             {isVertical ? "|" : "/"}
