@@ -7,7 +7,7 @@ export const SessionsStore = new Store({
     sessions: []
 });
 
-export function useSessions(depends = []) {
+export function useSessions(depends = [], cond = true) {
     const { sessions } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
@@ -79,7 +79,9 @@ export function useSessions(depends = []) {
         });
     }, []);
     useEffect(() => {
-        updateSessions();
+        if (cond) {
+            updateSessions();
+        }
     }, [depends]);
     return sessions;
 }

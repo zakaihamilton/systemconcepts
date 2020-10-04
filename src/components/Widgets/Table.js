@@ -18,6 +18,7 @@ import Progress from "@/widgets/Progress";
 import Error from "./Table/Error";
 import Column from "./Table/Column";
 import { useDeviceType } from "@/util/styles";
+import clsx from "clsx";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -228,7 +229,7 @@ export default function TableWidget(props) {
     });
 
     return (<>
-        <TableContainer className={className} style={style} {...otherProps}>
+        <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
             {!loading && !error && <Table stickyHeader style={style}>
                 {!hideColumns && <TableHead>
                     <TableRow>

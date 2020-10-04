@@ -14,13 +14,15 @@ export const SyncStore = new Store({
 
 export const SyncActiveStore = new Store({
     active: 0,
-    counter: 0
+    counter: 0,
+    busy: false
 });
 
 export function useSync() {
-    const { counter } = SyncActiveStore.useState(s => {
+    const { counter, busy } = SyncActiveStore.useState(s => {
         return {
-            counter: s.counter
+            counter: s.counter,
+            busy: s.busy
         };
     });
     useEffect(() => {
@@ -33,7 +35,7 @@ export function useSync() {
             });
         };
     }, []);
-    return [counter];
+    return [counter, busy];
 }
 
 export async function fetchUpdated(endPoint, start, end) {
@@ -64,11 +66,10 @@ export function useSyncFeature() {
     const startRef = useRef(null);
     const [duration, setDuration] = useState(0);
     const online = useOnline();
-    const [isBusy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const isLoaded = useLocalStorage("SyncStore", SyncStore);
     const { lastUpdated } = SyncStore.useState();
-    const { active } = SyncActiveStore.useState();
+    const { active, busy } = SyncActiveStore.useState();
     const resetSync = useCallback(async () => {
         SyncStore.update(s => {
             s.lastUpdated = 0;
@@ -81,7 +82,9 @@ export function useSyncFeature() {
         startRef.current = new Date().getTime();
         setDuration(0);
         setError(null);
-        setBusy(true);
+        SyncActiveStore.update(s => {
+            s.busy = true;
+        });
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
         const syncItems = async items => {
@@ -149,7 +152,9 @@ export function useSyncFeature() {
             });
         }
         startRef.current = 0;
-        setBusy(false);
+        SyncActiveStore.update(s => {
+            s.busy = false;
+        });
     }, [lastUpdated]);
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
@@ -158,5 +163,5 @@ export function useSyncFeature() {
         }
     }, [online, isLoaded]);
 
-    return [online && isLoaded && updateSync, !isBusy && resetSync, isBusy, error, active, duration];
+    return [online && isLoaded && updateSync, !busy && resetSync, busy, error, active, duration];
 }

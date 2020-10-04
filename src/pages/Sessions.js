@@ -9,11 +9,12 @@ import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
 import { useState } from "react";
 import { useSync } from "@/util/sync";
+import SyncMessage from "@/widgets/Table/SyncMessage";
 
 export default function Sessions() {
     const translations = useTranslations();
-    const [syncCounter] = useSync();
-    const sessions = useSessions([syncCounter]);
+    const [syncCounter, busy] = useSync();
+    const sessions = useSessions([syncCounter], !busy);
     const [groupFilter, setGroupFilter] = useState("");
     const [dateFilter, setDateFilter] = useState("");
 
@@ -111,6 +112,7 @@ export default function Sessions() {
             data={sessions}
             mapper={mapper}
             filter={filter}
+            empty={<SyncMessage show={busy} />}
             reset={[groupFilter, dateFilter]}
             depends={[groupFilter, dateFilter, translations]}
         />
