@@ -75,7 +75,7 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
         document.addEventListener("mouseup", handleUpEvent);
         return () => {
             document.removeEventListener("mousemove", handlePosEvent);
-            document.addEventListener("mouseup", handleUpEvent);
+            document.removeEventListener("mouseup", handleUpEvent);
         }
     }, []);
     const seek = useCallback(() => {
