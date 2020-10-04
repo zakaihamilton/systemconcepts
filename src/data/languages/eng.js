@@ -656,6 +656,14 @@ export default {
         {
             "id": "DOWNLOAD",
             "value": "Download"
+        },
+        {
+            "id": "EXPAND",
+            "value": "Expand"
+        },
+        {
+            "id": "COLLAPSE",
+            "value": "Collapse"
         }
     ]
 };

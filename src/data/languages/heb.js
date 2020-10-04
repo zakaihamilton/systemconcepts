@@ -652,6 +652,14 @@ export default {
         {
             "id": "DOWNLOAD",
             "value": "הורדה"
+        },
+        {
+            "id": "EXPAND",
+            "value": "הרחב"
+        },
+        {
+            "id": "COLLAPSE",
+            "value": "כווץ"
         }
     ]
 };

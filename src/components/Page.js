@@ -13,6 +13,9 @@ export default function Page() {
     const activePage = pages[pages.length - 1];
     const ref = useRef();
     const size = useResize(ref, [fullscreen, showSideBar]);
+    if (!activePage) {
+        return null;
+    }
     const { Component } = activePage;
     return <>
         <Breadcrumbs items={pages} />

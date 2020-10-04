@@ -656,6 +656,14 @@ export default {
         {
             "id": "DOWNLOAD",
             "value": "Baixar"
+        },
+        {
+            "id": "EXPAND",
+            "value": "Expandir"
+        },
+        {
+            "id": "COLLAPSE",
+            "value": "Recolher"
         }
     ]
 };

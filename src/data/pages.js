@@ -64,7 +64,6 @@ export default [
     {
         id: "apps",
         name: "APPS",
-        root: true,
         icon: <AppsIcon />,
         Component: Apps,
         separator: true
