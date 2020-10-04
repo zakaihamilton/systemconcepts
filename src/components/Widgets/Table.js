@@ -82,8 +82,6 @@ export default function TableWidget(props) {
     const { search } = useSearch();
 
     if (isPhone) {
-        hideColumns = true;
-        columns = [...columns.filter((_, idx) => !idx)];
         marginBottom = "4em";
     }
 
@@ -201,7 +199,8 @@ export default function TableWidget(props) {
 
     const height = size.height + "px";
     const style = {
-        maxHeight: height
+        maxHeight: height,
+        maxWidth: size.width
     };
 
     const sizeToPixels = text => {
