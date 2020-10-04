@@ -6,5 +6,5 @@ export function roleAuth(roleId, compareId) {
     if (!role || !compare) {
         return false;
     }
-    return compare.level >= role.level;
+    return role.level >= compare.level;
 }

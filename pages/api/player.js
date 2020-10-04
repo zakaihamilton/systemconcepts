@@ -2,6 +2,9 @@ import { cdnUrl } from "@/util/aws";
 import { login } from "../../src/util/login";
 import Cookie from "cookie";
 import { roleAuth } from "@/util/roles";
+import { error, log } from "@/util/logger";
+
+const component = "player";
 
 export default async (req, res) => {
     try {
@@ -10,19 +13,24 @@ export default async (req, res) => {
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
         if (!id || !hash) {
+            error({ component, error: "No ID or hash provided in cookies" });
             throw "ACCESS_DENIED";
         }
         const user = await login({ id, hash });
         if (!user) {
+            error({ component, error: `Cannot authorize user: ${id} in system` });
             throw "ACCESS_DENIED";
         }
-        if (roleAuth(user.role, "student")) {
+        if (!roleAuth(user.role, "student")) {
+            error({ component, error: `User: ${id} does not match the student role. role is: ${user.role}` });
             throw "ACCESS_DENIED";
         }
-        res.status(200).json({ path: cdnUrl(decodeURIComponent(path)) });
+        const sessionUrl = cdnUrl(decodeURIComponent(path));
+        log({ component, message: `User ${id} is playing session: ${sessionUrl}` });
+        res.status(200).json({ path: sessionUrl });
     }
     catch (err) {
-        console.error("login error: ", err);
+        error({ component, error: "login error", err });
         res.status(401).json({ err: err.toString() });
     }
 };

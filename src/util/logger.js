@@ -11,12 +11,14 @@ export function format({ date, utc, component, type, ...props }) {
 
 export function log(props) {
     const args = format({ type: "log", ...props });
-    console.log(...args);
+    const message = Object.entries(args).flat(1);
+    console.log(...message);
 }
 
 export function error({ throwError = true, ...props }) {
     const args = format({ type: "error", ...props });
-    console.error(...args);
+    const message = Object.entries(args).flat(1);
+    console.error(...message);
     if (throwError) {
         throw props;
     }
