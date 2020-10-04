@@ -41,6 +41,8 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
                 src: data.path,
                 format: extension,
                 autoplay: false,
+                html5: true,
+                preload: "metadata",
                 onload: () => {
                     AudioStore.update(s => {
                         s.loaded = true;
