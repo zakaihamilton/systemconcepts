@@ -34,12 +34,12 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
             AudioStore.update(s => {
                 s.hash = window.location.hash;
                 s.path = path;
+                if (s.loaded && audioPlayer.player) {
+                    audioPlayer.player.unload();
+                }
                 s.loaded = false;
                 s.url = data.path;
             });
-            if (audioPlayer.player) {
-                audioPlayer.player.unload();
-            }
             audioPlayer.load({
                 src: data.path,
                 format: extension,

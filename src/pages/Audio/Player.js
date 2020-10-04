@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import styles from "./Player.module.scss";
 import { useTranslations } from "@/util/translations";
 import Button from "./Button";
@@ -24,10 +24,13 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
     const audioPlayer = useAudioPlayer({});
     const audioPosition = useAudioPosition({});
     const translations = useTranslations();
-    const [dragging, setDragging] = useState(false);
-    const [pos, setPos] = useState(0);
-    const [width, setWidth] = useState(0);
+    const dragging = useRef(false);
+    const audioPositionRef = useRef(audioPosition);
+    audioPositionRef.current = audioPosition;
     const seekPosition = useCallback(position => {
+        if (isNaN(position)) {
+            return;
+        }
         setMetadata(data => {
             if (data) {
                 data.position = parseInt(position);
@@ -61,15 +64,27 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
     const progressText = formatDuration(audioPos * 1000) + " / " + formatDuration(audioPosition.duration * 1000);
     const progressPosition = `calc(${left}%)`;
     const handlePosEvent = useCallback(e => {
+        const audioPosition = audioPositionRef.current;
         const { clientX } = e;
-        const pos = clientX - progressRef.current.getBoundingClientRect().left;
-        setPos(pos);
+        if (!dragging.current) {
+            return;
+        }
         const width = progressRef.current.clientWidth;
-        setWidth(width);
+        let coord = clientX - progressRef.current.getBoundingClientRect().left;
+        const ratio = audioPosition.duration / width;
+        let position = coord * ratio;
+        if (position < 0) {
+            position = 0;
+        }
+        if (position >= audioPosition.duration) {
+            position = audioPosition.duration;
+        }
+        seekPosition(position);
     }, []);
     useEffect(() => {
-        const handleUpEvent = () => {
-            setDragging(false);
+        const handleUpEvent = e => {
+            handlePosEvent(e);
+            dragging.current = false;
         }
         document.addEventListener("mousemove", handlePosEvent);
         document.addEventListener("mouseup", handleUpEvent);
@@ -78,24 +93,6 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
             document.removeEventListener("mouseup", handleUpEvent);
         }
     }, []);
-    const seek = useCallback(() => {
-        const ratio = audioPosition.duration / width;
-        let position = pos * ratio;
-        if (position < 0) {
-            position = 0;
-        }
-        else if (position > audioPosition.duration) {
-            position = audioPosition.duration;
-        }
-        if (!isNaN(position)) {
-            seekPosition(position);
-        }
-    }, [audioPosition, pos, width]);
-    useEffect(() => {
-        if (dragging) {
-            seek(pos);
-        }
-    }, [pos, dragging]);
     useEffect(() => {
         if (audioPosition.position && !isNaN(audioPosition.position)) {
             setMetadata(data => {
@@ -108,8 +105,8 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
     }, [audioPosition.position]);
     const events = {
         onMouseDown(e) {
-            setDragging(true);
-            handlePosEvent(e);
+            dragging.current = true;
+            handlePosEvent(e, true);
         }
     };
     const rateItems = {
