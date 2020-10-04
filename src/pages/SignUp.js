@@ -183,6 +183,7 @@ export default function SignUp() {
                                 label={translations.ID}
                                 name="username"
                                 autoComplete="username"
+                                helperText={translations.ID_DESCRIPTION}
                                 validate={validate}
                                 onValidate={onValidateField}
                                 autoFocus

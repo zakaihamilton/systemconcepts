@@ -664,6 +664,10 @@ export default {
         {
             "id": "COLLAPSE",
             "value": "Collapse"
+        },
+        {
+            "id": "ID_DESCRIPTION",
+            "value": "This is your unique identifier that should consist of only letters (A-Z) and numbers (0-9)"
         }
     ]
 };

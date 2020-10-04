@@ -660,6 +660,10 @@ export default {
         {
             "id": "COLLAPSE",
             "value": "כווץ"
+        },
+        {
+            "id": "ID_DESCRIPTION",
+            "value": "זה המזהה היחודי שלך שמורכב באותיות באנגלית (A-Z) ומספרים (0-9)"
         }
     ]
 };

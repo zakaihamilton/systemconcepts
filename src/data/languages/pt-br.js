@@ -664,6 +664,10 @@ export default {
         {
             "id": "COLLAPSE",
             "value": "Recolher"
+        },
+        {
+            "id": "ID_DESCRIPTION",
+            "value": "Este é o seu identificador exclusivo que deve consistir apenas em letras (A-Z) e números (0-9)"
         }
     ]
 };
