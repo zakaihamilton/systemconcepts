@@ -37,6 +37,9 @@ export default function AudioPage({ prefix = "", group = "", year = "", name }) 
                 s.loaded = false;
                 s.url = data.path;
             });
+            if (audioPlayer.player) {
+                audioPlayer.player.unload();
+            }
             audioPlayer.load({
                 src: data.path,
                 format: extension,

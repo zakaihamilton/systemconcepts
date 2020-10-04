@@ -124,7 +124,7 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
             id: rate,
             icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
             name: translations[name],
-            onClick: () => audioPlayer.player.rate(rate)
+            onClick: () => audioPlayer.player && audioPlayer.player.rate(rate)
         }
     });
     const volumeItems = {
@@ -140,7 +140,7 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
             onClick: () => audioPlayer.volume(level)
         }
     });
-    const speed = audioPlayer.player.rate();
+    const speed = audioPlayer.player && audioPlayer.player.rate() || 1.0;
     const volume = audioPlayer.volume();
     const speedName = translations[Object.entries(rateItems).find(([, rate]) => rate === speed)[0]];
     const volumeName = translations[Object.entries(volumeItems).find(([, level]) => level === volume)[0]];
