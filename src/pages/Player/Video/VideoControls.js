@@ -81,7 +81,10 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
     };
     const left = currentTime / playerRef.duration * 100;
     const audioPos = isNaN(currentTime) ? 0 : currentTime;
-    const progressText = formatDuration(audioPos * 1000) + " / " + formatDuration(playerRef.duration * 1000);
+    let progressText = formatDuration(audioPos * 1000);
+    if (!isNaN(playerRef.duration)) {
+        progressText += " / " + formatDuration(playerRef.duration * 1000);
+    }
     const progressPosition = `calc(${left}%)`;
     const handlePosEvent = useCallback(e => {
         const { clientX } = e;
