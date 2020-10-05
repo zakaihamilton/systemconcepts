@@ -106,7 +106,7 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
     }
 
     return <div className={styles.root} style={style}>
-        <Download visible={mediaPath} onClick={downloadFile} />
+        <Download visible={show && mediaPath} onClick={downloadFile} />
         {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
         </MediaComponent>}
