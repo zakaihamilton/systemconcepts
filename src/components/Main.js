@@ -11,7 +11,6 @@ import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
 import Audio from "@/widgets/Audio";
 import Fullscreen from "./Fullscreen";
-import { AudioPlayerProvider } from "react-use-audio-player";
 import Header from "./Header";
 
 export const MainStoreDefaults = {
@@ -66,18 +65,16 @@ export default function Main() {
     return <>
         <Header />
         <Theme>
-            <AudioPlayerProvider>
-                <div className={className}>
-                    <Sync />
-                    <Audio />
-                    <Fullscreen />
-                    {!fullscreen && <AppBar />}
-                    <SideBar />
-                    <div className={styles.main}>
-                        <Page />
-                    </div>
+            <div className={className}>
+                <Sync />
+                <Audio />
+                <Fullscreen />
+                {!fullscreen && <AppBar />}
+                <SideBar />
+                <div className={styles.main}>
+                    <Page />
                 </div>
-            </AudioPlayerProvider>
+            </div>
         </Theme>
     </>;
 }
