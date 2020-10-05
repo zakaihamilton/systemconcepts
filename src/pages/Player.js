@@ -1,0 +1,110 @@
+import { useContext, useEffect } from "react";
+import { Store } from "pullstate";
+import { useTranslations } from "@/util/translations";
+import MovieIcon from '@material-ui/icons/Movie';
+import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import styles from "./Player.module.scss";
+import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@/util/path";
+import Audio from "./Player/Audio";
+import Video from "./Player/Video";
+import { PageSize } from "@/components/Page";
+import { useParentPath } from "@/util/pages";
+import Download from "@/widgets/Download";
+import { exportFile } from "@/util/importExport";
+import { useFetchJSON } from "@/util/fetch";
+import Progress from "@/widgets/Progress";
+import { useFile } from "@/util/storage";
+
+export const PlayerStore = new Store({
+    playerPath: "",
+    hash: "",
+    loaded: false,
+    url: ""
+});
+
+registerToolbar("Player");
+
+export default function PlayerPage({ show = false, prefix = "", group = "", year = "", name, suffix }) {
+    const translations = useTranslations();
+    const { hash, playerPath } = PlayerStore.useState();
+    const size = useContext(PageSize);
+    let components = [useParentPath(), prefix, group, year, name + (suffix || "")].filter(Boolean).join("/");
+    const path = makePath(components).split("/").slice(2).join("/");
+    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== playerPath);
+    const folder = fileFolder(path);
+    const [, , groupName, yearName] = folder.split("/");
+    const sessionName = fileTitle(path);
+    const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
+    const [metadata, , , setMetadata] = useFile(metadataPath, [], data => {
+        return data ? JSON.parse(data) : {};
+    });
+
+    const gotoPlayer = () => {
+        let hashPath = hash;
+        if (hashPath.startsWith("#")) {
+            hashPath = hashPath.substring(1);
+        }
+        window.location.hash = hashPath;
+    };
+
+    useEffect(() => {
+        PlayerStore.update(s => {
+            s.hash = window.location.hash;
+        });
+    }, []);
+
+    const menuItems = [
+        hash && {
+            id: "player",
+            name: translations.PLAYER,
+            icon: <MovieIcon />,
+            onClick: gotoPlayer
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "Player", items: menuItems, depends: [hash, translations] });
+
+    const style = {
+        visibility: show ? "visible" : "hidden",
+        flex: show ? "1" : "",
+        ...!show && { maxHeight: "0px" }
+    };
+    const mediaStyles = {
+        width: size.width + "px",
+        height: size.height + "px"
+    }
+    const mediaPath = data && data.path;
+    const isAudio = isAudioFile(mediaPath);
+    const isVideo = isVideoFile(mediaPath);
+    let MediaComponent = null;
+    let mediaType = undefined;
+    let mediaProps = {};
+    if (isAudio) {
+        MediaComponent = Audio;
+        mediaType = "audio/mp4";
+        mediaProps = {
+            metadata,
+            setMetadata,
+            group: groupName,
+            year: yearName,
+            name: sessionName
+        }
+    }
+    else if (isVideo) {
+        MediaComponent = Video;
+        mediaType = "video/mp4";
+        mediaProps = { controls: true };
+    }
+
+    const downloadFile = () => {
+        exportFile(data.path, fileName(path));
+    }
+
+    return <div className={styles.root} style={style}>
+        <Download visible={mediaPath} onClick={downloadFile} />
+        {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
+            {mediaPath && <source src={mediaPath} type={mediaType} />}
+        </MediaComponent>}
+        {!!loading && <Progress />}
+    </div>;
+}

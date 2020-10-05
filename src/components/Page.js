@@ -1,11 +1,12 @@
-import React, { useRef } from "react";
+import { useRef, createContext } from "react";
 import styles from "./Page.module.scss";
 import { useResize } from "@/util/size";
 import { MainStore } from "@/components/Main";
 import { usePagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
+import Player from "@/pages/Player";
 
-export const PageSize = React.createContext();
+export const PageSize = createContext();
 
 export default function Page() {
     const { hash, fullscreen, showSideBar } = MainStore.useState();
@@ -17,12 +18,15 @@ export default function Page() {
         return null;
     }
     const { Component } = activePage;
+    const showPage = activePage.id !== "player" && Component;
+    const showPlayer = activePage.id === "player";
     return <>
         <Breadcrumbs items={pages} />
         <div className={styles.pageContainer}>
             <main ref={ref} className={styles.page}>
                 <PageSize.Provider value={size}>
-                    {Component && <Component {...activePage} />}
+                    <Player show={showPlayer} {...showPlayer && activePage} />
+                    {showPage && <Component {...activePage} />}
                 </PageSize.Provider>
             </main>
         </div>

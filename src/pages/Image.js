@@ -63,7 +63,7 @@ export default function ImagePage({ name }) {
     const style = { height: size.height - 22, width: size.width - 22 };
 
     return <div className={styles.root}>
-        <Download loading={loading} onClick={downloadImage} />
+        <Download visible={!loading} onClick={downloadImage} />
         {!loading && <img className={styles.img} src={src} />}
         {loading && <Progress />}
     </div>;

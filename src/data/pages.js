@@ -49,14 +49,11 @@ import Diagrams from "@/pages/Diagrams";
 import LabelIcon from '@material-ui/icons/Label';
 import Terms from "@/pages/Terms";
 
-import MovieIcon from '@material-ui/icons/Movie';
-import Video from "@/pages/Video";
-
-import AudiotrackIcon from '@material-ui/icons/Audiotrack';
-import Audio from "@/pages/Audio";
-
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
 import Sessions from "@/pages/Sessions";
+
+import VideoLabelIcon from '@material-ui/icons/VideoLabel';
+import Player from "@/pages/Player";
 
 import diagrams from "@/data/diagrams";
 
@@ -188,23 +185,17 @@ export default [
         Component: Terms
     },
     {
-        id: "video",
-        name: "VIDEO",
-        icon: <MovieIcon />,
-        Component: Video
-    },
-    {
-        id: "audio",
-        name: "AUDIO",
-        icon: <AudiotrackIcon />,
-        Component: Audio
-    },
-    {
         sidebar: true,
         id: "sessions",
         name: "SESSIONS",
         icon: <VideoLibraryIcon />,
         Component: Sessions
+    },
+    {
+        id: "player",
+        name: "PLAYER",
+        icon: <VideoLabelIcon />,
+        Component: Player
     },
     ...diagrams.map(diagram => {
         let { icon } = diagram;

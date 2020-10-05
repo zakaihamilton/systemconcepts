@@ -4,11 +4,11 @@ import { useTranslations } from "@/util/translations";
 
 registerToolbar("Download");
 
-export default function Download({ onClick, loading }) {
+export default function Download({ onClick, visible }) {
     const translations = useTranslations();
 
     const menuItems = [
-        !loading && {
+        visible && {
             id: "download",
             name: translations.DOWNLOAD,
             icon: <GetAppIcon />,
@@ -16,6 +16,6 @@ export default function Download({ onClick, loading }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Download", items: menuItems, depends: [loading, translations] });
+    useToolbar({ id: "Download", items: menuItems, depends: [visible, translations] });
     return null;
 }
