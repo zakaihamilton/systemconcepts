@@ -73,6 +73,9 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
         }
         seekPosition(position);
     };
+    const play = async () => {
+        await playerRef.play();
+    };
     const left = currentTime / playerRef.duration * 100;
     const audioPos = isNaN(currentTime) ? 0 : currentTime;
     let progressText = formatDuration(audioPos * 1000);
@@ -172,7 +175,7 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
             <div className={styles.buttons}>
                 {direction === "ltr" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
                 {direction === "rtl" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
-                {playerRef.paused && <Button icon={<PlayArrowIcon />} name={translations.PLAY} onClick={() => playerRef.play()} />}
+                {playerRef.paused && <Button icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
                 {!playerRef.paused && <Button icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
                 <Button icon={<StopIcon />} name={translations.STOP} onClick={() => {
                     playerRef.pause();
