@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./AudioControls.module.scss";
+import styles from "./VideoControls.module.scss";
 import { useTranslations } from "@/util/translations";
 import Button from "../Button";
 import FastRewindIcon from '@material-ui/icons/FastRewind';
@@ -12,18 +12,18 @@ import { formatDuration } from "@/util/string";
 import Menu from "@/widgets/Menu";
 import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
-import Field from "../Field";
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
 
 const skipPoints = 10;
 
-export default function AudioControls({ playerRef, metadata, setMetadata, path = "", group = "", year = "", name = "" }) {
+export default function VideoControls({ playerRef, metadata, setMetadata, path = "" }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
     const dragging = useRef(false);
-    const [, setCounter] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const [, setCounter] = useState(0);
     useEffect(() => {
         const update = name => {
             if (name === "loadedmetadata" && metadata && metadata.position) {
@@ -162,14 +162,7 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
     const volumeId = Object.keys(volumeItems).find(volumeId => volumeItems[volumeId] === volume);
     const speedName = translations[rateId];
     const volumeName = translations[volumeId];
-    let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
-    const date = [year, month, day].join("-");
     return <div className={styles.root}>
-        <div className={styles.metadata}>
-            <Field name={translations.GROUP} value={group && (group[0].toUpperCase() + group.slice(1))} />
-            <Field name={translations.DATE} value={date} />
-            <Field name={translations.NAME} value={sessionName} />
-        </div>
         <div className={styles.toolbar}>
             <div className={styles.progress}>
                 <div className={styles.progressLine} ref={progressRef} {...events}>
@@ -196,6 +189,7 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
                 <Menu items={volumeMenuItems} selected={volume}>
                     <Button icon={<VolumeDownIcon />} name={translations.VOLUME} subHeading={volumeName} />
                 </Menu>
+                <Button icon={<FullscreenIcon />} name={translations.FULLSCREEN} onClick={() => playerRef.requestFullscreen()} />
             </div>
         </div>
     </div>;

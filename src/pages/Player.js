@@ -78,29 +78,27 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
     };
     const mediaStyles = {
         width: size.width + "px",
-        height: size.height + "px"
+        height: size.height - (size.emPixels * 9) + "px"
     }
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
     let MediaComponent = null;
     let mediaType = undefined;
-    let mediaProps = {};
+    const mediaProps = {
+        metadata,
+        setMetadata,
+        group: groupName,
+        year: yearName,
+        name: sessionName,
+        path: mediaPath
+    }
     if (isAudio) {
         MediaComponent = Audio;
         mediaType = "audio/mp4";
-        mediaProps = {
-            metadata,
-            setMetadata,
-            group: groupName,
-            year: yearName,
-            name: sessionName,
-            path: mediaPath
-        }
     }
     else if (isVideo) {
         MediaComponent = Video;
         mediaType = "video/mp4";
-        mediaProps = { controls: true, path: mediaPath };
     }
 
     const downloadFile = () => {
