@@ -10,13 +10,18 @@ import { addPath } from "@/util/pages";
 import { useState } from "react";
 import { useSync } from "@/util/sync";
 import SyncMessage from "@/widgets/Table/SyncMessage";
+import { Store } from "pullstate";
+
+export const SessionsStore = new Store({
+    groupFilter: "",
+    dateFilter: ""
+});
 
 export default function Sessions() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter], !busy);
-    const [groupFilter, setGroupFilter] = useState("");
-    const [dateFilter, setDateFilter] = useState("");
+    const { groupFilter, dateFilter } = SessionsStore.useState();
 
     const columns = [
         {
@@ -37,9 +42,9 @@ export default function Sessions() {
             tags: [dateFilter && {
                 id: dateFilter,
                 name: dateFilter,
-                onDelete: () => setDateFilter("")
+                onDelete: () => SessionsStore.update(s => { s.dateFilter = "" })
             }],
-            onClick: !dateFilter && (item => setDateFilter(typeof item.date !== "undefined" && item.date))
+            onClick: !dateFilter && (item => SessionsStore.update(s => { s.dateFilter = typeof item.date !== "undefined" && item.date }))
         },
         {
             id: "group",
@@ -49,9 +54,9 @@ export default function Sessions() {
             tags: [groupFilter && {
                 id: groupFilter,
                 name: groupFilter,
-                onDelete: () => setGroupFilter("")
+                onDelete: () => SessionsStore.update(s => { s.groupFilter = "" })
             }],
-            onClick: !groupFilter && (item => setGroupFilter(typeof item.group !== "undefined" && item.group))
+            onClick: !groupFilter && (item => SessionsStore.update(s => { s.groupFilter = typeof item.group !== "undefined" && item.group }))
         }
     ].filter(Boolean);
 
