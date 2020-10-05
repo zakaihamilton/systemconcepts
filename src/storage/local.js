@@ -54,7 +54,7 @@ async function createFolders(path) {
     }
     for (partIndex++; partIndex < parts.length; partIndex++) {
         const subPath = parts.slice(0, partIndex).join("/");
-        createFolder(subPath);
+        await createFolder(subPath);
     }
 }
 

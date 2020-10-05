@@ -67,7 +67,7 @@ export default function Toolbar() {
         {toolbarItems.map((item, idx) => {
             return <React.Fragment key={item.id}>
                 <Tooltip arrow title={item.name}>
-                    <IconButton onClick={item.onClick}>
+                    <IconButton onClick={item.onClick ? item.onClick : undefined}>
                         {item.icon}
                     </IconButton>
                 </Tooltip>
