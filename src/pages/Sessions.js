@@ -64,14 +64,14 @@ export default function Sessions() {
             media.push({
                 name: translations.AUDIO,
                 icon: <AudiotrackIcon />,
-                link: `audio?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.audio.name}`
+                link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`
             });
         }
         if (item.video) {
             media.push({
                 name: translations.VIDEO,
                 icon: <MovieIcon />,
-                link: `video?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.video.name}`
+                link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`
             });
         }
         return {

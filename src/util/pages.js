@@ -32,6 +32,12 @@ export function goBackPage() {
     window.location.hash = hash;
 }
 
+export function urlToParentPath(url) {
+    const items = decodeURI(url).split("/").filter(Boolean);
+    const previousItem = items[items.length - 2] || "";
+    return decodeURIComponent(previousItem);
+}
+
 export function useParentPath() {
     const { hash } = MainStore.useState();
     const items = decodeURI(hash).split("/").filter(Boolean);
@@ -109,7 +115,8 @@ export function usePagesFromHash(hash = "") {
             else if (sectionIndex) {
                 return;
             }
-            const result = { ...page, url, ...params, path: sectionPath, sectionIndex };
+            const parentPath = urlToParentPath(url);
+            const result = { ...page, url, ...params, path: sectionPath, sectionIndex, parentPath };
             if (name !== result.name && !result.tooltip) {
                 result.tooltip = name;
             }

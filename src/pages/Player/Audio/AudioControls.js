@@ -1,46 +1,60 @@
-import { useCallback, useEffect, useRef } from "react";
-import styles from "./Player.module.scss";
+import { useCallback, useEffect, useRef, useState } from "react";
+import styles from "./AudioControls.module.scss";
 import { useTranslations } from "@/util/translations";
-import Button from "./Button";
+import Button from "../Button";
 import FastRewindIcon from '@material-ui/icons/FastRewind';
 import FastForwardIcon from '@material-ui/icons/FastForward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import SpeedIcon from '@material-ui/icons/Speed';
-import { useAudioPlayer, useAudioPosition } from "react-use-audio-player"
 import { formatDuration } from "@/util/string";
 import Menu from "@/widgets/Menu";
 import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
-import Field from "./Field";
+import Field from "../Field";
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 
 const skipPoints = 10;
 
-export default function Tooolbar({ setMetadata, group = "", year = "", name = "" }) {
+export default function AudioControls({ playerRef, metadata, setMetadata, path = "", group = "", year = "", name = "" }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
-    const audioPlayer = useAudioPlayer({});
-    const audioPosition = useAudioPosition({});
     const translations = useTranslations();
     const dragging = useRef(false);
-    const audioPositionRef = useRef(audioPosition);
-    audioPositionRef.current = audioPosition;
+    const [, setCounter] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    useEffect(() => {
+        const update = name => {
+            if (name === "loadedmetadata" && metadata && metadata.position) {
+                playerRef.currentTime = metadata.position;
+                setCurrentTime(playerRef.currentTime);
+            }
+            if (name === "timeupdate" && !dragging.current) {
+                setCurrentTime(playerRef.currentTime);
+            }
+            else {
+                setCounter(counter => counter + 1);
+            }
+        };
+        const events = ["loadedmetadata", "pause", "play", "playing", "volumechange", "timeupdate"];
+        events.map(name => playerRef.addEventListener(name, () => update(name)));
+        return () => {
+            events.map(name => playerRef.removeEventListener(name, update));
+        };
+    }, []);
+    useEffect(() => {
+        playerRef.load();
+    }, [path]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;
         }
-        setMetadata(data => {
-            if (data) {
-                data.position = parseInt(position);
-            }
-            return data;
-        });
-        audioPosition.seek(position);
+        playerRef.currentTime = position;
+        setCurrentTime(position);
     }, []);
     const rewind = () => {
-        let position = audioPosition.position;
+        let position = currentTime;
         if (position > skipPoints) {
             position -= skipPoints;
         }
@@ -50,34 +64,33 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
         seekPosition(position);
     };
     const fastforward = () => {
-        let position = audioPosition.position;
-        if (position > audioPosition.duration - skipPoints) {
-            position = audioPosition.duration;
+        let position = currentTime;
+        if (position > playerRef.duration - skipPoints) {
+            position = playerRef.duration;
         }
         else {
             position += skipPoints;
         }
         seekPosition(position);
     };
-    const left = audioPosition.position / audioPosition.duration * 100;
-    const audioPos = isNaN(audioPosition.position) ? 0 : audioPosition.position;
-    const progressText = formatDuration(audioPos * 1000) + " / " + formatDuration(audioPosition.duration * 1000);
+    const left = currentTime / playerRef.duration * 100;
+    const audioPos = isNaN(currentTime) ? 0 : currentTime;
+    const progressText = formatDuration(audioPos * 1000) + " / " + formatDuration(playerRef.duration * 1000);
     const progressPosition = `calc(${left}%)`;
     const handlePosEvent = useCallback(e => {
-        const audioPosition = audioPositionRef.current;
         const { clientX } = e;
         if (!dragging.current) {
             return;
         }
         const width = progressRef.current.clientWidth;
         let coord = clientX - progressRef.current.getBoundingClientRect().left;
-        const ratio = audioPosition.duration / width;
+        const ratio = playerRef.duration / width;
         let position = coord * ratio;
         if (position < 0) {
             position = 0;
         }
-        if (position >= audioPosition.duration) {
-            position = audioPosition.duration;
+        if (position >= playerRef.duration) {
+            position = playerRef.duration;
         }
         seekPosition(position);
     }, []);
@@ -94,15 +107,16 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
         }
     }, []);
     useEffect(() => {
-        if (audioPosition.position && !isNaN(audioPosition.position)) {
+        if (currentTime && !isNaN(currentTime)) {
             setMetadata(data => {
-                if (data) {
-                    data.position = parseInt(audioPosition.position);
+                if (!data) {
+                    data = {};
                 }
+                data.position = parseInt(currentTime);
                 return data;
             });
         }
-    }, [audioPosition.position]);
+    }, [currentTime]);
     const events = {
         onMouseDown(e) {
             dragging.current = true;
@@ -121,7 +135,7 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
             id: rate,
             icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
             name: translations[name],
-            onClick: () => audioPlayer.player && audioPlayer.player.rate(rate)
+            onClick: () => playerRef.playbackRate = rate
         }
     });
     const volumeItems = {
@@ -134,13 +148,15 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
             id: level,
             icon: <Avatar className={styles.avatar} variant="square">{level.toFixed(2)}</Avatar>,
             name: translations[name],
-            onClick: () => audioPlayer.volume(level)
+            onClick: () => playerRef.volume = level
         }
     });
-    const speed = audioPlayer.player && audioPlayer.player.rate() || 1.0;
-    const volume = audioPlayer.volume();
-    const speedName = translations[Object.entries(rateItems).find(([, rate]) => rate === speed)[0]];
-    const volumeName = translations[Object.entries(volumeItems).find(([, level]) => level === volume)[0]];
+    const speed = playerRef.playbackRate || 1.0;
+    const volume = playerRef.volume;
+    const rateId = Object.keys(rateItems).find(rateId => rateItems[rateId] === speed);
+    const volumeId = Object.keys(volumeItems).find(volumeId => volumeItems[volumeId] === volume);
+    const speedName = translations[rateId];
+    const volumeName = translations[volumeId];
     let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
     const date = [year, month, day].join("-");
     return <div className={styles.root}>
@@ -160,10 +176,10 @@ export default function Tooolbar({ setMetadata, group = "", year = "", name = ""
             <div className={styles.buttons}>
                 {direction === "ltr" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
                 {direction === "rtl" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
-                {!audioPlayer.playing && <Button icon={<PlayArrowIcon />} name={translations.PLAY} onClick={() => audioPlayer.play()} />}
-                {audioPlayer.playing && <Button icon={<PauseIcon />} name={translations.PAUSE} onClick={() => audioPlayer.pause()} />}
+                {playerRef.paused && <Button icon={<PlayArrowIcon />} name={translations.PLAY} onClick={() => playerRef.play()} />}
+                {!playerRef.paused && <Button icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
                 <Button icon={<StopIcon />} name={translations.STOP} onClick={() => {
-                    audioPlayer.stop()
+                    playerRef.pause();
                     seekPosition(0);
                 }} />
                 {direction === "ltr" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
