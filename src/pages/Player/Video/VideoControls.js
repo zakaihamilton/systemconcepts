@@ -50,12 +50,6 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
         if (isNaN(position)) {
             return;
         }
-        setMetadata(data => {
-            if (data) {
-                data.position = parseInt(position);
-            }
-            return data;
-        });
         playerRef.currentTime = position;
         setCurrentTime(position);
     }, []);
@@ -118,9 +112,10 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
     useEffect(() => {
         if (currentTime && !isNaN(currentTime)) {
             setMetadata(data => {
-                if (data) {
-                    data.position = parseInt(currentTime);
+                if (!data) {
+                    data = {};
                 }
+                data.position = parseInt(currentTime);
                 return data;
             });
         }
