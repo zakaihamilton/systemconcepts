@@ -17,12 +17,12 @@ import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 
 const skipPoints = 10;
 
-export default function AudioControls({ playerRef, metadata, setMetadata, group = "", year = "", name = "" }) {
+export default function AudioControls({ playerRef, metadata, setMetadata, path = "", group = "", year = "", name = "" }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
     const dragging = useRef(false);
-    const [counter, setCounter] = useState(0);
+    const [, setCounter] = useState(0);
     useEffect(() => {
         const update = name => {
             if (name === "loadedmetadata" && metadata && metadata.position) {
@@ -36,6 +36,9 @@ export default function AudioControls({ playerRef, metadata, setMetadata, group 
             events.map(name => playerRef.removeEventListener(name, update));
         };
     }, []);
+    useEffect(() => {
+        playerRef.load();
+    }, [path]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;
@@ -68,7 +71,6 @@ export default function AudioControls({ playerRef, metadata, setMetadata, group 
         }
         seekPosition(position);
     };
-    console.log("playerRef.duration: ", playerRef.duration);
     const left = playerRef.currentTime / playerRef.duration * 100;
     const audioPos = isNaN(playerRef.currentTime) ? 0 : playerRef.currentTime;
     const progressText = formatDuration(audioPos * 1000) + " / " + formatDuration(playerRef.duration * 1000);
@@ -154,7 +156,6 @@ export default function AudioControls({ playerRef, metadata, setMetadata, group 
     const volumeName = translations[volumeId];
     let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
     const date = [year, month, day].join("-");
-    console.log("playerRef", playerRef);
     return <div className={styles.root}>
         <div className={styles.metadata}>
             <Field name={translations.GROUP} value={group && (group[0].toUpperCase() + group.slice(1))} />

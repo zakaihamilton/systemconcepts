@@ -8,7 +8,6 @@ import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } f
 import Audio from "./Player/Audio";
 import Video from "./Player/Video";
 import { PageSize } from "@/components/Page";
-import { useParentPath } from "@/util/pages";
 import Download from "@/widgets/Download";
 import { exportFile } from "@/util/importExport";
 import { useFetchJSON } from "@/util/fetch";
@@ -17,18 +16,17 @@ import { useFile } from "@/util/storage";
 
 export const PlayerStore = new Store({
     playerPath: "",
-    hash: "",
-    loaded: false,
-    url: ""
+    mediaPath: "",
+    hash: ""
 });
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, prefix = "", group = "", year = "", name, suffix }) {
+export default function PlayerPage({ show = false, prefix = "", group = "", year = "", name, suffix, parentPath }) {
     const translations = useTranslations();
-    const { hash, playerPath } = PlayerStore.useState();
+    const { hash, playerPath, mediaPath } = PlayerStore.useState();
     const size = useContext(PageSize);
-    let components = [useParentPath(), prefix, group, year, name + (suffix || "")].filter(Boolean).join("/");
+    let components = [parentPath, prefix, group, year, name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").slice(2).join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== playerPath);
     const folder = fileFolder(path);
@@ -48,13 +46,22 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
     };
 
     useEffect(() => {
+        if (show) {
+            PlayerStore.update(s => {
+                s.hash = window.location.hash;
+                s.playerPath = path;
+            });
+        }
+    }, [show, path]);
+
+    useEffect(() => {
         PlayerStore.update(s => {
-            s.hash = window.location.hash;
+            s.mediaPath = data && data.path;
         });
-    }, []);
+    }, [data && data.path]);
 
     const menuItems = [
-        hash && {
+        hash && !show && {
             id: "player",
             name: translations.PLAYER,
             icon: <MovieIcon />,
@@ -62,7 +69,7 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: menuItems, depends: [hash, translations] });
+    useToolbar({ id: "Player", items: menuItems, depends: [hash, show, translations] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
@@ -73,7 +80,6 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
         width: size.width + "px",
         height: size.height + "px"
     }
-    const mediaPath = data && data.path;
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
     let MediaComponent = null;
@@ -87,17 +93,18 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
             setMetadata,
             group: groupName,
             year: yearName,
-            name: sessionName
+            name: sessionName,
+            path: mediaPath
         }
     }
     else if (isVideo) {
         MediaComponent = Video;
         mediaType = "video/mp4";
-        mediaProps = { controls: true };
+        mediaProps = { controls: true, path: mediaPath };
     }
 
     const downloadFile = () => {
-        exportFile(data.path, fileName(path));
+        exportFile(mediaPath, fileName(path));
     }
 
     return <div className={styles.root} style={style}>
