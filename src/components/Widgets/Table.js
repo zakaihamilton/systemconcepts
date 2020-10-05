@@ -56,10 +56,6 @@ export default function TableWidget(props) {
         onImport,
         onExport,
         depends = [],
-        reset = [],
-        resetOnDataChange = true,
-        sortColumn,
-        sortDirection = "desc",
         data,
         mapper,
         filter,
@@ -69,18 +65,21 @@ export default function TableWidget(props) {
         hideColumns,
         rowClick,
         error,
+        store,
         ...otherProps
     } = props;
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const [order, setOrder] = React.useState(sortDirection);
-    const [offset, setOffset] = React.useState(0);
     columns = columns || [];
     const firstColumn = columns[0];
-    const defaultSort = sortColumn || (firstColumn && (firstColumn.sortable || firstColumn.id));
-    const [orderBy, setOrderBy] = React.useState(defaultSort);
+    const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
+    const { order = "desc", offset = 0, orderBy = defaultSort } = store.useState();
     const size = useContext(PageSize);
-    const { search } = useSearch();
+    const { search } = useSearch(() => {
+        store.update(s => {
+            s.offset = 0;
+        });
+    });
 
     if (isPhone) {
         marginBottom = "4em";
@@ -130,20 +129,18 @@ export default function TableWidget(props) {
     useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations] });
 
     useEffect(() => {
-        setOffset(0);
-    }, [resetOnDataChange && data, search, ...reset]);
-
-    useEffect(() => {
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
         if (!hasColumn) {
-            setOrderBy(defaultSort);
+            store.update(s => { s.orderBy = defaultSort });
         }
-    });
+    }, []);
 
     const createSortHandler = (property) => () => {
         const isDesc = orderBy === property && order === "desc";
-        setOrder(isDesc ? "asc" : "desc");
-        setOrderBy(property);
+        store.update(s => {
+            s.order = isDesc ? "asc" : "desc";
+            s.orderBy = property;
+        });
     };
 
     const items = useMemo(() => {
@@ -218,7 +215,9 @@ export default function TableWidget(props) {
     const pageIndex = parseInt(startIdx / itemsPerPage);
 
     const setPageIndex = index => {
-        setOffset(index * itemsPerPage);
+        store.update(s => {
+            s.offset = index * itemsPerPage;
+        });
     };
 
     const itemsOnPage = items.slice(startIdx, endIdx);

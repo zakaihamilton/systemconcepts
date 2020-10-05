@@ -9,8 +9,15 @@ import Cookies from 'js-cookie';
 import { useStyles } from "@/util/styles";
 import { formatDuration } from "@/util/string";
 import Progress from "@/widgets/Progress";
+import { Store } from "pullstate";
 
 registerToolbar("UpdateSessions");
+
+export const UpdateSessionsStore = new Store({
+    order: "desc",
+    offset: 0,
+    orderBy: ""
+});
 
 export default function UpdateSessions({ }) {
     const translations = useTranslations();
@@ -74,6 +81,13 @@ export default function UpdateSessions({ }) {
     };
 
     return <>
-        <Table rowHeight="5.5em" resetOnDataChange={false} name="sessions" columns={columns} data={data} mapper={mapper} />
+        <Table
+            rowHeight="5.5em"
+            name="sessions"
+            columns={columns}
+            data={data}
+            mapper={mapper}
+            store={UpdateSessionsStore}
+        />
     </>;
 }

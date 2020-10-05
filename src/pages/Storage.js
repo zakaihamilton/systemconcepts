@@ -17,7 +17,6 @@ import { Store } from "pullstate";
 import { abbreviateSize } from "@/util/string";
 import Typography from '@material-ui/core/Typography';
 import StatusBar from "@/widgets/StatusBar";
-import { useDeviceType } from "@/util/styles";
 import Destination from "./Storage/Destination";
 import { useDateLocale } from "@/util/locale";
 import { useSync } from "@/util/sync";
@@ -37,7 +36,10 @@ export const StorageStoreDefaults = {
     onValidate: null,
     enableItemClick: true,
     item: null,
-    destination: ""
+    destination: "",
+    order: "desc",
+    offset: 0,
+    orderBy: ""
 };
 
 export const StorageStore = new Store(StorageStoreDefaults);
@@ -230,6 +232,7 @@ export default function Storage({ path = "" }) {
             rowClick={onRowClick}
             rowHeight="6em"
             columns={columns}
+            store={StorageStore}
             data={dataEx}
             mapper={mapper}
             loading={loading}

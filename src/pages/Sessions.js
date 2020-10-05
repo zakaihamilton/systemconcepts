@@ -7,14 +7,15 @@ import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import { IconButton } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
-import { useState } from "react";
 import { useSync } from "@/util/sync";
 import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
 
 export const SessionsStore = new Store({
     groupFilter: "",
-    dateFilter: ""
+    dateFilter: "",
+    order: "asc",
+    orderBy: "date"
 });
 
 export default function Sessions() {
@@ -42,9 +43,15 @@ export default function Sessions() {
             tags: [dateFilter && {
                 id: dateFilter,
                 name: dateFilter,
-                onDelete: () => SessionsStore.update(s => { s.dateFilter = "" })
+                onDelete: () => SessionsStore.update(s => {
+                    s.dateFilter = "";
+                    s.offset = 0;
+                })
             }],
-            onClick: !dateFilter && (item => SessionsStore.update(s => { s.dateFilter = typeof item.date !== "undefined" && item.date }))
+            onClick: !dateFilter && (item => SessionsStore.update(s => {
+                s.dateFilter = typeof item.date !== "undefined" && item.date;
+                s.offset = 0;
+            }))
         },
         {
             id: "group",
@@ -56,7 +63,10 @@ export default function Sessions() {
                 name: groupFilter,
                 onDelete: () => SessionsStore.update(s => { s.groupFilter = "" })
             }],
-            onClick: !groupFilter && (item => SessionsStore.update(s => { s.groupFilter = typeof item.group !== "undefined" && item.group }))
+            onClick: !groupFilter && (item => SessionsStore.update(s => {
+                s.groupFilter = typeof item.group !== "undefined" && item.group;
+                s.offset = 0;
+            }))
         }
     ].filter(Boolean);
 
@@ -111,14 +121,12 @@ export default function Sessions() {
         <Table
             rowHeight="5.5em"
             name="sessions"
-            sortColumn="date"
-            sortDirection="asc"
+            store={SessionsStore}
             columns={columns}
             data={sessions}
             mapper={mapper}
             filter={filter}
             empty={<SyncMessage show={busy} />}
-            reset={[groupFilter, dateFilter]}
             depends={[groupFilter, dateFilter, translations]}
         />
     </>;

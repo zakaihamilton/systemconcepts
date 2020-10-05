@@ -5,11 +5,20 @@ import { useLanguage } from "@/util/language";
 import Term from "@/widgets/Term";
 import { useState } from "react";
 
+import { Store } from "pullstate";
+
+export const TermsStore = new Store({
+    order: "desc",
+    offset: 0,
+    orderBy: "sortId",
+    typeFilter: "",
+    phaseFilter: ""
+});
+
 export default function Terms() {
     const translations = useTranslations();
     const language = useLanguage();
-    const [typeFilter, setTypeFilter] = useState("");
-    const [phaseFilter, setPhaseFilter] = useState("");
+    const { typeFilter, phaseFilter } = TermsStore.useState();
 
     const columns = [
         {
@@ -25,9 +34,15 @@ export default function Terms() {
             tags: [phaseFilter && {
                 id: phaseFilter,
                 name: <Term id={phaseFilter} />,
-                onDelete: () => setPhaseFilter("")
+                onDelete: () => SessionsStore.update(s => {
+                    s.phaseFilter = "";
+                    s.offset = 0;
+                })
             }],
-            onClick: !phaseFilter && (item => setPhaseFilter(typeof item.phase !== "undefined" && "phase." + item.phase))
+            onClick: !phaseFilter && (item => SessionsStore.update(s => {
+                s.phaseFilter = typeof item.phase !== "undefined" && "phase." + item.phase;
+                s.offset = 0;
+            }))
         },
         {
             id: "typeWidget",
@@ -37,9 +52,15 @@ export default function Terms() {
             tags: [typeFilter && {
                 id: typeFilter,
                 name: <Term id={typeFilter} />,
-                onDelete: () => setTypeFilter("")
+                onDelete: () => SessionsStore.update(s => {
+                    s.typeFilter = "";
+                    s.offset = 0;
+                })
             }],
-            onClick: !typeFilter && (item => setTypeFilter(item.type))
+            onClick: !typeFilter && (item => SessionsStore.update(s => {
+                s.typeFilter = item.type;
+                s.offset = 0;
+            }))
         }
     ];
 
@@ -80,8 +101,7 @@ export default function Terms() {
             filter={filter}
             data={data}
             rowHeight="5.5em"
-            sortColumn="sortId"
-            reset={[typeFilter, phaseFilter]}
+            store={TermsStore}
             depends={[typeFilter, phaseFilter, translations]} />
     </>;
 }

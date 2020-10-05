@@ -20,6 +20,13 @@ import Cookies from 'js-cookie';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
 import Tooltip from '@material-ui/core/Tooltip';
+import { Store } from "pullstate";
+
+export const SettingsStore = new Store({
+    order: "desc",
+    offset: 0,
+    orderBy: ""
+});
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
@@ -148,6 +155,7 @@ export default function Settings() {
     return <>
         <Table
             sortColumn="index"
+            store={SettingsStore}
             columns={columns}
             data={data}
             mapper={mapper}

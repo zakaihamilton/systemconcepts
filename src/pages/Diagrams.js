@@ -3,6 +3,13 @@ import data from "@/data/diagrams";
 import { useTranslations } from "@/util/translations";
 import { addPath } from "@/util/pages";
 import { useLanguage } from "@/util/language";
+import { Store } from "pullstate";
+
+export const DiagramsStore = new Store({
+    order: "desc",
+    offset: 0,
+    orderBy: ""
+});
 
 export default function Diagrams() {
     const translations = useTranslations();
@@ -35,6 +42,13 @@ export default function Diagrams() {
     };
 
     return <>
-        <Table name="diagrams" rowClick={rowClick} columns={columns} mapper={mapper} data={data} />
+        <Table
+            name="diagrams"
+            store={DiagramsStore}
+            rowClick={rowClick}
+            columns={columns}
+            mapper={mapper}
+            data={data}
+        />
     </>;
 }

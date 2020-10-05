@@ -20,7 +20,10 @@ export const UsersStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true
+    enableItemClick: true,
+    order: "desc",
+    offset: 0,
+    orderBy: ""
 };
 
 export const UsersStore = new Store(UsersStoreDefaults);
@@ -134,6 +137,7 @@ export default function Users() {
     return <>
         <Table
             name="users"
+            store={UsersStore}
             onImport={onImport}
             rowClick={onRowClick}
             columns={columns}

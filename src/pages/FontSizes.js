@@ -5,6 +5,13 @@ import SmartphoneIcon from '@material-ui/icons/Smartphone';
 import TabletIcon from '@material-ui/icons/Tablet';
 import DesktopMacIcon from '@material-ui/icons/DesktopMac';
 import Label from "@/widgets/Label";
+import { Store } from "pullstate";
+
+export const FontSizesStore = new Store({
+    order: "desc",
+    offset: 0,
+    orderBy: ""
+});
 
 export default function FontSizes() {
     const translations = useTranslations();
@@ -59,6 +66,12 @@ export default function FontSizes() {
     };
 
     return <>
-        <Table sortColumn="id" columns={columns} data={data} mapper={mapper} />
+        <Table
+            sortColumn="id"
+            columns={columns}
+            data={data}
+            mapper={mapper}
+            store={FontSizesStore}
+        />
     </>;
 }

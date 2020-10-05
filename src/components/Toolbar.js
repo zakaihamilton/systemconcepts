@@ -6,8 +6,8 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from "@/widgets/Menu";
 import { useEffect } from "react";
-import { Store } from "pullstate";
 import styles from "./Toolbar.module.scss";
+import { Store } from "pullstate";
 
 export const ToolbarStore = new Store({
     sections: [],

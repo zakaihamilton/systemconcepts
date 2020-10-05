@@ -5,6 +5,13 @@ import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionL
 import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
 import Label from "@/widgets/Label";
 import { addPath } from "@/util/pages";
+import { Store } from "pullstate";
+
+export const LanguagesStore = new Store({
+    order: "desc",
+    offset: 0,
+    orderBy: ""
+});
 
 export default function Languages() {
     const translations = useTranslations();
@@ -50,6 +57,12 @@ export default function Languages() {
     };
 
     return <>
-        <Table name="languages" rowClick={rowClick} columns={columns} mapper={mapper} data={data} />
+        <Table
+            name="languages"
+            rowClick={rowClick}
+            columns={columns}
+            mapper={mapper}
+            store={LanguagesStore}
+            data={data} />
     </>;
 }

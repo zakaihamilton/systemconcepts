@@ -10,16 +10,18 @@ export const SearchStore = new Store({
     show: 0
 });
 
-export function useSearch() {
+export function useSearch(updateCallback) {
     const { search } = SearchStore.useState();
     useEffect(() => {
         SearchStore.update(s => {
             s.show++;
         });
+        const unsubscribe = SearchStore.subscribe(s => s.search, updateCallback);
         return () => {
             SearchStore.update(s => {
                 s.show--;
             });
+            unsubscribe();
         };
     }, []);
     return { search };
