@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "react";
 import { Store } from "pullstate";
 import { useTranslations } from "@/util/translations";
-import MovieIcon from '@material-ui/icons/Movie';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import styles from "./Player.module.scss";
 import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@/util/path";
@@ -13,6 +12,7 @@ import { exportFile } from "@/util/importExport";
 import { useFetchJSON } from "@/util/fetch";
 import Progress from "@/widgets/Progress";
 import { useFile } from "@/util/storage";
+import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 
 export const PlayerStore = new Store({
     playerPath: "",
@@ -64,7 +64,7 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
         hash && !show && {
             id: "player",
             name: translations.PLAYER,
-            icon: <MovieIcon />,
+            icon: <VideoLabelIcon />,
             onClick: gotoPlayer
         }
     ].filter(Boolean);
