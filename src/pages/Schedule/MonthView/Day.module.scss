@@ -5,6 +5,10 @@
     border-right: 1px solid var(--border-color);
 }
 
+.root:hover {
+    outline: 1px solid var(--hover-color);
+}
+
 .title {
     display: flex;
 }
@@ -23,4 +27,8 @@
     font-weight: bold;
     color: var(--inverse-text-color) !important;
     background-color: var(--hover-fill) !important;
+}
+
+.day:not(.active) {
+    opacity: 0.5;
 }

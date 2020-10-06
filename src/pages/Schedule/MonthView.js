@@ -20,10 +20,12 @@ export default function MonthView({ date, store }) {
         year: "numeric"
     });
 
+    const month = addDate(firstDay, 15);
+
     const numWeeks = 6;
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week key={index} date={weekFirstDay} row={index + 2} dateFormatter={dayFormatter} />;
+        return <Week key={index} month={month} date={weekFirstDay} row={index + 2} dateFormatter={dayFormatter} />;
     });
 
     const numDaysInWeek = 7;
@@ -32,7 +34,6 @@ export default function MonthView({ date, store }) {
         return <DayHeader key={index} date={day} index={index} dateFormatter={dayHeaderFormatter} />
     });
 
-    const month = addDate(firstDay, 15);
     const monthState = [month.getMonth() + 1, month => {
         store.update(s => {
             s.date = (new Date(date)).setMonth(month - 1);

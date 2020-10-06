@@ -28,6 +28,11 @@ export function isDateToday(date) {
         date.getFullYear() == today.getFullYear();
 }
 
+export function isDateMonth(date, month) {
+    return date.getMonth() == month.getMonth() &&
+        date.getFullYear() == month.getFullYear();
+};
+
 export function getMonthNames(date, formatter) {
     date = new Date(date);
     const months = new Array(12).fill(0).map((_, index) => {
