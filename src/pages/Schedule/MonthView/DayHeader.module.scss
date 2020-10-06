@@ -1,0 +1,13 @@
+.root {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    color: var(--text-color);
+    align-items: center;
+    justify-content: center;
+}
+
+.root.today {
+    font-weight: bold;
+    border-bottom: 1px solid var(--info-color);
+}

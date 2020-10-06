@@ -672,6 +672,22 @@ export default {
         {
             "id": "PLAYER",
             "value": "Player"
+        },
+        {
+            "id": "SCHEDULE",
+            "value": "Schedule"
+        },
+        {
+            "id": "PREVIOUS_MONTH",
+            "value": "Previous Month"
+        },
+        {
+            "id": "NEXT_MONTH",
+            "value": "Next Month"
+        },
+        {
+            "id": "TODAY",
+            "value": "Today"
         }
     ]
 };

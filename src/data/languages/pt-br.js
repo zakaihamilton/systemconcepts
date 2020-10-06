@@ -672,6 +672,22 @@ export default {
         {
             "id": "PLAYER",
             "value": "Tocador"
+        },
+        {
+            "id": "SCHEDULE",
+            "value": "Cronograma"
+        },
+        {
+            "id": "PREVIOUS_MONTH",
+            "value": "Mês anterior"
+        },
+        {
+            "id": "NEXT_MONTH",
+            "value": "Próximo mês"
+        },
+        {
+            "id": "TODAY",
+            "value": "Hoje"
         }
     ]
 };

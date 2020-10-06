@@ -18,7 +18,7 @@ import { abbreviateSize } from "@/util/string";
 import Typography from '@material-ui/core/Typography';
 import StatusBar from "@/widgets/StatusBar";
 import Destination from "./Storage/Destination";
-import { useDateLocale } from "@/util/locale";
+import { useDateFormatter } from "@/util/locale";
 import { useSync } from "@/util/sync";
 import { isBinaryFile, isImageFile, isVideoFile, isAudioFile } from "@/util/path";
 
@@ -72,7 +72,7 @@ export default function Storage({ path = "" }) {
     const [data, loading, error] = useListing(path, [counter, syncCounter]);
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
-    const dateFormatter = useDateLocale({
+    const dateFormatter = useDateFormatter({
         weekday: 'long',
         year: 'numeric',
         month: 'long',

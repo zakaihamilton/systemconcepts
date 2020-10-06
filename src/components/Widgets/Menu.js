@@ -40,7 +40,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
 
     const menuItems = (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
-        const { divider, name, icon, onClick, id, menu, ...props } = item;
+        const { divider, name, icon, onClick, id, menu, description, ...props } = item;
         const handleClick = event => {
             handleClose();
             if (onClick) {
@@ -54,7 +54,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
             <ListItemIcon>
                 {icon}
             </ListItemIcon>
-            <ListItemText primary={name} />
+            <ListItemText primary={name} secondary={description} />
         </MenuItem>,
         divider && !isLast && <Divider key={"_" + id + "_"} />
         ];

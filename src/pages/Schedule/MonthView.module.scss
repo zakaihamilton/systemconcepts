@@ -1,0 +1,30 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.title {
+    display: flex;
+    color: var(--text-color);
+    align-items: center;
+    justify-content: center;
+}
+
+.title div {
+    margin-left: 0.25em !important;
+    margin-right: 0.25em !important;
+}
+
+.grid {
+    display: grid;
+    flex-direction: column;
+    flex: 1;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 0.5fr repeat(6, 1fr);
+}
+
+.input {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
