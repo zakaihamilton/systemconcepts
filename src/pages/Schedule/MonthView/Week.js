@@ -1,10 +1,11 @@
-import styles from "./Week.module.scss";
 import Day from "./Day";
+import { addDate } from "@/util/date";
 
-export default function Week({ row }) {
+export default function Week({ date, row, dateFormatter }) {
     const numDays = 7;
     const days = new Array(numDays).fill(0).map((_, index) => {
-        return <Day column={index + 1} row={row} />;
+        const day = addDate(date, index);
+        return <Day column={index + 1} row={row} date={day} dateFormatter={dateFormatter} />;
     });
     return <>
         {days}
