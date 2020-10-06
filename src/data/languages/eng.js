@@ -672,6 +672,10 @@ export default {
         {
             "id": "PLAYER",
             "value": "Player"
+        },
+        {
+            "id": "SCHEDULE",
+            "value": "Schedule"
         }
     ]
 };

@@ -668,6 +668,10 @@ export default {
         {
             "id": "PLAYER",
             "value": "נגן"
+        },
+        {
+            "id": "SCHEDULE",
+            "value": "יומן"
         }
     ]
 };

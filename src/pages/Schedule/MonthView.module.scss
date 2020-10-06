@@ -1,0 +1,10 @@
+.root {
+    display: grid;
+    flex-direction: column;
+    flex: 1;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 0.5fr repeat(6, 1fr);
+    margin: 1em;
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+}

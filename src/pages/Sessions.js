@@ -18,7 +18,7 @@ export const SessionsStore = new Store({
     orderBy: "date"
 });
 
-export default function Sessions() {
+export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter], !busy);

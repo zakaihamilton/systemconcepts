@@ -672,6 +672,10 @@ export default {
         {
             "id": "PLAYER",
             "value": "Tocador"
+        },
+        {
+            "id": "SCHEDULE",
+            "value": "Cronograma"
         }
     ]
 };

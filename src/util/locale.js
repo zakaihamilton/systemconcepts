@@ -8,7 +8,7 @@ export function useLocale() {
     return locale;
 }
 
-export function useDateLocale(options, depends = []) {
+export function useDateFormatter(options, depends = []) {
     const locale = useLocale();
     const [dateObj, setDateObj] = useState(new Intl.DateTimeFormat(locale, options));
     useEffect(() => {
