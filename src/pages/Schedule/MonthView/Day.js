@@ -28,15 +28,16 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
                 id: "audio" + item.name,
                 name: item.name,
                 icon: <Tooltip title={translations.AUDIO}><AudiotrackIcon /></Tooltip>,
+                description: translations.AUDIO,
                 onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`)
             });
         }
         if (item.video) {
             media.push({
                 id: "video" + item.name,
-                name: translations.VIDEO,
                 name: item.name,
-                icon: <Tooltip title={translations.AUDIO}><MovieIcon /></Tooltip>,
+                icon: <Tooltip title={translations.VIDEO}><MovieIcon /></Tooltip>,
+                description: translations.VIDEO,
                 onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`)
             });
         }
