@@ -12,6 +12,7 @@ const StyledMenu = withStyles({
     },
 })((props) => (
     <Menu
+        transitionDuration={0}
         elevation={0}
         getContentAnchorEl={null}
         {...props}
@@ -20,7 +21,7 @@ const StyledMenu = withStyles({
 
 export default function MenuWidget({ items, children, onClick, selected, onVisible, ...props }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
-
+    const open = Boolean(anchorEl);
     const clickEnabled = items && items.length || onClick;
 
     const handleClick = (event) => {
@@ -38,7 +39,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
         setAnchorEl(null);
     };
 
-    const menuItems = (items || []).flatMap((item, index, list) => {
+    const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
         const { divider, name, icon, onClick, id, menu, description, ...props } = item;
         const handleClick = event => {
@@ -79,7 +80,7 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
                 id="menu"
                 anchorEl={anchorEl}
                 keepMounted
-                open={Boolean(anchorEl)}
+                open={!!open}
                 onClose={handleClose}
                 {...props}
             >

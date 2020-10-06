@@ -49,14 +49,14 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             </Avatar>
         </div>
         <div className={styles.sessions}>
-            {audioItems.length && <Menu items={audioItems}>
+            {!!audioItems.length && <Menu items={audioItems}>
                 <IconButton>
                     <Tooltip arrow title={translations.AUDIO}>
                         <AudiotrackIcon />
                     </Tooltip>
                 </IconButton>
             </Menu>}
-            {videoItems.length && <Menu items={videoItems}>
+            {!!videoItems.length && <Menu items={videoItems}>
                 <IconButton>
                     <Tooltip arrow title={translations.VIDEO}>
                         <MovieIcon />
