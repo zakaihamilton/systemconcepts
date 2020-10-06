@@ -2,7 +2,7 @@ export function getMonthViewStart(date) {
     date = new Date(date);
     date.setDate(1);
     const day = date.getDay();
-    const diff = date.getDate() - day + (day == 6 ? -6 : 0);
+    const diff = date.getDate() - day;
     const result = new Date(date.setDate(diff));
     return result;
 }
