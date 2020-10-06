@@ -1,10 +1,23 @@
 .root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 1em;
+}
+
+.title {
+    display: flex;
+    color: var(--text-color);
+    align-items: center;
+    justify-content: center;
+}
+
+.grid {
     display: grid;
     flex-direction: column;
     flex: 1;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: 0.5fr repeat(6, 1fr);
-    margin: 1em;
     border-top: 1px solid var(--border-color);
     border-left: 1px solid var(--border-color);
 }
