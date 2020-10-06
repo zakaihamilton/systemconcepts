@@ -9,10 +9,12 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TodayIcon from '@material-ui/icons/Today';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useDirection } from "@/util/direction";
 
 registerToolbar("MonthView");
 
 export default function MonthView({ sessions, date, store }) {
+    const direction = useDirection();
     const translations = useTranslations();
     const firstDay = getMonthViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
@@ -114,7 +116,7 @@ export default function MonthView({ sessions, date, store }) {
         {
             id: "previousMonth",
             name: translations.PREVIOUS_MONTH,
-            icon: <ChevronLeftIcon />,
+            icon: direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />,
             onClick: gotoPreviousMonth,
             disabled: !hasPreviousMonth,
             divider: true,
@@ -136,7 +138,7 @@ export default function MonthView({ sessions, date, store }) {
             id: "nextMonth",
             divider: true,
             name: translations.NEXT_MONTH,
-            icon: <ChevronRightIcon />,
+            icon: direction === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />,
             onClick: gotoNextMonth,
             disabled: !hasNextMonth,
             location: "footer"

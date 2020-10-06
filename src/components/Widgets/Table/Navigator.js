@@ -9,10 +9,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import clsx from "clsx";
 import TextField from '@material-ui/core/TextField';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useDirection } from "@/util/direction";
 
 registerToolbar("Navigator");
 
 export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
+    const direction = useDirection();
     const translations = useTranslations();
     const hasPreviousPage = pageIndex >= 1;
     const hasNextPage = pageIndex < pageCount - 1;
@@ -48,7 +50,7 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
         {
             id: "firstPage",
             name: translations.FIRST_PAGE,
-            icon: <FirstPageIcon />,
+            icon: direction === "rtl" ? <LastPageIcon /> : <FirstPageIcon />,
             onClick: gotoFirstPage,
             location: "footer",
             disabled: !hasPreviousPage
@@ -56,7 +58,7 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
         {
             id: "previousPage",
             name: translations.PREVIOUS_PAGE,
-            icon: <ChevronLeftIcon />,
+            icon: direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />,
             onClick: gotoPreviousPage,
             location: "footer",
             disabled: !hasPreviousPage,
@@ -83,7 +85,7 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
         {
             id: "nextPage",
             name: translations.NEXT_PAGE,
-            icon: <ChevronRightIcon />,
+            icon: direction === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />,
             onClick: gotoNextPage,
             location: "footer",
             disabled: !hasNextPage
@@ -91,7 +93,7 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
         {
             id: "lastPage",
             name: translations.LAST_PAGE,
-            icon: <LastPageIcon />,
+            icon: direction === "rtl" ? <FirstPageIcon /> : <LastPageIcon />,
             onClick: gotoLastPage,
             location: "footer",
             disabled: !hasNextPage
