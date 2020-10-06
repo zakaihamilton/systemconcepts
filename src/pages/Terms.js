@@ -34,12 +34,12 @@ export default function Terms() {
             tags: [phaseFilter && {
                 id: phaseFilter,
                 name: <Term id={phaseFilter} />,
-                onDelete: () => SessionsStore.update(s => {
+                onDelete: () => TermsStore.update(s => {
                     s.phaseFilter = "";
                     s.offset = 0;
                 })
             }],
-            onClick: !phaseFilter && (item => SessionsStore.update(s => {
+            onClick: !phaseFilter && (item => TermsStore.update(s => {
                 s.phaseFilter = typeof item.phase !== "undefined" && "phase." + item.phase;
                 s.offset = 0;
             }))
@@ -52,12 +52,12 @@ export default function Terms() {
             tags: [typeFilter && {
                 id: typeFilter,
                 name: <Term id={typeFilter} />,
-                onDelete: () => SessionsStore.update(s => {
+                onDelete: () => TermsStore.update(s => {
                     s.typeFilter = "";
                     s.offset = 0;
                 })
             }],
-            onClick: !typeFilter && (item => SessionsStore.update(s => {
+            onClick: !typeFilter && (item => TermsStore.update(s => {
                 s.typeFilter = item.type;
                 s.offset = 0;
             }))
