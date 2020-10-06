@@ -82,7 +82,7 @@ export default function BreadcrumbsWidget({ items }) {
                 <div className={styles.breadcrumbs}>
                     {breadcrumbItems}
                 </div>
-                <Toolbar />
+                <Toolbar collapsable={true} />
             </div>
             <Divider />
         </div>

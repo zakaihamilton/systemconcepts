@@ -49,7 +49,7 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
     }, depends);
 }
 
-export default function Toolbar({ location, divider }) {
+export default function Toolbar({ location, divider, collapsable }) {
     const isDesktop = useDeviceType() === "desktop";
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
@@ -63,8 +63,8 @@ export default function Toolbar({ location, divider }) {
     })).flat();
 
     sectionItems = sectionItems.filter(item => item.location === location);
-    const toolbarItems = sectionItems.filter(item => item && !item.menu && isDesktop);
-    const menuItems = sectionItems.filter(item => item && (item.menu || !isDesktop));
+    const toolbarItems = sectionItems.filter(item => item && !item.menu && (isDesktop || !collapsable));
+    const menuItems = sectionItems.filter(item => item && (item.menu || (!isDesktop && collapsable)));
 
     return <div className={styles.toolbar}>
         {toolbarItems.map((item, idx) => {
