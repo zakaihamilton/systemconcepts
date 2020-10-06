@@ -23,12 +23,13 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
     const sessionDate = getDateString(date);
     const sessionItems = sessions.filter(session => session.date === sessionDate).map(item => {
         const media = [];
+        const groupName = item.group[0].toUpperCase() + item.group.slice(1);
         if (item.audio) {
             media.push({
                 id: "audio" + item.name,
                 name: item.name,
                 icon: <Tooltip title={translations.AUDIO}><AudiotrackIcon /></Tooltip>,
-                description: translations.AUDIO,
+                description: groupName,
                 onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`)
             });
         }
@@ -37,7 +38,7 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
                 id: "video" + item.name,
                 name: item.name,
                 icon: <Tooltip title={translations.VIDEO}><MovieIcon /></Tooltip>,
-                description: translations.VIDEO,
+                description: groupName,
                 onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`)
             });
         }

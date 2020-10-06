@@ -1,13 +1,11 @@
 .root {
     display: flex;
     flex-direction: column;
+    border-left: 1px solid transparent;
+    border-top: 1px solid transparent;
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     padding: 0.5em;
-}
-
-.root:hover {
-    outline: 1px solid var(--hover-color);
 }
 
 .title {
