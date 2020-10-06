@@ -10,7 +10,7 @@ import { Store } from "pullstate";
 export const FontSizesStore = new Store({
     order: "desc",
     offset: 0,
-    orderBy: ""
+    orderBy: "id"
 });
 
 export default function FontSizes() {
@@ -67,7 +67,6 @@ export default function FontSizes() {
 
     return <>
         <Table
-            sortColumn="id"
             columns={columns}
             data={data}
             mapper={mapper}

@@ -25,7 +25,7 @@ import { Store } from "pullstate";
 export const SettingsStore = new Store({
     order: "desc",
     offset: 0,
-    orderBy: ""
+    orderBy: "index"
 });
 
 export default function Settings() {
@@ -154,7 +154,6 @@ export default function Settings() {
 
     return <>
         <Table
-            sortColumn="index"
             store={SettingsStore}
             columns={columns}
             data={data}
