@@ -215,8 +215,9 @@ export default function TableWidget(props) {
     const pageIndex = parseInt(startIdx / itemsPerPage);
 
     const setPageIndex = index => {
+        const offset = index * itemsPerPage;
         store.update(s => {
-            s.offset = index * itemsPerPage;
+            s.offset = offset;
         });
     };
 
@@ -242,10 +243,10 @@ export default function TableWidget(props) {
             {!!isEmpty && empty}
             {!loading && !error && <div className={styles.footer}>
                 {statusBar}
-                <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
             </div>}
         </TableContainer>
         {!!loading && <Progress />}
         {!!error && <Error error={error} />}
+        <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
     </>);
 }

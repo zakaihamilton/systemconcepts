@@ -19,12 +19,13 @@ export function registerToolbar(id) {
     });
 }
 
-export function useToolbar({ id, items, depends = [] }) {
+export function useToolbar({ id, items, visible = true, depends = [] }) {
     useEffect(() => {
         ToolbarStore.update(s => {
             const section = s.sections.find(item => item.id === id);
             if (section) {
                 section.used++;
+                section.visible = visible;
                 section.items = items;
             }
         });
@@ -41,18 +42,19 @@ export function useToolbar({ id, items, depends = [] }) {
         ToolbarStore.update(s => {
             const section = s.sections.find(item => item.id === id);
             if (section) {
+                section.visible = visible;
                 section.items = items;
             }
         });
     }, depends);
 }
 
-export default function Toolbar() {
+export default function Toolbar({ location, divider }) {
     const isDesktop = useDeviceType() === "desktop";
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
 
-    const sectionItems = sections.filter(section => section.used).map(section => section.items.map((item, idx, list) => {
+    let sectionItems = sections.filter(section => section.used).map(section => section.items.map((item, idx, list) => {
         item = { ...item };
         if (idx === list.length - 1) {
             item.divider = true;
@@ -60,30 +62,33 @@ export default function Toolbar() {
         return item;
     })).flat();
 
+    sectionItems = sectionItems.filter(item => item.location === location);
     const toolbarItems = sectionItems.filter(item => item && !item.menu && isDesktop);
     const menuItems = sectionItems.filter(item => item && (item.menu || !isDesktop));
 
     return <div className={styles.toolbar}>
         {toolbarItems.map((item, idx) => {
             return <React.Fragment key={item.id}>
-                <Tooltip arrow title={item.name}>
-                    <IconButton onClick={item.onClick ? item.onClick : undefined}>
+                {item.element}
+                {!item.element && <IconButton disabled={item.disabled} onClick={item.onClick ? item.onClick : undefined}>
+                    <Tooltip arrow title={item.name}>
                         {item.icon}
-                    </IconButton>
-                </Tooltip>
+                    </Tooltip>
+                </IconButton>}
                 {item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             </React.Fragment>
         })}
         {!!menuItems.length && <>
             {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             <Menu items={menuItems}>
-                <Tooltip arrow title={translations.MENU}>
-                    <IconButton>
+                <IconButton>
+                    <Tooltip arrow title={translations.MENU}>
                         <MoreVertIcon />
-                    </IconButton>
-                </Tooltip>
+                    </Tooltip>
+                </IconButton>
             </Menu>
         </>
         }
+        {divider && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
     </div>
 }

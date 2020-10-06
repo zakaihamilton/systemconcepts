@@ -5,6 +5,7 @@ import { MainStore } from "@/components/Main";
 import { usePagesFromHash } from "@/util/pages";
 import Breadcrumbs from "./Breadcrumbs";
 import Player from "@/pages/Player";
+import Footer from "./Footer";
 
 export const PageSize = createContext();
 
@@ -34,5 +35,6 @@ export default function Page() {
                 </PageSize.Provider>
             </main>
         </div>
+        <Footer />
     </>;
 }

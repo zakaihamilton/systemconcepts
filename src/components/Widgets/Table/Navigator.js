@@ -4,16 +4,16 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useTranslations } from "@/util/translations";
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
 import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
 import TextField from '@material-ui/core/TextField';
+import { registerToolbar, useToolbar } from "@/components/Toolbar";
+
+registerToolbar("Navigator");
 
 export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
-    const deviceType = useDeviceType();
-    const isVertical = deviceType === "phone" || deviceType === "tablet";
     const translations = useTranslations();
     const hasPreviousPage = pageIndex >= 1;
     const hasNextPage = pageIndex < pageCount - 1;
@@ -45,44 +45,61 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
         setPageIndex && setPageIndex(pageIndex);
     };
 
-    if (pageCount <= 1) {
-        return null;
-    }
+    const menuItems = [
+        {
+            id: "firstPage",
+            name: translations.FIRST_PAGE,
+            icon: <FirstPageIcon />,
+            onClick: gotoFirstPage,
+            location: "footer",
+            disabled: !hasPreviousPage
+        },
+        {
+            id: "previousPage",
+            name: translations.PREVIOUS_PAGE,
+            icon: <ChevronLeftIcon />,
+            onClick: gotoPreviousPage,
+            location: "footer",
+            disabled: !hasPreviousPage,
+            divider: true
+        },
+        {
+            id: "page",
+            location: "footer",
+            divider: true,
+            element: (<>
+                <Tooltip title={translations.PAGE_INDEX} arrow>
+                    <TextField className={styles.pageIndex} onChange={handlePageChange} value={pageIndex + 1} />
+                </Tooltip>
+                <Typography className={clsx(styles.pageSeparator)}>
+                    /
+                </Typography>
+                <Tooltip title={translations.PAGE_COUNT} arrow>
+                    <Typography className={styles.pageCount}>
+                        {pageCount}
+                    </Typography>
+                </Tooltip>
+            </>)
+        },
+        {
+            id: "nextPage",
+            name: translations.NEXT_PAGE,
+            icon: <ChevronRightIcon />,
+            onClick: gotoNextPage,
+            location: "footer",
+            disabled: !hasNextPage
+        },
+        {
+            id: "lastPage",
+            name: translations.LAST_PAGE,
+            icon: <LastPageIcon />,
+            onClick: gotoLastPage,
+            location: "footer",
+            disabled: !hasNextPage
+        }
+    ].filter(Boolean);
 
-    const iconClass = isVertical && styles.verticalIcon;
-    const tooltipPlacement = isVertical ? "left" : "bottom";
+    useToolbar({ id: "Navigator", items: menuItems, visible: pageCount > 1, depends: [translations, pageIndex, pageCount] });
 
-    return <div className={clsx(styles.root, isVertical ? styles.vertical : styles.horizontal)}>
-        <IconButton disabled={!hasPreviousPage} onClick={gotoFirstPage}>
-            <Tooltip title={translations.FIRST_PAGE} placement={tooltipPlacement} arrow>
-                <FirstPageIcon className={iconClass} />
-            </Tooltip>
-        </IconButton>
-        <IconButton disabled={!hasPreviousPage} onClick={gotoPreviousPage}>
-            <Tooltip title={translations.PREVIOUS_PAGE} placement={tooltipPlacement} arrow>
-                <ChevronLeftIcon className={iconClass} />
-            </Tooltip>
-        </IconButton>
-        <Tooltip title={translations.PAGE_INDEX} placement={tooltipPlacement} arrow>
-            <TextField className={styles.pageIndex} onChange={handlePageChange} value={pageIndex + 1} />
-        </Tooltip>
-        <Typography className={clsx(styles.pageSeparator, isVertical && styles.vertical)}>
-            {isVertical ? "|" : "/"}
-        </Typography>
-        <Tooltip title={translations.PAGE_COUNT} placement={tooltipPlacement} arrow>
-            <Typography className={styles.pageCount}>
-                {pageCount}
-            </Typography>
-        </Tooltip>
-        <IconButton disabled={!hasNextPage} onClick={gotoNextPage}>
-            <Tooltip title={translations.NEXT_PAGE} placement={tooltipPlacement} arrow>
-                <ChevronRightIcon className={iconClass} />
-            </Tooltip>
-        </IconButton>
-        <IconButton disabled={!hasNextPage} onClick={gotoLastPage}>
-            <Tooltip title={translations.LAST_PAGE} placement={tooltipPlacement} arrow>
-                <LastPageIcon className={iconClass} />
-            </Tooltip>
-        </IconButton>
-    </div >
+    return null;
 }
