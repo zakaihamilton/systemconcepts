@@ -75,7 +75,7 @@ export default function Toolbar({ location, divider, collapsable }) {
                         {item.icon}
                     </Tooltip>
                 </IconButton>}
-                {item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                {!!item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             </React.Fragment>
         })}
         {!!menuItems.length && <>
@@ -89,6 +89,6 @@ export default function Toolbar({ location, divider, collapsable }) {
             </Menu>
         </>
         }
-        {divider && (toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+        {!!divider && !!(toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
     </div>
 }
