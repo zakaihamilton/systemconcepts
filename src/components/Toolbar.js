@@ -54,7 +54,7 @@ export default function Toolbar({ location, divider }) {
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
 
-    let sectionItems = sections.filter(section => section.used).map(section => section.items.map((item, idx, list) => {
+    let sectionItems = sections.filter(section => section.used && section.visible).map(section => section.items.map((item, idx, list) => {
         item = { ...item };
         if (idx === list.length - 1) {
             item.divider = true;
@@ -89,6 +89,6 @@ export default function Toolbar({ location, divider }) {
             </Menu>
         </>
         }
-        {divider && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+        {divider && (toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
     </div>
 }
