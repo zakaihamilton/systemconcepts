@@ -1,6 +1,5 @@
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
-import { useSessions } from "@/util/sessions";
 import styles from "./Sessions.module.scss";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
@@ -8,6 +7,7 @@ import { IconButton } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
 import { useSync } from "@/util/sync";
+import { useSessions } from "@/util/sessions";
 import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
 

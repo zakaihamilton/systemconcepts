@@ -676,6 +676,18 @@ export default {
         {
             "id": "SCHEDULE",
             "value": "Schedule"
+        },
+        {
+            "id": "PREVIOUS_MONTH",
+            "value": "Previous Month"
+        },
+        {
+            "id": "NEXT_MONTH",
+            "value": "Next Month"
+        },
+        {
+            "id": "TODAY",
+            "value": "Today"
         }
     ]
 };

@@ -22,7 +22,7 @@ export function addDate(date, index) {
 }
 
 export function isDateToday(date) {
-    const today = new Date()
+    const today = new Date();
     return date.getDate() == today.getDate() &&
         date.getMonth() == today.getMonth() &&
         date.getFullYear() == today.getFullYear();
@@ -49,4 +49,17 @@ export function getYearNames(date, formatter, start, end) {
         return formatter.format(date);
     });
     return years;
+}
+
+export function getDateString(date) {
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    const year = date.getFullYear();
+
+    if (month.length < 2)
+        month = '0' + month;
+    if (day.length < 2)
+        day = '0' + day;
+
+    return [year, month, day].join('-');
 }

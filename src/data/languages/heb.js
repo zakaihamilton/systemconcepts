@@ -672,6 +672,18 @@ export default {
         {
             "id": "SCHEDULE",
             "value": "יומן"
+        },
+        {
+            "id": "PREVIOUS_MONTH",
+            "value": "חודש שעבר"
+        },
+        {
+            "id": "NEXT_MONTH",
+            "value": "חודש הבא"
+        },
+        {
+            "id": "TODAY",
+            "value": "היום"
         }
     ]
 };

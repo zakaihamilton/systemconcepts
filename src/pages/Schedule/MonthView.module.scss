@@ -12,12 +12,23 @@
     justify-content: center;
 }
 
+.title div {
+    margin-left: 0.25em !important;
+    margin-right: 0.25em !important;
+}
+
 .grid {
     display: grid;
     flex-direction: column;
     flex: 1;
+    margin-top: 1em;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: 0.5fr repeat(6, 1fr);
     border-top: 1px solid var(--border-color);
     border-left: 1px solid var(--border-color);
+}
+
+.input {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
 }

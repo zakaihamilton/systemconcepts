@@ -51,7 +51,7 @@ export default React.forwardRef(function InputWidget({ mapping, helperText = " "
             ref={ref}
             className={styles.root}
             InputProps={{
-                className: clsx(className, styles.input),
+                className: clsx(styles.input, className),
                 ...icon && {
                     startAdornment: (
                         <InputAdornment position="start">
@@ -64,7 +64,7 @@ export default React.forwardRef(function InputWidget({ mapping, helperText = " "
                 readOnly: Boolean(readOnly)
             }}
             SelectProps={{
-                className: clsx(className, styles.select),
+                className: clsx(styles.select, className),
                 multiple,
                 renderValue,
                 MenuProps: {

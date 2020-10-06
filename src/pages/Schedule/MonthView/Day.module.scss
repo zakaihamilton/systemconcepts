@@ -3,6 +3,7 @@
     flex-direction: column;
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
+    padding: 0.25em;
 }
 
 .root:hover {
@@ -15,7 +16,8 @@
 
 .day {
     color: var(--text-color);
-    margin: 0.5em;
+    margin-right: 0.25em;
+    margin-bottom: 0.25em;
     width: 2em !important;
     height: 2em !important;
     font-size: 100% !important;
@@ -31,4 +33,13 @@
 
 .day:not(.active) {
     opacity: 0.5;
+}
+
+.sessions {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.session {
+    color: var(--text-color);
 }

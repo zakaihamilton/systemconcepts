@@ -1,11 +1,19 @@
+import { useTranslations } from "@/util/translations";
 import styles from "./MonthView.module.scss";
 import Week from "./MonthView/Week";
 import DayHeader from "./MonthView/DayHeader";
 import { getMonthViewStart, addDate, getMonthNames, getYearNames } from "@/util/date";
 import { useDateFormatter } from "@/util/locale";
 import Input from "@/widgets/Input";
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import TodayIcon from '@material-ui/icons/Today';
+import { registerToolbar, useToolbar } from "@/components/Toolbar";
 
-export default function MonthView({ date, store }) {
+registerToolbar("MonthView");
+
+export default function MonthView({ sessions, date, store }) {
+    const translations = useTranslations();
     const firstDay = getMonthViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
         weekday: 'short'
@@ -25,7 +33,7 @@ export default function MonthView({ date, store }) {
     const numWeeks = 6;
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week key={index} month={month} date={weekFirstDay} row={index + 2} dateFormatter={dayFormatter} />;
+        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} dateFormatter={dayFormatter} />;
     });
 
     const numDaysInWeek = 7;
@@ -35,8 +43,10 @@ export default function MonthView({ date, store }) {
     });
 
     const monthState = [month.getMonth() + 1, month => {
+        const newDate = new Date(date);
+        newDate.setMonth(month - 1);
         store.update(s => {
-            s.date = (new Date(date)).setMonth(month - 1);
+            s.date = newDate;
         });
     }];
     const monthItems = getMonthNames(month, monthFormatter).map((name, index) => {
@@ -45,27 +55,97 @@ export default function MonthView({ date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} fullWidth={false} style={{ marginLeft: "1em", marginRight: "1em", minWidth: "10em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "12em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
+        const newDate = new Date(date);
+        newDate.setFullYear(year);
         store.update(s => {
-            s.date = (new Date(date)).setFullYear(year);
+            s.date = newDate;
         });
     }];
     const yearStart = 2015;
-    const yearItems = getYearNames(month, yearFormatter, yearStart, new Date().getFullYear() + 2).map((name, index) => {
+    const yearEnd = new Date().getFullYear() + 2;
+    const yearItems = getYearNames(month, yearFormatter, yearStart, yearEnd).map((name, index) => {
         return {
             id: yearStart + index,
             name
         };
     });
-    const yearWidget = <Input select={true} fullWidth={false} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
+
+    const gotoPreviousMonth = () => {
+        const newDate = new Date(month);
+        newDate.setMonth(newDate.getMonth() - 1);
+        store.update(s => {
+            s.date = newDate;
+        });
+    };
+
+    const gotoNextMonth = () => {
+        const newDate = new Date(month);
+        newDate.setMonth(newDate.getMonth() + 1);
+        store.update(s => {
+            s.date = newDate;
+        });
+    };
+
+    const today = new Date();
+    const hasPreviousMonth = month.getMonth() || month.getFullYear() !== yearStart;
+    const hasNextMonth = month.getMonth() !== 11 || month.getFullYear() !== yearEnd;
+    const isToday = month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear()
+
+    const gotoToday = () => {
+        store.update(s => {
+            s.date = today;
+        });
+    };
+
+    const menuItems = [
+        {
+            id: "today",
+            name: translations.TODAY,
+            icon: <TodayIcon />,
+            onClick: gotoToday,
+            disabled: isToday,
+            divider: true,
+            location: "footer"
+        },
+        {
+            id: "previousMonth",
+            name: translations.PREVIOUS_MONTH,
+            icon: <ChevronLeftIcon />,
+            onClick: gotoPreviousMonth,
+            disabled: !hasPreviousMonth,
+            divider: true,
+            location: "footer"
+        },
+        {
+            id: "monthWidget",
+            divider: true,
+            element: monthWidget,
+            location: "footer"
+        },
+        {
+            id: "yearWidget",
+            divider: true,
+            element: yearWidget,
+            location: "footer"
+        },
+        {
+            id: "nextMonth",
+            divider: true,
+            name: translations.NEXT_MONTH,
+            icon: <ChevronRightIcon />,
+            onClick: gotoNextMonth,
+            disabled: !hasNextMonth,
+            location: "footer"
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "MonthView", items: menuItems, depends: [translations, month] });
 
     return <div className={styles.root}>
-        <div className={styles.title}>
-            {monthWidget}
-            {yearWidget}
-        </div>
         <div className={styles.grid}>
             {dayTitles}
             {weeks}

@@ -6,7 +6,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useTranslations } from "@/util/translations";
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
-import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
 import TextField from '@material-ui/core/TextField';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
