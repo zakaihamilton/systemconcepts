@@ -1,25 +1,35 @@
 export function getMonthViewStart(date) {
-    date = new Date(date);
+    date = getWeekViewEnd(date);
     date.setDate(1);
     const day = date.getDay();
     const diff = date.getDate() - day;
-    const result = new Date(date.setDate(diff));
-    return result;
+    date.setDate(diff);
+    return date;
+}
+
+export function getMonthViewEnd(date) {
+    date = new Date(date);
+    date.setMonth(date.getMonth() + 1);
+    date.setDate(0);
+    const day = date.getDay();
+    const diff = date.getDate() - day + 6;
+    date.setDate(diff);
+    return date;
 }
 
 export function getWeekViewStart(date) {
     date = new Date(date);
     const day = date.getDay();
     const diff = date.getDate() - day;
-    const result = new Date(date.setDate(diff));
-    return result;
+    date.setDate(diff);
+    return date;
 }
 
 export function getWeekViewEnd(date) {
     date = getWeekViewStart(date);
-    const diff = date.getDate() + 7;
-    const result = new Date(date.setDate(diff));
-    return result;
+    const diff = date.getDate() + 6;
+    date.setDate(diff);
+    return date;
 }
 
 export function addDate(date, index) {
@@ -54,11 +64,10 @@ export function diffDays(from, to) {
 }
 
 export function getWeekOfMonth(date) {
-    const firstDayOfMonth = getMonthViewStart(date);
     const firstDayOfWeek = getWeekViewStart(date);
+    const firstDayOfMonth = getMonthViewStart(date);
     const offsetDate = diffDays(firstDayOfWeek, firstDayOfMonth);
     const result = Math.floor(offsetDate / 7);
-    console.log("result", result, "firstDayOfMonth", firstDayOfMonth, "firstDayOfWeek", firstDayOfWeek, "offsetDate", offsetDate);
     return result;
 }
 
@@ -69,8 +78,16 @@ export function setWeekOfMonth(date, weekNum) {
 }
 
 export function getNumberOfWeeksInMonth(date) {
-    const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 0);
-    return getWeekOfMonth(lastDayOfMonth) + 1;
+    let maxIndex = getWeekOfMonth(date);
+    while (true) {
+        date = addDate(date, 7);
+        const index = getWeekOfMonth(date);
+        if (index < maxIndex) {
+            break;
+        }
+        maxIndex = index;
+    }
+    return maxIndex + 1;
 }
 
 export function getMonthNames(date, formatter) {

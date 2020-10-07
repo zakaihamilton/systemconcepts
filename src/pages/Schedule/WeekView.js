@@ -17,6 +17,8 @@ export default function WeekView({ sessions, date, store }) {
     const direction = useDirection();
     const translations = useTranslations();
     const firstDay = getWeekViewStart(date);
+    const monthStart = getMonthViewStart(date);
+    const month = addDate(monthStart, 14);
     const dayHeaderFormatter = useDateFormatter({
         weekday: 'short'
     });
@@ -34,8 +36,6 @@ export default function WeekView({ sessions, date, store }) {
         year: "numeric"
     });
 
-    const month = addDate(getMonthViewStart(firstDay), 14);
-
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
         const day = addDate(firstDay, index);
@@ -51,7 +51,7 @@ export default function WeekView({ sessions, date, store }) {
             s.date = newDate;
         });
     }];
-    const weekItems = new Array(getNumberOfWeeksInMonth(month)).fill(0).map((_, index) => {
+    const weekItems = new Array(numOfWeeksInMonth).fill(0).map((_, index) => {
         return {
             id: index + 1,
             name: index + 1
