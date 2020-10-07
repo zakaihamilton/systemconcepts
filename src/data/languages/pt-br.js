@@ -686,8 +686,24 @@ export default {
             "value": "Próximo mês"
         },
         {
+            "id": "PREVIOUS_WEEK",
+            "value": "Semana anterior"
+        },
+        {
+            "id": "NEXT_WEEK",
+            "value": "Semana que vem"
+        },
+        {
             "id": "TODAY",
             "value": "Hoje"
+        },
+        {
+            "id": "WEEK_VIEW",
+            "value": "Vista da semana"
+        },
+        {
+            "id": "MONTH_VIEW",
+            "value": "Vista Mensal"
         }
     ]
 };

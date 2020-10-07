@@ -5,6 +5,15 @@
     color: var(--text-color);
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+}
+
+.root *:not(:last-child) {
+    margin-bottom: 0.5em;
+}
+
+.day {
+    font-weight: bold;
 }
 
 .root.today {

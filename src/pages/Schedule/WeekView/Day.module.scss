@@ -1,0 +1,46 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid transparent;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    padding: 0.25em;
+}
+
+.title {
+    display: flex;
+}
+
+.day {
+    color: var(--text-color);
+    margin-right: 0.25em;
+    margin-bottom: 0.25em;
+    width: 2em !important;
+    height: 2em !important;
+    font-size: 100% !important;
+    background-color: var(--main-background) !important;
+    color: var(--text-color) !important;
+}
+
+.day.today {
+    font-weight: bold;
+    color: var(--inverse-text-color) !important;
+    background-color: var(--hover-fill) !important;
+}
+
+.day:not(.active) {
+    opacity: 0.5;
+}
+
+.sessions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.session {
+    color: var(--text-color);
+}

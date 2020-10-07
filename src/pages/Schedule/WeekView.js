@@ -1,8 +1,8 @@
 import { useTranslations } from "@/util/translations";
-import styles from "./MonthView.module.scss";
-import Week from "./MonthView/Week";
-import DayHeader from "./MonthView/DayHeader";
-import { getMonthViewStart, addDate, getMonthNames, getYearNames } from "@/util/date";
+import styles from "./WeekView.module.scss";
+import Week from "./WeekView/Week";
+import DayHeader from "./WeekView/DayHeader";
+import { getWeekViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@/util/date";
 import { useDateFormatter } from "@/util/locale";
 import Input from "@/widgets/Input";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -11,17 +11,21 @@ import TodayIcon from '@material-ui/icons/Today';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { useDirection } from "@/util/direction";
 
-registerToolbar("MonthView");
+registerToolbar("WeekView");
 
-export default function MonthView({ sessions, date, store }) {
+export default function WeekView({ sessions, date, store }) {
     const direction = useDirection();
     const translations = useTranslations();
-    const firstDay = getMonthViewStart(date);
+    const firstDay = getWeekViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
         weekday: 'short'
     });
     const dayFormatter = useDateFormatter({
         day: 'numeric'
+    });
+    const dateFormatter = useDateFormatter({
+        day: 'numeric',
+        month: "short"
     });
     const monthFormatter = useDateFormatter({
         month: "long"
@@ -30,19 +34,31 @@ export default function MonthView({ sessions, date, store }) {
         year: "numeric"
     });
 
-    const month = addDate(firstDay, 14);
-
-    const numWeeks = 6;
-    const weeks = new Array(numWeeks).fill(0).map((_, index) => {
-        const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} dateFormatter={dayFormatter} />;
-    });
+    const month = new Date(firstDay);
 
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
-        const day = addDate(month, index);
-        return <DayHeader key={index} date={day} index={index} dateFormatter={dayHeaderFormatter} />
+        const day = addDate(firstDay, index);
+        return <DayHeader key={index} date={day} index={index} dateFormatter={dateFormatter} dayFormatter={dayHeaderFormatter} />
     });
+
+    const weekOfMonth = getWeekOfMonth(firstDay);
+    const numOfWeeksInMonth = getNumberOfWeeksInMonth(month);
+    const weekState = [weekOfMonth + 1, week => {
+        const newDate = new Date(date);
+        setWeekOfMonth(newDate, week - 1);
+        store.update(s => {
+            s.date = newDate;
+        });
+    }];
+    const weekItems = new Array(getNumberOfWeeksInMonth(month)).fill(0).map((_, index) => {
+        return {
+            id: index + 1,
+            name: index + 1
+        };
+    });
+
+    const weekWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "5em" }} items={weekItems} state={weekState} />;
 
     const monthState = [month.getMonth() + 1, month => {
         const newDate = new Date(date);
@@ -76,26 +92,26 @@ export default function MonthView({ sessions, date, store }) {
     });
     const yearWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
 
-    const gotoPreviousMonth = () => {
+    const gotoPreviousWeek = () => {
         const newDate = new Date(month);
-        newDate.setMonth(newDate.getMonth() - 1);
+        setWeekOfMonth(newDate, getWeekOfMonth(newDate) - 1);
         store.update(s => {
             s.date = newDate;
         });
     };
 
-    const gotoNextMonth = () => {
+    const gotoNextWeek = () => {
         const newDate = new Date(month);
-        newDate.setMonth(newDate.getMonth() + 1);
+        setWeekOfMonth(newDate, getWeekOfMonth(newDate) + 1);
         store.update(s => {
             s.date = newDate;
         });
     };
 
     const today = new Date();
-    const hasPreviousMonth = month.getMonth() || month.getFullYear() !== yearStart;
-    const hasNextMonth = month.getMonth() !== 11 || month.getFullYear() !== yearEnd;
-    const isToday = month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear()
+    const hasPreviousWeek = weekOfMonth || month.getFullYear() !== yearStart;
+    const hasNextWeek = weekOfMonth !== (numOfWeeksInMonth - 1) || month.getFullYear() !== yearEnd;
+    const isToday = weekOfMonth === getWeekOfMonth(today) && month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear()
 
     const gotoToday = () => {
         store.update(s => {
@@ -114,12 +130,18 @@ export default function MonthView({ sessions, date, store }) {
             location: "footer"
         },
         {
-            id: "previousMonth",
-            name: translations.PREVIOUS_MONTH,
+            id: "previousWeek",
+            name: translations.PREVIOUS_WEEK,
             icon: direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />,
-            onClick: gotoPreviousMonth,
-            disabled: !hasPreviousMonth,
+            onClick: gotoPreviousWeek,
+            disabled: !hasPreviousWeek,
             divider: true,
+            location: "footer"
+        },
+        {
+            id: "weekWidget",
+            divider: true,
+            element: weekWidget,
             location: "footer"
         },
         {
@@ -135,22 +157,22 @@ export default function MonthView({ sessions, date, store }) {
             location: "footer"
         },
         {
-            id: "nextMonth",
+            id: "nextWeek",
             divider: true,
-            name: translations.NEXT_MONTH,
+            name: translations.NEXT_WEEK,
             icon: direction === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />,
-            onClick: gotoNextMonth,
-            disabled: !hasNextMonth,
+            onClick: gotoNextWeek,
+            disabled: !hasNextWeek,
             location: "footer"
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "MonthView", items: menuItems, depends: [translations, month] });
+    useToolbar({ id: "WeekView", items: menuItems, depends: [translations, month] });
 
     return <div className={styles.root}>
         <div className={styles.grid}>
             {dayTitles}
-            {weeks}
+            <Week sessions={sessions} month={month} date={firstDay} row={2} dateFormatter={dayFormatter} />
         </div>
     </div>
 }

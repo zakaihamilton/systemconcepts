@@ -686,8 +686,24 @@ export default {
             "value": "Next Month"
         },
         {
+            "id": "PREVIOUS_WEEK",
+            "value": "Previous Week"
+        },
+        {
+            "id": "NEXT_WEEK",
+            "value": "Next Week"
+        },
+        {
             "id": "TODAY",
             "value": "Today"
+        },
+        {
+            "id": "WEEK_VIEW",
+            "value": "Week View"
+        },
+        {
+            "id": "MONTH_VIEW",
+            "value": "Month View"
         }
     ]
 };

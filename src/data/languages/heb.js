@@ -682,8 +682,24 @@ export default {
             "value": "חודש הבא"
         },
         {
+            "id": "PREVIOUS_WEEK",
+            "value": "שבוע שעבר"
+        },
+        {
+            "id": "NEXT_WEEK",
+            "value": "שבוע הבא"
+        },
+        {
             "id": "TODAY",
             "value": "היום"
+        },
+        {
+            "id": "WEEK_VIEW",
+            "value": "מבט שבועי"
+        },
+        {
+            "id": "MONTH_VIEW",
+            "value": "מבט חודשי"
         }
     ]
 };

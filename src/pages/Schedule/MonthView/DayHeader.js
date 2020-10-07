@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import styles from "./DayHeader.module.scss";
-import { isDateToday } from "@/util/date";
+import { isDayToday } from "@/util/date";
 
 export default function DayHeader({ dateFormatter, date, index }) {
     const style = {
@@ -8,7 +8,7 @@ export default function DayHeader({ dateFormatter, date, index }) {
         gridRow: 1
     }
     const dayName = dateFormatter.format(date);
-    const isToday = isDateToday(date);
+    const isToday = isDayToday(date);
     return <div className={clsx(styles.root, isToday && styles.today)} style={style}>
         {dayName}
     </div>
