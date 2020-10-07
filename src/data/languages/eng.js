@@ -704,6 +704,14 @@ export default {
         {
             "id": "MONTH_VIEW",
             "value": "Month View"
+        },
+        {
+            "id": "WEEK",
+            "value": "Week"
+        },
+        {
+            "id": "MONTH",
+            "value": "Month"
         }
     ]
 };

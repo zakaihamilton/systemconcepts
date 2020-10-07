@@ -58,7 +58,7 @@ export default function WeekView({ sessions, date, store }) {
         };
     });
 
-    const weekWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "5em" }} items={weekItems} state={weekState} />;
+    const weekWidget = <Input select={true} label={translations.WEEK} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "5em" }} items={weekItems} state={weekState} />;
 
     const monthState = [month.getMonth() + 1, month => {
         const newDate = new Date(date);
@@ -73,7 +73,7 @@ export default function WeekView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "10em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} label={translations.MONTH} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "10em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);
@@ -90,7 +90,7 @@ export default function WeekView({ sessions, date, store }) {
             name
         };
     });
-    const yearWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input select={true} label={translations.YEAR} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
 
     const gotoPreviousWeek = () => {
         const newDate = new Date(firstDay);

@@ -700,6 +700,14 @@ export default {
         {
             "id": "MONTH_VIEW",
             "value": "מבט חודשי"
+        },
+        {
+            "id": "WEEK",
+            "value": "שבוע"
+        },
+        {
+            "id": "MONTH",
+            "value": "חודש"
         }
     ]
 };
