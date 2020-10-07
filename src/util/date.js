@@ -1,18 +1,35 @@
 export function getMonthViewStart(date) {
-    date = new Date(date);
+    date = getWeekViewEnd(date);
     date.setDate(1);
     const day = date.getDay();
     const diff = date.getDate() - day;
-    const result = new Date(date.setDate(diff));
-    return result;
+    date.setDate(diff);
+    return date;
 }
 
-export function getSunday(date) {
+export function getMonthViewEnd(date) {
+    date = new Date(date);
+    date.setMonth(date.getMonth() + 1);
+    date.setDate(0);
+    const day = date.getDay();
+    const diff = date.getDate() - day + 6;
+    date.setDate(diff);
+    return date;
+}
+
+export function getWeekViewStart(date) {
     date = new Date(date);
     const day = date.getDay();
-    const diff = date.getDate() - day + (day == 6 ? -6 : 0);
-    const result = new Date(date.setDate(diff));
-    return result;
+    const diff = date.getDate() - day;
+    date.setDate(diff);
+    return date;
+}
+
+export function getWeekViewEnd(date) {
+    date = getWeekViewStart(date);
+    const diff = date.getDate() + 6;
+    date.setDate(diff);
+    return date;
 }
 
 export function addDate(date, index) {
@@ -28,10 +45,50 @@ export function isDateToday(date) {
         date.getFullYear() == today.getFullYear();
 }
 
+export function isDayToday(date) {
+    const today = new Date();
+    return date.getDay() == today.getDay() &&
+        date.getMonth() == today.getMonth() &&
+        date.getFullYear() == today.getFullYear();
+}
+
 export function isDateMonth(date, month) {
     return date.getMonth() == month.getMonth() &&
         date.getFullYear() == month.getFullYear();
 };
+
+export function diffDays(from, to) {
+    const diffTime = Math.abs(to - from);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+export function getWeekOfMonth(date) {
+    const firstDayOfWeek = getWeekViewStart(date);
+    const firstDayOfMonth = getMonthViewStart(date);
+    const offsetDate = diffDays(firstDayOfWeek, firstDayOfMonth);
+    const result = Math.floor(offsetDate / 7);
+    return result;
+}
+
+export function setWeekOfMonth(date, weekNum) {
+    const weekOfMonth = getWeekOfMonth(date);
+    const offset = date.getDate() + (weekNum - weekOfMonth) * 7;
+    date.setDate(offset);
+}
+
+export function getNumberOfWeeksInMonth(date) {
+    let maxIndex = getWeekOfMonth(date);
+    while (true) {
+        date = addDate(date, 7);
+        const index = getWeekOfMonth(date);
+        if (index < maxIndex) {
+            break;
+        }
+        maxIndex = index;
+    }
+    return maxIndex + 1;
+}
 
 export function getMonthNames(date, formatter) {
     date = new Date(date);
