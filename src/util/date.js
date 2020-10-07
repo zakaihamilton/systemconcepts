@@ -15,6 +15,13 @@ export function getWeekViewStart(date) {
     return result;
 }
 
+export function getWeekViewEnd(date) {
+    date = getWeekViewStart(date);
+    const diff = date.getDate() + 7;
+    const result = new Date(date.setDate(diff));
+    return result;
+}
+
 export function addDate(date, index) {
     date = new Date(date);
     date.setDate(date.getDate() + index);
@@ -30,7 +37,6 @@ export function isDateToday(date) {
 
 export function isDayToday(date) {
     const today = new Date();
-    console.log("today", today, "date", date);
     return date.getDay() == today.getDay() &&
         date.getMonth() == today.getMonth() &&
         date.getFullYear() == today.getFullYear();
@@ -41,23 +47,30 @@ export function isDateMonth(date, month) {
         date.getFullYear() == month.getFullYear();
 };
 
+export function diffDays(from, to) {
+    const diffTime = Math.abs(to - from);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
 export function getWeekOfMonth(date) {
-    const firstWeekday = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    const offsetDate = date.getDate() + firstWeekday - 1;
-    return Math.floor(offsetDate / 7);
+    const firstDayOfMonth = getMonthViewStart(date);
+    const firstDayOfWeek = getWeekViewStart(date);
+    const offsetDate = diffDays(firstDayOfWeek, firstDayOfMonth);
+    const result = Math.floor(offsetDate / 7);
+    console.log("result", result, "firstDayOfMonth", firstDayOfMonth, "firstDayOfWeek", firstDayOfWeek, "offsetDate", offsetDate);
+    return result;
 }
 
 export function setWeekOfMonth(date, weekNum) {
     const weekOfMonth = getWeekOfMonth(date);
     const offset = date.getDate() + (weekNum - weekOfMonth) * 7;
-    console.log("going from: " + weekOfMonth + " to: " + weekNum + " offset: " + offset);
     date.setDate(offset);
-    console.log("date", date);
 }
 
 export function getNumberOfWeeksInMonth(date) {
     const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 0);
-    return getWeekOfMonth(lastDayOfMonth);
+    return getWeekOfMonth(lastDayOfMonth) + 1;
 }
 
 export function getMonthNames(date, formatter) {

@@ -49,11 +49,6 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
         };
     });
     return <div className={styles.root} style={style}>
-        <div className={styles.title}>
-            <Avatar className={clsx(styles.day, isToday && styles.today, isMonth && styles.active)}>
-                {dayNumber}
-            </Avatar>
-        </div>
         <div className={styles.sessions}>
             {!isPhone && !!audioItems.length && <Menu items={audioItems}>
                 <IconButton>

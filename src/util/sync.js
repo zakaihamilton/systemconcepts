@@ -163,5 +163,5 @@ export function useSyncFeature() {
         }
     }, [online, isLoaded]);
 
-    return [online && isLoaded && updateSync, !busy && resetSync, busy, error, active, duration];
+    return [online && isLoaded && updateSync, resetSync, busy, error, active, duration];
 }

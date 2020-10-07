@@ -2,7 +2,7 @@ import { useTranslations } from "@/util/translations";
 import styles from "./WeekView.module.scss";
 import Week from "./WeekView/Week";
 import DayHeader from "./WeekView/DayHeader";
-import { getWeekViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@/util/date";
+import { getWeekViewStart, getMonthViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@/util/date";
 import { useDateFormatter } from "@/util/locale";
 import Input from "@/widgets/Input";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -34,7 +34,7 @@ export default function WeekView({ sessions, date, store }) {
         year: "numeric"
     });
 
-    const month = new Date(firstDay);
+    const month = addDate(getMonthViewStart(firstDay), 14);
 
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
@@ -93,7 +93,7 @@ export default function WeekView({ sessions, date, store }) {
     const yearWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
 
     const gotoPreviousWeek = () => {
-        const newDate = new Date(month);
+        const newDate = new Date(firstDay);
         setWeekOfMonth(newDate, getWeekOfMonth(newDate) - 1);
         store.update(s => {
             s.date = newDate;
@@ -101,7 +101,7 @@ export default function WeekView({ sessions, date, store }) {
     };
 
     const gotoNextWeek = () => {
-        const newDate = new Date(month);
+        const newDate = new Date(firstDay);
         setWeekOfMonth(newDate, getWeekOfMonth(newDate) + 1);
         store.update(s => {
             s.date = newDate;
