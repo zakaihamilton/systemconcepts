@@ -9,7 +9,6 @@ import Page from "./Page";
 import Theme from "./Theme";
 import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
-import Audio from "@/widgets/Audio";
 import Fullscreen from "./Fullscreen";
 import Header from "./Header";
 
@@ -67,7 +66,6 @@ export default function Main() {
         <Theme>
             <div className={className}>
                 <Sync />
-                <Audio />
                 <Fullscreen />
                 {!fullscreen && <AppBar />}
                 <SideBar />

@@ -81,6 +81,7 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
     let progressText = formatDuration(audioPos * 1000);
     if (!isNaN(playerRef.duration)) {
         progressText += " / " + formatDuration(playerRef.duration * 1000);
+        progressText += " ( -" + formatDuration((playerRef.duration - audioPos) * 1000) + " )";
     }
     const progressPosition = `calc(${left}%)`;
     const handlePosEvent = useCallback(e => {
