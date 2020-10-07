@@ -57,7 +57,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "12em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "10em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);

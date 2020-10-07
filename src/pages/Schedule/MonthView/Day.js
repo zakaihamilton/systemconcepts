@@ -10,12 +10,14 @@ import Menu from "@/widgets/Menu";
 import { addPath } from "@/util/pages";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import { useDeviceType } from "@/util/styles";
 
 export default function Day({ sessions, month, column, row, date, dateFormatter }) {
     const style = {
         gridColumn: column,
         gridRow: row
     }
+    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const dayNumber = dateFormatter.format(date);
     const isToday = isDateToday(date);
@@ -27,7 +29,9 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
         return {
             id: "audio" + item.name,
             name: item.name,
-            icon: <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
+            icon: isPhone ?
+                <Tooltip title={translations.AUDIO}><AudiotrackIcon /></Tooltip> :
+                <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
             description: groupName,
             onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`)
         };
@@ -37,7 +41,9 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
         return {
             id: "video" + item.name,
             name: item.name,
-            icon: <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
+            icon: isPhone ?
+                <Tooltip title={translations.VIDEO}><MovieIcon /></Tooltip> :
+                <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
             description: groupName,
             onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`)
         };
@@ -49,17 +55,24 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             </Avatar>
         </div>
         <div className={styles.sessions}>
-            {!!audioItems.length && <Menu items={audioItems}>
+            {!isPhone && !!audioItems.length && <Menu items={audioItems}>
                 <IconButton>
                     <Tooltip arrow title={translations.AUDIO}>
                         <AudiotrackIcon />
                     </Tooltip>
                 </IconButton>
             </Menu>}
-            {!!videoItems.length && <Menu items={videoItems}>
+            {!isPhone && !!videoItems.length && <Menu items={videoItems}>
                 <IconButton>
                     <Tooltip arrow title={translations.VIDEO}>
                         <MovieIcon />
+                    </Tooltip>
+                </IconButton>
+            </Menu>}
+            {!!isPhone && (!!videoItems.length || !!audioItems.length) && <Menu items={[...audioItems, ...videoItems]}>
+                <IconButton>
+                    <Tooltip arrow title={translations.PLAYER}>
+                        <VideoLabelIcon />
                     </Tooltip>
                 </IconButton>
             </Menu>}
