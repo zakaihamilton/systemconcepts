@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
@@ -8,6 +9,7 @@ import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
+import { useSearch } from "@/components/AppBar/Search";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -19,7 +21,9 @@ registerToolbar("Schedule");
 export default function SchedulePage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
-    const sessions = useSessions([syncCounter], !busy);
+    let sessions = useSessions([syncCounter], !busy);
+    const { search } = useSearch(() => {
+    });
     let { date, viewType } = ScheduleStore.useState();
     if (!date) {
         date = new Date();
@@ -52,8 +56,16 @@ export default function SchedulePage() {
 
     useToolbar({ id: "Schedule", items: menuItems, depends: [translations, viewType] });
 
+    const items = useMemo(() => {
+        let items = sessions;
+        if (search) {
+            items = items.filter(item => item.name.toLowerCase().includes(search.toLowerCase()));
+        }
+        return items;
+    }, [search, sessions]);
+
     return <div className={styles.root}>
-        {viewType === "month" && <MonthView sessions={sessions} date={date} store={ScheduleStore} />}
-        {viewType === "week" && <WeekView sessions={sessions} date={date} store={ScheduleStore} />}
+        {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+        {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
     </div>;
 }
