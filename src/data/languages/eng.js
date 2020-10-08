@@ -720,6 +720,10 @@ export default {
         {
             "id": "TIME_LEFT",
             "value": "Left"
+        },
+        {
+            "id": "NUM_ITEMS",
+            "value": "Number of Items"
         }
     ]
 };

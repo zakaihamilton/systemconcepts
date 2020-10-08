@@ -13,7 +13,7 @@ import { useDirection } from "@/util/direction";
 
 registerToolbar("Navigator");
 
-export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
+export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex }) {
     const direction = useDirection();
     const translations = useTranslations();
     const hasPreviousPage = pageIndex >= 1;
@@ -75,7 +75,14 @@ export default function Navigator({ pageIndex, pageCount, setPageIndex }) {
                 <Typography className={clsx(styles.pageSeparator)}>
                     /
                 </Typography>
-                <Tooltip title={translations.PAGE_COUNT} arrow>
+                <Tooltip title={<>
+                    <div style={{ whiteSpace: "nowrap" }}>
+                        <span>{translations.NUM_ITEMS}: </span>
+                        <span>{numItems}</span>
+                        <hr />
+                    </div>
+                    <div>{translations.PAGE_COUNT}</div>
+                </>} arrow>
                     <Typography className={styles.pageCount}>
                         {pageCount}
                     </Typography>

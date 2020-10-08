@@ -189,8 +189,6 @@ export default function TableWidget(props) {
             createSortHandler={createSortHandler} />
     });
 
-    const isEmpty = !items || !items.length;
-
     if (!size.height) {
         return null;
     }
@@ -206,10 +204,12 @@ export default function TableWidget(props) {
         const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
         return sizeInPixels;
     }
+    const numItems = items && items.length;
+    const isEmpty = !items || !numItems;
     const marginBottomInPixels = sizeToPixels(marginBottom);
     const rowHeightInPixels = sizeToPixels(rowHeight);
     const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
-    const pageCount = parseInt((items.length / itemsPerPage) + ((items.length % itemsPerPage) > 0 ? 1 : 0));
+    const pageCount = parseInt((numItems / itemsPerPage) + ((numItems % itemsPerPage) > 0 ? 1 : 0));
     const startIdx = offset;
     const endIdx = startIdx + itemsPerPage;
     const pageIndex = parseInt(startIdx / itemsPerPage);
@@ -247,6 +247,10 @@ export default function TableWidget(props) {
             </div>}
         </TableContainer>}
         {!!error && <Error error={error} />}
-        <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
+        <Navigator
+            pageIndex={pageIndex}
+            setPageIndex={setPageIndex}
+            pageCount={pageCount}
+            numItems={numItems} />
     </>);
 }

@@ -716,6 +716,10 @@ export default {
         {
             "id": "TIME_LEFT",
             "value": "נשאר"
+        },
+        {
+            "id": "NUM_ITEMS",
+            "value": "מספר פריטים"
         }
     ]
 };
