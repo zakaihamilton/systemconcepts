@@ -4,7 +4,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { addPath } from "@/util/pages";
 import MovieIcon from '@material-ui/icons/Movie';
-import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import AudioIcon from "@/icons/Audio";
 import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
 
@@ -13,7 +13,7 @@ export function SessionItem({ group, year, date, name, type, suffix }) {
     let icon = null;
     let tooltip = null;
     if (type === "audio") {
-        icon = <AudiotrackIcon />;
+        icon = <AudioIcon />;
         tooltip = translations.AUDIO;
     }
     else if (type === "video") {

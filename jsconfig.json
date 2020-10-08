@@ -8,6 +8,9 @@
             "@/widgets/*": [
                 "src/components/Widgets/*"
             ],
+            "@/icons/*": [
+                "src/components/Icons/*"
+            ],
             "@/util/*": [
                 "src/util/*"
             ],

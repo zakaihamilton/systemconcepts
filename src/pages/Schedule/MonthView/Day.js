@@ -9,7 +9,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Menu from "@/widgets/Menu";
 import { addPath } from "@/util/pages";
 import MovieIcon from '@material-ui/icons/Movie';
-import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import AudioIcon from "@/icons/Audio";
 import { useDeviceType } from "@/util/styles";
 
 export default function Day({ sessions, month, column, row, date, dateFormatter }) {
@@ -30,7 +30,7 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             id: "audio" + item.name,
             name: item.name,
             icon: isPhone ?
-                <Tooltip title={translations.AUDIO}><AudiotrackIcon /></Tooltip> :
+                <Tooltip title={translations.AUDIO}><AudioIcon /></Tooltip> :
                 <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
             description: groupName,
             onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`)
@@ -58,7 +58,7 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             {!isPhone && !!audioItems.length && <Menu items={audioItems}>
                 <IconButton>
                     <Tooltip arrow title={translations.AUDIO}>
-                        <AudiotrackIcon />
+                        <AudioIcon />
                     </Tooltip>
                 </IconButton>
             </Menu>}

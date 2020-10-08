@@ -2,7 +2,7 @@ import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
 import styles from "./Sessions.module.scss";
 import MovieIcon from '@material-ui/icons/Movie';
-import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import AudioIcon from "@/icons/Audio";
 import { IconButton } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
@@ -78,7 +78,7 @@ export default function SessionsPage() {
         if (item.audio) {
             media.push({
                 name: translations.AUDIO,
-                icon: <AudiotrackIcon />,
+                icon: <AudioIcon />,
                 link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`
             });
         }
