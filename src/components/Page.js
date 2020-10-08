@@ -26,15 +26,15 @@ export default function Page() {
         playerPageRef.current = { ...activePage };
     }
     return <>
-        <Breadcrumbs items={pages} />
-        <div className={styles.pageContainer}>
-            <main ref={ref} className={styles.page}>
-                <PageSize.Provider value={size}>
+        <PageSize.Provider value={size}>
+            <Breadcrumbs items={pages} />
+            <div className={styles.pageContainer}>
+                <main ref={ref} className={styles.page}>
                     {playerPageRef.current && <Player show={showPlayer} {...playerPageRef.current} />}
                     {showPage && <Component {...activePage} />}
-                </PageSize.Provider>
-            </main>
-        </div>
-        <Footer />
+                </main>
+            </div>
+            <Footer />
+        </PageSize.Provider>
     </>;
 }

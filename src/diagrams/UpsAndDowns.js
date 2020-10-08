@@ -1,10 +1,10 @@
 import { useState } from "react";
 import styles from "./UpsAndDowns.module.scss";
 import { useTerms } from "@/util/terms";
-import Tooltip from '@material-ui/core/Tooltip';
 import clsx from "clsx";
 import { MainStore } from "@/components/Main";
 import Term from "@/widgets/Term";
+import Zoom from "@/components/Zoom";
 
 function Worlds({ children, total }) {
     let offset = 0;
@@ -122,5 +122,6 @@ export default function UpsAndDowns() {
         <Face id="face.gentiles" headStart={4} headEnd={7} bodyEnd={10} column={3} />
         <Face id="face.animal" headStart={7} headEnd={10} bodyEnd={11} column={2} />
         <Face id="face.body" headStart={10} headEnd={11} bodyStart={11} column={1} />
+        <Zoom />
     </Worlds >
 }

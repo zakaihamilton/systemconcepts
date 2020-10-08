@@ -18,7 +18,7 @@ export function useResize(ref, depends = []) {
         }
         const { clientWidth, clientHeight } = ref.current.parentElement;
         const emPixels = getEmValueFromElement(ref.current);
-        setSize({ width: clientWidth, height: clientHeight, emPixels });
+        setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
     };
 
     useEffect(() => {

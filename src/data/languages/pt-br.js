@@ -728,6 +728,14 @@ export default {
         {
             "id": "REFRESH",
             "value": "Atualizar"
+        },
+        {
+            "id": "ZOOM_IN",
+            "value": "Mais Zoom"
+        },
+        {
+            "id": "ZOOM_OUT",
+            "value": "Reduzir o zoom"
         }
     ]
 };

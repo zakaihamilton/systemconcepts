@@ -724,6 +724,14 @@ export default {
         {
             "id": "REFRESH",
             "value": "רענן"
+        },
+        {
+            "id": "ZOOM_IN",
+            "value": "מיקוד תצוגה"
+        },
+        {
+            "id": "ZOOM_OUT",
+            "value": "הקטן תצוגה"
         }
     ]
 };
