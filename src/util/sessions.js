@@ -21,6 +21,9 @@ export function useSessions(depends = [], cond = true) {
             if (exists) {
                 data = await storage.readFile(localUrl);
                 data = JSON.parse(data);
+                if (!data) {
+                    data = [];
+                }
             }
             return data;
         }

@@ -10,22 +10,24 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TodayIcon from '@material-ui/icons/Today';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { useDirection } from "@/util/direction";
+import { useDeviceType } from "@/util/styles";
 
 registerToolbar("MonthView");
 
 export default function MonthView({ sessions, date, store }) {
+    const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
     const translations = useTranslations();
     const firstDay = getMonthViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
-        weekday: 'short'
-    });
+        weekday: isPhone ? "narrow" : "short"
+    }, [isPhone]);
     const dayFormatter = useDateFormatter({
         day: 'numeric'
     });
     const monthFormatter = useDateFormatter({
-        month: "long"
-    });
+        month: isPhone ? "numeric" : "long"
+    }, [isPhone]);
     const yearFormatter = useDateFormatter({
         year: "numeric"
     });
@@ -57,7 +59,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} label={translations.MONTH} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "10em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} label={translations.MONTH} variant="standard" helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);
@@ -74,7 +76,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const yearWidget = <Input select={true} label={translations.YEAR} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "8em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input select={true} label={translations.YEAR} variant="standard" helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
 
     const gotoPreviousMonth = () => {
         const newDate = new Date(month);
@@ -110,8 +112,7 @@ export default function MonthView({ sessions, date, store }) {
             icon: <TodayIcon />,
             onClick: gotoToday,
             disabled: isToday,
-            divider: true,
-            location: "footer"
+            divider: true
         },
         {
             id: "previousMonth",

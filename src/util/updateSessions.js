@@ -20,7 +20,10 @@ export function useUpdateSessions() {
         let items = [];
         const prefix = makePath("aws/sessions") + "/";
         const getListing = async path => {
-            const listing = await storage.getListing(path);
+            let listing = await storage.getListing(path);
+            if (!listing) {
+                return [];
+            }
             const sharedPath = "shared/sessions/" + path.substring(prefix.length) + "/listing.json";
             await storage.createFolders(sharedPath);
             const listingBody = JSON.stringify(listing, null, 4);

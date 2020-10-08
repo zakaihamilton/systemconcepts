@@ -33,8 +33,8 @@ export default function WeekView({ sessions, date, store }) {
         month: "short"
     });
     const monthFormatter = useDateFormatter({
-        month: "long"
-    });
+        month: isPhone ? "numeric" : "long"
+    }, [isPhone]);
     const yearFormatter = useDateFormatter({
         year: "numeric"
     });
@@ -61,7 +61,7 @@ export default function WeekView({ sessions, date, store }) {
         };
     });
 
-    const weekWidget = <Input select={true} label={translations.WEEK} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "5em" }} items={weekItems} state={weekState} />;
+    const weekWidget = <Input select={true} label={translations.WEEK} variant="standard" helperText="" fullWidth={false} style={{ minWidth: "3em" }} items={weekItems} state={weekState} />;
 
     const monthState = [month.getMonth() + 1, month => {
         const newDate = new Date(date);
@@ -76,7 +76,7 @@ export default function WeekView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} label={translations.MONTH} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "9.5em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} label={translations.MONTH} variant="standard" helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);
@@ -93,7 +93,7 @@ export default function WeekView({ sessions, date, store }) {
             name
         };
     });
-    const yearWidget = <Input select={true} label={translations.YEAR} variant="standard" helperText="" fullWidth={false} className={styles.input} style={{ minWidth: "6.5em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input select={true} label={translations.YEAR} variant="standard" helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
 
     const gotoPreviousWeek = () => {
         const newDate = new Date(firstDay);
@@ -129,8 +129,7 @@ export default function WeekView({ sessions, date, store }) {
             icon: <TodayIcon />,
             onClick: gotoToday,
             disabled: isToday,
-            divider: true,
-            location: "footer"
+            divider: true
         },
         {
             id: "previousWeek",
