@@ -1,6 +1,8 @@
 .root {
     display: flex;
+    border-top: 1px solid transparent;
     border-bottom: 1px solid var(--border-color);
+    border-left: 1px solid transparent;
     border-right: 1px solid var(--border-color);
     color: var(--text-color);
     align-items: center;
@@ -8,5 +10,8 @@
 }
 
 .root.today {
+    background-color: var(--info-background);
+    color: var(--info-color);
+    border-top: 1px solid var(--info-color);
     border-bottom: 1px solid var(--info-color);
 }
