@@ -32,7 +32,7 @@ export default function Session({ group, name, audio, video, ...props }) {
     const isPhone = useDeviceType() === "phone";
     const groupName = group[0].toUpperCase() + group.slice(1);
     const audioItem = audio && <SessionItem name={name} group={group} {...props} type="audio" suffix=".m4a" />;
-    const videoItem = video = <SessionItem name={name} group={group} {...props} type="video" suffix=".mp4" />;
+    const videoItem = video && <SessionItem name={name} group={group} {...props} type="video" suffix=".mp4" />;
 
     return <div className={clsx(styles.root, isPhone && styles.mobile)}>
         <div className={styles.group} dir="auto">
