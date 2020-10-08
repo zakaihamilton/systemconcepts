@@ -724,6 +724,10 @@ export default {
         {
             "id": "NUM_ITEMS",
             "value": "Número de ítens"
+        },
+        {
+            "id": "REFRESH",
+            "value": "Atualizar"
         }
     ]
 };

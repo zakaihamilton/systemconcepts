@@ -19,6 +19,7 @@ import Error from "./Table/Error";
 import Column from "./Table/Column";
 import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -59,6 +60,7 @@ export default function TableWidget(props) {
         data,
         mapper,
         filter,
+        refresh,
         empty,
         statusBar,
         className,
@@ -123,6 +125,12 @@ export default function TableWidget(props) {
                 }
                 exportData(body, name, "application/json");
             }
+        },
+        refresh && {
+            id: "refresh",
+            name: translations.REFRESH,
+            icon: <RefreshIcon />,
+            onClick: refresh
         }
     ].filter(Boolean);
 

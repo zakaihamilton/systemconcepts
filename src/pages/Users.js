@@ -142,6 +142,11 @@ export default function Users() {
             rowClick={onRowClick}
             columns={columns}
             data={data}
+            refresh={() => {
+                UsersStore.update(s => {
+                    s.counter++;
+                });
+            }}
             mapper={mapper}
             statusBar={statusBar}
             loading={loading || inProgress}

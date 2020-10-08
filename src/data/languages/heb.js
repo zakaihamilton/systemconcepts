@@ -720,6 +720,10 @@ export default {
         {
             "id": "NUM_ITEMS",
             "value": "מספר פריטים"
+        },
+        {
+            "id": "REFRESH",
+            "value": "רענן"
         }
     ]
 };

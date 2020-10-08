@@ -724,6 +724,10 @@ export default {
         {
             "id": "NUM_ITEMS",
             "value": "Number of Items"
+        },
+        {
+            "id": "REFRESH",
+            "value": "Refresh"
         }
     ]
 };
