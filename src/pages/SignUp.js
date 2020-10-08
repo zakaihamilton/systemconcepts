@@ -265,7 +265,7 @@ export default function SignUp() {
                     </Button>
                     <Grid container justify="flex-end">
                         <Grid item>
-                            <Link href="#settings/signin" variant="body2">
+                            <Link href="#signin" variant="body2">
                                 {translations.HAVE_ACCOUNT}
                             </Link>
                         </Grid>

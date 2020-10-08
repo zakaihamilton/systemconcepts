@@ -209,17 +209,17 @@ export default function Account() {
                             </Button>
                         </Grid>
                         {!isSignedIn && <Grid item xs={5}>
-                            <Link className={classes.link} href="#settings/resetpassword" variant="body2">
+                            <Link className={classes.link} href="#resetpassword" variant="body2">
                                 {translations.FORGET_PASSWORD}
                             </Link>
                         </Grid>}
                         {!isSignedIn && <Grid item xs={7}>
-                            <Link className={classes.link} href="#settings/signup" variant="body2">
+                            <Link className={classes.link} href="#signup" variant="body2">
                                 {translations.SIGN_UP_TEXT}
                             </Link>
                         </Grid>}
                         {isSignedIn && <Grid item xs={5}>
-                            <Link className={classes.link} href="#settings/changepassword" variant="body2">
+                            <Link className={classes.link} href="#changepassword" variant="body2">
                                 {translations.CHANGE_PASSWORD}
                             </Link>
                         </Grid>}

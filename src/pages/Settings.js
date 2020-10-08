@@ -15,11 +15,6 @@ import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@material-ui/core/Button";
 import { addPath } from "@/util/pages";
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import Cookies from 'js-cookie';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
-import LockIcon from '@material-ui/icons/Lock';
-import Tooltip from '@material-ui/core/Tooltip';
 import { Store } from "pullstate";
 
 export const SettingsStore = new Store({
@@ -94,9 +89,6 @@ export default function Settings() {
         name: translations[item.name]
     }));
 
-    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-    const signedInText = isSignedIn ? translations.SIGNED_IN : translations.NOT_SIGNED_IN;
-
     const navigate = id => {
         addPath(id);
     };
@@ -124,17 +116,6 @@ export default function Settings() {
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
             onClick: () => navigate("fontSizes")
-        },
-        {
-            id: "account",
-            icon: <AccountCircleIcon />,
-            name: translations.ACCOUNT,
-            value: signedInText,
-            widget: <Label icon={<Tooltip title={signedInText}>
-                {isSignedIn ? <LockOpenIcon /> : <LockIcon />}
-            </Tooltip>
-            } name={signedInText} />,
-            onClick: () => navigate("account")
         },
         {
             id: "reset",
