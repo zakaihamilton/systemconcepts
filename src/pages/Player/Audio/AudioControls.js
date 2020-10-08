@@ -7,13 +7,10 @@ import FastForwardIcon from '@material-ui/icons/FastForward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
-import SpeedIcon from '@material-ui/icons/Speed';
 import { formatDuration } from "@/util/string";
-import Menu from "@/widgets/Menu";
 import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
 import Field from "../Field";
-import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 
 const skipPoints = 10;
 
@@ -127,40 +124,6 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
             handlePosEvent(e, true);
         }
     };
-    const rateItems = {
-        SPEED_SLOW: 0.5,
-        SPEED_SLOWER: 0.75,
-        SPEED_NORMAL: 1.0,
-        SPEED_FASTER: 1.25,
-        SPEED_FAST: 1.5
-    };
-    const rateMenuItems = Object.entries(rateItems).map(([name, rate]) => {
-        return {
-            id: rate,
-            icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
-            name: translations[name],
-            onClick: () => playerRef.playbackRate = rate
-        }
-    });
-    const volumeItems = {
-        LOW_VOLUME: 0.5,
-        MEDIUM_VOLUME: 0.75,
-        HIGH_VOLUME: 1.0
-    };
-    const volumeMenuItems = Object.entries(volumeItems).map(([name, level]) => {
-        return {
-            id: level,
-            icon: <Avatar className={styles.avatar} variant="square">{level.toFixed(2)}</Avatar>,
-            name: translations[name],
-            onClick: () => playerRef.volume = level
-        }
-    });
-    const speed = playerRef.playbackRate || 1.0;
-    const volume = playerRef.volume;
-    const rateId = Object.keys(rateItems).find(rateId => rateItems[rateId] === speed);
-    const volumeId = Object.keys(volumeItems).find(volumeId => volumeItems[volumeId] === volume);
-    const speedName = translations[rateId];
-    const volumeName = translations[volumeId];
     let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
     const date = [year, month, day].join("-");
     return <div className={styles.root}>
@@ -188,13 +151,6 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
                 }} />
                 {direction === "ltr" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
                 {direction === "rtl" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
-                <div style={{ flex: 1 }} />
-                <Menu items={rateMenuItems} selected={speed}>
-                    <Button icon={<SpeedIcon />} name={translations.SPEED} subHeading={speedName} />
-                </Menu>
-                <Menu items={volumeMenuItems} selected={volume}>
-                    <Button icon={<VolumeDownIcon />} name={translations.VOLUME} subHeading={volumeName} />
-                </Menu>
             </div>
         </div>
     </div>;

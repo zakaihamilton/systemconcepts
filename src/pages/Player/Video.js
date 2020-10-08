@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import VideoControls from "./Video/VideoControls";
+import PlayerToolbar from "./PlayerToolbar";
 
-export default function Video({ path, metadata, setMetadata, group = "", year = "", name = "", children, ...props }) {
+export default function Video({ show, path, metadata, setMetadata, group = "", year = "", name = "", children, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -11,7 +12,7 @@ export default function Video({ path, metadata, setMetadata, group = "", year = 
         <video ref={ref} {...props}>
             {children}
         </video>
-        {ref && ref.current && <VideoControls
+        {playerRef && <VideoControls
             playerRef={playerRef}
             metadata={metadata}
             setMetadata={setMetadata}
@@ -20,5 +21,6 @@ export default function Video({ path, metadata, setMetadata, group = "", year = 
             name={name}
             path={path}
         />}
+        {playerRef && <PlayerToolbar show={show} playerRef={playerRef} isVideo={true} />}
     </>;
 }

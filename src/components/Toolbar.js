@@ -70,11 +70,15 @@ export default function Toolbar({ location, divider, collapsable }) {
         {toolbarItems.map((item, idx) => {
             return <React.Fragment key={item.id}>
                 {item.element}
-                {!item.element && <IconButton disabled={item.disabled} onClick={item.onClick ? item.onClick : undefined}>
-                    <Tooltip arrow title={item.name}>
-                        {item.icon}
-                    </Tooltip>
-                </IconButton>}
+                {!item.element &&
+                    <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
+                        <IconButton disabled={item.disabled}>
+                            <Tooltip arrow title={item.name}>
+                                {item.icon}
+                            </Tooltip>
+                        </IconButton>
+                    </Menu>
+                }
                 {!!item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             </React.Fragment>
         })}

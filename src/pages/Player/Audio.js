@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import AudioControls from "./Audio/AudioControls";
+import PlayerToolbar from "./PlayerToolbar";
 
-export default function Audio({ path, metadata, setMetadata, group = "", year = "", name = "", children, ...props }) {
+export default function Audio({ show, path, metadata, setMetadata, group = "", year = "", name = "", children, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -11,7 +12,7 @@ export default function Audio({ path, metadata, setMetadata, group = "", year = 
         <audio ref={ref} {...props}>
             {children}
         </audio>
-        {ref && ref.current && <AudioControls
+        {playerRef && <AudioControls
             playerRef={playerRef}
             metadata={metadata}
             setMetadata={setMetadata}
@@ -20,5 +21,6 @@ export default function Audio({ path, metadata, setMetadata, group = "", year = 
             name={name}
             path={path}
         />}
+        {playerRef && <PlayerToolbar show={show} playerRef={playerRef} />}
     </>;
 }

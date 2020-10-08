@@ -61,7 +61,7 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
     }, [data && data.path]);
 
     const menuItems = [
-        hash && !show && {
+        hash && {
             id: "player",
             name: translations.PLAYER,
             icon: <VideoLabelIcon />,
@@ -69,7 +69,7 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: menuItems, depends: [hash, show, translations] });
+    useToolbar({ id: "Player", items: menuItems, visible: !show, depends: [hash, translations] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
@@ -90,7 +90,8 @@ export default function PlayerPage({ show = false, prefix = "", group = "", year
         group: groupName,
         year: yearName,
         name: sessionName,
-        path: mediaPath
+        path: mediaPath,
+        show
     }
     if (isAudio) {
         MediaComponent = Audio;

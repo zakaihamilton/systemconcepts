@@ -130,40 +130,6 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
             handlePosEvent(e, true);
         }
     };
-    const rateItems = {
-        SPEED_SLOW: 0.5,
-        SPEED_SLOWER: 0.75,
-        SPEED_NORMAL: 1.0,
-        SPEED_FASTER: 1.25,
-        SPEED_FAST: 1.5
-    };
-    const rateMenuItems = Object.entries(rateItems).map(([name, rate]) => {
-        return {
-            id: rate,
-            icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
-            name: translations[name],
-            onClick: () => playerRef.playbackRate = rate
-        }
-    });
-    const volumeItems = {
-        LOW_VOLUME: 0.5,
-        MEDIUM_VOLUME: 0.75,
-        HIGH_VOLUME: 1.0
-    };
-    const volumeMenuItems = Object.entries(volumeItems).map(([name, level]) => {
-        return {
-            id: level,
-            icon: <Avatar className={styles.avatar} variant="square">{level.toFixed(2)}</Avatar>,
-            name: translations[name],
-            onClick: () => playerRef.volume = level
-        }
-    });
-    const speed = playerRef.playbackRate || 1.0;
-    const volume = playerRef.volume;
-    const rateId = Object.keys(rateItems).find(rateId => rateItems[rateId] === speed);
-    const volumeId = Object.keys(volumeItems).find(volumeId => volumeItems[volumeId] === volume);
-    const speedName = translations[rateId];
-    const volumeName = translations[volumeId];
     return <div className={styles.root}>
         <div className={styles.toolbar}>
             <div className={styles.progress}>
@@ -184,14 +150,6 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
                 }} />
                 {direction === "ltr" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
                 {direction === "rtl" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
-                <div style={{ flex: 1 }} />
-                <Menu items={rateMenuItems} selected={speed}>
-                    <Button icon={<SpeedIcon />} name={translations.SPEED} subHeading={speedName} />
-                </Menu>
-                <Menu items={volumeMenuItems} selected={volume}>
-                    <Button icon={<VolumeDownIcon />} name={translations.VOLUME} subHeading={volumeName} />
-                </Menu>
-                <Button icon={<FullscreenIcon />} name={translations.FULLSCREEN} onClick={() => playerRef.requestFullscreen()} />
             </div>
         </div>
     </div>;

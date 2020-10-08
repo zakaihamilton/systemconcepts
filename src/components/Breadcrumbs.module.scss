@@ -16,6 +16,7 @@
     align-items: center;
     flex: 1;
     color: var(--text-color);
+    overflow: hidden;
 }
 
 .separator {
@@ -33,14 +34,15 @@
     align-items: center;
     overflow: hidden;
     height: 3.70em;
+    min-width: 3em;
 }
 
 .name {
-    padding-left: 0.1em;
-    padding-right: 0.1em;
-    text-overflow: ellipsis;
+    color: var(--text-color);
     overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
 }
 
 .icon {
