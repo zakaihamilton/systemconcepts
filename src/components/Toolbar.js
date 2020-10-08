@@ -46,7 +46,7 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
                 section.items = items;
             }
         });
-    }, depends);
+    }, [...depends, visible]);
 }
 
 export default function Toolbar({ location, divider, collapsable }) {
