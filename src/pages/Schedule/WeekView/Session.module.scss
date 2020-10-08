@@ -28,13 +28,14 @@
     display: flex;
     margin-bottom: 0.5em;
     justify-content: center;
-    width: 10em;
 }
 
 .name {
+    width: 10em;
     color: var(--text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
+    text-align: center;
 }
