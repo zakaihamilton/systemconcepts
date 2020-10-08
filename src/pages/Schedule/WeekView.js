@@ -10,10 +10,13 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TodayIcon from '@material-ui/icons/Today';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { useDirection } from "@/util/direction";
+import { useDeviceType } from "@/util/styles";
+import clsx from "clsx";
 
 registerToolbar("WeekView");
 
 export default function WeekView({ sessions, date, store }) {
+    const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
     const translations = useTranslations();
     const firstDay = getWeekViewStart(date);
@@ -170,7 +173,7 @@ export default function WeekView({ sessions, date, store }) {
     useToolbar({ id: "WeekView", items: menuItems, depends: [translations, month] });
 
     return <div className={styles.root}>
-        <div className={styles.grid}>
+        <div className={clsx(styles.grid, isPhone && styles.mobile)}>
             {dayTitles}
             <Week sessions={sessions} month={month} date={firstDay} row={2} dateFormatter={dayFormatter} />
         </div>

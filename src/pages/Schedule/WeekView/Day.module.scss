@@ -9,9 +9,12 @@
 
 .sessions {
     display: flex;
-    flex-wrap: wrap;
     flex-direction: column;
     flex: 1;
+}
+
+.sessions.mobile {
+    flex-direction: row;
 }
 
 .session {

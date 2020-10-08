@@ -6,6 +6,17 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    position: sticky;
+    background-color: var(--main-background);
+    z-index: 1;
+}
+
+.root.mobile {
+    left: 0;
+}
+
+.root:not(.mobile) {
+    top: 0;
 }
 
 .root *:not(:last-child) {
