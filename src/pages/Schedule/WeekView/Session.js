@@ -35,12 +35,12 @@ export default function Session({ group, name, audio, video, ...props }) {
     const videoItem = video = <SessionItem name={name} group={group} {...props} type="video" suffix=".mp4" />;
 
     return <div className={clsx(styles.root, isPhone && styles.mobile)}>
-        <div className={styles.group}>
+        <div className={styles.group} dir="auto">
             {groupName}
         </div>
         <div className={styles.container}>
             <Tooltip arrow title={name}>
-                <div className={styles.name}>
+                <div className={styles.name} dir="auto">
                     {name}
                 </div>
             </Tooltip>

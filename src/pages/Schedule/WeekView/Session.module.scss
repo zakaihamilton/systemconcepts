@@ -19,12 +19,14 @@
 .group {
     color: var(--text-color);
     font-weight: bold;
+    justify-content: center;
+    display: flex;
 }
 
 .container {
     display: flex;
     margin-bottom: 0.5em;
-    overflow: hidden;
+    justify-content: center;
     width: 10em;
 }
 
