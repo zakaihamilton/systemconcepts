@@ -229,8 +229,9 @@ export default function TableWidget(props) {
     });
 
     return (<>
-        <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
-            {!loading && !error && <Table stickyHeader style={style}>
+        {!!loading && <Progress />}
+        {!loading && <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
+            {!error && <Table stickyHeader style={style}>
                 {!hideColumns && <TableHead>
                     <TableRow>
                         {tableColumns}
@@ -240,12 +241,11 @@ export default function TableWidget(props) {
                     {tableRows}
                 </TableBody>
             </Table>}
-            {!!isEmpty && empty}
+            {!!isEmpty && !loading && empty}
             {!loading && !error && <div className={styles.footer}>
                 {statusBar}
             </div>}
-        </TableContainer>
-        {!!loading && <Progress />}
+        </TableContainer>}
         {!!error && <Error error={error} />}
         <Navigator pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} />
     </>);

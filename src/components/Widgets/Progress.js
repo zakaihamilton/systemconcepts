@@ -22,7 +22,7 @@ export default function Progress({ size, value, tooltip = "", variant, ...props 
     const classes = useStyles();
 
     return (<div className={classes.progress} {...props}>
-        <Box position="relative" display="inline-flex">
+        <Box position="relative" display="flex">
             <CircularProgress size={size} value={value} variant={variant} />
             <Box
                 top={0}
