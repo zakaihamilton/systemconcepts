@@ -27,6 +27,13 @@ export function useUpdateSessions() {
             const sharedPath = "shared/sessions/" + path.substring(prefix.length) + "/listing.json";
             await storage.createFolders(sharedPath);
             const listingBody = JSON.stringify(listing, null, 4);
+            const exists = await storage.exists(sharedPath);
+            if (exists) {
+                const body = await storage.readFile(sharedPath);
+                if (body === listingBody) {
+                    return listing;
+                }
+            }
             await storage.writeFile(sharedPath, listingBody);
             return listing;
         }
