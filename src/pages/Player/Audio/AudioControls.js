@@ -8,7 +8,6 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import { formatDuration } from "@/util/string";
-import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
 import Field from "../Field";
 
@@ -113,6 +112,7 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
                 if (!data) {
                     data = {};
                 }
+                data.duration = parseInt(playerRef && playerRef.duration);
                 data.position = parseInt(currentTime);
                 return data;
             });

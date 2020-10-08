@@ -7,13 +7,8 @@ import FastForwardIcon from '@material-ui/icons/FastForward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
-import SpeedIcon from '@material-ui/icons/Speed';
 import { formatDuration } from "@/util/string";
-import Menu from "@/widgets/Menu";
-import Avatar from '@material-ui/core/Avatar';
 import { MainStore } from "@/components/Main";
-import VolumeDownIcon from '@material-ui/icons/VolumeDown';
-import FullscreenIcon from '@material-ui/icons/Fullscreen';
 
 const skipPoints = 10;
 
@@ -119,6 +114,7 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
                 if (!data) {
                     data = {};
                 }
+                data.duration = parseInt(playerRef && playerRef.duration);
                 data.position = parseInt(currentTime);
                 return data;
             });
