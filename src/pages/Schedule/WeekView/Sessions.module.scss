@@ -1,0 +1,31 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.media {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.group {
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.container {
+    display: flex;
+    margin-bottom: 0.5em;
+    overflow: hidden;
+    width: 10em;
+}
+
+.name {
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}

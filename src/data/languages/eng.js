@@ -712,6 +712,10 @@ export default {
         {
             "id": "MONTH",
             "value": "Month"
+        },
+        {
+            "id": "TIME_LEFT",
+            "value": "Left"
         }
     ]
 };

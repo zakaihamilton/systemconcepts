@@ -708,6 +708,10 @@ export default {
         {
             "id": "MONTH",
             "value": "חודש"
+        },
+        {
+            "id": "TIME_LEFT",
+            "value": "נשאר"
         }
     ]
 };

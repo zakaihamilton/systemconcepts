@@ -5,14 +5,12 @@
     border-top: 1px solid transparent;
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
-    padding: 0.25em;
 }
 
 .sessions {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: flex-end;
+    flex-direction: column;
     flex: 1;
 }
 
