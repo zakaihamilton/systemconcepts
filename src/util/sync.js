@@ -143,10 +143,10 @@ export function useSyncFeature() {
                 console.error(err);
             }
         }
-        SyncStore.update(s => {
-            s.lastUpdated = currentTime;
-        });
         if (updateCounter) {
+            SyncStore.update(s => {
+                s.lastUpdated = currentTime;
+            });
             SyncActiveStore.update(s => {
                 s.counter++;
             });
