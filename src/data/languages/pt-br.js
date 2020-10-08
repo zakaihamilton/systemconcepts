@@ -318,6 +318,10 @@ export default {
             "value": "Login"
         },
         {
+            "id": "ACCOUNT",
+            "value": "Conta"
+        },
+        {
             "id": "SIGN_IN",
             "value": "Entrar"
         },

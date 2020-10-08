@@ -314,6 +314,10 @@ export default {
             "value": "תפריט"
         },
         {
+            "id": "ACCOUNT",
+            "value": "חשבון"
+        },
+        {
             "id": "SIGN_IN",
             "value": "התחברות"
         },

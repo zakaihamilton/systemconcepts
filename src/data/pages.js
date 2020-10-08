@@ -34,12 +34,13 @@ import Editor from "@/pages/Editor";
 import ImageIcon from '@material-ui/icons/Image';
 import Image from "@/pages/Image";
 
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import SignIn from "@/pages/SignIn";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import Account from "@/pages/Account";
 
 import CreateIcon from '@material-ui/icons/Create';
 import SignUp from "@/pages/SignUp";
 
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import ChangePassword from "@/pages/ChangePassword";
 import ResetPassword, { getResetSection } from "@/pages/ResetPassword";
 
@@ -149,10 +150,10 @@ export default [
         showTooltip: true
     },
     {
-        id: "signin",
-        name: "SIGN_IN",
-        icon: <VpnKeyIcon />,
-        Component: SignIn
+        id: "account",
+        name: "ACCOUNT",
+        icon: <AccountCircleIcon />,
+        Component: Account
     },
     {
         id: "signup",

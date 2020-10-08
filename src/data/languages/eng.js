@@ -314,6 +314,10 @@ export default {
             "value": "Menu"
         },
         {
+            "id": "ACCOUNT",
+            "value": "Account"
+        },
+        {
             "id": "SIGN_IN",
             "value": "Sign In"
         },

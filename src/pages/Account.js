@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function SignIn() {
+export default function Account() {
     const { direction } = MainStore.useState();
     const classes = useStyles();
     const translations = useTranslations();

@@ -15,7 +15,7 @@ import { useDeviceType } from "@/util/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@material-ui/core/Button";
 import { addPath } from "@/util/pages";
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import Cookies from 'js-cookie';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
@@ -126,15 +126,15 @@ export default function Settings() {
             onClick: () => navigate("fontSizes")
         },
         {
-            id: "signin",
-            icon: <VpnKeyIcon />,
-            name: translations.SIGN_IN,
+            id: "account",
+            icon: <AccountCircleIcon />,
+            name: translations.ACCOUNT,
             value: signedInText,
             widget: <Label icon={<Tooltip title={signedInText}>
                 {isSignedIn ? <LockOpenIcon /> : <LockIcon />}
             </Tooltip>
             } name={signedInText} />,
-            onClick: () => navigate("signin")
+            onClick: () => navigate("account")
         },
         {
             id: "reset",
