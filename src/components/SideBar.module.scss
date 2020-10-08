@@ -6,12 +6,12 @@
     flex-direction: column;
 
     [dir=ltr] & {
-        border-right: 1px solid var(--border);
+        border-right: 1px solid var(--border-color);
         box-shadow: 10px 0 10px -10px var(--box-shadow-color);
     }
 
     [dir=rtl] & {
-        border-left: 1px solid var(--border);
+        border-left: 1px solid var(--border-color);
         box-shadow: -10px 0 10px -10px var(--box-shadow-color);
     }
 }

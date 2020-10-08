@@ -59,7 +59,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} label={translations.MONTH} variant="standard" helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);
@@ -76,7 +76,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const yearWidget = <Input select={true} label={translations.YEAR} variant="standard" helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
 
     const gotoPreviousMonth = () => {
         const newDate = new Date(month);

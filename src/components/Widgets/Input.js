@@ -85,7 +85,7 @@ export default React.forwardRef(function InputWidget({ label, mapping, helperTex
             select={select}
             error={!!error}
             helperText={error || helperText}
-            variant="outlined"
+            variant="filled"
             fullWidth={fullWidth}
             {...props}
         >

@@ -1,5 +1,4 @@
 :root {
-    --border: lightgray;
     --border-color: lightgray;
     --border-highlight: black;
     --border-focus: 2px solid black;
@@ -23,7 +22,6 @@
 }
 
 [data-theme="dark"] {
-    --border: rgba(255, 255, 255, 0.12);
     --border-color: rgba(255, 255, 255, 0.12);
     --border-highlight: white;
     --border-focus: 2px solid white;

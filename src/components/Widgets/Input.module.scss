@@ -28,7 +28,11 @@
 }
 
 .root label {
-    left: initial !important;
+    margin-top: 0.2em;
+    left: 0px !important;
+    right: 0px !important;
+    text-align: center;
+    transform: none !important;
 }
 
 .input div {
