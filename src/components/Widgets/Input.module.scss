@@ -27,6 +27,10 @@
     }
 }
 
+.root label {
+    left: initial !important;
+}
+
 .input div {
     cursor: default;
 }
