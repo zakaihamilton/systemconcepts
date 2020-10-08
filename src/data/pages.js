@@ -153,7 +153,9 @@ export default [
         id: "account",
         name: "ACCOUNT",
         icon: <AccountCircleIcon />,
-        Component: Account
+        Component: Account,
+        sidebar: true,
+        category: "quickaccess"
     },
     {
         id: "signup",
