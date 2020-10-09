@@ -732,6 +732,10 @@ export default {
         {
             "id": "ZOOM_OUT",
             "value": "הקטן תצוגה"
+        },
+        {
+            "id": "EDIT_ACCOUNT",
+            "value": "שינוי חשבון"
         }
     ]
 };

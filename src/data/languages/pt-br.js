@@ -736,6 +736,10 @@ export default {
         {
             "id": "ZOOM_OUT",
             "value": "Reduzir o zoom"
+        },
+        {
+            "id": "EDIT_ACCOUNT",
+            "value": "עדכון חשבון"
         }
     ]
 };

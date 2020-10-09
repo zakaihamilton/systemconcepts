@@ -68,7 +68,8 @@ export default function Account() {
     const [error, setError] = useState(false);
     const [inProgress, setProgress] = useState(false);
 
-    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
+    const userId = Cookies.get("id");
+    const isSignedIn = userId && Cookies.get("hash");
 
     const changeRemember = event => setRemember(event.target.value);
 
@@ -209,9 +210,14 @@ export default function Account() {
                                 {translations.SIGN_UP_TEXT}
                             </Link>
                         </Grid>}
-                        {isSignedIn && <Grid item xs={5}>
+                        {isSignedIn && <Grid item xs={8}>
                             <Link className={classes.link} href="#changepassword" variant="body2">
                                 {translations.CHANGE_PASSWORD}
+                            </Link>
+                        </Grid>}
+                        {isSignedIn && <Grid item xs={4}>
+                            <Link className={classes.link} href={"#account/" + encodeURIComponent(`user/${userId}`)} variant="body2">
+                                {translations.EDIT_ACCOUNT}
                             </Link>
                         </Grid>}
                     </Grid>

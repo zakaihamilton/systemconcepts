@@ -29,19 +29,25 @@ function FormItem({ child, record, setRecord, validate }) {
 
 export function FormGroup({ children, record, setRecord, validate }) {
     const elements = React.Children.map(children, child => {
+        if (!child) {
+            return null;
+        }
         return <FormItem child={child} record={record} setRecord={setRecord} validate={validate} />;
-    });
+    }).filter(Boolean);
     return <div className={styles.group}>
         {elements}
     </div>;
 }
 
-export default function Form({ children, actions, loading, validate }) {
+export default function Form({ children, actions, data, loading, validate }) {
     const elements = React.Children.map(children, child => {
+        if (!child) {
+            return null;
+        }
         return React.cloneElement(child, { validate });
-    });
+    }).filter(Boolean);
     return <div className={styles.root}>
-        {!loading && <form className={styles.form} noValidate>
+        {!loading && data && <form className={styles.form} noValidate>
             {elements}
         </form>}
         {loading && <Progress />}

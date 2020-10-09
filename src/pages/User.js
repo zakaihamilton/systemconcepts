@@ -9,6 +9,7 @@ import roles from "@/data/roles";
 import { useFetchJSON, fetchJSON } from "@/util/fetch";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
+import { useParentPath } from "@/util/pages";
 
 export function getUserSection({ sectionIndex, path }) {
     if (sectionIndex) {
@@ -18,6 +19,8 @@ export function getUserSection({ sectionIndex, path }) {
 
 export default function User({ path = "" }) {
     const translations = useTranslations();
+    const parentPath = useParentPath();
+    const editAccount = parentPath === "#account";
     const [data, setData, loading] = useFetchJSON("/api/users", { headers: { id: path } });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
@@ -114,15 +117,14 @@ export default function User({ path = "" }) {
         </Button>
     </>;
 
-    return <Form actions={actions} loading={loading} validate={validate}>
+    return <Form actions={actions} loading={loading} data={data} validate={validate}>
         <FormGroup record={data} setRecord={setData}>
-            <Input
+            {!editAccount && <Input
                 id="id"
                 label={translations.ID}
-                autoFocus
                 onValidate={onValidateId}
                 icon={<AccountCircleIcon />}
-            />
+            />}
             <Input
                 id="email"
                 label={translations.EMAIL_ADDRESS}
@@ -139,13 +141,13 @@ export default function User({ path = "" }) {
                 label={translations.LAST_NAME}
                 onValidate={onValidateField}
             />
-            <Input
+            {!editAccount && <Input
                 id="role"
                 icon={<RecentActorsIcon />}
                 label={translations.ROLE}
                 items={roles}
                 mapping={roleTypeMapping}
-                select={true} />
+                select={true} />}
         </FormGroup>
     </Form>;
 }

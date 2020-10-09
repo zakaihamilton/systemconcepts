@@ -736,6 +736,10 @@ export default {
         {
             "id": "ZOOM_OUT",
             "value": "Zoom Out"
+        },
+        {
+            "id": "EDIT_ACCOUNT",
+            "value": "Edit Account"
         }
     ]
 };
