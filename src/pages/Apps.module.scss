@@ -16,12 +16,11 @@
 }
 
 .item:hover {
-    color: var(--hover-color);
     border: 1px solid var(--info-color);
 }
 
 .item:hover:active {
-    background-color: var(--hover-fill);
+    background-color: var(--info-background);
 }
 
 .icon {
