@@ -66,7 +66,7 @@ export default [
         id: "apps",
         name: "APPS",
         root: true,
-        icon: <AppsIcon />,
+        Icon: AppsIcon,
         Component: Apps,
         separator: true
     },
@@ -75,7 +75,7 @@ export default [
         category: "tools",
         id: "users",
         name: "USERS",
-        icon: <PeopleIcon />,
+        Icon: PeopleIcon,
         Component: Users,
         visible: () => Cookies.get("id") && Cookies.get("hash")
     },
@@ -83,31 +83,31 @@ export default [
         id: "user",
         name: "USER",
         section: getUserSection,
-        icon: <PeopleIcon />,
+        Icon: PeopleIcon,
         Component: User
     },
     {
         id: "languages",
         name: "LANGUAGES",
-        icon: <LanguageIcon />,
+        Icon: LanguageIcon,
         Component: Languages
     },
     {
         id: "translations",
         name: "TRANSLATIONS",
-        icon: <TranslateIcon />,
+        Icon: TranslateIcon,
         Component: Translations
     },
     {
         id: "fontSizes",
         name: "FONTSIZES",
-        icon: <FormatSizeIcon />,
+        Icon: FormatSizeIcon,
         Component: FontSizes
     },
     {
         id: "storage",
         name: "STORAGE",
-        icon: <StorageIcon />,
+        Icon: StorageIcon,
         Component: Storage,
         section: getStorageSection,
         sidebar: true,
@@ -116,7 +116,7 @@ export default [
     {
         id: "update_sessions",
         name: "UPDATE_SESSIONS",
-        icon: <UpdateIcon />,
+        Icon: UpdateIcon,
         Component: UpdateSessions,
         sidebar: true,
         category: "tools"
@@ -126,33 +126,33 @@ export default [
         category: "quickaccess",
         id: "settings",
         name: "SETTINGS",
-        icon: <SettingsIcon />,
+        Icon: SettingsIcon,
         Component: Settings
     },
     {
         id: "settings/reset",
         name: "RESET",
-        icon: <SettingsBackupRestoreIcon />,
+        Icon: SettingsBackupRestoreIcon,
         Component: Reset
     },
     {
         id: "editor",
         name: "EDITOR",
-        icon: <EditIcon />,
+        Icon: EditIcon,
         Component: Editor,
         showTooltip: true
     },
     {
         id: "image",
         name: "IMAGE",
-        icon: <ImageIcon />,
+        Icon: ImageIcon,
         Component: Image,
         showTooltip: true
     },
     {
         id: "account",
         name: "ACCOUNT",
-        icon: <AccountCircleIcon />,
+        Icon: AccountCircleIcon,
         Component: Account,
         sidebar: true,
         category: "quickaccess"
@@ -160,65 +160,65 @@ export default [
     {
         id: "signup",
         name: "SIGN_UP",
-        icon: <CreateIcon />,
+        Icon: CreateIcon,
         Component: SignUp
     },
     {
         id: "changepassword",
         name: "CHANGE_PASSWORD",
-        icon: <VpnKeyIcon />,
+        Icon: VpnKeyIcon,
         Component: ChangePassword
     },
     {
         id: "resetpassword",
         name: "RESET_PASSWORD",
-        icon: <VpnKeyIcon />,
+        Icon: VpnKeyIcon,
         Component: ResetPassword,
         section: getResetSection
     },
     {
-        sidebar: true,
+        apps: true,
         id: "diagrams",
         name: "DIAGRAMS",
-        icon: <TableChartIcon />,
+        Icon: TableChartIcon,
         Component: Diagrams
     },
     {
         sidebar: true,
         id: "terms",
         name: "TERMS",
-        icon: <LabelIcon />,
+        Icon: LabelIcon,
         Component: Terms
     },
     {
-        sidebar: true,
+        apps: true,
         id: "sessions",
         name: "SESSIONS",
-        icon: <VideoLibraryIcon />,
+        Icon: VideoLibraryIcon,
         Component: Sessions
     },
     {
         id: "player",
         name: "PLAYER",
-        icon: <VideoLabelIcon />,
+        Icon: VideoLabelIcon,
         Component: Player
     },
     {
-        sidebar: true,
+        apps: true,
         id: "schedule",
         name: "SCHEDULE",
-        icon: <EventIcon />,
+        Icon: EventIcon,
         Component: Schedule
     },
     ...diagrams.map(diagram => {
-        let { icon } = diagram;
-        if (!icon) {
-            icon = <TableChartIcon />;
+        let { Icon } = diagram;
+        if (!Icon) {
+            Icon = TableChartIcon;
         }
         return {
             ...diagram,
             tooltip: "DIAGRAM",
-            icon
+            Icon
         };
     })
 ];

@@ -152,7 +152,8 @@ export function usePages() {
         return visible;
     }).map(page => {
         const { name, tooltip, ...props } = page;
-        return { ...props, name: mapText(name), tooltip: mapText(tooltip) };
+        const { Icon } = page;
+        return { ...props, icon: <Icon />, name: mapText(name), tooltip: mapText(tooltip) };
     });
     return pages;
 }
