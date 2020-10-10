@@ -50,20 +50,22 @@ export default function PlayerToolbar({ show, playerRef, isVideo }) {
     const menuItems = [
         {
             id: "speed",
-            name: translations.SPEED + " - " + speedName,
+            name: translations.SPEED,
             icon: <SpeedIcon />,
             items: rateMenuItems,
             selected: speed,
             location: "footer",
+            label: true,
             divider: true
         },
         {
             id: "volume",
-            name: translations.VOLUME + " - " + volumeName,
+            name: translations.VOLUME,
             icon: <VolumeDownIcon />,
             items: volumeMenuItems,
             selected: volume,
             divider: true,
+            label: true,
             location: "footer"
         },
         isVideo && {
