@@ -10,6 +10,9 @@ import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
+import Label from "@/widgets/Label";
+import Menu from "@/widgets/Menu";
+import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -26,14 +29,9 @@ export default function SessionsPage() {
 
     const columns = [
         {
-            id: "name",
+            id: "nameWidget",
             title: translations.NAME,
-            sortable: true
-        },
-        {
-            id: "mediaWidget",
-            title: translations.MEDIA,
-            sortable: "media"
+            sortable: "name"
         },
         {
             id: "date",
@@ -77,6 +75,7 @@ export default function SessionsPage() {
         const media = [];
         if (item.audio) {
             media.push({
+                id: "audio",
                 name: translations.AUDIO,
                 icon: <AudioIcon />,
                 link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`
@@ -84,29 +83,28 @@ export default function SessionsPage() {
         }
         if (item.video) {
             media.push({
+                id: "video",
                 name: translations.VIDEO,
                 icon: <MovieIcon />,
                 link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`
             });
         }
+        const menuItems = media.map(item => {
+            return {
+                ...item,
+                onClick: () => addPath(item.link)
+            };
+        });
         return {
             ...item,
-            group: item.group[0].toUpperCase() + item.group.slice(1),
-            media: media.map(element => element.id).join(" "),
-            mediaWidget: (<div className={styles.mediaLinks}>
-                {media.map(element => {
-                    const gotoLink = () => {
-                        addPath(element.link);
-                    };
-                    return <div key={element.name} className={styles.mediaLink}>
-                        <IconButton onClick={gotoLink}>
-                            <Tooltip arrow title={element.name}>
-                                {element.icon}
-                            </Tooltip>
-                        </IconButton>
-                    </div>
-                })}
-            </div>)
+            nameWidget: (<Label icon={
+                <Menu items={menuItems}>
+                    <Tooltip arrow title={translations.PLAYER}>
+                        <VideoLabelIcon />
+                    </Tooltip>
+                </Menu>}
+                name={item.name} />),
+            group: item.group[0].toUpperCase() + item.group.slice(1)
         };
     };
 
