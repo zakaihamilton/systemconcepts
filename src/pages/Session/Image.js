@@ -3,7 +3,7 @@ import { useState } from "react";
 import Progress from "@/widgets/Progress";
 import clsx from "clsx";
 
-export default function SessionImage({ path, width, height }) {
+export default function SessionImage({ path, width, height, alt }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const onLoad = () => {
@@ -19,5 +19,6 @@ export default function SessionImage({ path, width, height }) {
     return <div className={styles.root}>
         {loading && <Progress />}
         {path && !error && <img className={clsx(styles.img, loading && styles.loading)} style={style} onError={onError} onLoad={onLoad} src={path} />}
+        {!!error && alt}
     </div>;
 }

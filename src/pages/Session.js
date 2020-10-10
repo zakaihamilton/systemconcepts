@@ -70,8 +70,8 @@ export default function SessionPage({ prefix, group, year, date, name }) {
     return <div className={styles.root}>
         <div className={styles.info}>
             <div className={styles.preview}>
-                {session && session.video && <Image path={data && data.path} width="9em" height="9em" />}
-                {session && !session.video && <GraphicEqIcon />}
+                {session && session.video && <Image path={data && data.path} width="9em" height="9em" alt={<MovieIcon fontSize="large" />} />}
+                {session && !session.video && <GraphicEqIcon fontSize="large" />}
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
