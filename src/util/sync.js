@@ -70,6 +70,7 @@ export function useSyncFeature() {
     const isLoaded = useLocalStorage("SyncStore", SyncStore);
     const { lastUpdated } = SyncStore.useState();
     const { active, busy } = SyncActiveStore.useState();
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const resetSync = useCallback(async () => {
         SyncStore.update(s => {
             s.lastUpdated = 0;
@@ -158,10 +159,10 @@ export function useSyncFeature() {
     }, [lastUpdated]);
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
-        if (online && isLoaded) {
+        if (online && isLoaded && isSignedIn) {
             updateSync();
         }
-    }, [online, isLoaded]);
+    }, [online, isLoaded, isSignedIn]);
 
     return [online && isLoaded && updateSync, resetSync, busy, error, active, duration];
 }
