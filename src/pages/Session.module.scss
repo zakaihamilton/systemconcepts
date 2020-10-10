@@ -1,0 +1,54 @@
+.root {
+    display: flex;
+    color: var(--text-color);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.info {
+    display: flex;
+    margin: 1em;
+    align-content: center;
+    overflow: hidden;
+    width: 90vw;
+}
+
+.preview {
+    display: flex;
+    width: 9em;
+    height: 9em;
+    flex-shrink: 0;
+}
+
+.metadata {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1em;
+    margin-right: 1em;
+    border: 1px solid transparent;
+    overflow: hidden;
+}
+
+.set {
+    margin-bottom: 0.5em;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.name {
+    display: flex;
+    font-weight: bold;
+    user-select: none;
+}
+
+.value {
+    display: flex;
+    min-width: 0;
+    user-select: none;
+}
+
+.text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

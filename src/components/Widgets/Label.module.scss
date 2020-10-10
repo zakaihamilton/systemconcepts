@@ -1,20 +1,32 @@
 .root {
     display: flex;
     align-items: center;
-    border-radius: 8px;
     border: 1px solid transparent;
 }
 
-.root.button {
+.root.button:not(.noBorder) {
     border: 1px solid var(--border-color);
     font: inherit;
-    color: inherit;
+    color: var(--text-color);
     background-color: transparent;
     cursor: pointer;
 }
 
-.root.button:hover {
+.root.button:not(.noBorder):hover {
     border: 1px solid var(--border-highlight);
+}
+
+.root.noBorder {
+    font: inherit;
+    color: var(--text-color);
+    background-color: transparent;
+    cursor: pointer;
+    height: 100%;
+}
+
+.root.noBorder:hover:active {
+    background-color: var(--hover-fill);
+    color: var(--hover-text-color);
 }
 
 .root>* {

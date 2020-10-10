@@ -554,6 +554,10 @@ export default {
             "value": "שיעורים"
         },
         {
+            "id": "SESSION",
+            "value": "שיעור"
+        },
+        {
             "id": "UPDATE_SESSIONS",
             "value": "עדכון שיעורים"
         },

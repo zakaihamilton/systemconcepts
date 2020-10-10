@@ -8,8 +8,6 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import Menu from "@/widgets/Menu";
 import { addPath } from "@/util/pages";
-import MovieIcon from '@material-ui/icons/Movie';
-import AudioIcon from "@/icons/Audio";
 import { useDeviceType } from "@/util/styles";
 
 export default function Day({ sessions, month, column, row, date, dateFormatter }) {
@@ -24,28 +22,14 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
     const isMonth = isDateMonth(date, month);
     const sessionDate = getDateString(date);
     const sessionItems = sessions.filter(session => session.date === sessionDate);
-    const audioItems = sessionItems.filter(item => item.audio).map(item => {
+    const items = sessionItems.filter(item => item.audio || item.video).map(item => {
         const groupName = item.group[0].toUpperCase() + item.group.slice(1);
         return {
-            id: "audio" + item.name,
+            id: item.name,
             name: item.name,
-            icon: isPhone ?
-                <Tooltip title={translations.AUDIO}><AudioIcon /></Tooltip> :
-                <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
+            icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
             description: groupName,
-            onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`)
-        };
-    });
-    const videoItems = sessionItems.filter(item => item.video).map(item => {
-        const groupName = item.group[0].toUpperCase() + item.group.slice(1);
-        return {
-            id: "video" + item.name,
-            name: item.name,
-            icon: isPhone ?
-                <Tooltip title={translations.VIDEO}><MovieIcon /></Tooltip> :
-                <Tooltip title={translations.PLAYER}><VideoLabelIcon /></Tooltip>,
-            description: groupName,
-            onClick: () => addPath(`player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`)
+            onClick: () => addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`)
         };
     });
     return <div className={styles.root} style={style}>
@@ -55,23 +39,9 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             </Avatar>
         </div>
         <div className={styles.sessions}>
-            {!isPhone && !!audioItems.length && <Menu items={audioItems}>
+            {!!items.length && <Menu items={items}>
                 <IconButton>
-                    <Tooltip arrow title={translations.AUDIO}>
-                        <AudioIcon />
-                    </Tooltip>
-                </IconButton>
-            </Menu>}
-            {!isPhone && !!videoItems.length && <Menu items={videoItems}>
-                <IconButton>
-                    <Tooltip arrow title={translations.VIDEO}>
-                        <MovieIcon />
-                    </Tooltip>
-                </IconButton>
-            </Menu>}
-            {!!isPhone && (!!videoItems.length || !!audioItems.length) && <Menu items={[...audioItems, ...videoItems]}>
-                <IconButton>
-                    <Tooltip arrow title={translations.PLAYER}>
+                    <Tooltip arrow title={translations.SESSIONS}>
                         <VideoLabelIcon />
                     </Tooltip>
                 </IconButton>

@@ -8,6 +8,7 @@ import Menu from "@/widgets/Menu";
 import { useEffect } from "react";
 import styles from "./Toolbar.module.scss";
 import { Store } from "pullstate";
+import Label from "@/widgets/Label";
 
 export const ToolbarStore = new Store({
     sections: [],
@@ -72,11 +73,13 @@ export default function Toolbar({ location, divider, collapsable }) {
                 {item.element}
                 {!item.element &&
                     <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
-                        <IconButton disabled={item.disabled}>
-                            <Tooltip arrow title={item.name}>
-                                {item.icon}
-                            </Tooltip>
-                        </IconButton>
+                        {!!item.label ?
+                            (<Label icon={item.icon} name={item.name} noBorder={true} />) :
+                            (<IconButton disabled={item.disabled}>
+                                <Tooltip arrow title={item.name}>
+                                    {item.icon}
+                                </Tooltip>
+                            </IconButton>)}
                     </Menu>
                 }
                 {!!item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}

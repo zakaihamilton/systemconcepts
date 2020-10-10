@@ -56,6 +56,8 @@ import Sessions from "@/pages/Sessions";
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import Player from "@/pages/Player";
 
+import Session from "@/pages/Session";
+
 import EventIcon from '@material-ui/icons/Event';
 import Schedule from "@/pages/Schedule";
 
@@ -209,6 +211,12 @@ export default [
         name: "SCHEDULE",
         Icon: EventIcon,
         Component: Schedule
+    },
+    {
+        id: "session",
+        name: "SESSION",
+        Icon: VideoLabelIcon,
+        Component: Session
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

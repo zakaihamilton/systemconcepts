@@ -22,12 +22,12 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, prefix = "", group = "", year = "", name, suffix, parentPath }) {
+export default function PlayerPage({ show = false, prefix = "", group = "", year = "", date = "", name, suffix }) {
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
     const size = useContext(PageSize);
-    let components = [parentPath, prefix, group, year, name + (suffix || "")].filter(Boolean).join("/");
-    const path = makePath(components).split("/").slice(2).join("/");
+    let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
+    const path = makePath(components).split("/").join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== playerPath);
     const folder = fileFolder(path);
     const [, , groupName, yearName] = folder.split("/");

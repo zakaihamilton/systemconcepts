@@ -6,11 +6,19 @@
     border-top: 1px solid transparent;
     border-right: 1px solid transparent;
     border-bottom: 1px solid var(--border-color);
+    background: var(--background);
+    font: inherit;
+    align-items: center;
 }
 
 .root.mobile {
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
+}
+
+.root:hover:active {
+    background-color: var(--hover-fill);
+    color: var(--hover-text-color);
 }
 
 .media {

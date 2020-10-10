@@ -558,6 +558,10 @@ export default {
             "value": "Sessions"
         },
         {
+            "id": "SESSION",
+            "value": "Session"
+        },
+        {
             "id": "UPDATE_SESSIONS",
             "value": "Update Sessions"
         },

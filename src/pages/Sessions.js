@@ -1,9 +1,7 @@
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
-import styles from "./Sessions.module.scss";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@/icons/Audio";
-import { IconButton } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
 import { useSync } from "@/util/sync";
@@ -31,7 +29,11 @@ export default function SessionsPage() {
         {
             id: "nameWidget",
             title: translations.NAME,
-            sortable: "name"
+            sortable: "name",
+            onSelectable: () => true,
+            onClick: item => {
+                addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
+            }
         },
         {
             id: "date",
@@ -52,9 +54,9 @@ export default function SessionsPage() {
             }))
         },
         {
-            id: "group",
+            id: "groupWidget",
             title: translations.GROUP,
-            sortable: true,
+            sortable: "group",
             onSelectable: item => typeof item.group !== "undefined" && !groupFilter,
             tags: [groupFilter && {
                 id: groupFilter,
@@ -104,7 +106,8 @@ export default function SessionsPage() {
                     </Tooltip>
                 </Menu>}
                 name={item.name} />),
-            group: item.group[0].toUpperCase() + item.group.slice(1)
+            group: item.group,
+            groupWidget: item.group[0].toUpperCase() + item.group.slice(1)
         };
     };
 

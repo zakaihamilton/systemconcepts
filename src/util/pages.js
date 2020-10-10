@@ -20,6 +20,19 @@ export function setPath(...path) {
     window.location.hash = hash;
 }
 
+export function replacePath(...path) {
+    let hash = window.location.hash;
+    if (hash.startsWith("#")) {
+        hash = hash.substring(1);
+    }
+    hash = encodeURI(decodeURI(hash).split("/").filter(Boolean).slice(0, -1).join("/"));
+    hash += "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+    MainStore.update(s => {
+        s.hash = hash;
+    });
+    window.location.hash = hash;
+}
+
 export function goBackPage() {
     let hash = window.location.hash;
     if (hash.startsWith("#")) {
