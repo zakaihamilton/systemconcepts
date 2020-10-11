@@ -11,6 +11,7 @@
     align-items: center;
     min-height: 5em;
     border-radius: 0em;
+    color: var(--text-color);
 }
 
 .root:hover {
@@ -31,7 +32,6 @@
 }
 
 .group {
-    color: var(--text-color);
     font-weight: bold;
     justify-content: center;
     display: flex;
@@ -45,6 +45,5 @@
 
 .name {
     width: 10em;
-    color: var(--text-color);
     text-align: center;
 }
