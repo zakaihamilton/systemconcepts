@@ -638,6 +638,10 @@ export default {
             "value": "Group"
         },
         {
+            "id": "GROUPS",
+            "value": "Groups"
+        },
+        {
             "id": "YEAR",
             "value": "Year"
         },
@@ -751,7 +755,7 @@ export default {
         },
         {
             "id": "RELOAD",
-            "value":"Reload"
+            "value": "Reload"
         }
     ]
 };

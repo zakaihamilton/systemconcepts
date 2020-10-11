@@ -20,7 +20,7 @@ export default function SessionPage({ prefix, group, year, date, name }) {
     const path = makePath(components).split("/").join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
     const [syncCounter, busy] = useSync();
-    const sessions = useSessions([syncCounter], !busy);
+    const sessions = useSessions([syncCounter], !busy, false);
     const session = sessions && sessions.find(session =>
         session.group === group &&
         session.name === name &&

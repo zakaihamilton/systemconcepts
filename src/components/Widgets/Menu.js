@@ -19,7 +19,7 @@ const StyledMenu = withStyles({
     />
 ));
 
-export default function MenuWidget({ items, children, onClick, selected, onVisible, ...props }) {
+export default function MenuWidget({ items, children, onClick, selected: menuSelected, onVisible, ...props }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const clickEnabled = items && items.length || onClick;
@@ -41,9 +41,14 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
 
     const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
-        const { divider, name, icon, onClick, id, menu, description, ...props } = item;
+        const { divider, name, icon, items, onClick, id, menu, description, selected, ...props } = item;
+        const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
+        const selectedArray = Array.isArray(selectedItem);
+        const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
         const handleClick = event => {
-            handleClose();
+            if (!selectedArray) {
+                handleClose();
+            }
             if (onClick) {
                 event = { ...event };
                 event.target = { ...event.target };
@@ -51,13 +56,16 @@ export default function MenuWidget({ items, children, onClick, selected, onVisib
                 onClick(event);
             }
         };
-        return [<MenuItem key={id} selected={selected === id} onClick={handleClick} {...props}>
-            <ListItemIcon>
-                {icon}
-            </ListItemIcon>
-            <ListItemText primary={name} secondary={description} />
-        </MenuItem>,
-        divider && !isLast && <Divider key={"_" + id + "_"} />
+        return [
+            <MenuItem key={id} selected={isSelected} onClick={items ? undefined : handleClick} {...props}>
+                <MenuWidget items={item.items} selected={isSelected} onClick={items ? handleClick : undefined}>
+                    <ListItemIcon>
+                        {icon}
+                    </ListItemIcon>
+                    <ListItemText primary={name} secondary={description} />
+                </MenuWidget>
+            </MenuItem>,
+            divider && !isLast && <Divider key={"_" + id + "_"} />
         ];
     });
 

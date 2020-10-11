@@ -638,6 +638,10 @@ export default {
             "value": "Grupo"
         },
         {
+            "id": "GROUPS",
+            "value": "Grupos"
+        },
+        {
             "id": "YEAR",
             "value": "Ano"
         },

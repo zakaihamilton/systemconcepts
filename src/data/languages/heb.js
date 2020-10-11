@@ -634,6 +634,10 @@ export default {
             "value": "קבוצה"
         },
         {
+            "id": "GROUPS",
+            "value": "קבוצות"
+        },
+        {
             "id": "YEAR",
             "value": "שנה"
         },

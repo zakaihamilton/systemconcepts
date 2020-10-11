@@ -1,14 +1,22 @@
 import storage from "@/util/storage";
 import { makePath, fileTitle, isAudioFile, isVideoFile } from "@/util/path";
 import { Store } from "pullstate";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import { useTranslations } from "@/util/translations";
+
+registerToolbar("Sessions");
 
 export const SessionsStore = new Store({
-    sessions: []
+    sessions: [],
+    groups: [],
+    groupFilter: []
 });
 
-export function useSessions(depends = [], cond = true) {
-    const { sessions } = SessionsStore.useState();
+export function useSessions(depends = [], cond = true, filterSessions = true) {
+    const translations = useTranslations();
+    const { sessions, groups, groupFilter } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
         const getListing = async path => {
@@ -73,18 +81,64 @@ export function useSessions(depends = [], cond = true) {
                     }
                 }
             }
+            SessionsStore.update(s => {
+                s.sessions = sessions;
+                s.groups = groups;
+            });
         }
         catch (err) {
             console.error(err);
         }
-        SessionsStore.update(s => {
-            s.sessions = sessions;
-        });
     }, []);
     useEffect(() => {
         if (cond) {
             updateSessions();
         }
     }, [depends]);
-    return sessions;
+
+    const groupsItems = useMemo(() => {
+        return groups.map(group => {
+            return {
+                id: group.name,
+                icon: <GroupWorkIcon />,
+                name: group.name[0].toUpperCase() + group.name.slice(1),
+                selected: groupFilter,
+                onClick: () => {
+                    SessionsStore.update(s => {
+                        if (s.groupFilter.includes(group.name)) {
+                            s.groupFilter = s.groupFilter.filter(name => name !== group.name);
+                        }
+                        else {
+                            s.groupFilter = [...s.groupFilter, group.name];
+                        }
+                    });
+                }
+            };
+        });
+    }, [groups]);
+
+    const toolbarItems = [
+        {
+            id: "group",
+            name: translations.GROUPS,
+            icon: <GroupWorkIcon />,
+            items: groupsItems
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems] });
+
+    const filtered = useMemo(() => {
+        if (!groupFilter.length) {
+            return sessions;
+        }
+        return sessions.filter(session => groupFilter.includes(session.group));
+    }, [groupFilter, sessions]);
+
+    if (filterSessions) {
+        return filtered;
+    }
+    else {
+        return sessions;
+    }
 }
