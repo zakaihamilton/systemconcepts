@@ -17,7 +17,8 @@ export default function Reload() {
             id: "reload",
             name: translations.RELOAD,
             icon: <ReplayIcon />,
-            onClick: reload
+            onClick: reload,
+            menu: true
         }
     ].filter(Boolean);
 
