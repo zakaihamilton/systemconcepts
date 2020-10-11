@@ -17,11 +17,9 @@ export default function Session({ group, year, date, name }) {
             {groupName}
         </div>
         <div className={styles.container}>
-            <Tooltip arrow title={name}>
-                <div className={styles.name} dir="auto">
-                    {name}
-                </div>
-            </Tooltip>
+            <div className={styles.name} dir="auto">
+                {name}
+            </div>
         </div>
     </button>;
 }
