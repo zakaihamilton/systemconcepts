@@ -1,7 +1,7 @@
 .root {
     display: flex;
     flex-direction: column;
-    padding: 0.25em;
+    padding: 0.5em;
     border-left: 1px solid transparent;
     border-right: 1px solid transparent;
     border-top: 1px solid transparent;
@@ -12,6 +12,13 @@
     min-height: 5em;
     border-radius: 0em;
     color: var(--text-color);
+}
+
+.root.mobile {
+    border-left: 1px solid transparent;
+    border-right: 1px solid var(--border-color);
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
 }
 
 .root:hover {
