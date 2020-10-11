@@ -27,9 +27,9 @@ export default function SessionsPage() {
 
     const columns = [
         {
-            id: "nameWidget",
+            id: "name",
             title: translations.NAME,
-            sortable: "name",
+            sortable: true,
             onSelectable: () => true,
             onClick: item => {
                 addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
@@ -74,38 +74,8 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
-        const media = [];
-        if (item.audio) {
-            media.push({
-                id: "audio",
-                name: translations.AUDIO,
-                icon: <AudioIcon />,
-                link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.m4a`
-            });
-        }
-        if (item.video) {
-            media.push({
-                id: "video",
-                name: translations.VIDEO,
-                icon: <MovieIcon />,
-                link: `player?prefix=sessions&group=${item.group}&year=${item.year}&name=${item.date + " " + item.name}&suffix=.mp4`
-            });
-        }
-        const menuItems = media.map(item => {
-            return {
-                ...item,
-                onClick: () => addPath(item.link)
-            };
-        });
         return {
             ...item,
-            nameWidget: (<Label icon={
-                <Menu items={menuItems}>
-                    <Tooltip arrow title={translations.PLAYER}>
-                        <VideoLabelIcon />
-                    </Tooltip>
-                </Menu>}
-                name={item.name} />),
             group: item.group,
             groupWidget: item.group[0].toUpperCase() + item.group.slice(1)
         };

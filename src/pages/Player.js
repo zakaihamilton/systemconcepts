@@ -13,6 +13,7 @@ import { useFetchJSON } from "@/util/fetch";
 import Progress from "@/widgets/Progress";
 import { useFile } from "@/util/storage";
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
+import { getParentParams } from "@/util/pages";
 
 export const PlayerStore = new Store({
     playerPath: "",
@@ -22,10 +23,21 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, prefix = "", group = "", year = "", date = "", name, suffix }) {
+export function getPlayerSection({ suffix, translations }) {
+    if (suffix === ".m4a") {
+        name = translations.AUDIO;
+    }
+    else if (suffix === ".mp4") {
+        name = translations.VIDEO;
+    }
+    return { name };
+}
+
+export default function PlayerPage({ show = false, suffix }) {
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
     const size = useContext(PageSize);
+    const { prefix = "", group = "", year = "", date = "", name } = getParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== playerPath);

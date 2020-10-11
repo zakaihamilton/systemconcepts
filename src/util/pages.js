@@ -58,6 +58,13 @@ export function useParentPath() {
     return decodeURIComponent(previousItem);
 }
 
+export function getParentParams() {
+    const path = useParentPath();
+    const [, query] = path.split("?");
+    const params = Object.fromEntries(new URLSearchParams(query));
+    return params;
+}
+
 export function usePagesFromHash(hash = "") {
     const translations = useTranslations();
     const pages = usePages();
@@ -119,7 +126,7 @@ export function usePagesFromHash(hash = "") {
             const url = encodeURI(path + encodeURIComponent(subPath));
             const name = page.name;
             if (typeof page.section === "function") {
-                const result = page.section({ sectionIndex, id: sectionId, translations, path: sectionPath });
+                const result = page.section({ sectionIndex, id: sectionId, translations, path: sectionPath, ...params });
                 if (!result) {
                     return null;
                 }

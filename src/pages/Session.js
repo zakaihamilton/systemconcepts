@@ -9,7 +9,7 @@ import { useSessions } from "@/util/sessions";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@/icons/Audio";
-import { replacePath } from "@/util/pages";
+import { addPath } from "@/util/pages";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 
 registerToolbar("Session");
@@ -41,7 +41,7 @@ export default function SessionPage({ prefix, group, year, date, name }) {
     };
 
     const gotoPlayer = (suffix) => {
-        replacePath(`player?prefix=sessions&group=${session.group}&year=${session.year}&date=${session.date}&name=${session.name}&suffix=${suffix}`);
+        addPath(`player?suffix=${suffix}`);
     }
 
     const items = [

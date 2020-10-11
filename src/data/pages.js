@@ -54,7 +54,7 @@ import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
 import Sessions from "@/pages/Sessions";
 
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
-import Player from "@/pages/Player";
+import Player, { getPlayerSection } from "@/pages/Player";
 
 import Session from "@/pages/Session";
 
@@ -203,6 +203,7 @@ export default [
         id: "player",
         name: "PLAYER",
         Icon: VideoLabelIcon,
+        section: getPlayerSection,
         Component: Player
     },
     {
