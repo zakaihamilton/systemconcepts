@@ -740,6 +740,14 @@ export default {
         {
             "id": "EDIT_ACCOUNT",
             "value": "שינוי חשבון"
+        },
+        {
+            "id": "PLAYING_ERROR",
+            "value": "יש שגיאה בניגון המדיה"
+        },
+        {
+            "id": "RELOAD",
+            "value": "טעינה מחדש"
         }
     ]
 };

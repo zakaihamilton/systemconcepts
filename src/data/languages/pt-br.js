@@ -744,6 +744,14 @@ export default {
         {
             "id": "EDIT_ACCOUNT",
             "value": "עדכון חשבון"
+        },
+        {
+            "id": "PLAYING_ERROR",
+            "value": "Ocorreu um erro ao reproduzir esta mídia"
+        },
+        {
+            "id": "RELOAD",
+            "value": "Recarregar"
         }
     ]
 };

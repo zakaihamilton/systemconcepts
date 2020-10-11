@@ -744,6 +744,14 @@ export default {
         {
             "id": "EDIT_ACCOUNT",
             "value": "Edit Account"
+        },
+        {
+            "id": "PLAYING_ERROR",
+            "value": "There was an error playing this media"
+        },
+        {
+            "id": "RELOAD",
+            "value":"Reload"
         }
     ]
 };

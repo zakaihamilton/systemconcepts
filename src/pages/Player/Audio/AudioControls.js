@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./AudioControls.module.scss";
 import { useTranslations } from "@/util/translations";
-import Button from "../Button";
+import PlayerButton from "../Button";
 import FastRewindIcon from '@material-ui/icons/FastRewind';
 import FastForwardIcon from '@material-ui/icons/FastForward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import ReplayIcon from '@material-ui/icons/Replay';
 import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import { formatDuration } from "@/util/string";
 import { MainStore } from "@/components/Main";
 import Field from "../Field";
+import MuiAlert from '@material-ui/lab/Alert';
 
 const skipPoints = 10;
 
@@ -20,9 +22,16 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
     const dragging = useRef(false);
     const [, setCounter] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const [error, setError] = useState(null);
     useEffect(() => {
         const update = name => {
-            if (name === "loadedmetadata" && metadata && metadata.position) {
+            if (name === "error") {
+                setError("PLAYING_ERROR");
+            }
+            else if (name === "loadstart") {
+                setError(null);
+            }
+            else if (name === "loadedmetadata" && metadata && metadata.position) {
                 playerRef.currentTime = metadata.position;
                 setCurrentTime(playerRef.currentTime);
             }
@@ -33,7 +42,7 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
                 setCounter(counter => counter + 1);
             }
         };
-        const events = ["loadedmetadata", "pause", "play", "playing", "volumechange", "timeupdate"];
+        const events = ["loadedmetadata", "pause", "error", "loadstart", "play", "playing", "volumechange", "timeupdate"];
         events.map(name => playerRef.addEventListener(name, () => update(name)));
         return () => {
             events.map(name => playerRef.removeEventListener(name, update));
@@ -124,14 +133,14 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
             handlePosEvent(e, true);
         }
     };
-    let [, month, day, sessionName = ""] = name.split(/(\d{4})-(\d{2})-(\d{2})\s(.+)/g).slice(1);
-    const date = [year, month, day].join("-");
+    const play = () => {
+        playerRef.play().catch(err => {
+            console.error(err);
+            setError("PLAYING_ERROR");
+        });
+    };
     return <div className={styles.root}>
-        <div className={styles.metadata}>
-            <Field name={translations.GROUP} value={group && (group[0].toUpperCase() + group.slice(1))} />
-            <Field name={translations.DATE} value={date} />
-            <Field name={translations.NAME} value={sessionName} />
-        </div>
+        {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
         <div className={styles.toolbar}>
             <div className={styles.progress}>
                 <div className={styles.progressLine} ref={progressRef} {...events}>
@@ -141,16 +150,17 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
                 </div>
             </div>
             <div className={styles.buttons}>
-                {direction === "ltr" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
-                {direction === "rtl" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
-                {playerRef.paused && <Button icon={<PlayArrowIcon />} name={translations.PLAY} onClick={() => playerRef.play()} />}
-                {!playerRef.paused && <Button icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
-                <Button icon={<StopIcon />} name={translations.STOP} onClick={() => {
+                {direction === "ltr" && <PlayerButton icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
+                {direction === "rtl" && <PlayerButton icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
+                {error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
+                {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
+                {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
+                <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={() => {
                     playerRef.pause();
                     seekPosition(0);
                 }} />
-                {direction === "ltr" && <Button icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
-                {direction === "rtl" && <Button icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
+                {direction === "ltr" && <PlayerButton icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
+                {direction === "rtl" && <PlayerButton icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
             </div>
         </div>
     </div>;

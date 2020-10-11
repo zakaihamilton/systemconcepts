@@ -40,7 +40,7 @@ export default function PlayerPage({ show = false, suffix }) {
     const { prefix = "", group = "", year = "", date = "", name } = getParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
-    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && path !== playerPath);
+    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
     const folder = fileFolder(path);
     const [, , groupName, yearName] = folder.split("/");
     const sessionName = fileTitle(path);
