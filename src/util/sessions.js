@@ -100,7 +100,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
         return groups.map(group => {
             return {
                 id: group.name,
-                icon: <GroupWorkIcon />,
+                icon: !groupFilter.length || groupFilter.includes(group.name) ? <GroupWorkIcon /> : null,
                 name: group.name[0].toUpperCase() + group.name.slice(1),
                 selected: groupFilter,
                 onClick: () => {
