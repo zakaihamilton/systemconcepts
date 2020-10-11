@@ -10,7 +10,6 @@ import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import { formatDuration } from "@/util/string";
 import { MainStore } from "@/components/Main";
-import Field from "../Field";
 import MuiAlert from '@material-ui/lab/Alert';
 
 const skipPoints = 10;
