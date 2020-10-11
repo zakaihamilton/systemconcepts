@@ -9,6 +9,7 @@
     background: var(--background);
     font: inherit;
     align-items: center;
+    min-height: 5em;
 }
 
 .root.mobile {
@@ -43,9 +44,5 @@
 .name {
     width: 10em;
     color: var(--text-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
     text-align: center;
 }

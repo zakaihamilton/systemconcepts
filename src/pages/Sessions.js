@@ -1,16 +1,10 @@
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
-import MovieIcon from '@material-ui/icons/Movie';
-import AudioIcon from "@/icons/Audio";
-import Tooltip from "@material-ui/core/Tooltip";
 import { addPath } from "@/util/pages";
 import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
-import Label from "@/widgets/Label";
-import Menu from "@/widgets/Menu";
-import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 
 export const SessionsStore = new Store({
     groupFilter: "",

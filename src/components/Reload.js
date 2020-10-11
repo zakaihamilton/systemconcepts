@@ -1,4 +1,3 @@
-import { MainStore } from "@/components/Main";
 import { useTranslations } from "@/util/translations";
 import ReplayIcon from '@material-ui/icons/Replay';
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
