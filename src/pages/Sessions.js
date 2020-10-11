@@ -64,7 +64,7 @@ export default function SessionsPage() {
                 onDelete: () => SessionsStore.update(s => { s.groupFilter = "" })
             }],
             onClick: !groupFilter && (item => SessionsStore.update(s => {
-                s.groupFilter = typeof item.group !== "undefined" && item.group;
+                s.groupFilter = typeof item.group !== "undefined" && (item.group[0].toUpperCase() + item.group.slice(1));
                 s.offset = 0;
             }))
         }
