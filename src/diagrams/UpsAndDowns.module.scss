@@ -1,7 +1,5 @@
 .root {
     display: grid;
-    grid-auto-columns: auto;
-    grid-auto-rows: auto;
     color: var(--text-color);
     column-gap: 0.5em;
     flex: 1;
@@ -9,8 +7,6 @@
 
 .world {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
 .world:not(:last-child) {
@@ -25,6 +21,8 @@
 
 .divider {
     flex: 1;
+    border-top: 2px dashed var(--border-color);
+    line-height: 0.1em;
 
     [dir=ltr] & {
         text-align: right;
@@ -33,17 +31,10 @@
     [dir=rtl] & {
         text-align: left;
     }
-
-    border-top: 2px dashed var(--border-color);
-    line-height: 0.1em;
-    padding-right: 0.5em;
-    padding-left: 0.5em;
 }
 
 .dividerInfo {
     flex: 1;
-    padding-right: 0.5em;
-    padding-left: 0.5em;
     margin-top: -1.5em;
     display: flex;
     justify-content: flex-end;
@@ -62,7 +53,6 @@
     background-color: rgb(128, 128, 128, 0.2);
     color: var(--text-color);
     box-shadow: var(--blur-shadow);
-    padding: 0.25em;
 }
 
 .face.selected {
@@ -70,7 +60,6 @@
 }
 
 .head {
-    margin-top: 0.5em;
     border-left: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     border-top: 1px solid var(--border-color);
@@ -84,5 +73,4 @@
     border-top: 1px solid transparent;
     border-bottom: 1px solid var(--border-color);
     border-radius: 0em 0em 0.5em 0.5em;
-    margin-bottom: 0.5em;
 }

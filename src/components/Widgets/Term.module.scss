@@ -27,7 +27,6 @@
 .name {
     display: flex;
     flex: 1;
-    font-weight: bold;
     white-space: nowrap;
 }
 
@@ -38,7 +37,6 @@
 }
 
 .label {
-    font-weight: bold;
     white-space: nowrap;
 
     [dir=rtl] & {
