@@ -7,6 +7,7 @@ import storage from "@/util/storage";
 import Cookies from 'js-cookie';
 import { useOnline } from "@/util/online";
 import { makePath } from "@/util/path";
+import { usePageVisibility } from "@/util/hooks";
 
 export const SyncStore = new Store({
     lastUpdated: 0
@@ -68,6 +69,7 @@ export function useSyncFeature() {
     const online = useOnline();
     const [error, setError] = useState(null);
     const isLoaded = useLocalStorage("SyncStore", SyncStore);
+    const visible = usePageVisibility();
     const { lastUpdated } = SyncStore.useState();
     const { active, busy } = SyncActiveStore.useState();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -159,10 +161,10 @@ export function useSyncFeature() {
     }, [lastUpdated]);
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
-        if (online && isLoaded && isSignedIn) {
+        if (online && isLoaded && isSignedIn && visible) {
             updateSync();
         }
-    }, [online, isLoaded, isSignedIn]);
+    }, [online, isLoaded, isSignedIn, visible]);
 
     return [online && isLoaded && updateSync, resetSync, busy, error, active, duration];
 }
