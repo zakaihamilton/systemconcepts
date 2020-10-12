@@ -82,7 +82,7 @@ export function useSyncFeature() {
             s.lastSynced = 0;
         });
     }, []);
-    const updateSync = useCallback(async (forceUpdate = true) => {
+    const updateSync = useCallback(async (pollSync) => {
         if (startRef.current || !online) {
             return;
         }
@@ -93,7 +93,8 @@ export function useSyncFeature() {
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
         let continueSync = true;
         SyncActiveStore.update(s => {
-            if (!forceUpdate && (!s.lastSynced || s.lastSynced < currentTime + 60)) {
+            const diff = (currentTime - s.lastSynced) / 1000;
+            if (pollSync && s.lastSynced && diff < 60) {
                 continueSync = false;
             }
             else {
@@ -182,7 +183,7 @@ export function useSyncFeature() {
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
         if (online && isLoaded && isSignedIn && visible) {
-            updateSync(false);
+            updateSync(true);
         }
     }, [online, isLoaded, isSignedIn, visible]);
 
