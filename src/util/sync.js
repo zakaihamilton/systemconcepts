@@ -16,7 +16,8 @@ export const SyncStore = new Store({
 export const SyncActiveStore = new Store({
     active: 0,
     counter: 0,
-    busy: false
+    busy: false,
+    lastSynced: 0
 });
 
 export function useSync() {
@@ -77,19 +78,32 @@ export function useSyncFeature() {
         SyncStore.update(s => {
             s.lastUpdated = 0;
         });
+        SyncActiveStore.update(s => {
+            s.lastSynced = 0;
+        });
     }, []);
-    const updateSync = useCallback(async () => {
+    const updateSync = useCallback(async (forceUpdate = true) => {
         if (startRef.current || !online) {
             return;
         }
         startRef.current = new Date().getTime();
         setDuration(0);
         setError(null);
-        SyncActiveStore.update(s => {
-            s.busy = true;
-        });
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
+        let continueSync = true;
+        SyncActiveStore.update(s => {
+            if (!forceUpdate && (!s.lastSynced || s.lastSynced < currentTime + 60)) {
+                continueSync = false;
+            }
+            else {
+                s.busy = true;
+            }
+        });
+        if (!continueSync) {
+            startRef.current = 0;
+            return;
+        }
         const syncItems = async items => {
             for (const item of items) {
                 const duration = new Date().getTime() - startRef.current;
@@ -152,6 +166,12 @@ export function useSyncFeature() {
             });
             SyncActiveStore.update(s => {
                 s.counter++;
+                s.lastSynced = currentTime;
+            });
+        }
+        else {
+            SyncActiveStore.update(s => {
+                s.lastSynced = currentTime;
             });
         }
         startRef.current = 0;
@@ -162,7 +182,7 @@ export function useSyncFeature() {
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
         if (online && isLoaded && isSignedIn && visible) {
-            updateSync();
+            updateSync(false);
         }
     }, [online, isLoaded, isSignedIn, visible]);
 

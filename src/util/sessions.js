@@ -21,9 +21,18 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     const { sessions, groups, groupFilter, busy } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
+        let continueUpdate = true;
         SessionsStore.update(s => {
-            s.busy = true;
+            if (s.busy) {
+                continueUpdate = false;
+            }
+            else {
+                s.busy = true;
+            }
         });
+        if (!continueUpdate) {
+            return;
+        }
         const getListing = async path => {
             SessionsStore.update(s => {
                 s.counter++;
@@ -99,11 +108,12 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             s.busy = false;
         });
     }, []);
+
     useEffect(() => {
-        if (cond && !busy) {
+        if (cond) {
             updateSessions();
         }
-    }, [...depends, busy]);
+    }, [...depends]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
