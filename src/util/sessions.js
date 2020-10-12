@@ -134,7 +134,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                 }
             };
         });
-    }, [groups]);
+    }, [groups, groupFilter]);
 
     const toolbarItems = [
         {
