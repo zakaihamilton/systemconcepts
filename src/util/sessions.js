@@ -11,14 +11,19 @@ registerToolbar("Sessions");
 export const SessionsStore = new Store({
     sessions: [],
     groups: [],
-    groupFilter: []
+    groupFilter: [],
+    busy: false,
+    counter: 0
 });
 
 export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
-    const { sessions, groups, groupFilter } = SessionsStore.useState();
+    const { sessions, groups, groupFilter, busy } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
+        SessionsStore.update(s => {
+            s.busy = true;
+        });
         const getListing = async path => {
             SessionsStore.update(s => {
                 s.counter++;
@@ -84,17 +89,21 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             SessionsStore.update(s => {
                 s.sessions = sessions;
                 s.groups = groups;
+                s.busy = false;
             });
         }
         catch (err) {
             console.error(err);
         }
+        SessionsStore.update(s => {
+            s.busy = false;
+        });
     }, []);
     useEffect(() => {
-        if (cond) {
+        if (cond && !busy) {
             updateSessions();
         }
-    }, [depends]);
+    }, [...depends, busy]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {

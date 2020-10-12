@@ -10,6 +10,7 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { useSearch } from "@/components/AppBar/Search";
+import SyncMessage from "@/widgets/Table/SyncMessage";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -65,7 +66,8 @@ export default function SchedulePage() {
     }, [search, sessions]);
 
     return <div className={styles.root}>
-        {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+        {!busy && viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+        {!busy && viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+        <SyncMessage show={busy} />
     </div>;
 }
