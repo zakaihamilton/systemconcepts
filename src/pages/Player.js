@@ -33,6 +33,14 @@ export function getPlayerSection({ suffix, translations }) {
     return { name };
 }
 
+export function resetPlayer() {
+    PlayerStore.update(s => {
+        s.hash = "";
+        s.mediaPath = "";
+        s.playerPath = "";
+    });
+}
+
 export default function PlayerPage({ show = false, suffix }) {
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
@@ -67,9 +75,11 @@ export default function PlayerPage({ show = false, suffix }) {
     }, [show, path]);
 
     useEffect(() => {
-        PlayerStore.update(s => {
-            s.mediaPath = data && data.path;
-        });
+        if (data && data.path) {
+            PlayerStore.update(s => {
+                s.mediaPath = data && data.path;
+            });
+        }
     }, [data && data.path]);
 
     const menuItems = [
@@ -123,6 +133,6 @@ export default function PlayerPage({ show = false, suffix }) {
         {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
         </MediaComponent>}
-        {!!loading && <Progress />}
+        {!!loading && !mediaPath && <Progress />}
     </div>;
 }

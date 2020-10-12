@@ -11,6 +11,7 @@ import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@/icons/Audio";
 import { addPath } from "@/util/pages";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { resetPlayer } from "@/pages/Player";
 
 registerToolbar("Session");
 
@@ -41,6 +42,7 @@ export default function SessionPage({ prefix, group, year, date, name }) {
     };
 
     const gotoPlayer = (suffix) => {
+        resetPlayer();
         addPath(`player?suffix=${suffix}`);
     }
 
