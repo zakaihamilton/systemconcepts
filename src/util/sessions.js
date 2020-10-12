@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import { useTranslations } from "@/util/translations";
+import { useLocalStorage } from "@/util/store";
 
 registerToolbar("Sessions");
 
@@ -18,6 +19,7 @@ export const SessionsStore = new Store({
 
 export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
+    useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const { sessions, groups, groupFilter, busy } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];

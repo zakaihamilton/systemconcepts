@@ -66,8 +66,8 @@ export default function SchedulePage() {
     }, [search, sessions]);
 
     return <div className={styles.root}>
-        {!busy && viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {!busy && viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+        {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+        {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         <SyncMessage show={busy} />
     </div>;
 }

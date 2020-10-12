@@ -6,7 +6,7 @@ export function useStoreState(store, filter) {
     const ref = useRef({});
     const states = ref.current;
     const [counter, incCounter] = useCounter();
-    const keys = Object.keys(storeState || {}).map(key => {
+    Object.keys(storeState || {}).forEach(key => {
         const value = storeState[key];
         let state = states[key];
         if (!state) {
@@ -22,12 +22,20 @@ export function useStoreState(store, filter) {
     return states;
 }
 
-export function useLocalStorage(id, store) {
+export function useLocalStorage(id, store, fields) {
     const isLoaded = useRef(false);
     useEffect(() => {
         const unsubscribe = store.subscribe(s => s, s => {
             if (isLoaded.current) {
-                window.localStorage.setItem(id, JSON.stringify(s));
+                let values = Object.assign({}, s);
+                if (fields) {
+                    Object.keys(values).map(key => {
+                        if (!fields.includes(key)) {
+                            delete values[key];
+                        }
+                    });
+                }
+                window.localStorage.setItem(id, JSON.stringify(values));
             }
         });
         const item = window.localStorage.getItem(id);

@@ -8,7 +8,7 @@ export default function SyncMessage({ show }) {
     if (!show) {
         return null;
     }
-    return <div className={styles.empty}>
+    return <div className={styles.root}>
         <SyncIcon className={styles.animated} />
         <Typography variant="h6">{translations.SYNCING}...</Typography>
     </div>;
