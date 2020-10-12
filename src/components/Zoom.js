@@ -35,6 +35,12 @@ export default function Fullscreen() {
             ref.current.style.transform = `scale(${scale})`;
             ref.current.style.transformOrigin = "0% 0% 0px";
         }
+        return () => {
+            if (ref.current) {
+                ref.current.style.transform = "";
+                ref.current.style.transformOrigin = "";
+            }
+        };
     }, [scale, size.ref]);
 
     const menuItems = [
