@@ -17,6 +17,7 @@
 
 .root:not(.mobile) {
     top: 0;
+    min-width: 12em;
 }
 
 .root *:not(:last-child) {

@@ -21,7 +21,8 @@ export default function Fullscreen() {
             id: "fullscreen",
             name: fullscreen ? translations.EXIT_FULLSCREEN : translations.FULLSCREEN,
             icon: fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />,
-            onClick: toggleFullscreen
+            onClick: toggleFullscreen,
+            menu: true
         }
     ].filter(Boolean);
 
