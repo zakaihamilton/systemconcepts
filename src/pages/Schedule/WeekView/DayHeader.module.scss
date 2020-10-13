@@ -29,5 +29,7 @@
 }
 
 .root.today {
+    color: var(--info-background);
+    background-color: var(--info-color);
     border-bottom: 1px solid var(--info-color);
 }
