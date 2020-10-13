@@ -26,5 +26,6 @@ export default function Session({ group, year, date, name, color }) {
                 {name}
             </div>
         </div>
+        <div className={styles.backgroundBorder} style={style} />
     </button>;
 }
