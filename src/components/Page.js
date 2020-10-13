@@ -14,7 +14,7 @@ export default function Page() {
     const pages = usePagesFromHash(hash);
     const activePage = pages[pages.length - 1];
     const ref = useRef();
-    const size = useResize(ref, [fullscreen, showSideBar]);
+    const size = useResize(ref, [fullscreen, showSideBar, hash]);
     const playerPageRef = useRef(null);
     if (!activePage) {
         return null;
