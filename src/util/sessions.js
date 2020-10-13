@@ -20,9 +20,9 @@ export const SessionsStore = new Store({
 
 export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
-    const [groupMetadata, groupMetadataLoading] = useGroups(depends);
+    const [groupMetadata] = useGroups(depends);
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
-    const { sessions, groups, groupFilter } = SessionsStore.useState();
+    const { sessions, groups, groupFilter, busy } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
         let continueUpdate = true;
@@ -38,9 +38,6 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             return;
         }
         const getListing = async path => {
-            SessionsStore.update(s => {
-                s.counter++;
-            });
             const localUrl = "local/" + path + "/listing.json";
             const exists = !fetch && storage.exists(localUrl);
             let data = [];
@@ -120,7 +117,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
         if (cond && groupMetadata) {
             updateSessions();
         }
-    }, [...depends, groupMetadata]);
+    }, [cond, groupMetadata]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {

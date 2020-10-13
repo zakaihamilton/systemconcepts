@@ -32,7 +32,7 @@ export function useGroups(depends) {
             console.error(err);
         }
         setLoading(false);
-    });
+    }, []);
 
     useEffect(() => {
         loadGroups();

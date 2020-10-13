@@ -22,7 +22,7 @@ registerToolbar("Schedule");
 export default function SchedulePage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
-    let sessions = useSessions([syncCounter], !busy);
+    let sessions = useSessions([syncCounter, busy], !busy);
     const { search } = useSearch(() => {
     });
     let { date, viewType } = ScheduleStore.useState();

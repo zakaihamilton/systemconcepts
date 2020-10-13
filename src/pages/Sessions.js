@@ -16,7 +16,7 @@ export const SessionsStore = new Store({
 export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
-    const sessions = useSessions([syncCounter], !busy);
+    const sessions = useSessions([syncCounter, busy], !busy);
     const { groupFilter, dateFilter } = SessionsStore.useState();
 
     const columns = [
