@@ -22,7 +22,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
     const [groupMetadata] = useGroups(depends);
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
-    const { sessions, groups, groupFilter, busy } = SessionsStore.useState();
+    const { sessions, groups, groupFilter } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
         let continueUpdate = true;
@@ -121,11 +121,13 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
+            const metadata = groupMetadata.find(item => item.name === group.name) || {};
             return {
                 id: group.name,
                 icon: !groupFilter.length || groupFilter.includes(group.name) ? <GroupWorkIcon /> : null,
                 name: group.name[0].toUpperCase() + group.name.slice(1),
                 selected: groupFilter,
+                backgroundColor: metadata.color,
                 onClick: () => {
                     SessionsStore.update(s => {
                         if (s.groupFilter.includes(group.name)) {
@@ -145,7 +147,8 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             id: "group",
             name: translations.GROUPS,
             icon: <GroupWorkIcon />,
-            items: groupsItems
+            items: groupsItems,
+            disabled: !groupsItems.length
         }
     ].filter(Boolean);
 

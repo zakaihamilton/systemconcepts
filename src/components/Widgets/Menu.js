@@ -5,6 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
+import styles from "./Menu.module.scss";
 
 const StyledMenu = withStyles({
     paper: {
@@ -41,7 +42,7 @@ export default function MenuWidget({ items, children, onClick, selected: menuSel
 
     const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
-        const { divider, name, icon, items, onClick, id, menu, description, selected, ...props } = item;
+        const { divider, name, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
         const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
         const selectedArray = Array.isArray(selectedItem);
         const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
@@ -56,14 +57,17 @@ export default function MenuWidget({ items, children, onClick, selected: menuSel
                 onClick(event);
             }
         };
+        const style = { backgroundColor };
         return [
-            <MenuItem key={id} selected={isSelected} onClick={items ? undefined : handleClick} {...props}>
+            <MenuItem key={id} className={styles.item} selected={isSelected} onClick={items ? undefined : handleClick} {...props}>
+                <div key={id + "_background"} className={styles.background} style={style} />
                 <MenuWidget items={item.items} selected={isSelected} onClick={items ? handleClick : undefined}>
                     <ListItemIcon>
                         {icon}
                     </ListItemIcon>
                     <ListItemText primary={name} secondary={description} />
                 </MenuWidget>
+                <div key={id + "_border"} className={styles.backgroundBorder} style={style} />
             </MenuItem>,
             divider && !isLast && <Divider key={"_" + id + "_"} />
         ];

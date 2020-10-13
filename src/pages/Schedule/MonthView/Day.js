@@ -27,6 +27,7 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
         return {
             id: item.name,
             name: item.name,
+            backgroundColor: item.color,
             icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
             description: groupName,
             onClick: () => addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`)
