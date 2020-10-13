@@ -35,7 +35,7 @@ export default function User({ path = "" }) {
 
     const onValidateEmail = text => {
         let error = "";
-        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,9}[\.][a-z]{2,5}/g;
+        const emailPattern = /[a-zA-Z0-9]+[\.]?([a-zA-Z0-9]+)?[\@][a-z]{3,25}[\.][a-z]{2,5}/g;
         if (!text) {
             error = translations.EMPTY_EMAIL;
         }
