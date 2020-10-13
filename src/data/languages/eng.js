@@ -756,6 +756,14 @@ export default {
         {
             "id": "RELOAD",
             "value": "Reload"
+        },
+        {
+            "id": "COLOR",
+            "value": "Color"
+        },
+        {
+            "id": "USER",
+            "value": "User"
         }
     ]
 };

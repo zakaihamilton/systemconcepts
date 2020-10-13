@@ -255,10 +255,10 @@ export default function TableWidget(props) {
             </div>}
         </TableContainer>}
         {!!error && <Error error={error} />}
-        <Navigator
+        {!loading && <Navigator
             pageIndex={pageIndex}
             setPageIndex={setPageIndex}
             pageCount={pageCount}
-            numItems={numItems} />
+            numItems={numItems} />}
     </>);
 }

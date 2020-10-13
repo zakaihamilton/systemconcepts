@@ -1,6 +1,7 @@
 import { handleRequest } from "@/util/mongo";
 import { login } from "../../src/util/login";
 import Cookie from "cookie";
+import { roleAuth } from "@/util/roles";
 
 export default async (req, res) => {
     try {
@@ -10,9 +11,17 @@ export default async (req, res) => {
         const { id, hash } = cookies || {};
         let collectionName = "fs";
         let readOnly = true;
-        if (id && hash) {
-            await login({ id, hash });
+        if (!id || !hash) {
+            throw "ACCESS_DENIED";
+        }
+        const user = await login({ id, hash });
+        if (!user) {
+            throw "ACCESS_DENIED";
+        }
+        if (roleAuth(user.role, "admin")) {
             readOnly = false;
+        } else if (!roleAuth(user.role, "student")) {
+            throw "ACCESS_DENIED";
         }
         const result = await handleRequest({ collectionName, req, readOnly });
         res.status(200).json(result);
