@@ -1,6 +1,5 @@
 .root {
     display: flex;
-    border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     color: var(--info-color);
     align-items: center;
@@ -13,6 +12,7 @@
 
 .root.mobile {
     left: 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .root:not(.mobile) {
