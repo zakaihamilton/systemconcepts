@@ -752,6 +752,14 @@ export default {
         {
             "id": "RELOAD",
             "value": "טעינה מחדש"
+        },
+        {
+            "id": "COLOR",
+            "value": "צבע"
+        },
+        {
+            "id": "USER",
+            "value": "משתמש"
         }
     ]
 };

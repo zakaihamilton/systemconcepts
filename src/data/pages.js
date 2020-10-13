@@ -61,6 +61,9 @@ import Session from "@/pages/Session";
 import EventIcon from '@material-ui/icons/Event';
 import Schedule from "@/pages/Schedule";
 
+import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import Groups from "@/pages/Groups";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -218,6 +221,14 @@ export default [
         name: "SESSION",
         Icon: VideoLabelIcon,
         Component: Session
+    },
+    {
+        id: "groups",
+        name: "GROUPS",
+        Icon: GroupWorkIcon,
+        Component: Groups,
+        sidebar: true,
+        category: "tools"
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;
