@@ -3,7 +3,7 @@ import storage from "@/util/storage";
 
 export function useGroups(depends) {
     const [loading, setLoading] = useState(false);
-    const [metadata, setMetadata] = useState([]);
+    const [metadata, setMetadata] = useState(null);
 
     const metadataPath = "shared/sessions/groups.json";
     const loadGroups = useCallback(async () => {
@@ -48,10 +48,13 @@ export function useGroups(depends) {
         loadGroups();
     }, [...depends]);
 
-    useEffect(() => {
-        console.log("writing metadata", metadata);
-        storage.writeFile(metadataPath, JSON.stringify(metadata, null, 4));
+    const updateMetadata = useCallback(data => {
+        if (typeof data === "function") {
+            data = data(metadata);
+        }
+        setMetadata(data);
+        storage.writeFile(metadataPath, JSON.stringify(data, null, 4));
     }, [metadata]);
 
-    return [metadata, loading, setMetadata];
+    return [metadata, loading, updateMetadata];
 }

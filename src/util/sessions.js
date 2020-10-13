@@ -6,6 +6,7 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import { useTranslations } from "@/util/translations";
 import { useLocalStorage } from "@/util/store";
+import { useGroups } from "@/util/groups";
 
 registerToolbar("Sessions");
 
@@ -19,6 +20,7 @@ export const SessionsStore = new Store({
 
 export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
+    const [groupMetadata, groupMetadataLoading] = useGroups(depends);
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const { sessions, groups, groupFilter } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
@@ -59,14 +61,19 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                 for (const year of years) {
                     const files = await getListing(makePath(basePath, group.name, year.name));
                     files.sort((a, b) => a.name.localeCompare(b.name));
+                    const createItem = ({ id, name, date }) => {
+                        const metadata = groupMetadata.find(item => item.name === group.name) || {};
+                        const item = { id, name, date, year: year.name, group: group.name, color: metadata.color };
+                        sessions.push(item);
+                        return item;
+                    };
                     for (const file of files) {
                         const id = fileTitle(file.name);
                         const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                         if (isAudioFile(file.name)) {
                             let item = sessions.find(session => session.id === id);
                             if (!item) {
-                                item = { id, name, date, year: year.name, group: group.name };
-                                sessions.push(item);
+                                item = createItem({ id, name, date });
                             }
                             item.audio = file;
                         }
@@ -77,8 +84,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                                 const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                                 let item = sessions.find(session => session.id === id);
                                 if (!item) {
-                                    item = { id, name, date, year: year.name, group: group.name };
-                                    sessions.push(item);
+                                    item = createItem({ id, name, date });
                                 }
                                 if (!item.resolutions) {
                                     item.resolutions = {};
@@ -88,8 +94,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                             else {
                                 let item = sessions.find(session => session.id === id);
                                 if (!item) {
-                                    item = { id, name, date, year: year.name, group: group.name };
-                                    sessions.push(item);
+                                    item = createItem({ id, name, date });
                                 }
                                 item.video = file;
                             }
@@ -109,13 +114,13 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
         SessionsStore.update(s => {
             s.busy = false;
         });
-    }, []);
+    }, [groupMetadata]);
 
     useEffect(() => {
-        if (cond) {
+        if (cond && groupMetadata) {
             updateSessions();
         }
-    }, [...depends]);
+    }, [...depends, groupMetadata]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
