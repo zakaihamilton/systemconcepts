@@ -37,13 +37,13 @@ export default function SessionPage({ prefix, group, year, date, name, color }) 
         session.date === date &&
         session.year === year);
 
-    const metadataSet = (name, value) => {
+    const metadataSet = (name, value, tooltip) => {
         return (<div className={styles.set}>
             <div className={styles.name}>
                 {translations[name]}:
         </div>
             <div className={styles.value}>
-                <Tooltip arrow title={value}>
+                <Tooltip arrow title={tooltip || value}>
                     <div className={styles.text} dir="auto">{value}</div>
                 </Tooltip>
             </div>
@@ -87,8 +87,8 @@ export default function SessionPage({ prefix, group, year, date, name, color }) 
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
-                {metadataSet("GROUP", <Group name={group} color={color} />)}
-                {metadataSet("DATE", dateFormatter.format(new Date(date)))}
+                {metadataSet("GROUP", <Group name={group} color={color} />, group[0].toUpperCase() + group.slice(1))}
+                {metadataSet("DATE", dateFormatter.format(new Date(date)), date)}
             </div>
         </div>
     </div>;
