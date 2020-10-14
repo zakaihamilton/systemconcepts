@@ -768,6 +768,10 @@ export default {
         {
             "id": "THUMBNAIL",
             "value": "Miniatura"
+        },
+        {
+            "id": "NO_ITEMS",
+            "value": "Sem itens"
         }
     ]
 };

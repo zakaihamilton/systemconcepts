@@ -20,6 +20,7 @@ import Column from "./Table/Column";
 import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
 import RefreshIcon from '@material-ui/icons/Refresh';
+import EmptyMessage from "./Table/EmptyMessage";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -53,6 +54,7 @@ export default function TableWidget(props) {
         rowHeight = "4em",
         marginBottom = "8em",
         loading,
+        loadingElement,
         columns,
         onImport,
         onExport,
@@ -61,7 +63,7 @@ export default function TableWidget(props) {
         mapper,
         filter,
         refresh,
-        empty,
+        emptyElement,
         statusBar,
         className,
         hideColumns,
@@ -213,7 +215,7 @@ export default function TableWidget(props) {
         return sizeInPixels;
     }
     const numItems = items && items.length;
-    const isEmpty = !items || !numItems;
+    const isEmpty = !data;
     const marginBottomInPixels = sizeToPixels(marginBottom);
     const rowHeightInPixels = sizeToPixels(rowHeight);
     const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
@@ -236,9 +238,18 @@ export default function TableWidget(props) {
         return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
     });
 
+    if (!loadingElement) {
+        loadingElement = <Progress />;
+    }
+
+    if (!emptyElement) {
+        emptyElement = <EmptyMessage />;
+    }
+
     return (<>
-        {!!loading && <Progress />}
-        {!loading && <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
+        {!!loading && loadingElement}
+        {!!isEmpty && !loading && emptyElement}
+        {!loading && numItems && <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
             {!error && <Table stickyHeader style={style}>
                 {!hideColumns && <TableHead>
                     <TableRow>
@@ -249,13 +260,12 @@ export default function TableWidget(props) {
                     {tableRows}
                 </TableBody>
             </Table>}
-            {!!isEmpty && !loading && empty}
             {!loading && !error && <div className={styles.footer}>
                 {statusBar}
             </div>}
         </TableContainer>}
         {!!error && <Error error={error} />}
-        {!loading && <Navigator
+        {!loading && numItems && <Navigator
             pageIndex={pageIndex}
             setPageIndex={setPageIndex}
             pageCount={pageCount}

@@ -90,9 +90,10 @@ export default function SessionsPage() {
             store={SessionsStore}
             columns={columns}
             data={sessions}
+            loading={busy}
             mapper={mapper}
             filter={filter}
-            empty={<SyncMessage show={busy} />}
+            loadingElement={<SyncMessage />}
             depends={[groupFilter, dateFilter, translations]}
         />
     </>;

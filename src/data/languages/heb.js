@@ -764,6 +764,10 @@ export default {
         {
             "id": "THUMBNAIL",
             "value": "תמונה ממוזערת"
+        },
+        {
+            "id": "NO_ITEMS",
+            "value": "אין פריטים"
         }
     ]
 };

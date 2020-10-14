@@ -3,7 +3,7 @@ import SyncIcon from '@material-ui/icons/Sync';
 import { useTranslations } from "@/util/translations";
 import styles from "./SyncMessage.module.scss";
 
-export default function SyncMessage({ show }) {
+export default function SyncMessage({ show = true }) {
     const translations = useTranslations();
     if (!show) {
         return null;

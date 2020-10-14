@@ -767,7 +767,11 @@ export default {
         },
         {
             "id": "THUMBNAIL",
-            "value":"Thumbnail"
+            "value": "Thumbnail"
+        },
+        {
+            "id": "NO_ITEMS",
+            "value": "No Items"
         }
     ]
 };

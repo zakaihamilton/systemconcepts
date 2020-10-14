@@ -22,12 +22,7 @@ export default function SessionImage({ loading, path, width, height, alt }) {
     }
 
     useEffect(() => {
-        if (path) {
-            setImageLoading(true);
-        }
-        else {
-            setImageLoading(false);
-        }
+        setImageLoading(!!path);
     }, [path]);
 
     return <button style={style} className={styles.root} disabled={!path || !!error} onClick={gotoImage}>
