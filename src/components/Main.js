@@ -11,7 +11,6 @@ import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
 import Fullscreen from "./Fullscreen";
 import Header from "./Header";
-import Reload from "./Reload";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -68,7 +67,6 @@ export default function Main() {
             <div className={className}>
                 <Sync />
                 <Fullscreen />
-                <Reload />
                 {!fullscreen && <AppBar />}
                 <SideBar />
                 <div className={styles.main}>

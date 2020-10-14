@@ -7,6 +7,7 @@ import languages from "@/data/languages";
 import { usePages } from "@/util/pages";
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
+import ReplayIcon from '@material-ui/icons/Replay';
 import BuildIcon from '@material-ui/icons/Build';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import { useToolbarItems } from "@/components/Toolbar";
@@ -30,9 +31,19 @@ export default function Settings({ closeDrawer, state }) {
         });
     };
 
+    const reload = () => {
+        location.reload();
+    };
+
     const toolsItems = pages.filter(page => page.sidebar && page.category === "tools");
 
     const quickAccessItems = [
+        {
+            id: "reload",
+            name: translations.RELOAD,
+            icon: <ReplayIcon />,
+            onClick: reload
+        },
         {
             id: "toggleDarkMode",
             name: darkMode ? translations.LIGHT_MODE : translations.DARK_MODE,
@@ -55,7 +66,8 @@ export default function Settings({ closeDrawer, state }) {
             id: "tools",
             name: translations.TOOLS,
             icon: <BuildIcon />,
-            items: toolsItems
+            items: toolsItems,
+            divider: true
         },
         ...pages.filter(page => page.sidebar && page.category === "quickaccess"),
         advancedToolbar && advancedToolbar.length && {
