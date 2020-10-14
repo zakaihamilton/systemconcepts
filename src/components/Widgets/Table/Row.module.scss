@@ -32,3 +32,7 @@
     cursor: pointer;
     user-select: none;
 }
+
+.selected {
+    background: var(--info-background) !important;
+}

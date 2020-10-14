@@ -30,6 +30,7 @@ export default function Terms() {
             id: "phaseWidget",
             title: translations.PHASE,
             sortable: "phase",
+            selected: () => phaseFilter,
             onSelectable: item => typeof item.phase !== "undefined" && !phaseFilter,
             tags: [phaseFilter && {
                 id: phaseFilter,
@@ -48,6 +49,7 @@ export default function Terms() {
             id: "typeWidget",
             title: translations.TYPE,
             sortable: "type",
+            selected: () => typeFilter,
             onSelectable: item => item.type && !typeFilter,
             tags: [typeFilter && {
                 id: typeFilter,

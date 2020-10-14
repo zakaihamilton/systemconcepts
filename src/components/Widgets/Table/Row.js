@@ -6,14 +6,14 @@ import { useStyles } from "@/util/styles";
 
 export default function RowWidget({ rowHeight, columns, rowClick, item }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, onSelectable, rowProps = {}, onClick } = column;
+        const { id: columnId, dir, align, onSelectable, rowProps = {}, onClick, selected } = column;
         const value = item[columnId];
         return (<TableCell
             dir={dir}
             align={align}
             onClick={onClick ? () => onClick(item) : undefined}
             padding="none"
-            classes={{ root: clsx(styles.cell, !align && styles.defaultAlign, onSelectable && onSelectable(item) && styles.selectable) }}
+            classes={{ root: clsx(styles.cell, !align && styles.defaultAlign, onSelectable && onSelectable(item) && styles.selectable, selected && selected(item) && styles.selected) }}
             key={columnId}
             {...rowProps}>
             {value}
