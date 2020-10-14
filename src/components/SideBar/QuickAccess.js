@@ -11,9 +11,11 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import BuildIcon from '@material-ui/icons/Build';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import { useToolbarItems } from "@/components/Toolbar";
+import { useLanguage } from "@/util/language";
 
 export default function Settings({ closeDrawer, state }) {
-    const { language, darkMode, menuViewList } = MainStore.useState();
+    const { darkMode, menuViewList } = MainStore.useState();
+    const language = useLanguage();
     const translations = useTranslations();
     const pages = usePages();
     const advancedToolbar = useToolbarItems({ location: "advanced" });
