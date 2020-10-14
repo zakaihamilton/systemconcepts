@@ -4,13 +4,32 @@
     border: 1px solid var(--border-color);
     box-sizing: border-box;
     user-select: none;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .cell {
-    display: flex;
-    align-items: center;
     padding-left: 1em;
     padding-right: 1em;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.cell.defaultAlign {
+    [dir=ltr] & {
+        text-align: left;
+    }
+
+    [dir=rtl] & {
+        text-align: right;
+    }
+}
+
+.ellipsisText {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .cell.head {

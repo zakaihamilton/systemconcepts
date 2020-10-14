@@ -27,6 +27,7 @@ export default function SessionsPage() {
             id: "name",
             title: translations.NAME,
             sortable: true,
+            ellipsis: true,
             onSelectable: () => true,
             onClick: item => {
                 addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);

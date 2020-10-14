@@ -13,7 +13,13 @@ export default function RowWidget({ rowHeight, columns, rowClick, item }) {
             align={align}
             onClick={onClick ? () => onClick(item) : undefined}
             padding="none"
-            classes={{ root: clsx(styles.cell, !align && styles.defaultAlign, onSelectable && onSelectable(item) && styles.selectable, selected && selected(item) && styles.selected) }}
+            classes={{
+                root: clsx(
+                    styles.cell,
+                    !align && styles.defaultAlign,
+                    onSelectable && onSelectable(item) && styles.selectable,
+                    selected && selected(item) && styles.selected)
+            }}
             key={columnId}
             {...rowProps}>
             {value}
