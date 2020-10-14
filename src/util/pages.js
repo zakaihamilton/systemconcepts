@@ -58,7 +58,7 @@ export function useParentPath() {
     return decodeURIComponent(previousItem);
 }
 
-export function getParentParams() {
+export function useParentParams() {
     const path = useParentPath();
     const [, query] = path.split("?");
     const params = Object.fromEntries(new URLSearchParams(query));

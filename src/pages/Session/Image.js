@@ -2,6 +2,7 @@ import styles from "./Image.module.scss";
 import { useState } from "react";
 import Progress from "@/widgets/Progress";
 import clsx from "clsx";
+import { addPath } from "@/util/pages";
 
 export default function SessionImage({ path, width, height, alt }) {
     const [loading, setLoading] = useState(true);
@@ -16,9 +17,13 @@ export default function SessionImage({ path, width, height, alt }) {
 
     const style = { width, height };
 
-    return <div className={styles.root}>
+    const gotoImage = () => {
+        addPath("image");
+    }
+
+    return <button className={styles.root} onClick={gotoImage}>
         {loading && <Progress />}
         {path && !error && <img className={clsx(styles.img, loading && styles.loading)} style={style} onError={onError} onLoad={onLoad} src={path} />}
         {!!error && alt}
-    </div>;
+    </button>;
 }

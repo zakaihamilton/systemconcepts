@@ -1,27 +1,14 @@
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { makeStyles } from "@material-ui/core/styles";
+import styles from "./Progress.module.scss";;
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
+import clsx from "clsx";
 
-const useStyles = makeStyles({
-    progress: {
-        display: "flex",
-        alignContent: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        justifyItems: "center",
-        flex: "1",
-        marginLeft: "0.3em",
-        marginRight: "0.3em"
-    },
-});
-
-export default function Progress({ size, value, tooltip = "", variant, ...props }) {
+export default function Progress({ size, value, tooltip = "", fullscreen, variant, ...props }) {
     const text = typeof value !== "undefined" && `${Math.round(value)}%`;
-    const classes = useStyles();
 
-    return (<div className={classes.progress} {...props}>
+    return (<div className={clsx(styles.root, fullscreen && styles.fullscreen)} {...props}>
         <Box position="relative" display="flex">
             <CircularProgress size={size} value={value} variant={variant} />
             <Box

@@ -58,9 +58,11 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
                     {icon}
                 </Tooltip>
             </IconButton>}
-            {!!showName && <div className={styles.name}>
-                {name}
-            </div>}
+            {!!showName && <Tooltip arrow title={name}>
+                <div className={styles.name}>
+                    {name}
+                </div>
+            </Tooltip>}
         </Link>}
         {!isLast && <SeparatorIcon className={styles.separator} fontSize="small" />}
     </>;
