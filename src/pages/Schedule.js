@@ -14,7 +14,7 @@ import SyncMessage from "@/widgets/Table/SyncMessage";
 
 export const ScheduleStore = new Store({
     date: null,
-    viewType: "month"
+    viewType: "week"
 });
 
 registerToolbar("Schedule");

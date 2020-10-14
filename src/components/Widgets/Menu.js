@@ -65,7 +65,7 @@ export default function MenuWidget({ items, children, onClick, selected: menuSel
                     <ListItemIcon>
                         {icon}
                     </ListItemIcon>
-                    <ListItemText primary={name} secondary={description} />
+                    <ListItemText className={styles.itemText} primary={name} secondary={description} />
                 </MenuWidget>
                 <div key={id + "_border"} className={styles.backgroundBorder} style={style} />
             </MenuItem>,

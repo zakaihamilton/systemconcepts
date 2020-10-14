@@ -23,11 +23,6 @@ export default function Groups() {
             id: "colorWidget",
             title: translations.COLOR,
             sortable: "color"
-        },
-        {
-            id: "userWidget",
-            title: translations.USER,
-            sortable: "user"
         }
     ];
 

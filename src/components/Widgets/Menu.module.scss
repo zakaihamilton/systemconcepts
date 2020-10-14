@@ -16,3 +16,15 @@
     margin-left: -16px;
     margin-right: -16px;
 }
+
+.itemText {
+    max-width: 500px;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.itemText span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

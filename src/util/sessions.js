@@ -7,6 +7,7 @@ import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import { useTranslations } from "@/util/translations";
 import { useLocalStorage } from "@/util/store";
 import { useGroups } from "@/util/groups";
+import { useLanguage } from "@/util/language";
 
 registerToolbar("Sessions");
 
@@ -19,6 +20,7 @@ export const SessionsStore = new Store({
 });
 
 export function useSessions(depends = [], cond = true, filterSessions = true) {
+    const language = useLanguage();
     const translations = useTranslations();
     const [groupMetadata] = useGroups(depends);
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);

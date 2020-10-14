@@ -12,6 +12,7 @@ import AudioIcon from "@/icons/Audio";
 import { addPath } from "@/util/pages";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { resetPlayer } from "@/pages/Player";
+import { useDateFormatter } from "@/util/locale";
 
 registerToolbar("Session");
 
@@ -22,6 +23,12 @@ export default function SessionPage({ prefix, group, year, date, name }) {
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy, false);
+    const dateFormatter = useDateFormatter({
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
     const session = sessions && sessions.find(session =>
         session.group === group &&
         session.name === name &&
@@ -78,7 +85,7 @@ export default function SessionPage({ prefix, group, year, date, name }) {
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
                 {metadataSet("GROUP", group[0].toUpperCase() + group.slice(1))}
-                {metadataSet("DATE", date)}
+                {metadataSet("DATE", dateFormatter.format(new Date(date)))}
             </div>
         </div>
     </div>;

@@ -5,6 +5,7 @@ import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
+import styles from "./Sessions.module.scss";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -68,10 +69,18 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
+        const groupName = item.group[0].toUpperCase() + item.group.slice(1);
+        const style = { backgroundColor: item.color };
         return {
             ...item,
             group: item.group,
-            groupWidget: item.group[0].toUpperCase() + item.group.slice(1)
+            groupWidget: <div className={styles.groupContainer}>
+                <div className={styles.background} style={style} />
+                <div className={styles.group} dir="auto">
+                    {groupName}
+                </div>
+                <div className={styles.backgroundBorder} style={style} />
+            </div>
         };
     };
 
