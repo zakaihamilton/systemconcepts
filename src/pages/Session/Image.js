@@ -1,18 +1,18 @@
 import styles from "./Image.module.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Progress from "@/widgets/Progress";
 import clsx from "clsx";
 import { addPath } from "@/util/pages";
 
-export default function SessionImage({ path, width, height, alt }) {
-    const [loading, setLoading] = useState(true);
+export default function SessionImage({ loading, path, width, height, alt }) {
+    const [imageLoading, setImageLoading] = useState(false);
     const [error, setError] = useState(false);
     const onLoad = () => {
-        setLoading(false);
+        setImageLoading(false);
     }
     const onError = () => {
         setError(true);
-        setLoading(false);
+        setImageLoading(false);
     }
 
     const style = { width, height };
@@ -21,9 +21,18 @@ export default function SessionImage({ path, width, height, alt }) {
         addPath("image");
     }
 
-    return <button className={styles.root} onClick={gotoImage}>
-        {loading && <Progress />}
-        {path && !error && <img className={clsx(styles.img, loading && styles.loading)} style={style} onError={onError} onLoad={onLoad} src={path} />}
-        {!!error && alt}
+    useEffect(() => {
+        if (path) {
+            setImageLoading(true);
+        }
+        else {
+            setImageLoading(false);
+        }
+    }, [path]);
+
+    return <button style={style} className={styles.root} disabled={!path || !!error} onClick={gotoImage}>
+        {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
+        {path && !error && <img draggable={false} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
+        {(!path || !!error) && (!loading && !imageLoading) && <div className={styles.alt}>{alt}</div>}
     </button>;
 }

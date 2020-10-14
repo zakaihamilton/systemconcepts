@@ -22,7 +22,6 @@ function useImagePath() {
     else {
         path = (useParentPath() + "/" + name).split("/").slice(1).join("/");
     }
-    console.log("path", path);
     return path;
 }
 

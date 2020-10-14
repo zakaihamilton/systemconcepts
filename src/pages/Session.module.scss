@@ -7,27 +7,28 @@
 
 .info {
     display: flex;
-    margin: 1em;
+    flex-direction: column;
     align-content: center;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    width: 90vw;
 }
 
 .preview {
     display: flex;
-    width: 9em;
-    height: 9em;
-    flex-shrink: 0;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    margin: 1em;
+    height: 18em;
+    width: 18em;
 }
 
 .metadata {
+    margin: 1em;
+    width: 80vw;
     display: flex;
     flex-direction: column;
-    margin-left: 1em;
-    margin-right: 1em;
-    border: 1px solid transparent;
     overflow: hidden;
 }
 
@@ -44,6 +45,7 @@
 }
 
 .value {
+    margin-top: 0.5em;
     display: flex;
     min-width: 0;
     user-select: none;
@@ -53,4 +55,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.audioIcon {
+    font-size: 3em;
+}
+
+.preview.audio {
+    border-radius: 1em;
+    box-shadow: 0 10px 16px 0 var(--box-shadow-color) !important;
 }

@@ -13,10 +13,12 @@ import { addPath } from "@/util/pages";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { resetPlayer } from "@/pages/Player";
 import { useDateFormatter } from "@/util/locale";
+import Group from "@/widgets/Group";
+import clsx from "clsx";
 
 registerToolbar("Session");
 
-export default function SessionPage({ prefix, group, year, date, name }) {
+export default function SessionPage({ prefix, group, year, date, name, color }) {
     const translations = useTranslations();
     let components = [prefix, group, year, date + " " + name + ".png"].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
@@ -42,7 +44,7 @@ export default function SessionPage({ prefix, group, year, date, name }) {
         </div>
             <div className={styles.value}>
                 <Tooltip arrow title={value}>
-                    <div className={styles.text}>{value}</div>
+                    <div className={styles.text} dir="auto">{value}</div>
                 </Tooltip>
             </div>
         </div>);
@@ -76,15 +78,16 @@ export default function SessionPage({ prefix, group, year, date, name }) {
 
     useToolbar({ id: "Session", items, depends: [translations, session] });
 
+    const altIcon = session ? (session.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />) : null;
+
     return <div className={styles.root}>
         <div className={styles.info}>
             <div className={styles.preview}>
-                {session && session.video && <Image path={data && data.path} width="9em" height="9em" alt={<MovieIcon fontSize="large" />} />}
-                {session && !session.video && <GraphicEqIcon fontSize="large" />}
+                <Image path={data && data.path} loading={!session} width="18em" height="18em" alt={altIcon} />
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
-                {metadataSet("GROUP", group[0].toUpperCase() + group.slice(1))}
+                {metadataSet("GROUP", <Group name={group} color={color} />)}
                 {metadataSet("DATE", dateFormatter.format(new Date(date)))}
             </div>
         </div>

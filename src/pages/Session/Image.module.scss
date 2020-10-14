@@ -4,7 +4,16 @@
     justify-content: center;
     flex: 1;
     background-color: transparent;
-    border: none;
+    border: 1px solid transparent;
+    overflow: hidden;
+    position: relative;
+    border-radius: 1em;
+    box-shadow: 0 10px 16px 0 var(--box-shadow-color) !important;
+    color: var(--text-color);
+}
+
+.root:disabled {
+    color: var(--text-color);
 }
 
 .root:focus {
@@ -24,4 +33,11 @@
 
 .img.loading {
     display: none;
+}
+
+.alt {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

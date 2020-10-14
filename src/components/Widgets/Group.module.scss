@@ -2,9 +2,10 @@
     display: flex;
     position: relative;
     overflow: hidden;
-    height: 100%;
     align-items: center;
     justify-content: center;
+    padding: 0.5em;
+    border-radius: 0.5em;
 }
 
 .background {
