@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -74,6 +74,7 @@ export default function TableWidget(props) {
     } = props;
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
+    const [isEmpty, setEmpty] = useState(false);
     columns = columns || [];
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
@@ -153,6 +154,12 @@ export default function TableWidget(props) {
         });
     };
 
+    useEffect(() => {
+        if (loading) {
+            setEmpty(false);
+        }
+    }, [loading]);
+
     const items = useMemo(() => {
         let items = data || [];
         if (filter) {
@@ -187,6 +194,7 @@ export default function TableWidget(props) {
         });
 
         items = stableSort(items || [], getComparator(order, orderBy));
+        setEmpty(!items.length);
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
@@ -215,7 +223,6 @@ export default function TableWidget(props) {
         return sizeInPixels;
     }
     const numItems = items && items.length;
-    const isEmpty = !data;
     const marginBottomInPixels = sizeToPixels(marginBottom);
     const rowHeightInPixels = sizeToPixels(rowHeight);
     const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
