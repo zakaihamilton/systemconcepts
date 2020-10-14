@@ -59,7 +59,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                     const files = await getListing(makePath(basePath, group.name, year.name));
                     files.sort((a, b) => a.name.localeCompare(b.name));
                     const createItem = ({ id, name, date }) => {
-                        const metadata = groupMetadata.find(item => item.name === group.name) || {};
+                        const metadata = (groupMetadata || []).find(item => item.name === group.name) || {};
                         const item = { id, name, date, year: year.name, group: group.name, color: metadata.color };
                         sessions.push(item);
                         return item;
@@ -121,7 +121,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
-            const metadata = groupMetadata.find(item => item.name === group.name) || {};
+            const metadata = (groupMetadata || []).find(item => item.name === group.name) || {};
             return {
                 id: group.name,
                 icon: !groupFilter.length || groupFilter.includes(group.name) ? <GroupWorkIcon /> : null,
