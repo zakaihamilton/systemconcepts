@@ -764,6 +764,10 @@ export default {
         {
             "id": "USER",
             "value": "User"
+        },
+        {
+            "id": "THUMBNAIL",
+            "value":"Thumbnail"
         }
     ]
 };

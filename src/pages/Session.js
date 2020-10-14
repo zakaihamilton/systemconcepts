@@ -14,7 +14,6 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { resetPlayer } from "@/pages/Player";
 import { useDateFormatter } from "@/util/locale";
 import Group from "@/widgets/Group";
-import clsx from "clsx";
 
 registerToolbar("Session");
 

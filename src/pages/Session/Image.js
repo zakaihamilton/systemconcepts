@@ -18,7 +18,7 @@ export default function SessionImage({ loading, path, width, height, alt }) {
     const style = { width, height };
 
     const gotoImage = () => {
-        addPath("image");
+        addPath("image?label=THUMBNAIL");
     }
 
     useEffect(() => {

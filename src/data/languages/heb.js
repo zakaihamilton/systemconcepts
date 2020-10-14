@@ -760,6 +760,10 @@ export default {
         {
             "id": "USER",
             "value": "משתמש"
+        },
+        {
+            "id": "THUMBNAIL",
+            "value": "תמונה ממוזערת"
         }
     ]
 };

@@ -32,7 +32,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import Editor from "@/pages/Editor";
 
 import ImageIcon from '@material-ui/icons/Image';
-import Image from "@/pages/Image";
+import Image, { getImageSection } from "@/pages/Image";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import Account from "@/pages/Account";
@@ -152,6 +152,7 @@ export default [
         name: "IMAGE",
         Icon: ImageIcon,
         Component: Image,
+        section: getImageSection,
         showTooltip: true
     },
     {
