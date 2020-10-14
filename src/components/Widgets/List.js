@@ -13,7 +13,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { MainStore } from "@/components/Main";
 
-export function ListItemWidget({ id, separator, viewType, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
+export function ListItemWidget({ id, divider, reverse, viewType, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const isSelected = typeof selected === "function" ? selected(id) : selected === id;
@@ -63,6 +63,7 @@ export function ListItemWidget({ id, separator, viewType, depth, clickHandler, o
         style.paddingLeft = (depth * 1.5) + "em";
     }
     return <>
+        {viewType === "List" && !!reverse && !!divider && <Divider />}
         <ListItem style={style} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
@@ -85,7 +86,7 @@ export function ListItemWidget({ id, separator, viewType, depth, clickHandler, o
                 {elements}
             </List>
         </Collapse>}
-        {viewType === "List" && separator && <Divider />}
+        {viewType === "List" && !reverse && !!divider && <Divider />}
     </>;
 }
 
@@ -101,7 +102,7 @@ export default function ListWidget({ reverse, items, onClick, state, viewType })
 
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} viewType={viewType} selected={selected} setSelected={setSelected} {...props} />
+        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} viewType={viewType} reverse={reverse} selected={selected} setSelected={setSelected} {...props} />
     });
 
     return <List className={className} component="nav">

@@ -38,7 +38,7 @@ export default function Sync() {
             icon: <SyncIcon />,
             onClick: fullSync,
             label: true,
-            location: "tools"
+            location: "advanced"
         }
     ].filter(Boolean);
 

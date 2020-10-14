@@ -8,13 +8,14 @@ import { usePages } from "@/util/pages";
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import BuildIcon from '@material-ui/icons/Build';
+import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import { useToolbarItems } from "@/components/Toolbar";
 
 export default function Settings({ closeDrawer, state }) {
     const { language, darkMode, menuViewList } = MainStore.useState();
     const translations = useTranslations();
     const pages = usePages();
-    const toolsToolbar = useToolbarItems({ location: "tools" });
+    const advancedToolbar = useToolbarItems({ location: "advanced" });
 
     const toggleDarkMode = () => {
         MainStore.update(s => {
@@ -54,10 +55,17 @@ export default function Settings({ closeDrawer, state }) {
             id: "tools",
             name: translations.TOOLS,
             icon: <BuildIcon />,
-            items: [...toolsItems, ...toolsToolbar]
+            items: toolsItems
         },
-        ...pages.filter(page => page.sidebar && page.category === "quickaccess")
-    ];
+        ...pages.filter(page => page.sidebar && page.category === "quickaccess"),
+        advancedToolbar && advancedToolbar.length && {
+            id: "advanced",
+            name: translations.ADVANCED,
+            icon: <DeveloperModeIcon />,
+            items: [...advancedToolbar],
+            divider: true
+        }
+    ].filter(Boolean);
 
     return <>
         <div style={{ flex: "1" }} />

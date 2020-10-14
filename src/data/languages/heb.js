@@ -768,6 +768,10 @@ export default {
         {
             "id": "NO_ITEMS",
             "value": "אין פריטים"
+        },
+        {
+            "id": "ADVANCED",
+            "value": "מתקדם"
         }
     ]
 };

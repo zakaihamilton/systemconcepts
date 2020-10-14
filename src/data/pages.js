@@ -73,7 +73,7 @@ export default [
         root: true,
         Icon: AppsIcon,
         Component: Apps,
-        separator: true
+        divider: true
     },
     {
         sidebar: true,
@@ -160,8 +160,7 @@ export default [
         name: "ACCOUNT",
         Icon: AccountCircleIcon,
         Component: Account,
-        sidebar: true,
-        category: "quickaccess"
+        sidebar: true
     },
     {
         id: "signup",

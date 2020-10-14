@@ -112,7 +112,8 @@ export default function TableWidget(props) {
                 catch (err) {
                     console.error(err);
                 }
-            }
+            },
+            location: "advanced"
         },
         data && name && {
             id: "export",
@@ -127,13 +128,15 @@ export default function TableWidget(props) {
                     body = JSON.stringify({ [name]: data }, null, 4);
                 }
                 exportData(body, name, "application/json");
-            }
+            },
+            location: "advanced"
         },
         refresh && {
             id: "refresh",
             name: translations.REFRESH,
             icon: <RefreshIcon />,
-            onClick: refresh
+            onClick: refresh,
+            location: "advanced"
         }
     ].filter(Boolean);
 

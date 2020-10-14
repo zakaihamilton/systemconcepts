@@ -772,6 +772,10 @@ export default {
         {
             "id": "NO_ITEMS",
             "value": "Sem itens"
+        },
+        {
+            "id": "ADVANCED",
+            "value": "Avançado"
         }
     ]
 };
