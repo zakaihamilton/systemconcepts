@@ -6,7 +6,7 @@ import Progress from "@/widgets/Progress";
 import { useSync } from "@/util/sync";
 import { PageSize } from "@/components/Page";
 import Download from "@/widgets/Download";
-import { exportData } from "@/util/importExport";
+import { exportData, exportFile } from "@/util/importExport";
 import { makePath } from "@/util/path";
 import { useFetchJSON } from "@/util/fetch";
 
@@ -91,7 +91,12 @@ export default function ImagePage({ name }) {
 
 
     const downloadImage = () => {
-        exportData(content, name);
+        if (content) {
+            exportData(content, name);
+        }
+        else {
+            exportFile(path, name);
+        }
     };
     const style = { height: size.height - 22, width: size.width - 22 };
 
