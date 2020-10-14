@@ -9,6 +9,7 @@ import styles from "./Table.module.scss";
 import { useTranslations } from "@/util/translations";
 import { importData, exportData } from "@/util/importExport";
 import Row from "./Table/Row";
+import Item from "./Table/Item";
 import Navigator from "./Table/Navigator";
 import { useSearch } from "@/components/AppBar/Search";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
@@ -17,10 +18,12 @@ import PublishIcon from '@material-ui/icons/Publish';
 import Progress from "@/widgets/Progress";
 import Error from "./Table/Error";
 import Column from "./Table/Column";
-import { useDeviceType } from "@/util/styles";
 import clsx from "clsx";
 import RefreshIcon from '@material-ui/icons/Refresh';
 import EmptyMessage from "./Table/EmptyMessage";
+import { FixedSizeList as List } from 'react-window';
+import ViewListIcon from '@material-ui/icons/ViewList';
+import TableChartIcon from '@material-ui/icons/TableChart';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -70,25 +73,22 @@ export default function TableWidget(props) {
         rowClick,
         error,
         store,
+        itemProps = {},
+        viewModeToggle = false,
         ...otherProps
     } = props;
-    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [isEmpty, setEmpty] = useState(false);
     columns = columns || [];
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
-    const { order = "desc", offset = 0, orderBy = defaultSort } = store.useState();
+    const { order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const size = useContext(PageSize);
     const { search } = useSearch(() => {
         store.update(s => {
             s.offset = 0;
         });
     });
-
-    if (isPhone) {
-        marginBottom = "4em";
-    }
 
     const menuItems = [
         data && name && onImport && {
@@ -137,10 +137,20 @@ export default function TableWidget(props) {
             icon: <RefreshIcon />,
             onClick: refresh,
             location: "advanced"
+        },
+        viewModeToggle && {
+            id: "viewModeToggle",
+            name: viewMode === "list" ? translations.TABLE_VIEW : translations.LIST_VIEW,
+            icon: viewMode === "list" ? <TableChartIcon /> : <ViewListIcon />,
+            onClick: () => {
+                store.update(s => {
+                    s.viewMode = s.viewMode === "list" ? "table" : "list";
+                });
+            }
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations] });
+    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode] });
 
     useEffect(() => {
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
@@ -201,15 +211,6 @@ export default function TableWidget(props) {
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
-    const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
-        return <Column
-            key={item.id || idx}
-            item={item}
-            order={order}
-            orderBy={orderBy}
-            createSortHandler={createSortHandler} />
-    });
-
     if (!size.height) {
         return null;
     }
@@ -228,6 +229,48 @@ export default function TableWidget(props) {
     const numItems = items && items.length;
     const marginBottomInPixels = sizeToPixels(marginBottom);
     const rowHeightInPixels = sizeToPixels(rowHeight);
+
+    if (!loadingElement) {
+        loadingElement = <Progress />;
+    }
+
+    if (!emptyElement) {
+        emptyElement = <EmptyMessage />;
+    }
+
+    if (viewMode === "list") {
+
+        const Row = ({ index, style }) => {
+            const item = items[index];
+            const { id } = item;
+            const { style: itemStyles, ...props } = itemProps;
+            return <Item key={id || index} style={{ ...style, ...itemStyles }} {...props} columns={columns} rowClick={rowClick} item={item} index={index} />;
+        };
+
+        return <>
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && numItems && !error && <List
+                height={size.height}
+                itemCount={numItems}
+                itemSize={rowHeightInPixels}
+                width={size.width}
+            >
+                {Row}
+            </List>}
+            {!!error && <Error error={error} />}
+        </>;
+    }
+
+    const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
+        return <Column
+            key={item.id || idx}
+            item={item}
+            order={order}
+            orderBy={orderBy}
+            createSortHandler={createSortHandler} />
+    });
+
     const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
     const pageCount = parseInt((numItems / itemsPerPage) + ((numItems % itemsPerPage) > 0 ? 1 : 0));
     const startIdx = offset;
@@ -245,16 +288,8 @@ export default function TableWidget(props) {
 
     const tableRows = itemsOnPage.map((item, idx) => {
         const { id } = item;
-        return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} idx={idx} />;
+        return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} />;
     });
-
-    if (!loadingElement) {
-        loadingElement = <Progress />;
-    }
-
-    if (!emptyElement) {
-        emptyElement = <EmptyMessage />;
-    }
 
     return (<>
         {!!loading && loadingElement}

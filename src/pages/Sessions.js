@@ -6,19 +6,21 @@ import { useSessions } from "@/util/sessions";
 import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
 import Group from "@/widgets/Group";
+import styles from "./Sessions.module.scss";
 
 export const SessionsStore = new Store({
     groupFilter: "",
     dateFilter: "",
     order: "asc",
-    orderBy: "date"
+    orderBy: "date",
+    viewMode: "list"
 });
 
 export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy);
-    const { groupFilter, dateFilter } = SessionsStore.useState();
+    const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
 
     const columns = [
         {
@@ -34,7 +36,8 @@ export default function SessionsPage() {
             id: "date",
             title: translations.DATE,
             sortable: true,
-            onSelectable: item => typeof item.date !== "undefined" && !dateFilter,
+            selected: () => dateFilter,
+            onSelectable: item => typeof item.date !== "undefined",
             tags: [dateFilter && {
                 id: dateFilter,
                 name: dateFilter,
@@ -43,25 +46,42 @@ export default function SessionsPage() {
                     s.offset = 0;
                 })
             }],
-            onClick: !dateFilter && (item => SessionsStore.update(s => {
-                s.dateFilter = typeof item.date !== "undefined" && item.date;
+            onClick: item => SessionsStore.update(s => {
+                if (s.dateFilter) {
+                    s.dateFilter = "";
+                }
+                else {
+                    s.dateFilter = typeof item.date !== "undefined" && item.date;
+                }
                 s.offset = 0;
-            }))
+            }),
+            style: {
+                justifyContent: "center"
+            }
         },
         {
             id: "groupWidget",
             title: translations.GROUP,
             sortable: "group",
-            onSelectable: item => typeof item.group !== "undefined" && !groupFilter,
+            selected: () => groupFilter,
+            onSelectable: item => typeof item.group !== "undefined",
             tags: [groupFilter && {
                 id: groupFilter,
                 name: groupFilter,
                 onDelete: () => SessionsStore.update(s => { s.groupFilter = "" })
             }],
-            onClick: !groupFilter && (item => SessionsStore.update(s => {
-                s.groupFilter = typeof item.group !== "undefined" && (item.group[0].toUpperCase() + item.group.slice(1));
+            onClick: item => SessionsStore.update(s => {
+                if (s.groupFilter) {
+                    s.groupFilter = "";
+                }
+                else {
+                    s.groupFilter = typeof item.group !== "undefined" && (item.group[0].toUpperCase() + item.group.slice(1));
+                }
                 s.offset = 0;
-            }))
+            }),
+            style: {
+                justifyContent: "center"
+            }
         }
     ].filter(Boolean);
 
@@ -93,6 +113,10 @@ export default function SessionsPage() {
             loading={busy}
             mapper={mapper}
             filter={filter}
+            viewModeToggle={true}
+            itemProps={{
+                className: styles.item
+            }}
             loadingElement={<SyncMessage />}
             depends={[groupFilter, dateFilter, translations]}
         />

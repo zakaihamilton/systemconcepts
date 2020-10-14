@@ -776,6 +776,14 @@ export default {
         {
             "id": "ADVANCED",
             "value": "Avançado"
+        },
+        {
+            "id": "LIST_VIEW",
+            "value": "Vista de lista"
+        },
+        {
+            "id": "TABLE_VIEW",
+            "value": "Vista de mesa"
         }
     ]
 };

@@ -772,6 +772,14 @@ export default {
         {
             "id": "ADVANCED",
             "value": "מתקדם"
+        },
+        {
+            "id": "LIST_VIEW",
+            "value": "תצוגת רשימה"
+        },
+        {
+            "id": "TABLE_VIEW",
+            "value": "תצוגת טבלה"
         }
     ]
 };
