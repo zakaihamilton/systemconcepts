@@ -522,8 +522,8 @@ export default {
             "value": "סינכרון"
         },
         {
-            "id": "RESET_SYNC",
-            "value": "איפוס סינכרון",
+            "id": "FULL_SYNC",
+            "value": "סינכרון מלא",
         },
         {
             "id": "SYNC_FAILED",

@@ -8,11 +8,13 @@ import { usePages } from "@/util/pages";
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import BuildIcon from '@material-ui/icons/Build';
+import { useToolbarItems } from "@/components/Toolbar";
 
 export default function Settings({ closeDrawer, state }) {
     const { language, darkMode, menuViewList } = MainStore.useState();
     const translations = useTranslations();
     const pages = usePages();
+    const toolsToolbar = useToolbarItems({ location: "tools" });
 
     const toggleDarkMode = () => {
         MainStore.update(s => {
@@ -26,6 +28,8 @@ export default function Settings({ closeDrawer, state }) {
             s.language = id;
         });
     };
+
+    const toolsItems = pages.filter(page => page.sidebar && page.category === "tools");
 
     const quickAccessItems = [
         {
@@ -50,7 +54,7 @@ export default function Settings({ closeDrawer, state }) {
             id: "tools",
             name: translations.TOOLS,
             icon: <BuildIcon />,
-            items: pages.filter(page => page.sidebar && page.category === "tools")
+            items: [...toolsItems, ...toolsToolbar]
         },
         ...pages.filter(page => page.sidebar && page.category === "quickaccess")
     ];

@@ -50,6 +50,21 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
     }, [...depends, visible]);
 }
 
+export function useToolbarItems({ location }) {
+    const { sections } = ToolbarStore.useState();
+
+    let sectionItems = sections.filter(section => section.used && section.visible).map(section => section.items.map((item, idx, list) => {
+        item = { ...item };
+        if (idx === list.length - 1) {
+            item.divider = true;
+        }
+        return item;
+    })).flat();
+
+    sectionItems = sectionItems.filter(item => item.location === location);
+    return sectionItems;
+}
+
 export default function Toolbar({ location, divider, collapsable }) {
     const isDesktop = useDeviceType() === "desktop";
     const { sections } = ToolbarStore.useState();

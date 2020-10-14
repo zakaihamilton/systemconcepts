@@ -74,15 +74,7 @@ export function useSyncFeature() {
     const { lastUpdated } = SyncStore.useState();
     const { active, busy } = SyncActiveStore.useState();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-    const resetSync = useCallback(async () => {
-        SyncStore.update(s => {
-            s.lastUpdated = 0;
-        });
-        SyncActiveStore.update(s => {
-            s.lastSynced = 0;
-        });
-    }, []);
-    const updateSync = useCallback(async (pollSync) => {
+    const updateSync = useCallback(async (pollSync, lastUpdated) => {
         if (startRef.current || !online) {
             return;
         }
@@ -179,13 +171,25 @@ export function useSyncFeature() {
         SyncActiveStore.update(s => {
             s.busy = false;
         });
+    }, []);
+    const fullSync = useCallback(async () => {
+        SyncStore.update(s => {
+            s.lastUpdated = 0;
+        });
+        SyncActiveStore.update(s => {
+            s.lastSynced = 0;
+        });
+        updateSync(false, 0);
+    }, []);
+    const syncNow = useCallback(pollSync => {
+        updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
     useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
         if (online && isLoaded && isSignedIn && visible) {
-            updateSync(true);
+            syncNow(true);
         }
     }, [online, isLoaded, isSignedIn, visible]);
 
-    return [online && isLoaded && updateSync, resetSync, busy, error, active, duration];
+    return [online && isLoaded && syncNow, fullSync, busy, error, active, duration];
 }

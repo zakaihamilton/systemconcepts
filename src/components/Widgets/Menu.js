@@ -20,7 +20,7 @@ const StyledMenu = withStyles({
     />
 ));
 
-export default function MenuWidget({ items, children, onClick, selected: menuSelected, onVisible, ...props }) {
+const MenuWidget = React.forwardRef(function MenuComponent({ items, children, onClick, selected: menuSelected, onVisible, ...props }, ref) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const clickEnabled = items && items.length || onClick;
@@ -59,8 +59,8 @@ export default function MenuWidget({ items, children, onClick, selected: menuSel
         };
         const style = { backgroundColor };
         return [
-            <MenuWidget items={items} selected={isSelected} onClick={handleClick}>
-                <MenuItem key={id} selected={isSelected} {...props}>
+            <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClick}>
+                <MenuItem selected={isSelected} {...props}>
                     <div key={id + "_background"} className={styles.background} style={style} />
                     <ListItemIcon>
                         {icon}
@@ -100,4 +100,6 @@ export default function MenuWidget({ items, children, onClick, selected: menuSel
             </StyledMenu>
         </>
     );
-}
+});
+
+export default MenuWidget;

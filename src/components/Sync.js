@@ -5,7 +5,6 @@ import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import SyncIcon from '@material-ui/icons/Sync';
 import SyncProblemIcon from '@material-ui/icons/SyncProblem';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { formatDuration } from "@/util/string";
 
 registerToolbar("Sync");
@@ -13,7 +12,7 @@ registerToolbar("Sync");
 export default function Sync() {
     const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
-    const [updateSync, resetSync, isBusy, error, active, duration] = useSyncFeature();
+    const [updateSync, fullSync, isBusy, error, active, duration] = useSyncFeature();
     const className = useStyles(styles, {
         animated: isBusy
     });
@@ -33,15 +32,16 @@ export default function Sync() {
             onClick: updateSync,
             divider: isDesktop
         },
-        active && resetSync && {
-            id: "resetSync",
-            name: translations.RESET_SYNC,
-            icon: <HighlightOffIcon />,
-            onClick: resetSync,
-            menu: true
+        active && fullSync && {
+            id: "fullSync",
+            name: translations.FULL_SYNC,
+            icon: <SyncIcon />,
+            onClick: fullSync,
+            label: true,
+            location: "tools"
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, translations, updateSync, resetSync, active, duration, isDesktop] });
+    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, translations, updateSync, fullSync, active, duration, isDesktop] });
     return null;
 }
