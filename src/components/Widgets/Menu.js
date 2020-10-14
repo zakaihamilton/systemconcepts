@@ -59,16 +59,16 @@ export default function MenuWidget({ items, children, onClick, selected: menuSel
         };
         const style = { backgroundColor };
         return [
-            <MenuItem key={id} className={styles.item} selected={isSelected} onClick={items ? undefined : handleClick} {...props}>
-                <div key={id + "_background"} className={styles.background} style={style} />
-                <MenuWidget items={item.items} selected={isSelected} onClick={items ? handleClick : undefined}>
+            <MenuWidget items={items} selected={isSelected} onClick={handleClick}>
+                <MenuItem key={id} selected={isSelected} {...props}>
+                    <div key={id + "_background"} className={styles.background} style={style} />
                     <ListItemIcon>
                         {icon}
                     </ListItemIcon>
                     <ListItemText className={styles.itemText} primary={name} secondary={description} />
-                </MenuWidget>
-                <div key={id + "_border"} className={styles.backgroundBorder} style={style} />
-            </MenuItem>,
+                    <div key={id + "_border"} className={styles.backgroundBorder} style={style} />
+                </MenuItem>
+            </MenuWidget>,
             divider && !isLast && <Divider key={"_" + id + "_"} />
         ];
     });
