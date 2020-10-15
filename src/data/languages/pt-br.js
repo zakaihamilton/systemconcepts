@@ -784,6 +784,10 @@ export default {
         {
             "id": "TABLE_VIEW",
             "value": "Vista de mesa"
+        },
+        {
+            "id": "SORT",
+            "value": "Ordenar"
         }
     ]
 };

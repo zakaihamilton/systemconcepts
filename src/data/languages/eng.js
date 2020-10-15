@@ -784,6 +784,10 @@ export default {
         {
             "id": "TABLE_VIEW",
             "value": "Table View"
+        },
+        {
+            "id": "SORT",
+            "value": "Sort"
         }
     ]
 };

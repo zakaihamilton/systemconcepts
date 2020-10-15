@@ -24,6 +24,9 @@ import EmptyMessage from "./Table/EmptyMessage";
 import { FixedSizeList as List } from 'react-window';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import TableChartIcon from '@material-ui/icons/TableChart';
+import SortIcon from '@material-ui/icons/Sort';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -91,6 +94,32 @@ export default function TableWidget(props) {
         });
     });
 
+    const createSortHandler = (property) => () => {
+        console.log("createSortHandler");
+        const isDesc = orderBy === property && order === "desc";
+        store.update(s => {
+            s.order = isDesc ? "asc" : "desc";
+            s.orderBy = property;
+            console.log("s.order", s.order, "s.orderBy", s.orderBy);
+        });
+    };
+
+    const sortItems = useMemo(() => {
+        return (columns || []).filter(column => column.sortable).map(column => {
+            const { sortable, id, title } = column;
+            const sortId = typeof sortable === "string" ? sortable : id;
+            return {
+                id: id,
+                name: title,
+                icon: orderBy === sortId ? (order === "asc" ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : null,
+                selected: orderBy === sortId,
+                onClick: createSortHandler(sortId)
+            };
+        });
+    }, [orderBy, order]);
+
+    console.log("orderBy", orderBy, "sortItems", sortItems);
+
     const menuItems = [
         data && name && onImport && {
             id: "import",
@@ -148,10 +177,16 @@ export default function TableWidget(props) {
                     s.viewMode = s.viewMode === "list" ? "table" : "list";
                 });
             }
+        },
+        viewMode === "list" && !!sortItems.length && {
+            id: "sort",
+            name: translations.SORT,
+            icon: <SortIcon />,
+            items: sortItems
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode] });
+    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode, sortItems] });
 
     useEffect(() => {
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
@@ -159,14 +194,6 @@ export default function TableWidget(props) {
             store.update(s => { s.orderBy = defaultSort });
         }
     }, []);
-
-    const createSortHandler = (property) => () => {
-        const isDesc = orderBy === property && order === "desc";
-        store.update(s => {
-            s.order = isDesc ? "asc" : "desc";
-            s.orderBy = property;
-        });
-    };
 
     useEffect(() => {
         if (loading) {

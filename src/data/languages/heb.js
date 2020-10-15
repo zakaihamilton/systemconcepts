@@ -780,6 +780,10 @@ export default {
         {
             "id": "TABLE_VIEW",
             "value": "תצוגת טבלה"
+        },
+        {
+            "id": "SORT",
+            "value": "מיון"
         }
     ]
 };

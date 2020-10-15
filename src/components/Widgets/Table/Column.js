@@ -1,4 +1,3 @@
-import { useTranslations } from "@/util/translations";
 import clsx from "clsx";
 import TableCell from "@material-ui/core/TableCell";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
