@@ -1,6 +1,6 @@
-const { findRecord, insertRecord, replaceRecord } = require("./mongo");
-const { compare, hash } = require("bcrypt");
-const fs = require("fs");
+import { findRecord, insertRecord, replaceRecord } from "./mongo";
+import { compare, hash } from "bcrypt";
+import resetPasswordTemplate from '@/data/resetPasswordTemplate';
 
 const sendResetMail = require('gmail-send')({
     user: process.env.GMAIL_USER,
@@ -125,7 +125,7 @@ export async function sendResetEmail({ id }) {
     if (!user) {
         throw "USER_NOT_FOUND";
     }
-    let emailText = await fs.promises.readFile("public/resetPasswordTemplate.txt", "utf8");
+    let emailText = resetPasswordTemplate;
     const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
     emailText = emailText.replace(/{{name}}/g, fullName);
     emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/" + encodeURIComponent("resetpassword/" + user.hash));
