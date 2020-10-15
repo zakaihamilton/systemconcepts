@@ -396,7 +396,7 @@ export default function TableWidget(props) {
     else if (viewMode === "grid") {
         const cellHeightInPixels = sizeToPixels(cellHeight);
         const cellWidthInPixels = sizeToPixels(cellWidth);
-        const columnCount = Math.floor(size.width / cellWidthInPixels);
+        const columnCount = Math.floor(size.width / (cellWidthInPixels + 1));
         const rowCount = Math.ceil(numItems / columnCount);
 
         const Cell = ({ columnIndex, rowIndex, style }) => {
