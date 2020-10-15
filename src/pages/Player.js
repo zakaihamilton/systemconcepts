@@ -113,7 +113,8 @@ export default function PlayerPage({ show = false, suffix }) {
         year: yearName,
         name: sessionName,
         path: mediaPath,
-        show
+        show,
+        preload: "metadata"
     }
     if (isAudio) {
         MediaComponent = Audio;

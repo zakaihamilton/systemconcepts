@@ -48,9 +48,6 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
             events.map(name => playerRef.removeEventListener(name, update));
         };
     }, []);
-    useEffect(() => {
-        playerRef.load();
-    }, [path]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;
@@ -136,7 +133,6 @@ export default function VideoControls({ playerRef, metadata, setMetadata, path =
     const play = () => {
         playerRef.play().catch(err => {
             console.error(err);
-            setError("PLAYING_ERROR");
         });
     };
     return <div className={styles.root}>
