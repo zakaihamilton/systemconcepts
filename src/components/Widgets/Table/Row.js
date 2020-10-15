@@ -4,9 +4,9 @@ import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@/util/styles";
 
-export default function RowWidget({ rowHeight, columns, rowClick, item }) {
+export default function RowWidget({ viewMode, rowHeight, columns, rowClick, item }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, onSelectable, rowProps = {}, onClick, selected } = column;
+        const { id: columnId, dir, align, viewModes, onSelectable, onClick, selected } = column;
         const value = item[columnId];
         return (<TableCell
             dir={dir}
@@ -20,8 +20,7 @@ export default function RowWidget({ rowHeight, columns, rowClick, item }) {
                     onSelectable && onSelectable(item) && styles.selectable,
                     selected && selected(item) && styles.selected)
             }}
-            key={columnId}
-            {...rowProps}>
+            key={columnId}>
             {value}
         </TableCell>);
     });

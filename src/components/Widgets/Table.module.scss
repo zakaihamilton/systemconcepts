@@ -18,3 +18,10 @@
 .footer>* {
     margin: 1em;
 }
+
+.grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}

@@ -96,11 +96,13 @@ export default function Terms() {
             columns={columns}
             mapper={mapper}
             filter={filter}
-            viewModes={["list","table"]}
-            data={data}
-            itemProps={{
-                className: styles.item
+            viewModes={{
+                list: {
+                    className: styles.item
+                },
+                table: null
             }}
+            data={data}
             rowHeight="5.5em"
             itemHeight="4em"
             store={TermsStore}

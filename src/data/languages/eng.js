@@ -788,6 +788,10 @@ export default {
         {
             "id": "SORT",
             "value": "Sort"
+        },
+        {
+            "id": "GRID_VIEW",
+            "value":"Grid View"
         }
     ]
 };

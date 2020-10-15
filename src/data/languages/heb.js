@@ -784,6 +784,10 @@ export default {
         {
             "id": "SORT",
             "value": "מיון"
+        },
+        {
+            "id": "GRID_VIEW",
+            "value": "תצוגת רשת"
         }
     ]
 };

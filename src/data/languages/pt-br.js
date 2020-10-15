@@ -788,6 +788,10 @@ export default {
         {
             "id": "SORT",
             "value": "Ordenar"
+        },
+        {
+            "id": "GRID_VIEW",
+            "value": "Vista de grade"
         }
     ]
 };

@@ -10,6 +10,9 @@ import styles from "./Sessions.module.scss";
 import Label from "@/widgets/Label";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@/icons/Audio";
+import Tooltip from '@material-ui/core/Tooltip';
+import Image from "@/widgets/Image";
+import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -25,15 +28,34 @@ export default function SessionsPage() {
     const sessions = useSessions([syncCounter, busy], !busy);
     const { groupFilter, dateFilter } = SessionsStore.useState();
 
+    const gotoItem = item => {
+        addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
+    };
+
     const columns = [
         {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            ellipsis: "name",
             onSelectable: () => true,
-            onClick: item => {
-                addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
+            onClick: gotoItem,
+            viewModes: {
+                "list": null,
+                "table": null,
+                "grid": {
+                    className: styles.gridName
+                }
+            }
+        },
+        {
+            id: "thumbnailWidget",
+            onSelectable: () => true,
+            title: translations.THUMBNAIL,
+            onClick: gotoItem,
+            viewModes: {
+                "grid": {
+                    className: styles.gridThumbnail
+                }
             }
         },
         {
@@ -81,11 +103,19 @@ export default function SessionsPage() {
             return null;
         }
         const icon = item.video ? <MovieIcon /> : <AudioIcon />;
+        const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
         return {
             ...item,
-            nameWidget: <Label icon={icon} name={item.name} />,
+            nameWidget: <Label className={styles.labelName} icon={icon} name={
+                <Tooltip arrow title={item.name}>
+                    <div className={styles.labelText}>
+                        {item.name}
+                    </div>
+                </Tooltip>
+            } />,
             group: item.group,
-            groupWidget: <Group name={item.group} color={item.color} />
+            groupWidget: <Group name={item.group} color={item.color} />,
+            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="12em" height="12em" alt={altIcon} />
         };
     };
 
@@ -100,6 +130,8 @@ export default function SessionsPage() {
         <Table
             rowHeight="5.5em"
             itemHeight="4em"
+            cellWidth="18em"
+            cellHeight="18em"
             name="sessions"
             store={SessionsStore}
             columns={columns}
@@ -107,9 +139,14 @@ export default function SessionsPage() {
             loading={busy}
             mapper={mapper}
             filter={filter}
-            viewModes={["list", "table"]}
-            itemProps={{
-                className: styles.item
+            viewModes={{
+                list: {
+                    className: styles.listItem
+                },
+                table: null,
+                grid: {
+                    className: styles.gridItem
+                }
             }}
             loadingElement={<SyncMessage />}
             depends={[groupFilter, dateFilter, translations]}

@@ -21,9 +21,10 @@ import Column from "./Table/Column";
 import clsx from "clsx";
 import RefreshIcon from '@material-ui/icons/Refresh';
 import EmptyMessage from "./Table/EmptyMessage";
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList, FixedSizeGrid } from 'react-window';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import TableChartIcon from '@material-ui/icons/TableChart';
+import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
@@ -59,6 +60,8 @@ export default function TableWidget(props) {
         name,
         rowHeight = "4em",
         itemHeight = "4em",
+        cellWidth = "16em",
+        cellHeight = "16em",
         marginBottom = "8em",
         loading,
         loadingElement,
@@ -77,8 +80,7 @@ export default function TableWidget(props) {
         rowClick,
         error,
         store,
-        itemProps = {},
-        viewModes = ["table"],
+        viewModes = { table: null },
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -104,12 +106,24 @@ export default function TableWidget(props) {
             id: "list",
             icon: <ViewListIcon />,
             name: translations.LIST_VIEW
+        },
+        {
+            id: "grid",
+            icon: <ViewComfyIcon />,
+            name: translations.GRID_VIEW
         }
-    ].filter(item => viewModes.includes(item.id));
+    ].filter(item => viewModes.hasOwnProperty(item.id));
 
     const currentViewModeIndex = viewModesList.findIndex(item => item.id === viewMode);
     const nextViewModeIndex = (currentViewModeIndex + 1) % viewModesList.length;
     const nextViewModeItem = viewModesList[nextViewModeIndex];
+
+    columns = columns.filter(column => {
+        if (column.viewModes) {
+            return column.viewModes.hasOwnProperty(viewMode);
+        }
+        return true;
+    });
 
     const createSortHandler = (property) => () => {
         const isDesc = orderBy === property && order === "desc";
@@ -181,7 +195,7 @@ export default function TableWidget(props) {
             onClick: refresh,
             location: "advanced"
         },
-        viewModes && viewModes.length && {
+        Object.keys(viewModes).length > 1 && {
             id: "viewModeToggle",
             name: nextViewModeItem.name,
             icon: nextViewModeItem.icon,
@@ -284,79 +298,145 @@ export default function TableWidget(props) {
         const Row = ({ index, style }) => {
             const item = items[index];
             const { id } = item;
-            const { style: itemStyles, ...props } = itemProps;
-            return <Item key={id || index} style={{ ...style, ...itemStyles }} {...props} columns={columns} rowClick={rowClick} item={item} index={index} />;
+            const { style: itemStyles, ...props } = viewModes[viewMode] || {};
+            return <Item
+                key={id || index}
+                style={{ ...style, ...itemStyles }}
+                {...props}
+                columns={columns}
+                rowClick={rowClick}
+                item={item}
+                index={index}
+                viewMode={viewMode}
+            />;
         };
 
         return <>
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
-            {!loading && numItems && !error && <List
+            {!loading && !!numItems && !error && <FixedSizeList
                 height={size.height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}
                 width={size.width}
             >
                 {Row}
-            </List>}
+            </FixedSizeList>}
             {!!error && <Error error={error} />}
         </>;
     }
+    else if (viewMode === "table") {
 
-    const rowHeightInPixels = sizeToPixels(rowHeight);
+        const rowHeightInPixels = sizeToPixels(rowHeight);
 
-    const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
-        return <Column
-            key={item.id || idx}
-            item={item}
-            order={order}
-            orderBy={orderBy}
-            createSortHandler={createSortHandler} />
-    });
-
-    const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
-    const pageCount = parseInt((numItems / itemsPerPage) + ((numItems % itemsPerPage) > 0 ? 1 : 0));
-    const startIdx = offset;
-    const endIdx = startIdx + itemsPerPage;
-    const pageIndex = parseInt(startIdx / itemsPerPage);
-
-    const setPageIndex = index => {
-        const offset = index * itemsPerPage;
-        store.update(s => {
-            s.offset = offset;
+        const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
+            return <Column
+                key={item.id || idx}
+                item={item}
+                order={order}
+                orderBy={orderBy}
+                createSortHandler={createSortHandler} />
         });
-    };
 
-    const itemsOnPage = items.slice(startIdx, endIdx);
+        const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
+        const pageCount = parseInt((numItems / itemsPerPage) + ((numItems % itemsPerPage) > 0 ? 1 : 0));
+        const startIdx = offset;
+        const endIdx = startIdx + itemsPerPage;
+        const pageIndex = parseInt(startIdx / itemsPerPage);
 
-    const tableRows = itemsOnPage.map((item, idx) => {
-        const { id } = item;
-        return <Row key={id || idx} rowHeight={rowHeight} columns={columns} rowClick={rowClick} item={item} />;
-    });
+        const setPageIndex = index => {
+            const offset = index * itemsPerPage;
+            store.update(s => {
+                s.offset = offset;
+            });
+        };
 
-    return (<>
-        {!!loading && loadingElement}
-        {!!isEmpty && !loading && emptyElement}
-        {!loading && numItems && <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
-            {!error && <Table stickyHeader style={style}>
-                {!hideColumns && <TableHead>
-                    <TableRow>
-                        {tableColumns}
-                    </TableRow>
-                </TableHead>}
-                <TableBody>
-                    {tableRows}
-                </TableBody>
-            </Table>}
-            {!loading && !error && <div className={styles.footer}>
-                {statusBar}
-            </div>}
-        </TableContainer>}
-        {!!error && <Error error={error} />}
-        {!loading && numItems && <Navigator
-            pageIndex={pageIndex}
-            setPageIndex={setPageIndex}
-            pageCount={pageCount}
-            numItems={numItems} />}
-    </>);
+        const itemsOnPage = items.slice(startIdx, endIdx);
+
+        const tableRows = itemsOnPage.map((item, idx) => {
+            const { id } = item;
+            return <Row
+                key={id || idx}
+                rowHeight={rowHeight}
+                columns={columns}
+                rowClick={rowClick}
+                item={item}
+                viewMode={viewMode}
+            />;
+        });
+
+        return (<>
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && !!numItems && <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
+                {!error && <Table stickyHeader style={style}>
+                    {!hideColumns && <TableHead>
+                        <TableRow>
+                            {tableColumns}
+                        </TableRow>
+                    </TableHead>}
+                    <TableBody>
+                        {tableRows}
+                    </TableBody>
+                </Table>}
+                {!loading && !error && <div className={styles.footer}>
+                    {statusBar}
+                </div>}
+            </TableContainer>}
+            {!!error && <Error error={error} />}
+            {!loading && numItems && <Navigator
+                pageIndex={pageIndex}
+                setPageIndex={setPageIndex}
+                pageCount={pageCount}
+                numItems={numItems} />}
+        </>);
+    }
+    else if (viewMode === "grid") {
+        const cellHeightInPixels = sizeToPixels(cellHeight);
+        const cellWidthInPixels = sizeToPixels(cellWidth);
+        const columnCount = Math.floor(size.width / cellWidthInPixels);
+        const rowCount = Math.ceil(numItems / columnCount);
+
+        const Cell = ({ columnIndex, rowIndex, style }) => {
+            const index = (rowIndex * columnCount) + columnIndex;
+            const item = items[index];
+            if (!item) {
+                return null;
+            }
+            const { id } = item;
+            const { style: itemStyles, ...props } = viewModes[viewMode] || {};
+            return <Item
+                key={id || index}
+                style={{ ...style, ...itemStyles }}
+                {...props}
+                columns={columns}
+                rowClick={rowClick}
+                item={item}
+                index={index}
+                viewMode={viewMode}
+            />;
+        };
+
+        return <>
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && !!numItems && !error &&
+                <div className={styles.grid}>
+                    <FixedSizeGrid
+                        columnCount={columnCount}
+                        columnWidth={cellWidthInPixels}
+                        rowCount={rowCount}
+                        rowHeight={cellHeightInPixels}
+                        height={size.height}
+                        width={columnCount * cellWidthInPixels}
+                    >
+                        {Cell}
+                    </FixedSizeGrid>
+                </div>}
+            {!!error && <Error error={error} />}
+        </>;
+    }
+    else {
+        return null;
+    }
 }

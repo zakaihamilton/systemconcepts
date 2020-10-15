@@ -1,9 +1,7 @@
 import { useTranslations } from "@/util/translations";
 import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./Session.module.scss";
-import Image from "./Session/Image";
-import { useFetchJSON } from "@/util/fetch";
-import { makePath } from "@/util/path";
+import Image from "@/widgets/Image";
 import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
@@ -19,9 +17,6 @@ registerToolbar("Session");
 
 export default function SessionPage({ prefix, group, year, date, name, color }) {
     const translations = useTranslations();
-    let components = [prefix, group, year, date + " " + name + ".png"].filter(Boolean).join("/");
-    const path = makePath(components).split("/").join("/");
-    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy, false);
     const dateFormatter = useDateFormatter({
@@ -82,7 +77,7 @@ export default function SessionPage({ prefix, group, year, date, name, color }) 
     return <div className={styles.root}>
         <div className={styles.info}>
             <div className={styles.preview}>
-                <Image path={data && data.path} loading={!session} width="18em" height="18em" alt={altIcon} />
+                <Image path={session.thumbnail} loading={!session} width="18em" height="18em" alt={altIcon} />
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}

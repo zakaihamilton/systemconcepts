@@ -39,12 +39,11 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
         if (!continueUpdate) {
             return;
         }
-        const getListing = async path => {
-            const localUrl = "local/" + path + "/listing.json";
-            const exists = !fetch && storage.exists(localUrl);
+        const getJSON = async path => {
+            const exists = !fetch && storage.exists(path);
             let data = [];
             if (exists) {
-                data = await storage.readFile(localUrl);
+                data = await storage.readFile(path);
                 data = JSON.parse(data);
                 if (!data) {
                     data = [];
@@ -52,8 +51,13 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             }
             return data;
         }
+        const getListing = async path => {
+            const localUrl = "local/" + path + "/listing.json";
+            return await getJSON(localUrl);
+        }
+        const basePath = "shared/sessions";
+        const cdn = await getJSON("local/" + basePath + "/cdn.json") || {};
         try {
-            const basePath = "shared/sessions";
             const groups = await getListing(basePath);
             for (const group of groups) {
                 const years = await getListing(makePath(basePath, group.name));
@@ -96,6 +100,9 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                                     item = createItem({ id, name, date });
                                 }
                                 item.video = file;
+                                if (cdn.url) {
+                                    item.thumbnail = cdn.url + encodeURI(file.path.replace("/aws", "").replace(".mp4", ".png"));
+                                }
                             }
                         }
                     }

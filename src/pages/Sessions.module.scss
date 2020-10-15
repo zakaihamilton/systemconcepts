@@ -1,3 +1,31 @@
-.item {
+.gridThumbnail {
+    grid-row: 2 / 3;
+    grid-column: 1 / 4;
+}
+
+.gridName {
+    grid-row: 1/ 2;
+    grid-column: 1 / 4;
+}
+
+.gridItem {
+    grid-template-rows: 1fr auto 1fr;
+    grid-template-columns: 50% 50%;
+    margin: 0.5em;
+    box-shadow: 0 10px 16px 0 var(--box-shadow-color), 0 6px 20px 0 var(--box-shadow-color);
+}
+
+.listItem {
     grid-template-columns: auto minmax(4em, 10%) 7em;
+}
+
+.labelName {
+    display: flex;
+    min-width: 0;
+}
+
+.labelText {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden
 }

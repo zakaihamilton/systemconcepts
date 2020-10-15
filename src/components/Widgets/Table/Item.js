@@ -3,24 +3,26 @@ import clsx from "clsx";
 import { useStyles } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 
-export default function ItemWidget({ className, columns, rowClick, item, index, style, ...props }) {
+export default function ItemWidget({ className, viewMode, columns, rowClick, item, index, style, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, onSelectable, ellipsis, rowProps = {}, selected, onClick, style } = column;
+        const { id: columnId, dir, align, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
         const value = item[columnId];
+        const { className: viewModeClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         return (<div
             dir={dir}
-            style={style}
+            style={{ ...style, ...viewModeStyle }}
             onClick={onClick ? () => onClick(item) : undefined}
             className={clsx(
                 styles.cell,
                 onSelectable && onSelectable(item) && styles.selectable,
                 selected && selected(item) && styles.selected,
                 ellipsis && styles.ellipsis,
-                !align && styles.defaultAlign
-            )
-            }
+                !align && styles.defaultAlign,
+                viewModeClassName
+            )}
             key={columnId}
-            {...rowProps}>
+            {...viewModeProps}
+        >
             {!!ellipsis && <Tooltip arrow title={item[ellipsis]}>
                 <div className={styles.ellipsisText}>{value}</div>
             </Tooltip>}
@@ -34,7 +36,9 @@ export default function ItemWidget({ className, columns, rowClick, item, index, 
         item: true,
         hover: !!rowClick
     });
-    return <div className={classes + " " + className} style={style} {...rowClick && { onClick }} {...props}>
-        {cells}
+    return <div className={styles.root} style={style}>
+        <div className={classes + " " + className} {...rowClick && { onClick }} {...props}>
+            {cells}
+        </div>
     </div>;
 }
