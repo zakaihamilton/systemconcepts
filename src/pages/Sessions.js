@@ -7,6 +7,9 @@ import SyncMessage from "@/widgets/Table/SyncMessage";
 import { Store } from "pullstate";
 import Group from "@/widgets/Group";
 import styles from "./Sessions.module.scss";
+import Label from "@/widgets/Label";
+import MovieIcon from '@material-ui/icons/Movie';
+import AudioIcon from "@/icons/Audio";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -24,10 +27,10 @@ export default function SessionsPage() {
 
     const columns = [
         {
-            id: "name",
+            id: "nameWidget",
             title: translations.NAME,
-            sortable: true,
-            ellipsis: true,
+            sortable: "name",
+            ellipsis: "name",
             onSelectable: () => true,
             onClick: item => {
                 addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
@@ -90,8 +93,10 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
+        const icon = item.video ? <MovieIcon /> : <AudioIcon />;
         return {
             ...item,
+            nameWidget: <Label icon={icon} name={item.name} />,
             group: item.group,
             groupWidget: <Group name={item.group} color={item.color} />
         };

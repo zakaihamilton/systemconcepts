@@ -21,7 +21,7 @@ export default function ItemWidget({ className, columns, rowClick, item, index, 
             }
             key={columnId}
             {...rowProps}>
-            {!!ellipsis && <Tooltip arrow title={value}>
+            {!!ellipsis && <Tooltip arrow title={item[ellipsis]}>
                 <div className={styles.ellipsisText}>{value}</div>
             </Tooltip>}
             {!ellipsis && value}
