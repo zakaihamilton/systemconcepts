@@ -28,7 +28,7 @@ export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
     const language = useLanguage();
-    const isPhone = useDeviceType() === "phone";
+    const isMobile = useDeviceType() !== "desktop";
     useLocalStorage("MainStore", MainStore);
     const { direction, showSideBar, menuViewList, hash, fullscreen } = MainStore.useState();
 
@@ -55,7 +55,7 @@ export default function Main() {
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar && !isPhone && !fullscreen,
+        sidebar: showSideBar && !isMobile && !fullscreen,
         list: menuViewList === "List",
         rtl: direction === "rtl",
         fullscreen

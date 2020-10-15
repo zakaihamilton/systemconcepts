@@ -8,12 +8,12 @@ import { useTranslations } from "@/util/translations";
 
 export default function Menu() {
     const translations = useTranslations();
-    const isPhone = useDeviceType() === "phone";
+    const isMobile = useDeviceType() !== "desktop";
     const { fullscreen } = MainStore.useState();
 
     const toggleMenu = () => {
         MainStore.update(s => {
-            if (isPhone || fullscreen) {
+            if (isMobile || fullscreen) {
                 s.showSlider = true;
             }
             else {

@@ -8,7 +8,7 @@ import { usePagesFromHash, usePages, setPath } from "@/util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
 
 export default function SideBar() {
-    const isPhone = useDeviceType() === "phone";
+    const isMobile = useDeviceType() !== "desktop";
     const { menuViewList, direction, hash, fullscreen, showSlider } = MainStore.useState();
     const activePages = usePagesFromHash(hash);
     const pages = usePages();
@@ -25,7 +25,7 @@ export default function SideBar() {
 
     const closeDrawer = () => {
         MainStore.update(s => {
-            if (fullscreen || isPhone) {
+            if (fullscreen || isMobile) {
                 s.showSlider = false;
             }
             else {
@@ -36,7 +36,7 @@ export default function SideBar() {
 
     const items = pages.filter(page => page.sidebar && !page.category);
 
-    if (isPhone || fullscreen) {
+    if (isMobile || fullscreen) {
         return <Drawer
             anchor={direction === 'rtl' ? 'right' : 'left'}
             open={showSlider}
