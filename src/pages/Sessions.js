@@ -13,6 +13,7 @@ import AudioIcon from "@/icons/Audio";
 import Tooltip from '@material-ui/core/Tooltip';
 import Image from "@/widgets/Image";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
+import clsx from "clsx";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -26,7 +27,7 @@ export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy);
-    const { groupFilter, dateFilter } = SessionsStore.useState();
+    const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
 
     const gotoItem = item => {
         addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
@@ -108,7 +109,7 @@ export default function SessionsPage() {
             ...item,
             nameWidget: <Label className={styles.labelName} icon={icon} name={
                 <Tooltip arrow title={item.name}>
-                    <div className={styles.labelText}>
+                    <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                         {item.name}
                     </div>
                 </Tooltip>
@@ -149,7 +150,7 @@ export default function SessionsPage() {
                 }
             }}
             loadingElement={<SyncMessage />}
-            depends={[groupFilter, dateFilter, translations]}
+            depends={[groupFilter, dateFilter, translations, viewMode]}
         />
     </>;
 }

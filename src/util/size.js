@@ -16,12 +16,14 @@ export function useResize(ref, depends = []) {
         if (!ref.current) {
             return;
         }
-        const element = ref.current;
-        const { clientWidth, clientHeight } = element;
-        const emPixels = getEmValueFromElement(element);
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
-        setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
+        setTimeout(() => {
+            const element = ref.current.parentElement;
+            const { clientWidth, clientHeight } = element;
+            const emPixels = getEmValueFromElement(element);
+            setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
+        }, 0);
     };
 
     useEffect(() => {

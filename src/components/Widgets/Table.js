@@ -275,8 +275,8 @@ export default function TableWidget(props) {
 
     const height = size.height + "px";
     const style = {
-        maxHeight: height,
-        maxWidth: size.width
+        maxHeight: height + "px",
+        maxWidth: size.width + "px"
     };
 
     const sizeToPixels = text => {
@@ -357,6 +357,7 @@ export default function TableWidget(props) {
         const itemsOnPage = items.slice(startIdx, endIdx);
 
         const tableRows = itemsOnPage.map((item, idx) => {
+            const { style, ...props } = viewModes[viewMode] || {};
             const { id } = item;
             return <Row
                 key={id || idx}
@@ -365,14 +366,16 @@ export default function TableWidget(props) {
                 rowClick={rowClick}
                 item={item}
                 viewMode={viewMode}
+                style={style}
+                {...props}
             />;
         });
 
         return (<>
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
-            {!loading && !!numItems && <TableContainer className={clsx(styles.table, className)} style={style} {...otherProps}>
-                {!error && <Table stickyHeader style={style}>
+            {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+                {!error && <Table className={styles.table} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
                             {tableColumns}

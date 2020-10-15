@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useStyles } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 
-export default function ItemWidget({ className, viewMode, columns, rowClick, item, index, style, ...props }) {
+export default function ItemWidget({ className = "", viewMode, columns, rowClick, item, index, style, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
         const value = item[columnId];

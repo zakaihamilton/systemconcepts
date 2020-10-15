@@ -4,9 +4,10 @@ import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@/util/styles";
 
-export default function RowWidget({ viewMode, rowHeight, columns, rowClick, item }) {
+export default function RowWidget({ className = "", viewMode, rowHeight, columns, rowClick, item, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, viewModes, onSelectable, onClick, selected } = column;
+        const { id: columnId, dir, align, viewModes = {}, onSelectable, onClick, selected } = column;
+        const { className: viewModeClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const value = item[columnId];
         return (<TableCell
             dir={dir}
@@ -18,20 +19,30 @@ export default function RowWidget({ viewMode, rowHeight, columns, rowClick, item
                     styles.cell,
                     !align && styles.defaultAlign,
                     onSelectable && onSelectable(item) && styles.selectable,
-                    selected && selected(item) && styles.selected)
+                    selected && selected(item) && styles.selected,
+                    viewModeClassName
+                )
             }}
-            key={columnId}>
+            style={viewModeStyle}
+            key={columnId}
+            {...viewModeProps}
+        >
             {value}
         </TableCell>);
     });
     const onClick = event => {
         rowClick(event, item);
     };
-    const className = useStyles(styles, {
+    const classes = useStyles(styles, {
         row: true,
         hover: !!rowClick
     });
-    return <TableRow className={className} style={{ minHeight: rowHeight, height: rowHeight, maxHeight: rowHeight }} {...rowClick && { hover: true, onClick }}>
+    return <TableRow
+        className={classes + " " + className}
+        style={{ minHeight: rowHeight, height: rowHeight, maxHeight: rowHeight }}
+        {...rowClick && { hover: true, onClick }}
+        {...props}
+    >
         {cells}
     </TableRow>;
 }

@@ -22,11 +22,10 @@
 }
 
 .labelName {
-    display: flex;
     min-width: 0;
 }
 
-.labelText {
+.labelText.singleLine {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden
