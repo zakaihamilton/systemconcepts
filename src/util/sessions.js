@@ -157,6 +157,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             name: translations.GROUPS,
             icon: <GroupWorkIcon />,
             items: groupsItems,
+            divider: true,
             disabled: !groupsItems.length
         }
     ].filter(Boolean);

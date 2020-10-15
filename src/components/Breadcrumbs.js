@@ -86,7 +86,6 @@ export default function BreadcrumbsWidget({ items }) {
                 </div>
                 <Toolbar collapsable={true} />
             </div>
-            <Divider />
         </div>
     );
 }

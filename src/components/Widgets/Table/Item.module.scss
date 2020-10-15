@@ -6,7 +6,7 @@
 .item {
     display: grid;
     color: var(--text-color);
-    border: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     box-sizing: border-box;
     user-select: none;
     min-width: 0;

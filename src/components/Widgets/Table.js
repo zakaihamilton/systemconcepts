@@ -195,22 +195,24 @@ export default function TableWidget(props) {
             onClick: refresh,
             location: "advanced"
         },
-        Object.keys(viewModes).length > 1 && {
-            id: "viewModeToggle",
-            name: nextViewModeItem.name,
-            icon: nextViewModeItem.icon,
-            onClick: () => {
-                store.update(s => {
-                    s.viewMode = nextViewModeItem.id;
-                });
-            }
-        },
         viewMode === "list" && !!sortItems.length && {
             id: "sort",
             name: translations.SORT,
             icon: <SortIcon />,
-            items: sortItems
-        }
+            items: sortItems,
+            divider: true
+        },
+        ...viewModesList.map(item => {
+            return {
+                ...item,
+                selected: viewMode,
+                onClick: () => {
+                    store.update(s => {
+                        s.viewMode = item.id;
+                    });
+                }
+            }
+        }).filter(Boolean)
     ].filter(Boolean);
 
     useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode, sortItems] });

@@ -84,13 +84,14 @@ export default function Toolbar({ location, divider, collapsable }) {
 
     return <div className={styles.toolbar}>
         {toolbarItems.map((item, idx) => {
+            const className = item.selected === item.id ? styles.selected : undefined;
             return <React.Fragment key={item.id}>
                 {item.element}
                 {!item.element &&
                     <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
                         {!!item.label ?
                             (<Label icon={item.icon} name={item.name} noBorder={true} />) :
-                            (<IconButton disabled={item.disabled}>
+                            (<IconButton className={className} disabled={item.disabled}>
                                 <Tooltip arrow title={item.name}>
                                     {item.icon}
                                 </Tooltip>

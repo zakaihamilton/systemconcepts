@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .row {
@@ -9,6 +10,7 @@
     align-items: center;
     padding-left: 0.5em;
     padding-right: 0.5em;
+    flex: 1;
 }
 
 .breadcrumbs {
