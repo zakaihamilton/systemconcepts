@@ -3,7 +3,7 @@ import data from "@/data/terms";
 import { useTranslations } from "@/util/translations";
 import { useLanguage } from "@/util/language";
 import Term from "@/widgets/Term";
-import { useState } from "react";
+import styles from "./Terms.module.scss";
 
 import { Store } from "pullstate";
 
@@ -12,7 +12,8 @@ export const TermsStore = new Store({
     offset: 0,
     orderBy: "sortId",
     typeFilter: "",
-    phaseFilter: ""
+    phaseFilter: "",
+    viewMode: "list"
 });
 
 export default function Terms() {
@@ -32,18 +33,15 @@ export default function Terms() {
             sortable: "phase",
             selected: () => phaseFilter,
             onSelectable: item => typeof item.phase !== "undefined" && !phaseFilter,
-            tags: [phaseFilter && {
-                id: phaseFilter,
-                name: <Term id={phaseFilter} />,
-                onDelete: () => TermsStore.update(s => {
+            onClick: item => TermsStore.update(s => {
+                if (s.phaseFilter) {
                     s.phaseFilter = "";
-                    s.offset = 0;
-                })
-            }],
-            onClick: !phaseFilter && (item => TermsStore.update(s => {
-                s.phaseFilter = typeof item.phase !== "undefined" && "phase." + item.phase;
+                }
+                else {
+                    s.phaseFilter = typeof item.phase !== "undefined" && "phase." + item.phase;
+                }
                 s.offset = 0;
-            }))
+            })
         },
         {
             id: "typeWidget",
@@ -51,18 +49,15 @@ export default function Terms() {
             sortable: "type",
             selected: () => typeFilter,
             onSelectable: item => item.type && !typeFilter,
-            tags: [typeFilter && {
-                id: typeFilter,
-                name: <Term id={typeFilter} />,
-                onDelete: () => TermsStore.update(s => {
+            onClick: item => TermsStore.update(s => {
+                if (s.typeFilter) {
                     s.typeFilter = "";
-                    s.offset = 0;
-                })
-            }],
-            onClick: !typeFilter && (item => TermsStore.update(s => {
-                s.typeFilter = item.type;
+                }
+                else {
+                    s.typeFilter = typeof item.type !== "undefined" && item.type;
+                }
                 s.offset = 0;
-            }))
+            }),
         }
     ];
 
@@ -101,8 +96,13 @@ export default function Terms() {
             columns={columns}
             mapper={mapper}
             filter={filter}
+            viewModeToggle={true}
             data={data}
+            itemProps={{
+                className: styles.item
+            }}
             rowHeight="5.5em"
+            itemHeight="4em"
             store={TermsStore}
             depends={[typeFilter, phaseFilter, translations]} />
     </>;

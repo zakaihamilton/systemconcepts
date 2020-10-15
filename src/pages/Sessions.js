@@ -23,7 +23,7 @@ export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy);
-    const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
+    const { groupFilter, dateFilter } = SessionsStore.useState();
 
     const columns = [
         {
@@ -42,14 +42,6 @@ export default function SessionsPage() {
             sortable: true,
             selected: () => dateFilter,
             onSelectable: item => typeof item.date !== "undefined",
-            tags: [dateFilter && {
-                id: dateFilter,
-                name: dateFilter,
-                onDelete: () => SessionsStore.update(s => {
-                    s.dateFilter = "";
-                    s.offset = 0;
-                })
-            }],
             onClick: item => SessionsStore.update(s => {
                 if (s.dateFilter) {
                     s.dateFilter = "";
@@ -69,11 +61,6 @@ export default function SessionsPage() {
             sortable: "group",
             selected: () => groupFilter,
             onSelectable: item => typeof item.group !== "undefined",
-            tags: [groupFilter && {
-                id: groupFilter,
-                name: groupFilter,
-                onDelete: () => SessionsStore.update(s => { s.groupFilter = "" })
-            }],
             onClick: item => SessionsStore.update(s => {
                 if (s.groupFilter) {
                     s.groupFilter = "";
