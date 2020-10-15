@@ -265,7 +265,7 @@ export default function TableWidget(props) {
         });
 
         items = stableSort(items || [], getComparator(order, orderBy));
-        setEmpty(data && !items.length);
+        setEmpty(data && data.length && !items.length);
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
