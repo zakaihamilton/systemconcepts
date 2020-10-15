@@ -78,7 +78,7 @@ export default function TableWidget(props) {
         error,
         store,
         itemProps = {},
-        viewModeToggle = false,
+        viewModes = ["table"],
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -93,6 +93,23 @@ export default function TableWidget(props) {
             s.offset = 0;
         });
     });
+
+    const viewModesList = [
+        {
+            id: "table",
+            icon: <TableChartIcon />,
+            name: translations.TABLE_VIEW
+        },
+        {
+            id: "list",
+            icon: <ViewListIcon />,
+            name: translations.LIST_VIEW
+        }
+    ].filter(item => viewModes.includes(item.id));
+
+    const currentViewModeIndex = viewModesList.findIndex(item => item.id === viewMode);
+    const nextViewModeIndex = (currentViewModeIndex + 1) % viewModesList.length;
+    const nextViewModeItem = viewModesList[nextViewModeIndex];
 
     const createSortHandler = (property) => () => {
         const isDesc = orderBy === property && order === "desc";
@@ -164,13 +181,13 @@ export default function TableWidget(props) {
             onClick: refresh,
             location: "advanced"
         },
-        viewModeToggle && {
+        viewModes && viewModes.length && {
             id: "viewModeToggle",
-            name: viewMode === "list" ? translations.TABLE_VIEW : translations.LIST_VIEW,
-            icon: viewMode === "list" ? <TableChartIcon /> : <ViewListIcon />,
+            name: nextViewModeItem.name,
+            icon: nextViewModeItem.icon,
             onClick: () => {
                 store.update(s => {
-                    s.viewMode = s.viewMode === "list" ? "table" : "list";
+                    s.viewMode = nextViewModeItem.id;
                 });
             }
         },

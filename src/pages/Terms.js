@@ -96,7 +96,7 @@ export default function Terms() {
             columns={columns}
             mapper={mapper}
             filter={filter}
-            viewModeToggle={true}
+            viewModes={["list","table"]}
             data={data}
             itemProps={{
                 className: styles.item

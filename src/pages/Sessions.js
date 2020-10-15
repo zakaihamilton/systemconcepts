@@ -107,7 +107,7 @@ export default function SessionsPage() {
             loading={busy}
             mapper={mapper}
             filter={filter}
-            viewModeToggle={true}
+            viewModes={["list", "table"]}
             itemProps={{
                 className: styles.item
             }}
