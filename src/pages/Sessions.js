@@ -115,7 +115,7 @@ export default function SessionsPage() {
             } />,
             group: item.group,
             groupWidget: <Group name={item.group} color={item.color} />,
-            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="12em" height="12em" alt={altIcon} />
+            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="13em" height="9em" alt={altIcon} />
         };
     };
 
@@ -130,8 +130,8 @@ export default function SessionsPage() {
         <Table
             rowHeight="5.5em"
             itemHeight="4em"
-            cellWidth="18em"
-            cellHeight="18em"
+            cellWidth="16em"
+            cellHeight="14em"
             name="sessions"
             store={SessionsStore}
             columns={columns}
