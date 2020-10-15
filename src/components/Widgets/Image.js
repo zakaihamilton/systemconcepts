@@ -4,7 +4,7 @@ import Progress from "@/widgets/Progress";
 import clsx from "clsx";
 import { addPath } from "@/util/pages";
 
-export default function ImageWidget({ clickForImage, loading, path, width, height, alt }) {
+export default function ImageWidget({ clickForImage = true, loading, path, width, height, alt }) {
     const [imageLoading, setImageLoading] = useState(false);
     const [error, setError] = useState(false);
     const onLoad = () => {

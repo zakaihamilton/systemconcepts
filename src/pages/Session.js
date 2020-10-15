@@ -15,7 +15,7 @@ import Group from "@/widgets/Group";
 
 registerToolbar("Session");
 
-export default function SessionPage({ prefix, group, year, date, name, color }) {
+export default function SessionPage({ group, year, date, name, color }) {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy, false);
@@ -77,7 +77,7 @@ export default function SessionPage({ prefix, group, year, date, name, color }) 
     return <div className={styles.root}>
         <div className={styles.info}>
             <div className={styles.preview}>
-                <Image path={session.thumbnail} loading={!session} width="18em" height="18em" alt={altIcon} />
+                <Image path={session && session.thumbnail} loading={!session} width="18em" height="18em" alt={altIcon} />
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
