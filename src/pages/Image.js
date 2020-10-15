@@ -17,7 +17,7 @@ export function getImageSection({ label, translations }) {
     return {};
 }
 
-function useImagePath() {
+function useImagePath(imageName = "") {
     const { prefix = "", group = "", year = "", date = "", name } = useParentParams();
     let path = "";
     if (group) {
@@ -27,7 +27,7 @@ function useImagePath() {
         path = data && data.path || "";
     }
     else {
-        path = (useParentPath() + "/" + name).split("/").slice(1).join("/");
+        path = (useParentPath() + "/" + imageName).split("/").slice(1).join("/");
     }
     return path;
 }
@@ -35,7 +35,7 @@ function useImagePath() {
 export default function ImagePage({ name }) {
     const size = useContext(PageSize);
     const [syncCounter] = useSync();
-    const path = useImagePath();
+    const path = useImagePath(name);
     const busyRef = useRef(false);
     const [loading, setLoading] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);

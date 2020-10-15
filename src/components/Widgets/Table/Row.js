@@ -4,7 +4,7 @@ import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@/util/styles";
 
-export default function RowWidget({ className = "", viewMode, rowHeight, columns, rowClick, item, ...props }) {
+export default function RowWidget({ className = "", viewMode, rowHeight, columns, rowClick, item, style = {}, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, viewModes = {}, onSelectable, onClick, selected } = column;
         const { className: viewModeClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
@@ -39,7 +39,7 @@ export default function RowWidget({ className = "", viewMode, rowHeight, columns
     });
     return <TableRow
         className={classes + " " + className}
-        style={{ minHeight: rowHeight, height: rowHeight, maxHeight: rowHeight }}
+        style={{ minHeight: rowHeight, height: rowHeight, maxHeight: rowHeight, ...style }}
         {...rowClick && { hover: true, onClick }}
         {...props}
     >

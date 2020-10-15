@@ -341,11 +341,11 @@ export default function TableWidget(props) {
                 createSortHandler={createSortHandler} />
         });
 
-        const itemsPerPage = parseInt((size.height - marginBottomInPixels) / rowHeightInPixels);
-        const pageCount = parseInt((numItems / itemsPerPage) + ((numItems % itemsPerPage) > 0 ? 1 : 0));
+        const itemsPerPage = Math.floor((size.height - marginBottomInPixels) / rowHeightInPixels);
+        const pageCount = Math.ceil(numItems / itemsPerPage);
         const startIdx = offset;
         const endIdx = startIdx + itemsPerPage;
-        const pageIndex = parseInt(startIdx / itemsPerPage);
+        const pageIndex = Math.ceil(startIdx / itemsPerPage);
 
         const setPageIndex = index => {
             const offset = index * itemsPerPage;
