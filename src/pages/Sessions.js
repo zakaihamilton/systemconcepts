@@ -14,6 +14,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Image from "@/widgets/Image";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import clsx from "clsx";
+import { useLocalStorage } from "@/util/store";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -27,6 +28,7 @@ export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
     const sessions = useSessions([syncCounter, busy], !busy);
+    useLocalStorage("SessionsStore", SessionsStore);
     const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
 
     const gotoItem = item => {
