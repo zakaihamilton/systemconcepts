@@ -95,12 +95,10 @@ export default function TableWidget(props) {
     });
 
     const createSortHandler = (property) => () => {
-        console.log("createSortHandler");
         const isDesc = orderBy === property && order === "desc";
         store.update(s => {
             s.order = isDesc ? "asc" : "desc";
             s.orderBy = property;
-            console.log("s.order", s.order, "s.orderBy", s.orderBy);
         });
     };
 
@@ -117,8 +115,6 @@ export default function TableWidget(props) {
             };
         });
     }, [orderBy, order]);
-
-    console.log("orderBy", orderBy, "sortItems", sortItems);
 
     const menuItems = [
         data && name && onImport && {
