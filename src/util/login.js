@@ -10,25 +10,33 @@ const sendResetMail = require('gmail-send')({
 });
 
 export async function login({ id, password, hash }) {
+    if (!id) {
+        console.error("empty user id");
+        throw "USER_NOT_FOUND";
+    }
+    console.log("user", id, "is logging in...");
     id = id.toLowerCase();
     let user = null;
     try {
         user = await findRecord({ collectionName: "users", query: { id } });
     }
     catch (err) {
-        console.error(err);
+        console.error("Error finding record for user", id, err);
         throw "USER_NOT_FOUND";
     }
     if (!user) {
+        console.error("cannot find user for: ", id);
         throw "USER_NOT_FOUND";
     }
     if (password) {
         const result = await compare(password, user.hash);
         if (!result) {
+            console.error("wrong password for user", id);
             throw "WRONG_PASSWORD";
         }
     }
     else if (hash !== user.hash) {
+        console.error("wrong password for user", id);
         throw "WRONG_PASSWORD";
     }
     return user;
