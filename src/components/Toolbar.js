@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import styles from "./Toolbar.module.scss";
 import { Store } from "pullstate";
 import Label from "@/widgets/Label";
+import clsx from "clsx";
 
 export const ToolbarStore = new Store({
     sections: [],
@@ -85,6 +86,7 @@ export default function Toolbar({ location, divider, collapsable }) {
     return <div className={styles.toolbar}>
         {toolbarItems.map((item, idx) => {
             const className = item.selected === item.id ? styles.selected : undefined;
+            const showDivider = !!item.divider && idx !== toolbarItems.length - 1;
             return <React.Fragment key={item.id}>
                 {item.element}
                 {!item.element &&
@@ -98,7 +100,7 @@ export default function Toolbar({ location, divider, collapsable }) {
                             </IconButton>)}
                     </Menu>
                 }
-                {!!item.divider && idx !== toolbarItems.length - 1 && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                <Divider classes={{ root: clsx(styles.divider, !showDivider && styles.hidden) }} orientation="vertical" />
             </React.Fragment>
         })}
         {!!menuItems.length && <>

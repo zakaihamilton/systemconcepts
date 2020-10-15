@@ -202,7 +202,7 @@ export default function TableWidget(props) {
             items: sortItems,
             divider: true
         },
-        ...viewModesList.map(item => {
+        ...viewModesList.length > 1 ? viewModesList.map(item => {
             return {
                 ...item,
                 selected: viewMode,
@@ -212,12 +212,13 @@ export default function TableWidget(props) {
                     });
                 }
             }
-        }).filter(Boolean)
+        }).filter(Boolean) : []
     ].filter(Boolean);
 
     useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode, sortItems] });
 
     useEffect(() => {
+        setEmpty(false);
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
         if (!hasColumn) {
             store.update(s => { s.orderBy = defaultSort });
@@ -264,7 +265,7 @@ export default function TableWidget(props) {
         });
 
         items = stableSort(items || [], getComparator(order, orderBy));
-        setEmpty(!items.length);
+        setEmpty(data && !items.length);
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
