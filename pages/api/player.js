@@ -1,5 +1,5 @@
 import { cdnUrl } from "@/util/aws";
-import { login } from "../../src/util/login";
+import { login } from "@/util/login";
 import Cookie from "cookie";
 import { roleAuth } from "@/util/roles";
 import { error, log } from "@/util/logger";

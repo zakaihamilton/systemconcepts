@@ -1,5 +1,5 @@
 import { handleRequest } from "@/util/mongo";
-import { login } from "../../src/util/login";
+import { login } from "@/util/login";
 import Cookie from "cookie";
 
 export default async (req, res) => {

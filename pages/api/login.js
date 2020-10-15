@@ -1,4 +1,4 @@
-const { login, register, changePassword, resetPassword, sendResetEmail } = require("../../src/util/login");
+const { login, register, changePassword, resetPassword, sendResetEmail } = require("@/util/login");
 
 export default async (req, res) => {
     if (req.method === "GET") {

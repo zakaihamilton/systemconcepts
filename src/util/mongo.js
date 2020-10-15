@@ -88,6 +88,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                 if (!result) {
                     result = [];
                 }
+                console.log("found", result.length, "items for collection", collectionName, "query", parsedQuery, "fields", parsedFields);
                 return result;
             }
         }
