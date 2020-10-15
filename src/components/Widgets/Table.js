@@ -55,6 +55,7 @@ export default function TableWidget(props) {
     let {
         name,
         rowHeight = "4em",
+        itemHeight = "4em",
         marginBottom = "8em",
         loading,
         loadingElement,
@@ -228,7 +229,6 @@ export default function TableWidget(props) {
     }
     const numItems = items && items.length;
     const marginBottomInPixels = sizeToPixels(marginBottom);
-    const rowHeightInPixels = sizeToPixels(rowHeight);
 
     if (!loadingElement) {
         loadingElement = <Progress />;
@@ -239,6 +239,7 @@ export default function TableWidget(props) {
     }
 
     if (viewMode === "list") {
+        const itemHeightInPixels = sizeToPixels(itemHeight);
 
         const Row = ({ index, style }) => {
             const item = items[index];
@@ -253,7 +254,7 @@ export default function TableWidget(props) {
             {!loading && numItems && !error && <List
                 height={size.height}
                 itemCount={numItems}
-                itemSize={rowHeightInPixels}
+                itemSize={itemHeightInPixels}
                 width={size.width}
             >
                 {Row}
@@ -261,6 +262,8 @@ export default function TableWidget(props) {
             {!!error && <Error error={error} />}
         </>;
     }
+
+    const rowHeightInPixels = sizeToPixels(rowHeight);
 
     const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
         return <Column

@@ -107,6 +107,7 @@ export default function SessionsPage() {
     return <>
         <Table
             rowHeight="5.5em"
+            itemHeight="4em"
             name="sessions"
             store={SessionsStore}
             columns={columns}

@@ -16,8 +16,9 @@ export function useResize(ref, depends = []) {
         if (!ref.current) {
             return;
         }
-        const { clientWidth, clientHeight } = ref.current.parentElement;
-        const emPixels = getEmValueFromElement(ref.current);
+        const element = ref.current;
+        const { clientWidth, clientHeight } = element;
+        const emPixels = getEmValueFromElement(element);
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
         setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
