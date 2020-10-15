@@ -163,7 +163,6 @@ export default function ResetPassword({ path = "" }) {
                             <Input
                                 state={idState}
                                 required
-                                readOnly={Cookies.get("id")}
                                 id="userid"
                                 label={translations.ID}
                                 name="userid"

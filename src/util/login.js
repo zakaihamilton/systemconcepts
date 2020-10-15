@@ -10,6 +10,7 @@ const sendResetMail = require('gmail-send')({
 });
 
 export async function login({ id, password, hash }) {
+    id = id.toLowerCase();
     let user = null;
     try {
         user = await findRecord({ collectionName: "users", query: { id } });
@@ -34,8 +35,9 @@ export async function login({ id, password, hash }) {
 }
 
 export async function register({ id, firstName, lastName, email, password, salt = 10 }) {
+    id = id.toLowerCase();
     let result = undefined;
-    const user = await findRecord({ collectionName: "users", query: { email } });
+    const user = await findRecord({ collectionName: "users", query: { id } });
     if (user) {
         throw "USER_ALREADY_EXISTS";
     }
@@ -53,7 +55,7 @@ export async function register({ id, firstName, lastName, email, password, salt 
     await insertRecord({
         collectionName: "users",
         record: {
-            id,
+            id: id.toLowerCase(),
             firstName,
             lastName,
             email,
@@ -67,6 +69,7 @@ export async function register({ id, firstName, lastName, email, password, salt 
 }
 
 export async function changePassword({ id, oldPassword, newPassword, salt = 10 }) {
+    id = id.toLowerCase();
     let user = await login({ id, password: oldPassword });
     let result = null;
     try {
@@ -88,6 +91,7 @@ export async function changePassword({ id, oldPassword, newPassword, salt = 10 }
 }
 
 export async function resetPassword({ id, code, newPassword, salt = 10 }) {
+    id = id.toLowerCase();
     let user = await login({ id, hash: code });
     let result = null;
     try {
@@ -109,6 +113,7 @@ export async function resetPassword({ id, code, newPassword, salt = 10 }) {
 }
 
 export async function sendResetEmail({ id }) {
+    id = id.toLowerCase();
     let user = null;
     try {
         user = await findRecord({ collectionName: "users", query: { id } });
@@ -120,7 +125,7 @@ export async function sendResetEmail({ id }) {
     if (!user) {
         throw "USER_NOT_FOUND";
     }
-    let emailText = await fs.promises.readFile("src/data/resetPasswordTemplate.txt", "utf8");
+    let emailText = await fs.promises.readFile("public/resetPasswordTemplate.txt", "utf8");
     const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
     emailText = emailText.replace(/{{name}}/g, fullName);
     emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/" + encodeURIComponent("resetpassword/" + user.hash));
