@@ -4,13 +4,15 @@ import List from "@/widgets/List";
 import Drawer from '@material-ui/core/Drawer';
 import { useDeviceType } from "@/util/styles";
 import { MainStore } from "./Main";
-import { usePagesFromHash, usePages, setPath } from "@/util/pages";
+import { useActivePages, usePages, setPath } from "@/util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
+import { useBookmarks } from "@/components/Bookmarks";
 
 export default function SideBar() {
     const isMobile = useDeviceType() !== "desktop";
-    const { menuViewList, direction, hash, fullscreen, showSlider } = MainStore.useState();
-    const activePages = usePagesFromHash(hash);
+    const { menuViewList, direction, fullscreen, showSlider } = MainStore.useState();
+    const bookmarks = useBookmarks();
+    const activePages = useActivePages();
     const pages = usePages();
     const selected = id => {
         return !!activePages.find(page => page.id === id && !page.sectionIndex);
@@ -19,6 +21,12 @@ export default function SideBar() {
         const page = pages.find(page => page.id === id);
         if (page) {
             setPath(page.id);
+        }
+        else {
+            MainStore.update(s => {
+                s.hash = id;
+            });
+            window.location.hash = id;
         }
     }, []);
     const state = [selected, setSelected];
@@ -35,6 +43,10 @@ export default function SideBar() {
     };
 
     const items = pages.filter(page => page.sidebar && !page.category);
+    if (items.length && bookmarks.length) {
+        items[items.length - 1].divider = true;
+    }
+    items.push(...bookmarks);
 
     if (isMobile || fullscreen) {
         return <Drawer

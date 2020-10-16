@@ -796,6 +796,14 @@ export default {
         {
             "id": "LOADING",
             "value": "Loading"
+        },
+        {
+            "id": "ADD_BOOKMARK",
+            "value": "Add Bookmark"
+        },
+        {
+            "id": "REMOVE_BOOKMARK",
+            "value": "Remove Bookmark"
         }
     ]
 };

@@ -65,7 +65,8 @@ export function useParentParams() {
     return params;
 }
 
-export function usePagesFromHash(hash = "") {
+export function useActivePages() {
+    let { hash = "" } = MainStore.useState();
     const translations = useTranslations();
     const pages = usePages();
     let results = [];

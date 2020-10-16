@@ -796,6 +796,14 @@ export default {
         {
             "id": "LOADING",
             "value": "Carregando"
+        },
+        {
+            "id": "ADD_BOOKMARK",
+            "value": "Marcador Add"
+        },
+        {
+            "id": "REMOVE_BOOKMARK",
+            "value": "Marcador Remove"
         }
     ]
 };

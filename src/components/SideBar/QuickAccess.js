@@ -13,7 +13,7 @@ import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import { useToolbarItems } from "@/components/Toolbar";
 import { useLanguage } from "@/util/language";
 
-export default function Settings({ closeDrawer, state }) {
+export default function QuickAccess({ closeDrawer, state }) {
     const { darkMode, menuViewList } = MainStore.useState();
     const language = useLanguage();
     const translations = useTranslations();

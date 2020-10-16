@@ -792,6 +792,14 @@ export default {
         {
             "id": "LOADING",
             "value": "טעון"
+        },
+        {
+            "id": "ADD_BOOKMARK",
+            "value": "הוסף סימניה"
+        },
+        {
+            "id": "REMOVE_BOOKMARK",
+            "value": "הסר סימניה"
         }
     ]
 };

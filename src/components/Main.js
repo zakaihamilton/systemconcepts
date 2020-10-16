@@ -11,6 +11,7 @@ import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
 import Fullscreen from "./Fullscreen";
 import Header from "./Header";
+import Bookmarks from "./Bookmarks";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -30,7 +31,7 @@ export default function Main() {
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
     useLocalStorage("MainStore", MainStore);
-    const { direction, showSideBar, menuViewList, hash, fullscreen } = MainStore.useState();
+    const { direction, showSideBar, menuViewList, fullscreen } = MainStore.useState();
 
     useEffect(() => {
         MainStore.update(s => {
@@ -67,6 +68,7 @@ export default function Main() {
             <div className={className}>
                 <Sync />
                 <Fullscreen />
+                <Bookmarks />
                 {!fullscreen && <AppBar />}
                 <SideBar />
                 <div className={styles.main}>
