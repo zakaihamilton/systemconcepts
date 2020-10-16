@@ -5,11 +5,23 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import SpeedIcon from '@material-ui/icons/Speed';
+import { useState, useEffect } from "react";
 
 registerToolbar("PlayerToolbar");
 
 export default function PlayerToolbar({ show, playerRef, isVideo }) {
     const translations = useTranslations();
+    const [, setCounter] = useState(0);
+    useEffect(() => {
+        const update = name => {
+            setCounter(counter => counter + 1);
+        };
+        const events = ["ratechange", "volumechange"];
+        events.map(name => playerRef.addEventListener(name, () => update(name)));
+        return () => {
+            events.map(name => playerRef.removeEventListener(name, update));
+        };
+    }, []);
 
     const rateItems = {
         SPEED_SLOW: 0.5,
@@ -42,10 +54,6 @@ export default function PlayerToolbar({ show, playerRef, isVideo }) {
 
     const speed = playerRef.playbackRate || 1.0;
     const volume = playerRef.volume;
-    const rateId = Object.keys(rateItems).find(rateId => rateItems[rateId] === speed);
-    const volumeId = Object.keys(volumeItems).find(volumeId => volumeItems[volumeId] === volume);
-    const speedName = translations[rateId];
-    const volumeName = translations[volumeId];
 
     const menuItems = [
         {
@@ -77,6 +85,6 @@ export default function PlayerToolbar({ show, playerRef, isVideo }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speedName, volumeName, translations] });
+    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, volume, translations] });
     return null;
 }

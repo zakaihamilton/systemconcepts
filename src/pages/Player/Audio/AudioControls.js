@@ -14,7 +14,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 
 const skipPoints = 10;
 
-export default function AudioControls({ playerRef, metadata, setMetadata, path = "", group = "", year = "", name = "" }) {
+export default function AudioControls({ playerRef, metadata, setMetadata }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
@@ -41,7 +41,7 @@ export default function AudioControls({ playerRef, metadata, setMetadata, path =
                 setCounter(counter => counter + 1);
             }
         };
-        const events = ["loadedmetadata", "pause", "error", "loadstart", "play", "playing", "volumechange", "timeupdate"];
+        const events = ["loadedmetadata", "pause", "error", "loadstart", "play", "playing", "timeupdate"];
         events.map(name => playerRef.addEventListener(name, () => update(name)));
         return () => {
             events.map(name => playerRef.removeEventListener(name, update));
