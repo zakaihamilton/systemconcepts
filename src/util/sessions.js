@@ -154,12 +154,13 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             name: translations.GROUPS,
             icon: <GroupWorkIcon />,
             items: groupsItems,
+            active: groupFilter.length,
             divider: true,
             disabled: !groupsItems.length
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems] });
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter] });
 
     const filtered = useMemo(() => {
         if (!groupFilter.length) {

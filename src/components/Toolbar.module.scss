@@ -18,3 +18,7 @@
 .selected {
     box-shadow: 1px 1px 2px 1px var(--hover-color);
 }
+
+.active {
+    box-shadow: 1px 1px 2px 1px var(--info-color);
+}

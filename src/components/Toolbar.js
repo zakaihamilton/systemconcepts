@@ -10,6 +10,7 @@ import styles from "./Toolbar.module.scss";
 import { Store } from "pullstate";
 import Label from "@/widgets/Label";
 import clsx from "clsx";
+import { useStyles } from "@/util/styles";
 
 export const ToolbarStore = new Store({
     sections: [],
@@ -85,7 +86,10 @@ export default function Toolbar({ location, divider, collapsable }) {
 
     return <div className={styles.toolbar}>
         {toolbarItems.map((item, idx) => {
-            const className = item.selected === item.id ? styles.selected : undefined;
+            const className = useStyles(styles, {
+                selected: item.selected === item.id,
+                active: item.active
+            });
             const showDivider = !!item.divider && idx !== toolbarItems.length - 1;
             return <React.Fragment key={item.id}>
                 {item.element}
