@@ -792,6 +792,10 @@ export default {
         {
             "id": "GRID_VIEW",
             "value": "Vista de grade"
+        },
+        {
+            "id": "LOADING",
+            "value": "Carregando"
         }
     ]
 };

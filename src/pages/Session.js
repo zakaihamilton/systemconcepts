@@ -18,7 +18,7 @@ registerToolbar("Session");
 export default function SessionPage({ group, year, date, name, color }) {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
-    const sessions = useSessions([syncCounter, busy], !busy, false);
+    const [sessions] = useSessions([syncCounter, busy], !busy, false);
     const dateFormatter = useDateFormatter({
         weekday: 'long',
         year: 'numeric',

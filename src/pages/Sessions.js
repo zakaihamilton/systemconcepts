@@ -3,7 +3,7 @@ import { useTranslations } from "@/util/translations";
 import { addPath } from "@/util/pages";
 import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
-import SyncMessage from "@/widgets/Table/SyncMessage";
+import Message from "@/components/Widgets/Message";
 import { Store } from "pullstate";
 import Group from "@/widgets/Group";
 import styles from "./Sessions.module.scss";
@@ -26,8 +26,8 @@ export const SessionsStore = new Store({
 
 export default function SessionsPage() {
     const translations = useTranslations();
-    const [syncCounter, busy] = useSync();
-    const sessions = useSessions([syncCounter, busy], !busy);
+    const [syncCounter, syncing] = useSync();
+    const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
     useLocalStorage("SessionsStore", SessionsStore);
     const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
 
@@ -139,7 +139,8 @@ export default function SessionsPage() {
             store={SessionsStore}
             columns={columns}
             data={sessions}
-            loading={busy}
+            syncing={syncing}
+            loading={loading}
             mapper={mapper}
             filter={filter}
             viewModes={{
@@ -151,7 +152,6 @@ export default function SessionsPage() {
                     className: styles.gridItem
                 }
             }}
-            loadingElement={<SyncMessage />}
             depends={[groupFilter, dateFilter, translations, viewMode]}
         />
     </>;

@@ -21,7 +21,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
     const [groupMetadata] = useGroups(depends);
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
-    const { sessions, groups, groupFilter } = SessionsStore.useState();
+    const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
         let continueUpdate = true;
@@ -169,10 +169,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
         return sessions.filter(session => groupFilter.includes(session.group));
     }, [groupFilter, sessions]);
 
-    if (filterSessions) {
-        return filtered;
-    }
-    else {
-        return sessions;
-    }
+    const items = filterSessions ? filtered : sessions;
+
+    return [items, busy];
 }

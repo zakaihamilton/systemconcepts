@@ -15,12 +15,11 @@ import { useSearch } from "@/components/AppBar/Search";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
-import Progress from "@/widgets/Progress";
 import Error from "./Table/Error";
 import Column from "./Table/Column";
 import clsx from "clsx";
 import RefreshIcon from '@material-ui/icons/Refresh';
-import EmptyMessage from "./Table/EmptyMessage";
+import Message from "@/widgets/Message";
 import { FixedSizeList, FixedSizeGrid } from 'react-window';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import TableChartIcon from '@material-ui/icons/TableChart';
@@ -28,6 +27,9 @@ import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import SyncIcon from '@material-ui/icons/Sync';
+import DataUsageIcon from '@material-ui/icons/DataUsage';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -64,7 +66,7 @@ export default function TableWidget(props) {
         cellHeight = "16em",
         marginBottom = "8em",
         loading,
-        loadingElement,
+        syncing,
         columns,
         onImport,
         onExport,
@@ -73,7 +75,6 @@ export default function TableWidget(props) {
         mapper,
         filter,
         refresh,
-        emptyElement,
         statusBar,
         className,
         hideColumns,
@@ -287,13 +288,9 @@ export default function TableWidget(props) {
     const numItems = items && items.length;
     const marginBottomInPixels = sizeToPixels(marginBottom);
 
-    if (!loadingElement) {
-        loadingElement = <Progress />;
-    }
-
-    if (!emptyElement) {
-        emptyElement = <EmptyMessage />;
-    }
+    const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
+    const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
+    const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
 
     if (viewMode === "list") {
         const itemHeightInPixels = sizeToPixels(itemHeight);
@@ -315,6 +312,7 @@ export default function TableWidget(props) {
         };
 
         return <>
+            {!!syncing && syncingElement}
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
             {!loading && !!numItems && !error && <FixedSizeList
@@ -372,6 +370,7 @@ export default function TableWidget(props) {
         });
 
         return (<>
+            {!!syncing && syncingElement}
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
             {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
@@ -424,6 +423,7 @@ export default function TableWidget(props) {
         };
 
         return <>
+            {!!syncing && syncingElement}
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
             {!loading && !!numItems && !error &&

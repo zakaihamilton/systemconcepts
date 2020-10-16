@@ -531,7 +531,7 @@ export default {
         },
         {
             "id": "SYNCING",
-            "value": "סינכרון"
+            "value": "מסנכרן"
         },
         {
             "id": "IMAGE",
@@ -788,6 +788,10 @@ export default {
         {
             "id": "GRID_VIEW",
             "value": "תצוגת רשת"
+        },
+        {
+            "id": "LOADING",
+            "value": "טעון"
         }
     ]
 };

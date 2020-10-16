@@ -10,7 +10,9 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { useSearch } from "@/components/AppBar/Search";
-import SyncMessage from "@/widgets/Table/SyncMessage";
+import Message from "@/widgets/Message";
+import SyncIcon from '@material-ui/icons/Sync';
+import DataUsageIcon from '@material-ui/icons/DataUsage';
 
 export const ScheduleStore = new Store({
     date: null,
@@ -21,8 +23,8 @@ registerToolbar("Schedule");
 
 export default function SchedulePage() {
     const translations = useTranslations();
-    const [syncCounter, busy] = useSync();
-    let sessions = useSessions([syncCounter, busy], !busy);
+    const [syncCounter, syncing] = useSync();
+    let [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
     const { search } = useSearch(() => {
     });
     let { date, viewType } = ScheduleStore.useState();
@@ -65,9 +67,13 @@ export default function SchedulePage() {
         return items;
     }, [search, sessions]);
 
+    const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
+    const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
+
     return <div className={styles.root}>
         {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-        <SyncMessage show={busy} />
+        {syncing && syncingElement}
+        {loading && loadingElement}
     </div>;
 }

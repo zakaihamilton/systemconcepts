@@ -791,7 +791,11 @@ export default {
         },
         {
             "id": "GRID_VIEW",
-            "value":"Grid View"
+            "value": "Grid View"
+        },
+        {
+            "id": "LOADING",
+            "value": "Loading"
         }
     ]
 };
