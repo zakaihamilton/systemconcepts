@@ -313,8 +313,8 @@ export default function TableWidget(props) {
         return <>
             {!!syncing && syncingElement}
             {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
-            {!loading && !!numItems && !error && <FixedSizeList
+            {!!isEmpty && !syncing && !loading && emptyElement}
+            {!syncing && !loading && !!numItems && !error && <FixedSizeList
                 height={size.height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}
@@ -371,8 +371,8 @@ export default function TableWidget(props) {
         return (<>
             {!!syncing && syncingElement}
             {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
-            {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+            {!!isEmpty && !syncing && !loading && emptyElement}
+            {!syncing && !loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
                 {!error && <Table className={styles.table} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
@@ -383,12 +383,12 @@ export default function TableWidget(props) {
                         {tableRows}
                     </TableBody>
                 </Table>}
-                {!loading && !error && <div className={styles.footer}>
+                {!syncing && !loading && !error && <div className={styles.footer}>
                     {statusBar}
                 </div>}
             </TableContainer>}
             {!!error && <Error error={error} />}
-            {!loading && numItems && <Navigator
+            {!syncing && !loading && numItems && <Navigator
                 pageIndex={pageIndex}
                 setPageIndex={setPageIndex}
                 pageCount={pageCount}
@@ -424,8 +424,8 @@ export default function TableWidget(props) {
         return <>
             {!!syncing && syncingElement}
             {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
-            {!loading && !!numItems && !error &&
+            {!!isEmpty && !syncing && !loading && emptyElement}
+            {!syncing && !loading && !!numItems && !error &&
                 <div className={styles.grid}>
                     <FixedSizeGrid
                         columnCount={columnCount}
