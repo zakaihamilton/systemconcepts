@@ -62,14 +62,14 @@ export default function QuickAccess({ closeDrawer, state }) {
                     setSelected: setLanguage
                 }
             }),
-            selected: language
+            selected: language,
+            divider: true
         },
         {
             id: "tools",
             name: translations.TOOLS,
             icon: <BuildIcon />,
-            items: toolsItems,
-            divider: true
+            items: toolsItems
         },
         ...pages.filter(page => page.sidebar && page.category === "quickaccess"),
         advancedToolbar && advancedToolbar.length && {
@@ -84,6 +84,6 @@ export default function QuickAccess({ closeDrawer, state }) {
     return <>
         <div style={{ flex: "1" }} />
         <Divider style={{ color: "var(1px solid --border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <List reverse={true} items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
+        <List items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
     </>;
 }

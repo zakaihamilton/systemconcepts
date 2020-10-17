@@ -7,13 +7,16 @@ import { MainStore } from "./Main";
 import { useActivePages, usePages, setPath } from "@/util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
 import { useBookmarks } from "@/components/Bookmarks";
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import { useTranslations } from "@/util/translations";
 
 export default function SideBar() {
+    const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
     const { menuViewList, direction, fullscreen, showSlider } = MainStore.useState();
     const bookmarks = useBookmarks();
     const activePages = useActivePages();
-    const pages = usePages();
+    const pages = usePages("sidebar");
     const selected = id => {
         return !!activePages.find(page => page.id === id && !page.sectionIndex);
     };
@@ -46,7 +49,15 @@ export default function SideBar() {
     if (items.length && bookmarks.length) {
         items[items.length - 1].divider = true;
     }
-    items.push(...bookmarks);
+    items.push({
+        id: "bookmarks",
+        name: translations.BOOKMARKS,
+        icon: <BookmarkIcon />,
+        items: [
+            ...pages.filter(page => page.sidebar && page.category === "bookmarks"),
+            ...bookmarks],
+        divider: true
+    });
 
     if (isMobile || fullscreen) {
         return <Drawer

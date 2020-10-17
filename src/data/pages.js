@@ -130,8 +130,7 @@ export default [
         category: "tools"
     },
     {
-        sidebar: true,
-        category: "quickaccess",
+        apps: true,
         id: "settings",
         name: "SETTINGS",
         Icon: SettingsIcon,
@@ -235,12 +234,16 @@ export default [
         category: "tools"
     },
     {
-        id: "bookmarks",
+        id: "manageBookmarks",
         name: "BOOKMARKS",
+        sidebar: {
+            name: "MANAGE",
+            Icon: SettingsIcon
+        },
         Icon: BookmarkIcon,
         Component: Bookmarks,
-        sidebar: true,
-        category: "tools"
+        category: "bookmarks",
+        divider: true
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

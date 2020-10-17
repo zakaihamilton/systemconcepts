@@ -4,7 +4,8 @@ import { usePages, setPath } from "@/util/pages";
 export default function Apps() {
     const pages = usePages();
 
-    const items = pages.filter(page => page.apps && !page.category).map(page => {
+    const items = pages.filter(page => page.apps && !page.category).sort((a, b) => a.name.localeCompare(b.name));
+    const elements = items.map(page => {
         const { Icon } = page;
         return <div key={page.id} className={styles.item} onClick={() => setPath(page.id)}>
             <Icon className={styles.icon} fontSize="large" />
@@ -12,9 +13,9 @@ export default function Apps() {
                 {page.name}
             </div>
         </div>
-    }).sort((a, b) => a.name - b.name);
+    });
 
     return <div className={styles.root}>
-        {items}
+        {elements}
     </div>;
 }

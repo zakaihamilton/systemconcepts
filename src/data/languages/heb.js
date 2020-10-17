@@ -816,6 +816,10 @@ export default {
         {
             "id": "BOOKMARKS",
             "value": "סימניות"
+        },
+        {
+            "id": "MANAGE",
+            "value": "ניהול"
         }
     ]
 };

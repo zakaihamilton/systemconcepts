@@ -820,6 +820,10 @@ export default {
         {
             "id": "BOOKMARKS",
             "value": "Bookmarks"
+        },
+        {
+            "id": "MANAGE",
+            "value": "Manage"
         }
     ]
 };

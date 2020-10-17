@@ -154,7 +154,7 @@ export function useActivePages() {
     return getPagesFromHash({ hash, translations, pages });
 }
 
-export function usePages() {
+export function usePages(modeId) {
     const translations = useTranslations();
     const language = useLanguage();
     const mapText = text => {
@@ -176,8 +176,12 @@ export function usePages() {
         }
         return visible;
     }).map(page => {
-        const { name, tooltip, ...props } = page;
-        const { Icon } = page;
+        let { name, tooltip, ...props } = page;
+        let { Icon } = page;
+        if (modeId) {
+            Icon = page[modeId] && page[modeId].Icon || Icon;
+            name = page[modeId] && page[modeId].name || name;
+        }
         return { ...props, icon: <Icon />, name: mapText(name), tooltip: mapText(tooltip) };
     });
     return pages;
