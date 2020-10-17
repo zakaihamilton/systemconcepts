@@ -3,7 +3,7 @@ import styles from "./Page.module.scss";
 import { useResize } from "@/util/size";
 import { MainStore } from "@/components/Main";
 import { useActivePages } from "@/util/pages";
-import Breadcrumbs from "./Breadcrumbs";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import Player from "@/pages/Player";
 import Footer from "./Footer";
 
@@ -27,7 +27,7 @@ export default function Page() {
     }
     return <>
         <PageSize.Provider value={size}>
-            <Breadcrumbs items={pages} />
+            <Breadcrumbs items={pages} border={true} menu={true} />
             <div className={styles.pageContainer}>
                 <main ref={ref} className={styles.page}>
                     {playerPageRef.current && <Player show={showPlayer} {...playerPageRef.current} />}

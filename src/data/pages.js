@@ -64,6 +64,9 @@ import Schedule from "@/pages/Schedule";
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import Groups from "@/pages/Groups";
 
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import Bookmarks from "@/pages/Bookmarks";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -227,6 +230,14 @@ export default [
         name: "GROUPS",
         Icon: GroupWorkIcon,
         Component: Groups,
+        sidebar: true,
+        category: "tools"
+    },
+    {
+        id: "bookmarks",
+        name: "BOOKMARKS",
+        Icon: BookmarkIcon,
+        Component: Bookmarks,
         sidebar: true,
         category: "tools"
     },

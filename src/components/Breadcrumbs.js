@@ -11,8 +11,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Toolbar from "@/components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
+import clsx from "clsx";
 
-export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href }) {
+export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href, navigateLast }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
@@ -40,7 +41,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
         return null;
     }
     return <>
-        {isLast && <div className={styles.item}>
+        {isLast && !navigateLast && <div className={styles.item}>
             <Tooltip arrow title={title}>
                 <div className={styles.icon}>
                     {icon}
@@ -52,7 +53,7 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
                 </div>
             </Tooltip>
         </div>}
-        {!isLast && <Link className={styles.item} color="inherit" href={href}>
+        {(!isLast || navigateLast) && <Link className={styles.item} color="inherit" href={href}>
             {icon && <IconButton className={styles.iconButton}>
                 <Tooltip arrow title={title}>
                     {icon}
@@ -68,23 +69,30 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href 
     </>;
 }
 
-export default function BreadcrumbsWidget({ items }) {
+export default function BreadcrumbsWidget({ items, border, menu, navigateLast }) {
     const { fullscreen } = MainStore.useState();
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
-        return <BreadcrumbItem key={href} items={items} index={index} count={list.length} href={href} {...props} />
-    });
+        return <BreadcrumbItem
+            key={href}
+            items={items}
+            index={index}
+            count={list.length}
+            href={href}
+            navigateLast={navigateLast}
+            {...props} />
+    }).filter(Boolean);
 
     return (
-        <div className={styles.root}>
+        <div className={clsx(styles.root, border && styles.border)}>
             <div className={styles.row}>
                 {fullscreen && <MenuIcon />}
                 {fullscreen && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
                 <div className={styles.breadcrumbs}>
                     {breadcrumbItems}
                 </div>
-                <Toolbar collapsable={true} />
+                {!!menu && <Toolbar collapsable={true} />}
             </div>
         </div>
     );

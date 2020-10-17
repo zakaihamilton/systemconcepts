@@ -808,6 +808,14 @@ export default {
         {
             "id": "REMOVE_BOOKMARK",
             "value": "הסר סימניה"
+        },
+        {
+            "id": "LOCATION",
+            "value": "מקום"
+        },
+        {
+            "id": "BOOKMARKS",
+            "value": "סימניות"
         }
     ]
 };

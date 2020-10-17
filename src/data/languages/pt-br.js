@@ -812,6 +812,14 @@ export default {
         {
             "id": "REMOVE_BOOKMARK",
             "value": "Marcador Remove"
+        },
+        {
+            "id": "LOCATION",
+            "value": "Localização"
+        },
+        {
+            "id": "BOOKMARKS",
+            "value": "Marcadores"
         }
     ]
 };

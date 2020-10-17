@@ -65,10 +65,7 @@ export function useParentParams() {
     return params;
 }
 
-export function useActivePages() {
-    let { hash = "" } = MainStore.useState();
-    const translations = useTranslations();
-    const pages = usePages();
+export function getPagesFromHash({ hash, translations, pages }) {
     let results = [];
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
@@ -148,6 +145,13 @@ export function useActivePages() {
         }
     });
     return results;
+}
+
+export function useActivePages() {
+    let { hash = "" } = MainStore.useState();
+    const translations = useTranslations();
+    const pages = usePages();
+    return getPagesFromHash({ hash, translations, pages });
 }
 
 export function usePages() {

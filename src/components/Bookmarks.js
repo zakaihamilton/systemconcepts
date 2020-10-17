@@ -27,7 +27,7 @@ export function useBookmarks() {
 }
 
 export default function Bookmarks() {
-    useLocalStorage("BookmarksStore", BookmarksStore);
+    useLocalStorage("bookmarks", BookmarksStore);
     const { hash } = MainStore.useState();
     const { bookmarks } = BookmarksStore.useState();
     const translations = useTranslations();
@@ -46,7 +46,7 @@ export default function Bookmarks() {
                     id: window.location.hash,
                     name: activePage.name,
                     pageId: activePage.id
-                }]
+                }].sort((a, b) => a.name - b.name);
             }
         });
     };
