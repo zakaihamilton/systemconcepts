@@ -312,7 +312,7 @@ export default function TableWidget(props) {
 
         return <>
             {!!syncing && syncingElement}
-            {!!loading && loadingElement}
+            {!!loading && !syncing && loadingElement}
             {!!isEmpty && !syncing && !loading && emptyElement}
             {!syncing && !loading && !!numItems && !error && <FixedSizeList
                 height={size.height}
@@ -370,7 +370,7 @@ export default function TableWidget(props) {
 
         return (<>
             {!!syncing && syncingElement}
-            {!!loading && loadingElement}
+            {!!loading && !syncing && loadingElement}
             {!!isEmpty && !syncing && !loading && emptyElement}
             {!syncing && !loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
                 {!error && <Table className={styles.table} stickyHeader style={style}>
@@ -423,7 +423,7 @@ export default function TableWidget(props) {
 
         return <>
             {!!syncing && syncingElement}
-            {!!loading && loadingElement}
+            {!!loading && !syncing && loadingElement}
             {!!isEmpty && !syncing && !loading && emptyElement}
             {!syncing && !loading && !!numItems && !error &&
                 <div className={styles.grid}>
