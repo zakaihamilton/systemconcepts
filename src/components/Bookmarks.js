@@ -51,10 +51,10 @@ export default function Bookmarks() {
         });
     };
 
-    const inSideBar = !!activePage.sidebar;
+    const allowBookmark = !activePage.sidebar && !activePage.root;
 
     const menuItems = [
-        !inSideBar && {
+        allowBookmark && {
             id: "bookmark",
             name: bookmark ? translations.REMOVE_BOOKMARK : translations.ADD_BOOKMARK,
             icon: <BookmarkIcon />,

@@ -28,7 +28,9 @@ export default function PlayerToolbar({ show, playerRef, isVideo }) {
         SPEED_SLOWER: 0.75,
         SPEED_NORMAL: 1.0,
         SPEED_FASTER: 1.25,
-        SPEED_FAST: 1.5
+        SPEED_FAST: 1.5,
+        SPEED_DOUBLE: 2.0,
+        SPEED_TRIPLE: 3.0
     };
     const rateMenuItems = Object.entries(rateItems).map(([name, rate]) => {
         return {

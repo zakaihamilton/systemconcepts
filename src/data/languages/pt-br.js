@@ -634,6 +634,14 @@ export default {
             "value": "Mais Rápida"
         },
         {
+            "id": "SPEED_DOUBLE",
+            "value": "Velocidade Dupla"
+        },
+        {
+            "id": "SPEED_TRIPLE",
+            "value": "Velocidade Tripla"
+        },
+        {
             "id": "GROUP",
             "value": "Grupo"
         },

@@ -634,6 +634,14 @@ export default {
             "value": "Fast"
         },
         {
+            "id": "SPEED_DOUBLE",
+            "value": "Double Speed"
+        },
+        {
+            "id": "SPEED_TRIPLE",
+            "value": "Triple Speed"
+        },
+        {
             "id": "GROUP",
             "value": "Group"
         },

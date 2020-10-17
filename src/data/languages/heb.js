@@ -630,6 +630,14 @@ export default {
             "value": "הכי מהר"
         },
         {
+            "id": "SPEED_DOUBLE",
+            "value": "מהירות כפולה"
+        },
+        {
+            "id": "SPEED_TRIPLE",
+            "value": "מהירות משולשת"
+        },
+        {
             "id": "GROUP",
             "value": "קבוצה"
         },
