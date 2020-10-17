@@ -14,6 +14,8 @@ import Progress from "@/widgets/Progress";
 import { useFile } from "@/util/storage";
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import { useParentParams } from "@/util/pages";
+import MovieIcon from '@material-ui/icons/Movie';
+import AudioIcon from "@/icons/Audio";
 
 export const PlayerStore = new Store({
     playerPath: "",
@@ -23,14 +25,16 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export function getPlayerSection({ suffix, translations }) {
+export function getPlayerSection({ suffix, icon, name, translations }) {
     if (suffix === ".m4a") {
         name = translations.AUDIO;
+        icon = <AudioIcon />;
     }
     else if (suffix === ".mp4") {
         name = translations.VIDEO;
+        icon = <MovieIcon />;
     }
-    return { name };
+    return { name, icon };
 }
 
 export function resetPlayer() {

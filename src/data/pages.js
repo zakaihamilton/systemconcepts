@@ -210,7 +210,8 @@ export default [
         name: "PLAYER",
         Icon: VideoLabelIcon,
         section: getPlayerSection,
-        Component: Player
+        Component: Player,
+        useParentName: true
     },
     {
         apps: true,
