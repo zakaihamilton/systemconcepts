@@ -9,7 +9,7 @@ export default async (req, res) => {
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
         await login({ id, hash });
-        const result = await handleRequest({ collectionName: "fs_" + id, req, readOnly: false });
+        const result = await handleRequest({ collectionName: "fs_" + id.toLowerCase(), req, readOnly: false });
         res.status(200).json(result);
     }
     catch (err) {
