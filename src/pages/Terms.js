@@ -4,7 +4,7 @@ import { useTranslations } from "@/util/translations";
 import { useLanguage } from "@/util/language";
 import Term from "@/widgets/Term";
 import styles from "./Terms.module.scss";
-
+import { useDeviceType } from "@/util/styles";
 import { Store } from "pullstate";
 
 export const TermsStore = new Store({
@@ -17,6 +17,7 @@ export const TermsStore = new Store({
 });
 
 export default function Terms() {
+    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const language = useLanguage();
     const { typeFilter, phaseFilter } = TermsStore.useState();
@@ -27,7 +28,7 @@ export default function Terms() {
             title: translations.NAME,
             sortable: "name"
         },
-        {
+        !isPhone && {
             id: "phaseWidget",
             title: translations.PHASE,
             sortable: "phase",

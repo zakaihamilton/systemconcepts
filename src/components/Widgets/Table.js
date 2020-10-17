@@ -115,11 +115,10 @@ export default function TableWidget(props) {
         }
     ].filter(item => viewModes.hasOwnProperty(item.id));
 
-    const currentViewModeIndex = viewModesList.findIndex(item => item.id === viewMode);
-    const nextViewModeIndex = (currentViewModeIndex + 1) % viewModesList.length;
-    const nextViewModeItem = viewModesList[nextViewModeIndex];
-
     columns = columns.filter(column => {
+        if (!column) {
+            return false;
+        }
         if (column.viewModes) {
             return column.viewModes.hasOwnProperty(viewMode);
         }
