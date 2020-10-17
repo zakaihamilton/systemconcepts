@@ -1,10 +1,8 @@
 import styles from "./Apps.module.scss";
 import { usePages, setPath } from "@/util/pages";
-import { useTranslations } from "@/util/translations";
 
 export default function Apps() {
     const pages = usePages();
-    const translations = useTranslations();
 
     const items = pages.filter(page => page.apps && !page.category).map(page => {
         const { Icon } = page;
@@ -14,7 +12,7 @@ export default function Apps() {
                 {page.name}
             </div>
         </div>
-    });
+    }).sort((a, b) => a.name - b.name);
 
     return <div className={styles.root}>
         {items}

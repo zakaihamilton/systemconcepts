@@ -189,7 +189,7 @@ export default [
         Component: Diagrams
     },
     {
-        sidebar: true,
+        apps: true,
         id: "terms",
         name: "TERMS",
         Icon: LabelIcon,
