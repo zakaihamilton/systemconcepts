@@ -2,7 +2,6 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { Store } from "pullstate";
 import { fetchJSON } from "@/util/fetch";
 import { useLocalStorage } from "@/util/store";
-import { useInterval } from "@/util/timers";
 import storage from "@/util/storage";
 import Cookies from 'js-cookie';
 import { useOnline } from "@/util/online";
@@ -129,18 +128,18 @@ export function useSyncFeature() {
             }
         };
         let updateCounter = false;
-        try {
-            const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
-            if (shared.length) {
-                await storage.createFolders(makePath("local", "shared"));
-                await syncItems(shared);
-                updateCounter++;
-            }
-        }
-        catch (err) {
-            console.error(err);
-        }
         if (isSignedIn) {
+            try {
+                const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
+                if (shared.length) {
+                    await storage.createFolders(makePath("local", "shared"));
+                    await syncItems(shared);
+                    updateCounter++;
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
             try {
                 const personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
                 if (personal.length) {
@@ -184,7 +183,6 @@ export function useSyncFeature() {
     const syncNow = useCallback(pollSync => {
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
-    useInterval(updateSync, 0, [lastUpdated]);
     useEffect(() => {
         if (online && isLoaded && isSignedIn && visible) {
             syncNow(true);
