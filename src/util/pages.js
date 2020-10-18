@@ -51,15 +51,15 @@ export function urlToParentPath(url) {
     return decodeURIComponent(previousItem);
 }
 
-export function useParentPath() {
+export function useParentPath(index = 0) {
     const { hash } = MainStore.useState();
     const items = decodeURI(hash).split("/").filter(Boolean);
-    const previousItem = items[items.length - 2] || "";
+    const previousItem = items[items.length - 2 - index] || "";
     return decodeURIComponent(previousItem);
 }
 
-export function useParentParams() {
-    const path = useParentPath();
+export function useParentParams(index) {
+    const path = useParentPath(index);
     const [, query] = path.split("?");
     const params = Object.fromEntries(new URLSearchParams(query));
     return params;
@@ -182,7 +182,7 @@ export function usePages(modeId) {
             Icon = page[modeId] && page[modeId].Icon || Icon;
             name = page[modeId] && page[modeId].name || name;
         }
-        return { ...props, icon: <Icon />, name: mapText(name), tooltip: mapText(tooltip) };
+        return { ...props, icon: !!Icon && <Icon />, name: mapText(name), tooltip: mapText(tooltip) };
     });
     return pages;
 }

@@ -39,7 +39,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                             return false;
                         }
                         name = name.replace(/\//, " ");
-                        const target = makePath(fileFolder(item), name);
+                        const target = makePath(fileFolder(item.path), name);
                         if (makePath(item.path) === makePath(target)) {
                             return false;
                         }
@@ -47,7 +47,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     };
                     s.onDone = async name => {
                         name = name.replace(/\//, " ");
-                        const target = makePath(fileFolder(item), name);
+                        const target = makePath(fileFolder(item.path), name);
                         try {
                             if (await storage.exists(target)) {
                                 throw translations.ALREADY_EXISTS.replace("${name}", name);
@@ -80,7 +80,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.severity = "info";
                     s.onDone = () => {
                         StorageStore.update(s => {
-                            s.destination = fileFolder(item);
+                            s.destination = fileFolder(item.path);
                         });
                         return true;
                     }
@@ -98,7 +98,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.severity = "info";
                     s.onDone = () => {
                         StorageStore.update(s => {
-                            s.destination = fileFolder(item);
+                            s.destination = fileFolder(item.path);
                         });
                         return true;
                     }

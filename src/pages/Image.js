@@ -18,7 +18,7 @@ export function getImageSection({ label, translations }) {
 }
 
 function useImagePath(imageName = "") {
-    const { prefix = "", group = "", year = "", date = "", name } = useParentParams();
+    const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
     let path = "";
     if (group) {
         let components = [prefix, group, year, date + " " + name + ".png"].filter(Boolean).join("/");

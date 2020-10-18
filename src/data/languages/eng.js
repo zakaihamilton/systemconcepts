@@ -832,6 +832,22 @@ export default {
         {
             "id": "FORWARD",
             "value": "Forward"
+        },
+        {
+            "id": "ADD_TIMESTAMP",
+            "value": "Add Timestamp"
+        },
+        {
+            "id": "REMOVE_TIMESTAMP",
+            "value": "Remove Timestamp"
+        },
+        {
+            "id": "TIMESTAMPS",
+            "value": "Timestamps"
+        },
+        {
+            "id": "TIMESTAMP",
+            "value": "Timestamp"
         }
     ]
 };

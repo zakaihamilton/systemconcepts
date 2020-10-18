@@ -5,12 +5,12 @@ import PlayerButton from "./Button";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import ReplayIcon from '@material-ui/icons/Replay';
 import PauseIcon from '@material-ui/icons/Pause';
-import StopIcon from '@material-ui/icons/Stop';
 import { formatDuration } from "@/util/string";
 import { MainStore } from "@/components/Main";
 import MuiAlert from '@material-ui/lab/Alert';
 import Forward10Icon from '@material-ui/icons/Forward10';
 import Replay10Icon from '@material-ui/icons/Replay10';
+import TimelapseIcon from '@material-ui/icons/Timelapse';
 
 const skipPoints = 10;
 
@@ -81,7 +81,7 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
         progressText += " / " + formatDuration(playerRef.duration * 1000);
         progressText += " ( " + translations.TIME_LEFT + " " + formatDuration((playerRef.duration - audioPos) * 1000) + " )";
     }
-    const progressPosition = `calc(${left}%)`;
+    const progressPosition = left + "%";
     const handlePosEvent = useCallback(e => {
         const { clientX } = e;
         if (!dragging.current) {
@@ -119,7 +119,7 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                 }
                 data.duration = parseInt(playerRef && playerRef.duration);
                 data.position = parseInt(currentTime);
-                return data;
+                return { ...data };
             });
         }
     }, [currentTime]);
@@ -134,6 +134,29 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
             console.error(err);
         });
     };
+
+    const timestamps = metadata && metadata.timestamps || [];
+    const timestampPos = parseInt(currentTime);
+    const timestamp = timestamps.find(item => item.id === timestampPos);
+    const hasTimestamp = !!timestamp;
+
+    const toggleTimestamp = () => {
+        setMetadata(metadata => {
+            metadata.timestamps = metadata.timestamps || [];
+            if (hasTimestamp) {
+                metadata.timestamps = metadata.timestamps.filter(item => item.id !== timestampPos);
+            }
+            else {
+                metadata.timestamps = [...metadata.timestamps, {
+                    id: timestampPos
+                }];
+                metadata.timestamps.sort((a, b) => a.id - b.id);
+            }
+            setCounter(counter => counter + 1);
+            return { ...metadata };
+        });
+    };
+
     return <div className={styles.root}>
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
         <div className={styles.toolbar}>
@@ -142,6 +165,10 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                     <div className={styles.progressText}>{progressText}</div>
                     <div className={styles.progressPlayed} style={{ width: left + "%" }} />
                     <div className={styles.progressPosition} style={{ left: progressPosition }} />
+                    {timestamps.map(item => {
+                        const pos = item.id / playerRef.duration * 100;
+                        return <div key={item.id} className={styles.progressTimestamp} style={{ left: pos + "%" }} />;
+                    })}
                 </div>
             </div>
             <div className={styles.buttons}>
@@ -150,12 +177,9 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                 {error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
                 {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
                 {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
-                <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={() => {
-                    playerRef.pause();
-                    seekPosition(0);
-                }} />
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
+                <PlayerButton active={hasTimestamp} icon={<TimelapseIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>
             </div>
         </div>
     </div>;

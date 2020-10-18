@@ -9,7 +9,7 @@ export default function Session({ group, year, date, name, color }) {
     const groupName = group[0].toUpperCase() + group.slice(1);
 
     const onClick = () => {
-        addPath(`session?prefix=sessions&group=${group}&year=${year}&date=${date}&name=${name}&color=${color}`);
+        addPath(`session?group=${group}&year=${year}&date=${date}&name=${name}&color=${color}`);
     };
 
     const style = {

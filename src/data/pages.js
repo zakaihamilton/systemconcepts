@@ -67,6 +67,9 @@ import Groups from "@/pages/Groups";
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import Bookmarks from "@/pages/Bookmarks";
 
+import TimelapseIcon from '@material-ui/icons/Timelapse';
+import Timestamps from "@/pages/Player/Timestamps";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -210,7 +213,7 @@ export default [
         Icon: VideoLabelIcon,
         section: getPlayerSection,
         Component: Player,
-        useParentName: true
+        useParentName: 1
     },
     {
         apps: true,
@@ -244,6 +247,13 @@ export default [
         Component: Bookmarks,
         category: "bookmarks",
         divider: true
+    },
+    {
+        id: "timestamps",
+        name: "TIMESTAMPS",
+        Icon: TimelapseIcon,
+        Component: Timestamps,
+        useParentName: 2
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

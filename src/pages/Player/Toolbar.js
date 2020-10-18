@@ -6,6 +6,8 @@ import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import SpeedIcon from '@material-ui/icons/Speed';
 import { useState, useEffect } from "react";
+import TimelapseIcon from '@material-ui/icons/Timelapse';
+import { addPath } from "@/util/pages";
 
 registerToolbar("PlayerToolbar");
 
@@ -84,6 +86,12 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             icon: <FullscreenIcon />,
             onClick: () => playerRef.requestFullscreen(),
             location: "footer"
+        },
+        {
+            id: "timestamps",
+            name: translations.TIMESTAMPS,
+            icon: <TimelapseIcon />,
+            onClick: () => addPath("timestamps")
         }
     ].filter(Boolean);
 

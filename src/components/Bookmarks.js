@@ -34,7 +34,6 @@ export default function Bookmarks() {
     const translations = useTranslations();
     const pages = useActivePages();
     const activePage = pages[pages.length - 1];
-    const parentPage = pages[pages.length - 2];
     const bookmark = bookmarks.find(item => item.id === hash);
 
     const toogleBookmark = () => {
@@ -45,7 +44,7 @@ export default function Bookmarks() {
             else {
                 const bookmarks = [...s.bookmarks, {
                     id: window.location.hash,
-                    name: activePage.useParentName ? parentPage.name : activePage.name,
+                    name: pages[pages.length - 1 - (activePage.useParentName || 0)].name,
                     pageId: activePage.id
                 }];
                 bookmarks.sort((a, b) => a.name.localeCompare(b.name));

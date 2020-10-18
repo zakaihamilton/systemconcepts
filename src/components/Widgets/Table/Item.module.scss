@@ -52,6 +52,10 @@
     border: 1px solid var(--border-highlight);
 }
 
-.selected {
+.cell.selected {
+    background: var(--info-background) !important;
+}
+
+.item.selected {
     background: var(--info-background) !important;
 }

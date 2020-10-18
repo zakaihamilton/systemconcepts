@@ -79,6 +79,7 @@ export default function TableWidget(props) {
         className,
         hideColumns,
         rowClick,
+        selectedRow,
         error,
         store,
         viewModes = { table: null },
@@ -298,6 +299,7 @@ export default function TableWidget(props) {
             const item = items[index];
             const { id } = item;
             const { style: itemStyles, ...props } = viewModes[viewMode] || {};
+            const selected = selectedRow && selectedRow(item);
             return <Item
                 key={id || index}
                 style={{ ...style, ...itemStyles }}
@@ -307,6 +309,7 @@ export default function TableWidget(props) {
                 item={item}
                 index={index}
                 viewMode={viewMode}
+                selected={selected}
             />;
         };
 
@@ -356,6 +359,7 @@ export default function TableWidget(props) {
         const tableRows = itemsOnPage.map((item, idx) => {
             const { style, ...props } = viewModes[viewMode] || {};
             const { id } = item;
+            const selected = selectedRow && selectedRow(item);
             return <Row
                 key={id || idx}
                 rowHeight={rowHeight}
@@ -364,6 +368,7 @@ export default function TableWidget(props) {
                 item={item}
                 viewMode={viewMode}
                 style={style}
+                selected={selected}
                 {...props}
             />;
         });
@@ -409,6 +414,7 @@ export default function TableWidget(props) {
             }
             const { id } = item;
             const { style: itemStyles, ...props } = viewModes[viewMode] || {};
+            const selected = selectedRow && selectedRow(item);
             return <Item
                 key={id || index}
                 style={{ ...style, ...itemStyles }}
@@ -418,6 +424,7 @@ export default function TableWidget(props) {
                 item={item}
                 index={index}
                 viewMode={viewMode}
+                selected={selected}
             />;
         };
 

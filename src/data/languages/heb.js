@@ -828,6 +828,22 @@ export default {
         {
             "id": "FORWARD",
             "value": "קדימה"
+        },
+        {
+            "id": "ADD_TIMESTAMP",
+            "value": "הוסף ציון"
+        },
+        {
+            "id": "REMOVE_TIMESTAMP",
+            "value": "הסר ציון"
+        },
+        {
+            "id": "TIMESTAMPS",
+            "value": "ציונים"
+        },
+        {
+            "id": "TIMESTAMP",
+            "value": "ציון"
         }
     ]
 };

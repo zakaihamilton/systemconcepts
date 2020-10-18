@@ -46,9 +46,6 @@ export default function SideBar() {
     };
 
     const items = pages.filter(page => page.sidebar && !page.category);
-    if (items.length && bookmarks.length) {
-        items[items.length - 1].divider = true;
-    }
     items.push({
         id: "bookmarks",
         name: translations.BOOKMARKS,

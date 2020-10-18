@@ -30,7 +30,7 @@ export default function SessionsPage() {
     const [{ viewMode, groupFilter, dateFilter }] = useLocalStorage("SessionsStore", SessionsStore);
 
     const gotoItem = item => {
-        addPath(`session?prefix=sessions&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
+        addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
     };
 
     const columns = [

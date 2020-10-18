@@ -20,7 +20,8 @@ import AudioIcon from "@/icons/Audio";
 export const PlayerStore = new Store({
     playerPath: "",
     mediaPath: "",
-    hash: ""
+    hash: "",
+    player: null
 });
 
 registerToolbar("Player");
@@ -49,7 +50,7 @@ export default function PlayerPage({ show = false, suffix }) {
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
     const size = useContext(PageSize);
-    const { prefix = "", group = "", year = "", date = "", name } = useParentParams();
+    const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);

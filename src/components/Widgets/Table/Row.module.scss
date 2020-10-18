@@ -33,6 +33,10 @@
     user-select: none;
 }
 
-.selected {
+.cell.selected {
+    background: var(--info-background) !important;
+}
+
+.row.selected {
     background: var(--info-background) !important;
 }
