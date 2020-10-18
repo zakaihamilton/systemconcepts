@@ -45,8 +45,8 @@ export function useLocalStorage(id, store, fields) {
             store.update(s => {
                 Object.assign(s, obj);
                 isLoaded.current = true;
-                setLoaded(true);
             });
+            setLoaded(true);
         }
         else {
             isLoaded.current = true;
