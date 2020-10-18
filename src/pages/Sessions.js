@@ -3,7 +3,6 @@ import { useTranslations } from "@/util/translations";
 import { addPath } from "@/util/pages";
 import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
-import Message from "@/components/Widgets/Message";
 import { Store } from "pullstate";
 import Group from "@/widgets/Group";
 import styles from "./Sessions.module.scss";

@@ -1,14 +1,22 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
+import { Store } from "pullstate";
 import storage from "@/util/storage";
 
+export const GroupsStore = new Store({
+    groups: [],
+    busy: false,
+    counter: 0
+});
+
 export function useGroups(depends) {
-    const [loading, setLoading] = useState(false);
-    const [metadata, setMetadata] = useState(null);
+    const { busy, groups } = GroupsStore.useState();
 
     const localMetadataPath = "local/shared/sessions/groups.json";
     const remoteMetadataPath = "shared/sessions/groups.json";
     const loadGroups = useCallback(async () => {
-        setLoading(true);
+        GroupsStore.update(s => {
+            s.busy = true;
+        });
         try {
             const listingFile = await storage.readFile("local/shared/sessions/listing.json");
             const listing = JSON.parse(listingFile) || [];
@@ -26,26 +34,32 @@ export function useGroups(depends) {
                     });
                 }
             });
-            setMetadata(metadata);
+            GroupsStore.update(s => {
+                s.groups = metadata;
+            })
         }
         catch (err) {
             console.error(err);
         }
-        setLoading(false);
+        GroupsStore.update(s => {
+            s.busy = false;
+        })
     }, []);
 
     useEffect(() => {
         loadGroups();
     }, [...depends]);
 
-    const updateMetadata = useCallback(data => {
-        if (typeof data === "function") {
-            data = data(metadata);
-        }
-        setMetadata(data);
-        storage.writeFile(remoteMetadataPath, JSON.stringify(data, null, 4));
-        storage.writeFile(localMetadataPath, JSON.stringify(data, null, 4));
-    }, [metadata]);
+    const updateGroups = useCallback(data => {
+        GroupsStore.update(s => {
+            if (typeof data === "function") {
+                data = data(s.groups);
+            }
+            storage.writeFile(remoteMetadataPath, JSON.stringify(data, null, 4));
+            storage.writeFile(localMetadataPath, JSON.stringify(data, null, 4));
+            s.groups = data;
+        });
+    }, []);
 
-    return [metadata, loading, updateMetadata];
+    return [groups, busy, updateGroups];
 }
