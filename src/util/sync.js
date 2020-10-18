@@ -49,6 +49,7 @@ export async function fetchUpdated(endPoint, start, end) {
             fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 }))
         }
     });
+    console.log("fetchUpdated endPoint", endPoint, "start", start, "end", end, "# items", items && items.length);
     if (items) {
         for (const item of items) {
             const { name, stat, folder } = item;
