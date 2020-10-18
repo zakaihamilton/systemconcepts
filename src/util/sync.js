@@ -181,7 +181,9 @@ export function useSyncFeature() {
         });
         updateSync(false, 0);
     }, []);
+    console.log("lastUpdated", lastUpdated);
     const syncNow = useCallback(pollSync => {
+        console.log("syncNow: pollSync", pollSync, "lastUpdated", lastUpdated);
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
     useEffect(() => {
