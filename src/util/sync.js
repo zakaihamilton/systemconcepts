@@ -68,7 +68,7 @@ export function useSyncFeature() {
     const [duration, setDuration] = useState(0);
     const online = useOnline();
     const [error, setError] = useState(null);
-    const isLoaded = useLocalStorage("SyncStore", SyncStore);
+    const isLoaded = useLocalStorage("sync", SyncStore);
     const visible = usePageVisibility();
     const { lastUpdated } = SyncStore.useState();
     const { active, busy } = SyncActiveStore.useState();
