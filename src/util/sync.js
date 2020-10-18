@@ -170,7 +170,7 @@ export function useSyncFeature() {
         SyncActiveStore.update(s => {
             s.busy = false;
         });
-    }, []);
+    }, [online]);
     const fullSync = useCallback(async () => {
         SyncStore.update(s => {
             s.lastUpdated = 0;

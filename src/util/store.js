@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { useCounter } from "@/util/hooks";
 
 export function useStoreState(store, filter) {
@@ -23,11 +23,10 @@ export function useStoreState(store, filter) {
 }
 
 export function useLocalStorage(id, store, fields) {
-    const isLoaded = useRef(false);
-    const [loaded, setLoaded] = useState(false);
+    const { _loaded } = store.useState();
     useEffect(() => {
         const unsubscribe = store.subscribe(s => s, s => {
-            if (isLoaded.current) {
+            if (s._loaded) {
                 let values = Object.assign({}, s);
                 if (fields) {
                     Object.keys(values).map(key => {
@@ -44,17 +43,17 @@ export function useLocalStorage(id, store, fields) {
             const obj = JSON.parse(item);
             store.update(s => {
                 Object.assign(s, obj);
-                isLoaded.current = true;
+                s._loaded = true;
             });
-            setLoaded(true);
         }
         else {
-            isLoaded.current = true;
-            setLoaded(true);
+            store.update(s => {
+                s._loaded = true;
+            });
         }
         return () => {
             unsubscribe();
         }
     }, []);
-    return loaded;
+    return _loaded;
 }
