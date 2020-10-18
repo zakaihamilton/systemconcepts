@@ -53,11 +53,11 @@
 
 .progressTimestamp {
     display: flex;
-    width: 1px;
+    margin-left: -2.5px;
+    width: 5px;
     height: 1em;
     position: absolute;
     background-color: var(--info-color);
-    pointer-events: none;
 }
 
 .progressText {

@@ -11,6 +11,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import Forward10Icon from '@material-ui/icons/Forward10';
 import Replay10Icon from '@material-ui/icons/Replay10';
 import TimelapseIcon from '@material-ui/icons/Timelapse';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const skipPoints = 10;
 
@@ -167,7 +168,14 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                     <div className={styles.progressPosition} style={{ left: progressPosition }} />
                     {timestamps.map(item => {
                         const pos = item.id / playerRef.duration * 100;
-                        return <div key={item.id} className={styles.progressTimestamp} style={{ left: pos + "%" }} />;
+                        const name = <>
+                            <div>{item.name}</div>
+                            <div>{formatDuration(item.id * 1000, true)}</div>
+                        </>
+                            ;
+                        return <Tooltip arrow title={name}>
+                            <div key={item.id} className={styles.progressTimestamp} style={{ left: pos + "%" }} />
+                        </Tooltip>;
                     })}
                 </div>
             </div>
