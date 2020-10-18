@@ -54,7 +54,6 @@ export default function PlayerPage({ show = false, suffix }) {
     const path = makePath(components).split("/").join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
     const folder = fileFolder(path);
-    const [, , groupName, yearName] = folder.split("/");
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
     const [metadata, , , setMetadata] = useFile(metadataPath, [], data => {
@@ -104,7 +103,7 @@ export default function PlayerPage({ show = false, suffix }) {
     };
     const mediaStyles = {
         width: size.width + "px",
-        height: size.height - (size.emPixels * 9) + "px"
+        height: size.height - (size.emPixels * 11) + "px"
     }
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
@@ -113,9 +112,6 @@ export default function PlayerPage({ show = false, suffix }) {
     const mediaProps = {
         metadata,
         setMetadata,
-        group: groupName,
-        year: yearName,
-        name: sessionName,
         path: mediaPath,
         show,
         preload: "metadata"

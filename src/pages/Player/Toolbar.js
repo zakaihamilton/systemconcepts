@@ -1,4 +1,4 @@
-import styles from "./PlayerToolbar.module.scss";
+import styles from "./Toolbar.module.scss";
 import Avatar from '@material-ui/core/Avatar';
 import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 
 registerToolbar("PlayerToolbar");
 
-export default function PlayerToolbar({ show, playerRef, isVideo }) {
+export default function Toolbar({ show, playerRef, isVideo }) {
     const translations = useTranslations();
     const [, setCounter] = useState(0);
     useEffect(() => {

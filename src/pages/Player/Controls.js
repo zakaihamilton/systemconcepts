@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./VideoControls.module.scss";
+import styles from "./Controls.module.scss";
 import { useTranslations } from "@/util/translations";
-import PlayerButton from "../Button";
-import Button from '@material-ui/core/Button';
-import FastRewindIcon from '@material-ui/icons/FastRewind';
-import FastForwardIcon from '@material-ui/icons/FastForward';
+import PlayerButton from "./Button";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import ReplayIcon from '@material-ui/icons/Replay';
 import PauseIcon from '@material-ui/icons/Pause';
@@ -12,16 +9,18 @@ import StopIcon from '@material-ui/icons/Stop';
 import { formatDuration } from "@/util/string";
 import { MainStore } from "@/components/Main";
 import MuiAlert from '@material-ui/lab/Alert';
+import Forward10Icon from '@material-ui/icons/Forward10';
+import Replay10Icon from '@material-ui/icons/Replay10';
 
 const skipPoints = 10;
 
-export default function VideoControls({ playerRef, metadata, setMetadata }) {
+export default function Controls({ playerRef, metadata, setMetadata }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
     const dragging = useRef(false);
-    const [currentTime, setCurrentTime] = useState(0);
     const [, setCounter] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
     const [error, setError] = useState(null);
     useEffect(() => {
         const update = name => {
@@ -55,7 +54,7 @@ export default function VideoControls({ playerRef, metadata, setMetadata }) {
         playerRef.currentTime = position;
         setCurrentTime(position);
     }, []);
-    const rewind = () => {
+    const replay = () => {
         let position = currentTime;
         if (position > skipPoints) {
             position -= skipPoints;
@@ -65,7 +64,7 @@ export default function VideoControls({ playerRef, metadata, setMetadata }) {
         }
         seekPosition(position);
     };
-    const fastforward = () => {
+    const forward = () => {
         let position = currentTime;
         if (position > playerRef.duration - skipPoints) {
             position = playerRef.duration;
@@ -146,8 +145,8 @@ export default function VideoControls({ playerRef, metadata, setMetadata }) {
                 </div>
             </div>
             <div className={styles.buttons}>
-                {direction === "ltr" && <PlayerButton icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
-                {direction === "rtl" && <PlayerButton icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
+                {direction === "ltr" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
+                {direction === "rtl" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
                 {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
                 {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
@@ -155,8 +154,8 @@ export default function VideoControls({ playerRef, metadata, setMetadata }) {
                     playerRef.pause();
                     seekPosition(0);
                 }} />
-                {direction === "ltr" && <PlayerButton icon={<FastForwardIcon />} name={translations.FAST_FORWARD} onClick={fastforward} />}
-                {direction === "rtl" && <PlayerButton icon={<FastRewindIcon />} name={translations.REWIND} onClick={rewind} />}
+                {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
+                {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
             </div>
         </div>
     </div>;

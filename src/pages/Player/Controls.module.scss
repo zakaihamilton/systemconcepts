@@ -65,10 +65,13 @@
     display: flex;
     justify-content: center;
     align-items: flex-end;
+    margin-bottom: 1em;
+    border-left: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
 }
 
-.buttons * {
-    min-width: 2.3em;
+.buttons>* {
+    width: 7em;
 }
 
 .avatar {

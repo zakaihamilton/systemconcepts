@@ -820,6 +820,14 @@ export default {
         {
             "id": "MANAGE",
             "value": "ניהול"
+        },
+        {
+            "id": "REPLAY",
+            "value": "חזור"
+        },
+        {
+            "id": "FORWARD",
+            "value": "קדימה"
         }
     ]
 };

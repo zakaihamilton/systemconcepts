@@ -824,6 +824,14 @@ export default {
         {
             "id": "MANAGE",
             "value": "Gerir"
+        },
+        {
+            "id": "REPLAY",
+            "value": "Repetir"
+        },
+        {
+            "id": "FORWARD",
+            "value": "Frente"
         }
     ]
 };

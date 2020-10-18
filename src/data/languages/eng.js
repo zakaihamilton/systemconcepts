@@ -824,6 +824,14 @@ export default {
         {
             "id": "MANAGE",
             "value": "Manage"
+        },
+        {
+            "id": "REPLAY",
+            "value": "Replay"
+        },
+        {
+            "id": "FORWARD",
+            "value": "Forward"
         }
     ]
 };
