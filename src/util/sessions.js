@@ -20,8 +20,7 @@ export const SessionsStore = new Store({
 export function useSessions(depends = [], cond = true, filterSessions = true) {
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups(depends);
-    useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
-    const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
+    const [{ busy, sessions, groups, groupFilter }] = useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const updateSessions = useCallback(async (fetch) => {
         const sessions = [];
         let continueUpdate = true;

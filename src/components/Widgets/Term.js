@@ -45,8 +45,7 @@ registerToolbar("Term");
 
 export default function Term({ id, onClick, ...props }) {
     const translations = useTranslations();
-    useLocalStorage("TermStore", TermStore);
-    const { showConcepts } = TermStore.useState();
+    const [{ showConcepts }] = useLocalStorage("TermStore", TermStore);
     const { direction } = MainStore.useState();
     const toggleShowConcepts = () => {
         TermStore.update(s => {

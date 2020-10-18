@@ -49,7 +49,6 @@ export async function fetchUpdated(endPoint, start, end) {
             fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 }))
         }
     });
-    console.log("fetchUpdated endPoint", endPoint, "start", start, "end", end, "# items", items && items.length);
     if (items) {
         for (const item of items) {
             const { name, stat, folder } = item;
@@ -69,9 +68,8 @@ export function useSyncFeature() {
     const [duration, setDuration] = useState(0);
     const online = useOnline();
     const [error, setError] = useState(null);
-    const isLoaded = useLocalStorage("sync", SyncStore);
+    const [{ lastUpdated }, isLoaded] = useLocalStorage("sync", SyncStore);
     const visible = usePageVisibility();
-    const { lastUpdated } = SyncStore.useState();
     const { active, busy } = SyncActiveStore.useState();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const updateSync = useCallback(async (pollSync, lastUpdated) => {
@@ -181,9 +179,7 @@ export function useSyncFeature() {
         });
         updateSync(false, 0);
     }, []);
-    console.log("lastUpdated", lastUpdated);
     const syncNow = useCallback(pollSync => {
-        console.log("syncNow: pollSync", pollSync, "lastUpdated", lastUpdated);
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
     useEffect(() => {

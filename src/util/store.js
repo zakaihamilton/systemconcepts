@@ -24,7 +24,6 @@ export function useStoreState(store, filter) {
 
 export function useLocalStorage(id, store, fields) {
     const { _loaded, ...props } = store.useState();
-    console.log("id", id, "_loaded", _loaded, "props", props);
     useEffect(() => {
         const unsubscribe = store.subscribe(s => s, s => {
             if (s._loaded) {
@@ -42,7 +41,6 @@ export function useLocalStorage(id, store, fields) {
         });
         const item = window.localStorage.getItem(id);
         if (item) {
-            console.log("found item: " + id);
             const obj = JSON.parse(item);
             store.update(s => {
                 Object.assign(s, obj);
@@ -50,7 +48,6 @@ export function useLocalStorage(id, store, fields) {
             });
         }
         else {
-            console.log("cannot find item: " + id);
             store.update(s => {
                 s._loaded = true;
             });
@@ -59,5 +56,5 @@ export function useLocalStorage(id, store, fields) {
             unsubscribe();
         }
     }, []);
-    return _loaded;
+    return [props, _loaded];
 }

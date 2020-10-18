@@ -30,8 +30,7 @@ export const MainStore = new Store(MainStoreDefaults);
 export default function Main() {
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
-    useLocalStorage("MainStore", MainStore);
-    const { direction, showSideBar, menuViewList, fullscreen } = MainStore.useState();
+    const [{ direction, showSideBar, menuViewList, fullscreen }] = useLocalStorage("MainStore", MainStore);
 
     useEffect(() => {
         MainStore.update(s => {
