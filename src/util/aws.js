@@ -214,20 +214,21 @@ export function cdnUrl(path) {
 
 export async function handleRequest({ readOnly, req }) {
     const headers = req.headers || {};
-    if (req.method === "HEAD") {
-        const { path } = headers;
-        const metadata = await metadataInfo({ path });
-        if (metadata) {
-            const type = metadata.type === "application/x-directory" ? "dir" : "file";
-            return {
-                ...metadata,
-                type
-            };
+    if (req.method === "GET") {
+        let { path, binary, type, exists } = headers;
+        if (exists) {
+            path = decodeURIComponent(path);
+            const metadata = await metadataInfo({ path });
+            if (metadata) {
+                const type = metadata.type === "application/x-directory" ? "dir" : "file";
+                return {
+                    ...metadata,
+                    type
+                };
+            }
+            return {};
         }
-        return {};
-    } else if (req.method === "GET") {
         try {
-            let { path, binary, type } = headers;
             path = decodeURIComponent(path);
             if (type === "dir") {
                 const items = await list({ path, useCount: true });

@@ -124,9 +124,10 @@ async function exists(path) {
     let exists = false;
     try {
         const item = await fetchJSON(fsEndPoint, {
-            method: "HEAD",
+            method: "GET",
             headers: {
-                path: encodeURIComponent(path.slice(1))
+                path: encodeURIComponent(path.slice(1)),
+                exists: true
             },
         });
         exists = item && item.name;

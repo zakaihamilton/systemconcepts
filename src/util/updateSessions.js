@@ -19,6 +19,23 @@ export function useUpdateSessions() {
         });
         let items = [];
         const prefix = makePath("aws/sessions") + "/";
+        const copyFile = async (path, name) => {
+            const sourcePath = path + name;
+            const targetPath = "shared/sessions/" + path.substring(prefix.length) + name;
+            await storage.createFolders(targetPath);
+            if (!(await storage.exists(sourcePath))) {
+                return;
+            }
+            const sourceBody = await storage.readFile(sourcePath);
+            const exists = await storage.exists(targetPath);
+            if (exists) {
+                const targetBody = await storage.readFile(targetPath);
+                if (targetBody === sourceBody) {
+                    return;
+                }
+            }
+            await storage.writeFile(targetPath, sourceBody);
+        };
         const getListing = async path => {
             let listing = await storage.getListing(path);
             if (!listing) {
@@ -85,6 +102,7 @@ export function useUpdateSessions() {
                 });
                 try {
                     await getListing(year.path);
+                    await copyFile(year.path, "/metadata.json");
                 }
                 catch (err) {
                     console.error(err);
