@@ -160,24 +160,6 @@ export default function TimestampsPage() {
         });
     };
 
-    const selectedRow = item => player ? parseInt(player.currentTime) === item.id : metadata.position === item.id;
-
-    useEffect(() => {
-        const update = name => {
-            if (name === "timeupdate") {
-                console.log("updated");
-                setCounter(counter => counter + 1);
-            }
-        };
-        const events = ["timeupdate"];
-        if (player) {
-            events.map(name => player.addEventListener(name, () => update(name)));
-            return () => {
-                events.map(name => player.removeEventListener(name, update));
-            };
-        }
-    }, [player]);
-
     return <>
         <Table
             name="timestamps"
@@ -197,7 +179,6 @@ export default function TimestampsPage() {
                 table: null
             }}
             loading={loading}
-            selectedRow={selectedRow}
             mapper={mapper}
             statusBar={statusBar}
             depends={[mode, select, viewMode, metadata, counter, translations]}
