@@ -44,9 +44,10 @@ export default function Bookmarks() {
                 s.bookmarks = s.bookmarks.filter(item => item.id !== hash);
             }
             else {
+                const page = pages[pages.length - 1 - (activePage.useParentName || 0)];
                 const bookmarks = [...s.bookmarks, {
                     id: window.location.hash,
-                    name: pages[pages.length - 1 - (activePage.useParentName || 0)].name,
+                    name: page.label || page.name,
                     pageId: activePage.id
                 }];
                 bookmarks.sort((a, b) => a.name.localeCompare(b.name));

@@ -13,22 +13,22 @@ import Toolbar from "@/components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
 
-export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href, navigateLast }) {
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, navigateLast }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
-    const showName =
+    const showLabel =
         deviceType === "phone" && index && (count <= 2 || index === count - 1) ||
         deviceType === "tablet" && index && (count <= 3 || index === count - 1) ||
         deviceType === "desktop" && index && (count <= 6 || index === count - 1);
     const collapse = deviceType === "phone" && count >= 6 ||
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
-    const title = !showName ? name : tooltip || name;
+    const title = !showLabel ? (label || name) : tooltip || label || name;
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
-            const path = items.slice(2, -2).map(item => item.name).join("/");
+            const path = items.slice(2, -2).map(item => item.label || item.name).join("/");
             return <Link className={styles.item} color="inherit" href={href}>
                 <IconButton className={styles.iconButton}>
                     <Tooltip arrow title={path}>
@@ -47,9 +47,9 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href,
                     {icon}
                 </div>
             </Tooltip>
-            <Tooltip arrow title={name}>
+            <Tooltip arrow title={label || name}>
                 <div className={styles.name}>
-                    {name}
+                    {label || name}
                 </div>
             </Tooltip>
         </div>}
@@ -59,9 +59,9 @@ export function BreadcrumbItem({ index, count, items, name, tooltip, icon, href,
                     {icon}
                 </Tooltip>
             </IconButton>}
-            {!!showName && <Tooltip arrow title={name}>
+            {!!showLabel && <Tooltip arrow title={label || name}>
                 <div className={styles.name}>
-                    {name}
+                    {label || name}
                 </div>
             </Tooltip>}
         </Link>}

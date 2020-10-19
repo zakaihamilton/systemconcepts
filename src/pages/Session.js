@@ -15,6 +15,10 @@ import Group from "@/widgets/Group";
 
 registerToolbar("Session");
 
+export function getSessionSection({ date, name }) {
+    return { label: date + " " + name };
+}
+
 export default function SessionPage({ group, year, date, name, color }) {
     const translations = useTranslations();
     const [syncCounter, busy] = useSync();
