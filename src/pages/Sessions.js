@@ -15,6 +15,7 @@ import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import clsx from "clsx";
 import { useLocalStorage } from "@/util/store";
 import { formatDuration } from "@/util/string";
+import { useDeviceType } from "@/util/styles";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -25,6 +26,7 @@ export const SessionsStore = new Store({
 });
 
 export default function SessionsPage() {
+    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [syncCounter, syncing] = useSync();
     const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
@@ -94,7 +96,7 @@ export default function SessionsPage() {
                 justifyContent: "center"
             },
             viewModes: {
-                "list": null,
+                ...!isPhone && { "list": null },
                 "table": null,
                 "grid": {
                     className: styles.gridDuration
@@ -176,7 +178,7 @@ export default function SessionsPage() {
             filter={filter}
             viewModes={{
                 list: {
-                    className: styles.listItem
+                    className: isPhone ? styles.listPhoneItem : styles.listItem
                 },
                 table: null,
                 grid: {

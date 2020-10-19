@@ -37,6 +37,10 @@
     grid-template-columns: auto minmax(4em, 10%) 7em 7em;
 }
 
+.listPhoneItem {
+    grid-template-columns: auto minmax(4em, 10%) 7em;
+}
+
 .labelName {
     min-width: 0;
 }
