@@ -12,6 +12,7 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { resetPlayer } from "@/pages/Player";
 import { useDateFormatter } from "@/util/locale";
 import Group from "@/widgets/Group";
+import { formatDuration } from "@/util/string";
 
 registerToolbar("Session");
 
@@ -87,6 +88,7 @@ export default function SessionPage({ group, year, date, name, color }) {
                 {metadataSet("NAME", name)}
                 {metadataSet("GROUP", <Group name={group} color={color} />, group[0].toUpperCase() + group.slice(1))}
                 {metadataSet("DATE", dateFormatter.format(new Date(date)), date)}
+                {metadataSet("DURATION", session && session.duration ? formatDuration(session.duration * 1000, true) : translations.UNKNOWN)}
             </div>
         </div>
     </div>;
