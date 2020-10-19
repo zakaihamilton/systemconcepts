@@ -14,6 +14,7 @@ import Image from "@/widgets/Image";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import clsx from "clsx";
 import { useLocalStorage } from "@/util/store";
+import { formatDuration } from "@/util/string";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -76,6 +77,28 @@ export default function SessionsPage() {
             }),
             style: {
                 justifyContent: "center"
+            },
+            viewModes: {
+                "list": null,
+                "table": null,
+                "grid": {
+                    className: styles.gridDate
+                }
+            }
+        },
+        {
+            id: "durationWidget",
+            title: translations.DURATION,
+            sortable: "duration",
+            style: {
+                justifyContent: "center"
+            },
+            viewModes: {
+                "list": null,
+                "table": null,
+                "grid": {
+                    className: styles.gridDuration
+                }
             }
         },
         {
@@ -95,6 +118,13 @@ export default function SessionsPage() {
             }),
             style: {
                 justifyContent: "center"
+            },
+            viewModes: {
+                "list": null,
+                "table": null,
+                "grid": {
+                    className: styles.gridGroup
+                }
             }
         }
     ].filter(Boolean);
@@ -109,7 +139,7 @@ export default function SessionsPage() {
         const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
         return {
             ...item,
-            nameWidget: <Label className={styles.labelName} icon={icon} name={
+            nameWidget: <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={
                 <Tooltip arrow title={item.name}>
                     <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                         {item.name}
@@ -118,7 +148,8 @@ export default function SessionsPage() {
             } />,
             group: item.group,
             groupWidget: <Group name={item.group} color={item.color} />,
-            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="13em" height="9em" alt={altIcon} />
+            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="13em" height="9em" alt={altIcon} />,
+            durationWidget: item.duration ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN
         };
     };
 

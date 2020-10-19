@@ -852,6 +852,14 @@ export default {
         {
             "id": "UNNAMED",
             "value": "Sem Nome"
+        },
+        {
+            "id": "DURATION",
+            "value": "Duração"
+        },
+        {
+            "id": "UNKNOWN",
+            "value": "Desconhecido"
         }
     ]
 };

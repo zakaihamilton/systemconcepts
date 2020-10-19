@@ -848,6 +848,14 @@ export default {
         {
             "id": "UNNAMED",
             "value": "ללא שם"
+        },
+        {
+            "id": "DURATION",
+            "value": "אורך"
+        },
+        {
+            "id": "UNKNOWN",
+            "value": "לא ידוע"
         }
     ]
 };

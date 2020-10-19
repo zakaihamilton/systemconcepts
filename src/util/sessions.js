@@ -52,6 +52,10 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             const localUrl = "local/" + path + "/listing.json";
             return await getJSON(localUrl);
         }
+        const getMetadata = async path => {
+            const localUrl = "local/" + path + "/metadata.json";
+            return await getJSON(localUrl);
+        }
         const basePath = "shared/sessions";
         const cdn = await getJSON("local/" + basePath + "/cdn.json") || {};
         try {
@@ -59,11 +63,15 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             for (const group of groups) {
                 const years = await getListing(makePath(basePath, group.name));
                 for (const year of years) {
-                    const files = await getListing(makePath(basePath, group.name, year.name));
+                    const path = makePath(basePath, group.name, year.name);
+                    const files = await getListing(path);
+                    const sessionsMetadata = await getMetadata(path);
                     files.sort((a, b) => a.name.localeCompare(b.name));
                     const createItem = ({ id, name, date }) => {
-                        const metadata = (groupMetadata || []).find(item => item.name === group.name) || {};
-                        const item = { id, name, date, year: year.name, group: group.name, color: metadata.color };
+                        const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
+                        const sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
+                        const { name: _, ...metadata } = sessionInfo;
+                        const item = { id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...metadata };
                         sessions.push(item);
                         return item;
                     };
