@@ -120,10 +120,10 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     }, [groupMetadata]);
 
     useEffect(() => {
-        if (cond && groupMetadata) {
+        if (cond && !loading) {
             updateSessions();
         }
-    }, [cond, groupMetadata]);
+    }, [cond, loading]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
