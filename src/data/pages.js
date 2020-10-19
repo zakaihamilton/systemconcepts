@@ -67,7 +67,7 @@ import Groups from "@/pages/Groups";
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import Bookmarks from "@/pages/Bookmarks";
 
-import TimelapseIcon from '@material-ui/icons/Timelapse';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Timestamps from "@/pages/Player/Timestamps";
 
 import diagrams from "@/data/diagrams";
@@ -252,7 +252,7 @@ export default [
     {
         id: "timestamps",
         name: "TIMESTAMPS",
-        Icon: TimelapseIcon,
+        Icon: AccessTimeIcon,
         Component: Timestamps,
         useParentName: 2
     },

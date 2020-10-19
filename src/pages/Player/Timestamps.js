@@ -14,7 +14,7 @@ import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
 import styles from "./Timestamps.module.scss";
 import { useLocalStorage } from "@/util/store";
-import TimelapseIcon from '@material-ui/icons/Timelapse';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 export const TimestampsStoreDefaults = {
     mode: "",
@@ -99,7 +99,7 @@ export default function TimestampsPage() {
             id: "timestampWidget",
             title: translations.TIMESTAMP,
             sortable: "id",
-            icon: <TimelapseIcon />
+            icon: <AccessTimeIcon />
         }
     ];
 

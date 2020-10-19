@@ -10,7 +10,7 @@ import { MainStore } from "@/components/Main";
 import MuiAlert from '@material-ui/lab/Alert';
 import Forward10Icon from '@material-ui/icons/Forward10';
 import Replay10Icon from '@material-ui/icons/Replay10';
-import TimelapseIcon from '@material-ui/icons/Timelapse';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const skipPoints = 10;
@@ -185,7 +185,7 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                 {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
-                <PlayerButton active={hasTimestamp} icon={<TimelapseIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>
+                <PlayerButton active={hasTimestamp} icon={<AccessTimeIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>
             </div>
         </div>
     </div>;

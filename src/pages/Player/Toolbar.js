@@ -6,7 +6,7 @@ import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import SpeedIcon from '@material-ui/icons/Speed';
 import { useState, useEffect } from "react";
-import TimelapseIcon from '@material-ui/icons/Timelapse';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { addPath } from "@/util/pages";
 
 registerToolbar("PlayerToolbar");
@@ -90,7 +90,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         {
             id: "timestamps",
             name: translations.TIMESTAMPS,
-            icon: <TimelapseIcon />,
+            icon: <AccessTimeIcon />,
             onClick: () => addPath("timestamps")
         }
     ].filter(Boolean);
