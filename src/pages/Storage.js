@@ -68,7 +68,7 @@ export function getStorageSection({ sectionIndex, id, translations }) {
 export default function Storage({ path = "" }) {
     const [syncCounter] = useSync();
     const translations = useTranslations();
-    const { item: editedItem, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
+    const { item: editedItem, viewMode, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
     const [data, loading, error] = useListing(path, [counter, syncCounter]);
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
@@ -149,7 +149,7 @@ export default function Storage({ path = "" }) {
             nameWidget = <Edit key={id} />;
         } else {
             nameWidget = <Label key={id} icon={<>
-                {!select && item.type && !mode && <ItemMenu readOnly={readOnly} item={result} />}
+                {!select && item.type && !mode && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
                 {select && <Select select={select} item={result} store={StorageStore} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}

@@ -1,9 +1,4 @@
-import { useEffect, useRef } from "react";
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import IconButton from '@material-ui/core/IconButton';
 import { StorageStore } from "../Storage";
-import { useHover } from "@/util/hooks";
-import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import storage from "@/util/storage";
 import { exportData } from "@/util/importExport";
@@ -11,12 +6,10 @@ import ImportExportIcon from '@material-ui/icons/ImportExport';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
-import Tooltip from '@material-ui/core/Tooltip';
 import { isBinaryFile, makePath, fileFolder } from "@/util/path";
+import ItemMenu from "@/components/ItemMenu";
 
-export default function ItemMenuWidget({ item, readOnly }) {
-    const [ref, isHover] = useHover();
-    const isVisible = useRef();
+export default function ItemMenuWidget({ viewMode, item, readOnly }) {
     const translations = useTranslations();
 
     const items = [
@@ -145,34 +138,5 @@ export default function ItemMenuWidget({ item, readOnly }) {
         }
     ].filter(Boolean);
 
-    const updateHover = () => {
-        if (!isVisible.current) {
-            StorageStore.update(s => {
-                s.enableItemClick = !isHover;
-            });
-        }
-    };
-
-    const onMenuVisible = visible => {
-        isVisible.current = visible;
-        updateHover();
-    };
-
-    useEffect(() => {
-        updateHover();
-    }, [isHover]);
-
-    if (!items.length) {
-        return null;
-    }
-
-    return (<>
-        <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref}>
-                <Tooltip title={translations.MENU}>
-                    <MoreVertIcon />
-                </Tooltip>
-            </IconButton>
-        </Menu>
-    </>);
+    return <ItemMenu viewMode={viewMode} items={items} store={StorageStore} />;
 }

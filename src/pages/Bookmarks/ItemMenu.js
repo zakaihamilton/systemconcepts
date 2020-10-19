@@ -1,17 +1,10 @@
-import { useEffect, useRef } from "react";
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import IconButton from '@material-ui/core/IconButton';
-import { useHover } from "@/util/hooks";
-import Menu from "@/widgets/Menu";
 import { useTranslations } from "@/util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
-import Tooltip from '@material-ui/core/Tooltip';
 import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
 import { BookmarksStore } from "../Bookmarks";
+import ItemMenu from "@/components/ItemMenu";
 
 export default function ItemMenuWidget({ viewMode, item }) {
-    const [ref, isHover] = useHover();
-    const isVisible = useRef();
     const translations = useTranslations();
 
     const items = [
@@ -36,32 +29,5 @@ export default function ItemMenuWidget({ viewMode, item }) {
         }
     ];
 
-    const updateHover = () => {
-        if (viewMode === "table") {
-            if (!isVisible.current) {
-                BookmarksStore.update(s => {
-                    s.enableItemClick = !isHover;
-                });
-            }
-        }
-    };
-
-    const onMenuVisible = visible => {
-        isVisible.current = visible;
-        updateHover();
-    };
-
-    useEffect(() => {
-        updateHover();
-    }, [isHover]);
-
-    return (<>
-        <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref}>
-                <Tooltip title={translations.MENU}>
-                    <MoreVertIcon />
-                </Tooltip>
-            </IconButton>
-        </Menu>
-    </>);
+    return <ItemMenu viewMode={viewMode} items={items} store={Bookmarks} />;
 }

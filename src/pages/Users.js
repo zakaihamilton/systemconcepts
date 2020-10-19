@@ -30,7 +30,7 @@ export const UsersStore = new Store(UsersStoreDefaults);
 
 export default function Users() {
     const translations = useTranslations();
-    const { mode, select, counter, enableItemClick } = UsersStore.useState();
+    const { viewMode, mode, select, counter, enableItemClick } = UsersStore.useState();
     const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
@@ -71,7 +71,7 @@ export default function Users() {
         let { firstName, lastName } = item;
         const name = [firstName, lastName].filter(Boolean).join(" ");
 
-        const menuIcon = !select && <ItemMenu item={item} />;
+        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} />;
         const selectIcon = select && <Select select={select} item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
         const rtl = isRTL(name);
