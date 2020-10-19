@@ -103,7 +103,9 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
-        const icon = item.video ? <MovieIcon /> : <AudioIcon />;
+        const icon = <Tooltip arrow title={item.video ? translations.VIDEO : translations.AUDIO}>
+            {item.video ? <MovieIcon /> : <AudioIcon />}
+        </Tooltip>;
         const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
         return {
             ...item,
