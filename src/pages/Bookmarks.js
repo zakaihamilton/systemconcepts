@@ -33,7 +33,7 @@ export default function BookmarksPage() {
     const { bookmarks = [] } = Bookmarks.useState();
     const translations = useTranslations();
     const { viewMode, mode, select, enableItemClick } = BookmarksStore.useState();
-    useLocalStorage("BookmarksStore", BookmarksStore);
+    useLocalStorage("BookmarksStore", BookmarksStore, ["viewMode"]);
 
     useEffect(() => {
         BookmarksStore.update(s => {

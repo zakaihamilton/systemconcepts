@@ -48,7 +48,7 @@ export default function TimestampsPage() {
     });
     const timestamps = metadata && metadata.timestamps || [];
     const { item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
-    useLocalStorage("TimestampsStore", TimestampsStore);
+    useLocalStorage("TimestampsStore", TimestampsStore, ["viewMode"]);
 
     useEffect(() => {
         TimestampsStore.update(s => {

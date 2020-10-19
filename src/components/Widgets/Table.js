@@ -325,6 +325,9 @@ export default function TableWidget(props) {
             >
                 {Row}
             </FixedSizeList>}
+            {!syncing && !loading && !error && <div className={styles.footer}>
+                {statusBar}
+            </div>}
             {!!error && <Error error={error} />}
         </>;
     }
@@ -393,7 +396,7 @@ export default function TableWidget(props) {
                 </div>}
             </TableContainer>}
             {!!error && <Error error={error} />}
-            {!syncing && !loading && numItems && <Navigator
+            {!syncing && !loading && !!numItems && <Navigator
                 pageIndex={pageIndex}
                 setPageIndex={setPageIndex}
                 pageCount={pageCount}
