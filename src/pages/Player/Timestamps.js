@@ -5,7 +5,6 @@ import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
 import Select from '@/components/Widgets/Select';
 import ItemMenu from "./Timestamps/ItemMenu";
-import BookmarkIcon from '@material-ui/icons/Bookmark';
 import { useTranslations } from "@/util/translations";
 import { makePath, fileTitle, fileFolder } from "@/util/path";
 import { useFile } from "@/util/storage";
@@ -15,6 +14,7 @@ import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
 import styles from "./Timestamps.module.scss";
 import { useLocalStorage } from "@/util/store";
+import TimelapseIcon from '@material-ui/icons/Timelapse';
 
 export const TimestampsStoreDefaults = {
     mode: "",
@@ -99,7 +99,7 @@ export default function TimestampsPage() {
             id: "timestampWidget",
             title: translations.TIMESTAMP,
             sortable: "id",
-            icon: <BookmarkIcon />
+            icon: <TimelapseIcon />
         }
     ];
 
