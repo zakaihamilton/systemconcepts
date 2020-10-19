@@ -8,37 +8,6 @@ export default function ItemMenuWidget({ viewMode, setMetadata, item }) {
 
     const items = [
         {
-            id: "rename",
-            name: translations.RENAME,
-            onClick: () => {
-                TimestampsStore.update(s => {
-                    s.mode = "rename";
-                    s.type = item.type;
-                    s.name = item.name;
-                    s.item = item;
-                    s.icon = item.icon;
-                    s.tooltip = item.tooltip;
-                    s.placeholder = "";
-                    s.editing = true;
-                    s.onValidate = async name => {
-                        return !!name;
-                    };
-                    s.onDone = async name => {
-                        setMetadata(metadata => {
-                            const timestamps = [...metadata.timestamps].map(timestamp => {
-                                timestamp = { ...timestamp };
-                                if (timestamp.id === item.id) {
-                                    timestamp.name = name;
-                                }
-                                return timestamp;
-                            });
-                            return { ...metadata, timestamps };
-                        });
-                    }
-                });
-            }
-        },
-        {
             id: "delete",
             name: translations.DELETE,
             icon: <DeleteIcon />,

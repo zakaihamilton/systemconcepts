@@ -79,6 +79,34 @@ export default function TimestampsPage() {
         }
     }, [select]);
 
+    const renameItem = useCallback(item => {
+        TimestampsStore.update(s => {
+            s.mode = "rename";
+            s.type = item.type;
+            s.name = item.name;
+            s.item = item;
+            s.icon = item.icon;
+            s.tooltip = item.tooltip;
+            s.placeholder = "";
+            s.editing = true;
+            s.onValidate = async name => {
+                return !!name;
+            };
+            s.onDone = async name => {
+                setMetadata(metadata => {
+                    const timestamps = [...metadata.timestamps].map(timestamp => {
+                        timestamp = { ...timestamp };
+                        if (timestamp.id === item.id) {
+                            timestamp.name = name;
+                        }
+                        return timestamp;
+                    });
+                    return { ...metadata, timestamps };
+                });
+            }
+        });
+    }, []);
+
     const onTimestampClick = enableItemClick && timestampClick;
 
     const columns = [
@@ -93,13 +121,15 @@ export default function TimestampsPage() {
             title: translations.NAME,
             sortable: "name",
             onSelectable: item => mode !== "rename",
-            onClick: mode !== "rename" && onTimestampClick
+            onClick: mode !== "rename" && enableItemClick && renameItem
         },
         {
             id: "timestampWidget",
             title: translations.TIMESTAMP,
             sortable: "id",
-            icon: <AccessTimeIcon />
+            icon: <AccessTimeIcon />,
+            onSelectable: item => mode !== "rename",
+            onClick: mode !== "rename" && onTimestampClick
         }
     ];
 
