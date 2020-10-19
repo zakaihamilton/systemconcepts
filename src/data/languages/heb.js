@@ -844,6 +844,10 @@ export default {
         {
             "id": "TIMESTAMP",
             "value": "ציון"
+        },
+        {
+            "id": "UNNAMED",
+            "value": "ללא שם"
         }
     ]
 };

@@ -109,7 +109,7 @@ export default function TimestampsPage() {
         const timestamp = formatDuration(item.id * 1000, true);
         const iconWidget = select ? selectIcon : menuIcon;
 
-        let nameWidget = <Label name={item.name} icon={viewMode === "table" && iconWidget} />;
+        let nameWidget = <Label name={item.name || translations.UNNAMED} icon={viewMode === "table" && iconWidget} />;
         if (mode === "rename" && editedItem.id === item.id) {
             nameWidget = <Edit key={item.id} />;
         }

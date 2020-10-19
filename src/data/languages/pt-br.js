@@ -848,6 +848,10 @@ export default {
         {
             "id": "TIMESTAMP",
             "value": "Timestamp"
+        },
+        {
+            "id": "UNNAMED",
+            "value": "Sem Nome"
         }
     ]
 };
