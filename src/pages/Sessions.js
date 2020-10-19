@@ -27,8 +27,8 @@ export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, syncing] = useSync();
     const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
-    const [{ viewMode, groupFilter, dateFilter }] = useLocalStorage("SessionsStore", SessionsStore);
-
+    const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
+    useLocalStorage("SessionsStore", SessionsStore);
     const gotoItem = item => {
         addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`);
     };

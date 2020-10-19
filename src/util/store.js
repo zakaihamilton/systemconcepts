@@ -23,7 +23,6 @@ export function useStoreState(store, filter) {
 }
 
 export function useLocalStorage(id, store, fields) {
-    const { _loaded, ...props } = store.useState();
     useEffect(() => {
         const unsubscribe = store.subscribe(s => s, s => {
             if (s._loaded) {
@@ -56,5 +55,4 @@ export function useLocalStorage(id, store, fields) {
             unsubscribe();
         }
     }, []);
-    return [props, _loaded];
 }

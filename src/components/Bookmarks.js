@@ -29,12 +29,14 @@ export function useBookmarks() {
 }
 
 export default function Bookmarks() {
-    const [{ bookmarks }] = useLocalStorage("bookmarks", BookmarksStore);
+    const { bookmarks } = BookmarksStore.useState();
     const { hash } = MainStore.useState();
     const translations = useTranslations();
     const pages = useActivePages();
     const activePage = pages[pages.length - 1];
     const bookmark = bookmarks.find(item => item.id === hash);
+
+    useLocalStorage("bookmarks", BookmarksStore);
 
     const toogleBookmark = () => {
         BookmarksStore.update(s => {

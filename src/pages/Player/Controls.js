@@ -168,13 +168,11 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                     <div className={styles.progressPosition} style={{ left: progressPosition }} />
                     {timestamps.map(item => {
                         const pos = item.id / playerRef.duration * 100;
-                        const name = <>
+                        return <Tooltip key={item.id} arrow title={<>
                             <div>{item.name}</div>
                             <div>{formatDuration(item.id * 1000, true)}</div>
-                        </>
-                            ;
-                        return <Tooltip arrow title={name}>
-                            <div key={item.id} className={styles.progressTimestamp} style={{ left: pos + "%" }} />
+                        </>}>
+                            <div className={styles.progressTimestamp} style={{ left: pos + "%" }} />
                         </Tooltip>;
                     })}
                 </div>

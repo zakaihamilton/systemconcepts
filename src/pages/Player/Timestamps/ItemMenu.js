@@ -8,7 +8,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
 import { TimestampsStore } from "../Timestamps";
 
-export default function ItemMenuWidget({ setMetadata, item }) {
+export default function ItemMenuWidget({ viewMode, setMetadata, item }) {
     const [ref, isHover] = useHover();
     const isVisible = useRef();
     const translations = useTranslations();
@@ -68,10 +68,12 @@ export default function ItemMenuWidget({ setMetadata, item }) {
     ];
 
     const updateHover = () => {
-        if (!isVisible.current) {
-            TimestampsStore.update(s => {
-                s.enableItemClick = !isHover;
-            });
+        if (viewMode === "table") {
+            if (!isVisible.current) {
+                TimestampsStore.update(s => {
+                    s.enableItemClick = !isHover;
+                });
+            }
         }
     };
 
@@ -84,13 +86,11 @@ export default function ItemMenuWidget({ setMetadata, item }) {
         updateHover();
     }, [isHover]);
 
-    return (<>
-        <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref}>
-                <Tooltip title={translations.MENU}>
-                    <MoreVertIcon />
-                </Tooltip>
-            </IconButton>
-        </Menu>
-    </>);
+    return (<Menu items={items} onVisible={onMenuVisible}>
+        <IconButton ref={ref}>
+            <Tooltip title={translations.MENU}>
+                <MoreVertIcon />
+            </Tooltip>
+        </IconButton>
+    </Menu>);
 }

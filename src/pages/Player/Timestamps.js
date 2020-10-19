@@ -9,10 +9,12 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import { useTranslations } from "@/util/translations";
 import { makePath, fileTitle, fileFolder } from "@/util/path";
 import { useFile } from "@/util/storage";
-import { useParentParams, goBackPage } from "@/util/pages";
+import { useParentParams } from "@/util/pages";
 import { formatDuration } from "@/util/string";
 import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
+import styles from "./Timestamps.module.scss";
+import { useLocalStorage } from "@/util/store";
 
 export const TimestampsStoreDefaults = {
     mode: "",
@@ -45,7 +47,8 @@ export default function TimestampsPage() {
         return data ? JSON.parse(data) : {};
     });
     const timestamps = metadata && metadata.timestamps || [];
-    const { item: editedItem, mode, select, enableItemClick } = TimestampsStore.useState();
+    const { item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
+    useLocalStorage("TimestampsStore", TimestampsStore);
 
     useEffect(() => {
         TimestampsStore.update(s => {
@@ -53,46 +56,7 @@ export default function TimestampsPage() {
         });
     }, []);
 
-    const columns = [
-        {
-            id: "nameWidget",
-            title: translations.NAME,
-            sortable: "name"
-        },
-        {
-            id: "timestampWidget",
-            title: translations.TIMESTAMP,
-            sortable: "id",
-            icon: <BookmarkIcon />
-        }
-    ];
-
-    const mapper = item => {
-        const menuIcon = !select && <ItemMenu setMetadata={setMetadata} item={item} />;
-        const selectIcon = select && <Select select={select} item={item} store={TimestampsStore} />;
-        const timestamp = formatDuration(item.id * 1000, true);
-
-        let nameWidget = <Label name={item.name} icon={select ? selectIcon : menuIcon} />;
-        if (mode === "rename" && editedItem.id === item.id) {
-            nameWidget = <Edit key={item.id} />;
-        }
-
-        return {
-            ...item,
-            nameWidget,
-            timestampWidget: timestamp
-        };
-    };
-
-    const statusBar = <StatusBar data={timestamps} mapper={mapper} store={TimestampsStore} />;
-
-    const onImport = data => {
-        Bookmarks.update(s => {
-            s.timestamps = data.timestamps;
-        });
-    };
-
-    const rowClick = useCallback((_, item) => {
+    const timestampClick = useCallback(item => {
         const { id } = item;
         if (select) {
             const exists = select.find(item => item.id === id);
@@ -115,7 +79,57 @@ export default function TimestampsPage() {
         }
     }, [select]);
 
-    const onRowClick = enableItemClick && rowClick;
+    const onTimestampClick = enableItemClick && timestampClick;
+
+    const columns = [
+        {
+            id: "iconWidget",
+            viewModes: {
+                list: true
+            }
+        },
+        {
+            id: "nameWidget",
+            title: translations.NAME,
+            sortable: "name",
+            onSelectable: item => mode !== "rename",
+            onClick: mode !== "rename" && onTimestampClick
+        },
+        {
+            id: "timestampWidget",
+            title: translations.TIMESTAMP,
+            sortable: "id",
+            icon: <BookmarkIcon />
+        }
+    ];
+
+    const mapper = item => {
+        const menuIcon = !select && <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
+        const selectIcon = select && <Select select={select} item={item} store={TimestampsStore} />;
+        const timestamp = formatDuration(item.id * 1000, true);
+        const iconWidget = select ? selectIcon : menuIcon;
+
+        let nameWidget = <Label name={item.name} icon={viewMode === "table" && iconWidget} />;
+        if (mode === "rename" && editedItem.id === item.id) {
+            nameWidget = <Edit key={item.id} />;
+        }
+
+        return {
+            ...item,
+            nameWidget,
+            iconWidget,
+            timestampWidget: timestamp
+        };
+    };
+
+    const statusBar = <StatusBar data={timestamps} mapper={mapper} store={TimestampsStore} />;
+
+    const onImport = data => {
+        Bookmarks.update(s => {
+            s.timestamps = data.timestamps;
+        });
+    };
+
     const selectedRow = item => player ? parseInt(player.currentTime) === item.id : metadata.position === item.id;
 
     useEffect(() => {
@@ -139,7 +153,6 @@ export default function TimestampsPage() {
             name="timestamps"
             store={TimestampsStore}
             onImport={onImport}
-            rowClick={onRowClick}
             columns={columns}
             data={timestamps}
             refresh={() => {
@@ -147,12 +160,19 @@ export default function TimestampsPage() {
                     s.counter++;
                 });
             }}
+            viewModes={{
+                list: {
+                    className: styles.listItem
+                },
+                table: null
+            }}
             loading={loading}
             selectedRow={selectedRow}
             mapper={mapper}
             statusBar={statusBar}
-            depends={[mode, select, enableItemClick, metadata, counter, translations]}
+            depends={[mode, select, viewMode, metadata, counter, translations]}
             rowHeight="6em"
+            itemHeight="4em"
         />
     </>;
 }

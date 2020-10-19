@@ -50,13 +50,11 @@ export default function ItemMenuWidget({ item }) {
         updateHover();
     }, [isHover]);
 
-    return (<>
-        <Menu items={items} onVisible={onMenuVisible}>
-            <IconButton ref={ref}>
-                <Tooltip title={translations.MENU}>
-                    <MoreVertIcon />
-                </Tooltip>
-            </IconButton>
-        </Menu>
-    </>);
+    return (<Menu items={items} onVisible={onMenuVisible}>
+        <IconButton ref={ref}>
+            <Tooltip title={translations.MENU}>
+                <MoreVertIcon />
+            </Tooltip>
+        </IconButton>
+    </Menu>);
 }

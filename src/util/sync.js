@@ -68,7 +68,8 @@ export function useSyncFeature() {
     const [duration, setDuration] = useState(0);
     const online = useOnline();
     const [error, setError] = useState(null);
-    const [{ lastUpdated }, isLoaded] = useLocalStorage("sync", SyncStore);
+    const { lastUpdated, _loaded } = SyncStore.useState();
+    useLocalStorage("sync", SyncStore);
     const visible = usePageVisibility();
     const { active, busy } = SyncActiveStore.useState();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -183,10 +184,10 @@ export function useSyncFeature() {
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
     useEffect(() => {
-        if (online && isLoaded && isSignedIn && visible) {
+        if (online && _loaded && isSignedIn && visible) {
             syncNow(true);
         }
-    }, [online, isLoaded, isSignedIn, visible]);
+    }, [online, _loaded, isSignedIn, visible]);
 
-    return [online && isLoaded && syncNow, fullSync, busy, error, active, duration];
+    return [online && _loaded && syncNow, fullSync, busy, error, active, duration];
 }

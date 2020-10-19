@@ -9,7 +9,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
 import { BookmarksStore } from "../Bookmarks";
 
-export default function ItemMenuWidget({ item }) {
+export default function ItemMenuWidget({ viewMode, item }) {
     const [ref, isHover] = useHover();
     const isVisible = useRef();
     const translations = useTranslations();
@@ -37,10 +37,12 @@ export default function ItemMenuWidget({ item }) {
     ];
 
     const updateHover = () => {
-        if (!isVisible.current) {
-            BookmarksStore.update(s => {
-                s.enableItemClick = !isHover;
-            });
+        if (viewMode === "table") {
+            if (!isVisible.current) {
+                BookmarksStore.update(s => {
+                    s.enableItemClick = !isHover;
+                });
+            }
         }
     };
 

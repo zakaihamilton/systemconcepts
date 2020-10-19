@@ -11,6 +11,8 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import { MainStore } from "@/components/Main";
 import { getPagesFromHash, usePages } from "@/util/pages";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import styles from "./Bookmarks.module.scss";
+import { useLocalStorage } from "@/util/store";
 
 export const BookmarksStoreDefaults = {
     mode: "",
@@ -30,7 +32,8 @@ export default function BookmarksPage() {
     const pages = usePages();
     const { bookmarks = [] } = Bookmarks.useState();
     const translations = useTranslations();
-    const { mode, select, enableItemClick } = BookmarksStore.useState();
+    const { viewMode, mode, select, enableItemClick } = BookmarksStore.useState();
+    useLocalStorage("BookmarksStore", BookmarksStore);
 
     useEffect(() => {
         BookmarksStore.update(s => {
@@ -62,10 +65,16 @@ export default function BookmarksPage() {
 
     const columns = [
         {
+            id: "iconWidget",
+            viewModes: {
+                list: true
+            }
+        },
+        {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            onSelectable: item => enableItemClick,
+            onSelectable: item => true,
             onClick: onBookmarkClick
         },
         {
@@ -77,13 +86,15 @@ export default function BookmarksPage() {
     ];
 
     const mapper = item => {
-        const menuIcon = !select && <ItemMenu item={item} />;
+        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} />;
         const selectIcon = select && <Select select={select} item={item} store={BookmarksStore} />;
         const breadcrumbPages = getPagesFromHash({ hash: item.id, translations, pages });
+        const iconWidget = select ? selectIcon : menuIcon;
 
         return {
             ...item,
-            nameWidget: <Label style={{ userSelect: "none" }} name={item.name} icon={select ? selectIcon : menuIcon} />,
+            iconWidget,
+            nameWidget: viewMode === "table" ? <Label style={{ userSelect: "none" }} name={item.name} icon={iconWidget} /> : item.name,
             locationWidget: <Breadcrumbs navigateLast={true} items={breadcrumbPages.slice(0, -1)} />
         };
     };
@@ -103,6 +114,12 @@ export default function BookmarksPage() {
             onImport={onImport}
             columns={columns}
             data={bookmarks}
+            viewModes={{
+                list: {
+                    className: styles.listItem
+                },
+                table: null
+            }}
             refresh={() => {
                 BookmarksStore.update(s => {
                     s.counter++;
@@ -110,8 +127,9 @@ export default function BookmarksPage() {
             }}
             mapper={mapper}
             statusBar={statusBar}
-            depends={[mode, select, onBookmarkClick, translations]}
+            depends={[mode, select, translations, viewMode]}
             rowHeight="6em"
+            itemHeight="4em"
         />
     </>;
 }
