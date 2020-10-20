@@ -1,5 +1,8 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { useCounter } from "@/util/hooks";
+import { Store } from "pullstate";
+
+export const StateStore = new Store({});
 
 export function useStoreState(store, filter) {
     const storeState = store.useState(filter);
@@ -55,4 +58,27 @@ export function useLocalStorage(id, store, fields) {
             unsubscribe();
         }
     }, []);
+}
+
+export function useGlobalState(id, defaults) {
+    const state = StateStore.useState(s => s[id]);
+    useEffect(() => {
+        if (typeof state === "undefined" && id) {
+            StateStore.update(s => {
+                s[id] = defaults;
+            });
+        }
+    }, [state, id]);
+    const setState = useCallback(data => {
+        if (!id) {
+            return;
+        }
+        StateStore.update(s => {
+            if (typeof data === "function") {
+                data = data(s[id]);
+            }
+            s[id] = data;
+        });
+    }, [id]);
+    return [state, setState];
 }

@@ -1,6 +1,7 @@
 import storage from "@/data/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { makePath, isBinaryFile } from "@/util/path";
+import { useGlobalState } from "@/util/store";
 
 export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;
@@ -130,60 +131,18 @@ export function useListing(url, depends = [], options) {
     return [listing, loading, error];
 }
 
-export function useCacheFile(url, depends = [], mapping) {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(null);
-    const [error, setError] = useState(null);
-    const active = useRef(true);
-    useEffect(() => {
-        setError(null);
-        if (!url) {
-            return;
-        }
-        setLoading(true);
-        const localUrl = "local/" + url;
-        storageMethods.exists(localUrl).then(async exists => {
-            let data = null;
-            if (exists) {
-                data = await storageMethods.readFile(localUrl);
-            }
-            else {
-                data = await storageMethods.readFile(url);
-                await storageMethods.createFolders(localUrl);
-                await storageMethods.writeFile(localUrl, data);
-            }
-            if (active.current) {
-                if (mapping) {
-                    data = mapping(data, url);
-                }
-                setData(data);
-                setLoading(false);
-            }
-        }).catch(err => {
-            setError(err);
-            setLoading(false);
-        });
-    }, [url, ...depends]);
-    useEffect(() => {
-        return () => {
-            active.current = false;
-        };
-    }, []);
-    return [data, loading, error];
-}
-
 export function useFile(url, depends = [], mapping) {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(null);
-    const [error, setError] = useState(null);
-    const active = useRef(true);
+    url = url && makePath(url);
+    const [state, setState] = useGlobalState(url && "useFile:" + url, {});
+    const { data, loading, error } = state || {};
     const write = useCallback(async data => {
         if (typeof data === "function") {
             let updatedData = await new Promise((resolve) => {
-                setData(currentData => {
-                    const updatedData = data(currentData);
+                setState(state => {
+                    const updatedData = data(state.data);
                     resolve(updatedData);
-                    return updatedData;
+                    state.data = updatedData;
+                    return state;
                 });
             });
             if (typeof updatedData !== "string") {
@@ -195,49 +154,61 @@ export function useFile(url, depends = [], mapping) {
         else {
             await storageMethods.createFolders(url);
             await storageMethods.writeFile(url, data);
-            setData(data);
+            setState(state => {
+                state.data = data;
+                return state;
+            });
         }
     }, [url]);
     useEffect(() => {
-        setError(null);
+        setState(state => {
+            state.error = null;
+            return state;
+        });
         if (!url) {
             return;
         }
-        setLoading(true);
+        setState(state => {
+            state.loading = true;
+            return state;
+        });
         storageMethods.exists(url).then(exists => {
             if (!exists) {
                 let data = null;
-                if (active.current) {
-                    if (mapping) {
-                        data = mapping(data, url);
-                    }
-                    setData(data);
-                    setLoading(false);
+                if (mapping) {
+                    data = mapping(data, url);
                 }
+                setState(state => {
+                    state.loading = false;
+                    state.data = data;
+                    return state;
+                });
                 return;
             }
             storageMethods.readFile(url).then(data => {
-                if (active.current) {
-                    if (mapping) {
-                        data = mapping(data, url);
-                    }
-                    setData(data);
-                    setLoading(false);
+                if (mapping) {
+                    data = mapping(data, url);
                 }
+                setState(state => {
+                    state.data = data;
+                    state.loading = false;
+                    return state;
+                });
             }).catch(err => {
-                setError(err);
-                setLoading(false);
+                setState(state => {
+                    state.error = err;
+                    state.loading = false;
+                    return state;
+                });
             });
         }).catch(err => {
-            setError(err);
-            setLoading(false);
+            setState(state => {
+                state.error = err;
+                state.loading = false;
+                return state;
+            });
         });
     }, [url, ...depends]);
-    useEffect(() => {
-        return () => {
-            active.current = false;
-        };
-    }, []);
     return [data, loading, error, write];
 }
 

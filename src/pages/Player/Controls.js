@@ -12,11 +12,11 @@ import Forward10Icon from '@material-ui/icons/Forward10';
 import Replay10Icon from '@material-ui/icons/Replay10';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Tooltip from '@material-ui/core/Tooltip';
-import clsx from "clsx";
+import { usePageVisibility } from "@/util/hooks";
 
 const skipPoints = 10;
 
-export default function Controls({ playerRef, metadata, setMetadata }) {
+export default function Controls({ show, playerRef, metadata, setMetadata }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
@@ -24,7 +24,12 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
     const [, setCounter] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [error, setError] = useState(null);
+    const visible = usePageVisibility();
+
     useEffect(() => {
+        if (!visible || !show) {
+            return;
+        }
         const update = name => {
             if (name === "error") {
                 setError("PLAYING_ERROR");
@@ -37,18 +42,23 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
                 setCurrentTime(playerRef.currentTime);
             }
             if (name === "timeupdate" && !dragging.current) {
-                setCurrentTime(playerRef.currentTime);
+                const currentTime = parseInt(playerRef.currentTime);
+                setCurrentTime(currentTime);
             }
             else {
                 setCounter(counter => counter + 1);
             }
         };
         const events = ["loadedmetadata", "pause", "error", "loadstart", "play", "playing", "timeupdate"];
-        events.map(name => playerRef.addEventListener(name, () => update(name)));
+        const listeners = events.map(name => {
+            const callback = () => update(name);
+            playerRef.addEventListener(name, callback);
+            return { name, callback };
+        });
         return () => {
-            events.map(name => playerRef.removeEventListener(name, update));
+            listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, []);
+    }, [visible, show]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;

@@ -19,9 +19,13 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             setCounter(counter => counter + 1);
         };
         const events = ["ratechange", "volumechange"];
-        events.map(name => playerRef.addEventListener(name, () => update(name)));
+        const listeners = events.map(name => {
+            const callback = () => update(name);
+            playerRef.addEventListener(name, callback);
+            return { name, callback };
+        });
         return () => {
-            events.map(name => playerRef.removeEventListener(name, update));
+            listeners.forEach(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
     }, []);
 

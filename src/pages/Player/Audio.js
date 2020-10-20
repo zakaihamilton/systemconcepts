@@ -25,6 +25,7 @@ export default function Audio({ show, metadata, setMetadata, children, ...props 
             playerRef={playerRef}
             metadata={metadata}
             setMetadata={setMetadata}
+            show={show}
         />}
         {playerRef && <Toolbar show={show} playerRef={playerRef} />}
     </>;

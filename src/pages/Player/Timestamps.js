@@ -36,14 +36,14 @@ export default function TimestampsPage() {
     });
     const translations = useTranslations();
     const { suffix } = useParentParams();
-    const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams(1);
+    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams(1);
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
     const { counter, item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
-    const [metadata, loading, , setMetadata] = useFile(metadataPath, [counter], data => {
+    const [metadata, loading, , setMetadata] = useFile(!!name && metadataPath, [name, counter], data => {
         return data ? JSON.parse(data) : {};
     });
     const timestamps = metadata && metadata.timestamps || [];

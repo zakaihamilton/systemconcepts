@@ -50,14 +50,14 @@ export default function PlayerPage({ show = false, suffix }) {
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
     const size = useContext(PageSize);
-    const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
+    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
-    const [metadata, , , setMetadata] = useFile(metadataPath, [], data => {
+    const [metadata, , , setMetadata] = useFile(!!name && metadataPath, [name], data => {
         return data ? JSON.parse(data) : {};
     });
 
