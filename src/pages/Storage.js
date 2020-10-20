@@ -224,7 +224,6 @@ export default function Storage({ path = "" }) {
         <Table
             name={name}
             rowClick={onRowClick}
-            rowHeight="6em"
             columns={columns}
             store={StorageStore}
             data={dataEx}

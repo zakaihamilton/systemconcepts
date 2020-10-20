@@ -151,7 +151,6 @@ export default function Users() {
             statusBar={statusBar}
             loading={loading || inProgress}
             depends={[mode, select, onRowClick, translations]}
-            rowHeight="6em"
         />
     </>;
 }

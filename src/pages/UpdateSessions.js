@@ -82,7 +82,6 @@ export default function UpdateSessions({ }) {
 
     return <>
         <Table
-            rowHeight="5.5em"
             name="sessions"
             columns={columns}
             data={data}

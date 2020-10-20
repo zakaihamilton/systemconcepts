@@ -58,7 +58,6 @@ export default function Groups() {
             mapper={mapper}
             loading={loading}
             depends={[translations]}
-            rowHeight="6em"
         />
     </>;
 }

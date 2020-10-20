@@ -64,7 +64,6 @@ export default function TableWidget(props) {
         itemHeight = "4em",
         cellWidth = "16em",
         cellHeight = "16em",
-        marginBottom = "8em",
         loading,
         syncing,
         columns,
@@ -286,7 +285,6 @@ export default function TableWidget(props) {
         return sizeInPixels;
     }
     const numItems = items && items.length;
-    const marginBottomInPixels = sizeToPixels(marginBottom);
 
     const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
@@ -344,7 +342,7 @@ export default function TableWidget(props) {
                 createSortHandler={createSortHandler} />
         });
 
-        const itemsPerPage = Math.floor((size.height - marginBottomInPixels) / rowHeightInPixels);
+        const itemsPerPage = Math.floor(size.height / rowHeightInPixels) - 1;
         const pageCount = Math.ceil(numItems / itemsPerPage);
         const startIdx = offset;
         const endIdx = startIdx + itemsPerPage;

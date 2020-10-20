@@ -33,7 +33,7 @@ export default function Terms() {
             title: translations.PHASE,
             sortable: "phase",
             selected: () => phaseFilter,
-            onSelectable: item => typeof item.phase !== "undefined" && !phaseFilter,
+            onSelectable: item => typeof item.phase !== "undefined",
             onClick: item => TermsStore.update(s => {
                 if (s.phaseFilter) {
                     s.phaseFilter = "";
@@ -49,7 +49,7 @@ export default function Terms() {
             title: translations.TYPE,
             sortable: "type",
             selected: () => typeFilter,
-            onSelectable: item => item.type && !typeFilter,
+            onSelectable: item => item.type,
             onClick: item => TermsStore.update(s => {
                 if (s.typeFilter) {
                     s.typeFilter = "";
@@ -104,8 +104,6 @@ export default function Terms() {
                 table: null
             }}
             data={data}
-            rowHeight="5.5em"
-            itemHeight="4em"
             store={TermsStore}
             depends={[typeFilter, phaseFilter, translations]} />
     </>;

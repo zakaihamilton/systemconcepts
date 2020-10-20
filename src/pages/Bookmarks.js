@@ -128,8 +128,6 @@ export default function BookmarksPage() {
             mapper={mapper}
             statusBar={statusBar}
             depends={[mode, select, translations, viewMode]}
-            rowHeight="4em"
-            itemHeight="4em"
         />
     </>;
 }

@@ -164,8 +164,6 @@ export default function SessionsPage() {
 
     return <>
         <Table
-            rowHeight="5.5em"
-            itemHeight="4em"
             cellWidth="16em"
             cellHeight="14em"
             name="sessions"

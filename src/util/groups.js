@@ -51,6 +51,10 @@ export function useGroups(depends) {
         loadGroups();
     }, [...depends]);
 
+    useEffect(() => {
+        loadGroups();
+    }, []);
+
     const updateGroups = useCallback(data => {
         GroupsStore.update(s => {
             if (typeof data === "function") {
