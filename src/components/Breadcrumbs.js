@@ -35,7 +35,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
                         <MoreHorizIcon />
                     </Tooltip>
                 </IconButton>
-                <SeparatorIcon className={styles.separator} fontSize="small" />
+                <SeparatorIcon fontSize="small" />
             </Link>;
         }
         return null;
@@ -65,7 +65,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
                 </div>
             </Tooltip>}
         </Link>}
-        {!isLast && <SeparatorIcon className={styles.separator} fontSize="small" />}
+        {!isLast && <SeparatorIcon fontSize="small" />}
     </>;
 }
 
