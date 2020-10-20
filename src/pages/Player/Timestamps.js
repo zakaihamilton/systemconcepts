@@ -35,7 +35,6 @@ export default function TimestampsPage() {
         return s.player;
     });
     const translations = useTranslations();
-    const [counter, setCounter] = useState(0);
     const { suffix } = useParentParams();
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams(1);
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
@@ -47,7 +46,7 @@ export default function TimestampsPage() {
         return data ? JSON.parse(data) : {};
     });
     const timestamps = metadata && metadata.timestamps || [];
-    const { item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
+    const { counter, item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
     useLocalStorage("TimestampsStore", TimestampsStore, ["viewMode"]);
 
     useEffect(() => {
