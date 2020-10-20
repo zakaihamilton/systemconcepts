@@ -42,11 +42,11 @@ export default function TimestampsPage() {
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
-    const [metadata, loading, , setMetadata] = useFile(metadataPath, [], data => {
+    const { counter, item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
+    const [metadata, loading, , setMetadata] = useFile(metadataPath, [counter], data => {
         return data ? JSON.parse(data) : {};
     });
     const timestamps = metadata && metadata.timestamps || [];
-    const { counter, item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
     useLocalStorage("TimestampsStore", TimestampsStore, ["viewMode"]);
 
     useEffect(() => {
