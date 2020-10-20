@@ -66,17 +66,6 @@ export default function SessionsPage() {
             id: "date",
             title: translations.DATE,
             sortable: true,
-            selected: () => dateFilter,
-            onSelectable: item => typeof item.date !== "undefined",
-            onClick: item => SessionsStore.update(s => {
-                if (s.dateFilter) {
-                    s.dateFilter = "";
-                }
-                else {
-                    s.dateFilter = typeof item.date !== "undefined" && item.date;
-                }
-                s.offset = 0;
-            }),
             style: {
                 justifyContent: "center"
             },
