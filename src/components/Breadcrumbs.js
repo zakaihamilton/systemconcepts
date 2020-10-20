@@ -13,7 +13,7 @@ import Toolbar from "@/components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
 
-export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, navigateLast }) {
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
@@ -38,6 +38,9 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
                 <SeparatorIcon fontSize="small" />
             </Link>;
         }
+        return null;
+    }
+    if (hideRoot && !index) {
         return null;
     }
     return <>
@@ -69,7 +72,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
     </>;
 }
 
-export default function BreadcrumbsWidget({ items, border, menu, navigateLast }) {
+export default function BreadcrumbsWidget({ items, border, menu, hideRoot, navigateLast }) {
     const { fullscreen } = MainStore.useState();
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const { id, url, ...props } = item;
@@ -81,6 +84,7 @@ export default function BreadcrumbsWidget({ items, border, menu, navigateLast })
             count={list.length}
             href={href}
             navigateLast={navigateLast}
+            hideRoot={hideRoot}
             {...props} />
     }).filter(Boolean);
 

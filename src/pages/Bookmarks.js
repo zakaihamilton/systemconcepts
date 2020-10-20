@@ -95,7 +95,7 @@ export default function BookmarksPage() {
             ...item,
             iconWidget,
             nameWidget: viewMode === "table" ? <Label style={{ userSelect: "none" }} name={item.name} icon={iconWidget} /> : item.name,
-            locationWidget: <Breadcrumbs navigateLast={true} items={breadcrumbPages.slice(0, -1)} />
+            locationWidget: <Breadcrumbs hideRoot={true} navigateLast={true} items={breadcrumbPages.slice(0, -1)} />
         };
     };
 
