@@ -142,7 +142,7 @@ export function useFile(url, depends = [], mapping) {
                     const updatedData = data(state.data);
                     resolve(updatedData);
                     state.data = updatedData;
-                    return state;
+                    return { ...state };
                 });
             });
             if (typeof updatedData !== "string") {
@@ -156,21 +156,21 @@ export function useFile(url, depends = [], mapping) {
             await storageMethods.writeFile(url, data);
             setState(state => {
                 state.data = data;
-                return state;
+                return { ...state };
             });
         }
     }, [url]);
     useEffect(() => {
         setState(state => {
             state.error = null;
-            return state;
+            return { ...state };
         });
         if (!url) {
             return;
         }
         setState(state => {
             state.loading = true;
-            return state;
+            return { ...state };
         });
         storageMethods.exists(url).then(exists => {
             if (!exists) {
@@ -181,7 +181,7 @@ export function useFile(url, depends = [], mapping) {
                 setState(state => {
                     state.loading = false;
                     state.data = data;
-                    return state;
+                    return { ...state };
                 });
                 return;
             }
@@ -192,20 +192,20 @@ export function useFile(url, depends = [], mapping) {
                 setState(state => {
                     state.data = data;
                     state.loading = false;
-                    return state;
+                    return { ...state };
                 });
             }).catch(err => {
                 setState(state => {
                     state.error = err;
                     state.loading = false;
-                    return state;
+                    return { ...state };
                 });
             });
         }).catch(err => {
             setState(state => {
                 state.error = err;
                 state.loading = false;
-                return state;
+                return { ...state };
             });
         });
     }, [url, ...depends]);

@@ -16,7 +16,6 @@ export default function EditWidget() {
             s.mode = "";
             s.item = null;
             s.editing = false;
-            s.counter++;
         });
         return result;
     }, [name[0]]);

@@ -42,8 +42,8 @@ export default function TimestampsPage() {
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
-    const { counter, item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
-    const [metadata, loading, , setMetadata] = useFile(!!name && metadataPath, [name, counter], data => {
+    const { item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
+    const [metadata, loading, , setMetadata] = useFile(!!name && metadataPath, [name], data => {
         return data ? JSON.parse(data) : {};
     });
     const timestamps = metadata && metadata.timestamps || [];
@@ -167,11 +167,6 @@ export default function TimestampsPage() {
             onImport={onImport}
             columns={columns}
             data={timestamps}
-            refresh={() => {
-                TimestampsStore.update(s => {
-                    s.counter++;
-                });
-            }}
             viewModes={{
                 list: {
                     className: styles.listItem
@@ -181,7 +176,7 @@ export default function TimestampsPage() {
             loading={loading}
             mapper={mapper}
             statusBar={statusBar}
-            depends={[mode, select, viewMode, metadata, counter, translations]}
+            depends={[mode, select, viewMode, metadata, translations]}
             rowHeight="6em"
             itemHeight="4em"
         />
