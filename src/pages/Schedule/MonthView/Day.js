@@ -30,7 +30,7 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             backgroundColor: item.color,
             icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
             description: groupName,
-            onClick: () => addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}&color=${item.color}`)
+            onClick: () => addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`)
         };
     });
     return <div className={styles.root} style={style}>

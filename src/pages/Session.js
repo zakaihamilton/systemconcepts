@@ -20,10 +20,10 @@ export function getSessionSection({ date, name }) {
     return { label: date + " " + name };
 }
 
-export default function SessionPage({ group, year, date, name, color }) {
+export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
-    const [syncCounter, busy] = useSync();
-    const [sessions] = useSessions([syncCounter, busy], !busy, false);
+    const [syncCounter, syncing] = useSync();
+    const [sessions] = useSessions([syncCounter, syncing], !syncing, false);
     const dateFormatter = useDateFormatter({
         weekday: 'long',
         year: 'numeric',
@@ -86,7 +86,7 @@ export default function SessionPage({ group, year, date, name, color }) {
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
-                {metadataSet("GROUP", <Group name={group} color={color} />, group[0].toUpperCase() + group.slice(1))}
+                {metadataSet("GROUP", <Group name={group} color={session && session.color} />, group[0].toUpperCase() + group.slice(1))}
                 {metadataSet("DATE", dateFormatter.format(new Date(date)), date)}
                 {metadataSet("DURATION", session && session.duration ? formatDuration(session.duration * 1000, true) : translations.UNKNOWN)}
             </div>
