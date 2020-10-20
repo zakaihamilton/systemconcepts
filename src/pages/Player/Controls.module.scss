@@ -31,6 +31,13 @@
     direction: ltr;
 }
 
+.progressBack {
+    display: flex;
+    height: 4em;
+    position: absolute;
+    width: 100%;
+}
+
 .progressPlayed {
     display: flex;
     height: 4em;
@@ -53,10 +60,10 @@
 
 .progressTimestamp {
     display: flex;
-    margin-left: -2.5px;
-    width: 5px;
+    width: 0.4em;
     height: 1em;
     position: absolute;
+    border: 1px solid transparent;
     background-color: var(--info-color);
 }
 

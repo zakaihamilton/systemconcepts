@@ -12,6 +12,7 @@ import Forward10Icon from '@material-ui/icons/Forward10';
 import Replay10Icon from '@material-ui/icons/Replay10';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Tooltip from '@material-ui/core/Tooltip';
+import clsx from "clsx";
 
 const skipPoints = 10;
 
@@ -162,17 +163,21 @@ export default function Controls({ playerRef, metadata, setMetadata }) {
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
         <div className={styles.toolbar}>
             <div className={styles.progress}>
-                <div className={styles.progressLine} ref={progressRef} {...events}>
+                <div className={styles.progressLine}>
+                    <div className={styles.progressBack} ref={progressRef} {...events} />
                     <div className={styles.progressText}>{progressText}</div>
                     <div className={styles.progressPlayed} style={{ width: left + "%" }} />
                     <div className={styles.progressPosition} style={{ left: progressPosition }} />
                     {timestamps.map(item => {
                         const pos = item.id / playerRef.duration * 100;
+                        const gotoTimestamp = () => {
+                            seekPosition(item.id);
+                        };
                         return <Tooltip key={item.id} arrow title={<>
                             <div>{item.name}</div>
                             <div>{formatDuration(item.id * 1000, true)}</div>
                         </>}>
-                            <div className={styles.progressTimestamp} style={{ left: pos + "%" }} />
+                            <div className={styles.progressTimestamp} onClick={gotoTimestamp} style={{ left: pos + "%" }} />
                         </Tooltip>;
                     })}
                 </div>
