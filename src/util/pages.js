@@ -123,8 +123,15 @@ export function getPagesFromHash({ hash, translations, pages }) {
             }
             const url = encodeURI(path + encodeURIComponent(subPath));
             const name = page.name;
+            page = Object.assign({}, page, params);
             if (typeof page.section === "function") {
-                const result = page.section({ sectionIndex, id: sectionId, translations, path: sectionPath, ...params });
+                const result = page.section({
+                    sectionIndex,
+                    id: sectionId,
+                    translations,
+                    path: sectionPath,
+                    ...params
+                });
                 if (!result) {
                     return null;
                 }
@@ -134,7 +141,7 @@ export function getPagesFromHash({ hash, translations, pages }) {
                 return;
             }
             const parentPath = urlToParentPath(url);
-            const result = { ...page, url, ...params, path: sectionPath, sectionIndex, parentPath };
+            const result = { ...page, url, path: sectionPath, sectionIndex, parentPath };
             if (name !== result.name && !result.tooltip) {
                 result.tooltip = name;
             }
@@ -176,13 +183,20 @@ export function usePages(modeId) {
         }
         return visible;
     }).map(page => {
-        let { name, tooltip, ...props } = page;
+        let { name, label, tooltip, ...props } = page;
         let { Icon } = page;
         if (modeId) {
             Icon = page[modeId] && page[modeId].Icon || Icon;
             name = page[modeId] && page[modeId].name || name;
+            label = page[modeId] && page[modeId].name || label;
         }
-        return { ...props, icon: !!Icon && <Icon />, name: mapText(name), tooltip: mapText(tooltip) };
+        return {
+            ...props,
+            icon: !!Icon && <Icon />,
+            name: mapText(name),
+            label: mapText(label),
+            tooltip: mapText(tooltip)
+        };
     });
     return pages;
 }

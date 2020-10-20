@@ -86,8 +86,8 @@ export default function SessionPage({ group, year, date, name }) {
             </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
-                {metadataSet("GROUP", <Group name={group} color={session && session.color} />, group[0].toUpperCase() + group.slice(1))}
-                {metadataSet("DATE", dateFormatter.format(new Date(date)), date)}
+                {metadataSet("GROUP", <Group name={group} color={session && session.color} />, group && group[0].toUpperCase() + group.slice(1))}
+                {metadataSet("DATE", date && dateFormatter.format(new Date(date)), date)}
                 {metadataSet("DURATION", session && session.duration ? formatDuration(session.duration * 1000, true) : translations.UNKNOWN)}
             </div>
         </div>

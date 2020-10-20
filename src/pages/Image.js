@@ -12,7 +12,7 @@ import { useFetchJSON } from "@/util/fetch";
 
 export function getImageSection({ label, translations }) {
     if (label) {
-        return { name: translations[label] };
+        return { label: translations[label] };
     }
     return {};
 }
