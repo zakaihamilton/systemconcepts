@@ -36,14 +36,15 @@ export function useGroups(depends) {
             });
             GroupsStore.update(s => {
                 s.groups = metadata;
+                s.busy = false;
             })
         }
         catch (err) {
             console.error(err);
+            GroupsStore.update(s => {
+                s.busy = false;
+            })
         }
-        GroupsStore.update(s => {
-            s.busy = false;
-        })
     }, []);
 
     useEffect(() => {
