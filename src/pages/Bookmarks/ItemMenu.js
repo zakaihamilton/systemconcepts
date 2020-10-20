@@ -1,10 +1,9 @@
 import { useTranslations } from "@/util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
-import { BookmarksStore } from "../Bookmarks";
 import ItemMenu from "@/components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode, item }) {
+export default function ItemMenuWidget({ viewMode, item, store }) {
     const translations = useTranslations();
 
     const items = [
@@ -13,7 +12,7 @@ export default function ItemMenuWidget({ viewMode, item }) {
             name: translations.DELETE,
             icon: <DeleteIcon />,
             onClick: () => {
-                BookmarksStore.update(s => {
+                store.update(s => {
                     s.select = [item];
                     s.mode = "delete";
                     s.severity = "info";
@@ -29,5 +28,5 @@ export default function ItemMenuWidget({ viewMode, item }) {
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} items={items} store={Bookmarks} />;
+    return <ItemMenu viewMode={viewMode} items={items} store={store} />;
 }

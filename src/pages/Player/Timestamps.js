@@ -177,7 +177,7 @@ export default function TimestampsPage() {
             mapper={mapper}
             statusBar={statusBar}
             depends={[mode, select, viewMode, metadata, translations]}
-            rowHeight="6em"
+            rowHeight="4em"
             itemHeight="4em"
         />
     </>;

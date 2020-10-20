@@ -86,7 +86,7 @@ export default function BookmarksPage() {
     ];
 
     const mapper = item => {
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} />;
+        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} store={BookmarksStore} />;
         const selectIcon = select && <Select select={select} item={item} store={BookmarksStore} />;
         const breadcrumbPages = getPagesFromHash({ hash: item.id, translations, pages });
         const iconWidget = select ? selectIcon : menuIcon;
@@ -128,7 +128,7 @@ export default function BookmarksPage() {
             mapper={mapper}
             statusBar={statusBar}
             depends={[mode, select, translations, viewMode]}
-            rowHeight="6em"
+            rowHeight="4em"
             itemHeight="4em"
         />
     </>;

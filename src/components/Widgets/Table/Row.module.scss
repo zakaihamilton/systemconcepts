@@ -1,7 +1,10 @@
 .cell {
     font-size: 16px;
     border: 1px solid transparent;
-    padding: 1em !important;
+    padding-top: 0em !important;
+    padding-bottom: 0em !important;
+    padding-left: 1em !important;
+    padding-right: 1em !important;
 }
 
 .cell.head {
