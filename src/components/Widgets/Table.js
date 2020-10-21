@@ -65,7 +65,6 @@ export default function TableWidget(props) {
         cellWidth = "16em",
         cellHeight = "16em",
         loading,
-        syncing,
         columns,
         onImport,
         onExport,
@@ -286,7 +285,6 @@ export default function TableWidget(props) {
     }
     const numItems = items && items.length;
 
-    const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
 
@@ -312,10 +310,9 @@ export default function TableWidget(props) {
         };
 
         return <>
-            {!!syncing && syncingElement}
-            {!!loading && !syncing && loadingElement}
-            {!!isEmpty && !syncing && !loading && emptyElement}
-            {!syncing && !loading && !!numItems && !error && <FixedSizeList
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && !!numItems && !error && <FixedSizeList
                 height={size.height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}
@@ -323,15 +320,13 @@ export default function TableWidget(props) {
             >
                 {Row}
             </FixedSizeList>}
-            {!syncing && !loading && !error && <div className={styles.footer}>
+            {!loading && !error && <div className={styles.footer}>
                 {statusBar}
             </div>}
             {!!error && <Error error={error} />}
         </>;
     }
     else if (viewMode === "table") {
-
-        const rowHeightInPixels = sizeToPixels(rowHeight);
 
         const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
             return <Column
@@ -375,10 +370,9 @@ export default function TableWidget(props) {
         });
 
         return (<>
-            {!!syncing && syncingElement}
-            {!!loading && !syncing && loadingElement}
-            {!!isEmpty && !syncing && !loading && emptyElement}
-            {!syncing && !loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
                 {!error && <Table className={styles.table} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
@@ -389,12 +383,12 @@ export default function TableWidget(props) {
                         {tableRows}
                     </TableBody>
                 </Table>}
-                {!syncing && !loading && !error && <div className={styles.footer}>
+                {!loading && !error && <div className={styles.footer}>
                     {statusBar}
                 </div>}
             </TableContainer>}
             {!!error && <Error error={error} />}
-            {!syncing && !loading && !!numItems && <Navigator
+            {!loading && !!numItems && <Navigator
                 pageIndex={pageIndex}
                 setPageIndex={setPageIndex}
                 pageCount={pageCount}
@@ -430,10 +424,9 @@ export default function TableWidget(props) {
         };
 
         return <>
-            {!!syncing && syncingElement}
-            {!!loading && !syncing && loadingElement}
-            {!!isEmpty && !syncing && !loading && emptyElement}
-            {!syncing && !loading && !!numItems && !error &&
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && !!numItems && !error &&
                 <div className={styles.grid}>
                     <FixedSizeGrid
                         columnCount={columnCount}

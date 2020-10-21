@@ -28,6 +28,8 @@ export default function Sync() {
         active && updateSync && {
             id: "sync",
             name,
+            location: "header",
+            menu: false,
             icon: error ? <SyncProblemIcon /> : <SyncIcon className={className} />,
             onClick: updateSync,
             divider: isDesktop

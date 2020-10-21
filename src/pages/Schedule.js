@@ -23,8 +23,8 @@ registerToolbar("Schedule");
 
 export default function SchedulePage() {
     const translations = useTranslations();
-    const [syncCounter, syncing] = useSync();
-    let [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
+    const [syncCounter] = useSync();
+    let [sessions, loading] = useSessions([syncCounter]);
     const { search } = useSearch(() => {
     });
     let { date, viewType } = ScheduleStore.useState();
@@ -67,13 +67,11 @@ export default function SchedulePage() {
         return items;
     }, [search, sessions]);
 
-    const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
 
     return <div className={styles.root}>
         {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-        {syncing && syncingElement}
         {loading && loadingElement}
     </div>;
 }

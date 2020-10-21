@@ -22,8 +22,8 @@ export function getSessionSection({ date, name }) {
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
-    const [syncCounter, syncing] = useSync();
-    const [sessions] = useSessions([syncCounter, syncing], !syncing, false);
+    const [syncCounter] = useSync();
+    const [sessions] = useSessions([syncCounter], false);
     const dateFormatter = useDateFormatter({
         weekday: 'long',
         year: 'numeric',

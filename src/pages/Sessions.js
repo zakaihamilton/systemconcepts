@@ -27,8 +27,8 @@ export const SessionsStore = new Store({
 export default function SessionsPage() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const [syncCounter, syncing] = useSync();
-    const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
+    const [syncCounter] = useSync();
+    const [sessions, loading] = useSessions([syncCounter]);
     const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const gotoItem = item => {
@@ -157,7 +157,6 @@ export default function SessionsPage() {
             store={SessionsStore}
             columns={columns}
             data={sessions}
-            syncing={syncing}
             loading={loading}
             mapper={mapper}
             filter={filter}

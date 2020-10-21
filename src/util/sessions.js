@@ -17,7 +17,7 @@ export const SessionsStore = new Store({
     counter: 0
 });
 
-export function useSessions(depends = [], cond = true, filterSessions = true) {
+export function useSessions(depends = [], filterSessions = true) {
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups(depends);
     const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
@@ -128,10 +128,10 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     }, [groupMetadata]);
 
     useEffect(() => {
-        if (groupMetadata && groupMetadata.length && cond && !loading) {
+        if (groupMetadata && groupMetadata.length && !loading) {
             updateSessions(groupMetadata);
         }
-    }, [groupMetadata, cond, loading]);
+    }, [groupMetadata, loading]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
