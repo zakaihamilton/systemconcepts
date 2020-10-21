@@ -128,6 +128,7 @@ export default function WeekView({ sessions, date, store }) {
             name: translations.TODAY,
             icon: <TodayIcon />,
             onClick: gotoToday,
+            location: "header",
             disabled: isToday,
             divider: true
         },
