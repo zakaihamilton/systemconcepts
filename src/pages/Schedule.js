@@ -11,12 +11,12 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { useSearch } from "@/components/Search";
 import Message from "@/widgets/Message";
-import SyncIcon from '@material-ui/icons/Sync';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
+import { useLocalStorage } from "@/util/store";
 
 export const ScheduleStore = new Store({
     date: null,
-    viewType: "week"
+    viewMode: "week"
 });
 
 registerToolbar("Schedule");
@@ -27,37 +27,39 @@ export default function SchedulePage() {
     let [sessions, loading] = useSessions([syncCounter]);
     const { search } = useSearch(() => {
     });
-    let { date, viewType } = ScheduleStore.useState();
+    let { date, viewMode } = ScheduleStore.useState();
     if (!date) {
         date = new Date();
     }
+    useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode"]);
 
     const toolbarItems = [
-        viewType !== "month" && {
+        {
             id: "month",
             name: translations.MONTH_VIEW,
+            selected: viewMode,
             icon: <DateRangeIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
-                    s.viewType = "month";
+                    s.viewMode = "month";
                 });
-            },
-            divider: true
+            }
         },
-        viewType !== "week" && {
+        {
             id: "week",
             name: translations.WEEK_VIEW,
+            selected: viewMode,
             icon: <ViewWeekIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
-                    s.viewType = "week";
+                    s.viewMode = "week";
                 });
             },
             divider: true
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewType] });
+    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode] });
 
     const items = useMemo(() => {
         let items = sessions;
@@ -70,8 +72,8 @@ export default function SchedulePage() {
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
 
     return <div className={styles.root}>
-        {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+        {viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+        {viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         {loading && loadingElement}
     </div>;
 }

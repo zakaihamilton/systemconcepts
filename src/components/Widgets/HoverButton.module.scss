@@ -1,0 +1,35 @@
+.root {
+    display: flex;
+    align-items: center;
+}
+
+.wrapper {
+    margin: 0.25em;
+    position: relative;
+}
+
+.buttonSuccess {
+    background-color: green;
+}
+
+.buttonSuccess {
+    background-color: lightgreen;
+}
+
+.fabProgress {
+    color: green;
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.buttonProgress {
+    color: green;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -12px;
+    margin-left: -12px;
+}

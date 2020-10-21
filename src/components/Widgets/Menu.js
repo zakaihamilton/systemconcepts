@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -6,6 +6,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import styles from "./Menu.module.scss";
+import { useTimer } from "@/util/timers";
 
 const StyledMenu = withStyles({
     paper: {
@@ -20,10 +21,12 @@ const StyledMenu = withStyles({
     />
 ));
 
-const MenuWidget = React.forwardRef(function MenuComponent({ items, children, onClick, selected: menuSelected, onVisible, ...props }, ref) {
-    const [anchorEl, setAnchorEl] = React.useState(null);
+const MenuWidget = React.forwardRef(function MenuComponent({ hover, items, children, onClick, selected: menuSelected, onVisible, ...props }, ref) {
+    const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const clickEnabled = items && items.length || onClick;
+    const hoverEnabled = clickEnabled && hover;
+    const [hoverRef, setHoverRef] = useState(null);
 
     const handleClick = (event) => {
         if (items && items.length) {
@@ -38,6 +41,7 @@ const MenuWidget = React.forwardRef(function MenuComponent({ items, children, on
     const handleClose = () => {
         onVisible && onVisible(false);
         setAnchorEl(null);
+        setHoverRef(null);
     };
 
     const menuItems = open && (items || []).flatMap((item, index, list) => {
@@ -81,6 +85,12 @@ const MenuWidget = React.forwardRef(function MenuComponent({ items, children, on
         if (clickEnabled) {
             props.onClick = handleClick;
         }
+        if (hoverEnabled) {
+            props.onHoverComplete = event => {
+                setHoverRef(event.currentTarget);
+                handleClick(event);
+            }
+        }
         const element = React.cloneElement(child, props);
         return element;
     });
@@ -94,6 +104,7 @@ const MenuWidget = React.forwardRef(function MenuComponent({ items, children, on
                 keepMounted
                 open={!!open}
                 onClose={handleClose}
+                {...hoverEnabled && hoverRef && { MenuListProps: { onMouseLeave: handleClose } }}
                 {...props}
             >
                 {menuItems}

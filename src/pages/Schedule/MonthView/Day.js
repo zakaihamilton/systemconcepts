@@ -9,6 +9,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Menu from "@/widgets/Menu";
 import { addPath } from "@/util/pages";
 import { useDeviceType } from "@/util/styles";
+import HoverButton from "@/widgets/HoverButton";
 
 export default function Day({ sessions, month, column, row, date, dateFormatter }) {
     const style = {
@@ -40,12 +41,10 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             </Avatar>
         </div>
         <div className={styles.sessions}>
-            {!!items.length && <Menu items={items}>
-                <IconButton>
-                    <Tooltip arrow title={translations.SESSIONS}>
-                        <VideoLabelIcon />
-                    </Tooltip>
-                </IconButton>
+            {!!items.length && <Menu hover={true} items={items}>
+                <HoverButton>
+                    <VideoLabelIcon />
+                </HoverButton>
             </Menu>}
         </div>
     </div>
