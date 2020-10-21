@@ -50,6 +50,7 @@ export default function Search() {
         {
             id: "search",
             divider: true,
+            location: "header",
             menu: false,
             element: <div className={styles.search}>
                 <div className={styles.searchIcon}>

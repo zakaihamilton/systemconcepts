@@ -1,9 +1,11 @@
 :root {
+    --icon-color: darkgray;
     --border-color: lightgray;
     --border-highlight: black;
     --border-focus: 2px solid black;
     --box-shadow-color: rgba(0, 0, 0, .2);
     --bar-background: lightgray;
+    --header-background: rgb(240, 240, 240);
     --main-background: white;
     --main-border: lightgray;
     --app-bar-background: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
@@ -26,11 +28,13 @@
 }
 
 [data-theme="dark"] {
+    --icon-color: lightgray;
     --border-color: rgba(255, 255, 255, 0.12);
     --border-highlight: white;
     --border-focus: 2px solid white;
     --box-shadow-color: rgb(42, 42, 57);
     --bar-background: black;
+    --header-background: rgb(12, 12, 27);
     --main-background: #161625;
     --main-border: darkgray;
     --app-bar-background: radial-gradient(circle farthest-corner at 10% 20%, rgba(0, 52, 89, 1) 0%, rgba(0, 168, 232, 1) 90%);

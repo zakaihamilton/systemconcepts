@@ -61,13 +61,11 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
             icon: direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />,
             onClick: gotoPreviousPage,
             location: "footer",
-            disabled: !hasPreviousPage,
-            divider: true
+            disabled: !hasPreviousPage
         },
         {
             id: "page",
             location: "footer",
-            divider: true,
             element: (<>
                 <Tooltip title={translations.PAGE_INDEX} arrow>
                     <TextField className={styles.pageIndex} onChange={handlePageChange} value={pageIndex + 1} />

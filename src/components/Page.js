@@ -3,7 +3,7 @@ import styles from "./Page.module.scss";
 import { useResize } from "@/util/size";
 import { MainStore } from "@/components/Main";
 import Player from "@/pages/Player";
-import Footer from "./Footer";
+import { ToolbarStore } from "@/components/Toolbar";
 
 export const PageSize = createContext();
 
@@ -11,7 +11,8 @@ export default function Page({ pages }) {
     const { hash, showSideBar } = MainStore.useState();
     const activePage = pages[pages.length - 1];
     const ref = useRef();
-    const size = useResize(ref, [showSideBar, hash]);
+    const { sections } = ToolbarStore.useState();
+    const size = useResize(ref, [showSideBar, hash, sections]);
     const playerPageRef = useRef(null);
     if (!activePage) {
         return null;
@@ -30,7 +31,6 @@ export default function Page({ pages }) {
                     {showPage && <Component {...activePage} />}
                 </main>
             </div>
-            <Footer />
         </PageSize.Provider>
     </>;
 }

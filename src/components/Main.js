@@ -8,11 +8,13 @@ import Page from "./Page";
 import Theme from "./Theme";
 import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
-import Header from "./Header";
+import Head from "./Head";
 import Bookmarks from "./Bookmarks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useActivePages } from "@/util/pages";
 import Search from "@/components/Search";
+import Header from "./Header";
+import Footer from "./Footer";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -63,7 +65,7 @@ export default function Main() {
     });
 
     return <>
-        <Header />
+        <Head />
         <Theme>
             <div className={className}>
                 <Breadcrumbs className={styles.bar} items={pages} bar={true} />
@@ -72,7 +74,9 @@ export default function Main() {
                 <Bookmarks />
                 <SideBar />
                 <div className={styles.main}>
+                    <Header />
                     <Page pages={pages} />
+                    <Footer />
                 </div>
             </div>
         </Theme>

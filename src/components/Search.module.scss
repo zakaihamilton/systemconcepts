@@ -1,12 +1,12 @@
 .search {
     display: flex;
     position: relative;
-    border-radius: 1em;
+    border-radius: 0.5em;
     background-color: var(--main-background);
     margin-left: 0.5em;
     margin-right: 0.5em;
     height: 3em;
-    width: 10em;
+    min-width: 12em;
 }
 
 .searchIcon {
@@ -15,6 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--icon-color);
 }
 
 .inputRoot {
@@ -25,5 +26,5 @@
     padding: 1em;
     padding-left: 0.5em;
     padding-right: 0.5em;
-    width: 5em !important;
+    width: 7.5em !important;
 }
