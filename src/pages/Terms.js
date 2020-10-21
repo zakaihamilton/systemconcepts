@@ -6,6 +6,7 @@ import Term from "@/widgets/Term";
 import styles from "./Terms.module.scss";
 import { useDeviceType } from "@/util/styles";
 import { Store } from "pullstate";
+import { useLocalStorage } from "@/util/store";
 
 export const TermsStore = new Store({
     order: "desc",
@@ -21,6 +22,7 @@ export default function Terms() {
     const translations = useTranslations();
     const language = useLanguage();
     const { typeFilter, phaseFilter } = TermsStore.useState();
+    useLocalStorage("TermsStore", TermsStore, ["viewMode"]);
 
     const columns = [
         {
