@@ -3,7 +3,6 @@ import styles from "./Page.module.scss";
 import { useResize } from "@/util/size";
 import { MainStore } from "@/components/Main";
 import Player from "@/pages/Player";
-import { ToolbarStore } from "@/components/Toolbar";
 import { useActivePages } from "@/util/pages";
 
 export const PageSize = createContext();
@@ -13,8 +12,7 @@ export default function Page() {
     const { hash, showSideBar } = MainStore.useState();
     const activePage = pages[pages.length - 1];
     const ref = useRef();
-    const { sections } = ToolbarStore.useState();
-    const size = useResize(ref, [showSideBar, hash, sections]);
+    const size = useResize(ref, [showSideBar, hash]);
     const playerPageRef = useRef(null);
     if (!activePage) {
         return null;

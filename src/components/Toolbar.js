@@ -52,21 +52,6 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
     }, [...depends, visible]);
 }
 
-export function useToolbarIsVisible({ location }) {
-    const { sections } = ToolbarStore.useState();
-
-    let sectionItems = sections.filter(section => section.used && section.visible).map(section => section.items.map((item, idx, list) => {
-        item = { ...item };
-        if (idx === list.length - 1) {
-            item.divider = true;
-        }
-        return item;
-    })).flat();
-
-    sectionItems = sectionItems.filter(item => item && (item.location === location || (!location && !item.location)));
-    return sectionItems.length >= 0;
-}
-
 export function useToolbarItems({ location }) {
     const { sections } = ToolbarStore.useState();
 
