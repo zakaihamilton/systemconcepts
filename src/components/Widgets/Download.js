@@ -12,6 +12,7 @@ export default function Download({ onClick, visible }) {
             id: "download",
             name: translations.DOWNLOAD,
             icon: <GetAppIcon />,
+            location: "header",
             onClick
         }
     ].filter(Boolean);

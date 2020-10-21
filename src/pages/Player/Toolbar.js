@@ -95,6 +95,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             id: "timestamps",
             name: translations.TIMESTAMPS,
             icon: <AccessTimeIcon />,
+            location: "header",
             onClick: () => addPath("timestamps")
         }
     ].filter(Boolean);
