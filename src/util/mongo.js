@@ -10,6 +10,7 @@ export async function getCluster({ url = process.env.MONGO_URL }) {
     const unlock = await lockMutex({ id: "mongo" });
     let cluster = _clusters[url];
     if (!cluster) {
+        console.log("connecting to database");
         cluster = _clusters[url] = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
         if (!cluster) {
             throw "Cannot connect to database, url: " + url;

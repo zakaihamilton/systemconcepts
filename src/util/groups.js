@@ -14,9 +14,17 @@ export function useGroups(depends) {
     const localMetadataPath = "local/shared/sessions/groups.json";
     const remoteMetadataPath = "shared/sessions/groups.json";
     const loadGroups = useCallback(async () => {
+        let busy = false;
         GroupsStore.update(s => {
+            busy = s.busy;
+            if (s.busy) {
+                return;
+            }
             s.busy = true;
         });
+        if (busy) {
+            return;
+        }
         try {
             const listingFile = await storage.readFile("local/shared/sessions/listing.json");
             const listing = JSON.parse(listingFile) || [];
@@ -50,10 +58,6 @@ export function useGroups(depends) {
     useEffect(() => {
         loadGroups();
     }, [...depends]);
-
-    useEffect(() => {
-        loadGroups();
-    }, []);
 
     const updateGroups = useCallback(data => {
         GroupsStore.update(s => {

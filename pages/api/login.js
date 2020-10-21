@@ -9,7 +9,8 @@ export default async (req, res) => {
             params = await login({
                 id,
                 password: decodeURIComponent(password),
-                hash
+                hash,
+                api: "login"
             });
         }
         catch (err) {
@@ -42,7 +43,8 @@ export default async (req, res) => {
                 const hash = await resetPassword({
                     id,
                     code,
-                    newPassword: decodeURIComponent(newpassword)
+                    newPassword: decodeURIComponent(newpassword),
+                    api: "login"
                 });
                 res.status(200).json({ hash });
             }
@@ -57,7 +59,8 @@ export default async (req, res) => {
                 const hash = await changePassword({
                     id,
                     oldPassword: decodeURIComponent(oldpassword),
-                    newPassword: decodeURIComponent(newpassword)
+                    newPassword: decodeURIComponent(newpassword),
+                    api: "login"
                 });
                 res.status(200).json({ hash });
             }

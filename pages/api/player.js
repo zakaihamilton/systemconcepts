@@ -16,7 +16,7 @@ export default async (req, res) => {
             error({ component, error: "No ID or hash provided in cookies" });
             throw "ACCESS_DENIED";
         }
-        const user = await login({ id, hash });
+        const user = await login({ id, hash, api: "player" });
         if (!user) {
             error({ component, error: `Cannot authorize user: ${id} in system` });
             throw "ACCESS_DENIED";

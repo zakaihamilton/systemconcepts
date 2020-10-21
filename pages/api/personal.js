@@ -8,7 +8,7 @@ export default async (req, res) => {
         const { cookie } = headers || {};
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
-        await login({ id, hash });
+        await login({ id, hash, api: "personal" });
         const result = await handleRequest({ collectionName: "fs_" + id.toLowerCase(), req, readOnly: false });
         res.status(200).json(result);
     }

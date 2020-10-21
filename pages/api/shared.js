@@ -14,7 +14,7 @@ export default async (req, res) => {
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
-        const user = await login({ id, hash });
+        const user = await login({ id, hash, api: "shared" });
         if (!user) {
             throw "ACCESS_DENIED";
         }

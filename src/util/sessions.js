@@ -22,7 +22,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     const [groupMetadata, loading] = useGroups(depends);
     const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
-    const updateSessions = useCallback(async (fetch) => {
+    const updateSessions = useCallback(async groupMetadata => {
         const sessions = [];
         let continueUpdate = true;
         SessionsStore.update(s => {
@@ -37,7 +37,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
             return;
         }
         const getJSON = async path => {
-            const exists = !fetch && storage.exists(path);
+            const exists = storage.exists(path);
             let data = [];
             if (exists) {
                 data = await storage.readFile(path);
@@ -128,10 +128,10 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     }, [groupMetadata]);
 
     useEffect(() => {
-        if (cond && !loading) {
-            updateSessions();
+        if (groupMetadata && groupMetadata.length && cond && !loading) {
+            updateSessions(groupMetadata);
         }
-    }, [cond, loading]);
+    }, [groupMetadata, cond, loading]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
@@ -154,7 +154,7 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
                 }
             };
         });
-    }, [groups, groupFilter]);
+    }, [groupMetadata, groups, groupFilter]);
 
     const toolbarItems = [
         {

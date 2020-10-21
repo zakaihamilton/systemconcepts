@@ -9,12 +9,12 @@ const sendResetMail = require('gmail-send')({
     subject: 'Reset Password',
 });
 
-export async function login({ id, password, hash }) {
+export async function login({ id, password, hash, api }) {
     if (!id) {
         console.error("empty user id");
         throw "USER_NOT_FOUND";
     }
-    console.log("user", id, "is logging in...");
+    console.log("user:", id, "api:", api);
     id = id.toLowerCase();
     let user = null;
     try {
@@ -76,9 +76,9 @@ export async function register({ id, firstName, lastName, email, password, salt 
     return result;
 }
 
-export async function changePassword({ id, oldPassword, newPassword, salt = 10 }) {
+export async function changePassword({ api, id, oldPassword, newPassword, salt = 10 }) {
     id = id.toLowerCase();
-    let user = await login({ id, password: oldPassword });
+    let user = await login({ id, password: oldPassword, api });
     let result = null;
     try {
         result = await hash(newPassword, salt);
@@ -98,9 +98,9 @@ export async function changePassword({ id, oldPassword, newPassword, salt = 10 }
     return result;
 }
 
-export async function resetPassword({ id, code, newPassword, salt = 10 }) {
+export async function resetPassword({ api, id, code, newPassword, salt = 10 }) {
     id = id.toLowerCase();
-    let user = await login({ id, hash: code });
+    let user = await login({ api, id, hash: code });
     let result = null;
     try {
         result = await hash(newPassword, salt);

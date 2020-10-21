@@ -30,7 +30,7 @@ export default function SessionsPage() {
     const [syncCounter, syncing] = useSync();
     const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
     const { viewMode, groupFilter } = SessionsStore.useState();
-    useLocalStorage("SessionsStore", SessionsStore);
+    useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const gotoItem = item => {
         addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
     };
