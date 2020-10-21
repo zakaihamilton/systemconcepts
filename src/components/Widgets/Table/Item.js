@@ -35,7 +35,8 @@ export default function ItemWidget({ className = "", viewMode, selected: selecte
     const classes = useStyles(styles, {
         item: true,
         hover: !!rowClick,
-        selected: selectedItem
+        selected: selectedItem,
+        even: index % 2 === 0
     });
     return <div className={styles.root} style={style}>
         <div className={classes + " " + className} {...rowClick && { onClick }} {...props}>

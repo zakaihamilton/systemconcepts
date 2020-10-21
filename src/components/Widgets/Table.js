@@ -359,6 +359,7 @@ export default function TableWidget(props) {
             const selected = selectedRow && selectedRow(item);
             return <Row
                 key={id || idx}
+                index={idx}
                 rowHeight={rowHeight}
                 columns={columns}
                 rowClick={rowClick}

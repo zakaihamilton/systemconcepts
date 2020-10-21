@@ -31,6 +31,14 @@
     border: 1px solid var(--border-highlight);
 }
 
+.row {
+    background-color: var(--main-background);
+}
+
+.row.even {
+    background-color: var(--main-background-alternative);
+}
+
 .row.hover {
     cursor: pointer;
     user-select: none;
