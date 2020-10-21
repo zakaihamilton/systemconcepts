@@ -15,6 +15,7 @@ export const BookmarksStore = new Store({
 export function useBookmarks() {
     const translations = useTranslations();
     const { bookmarks = [] } = BookmarksStore.useState();
+    useLocalStorage("bookmarks", BookmarksStore);
     const pages = usePages();
     const items = bookmarks.map(bookmark => {
         const { pageId, ...props } = bookmark;

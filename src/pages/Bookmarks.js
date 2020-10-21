@@ -7,7 +7,6 @@ import StatusBar from "@/widgets/StatusBar";
 import { Store } from "pullstate";
 import Select from '@/components/Widgets/Select';
 import ItemMenu from "./Bookmarks/ItemMenu";
-import BookmarkIcon from '@material-ui/icons/Bookmark';
 import { MainStore } from "@/components/Main";
 import { getPagesFromHash, usePages } from "@/util/pages";
 import Breadcrumbs from "@/components/Breadcrumbs";

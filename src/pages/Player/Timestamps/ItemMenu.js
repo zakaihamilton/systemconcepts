@@ -15,7 +15,7 @@ export default function ItemMenuWidget({ viewMode, setMetadata, item }) {
                 TimestampsStore.update(s => {
                     s.select = [item];
                     s.mode = "delete";
-                    s.severity = "info";
+                    s.severity = "error";
                     s.onDone = async select => {
                         setMetadata(metadata => {
                             metadata.timestamps = metadata.timestamps.filter(timestamp => {

@@ -8,21 +8,6 @@
     flex-direction: column;
 }
 
-.footer {
-    display: flex;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    bottom: 1em;
-    left: 0px;
-    width: 100%;
-}
-
-.footer>* {
-    margin: 1em;
-}
-
 .grid {
     display: flex;
     justify-content: center;

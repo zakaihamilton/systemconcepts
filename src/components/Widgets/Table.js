@@ -64,6 +64,7 @@ export default function TableWidget(props) {
         itemHeight = "4em",
         cellWidth = "16em",
         cellHeight = "16em",
+        statusBarHeight = "4em",
         loading,
         columns,
         onImport,
@@ -295,16 +296,19 @@ export default function TableWidget(props) {
         return null;
     }
 
-    const style = {
-        maxHeight: size.height + "px",
-        maxWidth: size.width + "px"
-    };
-
     const sizeToPixels = text => {
         const number = parseFloat(text);
         const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
         return sizeInPixels;
     }
+
+    const statusBarVisible = !loading && !error && !!statusBar;
+    const height = size.height - (!!statusBarVisible && sizeToPixels(statusBarHeight));
+    const style = {
+        maxHeight: size.height + "px",
+        maxWidth: size.width + "px"
+    };
+
     const numItems = items && items.length;
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
@@ -334,17 +338,15 @@ export default function TableWidget(props) {
         return <>
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
+            {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
-                height={size.height}
+                height={height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}
                 width={size.width}
             >
                 {Row}
             </FixedSizeList>}
-            {!loading && !error && <div className={styles.footer}>
-                {statusBar}
-            </div>}
             {!!error && <Error error={error} />}
         </>;
     }
@@ -395,6 +397,7 @@ export default function TableWidget(props) {
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
             {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+                {!!statusBarVisible && statusBar}
                 {!error && <Table className={styles.table} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
@@ -405,9 +408,6 @@ export default function TableWidget(props) {
                         {tableRows}
                     </TableBody>
                 </Table>}
-                {!loading && !error && <div className={styles.footer}>
-                    {statusBar}
-                </div>}
             </TableContainer>}
             {!!error && <Error error={error} />}
             {!loading && !!numItems && <Navigator
@@ -448,6 +448,7 @@ export default function TableWidget(props) {
         return <>
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
+            {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error &&
                 <div className={styles.grid}>
                     <FixedSizeGrid

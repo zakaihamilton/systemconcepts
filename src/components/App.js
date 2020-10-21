@@ -4,8 +4,10 @@ import Main from "./Main";
 
 export default function App() {
     console.log("App");
-    return <Theme>
+    return <>
         <Head />
-        <Main />
-    </Theme>;
+        <Theme>
+            <Main />
+        </Theme>
+    </>;
 }

@@ -16,7 +16,7 @@ export default function ItemMenuWidget({ viewMode, item }) {
                 UsersStore.update(s => {
                     s.select = [item];
                     s.mode = "delete";
-                    s.severity = "info";
+                    s.severity = "error";
                     s.onDone = async select => {
                         const records = select.map(item => ({ id: item.id }));
                         await fetchJSON("/api/users", { body: JSON.stringify(records), method: "DELETE" });
