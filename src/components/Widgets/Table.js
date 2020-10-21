@@ -27,9 +27,9 @@ import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import SyncIcon from '@material-ui/icons/Sync';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
 import WarningIcon from '@material-ui/icons/Warning';
+import ViewStreamIcon from '@material-ui/icons/ViewStream';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -88,7 +88,7 @@ export default function TableWidget(props) {
     columns = columns || [];
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
-    const { order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
+    const { itemsPerPage = 50, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const size = useContext(PageSize);
     const { search } = useSearch(() => {
         store.update(s => {
@@ -146,6 +146,20 @@ export default function TableWidget(props) {
         });
     }, [orderBy, order]);
 
+    const itemsPerPageItems = useMemo(() => {
+        return [10, 25, 50, 75, 100].map(num => {
+            return {
+                id: num,
+                name: num,
+                icon: null,
+                selected: itemsPerPage,
+                onClick: () => store.update(s => {
+                    s.itemsPerPage = num;
+                })
+            }
+        });
+    }, [itemsPerPage]);
+
     const toolbarItems = [
         data && name && onImport && {
             id: "import",
@@ -202,6 +216,14 @@ export default function TableWidget(props) {
             items: sortItems,
             divider: true
         },
+        viewMode === "table" && {
+            id: "itemsPerPage",
+            location: "header",
+            name: translations.ROWS_PER_PAGE,
+            icon: <ViewStreamIcon />,
+            items: itemsPerPageItems,
+            divider: true
+        },
         ...viewModesList.length > 1 ? viewModesList.map(item => {
             return {
                 ...item,
@@ -215,7 +237,7 @@ export default function TableWidget(props) {
         }).filter(Boolean) : []
     ].filter(Boolean);
 
-    useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems] });
+    useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems, itemsPerPage] });
 
     useEffect(() => {
         setEmpty(false);
@@ -338,7 +360,6 @@ export default function TableWidget(props) {
                 createSortHandler={createSortHandler} />
         });
 
-        const itemsPerPage = 50;
         const pageCount = Math.ceil(numItems / itemsPerPage);
         const startIdx = offset;
         const endIdx = startIdx + itemsPerPage;

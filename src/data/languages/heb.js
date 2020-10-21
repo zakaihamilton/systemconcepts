@@ -860,6 +860,10 @@ export default {
         {
             "id": "VERSION",
             "value": "גירסה"
+        },
+        {
+            "id": "ROWS_PER_PAGE",
+            "value": "מספר שורות לעמוד"
         }
     ]
 };

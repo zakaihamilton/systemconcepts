@@ -864,6 +864,10 @@ export default {
         {
             "id": "VERSION",
             "value": "Versão"
+        },
+        {
+            "id": "ROWS_PER_PAGE",
+            "value": "Linhas Por Página"
         }
     ]
 };
