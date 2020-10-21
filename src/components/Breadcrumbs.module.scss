@@ -4,7 +4,8 @@
     overflow: hidden;
 }
 
-.root.border {
+.root.bar {
+    background-color: var(--bar-background);
     border-bottom: 1px solid var(--border-color);
     padding-left: 0.5em;
     padding-right: 0.5em;

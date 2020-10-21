@@ -13,7 +13,7 @@ import { useTranslations } from "@/util/translations";
 export default function SideBar() {
     const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
-    const { menuViewList, direction, fullscreen, showSlider } = MainStore.useState();
+    const { menuViewList, direction, showSlider } = MainStore.useState();
     const bookmarks = useBookmarks();
     const activePages = useActivePages();
     const pages = usePages("sidebar");
@@ -36,7 +36,7 @@ export default function SideBar() {
 
     const closeDrawer = () => {
         MainStore.update(s => {
-            if (fullscreen || isMobile) {
+            if (isMobile) {
                 s.showSlider = false;
             }
             else {
@@ -56,7 +56,7 @@ export default function SideBar() {
         divider: true
     });
 
-    if (isMobile || fullscreen) {
+    if (isMobile) {
         return <Drawer
             anchor={direction === 'rtl' ? 'right' : 'left'}
             open={showSlider}

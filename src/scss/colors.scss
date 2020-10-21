@@ -3,6 +3,7 @@
     --border-highlight: black;
     --border-focus: 2px solid black;
     --box-shadow-color: rgba(0, 0, 0, .2);
+    --bar-background: lightgray;
     --main-background: white;
     --main-border: lightgray;
     --app-bar-background: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
@@ -20,6 +21,8 @@
     --hover-color: #8EC5FC;
     --hover-text-color: black;
     --hover-fill: rgba(0, 168, 232, 1);
+    --selected-color: darkgray;
+    --active-color: darkgray;
 }
 
 [data-theme="dark"] {
@@ -27,6 +30,7 @@
     --border-highlight: white;
     --border-focus: 2px solid white;
     --box-shadow-color: rgb(42, 42, 57);
+    --bar-background: black;
     --main-background: #161625;
     --main-border: darkgray;
     --app-bar-background: radial-gradient(circle farthest-corner at 10% 20%, rgba(0, 52, 89, 1) 0%, rgba(0, 168, 232, 1) 90%);
@@ -44,4 +48,6 @@
     --hover-color: rgba(0, 168, 232, 1);
     --hover-text-color: black;
     --hover-fill: #8EC5FC;
+    --selected-color: rgb(166, 213, 250);
+    --active-color: rgb(166, 213, 250);
 }

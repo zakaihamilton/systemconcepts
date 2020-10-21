@@ -12,7 +12,7 @@ export const ZoomStore = new Store({
     scale: 1.0
 });
 
-export default function Fullscreen() {
+export default function Zoom() {
     const size = useContext(PageSize);
     const { scale } = ZoomStore.useState();
     const translations = useTranslations();

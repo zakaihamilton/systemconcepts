@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import AppBar from "./AppBar";
 import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
 import { Store } from "pullstate";
@@ -9,9 +8,10 @@ import Page from "./Page";
 import Theme from "./Theme";
 import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
-import Fullscreen from "./Fullscreen";
 import Header from "./Header";
 import Bookmarks from "./Bookmarks";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { useActivePages } from "@/util/pages";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -21,8 +21,7 @@ export const MainStoreDefaults = {
     language: "auto",
     menuViewList: "List",
     showSideBar: true,
-    showDrawer: false,
-    fullscreen: false
+    showDrawer: false
 };
 
 export const MainStore = new Store(MainStoreDefaults);
@@ -30,7 +29,8 @@ export const MainStore = new Store(MainStoreDefaults);
 export default function Main() {
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
-    const { direction, showSideBar, menuViewList, fullscreen } = MainStore.useState();
+    const { direction, showSideBar, menuViewList } = MainStore.useState();
+    const pages = useActivePages();
     useLocalStorage("MainStore", MainStore);
 
     useEffect(() => {
@@ -56,23 +56,21 @@ export default function Main() {
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar && !isMobile && !fullscreen,
+        sidebar: showSideBar && !isMobile,
         list: menuViewList === "List",
-        rtl: direction === "rtl",
-        fullscreen
+        rtl: direction === "rtl"
     });
 
     return <>
         <Header />
         <Theme>
             <div className={className}>
+                <Breadcrumbs className={styles.bar} items={pages} bar={true} />
                 <Sync />
-                <Fullscreen />
                 <Bookmarks />
-                {!fullscreen && <AppBar />}
                 <SideBar />
                 <div className={styles.main}>
-                    <Page />
+                    <Page pages={pages} />
                 </div>
             </div>
         </Theme>

@@ -72,8 +72,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
     </>;
 }
 
-export default function BreadcrumbsWidget({ items, border, menu, hideRoot, navigateLast }) {
-    const { fullscreen } = MainStore.useState();
+export default function BreadcrumbsWidget({ className, items, border, bar, hideRoot, navigateLast }) {
     const breadcrumbItems = (items || []).map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
@@ -89,14 +88,14 @@ export default function BreadcrumbsWidget({ items, border, menu, hideRoot, navig
     }).filter(Boolean);
 
     return (
-        <div className={clsx(styles.root, border && styles.border)}>
+        <div className={clsx(styles.root, bar && styles.bar, border && styles.border, className)}>
             <div className={styles.row}>
-                {fullscreen && <MenuIcon />}
-                {fullscreen && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                <MenuIcon />
+                <Divider classes={{ root: styles.divider }} orientation="vertical" />
                 <div className={styles.breadcrumbs}>
                     {breadcrumbItems}
                 </div>
-                {!!menu && <Toolbar collapsable={true} />}
+                {!!bar && <Toolbar collapsable={true} />}
             </div>
         </div>
     );
