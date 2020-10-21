@@ -6,6 +6,7 @@ import { useTranslations } from "@/util/translations";
 import { Store } from "pullstate";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { useTimer } from "@/util/timers";
+import { useDeviceType } from "@/util/styles";
 
 registerToolbar("Search");
 
@@ -32,6 +33,7 @@ export function useSearch(updateCallback) {
 }
 
 export default function Search() {
+    const isPhone = useDeviceType() === "phone";
     const { search, show } = SearchStore.useState();
     const [value, setValue] = useState(search || "");
     const { SEARCH } = useTranslations();
@@ -50,8 +52,8 @@ export default function Search() {
         {
             id: "search",
             divider: true,
-            location: "header",
             menu: false,
+            location: isPhone && "header",
             element: <div className={styles.search}>
                 <div className={styles.searchIcon}>
                     <SearchIcon />
