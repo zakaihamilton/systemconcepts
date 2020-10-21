@@ -1,11 +1,14 @@
 .root {
-    border-top: 1px solid var(--border-color);
     padding-left: 0.5em;
     padding-right: 0.5em;
     height: 4em;
     display: flex;
     overflow: hidden;
-    background-color: var(--header-background);
     box-sizing: border-box;
     justify-content: center;
+}
+
+.toolbar {
+    background-color: var(--header-background);
+    border-radius: 0.5em 0.5em 0 0;
 }
