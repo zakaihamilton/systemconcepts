@@ -80,8 +80,7 @@ export default function BookmarksPage() {
         {
             id: "locationWidget",
             title: translations.LOCATION,
-            sortable: "id",
-            icon: <BookmarkIcon />
+            sortable: "id"
         }
     ];
 

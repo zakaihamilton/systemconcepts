@@ -90,7 +90,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     return (
         <div className={clsx(styles.root, bar && styles.bar, border && styles.border, className)}>
             <div className={styles.row}>
-                <MenuIcon />
+                {!!bar && <MenuIcon />}
                 <Divider classes={{ root: styles.divider }} orientation="vertical" />
                 <div className={styles.breadcrumbs}>
                     {breadcrumbItems}
