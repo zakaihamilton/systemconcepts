@@ -8,39 +8,22 @@ import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import { useTimer } from "@/util/timers";
 import { useDeviceType } from "@/util/styles";
 
-registerToolbar("Search");
+registerToolbar("Search", 100);
 
 export const SearchStore = new Store({
-    search: "",
-    show: 0
+    search: ""
 });
 
 export function useSearch(updateCallback) {
-    const { search } = SearchStore.useState();
-    useEffect(() => {
-        SearchStore.update(s => {
-            s.show++;
-        });
-        const unsubscribe = SearchStore.subscribe(s => s.search, updateCallback);
-        return () => {
-            SearchStore.update(s => {
-                s.show--;
-            });
-            unsubscribe();
-        };
-    }, []);
-    return { search };
-}
-
-export default function Search() {
     const isPhone = useDeviceType() === "phone";
-    const { search, show } = SearchStore.useState();
+    const { search } = SearchStore.useState();
     const [value, setValue] = useState(search || "");
     const { SEARCH } = useTranslations();
     useTimer(() => {
         SearchStore.update(s => {
             s.search = value;
         });
+        updateCallback && updateCallback(value);
     }, 500, [value]);
 
     const onChangeText = event => {
@@ -73,7 +56,7 @@ export default function Search() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Search", items: toolbarItems, visible: show, depends: [search, value] });
+    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value] });
 
-    return null;
+    return search;
 }

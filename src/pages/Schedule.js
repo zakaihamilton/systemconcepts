@@ -25,8 +25,7 @@ export default function SchedulePage() {
     const translations = useTranslations();
     const [syncCounter] = useSync();
     let [sessions, loading] = useSessions([syncCounter]);
-    const { search } = useSearch(() => {
-    });
+    const search = useSearch();
     let { date, viewMode } = ScheduleStore.useState();
     if (!date) {
         date = new Date();

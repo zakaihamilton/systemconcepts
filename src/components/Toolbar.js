@@ -16,9 +16,9 @@ export const ToolbarStore = new Store({
     sections: [],
 });
 
-export function registerToolbar(id) {
+export function registerToolbar(id, sortKey) {
     ToolbarStore.update(s => {
-        s.sections = [...s.sections, { items: [], used: 0, id }];
+        s.sections = [...s.sections, { items: [], used: 0, id, sortKey }];
     });
 }
 
@@ -55,14 +55,21 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
 export function useToolbarItems({ location }) {
     const { sections } = ToolbarStore.useState();
 
-    let sectionItems = sections.filter(section => section.used && section.visible).map(section => section.items.map((item, idx, list) => {
+    let toolbars = sections.filter(section => section.used && section.visible);
+
+    toolbars.sort((a, b) => {
+        const aKey = a.sortKey || 0;
+        const bKey = b.sortKey || 0;
+        return aKey - bKey;
+    });
+
+    let sectionItems = toolbars.map(section => section.items.map((item, idx, list) => {
         item = { ...item };
         if (idx === list.length - 1) {
             item.divider = true;
         }
         return item;
     })).flat();
-
     sectionItems = sectionItems.filter(item => item && (item.location === location || (!location && !item.location)));
     return sectionItems;
 }
@@ -71,16 +78,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
     const isDesktop = useDeviceType() === "desktop";
     const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
-
-    let sectionItems = sections.filter(section => section.used && section.visible).map(section => section.items.map((item, idx, list) => {
-        item = { ...item };
-        if (idx === list.length - 1) {
-            item.divider = true;
-        }
-        return item;
-    })).flat();
-
-    sectionItems = sectionItems.filter(item => item && (item.location === location || (!location && !item.location)));
+    const sectionItems = useToolbarItems({ location });
     const toolbarItems = sectionItems.filter(item => {
         const { menu } = item;
         if (typeof menu === "undefined") {

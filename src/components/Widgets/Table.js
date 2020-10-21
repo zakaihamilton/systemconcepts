@@ -91,7 +91,7 @@ export default function TableWidget(props) {
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 10, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const size = useContext(PageSize);
-    const { search } = useSearch(() => {
+    const search = useSearch(() => {
         store.update(s => {
             s.offset = 0;
         });

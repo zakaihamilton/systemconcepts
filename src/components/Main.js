@@ -10,7 +10,6 @@ import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
 import Head from "./Head";
 import Bookmarks from "./Bookmarks";
-import Search from "@/components/Search";
 import Header from "./Header";
 import Footer from "./Footer";
 import Title from "./Title";
@@ -69,7 +68,6 @@ export default function Main() {
         <Theme>
             <div className={className}>
                 <Title />
-                <Search />
                 <Sync />
                 <Bookmarks />
                 <SideBar />
