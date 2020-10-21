@@ -106,7 +106,7 @@ export default function StatusBar({ data, mapper, store }) {
                     {selectIcon}
                 </Tooltip>
             </IconButton>}
-            {mode === "delete" && !busy && <IconButton variant="contained" onClick={selectClick}>
+            {mode === "delete" && !busy && <IconButton variant="contained" onClick={onClick}>
                 <Tooltip title={translations[mode.toUpperCase()]} arrow>
                     <DeleteIcon />
                 </Tooltip>
