@@ -342,7 +342,7 @@ export default function TableWidget(props) {
                 createSortHandler={createSortHandler} />
         });
 
-        const itemsPerPage = Math.floor(size.height / rowHeightInPixels) - 1;
+        const itemsPerPage = 50;
         const pageCount = Math.ceil(numItems / itemsPerPage);
         const startIdx = offset;
         const endIdx = startIdx + itemsPerPage;
