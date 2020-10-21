@@ -39,7 +39,7 @@ export default function Search() {
         SearchStore.update(s => {
             s.search = value;
         });
-    }, 250, [value]);
+    }, 500, [value]);
 
     const onChangeText = event => {
         const { value } = event.target;
