@@ -19,7 +19,6 @@ import { useDeviceType } from "@/util/styles";
 
 export const SessionsStore = new Store({
     groupFilter: "",
-    dateFilter: "",
     order: "asc",
     orderBy: "date",
     viewMode: "list"
@@ -30,7 +29,7 @@ export default function SessionsPage() {
     const translations = useTranslations();
     const [syncCounter, syncing] = useSync();
     const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
-    const { viewMode, groupFilter, dateFilter } = SessionsStore.useState();
+    const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore);
     const gotoItem = item => {
         addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
@@ -145,9 +144,8 @@ export default function SessionsPage() {
     };
 
     const filter = item => {
-        let { date, group } = item;
-        let show = !dateFilter || dateFilter === date;
-        show = show && (!groupFilter || groupFilter === (group[0].toUpperCase() + group.slice(1)));
+        let { group } = item;
+        let show = (!groupFilter || groupFilter === (group[0].toUpperCase() + group.slice(1)));
         return show;
     };
 
@@ -172,7 +170,7 @@ export default function SessionsPage() {
                     className: styles.gridItem
                 }
             }}
-            depends={[groupFilter, dateFilter, translations, viewMode]}
+            depends={[groupFilter, translations, viewMode]}
         />
     </>;
 }
