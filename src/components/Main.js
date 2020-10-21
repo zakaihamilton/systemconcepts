@@ -10,11 +10,10 @@ import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
 import Head from "./Head";
 import Bookmarks from "./Bookmarks";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import { useActivePages } from "@/util/pages";
 import Search from "@/components/Search";
 import Header from "./Header";
 import Footer from "./Footer";
+import Title from "./Title";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -33,7 +32,6 @@ export default function Main() {
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
     const { direction, showSideBar, menuViewList } = MainStore.useState();
-    const pages = useActivePages();
     useLocalStorage("MainStore", MainStore);
 
     useEffect(() => {
@@ -68,14 +66,14 @@ export default function Main() {
         <Head />
         <Theme>
             <div className={className}>
-                <Breadcrumbs className={styles.bar} items={pages} bar={true} />
+                <Title />
                 <Search />
                 <Sync />
                 <Bookmarks />
                 <SideBar />
                 <div className={styles.main}>
                     <Header />
-                    <Page pages={pages} />
+                    <Page />
                     <Footer />
                 </div>
             </div>

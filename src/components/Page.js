@@ -4,10 +4,12 @@ import { useResize } from "@/util/size";
 import { MainStore } from "@/components/Main";
 import Player from "@/pages/Player";
 import { ToolbarStore } from "@/components/Toolbar";
+import { useActivePages } from "@/util/pages";
 
 export const PageSize = createContext();
 
-export default function Page({ pages }) {
+export default function Page() {
+    const pages = useActivePages();
     const { hash, showSideBar } = MainStore.useState();
     const activePage = pages[pages.length - 1];
     const ref = useRef();
