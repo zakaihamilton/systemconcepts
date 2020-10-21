@@ -88,7 +88,7 @@ export default function TableWidget(props) {
     columns = columns || [];
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
-    const { itemsPerPage = 50, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
+    const { itemsPerPage = 10, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const size = useContext(PageSize);
     const { search } = useSearch(() => {
         store.update(s => {
@@ -295,9 +295,8 @@ export default function TableWidget(props) {
         return null;
     }
 
-    const height = size.height + "px";
     const style = {
-        maxHeight: height + "px",
+        maxHeight: size.height + "px",
         maxWidth: size.width + "px"
     };
 

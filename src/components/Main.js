@@ -40,7 +40,9 @@ export default function Main() {
         });
         window.onhashchange = function () {
             MainStore.update(s => {
-                s.hash = window.location.hash;
+                if (s.hash !== window.location.hash) {
+                    s.hash = window.location.hash;
+                }
             });
         };
         return () => {
