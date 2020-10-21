@@ -31,12 +31,12 @@ export default function Zoom() {
 
     useEffect(() => {
         const ref = size.ref;
-        if (ref) {
+        if (ref && ref.current) {
             ref.current.style.transform = `scale(${scale})`;
             ref.current.style.transformOrigin = "0% 0% 0px";
         }
         return () => {
-            if (ref.current) {
+            if (ref && ref.current) {
                 ref.current.style.transform = "";
                 ref.current.style.transformOrigin = "";
             }

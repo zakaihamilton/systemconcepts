@@ -16,6 +16,7 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@material-ui/core/Button";
 import { addPath } from "@/util/pages";
 import { Store } from "pullstate";
+import BuildIcon from '@material-ui/icons/Build';
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -124,6 +125,12 @@ export default function Settings() {
             widget: <Button variant="contained" onClick={() => addPath("reset")}>
                 {translations.RESET}
             </Button>
+        },
+        {
+            id: "version",
+            icon: <BuildIcon />,
+            name: translations.VERSION,
+            widget: VERSION
         }
     ];
 

@@ -56,6 +56,7 @@ export default function Term({ id, onClick, ...props }) {
     const toolbarItems = [
         {
             id: "showconcepts",
+            location: "header",
             name: showConcepts ? translations.HIDE_CONCEPTS : translations.SHOW_CONCEPTS,
             icon: showConcepts ? <VisibilityOffIcon /> : <VisibilityIcon />,
             onClick: toggleShowConcepts

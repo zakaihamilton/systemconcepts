@@ -860,6 +860,10 @@ export default {
         {
             "id": "UNKNOWN",
             "value": "Unknown"
+        },
+        {
+            "id": "VERSION",
+            "value": "Version"
         }
     ]
 };

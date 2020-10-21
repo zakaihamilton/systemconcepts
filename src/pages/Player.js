@@ -91,6 +91,7 @@ export default function PlayerPage({ show = false, suffix }) {
             id: "player",
             name: translations.PLAYER,
             icon: <VideoLabelIcon />,
+            menu: false,
             onClick: gotoPlayer
         }
     ].filter(Boolean);

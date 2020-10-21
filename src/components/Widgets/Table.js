@@ -196,6 +196,7 @@ export default function TableWidget(props) {
         },
         viewMode !== "table" && !!sortItems.length && {
             id: "sort",
+            location: "header",
             name: translations.SORT,
             icon: <SortIcon />,
             items: sortItems,

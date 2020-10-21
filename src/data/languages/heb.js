@@ -856,6 +856,10 @@ export default {
         {
             "id": "UNKNOWN",
             "value": "לא ידוע"
+        },
+        {
+            "id": "VERSION",
+            "value": "גירסה"
         }
     ]
 };
