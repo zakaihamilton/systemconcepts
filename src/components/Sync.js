@@ -24,7 +24,7 @@ export default function Sync() {
         {!!duration && formattedDuration}
     </span>;
 
-    const menuItems = [
+    const toolbarItems = [
         active && updateSync && {
             id: "sync",
             name,
@@ -42,6 +42,6 @@ export default function Sync() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: menuItems, depends: [isBusy, translations, updateSync, fullSync, active, duration, isDesktop] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [isBusy, translations, updateSync, fullSync, active, duration, isDesktop] });
     return null;
 }

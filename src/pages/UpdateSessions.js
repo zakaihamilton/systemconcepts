@@ -38,7 +38,7 @@ export default function UpdateSessions({ }) {
         {!!duration && formattedDuration}
     </span>;
 
-    const menuItems = [
+    const toolbarItems = [
         syncEnabled && {
             id: "sessions",
             name,
@@ -47,7 +47,7 @@ export default function UpdateSessions({ }) {
         }
     ];
 
-    useToolbar({ id: "UpdateSessions", items: menuItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
+    useToolbar({ id: "UpdateSessions", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
 
     const columns = [
         {

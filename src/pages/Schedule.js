@@ -9,7 +9,7 @@ import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
-import { useSearch } from "@/components/AppBar/Search";
+import { useSearch } from "@/components/Search";
 import Message from "@/widgets/Message";
 import SyncIcon from '@material-ui/icons/Sync';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
@@ -32,7 +32,7 @@ export default function SchedulePage() {
         date = new Date();
     }
 
-    const menuItems = [
+    const toolbarItems = [
         viewType !== "month" && {
             id: "month",
             name: translations.MONTH_VIEW,
@@ -57,7 +57,7 @@ export default function SchedulePage() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Schedule", items: menuItems, depends: [translations, viewType] });
+    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewType] });
 
     const items = useMemo(() => {
         let items = sessions;

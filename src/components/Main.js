@@ -12,6 +12,7 @@ import Header from "./Header";
 import Bookmarks from "./Bookmarks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useActivePages } from "@/util/pages";
+import Search from "@/components/Search";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -66,6 +67,7 @@ export default function Main() {
         <Theme>
             <div className={className}>
                 <Breadcrumbs className={styles.bar} items={pages} bar={true} />
+                <Search />
                 <Sync />
                 <Bookmarks />
                 <SideBar />

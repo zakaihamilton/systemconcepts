@@ -105,7 +105,7 @@ export default function MonthView({ sessions, date, store }) {
         });
     };
 
-    const menuItems = [
+    const toolbarItems = [
         {
             id: "today",
             name: translations.TODAY,
@@ -146,7 +146,7 @@ export default function MonthView({ sessions, date, store }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "MonthView", items: menuItems, depends: [translations, month] });
+    useToolbar({ id: "MonthView", items: toolbarItems, depends: [translations, month] });
 
     return <div className={styles.root}>
         <div className={styles.grid}>

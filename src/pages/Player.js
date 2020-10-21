@@ -86,7 +86,7 @@ export default function PlayerPage({ show = false, suffix }) {
         }
     }, [data && data.path]);
 
-    const menuItems = [
+    const toolbarItems = [
         hash && {
             id: "player",
             name: translations.PLAYER,
@@ -95,7 +95,7 @@ export default function PlayerPage({ show = false, suffix }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: menuItems, visible: !show, depends: [hash, translations] });
+    useToolbar({ id: "Player", items: toolbarItems, visible: !show, depends: [hash, translations] });
 
     const style = {
         visibility: show ? "visible" : "hidden",

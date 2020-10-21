@@ -11,7 +11,7 @@ import { importData, exportData } from "@/util/importExport";
 import Row from "./Table/Row";
 import Item from "./Table/Item";
 import Navigator from "./Table/Navigator";
-import { useSearch } from "@/components/AppBar/Search";
+import { useSearch } from "@/components/Search";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
@@ -147,7 +147,7 @@ export default function TableWidget(props) {
         });
     }, [orderBy, order]);
 
-    const menuItems = [
+    const toolbarItems = [
         data && name && onImport && {
             id: "import",
             name: translations.IMPORT,
@@ -215,7 +215,7 @@ export default function TableWidget(props) {
         }).filter(Boolean) : []
     ].filter(Boolean);
 
-    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode, sortItems] });
+    useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems] });
 
     useEffect(() => {
         setEmpty(false);

@@ -43,7 +43,7 @@ export default function Zoom() {
         };
     }, [scale, size.ref]);
 
-    const menuItems = [
+    const toolbarItems = [
         {
             id: "zoom_in",
             name: translations.ZOOM_IN,
@@ -62,6 +62,6 @@ export default function Zoom() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Zoom", items: menuItems, depends: [translations, scale] });
+    useToolbar({ id: "Zoom", items: toolbarItems, depends: [translations, scale] });
     return null;
 }

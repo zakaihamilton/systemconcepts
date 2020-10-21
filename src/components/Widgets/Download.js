@@ -7,7 +7,7 @@ registerToolbar("Download");
 export default function Download({ onClick, visible }) {
     const translations = useTranslations();
 
-    const menuItems = [
+    const toolbarItems = [
         visible && {
             id: "download",
             name: translations.DOWNLOAD,
@@ -16,6 +16,6 @@ export default function Download({ onClick, visible }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Download", items: menuItems, depends: [visible, translations] });
+    useToolbar({ id: "Download", items: toolbarItems, depends: [visible, translations] });
     return null;
 }

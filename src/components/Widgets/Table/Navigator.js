@@ -46,7 +46,7 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
         setPageIndex && setPageIndex(pageIndex);
     };
 
-    const menuItems = [
+    const toolbarItems = [
         {
             id: "firstPage",
             name: translations.FIRST_PAGE,
@@ -107,7 +107,7 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Navigator", items: menuItems, visible: pageCount > 1, depends: [translations, pageIndex, pageCount] });
+    useToolbar({ id: "Navigator", items: toolbarItems, visible: pageCount > 1, depends: [translations, pageIndex, pageCount] });
 
     return null;
 }

@@ -122,7 +122,7 @@ export default function WeekView({ sessions, date, store }) {
         });
     };
 
-    const menuItems = [
+    const toolbarItems = [
         {
             id: "today",
             name: translations.TODAY,
@@ -169,7 +169,7 @@ export default function WeekView({ sessions, date, store }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "WeekView", items: menuItems, depends: [translations, month] });
+    useToolbar({ id: "WeekView", items: toolbarItems, depends: [translations, month] });
 
     return <div className={styles.root}>
         <div className={clsx(styles.grid, isPhone && styles.mobile)}>

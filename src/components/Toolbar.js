@@ -80,9 +80,21 @@ export default function Toolbar({ location, divider, collapsable }) {
         return item;
     })).flat();
 
-    sectionItems = sectionItems.filter(item => item.location === location);
-    const toolbarItems = sectionItems.filter(item => item && !item.menu && (isDesktop || !collapsable));
-    const menuItems = sectionItems.filter(item => item && (item.menu || (!isDesktop && collapsable)));
+    sectionItems = sectionItems.filter(item => item && item.location === location);
+    const toolbarItems = sectionItems.filter(item => {
+        const { menu } = item;
+        if (typeof menu === "undefined") {
+            return isDesktop || !collapsable;
+        }
+        return !menu;
+    });
+    const menuItems = sectionItems.filter(item => {
+        const { menu } = item;
+        if (typeof menu === "undefined") {
+            return !isDesktop && collapsable;
+        }
+        return menu;
+    });
 
     return <div className={styles.toolbar}>
         {toolbarItems.map((item, idx) => {
