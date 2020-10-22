@@ -27,6 +27,9 @@
     --hover-fill: rgba(0, 168, 232, 1);
     --selected-color: rgb(255, 255, 255, 0.4);
     --active-color: rgb(255, 255, 255, 0.4);
+    --icon-color: rgb(12, 12, 27);
+    --icon-background: lightgray;
+    --icon-focus-color: black;
 }
 
 [data-theme="dark"] {
@@ -58,4 +61,7 @@
     --hover-fill: #8EC5FC;
     --selected-color: rgb(166, 213, 250);
     --active-color: rgb(166, 213, 250);
+    --icon-color: rgb(12, 12, 27);
+    --icon-background: lightgray;
+    --icon-focus-color: rgb(166, 213, 250);
 }

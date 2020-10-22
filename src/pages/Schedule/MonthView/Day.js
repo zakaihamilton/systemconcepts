@@ -42,8 +42,8 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
         </div>
         <div className={styles.sessions}>
             {!!items.length && <Menu hover={true} items={items}>
-                <HoverButton>
-                    <VideoLabelIcon />
+                <HoverButton size={48}>
+                    <VideoLabelIcon fontSize="small" />
                 </HoverButton>
             </Menu>}
         </div>

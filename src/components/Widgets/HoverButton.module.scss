@@ -8,16 +8,16 @@
     position: relative;
 }
 
-.buttonSuccess {
-    background-color: green;
+.button {
+    background-color: var(--icon-background) !important;
+    color: var(--icon-color) !important;
 }
 
-.buttonSuccess {
-    background-color: lightgreen;
+.button:hover {
+    box-shadow: 1px 1px 4px 1px var(--icon-focus-color) !important;
 }
 
 .fabProgress {
-    color: green;
     position: absolute;
     top: -6px;
     left: -6px;
@@ -26,10 +26,13 @@
 }
 
 .buttonProgress {
-    color: green;
     position: absolute;
     top: 50%;
     left: 50%;
     margin-top: -12px;
     margin-left: -12px;
+}
+
+.progressContainer {
+    color: var(--icon-focus-color);
 }
