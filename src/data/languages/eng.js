@@ -871,11 +871,11 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "Sign in into your account"
+            "value": "Sign in into your account to update the list of sessions"
         },
         {
             "id": "REQUIRE_FULL_SYNC",
-            "value": "Do a full sync to update the sessions"
+            "value": "Do a full sync to update the list of sessions"
         },
         {
             "id": "WAIT_FOR_APPROVAL",

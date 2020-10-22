@@ -871,11 +871,11 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "Login em sua conta"
+            "value": "Faça login em sua conta para atualizar a lista de sessões"
         },
         {
             "id": "REQUIRE_FULL_SYNC",
-            "value": "Sincronização completa para atualizar as sessões"
+            "value": "Faça uma sincronização completa para atualizar a lista de sessões"
         },
         {
             "id": "WAIT_FOR_APPROVAL",
