@@ -9,6 +9,11 @@
     @include media("<=tablet") {
         grid-template: 4em auto / 0em auto;
     }
+
+    font-family: "Roboto",
+    "Helvetica",
+    "Arial",
+    sans-serif;
 }
 
 .root.sidebar.list {
