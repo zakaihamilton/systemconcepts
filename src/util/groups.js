@@ -50,6 +50,7 @@ export function useGroups(depends) {
         catch (err) {
             console.error(err);
             GroupsStore.update(s => {
+                s.groups = [];
                 s.busy = false;
             })
         }

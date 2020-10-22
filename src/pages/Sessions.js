@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
 import { addPath } from "@/util/pages";
-import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import { Store } from "pullstate";
 import Group from "@/widgets/Group";
@@ -31,8 +30,7 @@ export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const [syncCounter] = useSync();
-    const [sessions, loading] = useSessions([syncCounter]);
+    const [sessions, loading, askForFullSync] = useSessions();
     const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const gotoItem = item => {
@@ -157,10 +155,20 @@ export default function SessionsPage() {
 
     useEffect(() => {
         SessionsStore.update(s => {
-            s.mode = !isSignedIn ? "signin" : "";
-            s.message = !isSignedIn ? translations.REQUIRE_SIGNIN : "";
+            if (!isSignedIn) {
+                s.mode = "signin";
+                s.message = translations.REQUIRE_SIGNIN;
+            }
+            else if (askForFullSync) {
+                s.mode = "fullsync";
+                s.message = translations.REQUIRE_FULL_SYNC;
+            }
+            else {
+                s.mode = "";
+                s.message = "";
+            }
         });
-    }, [isSignedIn, translations]);
+    }, [isSignedIn, askForFullSync, translations]);
 
     return <>
         <Table

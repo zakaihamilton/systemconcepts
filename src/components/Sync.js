@@ -1,3 +1,4 @@
+import { createContext, useMemo } from "react";
 import styles from "./Sync.module.scss";
 import { useDeviceType, useStyles } from "@/util/styles";
 import { useSyncFeature } from "@/util/sync";
@@ -9,7 +10,9 @@ import { formatDuration } from "@/util/string";
 
 registerToolbar("Sync");
 
-export default function Sync() {
+export const SyncContext = createContext();
+
+export default function Sync({ children }) {
     const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
     const [updateSync, fullSync, isBusy, error, active, duration] = useSyncFeature();
@@ -45,5 +48,12 @@ export default function Sync() {
     ].filter(Boolean);
 
     useToolbar({ id: "Sync", items: toolbarItems, depends: [isBusy, translations, updateSync, fullSync, active, duration, isDesktop] });
-    return null;
+
+    const syncContext = useMemo(() => {
+        return { updateSync, fullSync };
+    }, [updateSync, fullSync]);
+
+    return <SyncContext.Provider value={syncContext}>
+        {children}
+    </SyncContext.Provider>;
 }

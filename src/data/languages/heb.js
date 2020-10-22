@@ -867,7 +867,11 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "בבקשה תירשם לחשבון שלך"
+            "value": "תירשם לחשבון שלך"
+        },
+        {
+            "id": "REQUIRE_FULL_SYNC",
+            "value": "תעשה סנכרון מלא כדי לעדכן את השיעורים"
         }
     ]
 };

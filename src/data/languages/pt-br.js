@@ -871,7 +871,11 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "Faça login em sua conta"
+            "value": "Login em sua conta"
+        },
+        {
+            "id": "REQUIRE_FULL_SYNC",
+            "value": "Sincronização completa para atualizar as sessões"
         }
     ]
 };

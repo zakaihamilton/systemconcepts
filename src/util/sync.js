@@ -189,5 +189,5 @@ export function useSyncFeature() {
         }
     }, [online, _loaded, isSignedIn, visible]);
 
-    return [online && _loaded && syncNow, fullSync, busy, error, active, duration];
+    return [online && _loaded && syncNow, online && _loaded && fullSync, busy, error, active, duration];
 }

@@ -871,7 +871,11 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "Please sign in into your account"
+            "value": "Sign in into your account"
+        },
+        {
+            "id": "REQUIRE_FULL_SYNC",
+            "value": "Do a full sync to update the sessions"
         }
     ]
 };

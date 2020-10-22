@@ -3,7 +3,6 @@ import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
 import { Store } from "pullstate";
-import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
@@ -26,8 +25,7 @@ registerToolbar("Schedule");
 export default function SchedulePage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const [syncCounter] = useSync();
-    let [sessions, loading] = useSessions([syncCounter]);
+    let [sessions, loading, askForFullSync] = useSessions();
     const search = useSearch();
     let { date, viewMode } = ScheduleStore.useState();
     if (!date) {
@@ -77,10 +75,20 @@ export default function SchedulePage() {
 
     useEffect(() => {
         ScheduleStore.update(s => {
-            s.mode = !isSignedIn ? "signin" : "";
-            s.message = !isSignedIn ? translations.REQUIRE_SIGNIN : "";
+            if (!isSignedIn) {
+                s.mode = "signin";
+                s.message = translations.REQUIRE_SIGNIN;
+            }
+            else if (askForFullSync) {
+                s.mode = "fullsync";
+                s.message = translations.REQUIRE_FULL_SYNC;
+            }
+            else {
+                s.mode = "";
+                s.message = "";
+            }
         });
-    }, [isSignedIn, translations]);
+    }, [isSignedIn, askForFullSync, translations]);
 
     return <div className={styles.root}>
         {statusBar}

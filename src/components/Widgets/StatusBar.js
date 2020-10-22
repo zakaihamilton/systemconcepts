@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -12,8 +12,11 @@ import clsx from "clsx";
 import ButtonSelector from "@/components/Widgets/ButtonSelector";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { setPath } from "@/util/pages";
+import { SyncContext } from "@/components/Sync";
+import Button from "@material-ui/core/Button";
 
 export default function StatusBar({ data, mapper, store }) {
+    const syncContext = useContext(SyncContext);
     const translations = useTranslations();
     const { mode, select, message, onDone, severity = "info" } = store.useState();
     const [busy, setBusy] = useState(false);
@@ -116,16 +119,20 @@ export default function StatusBar({ data, mapper, store }) {
                     <DeleteIcon />
                 </Tooltip>
             </IconButton>}
-            {mode && mode !== "delete" && mode !== "signin" && <ButtonSelector items={modeItems} state={[mode, setMode]} disabled={disabled} variant="contained" onClick={onClick}>
+            {mode && (mode === "copy" || mode === "move") && <ButtonSelector items={modeItems} state={[mode, setMode]} disabled={disabled} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
                 {modeItems && "\u2026"}
             </ButtonSelector>}
             <Typography className={styles.message}>
                 {messageText}
             </Typography>
-            {mode && mode === "signin" && <ButtonSelector items={modeItems} state={[mode, setMode]} variant="contained" onClick={gotoAccount}>
+            <div style={{ flex: 1 }} />
+            {mode && mode === "signin" && <Button variant="contained" onClick={gotoAccount}>
                 {translations.ACCOUNT}
-            </ButtonSelector>}
+            </Button>}
+            {mode && mode === "fullsync" && <Button variant="contained" disabled={!syncContext.fullSync} onClick={syncContext.fullSync}>
+                {translations.FULL_SYNC}
+            </Button>}
             {!busy && <IconButton variant="contained" onClick={handleClose}>
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />

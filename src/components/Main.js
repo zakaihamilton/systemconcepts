@@ -68,14 +68,15 @@ export default function Main() {
         <Theme>
             <div className={className}>
                 <Title />
-                <Sync />
-                <Bookmarks />
-                <SideBar />
-                <div className={styles.main}>
-                    <Header />
-                    <Page />
-                    <Footer />
-                </div>
+                <Sync>
+                    <Bookmarks />
+                    <SideBar />
+                    <div className={styles.main}>
+                        <Header />
+                        <Page />
+                        <Footer />
+                    </div>
+                </Sync>
             </div>
         </Theme>
     </>;

@@ -47,8 +47,7 @@ export function useSearch(updateCallback) {
                     onChange={onChangeText}
                     type="search"
                     classes={{
-                        root: styles.inputRoot,
-                        input: styles.inputInput,
+                        root: styles.inputRoot
                     }}
                     inputProps={{ 'aria-label': 'search' }}
                 />
