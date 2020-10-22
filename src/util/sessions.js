@@ -164,9 +164,7 @@ export function useSessions(depends = [], filterSessions = true) {
             items: groupsItems,
             active: groupFilter.length,
             divider: true,
-            disabled: !groupsItems.length,
-            menu: false,
-            location: "header"
+            disabled: !groupsItems.length
         }
     ].filter(Boolean);
 

@@ -56,7 +56,7 @@ export function useSearch(updateCallback) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value] });
+    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone] });
 
     return search;
 }
