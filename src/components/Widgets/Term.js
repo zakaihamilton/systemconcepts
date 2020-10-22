@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import styles from "./Term.module.scss";
 import { useTerms } from "@/util/terms";
 import Tooltip from '@material-ui/core/Tooltip';
@@ -82,7 +83,7 @@ export default function Term({ id, onClick, ...props }) {
     const classes = useStyles({ ...phase });
     const { name = "", explanation = "", description = "", concept = "", transliteration = "" } = term;
     let { icon } = term;
-    const toLines = (text, ...props) => (text || "").split("\n").map((line, index) => <React.Fragment key={index}><span {...props}>{line}</span><br /></React.Fragment>);
+    const toLines = (text, ...props) => (text || "").split("\n").map((line, index) => <Fragment key={index}><span {...props}>{line}</span><br /></Fragment>);
     if (!icon && type) {
         icon = type.icon;
     }

@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useCallback, cloneElement, Children } from "react";
 import styles from "./Form.module.scss";
 import Progress from "./Progress";
 
@@ -17,7 +17,7 @@ function FormItem({ child, record, setRecord, validate }) {
 
     const state = [record && record[id], setValue];
 
-    const element = React.cloneElement(child, {
+    const element = cloneElement(child, {
         state,
         validate
     });
@@ -28,7 +28,7 @@ function FormItem({ child, record, setRecord, validate }) {
 }
 
 export function FormGroup({ children, record, setRecord, validate }) {
-    const elements = React.Children.map(children, child => {
+    const elements = Children.map(children, child => {
         if (!child) {
             return null;
         }
@@ -40,11 +40,11 @@ export function FormGroup({ children, record, setRecord, validate }) {
 }
 
 export default function Form({ children, actions, data, loading, validate }) {
-    const elements = React.Children.map(children, child => {
+    const elements = Children.map(children, child => {
         if (!child) {
             return null;
         }
-        return React.cloneElement(child, { validate });
+        return cloneElement(child, { validate });
     }).filter(Boolean);
     return <div className={styles.root}>
         {!loading && data && <form className={styles.form} noValidate>

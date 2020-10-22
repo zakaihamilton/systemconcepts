@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, forwardRef, Children, cloneElement } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -21,7 +21,7 @@ const StyledMenu = withStyles({
     />
 ));
 
-const MenuWidget = React.forwardRef(function MenuComponent({ hover, items, children, onClick, selected: menuSelected, onVisible, ...props }, ref) {
+const MenuWidget = forwardRef(function MenuComponent({ hover, items, children, onClick, selected: menuSelected, onVisible, ...props }, ref) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const clickEnabled = items && items.length || onClick;
@@ -77,7 +77,7 @@ const MenuWidget = React.forwardRef(function MenuComponent({ hover, items, child
         ];
     });
 
-    children = React.Children.map(children, child => {
+    children = Children.map(children, child => {
         if (!child) {
             return null;
         }
@@ -91,7 +91,7 @@ const MenuWidget = React.forwardRef(function MenuComponent({ hover, items, child
                 handleClick(event);
             }
         }
-        const element = React.cloneElement(child, props);
+        const element = cloneElement(child, props);
         return element;
     });
 
