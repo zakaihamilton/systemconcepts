@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
@@ -13,6 +13,8 @@ import { useSearch } from "@/components/Search";
 import Message from "@/widgets/Message";
 import DataUsageIcon from '@material-ui/icons/DataUsage';
 import { useLocalStorage } from "@/util/store";
+import StatusBar from "@/widgets/StatusBar";
+import Cookies from 'js-cookie';
 
 export const ScheduleStore = new Store({
     date: null,
@@ -22,6 +24,7 @@ export const ScheduleStore = new Store({
 registerToolbar("Schedule");
 
 export default function SchedulePage() {
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const [syncCounter] = useSync();
     let [sessions, loading] = useSessions([syncCounter]);
@@ -70,7 +73,17 @@ export default function SchedulePage() {
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
 
+    const statusBar = <StatusBar store={ScheduleStore} />;
+
+    useEffect(() => {
+        ScheduleStore.update(s => {
+            s.mode = !isSignedIn ? "signin" : "";
+            s.message = !isSignedIn ? translations.REQUIRE_SIGNIN : "";
+        });
+    }, [isSignedIn, translations]);
+
     return <div className={styles.root}>
+        {statusBar}
         {viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         {loading && loadingElement}

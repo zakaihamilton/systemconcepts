@@ -868,6 +868,10 @@ export default {
         {
             "id": "ROWS_PER_PAGE",
             "value": "Linhas Por Página"
+        },
+        {
+            "id": "REQUIRE_SIGNIN",
+            "value": "Faça login em sua conta"
         }
     ]
 };

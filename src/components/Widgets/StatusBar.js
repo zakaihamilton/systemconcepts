@@ -11,10 +11,11 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
 import ButtonSelector from "@/components/Widgets/ButtonSelector";
 import DeleteIcon from '@material-ui/icons/Delete';
+import { setPath } from "@/util/pages";
 
 export default function StatusBar({ data, mapper, store }) {
     const translations = useTranslations();
-    const { mode, select, message, onDone, severity } = store.useState();
+    const { mode, select, message, onDone, severity = "info" } = store.useState();
     const [busy, setBusy] = useState(false);
 
     const open = !!(select || message);
@@ -82,7 +83,7 @@ export default function StatusBar({ data, mapper, store }) {
         });
     };
 
-    const modeItems = mode !== "delete" && [
+    const modeItems = mode !== "delete" && mode !== "signin" && [
         {
             id: "move",
             name: translations.MOVE
@@ -99,9 +100,13 @@ export default function StatusBar({ data, mapper, store }) {
         });
     };
 
+    const gotoAccount = () => {
+        setPath("account");
+    };
+
     return (
         <div className={clsx(styles.root, styles[severity])}>
-            {mode && !busy && <IconButton variant="contained" onClick={selectClick}>
+            {selectTitle && selectIcon && <IconButton variant="contained" onClick={selectClick}>
                 <Tooltip title={selectTitle} arrow>
                     {selectIcon}
                 </Tooltip>
@@ -111,13 +116,16 @@ export default function StatusBar({ data, mapper, store }) {
                     <DeleteIcon />
                 </Tooltip>
             </IconButton>}
-            {mode && mode !== "delete" && <ButtonSelector items={modeItems} state={[mode, setMode]} disabled={disabled} variant="contained" onClick={onClick}>
+            {mode && mode !== "delete" && mode !== "signin" && <ButtonSelector items={modeItems} state={[mode, setMode]} disabled={disabled} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
                 {modeItems && "\u2026"}
             </ButtonSelector>}
             <Typography className={styles.message}>
                 {messageText}
             </Typography>
+            {mode && mode === "signin" && <ButtonSelector items={modeItems} state={[mode, setMode]} variant="contained" onClick={gotoAccount}>
+                {translations.ACCOUNT}
+            </ButtonSelector>}
             {!busy && <IconButton variant="contained" onClick={handleClose}>
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />

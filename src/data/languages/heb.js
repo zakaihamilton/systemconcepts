@@ -864,6 +864,10 @@ export default {
         {
             "id": "ROWS_PER_PAGE",
             "value": "מספר שורות לעמוד"
+        },
+        {
+            "id": "REQUIRE_SIGNIN",
+            "value": "בבקשה תירשם לחשבון שלך"
         }
     ]
 };

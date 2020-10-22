@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
 import { addPath } from "@/util/pages";
@@ -16,6 +17,8 @@ import clsx from "clsx";
 import { useLocalStorage } from "@/util/store";
 import { formatDuration } from "@/util/string";
 import { useDeviceType } from "@/util/styles";
+import StatusBar from "@/widgets/StatusBar";
+import Cookies from 'js-cookie';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -25,6 +28,7 @@ export const SessionsStore = new Store({
 });
 
 export default function SessionsPage() {
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [syncCounter] = useSync();
@@ -149,6 +153,15 @@ export default function SessionsPage() {
         return show;
     };
 
+    const statusBar = <StatusBar store={SessionsStore} />;
+
+    useEffect(() => {
+        SessionsStore.update(s => {
+            s.mode = !isSignedIn ? "signin" : "";
+            s.message = !isSignedIn ? translations.REQUIRE_SIGNIN : "";
+        });
+    }, [isSignedIn, translations]);
+
     return <>
         <Table
             cellWidth="16em"
@@ -158,6 +171,7 @@ export default function SessionsPage() {
             columns={columns}
             data={sessions}
             loading={loading}
+            statusBar={statusBar}
             mapper={mapper}
             filter={filter}
             viewModes={{
