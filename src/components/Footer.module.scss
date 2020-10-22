@@ -6,9 +6,6 @@
     overflow: hidden;
     box-sizing: border-box;
     justify-content: center;
-}
-
-.toolbar {
+    align-items: center;
     background-color: var(--footer-background);
-    border-radius: 0.5em 0.5em 0 0;
 }
