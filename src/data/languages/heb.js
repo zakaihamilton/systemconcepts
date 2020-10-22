@@ -627,7 +627,11 @@ export default {
         },
         {
             "id": "SPEED_FAST",
-            "value": "הכי מהר"
+            "value": "יותר מהר"
+        },
+        {
+            "id": "SPEED_SUPER_FAST",
+            "value": "סופר מהיר"
         },
         {
             "id": "SPEED_DOUBLE",

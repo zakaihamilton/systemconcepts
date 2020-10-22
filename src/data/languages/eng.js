@@ -634,6 +634,10 @@ export default {
             "value": "Fast"
         },
         {
+            "id": "SPEED_SUPER_FAST",
+            "value": "Super Fast"
+        },
+        {
             "id": "SPEED_DOUBLE",
             "value": "Double Speed"
         },
