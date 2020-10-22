@@ -212,6 +212,29 @@ export function useFile(url, depends = [], mapping) {
     return [data, loading, error, write];
 }
 
+async function getRecursiveList(path) {
+    let listing = [];
+    const addListing = async path => {
+        const data = {};
+        const items = await storageMethods.getListing(path);
+        listing.push(...items);
+        for (const item of items) {
+            const { type, path } = item;
+            try {
+                if (type === "dir") {
+                    await addListing(path);
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }
+        return data;
+    }
+    await addListing(path);
+    return listing;
+}
+
 async function exportFolder(path) {
     const toData = async path => {
         const data = {};
@@ -317,5 +340,6 @@ export default {
     copyFolder,
     copyFile,
     moveFile,
-    moveFolder
+    moveFolder,
+    getRecursiveList
 };
