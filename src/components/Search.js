@@ -18,7 +18,7 @@ export function useSearch(updateCallback) {
     const isPhone = useDeviceType() === "phone";
     const { search } = SearchStore.useState();
     const [value, setValue] = useState(search || "");
-    const { SEARCH } = useTranslations();
+    const translations = useTranslations();
     useTimer(() => {
         SearchStore.update(s => {
             s.search = value;
@@ -42,7 +42,7 @@ export function useSearch(updateCallback) {
                     <SearchIcon />
                 </div>
                 <InputBase
-                    placeholder={SEARCH + "…"}
+                    placeholder={translations.SEARCH + "…"}
                     value={value}
                     onChange={onChangeText}
                     type="search"
@@ -55,7 +55,7 @@ export function useSearch(updateCallback) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone] });
+    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations] });
 
     return search;
 }
