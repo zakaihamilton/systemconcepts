@@ -188,7 +188,7 @@ export function useSyncFeature() {
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
     useEffect(() => {
-        if (online && _loaded && isSignedIn && visible) {
+        if (online && _loaded && isSignedIn) {
             syncNow(true);
         }
     }, [online, _loaded, isSignedIn, visible]);
