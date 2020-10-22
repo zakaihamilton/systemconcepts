@@ -876,6 +876,10 @@ export default {
         {
             "id": "WAIT_FOR_APPROVAL",
             "value": "המתן לאישור לפני שתוכל לגשת לשיעורים, נסה שוב מאוחר יותר"
+        },
+        {
+            "id": "PLAY_NOT_ALLOWED",
+            "value": "אינך מורשה לנגן את שיעור"
         }
     ]
 };

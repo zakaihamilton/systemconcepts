@@ -89,7 +89,7 @@ export default function StatusBar({ data, mapper, store }) {
         });
     };
 
-    const modeItems = mode !== "delete" && mode !== "signin" && [
+    const modeItems = (mode === "move" || mode === "copy") && [
         {
             id: "move",
             name: translations.MOVE

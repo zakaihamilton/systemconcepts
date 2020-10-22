@@ -16,6 +16,8 @@ import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import { useParentParams } from "@/util/pages";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@/icons/Audio";
+import StatusBar from "@/widgets/StatusBar";
+import Cookies from 'js-cookie';
 
 export const PlayerStore = new Store({
     playerPath: "",
@@ -47,13 +49,14 @@ export function resetPlayer() {
 }
 
 export default function PlayerPage({ show = false, suffix }) {
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
     const size = useContext(PageSize);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
-    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
+    const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
@@ -131,7 +134,27 @@ export default function PlayerPage({ show = false, suffix }) {
         exportFile(mediaPath, fileName(path));
     }
 
+    const statusBar = <StatusBar store={PlayerStore} />;
+
+    useEffect(() => {
+        PlayerStore.update(s => {
+            if (!isSignedIn) {
+                s.mode = "signin";
+                s.message = translations.REQUIRE_SIGNIN;
+            }
+            else if (error) {
+                s.mode = "player";
+                s.message = translations.PLAY_NOT_ALLOWED;
+            }
+            else {
+                s.mode = "";
+                s.message = "";
+            }
+        });
+    }, [isSignedIn, translations, error]);
+
     return <div className={styles.root} style={style}>
+        {statusBar}
         <Download visible={show && mediaPath} onClick={downloadFile} />
         {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}

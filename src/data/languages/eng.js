@@ -880,6 +880,10 @@ export default {
         {
             "id": "WAIT_FOR_APPROVAL",
             "value": "Wait for approval before you can access the sessions, try again later"
+        },
+        {
+            "id": "PLAY_NOT_ALLOWED",
+            "value": "You are not authorized to play this session"
         }
     ]
 };
