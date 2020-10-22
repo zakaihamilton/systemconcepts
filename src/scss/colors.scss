@@ -30,6 +30,7 @@
     --icon-color: rgb(12, 12, 27);
     --icon-background: lightgray;
     --icon-focus-color: black;
+    --input-icon-color: darkgray;
 }
 
 [data-theme="dark"] {
@@ -64,4 +65,5 @@
     --icon-color: rgb(12, 12, 27);
     --icon-background: lightgray;
     --icon-focus-color: rgb(166, 213, 250);
+    --input-icon-color: lightgray;
 }

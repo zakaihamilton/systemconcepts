@@ -14,15 +14,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--icon-color);
+    color: var(--input-icon-color);
 }
 
 .inputRoot {
     color: inherit;
+    margin: 0.3em;
 }
 
-.inputInput {
-    padding: 1em;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-}
+.inputInput {}
