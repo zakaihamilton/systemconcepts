@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Divider } from "@material-ui/core";
 import { useDeviceType } from "@/util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
@@ -102,7 +103,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
                 active: item.active
             });
             const showDivider = !!item.divider && idx !== toolbarItems.length - 1;
-            return <React.Fragment key={item.id}>
+            return <Fragment key={item.id}>
                 {item.element}
                 {!item.element &&
                     <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
@@ -116,7 +117,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
                     </Menu>
                 }
                 <Divider classes={{ root: clsx(styles.divider, !showDivider && styles.hidden) }} orientation="vertical" />
-            </React.Fragment>
+            </Fragment>
         })}
         {!!menuItems.length && <>
             {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}

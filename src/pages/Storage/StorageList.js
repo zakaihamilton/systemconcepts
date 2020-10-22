@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { useTranslations } from "@/util/translations";
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
@@ -59,7 +60,7 @@ export default function StorageList({ path = "", state }) {
             onClick = () => setDestination(id);
         }
 
-        return <React.Fragment key={id}>
+        return <Fragment key={id}>
             <ListItem button selected={selected} style={{ paddingLeft }} onClick={onClick}>
                 <ListItemIcon>
                     <Tooltip title={tooltip} arrow>
@@ -74,7 +75,7 @@ export default function StorageList({ path = "", state }) {
                     {open && <StorageList path={id} state={state} />}
                 </List>
             </Collapse>}
-        </React.Fragment>
+        </Fragment>
     }).filter(Boolean);
 
     return (

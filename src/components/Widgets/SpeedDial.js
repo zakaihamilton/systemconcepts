@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
@@ -7,7 +7,7 @@ import styles from "./SpeedDial.module.scss";
 
 export default function SpeedDialWidget({ visible = true, items }) {
     const { direction } = MainStore.useState();
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
 
     const handleOpen = () => {
         setOpen(true);

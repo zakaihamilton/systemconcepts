@@ -63,6 +63,25 @@ export async function fetchUpdated(endPoint, start, end) {
     return listing;
 }
 
+export async function syncLocal(endPoint, start, end) {
+    const listing = await storage.getRecursiveList("local/" + endPoint);
+    const changed = listing.filter(item => item.mtimeMs >= start && item.mtimeMs <= end);
+    for (const item of changed) {
+        if (item.type === "file") {
+            const remote = makePath(item.path.replace(/^\/local\//, ""));
+            const localBuffer = await storage.readFile(item.path);
+            if (await storage.exists(remote)) {
+                const remoteBuffer = await storage.readFile(remote);
+                if (remoteBuffer === localBuffer) {
+                    continue;
+                }
+            }
+            await storage.createFolders(remote);
+            await storage.writeFile(remote, buffer);
+        }
+    }
+}
+
 export function useSyncFeature() {
     const startRef = useRef(null);
     const [duration, setDuration] = useState(0);
@@ -150,6 +169,7 @@ export function useSyncFeature() {
                     await syncItems(personal);
                     updateCounter++;
                 }
+                await syncLocal("personal", lastUpdated, currentTime);
             }
             catch (err) {
                 console.error(err);
@@ -188,7 +208,7 @@ export function useSyncFeature() {
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated]);
     useEffect(() => {
-        if (online && _loaded && isSignedIn && visible) {
+        if (online && _loaded && isSignedIn) {
             syncNow(true);
         }
     }, [online, _loaded, isSignedIn, visible]);

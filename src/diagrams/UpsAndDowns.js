@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, cloneElement, Children } from "react";
 import styles from "./UpsAndDowns.module.scss";
 import { useTerms } from "@/util/terms";
 import clsx from "clsx";
@@ -8,12 +8,12 @@ import Zoom from "@/components/Zoom";
 
 function Worlds({ children, total }) {
     let offset = 0;
-    const elements = React.Children.map(children, child => {
+    const elements = Children.map(children, child => {
         const { props = {} } = child;
         const row = props.row || offset;
         const size = props.size || 1;
         offset += size;
-        return React.cloneElement(child, { row, total });
+        return cloneElement(child, { row, total });
     });
     return <div className={styles.root}>
         {elements}
