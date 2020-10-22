@@ -217,7 +217,7 @@ export default function TableWidget(props) {
             items: sortItems,
             divider: true
         },
-        viewMode === "table" && {
+        viewMode === "table" && data && data.length > 10 && {
             id: "itemsPerPage",
             location: "header",
             name: translations.ROWS_PER_PAGE,
