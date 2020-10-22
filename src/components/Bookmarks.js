@@ -15,6 +15,7 @@ export const BookmarksStore = new Store({
 export function useBookmarks() {
     const translations = useTranslations();
     const { bookmarks = [] } = BookmarksStore.useState();
+    useLocalStorage("bookmarks", BookmarksStore);
     const pages = usePages();
     const items = bookmarks.map(bookmark => {
         const { pageId, ...props } = bookmark;
@@ -58,7 +59,7 @@ export default function Bookmarks() {
 
     const allowBookmark = !activePage.sidebar && !activePage.root;
 
-    const menuItems = [
+    const toolbarItems = [
         allowBookmark && {
             id: "bookmark",
             name: bookmark ? translations.REMOVE_BOOKMARK : translations.ADD_BOOKMARK,
@@ -68,6 +69,6 @@ export default function Bookmarks() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Bookmarks", items: menuItems, depends: [activePage, bookmarks] });
+    useToolbar({ id: "Bookmarks", items: toolbarItems, depends: [activePage, bookmarks] });
     return null;
 }

@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import AppBar from "./AppBar";
 import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
 import { Store } from "pullstate";
@@ -9,9 +8,11 @@ import Page from "./Page";
 import Theme from "./Theme";
 import { useLanguage } from "@/util/language";
 import Sync from "./Sync";
-import Fullscreen from "./Fullscreen";
-import Header from "./Header";
+import Head from "./Head";
 import Bookmarks from "./Bookmarks";
+import Header from "./Header";
+import Footer from "./Footer";
+import Title from "./Title";
 
 export const MainStoreDefaults = {
     autoDetectDarkMode: true,
@@ -21,8 +22,7 @@ export const MainStoreDefaults = {
     language: "auto",
     menuViewList: "List",
     showSideBar: true,
-    showDrawer: false,
-    fullscreen: false
+    showDrawer: false
 };
 
 export const MainStore = new Store(MainStoreDefaults);
@@ -30,7 +30,7 @@ export const MainStore = new Store(MainStoreDefaults);
 export default function Main() {
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
-    const { direction, showSideBar, menuViewList, fullscreen } = MainStore.useState();
+    const { direction, showSideBar, menuViewList } = MainStore.useState();
     useLocalStorage("MainStore", MainStore);
 
     useEffect(() => {
@@ -39,7 +39,9 @@ export default function Main() {
         });
         window.onhashchange = function () {
             MainStore.update(s => {
-                s.hash = window.location.hash;
+                if (s.hash !== window.location.hash) {
+                    s.hash = window.location.hash;
+                }
             });
         };
         return () => {
@@ -56,24 +58,25 @@ export default function Main() {
 
     const className = useStyles(styles, {
         root: true,
-        sidebar: showSideBar && !isMobile && !fullscreen,
+        sidebar: showSideBar && !isMobile,
         list: menuViewList === "List",
-        rtl: direction === "rtl",
-        fullscreen
+        rtl: direction === "rtl"
     });
 
     return <>
-        <Header />
+        <Head />
         <Theme>
             <div className={className}>
-                <Sync />
-                <Fullscreen />
-                <Bookmarks />
-                {!fullscreen && <AppBar />}
-                <SideBar />
-                <div className={styles.main}>
-                    <Page />
-                </div>
+                <Title />
+                <Sync>
+                    <Bookmarks />
+                    <SideBar />
+                    <div className={styles.main}>
+                        <Header />
+                        <Page />
+                        <Footer />
+                    </div>
+                </Sync>
             </div>
         </Theme>
     </>;

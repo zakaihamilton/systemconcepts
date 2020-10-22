@@ -1,9 +1,11 @@
 .root {
-    padding: 0.5em;
-    border: 1px solid var(--main-border);
-    border-radius: 0.5em;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
     display: flex;
     align-items: center;
+    height: 4em;
+    border: 1px solid var(--hover-fill);
+    box-sizing: border-box;
 }
 
 .root>*:not(:last-child) {
@@ -25,5 +27,4 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    flex: 1;
 }

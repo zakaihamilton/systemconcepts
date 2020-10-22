@@ -12,7 +12,7 @@ export const ZoomStore = new Store({
     scale: 1.0
 });
 
-export default function Fullscreen() {
+export default function Zoom() {
     const size = useContext(PageSize);
     const { scale } = ZoomStore.useState();
     const translations = useTranslations();
@@ -31,19 +31,19 @@ export default function Fullscreen() {
 
     useEffect(() => {
         const ref = size.ref;
-        if (ref) {
+        if (ref && ref.current) {
             ref.current.style.transform = `scale(${scale})`;
             ref.current.style.transformOrigin = "0% 0% 0px";
         }
         return () => {
-            if (ref.current) {
+            if (ref && ref.current) {
                 ref.current.style.transform = "";
                 ref.current.style.transformOrigin = "";
             }
         };
     }, [scale, size.ref]);
 
-    const menuItems = [
+    const toolbarItems = [
         {
             id: "zoom_in",
             name: translations.ZOOM_IN,
@@ -62,6 +62,6 @@ export default function Fullscreen() {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Zoom", items: menuItems, depends: [translations, scale] });
+    useToolbar({ id: "Zoom", items: toolbarItems, depends: [translations, scale] });
     return null;
 }

@@ -18,3 +18,22 @@ export function useInterval(callback, delay, depends = []) {
         }
     }, [...depends, delay]);
 }
+
+export function useTimer(callback, delay, depends = []) {
+    const savedCallback = useRef();
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+    useEffect(() => {
+        function tick() {
+            const { current } = savedCallback;
+            if (current) {
+                current();
+            }
+        }
+        if (delay) {
+            let id = setTimeout(tick, delay);
+            return () => clearTimeout(id);
+        }
+    }, [...depends, delay]);
+}

@@ -1,0 +1,23 @@
+.search {
+    display: flex;
+    position: relative;
+    border-radius: 0.5em;
+    background-color: var(--main-background);
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    height: 3em;
+}
+
+.searchIcon {
+    padding: 0.5em;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--input-icon-color);
+}
+
+.inputRoot {
+    color: inherit;
+    margin: 0.3em;
+}

@@ -1,8 +1,8 @@
 import styles from "./Footer.module.scss";
 import Toolbar from "./Toolbar";
 
-export default function Footer() {
+export default function Header() {
     return <div className={styles.root}>
-        <Toolbar location="footer" divider={true} />
+        <Toolbar location="footer" />
     </div>
 }

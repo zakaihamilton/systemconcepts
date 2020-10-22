@@ -1,6 +1,12 @@
 .root {
-    display: flex;
-    border-top: 1px solid var(--border-color);
     padding-left: 0.5em;
     padding-right: 0.5em;
+    height: 4em;
+    display: flex;
+    overflow: hidden;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--footer-background);
+    border-top: 1px solid var(--border-color);
 }

@@ -1,7 +1,7 @@
+import React, { useEffect } from "react";
 import Table from "@/widgets/Table";
 import { useTranslations } from "@/util/translations";
 import { addPath } from "@/util/pages";
-import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import { Store } from "pullstate";
 import Group from "@/widgets/Group";
@@ -16,6 +16,8 @@ import clsx from "clsx";
 import { useLocalStorage } from "@/util/store";
 import { formatDuration } from "@/util/string";
 import { useDeviceType } from "@/util/styles";
+import StatusBar from "@/widgets/StatusBar";
+import Cookies from 'js-cookie';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -25,10 +27,10 @@ export const SessionsStore = new Store({
 });
 
 export default function SessionsPage() {
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const [syncCounter, syncing] = useSync();
-    const [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
+    const [sessions, loading, askForFullSync] = useSessions();
     const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const gotoItem = item => {
@@ -149,6 +151,25 @@ export default function SessionsPage() {
         return show;
     };
 
+    const statusBar = <StatusBar store={SessionsStore} />;
+
+    useEffect(() => {
+        SessionsStore.update(s => {
+            if (!isSignedIn) {
+                s.mode = "signin";
+                s.message = translations.REQUIRE_SIGNIN;
+            }
+            else if (askForFullSync) {
+                s.mode = "sync";
+                s.message = translations.REQUIRE_FULL_SYNC;
+            }
+            else {
+                s.mode = "";
+                s.message = "";
+            }
+        });
+    }, [isSignedIn, askForFullSync, translations]);
+
     return <>
         <Table
             cellWidth="16em"
@@ -157,8 +178,8 @@ export default function SessionsPage() {
             store={SessionsStore}
             columns={columns}
             data={sessions}
-            syncing={syncing}
             loading={loading}
+            statusBar={statusBar}
             mapper={mapper}
             filter={filter}
             viewModes={{

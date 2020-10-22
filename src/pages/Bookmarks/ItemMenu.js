@@ -15,7 +15,7 @@ export default function ItemMenuWidget({ viewMode, item, store }) {
                 store.update(s => {
                     s.select = [item];
                     s.mode = "delete";
-                    s.severity = "info";
+                    s.severity = "error";
                     s.onDone = async select => {
                         Bookmarks.update(s => {
                             s.bookmarks = s.bookmarks.filter(bookmark => {

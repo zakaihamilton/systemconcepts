@@ -860,6 +860,26 @@ export default {
         {
             "id": "UNKNOWN",
             "value": "Desconhecido"
+        },
+        {
+            "id": "VERSION",
+            "value": "Versão"
+        },
+        {
+            "id": "ROWS_PER_PAGE",
+            "value": "Linhas Por Página"
+        },
+        {
+            "id": "REQUIRE_SIGNIN",
+            "value": "Login em sua conta"
+        },
+        {
+            "id": "REQUIRE_FULL_SYNC",
+            "value": "Sincronização completa para atualizar as sessões"
+        },
+        {
+            "id": "WAIT_FOR_APPROVAL",
+            "value": "Aguarde a aprovação antes de acessar as sessões, tente novamente mais tarde"
         }
     ]
 };

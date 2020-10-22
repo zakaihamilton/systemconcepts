@@ -6,12 +6,21 @@
 .item {
     display: grid;
     color: var(--text-color);
+    background-color: var(--main-background);
     border-bottom: 1px solid var(--border-color);
     box-sizing: border-box;
     user-select: none;
     min-width: 0;
     overflow: hidden;
     flex: 1;
+}
+
+.item.selected {
+    background: var(--info-background) !important;
+}
+
+.item.even {
+    background-color: var(--main-background-alternative);
 }
 
 .cell {
@@ -53,9 +62,5 @@
 }
 
 .cell.selected {
-    background: var(--info-background) !important;
-}
-
-.item.selected {
     background: var(--info-background) !important;
 }

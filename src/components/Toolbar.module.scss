@@ -16,9 +16,9 @@
 }
 
 .selected {
-    box-shadow: 1px 1px 2px 1px var(--hover-color);
+    box-shadow: 1px 1px 4px 1px var(--selected-color);
 }
 
 .active {
-    box-shadow: 1px 1px 2px 1px var(--info-color);
+    box-shadow: 1px 1px 2px 1px var(--active-color);
 }

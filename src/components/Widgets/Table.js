@@ -11,7 +11,7 @@ import { importData, exportData } from "@/util/importExport";
 import Row from "./Table/Row";
 import Item from "./Table/Item";
 import Navigator from "./Table/Navigator";
-import { useSearch } from "@/components/AppBar/Search";
+import { useSearch } from "@/components/Search";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
@@ -27,9 +27,9 @@ import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import SyncIcon from '@material-ui/icons/Sync';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
 import WarningIcon from '@material-ui/icons/Warning';
+import ViewStreamIcon from '@material-ui/icons/ViewStream';
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -64,8 +64,8 @@ export default function TableWidget(props) {
         itemHeight = "4em",
         cellWidth = "16em",
         cellHeight = "16em",
+        statusBarHeight = "4em",
         loading,
-        syncing,
         columns,
         onImport,
         onExport,
@@ -89,9 +89,9 @@ export default function TableWidget(props) {
     columns = columns || [];
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
-    const { order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
+    const { itemsPerPage = 10, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const size = useContext(PageSize);
-    const { search } = useSearch(() => {
+    const search = useSearch(() => {
         store.update(s => {
             s.offset = 0;
         });
@@ -147,7 +147,21 @@ export default function TableWidget(props) {
         });
     }, [orderBy, order]);
 
-    const menuItems = [
+    const itemsPerPageItems = useMemo(() => {
+        return [10, 25, 50, 75, 100].map(num => {
+            return {
+                id: num,
+                name: num,
+                icon: null,
+                selected: itemsPerPage,
+                onClick: () => store.update(s => {
+                    s.itemsPerPage = num;
+                })
+            }
+        });
+    }, [itemsPerPage]);
+
+    const toolbarItems = [
         data && name && onImport && {
             id: "import",
             name: translations.IMPORT,
@@ -197,9 +211,18 @@ export default function TableWidget(props) {
         },
         viewMode !== "table" && !!sortItems.length && {
             id: "sort",
+            location: "header",
             name: translations.SORT,
             icon: <SortIcon />,
             items: sortItems,
+            divider: true
+        },
+        viewMode === "table" && {
+            id: "itemsPerPage",
+            location: "header",
+            name: translations.ROWS_PER_PAGE,
+            icon: <ViewStreamIcon />,
+            items: itemsPerPageItems,
             divider: true
         },
         ...viewModesList.length > 1 ? viewModesList.map(item => {
@@ -215,7 +238,7 @@ export default function TableWidget(props) {
         }).filter(Boolean) : []
     ].filter(Boolean);
 
-    useToolbar({ id: "Table", items: menuItems, depends: [data, name, translations, viewMode, sortItems] });
+    useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems, itemsPerPage] });
 
     useEffect(() => {
         setEmpty(false);
@@ -273,20 +296,21 @@ export default function TableWidget(props) {
         return null;
     }
 
-    const height = size.height + "px";
-    const style = {
-        maxHeight: height + "px",
-        maxWidth: size.width + "px"
-    };
-
     const sizeToPixels = text => {
         const number = parseFloat(text);
         const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
         return sizeInPixels;
     }
+
+    const statusBarVisible = !loading && !error && !!statusBar;
+    const height = size.height - (!!statusBarVisible && sizeToPixels(statusBarHeight));
+    const style = {
+        maxHeight: size.height + "px",
+        maxWidth: size.width + "px"
+    };
+
     const numItems = items && items.length;
 
-    const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
 
@@ -312,26 +336,21 @@ export default function TableWidget(props) {
         };
 
         return <>
-            {!!syncing && syncingElement}
-            {!!loading && !syncing && loadingElement}
-            {!!isEmpty && !syncing && !loading && emptyElement}
-            {!syncing && !loading && !!numItems && !error && <FixedSizeList
-                height={size.height}
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!!statusBarVisible && statusBar}
+            {!loading && !!numItems && !error && <FixedSizeList
+                height={height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}
                 width={size.width}
             >
                 {Row}
             </FixedSizeList>}
-            {!syncing && !loading && !error && <div className={styles.footer}>
-                {statusBar}
-            </div>}
             {!!error && <Error error={error} />}
         </>;
     }
     else if (viewMode === "table") {
-
-        const rowHeightInPixels = sizeToPixels(rowHeight);
 
         const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
             return <Column
@@ -342,7 +361,6 @@ export default function TableWidget(props) {
                 createSortHandler={createSortHandler} />
         });
 
-        const itemsPerPage = Math.floor(size.height / rowHeightInPixels) - 1;
         const pageCount = Math.ceil(numItems / itemsPerPage);
         const startIdx = offset;
         const endIdx = startIdx + itemsPerPage;
@@ -363,6 +381,7 @@ export default function TableWidget(props) {
             const selected = selectedRow && selectedRow(item);
             return <Row
                 key={id || idx}
+                index={idx}
                 rowHeight={rowHeight}
                 columns={columns}
                 rowClick={rowClick}
@@ -375,10 +394,10 @@ export default function TableWidget(props) {
         });
 
         return (<>
-            {!!syncing && syncingElement}
-            {!!loading && !syncing && loadingElement}
-            {!!isEmpty && !syncing && !loading && emptyElement}
-            {!syncing && !loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+                {!!statusBarVisible && statusBar}
                 {!error && <Table className={styles.table} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
@@ -389,12 +408,9 @@ export default function TableWidget(props) {
                         {tableRows}
                     </TableBody>
                 </Table>}
-                {!syncing && !loading && !error && <div className={styles.footer}>
-                    {statusBar}
-                </div>}
             </TableContainer>}
             {!!error && <Error error={error} />}
-            {!syncing && !loading && !!numItems && <Navigator
+            {!loading && !!numItems && <Navigator
                 pageIndex={pageIndex}
                 setPageIndex={setPageIndex}
                 pageCount={pageCount}
@@ -430,10 +446,10 @@ export default function TableWidget(props) {
         };
 
         return <>
-            {!!syncing && syncingElement}
-            {!!loading && !syncing && loadingElement}
-            {!!isEmpty && !syncing && !loading && emptyElement}
-            {!syncing && !loading && !!numItems && !error &&
+            {!!loading && loadingElement}
+            {!!isEmpty && !loading && emptyElement}
+            {!!statusBarVisible && statusBar}
+            {!loading && !!numItems && !error &&
                 <div className={styles.grid}>
                     <FixedSizeGrid
                         columnCount={columnCount}

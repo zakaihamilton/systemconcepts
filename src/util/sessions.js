@@ -7,6 +7,8 @@ import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import { useTranslations } from "@/util/translations";
 import { useLocalStorage } from "@/util/store";
 import { useGroups } from "@/util/groups";
+import { useSync } from "@/util/sync";
+
 registerToolbar("Sessions");
 
 export const SessionsStore = new Store({
@@ -17,9 +19,10 @@ export const SessionsStore = new Store({
     counter: 0
 });
 
-export function useSessions(depends = [], cond = true, filterSessions = true) {
+export function useSessions(depends = [], filterSessions = true) {
+    const [syncCounter, syncing] = useSync();
     const translations = useTranslations();
-    const [groupMetadata, loading] = useGroups(depends);
+    const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
     const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const updateSessions = useCallback(async groupMetadata => {
@@ -128,10 +131,10 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
     }, [groupMetadata]);
 
     useEffect(() => {
-        if (groupMetadata && groupMetadata.length && cond && !loading) {
+        if (groupMetadata && groupMetadata.length && !loading) {
             updateSessions(groupMetadata);
         }
-    }, [groupMetadata, cond, loading]);
+    }, [groupMetadata, loading]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
@@ -179,5 +182,8 @@ export function useSessions(depends = [], cond = true, filterSessions = true) {
 
     const items = filterSessions ? filtered : sessions;
 
-    return [items, busy || loading];
+    const isLoading = busy || loading || (syncing && !sessions.length);
+    const askForFullSync = !isLoading && !sessions.length;
+
+    return [items, isLoading, askForFullSync];
 }

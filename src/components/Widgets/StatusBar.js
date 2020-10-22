@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useTranslations } from "@/util/translations";
 import Typography from "@material-ui/core/Typography";
-import SelectAllIcon from '@material-ui/icons/SelectAll';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./StatusBar.module.scss";
 import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
 import ButtonSelector from "@/components/Widgets/ButtonSelector";
+import DeleteIcon from '@material-ui/icons/Delete';
+import { setPath } from "@/util/pages";
+import { SyncContext } from "@/components/Sync";
+import Button from "@material-ui/core/Button";
 
 export default function StatusBar({ data, mapper, store }) {
+    const syncContext = useContext(SyncContext);
     const translations = useTranslations();
-    const { mode, select, message, onDone, severity } = store.useState();
+    const { mode, select, message, onDone, severity = "info" } = store.useState();
     const [busy, setBusy] = useState(false);
 
     const open = !!(select || message);
@@ -52,19 +59,23 @@ export default function StatusBar({ data, mapper, store }) {
     };
 
     let messageText = message && message.toString();
-    if (!message && select) {
-        if (!count) {
-            messageText = translations.ITEMS_NONE_SELECTED;
-        }
-        else if (count > 1) {
-            messageText = translations.SELECTED_ITEMS.replace("${count}", count);
-        }
-        else {
-            messageText = translations.SELECTED_ITEM;
-        }
+    if (mode === "sync" && syncContext.error) {
+        messageText = translations.WAIT_FOR_APPROVAL;
     }
 
     const selectTitle = select && select.length ? translations.SELECT_NONE : translations.SELECT_ALL;
+    let selectIcon = null;
+    if (select && data) {
+        if (!select.length) {
+            selectIcon = <CheckBoxOutlineBlankIcon />;
+        }
+        else if (select.length === data.length) {
+            selectIcon = <CheckBoxIcon />;
+        }
+        else {
+            selectIcon = <IndeterminateCheckBoxIcon />;
+        }
+    }
 
     const selectClick = () => {
         store.update(s => {
@@ -78,7 +89,7 @@ export default function StatusBar({ data, mapper, store }) {
         });
     };
 
-    const modeItems = mode !== "delete" && [
+    const modeItems = mode !== "delete" && mode !== "signin" && [
         {
             id: "move",
             name: translations.MOVE
@@ -95,20 +106,36 @@ export default function StatusBar({ data, mapper, store }) {
         });
     };
 
+    const gotoAccount = () => {
+        setPath("account");
+    };
+
     return (
         <div className={clsx(styles.root, styles[severity])}>
-            {mode && <ButtonSelector items={modeItems} state={[mode, setMode]} color="primary" disabled={disabled} variant="contained" onClick={onClick}>
+            {selectTitle && selectIcon && <IconButton variant="contained" onClick={selectClick}>
+                <Tooltip title={selectTitle} arrow>
+                    {selectIcon}
+                </Tooltip>
+            </IconButton>}
+            {mode === "delete" && !busy && <IconButton variant="contained" onClick={onClick}>
+                <Tooltip title={translations[mode.toUpperCase()]} arrow>
+                    <DeleteIcon />
+                </Tooltip>
+            </IconButton>}
+            {mode && (mode === "copy" || mode === "move") && <ButtonSelector items={modeItems} state={[mode, setMode]} disabled={disabled} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
                 {modeItems && "\u2026"}
             </ButtonSelector>}
             <Typography className={styles.message}>
                 {messageText}
             </Typography>
-            {mode && !busy && <IconButton variant="contained" onClick={selectClick}>
-                <Tooltip title={selectTitle} arrow>
-                    <SelectAllIcon />
-                </Tooltip>
-            </IconButton>}
+            <div style={{ flex: 1 }} />
+            {mode && mode === "signin" && <Button variant="contained" onClick={gotoAccount}>
+                {translations.ACCOUNT}
+            </Button>}
+            {mode && mode === "sync" && !syncContext.error && <Button variant="contained" disabled={!syncContext.fullSync} onClick={syncContext.fullSync}>
+                {translations.FULL_SYNC}
+            </Button>}
             {!busy && <IconButton variant="contained" onClick={handleClose}>
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />

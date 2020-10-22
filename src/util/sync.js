@@ -138,6 +138,9 @@ export function useSyncFeature() {
                 }
             }
             catch (err) {
+                if (err === 401) {
+                    setError("ACCESS_DENIED");
+                }
                 console.error(err);
             }
             try {
@@ -159,6 +162,7 @@ export function useSyncFeature() {
             SyncActiveStore.update(s => {
                 s.counter++;
                 s.lastSynced = currentTime;
+                s.waitForApproval = false;
             });
         }
         else {
@@ -189,5 +193,5 @@ export function useSyncFeature() {
         }
     }, [online, _loaded, isSignedIn, visible]);
 
-    return [online && _loaded && syncNow, fullSync, busy, error, active, duration];
+    return [online && _loaded && syncNow, online && _loaded && fullSync, busy, error, active, duration];
 }

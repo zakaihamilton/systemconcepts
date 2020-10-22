@@ -106,7 +106,7 @@ export default function ItemMenuWidget({ viewMode, item, readOnly }) {
                 StorageStore.update(s => {
                     s.select = [item];
                     s.mode = "delete";
-                    s.severity = "info";
+                    s.severity = "error";
                     s.onDone = async select => {
                         for (const item of select) {
                             if (item.type === "dir") {

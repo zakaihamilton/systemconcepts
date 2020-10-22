@@ -34,7 +34,7 @@ export default function ButtonSelector({ state, items, onClick, children, ...pro
   return (
     <>
       <ButtonGroup ref={anchorRef} {...props}>
-        <Button onClick={onClick}>{children}</Button>
+        <Button disabled={!onClick} onClick={onClick}>{children}</Button>
         {items && <Button
           onClick={handleToggle}
         >

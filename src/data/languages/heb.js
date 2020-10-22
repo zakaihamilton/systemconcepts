@@ -856,6 +856,26 @@ export default {
         {
             "id": "UNKNOWN",
             "value": "לא ידוע"
+        },
+        {
+            "id": "VERSION",
+            "value": "גירסה"
+        },
+        {
+            "id": "ROWS_PER_PAGE",
+            "value": "מספר שורות לעמוד"
+        },
+        {
+            "id": "REQUIRE_SIGNIN",
+            "value": "תירשם לחשבון שלך"
+        },
+        {
+            "id": "REQUIRE_FULL_SYNC",
+            "value": "תעשה סנכרון מלא כדי לעדכן את השיעורים"
+        },
+        {
+            "id": "WAIT_FOR_APPROVAL",
+            "value": "המתן לאישור לפני שתוכל לגשת לשיעורים, נסה שוב מאוחר יותר"
         }
     ]
 };

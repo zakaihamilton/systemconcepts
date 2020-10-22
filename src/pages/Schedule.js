@@ -1,63 +1,65 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
 import { Store } from "pullstate";
-import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import { useTranslations } from "@/util/translations";
 import { registerToolbar, useToolbar } from "@/components/Toolbar";
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
-import { useSearch } from "@/components/AppBar/Search";
+import { useSearch } from "@/components/Search";
 import Message from "@/widgets/Message";
-import SyncIcon from '@material-ui/icons/Sync';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
+import { useLocalStorage } from "@/util/store";
+import StatusBar from "@/widgets/StatusBar";
+import Cookies from 'js-cookie';
 
 export const ScheduleStore = new Store({
     date: null,
-    viewType: "week"
+    viewMode: "week"
 });
 
 registerToolbar("Schedule");
 
 export default function SchedulePage() {
+    const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const [syncCounter, syncing] = useSync();
-    let [sessions, loading] = useSessions([syncCounter, syncing], !syncing);
-    const { search } = useSearch(() => {
-    });
-    let { date, viewType } = ScheduleStore.useState();
+    let [sessions, loading, askForFullSync] = useSessions();
+    const search = useSearch();
+    let { date, viewMode } = ScheduleStore.useState();
     if (!date) {
         date = new Date();
     }
+    useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode"]);
 
-    const menuItems = [
-        viewType !== "month" && {
+    const toolbarItems = [
+        {
             id: "month",
             name: translations.MONTH_VIEW,
+            selected: viewMode,
             icon: <DateRangeIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
-                    s.viewType = "month";
+                    s.viewMode = "month";
                 });
-            },
-            divider: true
+            }
         },
-        viewType !== "week" && {
+        {
             id: "week",
             name: translations.WEEK_VIEW,
+            selected: viewMode,
             icon: <ViewWeekIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
-                    s.viewType = "week";
+                    s.viewMode = "week";
                 });
             },
             divider: true
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Schedule", items: menuItems, depends: [translations, viewType] });
+    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode] });
 
     const items = useMemo(() => {
         let items = sessions;
@@ -67,13 +69,31 @@ export default function SchedulePage() {
         return items;
     }, [search, sessions]);
 
-    const syncingElement = <Message animated={true} Icon={SyncIcon} label={translations.SYNCING + "..."} />;
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
 
+    const statusBar = <StatusBar store={ScheduleStore} />;
+
+    useEffect(() => {
+        ScheduleStore.update(s => {
+            if (!isSignedIn) {
+                s.mode = "signin";
+                s.message = translations.REQUIRE_SIGNIN;
+            }
+            else if (askForFullSync) {
+                s.mode = "sync";
+                s.message = translations.REQUIRE_FULL_SYNC;
+            }
+            else {
+                s.mode = "";
+                s.message = "";
+            }
+        });
+    }, [isSignedIn, askForFullSync, translations]);
+
     return <div className={styles.root}>
-        {viewType === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {viewType === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-        {syncing && syncingElement}
+        {statusBar}
+        {viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+        {viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         {loading && loadingElement}
     </div>;
 }

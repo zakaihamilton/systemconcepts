@@ -860,6 +860,26 @@ export default {
         {
             "id": "UNKNOWN",
             "value": "Unknown"
+        },
+        {
+            "id": "VERSION",
+            "value": "Version"
+        },
+        {
+            "id": "ROWS_PER_PAGE",
+            "value": "Rows Per Page"
+        },
+        {
+            "id": "REQUIRE_SIGNIN",
+            "value": "Sign in into your account"
+        },
+        {
+            "id": "REQUIRE_FULL_SYNC",
+            "value": "Do a full sync to update the sessions"
+        },
+        {
+            "id": "WAIT_FOR_APPROVAL",
+            "value": "Wait for approval before you can access the sessions, try again later"
         }
     ]
 };

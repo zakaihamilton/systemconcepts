@@ -2,7 +2,6 @@ import { useTranslations } from "@/util/translations";
 import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./Session.module.scss";
 import Image from "@/widgets/Image";
-import { useSync } from "@/util/sync";
 import { useSessions } from "@/util/sessions";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import MovieIcon from '@material-ui/icons/Movie';
@@ -22,8 +21,7 @@ export function getSessionSection({ date, name }) {
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
-    const [syncCounter, syncing] = useSync();
-    const [sessions] = useSessions([syncCounter, syncing], !syncing, false);
+    const [sessions] = useSessions([], false);
     const dateFormatter = useDateFormatter({
         weekday: 'long',
         year: 'numeric',

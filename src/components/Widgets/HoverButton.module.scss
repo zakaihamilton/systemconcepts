@@ -1,0 +1,38 @@
+.root {
+    display: flex;
+    align-items: center;
+}
+
+.wrapper {
+    margin: 0.25em;
+    position: relative;
+}
+
+.button {
+    background-color: var(--icon-background) !important;
+    color: var(--icon-color) !important;
+}
+
+.button:hover {
+    box-shadow: 1px 1px 4px 1px var(--icon-focus-color) !important;
+}
+
+.fabProgress {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.buttonProgress {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -12px;
+    margin-left: -12px;
+}
+
+.progressContainer {
+    color: var(--icon-focus-color);
+}
