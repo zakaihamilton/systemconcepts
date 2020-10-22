@@ -160,7 +160,7 @@ export default function SessionsPage() {
                 s.message = translations.REQUIRE_SIGNIN;
             }
             else if (askForFullSync) {
-                s.mode = "fullsync";
+                s.mode = "sync";
                 s.message = translations.REQUIRE_FULL_SYNC;
             }
             else {

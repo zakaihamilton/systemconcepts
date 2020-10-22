@@ -50,8 +50,8 @@ export default function Sync({ children }) {
     useToolbar({ id: "Sync", items: toolbarItems, depends: [isBusy, translations, updateSync, fullSync, active, duration, isDesktop] });
 
     const syncContext = useMemo(() => {
-        return { updateSync, fullSync };
-    }, [updateSync, fullSync]);
+        return { updateSync, fullSync, error };
+    }, [updateSync, fullSync, error]);
 
     return <SyncContext.Provider value={syncContext}>
         {children}

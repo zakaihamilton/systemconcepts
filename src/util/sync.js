@@ -138,6 +138,9 @@ export function useSyncFeature() {
                 }
             }
             catch (err) {
+                if (err === 401) {
+                    setError("ACCESS_DENIED");
+                }
                 console.error(err);
             }
             try {
@@ -159,6 +162,7 @@ export function useSyncFeature() {
             SyncActiveStore.update(s => {
                 s.counter++;
                 s.lastSynced = currentTime;
+                s.waitForApproval = false;
             });
         }
         else {

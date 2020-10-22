@@ -876,6 +876,10 @@ export default {
         {
             "id": "REQUIRE_FULL_SYNC",
             "value": "Sincronização completa para atualizar as sessões"
+        },
+        {
+            "id": "WAIT_FOR_APPROVAL",
+            "value": "Aguarde a aprovação antes de acessar as sessões, tente novamente mais tarde"
         }
     ]
 };

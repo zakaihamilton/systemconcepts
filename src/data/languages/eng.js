@@ -876,6 +876,10 @@ export default {
         {
             "id": "REQUIRE_FULL_SYNC",
             "value": "Do a full sync to update the sessions"
+        },
+        {
+            "id": "WAIT_FOR_APPROVAL",
+            "value": "Wait for approval before you can access the sessions, try again later"
         }
     ]
 };

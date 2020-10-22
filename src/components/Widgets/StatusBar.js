@@ -59,6 +59,9 @@ export default function StatusBar({ data, mapper, store }) {
     };
 
     let messageText = message && message.toString();
+    if (mode === "sync" && syncContext.error) {
+        messageText = translations.WAIT_FOR_APPROVAL;
+    }
 
     const selectTitle = select && select.length ? translations.SELECT_NONE : translations.SELECT_ALL;
     let selectIcon = null;
@@ -130,7 +133,7 @@ export default function StatusBar({ data, mapper, store }) {
             {mode && mode === "signin" && <Button variant="contained" onClick={gotoAccount}>
                 {translations.ACCOUNT}
             </Button>}
-            {mode && mode === "fullsync" && <Button variant="contained" disabled={!syncContext.fullSync} onClick={syncContext.fullSync}>
+            {mode && mode === "sync" && !syncContext.error && <Button variant="contained" disabled={!syncContext.fullSync} onClick={syncContext.fullSync}>
                 {translations.FULL_SYNC}
             </Button>}
             {!busy && <IconButton variant="contained" onClick={handleClose}>
