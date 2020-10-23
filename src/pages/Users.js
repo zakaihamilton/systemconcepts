@@ -13,6 +13,8 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import EmailIcon from '@material-ui/icons/Email';
 import { isRTL } from "@/util/string";
+import { useDeviceType } from "@/util/styles";
+import styles from "./Users.module.scss";
 
 export const UsersStoreDefaults = {
     mode: "",
@@ -29,6 +31,7 @@ export const UsersStoreDefaults = {
 export const UsersStore = new Store(UsersStoreDefaults);
 
 export default function Users() {
+    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const { viewMode, mode, select, counter, enableItemClick } = UsersStore.useState();
     const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
@@ -47,13 +50,13 @@ export default function Users() {
             title: translations.NAME,
             sortable: "name"
         },
-        {
+        !isPhone && {
             id: "id",
             title: translations.ID,
             sortable: true,
             icon: <AccountCircleIcon />
         },
-        {
+        !isPhone && {
             id: "email",
             title: translations.EMAIL_ADDRESS,
             sortable: true,
@@ -146,6 +149,12 @@ export default function Users() {
                 UsersStore.update(s => {
                     s.counter++;
                 });
+            }}
+            viewModes={{
+                list: {
+                    className: isPhone ? styles.listPhoneItem : styles.listItem
+                },
+                table: null
             }}
             mapper={mapper}
             statusBar={statusBar}
