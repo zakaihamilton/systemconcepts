@@ -142,7 +142,6 @@ export default function Users() {
 
     const filter = item => {
         const { role } = item;
-        console.log("roleFilter", roleFilter);
         const show = !roleFilter || roleFilter === role;
         return show;
     };
