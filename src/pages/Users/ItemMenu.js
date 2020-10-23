@@ -1,10 +1,9 @@
-import { UsersStore } from "../Users";
 import { useTranslations } from "@/util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { fetchJSON } from "@/util/fetch";
 import ItemMenu from "@/components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode, item }) {
+export default function ItemMenuWidget({ viewMode, item, store }) {
     const translations = useTranslations();
 
     const items = [
@@ -13,7 +12,7 @@ export default function ItemMenuWidget({ viewMode, item }) {
             name: translations.DELETE,
             icon: <DeleteIcon />,
             onClick: () => {
-                UsersStore.update(s => {
+                store.update(s => {
                     s.select = [item];
                     s.mode = "delete";
                     s.severity = "error";
@@ -26,5 +25,5 @@ export default function ItemMenuWidget({ viewMode, item }) {
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} items={items} store={UsersStore} />;
+    return <ItemMenu viewMode={viewMode} items={items} store={store} />;
 }

@@ -15,6 +15,7 @@ import EmailIcon from '@material-ui/icons/Email';
 import { isRTL } from "@/util/string";
 import { useDeviceType } from "@/util/styles";
 import styles from "./Users.module.scss";
+import { useLocalStorage } from "@/util/store";
 
 export const UsersStoreDefaults = {
     mode: "",
@@ -25,7 +26,8 @@ export const UsersStoreDefaults = {
     enableItemClick: true,
     order: "desc",
     offset: 0,
-    orderBy: ""
+    orderBy: "",
+    roleFilter: "",
 };
 
 export const UsersStore = new Store(UsersStoreDefaults);
@@ -33,7 +35,8 @@ export const UsersStore = new Store(UsersStoreDefaults);
 export default function Users() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const { viewMode, mode, select, counter, enableItemClick } = UsersStore.useState();
+    const { roleFilter, viewMode = "table", mode, select, counter, enableItemClick } = UsersStore.useState();
+    useLocalStorage("UsersStore", UsersStore, ["viewMode"]);
     const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
@@ -44,11 +47,38 @@ export default function Users() {
         });
     }, []);
 
+    const userClick = useCallback(item => {
+        const { id } = item;
+        if (select) {
+            const exists = select.find(item => item.id === id);
+            UsersStore.update(s => {
+                if (exists) {
+                    s.select = select.filter(item => item.id !== id);
+                }
+                else {
+                    s.select = [...select, item];
+                }
+            });
+            return;
+        }
+        addPath("user/" + id);
+    }, [select]);
+
+    const onUserClick = enableItemClick && userClick;
+
     const columns = [
+        {
+            id: "iconWidget",
+            viewModes: {
+                list: true
+            }
+        },
         {
             id: "nameWidget",
             title: translations.NAME,
-            sortable: "name"
+            sortable: "name",
+            onSelectable: item => true,
+            onClick: onUserClick
         },
         !isPhone && {
             id: "id",
@@ -66,7 +96,18 @@ export default function Users() {
             id: "roleWidget",
             title: translations.ROLE,
             sortable: "role",
-            icon: <RecentActorsIcon />
+            icon: <RecentActorsIcon />,
+            selected: () => roleFilter,
+            onSelectable: item => item.role,
+            onClick: item => UsersStore.update(s => {
+                if (s.roleFilter) {
+                    s.roleFilter = "";
+                }
+                else {
+                    s.roleFilter = typeof item.role !== "undefined" && item.role;
+                }
+                s.offset = 0;
+            })
         }
     ];
 
@@ -74,8 +115,11 @@ export default function Users() {
         let { firstName, lastName } = item;
         const name = [firstName, lastName].filter(Boolean).join(" ");
 
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} />;
+
+        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} store={UsersStore} />;
         const selectIcon = select && <Select select={select} item={item} store={UsersStore} />;
+        const iconWidget = select ? selectIcon : menuIcon;
+
         const roleItem = roles.find(role => role.id === item.role);
         const rtl = isRTL(name);
 
@@ -89,32 +133,20 @@ export default function Users() {
 
         return {
             ...item,
-            name,
-            nameWidget: <Label name={labelName} icon={select ? selectIcon : menuIcon} />,
+            iconWidget,
+            nameWidget: <Label name={labelName} icon={viewMode === "table" && iconWidget} />,
             roleWidget: roleItem && translations[roleItem.name]
         };
     };
 
+    const filter = item => {
+        const { role } = item;
+        console.log("roleFilter", roleFilter);
+        const show = !roleFilter || roleFilter === role;
+        return show;
+    };
+
     const statusBar = <StatusBar data={data} mapper={mapper} store={UsersStore} />;
-
-    const rowClick = useCallback((_, item) => {
-        const { id } = item;
-        if (select) {
-            const exists = select.find(item => item.id === id);
-            UsersStore.update(s => {
-                if (exists) {
-                    s.select = select.filter(item => item.id !== id);
-                }
-                else {
-                    s.select = [...select, item];
-                }
-            });
-            return;
-        }
-        addPath("user/" + id);
-    }, [select]);
-
-    const onRowClick = enableItemClick && rowClick;
 
     const onImport = data => {
         const body = JSON.stringify(data);
@@ -142,7 +174,6 @@ export default function Users() {
             name="users"
             store={UsersStore}
             onImport={onImport}
-            rowClick={onRowClick}
             columns={columns}
             data={data}
             refresh={() => {
@@ -157,9 +188,10 @@ export default function Users() {
                 table: null
             }}
             mapper={mapper}
+            filter={filter}
             statusBar={statusBar}
             loading={loading || inProgress}
-            depends={[mode, select, onRowClick, translations]}
+            depends={[mode, select, translations, viewMode, roleFilter]}
         />
     </>;
 }
