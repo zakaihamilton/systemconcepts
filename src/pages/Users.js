@@ -135,7 +135,8 @@ export default function Users() {
             ...item,
             iconWidget,
             nameWidget: <Label name={labelName} icon={viewMode === "table" && iconWidget} />,
-            roleWidget: roleItem && translations[roleItem.name]
+            roleWidget: roleItem && translations[roleItem.name],
+            name
         };
     };
 
