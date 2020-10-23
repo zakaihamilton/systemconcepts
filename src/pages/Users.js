@@ -48,7 +48,7 @@ export default function Users() {
     }, []);
 
     const userClick = useCallback(item => {
-        const { id } = item;
+        const { id, firstName, lastName } = item;
         if (select) {
             const exists = select.find(item => item.id === id);
             UsersStore.update(s => {
@@ -61,7 +61,7 @@ export default function Users() {
             });
             return;
         }
-        addPath("user/" + id);
+        addPath("user/" + id + "?name=" + firstName + " " + lastName);
     }, [select]);
 
     const onUserClick = enableItemClick && userClick;

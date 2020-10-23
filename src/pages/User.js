@@ -11,9 +11,9 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import { useParentPath } from "@/util/pages";
 
-export function getUserSection({ sectionIndex, path }) {
+export function getUserSection({ sectionIndex, name }) {
     if (sectionIndex) {
-        return { name: path };
+        return { name };
     }
 }
 
