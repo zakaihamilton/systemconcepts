@@ -1,0 +1,8 @@
+.root {
+    display: flex;
+    color: var(--text-color);
+    height: 4em;
+    border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
+    align-items: center;
+}

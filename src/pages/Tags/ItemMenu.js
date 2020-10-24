@@ -1,9 +1,9 @@
 import { useTranslations } from "@/util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
-import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
+import { fetchJSON } from "@/util/fetch";
 import ItemMenu from "@/components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode, item, store }) {
+export default function ItemMenuWidget({ viewMode = "tree", item, store }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -17,11 +17,8 @@ export default function ItemMenuWidget({ viewMode, item, store }) {
                     s.mode = "delete";
                     s.severity = "error";
                     s.onDone = async select => {
-                        Bookmarks.update(s => {
-                            s.bookmarks = s.bookmarks.filter(bookmark => {
-                                return !select.find(item => item.id === bookmark.id);
-                            });
-                        });
+                        const records = select.map(item => ({ id: item.id }));
+                        await fetchJSON("/api/tags", { body: JSON.stringify(records), method: "DELETE" });
                     }
                 });
             }

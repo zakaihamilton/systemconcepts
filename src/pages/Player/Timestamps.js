@@ -134,10 +134,8 @@ export default function TimestampsPage() {
     ];
 
     const mapper = item => {
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
-        const selectIcon = select && <Select select={select} item={item} store={TimestampsStore} />;
         const timestamp = formatDuration(item.id * 1000, true);
-        const iconWidget = select ? selectIcon : menuIcon;
+        const iconWidget = <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
 
         let nameWidget = <Label name={item.name || translations.UNNAMED} icon={viewMode === "table" && iconWidget} />;
         if (mode === "rename" && editedItem.id === item.id) {

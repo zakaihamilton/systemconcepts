@@ -70,6 +70,9 @@ import Bookmarks from "@/pages/Bookmarks";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Timestamps from "@/pages/Player/Timestamps";
 
+import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import Tags from "@/pages/Tags";
+
 import diagrams from "@/data/diagrams";
 
 export default [
@@ -256,6 +259,14 @@ export default [
         Icon: AccessTimeIcon,
         Component: Timestamps,
         useParentName: 2
+    },
+    {
+        id: "tags",
+        name: "TAGS",
+        Icon: LocalOfferIcon,
+        Component: Tags,
+        category: "tools",
+        sidebar: true
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

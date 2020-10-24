@@ -888,6 +888,10 @@ export default {
         {
             "id": "PLAY_NOT_ALLOWED",
             "value": "You are not authorized to play this session"
+        },
+        {
+            "id": "TAGS",
+            "value": "Tags"
         }
     ]
 };

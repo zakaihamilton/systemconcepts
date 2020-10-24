@@ -114,15 +114,9 @@ export default function Users() {
     const mapper = item => {
         let { firstName, lastName } = item;
         const name = [firstName, lastName].filter(Boolean).join(" ");
-
-
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} store={UsersStore} />;
-        const selectIcon = select && <Select select={select} item={item} store={UsersStore} />;
-        const iconWidget = select ? selectIcon : menuIcon;
-
+        const iconWidget = <ItemMenu viewMode={viewMode} item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
         const rtl = isRTL(name);
-
         const labelName = rtl ? <>
             <span>{lastName}</span>
             <b>{firstName}</b>

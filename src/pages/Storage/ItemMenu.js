@@ -12,7 +12,7 @@ import ItemMenu from "@/components/ItemMenu";
 export default function ItemMenuWidget({ viewMode, item, readOnly }) {
     const translations = useTranslations();
 
-    const items = [
+    const menuItems = [
         !readOnly && {
             id: "rename",
             name: translations.RENAME,
@@ -138,5 +138,5 @@ export default function ItemMenuWidget({ viewMode, item, readOnly }) {
         }
     ].filter(Boolean);
 
-    return <ItemMenu viewMode={viewMode} items={items} store={StorageStore} />;
+    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={StorageStore} />;
 }

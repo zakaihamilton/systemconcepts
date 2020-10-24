@@ -6,7 +6,7 @@ import ItemMenu from "@/components/ItemMenu";
 export default function ItemMenuWidget({ viewMode, item, store }) {
     const translations = useTranslations();
 
-    const items = [
+    const menuItems = [
         {
             id: "delete",
             name: translations.DELETE,
@@ -25,5 +25,5 @@ export default function ItemMenuWidget({ viewMode, item, store }) {
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} items={items} store={store} />;
+    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={store} />;
 }
