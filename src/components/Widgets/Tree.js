@@ -12,8 +12,6 @@ registerToolbar("Tree");
 function* treeWalker(tree, mapper, refresh = false) {
     const stack = [];
 
-    console.log("tree", tree);
-
     if (!tree || tree.length === 0) {
         return null;
     }

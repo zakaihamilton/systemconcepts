@@ -7,17 +7,17 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useTranslations } from "@/util/translations";
 
-export default function Tag({ data: { isLeaf, ...item }, isOpen, style, toggle }) {
+export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, style, toggle }) {
     const translations = useTranslations();
     const { name } = item;
+    style = { ...style };
+    style.paddingLeft = nestingLevel * 8;
     return <div className={styles.root} style={style}>
-        {!isLeaf && (
-            <IconButton onClick={toggle}>
-                <Tooltip arrow title={translations.EXPAND}>
-                    {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </Tooltip>
-            </IconButton>
-        )}
+        <IconButton className={isLeaf && styles.hidden} onClick={toggle}>
+            <Tooltip arrow title={translations.EXPAND}>
+                {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </Tooltip>
+        </IconButton>
         <ItemMenu item={item} store={TagsStore} />
         <div>{name}</div>
     </div>;
