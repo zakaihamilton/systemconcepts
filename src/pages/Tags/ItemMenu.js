@@ -18,7 +18,7 @@ export default function ItemMenuWidget({ viewMode = "tree", item, store }) {
                     s.severity = "error";
                     s.onDone = async select => {
                         const records = select.map(item => ({ id: item.id }));
-                        await fetchJSON("/api/tags", { body: JSON.stringify(records), method: "DELETE" });
+                        /* todo */
                     }
                 });
             }

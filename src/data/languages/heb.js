@@ -888,6 +888,14 @@ export default {
         {
             "id": "TAGS",
             "value": "תגים"
+        },
+        {
+            "id":"TAG",
+            "value":"תג"
+        },
+        {
+            "id":"NEW_TAG",
+            "value":"תג חדש"
         }
     ]
 };

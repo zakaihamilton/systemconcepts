@@ -1,4 +1,4 @@
-import { useMemo, useContext } from "react";
+import { useMemo, useContext, useEffect, useState } from "react";
 import { FixedSizeTree as Tree } from 'react-vtree';
 import { PageSize } from "@components/Page";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -6,21 +6,33 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
 import { importData, exportData } from "@util/importExport";
 import { useTranslations } from "@util/translations";
+import DataUsageIcon from '@material-ui/icons/DataUsage';
+import WarningIcon from '@material-ui/icons/Warning';
+import Message from "@widgets/Message";
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 registerToolbar("Tree");
 
-function* treeWalker(tree, mapper, refresh = false) {
+function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = false) {
     const stack = [];
 
-    if (!tree || tree.length === 0) {
+    if (builder) {
+        data = builder(data);
+        console.log("data", data);
+    }
+
+    if (!data || !data.id) {
+        setEmpty(true);
         return null;
     }
 
     // Remember all the necessary data of the first node in the stack.
     stack.push({
         nestingLevel: 0,
-        node: tree,
+        node: data,
     });
+
+    let numItems = 0;
 
     // Walk through the tree until we have no nodes available.
     while (stack.length !== 0) {
@@ -32,6 +44,14 @@ function* treeWalker(tree, mapper, refresh = false) {
         if (mapper) {
             node = mapper(node);
         }
+
+        if (filter) {
+            if (!filter(node)) {
+                continue;
+            }
+        }
+
+        numItems++;
 
         const { items = [], id, ...props } = node;
 
@@ -63,20 +83,27 @@ function* treeWalker(tree, mapper, refresh = false) {
             }
         }
     }
+
+    setEmpty(!numItems);
 }
 
-export default function TreeWidget({ Node, mapper, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
+export default function TreeWidget({ Node, builder, mapper, store, filter, loading, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
+    const { select } = store.useState();
     const translations = useTranslations();
     const size = useContext(PageSize);
+    const [isEmpty, setEmpty] = useState(false);
     const boundTreeWalker = useMemo(() => {
-        return treeWalker.bind(this, data, mapper);
-    }, [data, mapper]);
+        return treeWalker.bind(this, { builder, data, mapper, filter, setEmpty });
+    }, [select, builder, data, mapper, filter]);
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
         const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
         return sizeInPixels;
     }
+
+    const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
+    const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
 
     itemSize = sizeToPixels(itemSize);
 
@@ -134,9 +161,19 @@ export default function TreeWidget({ Node, mapper, refresh, itemSize = "4em", on
         }
     ].filter(Boolean);
 
+    useEffect(() => {
+        if (loading) {
+            setEmpty(false);
+        }
+    }, [loading]);
+
     useToolbar({ id: "Tree", items: toolbarItems, depends: [data, name, translations] });
 
-    return <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size.height} width={size.width}>
-        {Node}
-    </Tree>;
+    return <>
+        {!!loading && loadingElement}
+        {!!isEmpty && !loading && emptyElement}
+        {!loading && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size.height} width={size.width}>
+            {Node}
+        </Tree>}
+    </>;
 }

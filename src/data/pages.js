@@ -73,6 +73,8 @@ import Timestamps from "@pages/Player/Timestamps";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import Tags from "@pages/Tags";
 
+import Tag, { getTagSection } from "@pages/Tag";
+
 import diagrams from "@data/diagrams";
 
 export default [
@@ -267,6 +269,13 @@ export default [
         Component: Tags,
         category: "tools",
         sidebar: true
+    },
+    {
+        id: "tag",
+        name: "TAG",
+        section: getTagSection,
+        Icon: LocalOfferIcon,
+        Component: Tag
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

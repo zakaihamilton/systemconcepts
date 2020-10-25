@@ -5,7 +5,6 @@ import { useFetchJSON, fetchJSON } from "@util/fetch";
 import Label from "@widgets/Label";
 import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@components/Widgets/Select';
 import ItemMenu from "./Users/ItemMenu";
 import { addPath } from "@util/pages";
 import roles from "@data/roles";
