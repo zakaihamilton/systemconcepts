@@ -7,9 +7,7 @@ export function buildTree(items, item) {
     item = item || { id: "root" };
     const { id } = item;
     if (!id) {
-        console.log("root items", items);
         items = (items || []).filter(item => !item.parent || !item.parent.length);
-        console.log("id", id, "items", items);
         items = items.map(item => buildTree(items, item));
     }
     return { ...item, items };

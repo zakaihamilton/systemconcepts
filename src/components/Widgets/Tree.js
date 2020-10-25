@@ -18,7 +18,6 @@ function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = fals
 
     if (builder) {
         data = builder(data);
-        console.log("data", data);
     }
 
     if (!data || !data.id) {

@@ -59,8 +59,6 @@ export default function Tags() {
         addPath("tag");
     };
 
-    console.log("data", data);
-
     return <>
         <StatusBar data={data} mapper={mapper} store={TagsStore} />
         <Tree
