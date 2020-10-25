@@ -1,17 +1,17 @@
-import { MainStore } from "@/components/Main";
-import { useTranslations } from "@/util/translations";
-import List from "@/widgets/List";
+import { MainStore } from "@components/Main";
+import { useTranslations } from "@util/translations";
+import List from "@widgets/List";
 import { Divider } from "@material-ui/core";
 import LanguageIcon from '@material-ui/icons/Language';
-import languages from "@/data/languages";
-import { usePages } from "@/util/pages";
+import languages from "@data/languages";
+import { usePages } from "@util/pages";
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import ReplayIcon from '@material-ui/icons/Replay';
 import BuildIcon from '@material-ui/icons/Build';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
-import { useToolbarItems } from "@/components/Toolbar";
-import { useLanguage } from "@/util/language";
+import { useToolbarItems } from "@components/Toolbar";
+import { useLanguage } from "@util/language";
 
 export default function QuickAccess({ closeDrawer, state }) {
     const { darkMode, menuViewList } = MainStore.useState();

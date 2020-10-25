@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { useLanguage } from "@/util/language";
-import terms from "@/data/terms";
-import { MainStore } from "@/components/Main";
+import { useLanguage } from "@util/language";
+import terms from "@data/terms";
+import { MainStore } from "@components/Main";
 
 export function useTerms() {
     const { darkMode } = MainStore.useState();

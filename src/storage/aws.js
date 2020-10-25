@@ -1,7 +1,7 @@
-import { fetchJSON, fetchText, fetchBlob } from "@/util/fetch";
-import { makePath } from "@/util/path";
-import { isBinaryFile } from "@/util/path";
-import { binaryToString } from "@/util/binary";
+import { fetchJSON, fetchText, fetchBlob } from "@util/fetch";
+import { makePath } from "@util/path";
+import { isBinaryFile } from "@util/path";
+import { binaryToString } from "@util/binary";
 
 const fsEndPoint = "/api/aws";
 

@@ -1,6 +1,6 @@
-import StatusBar from "@/widgets/StatusBar";
+import StatusBar from "@widgets/StatusBar";
 import { useEffect } from "react";
-import Tree from "@/widgets/Tree";
+import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
 

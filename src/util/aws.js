@@ -1,7 +1,7 @@
 import AWS from "aws-sdk";
 import { lockMutex } from "./mutex";
 import fs from "fs";
-import { makePath } from "@/util/path";
+import { makePath } from "@util/path";
 
 let s3Object = null;
 

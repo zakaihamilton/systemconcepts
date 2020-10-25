@@ -1,14 +1,14 @@
 import styles from "./Image.module.scss";
 import { useEffect, useState, useCallback, useContext, useRef } from "react";
-import { useParentPath, useParentParams } from "@/util/pages";
-import { readBinary } from "@/util/binary";
-import Progress from "@/widgets/Progress";
-import { useSync } from "@/util/sync";
-import { PageSize } from "@/components/Page";
-import Download from "@/widgets/Download";
-import { exportData, exportFile } from "@/util/importExport";
-import { makePath } from "@/util/path";
-import { useFetchJSON } from "@/util/fetch";
+import { useParentPath, useParentParams } from "@util/pages";
+import { readBinary } from "@util/binary";
+import Progress from "@widgets/Progress";
+import { useSync } from "@util/sync";
+import { PageSize } from "@components/Page";
+import Download from "@widgets/Download";
+import { exportData, exportFile } from "@util/importExport";
+import { makePath } from "@util/path";
+import { useFetchJSON } from "@util/fetch";
 
 export function getImageSection({ label, translations }) {
     if (label) {

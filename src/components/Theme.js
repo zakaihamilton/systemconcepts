@@ -3,7 +3,7 @@ import { StylesProvider, ThemeProvider, jssPreset } from "@material-ui/styles";
 import { create } from "jss";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { createMuiTheme } from "@material-ui/core/styles";
-import { MainStore } from "@/components/Main";
+import { MainStore } from "@components/Main";
 import rtl from "jss-rtl";
 
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });

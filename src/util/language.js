@@ -1,5 +1,5 @@
-import languages from "@/data/languages";
-import { MainStore } from "@/components/Main";
+import languages from "@data/languages";
+import { MainStore } from "@components/Main";
 
 export function useLanguage() {
     let { language } = MainStore.useState();

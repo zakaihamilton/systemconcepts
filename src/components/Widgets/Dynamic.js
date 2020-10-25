@@ -1,6 +1,6 @@
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import Input from "./Input";
-import { useDeviceType } from "@/util/styles";
+import { useDeviceType } from "@util/styles";
 
 export default function DynamicWidget({ state, items, ...props }) {
     const deviceType = useDeviceType();

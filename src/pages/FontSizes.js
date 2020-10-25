@@ -1,10 +1,10 @@
-import Table from "@/widgets/Table";
-import data from "@/data/fontSizes";
-import { useTranslations } from "@/util/translations";
+import Table from "@widgets/Table";
+import data from "@data/fontSizes";
+import { useTranslations } from "@util/translations";
 import SmartphoneIcon from '@material-ui/icons/Smartphone';
 import TabletIcon from '@material-ui/icons/Tablet';
 import DesktopMacIcon from '@material-ui/icons/DesktopMac';
-import Label from "@/widgets/Label";
+import Label from "@widgets/Label";
 import { Store } from "pullstate";
 
 export const FontSizesStore = new Store({

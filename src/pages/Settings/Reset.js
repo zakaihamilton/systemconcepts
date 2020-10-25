@@ -1,9 +1,9 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import Typography from '@material-ui/core/Typography';
 import Button from "@material-ui/core/Button";
-import { MainStore, MainStoreDefaults } from "@/components/Main";
-import Dialog from "@/widgets/Dialog";
-import { goBackPage } from "@/util/pages";
+import { MainStore, MainStoreDefaults } from "@components/Main";
+import Dialog from "@widgets/Dialog";
+import { goBackPage } from "@util/pages";
 
 export default function Reset() {
     const translations = useTranslations();

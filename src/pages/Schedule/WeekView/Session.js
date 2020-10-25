@@ -1,7 +1,7 @@
 import styles from "./Session.module.scss";
 import Tooltip from '@material-ui/core/Tooltip';
-import { addPath } from "@/util/pages";
-import { useDeviceType } from "@/util/styles";
+import { addPath } from "@util/pages";
+import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 
 export default function Session({ group, year, date, name, color }) {

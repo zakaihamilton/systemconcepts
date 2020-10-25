@@ -1,14 +1,14 @@
-import Table from "@/widgets/Table";
-import { useTranslations } from "@/util/translations";
-import { useUpdateSessions } from "@/util/updateSessions";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import Table from "@widgets/Table";
+import { useTranslations } from "@util/translations";
+import { useUpdateSessions } from "@util/updateSessions";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import UpdateIcon from "@material-ui/icons/Update";
 import styles from "./UpdateSessions.module.scss";
-import { useOnline } from "@/util/online";
+import { useOnline } from "@util/online";
 import Cookies from 'js-cookie';
-import { useStyles } from "@/util/styles";
-import { formatDuration } from "@/util/string";
-import Progress from "@/widgets/Progress";
+import { useStyles } from "@util/styles";
+import { formatDuration } from "@util/string";
+import Progress from "@widgets/Progress";
 import { Store } from "pullstate";
 
 registerToolbar("UpdateSessions");

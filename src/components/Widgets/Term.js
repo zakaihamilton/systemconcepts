@@ -1,18 +1,18 @@
 import { Fragment } from "react";
 import styles from "./Term.module.scss";
-import { useTerms } from "@/util/terms";
+import { useTerms } from "@util/terms";
 import Tooltip from '@material-ui/core/Tooltip';
 import Badge from '@material-ui/core/Badge';
 import { makeStyles } from '@material-ui/core/styles';
-import { MainStore } from "@/components/Main";
+import { MainStore } from "@components/Main";
 import clsx from "clsx";
-import { useLanguage } from "@/util/language";
-import { useTranslations } from "@/util/translations";
+import { useLanguage } from "@util/language";
+import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { useLocalStorage } from "@/util/store";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { useLocalStorage } from "@util/store";
 
 export const TermStore = new Store({
     showConcepts: true

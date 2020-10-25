@@ -1,7 +1,7 @@
-import storage from "@/data/storage";
+import storage from "@data/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { makePath, isBinaryFile } from "@/util/path";
-import { useGlobalState } from "@/util/store";
+import { makePath, isBinaryFile } from "@util/path";
+import { useGlobalState } from "@util/store";
 
 export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;

@@ -1,9 +1,9 @@
-import Table from "@/widgets/Table";
-import languages from "@/data/languages";
-import { useTranslations } from "@/util/translations";
+import Table from "@widgets/Table";
+import languages from "@data/languages";
+import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import styles from "./Translations.module.scss";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 
 export const TranslationsStore = new Store({
     order: "desc",

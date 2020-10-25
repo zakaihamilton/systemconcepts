@@ -1,22 +1,22 @@
 import { useContext, useEffect } from "react";
 import { Store } from "pullstate";
-import { useTranslations } from "@/util/translations";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useTranslations } from "@util/translations";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import styles from "./Player.module.scss";
-import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@/util/path";
+import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@util/path";
 import Audio from "./Player/Audio";
 import Video from "./Player/Video";
-import { PageSize } from "@/components/Page";
-import Download from "@/widgets/Download";
-import { exportFile } from "@/util/importExport";
-import { useFetchJSON } from "@/util/fetch";
-import Progress from "@/widgets/Progress";
-import { useFile } from "@/util/storage";
+import { PageSize } from "@components/Page";
+import Download from "@widgets/Download";
+import { exportFile } from "@util/importExport";
+import { useFetchJSON } from "@util/fetch";
+import Progress from "@widgets/Progress";
+import { useFile } from "@util/storage";
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
-import { useParentParams } from "@/util/pages";
+import { useParentParams } from "@util/pages";
 import MovieIcon from '@material-ui/icons/Movie';
-import AudioIcon from "@/icons/Audio";
-import StatusBar from "@/widgets/StatusBar";
+import AudioIcon from "@icons/Audio";
+import StatusBar from "@widgets/StatusBar";
 import Cookies from 'js-cookie';
 
 export const PlayerStore = new Store({

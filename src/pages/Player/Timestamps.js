@@ -1,19 +1,19 @@
 import { useEffect, useCallback, useState } from "react";
-import Table from "@/widgets/Table";
-import Label from "@/widgets/Label";
-import StatusBar from "@/widgets/StatusBar";
+import Table from "@widgets/Table";
+import Label from "@widgets/Label";
+import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@/components/Widgets/Select';
+import Select from '@components/Widgets/Select';
 import ItemMenu from "./Timestamps/ItemMenu";
-import { useTranslations } from "@/util/translations";
-import { makePath, fileTitle, fileFolder } from "@/util/path";
-import { useFile } from "@/util/storage";
-import { useParentParams, goBackPage } from "@/util/pages";
-import { formatDuration } from "@/util/string";
+import { useTranslations } from "@util/translations";
+import { makePath, fileTitle, fileFolder } from "@util/path";
+import { useFile } from "@util/storage";
+import { useParentParams, goBackPage } from "@util/pages";
+import { formatDuration } from "@util/string";
 import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
 import styles from "./Timestamps.module.scss";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 export const TimestampsStoreDefaults = {

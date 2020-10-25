@@ -1,13 +1,13 @@
-import storage from "@/util/storage";
-import { makePath, fileTitle, isAudioFile, isVideoFile } from "@/util/path";
+import storage from "@util/storage";
+import { makePath, fileTitle, isAudioFile, isVideoFile } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
-import { useTranslations } from "@/util/translations";
-import { useLocalStorage } from "@/util/store";
-import { useGroups } from "@/util/groups";
-import { useSync } from "@/util/sync";
+import { useTranslations } from "@util/translations";
+import { useLocalStorage } from "@util/store";
+import { useGroups } from "@util/groups";
+import { useSync } from "@util/sync";
 
 registerToolbar("Sessions");
 

@@ -1,8 +1,8 @@
 import Head from "next/head"
 import dynamic from "next/dynamic";
-import Loading from "@/components/Loading";
+import Loading from "@components/Loading";
 
-const App = dynamic(() => import("@/components/App"), {
+const App = dynamic(() => import("@components/App"), {
   ssr: false,
   loading: ({ error }) => (<Loading error={error} />)
 });

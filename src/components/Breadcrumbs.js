@@ -3,13 +3,13 @@ import Link from '@material-ui/core/Link';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import { Divider } from "@material-ui/core";
-import { MainStore } from "@/components/Main";
+import { MainStore } from "@components/Main";
 import styles from "./Breadcrumbs.module.scss";
-import { useDeviceType } from "@/util/styles";
+import { useDeviceType } from "@util/styles";
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Toolbar from "@/components/Toolbar";
+import Toolbar from "@components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
 

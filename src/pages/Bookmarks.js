@@ -1,17 +1,17 @@
 import { useEffect, useCallback } from "react";
-import Table from "@/widgets/Table";
-import { useTranslations } from "@/util/translations";
-import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
-import Label from "@/widgets/Label";
-import StatusBar from "@/widgets/StatusBar";
+import Table from "@widgets/Table";
+import { useTranslations } from "@util/translations";
+import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
+import Label from "@widgets/Label";
+import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@/components/Widgets/Select';
+import Select from '@components/Widgets/Select';
 import ItemMenu from "./Bookmarks/ItemMenu";
-import { MainStore } from "@/components/Main";
-import { getPagesFromHash, usePages } from "@/util/pages";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { MainStore } from "@components/Main";
+import { getPagesFromHash, usePages } from "@util/pages";
+import Breadcrumbs from "@components/Breadcrumbs";
 import styles from "./Bookmarks.module.scss";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 
 export const BookmarksStoreDefaults = {
     mode: "",

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import styles from "./DayHeader.module.scss";
-import { useDeviceType } from "@/util/styles";
-import { isDateToday } from "@/util/date";
+import { useDeviceType } from "@util/styles";
+import { isDateToday } from "@util/date";
 
 export default function DayHeader({ dateFormatter, dayFormatter, date, index }) {
     const isPhone = useDeviceType() === "phone";

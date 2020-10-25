@@ -1,79 +1,79 @@
 import Cookies from 'js-cookie';
 
 import AppsIcon from '@material-ui/icons/Apps';
-import Apps from "@/pages/Apps";
+import Apps from "@pages/Apps";
 
 import PeopleIcon from '@material-ui/icons/People';
-import Users from "@/pages/Users";
-import User, { getUserSection } from "@/pages/User";
+import Users from "@pages/Users";
+import User, { getUserSection } from "@pages/User";
 
 import SettingsIcon from '@material-ui/icons/Settings';
-import Settings from "@/pages/Settings";
+import Settings from "@pages/Settings";
 
 import LanguageIcon from '@material-ui/icons/Language';
-import Languages from "@/pages/Languages";
+import Languages from "@pages/Languages";
 
 import TranslateIcon from '@material-ui/icons/Translate';
-import Translations, { getTranslationsSection } from "@/pages/Translations";
+import Translations, { getTranslationsSection } from "@pages/Translations";
 
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
-import FontSizes from "@/pages/FontSizes";
+import FontSizes from "@pages/FontSizes";
 
 import StorageIcon from '@material-ui/icons/Storage';
-import Storage, { getStorageSection } from "@/pages/Storage";
+import Storage, { getStorageSection } from "@pages/Storage";
 
 import UpdateIcon from "@material-ui/icons/Update";
-import UpdateSessions from "@/pages/UpdateSessions";
+import UpdateSessions from "@pages/UpdateSessions";
 
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
-import Reset from "@/pages/Settings/Reset";
+import Reset from "@pages/Settings/Reset";
 
 import EditIcon from '@material-ui/icons/Edit';
-import Editor from "@/pages/Editor";
+import Editor from "@pages/Editor";
 
 import ImageIcon from '@material-ui/icons/Image';
-import Image, { getImageSection } from "@/pages/Image";
+import Image, { getImageSection } from "@pages/Image";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import Account from "@/pages/Account";
+import Account from "@pages/Account";
 
 import CreateIcon from '@material-ui/icons/Create';
-import SignUp from "@/pages/SignUp";
+import SignUp from "@pages/SignUp";
 
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import ChangePassword from "@/pages/ChangePassword";
-import ResetPassword, { getResetSection } from "@/pages/ResetPassword";
+import ChangePassword from "@pages/ChangePassword";
+import ResetPassword, { getResetSection } from "@pages/ResetPassword";
 
 import TableChartIcon from '@material-ui/icons/TableChart';
-import Diagrams from "@/pages/Diagrams";
+import Diagrams from "@pages/Diagrams";
 
 import LabelIcon from '@material-ui/icons/Label';
-import Terms from "@/pages/Terms";
+import Terms from "@pages/Terms";
 
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
-import Sessions from "@/pages/Sessions";
+import Sessions from "@pages/Sessions";
 
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
-import Player, { getPlayerSection } from "@/pages/Player";
+import Player, { getPlayerSection } from "@pages/Player";
 
-import Session, { getSessionSection } from "@/pages/Session";
+import Session, { getSessionSection } from "@pages/Session";
 
 import EventIcon from '@material-ui/icons/Event';
-import Schedule from "@/pages/Schedule";
+import Schedule from "@pages/Schedule";
 
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
-import Groups from "@/pages/Groups";
+import Groups from "@pages/Groups";
 
 import BookmarkIcon from '@material-ui/icons/Bookmark';
-import Bookmarks from "@/pages/Bookmarks";
+import Bookmarks from "@pages/Bookmarks";
 
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import Timestamps from "@/pages/Player/Timestamps";
+import Timestamps from "@pages/Player/Timestamps";
 
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import Tags from "@/pages/Tags";
+import Tags from "@pages/Tags";
 
-import diagrams from "@/data/diagrams";
+import diagrams from "@data/diagrams";
 
 export default [
     {

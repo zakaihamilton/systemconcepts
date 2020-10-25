@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import InputBase from '@material-ui/core/InputBase';
 import styles from "./Search.module.scss";
 import SearchIcon from '@material-ui/icons/Search';
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { useTimer } from "@/util/timers";
-import { useDeviceType } from "@/util/styles";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { useTimer } from "@util/timers";
+import { useDeviceType } from "@util/styles";
 
 registerToolbar("Search", 100);
 

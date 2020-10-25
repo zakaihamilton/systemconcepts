@@ -1,7 +1,7 @@
-import { handleRequest } from "@/util/aws";
-import { login } from "@/util/login";
+import { handleRequest } from "@util/aws";
+import { login } from "@util/login";
 import Cookie from "cookie";
-import { roleAuth } from "@/util/roles";
+import { roleAuth } from "@util/roles";
 
 export default async (req, res) => {
     try {

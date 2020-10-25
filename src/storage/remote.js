@@ -1,5 +1,5 @@
-import { fetchJSON } from "@/util/fetch";
-import { makePath } from "@/util/path";
+import { fetchJSON } from "@util/fetch";
+import { makePath } from "@util/path";
 
 export default function remoteStorage({ fsEndPoint, deviceId }) {
 

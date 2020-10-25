@@ -1,17 +1,17 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./Session.module.scss";
-import Image from "@/widgets/Image";
-import { useSessions } from "@/util/sessions";
+import Image from "@widgets/Image";
+import { useSessions } from "@util/sessions";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import MovieIcon from '@material-ui/icons/Movie';
-import AudioIcon from "@/icons/Audio";
-import { addPath } from "@/util/pages";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { resetPlayer } from "@/pages/Player";
-import { useDateFormatter } from "@/util/locale";
-import Group from "@/widgets/Group";
-import { formatDuration } from "@/util/string";
+import AudioIcon from "@icons/Audio";
+import { addPath } from "@util/pages";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { resetPlayer } from "@pages/Player";
+import { useDateFormatter } from "@util/locale";
+import Group from "@widgets/Group";
+import { formatDuration } from "@util/string";
 
 registerToolbar("Session");
 

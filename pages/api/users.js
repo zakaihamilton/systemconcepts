@@ -1,6 +1,6 @@
-import { handleRequest, findRecord } from "@/util/mongo";
-import { login } from "@/util/login";
-import { roleAuth } from "@/util/roles";
+import { handleRequest, findRecord } from "@util/mongo";
+import { login } from "@util/login";
+import { roleAuth } from "@util/roles";
 import Cookie from "cookie";
 
 const collectionName = "users";

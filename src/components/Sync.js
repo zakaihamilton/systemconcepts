@@ -1,12 +1,12 @@
 import { createContext, useMemo } from "react";
 import styles from "./Sync.module.scss";
-import { useDeviceType, useStyles } from "@/util/styles";
-import { useSyncFeature } from "@/util/sync";
-import { useTranslations } from "@/util/translations";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useDeviceType, useStyles } from "@util/styles";
+import { useSyncFeature } from "@util/sync";
+import { useTranslations } from "@util/translations";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import SyncIcon from '@material-ui/icons/Sync';
 import SyncProblemIcon from '@material-ui/icons/SyncProblem';
-import { formatDuration } from "@/util/string";
+import { formatDuration } from "@util/string";
 
 registerToolbar("Sync");
 

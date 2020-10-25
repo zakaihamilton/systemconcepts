@@ -1,7 +1,7 @@
-import Table from "@/widgets/Table";
-import { useTranslations } from "@/util/translations";
+import Table from "@widgets/Table";
+import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
-import { useGroups } from "@/util/groups";
+import { useGroups } from "@util/groups";
 import ColorPicker from "./Groups/ColorPicker";
 
 export const GroupsStore = new Store({

@@ -3,13 +3,13 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
 import clsx from "clsx";
 import TextField from '@material-ui/core/TextField';
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { useDirection } from "@/util/direction";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { useDirection } from "@util/direction";
 
 registerToolbar("Navigator");
 

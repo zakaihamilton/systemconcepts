@@ -1,13 +1,13 @@
 import styles from "./Toolbar.module.scss";
 import Avatar from '@material-ui/core/Avatar';
-import { useTranslations } from "@/util/translations";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useTranslations } from "@util/translations";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import SpeedIcon from '@material-ui/icons/Speed';
 import { useState, useEffect } from "react";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import { addPath } from "@/util/pages";
+import { addPath } from "@util/pages";
 
 registerToolbar("PlayerToolbar");
 

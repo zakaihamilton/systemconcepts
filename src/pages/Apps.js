@@ -1,5 +1,5 @@
 import styles from "./Apps.module.scss";
-import { usePages, setPath } from "@/util/pages";
+import { usePages, setPath } from "@util/pages";
 
 export default function Apps() {
     const pages = usePages();

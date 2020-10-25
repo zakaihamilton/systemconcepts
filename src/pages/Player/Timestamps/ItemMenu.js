@@ -1,7 +1,7 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { TimestampsStore } from "../Timestamps";
-import ItemMenu from "@/components/ItemMenu";
+import ItemMenu from "@components/ItemMenu";
 
 export default function ItemMenuWidget({ viewMode, setMetadata, item }) {
     const translations = useTranslations();

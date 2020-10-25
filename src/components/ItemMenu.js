@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
-import { useHover } from "@/util/hooks";
-import Menu from "@/widgets/Menu";
-import { useTranslations } from "@/util/translations";
+import { useHover } from "@util/hooks";
+import Menu from "@widgets/Menu";
+import { useTranslations } from "@util/translations";
 import Tooltip from '@material-ui/core/Tooltip';
-import Select from '@/components/Widgets/Select';
+import Select from '@components/Widgets/Select';
 
 export default function ItemMenuWidget({ viewMode = "table", item, menuItems, store }) {
     const [ref, isHover] = useHover();

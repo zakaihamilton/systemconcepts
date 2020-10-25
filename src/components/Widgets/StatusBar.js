@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import Typography from "@material-ui/core/Typography";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -9,10 +9,10 @@ import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./StatusBar.module.scss";
 import CancelIcon from '@material-ui/icons/Cancel';
 import clsx from "clsx";
-import ButtonSelector from "@/components/Widgets/ButtonSelector";
+import ButtonSelector from "@components/Widgets/ButtonSelector";
 import DeleteIcon from '@material-ui/icons/Delete';
-import { setPath } from "@/util/pages";
-import { SyncContext } from "@/components/Sync";
+import { setPath } from "@util/pages";
+import { SyncContext } from "@components/Sync";
 import Button from "@material-ui/core/Button";
 
 export default function StatusBar({ data, mapper, store }) {

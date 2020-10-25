@@ -1,10 +1,10 @@
 import BookmarkIcon from '@material-ui/icons/Bookmark';
-import { useTranslations } from "@/util/translations";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useTranslations } from "@util/translations";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { Store } from "pullstate";
-import { useLocalStorage } from "@/util/store";
-import { useActivePages, getPagesFromHash, usePages } from "@/util/pages";
-import { MainStore } from "@/components/Main";
+import { useLocalStorage } from "@util/store";
+import { useActivePages, getPagesFromHash, usePages } from "@util/pages";
+import { MainStore } from "@components/Main";
 
 registerToolbar("Bookmarks");
 

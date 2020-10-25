@@ -1,4 +1,4 @@
-import UpsAndDowns from "@/diagrams/UpsAndDowns";
+import UpsAndDowns from "@diagrams/UpsAndDowns";
 
 export default [
     {

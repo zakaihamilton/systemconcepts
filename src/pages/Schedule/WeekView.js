@@ -1,16 +1,16 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import styles from "./WeekView.module.scss";
 import Week from "./WeekView/Week";
 import DayHeader from "./WeekView/DayHeader";
-import { getWeekViewStart, getMonthViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@/util/date";
-import { useDateFormatter } from "@/util/locale";
-import Input from "@/widgets/Input";
+import { getWeekViewStart, getMonthViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@util/date";
+import { useDateFormatter } from "@util/locale";
+import Input from "@widgets/Input";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TodayIcon from '@material-ui/icons/Today';
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { useDirection } from "@/util/direction";
-import { useDeviceType } from "@/util/styles";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { useDirection } from "@util/direction";
+import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 
 registerToolbar("WeekView");

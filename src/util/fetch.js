@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOnline } from "@/util/online";
+import { useOnline } from "@util/online";
 
 export function fetchBlob(url, options) {
     options = Object.assign({}, options);

@@ -1,6 +1,6 @@
 import styles from "./Item.module.scss";
 import clsx from "clsx";
-import { useStyles } from "@/util/styles";
+import { useStyles } from "@util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
 
 export default function ItemWidget({ className = "", viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {

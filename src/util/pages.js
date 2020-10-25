@@ -1,8 +1,8 @@
-import pageList from "@/data/pages";
-import { useTranslations } from "@/util/translations";
-import { isRegEx } from "@/util/string";
-import { useLanguage } from "@/util/language";
-import { MainStore } from "@/components/Main";
+import pageList from "@data/pages";
+import { useTranslations } from "@util/translations";
+import { isRegEx } from "@util/string";
+import { useLanguage } from "@util/language";
+import { MainStore } from "@components/Main";
 
 export function addPath(...path) {
     const hash = window.location.hash + "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));

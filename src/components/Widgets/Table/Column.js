@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import TableCell from "@material-ui/core/TableCell";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
-import Label from "@/widgets/Label";
+import Label from "@widgets/Label";
 import styles from "./Column.module.scss";
 
 export default function TableColumn({ item, order, orderBy, createSortHandler }) {

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useStoreState } from "@/util/store";
-import EditorWidget from "@/widgets/Editor";
+import { useStoreState } from "@util/store";
+import EditorWidget from "@widgets/Editor";
 import { Store } from "pullstate";
-import { useParentPath } from "@/util/pages";
-import storage from "@/util/storage";
-import Progress from "@/widgets/Progress";
-import { useSync } from "@/util/sync";
+import { useParentPath } from "@util/pages";
+import storage from "@util/storage";
+import Progress from "@widgets/Progress";
+import { useSync } from "@util/sync";
 
 const EditorStoreDefaults = {
     content: "",

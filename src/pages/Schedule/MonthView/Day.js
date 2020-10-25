@@ -1,15 +1,15 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import clsx from "clsx";
 import styles from "./Day.module.scss";
-import { isDateToday, isDateMonth, getDateString } from "@/util/date";
+import { isDateToday, isDateMonth, getDateString } from "@util/date";
 import Avatar from '@material-ui/core/Avatar';
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import Menu from "@/widgets/Menu";
-import { addPath } from "@/util/pages";
-import { useDeviceType } from "@/util/styles";
-import HoverButton from "@/widgets/HoverButton";
+import Menu from "@widgets/Menu";
+import { addPath } from "@util/pages";
+import { useDeviceType } from "@util/styles";
+import HoverButton from "@widgets/HoverButton";
 
 export default function Day({ sessions, month, column, row, date, dateFormatter }) {
     const style = {

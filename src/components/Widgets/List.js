@@ -7,11 +7,11 @@ import Divider from '@material-ui/core/Divider';
 import styles from "./List.module.scss";
 import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import { useStyles } from "@/util/styles";
+import { useStyles } from "@util/styles";
 import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { MainStore } from "@/components/Main";
+import { MainStore } from "@components/Main";
 
 export function ListItemWidget({ id, divider, reverse, viewType, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();

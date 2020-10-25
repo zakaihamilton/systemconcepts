@@ -1,7 +1,7 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
-import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
-import ItemMenu from "@/components/ItemMenu";
+import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
+import ItemMenu from "@components/ItemMenu";
 
 export default function ItemMenuWidget({ viewMode, item, store }) {
     const translations = useTranslations();

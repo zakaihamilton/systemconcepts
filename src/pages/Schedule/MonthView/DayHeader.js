@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import styles from "./DayHeader.module.scss";
-import { isDayToday } from "@/util/date";
+import { isDayToday } from "@util/date";
 
 export default function DayHeader({ dateFormatter, date, index }) {
     const style = {

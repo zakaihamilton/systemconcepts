@@ -1,11 +1,11 @@
 import { useMemo, useContext } from "react";
 import { FixedSizeTree as Tree } from 'react-vtree';
-import { PageSize } from "@/components/Page";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { PageSize } from "@components/Page";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
-import { importData, exportData } from "@/util/importExport";
-import { useTranslations } from "@/util/translations";
+import { importData, exportData } from "@util/importExport";
+import { useTranslations } from "@util/translations";
 
 registerToolbar("Tree");
 

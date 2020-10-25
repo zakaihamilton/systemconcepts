@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
-import local from "@/storage/local";
-import remote from "@/storage/remote";
-import aws from "@/storage/aws";
+import local from "@storage/local";
+import remote from "@storage/remote";
+import aws from "@storage/aws";
 
 export default [
     {

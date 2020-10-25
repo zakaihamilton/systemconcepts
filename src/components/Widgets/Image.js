@@ -1,8 +1,8 @@
 import styles from "./Image.module.scss";
 import { useState, useEffect } from "react";
-import Progress from "@/widgets/Progress";
+import Progress from "@widgets/Progress";
 import clsx from "clsx";
-import { addPath } from "@/util/pages";
+import { addPath } from "@util/pages";
 
 export default function ImageWidget({ clickForImage = true, loading, path, width, height, alt }) {
     const [imageLoading, setImageLoading] = useState(false);

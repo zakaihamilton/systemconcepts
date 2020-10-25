@@ -1,12 +1,12 @@
-import Table from "@/widgets/Table";
-import data from "@/data/terms";
-import { useTranslations } from "@/util/translations";
-import { useLanguage } from "@/util/language";
-import Term from "@/widgets/Term";
+import Table from "@widgets/Table";
+import data from "@data/terms";
+import { useTranslations } from "@util/translations";
+import { useLanguage } from "@util/language";
+import Term from "@widgets/Term";
 import styles from "./Terms.module.scss";
-import { useDeviceType } from "@/util/styles";
+import { useDeviceType } from "@util/styles";
 import { Store } from "pullstate";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 
 export const TermsStore = new Store({
     order: "desc",
