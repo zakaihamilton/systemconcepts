@@ -20,26 +20,6 @@ export const TagsStoreDefaults = {
 
 export const TagsStore = new Store(TagsStoreDefaults);
 
-const tags = {
-    name: 'Root #1',
-    id: 'root-1',
-    items: [
-        {
-            items: [
-                { id: 'child-2', name: 'Child #2' },
-                { id: 'child-3', name: 'Child #3' },
-            ],
-            id: 'child-1',
-            name: 'Child #1',
-        },
-        {
-            items: [{ id: 'child-5', name: 'Child #5' }],
-            id: 'child-4',
-            name: 'Child #4',
-        }
-    ],
-};
-
 export default function Tags() {
     const translations = useTranslations();
     const { counter } = TagsStore.useState();

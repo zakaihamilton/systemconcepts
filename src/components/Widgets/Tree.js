@@ -20,16 +20,18 @@ function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = fals
         data = builder(data);
     }
 
-    if (!data || !data.id) {
+    if (!data || !data.items) {
         setEmpty(true);
         return null;
     }
 
     // Remember all the necessary data of the first node in the stack.
-    stack.push({
-        nestingLevel: 0,
-        node: data,
-    });
+    for (const item of data.items) {
+        stack.push({
+            nestingLevel: 0,
+            node: item,
+        });
+    }
 
     let numItems = 0;
 

@@ -340,6 +340,7 @@ export default function TableWidget(props) {
             {!!isEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
+                className={styles.tableList}
                 height={height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}

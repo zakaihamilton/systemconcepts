@@ -50,7 +50,7 @@ export default function EditWidget() {
         }
     };
 
-    return <ClickAwayListener onClickAway={onClickAway}>
+    return <ClickAwayListener onClickAway={onClickAway} mouseEvent="onMouseDown">
         <Input
             onKeyDown={keyDown}
             placeholder={placeholder}

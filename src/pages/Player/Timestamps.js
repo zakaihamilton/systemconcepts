@@ -89,9 +89,6 @@ export default function TimestampsPage() {
             s.tooltip = item.tooltip;
             s.placeholder = "";
             s.editing = true;
-            s.onValidate = async name => {
-                return !!name;
-            };
             s.onDone = async name => {
                 setMetadata(metadata => {
                     const timestamps = [...metadata.timestamps].map(timestamp => {
@@ -120,7 +117,7 @@ export default function TimestampsPage() {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            onSelectable: item => mode !== "rename",
+            onSelectable: () => mode !== "rename",
             onClick: mode !== "rename" && enableItemClick && renameItem
         },
         {
@@ -138,6 +135,7 @@ export default function TimestampsPage() {
         const iconWidget = <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
 
         let nameWidget = <Label name={item.name || translations.UNNAMED} icon={viewMode === "table" && iconWidget} />;
+        console.log("mode", mode);
         if (mode === "rename" && editedItem.id === item.id) {
             nameWidget = <Edit key={item.id} />;
         }

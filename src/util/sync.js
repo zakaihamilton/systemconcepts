@@ -77,7 +77,7 @@ export async function syncLocal(endPoint, start, end) {
                 }
             }
             await storage.createFolders(remote);
-            await storage.writeFile(remote, buffer);
+            await storage.writeFile(remote, localBuffer);
         }
     }
 }

@@ -34,11 +34,11 @@ export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, s
     const onTagClick = enableItemClick ? tagClick : undefined;
 
     const translations = useTranslations();
-    const basePadding = (nestingLevel + 1) * 8;
+    const basePadding = (nestingLevel * 32) + 8;
     const { name = item.id } = item;
     const icons = <>
         <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
-            <Tooltip arrow title={translations.EXPAND}>
+            <Tooltip arrow title={isOpen ? translations.COLLAPSE : translations.EXPAND}>
                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Tooltip>
         </IconButton>

@@ -4,13 +4,27 @@ import { useFile } from "@util/storage";
 const filePath = "/shared/library/tags.json";
 
 export function buildTree(items, item) {
-    item = item || { id: "root" };
+    item = item || {};
     const { id } = item;
-    if (!id) {
-        items = (items || []).filter(item => !item.parent || !item.parent.length);
-        items = items.map(item => buildTree(items, item));
+    let children = [];
+    if (id) {
+        children = (items || []).filter(item => item.parent && item.parent.includes(id));
+        children = children.map(item => {
+            item = { ...item };
+            item.tag = item.id;
+            item.id = id + "/" + item.id;
+            return buildTree(items, item);
+        });
     }
-    return { ...item, items };
+    else {
+        children = (items || []).filter(item => !item.parent || !item.parent.length || item.root);
+        children = children.map(item => {
+            item = { ...item };
+            item.tag = item.id;
+            return buildTree(items, item);
+        });
+    }
+    return { ...item, items: children };
 }
 
 export function useTags({ counter }) {
