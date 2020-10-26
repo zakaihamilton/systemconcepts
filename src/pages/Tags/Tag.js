@@ -28,14 +28,14 @@ export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, s
             });
             return;
         }
-        addPath("tag/" + item.id);
+        addPath("tag/" + item.tag);
     }, [select]);
 
     const onTagClick = enableItemClick ? tagClick : undefined;
 
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
-    const { name = item.id } = item;
+    const { name = item.tag } = item;
     const icons = <>
         <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
             <Tooltip arrow title={isOpen ? translations.COLLAPSE : translations.EXPAND}>
