@@ -119,6 +119,7 @@ export default function PlayerPage({ show = false, suffix }) {
         setMetadata,
         path: mediaPath,
         show,
+        name: date + " " + name,
         preload: "metadata"
     }
     if (isAudio) {

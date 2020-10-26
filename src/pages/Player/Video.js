@@ -3,7 +3,7 @@ import Controls from "./Controls";
 import Toolbar from "./Toolbar";
 import { PlayerStore } from "../Player";
 
-export default function Video({ show, metadata, setMetadata, children, ...props }) {
+export default function Video({ show, name, metadata, setMetadata, children, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -27,6 +27,6 @@ export default function Video({ show, metadata, setMetadata, children, ...props 
             setMetadata={setMetadata}
             show={show}
         />}
-        {playerRef && <Toolbar show={show} playerRef={playerRef} isVideo={true} />}
+        {playerRef && <Toolbar show={show} name={name} playerRef={playerRef} isVideo={true} />}
     </>;
 }

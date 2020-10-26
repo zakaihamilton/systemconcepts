@@ -8,10 +8,12 @@ import SpeedIcon from '@material-ui/icons/Speed';
 import { useState, useEffect } from "react";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { addPath } from "@util/pages";
+import { useDeviceType } from "@util/styles";
 
 registerToolbar("PlayerToolbar");
 
-export default function Toolbar({ show, playerRef, isVideo }) {
+export default function Toolbar({ show, playerRef, name, isVideo }) {
+    const isMobile = useDeviceType() !== "desktop";
     const translations = useTranslations();
     const [, setCounter] = useState(0);
     useEffect(() => {
@@ -85,6 +87,17 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             label: true,
             location: "footer"
         },
+        isMobile && {
+            id: "name",
+            element:
+                <>
+                    <div className={styles.name}>
+                        {name}
+                    </div>
+                    <div style={{ flex: 1 }} />
+                </>,
+            location: "header"
+        },
         isVideo && {
             id: "fullscreen",
             name: translations.FULLSCREEN,
@@ -101,6 +114,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, volume, translations] });
+    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, volume, isMobile, translations] });
     return null;
 }

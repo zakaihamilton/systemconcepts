@@ -162,6 +162,7 @@ export function useFile(url, depends = [], mapping) {
     }, [url]);
     useEffect(() => {
         setState(state => {
+            state = state || {};
             state.error = null;
             return { ...state };
         });
@@ -169,6 +170,7 @@ export function useFile(url, depends = [], mapping) {
             return;
         }
         setState(state => {
+            state = state || {};
             state.loading = true;
             return { ...state };
         });
