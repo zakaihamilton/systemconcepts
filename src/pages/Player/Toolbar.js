@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { addPath } from "@util/pages";
 import { useDeviceType } from "@util/styles";
+import Tooltip from '@material-ui/core/Tooltip';
 
 registerToolbar("PlayerToolbar");
 
@@ -91,9 +92,11 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             id: "name",
             element:
                 <>
-                    <div className={styles.name}>
-                        {name}
-                    </div>
+                    <Tooltip arrow title={name}>
+                        <div className={styles.name}>
+                            {name}
+                        </div>
+                    </Tooltip>
                     <div style={{ flex: 1 }} />
                 </>,
             location: "header"
