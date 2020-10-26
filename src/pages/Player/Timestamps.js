@@ -135,7 +135,6 @@ export default function TimestampsPage() {
         const iconWidget = <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
 
         let nameWidget = <Label name={item.name || translations.UNNAMED} icon={viewMode === "table" && iconWidget} />;
-        console.log("mode", mode);
         if (mode === "rename" && editedItem.id === item.id) {
             nameWidget = <Edit key={item.id} />;
         }
