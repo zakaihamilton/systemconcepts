@@ -1,14 +1,33 @@
 .root {
+    box-sizing: border-box;
     display: flex;
-    align-items: center;
+    position: relative;
 }
 
-.root>*:not(:last-child) {
-    [dir=rtl] & {
-        margin-left: 1em;
-    }
+.background {
+    position: relative;
+    left: 0px;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid transparent;
+    border-top: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-bottom: 1px solid var(--border-color);
+    height: 100%;
+    flex: 1;
+}
 
-    [dir=ltr] & {
-        margin-right: 1em;
-    }
+.background:hover {
+    background: var(--info-background) !important;
+    border: 1px solid var(--border-highlight);
+}
+
+.icons {
+    position: relative;
+    left: 0px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    position: absolute;
+    background: transparent;
 }

@@ -7,9 +7,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useTranslations } from "@util/translations";
-import Label from "@widgets/Label";
 import { addPath } from "@util/pages";
 import clsx from "clsx";
+import Row from "@widgets/Row";
 
 export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, style, toggle }) {
     const { enableItemClick, select } = TagsStore.useState();
@@ -34,16 +34,23 @@ export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, s
     const onTagClick = enableItemClick ? tagClick : undefined;
 
     const translations = useTranslations();
+    const basePadding = (nestingLevel + 1) * 8;
     const { name = item.id } = item;
-    const icon = <ItemMenu item={item} store={TagsStore} />;
-    style = { ...style };
-    style.paddingLeft = nestingLevel * 8;
-    return <div className={styles.root} style={style} onClick={onTagClick}>
+    const icons = <>
         <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
             <Tooltip arrow title={translations.EXPAND}>
                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Tooltip>
         </IconButton>
-        <Label style={{ userSelect: "none" }} icon={icon} name={name} />
-    </div>;
+        <ItemMenu item={item} store={TagsStore} />
+    </>;
+    return <Row
+        className={styles.root}
+        iconPadding={106}
+        basePadding={basePadding}
+        icons={icons}
+        style={style}
+        onClick={onTagClick}>
+        {name}
+    </Row>;
 }

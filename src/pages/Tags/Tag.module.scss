@@ -1,18 +1,7 @@
 .root {
-    display: flex;
     color: var(--text-color);
     height: 4em;
-    border-left: 1px solid transparent;
-    border-top: 1px solid transparent;
-    border-right: 1px solid transparent;
-    border-bottom: 1px solid var(--border-color);
-    box-sizing: border-box;
-    align-items: center;
-}
-
-.root:hover {
-    background: var(--info-background) !important;
-    border: 1px solid var(--border-highlight);
+    user-select: none;
 }
 
 .hidden {
