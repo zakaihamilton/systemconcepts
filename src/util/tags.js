@@ -38,7 +38,7 @@ export function useTag({ id, counter }) {
     const [data, loading, , setData] = useTags({ counter });
     const record = (data || []).find(item => item && item.id === id);
     const setRecord = useCallback(record => {
-        setData(data => {
+        return setData(data => {
             data = [...data];
             const recordIndex = data.findIndex(item => item && item.id === id);
             if (recordIndex !== -1) {

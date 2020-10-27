@@ -38,11 +38,11 @@ export default function Tag({ tag = "" }) {
         onValidateId(data.id);
     const isInvalid = validate && invalidFields;
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         setValidate(true);
         if (!invalidFields && !inProgress) {
             setProgress(true);
-            setRecord(data);
+            await setRecord(data);
             goBackPage();
             setProgress(false);
             setError("");
@@ -73,7 +73,7 @@ export default function Tag({ tag = "" }) {
         </Button>
     </>;
 
-    return <Form actions={actions} loading={loading} data={data} validate={validate}>
+    return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>
         <FormGroup record={data} setRecord={setData}>
             <Input
                 id="id"
