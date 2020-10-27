@@ -1,4 +1,4 @@
-import roles from "@/data/roles";
+import roles from "@data/roles";
 
 export function roleAuth(roleId, compareId) {
     const role = roles.find(role => role.id === roleId);

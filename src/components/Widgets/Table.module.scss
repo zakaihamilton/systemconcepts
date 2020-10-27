@@ -8,6 +8,18 @@
     flex-direction: column;
 }
 
+.tableList {
+    display: flex;
+
+    [dir=ltr] & {
+        direction: ltr !important;
+    }
+
+    [dir=rtl] & {
+        direction: rtl !important;
+    }
+}
+
 .grid {
     display: flex;
     justify-content: center;

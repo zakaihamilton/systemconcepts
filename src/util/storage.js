@@ -1,7 +1,7 @@
-import storage from "@/data/storage";
+import storage from "@data/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { makePath, isBinaryFile } from "@/util/path";
-import { useGlobalState } from "@/util/store";
+import { makePath, isBinaryFile } from "@util/path";
+import { useGlobalState } from "@util/store";
 
 export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;
@@ -162,6 +162,7 @@ export function useFile(url, depends = [], mapping) {
     }, [url]);
     useEffect(() => {
         setState(state => {
+            state = state || {};
             state.error = null;
             return { ...state };
         });
@@ -169,6 +170,7 @@ export function useFile(url, depends = [], mapping) {
             return;
         }
         setState(state => {
+            state = state || {};
             state.loading = true;
             return { ...state };
         });

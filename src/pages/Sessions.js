@@ -1,22 +1,22 @@
 import React, { useEffect } from "react";
-import Table from "@/widgets/Table";
-import { useTranslations } from "@/util/translations";
-import { addPath } from "@/util/pages";
-import { useSessions } from "@/util/sessions";
+import Table from "@widgets/Table";
+import { useTranslations } from "@util/translations";
+import { addPath } from "@util/pages";
+import { useSessions } from "@util/sessions";
 import { Store } from "pullstate";
-import Group from "@/widgets/Group";
+import Group from "@widgets/Group";
 import styles from "./Sessions.module.scss";
-import Label from "@/widgets/Label";
+import Label from "@widgets/Label";
 import MovieIcon from '@material-ui/icons/Movie';
-import AudioIcon from "@/icons/Audio";
+import AudioIcon from "@icons/Audio";
 import Tooltip from '@material-ui/core/Tooltip';
-import Image from "@/widgets/Image";
+import Image from "@widgets/Image";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import clsx from "clsx";
-import { useLocalStorage } from "@/util/store";
-import { formatDuration } from "@/util/string";
-import { useDeviceType } from "@/util/styles";
-import StatusBar from "@/widgets/StatusBar";
+import { useLocalStorage } from "@util/store";
+import { formatDuration } from "@util/string";
+import { useDeviceType } from "@util/styles";
+import StatusBar from "@widgets/StatusBar";
 import Cookies from 'js-cookie';
 
 export const SessionsStore = new Store({
@@ -34,7 +34,7 @@ export default function SessionsPage() {
     const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const gotoItem = item => {
-        addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
+        addPath(`session?group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
     };
 
     const columns = [

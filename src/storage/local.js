@@ -1,5 +1,5 @@
 import FS from '@isomorphic-git/lightning-fs';
-import { makePath } from "@/util/path";
+import { makePath } from "@util/path";
 
 const fs = new FS("systemconcepts-fs");
 

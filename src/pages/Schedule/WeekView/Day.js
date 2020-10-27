@@ -1,6 +1,6 @@
 import styles from "./Day.module.scss";
-import { useDeviceType } from "@/util/styles";
-import { getDateString } from "@/util/date";
+import { useDeviceType } from "@util/styles";
+import { getDateString } from "@util/date";
 import Session from "./Session";
 import clsx from "clsx";
 

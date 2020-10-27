@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
-import { useCounter } from "@/util/hooks";
+import { useCounter } from "@util/hooks";
 import { Store } from "pullstate";
 
 export const StateStore = new Store({});

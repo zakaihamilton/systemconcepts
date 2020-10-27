@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import languages from "@/data/languages";
-import { useLanguage } from "@/util/language";
+import languages from "@data/languages";
+import { useLanguage } from "@util/language";
 
 export function useLocale() {
     const language = useLanguage();

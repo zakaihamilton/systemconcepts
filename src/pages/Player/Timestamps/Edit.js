@@ -1,5 +1,5 @@
-import { useStoreState } from "@/util/store";
-import Input from "@/widgets/Input";
+import { useStoreState } from "@util/store";
+import Input from "@widgets/Input";
 import { TimestampsStore } from "../Timestamps";
 import { useCallback } from "react";
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -50,7 +50,7 @@ export default function EditWidget() {
         }
     };
 
-    return <ClickAwayListener onClickAway={onClickAway}>
+    return <ClickAwayListener onClickAway={onClickAway} mouseEvent="onMouseDown">
         <Input
             onKeyDown={keyDown}
             placeholder={placeholder}

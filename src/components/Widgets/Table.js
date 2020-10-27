@@ -6,20 +6,20 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { PageSize } from "../Page";
 import styles from "./Table.module.scss";
-import { useTranslations } from "@/util/translations";
-import { importData, exportData } from "@/util/importExport";
+import { useTranslations } from "@util/translations";
+import { importData, exportData } from "@util/importExport";
 import Row from "./Table/Row";
 import Item from "./Table/Item";
 import Navigator from "./Table/Navigator";
-import { useSearch } from "@/components/Search";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useSearch } from "@components/Search";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
 import Error from "./Table/Error";
 import Column from "./Table/Column";
 import clsx from "clsx";
 import RefreshIcon from '@material-ui/icons/Refresh';
-import Message from "@/widgets/Message";
+import Message from "@widgets/Message";
 import { FixedSizeList, FixedSizeGrid } from 'react-window';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import TableChartIcon from '@material-ui/icons/TableChart';
@@ -340,6 +340,7 @@ export default function TableWidget(props) {
             {!!isEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
+                className={styles.tableList}
                 height={height}
                 itemCount={numItems}
                 itemSize={itemHeightInPixels}

@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { Store } from "pullstate";
-import storage from "@/util/storage";
+import storage from "@util/storage";
 
 export const GroupsStore = new Store({
     groups: [],

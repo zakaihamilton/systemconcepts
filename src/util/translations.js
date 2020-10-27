@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import languages from "@/data/languages";
-import { useLanguage } from "@/util/language";
+import languages from "@data/languages";
+import { useLanguage } from "@util/language";
 
 export function useTranslations() {
     const language = useLanguage();

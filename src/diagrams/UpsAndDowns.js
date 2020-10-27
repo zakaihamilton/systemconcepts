@@ -1,10 +1,10 @@
 import { useState, cloneElement, Children } from "react";
 import styles from "./UpsAndDowns.module.scss";
-import { useTerms } from "@/util/terms";
+import { useTerms } from "@util/terms";
 import clsx from "clsx";
-import { MainStore } from "@/components/Main";
-import Term from "@/widgets/Term";
-import Zoom from "@/components/Zoom";
+import { MainStore } from "@components/Main";
+import Term from "@widgets/Term";
+import Zoom from "@components/Zoom";
 
 function Worlds({ children, total }) {
     let offset = 0;

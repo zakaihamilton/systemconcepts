@@ -1,4 +1,4 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import Typography from '@material-ui/core/Typography';
 import styles from "./Dialog.module.scss";
 import Tooltip from "@material-ui/core/Tooltip";

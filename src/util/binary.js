@@ -1,4 +1,4 @@
-import storage from "@/util/storage";
+import storage from "@util/storage";
 import { decode, encode } from "base64-arraybuffer-es6";
 
 export async function binaryToString(blob) {

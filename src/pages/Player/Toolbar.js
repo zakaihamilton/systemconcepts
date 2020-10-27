@@ -1,17 +1,20 @@
 import styles from "./Toolbar.module.scss";
 import Avatar from '@material-ui/core/Avatar';
-import { useTranslations } from "@/util/translations";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useTranslations } from "@util/translations";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import SpeedIcon from '@material-ui/icons/Speed';
 import { useState, useEffect } from "react";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import { addPath } from "@/util/pages";
+import { addPath } from "@util/pages";
+import { useDeviceType } from "@util/styles";
+import Tooltip from '@material-ui/core/Tooltip';
 
 registerToolbar("PlayerToolbar");
 
-export default function Toolbar({ show, playerRef, isVideo }) {
+export default function Toolbar({ show, playerRef, name, isVideo }) {
+    const isMobile = useDeviceType() !== "desktop";
     const translations = useTranslations();
     const [, setCounter] = useState(0);
     useEffect(() => {
@@ -85,6 +88,19 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             label: true,
             location: "footer"
         },
+        isMobile && {
+            id: "name",
+            element:
+                <>
+                    <Tooltip arrow title={name}>
+                        <div className={styles.name}>
+                            {name}
+                        </div>
+                    </Tooltip>
+                    <div style={{ flex: 1 }} />
+                </>,
+            location: "header"
+        },
         isVideo && {
             id: "fullscreen",
             name: translations.FULLSCREEN,
@@ -101,6 +117,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, volume, translations] });
+    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, volume, isMobile, translations] });
     return null;
 }

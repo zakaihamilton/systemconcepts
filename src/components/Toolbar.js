@@ -1,17 +1,17 @@
 import { Fragment } from "react";
 import { Divider } from "@material-ui/core";
-import { useDeviceType } from "@/util/styles";
+import { useDeviceType } from "@util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
-import Menu from "@/widgets/Menu";
+import Menu from "@widgets/Menu";
 import { useEffect } from "react";
 import styles from "./Toolbar.module.scss";
 import { Store } from "pullstate";
-import Label from "@/widgets/Label";
+import Label from "@widgets/Label";
 import clsx from "clsx";
-import { useStyles } from "@/util/styles";
+import { useStyles } from "@util/styles";
 
 export const ToolbarStore = new Store({
     sections: [],

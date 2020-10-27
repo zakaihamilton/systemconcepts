@@ -1,9 +1,9 @@
 import { useRef, createContext } from "react";
 import styles from "./Page.module.scss";
-import { useResize } from "@/util/size";
-import { MainStore } from "@/components/Main";
-import Player from "@/pages/Player";
-import { useActivePages } from "@/util/pages";
+import { useResize } from "@util/size";
+import { MainStore } from "@components/Main";
+import Player from "@pages/Player";
+import { useActivePages } from "@util/pages";
 
 export const PageSize = createContext();
 

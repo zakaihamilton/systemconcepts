@@ -1,16 +1,16 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import styles from "./MonthView.module.scss";
 import Week from "./MonthView/Week";
 import DayHeader from "./MonthView/DayHeader";
-import { getMonthViewStart, addDate, getMonthNames, getYearNames } from "@/util/date";
-import { useDateFormatter } from "@/util/locale";
-import Input from "@/widgets/Input";
+import { getMonthViewStart, addDate, getMonthNames, getYearNames } from "@util/date";
+import { useDateFormatter } from "@util/locale";
+import Input from "@widgets/Input";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TodayIcon from '@material-ui/icons/Today';
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
-import { useDirection } from "@/util/direction";
-import { useDeviceType } from "@/util/styles";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { useDirection } from "@util/direction";
+import { useDeviceType } from "@util/styles";
 
 registerToolbar("MonthView");
 

@@ -2,7 +2,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import styles from "./Row.module.scss";
 import clsx from "clsx";
-import { useStyles } from "@/util/styles";
+import { useStyles } from "@util/styles";
 
 export default function RowWidget({ className = "", viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {

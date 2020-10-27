@@ -884,6 +884,18 @@ export default {
         {
             "id": "PLAY_NOT_ALLOWED",
             "value": "אינך מורשה לנגן את שיעור"
+        },
+        {
+            "id": "TAGS",
+            "value": "תגים"
+        },
+        {
+            "id":"TAG",
+            "value":"תג"
+        },
+        {
+            "id":"NEW_TAG",
+            "value":"תג חדש"
         }
     ]
 };

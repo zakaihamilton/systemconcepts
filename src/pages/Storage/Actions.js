@@ -1,13 +1,13 @@
-import { useTranslations } from "@/util/translations";
-import storage from "@/util/storage";
-import SpeedDial from "@/widgets/SpeedDial";
+import { useTranslations } from "@util/translations";
+import storage from "@util/storage";
+import SpeedDial from "@widgets/SpeedDial";
 import AddIcon from '@material-ui/icons/Add';
 import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { StorageStore } from "../Storage";
-import { importData } from "@/util/importExport";
-import { makePath } from "@/util/path";
+import { importData } from "@util/importExport";
+import { makePath } from "@util/path";
 
 export function useActions(data) {
     const { mode, type } = StorageStore.useState();

@@ -1,5 +1,5 @@
 import Head from "next/head"
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 
 export default function HeadComponent() {
     const translations = useTranslations();

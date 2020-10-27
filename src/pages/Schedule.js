@@ -3,16 +3,16 @@ import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
 import { Store } from "pullstate";
-import { useSessions } from "@/util/sessions";
-import { useTranslations } from "@/util/translations";
-import { registerToolbar, useToolbar } from "@/components/Toolbar";
+import { useSessions } from "@util/sessions";
+import { useTranslations } from "@util/translations";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
-import { useSearch } from "@/components/Search";
-import Message from "@/widgets/Message";
+import { useSearch } from "@components/Search";
+import Message from "@widgets/Message";
 import DataUsageIcon from '@material-ui/icons/DataUsage';
-import { useLocalStorage } from "@/util/store";
-import StatusBar from "@/widgets/StatusBar";
+import { useLocalStorage } from "@util/store";
+import StatusBar from "@widgets/StatusBar";
 import Cookies from 'js-cookie';
 
 export const ScheduleStore = new Store({

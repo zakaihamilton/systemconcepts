@@ -1,17 +1,17 @@
 import { useEffect, useCallback } from "react";
-import Table from "@/widgets/Table";
-import { useTranslations } from "@/util/translations";
-import { BookmarksStore as Bookmarks } from "@/components/Bookmarks";
-import Label from "@/widgets/Label";
-import StatusBar from "@/widgets/StatusBar";
+import Table from "@widgets/Table";
+import { useTranslations } from "@util/translations";
+import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
+import Label from "@widgets/Label";
+import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@/components/Widgets/Select';
+import Select from '@components/Widgets/Select';
 import ItemMenu from "./Bookmarks/ItemMenu";
-import { MainStore } from "@/components/Main";
-import { getPagesFromHash, usePages } from "@/util/pages";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { MainStore } from "@components/Main";
+import { getPagesFromHash, usePages } from "@util/pages";
+import Breadcrumbs from "@components/Breadcrumbs";
 import styles from "./Bookmarks.module.scss";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 
 export const BookmarksStoreDefaults = {
     mode: "",
@@ -84,10 +84,8 @@ export default function BookmarksPage() {
     ];
 
     const mapper = item => {
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} store={BookmarksStore} />;
-        const selectIcon = select && <Select select={select} item={item} store={BookmarksStore} />;
         const breadcrumbPages = getPagesFromHash({ hash: item.id, translations, pages });
-        const iconWidget = select ? selectIcon : menuIcon;
+        const iconWidget = <ItemMenu viewMode={viewMode} item={item} store={BookmarksStore} />;
 
         return {
             ...item,

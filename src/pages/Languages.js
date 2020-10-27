@@ -1,10 +1,10 @@
-import Table from "@/widgets/Table";
-import data from "@/data/languages";
-import { useTranslations } from "@/util/translations";
+import Table from "@widgets/Table";
+import data from "@data/languages";
+import { useTranslations } from "@util/translations";
 import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionLToR';
 import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
-import Label from "@/widgets/Label";
-import { addPath } from "@/util/pages";
+import Label from "@widgets/Label";
+import { addPath } from "@util/pages";
 import { Store } from "pullstate";
 
 export const LanguagesStore = new Store({

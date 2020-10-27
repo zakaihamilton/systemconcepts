@@ -1,19 +1,19 @@
 import { useEffect, useCallback, useState } from "react";
-import Table from "@/widgets/Table";
-import Label from "@/widgets/Label";
-import StatusBar from "@/widgets/StatusBar";
+import Table from "@widgets/Table";
+import Label from "@widgets/Label";
+import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@/components/Widgets/Select';
+import Select from '@components/Widgets/Select';
 import ItemMenu from "./Timestamps/ItemMenu";
-import { useTranslations } from "@/util/translations";
-import { makePath, fileTitle, fileFolder } from "@/util/path";
-import { useFile } from "@/util/storage";
-import { useParentParams, goBackPage } from "@/util/pages";
-import { formatDuration } from "@/util/string";
+import { useTranslations } from "@util/translations";
+import { makePath, fileTitle, fileFolder } from "@util/path";
+import { useFile } from "@util/storage";
+import { useParentParams, goBackPage } from "@util/pages";
+import { formatDuration } from "@util/string";
 import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
 import styles from "./Timestamps.module.scss";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 export const TimestampsStoreDefaults = {
@@ -89,9 +89,6 @@ export default function TimestampsPage() {
             s.tooltip = item.tooltip;
             s.placeholder = "";
             s.editing = true;
-            s.onValidate = async name => {
-                return !!name;
-            };
             s.onDone = async name => {
                 setMetadata(metadata => {
                     const timestamps = [...metadata.timestamps].map(timestamp => {
@@ -120,7 +117,7 @@ export default function TimestampsPage() {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            onSelectable: item => mode !== "rename",
+            onSelectable: () => mode !== "rename",
             onClick: mode !== "rename" && enableItemClick && renameItem
         },
         {
@@ -134,10 +131,8 @@ export default function TimestampsPage() {
     ];
 
     const mapper = item => {
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
-        const selectIcon = select && <Select select={select} item={item} store={TimestampsStore} />;
         const timestamp = formatDuration(item.id * 1000, true);
-        const iconWidget = select ? selectIcon : menuIcon;
+        const iconWidget = <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
 
         let nameWidget = <Label name={item.name || translations.UNNAMED} icon={viewMode === "table" && iconWidget} />;
         if (mode === "rename" && editedItem.id === item.id) {

@@ -1,26 +1,26 @@
 import { useCallback, useEffect } from "react";
-import Table from "@/widgets/Table";
+import Table from "@widgets/Table";
 import Tooltip from '@material-ui/core/Tooltip';
 import StorageIcon from '@material-ui/icons/Storage';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import { useTranslations } from "@/util/translations";
-import Label from "@/widgets/Label";
-import storage, { useListing } from "@/util/storage";
+import { useTranslations } from "@util/translations";
+import Label from "@widgets/Label";
+import storage, { useListing } from "@util/storage";
 import Actions, { useActions } from "./Storage/Actions";
-import { setPath, addPath } from "@/util/pages";
-import devices from "@/data/storage";
+import { setPath, addPath } from "@util/pages";
+import devices from "@data/storage";
 import ItemMenu from "./Storage/ItemMenu";
-import Select from '@/components/Widgets/Select';
+import Select from '@components/Widgets/Select';
 import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
-import { abbreviateSize } from "@/util/string";
+import { abbreviateSize } from "@util/string";
 import Typography from '@material-ui/core/Typography';
-import StatusBar from "@/widgets/StatusBar";
+import StatusBar from "@widgets/StatusBar";
 import Destination from "./Storage/Destination";
-import { useDateFormatter } from "@/util/locale";
-import { useSync } from "@/util/sync";
-import { isBinaryFile, isImageFile, isVideoFile, isAudioFile } from "@/util/path";
+import { useDateFormatter } from "@util/locale";
+import { useSync } from "@util/sync";
+import { isBinaryFile, isImageFile, isVideoFile, isAudioFile } from "@util/path";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -149,8 +149,7 @@ export default function Storage({ path = "" }) {
             nameWidget = <Edit key={id} />;
         } else {
             nameWidget = <Label key={id} icon={<>
-                {!select && item.type && !mode && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
-                {select && <Select select={select} item={result} store={StorageStore} />}
+                {item.type && !mode && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}
                 </Tooltip>

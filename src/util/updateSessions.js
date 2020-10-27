@@ -1,5 +1,5 @@
-import storage from "@/util/storage";
-import { makePath } from "@/util/path";
+import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback } from "react";
 

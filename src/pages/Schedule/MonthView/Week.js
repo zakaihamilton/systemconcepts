@@ -1,5 +1,5 @@
 import Day from "./Day";
-import { addDate } from "@/util/date";
+import { addDate } from "@util/date";
 
 export default function Week({ sessions, month, date, row, dateFormatter }) {
     const numDays = 7;

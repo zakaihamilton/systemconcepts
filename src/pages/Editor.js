@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useStoreState } from "@/util/store";
-import EditorWidget from "@/widgets/Editor";
+import { useStoreState } from "@util/store";
+import EditorWidget from "@widgets/Editor";
 import { Store } from "pullstate";
-import { useParentPath } from "@/util/pages";
-import storage from "@/util/storage";
-import Progress from "@/widgets/Progress";
-import { useSync } from "@/util/sync";
+import { useParentPath } from "@util/pages";
+import storage from "@util/storage";
+import Progress from "@widgets/Progress";
+import { useSync } from "@util/sync";
+import Download from "@widgets/Download";
+import { exportData } from "@util/importExport";
 
 const EditorStoreDefaults = {
     content: "",
@@ -56,7 +58,14 @@ export default function Editor({ name }) {
         readFile();
     }, [syncCounter]);
 
+    const downloadFile = () => {
+        if (content) {
+            exportData(content[0], name, "text/plain");
+        }
+    };
+
     return <>
+        <Download visible={!loading} onClick={downloadFile} />
         {!loading && <EditorWidget state={content} />}
         {loading && <Progress />}
     </>;

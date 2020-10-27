@@ -1,12 +1,12 @@
-import { useTranslations } from "@/util/translations";
+import { useTranslations } from "@util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
-import { fetchJSON } from "@/util/fetch";
-import ItemMenu from "@/components/ItemMenu";
+import { fetchJSON } from "@util/fetch";
+import ItemMenu from "@components/ItemMenu";
 
 export default function ItemMenuWidget({ viewMode, item, store }) {
     const translations = useTranslations();
 
-    const items = [
+    const menuItems = [
         {
             id: "delete",
             name: translations.DELETE,
@@ -25,5 +25,5 @@ export default function ItemMenuWidget({ viewMode, item, store }) {
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} items={items} store={store} />;
+    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={store} />;
 }

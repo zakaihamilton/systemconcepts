@@ -1,21 +1,20 @@
 import { useEffect, useCallback, useState } from "react";
-import Table from "@/widgets/Table";
-import { useTranslations } from "@/util/translations";
-import { useFetchJSON, fetchJSON } from "@/util/fetch";
-import Label from "@/widgets/Label";
-import StatusBar from "@/widgets/StatusBar";
+import Table from "@widgets/Table";
+import { useTranslations } from "@util/translations";
+import { useFetchJSON, fetchJSON } from "@util/fetch";
+import Label from "@widgets/Label";
+import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@/components/Widgets/Select';
 import ItemMenu from "./Users/ItemMenu";
-import { addPath } from "@/util/pages";
-import roles from "@/data/roles";
+import { addPath } from "@util/pages";
+import roles from "@data/roles";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import EmailIcon from '@material-ui/icons/Email';
-import { isRTL } from "@/util/string";
-import { useDeviceType } from "@/util/styles";
+import { isRTL } from "@util/string";
+import { useDeviceType } from "@util/styles";
 import styles from "./Users.module.scss";
-import { useLocalStorage } from "@/util/store";
+import { useLocalStorage } from "@util/store";
 
 export const UsersStoreDefaults = {
     mode: "",
@@ -114,15 +113,9 @@ export default function Users() {
     const mapper = item => {
         let { firstName, lastName } = item;
         const name = [firstName, lastName].filter(Boolean).join(" ");
-
-
-        const menuIcon = !select && <ItemMenu viewMode={viewMode} item={item} store={UsersStore} />;
-        const selectIcon = select && <Select select={select} item={item} store={UsersStore} />;
-        const iconWidget = select ? selectIcon : menuIcon;
-
+        const iconWidget = <ItemMenu viewMode={viewMode} item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
         const rtl = isRTL(name);
-
         const labelName = rtl ? <>
             <span>{lastName}</span>
             <b>{firstName}</b>
