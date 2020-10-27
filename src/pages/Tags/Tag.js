@@ -28,7 +28,7 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
             });
             return;
         }
-        addPath("tag/" + item.id);
+        addPath("tag?tag=" + item.id);
     }, [select]);
 
     const onTagClick = enableItemClick ? tagClick : undefined;

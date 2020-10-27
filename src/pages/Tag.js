@@ -7,15 +7,13 @@ import { goBackPage } from "@util/pages";
 import { useTag } from "@util/tags";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 
-export function getTagSection({ sectionIndex, id, name }) {
-    if (sectionIndex) {
-        return { name: name || id };
-    }
-}
+export function getTagSection({ tag, translations }) {
+    return { name: tag || translations.NEW_TAG };
+};
 
-export default function Tag({ path = "" }) {
+export default function Tag({ tag = "" }) {
     const translations = useTranslations();
-    const [record, loading, setRecord] = useTag({ id: path });
+    const [record, loading, setRecord] = useTag({ id: tag });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);

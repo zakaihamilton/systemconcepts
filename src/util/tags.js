@@ -23,6 +23,7 @@ export function buildTree(items, path = "", item) {
         item.name = name;
         return buildTree(items, item.id, item);
     });
+    children.sort((a, b) => b.name.localeCompare(a.name));
     return { ...item, items: children };
 }
 
