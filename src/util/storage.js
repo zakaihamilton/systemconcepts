@@ -152,8 +152,12 @@ export function useFile(url, depends = [], mapping) {
             await storageMethods.writeFile(url, updatedData);
         }
         else {
+            let stringData = data;
+            if (typeof stringData !== "string") {
+                stringData = JSON.stringify(stringData, null, 4);
+            }
             await storageMethods.createFolders(url);
-            await storageMethods.writeFile(url, data);
+            await storageMethods.writeFile(url, stringData);
             setState(state => {
                 state.data = data;
                 return { ...state };

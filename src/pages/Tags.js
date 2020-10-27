@@ -39,6 +39,10 @@ export default function Tags() {
         addPath("tag");
     };
 
+    const onImport = data => {
+        setData(data.tags);
+    };
+
     const params = useMemo(() => {
         return { data, setData };
     }, [data, setData]);
@@ -48,6 +52,7 @@ export default function Tags() {
         <Tree
             name="tags"
             mapper={mapper}
+            onImport={onImport}
             loading={loading}
             Node={Tag}
             store={TagsStore}
