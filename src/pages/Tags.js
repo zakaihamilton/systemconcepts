@@ -1,5 +1,5 @@
 import StatusBar from "@widgets/StatusBar";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
@@ -39,6 +39,10 @@ export default function Tags() {
         addPath("tag");
     };
 
+    const params = useMemo(() => {
+        return { data, setData };
+    }, [data, setData]);
+
     return <>
         <StatusBar data={data} mapper={mapper} store={TagsStore} />
         <Tree
@@ -48,6 +52,7 @@ export default function Tags() {
             Node={Tag}
             store={TagsStore}
             builder={buildTree}
+            params={params}
             data={data}
             refresh={() => {
                 TagsStore.update(s => {

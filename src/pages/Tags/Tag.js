@@ -11,7 +11,7 @@ import { addPath } from "@util/pages";
 import clsx from "clsx";
 import Row from "@widgets/Row";
 
-export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, style, toggle }) {
+export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isOpen, style, toggle }) {
     const { enableItemClick, select } = TagsStore.useState();
 
     const tagClick = useCallback(() => {
@@ -28,21 +28,21 @@ export default function Tag({ data: { isLeaf, nestingLevel, ...item }, isOpen, s
             });
             return;
         }
-        addPath("tag/" + item.tag);
+        addPath("tag/" + item.id);
     }, [select]);
 
     const onTagClick = enableItemClick ? tagClick : undefined;
 
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
-    const { name = item.tag } = item;
+    const { name = "" } = item;
     const icons = <>
         <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
             <Tooltip arrow title={isOpen ? translations.COLLAPSE : translations.EXPAND}>
                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Tooltip>
         </IconButton>
-        <ItemMenu item={item} store={TagsStore} />
+        <ItemMenu setData={setData} item={item} store={TagsStore} />
     </>;
     return <Row
         className={styles.root}

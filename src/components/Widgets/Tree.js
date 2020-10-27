@@ -13,7 +13,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 registerToolbar("Tree");
 
-function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = false) {
+function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refresh = false) {
     const stack = [];
 
     if (builder) {
@@ -54,7 +54,7 @@ function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = fals
 
         numItems++;
 
-        const { items = [], id, ...props } = node;
+        const { items = [], id } = node;
 
         // Here we are sending the information about the node to the Tree component
         // and receive an information about the openness state from it. The
@@ -66,8 +66,9 @@ function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = fals
                 id,
                 isLeaf: items.length === 0,
                 isOpenByDefault: true,
-                ...props,
+                item: node,
                 nestingLevel,
+                ...params
             }
             : id;
 
@@ -88,14 +89,14 @@ function* treeWalker({ builder, data, mapper, filter, setEmpty }, refresh = fals
     setEmpty(!numItems);
 }
 
-export default function TreeWidget({ Node, builder, mapper, store, filter, loading, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
+export default function TreeWidget({ Node, builder, params, mapper, store, filter, loading, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
     const { select } = store.useState();
     const translations = useTranslations();
     const size = useContext(PageSize);
     const [isEmpty, setEmpty] = useState(false);
     const boundTreeWalker = useMemo(() => {
-        return treeWalker.bind(this, { builder, data, mapper, filter, setEmpty });
-    }, [select, builder, data, mapper, filter]);
+        return treeWalker.bind(this, { builder, data, params, mapper, filter, setEmpty });
+    }, [select, builder, data, params, mapper, filter]);
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
@@ -173,7 +174,7 @@ export default function TreeWidget({ Node, builder, mapper, store, filter, loadi
     return <>
         {!!loading && loadingElement}
         {!!isEmpty && !loading && emptyElement}
-        {!loading && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size.height} width={size.width}>
+        {!loading && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size && size.height} width={size && size.width}>
             {Node}
         </Tree>}
     </>;

@@ -1,9 +1,8 @@
 import { useTranslations } from "@util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
-import { fetchJSON } from "@util/fetch";
 import ItemMenu from "@components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode = "tree", item, store }) {
+export default function ItemMenuWidget({ viewMode = "tree", item, store, setData }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -17,8 +16,14 @@ export default function ItemMenuWidget({ viewMode = "tree", item, store }) {
                     s.mode = "delete";
                     s.severity = "error";
                     s.onDone = async select => {
-                        const records = select.map(item => ({ id: item.id }));
-                        /* todo */
+                        const ids = select.map(item => item.id);
+                        setData(data => {
+                            data = data.map(item => ({ ...item }));
+                            data = data.filter(item => {
+                                return !ids.includes(item.id);
+                            });
+                            return data;
+                        });
                     }
                 });
             }

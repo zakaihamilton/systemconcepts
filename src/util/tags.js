@@ -3,27 +3,26 @@ import { useFile } from "@util/storage";
 
 const filePath = "/shared/library/tags.json";
 
-export function buildTree(items, item) {
+export function buildTree(items, path = "", item) {
     item = item || {};
     const { id } = item;
     let children = [];
     if (id) {
-        children = (items || []).filter(item => item.parent && item.parent.includes(id));
-        children = children.map(item => {
-            item = { ...item };
-            item.tag = item.id;
-            item.id = id + "/" + item.id;
-            return buildTree(items, item);
+        children = (items || []).filter(item => {
+            const { id } = item || {};
+            const name = id.split(".").pop();
+            return id === path + "." + name;
         });
     }
     else {
-        children = (items || []).filter(item => !item.parent || !item.parent.length || item.root);
-        children = children.map(item => {
-            item = { ...item };
-            item.tag = item.id;
-            return buildTree(items, item);
-        });
+        children = (items || []).filter(item => !item.id.includes("."));
     }
+    children = children.map(item => {
+        item = { ...item };
+        const name = item.id.split(".").pop();
+        item.name = name;
+        return buildTree(items, item.id, item);
+    });
     return { ...item, items: children };
 }
 
