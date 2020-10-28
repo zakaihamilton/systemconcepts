@@ -28,9 +28,6 @@ export default function Tag({ tag = "" }) {
         if (!text) {
             error = translations.EMPTY_FIELD;
         }
-        else if (!text.match(/^[a-z0-9]+$/i)) {
-            error = translations.BAD_ID;
-        }
         return error;
     };
 

@@ -13,6 +13,21 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 registerToolbar("Tree");
 
+export function flatten(root) {
+    let results = [];
+    const items = root.items;
+
+    results.push(root);
+
+    if (items) {
+        for (const item of items) {
+            results.push(...flatten(item));
+        }
+    }
+
+    return results;
+}
+
 function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refresh = false) {
     const stack = [];
 
@@ -171,10 +186,12 @@ export default function TreeWidget({ Node, builder, params, mapper, store, filte
 
     useToolbar({ id: "Tree", items: toolbarItems, depends: [data, name, translations] });
 
+    const sizeValid = size && size.width && size.height;
+
     return <>
         {!!loading && loadingElement}
         {!!isEmpty && !loading && emptyElement}
-        {!loading && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size && size.height} width={size && size.width}>
+        {!loading && sizeValid && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size && size.height} width={size && size.width}>
             {Node}
         </Tree>}
     </>;
