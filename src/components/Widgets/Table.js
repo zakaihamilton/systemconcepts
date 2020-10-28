@@ -30,6 +30,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
 import WarningIcon from '@material-ui/icons/Warning';
 import ViewStreamIcon from '@material-ui/icons/ViewStream';
+import { StatusBarStore } from "@widgets/StatusBar";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -86,6 +87,7 @@ export default function TableWidget(props) {
     } = props;
     const translations = useTranslations();
     const [isEmpty, setEmpty] = useState(false);
+    const statusBarIsActive = StatusBarStore.useState(s => s.active);
     columns = columns || [];
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
@@ -303,7 +305,7 @@ export default function TableWidget(props) {
     }
 
     const statusBarVisible = !loading && !error && !!statusBar;
-    const height = size.height - (!!statusBarVisible && sizeToPixels(statusBarHeight));
+    const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
     const style = {
         maxHeight: size.height + "px",
         maxWidth: size.width + "px"

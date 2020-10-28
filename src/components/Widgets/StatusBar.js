@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useTranslations } from "@util/translations";
 import Typography from "@material-ui/core/Typography";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -14,6 +14,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { setPath } from "@util/pages";
 import { SyncContext } from "@components/Sync";
 import Button from "@material-ui/core/Button";
+import { Store } from "pullstate";
+
+export const StatusBarStore = new Store({ active: 0 });
 
 export default function StatusBar({ data, mapper, store }) {
     const syncContext = useContext(SyncContext);
@@ -22,6 +25,21 @@ export default function StatusBar({ data, mapper, store }) {
     const [busy, setBusy] = useState(false);
 
     const open = !!(select || message);
+
+    useEffect(() => {
+        if (open) {
+            StatusBarStore.update(s => {
+                s.active++;
+            });
+        }
+        return () => {
+            if (open) {
+                StatusBarStore.update(s => {
+                    s.active--;
+                });
+            }
+        };
+    }, [open]);
 
     if (!open) {
         return null;

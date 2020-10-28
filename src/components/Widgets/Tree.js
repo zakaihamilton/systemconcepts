@@ -12,6 +12,7 @@ import Message from "@widgets/Message";
 import RefreshIcon from '@material-ui/icons/Refresh';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { addPath } from "@util/pages";
+import { StatusBarStore } from "@widgets/StatusBar";
 
 registerToolbar("Tree");
 
@@ -106,9 +107,28 @@ function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refres
     setEmpty(!numItems);
 }
 
-export default function TreeWidget({ Node, builder, params, mapper, store, filter, loading, source, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
+export default function TreeWidget(props) {
+    let {
+        Node,
+        builder,
+        params,
+        mapper,
+        store,
+        filter,
+        loading,
+        source,
+        statusBar,
+        refresh,
+        itemSize = "4em",
+        statusBarHeight = "4em",
+        onImport,
+        onExport,
+        name,
+        data = []
+    } = props;
     const { select } = store.useState();
     const translations = useTranslations();
+    const statusBarIsActive = StatusBarStore.useState(s => s.active);
     const size = useContext(PageSize);
     const [isEmpty, setEmpty] = useState(false);
     const boundTreeWalker = useMemo(() => {
@@ -200,11 +220,14 @@ export default function TreeWidget({ Node, builder, params, mapper, store, filte
     useToolbar({ id: "Tree", items: toolbarItems, depends: [data, name, translations] });
 
     const sizeValid = size && size.width && size.height;
+    const statusBarVisible = !loading && !!statusBar;
+    const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
 
     return <>
         {!!loading && loadingElement}
         {!!isEmpty && !loading && emptyElement}
-        {!loading && sizeValid && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={size && size.height} width={size && size.width}>
+        {!!statusBarVisible && statusBar}
+        {!loading && sizeValid && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={height} width={size && size.width}>
             {Node}
         </Tree>}
     </>;

@@ -54,12 +54,12 @@ export default function Tags() {
     }, [data, setData]);
 
     return <>
-        <StatusBar data={data} mapper={mapper} store={TagsStore} />
         <Tree
             name="tags"
             mapper={mapper}
             onImport={onImport}
             loading={loading}
+            statusBar={<StatusBar data={data} mapper={mapper} store={TagsStore} />}
             Node={Tag}
             store={TagsStore}
             builder={buildTree}
