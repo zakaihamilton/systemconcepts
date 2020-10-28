@@ -1,7 +1,7 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useFile } from "@util/storage";
 
-const filePath = "/shared/library/tags.json";
+export const tagsFilePath = "/shared/library/tags.json";
 
 export function buildTree(items, path = "", item) {
     item = item || {};
@@ -19,8 +19,10 @@ export function buildTree(items, path = "", item) {
     }
     children = children.map(item => {
         item = { ...item };
-        const name = item.id.split(".").pop();
-        item.name = name;
+        if (!item.name) {
+            const name = item.id.split(".").pop();
+            item.name = name;
+        }
         return buildTree(items, item.id, item);
     });
     children.sort((a, b) => b.name.localeCompare(a.name));
@@ -28,7 +30,7 @@ export function buildTree(items, path = "", item) {
 }
 
 export function useTags({ counter }) {
-    const result = useFile(filePath, [counter], data => {
+    const result = useFile(tagsFilePath, [counter], data => {
         return data ? JSON.parse(data) : [];
     });
     return result;

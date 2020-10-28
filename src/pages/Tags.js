@@ -3,11 +3,12 @@ import { useEffect, useMemo } from "react";
 import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
-import { useTags, buildTree } from "@util/tags";
+import { useTags, buildTree, tagsFilePath } from "@util/tags";
 import Fab from "@widgets/Fab";
 import { useTranslations } from "@util/translations";
 import AddIcon from '@material-ui/icons/Add';
 import { addPath } from "@util/pages";
+import { useLanguage } from "@util/language";
 
 export const TagsStoreDefaults = {
     mode: "",
@@ -21,6 +22,7 @@ export const TagsStoreDefaults = {
 export const TagsStore = new Store(TagsStoreDefaults);
 
 export default function Tags() {
+    const language = useLanguage();
     const translations = useTranslations();
     const { counter } = TagsStore.useState();
     const [data, loading, , setData] = useTags({ counter });
@@ -32,6 +34,10 @@ export default function Tags() {
     }, []);
 
     const mapper = item => {
+        const translation = item[language];
+        if (translation) {
+            item.name = translation;
+        }
         return item;
     };
 
@@ -58,6 +64,7 @@ export default function Tags() {
             store={TagsStore}
             builder={buildTree}
             params={params}
+            source={tagsFilePath}
             data={data}
             refresh={() => {
                 TagsStore.update(s => {

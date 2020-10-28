@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import { goBackPage } from "@util/pages";
 import { useTag } from "@util/tags";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import languages from "@data/languages";
 
 export function getTagSection({ tag, translations }) {
     return { name: tag || translations.NEW_TAG };
@@ -70,6 +71,13 @@ export default function Tag({ tag = "" }) {
         </Button>
     </>;
 
+    const languageItems = languages.map(language => {
+        return <Input
+            id={language.id}
+            label={language.name}
+        />
+    });
+
     return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>
         <FormGroup record={data} setRecord={setData}>
             <Input
@@ -78,6 +86,9 @@ export default function Tag({ tag = "" }) {
                 onValidate={onValidateId}
                 icon={<LocalOfferIcon />}
             />
+        </FormGroup>
+        <FormGroup record={data} setRecord={setData}>
+            {languageItems}
         </FormGroup>
     </Form>;
 }

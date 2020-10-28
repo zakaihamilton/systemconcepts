@@ -16,10 +16,10 @@ const EditorStoreDefaults = {
 
 export const EditorStore = new Store(EditorStoreDefaults);
 
-export default function Editor({ name }) {
+export default function Editor({ name, path, ...params }) {
     const [syncCounter] = useSync();
     const timerRef = useRef();
-    const path = (useParentPath() + "/" + name).split("/").slice(1).join("/");
+    path = path || (useParentPath() + "/" + name).split("/").slice(1).join("/");
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
     const [loading, setLoading] = useState(false);
     const readFile = useCallback(() => {

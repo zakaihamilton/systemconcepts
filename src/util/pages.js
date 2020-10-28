@@ -137,11 +137,11 @@ export function getPagesFromHash({ hash, translations, pages }) {
                 }
                 page = Object.assign({}, page, result);
             }
-            else if (sectionIndex) {
+            else if (sections.length > 1 && sectionIndex !== sections.length - 1) {
                 return;
             }
             const parentPath = urlToParentPath(url);
-            const result = { ...page, url, path: sectionPath, sectionIndex, parentPath };
+            const result = { ...page, url, path: sectionPath, sectionIndex, subPath, parentPath };
             if (name !== result.name && !result.tooltip) {
                 result.tooltip = name;
             }

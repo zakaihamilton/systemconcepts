@@ -10,6 +10,8 @@ import DataUsageIcon from '@material-ui/icons/DataUsage';
 import WarningIcon from '@material-ui/icons/Warning';
 import Message from "@widgets/Message";
 import RefreshIcon from '@material-ui/icons/Refresh';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import { addPath } from "@util/pages";
 
 registerToolbar("Tree");
 
@@ -104,7 +106,7 @@ function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refres
     setEmpty(!numItems);
 }
 
-export default function TreeWidget({ Node, builder, params, mapper, store, filter, loading, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
+export default function TreeWidget({ Node, builder, params, mapper, store, filter, loading, source, refresh, itemSize = "4em", onImport, onExport, name, data = [] }) {
     const { select } = store.useState();
     const translations = useTranslations();
     const size = useContext(PageSize);
@@ -127,6 +129,10 @@ export default function TreeWidget({ Node, builder, params, mapper, store, filte
     if (!Node) {
         return null;
     }
+
+    const gotoSource = () => {
+        addPath("editor" + source);
+    };
 
     const toolbarItems = [
         data && name && onImport && {
@@ -174,6 +180,13 @@ export default function TreeWidget({ Node, builder, params, mapper, store, filte
             name: translations.REFRESH,
             icon: <RefreshIcon />,
             onClick: refresh,
+            location: "advanced"
+        },
+        source && {
+            id: "editor",
+            name: translations.EDITOR,
+            icon: <InsertDriveFileIcon />,
+            onClick: gotoSource,
             location: "advanced"
         }
     ].filter(Boolean);
