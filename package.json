@@ -34,6 +34,7 @@
     "react-vtree": "^2.0.4",
     "react-window": "^1.8.5",
     "sass": "^1.26.10",
-    "swr": "^0.3.2"
+    "swr": "^0.3.2",
+    "use-dark-mode": "^2.3.1"
   }
 }

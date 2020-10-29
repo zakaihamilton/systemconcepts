@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { useLanguage } from "@util/language";
 import terms from "@data/terms";
-import { MainStore } from "@components/Main";
+import useDarkMode from 'use-dark-mode';
 
 export function useTerms() {
-    const { darkMode } = MainStore.useState();
-    const darkModeKey = darkMode ? "dark" : "light";
+    const darkMode = useDarkMode(false);
+    const darkModeKey = darkMode.value ? "dark" : "light";
     const language = useLanguage();
     const items = useMemo(() => {
         const obj = {};

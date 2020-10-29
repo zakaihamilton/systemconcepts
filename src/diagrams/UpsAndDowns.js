@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { MainStore } from "@components/Main";
 import Term from "@widgets/Term";
 import Zoom from "@components/Zoom";
+import useDarkMode from 'use-dark-mode';
 
 function Worlds({ children, total }) {
     let offset = 0;
@@ -56,11 +57,11 @@ function Divider({ id, row, style, total }) {
 }
 
 function Item({ className, style, start, end, column, term, type, selected, ...props }) {
-    const { darkMode } = MainStore.useState();
+    const darkMode = useDarkMode(false);
     const gridRow = `${start + 1}/${end + 1}`;
     const gridColumn = `${column + 1}/${column + 2}`;
     style = { gridRow, gridColumn, ...style };
-    return <div className={clsx(styles.face, className, selected && styles.selected, darkMode && styles.darkMode)} style={style} {...props}>
+    return <div className={clsx(styles.face, className, selected && styles.selected, darkMode.value && styles.darkMode)} style={style} {...props}>
         {term && <Term id={term} />}
         {type && <div className={clsx(styles.itemType, selected && styles.selected)}>
             <Term id={type} />

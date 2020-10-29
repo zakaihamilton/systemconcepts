@@ -11,6 +11,7 @@ export default class MyDocument extends Document {
             <Html lang="en">
                 <Head />
                 <body>
+                    <script src="noflash.js" />
                     <Main />
                     <NextScript />
                 </body>
