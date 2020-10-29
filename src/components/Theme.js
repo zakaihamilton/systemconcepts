@@ -1,22 +1,20 @@
 import React, { useMemo, useEffect } from "react";
 import { StylesProvider, ThemeProvider, jssPreset } from "@material-ui/styles";
 import { create } from "jss";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { createMuiTheme } from "@material-ui/core/styles";
 import { MainStore } from "@components/Main";
 import rtl from "jss-rtl";
+import useDarkMode from 'use-dark-mode';
 
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
 export default function Theme({ children }) {
-    const { darkMode, fontSize, autoDetectDarkMode } = MainStore.useState(s => {
+    const darkMode = useDarkMode(false);
+    const { fontSize } = MainStore.useState(s => {
         return {
-            darkMode: s.darkMode,
-            fontSize: s.fontSize,
-            autoDetectDarkMode: s.autoDetectDarkMode
+            fontSize: s.fontSize
         };
     });
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
 
     const theme = useMemo(() =>
         createMuiTheme({
@@ -24,7 +22,7 @@ export default function Theme({ children }) {
                 fontSize: parseInt(fontSize)
             },
             palette: {
-                type: darkMode ? 'dark' : 'light',
+                type: darkMode.value ? 'dark' : 'light',
                 primary: {
                     main: "#1e88e5",
                     light: "#4b9fea",
@@ -36,7 +34,7 @@ export default function Theme({ children }) {
                 },
                 tonalOffset: 0.2,
             },
-        }), [darkMode, fontSize]);
+        }), [darkMode.value, fontSize]);
 
     useEffect(() => {
         const body = document.getElementsByTagName('body');
@@ -44,16 +42,8 @@ export default function Theme({ children }) {
     }, [fontSize]);
 
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-    }, [darkMode]);
-
-    useEffect(() => {
-        if (autoDetectDarkMode) {
-            MainStore.update(s => {
-                s.darkMode = prefersDarkMode;
-            });
-        }
-    }, [prefersDarkMode, autoDetectDarkMode]);
+        document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light');
+    }, [darkMode.value]);
 
     return <StylesProvider jss={jss}>
         <ThemeProvider theme={theme}>

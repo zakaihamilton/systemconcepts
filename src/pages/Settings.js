@@ -12,11 +12,11 @@ import Label from "@widgets/Label";
 import { useCallback } from "react";
 import Dynamic from "@widgets/Dynamic";
 import { useDeviceType } from "@util/styles";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@material-ui/core/Button";
 import { addPath } from "@util/pages";
 import { Store } from "pullstate";
 import BuildIcon from '@material-ui/icons/Build';
+import useDarkMode from 'use-dark-mode';
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -25,25 +25,20 @@ export const SettingsStore = new Store({
 });
 
 export default function Settings() {
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
-    const prefferedLanguage = languages.find(item => navigator.language.includes(item.code)) || languages[0];
+    const prefferedLanguage = typeof navigator !== "undefined" && languages.find(item => navigator.language.includes(item.code)) || languages[0];
+    const darkMode = useDarkMode(false);
     const translations = useTranslations();
     const states = useStoreState(MainStore);
     const deviceType = useDeviceType();
-    let darkModeSelected = "off";
-    if (states.autoDetectDarkMode[0]) {
-        darkModeSelected = "auto";
-    }
-    else if (states.darkMode[0]) {
-        darkModeSelected = "on";
-    }
-    const setDarkMode = useCallback(darkMode => {
-        MainStore.update(s => {
-            s.autoDetectDarkMode = darkMode === "auto";
-            if (darkMode !== "auto") {
-                s.darkMode = darkMode === "on"
-            }
-        });
+    const darkModeSelected = darkMode.value ? "on" : "off";
+    const setDarkMode = useCallback(value => {
+        if (value === "on") {
+            darkMode.enable();
+        }
+        else {
+            darkMode.disable();
+        }
+        console.log("value", value, "darkMode.value", darkMode.value);
     });
     const darkModeState = [darkModeSelected, setDarkMode];
 
@@ -70,11 +65,6 @@ export default function Settings() {
     ]
 
     const darkModeItems = [
-        {
-            id: "auto",
-            name: translations.AUTO,
-            tooltip: prefersDarkMode ? "Dark Mode Preferred" : "Light Mode Preferred"
-        },
         {
             id: "off",
             name: translations.OFF

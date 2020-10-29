@@ -13,18 +13,15 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { MainStore } from "@components/Main";
 
-export function ListItemWidget({ id, divider, reverse, viewType, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
+export function ListItemWidget({ id, divider, reverse, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const isSelected = typeof selected === "function" ? selected(id) : selected === id;
     const itemClassName = useStyles(styles, {
-        itemList: viewType === "List",
-        itemIconList: viewType === "IconList",
         selected: isSelected
     });
     const iconContainerClassName = useStyles(styles, {
-        iconContainerList: viewType === "List",
-        iconContainerIconList: viewType === "IconList"
+        iconContainer: true
     });
     const [open, setOpen] = useState(false);
     let expandIcon = null;
@@ -50,7 +47,6 @@ export function ListItemWidget({ id, divider, reverse, viewType, depth, clickHan
             depth={depth + 1}
             key={item.id}
             clickHandler={clickHandler}
-            viewType={viewType}
             selected={selected}
             setSelected={setSelected}
             {...props} />
@@ -63,7 +59,7 @@ export function ListItemWidget({ id, divider, reverse, viewType, depth, clickHan
         style.paddingLeft = (depth * 1.5) + "em";
     }
     return <>
-        {viewType === "List" && !!reverse && !!divider && <Divider />}
+        {!!reverse && !!divider && <Divider />}
         <ListItem style={style} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
@@ -86,23 +82,21 @@ export function ListItemWidget({ id, divider, reverse, viewType, depth, clickHan
                 {elements}
             </List>
         </Collapse>}
-        {viewType === "List" && !reverse && !!divider && <Divider />}
+        {!reverse && !!divider && <Divider />}
     </>;
 }
 
-export default function ListWidget({ reverse, items, onClick, state, viewType }) {
+export default function ListWidget({ reverse, items, onClick, state }) {
     const [selected, setSelected] = state || [];
 
     const className = useStyles(styles, {
         root: true,
-        iconList: viewType === "IconList",
-        list: viewType === "List",
         reverse
     });
 
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} viewType={viewType} reverse={reverse} selected={selected} setSelected={setSelected} {...props} />
+        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} reverse={reverse} selected={selected} setSelected={setSelected} {...props} />
     });
 
     return <List className={className} component="nav">

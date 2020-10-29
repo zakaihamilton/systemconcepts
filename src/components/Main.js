@@ -15,8 +15,6 @@ import Footer from "./Footer";
 import Title from "./Title";
 
 export const MainStoreDefaults = {
-    autoDetectDarkMode: true,
-    darkMode: false,
     fontSize: "16",
     direction: "ltr",
     language: "auto",

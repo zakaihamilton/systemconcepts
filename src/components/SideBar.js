@@ -68,13 +68,13 @@ export default function SideBar() {
             }}
             onClose={closeDrawer}
         >
-            <List onClick={closeDrawer} items={items} state={state} viewType={menuViewList} />
+            <List onClick={closeDrawer} items={items} state={state} />
             <QuickAccess closeDrawer={closeDrawer} state={state} />
         </Drawer>;
     }
 
     return <div className={styles.root}>
-        <List items={items} state={state} viewType={menuViewList} />
+        <List items={items} state={state} />
         <QuickAccess closeDrawer={closeDrawer} state={state} />
     </div>;
 }

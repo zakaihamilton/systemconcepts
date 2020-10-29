@@ -1,7 +1,7 @@
-import FS from '@isomorphic-git/lightning-fs';
+const FS = process.browser && require('@isomorphic-git/lightning-fs');
 import { makePath } from "@util/path";
 
-const fs = new FS("systemconcepts-fs");
+const fs = process.browser && new FS("systemconcepts-fs");
 
 async function getListing(path, options = {}) {
     const { useCount } = options;

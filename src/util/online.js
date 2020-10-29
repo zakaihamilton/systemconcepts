@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 export function useOnline() {
-    const [onlineStatus, setOnlineStatus] = useState(navigator.onLine);
+    const [onlineStatus, setOnlineStatus] = useState(typeof navigator !== "undefined" && navigator.onLine);
     const onOnline = useCallback(() => setOnlineStatus(true));
     const onOffline = useCallback(() => setOnlineStatus(false));
     useEffect(() => {

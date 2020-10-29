@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useEffect } from "react";
-import im from "node_modules/include-media-export/include-media.js";
+const im = process.browser && require("node_modules/include-media-export/include-media.js");
 import { useCounter } from "./hooks";
 
 export function getProperty(name) {
@@ -44,8 +44,8 @@ export function useImportMedia(callback) {
 
 export function useDeviceType() {
     return useImportMedia(im => {
-        const isPhone = im.lessThan('tablet');
-        const isTablet = im.greaterThan('tablet') && im.lessThan('desktop');
+        const isPhone = im && im.lessThan('tablet');
+        const isTablet = im && im.greaterThan('tablet') && im.lessThan('desktop');
         if (isTablet) {
             return "tablet";
         }

@@ -44,7 +44,7 @@ export function useUnique() {
 }
 
 export function usePageVisibility() {
-    const [isVisible, setIsVisible] = useState(document.visibilityState === "visible");
+    const [isVisible, setIsVisible] = useState(typeof document !== "undefined" && document.visibilityState === "visible");
     const onVisibilityChange = () => setIsVisible(document.visibilityState === "visible");
     useEffect(() => {
         document.addEventListener("visibilitychange", onVisibilityChange);

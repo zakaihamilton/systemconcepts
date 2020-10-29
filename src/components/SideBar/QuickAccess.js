@@ -12,19 +12,17 @@ import BuildIcon from '@material-ui/icons/Build';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import { useToolbarItems } from "@components/Toolbar";
 import { useLanguage } from "@util/language";
+import useDarkMode from 'use-dark-mode';
 
 export default function QuickAccess({ closeDrawer, state }) {
-    const { darkMode, menuViewList } = MainStore.useState();
     const language = useLanguage();
     const translations = useTranslations();
     const pages = usePages();
     const advancedToolbar = useToolbarItems({ location: "advanced" });
+    const darkMode = useDarkMode(false);
 
     const toggleDarkMode = () => {
-        MainStore.update(s => {
-            s.darkMode = !s.darkMode;
-            s.autoDetectDarkMode = false;
-        });
+        darkMode.toggle();
     };
 
     const setLanguage = (id) => {
@@ -48,8 +46,8 @@ export default function QuickAccess({ closeDrawer, state }) {
         },
         {
             id: "toggleDarkMode",
-            name: darkMode ? translations.LIGHT_MODE : translations.DARK_MODE,
-            icon: darkMode ? <Brightness7Icon /> : <Brightness4Icon />,
+            name: darkMode.value ? translations.LIGHT_MODE : translations.DARK_MODE,
+            icon: darkMode.value ? <Brightness7Icon /> : <Brightness4Icon />,
             onClick: toggleDarkMode
         },
         {
@@ -84,6 +82,6 @@ export default function QuickAccess({ closeDrawer, state }) {
     return <>
         <div style={{ flex: "1" }} />
         <Divider style={{ color: "var(1px solid --border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <List items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
+        <List items={quickAccessItems} onClick={closeDrawer} state={state} />
     </>;
 }
