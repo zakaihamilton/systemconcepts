@@ -22,7 +22,8 @@ export default function Sync({ children }) {
 
     const formattedDuration = formatDuration(duration);
     const name = <span>
-        {isBusy ? translations.SYNCING : translations.SYNC}
+        {!!error && translations.SYNC_FAILED}
+        {!error && (isBusy ? translations.SYNCING : translations.SYNC)}
         <br />
         {!!duration && formattedDuration}
     </span>;

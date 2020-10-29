@@ -85,6 +85,7 @@ export async function syncLocal(endPoint, start, end) {
 export function useSyncFeature() {
     const startRef = useRef(null);
     const [duration, setDuration] = useState(0);
+    const [complete, setComplete] = useState(false);
     const online = useOnline();
     const [error, setError] = useState(null);
     const { lastUpdated, _loaded } = SyncStore.useState();
@@ -97,6 +98,7 @@ export function useSyncFeature() {
             return;
         }
         startRef.current = new Date().getTime();
+        setComplete(false);
         setDuration(0);
         setError(null);
         const currentTime = new Date().getTime();
@@ -160,6 +162,9 @@ export function useSyncFeature() {
                 if (err === 401) {
                     setError("ACCESS_DENIED");
                 }
+                else {
+                    setError("SYNC_FAILED");
+                }
                 console.error(err);
             }
             try {
@@ -172,6 +177,7 @@ export function useSyncFeature() {
                 await syncLocal("personal", lastUpdated, currentTime);
             }
             catch (err) {
+                setError("SYNC_FAILED");
                 console.error(err);
             }
         }
@@ -194,6 +200,7 @@ export function useSyncFeature() {
         SyncActiveStore.update(s => {
             s.busy = false;
         });
+        setComplete(true);
     }, [online]);
     const fullSync = useCallback(async () => {
         SyncStore.update(s => {
@@ -213,5 +220,5 @@ export function useSyncFeature() {
         }
     }, [online, _loaded, isSignedIn, visible]);
 
-    return [online && _loaded && syncNow, online && _loaded && fullSync, busy, error, active, duration];
+    return [online && _loaded && syncNow, online && _loaded && fullSync, busy, error, active, duration, complete];
 }
