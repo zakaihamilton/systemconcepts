@@ -1,27 +1,17 @@
-@import "~include-media/dist/_include-media.scss";
-
 .root {
     display: grid;
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
     grid-template: 4em auto / 0em auto;
 
-    @include media("<=tablet") {
-        grid-template: 4em auto / 0em auto;
-    }
-
     font-family: "Roboto",
-    "Helvetica",
-    "Arial",
-    sans-serif;
+        "Helvetica",
+        "Arial",
+        sans-serif;
 }
 
 .root.sidebar.list {
     grid-template: 4em auto / 15em auto;
-
-    @include media("<=tablet") {
-        grid-template: auto / auto;
-    }
 }
 
 .main {
