@@ -53,7 +53,7 @@ export default function Theme({ children }) {
                 s.darkMode = prefersDarkMode;
             });
         }
-    }, [prefersDarkMode, autoDetectDarkMode]);
+    }, [autoDetectDarkMode]);
 
     return <StylesProvider jss={jss}>
         <ThemeProvider theme={theme}>

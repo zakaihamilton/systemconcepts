@@ -14,7 +14,7 @@ import { useToolbarItems } from "@components/Toolbar";
 import { useLanguage } from "@util/language";
 
 export default function QuickAccess({ closeDrawer, state }) {
-    const { darkMode, menuViewList } = MainStore.useState();
+    const { darkMode } = MainStore.useState();
     const language = useLanguage();
     const translations = useTranslations();
     const pages = usePages();
@@ -84,6 +84,6 @@ export default function QuickAccess({ closeDrawer, state }) {
     return <>
         <div style={{ flex: "1" }} />
         <Divider style={{ color: "var(1px solid --border)", marginTop: "0.5em", marginBottom: "0.5em" }} />
-        <List items={quickAccessItems} onClick={closeDrawer} state={state} viewType={menuViewList} />
+        <List items={quickAccessItems} onClick={closeDrawer} state={state} />
     </>;
 }

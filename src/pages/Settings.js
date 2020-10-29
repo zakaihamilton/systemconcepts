@@ -26,7 +26,7 @@ export const SettingsStore = new Store({
 
 export default function Settings() {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
-    const prefferedLanguage = languages.find(item => navigator.language.includes(item.code)) || languages[0];
+    const prefferedLanguage = typeof navigator !== "undefined" && languages.find(item => navigator.language.includes(item.code)) || languages[0];
     const translations = useTranslations();
     const states = useStoreState(MainStore);
     const deviceType = useDeviceType();
