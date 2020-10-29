@@ -12,11 +12,11 @@ import Label from "@widgets/Label";
 import { useCallback } from "react";
 import Dynamic from "@widgets/Dynamic";
 import { useDeviceType } from "@util/styles";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from "@material-ui/core/Button";
 import { addPath } from "@util/pages";
 import { Store } from "pullstate";
 import BuildIcon from '@material-ui/icons/Build';
+import { prefersDarkMode } from "@components/Theme";
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -25,7 +25,6 @@ export const SettingsStore = new Store({
 });
 
 export default function Settings() {
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
     const prefferedLanguage = typeof navigator !== "undefined" && languages.find(item => navigator.language.includes(item.code)) || languages[0];
     const translations = useTranslations();
     const states = useStoreState(MainStore);
@@ -73,7 +72,7 @@ export default function Settings() {
         {
             id: "auto",
             name: translations.AUTO,
-            tooltip: prefersDarkMode ? "Dark Mode Preferred" : "Light Mode Preferred"
+            tooltip: prefersDarkMode() ? "Dark Mode Preferred" : "Light Mode Preferred"
         },
         {
             id: "off",

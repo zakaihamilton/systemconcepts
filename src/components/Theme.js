@@ -1,22 +1,25 @@
 import React, { useMemo, useEffect } from "react";
 import { StylesProvider, ThemeProvider, jssPreset } from "@material-ui/styles";
 import { create } from "jss";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { createMuiTheme } from "@material-ui/core/styles";
 import { MainStore } from "@components/Main";
 import rtl from "jss-rtl";
 
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
+export function prefersDarkMode() {
+    return (window.matchMedia('(prefers-color-scheme)').media !== 'not all');
+}
+
 export default function Theme({ children }) {
-    const { darkMode, fontSize, autoDetectDarkMode } = MainStore.useState(s => {
+    const { darkMode, fontSize, autoDetectDarkMode, _loaded } = MainStore.useState(s => {
         return {
             darkMode: s.darkMode,
             fontSize: s.fontSize,
-            autoDetectDarkMode: s.autoDetectDarkMode
+            autoDetectDarkMode: s.autoDetectDarkMode,
+            _loaded: s._loaded
         };
     });
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { noSsr: true });
 
     const theme = useMemo(() =>
         createMuiTheme({
@@ -48,12 +51,12 @@ export default function Theme({ children }) {
     }, [darkMode]);
 
     useEffect(() => {
-        if (autoDetectDarkMode) {
+        if (_loaded && autoDetectDarkMode) {
             MainStore.update(s => {
-                s.darkMode = prefersDarkMode;
+                s.darkMode = prefersDarkMode();
             });
         }
-    }, [autoDetectDarkMode]);
+    }, [_loaded, autoDetectDarkMode]);
 
     return <StylesProvider jss={jss}>
         <ThemeProvider theme={theme}>
