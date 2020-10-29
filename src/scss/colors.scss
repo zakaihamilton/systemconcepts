@@ -31,6 +31,7 @@
     --icon-background: lightgray;
     --icon-focus-color: black;
     --input-icon-color: darkgray;
+    --overlay: rgb(240, 240, 240, 0.5);
 }
 
 [data-theme="dark"] {
@@ -38,7 +39,7 @@
     --border-color: rgba(255, 255, 255, 0.12);
     --border-highlight: white;
     --border-focus: 2px solid white;
-    --box-shadow-color: rgb(42, 42, 57);
+    --box-shadow-color: rgb(255, 255, 255, 0.2);
     --bar-background: black;
     --header-background: rgb(12, 12, 27);
     --footer-background: rgb(12, 12, 27);
@@ -66,4 +67,5 @@
     --icon-background: lightgray;
     --icon-focus-color: rgb(166, 213, 250);
     --input-icon-color: lightgray;
+    --overlay: rgb(12, 12, 27, 0.75);
 }

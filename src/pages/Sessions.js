@@ -39,20 +39,6 @@ export default function SessionsPage() {
 
     const columns = [
         {
-            id: "nameWidget",
-            title: translations.NAME,
-            sortable: "name",
-            onSelectable: () => true,
-            onClick: gotoItem,
-            viewModes: {
-                "list": null,
-                "table": null,
-                "grid": {
-                    className: styles.gridName
-                }
-            }
-        },
-        {
             id: "thumbnailWidget",
             onSelectable: () => true,
             title: translations.THUMBNAIL,
@@ -60,6 +46,20 @@ export default function SessionsPage() {
             viewModes: {
                 "grid": {
                     className: styles.gridThumbnail
+                }
+            }
+        },
+        {
+            id: "nameWidget",
+            title: translations.NAME,
+            sortable: "name",
+            onSelectable: () => viewMode !== "grid",
+            onClick: viewMode !== "grid" && gotoItem,
+            viewModes: {
+                "list": null,
+                "table": null,
+                "grid": {
+                    className: styles.gridName
                 }
             }
         },
@@ -115,7 +115,8 @@ export default function SessionsPage() {
                 "list": null,
                 "table": null,
                 "grid": {
-                    className: styles.gridGroup
+                    className: styles.gridGroup,
+                    selectedClassName: styles.gridGroupSelected
                 }
             }
         }
@@ -139,8 +140,8 @@ export default function SessionsPage() {
                 </Tooltip>
             } />,
             group: item.group,
-            groupWidget: <Group name={item.group} color={item.color} />,
-            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="13em" height="9em" alt={altIcon} />,
+            groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
+            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
             durationWidget: item.duration ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN
         };
     };
@@ -173,7 +174,7 @@ export default function SessionsPage() {
     return <>
         <Table
             cellWidth="16em"
-            cellHeight="14em"
+            cellHeight="20em"
             name="sessions"
             store={SessionsStore}
             columns={columns}

@@ -425,6 +425,7 @@ export default function TableWidget(props) {
         const cellWidthInPixels = sizeToPixels(cellWidth);
         const columnCount = Math.floor(size.width / (cellWidthInPixels + 1));
         const rowCount = Math.ceil(numItems / columnCount);
+        const sidePadding = (size.width - (columnCount * cellWidthInPixels)) / 2;
 
         const Cell = ({ columnIndex, rowIndex, style }) => {
             const index = (rowIndex * columnCount) + columnIndex;
@@ -435,6 +436,8 @@ export default function TableWidget(props) {
             const { id } = item;
             const { style: itemStyles, ...props } = viewModes[viewMode] || {};
             const selected = selectedRow && selectedRow(item);
+            style = { ...style };
+            style.left += sidePadding;
             return <Item
                 key={id || index}
                 style={{ ...style, ...itemStyles }}
@@ -452,19 +455,17 @@ export default function TableWidget(props) {
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
-            {!loading && !!numItems && !error &&
-                <div className={styles.grid}>
-                    <FixedSizeGrid
-                        columnCount={columnCount}
-                        columnWidth={cellWidthInPixels}
-                        rowCount={rowCount}
-                        rowHeight={cellHeightInPixels}
-                        height={size.height}
-                        width={columnCount * cellWidthInPixels}
-                    >
-                        {Cell}
-                    </FixedSizeGrid>
-                </div>}
+            {!loading && !!numItems && !error && <FixedSizeGrid
+                className={styles.grid}
+                columnCount={columnCount}
+                columnWidth={cellWidthInPixels}
+                rowCount={rowCount}
+                rowHeight={cellHeightInPixels}
+                height={size.height}
+                width={size.width}
+            >
+                {Cell}
+            </FixedSizeGrid>}
             {!!error && <Error error={error} />}
         </>;
     }

@@ -7,7 +7,8 @@ export default function ItemWidget({ className = "", viewMode, selected: selecte
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
         const value = item[columnId];
-        const { className: viewModeClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
+        const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
+        const isSelected = selected && selected(item);
         return (<div
             dir={dir}
             style={{ ...style, ...viewModeStyle }}
@@ -15,10 +16,12 @@ export default function ItemWidget({ className = "", viewMode, selected: selecte
             className={clsx(
                 styles.cell,
                 onSelectable && onSelectable(item) && styles.selectable,
-                selected && selected(item) && styles.selected,
+                isSelected && styles.selected,
+                isSelected && selectedClassName,
                 ellipsis && styles.ellipsis,
                 !align && styles.defaultAlign,
-                viewModeClassName
+                viewModeClassName,
+                styles[viewMode]
             )}
             key={columnId}
             {...viewModeProps}

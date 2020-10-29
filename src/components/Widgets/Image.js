@@ -15,7 +15,8 @@ export default function ImageWidget({ clickForImage = true, loading, path, width
         setImageLoading(false);
     }
 
-    const style = { width, height };
+    const buttonStyle = { minWidth: width, minHeight: height };
+    const imageStyle = { width, height };
 
     const gotoImage = () => {
         addPath("image?label=THUMBNAIL");
@@ -25,9 +26,9 @@ export default function ImageWidget({ clickForImage = true, loading, path, width
         setImageLoading(!!path);
     }, [path]);
 
-    return <button style={style} className={styles.root} disabled={clickForImage && (!path || !!error)} onClick={clickForImage ? gotoImage : undefined}>
+    return <div style={buttonStyle} className={styles.root} disabled={clickForImage && (!path || !!error)} onClick={clickForImage ? gotoImage : undefined}>
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
-        {path && !error && <img draggable={false} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
+        {path && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
         {(!path || !!error) && (!loading && !imageLoading) && <div className={styles.alt}>{alt}</div>}
-    </button>;
+    </div>;
 }

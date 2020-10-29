@@ -15,6 +15,7 @@ import Footer from "./Footer";
 import Title from "./Title";
 import { useResize } from "@util/size";
 import clsx from "clsx";
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 export const MainStoreDefaults = {
     fontSize: "16",
@@ -66,18 +67,20 @@ export default function Main() {
     return <>
         <Head />
         <Theme>
-            <div className={className}>
-                <Title />
-                <Sync>
-                    <Bookmarks />
-                    <SideBar />
-                    <div className={clsx(styles.main, isMobile && styles.mobile)}>
-                        <Header />
-                        <Page />
-                        <Footer />
-                    </div>
-                </Sync>
-            </div>
+            <CssBaseline>
+                <div className={className}>
+                    <Title />
+                    <Sync>
+                        <Bookmarks />
+                        <SideBar />
+                        <div className={clsx(styles.main, isMobile && styles.mobile)}>
+                            <Header />
+                            <Page />
+                            <Footer />
+                        </div>
+                    </Sync>
+                </div>
+            </CssBaseline>
         </Theme>
     </>;
 }

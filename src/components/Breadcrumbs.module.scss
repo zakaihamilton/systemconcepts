@@ -49,9 +49,17 @@
 }
 
 .icon {
-    margin-top: 0.2em;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+    padding: 12px;
+    margin-top: 0.3em;
+    font-size: 1.7rem;
+
+    [dir=ltr] & {
+        margin-right: 0.1em;
+    }
+
+    [dir=rtl] & {
+        margin-left: 0.1em;
+    }
 }
 
 .iconButton {

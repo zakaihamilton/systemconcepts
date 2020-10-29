@@ -23,11 +23,11 @@ export function useResize(depends = []) {
     useEffect(() => {
         const handler = () => handleResize();
         window.addEventListener("resize", handler);
-
+        handleResize();
         return () => {
             window.removeEventListener("resize", handler);
         };
-    }, [...depends]);
+    }, depends);
 
     return counter;
 }
@@ -37,10 +37,14 @@ export function useSize(ref, depends = []) {
     const [size, setSize] = useState({ width: 0, height: 0 });
 
     const handleResize = () => {
-        if (!ref || !ref.current) {
+        if (!ref) {
             if (window) {
                 setSize({ width: window.innerWidth, height: window.innerHeight });
             }
+            return;
+        }
+        if (!ref.current) {
+            setSize({ width: 0, height: 0, emPixels, ref });
             return;
         }
         const element = ref.current.parentElement;

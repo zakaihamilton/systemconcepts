@@ -7,8 +7,6 @@
     border: 1px solid transparent;
     overflow: hidden;
     position: relative;
-    border-radius: 1em;
-    padding: 0.5em;
     color: var(--text-color);
 }
 
@@ -27,7 +25,7 @@
 }
 
 .img {
-    object-fit: contain;
+    object-fit: fill;
     overflow: hidden;
 }
 

@@ -7,8 +7,9 @@ import { useStyles } from "@util/styles";
 export default function RowWidget({ className = "", viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, viewModes = {}, onSelectable, onClick, selected } = column;
-        const { className: viewModeClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
+        const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const value = item[columnId];
+        const isSelected = selected && selected(item);
         return (<TableCell
             dir={dir}
             align={align}
@@ -19,7 +20,8 @@ export default function RowWidget({ className = "", viewMode, index, selected: s
                     styles.cell,
                     !align && styles.defaultAlign,
                     onSelectable && onSelectable(item) && styles.selectable,
-                    selected && selected(item) && styles.selected,
+                    isSelected && styles.selected,
+                    isSelected && selectedClassName,
                     viewModeClassName
                 )
             }}

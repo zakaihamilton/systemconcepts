@@ -4,6 +4,7 @@ import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
 import Player from "@pages/Player";
 import { useActivePages } from "@util/pages";
+import NoSsr from '@material-ui/core/NoSsr';
 
 export const PageSize = createContext();
 
@@ -28,7 +29,9 @@ export default function Page() {
             <div className={styles.pageContainer}>
                 <main ref={ref} className={styles.page}>
                     {playerPageRef.current && <Player show={showPlayer} {...playerPageRef.current} />}
-                    {!!process.browser && showPage && <Component {...activePage} />}
+                    <NoSsr>
+                        {showPage && <Component {...activePage} />}
+                    </NoSsr>
                 </main>
             </div>
         </PageSize.Provider>

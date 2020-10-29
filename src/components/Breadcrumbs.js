@@ -12,6 +12,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Toolbar from "@components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
+import NoSsr from '@material-ui/core/NoSsr';
 
 export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
     const { direction } = MainStore.useState();
@@ -90,12 +91,14 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     return (
         <div className={clsx(styles.root, bar && styles.bar, border && styles.border, className)}>
             <div className={styles.row}>
-                {!!bar && !!process.browser && <MenuIcon />}
-                {!!process.browser && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-                <div className={styles.breadcrumbs}>
-                    {!!process.browser && breadcrumbItems}
-                </div>
-                {!!bar && <Toolbar collapsable={true} />}
+                <NoSsr>
+                    {!!bar && <MenuIcon />}
+                    {<Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                    <div className={styles.breadcrumbs}>
+                        {breadcrumbItems}
+                    </div>
+                    {!!bar && <Toolbar collapsable={true} />}
+                </NoSsr>
             </div>
         </div>
     );

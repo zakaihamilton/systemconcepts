@@ -21,6 +21,7 @@
     text-align: center;
     height: 18em;
     width: 18em;
+    margin: 1em;
 }
 
 .metadata {
@@ -60,6 +61,6 @@
 }
 
 .preview.audio {
-    border-radius: 1em;
+    border-radius: 0.5em;
     box-shadow: 0 10px 16px 0 var(--box-shadow-color) !important;
 }
