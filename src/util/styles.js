@@ -34,6 +34,9 @@ export function useDeviceType() {
     const size = useSize();
     const isPhone = size.width && size.width <= 768;
     const isTablet = size.width && size.width >= 768 && size.width <= 1024;
+    if (!size.width) {
+        return "ssr";
+    }
     if (isTablet) {
         return "tablet";
     }
