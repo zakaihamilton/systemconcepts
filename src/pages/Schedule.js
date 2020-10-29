@@ -92,8 +92,8 @@ export default function SchedulePage() {
 
     return <div className={styles.root}>
         {statusBar}
-        {viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-        {loading && loadingElement}
+        {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+        {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+        {!!loading && loadingElement}
     </div>;
 }
