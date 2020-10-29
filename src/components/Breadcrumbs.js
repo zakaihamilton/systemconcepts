@@ -90,10 +90,10 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     return (
         <div className={clsx(styles.root, bar && styles.bar, border && styles.border, className)}>
             <div className={styles.row}>
-                {!!bar && <MenuIcon />}
-                <Divider classes={{ root: styles.divider }} orientation="vertical" />
+                {!!bar && !!process.browser && <MenuIcon />}
+                {!!process.browser && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
                 <div className={styles.breadcrumbs}>
-                    {process.browser && breadcrumbItems}
+                    {!!process.browser && breadcrumbItems}
                 </div>
                 {!!bar && <Toolbar collapsable={true} />}
             </div>

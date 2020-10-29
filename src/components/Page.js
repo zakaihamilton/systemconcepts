@@ -28,7 +28,7 @@ export default function Page() {
             <div className={styles.pageContainer}>
                 <main ref={ref} className={styles.page}>
                     {playerPageRef.current && <Player show={showPlayer} {...playerPageRef.current} />}
-                    {process.browser && showPage && <Component {...activePage} />}
+                    {!!process.browser && showPage && <Component {...activePage} />}
                 </main>
             </div>
         </PageSize.Provider>
