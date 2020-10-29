@@ -14,6 +14,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Title from "./Title";
 import { useResize } from "@util/size";
+import clsx from "clsx";
 
 export const MainStoreDefaults = {
     fontSize: "16",
@@ -70,7 +71,7 @@ export default function Main() {
                 <Sync>
                     <Bookmarks />
                     <SideBar />
-                    <div className={styles.main}>
+                    <div className={clsx(styles.main, isMobile && styles.mobile)}>
                         <Header />
                         <Page />
                         <Footer />

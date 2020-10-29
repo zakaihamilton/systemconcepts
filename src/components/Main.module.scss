@@ -16,7 +16,7 @@
 }
 
 .root.mobile {
-    grid-template-columns: auto !important;
+    grid-template-columns: auto;
 }
 
 .main {
@@ -25,4 +25,8 @@
     display: grid;
     overflow: hidden;
     grid-template-rows: 4em auto 4em;
+}
+
+.main.mobile {
+    grid-column: 1 / 3;
 }

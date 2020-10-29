@@ -32,8 +32,8 @@ export function useStyles(styles, data) {
 
 export function useDeviceType() {
     const size = useSize();
-    const isPhone = size.width <= 768;
-    const isTablet = size.width >= 768 && size.width <= 1024;
+    const isPhone = size.width && size.width <= 768;
+    const isTablet = size.width && size.width >= 768 && size.width <= 1024;
     if (isTablet) {
         return "tablet";
     }
