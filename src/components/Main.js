@@ -13,12 +13,12 @@ import Bookmarks from "./Bookmarks";
 import Header from "./Header";
 import Footer from "./Footer";
 import Title from "./Title";
+import { useResize } from "@util/size";
 
 export const MainStoreDefaults = {
     fontSize: "16",
     direction: "ltr",
     language: "auto",
-    menuViewList: "List",
     showSideBar: true,
     showDrawer: false
 };
@@ -26,9 +26,10 @@ export const MainStoreDefaults = {
 export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
+    const counter = useResize();
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
-    const { direction, showSideBar, menuViewList } = MainStore.useState();
+    const { direction, showSideBar } = MainStore.useState();
     useLocalStorage("MainStore", MainStore);
 
     useEffect(() => {
@@ -57,7 +58,7 @@ export default function Main() {
     const className = useStyles(styles, {
         root: true,
         sidebar: showSideBar && !isMobile,
-        list: menuViewList === "List",
+        mobile: isMobile,
         rtl: direction === "rtl"
     });
 

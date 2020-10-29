@@ -13,7 +13,7 @@ import { useTranslations } from "@util/translations";
 export default function SideBar() {
     const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
-    const { menuViewList, direction, showSlider } = MainStore.useState();
+    const { direction, showSlider } = MainStore.useState();
     const bookmarks = useBookmarks();
     const activePages = useActivePages();
     const pages = usePages("sidebar");

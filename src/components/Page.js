@@ -1,6 +1,6 @@
 import { useRef, createContext } from "react";
 import styles from "./Page.module.scss";
-import { useResize } from "@util/size";
+import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
 import Player from "@pages/Player";
 import { useActivePages } from "@util/pages";
@@ -12,7 +12,7 @@ export default function Page() {
     const { hash, showSideBar } = MainStore.useState();
     const activePage = pages[pages.length - 1];
     const ref = useRef();
-    const size = useResize(ref, [showSideBar, hash]);
+    const size = useSize(ref, [showSideBar, hash]);
     const playerPageRef = useRef(null);
     if (!activePage) {
         return null;

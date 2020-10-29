@@ -1,7 +1,5 @@
 import clsx from "clsx";
-import { useEffect } from "react";
-const im = process.browser && require("node_modules/include-media-export/include-media.js");
-import { useCounter } from "./hooks";
+import { useSize } from "@util/size";
 
 export function getProperty(name) {
     return getComputedStyle(document.documentElement, null).getPropertyValue(name);
@@ -32,26 +30,15 @@ export function useStyles(styles, data) {
     return clsx(...classList);
 }
 
-export function useImportMedia(callback) {
-    const [, incCounter] = useCounter();
-    const value = callback(im);
-    useEffect(() => {
-        window.addEventListener('resize', incCounter);
-        return () => window.removeEventListener('resize', incCounter);
-    });
-    return value;
-}
-
 export function useDeviceType() {
-    return useImportMedia(im => {
-        const isPhone = im && im.lessThan('tablet');
-        const isTablet = im && im.greaterThan('tablet') && im.lessThan('desktop');
-        if (isTablet) {
-            return "tablet";
-        }
-        if (isPhone) {
-            return "phone";
-        }
-        return "desktop";
-    });
+    const size = useSize();
+    const isPhone = size.width <= 768;
+    const isTablet = size.width >= 768 && size.width <= 1024;
+    if (isTablet) {
+        return "tablet";
+    }
+    if (isPhone) {
+        return "phone";
+    }
+    return "desktop";
 }

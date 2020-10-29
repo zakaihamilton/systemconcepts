@@ -19,8 +19,6 @@
     "eslint": "^7.12.1",
     "fontsource-roboto": "^3.0.3",
     "gmail-send": "^1.8.10",
-    "include-media": "^1.4.9",
-    "include-media-export": "^1.0.3",
     "js-cookie": "^2.2.1",
     "jss-rtl": "^0.3.0",
     "mongodb": "^3.6.2",

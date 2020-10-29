@@ -2,7 +2,8 @@
     display: grid;
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
-    grid-template: 4em auto / 0em auto;
+    grid-template-rows: 4em auto;
+    grid-template-columns: 0em auto;
 
     font-family: "Roboto",
         "Helvetica",
@@ -10,8 +11,12 @@
         sans-serif;
 }
 
-.root.sidebar.list {
-    grid-template: 4em auto / 15em auto;
+.root.sidebar {
+    grid-template-columns: 15em auto;
+}
+
+.root.mobile {
+    grid-template-columns: auto !important;
 }
 
 .main {
