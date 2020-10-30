@@ -70,6 +70,11 @@ export default function SessionsPage() {
             style: {
                 justifyContent: "center"
             },
+            columnProps: {
+                style: {
+                    width: "7.5em"
+                }
+            },
             viewModes: {
                 "list": null,
                 "table": null,
@@ -84,6 +89,11 @@ export default function SessionsPage() {
             sortable: "duration",
             style: {
                 justifyContent: "center"
+            },
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
             },
             viewModes: {
                 ...!isPhone && { "list": null },
@@ -108,6 +118,11 @@ export default function SessionsPage() {
                 }
                 s.offset = 0;
             }),
+            columnProps: {
+                style: {
+                    width: "8em"
+                }
+            },
             style: {
                 justifyContent: "center"
             },

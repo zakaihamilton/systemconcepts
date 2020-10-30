@@ -354,7 +354,6 @@ export default function TableWidget(props) {
         </>;
     }
     else if (viewMode === "table") {
-
         const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
             return <Column
                 key={item.id || idx}
