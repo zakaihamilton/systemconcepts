@@ -72,7 +72,7 @@ export default function SessionsPage() {
             },
             columnProps: {
                 style: {
-                    width: "7.5em"
+                    width: "7em"
                 }
             },
             viewModes: {
@@ -96,8 +96,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                ...!isPhone && { "list": null },
-                "table": null,
+                ...!isPhone && { "list": null, "table": null },
                 "grid": {
                     className: styles.gridDuration
                 }
@@ -120,7 +119,7 @@ export default function SessionsPage() {
             }),
             columnProps: {
                 style: {
-                    width: "8em"
+                    width: "7em"
                 }
             },
             style: {
