@@ -3,6 +3,7 @@ import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import { useGroups } from "@util/groups";
 import ColorPicker from "./Groups/ColorPicker";
+import styles from "./Groups.module.scss";
 
 export const GroupsStore = new Store({
     counter: 0
@@ -54,6 +55,12 @@ export default function Groups() {
                 GroupsStore.update(s => {
                     s.counter++;
                 });
+            }}
+            viewModes={{
+                list: {
+                    className: styles.listItem
+                },
+                table: null
             }}
             mapper={mapper}
             loading={loading}
