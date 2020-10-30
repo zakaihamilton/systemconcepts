@@ -132,7 +132,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 id: encodeURIComponent(path)
             }
         });
-        return item && item.body;
+        return item && !item.deleted && item.body;
     }
 
     async function writeFile(path, body = "") {

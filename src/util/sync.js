@@ -143,6 +143,7 @@ export function useSyncFeature() {
                     }
                 }
                 catch (err) {
+                    setError("SYNC_FAILED");
                     console.error(err);
                 }
                 setDuration(parseInt(duration / 1000) * 1000);
@@ -177,7 +178,12 @@ export function useSyncFeature() {
                 await syncLocal("personal", lastUpdated, currentTime);
             }
             catch (err) {
-                setError("SYNC_FAILED");
+                if (err === 401) {
+                    setError("ACCESS_DENIED");
+                }
+                else {
+                    setError("SYNC_FAILED");
+                }
                 console.error(err);
             }
         }
