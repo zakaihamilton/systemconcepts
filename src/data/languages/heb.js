@@ -807,7 +807,7 @@ export default {
         },
         {
             "id": "LOADING",
-            "value": "טעון"
+            "value": "טוען"
         },
         {
             "id": "ADD_BOOKMARK",
