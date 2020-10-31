@@ -5,7 +5,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import { useTimer } from "@util/timers";
+import { useTimeout } from "@util/timers";
 import { useDeviceType } from "@util/styles";
 
 registerToolbar("Search", 100);
@@ -19,7 +19,7 @@ export function useSearch(updateCallback) {
     const { search } = SearchStore.useState();
     const [value, setValue] = useState(search || "");
     const translations = useTranslations();
-    useTimer(() => {
+    useTimeout(() => {
         SearchStore.update(s => {
             s.search = value;
         });

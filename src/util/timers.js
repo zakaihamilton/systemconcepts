@@ -19,7 +19,7 @@ export function useInterval(callback, delay, depends = []) {
     }, [...depends, delay]);
 }
 
-export function useTimer(callback, delay, depends = []) {
+export function useTimeout(callback, delay, depends = []) {
     const savedCallback = useRef();
     useEffect(() => {
         savedCallback.current = callback;

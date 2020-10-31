@@ -38,7 +38,6 @@ export default function Settings() {
         else {
             darkMode.disable();
         }
-        console.log("value", value, "darkMode.value", darkMode.value);
     });
     const darkModeState = [darkModeSelected, setDarkMode];
 

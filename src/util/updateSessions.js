@@ -77,7 +77,6 @@ export function useUpdateSessions() {
                 s.status = [...s.status];
             });
         }
-        console.log("years", years);
         for (let yearIndex = 0; yearIndex < years.length; yearIndex++) {
             const year = years[yearIndex];
             const percentage = parseInt((yearIndex / years.length) * 100);
@@ -129,6 +128,5 @@ export function useUpdateSessions() {
             s.busy = false;
         });
     }, []);
-    console.log("status", status);
     return { status, busy, start, updateSessions: !busy && updateSessions, updateGroup: !busy && updateGroup };
 }

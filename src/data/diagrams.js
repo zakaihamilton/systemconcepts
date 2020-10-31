@@ -1,4 +1,6 @@
-import UpsAndDowns from "@diagrams/UpsAndDowns";
+import dynamic from 'next/dynamic'
+import PageLoad from "@components/PageLoad";
+const UpsAndDowns = dynamic(() => import("@diagrams/UpsAndDowns"), { loading: () => <PageLoad /> });
 
 export default [
     {

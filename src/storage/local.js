@@ -42,7 +42,7 @@ async function createFolder(path) {
     }
 }
 
-async function createFolders(path) {
+async function createFolders(path, isFolder = false) {
     path = makePath(path);
     const parts = path.split("/");
     let partIndex = parts.length - 1;
@@ -52,7 +52,7 @@ async function createFolders(path) {
             break;
         }
     }
-    for (partIndex++; partIndex < parts.length; partIndex++) {
+    for (partIndex++; partIndex < parts.length + (!!isFolder); partIndex++) {
         const subPath = parts.slice(0, partIndex).join("/");
         await createFolder(subPath);
     }
