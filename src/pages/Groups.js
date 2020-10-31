@@ -12,6 +12,8 @@ import { formatDuration } from "@util/string";
 import UpdateIcon from "@material-ui/icons/Update";
 import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
+import ItemMenu from "./Groups/ItemMenu";
+import Label from "@widgets/Label";
 
 registerToolbar("Groups");
 
@@ -22,9 +24,9 @@ export const GroupsStore = new Store({
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
-    const { counter } = GroupsStore.useState();
+    const { viewMode, counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
-    const [data, busy, start, updateSessions] = useUpdateSessions();
+    const { status, busy, start, updateSessions, updateGroup: syncGroup } = useUpdateSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -51,7 +53,7 @@ export default function Groups() {
 
     useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
 
-    const withProgress = data && !!data.length;
+    const withProgress = status && !!status.length;
 
     const columns = [
         {
@@ -81,15 +83,19 @@ export default function Groups() {
             });
         };
 
-        const status = (data || []).find(group => group.name === item.name) || {};
+        const statusItem = (status || []).find(group => group.name === item.name) || {};
+        const hasStatusItem = statusItem.progress !== "undefined";
 
-        const variant = status.progress !== -1 ? "static" : undefined;
-        const tooltip = status.index + " / " + status.count;
+        const variant = statusItem.progress !== -1 ? "static" : undefined;
+        const tooltip = statusItem.index + " / " + statusItem.count;
+
+        const iconWidget = <ItemMenu viewMode={viewMode} syncGroup={syncGroup} item={item} store={GroupsStore} />;
 
         return {
             ...item,
-            nameWidget: item.name[0].toUpperCase() + item.name.slice(1),
-            progress: !!status.progress && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? status.progress : undefined} />,
+            iconWidget,
+            nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} />,
+            progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? statusItem.progress : undefined} />,
             colorWidget: <ColorPicker key={item.name} color={item.color} onChangeComplete={changeColor} />
         };
     };
@@ -113,7 +119,7 @@ export default function Groups() {
             }}
             mapper={mapper}
             loading={loading}
-            depends={[translations, data]}
+            depends={[translations, status]}
         />
     </>;
 }
