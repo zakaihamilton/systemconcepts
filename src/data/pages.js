@@ -22,9 +22,6 @@ import FontSizes from "@pages/FontSizes";
 import StorageIcon from '@material-ui/icons/Storage';
 import Storage, { getStorageSection } from "@pages/Storage";
 
-import UpdateIcon from "@material-ui/icons/Update";
-import UpdateSessions from "@pages/UpdateSessions";
-
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 import Reset from "@pages/Settings/Reset";
 
@@ -127,14 +124,6 @@ export default [
         Icon: StorageIcon,
         Component: Storage,
         section: getStorageSection,
-        sidebar: true,
-        category: "tools"
-    },
-    {
-        id: "update_sessions",
-        name: "UPDATE_SESSIONS",
-        Icon: UpdateIcon,
-        Component: UpdateSessions,
         sidebar: true,
         category: "tools"
     },
