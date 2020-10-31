@@ -538,6 +538,10 @@ export default {
             "value": "Sincronizando"
         },
         {
+            "id": "SYNC_SESSIONS",
+            "value": "Sincronizar Sessões"
+        },
+        {
             "id": "IMAGE",
             "value": "Imagem"
         },
@@ -894,12 +898,12 @@ export default {
             "value": "Tags"
         },
         {
-            "id":"TAG",
-            "value":"Tag"
+            "id": "TAG",
+            "value": "Tag"
         },
         {
-            "id":"NEW_TAG",
-            "value":"Nova Tag"
+            "id": "NEW_TAG",
+            "value": "Nova Tag"
         }
     ]
 };

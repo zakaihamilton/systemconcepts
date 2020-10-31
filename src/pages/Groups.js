@@ -37,14 +37,14 @@ export default function Groups() {
     const duration = start && new Date().getTime() - start;
     const formattedDuration = formatDuration(duration);
     const name = <span>
-        {busy ? translations.SYNCING : translations.SYNC}
+        {busy ? translations.SYNCING : translations.SYNC_SESSIONS}
         <br />
         {!!duration && formattedDuration}
     </span>;
 
     const toolbarItems = [
         syncEnabled && {
-            id: "sessions",
+            id: "sync_sessions",
             name,
             icon: <UpdateIcon className={className} />,
             onClick: updateSessions

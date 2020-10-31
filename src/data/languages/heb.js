@@ -534,6 +534,10 @@ export default {
             "value": "מסנכרן"
         },
         {
+            "id": "SYNC_SESSIONS",
+            "value": "סנכרון שיעורים"
+        },
+        {
             "id": "IMAGE",
             "value": "תמונה"
         },
@@ -890,12 +894,12 @@ export default {
             "value": "תגים"
         },
         {
-            "id":"TAG",
-            "value":"תג"
+            "id": "TAG",
+            "value": "תג"
         },
         {
-            "id":"NEW_TAG",
-            "value":"תג חדש"
+            "id": "NEW_TAG",
+            "value": "תג חדש"
         }
     ]
 };
