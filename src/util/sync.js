@@ -86,6 +86,7 @@ export function useSyncFeature() {
     const startRef = useRef(null);
     const [duration, setDuration] = useState(0);
     const [complete, setComplete] = useState(false);
+    const [changed, setChanged] = useState(false);
     const online = useOnline();
     const [error, setError] = useState(null);
     const { lastUpdated, _loaded } = SyncStore.useState();
@@ -101,6 +102,7 @@ export function useSyncFeature() {
         setComplete(false);
         setDuration(0);
         setError(null);
+        setChanged(false);
         const currentTime = new Date().getTime();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
         let continueSync = true;
@@ -196,6 +198,7 @@ export function useSyncFeature() {
                 s.lastSynced = currentTime;
                 s.waitForApproval = false;
             });
+            setChanged(true);
         }
         else {
             SyncActiveStore.update(s => {
@@ -226,5 +229,14 @@ export function useSyncFeature() {
         }
     }, [online, _loaded, isSignedIn, visible]);
 
-    return [online && _loaded && syncNow, online && _loaded && fullSync, busy, error, active, duration, complete];
+    return {
+        sync: online && _loaded && syncNow,
+        fullSync: online && _loaded && fullSync,
+        busy,
+        error,
+        active,
+        duration,
+        complete,
+        changed
+    };
 }

@@ -7,6 +7,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import SyncIcon from '@material-ui/icons/Sync';
 import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 import { formatDuration } from "@util/string";
+import Badge from '@material-ui/core/Badge';
 
 registerToolbar("Sync");
 
@@ -15,27 +16,32 @@ export const SyncContext = createContext();
 export default function Sync({ children }) {
     const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
-    const [updateSync, fullSync, isBusy, error, active, duration] = useSyncFeature();
+    const { sync, fullSync, busy, error, active, duration, changed } = useSyncFeature();
     const className = useStyles(styles, {
-        animated: isBusy
+        animated: busy
     });
 
     const formattedDuration = formatDuration(duration);
     const name = <span>
         {!!error && translations.SYNC_FAILED}
-        {!error && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {!error && (busy ? translations.SYNCING : translations.SYNC)}
         <br />
         {!!duration && formattedDuration}
     </span>;
 
+    const syncIcon =
+        <Badge color="secondary" variant="dot" invisible={!changed}>
+            {error ? <SyncProblemIcon /> : <SyncIcon className={className} />}
+        </Badge>;
+
     const toolbarItems = [
-        active && updateSync && {
+        active && sync && {
             id: "sync",
             name,
             location: "header",
             menu: false,
-            icon: error ? <SyncProblemIcon /> : <SyncIcon className={className} />,
-            onClick: updateSync,
+            icon: syncIcon,
+            onClick: sync,
             divider: isDesktop
         },
         active && fullSync && {
@@ -48,11 +54,11 @@ export default function Sync({ children }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [isBusy, translations, updateSync, fullSync, active, duration, isDesktop] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, fullSync, changed, active, duration, error, isDesktop] });
 
     const syncContext = useMemo(() => {
-        return { updateSync, fullSync, error };
-    }, [updateSync, fullSync, error]);
+        return { updateSync: sync, fullSync, error };
+    }, [sync, fullSync, error]);
 
     return <SyncContext.Provider value={syncContext}>
         {children}
