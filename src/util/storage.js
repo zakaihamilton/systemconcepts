@@ -299,8 +299,7 @@ async function copyFolder(from, to) {
     if (makePath(from) === makePath(to)) {
         return;
     }
-    await storageMethods.createFolders(to);
-    await storageMethods.createFolder(to);
+    await storageMethods.createFolders(to, true);
     const items = await storageMethods.getListing(from);
     for (const item of items) {
         const { name, type } = item;

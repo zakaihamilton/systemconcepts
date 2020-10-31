@@ -1,4 +1,6 @@
+import dynamic from 'next/dynamic'
 import Cookies from 'js-cookie';
+import PageLoad from "@components/PageLoad";
 
 import AppsIcon from '@material-ui/icons/Apps';
 import Apps from "@pages/Apps";
@@ -8,47 +10,47 @@ import Users from "@pages/Users";
 import User, { getUserSection } from "@pages/User";
 
 import SettingsIcon from '@material-ui/icons/Settings';
-import Settings from "@pages/Settings";
+const Settings = dynamic(() => import("@pages/Settings"), { loading: () => <PageLoad /> });
 
 import LanguageIcon from '@material-ui/icons/Language';
-import Languages from "@pages/Languages";
+const Languages = dynamic(() => import("@pages/Languages"), { loading: () => <PageLoad /> });
 
 import TranslateIcon from '@material-ui/icons/Translate';
 import Translations, { getTranslationsSection } from "@pages/Translations";
 
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
-import FontSizes from "@pages/FontSizes";
+const FontSizes = dynamic(() => import("@pages/FontSizes"), { loading: () => <PageLoad /> });
 
 import StorageIcon from '@material-ui/icons/Storage';
 import Storage, { getStorageSection } from "@pages/Storage";
 
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
-import Reset from "@pages/Settings/Reset";
+const Reset = dynamic(() => import("@pages/Settings/Reset"), { loading: () => <PageLoad /> });
 
 import EditIcon from '@material-ui/icons/Edit';
-import Editor from "@pages/Editor";
+const Editor = dynamic(() => import("@pages/Editor"), { loading: () => <PageLoad /> });
 
 import ImageIcon from '@material-ui/icons/Image';
 import Image, { getImageSection } from "@pages/Image";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import Account from "@pages/Account";
+const Account = dynamic(() => import("@pages/Account"), { loading: () => <PageLoad /> });
 
 import CreateIcon from '@material-ui/icons/Create';
-import SignUp from "@pages/SignUp";
+const SignUp = dynamic(() => import("@pages/SignUp"), { loading: () => <PageLoad /> });
 
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import ChangePassword from "@pages/ChangePassword";
+const ChangePassword = dynamic(() => import("@pages/ChangePassword"), { loading: () => <PageLoad /> });
 import ResetPassword, { getResetSection } from "@pages/ResetPassword";
 
 import TableChartIcon from '@material-ui/icons/TableChart';
-import Diagrams from "@pages/Diagrams";
+const Diagrams = dynamic(() => import("@pages/Diagrams"), { loading: () => <PageLoad /> });
 
 import LabelIcon from '@material-ui/icons/Label';
-import Terms from "@pages/Terms";
+const Terms = dynamic(() => import("@pages/Terms"), { loading: () => <PageLoad /> });
 
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
-import Sessions from "@pages/Sessions";
+const Sessions = dynamic(() => import("@pages/Sessions"), { loading: () => <PageLoad /> });
 
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import Player, { getPlayerSection } from "@pages/Player";
@@ -56,19 +58,19 @@ import Player, { getPlayerSection } from "@pages/Player";
 import Session, { getSessionSection } from "@pages/Session";
 
 import EventIcon from '@material-ui/icons/Event';
-import Schedule from "@pages/Schedule";
+const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
 
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
-import Groups from "@pages/Groups";
+const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad /> });
 
 import BookmarkIcon from '@material-ui/icons/Bookmark';
-import Bookmarks from "@pages/Bookmarks";
+const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import Timestamps from "@pages/Player/Timestamps";
+const Timestamps = dynamic(() => import("@pages/Player/Timestamps"), { loading: () => <PageLoad /> });
 
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import Tags from "@pages/Tags";
+const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
 
 import Tag, { getTagSection } from "@pages/Tag";
 

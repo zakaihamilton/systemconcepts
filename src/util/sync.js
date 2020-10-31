@@ -64,7 +64,9 @@ export async function fetchUpdated(endPoint, start, end) {
 }
 
 export async function syncLocal(endPoint, start, end) {
-    const listing = await storage.getRecursiveList("local/" + endPoint);
+    const path = makePath("local", endPoint);
+    await storage.createFolders(path, true);
+    const listing = await storage.getRecursiveList(path);
     const changed = listing.filter(item => item.mtimeMs >= start && item.mtimeMs <= end);
     for (const item of changed) {
         if (item.type === "file") {
@@ -156,7 +158,7 @@ export function useSyncFeature() {
             try {
                 const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
                 if (shared.length) {
-                    await storage.createFolders(makePath("local", "shared"));
+                    await storage.createFolders(makePath("local", "shared"), true);
                     await syncItems(shared);
                     updateCounter++;
                 }
@@ -173,7 +175,6 @@ export function useSyncFeature() {
             try {
                 const personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
                 if (personal.length) {
-                    await storage.createFolders(makePath("local", "personal"));
                     await syncItems(personal);
                     updateCounter++;
                 }
