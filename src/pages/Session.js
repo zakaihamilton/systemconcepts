@@ -15,10 +15,6 @@ import { formatDuration } from "@util/string";
 
 registerToolbar("Session");
 
-export function getSessionSection({ date, name }) {
-    return { label: date + " " + name };
-}
-
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
     const [sessions] = useSessions([], false);

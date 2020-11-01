@@ -6,8 +6,10 @@ import AppsIcon from '@material-ui/icons/Apps';
 import Apps from "@pages/Apps";
 
 import PeopleIcon from '@material-ui/icons/People';
-import Users from "@pages/Users";
-import User, { getUserSection } from "@pages/User";
+const Users = dynamic(() => import("@pages/Users"), { loading: () => <PageLoad /> });
+
+const User = dynamic(() => import("@pages/User"), { loading: () => <PageLoad /> });
+import { getUserSection } from "@pages/User/Section";
 
 import SettingsIcon from '@material-ui/icons/Settings';
 const Settings = dynamic(() => import("@pages/Settings"), { loading: () => <PageLoad /> });
@@ -16,13 +18,15 @@ import LanguageIcon from '@material-ui/icons/Language';
 const Languages = dynamic(() => import("@pages/Languages"), { loading: () => <PageLoad /> });
 
 import TranslateIcon from '@material-ui/icons/Translate';
-import Translations, { getTranslationsSection } from "@pages/Translations";
+const Translations = dynamic(() => import("@pages/Translations"), { loading: () => <PageLoad /> });
+import { getTranslationsSection } from "@pages/Translations/Section";
 
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 const FontSizes = dynamic(() => import("@pages/FontSizes"), { loading: () => <PageLoad /> });
 
 import StorageIcon from '@material-ui/icons/Storage';
-import Storage, { getStorageSection } from "@pages/Storage";
+const Storage = dynamic(() => import("@pages/Storage"), { loading: () => <PageLoad /> });
+import { getStorageSection } from "@pages/Storage/Section";
 
 import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
 const Reset = dynamic(() => import("@pages/Settings/Reset"), { loading: () => <PageLoad /> });
@@ -31,7 +35,8 @@ import EditIcon from '@material-ui/icons/Edit';
 const Editor = dynamic(() => import("@pages/Editor"), { loading: () => <PageLoad /> });
 
 import ImageIcon from '@material-ui/icons/Image';
-import Image, { getImageSection } from "@pages/Image";
+const Image = dynamic(() => import("@pages/Image"), { loading: () => <PageLoad /> });
+import { getImageSection } from "@pages/Image/Section";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 const Account = dynamic(() => import("@pages/Account"), { loading: () => <PageLoad /> });
@@ -41,7 +46,9 @@ const SignUp = dynamic(() => import("@pages/SignUp"), { loading: () => <PageLoad
 
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 const ChangePassword = dynamic(() => import("@pages/ChangePassword"), { loading: () => <PageLoad /> });
-import ResetPassword, { getResetSection } from "@pages/ResetPassword";
+
+const ResetPassword = dynamic(() => import("@pages/ResetPassword"), { loading: () => <PageLoad /> });
+import { getResetSection } from "@pages/ResetPassword/Section";
 
 import TableChartIcon from '@material-ui/icons/TableChart';
 const Diagrams = dynamic(() => import("@pages/Diagrams"), { loading: () => <PageLoad /> });
@@ -53,9 +60,11 @@ import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
 const Sessions = dynamic(() => import("@pages/Sessions"), { loading: () => <PageLoad /> });
 
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
-import Player, { getPlayerSection } from "@pages/Player";
+const Player = dynamic(() => import("@pages/Player"), { loading: () => <PageLoad /> });
+import { getPlayerSection } from "@pages/Player/Section";
 
-import Session, { getSessionSection } from "@pages/Session";
+const Session = dynamic(() => import("@pages/Session"), { loading: () => <PageLoad /> });
+import { getSessionSection } from "@pages/Session/Section";
 
 import EventIcon from '@material-ui/icons/Event';
 const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
@@ -72,7 +81,8 @@ const Timestamps = dynamic(() => import("@pages/Player/Timestamps"), { loading: 
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
 
-import Tag, { getTagSection } from "@pages/Tag";
+const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> });
+import { getTagSection } from "@pages/Tag/Section";
 
 import diagrams from "@data/diagrams";
 

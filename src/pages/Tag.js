@@ -8,10 +8,6 @@ import { useTag } from "@util/tags";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import languages from "@data/languages";
 
-export function getTagSection({ tag, translations }) {
-    return { name: tag || translations.NEW_TAG };
-};
-
 export default function Tag({ tag = "" }) {
     const translations = useTranslations();
     const [record, loading, setRecord] = useTag({ id: tag });

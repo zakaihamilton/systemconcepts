@@ -11,13 +11,6 @@ export const TranslationsStore = new Store({
     orderBy: ""
 });
 
-export function getTranslationsSection({ language: languageId }) {
-    if (languageId) {
-        const language = languageId && languages.find(item => item.id === languageId);
-        return { name: language.name };
-    }
-}
-
 export default function Translations({ language: languageId }) {
     const translations = useTranslations();
     const language = languageId && languages.find(item => item.id === languageId);

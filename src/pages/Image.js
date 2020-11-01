@@ -10,13 +10,6 @@ import { exportData, exportFile } from "@util/importExport";
 import { makePath } from "@util/path";
 import { useFetchJSON } from "@util/fetch";
 
-export function getImageSection({ label, translations }) {
-    if (label) {
-        return { label: translations[label] };
-    }
-    return {};
-}
-
 function useImagePath(imageName = "") {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
     let path = "";

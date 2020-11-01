@@ -11,7 +11,6 @@ import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@util/pages";
 import devices from "@data/storage";
 import ItemMenu from "./Storage/ItemMenu";
-import Select from '@components/Widgets/Select';
 import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
 import { abbreviateSize } from "@util/string";
@@ -20,7 +19,7 @@ import StatusBar from "@widgets/StatusBar";
 import Destination from "./Storage/Destination";
 import { useDateFormatter } from "@util/locale";
 import { useSync } from "@util/sync";
-import { isBinaryFile, isImageFile, isVideoFile, isAudioFile } from "@util/path";
+import { isBinaryFile, isImageFile } from "@util/path";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -43,27 +42,6 @@ export const StorageStoreDefaults = {
 };
 
 export const StorageStore = new Store(StorageStoreDefaults);
-
-export function getStorageSection({ sectionIndex, id, translations }) {
-    let icon = <FolderIcon />;
-    let tooltip = translations.FOLDER;
-    if (sectionIndex <= 1) {
-        tooltip = translations.STORAGE;
-        icon = <StorageIcon />;
-    }
-    let name = id;
-    if (sectionIndex) {
-        const item = devices.find(item => item.id === id);
-        if (item) {
-            name = translations[item.name] || item.name;
-            id = name;
-        }
-    }
-    else {
-        name = translations.STORAGE;
-    }
-    return { icon, name, id, tooltip };
-}
 
 export default function Storage({ path = "" }) {
     const [syncCounter] = useSync();
