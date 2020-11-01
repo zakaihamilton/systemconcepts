@@ -1,7 +1,7 @@
 import StatusBar from "@widgets/StatusBar";
 import { useEffect, useMemo } from "react";
 import Tree from "@widgets/Tree";
-import Item from "./Content/Item";
+import Item from "./Librarian/Item";
 import { Store } from "pullstate";
 import { buildTree } from "@util/tags";
 import { useContent } from "@util/content";
@@ -11,7 +11,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { addPath } from "@util/pages";
 import { useLanguage } from "@util/language";
 
-export const ContentStoreDefaults = {
+export const LibrarianStoreDefaults = {
     mode: "",
     select: null,
     counter: 1,
@@ -20,17 +20,17 @@ export const ContentStoreDefaults = {
     offset: 0,
 };
 
-export const ContentStore = new Store(ContentStoreDefaults);
+export const LibrarianStore = new Store(LibrarianStoreDefaults);
 
-export default function Tags() {
+export default function Librarian() {
     const language = useLanguage();
     const translations = useTranslations();
-    const { counter } = ContentStore.useState();
+    const { counter } = LibrarianStore.useState();
     const { data, busy, write } = useContent({ counter });
 
     useEffect(() => {
-        ContentStore.update(s => {
-            Object.assign(s, ContentStoreDefaults);
+        LibrarianStore.update(s => {
+            Object.assign(s, LibrarianStoreDefaults);
         });
     }, []);
 
@@ -60,18 +60,18 @@ export default function Tags() {
             mapper={mapper}
             onImport={onImport}
             loading={busy}
-            statusBar={<StatusBar data={data} mapper={mapper} store={ContentStore} />}
+            statusBar={<StatusBar data={data} mapper={mapper} store={LibrarianStore} />}
             Node={Item}
-            store={ContentStore}
+            store={LibrarianStore}
             builder={buildTree}
             params={params}
             data={data}
             refresh={() => {
-                ContentStore.update(s => {
+                LibrarianStore.update(s => {
                     s.counter++;
                 });
             }}
         />
-        <Fab title={translations.NEW_TAG} icon={<AddIcon />} onClick={addContent} />
+        <Fab title={translations.NEW_CONTENT} icon={<AddIcon />} onClick={addContent} />
     </>;
 }

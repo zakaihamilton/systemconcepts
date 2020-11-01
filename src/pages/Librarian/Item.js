@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import styles from "./Item.module.scss";
 import ItemMenu from "./ItemMenu";
-import { ContentStore } from "../Content";
+import { LibrarianStore } from "../Librarian";
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -13,13 +13,13 @@ import Row from "@widgets/Row";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 
 export default function Item({ data: { isLeaf, nestingLevel, item, setData }, isOpen, style, toggle }) {
-    const { enableItemClick, select } = ContentStore.useState();
+    const { enableItemClick, select } = LibrarianStore.useState();
 
     const tagClick = useCallback(() => {
         const { id } = item;
         if (select) {
             const exists = select.find(item => item.id === id);
-            ContentStore.update(s => {
+            LibrarianStore.update(s => {
                 if (exists) {
                     s.select = select.filter(item => item.id !== id);
                 }
@@ -46,7 +46,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, setData }, is
             </Tooltip>
         </IconButton>
         {item.type === "tag" && <LocalOfferIcon />}
-        {item.type === "content" && <ItemMenu setData={setData} item={item} store={ContentStore} />}
+        {item.type === "content" && <ItemMenu setData={setData} item={item} store={LibrarianStore} />}
     </>;
     return <Row
         className={styles.root}

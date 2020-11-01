@@ -912,6 +912,10 @@ export default {
         {
             "id": "NEW_CONTENT",
             "value": "Nova Conteúdo"
+        },
+        {
+            "id": "LIBRARIAN",
+            "value": "Bibliotecário"
         }
     ]
 };

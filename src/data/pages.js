@@ -84,8 +84,8 @@ const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> 
 const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> });
 import { getTagSection } from "@pages/Tag/Section";
 
-import DescriptionIcon from '@material-ui/icons/Description';
-const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
+const Librarian = dynamic(() => import("@pages/Librarian"), { loading: () => <PageLoad /> });
 
 import diagrams from "@data/diagrams";
 
@@ -282,10 +282,10 @@ export default [
         Component: Tag
     },
     {
-        id: "content",
-        name: "CONTENT",
-        Icon: DescriptionIcon,
-        Component: Content,
+        id: "librarian",
+        name: "LIBRARIAN",
+        Icon: LibraryBooksIcon,
+        Component: Librarian,
         category: "tools",
         sidebar: true
     },

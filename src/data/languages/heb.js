@@ -908,6 +908,10 @@ export default {
         {
             "id": "NEW_CONTENT",
             "value": "תוכן חדש"
+        },
+        {
+            "id": "LIBRARIAN",
+            "value": "ספרן"
         }
     ]
 };

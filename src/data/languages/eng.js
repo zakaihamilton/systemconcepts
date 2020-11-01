@@ -912,6 +912,10 @@ export default {
         {
             "id": "NEW_CONTENT",
             "value": "New Content"
+        },
+        {
+            "id": "LIBRARIAN",
+            "value": "Librarian"
         }
     ]
 };
