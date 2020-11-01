@@ -43,7 +43,7 @@ export default function Librarian() {
     };
 
     const addContent = () => {
-
+        addPath("content/");
     };
 
     const onImport = data => {
@@ -72,6 +72,6 @@ export default function Librarian() {
                 });
             }}
         />
-        <Fab title={translations.NEW_CONTENT} icon={<AddIcon />} onClick={addContent} />
+        {!busy && <Fab title={translations.NEW_CONTENT} icon={<AddIcon />} onClick={addContent} />}
     </>;
 }

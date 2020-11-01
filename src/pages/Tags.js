@@ -72,6 +72,6 @@ export default function Tags() {
                 });
             }}
         />
-        <Fab title={translations.NEW_TAG} icon={<AddIcon />} onClick={addTag} />
+        {!loading && <Fab title={translations.NEW_TAG} icon={<AddIcon />} onClick={addTag} />}
     </>;
 }

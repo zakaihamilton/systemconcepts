@@ -87,6 +87,10 @@ import { getTagSection } from "@pages/Tag/Section";
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 const Librarian = dynamic(() => import("@pages/Librarian"), { loading: () => <PageLoad /> });
 
+import DescriptionIcon from '@material-ui/icons/Description';
+const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
+import { getContentSection } from "@pages/Content/Section";
+
 import diagrams from "@data/diagrams";
 
 export default [
@@ -288,6 +292,13 @@ export default [
         Component: Librarian,
         category: "tools",
         sidebar: true
+    },
+    {
+        id: "content",
+        name: "CONTENT",
+        section: getContentSection,
+        Icon: DescriptionIcon,
+        Component: Content
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

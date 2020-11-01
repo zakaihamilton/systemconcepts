@@ -43,7 +43,7 @@ export function useContent({ counter }) {
             const content = await updateTagContent(uniqueTag);
             tags.filter(tag => tag.name === uniqueTag).map(tag => {
                 content.map(item => {
-                    data.push({ ...item, type: "content", id: tag.id + "." + content.id });
+                    data.push({ ...item, type: "content", id: tag.id + "." + content.id, contentId: content.id });
                 });
             });
         }

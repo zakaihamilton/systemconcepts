@@ -52,7 +52,7 @@ export default function User({ path = "" }) {
         if (!text) {
             error = translations.EMPTY_FIELD;
         }
-        if (!text.match(/^[a-z0-9]+$/i)) {
+        else if (!text.match(/^[a-z0-9]+$/i)) {
             error = translations.BAD_ID;
         }
         return error;
