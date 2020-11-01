@@ -20,8 +20,7 @@ export function buildTree(items, path = "", item) {
     children = children.map(item => {
         item = { ...item };
         if (!item.name) {
-            const name = item.id.split(".").pop();
-            item.name = name;
+            item.name = item.id.split(".").pop();
         }
         return buildTree(items, item.id, item);
     });

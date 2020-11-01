@@ -904,6 +904,14 @@ export default {
         {
             "id": "NEW_TAG",
             "value": "Nova Tag"
+        },
+        {
+            "id": "CONTENT",
+            "value": "Conteúdo"
+        },
+        {
+            "id": "NEW_CONTENT",
+            "value": "Nova Conteúdo"
         }
     ]
 };

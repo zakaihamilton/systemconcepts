@@ -84,6 +84,9 @@ const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> 
 const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> });
 import { getTagSection } from "@pages/Tag/Section";
 
+import DescriptionIcon from '@material-ui/icons/Description';
+const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
+
 import diagrams from "@data/diagrams";
 
 export default [
@@ -277,6 +280,14 @@ export default [
         section: getTagSection,
         Icon: LocalOfferIcon,
         Component: Tag
+    },
+    {
+        id: "content",
+        name: "CONTENT",
+        Icon: DescriptionIcon,
+        Component: Content,
+        category: "tools",
+        sidebar: true
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

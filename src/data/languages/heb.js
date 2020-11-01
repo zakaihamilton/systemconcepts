@@ -900,6 +900,14 @@ export default {
         {
             "id": "NEW_TAG",
             "value": "תג חדש"
+        },
+        {
+            "id": "CONTENT",
+            "value": "תוכן"
+        },
+        {
+            "id": "NEW_CONTENT",
+            "value": "תוכן חדש"
         }
     ]
 };
