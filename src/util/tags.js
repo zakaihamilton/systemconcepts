@@ -19,12 +19,9 @@ export function buildTree(items, path = "", item) {
     }
     children = children.map(item => {
         item = { ...item };
-        if (!item.name) {
-            item.name = item.id.split(".").pop();
-        }
         return buildTree(items, item.id, item);
     });
-    children.sort((a, b) => b.name.localeCompare(a.name));
+    children.sort((a, b) => b.id.localeCompare(a.id));
     return { ...item, items: children };
 }
 

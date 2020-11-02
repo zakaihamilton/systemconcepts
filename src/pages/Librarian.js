@@ -39,7 +39,14 @@ export default function Librarian() {
         if (translation) {
             item.name = translation;
         }
+        if (!item.name) {
+            item.name = item.id.split(".").pop();
+        }
         return item;
+    };
+
+    const filter = (item, search) => {
+        return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));
     };
 
     const addContent = () => {
@@ -58,6 +65,7 @@ export default function Librarian() {
         <Tree
             name="tags"
             mapper={mapper}
+            filter={filter}
             onImport={onImport}
             loading={busy}
             statusBar={<StatusBar data={data} mapper={mapper} store={LibrarianStore} />}

@@ -38,7 +38,14 @@ export default function Tags() {
         if (translation) {
             item.name = translation;
         }
+        if (!item.name) {
+            item.name = item.id.split(".").pop();
+        }
         return item;
+    };
+
+    const filter = (item, search) => {
+        return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));
     };
 
     const addTag = () => {
@@ -57,6 +64,7 @@ export default function Tags() {
         <Tree
             name="tags"
             mapper={mapper}
+            filter={filter}
             onImport={onImport}
             loading={loading}
             statusBar={<StatusBar data={data} mapper={mapper} store={TagsStore} />}
