@@ -1,5 +1,5 @@
 import StatusBar from "@widgets/StatusBar";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
@@ -33,7 +33,7 @@ export default function Tags() {
         });
     }, []);
 
-    const mapper = item => {
+    const mapper = useCallback(item => {
         const translation = item[language];
         if (translation) {
             item.name = translation;
@@ -42,11 +42,11 @@ export default function Tags() {
             item.name = item.id.split(".").pop();
         }
         return item;
-    };
+    }, []);
 
-    const filter = (item, search) => {
+    const filter = useCallback((item, search) => {
         return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));
-    };
+    }, []);
 
     const addTag = () => {
         addPath("tag");

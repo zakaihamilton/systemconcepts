@@ -75,7 +75,6 @@ function* treeWalker({ builder, data = [], params, mapper, filter, search, setEm
     });
 
     iterate(data, (item, parent) => {
-        console.log("item", item, "parent", parent);
         if (!item.match && parent && parent.match === 1) {
             item.match = parent.match + 1;
         }

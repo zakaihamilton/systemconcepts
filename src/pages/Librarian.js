@@ -1,5 +1,5 @@
+import { useEffect, useMemo, useCallback } from "react";
 import StatusBar from "@widgets/StatusBar";
-import { useEffect, useMemo } from "react";
 import Tree from "@widgets/Tree";
 import Item from "./Librarian/Item";
 import { Store } from "pullstate";
@@ -34,7 +34,7 @@ export default function Librarian() {
         });
     }, []);
 
-    const mapper = item => {
+    const mapper = useCallback(item => {
         const translation = item[language];
         if (translation) {
             item.name = translation;
@@ -43,11 +43,11 @@ export default function Librarian() {
             item.name = item.id.split(".").pop();
         }
         return item;
-    };
+    }, []);
 
-    const filter = (item, search) => {
+    const filter = useCallback((item, search) => {
         return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));
-    };
+    }, []);
 
     const addContent = () => {
         addPath("content/");
