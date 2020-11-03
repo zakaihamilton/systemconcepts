@@ -82,6 +82,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
             if (id) {
                 const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
+                console.log("found an item for collection", collectionName, "id", parsedId, "fields", parsedFields);
                 return result;
             }
             else {

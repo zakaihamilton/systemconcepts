@@ -36,16 +36,16 @@ export default function Content({ path = "" }) {
     const language = useLanguage();
     const contentId = path;
     const translations = useTranslations();
-    const { tags, uniqueTags, busy } = useContent({ counter: 0 });
+    const { counter, viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
+    const { tags, uniqueTags, busy } = useContent({ counter, tagsOnly: true });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
-    const toPath = contentId => "content/" + contentId + ".json";
+    const toPath = contentId => "content/" + contentId + "/tags.json";
     const [data, loading, , setData] = useFile(contentId && (toPath(contentId)), [contentId], data => {
         return data ? JSON.parse(data) : {};
     });
     const ref = useRef();
     const [record, setRecord] = useState({});
-    const { viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
     useLocalStorage("ContentStore", ContentStore, ["viewMode"]);
 
     useEffect(() => {

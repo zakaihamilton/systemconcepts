@@ -13,7 +13,7 @@ function FormItem({ child, record, setRecord, validate }) {
                 [id]: value
             };
         });
-    }, []);
+    }, [id]);
 
     const state = [record && record[id], setValue];
 

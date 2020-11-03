@@ -11,7 +11,7 @@ export const ContentStore = new Store({
     busy: false
 });
 
-export function useContent({ counter }) {
+export function useContent({ counter, tagsOnly }) {
     const [tags, tagsLoading] = useTags({ counter });
     const { content, data, busy } = ContentStore.useState();
     const updateTagContent = useCallback(async (tagId) => {
@@ -41,13 +41,15 @@ export function useContent({ counter }) {
             const name = tag.id.split(".").pop();
             return { ...tag, name, type: "tag" };
         })];
-        for (const uniqueTag of uniqueTags) {
-            const content = await updateTagContent(uniqueTag);
-            tags.filter(tag => tag.name === uniqueTag).map(tag => {
-                content.map(item => {
-                    data.push({ ...item, type: "content", id: tag.id + "." + content.id, contentId: content.id });
+        if (!tagsOnly) {
+            for (const uniqueTag of uniqueTags) {
+                const content = await updateTagContent(uniqueTag);
+                tags.filter(tag => tag.name === uniqueTag).map(tag => {
+                    content.map(item => {
+                        data.push({ ...item, type: "content", id: tag.id + "." + content.id, contentId: content.id });
+                    });
                 });
-            });
+            }
         }
         ContentStore.update(s => {
             s.busy = false;
