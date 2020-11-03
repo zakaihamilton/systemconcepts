@@ -26,7 +26,7 @@ export default function Librarian() {
     const language = useLanguage();
     const translations = useTranslations();
     const { counter } = LibrarianStore.useState();
-    const { data, busy, write } = useContent({ counter });
+    const { data, busy, remove } = useContent({ counter });
 
     useEffect(() => {
         LibrarianStore.update(s => {
@@ -58,8 +58,8 @@ export default function Librarian() {
     };
 
     const params = useMemo(() => {
-        return { data, write };
-    }, [data, write]);
+        return { data, remove };
+    }, [data, remove]);
 
     return <>
         <Tree

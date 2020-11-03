@@ -37,11 +37,10 @@ export default function Content({ path = "" }) {
     const contentId = path;
     const translations = useTranslations();
     const { counter, viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
-    const { tags, uniqueTags, busy } = useContent({ counter, tagsOnly: true });
+    const { tags, uniqueTags, busy, toPath } = useContent({ counter, tagsOnly: true });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
-    const toPath = contentId => "content/" + contentId + "/tags.json";
-    const [data, loading, , setData] = useFile(contentId && (toPath(contentId)), [contentId], data => {
+    const [data, loading, , setData] = useFile(contentId && (toPath(contentId) + "/tags.json"), [contentId], data => {
         return data ? JSON.parse(data) : {};
     });
     const ref = useRef();
@@ -77,7 +76,7 @@ export default function Content({ path = "" }) {
         setValidate(true);
         if (!invalidFields && !inProgress) {
             setProgress(true);
-            await setData(record, toPath(record.id));
+            await setData(record, toPath(record.id) + "/tags.json");
             setProgress(false);
             goBackPage();
         }

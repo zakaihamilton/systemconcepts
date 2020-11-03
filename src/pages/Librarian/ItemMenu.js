@@ -2,7 +2,7 @@ import { useTranslations } from "@util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
 import ItemMenu from "@components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode = "tree", item, store, setData }) {
+export default function ItemMenuWidget({ viewMode = "tree", item, store, remove }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -16,14 +16,9 @@ export default function ItemMenuWidget({ viewMode = "tree", item, store, setData
                     s.mode = "delete";
                     s.severity = "error";
                     s.onDone = async select => {
-                        const ids = select.map(item => item.id);
-                        setData(data => {
-                            data = data.map(item => ({ ...item }));
-                            data = data.filter(item => {
-                                return !ids.includes(item.id);
-                            });
-                            return data;
-                        });
+                        for (const item of select) {
+                            await remove(item.contentId);
+                        }
                     }
                 });
             }

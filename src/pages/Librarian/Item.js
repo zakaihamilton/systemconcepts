@@ -12,7 +12,7 @@ import clsx from "clsx";
 import Row from "@widgets/Row";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 
-export default function Item({ data: { isLeaf, nestingLevel, item, setData }, isOpen, style, toggle }) {
+export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
     const { enableItemClick, select } = LibrarianStore.useState();
 
     const tagClick = useCallback(() => {
@@ -49,7 +49,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, setData }, is
             </Tooltip>
         </IconButton>
         {item.type === "tag" && <LocalOfferIcon />}
-        {item.type === "content" && <ItemMenu setData={setData} item={item} store={LibrarianStore} />}
+        {item.type === "content" && <ItemMenu remove={remove} item={item} store={LibrarianStore} />}
     </>;
     return <Row
         className={styles.root}

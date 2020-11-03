@@ -56,15 +56,15 @@ export function useContent({ counter, tagsOnly }) {
             s.data = data;
         });
     }, [tags]);
-    const write = useCallback(async (tagId, data) => {
-        const path = tagsBasePath + tagId + ".json";
-        await storage.writeFile(path, JSON.stringify(data, null, 4));
-        await refresh();
+    const toPath = contentId => "content/" + contentId;
+    const remove = useCallback(async (contentId) => {
+        const path = toPath(contentId);
+        await storage.deleteFolder(path);
     }, []);
     useEffect(() => {
         if (tags) {
             refresh();
         }
     }, [counter, tags]);
-    return { content, data, busy: busy || tagsLoading, write, tags, uniqueTags };
+    return { content, data, busy: busy || tagsLoading, remove, tags, toPath, uniqueTags };
 }
