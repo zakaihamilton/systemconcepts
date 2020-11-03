@@ -44,9 +44,9 @@ export function useContent({ counter, tagsOnly }) {
         if (!tagsOnly) {
             for (const uniqueTag of uniqueTags) {
                 const content = await updateTagContent(uniqueTag);
-                tags.filter(tag => tag.name === uniqueTag).map(tag => {
+                data.filter(tag => tag.name === uniqueTag).forEach(tag => {
                     content.map(item => {
-                        data.push({ ...item, type: "content", id: tag.id + "." + content.id, contentId: content.id });
+                        data.push({ ...item, type: "content", id: tag.id + "." + item.id, contentId: item.id });
                     });
                 });
             }
