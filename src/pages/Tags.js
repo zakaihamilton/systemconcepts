@@ -42,7 +42,7 @@ export default function Tags() {
             item.name = item.id.split(".").pop();
         }
         return item;
-    }, []);
+    }, [language]);
 
     const filter = useCallback((item, search) => {
         return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));

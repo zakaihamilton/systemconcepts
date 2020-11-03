@@ -9,7 +9,7 @@ export default async (req, res) => {
         const { cookie } = headers || {};
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
-        let collectionName = "fs_content";
+        let collectionName = "content";
         let readOnly = true;
         if (!id || !hash) {
             throw "ACCESS_DENIED";

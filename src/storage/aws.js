@@ -17,7 +17,7 @@ async function getListing(path, options = {}) {
         }
     });
     for (const item of items) {
-        const { name, stat } = item;
+        const { name, stat = {} } = item;
         const itemPath = makePath(path, name);
         if (useCount && stat.type === "dir") {
             const children = await fetchJSON(fsEndPoint, {

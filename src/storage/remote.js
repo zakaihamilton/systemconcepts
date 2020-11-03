@@ -15,7 +15,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             }
         });
         for (const item of items) {
-            const { name, stat, deleted } = item;
+            const { name, stat = {}, deleted } = item;
             const itemPath = makePath(path, name);
             if (deleted) {
                 continue;
