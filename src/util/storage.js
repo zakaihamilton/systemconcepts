@@ -135,7 +135,8 @@ export function useFile(url, depends = [], mapping) {
     url = url && makePath(url);
     const [state, setState] = useGlobalState(url && "useFile:" + url, {});
     const { data, loading, error } = state || {};
-    const write = useCallback(async data => {
+    const write = useCallback(async (data, path) => {
+        path = path || url;
         if (typeof data === "function") {
             let updatedData = await new Promise((resolve) => {
                 setState(state => {
@@ -148,16 +149,16 @@ export function useFile(url, depends = [], mapping) {
             if (typeof updatedData !== "string") {
                 updatedData = JSON.stringify(updatedData, null, 4);
             }
-            await storageMethods.createFolders(url);
-            await storageMethods.writeFile(url, updatedData);
+            await storageMethods.createFolders(path);
+            await storageMethods.writeFile(path, updatedData);
         }
         else {
             let stringData = data;
             if (typeof stringData !== "string") {
                 stringData = JSON.stringify(stringData, null, 4);
             }
-            await storageMethods.createFolders(url);
-            await storageMethods.writeFile(url, stringData);
+            await storageMethods.createFolders(path);
+            await storageMethods.writeFile(path, stringData);
             setState(state => {
                 state.data = data;
                 return { ...state };

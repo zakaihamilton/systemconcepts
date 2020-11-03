@@ -1,62 +1,50 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
+import styles from "./Tabs.module.scss";
 
-const useStyles = makeStyles({
-    root: {
-        flexGrow: 1
-    },
-    tab: {
-        
-    },
-    panel: {
-        marginTop:"1em"
-    }
-});
-
-
-function TabPanel({ children, value, index, ...other }) {
-    const classes = useStyles();
+function TabPanel({ children, value, id, ...other }) {
     return (
         <div
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
+            hidden={value !== id}
+            id={`simple-tabpanel-${id}`}
             {...other}
         >
-            {value === index && <div className={classes.panel}>
+            {value === id && <div className={styles.panel}>
                 {children}
             </div>}
         </div>
     );
 }
 
-export default function TabsWidget({ panels, state, ...props }) {
-    const classes = useStyles();
+export default function TabsWidget({ panels, state, children, ...props }) {
     const [value, setValue] = state;
+    const index = panels.findIndex(item => item.id === value);
 
     const handleChange = (event, newValue) => {
-        setValue(newValue);
+        const id = panels[newValue].id;
+        setValue(id);
     };
 
-    const panelItems = panels && panels.map((panel, index) => {
-        return (<TabPanel key={panel.id} value={value} index={index}>
+    const panelItems = panels && panels.map((panel) => {
+        return (<TabPanel key={panel.id} value={value} id={panel.id}>
+            {children}
             {panel.items}
         </TabPanel>);
     });
 
     const tabItems = panels && panels.map(panel => {
-        return (<Tab key={panel.id} className={classes.tab} label={panel.label} />);
+        return (<Tab key={panel.id} className={styles.tab} label={panel.label} />);
     });
 
     return (
-        <div className={classes.root}>
-            <Tabs value={value}
+        <div className={styles.root}>
+            <Tabs value={index}
                 indicatorColor="primary"
                 textColor="primary"
                 onChange={handleChange}
                 {...props}
-                >
+            >
                 {tabItems}
             </Tabs>
             {panelItems}

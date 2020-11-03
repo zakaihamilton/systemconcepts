@@ -19,7 +19,7 @@ function FormItem({ child, record, setRecord, validate }) {
 
     const element = cloneElement(child, {
         state,
-        validate
+        validate: validate ? validate : undefined
     });
 
     return <div className={styles.item}>
@@ -44,15 +44,15 @@ export default function Form({ children, actions, data, loading, validate }) {
         if (!child) {
             return null;
         }
-        return cloneElement(child, { validate });
+        return cloneElement(child, { validate: validate ? validate : undefined });
     }).filter(Boolean);
     return <div className={styles.root}>
         {!loading && data && <form className={styles.form} noValidate>
             {elements}
         </form>}
         {loading && <Progress />}
-        <div className={styles.actions}>
+        {!loading && <div className={styles.actions}>
             {actions}
-        </div>
+        </div>}
     </div>;
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
@@ -6,23 +6,57 @@ import Button from '@material-ui/core/Button';
 import { goBackPage } from "@util/pages";
 import { useFile } from "@util/storage";
 import { useContent } from "@util/content";
+import { useLanguage } from "@util/language";
+import Table from "@widgets/Table";
+import { Store } from "pullstate";
+import { useLocalStorage } from "@util/store";
+import styles from "./Content.module.scss";
+import { MainStore } from "@components/Main";
+import { useSize } from "@util/size";
+import Edit from "@pages/Content/Edit";
+
+export const ContentStoreDefaults = {
+    mode: "",
+    name: "",
+    value: "",
+    select: null,
+    counter: 1,
+    onDone: null,
+    enableItemClick: true,
+    order: "desc",
+    offset: 0,
+    orderBy: "",
+    roleFilter: "",
+};
+
+export const ContentStore = new Store(ContentStoreDefaults);
 
 export default function Content({ path = "" }) {
+    const { showSideBar } = MainStore.useState();
+    const language = useLanguage();
     const contentId = path;
     const translations = useTranslations();
-    const { write } = useContent({ counter: 0 });
+    const { tags, uniqueTags, busy } = useContent({ counter: 0 });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
-    const [data, loading, setData] = useFile("content/" + contentId, [contentId], data => {
+    const toPath = contentId => "content/" + contentId + ".json";
+    const [data, loading, , setData] = useFile(contentId && (toPath(contentId)), [contentId], data => {
         return data ? JSON.parse(data) : {};
     });
+    const ref = useRef();
+    const [record, setRecord] = useState({});
+    const { viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
+    useLocalStorage("ContentStore", ContentStore, ["viewMode"]);
 
-    const updateData = useCallback(data => {
-        for (const tag of data.tags) {
-            write(tag, data.id);
-        }
-        setData(data);
-    }, [write]);
+    useEffect(() => {
+        ContentStore.update(s => {
+            Object.assign(s, ContentStoreDefaults);
+        });
+    }, []);
+
+    useEffect(() => {
+        setRecord(data || {});
+    }, [data]);
 
     const onValidateId = text => {
         let error = "";
@@ -35,34 +69,78 @@ export default function Content({ path = "" }) {
         return error;
     };
 
-    const invalidFields = !data ||
-        onValidateId(data.id);
+    const invalidFields = !record ||
+        onValidateId(record.id);
     const isInvalid = validate && invalidFields;
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         setValidate(true);
         if (!invalidFields && !inProgress) {
             setProgress(true);
-            fetchJSON("/api/users", {
-                method: "PUT",
-                body: JSON.stringify(data)
-            }).then(({ err }) => {
-                if (err) {
-                    console.error(err);
-                    throw err;
-                }
-                goBackPage();
-                setProgress(false);
-                setError("");
-            }).catch(err => {
-                setError(translations[err] || String(err));
-                setProgress(false);
-            });
+            await setData(record, toPath(record.id));
+            setProgress(false);
+            goBackPage();
         }
     };
 
     const onCancel = () => {
         goBackPage();
+    };
+
+    const renameItem = useCallback(item => {
+        ContentStore.update(s => {
+            s.mode = "rename";
+            s.type = item.type;
+            s.value = item.value;
+            s.item = item;
+            s.icon = item.icon;
+            s.tooltip = item.tooltip;
+            s.placeholder = "";
+            s.editing = true;
+            s.onDone = async value => {
+                setRecord(record => {
+                    record.tags = record.tags || {};
+                    const values = record.tags[item.id] = record.tags[item.id] || {};
+                    values[language] = value;
+                    return { ...record };
+                });
+            }
+        });
+    }, [language]);
+
+    const columns = [
+        {
+            id: "name",
+            title: translations.TAG,
+            sortable: "name"
+        },
+        {
+            id: "valueWidget",
+            title: translations.NAME,
+            sortable: "value",
+            onSelectable: () => mode !== "rename",
+            onClick: mode !== "rename" && enableItemClick && renameItem
+        }
+    ];
+
+    const mapper = tagId => {
+        const tag = tags.find(tag => tag.id === tagId);
+        const item = { ...tag, id: tagId };
+        const translation = item[language];
+        if (translation) {
+            item.name = translation;
+        }
+        if (!item.name) {
+            item.name = item.id.split(".").pop();
+        }
+        const recordTags = record.tags || {};
+        const values = recordTags[tagId] || {};
+        item.value = values[language];
+        item.valueWidget = item.value;
+        if (mode === "rename" && editedItem.id === item.id) {
+            item.valueWidget = <Edit key={item.id} />;
+        }
+        return item;
     };
 
     const actions = <>
@@ -71,7 +149,7 @@ export default function Content({ path = "" }) {
             variant="contained"
             color="primary"
             size="large"
-            disabled={!!(isInvalid || inProgress || !data)}
+            disabled={!!(isInvalid || inProgress || !record)}
         >
             {translations.SAVE}
         </Button>
@@ -85,13 +163,42 @@ export default function Content({ path = "" }) {
         </Button>
     </>;
 
-    return <Form actions={actions} loading={loading} data={data} validate={validate}>
-        <FormGroup record={data} setRecord={updateData}>
-            <Input
-                id="id"
-                label={translations.ID}
-                onValidate={onValidateId}
-            />
-        </FormGroup>
-    </Form>;
+    const onImport = data => {
+
+    };
+
+    const size = useSize(ref, [showSideBar], false);
+    const readOnly = !!contentId;
+
+    return <>
+        <Form actions={actions} loading={loading} data={record} validate={validate}>
+            <FormGroup record={record} setRecord={setRecord}>
+                <Input
+                    id="id"
+                    label={translations.ID}
+                    onValidate={onValidateId}
+                    readOnly={readOnly}
+                />
+            </FormGroup>
+            <div ref={ref} className={styles.table}>
+                <Table
+                    name={record.id || "content"}
+                    size={size}
+                    loading={busy}
+                    store={ContentStore}
+                    onImport={onImport}
+                    columns={columns}
+                    data={uniqueTags}
+                    viewModes={{
+                        list: {
+                            className: styles.listItem
+                        },
+                        table: null
+                    }}
+                    mapper={mapper}
+                    depends={[mode, translations, record, uniqueTags, language, viewMode]}
+                />
+            </div>
+        </Form>
+    </>;
 }

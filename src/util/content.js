@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTags } from "./tags";
 import { Store } from "pullstate";
 import storage from "@util/storage";
@@ -28,6 +28,9 @@ export function useContent({ counter }) {
         });
         return results;
     }, []);
+    const uniqueTags = useMemo(() => {
+        return Array.from(new Set((tags || []).map(tag => tag.id.split(".").pop())));
+    }, [tags]);
     const refresh = useCallback(async () => {
         ContentStore.update(s => {
             s.content = [];
@@ -38,7 +41,6 @@ export function useContent({ counter }) {
             const name = tag.id.split(".").pop();
             return { ...tag, name, type: "tag" };
         })];
-        const uniqueTags = Array.from(new Set(tags.map(tag => tag.id.split(".").pop())));
         for (const uniqueTag of uniqueTags) {
             const content = await updateTagContent(uniqueTag);
             tags.filter(tag => tag.name === uniqueTag).map(tag => {
@@ -62,5 +64,5 @@ export function useContent({ counter }) {
             refresh();
         }
     }, [counter, tags]);
-    return { content, data, busy: busy || tagsLoading, write, tags };
+    return { content, data, busy: busy || tagsLoading, write, tags, uniqueTags };
 }

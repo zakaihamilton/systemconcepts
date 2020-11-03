@@ -32,7 +32,7 @@ export function useResize(depends = []) {
     return counter;
 }
 
-export function useSize(ref, depends = []) {
+export function useSize(ref, depends = [], useParent = true) {
     const counter = useResize(depends);
     const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -47,7 +47,7 @@ export function useSize(ref, depends = []) {
             setSize({ width: 0, height: 0, emPixels, ref });
             return;
         }
-        const element = ref.current.parentElement;
+        const element = useParent ? ref.current.parentElement : ref.current;
         const { clientWidth, clientHeight } = element;
         const emPixels = getEmValueFromElement(element);
         setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
