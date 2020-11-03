@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
@@ -99,10 +99,19 @@ export default function Content({ path = "" }) {
             s.editing = true;
             s.onDone = async value => {
                 setRecord(record => {
-                    record.tags = record.tags || {};
-                    const values = record.tags[item.id] = record.tags[item.id] || {};
-                    values[language] = value;
-                    return { ...record };
+                    record = { ...record };
+                    record.tags = Object.assign({}, record.tags);
+                    const values = record.tags[item.id] = Object.assign({}, record.tags[item.id]);
+                    if (value) {
+                        values[language] = value;
+                    }
+                    else {
+                        delete values[language]
+                        if (!Object.keys(values).length) {
+                            delete record.tags[item.id];
+                        }
+                    }
+                    return record;
                 });
             }
         });
@@ -123,9 +132,19 @@ export default function Content({ path = "" }) {
         }
     ];
 
-    const mapper = tagId => {
-        const tag = tags.find(tag => tag.id === tagId);
-        const item = { ...tag, id: tagId };
+    const tagsData = useMemo(() => {
+        return uniqueTags.map(tagId => {
+            const item = { id: tagId };
+            const recordTags = record.tags || {};
+            const values = recordTags[tagId] || {};
+            item.value = values[language];
+            return item;
+        });
+    }, [uniqueTags, record]);
+
+    const mapper = item => {
+        const tag = tags.find(tag => tag.id === item.id);
+        item = { ...tag, ...item };
         const translation = item[language];
         if (translation) {
             item.name = translation;
@@ -133,9 +152,6 @@ export default function Content({ path = "" }) {
         if (!item.name) {
             item.name = item.id.split(".").pop();
         }
-        const recordTags = record.tags || {};
-        const values = recordTags[tagId] || {};
-        item.value = values[language];
         item.valueWidget = item.value;
         if (mode === "rename" && editedItem.id === item.id) {
             item.valueWidget = <Edit key={item.id} />;
@@ -164,7 +180,11 @@ export default function Content({ path = "" }) {
     </>;
 
     const onImport = data => {
+        setRecord(data);
+    };
 
+    const onExport = () => {
+        return JSON.stringify(record, null, 4);
     };
 
     const size = useSize(ref, [showSideBar], false);
@@ -187,8 +207,9 @@ export default function Content({ path = "" }) {
                     loading={busy}
                     store={ContentStore}
                     onImport={onImport}
+                    onExport={onExport}
                     columns={columns}
-                    data={uniqueTags}
+                    data={tagsData}
                     viewModes={{
                         list: {
                             className: styles.listItem
@@ -196,7 +217,7 @@ export default function Content({ path = "" }) {
                         table: null
                     }}
                     mapper={mapper}
-                    depends={[mode, translations, record, uniqueTags, language, viewMode]}
+                    depends={[mode, translations, record, tagsData, language, viewMode]}
                 />
             </div>
         </Form>
