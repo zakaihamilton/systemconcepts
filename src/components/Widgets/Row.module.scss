@@ -2,11 +2,27 @@
     box-sizing: border-box;
     display: flex;
     position: relative;
+
+    [dir=ltr] & {
+        direction: ltr !important;
+    }
+
+    [dir=rtl] & {
+        direction: rtl !important;
+    }
 }
 
 .background {
     position: relative;
-    left: 0px;
+
+    [dir=ltr] & {
+        left: 0px;
+    }
+
+    [dir=rtl] & {
+        right: 0px;
+    }
+
     display: flex;
     align-items: center;
     border-left: 1px solid transparent;
@@ -24,7 +40,15 @@
 
 .icons {
     position: relative;
-    left: 0px;
+
+    [dir=ltr] & {
+        left: 0px;
+    }
+
+    [dir=rtl] & {
+        right: 0px;
+    }
+
     display: flex;
     align-items: center;
     height: 100%;

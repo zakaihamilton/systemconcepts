@@ -14,6 +14,7 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { addPath } from "@util/pages";
 import { StatusBarStore } from "@widgets/StatusBar";
 import { useSearch } from "@components/Search";
+import styles from "./Tree.module.scss";
 
 registerToolbar("Tree");
 
@@ -265,7 +266,7 @@ export default function TreeWidget(props) {
         {!!loading && loadingElement}
         {!!isEmpty && !loading && emptyElement}
         {!!statusBarVisible && statusBar}
-        {!loading && sizeValid && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={height} width={size && size.width}>
+        {!loading && sizeValid && <Tree className={styles.tree} treeWalker={boundTreeWalker} itemSize={itemSize} height={height} width={size && size.width}>
             {Node}
         </Tree>}
     </>;
