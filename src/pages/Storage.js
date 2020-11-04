@@ -127,7 +127,7 @@ export default function Storage({ path = "" }) {
             nameWidget = <Edit key={id} />;
         } else {
             nameWidget = <Label key={id} icon={<>
-                {item.type && !mode && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
+                {item.type && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
                 <Tooltip title={tooltip} arrow>
                     {icon}
                 </Tooltip>

@@ -33,7 +33,7 @@ export default function ItemMenuWidget({ viewMode = "table", item, menuItems, st
     }, [isHover]);
 
     return (<>
-        {select && <Select select={select} item={item} store={store} />}
+        {!!select && <Select select={select} item={item} store={store} />}
         {!select && <Menu items={menuItems} onVisible={onMenuVisible}>
             <IconButton ref={ref}>
                 <Tooltip title={translations.MENU}>
