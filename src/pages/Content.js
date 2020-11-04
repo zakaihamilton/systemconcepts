@@ -3,7 +3,7 @@ import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
 import Button from '@material-ui/core/Button';
-import { goBackPage } from "@util/pages";
+import { goBackPage, addPath } from "@util/pages";
 import { useFile } from "@util/storage";
 import { useContent } from "@util/content";
 import { useLanguage } from "@util/language";
@@ -14,6 +14,10 @@ import styles from "./Content.module.scss";
 import { MainStore } from "@components/Main";
 import { useSize } from "@util/size";
 import Edit from "@pages/Content/Edit";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+
+registerToolbar("Content");
 
 export const ContentStoreDefaults = {
     mode: "",
@@ -188,6 +192,22 @@ export default function Content({ path = "" }) {
 
     const size = useSize(ref, [showSideBar], false);
     const readOnly = !!contentId;
+
+    const gotoEditor = () => {
+        addPath("editor/" + toPath(record.id) + "/" + language + ".txt");
+    };
+
+    const toolbarItems = [
+        contentId && {
+            id: "editor",
+            name: translations.EDITOR,
+            icon: <InsertDriveFileIcon />,
+            onClick: gotoEditor,
+            location: "header"
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "Content", items: toolbarItems, depends: [contentId, language] });
 
     return <>
         <Form actions={actions} loading={loading} data={record} validate={validate}>

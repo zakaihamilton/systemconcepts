@@ -16,7 +16,7 @@ const EditorStoreDefaults = {
 
 export const EditorStore = new Store(EditorStoreDefaults);
 
-export default function Editor({ name, path, ...params }) {
+export default function Editor({ name, path }) {
     const [syncCounter] = useSync();
     const timerRef = useRef();
     path = path || (useParentPath() + "/" + name).split("/").slice(1).join("/");
@@ -24,14 +24,12 @@ export default function Editor({ name, path, ...params }) {
     const [loading, setLoading] = useState(false);
     const readFile = useCallback(() => {
         storage.readFile(path).then(content => {
-            if (content !== null) {
-                EditorStore.update(s => {
-                    s.content = content || "";
-                });
-                EditorStore.update(s => {
-                    s.autoSave = true;
-                });
-            }
+            EditorStore.update(s => {
+                s.content = content || "";
+            });
+            EditorStore.update(s => {
+                s.autoSave = true;
+            });
             setLoading(false);
         });
     }, []);
@@ -44,8 +42,9 @@ export default function Editor({ name, path, ...params }) {
                     clearTimeout(timerRef.current);
                     timerRef.current = null;
                 }
-                timerRef.current = setTimeout(() => {
-                    storage.writeFile(path, data);
+                timerRef.current = setTimeout(async () => {
+                    await storage.createFolders(path);
+                    await storage.writeFile(path, data);
                 }, 1000);
             }
         });
