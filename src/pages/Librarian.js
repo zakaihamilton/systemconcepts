@@ -37,13 +37,13 @@ export default function Librarian() {
     const mapper = useCallback(item => {
         const translation = item[language];
         if (translation) {
-            item.name = translation;
+            item.label = translation;
         }
-        if (!item.name) {
-            item.name = item.id.split(".").pop();
+        else {
+            item.label = item.name;
         }
         return item;
-    }, []);
+    }, [language]);
 
     const filter = useCallback((item, search) => {
         return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));

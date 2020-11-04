@@ -11,6 +11,8 @@ import { addPath } from "@util/pages";
 import clsx from "clsx";
 import Row from "@widgets/Row";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import DescriptionIcon from '@material-ui/icons/Description';
+import FolderIcon from '@material-ui/icons/Folder';
 
 export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
     const { enableItemClick, select } = LibrarianStore.useState();
@@ -33,7 +35,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
             addPath("tag?tag=" + item.id);
         }
         else if (item.type === "content") {
-            addPath("content/" + item.contentId + "?name=" + item.name);
+            addPath("content/" + item.name + "?name=" + item.label);
         }
     }, [select]);
 
@@ -41,23 +43,25 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
 
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
-    const { name = "" } = item;
+    const { label = "" } = item;
     const icons = <>
         <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
             <Tooltip arrow title={isOpen ? translations.COLLAPSE : translations.EXPAND}>
                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Tooltip>
         </IconButton>
+        {item.type === "set" && <FolderIcon />}
         {item.type === "tag" && <LocalOfferIcon />}
+        {item.type === "content" && <DescriptionIcon />}
         {item.type === "content" && <ItemMenu remove={remove} item={item} store={LibrarianStore} />}
     </>;
     return <Row
         className={styles.root}
-        iconPadding={106}
+        iconPadding={item.type === "content" ? 140 : 90}
         basePadding={basePadding}
         icons={icons}
         style={style}
         onClick={onTagClick}>
-        {name}
+        {label}
     </Row>;
 }

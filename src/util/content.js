@@ -1,56 +1,75 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useTags } from "./tags";
 import { Store } from "pullstate";
 import storage from "@util/storage";
-
-export const tagsBasePath = "/shared/library/tags/";
+import { v4 as uuidv4 } from 'uuid';
+import { tagsFilePath } from "@util/tags";
 
 export const ContentStore = new Store({
-    content: [],
-    data: [],
+    tags: null,
+    data: null,
     busy: false
 });
 
+export function createID() {
+    return uuidv4();
+}
+
 export function useContent({ counter, tagsOnly }) {
-    const [tags, tagsLoading] = useTags({ counter });
-    const { content, data, busy } = ContentStore.useState();
-    const updateTagContent = useCallback(async (tagId) => {
-        const path = tagsBasePath + tagId + ".json";
+    const { tags, data, busy } = ContentStore.useState();
+    const getTags = useCallback(async () => {
+        const path = "content/tags.json";
         let results = [];
         if (await storage.exists(path)) {
             const content = await storage.readFile(path);
             results = JSON.parse(content);
         }
         ContentStore.update(s => {
-            const content = [...s.content];
-            content[tagId] = results;
-            s.content = content;
+            s.tags = results;
         });
         return results;
+    }, []);
+    const buildIndex = useCallback(async () => {
+        const listing = await storage.getListing("content");
+        const tags = (await getTags()).map(item => {
+            item = { ...item };
+            item.name = item.id.split(".").pop();
+            item.type = "tag";
+            return item;
+        });
+        const index = [...tags];
+        for (const item of listing) {
+            if (item.type !== "dir") {
+                continue;
+            }
+            const contentTagsPath = item.path + "/tags.json";
+            if (!await storage.exists(contentTagsPath)) {
+                continue;
+            }
+            const contentBody = await storage.readFile(contentTagsPath);
+            const contentTags = JSON.parse(contentBody);
+            for (const tagName in contentTags.tags) {
+                const value = contentTags.tags[tagName];
+                index.push({
+                    id: tagName + "." + contentTags.id,
+                    name: contentTags.id,
+                    type: "content",
+                    ...value
+                });
+            }
+        }
+        await storage.writeFile(tagsFilePath, JSON.stringify(index, null, 4));
     }, []);
     const uniqueTags = useMemo(() => {
         return Array.from(new Set((tags || []).map(tag => tag.id.split(".").pop())));
     }, [tags]);
     const refresh = useCallback(async () => {
         ContentStore.update(s => {
-            s.content = [];
-            s.data = [];
+            s.data = null;
+            s.tags = null;
             s.busy = true;
         });
-        const data = [...tags.map(tag => {
-            const name = tag.id.split(".").pop();
-            return { ...tag, name, type: "tag" };
-        })];
-        if (!tagsOnly) {
-            for (const uniqueTag of uniqueTags) {
-                const content = await updateTagContent(uniqueTag);
-                data.filter(tag => tag.name === uniqueTag).forEach(tag => {
-                    content.map(item => {
-                        data.push({ ...item, type: "content", id: tag.id + "." + item.id, contentId: item.id });
-                    });
-                });
-            }
-        }
+        await getTags();
+        const data = JSON.parse(await storage.readFile(tagsFilePath));
         ContentStore.update(s => {
             s.busy = false;
             s.data = data;
@@ -60,11 +79,12 @@ export function useContent({ counter, tagsOnly }) {
     const remove = useCallback(async (contentId) => {
         const path = toPath(contentId);
         await storage.deleteFolder(path);
+        await buildIndex();
     }, []);
     useEffect(() => {
-        if (tags) {
+        if (!data) {
             refresh();
         }
-    }, [counter, tags]);
-    return { content, data, busy: busy || tagsLoading, remove, tags, toPath, uniqueTags };
+    }, [counter, data]);
+    return { tags, data, busy: busy, remove, tags, toPath, uniqueTags, buildIndex };
 }

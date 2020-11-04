@@ -53,10 +53,10 @@ export function reverseIterate(root, callback, parent) {
     callback(root, parent);
 }
 
-function* treeWalker({ builder, data = [], params, mapper, filter, search, setEmpty }, refresh = false) {
+function* treeWalker({ builder, data, params, mapper, filter, search, setEmpty }, refresh = false) {
     const stack = [];
 
-    data = data.map(item => {
+    data = (data || []).map(item => {
         item = { ...item };
         if (mapper) {
             item = mapper(item);

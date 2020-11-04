@@ -125,6 +125,8 @@ export default function User({ path = "" }) {
                 icon={<EmailIcon />}
                 onValidate={onValidateEmail}
             />
+        </FormGroup>
+        <FormGroup record={data} setRecord={setData}>
             <Input
                 id="firstName"
                 label={translations.FIRST_NAME}

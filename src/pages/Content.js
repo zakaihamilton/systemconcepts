@@ -5,7 +5,7 @@ import Input from "@widgets/Input";
 import Button from '@material-ui/core/Button';
 import { goBackPage, addPath } from "@util/pages";
 import { useFile } from "@util/storage";
-import { useContent } from "@util/content";
+import { createID, useContent } from "@util/content";
 import { useLanguage } from "@util/language";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
@@ -41,8 +41,7 @@ export default function Content({ path = "" }) {
     const contentId = path;
     const translations = useTranslations();
     const { counter, viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
-    const { tags, uniqueTags, busy, toPath } = useContent({ counter, tagsOnly: true });
-    const [validate, setValidate] = useState(false);
+    const { buildIndex, tags, uniqueTags, busy, toPath } = useContent({ counter, tagsOnly: true });
     const [inProgress, setProgress] = useState(false);
     const [data, loading, , setData] = useFile(contentId && (toPath(contentId) + "/tags.json"), [contentId], data => {
         return data ? JSON.parse(data) : {};
@@ -55,32 +54,27 @@ export default function Content({ path = "" }) {
         ContentStore.update(s => {
             Object.assign(s, ContentStoreDefaults);
         });
+        buildIndex();
     }, []);
 
     useEffect(() => {
         setRecord(data || {});
     }, [data]);
 
-    const onValidateId = text => {
-        let error = "";
-        if (!text) {
-            error = translations.EMPTY_FIELD;
+    useEffect(() => {
+        if (!contentId) {
+            setRecord(record => {
+                record.id = createID();
+                return record;
+            });
         }
-        else if (!text.match(/^[a-z0-9]+$/i)) {
-            error = translations.BAD_ID;
-        }
-        return error;
-    };
-
-    const invalidFields = !record ||
-        onValidateId(record.id);
-    const isInvalid = validate && invalidFields;
+    }, [contentId]);
 
     const onSubmit = async () => {
-        setValidate(true);
-        if (!invalidFields && !inProgress) {
+        if (!inProgress) {
             setProgress(true);
             await setData(record, toPath(record.id) + "/tags.json");
+            await buildIndex();
             setProgress(false);
             goBackPage();
         }
@@ -168,7 +162,7 @@ export default function Content({ path = "" }) {
             variant="contained"
             color="primary"
             size="large"
-            disabled={!!(isInvalid || inProgress || !record)}
+            disabled={!!(inProgress || !record)}
         >
             {translations.SAVE}
         </Button>
@@ -191,7 +185,6 @@ export default function Content({ path = "" }) {
     };
 
     const size = useSize(ref, [showSideBar], false);
-    const readOnly = !!contentId;
 
     const gotoEditor = () => {
         addPath("editor/" + toPath(record.id) + "/" + language + ".txt");
@@ -210,18 +203,17 @@ export default function Content({ path = "" }) {
     useToolbar({ id: "Content", items: toolbarItems, depends: [contentId, language] });
 
     return <>
-        <Form actions={actions} loading={loading} data={record} validate={validate}>
+        <Form actions={actions} loading={loading} data={record}>
             <FormGroup record={record} setRecord={setRecord}>
                 <Input
                     id="id"
                     label={translations.ID}
-                    onValidate={onValidateId}
-                    readOnly={readOnly}
+                    readOnly={true}
                 />
             </FormGroup>
             <div ref={ref} className={styles.table}>
                 <Table
-                    name={record.id || "content"}
+                    name={record.id}
                     size={size}
                     loading={busy}
                     store={ContentStore}

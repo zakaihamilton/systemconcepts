@@ -36,10 +36,10 @@ export default function Tags() {
     const mapper = useCallback(item => {
         const translation = item[language];
         if (translation) {
-            item.name = translation;
+            item.label = translation;
         }
-        if (!item.name) {
-            item.name = item.id.split(".").pop();
+        else {
+            item.label = item.name;
         }
         return item;
     }, [language]);

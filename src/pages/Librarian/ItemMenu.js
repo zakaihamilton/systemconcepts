@@ -17,7 +17,7 @@ export default function ItemMenuWidget({ viewMode = "tree", item, store, remove 
                     s.severity = "error";
                     s.onDone = async select => {
                         for (const item of select) {
-                            await remove(item.contentId);
+                            await remove(item.name);
                         }
                     }
                 });

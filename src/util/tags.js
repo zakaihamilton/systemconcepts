@@ -9,8 +9,7 @@ export function buildTree(items, path = "", item) {
     let children = [];
     if (id) {
         children = (items || []).filter(item => {
-            const { id } = item || {};
-            const name = id.split(".").pop();
+            const { id, name } = item || {};
             return id === path + "." + name;
         });
     }
