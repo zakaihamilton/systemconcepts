@@ -41,7 +41,7 @@ export default function Content({ path = "" }) {
     const contentId = path;
     const translations = useTranslations();
     const { counter, viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
-    const { buildIndex, tags, uniqueTags, busy, toPath } = useContent({ counter, tagsOnly: true });
+    const { buildIndex, tags, uniqueTags, busy, toPath } = useContent({ counter });
     const [inProgress, setProgress] = useState(false);
     const [data, loading, , setData] = useFile(contentId && (toPath(contentId) + "/tags.json"), [contentId], data => {
         return data ? JSON.parse(data) : {};

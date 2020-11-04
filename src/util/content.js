@@ -14,7 +14,7 @@ export function createID() {
     return uuidv4();
 }
 
-export function useContent({ counter, tagsOnly }) {
+export function useContent({ counter }) {
     const { tags, data, busy } = ContentStore.useState();
     const getTags = useCallback(async () => {
         const path = "content/tags.json";

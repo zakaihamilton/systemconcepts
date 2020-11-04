@@ -4,12 +4,13 @@ import Tree from "@widgets/Tree";
 import Item from "./Librarian/Item";
 import { Store } from "pullstate";
 import { buildTree } from "@util/tags";
-import { useContent } from "@util/content";
+import { useContent, createID } from "@util/content";
 import Fab from "@widgets/Fab";
 import { useTranslations } from "@util/translations";
 import AddIcon from '@material-ui/icons/Add';
 import { addPath } from "@util/pages";
 import { useLanguage } from "@util/language";
+import storage from "@util/storage";
 
 export const LibrarianStoreDefaults = {
     mode: "",
@@ -53,8 +54,28 @@ export default function Librarian() {
         addPath("content/");
     };
 
-    const onImport = data => {
-
+    const onImport = async data => {
+        const records = [];
+        for (const item of data) {
+            const { text, _id, user, ...tags } = item;
+            let record = records.find(record => record._id === _id);
+            if (!record) {
+                record = { _id, id: createID(), tags: {} };
+                records.push(record);
+            }
+            for (const tag in tags) {
+                record.tags[tag] = { eng: tags[tag] };
+            }
+            if (text) {
+                record.text = text;
+            }
+        }
+        for (const item of records) {
+            const { id, tags, text } = item;
+            await storage.createFolder("content/" + item.id);
+            await storage.writeFile("content/" + item.id + "/tags.json", JSON.stringify({ id, tags }, null, 4));
+            await storage.writeFile("content/" + item.id + "/eng.txt", text);
+        }
     };
 
     const params = useMemo(() => {
