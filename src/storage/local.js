@@ -42,7 +42,13 @@ async function createFolder(path) {
     }
 }
 
-async function createFolders(path, isFolder = false) {
+async function createFolders(prefix, folders) {
+    for (const path of folders) {
+        await createFolder(prefix + path);
+    }
+}
+
+async function createFolderPath(path, isFolder = false) {
     path = makePath(path);
     const parts = path.split("/");
     let partIndex = parts.length - 1;
@@ -89,6 +95,12 @@ async function writeFile(path, body) {
     return await fs.promises.writeFile(path, body, "utf8");
 }
 
+async function writeFiles(prefix, files) {
+    for (const path in files) {
+        await writeFile(prefix + path, files[path]);
+    }
+}
+
 async function exists(path) {
     path = makePath(path);
     let exists = false;
@@ -104,9 +116,11 @@ export default {
     getListing,
     createFolder,
     createFolders,
+    createFolderPath,
     deleteFolder,
     deleteFile,
     readFile,
     writeFile,
+    writeFiles,
     exists
 };

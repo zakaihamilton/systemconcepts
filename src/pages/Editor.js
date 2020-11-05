@@ -43,7 +43,7 @@ export default function Editor({ name, path }) {
                     timerRef.current = null;
                 }
                 timerRef.current = setTimeout(async () => {
-                    await storage.createFolders(path);
+                    await storage.createFolderPath(path);
                     await storage.writeFile(path, data);
                 }, 1000);
             }

@@ -70,6 +70,9 @@ const storageMethods = Object.fromEntries([
         name: "createFolders"
     },
     {
+        name: "createFolderPath"
+    },
+    {
         name: "deleteFolder"
     },
     {
@@ -80,6 +83,9 @@ const storageMethods = Object.fromEntries([
     },
     {
         name: "writeFile"
+    },
+    {
+        name: "writeFiles"
     },
     {
         name: "exists"
@@ -149,7 +155,7 @@ export function useFile(url, depends = [], mapping) {
             if (typeof updatedData !== "string") {
                 updatedData = JSON.stringify(updatedData, null, 4);
             }
-            await storageMethods.createFolders(path);
+            await storageMethods.createFolderPath(path);
             await storageMethods.writeFile(path, updatedData);
         }
         else {
@@ -157,7 +163,7 @@ export function useFile(url, depends = [], mapping) {
             if (typeof stringData !== "string") {
                 stringData = JSON.stringify(stringData, null, 4);
             }
-            await storageMethods.createFolders(path);
+            await storageMethods.createFolderPath(path);
             await storageMethods.writeFile(path, stringData);
             setState(state => {
                 state.data = data;
@@ -300,7 +306,7 @@ async function copyFolder(from, to) {
     if (makePath(from) === makePath(to)) {
         return;
     }
-    await storageMethods.createFolders(to, true);
+    await storageMethods.createFolderPath(to, true);
     const items = await storageMethods.getListing(from);
     for (const item of items) {
         const { name, type } = item;

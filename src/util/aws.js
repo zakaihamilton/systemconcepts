@@ -243,7 +243,9 @@ export async function handleRequest({ readOnly, req }) {
             return { err: err.toString() };
         }
     } else if (!readOnly && req.method === "PUT") {
-        await uploadData({ path, data: req.body });
+        for (const item of req.body) {
+            await uploadData({ path: item.path, data: item.body });
+        }
     } else if (!readOnly && req.method === "DELETE") {
         const { path } = headers;
         await deleteFile({ path: decodeURIComponent(path) });

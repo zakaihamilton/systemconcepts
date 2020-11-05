@@ -70,12 +70,21 @@ export default function Librarian() {
                 record.text = text;
             }
         }
+        let library = [];
+        let folders = [];
+        let files = {};
         for (const item of records) {
             const { id, tags, text } = item;
-            await storage.createFolder("content/" + item.id);
-            await storage.writeFile("content/" + item.id + "/tags.json", JSON.stringify({ id, tags }, null, 4));
-            await storage.writeFile("content/" + item.id + "/eng.txt", text);
+            library.push({ id, tags });
+            folders.push(item.id);
+            files[item.id + "/tags.json"] = JSON.stringify({ id, tags }, null, 4);
+            files[item.id + "/eng.txt"] = text;
         }
+        console.log(`creating ${folders.length} folders`);
+        await storage.createFolders("content/", folders);
+        console.log(`writing ${Object.keys(files).length} files`);
+        await storage.writeFiles("content/", files);
+        await storage.writeFile("shared/library/tags.json", JSON.stringify(library, null, 4));
     };
 
     const params = useMemo(() => {

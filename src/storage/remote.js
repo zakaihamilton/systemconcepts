@@ -62,7 +62,37 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         }
     }
 
-    async function createFolders(path, isFolder = false) {
+    async function createFolders(prefix, folders) {
+        const maxBytes = 4000 * 1000;
+        let batch = [];
+        for (const name of folders) {
+            const path = prefix + name;
+            if (JSON.stringify(batch).length > maxBytes) {
+                await fetchJSON(fsEndPoint, {
+                    method: "PUT",
+                    body: batch
+                });
+                batch = [];
+            }
+            batch.push({
+                id: path,
+                name: path.split("/").filter(Boolean).pop(),
+                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+                stat: {
+                    type: "dir",
+                    mtimeMs: new Date().getTime()
+                }
+            });
+        }
+        if (batch.length) {
+            await fetchJSON(fsEndPoint, {
+                method: "PUT",
+                body: JSON.stringify(batch)
+            });
+        }
+    }
+
+    async function createFolderPath(path, isFolder = false) {
         path = makePath(path);
         const parts = path.split("/");
         let partIndex = parts.length - 1;
@@ -153,6 +183,39 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         });
     }
 
+    async function writeFiles(prefix, files) {
+        const maxBytes = 4000 * 1000;
+        let batch = [];
+        for (const name in files) {
+            const path = prefix + name;
+            const body = files[name] || "";
+            if (JSON.stringify(batch).length + body.length > maxBytes) {
+                await fetchJSON(fsEndPoint, {
+                    method: "PUT",
+                    body: JSON.stringify(batch)
+                });
+                batch = [];
+            }
+            batch.push({
+                id: path,
+                name: path.split("/").filter(Boolean).pop(),
+                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+                stat: {
+                    type: "file",
+                    size: body.length,
+                    mtimeMs: new Date().getTime()
+                },
+                body
+            });
+        }
+        if (batch.length) {
+            await fetchJSON(fsEndPoint, {
+                method: "PUT",
+                body: JSON.stringify(batch)
+            });
+        }
+    }
+
     async function exists(path) {
         path = makePath(path);
         let exists = false;
@@ -175,10 +238,12 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         getListing,
         createFolder,
         createFolders,
+        createFolderPath,
         deleteFolder,
         deleteFile,
         readFile,
         writeFile,
+        writeFiles,
         exists
     };
 };

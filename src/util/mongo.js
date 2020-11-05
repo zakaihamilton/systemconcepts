@@ -72,6 +72,11 @@ export async function replaceRecord({ query, record, ...params }) {
     });
 }
 
+export async function bulkWrite({ operations, ordered, ...params }) {
+    const collection = await getCollection(params);
+    await collection.bulkWrite(operations, { ordered });
+}
+
 export async function handleRequest({ dbName, collectionName, readOnly, req }) {
     const headers = req.headers || {};
     if (req.method === "GET") {
@@ -110,16 +115,19 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                     records = [result];
                 }
             }
+            console.log("pushing " + records.length + " records");
+            const operations = [];
             for (const record of records) {
                 const { id } = record;
                 delete record._id;
                 if (req.method === "DELETE") {
-                    await deleteRecord({ dbName, collectionName, query: { id } });
+                    operations.push({ deleteOne: { filter: { id } } });
                 }
                 else {
-                    await replaceRecord({ dbName, collectionName, query: { id }, record });
+                    operations.push({ replaceOne: { filter: { id }, replacement: record, upsert: true } });
                 }
             }
+            await bulkWrite({ dbName, collectionName, operations, ordered: false });
             return {};
         }
         catch (err) {
