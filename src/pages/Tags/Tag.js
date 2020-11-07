@@ -35,7 +35,7 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
 
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
-    const { name = "" } = item;
+    const { label = "" } = item;
     const icons = <>
         <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
             <Tooltip arrow title={isOpen ? translations.COLLAPSE : translations.EXPAND}>
@@ -51,6 +51,6 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
         icons={icons}
         style={style}
         onClick={onTagClick}>
-        {name}
+        {label}
     </Row>;
 }

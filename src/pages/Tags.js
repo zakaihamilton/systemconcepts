@@ -45,7 +45,7 @@ export default function Tags() {
     }, [language]);
 
     const filter = useCallback((item, search) => {
-        return !search || (item.name && item.name.toLowerCase().includes(search.toLowerCase()));
+        return !search || (item.label && item.label.toLowerCase().includes(search.toLowerCase()));
     }, []);
 
     const addTag = () => {
