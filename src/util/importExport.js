@@ -37,7 +37,7 @@ export function importData() {
             reader.readAsText(file, "UTF-8");
             reader.onload = readerEvent => {
                 var body = readerEvent.target.result;
-                resolve(body);
+                resolve({ name: file.name, body });
             };
             reader.onerror = () => {
                 reject(reader.error);

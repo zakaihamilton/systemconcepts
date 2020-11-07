@@ -258,6 +258,10 @@ export default {
             "value": "Importar Pasta"
         },
         {
+            "id": "IMPORT_FILE",
+            "value": "Importar Arquivo"
+        },
+        {
             "id": "MOVE",
             "value": "Mover"
         },

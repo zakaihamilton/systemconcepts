@@ -173,7 +173,7 @@ export default function TableWidget(props) {
             onClick: async () => {
                 let body = "";
                 try {
-                    body = await importData();
+                    ({ body } = await importData());
                 }
                 catch (err) {
                     if (err) {

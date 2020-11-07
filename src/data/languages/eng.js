@@ -258,6 +258,10 @@ export default {
             "value": "Import Folder"
         },
         {
+            "id": "IMPORT_FILE",
+            "value": "Import File"
+        },
+        {
             "id": "MOVE",
             "value": "Move"
         },

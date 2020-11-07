@@ -258,6 +258,10 @@ export default {
             "value": "יבוא תיקייה"
         },
         {
+            "id": "IMPORT_FOLDER",
+            "value": "יבוא קובץ"
+        },
+        {
             "id": "MOVE",
             "value": "העבר"
         },
