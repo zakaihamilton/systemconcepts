@@ -84,7 +84,7 @@ export default function Librarian() {
         await storage.createFolders("content/", folders);
         console.log(`writing ${Object.keys(files).length} files`);
         await storage.writeFiles("content/", files);
-        await storage.writeFile("shared/library/library.json", JSON.stringify(library, null, 4));
+        await storage.writeFile("shared/library/content.json", JSON.stringify(library, null, 4));
     };
 
     const params = useMemo(() => {

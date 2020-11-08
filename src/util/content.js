@@ -28,37 +28,6 @@ export function useContent({ counter }) {
         });
         return results;
     }, []);
-    const buildIndex = useCallback(async () => {
-        const listing = await storage.getListing("content");
-        const tags = (await getTags()).map(item => {
-            item = { ...item };
-            item.name = item.id.split(".").pop();
-            item.type = "tag";
-            return item;
-        });
-        const index = [...tags];
-        for (const item of listing) {
-            if (item.type !== "dir") {
-                continue;
-            }
-            const contentTagsPath = item.path + "/tags.json";
-            if (!await storage.exists(contentTagsPath)) {
-                continue;
-            }
-            const contentBody = await storage.readFile(contentTagsPath);
-            const contentTags = JSON.parse(contentBody);
-            for (const tagName in contentTags.tags) {
-                const value = contentTags.tags[tagName];
-                index.push({
-                    id: tagName + "." + contentTags.id,
-                    name: contentTags.id,
-                    type: "content",
-                    ...value
-                });
-            }
-        }
-        await storage.writeFile(tagsFilePath, JSON.stringify(index, null, 4));
-    }, []);
     const uniqueTags = useMemo(() => {
         return Array.from(new Set((tags || []).map(tag => tag.id.split(".").pop())));
     }, [tags]);
@@ -79,12 +48,11 @@ export function useContent({ counter }) {
     const remove = useCallback(async (contentId) => {
         const path = toPath(contentId);
         await storage.deleteFolder(path);
-        await buildIndex();
     }, []);
     useEffect(() => {
         if (!data) {
             refresh();
         }
     }, [counter, data]);
-    return { tags, data, busy: busy, remove, tags, toPath, uniqueTags, buildIndex };
+    return { tags, data, busy: busy, remove, tags, toPath, uniqueTags };
 }
