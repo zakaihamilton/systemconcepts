@@ -3,8 +3,7 @@ import StatusBar from "@widgets/StatusBar";
 import Tree from "@widgets/Tree";
 import Item from "./Librarian/Item";
 import { Store } from "pullstate";
-import { buildTree } from "@util/tags";
-import { useContent, createID } from "@util/content";
+import { useTags, buildTree } from "@util/tags";
 import Fab from "@widgets/Fab";
 import { useTranslations } from "@util/translations";
 import AddIcon from '@material-ui/icons/Add';
@@ -31,7 +30,9 @@ export default function Librarian() {
     const language = useLanguage();
     const translations = useTranslations();
     const { counter } = LibrarianStore.useState();
-    const { data, busy, remove } = useContent({ counter });
+    const [data, busy] = useTags({ counter });
+
+    console.log("data", data);
 
     useEffect(() => {
         LibrarianStore.update(s => {
@@ -66,8 +67,8 @@ export default function Librarian() {
     };
 
     const params = useMemo(() => {
-        return { data, remove };
-    }, [data, remove]);
+        return { data, remove: null };
+    }, [data]);
 
     const toolbarItems = [
         {
