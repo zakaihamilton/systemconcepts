@@ -920,6 +920,10 @@ export default {
         {
             "id": "LIBRARIAN",
             "value": "Bibliotecário"
+        },
+        {
+            "id": "SCAN_CONTENT",
+            "value": "Escanear Conteúdo"
         }
     ]
 };

@@ -920,6 +920,10 @@ export default {
         {
             "id": "LIBRARIAN",
             "value": "Librarian"
+        },
+        {
+            "id": "SCAN_CONTENT",
+            "value": "Scan Content"
         }
     ]
 };

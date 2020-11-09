@@ -194,7 +194,7 @@ export default function TreeWidget(props) {
     };
 
     const toolbarItems = [
-        data && name && onImport && {
+        name && onImport && {
             id: "import",
             name: translations.IMPORT,
             icon: <PublishIcon />,

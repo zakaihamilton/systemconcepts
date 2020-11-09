@@ -916,6 +916,10 @@ export default {
         {
             "id": "LIBRARIAN",
             "value": "ספרן"
+        },
+        {
+            "id": "SCAN_CONTENT",
+            "value": "סרוק תוכן"
         }
     ]
 };

@@ -31,6 +31,10 @@ export function useTags({ counter }) {
     return result;
 }
 
+export function uniqueTags(tags) {
+    return Array.from(new Set((tags || []).map(tag => tag.id.split(".").pop())));
+}
+
 export function useTag({ id, counter }) {
     const [data, loading, , setData] = useTags({ counter });
     const record = (data || []).find(item => item && item.id === id);

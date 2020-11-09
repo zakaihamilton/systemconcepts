@@ -16,6 +16,7 @@ import { useSize } from "@util/size";
 import Edit from "@pages/Content/Edit";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import { useTags, uniqueTags } from "@util/tags";
 
 registerToolbar("Content");
 
@@ -41,7 +42,8 @@ export default function Content({ path = "" }) {
     const contentId = path;
     const translations = useTranslations();
     const { counter, viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
-    const { tags, uniqueTags, busy, toPath } = useContent({ counter });
+    const [tags] = useTags({ counter });
+    const { busy, toPath } = useContent({ counter });
     const [inProgress, setProgress] = useState(false);
     const [data, loading, , setData] = useFile(contentId && (toPath(contentId) + "/tags.json"), [contentId], data => {
         return data ? JSON.parse(data) : {};
@@ -128,14 +130,14 @@ export default function Content({ path = "" }) {
     ];
 
     const tagsData = useMemo(() => {
-        return uniqueTags.map(tagId => {
+        return uniqueTags(tags).map(tagId => {
             const item = { id: tagId };
             const recordTags = record.tags || {};
             const values = recordTags[tagId] || {};
             item.value = values[language];
             return item;
         });
-    }, [uniqueTags, record]);
+    }, [tags, record]);
 
     const mapper = item => {
         const tag = tags.find(tag => tag.id === item.id);
