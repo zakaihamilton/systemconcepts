@@ -1,7 +1,17 @@
 .listItem {
-    grid-template-columns: 4.5em 1fr 1fr 1fr 10em;
+    grid-template-columns: 1fr 1fr 1fr 10em;
 }
 
 .listPhoneItem {
-    grid-template-columns: 4.5em 1fr 10em;
+    grid-template-columns: 1fr 10em;
+}
+
+.name>* {
+    [dir=ltr] & {
+        margin-right: 0.25em;
+    }
+
+    [dir=rtl] & {
+        margin-left: 0.25em;
+    }
 }

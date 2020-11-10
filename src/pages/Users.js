@@ -2,7 +2,7 @@ import { useEffect, useCallback, useState } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { useFetchJSON, fetchJSON } from "@util/fetch";
-import Label from "@widgets/Label";
+import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
 import ItemMenu from "./Users/ItemMenu";
@@ -64,17 +64,9 @@ export default function Users() {
 
     const columns = [
         {
-            id: "iconWidget",
-            viewModes: {
-                list: true
-            }
-        },
-        {
             id: "nameWidget",
             title: translations.NAME,
-            sortable: "name",
-            onSelectable: item => true,
-            onClick: userClick
+            sortable: "name"
         },
         !isPhone && {
             id: "id",
@@ -110,21 +102,20 @@ export default function Users() {
     const mapper = item => {
         let { firstName, lastName } = item;
         const name = [firstName, lastName].filter(Boolean).join(" ");
-        const iconWidget = <ItemMenu viewMode={viewMode} item={item} store={UsersStore} />;
+        const iconWidget = <ItemMenu item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
         const rtl = isRTL(name);
-        const labelName = rtl ? <>
+        const labelName = rtl ? <div className={styles.name}>
             <span>{lastName}</span>
             <b>{firstName}</b>
-        </> : <>
+        </div> : <div className={styles.name}>
                 <b>{firstName}</b>
                 <span>{lastName}</span>
-            </>;
+            </div>;
 
         return {
             ...item,
-            iconWidget,
-            nameWidget: <Label name={labelName} icon={viewMode === "table" && iconWidget} />,
+            nameWidget: <Row onClick={userClick.bind(this, item)} icons={iconWidget}>{labelName}</Row>,
             roleWidget: roleItem && translations[roleItem.name],
             name
         };

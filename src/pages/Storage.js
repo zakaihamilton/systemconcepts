@@ -144,7 +144,7 @@ export default function Storage({ path = "" }) {
                 onClick={!editing && rowClick.bind(this, result)}
                 iconPadding={item.type ? 110 : 60}
                 icons={<>
-                    {item.type && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
+                    {item.type && <ItemMenu readOnly={readOnly} item={result} />}
                     <Tooltip title={tooltip} arrow>
                         {icon}
                     </Tooltip>

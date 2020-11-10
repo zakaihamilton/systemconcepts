@@ -89,7 +89,7 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "static" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
-        const iconWidget = <ItemMenu viewMode={viewMode} syncGroup={syncGroup} item={item} store={GroupsStore} />;
+        const iconWidget = <ItemMenu syncGroup={syncGroup} item={item} store={GroupsStore} />;
 
         return {
             ...item,

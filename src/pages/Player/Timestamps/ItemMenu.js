@@ -3,7 +3,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { TimestampsStore } from "../Timestamps";
 import ItemMenu from "@components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode, setMetadata, item }) {
+export default function ItemMenuWidget({ setMetadata, item }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -29,5 +29,5 @@ export default function ItemMenuWidget({ viewMode, setMetadata, item }) {
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={TimestampsStore} />;
+    return <ItemMenu item={item} menuItems={menuItems} store={TimestampsStore} />;
 }

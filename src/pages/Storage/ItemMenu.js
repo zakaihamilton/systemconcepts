@@ -9,7 +9,7 @@ import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
 import { isBinaryFile, makePath, fileFolder } from "@util/path";
 import ItemMenu from "@components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode, item, readOnly }) {
+export default function ItemMenuWidget({ item, readOnly }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -138,5 +138,5 @@ export default function ItemMenuWidget({ viewMode, item, readOnly }) {
         }
     ].filter(Boolean);
 
-    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={StorageStore} />;
+    return <ItemMenu item={item} menuItems={menuItems} store={StorageStore} />;
 }

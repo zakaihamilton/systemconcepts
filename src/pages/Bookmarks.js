@@ -74,7 +74,7 @@ export default function BookmarksPage() {
 
     const mapper = item => {
         const breadcrumbPages = getPagesFromHash({ hash: item.id, translations, pages });
-        const iconWidget = <ItemMenu viewMode={viewMode} item={item} store={BookmarksStore} />;
+        const iconWidget = <ItemMenu item={item} store={BookmarksStore} />;
 
         return {
             ...item,

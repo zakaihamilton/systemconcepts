@@ -3,7 +3,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { fetchJSON } from "@util/fetch";
 import ItemMenu from "@components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode, item, store }) {
+export default function ItemMenuWidget({ item, store }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -25,5 +25,5 @@ export default function ItemMenuWidget({ viewMode, item, store }) {
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={store} />;
+    return <ItemMenu item={item} menuItems={menuItems} store={store} />;
 }

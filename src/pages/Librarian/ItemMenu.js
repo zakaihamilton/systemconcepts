@@ -2,7 +2,7 @@ import { useTranslations } from "@util/translations";
 import DeleteIcon from '@material-ui/icons/Delete';
 import ItemMenu from "@components/ItemMenu";
 
-export default function ItemMenuWidget({ viewMode = "tree", item, store, remove }) {
+export default function ItemMenuWidget({ item, store, remove }) {
     const translations = useTranslations();
 
     const menuItems = [
@@ -25,5 +25,5 @@ export default function ItemMenuWidget({ viewMode = "tree", item, store, remove 
         }
     ];
 
-    return <ItemMenu viewMode={viewMode} item={item} menuItems={menuItems} store={store} />;
+    return <ItemMenu item={item} menuItems={menuItems} store={store} />;
 }

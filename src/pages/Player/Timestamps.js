@@ -121,7 +121,7 @@ export default function TimestampsPage() {
 
     const mapper = item => {
         const timestamp = formatDuration(item.id * 1000, true);
-        const iconWidget = <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
+        const iconWidget = <ItemMenu setMetadata={setMetadata} item={item} />;
 
         console.log("item", item, "mode", mode, "editedItem", editedItem);
 
