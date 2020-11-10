@@ -51,8 +51,12 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
             </Tooltip>
         </IconButton>
         {item.type === "set" && <FolderIcon />}
-        {item.type === "tag" && <LocalOfferIcon />}
-        {item.type === "content" && <DescriptionIcon />}
+        {item.type === "tag" && <Tooltip title={translations.TAG} arrow>
+            <LocalOfferIcon />
+        </Tooltip>}
+        {item.type === "content" && <Tooltip title={translations.CONTENT} arrow>
+            <DescriptionIcon />
+        </Tooltip>}
         {item.type === "content" && <ItemMenu remove={remove} item={item} store={LibrarianStore} />}
     </>;
     return <Row

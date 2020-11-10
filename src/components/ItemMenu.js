@@ -14,7 +14,7 @@ export default function ItemMenuWidget({ viewMode = "table", item, menuItems, st
     const select = store.useState(s => s.select);
 
     const updateHover = () => {
-        if (viewMode === "table" || viewMode === "tree") {
+        if (viewMode === "table") {
             if (!isVisible.current) {
                 store.update(s => {
                     s.enableItemClick = !isHover;
