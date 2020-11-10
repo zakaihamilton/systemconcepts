@@ -53,33 +53,8 @@ export function reverseIterate(root, callback, parent) {
     callback(root, parent);
 }
 
-function* treeWalker({ builder, data, params, mapper, filter, search, setEmpty, isOpenByDefault }, refresh = false) {
+function* treeWalker({ data, params, setEmpty, isOpenByDefault }, refresh = false) {
     const stack = [];
-
-    data = (data || []).map(item => {
-        item = { ...item };
-        if (mapper) {
-            item = mapper(item);
-        }
-        item.match = !filter || filter(item, search) ? 1 : 0;
-        return item;
-    });
-
-    if (builder) {
-        data = builder(data);
-    }
-
-    reverseIterate(data, (item, parent) => {
-        if (item && item.match && parent && !parent.match) {
-            parent.match = item.match + 1;
-        }
-    });
-
-    iterate(data, (item, parent) => {
-        if (!item.match && parent && parent.match === 1) {
-            item.match = parent.match + 1;
-        }
-    });
 
     const items = data && data.items;
     if (!items) {
@@ -172,7 +147,40 @@ export default function TreeWidget(props) {
     const [isEmpty, setEmpty] = useState(false);
     const search = useSearch(() => { });
     const boundTreeWalker = useMemo(() => {
-        return treeWalker.bind(this, { builder, data, params, mapper, filter, search, setEmpty, isOpenByDefault });
+        let tree = (data || []).map(item => {
+            item = { ...item };
+            if (mapper) {
+                item = mapper(item);
+            }
+            item.match = !filter || filter(item, search) ? 1 : 0;
+            return item;
+        });
+
+        if (builder) {
+            tree = builder(tree);
+        }
+
+        reverseIterate(tree, (item, parent) => {
+            if (item && item.match && parent && !parent.match) {
+                parent.match = item.match + 1;
+            }
+        });
+
+        iterate(tree, (item, parent) => {
+            if (!item.match && parent && parent.match === 1) {
+                item.match = parent.match + 1;
+            }
+        });
+        return treeWalker.bind(this, {
+            builder,
+            data: tree,
+            params,
+            mapper,
+            filter,
+            search,
+            setEmpty,
+            isOpenByDefault
+        });
     }, [select, builder, data, params, mapper, search, filter, isOpenByDefault]);
 
     const sizeToPixels = text => {

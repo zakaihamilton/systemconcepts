@@ -57,7 +57,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
     </>;
     return <Row
         className={styles.root}
-        iconPadding={item.type === "content" ? 140 : 100}
+        iconPadding={item.type === "content" ? 150 : 110}
         basePadding={basePadding}
         icons={icons}
         style={style}
