@@ -21,6 +21,7 @@ import { useDateFormatter } from "@util/locale";
 import { useSync } from "@util/sync";
 import { isBinaryFile, isImageFile } from "@util/path";
 import styles from "./Storage.module.scss";
+import { useLocalStorage } from "@util/store";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -41,12 +42,13 @@ export const StorageStoreDefaults = {
     orderBy: ""
 };
 
-export const StorageStore = new Store(StorageStoreDefaults);
+export const StorageStore = new Store({ viewMode: "list", ...StorageStoreDefaults });
 
 export default function Storage({ path = "" }) {
     const [syncCounter] = useSync();
     const translations = useTranslations();
     const { item: editedItem, viewMode, mode, select, counter, editing } = StorageStore.useState();
+    useLocalStorage("StorageStore", StorageStore, ["viewMode"]);
     const [data, loading, error] = useListing(path, [counter, syncCounter]);
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
@@ -75,12 +77,22 @@ export default function Storage({ path = "" }) {
         {
             id: "sizeWidget",
             title: translations.SIZE,
-            sortable: "size"
+            sortable: "size",
+            columnProps: {
+                style: {
+                    width: "10em"
+                }
+            }
         },
         {
             id: "dateWidget",
             title: translations.DATE,
-            sortable: "mtimeMs"
+            sortable: "mtimeMs",
+            columnProps: {
+                style: {
+                    width: "20em"
+                }
+            }
         }
     ];
 
