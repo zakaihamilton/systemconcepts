@@ -20,7 +20,6 @@ export const LibrarianStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     offset: 0,
 };
 

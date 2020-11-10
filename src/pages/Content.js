@@ -27,7 +27,6 @@ export const ContentStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     order: "desc",
     offset: 0,
     orderBy: "",
@@ -41,7 +40,7 @@ export default function Content({ path = "" }) {
     const language = useLanguage();
     const contentId = path;
     const translations = useTranslations();
-    const { counter, viewMode = "table", mode, item: editedItem, enableItemClick } = ContentStore.useState();
+    const { counter, viewMode = "table", mode, item: editedItem } = ContentStore.useState();
     const [tags] = useTags({ counter });
     const { busy, toPath } = useContent({ counter });
     const [inProgress, setProgress] = useState(false);
@@ -125,7 +124,7 @@ export default function Content({ path = "" }) {
             title: translations.NAME,
             sortable: "value",
             onSelectable: () => mode !== "rename",
-            onClick: mode !== "rename" && enableItemClick && renameItem
+            onClick: mode !== "rename" && renameItem
         }
     ];
 

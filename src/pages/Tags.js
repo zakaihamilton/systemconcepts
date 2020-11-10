@@ -15,7 +15,6 @@ export const TagsStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     offset: 0,
 };
 

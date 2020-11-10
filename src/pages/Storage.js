@@ -5,7 +5,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useTranslations } from "@util/translations";
-import Label from "@widgets/Label";
+import Row from "@widgets/Row";
 import storage, { useListing } from "@util/storage";
 import Actions, { useActions } from "./Storage/Actions";
 import { setPath, addPath } from "@util/pages";
@@ -20,6 +20,7 @@ import Destination from "./Storage/Destination";
 import { useDateFormatter } from "@util/locale";
 import { useSync } from "@util/sync";
 import { isBinaryFile, isImageFile } from "@util/path";
+import styles from "./Storage.module.scss";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -33,7 +34,6 @@ export const StorageStoreDefaults = {
     counter: 1,
     onDone: null,
     onValidate: null,
-    enableItemClick: true,
     item: null,
     destination: "",
     order: "desc",
@@ -46,7 +46,7 @@ export const StorageStore = new Store(StorageStoreDefaults);
 export default function Storage({ path = "" }) {
     const [syncCounter] = useSync();
     const translations = useTranslations();
-    const { item: editedItem, viewMode, mode, select, counter, enableItemClick, editing } = StorageStore.useState();
+    const { item: editedItem, viewMode, mode, select, counter, editing } = StorageStore.useState();
     const [data, loading, error] = useListing(path, [counter, syncCounter]);
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
@@ -69,7 +69,8 @@ export default function Storage({ path = "" }) {
         {
             id: "nameWidget",
             title: translations.NAME,
-            sortable: "name"
+            sortable: "name",
+            padding: false
         },
         {
             id: "sizeWidget",
@@ -126,12 +127,18 @@ export default function Storage({ path = "" }) {
         } else if (mode === "rename" && editedItem.id === id) {
             nameWidget = <Edit key={id} />;
         } else {
-            nameWidget = <Label key={id} icon={<>
-                {item.type && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
-                <Tooltip title={tooltip} arrow>
-                    {icon}
-                </Tooltip>
-            </>} name={name} />;
+            nameWidget = <Row
+                key={id}
+                onClick={!editing && rowClick.bind(this, result)}
+                iconPadding={item.type ? 110 : 60}
+                icons={<>
+                    {item.type && <ItemMenu viewMode={viewMode} readOnly={readOnly} item={result} />}
+                    <Tooltip title={tooltip} arrow>
+                        {icon}
+                    </Tooltip>
+                </>}>
+                {name}
+            </Row>;
         }
 
         result.nameWidget = nameWidget;
@@ -140,7 +147,7 @@ export default function Storage({ path = "" }) {
 
     let dataEx = useActions(data);
 
-    const rowClick = useCallback((_, item) => {
+    const rowClick = useCallback(item => {
         const { id } = item;
         if (select) {
             const exists = select.find(item => item.id === id);
@@ -170,7 +177,6 @@ export default function Storage({ path = "" }) {
         }
     }, [select, path]);
 
-    const onRowClick = enableItemClick && !editing && rowClick;
     const statusBar = <StatusBar data={dataEx} mapper={mapper} store={StorageStore} />;
 
     const onImport = async (data) => {
@@ -200,14 +206,24 @@ export default function Storage({ path = "" }) {
     return <>
         <Table
             name={name}
-            rowClick={onRowClick}
             columns={columns}
             store={StorageStore}
             data={dataEx}
             mapper={mapper}
             loading={loading}
             error={error}
-            depends={[mode, select, path, onRowClick, dateFormatter]}
+            viewModes={{
+                list: {
+                    className: styles.listItem
+                },
+                table: null
+            }}
+            refresh={() => {
+                StorageStore.update(s => {
+                    s.counter++;
+                });
+            }}
+            depends={[mode, select, path, editing, dateFormatter]}
             onExport={onExport}
             onImport={!readOnly && onImport}
             statusBar={statusBar}

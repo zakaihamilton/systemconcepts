@@ -15,7 +15,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import FolderIcon from '@material-ui/icons/Folder';
 
 export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
-    const { enableItemClick, select } = LibrarianStore.useState();
+    const { select } = LibrarianStore.useState();
 
     const tagClick = useCallback(() => {
         const { id } = item;
@@ -38,8 +38,6 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
             addPath("content/" + item.content[0] + "?name=" + item.label);
         }
     }, [select, item]);
-
-    const onTagClick = enableItemClick ? tagClick : undefined;
 
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
@@ -65,7 +63,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
         basePadding={basePadding}
         icons={icons}
         style={style}
-        onClick={onTagClick}>
+        onClick={tagClick}>
         {label}
     </Row>;
 }

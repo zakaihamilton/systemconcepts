@@ -1,9 +1,8 @@
 import { useEffect, useCallback, useState } from "react";
 import Table from "@widgets/Table";
-import Label from "@widgets/Label";
+import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@components/Widgets/Select';
 import ItemMenu from "./Timestamps/ItemMenu";
 import { useTranslations } from "@util/translations";
 import { makePath, fileTitle, fileFolder } from "@util/path";
@@ -22,7 +21,6 @@ export const TimestampsStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     order: "desc",
     offset: 0,
     orderBy: ""
@@ -42,7 +40,7 @@ export default function TimestampsPage() {
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
-    const { item: editedItem, mode, select, enableItemClick, viewMode } = TimestampsStore.useState();
+    const { item: editedItem, mode, select, viewMode } = TimestampsStore.useState();
     const [metadata, loading, , setMetadata] = useFile(!!name && metadataPath, [name], data => {
         return data ? JSON.parse(data) : {};
     });
@@ -104,29 +102,20 @@ export default function TimestampsPage() {
         });
     }, []);
 
-    const onTimestampClick = enableItemClick && timestampClick;
-
     const columns = [
-        {
-            id: "iconWidget",
-            viewModes: {
-                list: true
-            }
-        },
         {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            onSelectable: () => mode !== "rename",
-            onClick: mode !== "rename" && enableItemClick && renameItem
+            padding: false
         },
         {
             id: "timestampWidget",
             title: translations.TIMESTAMP,
             sortable: "id",
             icon: <AccessTimeIcon />,
-            onSelectable: item => mode !== "rename",
-            onClick: mode !== "rename" && onTimestampClick
+            onSelectable: () => mode !== "rename",
+            onClick: mode !== "rename" && timestampClick
         }
     ];
 
@@ -134,7 +123,15 @@ export default function TimestampsPage() {
         const timestamp = formatDuration(item.id * 1000, true);
         const iconWidget = <ItemMenu viewMode={viewMode} setMetadata={setMetadata} item={item} />;
 
-        let nameWidget = <Label name={item.name || translations.UNNAMED} icon={viewMode === "table" && iconWidget} />;
+        console.log("item", item, "mode", mode, "editedItem", editedItem);
+
+        let nameWidget = <Row
+            className={styles.row}
+            fill={true}
+            onClick={mode !== "rename" && renameItem.bind(this, item)}
+            icons={iconWidget}>
+            {item.name || translations.UNNAMED}
+        </Row>;
         if (mode === "rename" && editedItem.id === item.id) {
             nameWidget = <Edit key={item.id} />;
         }
@@ -171,7 +168,7 @@ export default function TimestampsPage() {
             loading={loading}
             mapper={mapper}
             statusBar={statusBar}
-            depends={[mode, select, viewMode, metadata, translations]}
+            depends={[mode, select, editedItem, viewMode, metadata, translations]}
         />
     </>;
 }

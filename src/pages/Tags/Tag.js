@@ -12,7 +12,7 @@ import clsx from "clsx";
 import Row from "@widgets/Row";
 
 export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isOpen, style, toggle }) {
-    const { enableItemClick, select } = TagsStore.useState();
+    const { select } = TagsStore.useState();
 
     const tagClick = useCallback(() => {
         const { id } = item;
@@ -31,8 +31,6 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
         addPath("tag?tag=" + item.id);
     }, [select]);
 
-    const onTagClick = enableItemClick ? tagClick : undefined;
-
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
     const { label = "" } = item;
@@ -45,12 +43,13 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
         <ItemMenu setData={setData} item={item} store={TagsStore} />
     </>;
     return <Row
+        border={true}
         className={styles.root}
         iconPadding={106}
         basePadding={basePadding}
         icons={icons}
         style={style}
-        onClick={onTagClick}>
+        onClick={tagClick}>
         {label}
     </Row>;
 }
