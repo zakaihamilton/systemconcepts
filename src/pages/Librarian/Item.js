@@ -36,7 +36,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
             addPath("tag?tag=" + item.id);
         }
         else if (item.type === "content") {
-            addPath("content/" + item.name + "?name=" + item.label);
+            addPath("content/" + item.content[0] + "?name=" + item.label);
         }
     }, [select, item]);
 
