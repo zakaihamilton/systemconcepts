@@ -32,8 +32,6 @@ export default function Librarian() {
     const { counter } = LibrarianStore.useState();
     const [data, busy] = useTags({ counter });
 
-    console.log("data", data);
-
     useEffect(() => {
         LibrarianStore.update(s => {
             Object.assign(s, LibrarianStoreDefaults);
@@ -47,6 +45,12 @@ export default function Librarian() {
         }
         else {
             item.label = item.name;
+        }
+        if (!item.content || !item.content.length) {
+            item.type = "tag";
+        }
+        else {
+            item.type = "content";
         }
         return item;
     }, [language]);

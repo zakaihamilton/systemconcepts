@@ -53,7 +53,7 @@ export function reverseIterate(root, callback, parent) {
     callback(root, parent);
 }
 
-function* treeWalker({ builder, data, params, mapper, filter, search, setEmpty }, refresh = false) {
+function* treeWalker({ builder, data, params, mapper, filter, search, setEmpty, isOpenByDefault }, refresh = false) {
     const stack = [];
 
     data = (data || []).map(item => {
@@ -121,7 +121,7 @@ function* treeWalker({ builder, data, params, mapper, filter, search, setEmpty }
             ? {
                 id,
                 isLeaf: items.length === 0,
-                isOpenByDefault: true,
+                isOpenByDefault,
                 item: node,
                 nestingLevel,
                 ...params
@@ -162,7 +162,8 @@ export default function TreeWidget(props) {
         onImport,
         onExport,
         name,
-        data = []
+        data = [],
+        isOpenByDefault = false
     } = props;
     const { select } = store.useState();
     const translations = useTranslations();
@@ -171,8 +172,8 @@ export default function TreeWidget(props) {
     const [isEmpty, setEmpty] = useState(false);
     const search = useSearch(() => { });
     const boundTreeWalker = useMemo(() => {
-        return treeWalker.bind(this, { builder, data, params, mapper, filter, search, setEmpty });
-    }, [select, builder, data, params, mapper, search, filter]);
+        return treeWalker.bind(this, { builder, data, params, mapper, filter, search, setEmpty, isOpenByDefault });
+    }, [select, builder, data, params, mapper, search, filter, isOpenByDefault]);
 
     const sizeToPixels = text => {
         const number = parseFloat(text);

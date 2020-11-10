@@ -32,7 +32,7 @@ export function useTags({ counter }) {
 }
 
 export function uniqueTags(tags) {
-    return Array.from(new Set((tags || []).map(tag => tag.id.split(".").pop())));
+    return Array.from(new Set((tags || []).filter(tag => tag.id === tag.name).map(tag => tag.name)));
 }
 
 export function useTag({ id, counter }) {

@@ -17,6 +17,7 @@ import FolderIcon from '@material-ui/icons/Folder';
 export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
     const { enableItemClick, select } = LibrarianStore.useState();
 
+
     const tagClick = useCallback(() => {
         const { id } = item;
         if (select) {
@@ -37,7 +38,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
         else if (item.type === "content") {
             addPath("content/" + item.name + "?name=" + item.label);
         }
-    }, [select]);
+    }, [select, item]);
 
     const onTagClick = enableItemClick ? tagClick : undefined;
 
