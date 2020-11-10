@@ -6,7 +6,7 @@ import { useStyles } from "@util/styles";
 
 export default function RowWidget({ className = "", viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, viewModes = {}, onSelectable, onClick, selected } = column;
+        const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, onClick, selected } = column;
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const value = item[columnId];
         const isSelected = selected && selected(item);
@@ -18,6 +18,7 @@ export default function RowWidget({ className = "", viewMode, index, selected: s
             classes={{
                 root: clsx(
                     styles.cell,
+                    padding && styles.padding,
                     !align && styles.defaultAlign,
                     onSelectable && onSelectable(item) && styles.selectable,
                     isSelected && styles.selected,

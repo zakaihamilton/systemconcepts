@@ -31,13 +31,13 @@ export function importData() {
     var input = document.createElement("input");
     input.type = "file";
     return new Promise((resolve, reject) => {
-        input.onchange = e => {
+        input.addEventListener("change", e => {
             var file = e.target.files[0];
             var reader = new FileReader();
             reader.readAsText(file, "UTF-8");
             reader.onload = readerEvent => {
                 var body = readerEvent.target.result;
-                resolve(body);
+                resolve({ name: file.name, body });
             };
             reader.onerror = () => {
                 reject(reader.error);
@@ -45,8 +45,7 @@ export function importData() {
             reader.onabort = () => {
                 reject();
             }
-        };
-
+        });
         input.click();
     });
 }

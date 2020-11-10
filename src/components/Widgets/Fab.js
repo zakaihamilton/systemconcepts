@@ -8,10 +8,12 @@ export default function FloatingActionButtons({ onClick, title, icon, ...props }
     const className = clsx(styles.root, onClick && styles.visible);
 
     return (
-        <Tooltip arrow title={title}>
-            <Fab className={className} color="primary" onClick={onClick} {...props}>
-                {icon}
-            </Fab>
-        </Tooltip>
+        <div className={className}>
+            <Tooltip arrow title={title}>
+                <Fab color="primary" onClick={onClick} {...props}>
+                    {icon}
+                </Fab>
+            </Tooltip>
+        </div>
     );
 }

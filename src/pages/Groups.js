@@ -112,9 +112,6 @@ export default function Groups() {
                 });
             }}
             viewModes={{
-                list: {
-                    className: withProgress ? styles.listItemWithProgress : styles.listItem
-                },
                 table: null
             }}
             mapper={mapper}

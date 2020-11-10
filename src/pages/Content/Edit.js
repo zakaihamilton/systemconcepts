@@ -1,22 +1,21 @@
 import { useStoreState } from "@util/store";
 import Input from "@widgets/Input";
-import { StorageStore } from "../Storage";
+import { ContentStore } from "../Content";
 import { useCallback } from "react";
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 export default function EditWidget() {
-    const { icon, type, tooltip, onDone, onValidate, placeholder } = StorageStore.useState();
-    const { name } = useStoreState(StorageStore, s => ({ name: s.name }));
+    const { icon, type, tooltip, onDone, onValidate, placeholder } = ContentStore.useState();
+    const { value } = useStoreState(ContentStore, s => ({ value: s.value }));
     const complete = useCallback(async () => {
         let result = undefined;
         if (onDone) {
-            result = await onDone(name[0]);
+            result = await onDone(value[0]);
         }
-        StorageStore.update(s => {
+        ContentStore.update(s => {
             s.mode = "";
             s.item = null;
             s.editing = false;
-            s.counter++;
         });
         return result;
     }, [name[0]]);
@@ -27,7 +26,7 @@ export default function EditWidget() {
                 valid = onValidate(name[0]);
             }
             if (valid) {
-                StorageStore.update(s => {
+                ContentStore.update(s => {
                     s.editing = false;
                 });
                 await complete();
@@ -43,7 +42,7 @@ export default function EditWidget() {
             await complete();
         }
         else {
-            StorageStore.update(s => {
+            ContentStore.update(s => {
                 s.mode = "";
                 s.item = null;
                 s.editing = false;
@@ -55,10 +54,11 @@ export default function EditWidget() {
         <Input
             onKeyDown={keyDown}
             placeholder={placeholder}
+            helperText=""
             autoFocus
             key={type}
             icon={icon}
             tooltip={tooltip}
-            state={name} />
+            state={value} />
     </ClickAwayListener>;
 }

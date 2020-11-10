@@ -22,7 +22,6 @@ export const UsersStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     order: "desc",
     offset: 0,
     orderBy: "",
@@ -34,7 +33,7 @@ export const UsersStore = new Store(UsersStoreDefaults);
 export default function Users() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const { roleFilter, viewMode = "table", mode, select, counter, enableItemClick } = UsersStore.useState();
+    const { roleFilter, viewMode = "table", mode, select, counter } = UsersStore.useState();
     useLocalStorage("UsersStore", UsersStore, ["viewMode"]);
     const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
     const [inProgress, setProgress] = useState(false);
@@ -63,8 +62,6 @@ export default function Users() {
         addPath("user/" + id + "?name=" + firstName + " " + lastName);
     }, [select]);
 
-    const onUserClick = enableItemClick && userClick;
-
     const columns = [
         {
             id: "iconWidget",
@@ -77,7 +74,7 @@ export default function Users() {
             title: translations.NAME,
             sortable: "name",
             onSelectable: item => true,
-            onClick: onUserClick
+            onClick: userClick
         },
         !isPhone && {
             id: "id",

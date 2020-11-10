@@ -17,7 +17,7 @@ async function getListing(path, options = {}) {
         }
     });
     for (const item of items) {
-        const { name, stat } = item;
+        const { name, stat = {} } = item;
         const itemPath = makePath(path, name);
         if (useCount && stat.type === "dir") {
             const children = await fetchJSON(fsEndPoint, {
@@ -47,7 +47,11 @@ async function createFolder(path) {
     /* ignore on aws */
 }
 
-async function createFolders(path) {
+async function createFolders(prefix, folders) {
+    /* ignore on aws */
+}
+
+async function createFolderPath(path) {
     /* ignore on aws */
 }
 
@@ -110,13 +114,39 @@ async function readFile(path) {
 
 async function writeFile(path, body) {
     path = makePath(path);
-    await fetchText(fsEndPoint, {
+    await fetchJSON(fsEndPoint, {
         method: "PUT",
-        headers: {
-            path: encodeURIComponent(path.slice(1))
-        },
-        body
+        body: JSON.stringify([{
+            path,
+            body
+        }])
     });
+}
+
+async function writeFiles(prefix, files) {
+    const maxBytes = 4000 * 1000;
+    let batch = [];
+    for (const name in files) {
+        const path = prefix + name;
+        const body = files[name] || "";
+        if (JSON.stringify(batch).length + body.length > maxBytes) {
+            await fetchJSON(fsEndPoint, {
+                method: "PUT",
+                body: JSON.stringify(batch)
+            });
+            batch = [];
+        }
+        batch.push({
+            path,
+            body
+        });
+    }
+    if (batch.length) {
+        await fetchJSON(fsEndPoint, {
+            method: "PUT",
+            body: JSON.stringify(batch)
+        });
+    }
 }
 
 async function exists(path) {
@@ -142,9 +172,11 @@ export default {
     getListing,
     createFolder,
     createFolders,
+    createFolderPath,
     deleteFolder,
     deleteFile,
     readFile,
     writeFile,
+    writeFiles,
     exists
 };

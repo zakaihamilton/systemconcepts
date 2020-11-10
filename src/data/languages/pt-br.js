@@ -258,6 +258,10 @@ export default {
             "value": "Importar Pasta"
         },
         {
+            "id": "IMPORT_FILE",
+            "value": "Importar Arquivo"
+        },
+        {
             "id": "MOVE",
             "value": "Mover"
         },
@@ -904,6 +908,22 @@ export default {
         {
             "id": "NEW_TAG",
             "value": "Nova Tag"
+        },
+        {
+            "id": "CONTENT",
+            "value": "Conteúdo"
+        },
+        {
+            "id": "NEW_CONTENT",
+            "value": "Nova Conteúdo"
+        },
+        {
+            "id": "LIBRARIAN",
+            "value": "Bibliotecário"
+        },
+        {
+            "id": "SCAN_CONTENT",
+            "value": "Escanear Conteúdo"
         }
     ]
 };

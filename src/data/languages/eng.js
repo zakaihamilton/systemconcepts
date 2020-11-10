@@ -258,6 +258,10 @@ export default {
             "value": "Import Folder"
         },
         {
+            "id": "IMPORT_FILE",
+            "value": "Import File"
+        },
+        {
             "id": "MOVE",
             "value": "Move"
         },
@@ -904,6 +908,22 @@ export default {
         {
             "id": "NEW_TAG",
             "value": "New Tag"
+        },
+        {
+            "id": "CONTENT",
+            "value": "Content"
+        },
+        {
+            "id": "NEW_CONTENT",
+            "value": "New Content"
+        },
+        {
+            "id": "LIBRARIAN",
+            "value": "Librarian"
+        },
+        {
+            "id": "SCAN_CONTENT",
+            "value": "Scan Content"
         }
     ]
 };

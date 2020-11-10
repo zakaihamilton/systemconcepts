@@ -17,6 +17,12 @@ export default [
         ...remote({ fsEndPoint: "/api/shared", deviceId: "shared" })
     },
     {
+        id: "content",
+        name: "CONTENT",
+        enabled: true,
+        ...remote({ fsEndPoint: "/api/content", deviceId: "content" })
+    },
+    {
         id: "personal",
         name: "PERSONAL",
         enabled: () => {

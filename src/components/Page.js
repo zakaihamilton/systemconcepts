@@ -2,16 +2,16 @@ import { useRef, createContext } from "react";
 import styles from "./Page.module.scss";
 import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
-import Player from "@pages/Player";
 import { useActivePages } from "@util/pages";
 import NoSsr from '@material-ui/core/NoSsr';
+import pages from "@data/pages";
 
 export const PageSize = createContext();
 
 export default function Page() {
-    const pages = useActivePages();
+    const activePages = useActivePages();
     const { hash, showSideBar } = MainStore.useState();
-    const activePage = pages[pages.length - 1];
+    const activePage = activePages[activePages.length - 1];
     const ref = useRef();
     const size = useSize(ref, [showSideBar, hash]);
     const playerPageRef = useRef(null);
@@ -24,6 +24,7 @@ export default function Page() {
     if (showPlayer) {
         playerPageRef.current = { ...activePage };
     }
+    const Player = pages.find(page => page.id === "player").Component;
     return <>
         <PageSize.Provider value={size}>
             <div className={styles.pageContainer}>

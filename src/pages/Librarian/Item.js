@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import styles from "./Tag.module.scss";
+import styles from "./Item.module.scss";
 import ItemMenu from "./ItemMenu";
-import { TagsStore } from "../Tags";
+import { LibrarianStore } from "../Librarian";
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -10,15 +10,18 @@ import { useTranslations } from "@util/translations";
 import { addPath } from "@util/pages";
 import clsx from "clsx";
 import Row from "@widgets/Row";
+import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import DescriptionIcon from '@material-ui/icons/Description';
+import FolderIcon from '@material-ui/icons/Folder';
 
-export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isOpen, style, toggle }) {
-    const { select } = TagsStore.useState();
+export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
+    const { select } = LibrarianStore.useState();
 
     const tagClick = useCallback(() => {
         const { id } = item;
         if (select) {
             const exists = select.find(item => item.id === id);
-            TagsStore.update(s => {
+            LibrarianStore.update(s => {
                 if (exists) {
                     s.select = select.filter(item => item.id !== id);
                 }
@@ -28,8 +31,13 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
             });
             return;
         }
-        addPath("tag?tag=" + item.id);
-    }, [select]);
+        if (item.type === "tag") {
+            addPath("tag/" + item.id + "?name=" + item.label);
+        }
+        else if (item.type === "content") {
+            addPath("content/" + item.content[0] + "?name=" + item.label);
+        }
+    }, [select, item]);
 
     const translations = useTranslations();
     const basePadding = (nestingLevel * 32) + 8;
@@ -40,12 +48,18 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Tooltip>
         </IconButton>
-        <ItemMenu setData={setData} item={item} store={TagsStore} />
+        {item.type === "set" && <FolderIcon />}
+        {item.type === "tag" && <Tooltip title={translations.TAG} arrow>
+            <LocalOfferIcon />
+        </Tooltip>}
+        {item.type === "content" && <Tooltip title={translations.CONTENT} arrow>
+            <DescriptionIcon />
+        </Tooltip>}
+        {item.type === "content" && <ItemMenu remove={remove} item={item} store={LibrarianStore} />}
     </>;
     return <Row
-        border={true}
         className={styles.root}
-        iconPadding={106}
+        iconPadding={item.type === "content" ? 150 : 110}
         basePadding={basePadding}
         icons={icons}
         style={style}

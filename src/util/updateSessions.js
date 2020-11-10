@@ -18,7 +18,7 @@ export function useUpdateSessions() {
             return [];
         }
         const sharedPath = "shared/sessions/" + path.substring(prefix.length) + "/listing.json";
-        await storage.createFolders(sharedPath);
+        await storage.createFolderPath(sharedPath);
         const listingBody = JSON.stringify(listing, null, 4);
         const exists = await storage.exists(sharedPath);
         if (exists) {
@@ -33,7 +33,7 @@ export function useUpdateSessions() {
     const copyFile = useCallback(async (path, name) => {
         const sourcePath = path + name;
         const targetPath = "shared/sessions/" + path.substring(prefix.length) + name;
-        await storage.createFolders(targetPath);
+        await storage.createFolderPath(targetPath);
         if (!(await storage.exists(sourcePath))) {
             return;
         }

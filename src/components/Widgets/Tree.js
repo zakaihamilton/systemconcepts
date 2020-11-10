@@ -13,6 +13,8 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { addPath } from "@util/pages";
 import { StatusBarStore } from "@widgets/StatusBar";
+import { useSearch } from "@components/Search";
+import styles from "./Tree.module.scss";
 
 registerToolbar("Tree");
 
@@ -31,14 +33,31 @@ export function flatten(root) {
     return results;
 }
 
-function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refresh = false) {
+export function iterate(root, callback, parent) {
+    const items = root.items;
+    callback(root, parent);
+    if (items) {
+        for (const item of items) {
+            iterate(item, callback, root);
+        }
+    }
+}
+
+export function reverseIterate(root, callback, parent) {
+    const items = root.items;
+    if (items) {
+        for (const item of items) {
+            reverseIterate(item, callback, root);
+        }
+    }
+    callback(root, parent);
+}
+
+function* treeWalker({ data, params, setEmpty, isOpenByDefault }, refresh = false) {
     const stack = [];
 
-    if (builder) {
-        data = builder(data);
-    }
-
-    if (!data || !data.items) {
+    const items = data && data.items;
+    if (!items) {
         setEmpty(true);
         return null;
     }
@@ -47,7 +66,7 @@ function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refres
     for (const item of data.items) {
         stack.push({
             nestingLevel: 0,
-            node: item,
+            node: item
         });
     }
 
@@ -60,19 +79,13 @@ function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refres
             nestingLevel,
         } = stack.pop();
 
-        if (mapper) {
-            node = mapper(node);
-        }
-
-        if (filter) {
-            if (!filter(node)) {
-                continue;
-            }
-        }
-
         numItems++;
 
-        const { items = [], id } = node;
+        const { items = [], id, match } = node;
+
+        if (!match) {
+            continue;
+        }
 
         // Here we are sending the information about the node to the Tree component
         // and receive an information about the openness state from it. The
@@ -83,7 +96,7 @@ function* treeWalker({ builder, data, params, mapper, filter, setEmpty }, refres
             ? {
                 id,
                 isLeaf: items.length === 0,
-                isOpenByDefault: true,
+                isOpenByDefault,
                 item: node,
                 nestingLevel,
                 ...params
@@ -124,16 +137,51 @@ export default function TreeWidget(props) {
         onImport,
         onExport,
         name,
-        data = []
+        data = [],
+        isOpenByDefault = false
     } = props;
     const { select } = store.useState();
     const translations = useTranslations();
     const statusBarIsActive = StatusBarStore.useState(s => s.active);
     const size = useContext(PageSize);
     const [isEmpty, setEmpty] = useState(false);
+    const search = useSearch(() => { });
     const boundTreeWalker = useMemo(() => {
-        return treeWalker.bind(this, { builder, data, params, mapper, filter, setEmpty });
-    }, [select, builder, data, params, mapper, filter]);
+        let tree = (data || []).map(item => {
+            item = { ...item };
+            if (mapper) {
+                item = mapper(item);
+            }
+            item.match = !filter || filter(item, search) ? 1 : 0;
+            return item;
+        });
+
+        if (builder) {
+            tree = builder(tree);
+        }
+
+        reverseIterate(tree, (item, parent) => {
+            if (item && item.match && parent && !parent.match) {
+                parent.match = item.match + 1;
+            }
+        });
+
+        iterate(tree, (item, parent) => {
+            if (!item.match && parent && parent.match === 1) {
+                item.match = parent.match + 1;
+            }
+        });
+        return treeWalker.bind(this, {
+            builder,
+            data: tree,
+            params,
+            mapper,
+            filter,
+            search,
+            setEmpty,
+            isOpenByDefault
+        });
+    }, [select, builder, data, params, mapper, search, filter, isOpenByDefault]);
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
@@ -155,14 +203,14 @@ export default function TreeWidget(props) {
     };
 
     const toolbarItems = [
-        data && name && onImport && {
+        name && onImport && {
             id: "import",
             name: translations.IMPORT,
             icon: <PublishIcon />,
             onClick: async () => {
                 let body = "";
                 try {
-                    body = await importData();
+                    ({ body } = await importData());
                 }
                 catch (err) {
                     if (err) {
@@ -227,7 +275,7 @@ export default function TreeWidget(props) {
         {!!loading && loadingElement}
         {!!isEmpty && !loading && emptyElement}
         {!!statusBarVisible && statusBar}
-        {!loading && sizeValid && <Tree treeWalker={boundTreeWalker} itemSize={itemSize} height={height} width={size && size.width}>
+        {!loading && sizeValid && <Tree className={styles.tree} treeWalker={boundTreeWalker} itemSize={itemSize} height={height} width={size && size.width}>
             {Node}
         </Tree>}
     </>;

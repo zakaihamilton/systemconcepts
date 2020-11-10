@@ -2,10 +2,9 @@ import { useEffect, useCallback } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
-import Label from "@widgets/Label";
+import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
-import Select from '@components/Widgets/Select';
 import ItemMenu from "./Bookmarks/ItemMenu";
 import { MainStore } from "@components/Main";
 import { getPagesFromHash, usePages } from "@util/pages";
@@ -19,7 +18,6 @@ export const BookmarksStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     order: "desc",
     offset: 0,
     orderBy: ""
@@ -31,7 +29,7 @@ export default function BookmarksPage() {
     const pages = usePages();
     const { bookmarks = [] } = Bookmarks.useState();
     const translations = useTranslations();
-    const { viewMode = "table", mode, select, enableItemClick } = BookmarksStore.useState();
+    const { viewMode = "table", mode, select } = BookmarksStore.useState();
     useLocalStorage("BookmarksStore", BookmarksStore, ["viewMode"]);
 
     useEffect(() => {
@@ -60,21 +58,12 @@ export default function BookmarksPage() {
         window.location.hash = item.id;
     }, [select]);
 
-    const onBookmarkClick = enableItemClick && bookmarkClick;
-
     const columns = [
-        {
-            id: "iconWidget",
-            viewModes: {
-                list: true
-            }
-        },
         {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            onSelectable: item => true,
-            onClick: onBookmarkClick
+            padding: false
         },
         {
             id: "locationWidget",
@@ -90,7 +79,11 @@ export default function BookmarksPage() {
         return {
             ...item,
             iconWidget,
-            nameWidget: viewMode === "table" ? <Label style={{ userSelect: "none" }} name={item.name} icon={iconWidget} /> : item.name,
+            nameWidget: <Row
+                onClick={bookmarkClick.bind(this, item)}
+                icons={iconWidget}>
+                {item.name}
+            </Row>,
             locationWidget: <Breadcrumbs hideRoot={true} navigateLast={true} items={breadcrumbPages.slice(0, -1)} />
         };
     };

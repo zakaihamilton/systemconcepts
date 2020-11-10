@@ -26,9 +26,12 @@ export default function ImageWidget({ clickForImage = true, loading, path, width
         setImageLoading(!!path);
     }, [path]);
 
-    return <div style={buttonStyle} className={styles.root} disabled={clickForImage && (!path || !!error)} onClick={clickForImage ? gotoImage : undefined}>
+    const showAlt = (!path || !!error) && (!loading && !imageLoading);
+    const clickable = clickForImage && !showAlt;
+
+    return <div style={buttonStyle} className={clsx(styles.root, clickable && styles.clickable)} disabled={clickForImage && (!path || !!error)} onClick={clickable ? gotoImage : undefined}>
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
         {path && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
-        {(!path || !!error) && (!loading && !imageLoading) && <div className={styles.alt}>{alt}</div>}
+        {showAlt && <div className={styles.alt}>{alt}</div>}
     </div>;
 }

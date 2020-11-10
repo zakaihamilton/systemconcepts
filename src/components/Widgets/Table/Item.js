@@ -5,7 +5,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 export default function ItemWidget({ className = "", viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
+        const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
         const value = item[columnId];
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const isSelected = selected && selected(item);
@@ -15,6 +15,7 @@ export default function ItemWidget({ className = "", viewMode, selected: selecte
             onClick={onClick ? () => onClick(item) : undefined}
             className={clsx(
                 styles.cell,
+                padding && styles.padding,
                 onSelectable && onSelectable(item) && styles.selectable,
                 isSelected && styles.selected,
                 isSelected && selectedClassName,

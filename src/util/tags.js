@@ -9,8 +9,7 @@ export function buildTree(items, path = "", item) {
     let children = [];
     if (id) {
         children = (items || []).filter(item => {
-            const { id } = item || {};
-            const name = id.split(".").pop();
+            const { id, name } = item || {};
             return id === path + "." + name;
         });
     }
@@ -19,13 +18,9 @@ export function buildTree(items, path = "", item) {
     }
     children = children.map(item => {
         item = { ...item };
-        if (!item.name) {
-            const name = item.id.split(".").pop();
-            item.name = name;
-        }
         return buildTree(items, item.id, item);
     });
-    children.sort((a, b) => b.name.localeCompare(a.name));
+    children.sort((a, b) => b.id.localeCompare(a.id));
     return { ...item, items: children };
 }
 
@@ -34,6 +29,10 @@ export function useTags({ counter }) {
         return data ? JSON.parse(data) : [];
     });
     return result;
+}
+
+export function uniqueTags(tags) {
+    return Array.from(new Set((tags || []).filter(tag => tag.id === tag.name).map(tag => tag.name)));
 }
 
 export function useTag({ id, counter }) {

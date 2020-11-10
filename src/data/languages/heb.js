@@ -258,6 +258,10 @@ export default {
             "value": "יבוא תיקייה"
         },
         {
+            "id": "IMPORT_FOLDER",
+            "value": "יבוא קובץ"
+        },
+        {
             "id": "MOVE",
             "value": "העבר"
         },
@@ -900,6 +904,22 @@ export default {
         {
             "id": "NEW_TAG",
             "value": "תג חדש"
+        },
+        {
+            "id": "CONTENT",
+            "value": "תוכן"
+        },
+        {
+            "id": "NEW_CONTENT",
+            "value": "תוכן חדש"
+        },
+        {
+            "id": "LIBRARIAN",
+            "value": "ספרן"
+        },
+        {
+            "id": "SCAN_CONTENT",
+            "value": "סרוק תוכן"
         }
     ]
 };

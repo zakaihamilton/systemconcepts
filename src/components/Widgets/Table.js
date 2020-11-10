@@ -82,6 +82,7 @@ export default function TableWidget(props) {
         selectedRow,
         error,
         store,
+        size,
         viewModes = { table: null },
         ...otherProps
     } = props;
@@ -92,12 +93,13 @@ export default function TableWidget(props) {
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 10, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
-    const size = useContext(PageSize);
+    const pageSize = useContext(PageSize);
     const search = useSearch(() => {
         store.update(s => {
             s.offset = 0;
         });
     });
+    size = size || pageSize;
 
     const viewModesList = [
         {
@@ -171,7 +173,7 @@ export default function TableWidget(props) {
             onClick: async () => {
                 let body = "";
                 try {
-                    body = await importData();
+                    ({ body } = await importData());
                 }
                 catch (err) {
                     if (err) {

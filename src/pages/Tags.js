@@ -1,5 +1,5 @@
 import StatusBar from "@widgets/StatusBar";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
@@ -15,7 +15,6 @@ export const TagsStoreDefaults = {
     select: null,
     counter: 1,
     onDone: null,
-    enableItemClick: true,
     offset: 0,
 };
 
@@ -33,13 +32,20 @@ export default function Tags() {
         });
     }, []);
 
-    const mapper = item => {
+    const mapper = useCallback(item => {
         const translation = item[language];
         if (translation) {
-            item.name = translation;
+            item.label = translation;
+        }
+        else {
+            item.label = item.name;
         }
         return item;
-    };
+    }, [language]);
+
+    const filter = useCallback((item, search) => {
+        return !search || (item.label && item.label.toLowerCase().includes(search.toLowerCase()));
+    }, []);
 
     const addTag = () => {
         addPath("tag");
@@ -57,6 +63,7 @@ export default function Tags() {
         <Tree
             name="tags"
             mapper={mapper}
+            filter={filter}
             onImport={onImport}
             loading={loading}
             statusBar={<StatusBar data={data} mapper={mapper} store={TagsStore} />}
@@ -72,6 +79,6 @@ export default function Tags() {
                 });
             }}
         />
-        <Fab title={translations.NEW_TAG} icon={<AddIcon />} onClick={addTag} />
+        {!loading && <Fab title={translations.NEW_TAG} icon={<AddIcon />} onClick={addTag} />}
     </>;
 }

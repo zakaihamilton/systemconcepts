@@ -96,6 +96,39 @@ export default function Actions({ data, path, readOnly }) {
 
     addItems.push(...[
         {
+            id: "importFile",
+            name: translations.IMPORT_FILE,
+            icon: <InsertDriveFileIcon />,
+            tooltip: translations.FILE,
+            onClick: async () => {
+                let body = "";
+                let name = "";
+                try {
+                    ({ name, body } = await importData());
+                }
+                catch (err) {
+                    if (err) {
+                        StorageStore.update(s => {
+                            s.message = err;
+                            s.severity = "error";
+                        });
+                    }
+                }
+                try {
+                    await storage.writeFile(path + "/" + name, body);
+                    StorageStore.update(s => {
+                        s.counter++;
+                    });
+                }
+                catch (err) {
+                    StorageStore.update(s => {
+                        s.message = err;
+                        s.severity = "error";
+                    });
+                }
+            }
+        },
+        {
             id: "importFolder",
             name: translations.IMPORT_FOLDER,
             icon: <FolderIcon />,
@@ -103,7 +136,7 @@ export default function Actions({ data, path, readOnly }) {
             onClick: async () => {
                 let body = "";
                 try {
-                    body = await importData();
+                    ({ body } = await importData());
                 }
                 catch (err) {
                     if (err) {
