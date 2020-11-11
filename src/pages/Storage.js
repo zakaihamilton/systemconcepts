@@ -90,7 +90,7 @@ export default function Storage({ path = "" }) {
             sortable: "mtimeMs",
             columnProps: {
                 style: {
-                    width: "20em"
+                    width: "22em"
                 }
             }
         }
