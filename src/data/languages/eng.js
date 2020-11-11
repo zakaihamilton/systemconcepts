@@ -924,6 +924,10 @@ export default {
         {
             "id": "SCAN_CONTENT",
             "value": "Scan Content"
+        },
+        {
+            "id": "RESTART",
+            "value":"Restart"
         }
     ]
 };

@@ -920,6 +920,10 @@ export default {
         {
             "id": "SCAN_CONTENT",
             "value": "סרוק תוכן"
+        },
+        {
+            "id": "RESTART",
+            "value":"אתחול"
         }
     ]
 };

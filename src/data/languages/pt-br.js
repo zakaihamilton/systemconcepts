@@ -924,6 +924,10 @@ export default {
         {
             "id": "SCAN_CONTENT",
             "value": "Escanear Conteúdo"
+        },
+        {
+            "id": "RESTART",
+            "value": "Reiniciar"
         }
     ]
 };
