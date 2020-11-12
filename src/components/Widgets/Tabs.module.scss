@@ -1,10 +1,14 @@
 .root {
     flex: 1;
     width: 100%;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.tab {}
+.label {
+    display: flex;
+}
 
-.panel {
-    margin-top: 1em;
+.label>* {
+    margin-left: 0.5em;
+    margin-left: 0.5em;
 }

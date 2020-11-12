@@ -65,6 +65,7 @@ import { getPlayerSection } from "@pages/Player/Section";
 
 const Session = dynamic(() => import("@pages/Session"), { loading: () => <PageLoad /> });
 import { getSessionSection } from "@pages/Session/Section";
+import SessionTabs from "@pages/Session/Tabs";
 
 import EventIcon from '@material-ui/icons/Event';
 const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
@@ -241,7 +242,8 @@ export default [
         name: "SESSION",
         section: getSessionSection,
         Icon: VideoLabelIcon,
-        Component: Session
+        Component: Session,
+        tabs: SessionTabs
     },
     {
         id: "groups",

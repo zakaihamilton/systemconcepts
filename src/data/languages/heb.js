@@ -923,7 +923,11 @@ export default {
         },
         {
             "id": "RESTART",
-            "value":"אתחול"
+            "value": "אתחול"
+        },
+        {
+            "id": "DETAILS",
+            "value": "פרטים"
         }
     ]
 };

@@ -123,8 +123,6 @@ export default function TimestampsPage() {
         const timestamp = formatDuration(item.id * 1000, true);
         const iconWidget = <ItemMenu setMetadata={setMetadata} item={item} />;
 
-        console.log("item", item, "mode", mode, "editedItem", editedItem);
-
         let nameWidget = <Row
             className={styles.row}
             fill={true}

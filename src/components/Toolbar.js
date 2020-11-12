@@ -77,7 +77,6 @@ export function useToolbarItems({ location }) {
 
 export default function Toolbar({ className, location, dividerBefore, dividerAfter, collapsable }) {
     const isDesktop = useDeviceType() === "desktop";
-    const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
     const sectionItems = useToolbarItems({ location });
     const toolbarItems = sectionItems.filter(item => {
@@ -95,8 +94,10 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
         return menu;
     });
 
-    return <div className={clsx(styles.toolbar, className)}>
-        {!!dividerBefore && !!(toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+    const toolbarVisible = !!toolbarItems.length;
+
+    return <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
+        {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
         {toolbarItems.map((item, idx) => {
             const className = useStyles(styles, {
                 selected: item.selected === item.id,
@@ -130,6 +131,6 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
             </Menu>
         </>
         }
-        {!!dividerAfter && !!(toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+        {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
     </div>
 }

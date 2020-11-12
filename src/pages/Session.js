@@ -5,15 +5,9 @@ import Image from "@widgets/Image";
 import { useSessions } from "@util/sessions";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import MovieIcon from '@material-ui/icons/Movie';
-import AudioIcon from "@icons/Audio";
-import { addPath } from "@util/pages";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
-import { resetPlayer } from "@pages/Player";
 import { useDateFormatter } from "@util/locale";
 import Group from "@widgets/Group";
 import { formatDuration } from "@util/string";
-
-registerToolbar("Session");
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
@@ -42,34 +36,6 @@ export default function SessionPage({ group, year, date, name }) {
             </div>
         </div>);
     };
-
-    const gotoPlayer = (suffix) => {
-        resetPlayer();
-        addPath(`player?suffix=${suffix}`);
-    }
-
-    const items = [
-        session && session.audio && {
-            id: "audio",
-            name: translations.AUDIO,
-            icon: <AudioIcon />,
-            location: "footer",
-            divider: true,
-            label: true,
-            onClick: () => gotoPlayer(".m4a")
-        },
-        session && session.video && {
-            id: "video",
-            name: translations.VIDEO,
-            icon: <MovieIcon />,
-            location: "footer",
-            divider: true,
-            label: true,
-            onClick: () => gotoPlayer(".mp4")
-        }
-    ].filter(Boolean);
-
-    useToolbar({ id: "Session", items, depends: [translations, session] });
 
     const altIcon = session ? (session.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />) : null;
 

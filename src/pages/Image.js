@@ -4,7 +4,7 @@ import { useParentPath, useParentParams } from "@util/pages";
 import { readBinary } from "@util/binary";
 import Progress from "@widgets/Progress";
 import { useSync } from "@util/sync";
-import { PageSize } from "@components/Page";
+import { ContentSize } from "@components/Page/Content";
 import Download from "@widgets/Download";
 import { exportData, exportFile } from "@util/importExport";
 import { makePath } from "@util/path";
@@ -26,7 +26,7 @@ function useImagePath(imageName = "") {
 }
 
 export default function ImagePage({ name }) {
-    const size = useContext(PageSize);
+    const size = useContext(ContentSize);
     const [syncCounter] = useSync();
     const path = useImagePath(name);
     const busyRef = useRef(false);

@@ -928,6 +928,10 @@ export default {
         {
             "id": "RESTART",
             "value": "Reiniciar"
+        },
+        {
+            "id": "DETAILS",
+            "value": "Detalhes"
         }
     ]
 };

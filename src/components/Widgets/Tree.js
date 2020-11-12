@@ -1,6 +1,6 @@
 import { useMemo, useContext, useEffect, useState } from "react";
 import { FixedSizeTree as Tree } from 'react-vtree';
-import { PageSize } from "@components/Page";
+import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
@@ -143,7 +143,7 @@ export default function TreeWidget(props) {
     const { select } = store.useState();
     const translations = useTranslations();
     const statusBarIsActive = StatusBarStore.useState(s => s.active);
-    const size = useContext(PageSize);
+    const size = useContext(ContentSize);
     const [isEmpty, setEmpty] = useState(false);
     const search = useSearch(() => { });
     const boundTreeWalker = useMemo(() => {

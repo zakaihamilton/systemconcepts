@@ -4,7 +4,7 @@ import TableBody from "@material-ui/core/TableBody";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { PageSize } from "../Page";
+import { ContentSize } from "@components/Page/Content";
 import styles from "./Table.module.scss";
 import { useTranslations } from "@util/translations";
 import { importData, exportData } from "@util/importExport";
@@ -93,7 +93,7 @@ export default function TableWidget(props) {
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 10, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
-    const pageSize = useContext(PageSize);
+    const pageSize = useContext(ContentSize);
     const search = useSearch(() => {
         store.update(s => {
             s.offset = 0;

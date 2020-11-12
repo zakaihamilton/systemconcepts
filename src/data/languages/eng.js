@@ -927,7 +927,11 @@ export default {
         },
         {
             "id": "RESTART",
-            "value":"Restart"
+            "value": "Restart"
+        },
+        {
+            "id": "DETAILS",
+            "value": "Details"
         }
     ]
 };

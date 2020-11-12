@@ -1,7 +1,11 @@
 .toolbar {
     display: flex;
     align-items: center;
-    height: 100%;
+}
+
+.toolbar.visible {
+    height: 4em;
+    padding: 0.5em;
 }
 
 .divider {
