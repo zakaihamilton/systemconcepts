@@ -6,6 +6,7 @@ import { useSessions } from "@util/sessions";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@icons/Audio";
 import InfoIcon from '@material-ui/icons/Info';
+import ImageIcon from '@material-ui/icons/Image';
 
 export default function Tabs({ Container }) {
     const translations = useTranslations();
@@ -43,6 +44,11 @@ export default function Tabs({ Container }) {
             label: translations.VIDEO,
             icon: <MovieIcon />,
             value: basePath + "/" + encodeURIComponent("player?suffix=.mp4")
+        },
+        session.thumbnail && {
+            label: translations.THUMBNAIL,
+            icon: <ImageIcon />,
+            value: basePath + "/" + encodeURIComponent("image?label=THUMBNAIL")
         }
     ].filter(Boolean).map(item => {
         const label = <div className={tabStyles.label}>
