@@ -105,7 +105,7 @@ export default function ImagePage({ name }) {
     const style = { height: size.height - 22, width: size.width - 22 };
 
     return <div className={styles.root}>
-        <Download visible={!loading && !imageLoading} onClick={downloadImage} />
+        <Download visible={!loading && !imageLoading && !error} onClick={downloadImage} />
         {!loading && !error && <img className={styles.img} onError={onError} onLoad={onLoad} style={style} src={src} />}
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
         {!!error && <Message Icon={ErrorIcon} label={translations.CANNOT_LOAD_IMAGE} />}

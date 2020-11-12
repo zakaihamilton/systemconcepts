@@ -14,6 +14,7 @@ export default function TabsWidget({ state, children, ...props }) {
         centered={true}
         indicatorColor="primary"
         textColor="primary"
+        variant="fullWidth"
         onChange={handleChange}
         {...props}
     >

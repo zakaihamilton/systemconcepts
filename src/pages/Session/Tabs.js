@@ -1,5 +1,3 @@
-import Tab from "@material-ui/core/Tab";
-import tabStyles from "@widgets/Tabs.module.scss";
 import { useTranslations } from "@util/translations";
 import { usePathItems, useParentParams, toPath } from "@util/pages";
 import { useSessions } from "@util/sessions";
@@ -8,6 +6,7 @@ import AudioIcon from "@icons/Audio";
 import InfoIcon from '@material-ui/icons/Info';
 import ImageIcon from '@material-ui/icons/Image';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import Tab from "@components/Widgets/Tabs/Tab";
 
 export default function Tabs({ Container }) {
     const translations = useTranslations();
@@ -57,11 +56,7 @@ export default function Tabs({ Container }) {
             value: basePath + "/" + encodeURIComponent("timestamps")
         }
     ].filter(Boolean).map(item => {
-        const label = <div className={tabStyles.label}>
-            {item.icon}
-            <div>{item.label}</div>
-        </div >;
-        return <Tab key={item.value} label={label} value={item.value} />;
+        return <Tab key={item.label} {...item} />;
     });
 
     return <Container>

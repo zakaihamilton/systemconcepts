@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTimeout } from "@util/timers";
 
 export function getEmValueFromElement(element) {
     if (element.parentNode) {
@@ -50,6 +51,7 @@ export function useSize(ref, depends = [], useParent = true) {
         const element = useParent ? ref.current.parentElement : ref.current;
         const { clientWidth, clientHeight } = element;
         const emPixels = getEmValueFromElement(element);
+        console.log("width", clientWidth, "height", clientHeight, "element", element);
         setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
     };
 

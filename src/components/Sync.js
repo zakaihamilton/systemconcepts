@@ -9,7 +9,7 @@ import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 import { formatDuration } from "@util/string";
 import Badge from '@material-ui/core/Badge';
 
-registerToolbar("Sync");
+registerToolbar("Sync", 1);
 
 export const SyncContext = createContext();
 

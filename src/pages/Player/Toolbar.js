@@ -6,11 +6,8 @@ import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import SpeedIcon from '@material-ui/icons/Speed';
 import { useState, useEffect } from "react";
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import { addPath } from "@util/pages";
 import { useDeviceType } from "@util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
-import StopIcon from '@material-ui/icons/Stop';
 
 registerToolbar("PlayerToolbar");
 
@@ -69,17 +66,6 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
     const volume = playerRef.volume;
 
     const menuItems = [
-        {
-            id: "stop",
-            name: translations.STOP,
-            icon: <StopIcon />,
-            location: "footer",
-            onClick: () => {
-                playerRef.pause();
-                playerRef.currentTime = 0;
-            },
-            divider: true
-        },
         {
             id: "speed",
             name: translations.SPEED,

@@ -12,15 +12,6 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-}
-
-.preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    height: 18em;
-    width: 18em;
     margin: 1em;
 }
 
@@ -54,13 +45,4 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.audioIcon {
-    font-size: 3em;
-}
-
-.preview.audio {
-    border-radius: 0.5em;
-    box-shadow: 0 10px 16px 0 var(--box-shadow-color) !important;
 }

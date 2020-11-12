@@ -1,7 +1,6 @@
 import { useTranslations } from "@util/translations";
 import Tooltip from '@material-ui/core/Tooltip';
 import styles from "./Session.module.scss";
-import Image from "@widgets/Image";
 import { useSessions } from "@util/sessions";
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import MovieIcon from '@material-ui/icons/Movie';
@@ -41,9 +40,6 @@ export default function SessionPage({ group, year, date, name }) {
 
     return <div className={styles.root}>
         <div className={styles.info}>
-            <div className={styles.preview}>
-                <Image path={session && session.thumbnail} loading={!session} width="18em" height="18em" alt={altIcon} />
-            </div>
             <div className={styles.metadata}>
                 {metadataSet("NAME", name)}
                 {metadataSet("GROUP", <Group name={group} color={session && session.color} />, group && group[0].toUpperCase() + group.slice(1))}

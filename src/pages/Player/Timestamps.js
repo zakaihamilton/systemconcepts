@@ -33,13 +33,12 @@ export default function TimestampsPage() {
         return s.player;
     });
     const translations = useTranslations();
-    const { suffix } = useParentParams();
-    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams(1);
-    let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
+    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams(0);
+    let components = [prefix, group, year, date + " " + name].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
-    const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
+    const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
     const { item: editedItem, mode, select, viewMode } = TimestampsStore.useState();
     const [metadata, loading, , setMetadata] = useFile(!!name && metadataPath, [name], data => {
         return data ? JSON.parse(data) : {};

@@ -134,7 +134,7 @@ export function useSessions(depends = [], filterSessions = true) {
         if (groupMetadata && groupMetadata.length && !loading) {
             updateSessions(groupMetadata);
         }
-    }, [groupMetadata, loading]);
+    }, [loading]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {

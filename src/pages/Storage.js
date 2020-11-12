@@ -22,6 +22,7 @@ import { useSync } from "@util/sync";
 import { isBinaryFile, isImageFile } from "@util/path";
 import styles from "./Storage.module.scss";
 import { useLocalStorage } from "@util/store";
+import { useDeviceType } from "@util/styles";
 
 export const StorageStoreDefaults = {
     mode: "",
@@ -45,6 +46,7 @@ export const StorageStoreDefaults = {
 export const StorageStore = new Store({ viewMode: "list", ...StorageStoreDefaults });
 
 export default function Storage({ path = "" }) {
+    const isPhone = useDeviceType() === "phone";
     const [syncCounter] = useSync();
     const translations = useTranslations();
     const { item: editedItem, viewMode, mode, select, counter, editing } = StorageStore.useState();
@@ -74,7 +76,7 @@ export default function Storage({ path = "" }) {
             sortable: "name",
             padding: false
         },
-        {
+        !isPhone && {
             id: "sizeWidget",
             title: translations.SIZE,
             sortable: "size",
@@ -84,7 +86,7 @@ export default function Storage({ path = "" }) {
                 }
             }
         },
-        {
+        !isPhone && {
             id: "dateWidget",
             title: translations.DATE,
             sortable: "mtimeMs",
@@ -94,7 +96,7 @@ export default function Storage({ path = "" }) {
                 }
             }
         }
-    ];
+    ].filter(Boolean);
 
     const mapper = item => {
         const id = item.id || item.name;

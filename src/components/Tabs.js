@@ -1,6 +1,5 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import TabsWidget from "@widgets/Tabs";
-import clsx from "clsx";
 import styles from "./Tabs.module.scss";
 import { useActivePages } from "@util/pages";
 import { MainStore } from "@components/Main";
