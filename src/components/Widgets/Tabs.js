@@ -9,7 +9,11 @@ export default function TabsWidget({ state, children, ...props }) {
         setValue(newValue);
     };
 
-    return <Tabs value={value}
+    const foundValue = children && children.find(item => {
+        return (item.props.value === value);
+    });
+
+    return <Tabs value={foundValue ? value : false}
         classes={{ root: styles.root }}
         centered={true}
         indicatorColor="primary"

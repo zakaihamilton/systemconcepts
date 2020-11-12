@@ -183,7 +183,7 @@ export default function Content({ path = "" }) {
         return JSON.stringify(record, null, 4);
     };
 
-    const size = useSize(ref, [showSideBar], false);
+    const size = useSize(ref, [showSideBar]);
 
     const gotoEditor = () => {
         addPath("editor/" + toPath(record.id) + "/" + language + ".txt");
