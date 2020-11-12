@@ -928,6 +928,10 @@ export default {
         {
             "id": "DETAILS",
             "value": "פרטים"
+        },
+        {
+            "id": "CANNOT_LOAD_IMAGE",
+            "value": "תמונה לא נטענת"
         }
     ]
 };

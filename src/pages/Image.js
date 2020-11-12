@@ -9,6 +9,9 @@ import Download from "@widgets/Download";
 import { exportData, exportFile } from "@util/importExport";
 import { makePath } from "@util/path";
 import { useFetchJSON } from "@util/fetch";
+import Message from "@widgets/Message";
+import { useTranslations } from "@util/translations";
+import ErrorIcon from '@material-ui/icons/Error';
 
 function useImagePath(imageName = "") {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
@@ -26,6 +29,7 @@ function useImagePath(imageName = "") {
 }
 
 export default function ImagePage({ name }) {
+    const translations = useTranslations();
     const size = useContext(ContentSize);
     const [syncCounter] = useSync();
     const path = useImagePath(name);
@@ -104,5 +108,6 @@ export default function ImagePage({ name }) {
         <Download visible={!loading && !imageLoading} onClick={downloadImage} />
         {!loading && !error && <img className={styles.img} onError={onError} onLoad={onLoad} style={style} src={src} />}
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
+        {!!error && <Message Icon={ErrorIcon} label={translations.CANNOT_LOAD_IMAGE} />}
     </div>;
 }

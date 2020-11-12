@@ -932,6 +932,10 @@ export default {
         {
             "id": "DETAILS",
             "value": "Detalhes"
+        },
+        {
+            "id": "CANNOT_LOAD_IMAGE",
+            "value": "Não pode carregar imagem"
         }
     ]
 };

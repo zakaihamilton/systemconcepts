@@ -7,6 +7,7 @@ import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@icons/Audio";
 import InfoIcon from '@material-ui/icons/Info';
 import ImageIcon from '@material-ui/icons/Image';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 export default function Tabs({ Container }) {
     const translations = useTranslations();
@@ -49,6 +50,11 @@ export default function Tabs({ Container }) {
             label: translations.THUMBNAIL,
             icon: <ImageIcon />,
             value: basePath + "/" + encodeURIComponent("image?label=THUMBNAIL")
+        },
+        {
+            label: translations.TIMESTAMPS,
+            icon: <AccessTimeIcon />,
+            value: basePath + "/" + encodeURIComponent("timestamps")
         }
     ].filter(Boolean).map(item => {
         const label = <div className={tabStyles.label}>

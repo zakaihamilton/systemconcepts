@@ -119,13 +119,6 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             icon: <FullscreenIcon />,
             onClick: () => playerRef.requestFullscreen(),
             location: "footer"
-        },
-        {
-            id: "timestamps",
-            name: translations.TIMESTAMPS,
-            icon: <AccessTimeIcon />,
-            location: "header",
-            onClick: () => addPath("timestamps")
         }
     ].filter(Boolean);
 
