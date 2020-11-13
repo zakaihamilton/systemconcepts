@@ -83,6 +83,7 @@ export default function TableWidget(props) {
         error,
         store,
         size,
+        showSort = true,
         viewModes = { table: null },
         ...otherProps
     } = props;
@@ -213,7 +214,7 @@ export default function TableWidget(props) {
             onClick: refresh,
             location: "advanced"
         },
-        viewMode !== "table" && !!sortItems.length && {
+        viewMode !== "table" && !!sortItems.length && showSort && {
             id: "sort",
             location: "header",
             name: translations.SORT,

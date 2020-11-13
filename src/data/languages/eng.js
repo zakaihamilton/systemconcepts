@@ -936,6 +936,10 @@ export default {
         {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Cannot load image"
+        },
+        {
+            "id": "VALUE",
+            "value": "Value"
         }
     ]
 };

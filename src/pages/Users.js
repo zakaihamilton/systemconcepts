@@ -150,29 +150,27 @@ export default function Users() {
         });
     };
 
-    return <>
-        <Table
-            name="users"
-            store={UsersStore}
-            onImport={onImport}
-            columns={columns}
-            data={data}
-            refresh={() => {
-                UsersStore.update(s => {
-                    s.counter++;
-                });
-            }}
-            viewModes={{
-                list: {
-                    className: isPhone ? styles.listPhoneItem : styles.listItem
-                },
-                table: null
-            }}
-            mapper={mapper}
-            filter={filter}
-            statusBar={statusBar}
-            loading={loading || inProgress}
-            depends={[mode, select, translations, viewMode, roleFilter]}
-        />
-    </>;
+    return <Table
+        name="users"
+        store={UsersStore}
+        onImport={onImport}
+        columns={columns}
+        data={data}
+        refresh={() => {
+            UsersStore.update(s => {
+                s.counter++;
+            });
+        }}
+        viewModes={{
+            list: {
+                className: isPhone ? styles.listPhoneItem : styles.listItem
+            },
+            table: null
+        }}
+        mapper={mapper}
+        filter={filter}
+        statusBar={statusBar}
+        loading={loading || inProgress}
+        depends={[mode, select, translations, viewMode, roleFilter]}
+    />;
 }

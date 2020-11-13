@@ -932,6 +932,10 @@ export default {
         {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "תמונה לא נטענת"
+        },
+        {
+            "id": "VALUE",
+            "value": "ערך"
         }
     ]
 };
