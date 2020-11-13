@@ -61,19 +61,19 @@ export default function Groups() {
             title: translations.NAME,
             sortable: "name"
         },
-        {
-            id: "colorWidget",
-            title: translations.COLOR,
-            sortable: "color",
+        withProgress && {
+            id: "progress",
+            title: translations.PROGRESS,
             columnProps: {
                 style: {
                     width: "6em"
                 }
             }
         },
-        withProgress && {
-            id: "progress",
-            title: translations.PROGRESS,
+        {
+            id: "colorWidget",
+            title: translations.COLOR,
+            sortable: "color",
             columnProps: {
                 style: {
                     width: "6em"

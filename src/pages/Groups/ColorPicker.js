@@ -19,7 +19,7 @@ export default function ColorPicker({ color, onChangeComplete }) {
         </div>
         { isVisible && <div className={styles.popover}>
             <div className={styles.cover} onClick={handleClose} />
-            <SwatchesPicker color={color} onChangeComplete={onChangeComplete} />
+            <SwatchesPicker className={styles.picker} color={color} onChangeComplete={onChangeComplete} />
         </div>}
     </>);
 }
