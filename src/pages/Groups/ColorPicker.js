@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { SwatchesPicker } from 'react-color'
 import styles from "./ColorPicker.module.scss";
+import clsx from "clsx";
 
-export default function ColorPicker({ color, onChangeComplete }) {
+export default function ColorPicker({ color, pickerClassName, onChangeComplete }) {
     const [isVisible, show] = useState(false);
 
     const handleClick = () => {
@@ -19,7 +20,7 @@ export default function ColorPicker({ color, onChangeComplete }) {
         </div>
         { isVisible && <div className={styles.popover}>
             <div className={styles.cover} onClick={handleClose} />
-            <SwatchesPicker className={styles.picker} color={color} onChangeComplete={onChangeComplete} />
+            <SwatchesPicker className={clsx(styles.picker, pickerClassName)} color={color} onChangeComplete={onChangeComplete} />
         </div>}
     </>);
 }

@@ -106,7 +106,7 @@ export default function Groups() {
             iconWidget,
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} />,
             progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? statusItem.progress : undefined} />,
-            colorWidget: <ColorPicker key={item.name} color={item.color} onChangeComplete={changeColor} />
+            colorWidget: <ColorPicker pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
         };
     };
 
