@@ -7,7 +7,7 @@ import ItemMenu from "./Timestamps/ItemMenu";
 import { useTranslations } from "@util/translations";
 import { makePath, fileTitle, fileFolder } from "@util/path";
 import { useFile } from "@util/storage";
-import { useParentParams, goBackPage } from "@util/pages";
+import { useParentParams } from "@util/pages";
 import { formatDuration } from "@util/string";
 import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
@@ -73,7 +73,6 @@ export default function TimestampsPage() {
         if (player) {
             player.currentTime = id;
         }
-        goBackPage();
     }, [select]);
 
     const renameItem = useCallback(item => {
