@@ -64,11 +64,21 @@ export default function Groups() {
         {
             id: "colorWidget",
             title: translations.COLOR,
-            sortable: "color"
+            sortable: "color",
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
         },
         withProgress && {
             id: "progress",
-            title: translations.PROGRESS
+            title: translations.PROGRESS,
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
         }
     ];
 
