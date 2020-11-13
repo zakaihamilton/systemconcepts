@@ -940,6 +940,10 @@ export default {
         {
             "id": "VALUE",
             "value": "Value"
+        },
+        {
+            "id": "FULL_NAME",
+            "value": "Full Name"
         }
     ]
 };

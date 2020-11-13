@@ -936,6 +936,10 @@ export default {
         {
             "id": "VALUE",
             "value": "ערך"
+        },
+        {
+            "id": "FULL_NAME",
+            "value": "שם מלא"
         }
     ]
 };

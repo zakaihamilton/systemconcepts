@@ -58,6 +58,11 @@ export default function SessionPage({ group, year, date, name }) {
             name: translations.DURATION,
             value: session && session.duration,
             widget: session && session.duration ? formatDuration(session.duration * 1000, true) : translations.UNKNOWN
+        },
+        {
+            name: translations.FULL_NAME,
+            value: date + " " + name,
+            widget: date + " " + name
         }
     ];
 
