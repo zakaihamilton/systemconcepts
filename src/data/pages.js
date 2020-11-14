@@ -87,6 +87,7 @@ import { getTagSection } from "@pages/Tag/Section";
 
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 const Librarian = dynamic(() => import("@pages/Librarian"), { loading: () => <PageLoad /> });
+import LibrarianTabs from "@pages/Librarian/Tabs";
 
 import DescriptionIcon from '@material-ui/icons/Description';
 const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
@@ -276,9 +277,7 @@ export default [
         id: "tags",
         name: "TAGS",
         Icon: LocalOfferIcon,
-        Component: Tags,
-        category: "tools",
-        sidebar: true
+        Component: Tags
     },
     {
         id: "tag",
@@ -293,7 +292,8 @@ export default [
         Icon: LibraryBooksIcon,
         Component: Librarian,
         category: "tools",
-        sidebar: true
+        sidebar: true,
+        tabs: LibrarianTabs
     },
     {
         id: "content",
