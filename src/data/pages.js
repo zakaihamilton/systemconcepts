@@ -65,7 +65,7 @@ import { getPlayerSection } from "@pages/Player/Section";
 
 const Session = dynamic(() => import("@pages/Session"), { loading: () => <PageLoad /> });
 import { getSessionSection } from "@pages/Session/Section";
-import SessionTabs from "@pages/Session/Tabs";
+const SessionTabs = dynamic(() => import("@pages/Session/Tabs"));
 
 import EventIcon from '@material-ui/icons/Event';
 const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
@@ -87,7 +87,7 @@ import { getTagSection } from "@pages/Tag/Section";
 
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 const Librarian = dynamic(() => import("@pages/Librarian"), { loading: () => <PageLoad /> });
-import LibrarianTabs from "@pages/Librarian/Tabs";
+const LibrarianTabs = dynamic(() => import("@pages/Librarian/Tabs"));
 
 import DescriptionIcon from '@material-ui/icons/Description';
 const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });

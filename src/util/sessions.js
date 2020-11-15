@@ -12,7 +12,7 @@ import { useSync } from "@util/sync";
 registerToolbar("Sessions");
 
 export const SessionsStore = new Store({
-    sessions: [],
+    sessions: null,
     groups: [],
     groupFilter: [],
     busy: false,
@@ -182,8 +182,8 @@ export function useSessions(depends = [], filterSessions = true) {
 
     const items = filterSessions ? filtered : sessions;
 
-    const isLoading = busy || loading || (syncing && !sessions.length);
-    const askForFullSync = !isLoading && !sessions.length;
+    const isLoading = busy || loading || (syncing && (!sessions || !sessions.length));
+    const askForFullSync = !isLoading && (!sessions || !sessions.length);
 
     return [items, isLoading, askForFullSync];
 }
