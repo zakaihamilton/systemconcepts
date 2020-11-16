@@ -41,11 +41,22 @@ export default function Settings() {
     });
     const darkModeState = [darkModeSelected, setDarkMode];
 
+    const navigate = id => {
+        addPath(id);
+    };
+
+    const target = item => {
+        return "#settings/" + item.target;
+    };
+
     const columns = [
         {
             id: "title",
             title: translations.NAME,
-            sortable: "name"
+            sortable: "name",
+            onSelectable: item => item.target,
+            onClick: item => item.target && navigate(item.target),
+            target
         },
         {
             id: "widget",
@@ -79,10 +90,6 @@ export default function Settings() {
         name: translations[item.name]
     }));
 
-    const navigate = id => {
-        addPath(id);
-    };
-
     const data = [
         {
             id: "language",
@@ -90,7 +97,7 @@ export default function Settings() {
             name: translations.LANGUAGE,
             value: states.language[0],
             widget: <Dynamic items={languageItems} state={states.language} />,
-            onClick: () => navigate("languages")
+            target: "languages"
         },
         {
             id: "darkMode",
@@ -105,7 +112,7 @@ export default function Settings() {
             name: translations.FONT_SIZE,
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
-            onClick: () => navigate("fontSizes")
+            target: "fontSizes"
         },
         {
             id: "reset",
@@ -125,7 +132,7 @@ export default function Settings() {
 
     const mapper = item => {
         const { icon, onClick, ...props } = item;
-        props.title = <Label key={item.id} icon={icon} name={item.name} onClick={onClick} />;
+        props.title = <Label key={item.id} icon={icon} name={item.name} />;
         return props;
     };
 

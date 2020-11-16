@@ -45,13 +45,17 @@ export default function SideBar() {
         });
     };
 
-    const items = pages.filter(page => page.sidebar && !page.category);
+    const items = pages.filter(page => page.sidebar && !page.category).map(item => {
+        return { ...item, target: item.id };
+    });
     items.push({
         id: "bookmarks",
         name: translations.BOOKMARKS,
         icon: <BookmarkIcon />,
         items: [
-            ...pages.filter(page => page.sidebar && page.category === "bookmarks"),
+            ...pages.filter(page => page.sidebar && page.category === "bookmarks").map(item => {
+                return { ...item, target: item.id };
+            }),
             ...bookmarks],
         divider: true
     });

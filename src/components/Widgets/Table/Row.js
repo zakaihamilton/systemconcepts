@@ -3,14 +3,19 @@ import TableRow from "@material-ui/core/TableRow";
 import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
+import Link from '@material-ui/core/Link';
 
-export default function RowWidget({ className = "", viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
+export default function RowWidget({ className = "", viewMode, index, selected: selectedRow, rowHeight, columns, rowTarget, rowClick, item, style = {}, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, onClick, selected } = column;
+        const { id: columnId, dir, align, target, padding = true, viewModes = {}, onSelectable, onClick, selected } = column;
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const value = item[columnId];
         const isSelected = selected && selected(item);
+        const hrefHandler = target || rowTarget;
         return (<TableCell
+            component={Link}
+            underline="none"
+            href={hrefHandler && hrefHandler(item)}
             dir={dir}
             align={align}
             onClick={onClick ? () => onClick(item) : undefined}

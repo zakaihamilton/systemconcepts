@@ -41,11 +41,16 @@ export default function Diagrams() {
         addPath(item.id);
     };
 
+    const rowTarget = item => {
+        return "#" + item.id;
+    };
+
     return <>
         <Table
             name="diagrams"
             store={DiagramsStore}
             rowClick={rowClick}
+            rowTarget={rowTarget}
             columns={columns}
             mapper={mapper}
             data={data}

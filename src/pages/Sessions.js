@@ -33,8 +33,14 @@ export default function SessionsPage() {
     const [sessions, loading, askForFullSync] = useSessions();
     const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
+    const itemPath = item => {
+        return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`;
+    };
+    const target = item => {
+        return "#" + itemPath(item);
+    };
     const gotoItem = item => {
-        addPath(`session?group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`);
+        addPath(itemPath(item));
     };
 
     const columns = [
@@ -43,6 +49,7 @@ export default function SessionsPage() {
             onSelectable: () => true,
             title: translations.THUMBNAIL,
             onClick: gotoItem,
+            target,
             viewModes: {
                 "grid": {
                     className: styles.gridThumbnail
@@ -55,6 +62,7 @@ export default function SessionsPage() {
             sortable: "name",
             onSelectable: () => viewMode !== "grid",
             onClick: viewMode !== "grid" && gotoItem,
+            target: viewMode !== "grid" && target,
             viewModes: {
                 "list": null,
                 "table": null,

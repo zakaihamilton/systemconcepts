@@ -34,7 +34,9 @@ export default function QuickAccess({ closeDrawer, state }) {
         location.reload();
     };
 
-    const toolsItems = pages.filter(page => page.sidebar && page.category === "tools");
+    const toolsItems = pages.filter(page => page.sidebar && page.category === "tools").map(item => {
+        return { ...item, target: item.id };
+    });
 
     const quickAccessItems = [
         {

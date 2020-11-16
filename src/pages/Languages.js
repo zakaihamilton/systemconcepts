@@ -56,10 +56,15 @@ export default function Languages() {
         addPath("translations?language=" + item.id);
     };
 
+    const rowTarget = item => {
+        return "#settings/languages/translations?language=" + item.id;
+    };
+
     return <>
         <Table
             name="languages"
             rowClick={rowClick}
+            rowTarget={rowTarget}
             columns={columns}
             mapper={mapper}
             store={LanguagesStore}
