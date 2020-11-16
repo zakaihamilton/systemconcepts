@@ -164,7 +164,7 @@ export function useSyncFeature() {
                 }
             }
             catch (err) {
-                if (err === 401) {
+                if (err === 403) {
                     setError("ACCESS_DENIED");
                 }
                 else {
@@ -181,7 +181,7 @@ export function useSyncFeature() {
                 await syncLocal("personal", lastUpdated, currentTime);
             }
             catch (err) {
-                if (err === 401) {
+                if (err === 403) {
                     setError("ACCESS_DENIED");
                 }
                 else {
