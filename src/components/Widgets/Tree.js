@@ -225,7 +225,8 @@ export default function TreeWidget(props) {
                     console.error(err);
                 }
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         data && name && {
             id: "export",
@@ -241,21 +242,24 @@ export default function TreeWidget(props) {
                 }
                 exportData(body, name, "application/json");
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         refresh && {
             id: "refresh",
             name: translations.REFRESH,
             icon: <RefreshIcon />,
             onClick: refresh,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         source && {
             id: "editor",
             name: translations.EDITOR,
             icon: <InsertDriveFileIcon />,
             onClick: gotoSource,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         }
     ].filter(Boolean);
 

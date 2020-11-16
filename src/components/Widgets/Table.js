@@ -189,7 +189,8 @@ export default function TableWidget(props) {
                     console.error(err);
                 }
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         data && name && {
             id: "export",
@@ -205,14 +206,16 @@ export default function TableWidget(props) {
                 }
                 exportData(body, name, "application/json");
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         refresh && {
             id: "refresh",
             name: translations.REFRESH,
             icon: <RefreshIcon />,
             onClick: refresh,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         viewMode !== "table" && !!sortItems.length && showSort && {
             id: "sort",

@@ -18,7 +18,6 @@ export default function QuickAccess({ closeDrawer, state }) {
     const language = useLanguage();
     const translations = useTranslations();
     const pages = usePages();
-    const advancedToolbar = useToolbarItems({ location: "advanced" });
     const darkMode = useDarkMode(false);
 
     const toggleDarkMode = () => {
@@ -69,14 +68,7 @@ export default function QuickAccess({ closeDrawer, state }) {
             icon: <BuildIcon />,
             items: toolsItems
         },
-        ...pages.filter(page => page.sidebar && page.category === "quickaccess"),
-        advancedToolbar && advancedToolbar.length && {
-            id: "advanced",
-            name: translations.ADVANCED,
-            icon: <DeveloperModeIcon />,
-            items: [...advancedToolbar],
-            divider: true
-        }
+        ...pages.filter(page => page.sidebar && page.category === "quickaccess")
     ].filter(Boolean);
 
     return <>

@@ -50,7 +50,8 @@ export default function Sync({ children }) {
             icon: <SyncIcon />,
             onClick: fullSync,
             label: true,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         }
     ].filter(Boolean);
 
