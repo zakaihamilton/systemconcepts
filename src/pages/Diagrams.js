@@ -1,7 +1,7 @@
 import Table from "@widgets/Table";
 import data from "@data/diagrams";
 import { useTranslations } from "@util/translations";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { useLanguage } from "@util/language";
 import { Store } from "pullstate";
 
@@ -42,7 +42,7 @@ export default function Diagrams() {
     };
 
     const rowTarget = item => {
-        return "#" + item.id;
+        return "#diagrams/" + toPath(item.id);
     };
 
     return <>
