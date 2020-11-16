@@ -214,3 +214,18 @@ export function usePages(modeId) {
     });
     return pages;
 }
+
+export function useCurrentPage() {
+    const pages = useActivePages();
+    const activePage = pages[pages.length - 1];
+    const page = pages[pages.length - 1 - (activePage.useParentName || 0)];
+    return page;
+}
+
+export function useCurrentPageTitle() {
+    const page = useCurrentPage();
+    if (page && !page.root) {
+        return page.label || page.name;
+    }
+    return "";
+}

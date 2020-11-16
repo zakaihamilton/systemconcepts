@@ -28,7 +28,7 @@ import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
-import WarningIcon from '@material-ui/icons/Warning';
+import InfoIcon from '@material-ui/icons/Info';
 import ViewStreamIcon from '@material-ui/icons/ViewStream';
 import { StatusBarStore } from "@widgets/StatusBar";
 
@@ -320,7 +320,7 @@ export default function TableWidget(props) {
     const numItems = items && items.length;
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
-    const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
+    const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
 
     if (viewMode === "list") {
         const itemHeightInPixels = sizeToPixels(itemHeight);

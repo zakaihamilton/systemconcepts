@@ -7,7 +7,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import { importData, exportData } from "@util/importExport";
 import { useTranslations } from "@util/translations";
 import DataUsageIcon from '@material-ui/icons/DataUsage';
-import WarningIcon from '@material-ui/icons/Warning';
+import InfoIcon from '@material-ui/icons/Info';
 import Message from "@widgets/Message";
 import RefreshIcon from '@material-ui/icons/Refresh';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
@@ -190,7 +190,7 @@ export default function TreeWidget(props) {
     }
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
-    const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
+    const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
 
     itemSize = sizeToPixels(itemSize);
 
