@@ -24,9 +24,9 @@ export const GroupsStore = new Store({
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
-    const { viewMode, counter } = GroupsStore.useState();
+    const { counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
-    const { status, busy, start, updateSessions, updateGroup: syncGroup } = useUpdateSessions();
+    const { status, busy, start, updateSessions, updateGroup } = useUpdateSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -70,7 +70,7 @@ export default function Groups() {
                 }
             }
         },
-        {
+        !busy && {
             id: "colorWidget",
             title: translations.COLOR,
             sortable: "color",
@@ -99,7 +99,7 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "static" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
-        const iconWidget = <ItemMenu syncGroup={syncGroup} item={item} store={GroupsStore} />;
+        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} />;
 
         return {
             ...item,
@@ -122,11 +122,14 @@ export default function Groups() {
                 });
             }}
             viewModes={{
+                list: {
+                    className: withProgress && !busy ? styles.listItemWithProgress : styles.listItem
+                },
                 table: null
             }}
             mapper={mapper}
             loading={loading}
-            depends={[translations, status]}
+            depends={[translations, status, updateGroup]}
         />
     </>;
 }
