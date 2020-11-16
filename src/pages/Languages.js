@@ -4,7 +4,7 @@ import { useTranslations } from "@util/translations";
 import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionLToR';
 import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
 import Label from "@widgets/Label";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { Store } from "pullstate";
 
 export const LanguagesStore = new Store({
@@ -57,7 +57,7 @@ export default function Languages() {
     };
 
     const rowTarget = item => {
-        return "#settings/languages/translations?language=" + item.id;
+        return "#" + toPath("settings", "languages", "translations?language=" + item.id);
     };
 
     return <>

@@ -27,7 +27,12 @@ export function addPath(...path) {
 }
 
 export function setPath(...path) {
-    const hash = path.map(item => encodeURIComponent(item)).join("/");
+    let hash = path.map(item => {
+        if (item.startsWith("#")) {
+            item = item.substring(1);
+        }
+        return encodeURIComponent(item);
+    }).join("/");
     MainStore.update(s => {
         s.hash = hash;
     });

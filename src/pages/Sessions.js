@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { useSessions } from "@util/sessions";
 import { Store } from "pullstate";
 import Group from "@widgets/Group";
@@ -37,7 +37,7 @@ export default function SessionsPage() {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`;
     };
     const target = item => {
-        return "#" + itemPath(item);
+        return "#" + toPath("sessions", itemPath(item));
     };
     const gotoItem = item => {
         addPath(itemPath(item));

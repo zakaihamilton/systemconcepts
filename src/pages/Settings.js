@@ -13,7 +13,7 @@ import { useCallback } from "react";
 import Dynamic from "@widgets/Dynamic";
 import { useDeviceType } from "@util/styles";
 import Button from "@material-ui/core/Button";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { Store } from "pullstate";
 import BuildIcon from '@material-ui/icons/Build';
 import useDarkMode from 'use-dark-mode';
@@ -46,7 +46,7 @@ export default function Settings() {
     };
 
     const target = item => {
-        return "#settings/" + item.target;
+        return "#" + toPath("settings", item.target);
     };
 
     const columns = [
