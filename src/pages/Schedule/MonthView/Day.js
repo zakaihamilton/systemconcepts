@@ -4,10 +4,9 @@ import styles from "./Day.module.scss";
 import { isDateToday, isDateMonth, getDateString } from "@util/date";
 import Avatar from '@material-ui/core/Avatar';
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
-import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import Menu from "@widgets/Menu";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { useDeviceType } from "@util/styles";
 import HoverButton from "@widgets/HoverButton";
 
@@ -25,13 +24,15 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
     const sessionItems = sessions.filter(session => session.date === sessionDate);
     const items = sessionItems.filter(item => item.audio || item.video).map(item => {
         const groupName = item.group[0].toUpperCase() + item.group.slice(1);
+        const path = `session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`;
         return {
             id: item.name,
             name: item.name,
             backgroundColor: item.color,
             icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
             description: groupName,
-            onClick: () => addPath(`session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`)
+            target: "#schedule/" + toPath(path),
+            onClick: () => addPath(path)
         };
     });
     return <div className={styles.root} style={style}>

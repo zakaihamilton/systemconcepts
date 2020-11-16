@@ -6,7 +6,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import styles from "./Menu.module.scss";
-import { useTimeout } from "@util/timers";
+import Link from '@material-ui/core/Link';
 
 const StyledMenu = withStyles({
     paper: {
@@ -46,7 +46,7 @@ const MenuWidget = forwardRef(function MenuComponent({ hover, items, children, o
 
     const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
-        const { divider, name, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
+        const { divider, name, target, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
         const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
         const selectedArray = Array.isArray(selectedItem);
         const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
@@ -64,7 +64,7 @@ const MenuWidget = forwardRef(function MenuComponent({ hover, items, children, o
         const style = { backgroundColor };
         return [
             <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClick}>
-                <MenuItem selected={isSelected} {...props}>
+                <MenuItem color="initial" component={Link} underline="none" href={target} selected={isSelected} {...props}>
                     <div key={id + "_background"} className={styles.background} style={style} />
                     <ListItemIcon>
                         {icon}

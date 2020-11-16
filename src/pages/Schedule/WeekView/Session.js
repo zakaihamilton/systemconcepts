@@ -1,22 +1,25 @@
 import styles from "./Session.module.scss";
-import Tooltip from '@material-ui/core/Tooltip';
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
+import Link from '@material-ui/core/Link';
 
 export default function Session({ group, year, date, name, color }) {
     const isPhone = useDeviceType() === "phone";
     const groupName = group[0].toUpperCase() + group.slice(1);
+    const path = `session?group=${group}&year=${year}&date=${date}&name=${name}`;
 
     const onClick = () => {
-        addPath(`session?group=${group}&year=${year}&date=${date}&name=${name}`);
+        addPath(path);
     };
+
+    const href = "#schedule/" + toPath(path);
 
     const style = {
         backgroundColor: color
     };
 
-    return <button className={clsx(styles.root, isPhone && styles.mobile)} onClick={onClick}>
+    return <Link underline="none" color="initial" href={href} className={clsx(styles.root, isPhone && styles.mobile)} onClick={onClick}>
         <div className={styles.background} style={style} />
         <div className={styles.group} dir="auto">
             {groupName}
@@ -27,5 +30,5 @@ export default function Session({ group, year, date, name, color }) {
             </div>
         </div>
         <div className={styles.backgroundBorder} style={style} />
-    </button>;
+    </Link>;
 }
