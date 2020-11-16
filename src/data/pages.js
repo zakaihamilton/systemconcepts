@@ -174,7 +174,8 @@ export default [
         Icon: ImageIcon,
         Component: Image,
         section: getImageSection,
-        showTooltip: true
+        showTooltip: true,
+        useParentName: 1
     },
     {
         id: "account",
@@ -271,7 +272,7 @@ export default [
         name: "TIMESTAMPS",
         Icon: AccessTimeIcon,
         Component: Timestamps,
-        useParentName: 2
+        useParentName: 1
     },
     {
         id: "tags",
