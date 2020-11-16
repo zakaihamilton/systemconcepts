@@ -153,7 +153,7 @@ export function useSyncFeature() {
                 setDuration(parseInt(duration / 1000) * 1000);
             }
         };
-        let updateCounter = false;
+        let updateCounter = 0;
         if (isSignedIn) {
             try {
                 const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
@@ -164,6 +164,7 @@ export function useSyncFeature() {
                 }
             }
             catch (err) {
+                updateCounter--;
                 if (err === 403) {
                     setError("ACCESS_DENIED");
                 }
@@ -181,6 +182,7 @@ export function useSyncFeature() {
                 await syncLocal("personal", lastUpdated, currentTime);
             }
             catch (err) {
+                updateCounter--;
                 if (err === 403) {
                     setError("ACCESS_DENIED");
                 }
@@ -190,7 +192,7 @@ export function useSyncFeature() {
                 console.error(err);
             }
         }
-        if (updateCounter) {
+        if (updateCounter > 0) {
             SyncStore.update(s => {
                 s.lastUpdated = currentTime;
             });

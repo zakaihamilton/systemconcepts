@@ -12,8 +12,6 @@ export default function HeadComponent() {
         title += " - " + (page.label || page.name);
     }
 
-    console.log("page", page);
-
     return <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
