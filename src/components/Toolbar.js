@@ -12,6 +12,7 @@ import { Store } from "pullstate";
 import Label from "@widgets/Label";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
+import Link from '@material-ui/core/Link';
 
 export const ToolbarStore = new Store({
     sections: [],
@@ -100,6 +101,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
         {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
         {toolbarItems.map((item, idx) => {
             const className = useStyles(styles, {
+                item: true,
                 selected: item.selected === item.id,
                 active: item.active
             });
@@ -110,7 +112,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
                     <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
                         {!!item.label ?
                             (<Label icon={item.icon} name={item.name} noBorder={true} />) :
-                            (<IconButton className={className} disabled={item.disabled}>
+                            (<IconButton component={Link} underline="none" color="inherit" href={item.target} className={className} disabled={item.disabled}>
                                 <Tooltip arrow title={item.name}>
                                     {item.icon}
                                 </Tooltip>
