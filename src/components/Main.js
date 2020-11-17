@@ -66,20 +66,19 @@ export default function Main() {
     return <>
         <Head />
         <Theme>
-            <CssBaseline>
-                <div className={className}>
-                    <Title />
-                    <Sync>
-                        <Bookmarks />
-                        <SideBar />
-                        <div className={clsx(styles.main, isMobile && styles.mobile)}>
-                            <NoSsr>
-                                <Page />
-                            </NoSsr>
-                        </div>
-                    </Sync>
-                </div>
-            </CssBaseline>
+            <CssBaseline />
+            <div className={className}>
+                <Title />
+                <Sync>
+                    <Bookmarks />
+                    <SideBar />
+                    <div className={clsx(styles.main, isMobile && styles.mobile)}>
+                        <NoSsr>
+                            <Page />
+                        </NoSsr>
+                    </div>
+                </Sync>
+            </div>
         </Theme>
     </>;
 }

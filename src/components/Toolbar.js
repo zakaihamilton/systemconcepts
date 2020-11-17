@@ -95,7 +95,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
         return menu;
     });
 
-    const toolbarVisible = !!toolbarItems.length;
+    const toolbarVisible = !!toolbarItems.length || !!menuItems.length;
 
     return <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
         {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
