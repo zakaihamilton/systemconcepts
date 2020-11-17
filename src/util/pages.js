@@ -20,6 +20,10 @@ export function toPath(...path) {
 
 export function addPath(...path) {
     const hash = window.location.hash + "/" + path.map(item => encodeURIComponent(item)).join("/");
+    setHash(hash);
+}
+
+export function setHash(hash) {
     MainStore.update(s => {
         s.hash = hash;
     });
@@ -33,10 +37,7 @@ export function setPath(...path) {
         }
         return encodeURIComponent(item);
     }).join("/");
-    MainStore.update(s => {
-        s.hash = hash;
-    });
-    window.location.hash = hash;
+    setHash(hash);
 }
 
 export function replacePath(...path) {
@@ -46,10 +47,7 @@ export function replacePath(...path) {
     }
     hash = hash.split("/").filter(Boolean).slice(0, -1).join("/");
     hash += "/" + path.map(item => encodeURIComponent(item)).join("/");
-    MainStore.update(s => {
-        s.hash = hash;
-    });
-    window.location.hash = hash;
+    setHash(hash);
 }
 
 export function goBackPage() {
@@ -58,10 +56,7 @@ export function goBackPage() {
         hash = hash.substring(1);
     }
     hash = hash.split("/").filter(Boolean).slice(0, -1).join("/");
-    MainStore.update(s => {
-        s.hash = hash;
-    });
-    window.location.hash = hash;
+    setHash(hash);
 }
 
 export function urlToParentPath(url) {

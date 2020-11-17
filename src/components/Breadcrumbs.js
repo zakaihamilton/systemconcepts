@@ -13,7 +13,7 @@ import Toolbar from "@components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
 import NoSsr from '@material-ui/core/NoSsr';
-import { setPath } from "@util/pages";
+import { setHash } from "@util/pages";
 
 export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
     const { direction } = MainStore.useState();
@@ -29,7 +29,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
         deviceType === "desktop" && count >= 10;
     const title = !showLabel ? (label || name) : tooltip || label || name;
     const gotoItem = () => {
-        setPath(href);
+        setHash(href);
     };
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
