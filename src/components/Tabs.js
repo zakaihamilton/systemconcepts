@@ -17,9 +17,11 @@ export default function Tabs() {
     const page = activePages.reverse().find(page => page.tabs);
 
     const Container = useCallback(function Container({ children }) {
-        return <TabsWidget state={pageState}>
-            {children}
-        </TabsWidget>;
+        return <div className={styles.root}>
+            <TabsWidget state={pageState}>
+                {children}
+            </TabsWidget>
+        </div>;
     });
 
     if (!page) {
@@ -27,7 +29,5 @@ export default function Tabs() {
     }
     const Tabs = page.tabs;
 
-    return <div className={styles.root}>
-        <Tabs Container={Container} />
-    </div>;
+    return <Tabs Container={Container} />;
 }

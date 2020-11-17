@@ -93,6 +93,12 @@ import DescriptionIcon from '@material-ui/icons/Description';
 const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
 import { getContentSection } from "@pages/Content/Section";
 
+import StyleIcon from '@material-ui/icons/Style';
+const Types = dynamic(() => import("@pages/Types"), { loading: () => <PageLoad /> });
+
+const Type = dynamic(() => import("@pages/Type"), { loading: () => <PageLoad /> });
+import { getTypeSection } from "@pages/Type/Section";
+
 import diagrams from "@data/diagrams";
 
 export default [
@@ -302,6 +308,19 @@ export default [
         section: getContentSection,
         Icon: DescriptionIcon,
         Component: Content
+    },
+    {
+        id: "type",
+        name: "TYPE",
+        section: getTypeSection,
+        Icon: StyleIcon,
+        Component: Type
+    },
+    {
+        id: "types",
+        name: "TYPES",
+        Icon: StyleIcon,
+        Component: Types
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

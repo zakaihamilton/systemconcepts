@@ -430,6 +430,10 @@ export default {
             "value": "Type"
         },
         {
+            "id": "TYPES",
+            "value": "Types"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Add Role"
         },
@@ -944,6 +948,10 @@ export default {
         {
             "id": "FULL_NAME",
             "value": "Full Name"
+        },
+        {
+            "id": "NEW_TYPE",
+            "value": "New Type"
         }
     ]
 };

@@ -426,6 +426,10 @@ export default {
             "value": "סוג"
         },
         {
+            "id": "TYPES",
+            "value": "סוגים"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "הוסף תפקיד"
         },
@@ -940,6 +944,10 @@ export default {
         {
             "id": "FULL_NAME",
             "value": "שם מלא"
+        },
+        {
+            "id": "NEW_TYPE",
+            "value": "סוג חדש"
         }
     ]
 };

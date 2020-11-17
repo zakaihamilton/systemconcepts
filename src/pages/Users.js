@@ -6,7 +6,7 @@ import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
 import ItemMenu from "./Users/ItemMenu";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import roles from "@data/roles";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
@@ -100,7 +100,7 @@ export default function Users() {
     ];
 
     const mapper = item => {
-        let { firstName, lastName } = item;
+        let { id, firstName, lastName } = item;
         const name = [firstName, lastName].filter(Boolean).join(" ");
         const iconWidget = <ItemMenu item={item} store={UsersStore} />;
         const roleItem = roles.find(role => role.id === item.role);
@@ -112,10 +112,10 @@ export default function Users() {
                 <b>{firstName}</b>
                 <span>{lastName}</span>
             </div>;
-
+        const href = "#users/" + toPath("user/" + id + "?name=" + firstName + " " + lastName);
         return {
             ...item,
-            nameWidget: <Row onClick={userClick.bind(this, item)} icons={iconWidget}>{labelName}</Row>,
+            nameWidget: <Row href={href} onClick={userClick.bind(this, item)} icons={iconWidget}>{labelName}</Row>,
             roleWidget: roleItem && translations[roleItem.name],
             name
         };

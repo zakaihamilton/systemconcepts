@@ -430,6 +430,10 @@ export default {
             "value": "Tipo"
         },
         {
+            "id": "TYPES",
+            "value": "Tipos"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Adicionar função"
         },
@@ -944,6 +948,10 @@ export default {
         {
             "id": "FULL_NAME",
             "value": "Nome Completo"
+        },
+        {
+            "id": "NEW_TYPE",
+            "value": "Novo Tipo"
         }
     ]
 };
