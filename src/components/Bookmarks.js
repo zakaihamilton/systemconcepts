@@ -66,6 +66,8 @@ export default function Bookmarks() {
             name: bookmark ? translations.REMOVE_BOOKMARK : translations.ADD_BOOKMARK,
             icon: <BookmarkIcon />,
             active: bookmark,
+            location: "header",
+            menu: true,
             onClick: toogleBookmark
         }
     ].filter(Boolean);
