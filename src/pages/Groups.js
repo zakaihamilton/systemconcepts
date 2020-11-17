@@ -47,7 +47,9 @@ export default function Groups() {
             id: "sync_sessions",
             name,
             icon: <UpdateIcon className={className} />,
-            onClick: updateSessions
+            onClick: updateSessions,
+            location: "header",
+            menu: true
         }
     ];
 
