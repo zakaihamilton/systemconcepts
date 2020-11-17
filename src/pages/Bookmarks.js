@@ -84,7 +84,7 @@ export default function BookmarksPage() {
                 icons={iconWidget}>
                 {item.name}
             </Row>,
-            locationWidget: <Breadcrumbs hideRoot={true} navigateLast={true} items={breadcrumbPages.slice(0, -1)} />
+            locationWidget: <Breadcrumbs navigateLast={true} items={breadcrumbPages.slice(0, -1)} />
         };
     };
 
