@@ -48,7 +48,7 @@ export default function Tags() {
     }, []);
 
     const addTag = () => {
-        addPath("tag");
+        addPath("tag/");
     };
 
     const onImport = data => {
