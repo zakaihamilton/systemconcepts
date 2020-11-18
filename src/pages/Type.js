@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
@@ -8,11 +8,27 @@ import { useType } from "@util/types";
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import languages from "@data/languages";
 import { useLanguage } from "@util/language";
+import Table from "@widgets/Table";
+import { Store } from "pullstate";
+import Row from "@widgets/Row";
+import Select from '@components/Widgets/Select';
+import styles from "./Type.module.scss";
+
+export const TypeStoreDefaults = {
+    mode: "",
+    select: [],
+    counter: 1,
+    onDone: null,
+    offset: 0
+};
+
+export const TypeStore = new Store(TypeStoreDefaults);
 
 export default function Type({ path = "" }) {
+    const { select } = TypeStore.useState();
     const language = useLanguage();
     const translations = useTranslations();
-    const [record, loading, setRecord] = useType({ id: path });
+    const [record, loading, setRecord, types] = useType({ id: path });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
@@ -26,6 +42,9 @@ export default function Type({ path = "" }) {
         let error = "";
         if (!text) {
             error = translations.EMPTY_FIELD;
+        }
+        else if (!text.match(/^[a-z0-9]+$/i)) {
+            error = translations.BAD_ID;
         }
         return error;
     };
@@ -72,6 +91,50 @@ export default function Type({ path = "" }) {
     const languageItem = languages.find(item => item.id === language) || {};
     const languageName = languageItem.name;
 
+    const columns = [
+        {
+            id: "idWidget",
+            title: translations.ID,
+            sortable: "id"
+        },
+        {
+            id: "label",
+            title: translations.NAME,
+            sortable: true
+        }
+    ];
+
+    const typeClick = useCallback(item => {
+        const { id } = item;
+        TypeStore.update(s => {
+            const exists = s.select.find(item => item.id === id);
+            if (exists) {
+                s.select = s.select.filter(item => item.id !== id);
+            }
+            else {
+                s.select = [...select, item];
+            }
+        });
+    }, []);
+
+    const mapper = item => {
+        const label = item[language];
+        const iconWidget = <Select select={select} item={item} store={TypeStore} />;
+        return {
+            ...item,
+            label,
+            idWidget: <Row onClick={typeClick.bind(this, item)} icons={iconWidget}>{item.id}</Row>
+        };
+    };
+
+    const addType = () => {
+        addPath("type/");
+    };
+
+    const onImport = data => {
+        setData(data.types);
+    };
+
     return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>
         <FormGroup record={data} setRecord={setData}>
             <Input
@@ -85,5 +148,18 @@ export default function Type({ path = "" }) {
                 label={languageName}
             />
         </FormGroup>
+        <Table
+            name={data.id}
+            data={types}
+            loading={loading}
+            columns={columns}
+            mapper={mapper}
+            viewModes={{
+                list: {
+                    className: styles.listItem
+                }
+            }}
+            store={TypeStore}
+        />
     </Form>;
 }

@@ -17,6 +17,7 @@ import { addPath, toPath } from "@util/pages";
 import { Store } from "pullstate";
 import BuildIcon from '@material-ui/icons/Build';
 import useDarkMode from 'use-dark-mode';
+import Row from "@widgets/Row";
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -53,10 +54,7 @@ export default function Settings() {
         {
             id: "title",
             title: translations.NAME,
-            sortable: "name",
-            onSelectable: item => item.target,
-            onClick: item => item.target && navigate(item.target),
-            target
+            sortable: "name"
         },
         {
             id: "widget",
@@ -131,8 +129,12 @@ export default function Settings() {
     ];
 
     const mapper = item => {
-        const { icon, onClick, ...props } = item;
-        props.title = <Label key={item.id} icon={icon} name={item.name} />;
+        const { icon, name, ...props } = item;
+        const href = item.target && target(item);
+        const onClick = () => navigate(item.target);
+        props.title = <Row onClick={item.target ? onClick : undefined} href={href} key={item.id} icons={icon}>
+            {name}
+        </Row>;
         return props;
     };
 

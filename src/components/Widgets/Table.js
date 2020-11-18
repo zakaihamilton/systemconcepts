@@ -79,7 +79,6 @@ export default function TableWidget(props) {
         className,
         hideColumns,
         rowClick,
-        rowTarget,
         selectedRow,
         error,
         store,
@@ -337,7 +336,6 @@ export default function TableWidget(props) {
                 {...props}
                 columns={columns}
                 rowClick={rowClick}
-                rowTarget={rowTarget}
                 item={item}
                 index={index}
                 viewMode={viewMode}
@@ -395,7 +393,6 @@ export default function TableWidget(props) {
                 rowHeight={rowHeight}
                 columns={columns}
                 rowClick={rowClick}
-                rowTarget={rowTarget}
                 item={item}
                 viewMode={viewMode}
                 style={style}

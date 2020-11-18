@@ -26,5 +26,5 @@ export function useType({ id, counter }) {
             return data;
         });
     });
-    return [record, loading, setRecord];
+    return [record, loading, setRecord, data];
 }

@@ -50,7 +50,6 @@ export default function Diagrams() {
             name="diagrams"
             store={DiagramsStore}
             rowClick={rowClick}
-            rowTarget={rowTarget}
             columns={columns}
             mapper={mapper}
             data={data}

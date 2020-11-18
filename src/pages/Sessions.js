@@ -7,6 +7,7 @@ import { Store } from "pullstate";
 import Group from "@widgets/Group";
 import styles from "./Sessions.module.scss";
 import Label from "@widgets/Label";
+import Row from "@widgets/Row";
 import MovieIcon from '@material-ui/icons/Movie';
 import AudioIcon from "@icons/Audio";
 import Tooltip from '@material-ui/core/Tooltip';
@@ -46,10 +47,7 @@ export default function SessionsPage() {
     const columns = [
         {
             id: "thumbnailWidget",
-            onSelectable: () => true,
             title: translations.THUMBNAIL,
-            onClick: gotoItem,
-            target,
             viewModes: {
                 "grid": {
                     className: styles.gridThumbnail
@@ -60,9 +58,7 @@ export default function SessionsPage() {
             id: "nameWidget",
             title: translations.NAME,
             sortable: "name",
-            onSelectable: () => viewMode !== "grid",
-            onClick: viewMode !== "grid" && gotoItem,
-            target: viewMode !== "grid" && target,
+            padding: false,
             viewModes: {
                 "list": null,
                 "table": null,
@@ -152,18 +148,22 @@ export default function SessionsPage() {
             {item.video ? <MovieIcon /> : <AudioIcon />}
         </Tooltip>;
         const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
+        const nameContent = <Tooltip arrow title={item.name}>
+            <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
+                {item.name}
+            </div>
+        </Tooltip>;
+        const href = target(item);
+        let nameWidget = <Row href={href} onClick={gotoItem.bind(this, item)} icons={icon}>{nameContent}</Row>;
+        if (viewMode === "grid") {
+            nameWidget = <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />;
+        }
         return {
             ...item,
-            nameWidget: <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={
-                <Tooltip arrow title={item.name}>
-                    <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
-                        {item.name}
-                    </div>
-                </Tooltip>
-            } />,
+            nameWidget,
             group: item.group,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
-            thumbnailWidget: <Image clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
+            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(this, item)} clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
             durationWidget: item.duration ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN
         };
     };

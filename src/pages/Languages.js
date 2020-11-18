@@ -64,7 +64,6 @@ export default function Languages() {
         <Table
             name="languages"
             rowClick={rowClick}
-            rowTarget={rowTarget}
             columns={columns}
             mapper={mapper}
             store={LanguagesStore}

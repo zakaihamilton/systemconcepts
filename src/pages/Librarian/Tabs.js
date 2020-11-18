@@ -14,8 +14,6 @@ export default function Tabs({ Container }) {
     });
 
     const currentPage = items[items.length - 1];
-    console.log("currentPage", currentPage);
-
     const basePath = "#" + toPath(...items.slice(0, baseIndex + 1));
 
     const tabItems = [

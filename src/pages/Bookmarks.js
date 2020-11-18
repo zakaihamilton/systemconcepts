@@ -80,6 +80,7 @@ export default function BookmarksPage() {
             ...item,
             iconWidget,
             nameWidget: <Row
+                href={select ? undefined : item.id}
                 onClick={bookmarkClick.bind(this, item)}
                 icons={iconWidget}>
                 {item.name}
