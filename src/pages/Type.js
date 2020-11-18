@@ -138,10 +138,6 @@ export default function Type({ path = "" }) {
         addPath("type/");
     };
 
-    const onImport = data => {
-        setData(data.types);
-    };
-
     const size = useSize(ref, [showSideBar]);
 
     return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>

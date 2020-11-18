@@ -54,7 +54,7 @@ export function useWindowSize() {
 export function useSize(ref, depends = []) {
     const counter = useResize(depends);
     const emPixels = getEmValueFromElement(ref && ref.current);
-    const { width, height } = useDimensions({ ref });
+    const { width, height } = useDimensions({ ref: ref && ref.current && ref });
 
     if (!ref || typeof window === "undefined") {
         return { width: 0, height: 0, emPixels };
