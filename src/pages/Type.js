@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
@@ -13,6 +13,8 @@ import { Store } from "pullstate";
 import Row from "@widgets/Row";
 import Select from '@components/Widgets/Select';
 import styles from "./Type.module.scss";
+import { MainStore } from "@components/Main";
+import { useSize } from "@util/size";
 
 export const TypeStoreDefaults = {
     mode: "",
@@ -25,6 +27,7 @@ export const TypeStoreDefaults = {
 export const TypeStore = new Store(TypeStoreDefaults);
 
 export default function Type({ path = "" }) {
+    const { showSideBar } = MainStore.useState();
     const { select } = TypeStore.useState();
     const language = useLanguage();
     const translations = useTranslations();
@@ -33,6 +36,7 @@ export default function Type({ path = "" }) {
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);
     const [data, setData] = useState({});
+    const ref = useRef();
 
     useEffect(() => {
         setData(record || {});
@@ -106,10 +110,13 @@ export default function Type({ path = "" }) {
 
     const typeClick = useCallback(item => {
         const { id } = item;
+        console.log("id", id);
         TypeStore.update(s => {
-            const exists = s.select.find(item => item.id === id);
+            const select = s.select || [];
+            const exists = select.find(item => item.id === id);
+            console.log("exists", exists);
             if (exists) {
-                s.select = s.select.filter(item => item.id !== id);
+                s.select = select.filter(item => item.id !== id);
             }
             else {
                 s.select = [...select, item];
@@ -135,6 +142,8 @@ export default function Type({ path = "" }) {
         setData(data.types);
     };
 
+    const size = useSize(ref, [showSideBar]);
+
     return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>
         <FormGroup record={data} setRecord={setData}>
             <Input
@@ -148,18 +157,23 @@ export default function Type({ path = "" }) {
                 label={languageName}
             />
         </FormGroup>
-        <Table
-            name={data.id}
-            data={types}
-            loading={loading}
-            columns={columns}
-            mapper={mapper}
-            viewModes={{
-                list: {
-                    className: styles.listItem
-                }
-            }}
-            store={TypeStore}
-        />
+        <div ref={ref} className={styles.table}>
+            <Table
+                name={data.id}
+                data={types}
+                loading={loading}
+                columns={columns}
+                mapper={mapper}
+                size={size}
+                viewModes={{
+                    list: {
+                        className: styles.listItem
+                    },
+                    table: null
+                }}
+                depends={[select]}
+                store={TypeStore}
+            />
+        </div>
     </Form>;
 }
