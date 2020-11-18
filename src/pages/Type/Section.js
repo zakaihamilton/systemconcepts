@@ -1,5 +1,5 @@
-export function getTypeSection({ sectionIndex, name, translations }) {
+export function getTypeSection({ sectionIndex, path, translations }) {
     if (sectionIndex) {
-        return { name: name || translations.NEW_TYPE };
+        return { name: path || translations.NEW_TYPE };
     }
 };
