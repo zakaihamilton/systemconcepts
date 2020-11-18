@@ -49,7 +49,6 @@ export default function Sync({ children }) {
             name: translations.FULL_SYNC,
             icon: <SyncIcon />,
             onClick: fullSync,
-            label: true,
             location: "header",
             menu: "true"
         }
