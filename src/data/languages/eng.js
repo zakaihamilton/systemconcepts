@@ -952,6 +952,10 @@ export default {
         {
             "id": "NEW_TYPE",
             "value": "New Type"
+        },
+        {
+            "id": "PARENT_TYPES",
+            "value": "Parent Types"
         }
     ]
 };

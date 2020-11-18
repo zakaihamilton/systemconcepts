@@ -44,6 +44,11 @@ export default function Types() {
             id: "label",
             title: translations.NAME,
             sortable: true
+        },
+        {
+            id: "parents",
+            title: translations.PARENT_TYPES,
+            sortable: true
         }
     ];
 
@@ -67,10 +72,15 @@ export default function Types() {
     const mapper = item => {
         const label = item[language];
         const iconWidget = <ItemMenu item={item} store={TypesStore} />;
-        const href = "#librarian/types/" + toPath("type/" + item.id);
+        const href = !select && "#librarian/types/" + toPath("type/" + item.id);
+        const parents = item.parents && item.parents.map(id => {
+            const parent = data.find(item => item.id === id);
+            return parent[language];
+        }).join(", ");
         return {
             ...item,
             label,
+            parents,
             idWidget: <Row href={href} onClick={typeClick.bind(this, item)} icons={iconWidget}>{item.id}</Row>
         };
     };

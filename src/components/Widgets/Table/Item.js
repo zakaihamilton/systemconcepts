@@ -2,18 +2,14 @@ import styles from "./Item.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
 import Tooltip from '@material-ui/core/Tooltip';
-import Link from '@material-ui/core/Link';
 
 export default function ItemWidget({ className = "", viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, target, padding = true, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
+        const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
         const value = item[columnId];
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const isSelected = selected && selected(item);
-        return (<Link
-            color="inherit"
-            underline="none"
-            href={target && target(item)}
+        return (<div
             dir={dir}
             style={{ ...style, ...viewModeStyle }}
             onClick={onClick ? () => onClick(item) : undefined}
@@ -35,7 +31,7 @@ export default function ItemWidget({ className = "", viewMode, selected: selecte
                 <div className={styles.ellipsisText}>{value}</div>
             </Tooltip>}
             {!ellipsis && value}
-        </Link>);
+        </div>);
     });
     const onClick = event => {
         rowClick(event, item);

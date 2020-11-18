@@ -15,13 +15,15 @@ import Select from '@components/Widgets/Select';
 import styles from "./Type.module.scss";
 import { MainStore } from "@components/Main";
 import { useSize } from "@util/size";
+import Typography from '@material-ui/core/Typography';
 
 export const TypeStoreDefaults = {
     mode: "",
     select: [],
     counter: 1,
     onDone: null,
-    offset: 0
+    offset: 0,
+    viewMode: "list"
 };
 
 export const TypeStore = new Store(TypeStoreDefaults);
@@ -40,7 +42,17 @@ export default function Type({ path = "" }) {
 
     useEffect(() => {
         setData(record || {});
-    }, [record]);
+        TypeStore.update(s => {
+            s.select = types && types.filter(item => record.parents && record.parents.includes(item.id)) || [];
+        });
+    }, [record, types]);
+
+    useEffect(() => {
+        setData(data => {
+            const parents = select.filter(item => !data || item.id !== data.id).map(item => item.id);
+            return { ...data, parents };
+        });
+    }, [select, data && data.id]);
 
     const onValidateId = text => {
         let error = "";
@@ -97,24 +109,17 @@ export default function Type({ path = "" }) {
 
     const columns = [
         {
-            id: "idWidget",
-            title: translations.ID,
-            sortable: "id"
-        },
-        {
-            id: "label",
+            id: "widget",
             title: translations.NAME,
-            sortable: true
+            sortable: "name"
         }
     ];
 
     const typeClick = useCallback(item => {
         const { id } = item;
-        console.log("id", id);
         TypeStore.update(s => {
             const select = s.select || [];
             const exists = select.find(item => item.id === id);
-            console.log("exists", exists);
             if (exists) {
                 s.select = select.filter(item => item.id !== id);
             }
@@ -125,17 +130,16 @@ export default function Type({ path = "" }) {
     }, []);
 
     const mapper = item => {
-        const label = item[language];
+        const label = item[language] || item.id;
         const iconWidget = <Select select={select} item={item} store={TypeStore} />;
         return {
             ...item,
-            label,
-            idWidget: <Row onClick={typeClick.bind(this, item)} icons={iconWidget}>{item.id}</Row>
+            widget: <Row onClick={typeClick.bind(this, item)} icons={iconWidget}>{label}</Row>
         };
     };
 
-    const addType = () => {
-        addPath("type/");
+    const filter = item => {
+        return item.id !== data.id;
     };
 
     const size = useSize(ref, [showSideBar]);
@@ -153,10 +157,14 @@ export default function Type({ path = "" }) {
                 label={languageName}
             />
         </FormGroup>
+        <Typography>
+            {translations.PARENT_TYPES}
+        </Typography>
         <div ref={ref} className={styles.table}>
             <Table
                 name={data.id}
                 data={types}
+                filter={filter}
                 loading={loading}
                 columns={columns}
                 mapper={mapper}
@@ -164,10 +172,9 @@ export default function Type({ path = "" }) {
                 viewModes={{
                     list: {
                         className: styles.listItem
-                    },
-                    table: null
+                    }
                 }}
-                depends={[select]}
+                depends={[select, data.id]}
                 store={TypeStore}
             />
         </div>

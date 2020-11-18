@@ -952,6 +952,10 @@ export default {
         {
             "id": "NEW_TYPE",
             "value": "Novo Tipo"
+        },
+        {
+            "id": "PARENT_TYPES",
+            "value": "Tipos de pais"
         }
     ]
 };

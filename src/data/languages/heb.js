@@ -948,6 +948,10 @@ export default {
         {
             "id": "NEW_TYPE",
             "value": "סוג חדש"
+        },
+        {
+            "id": "PARENT_TYPES",
+            "value": "סוגי הורים"
         }
     ]
 };

@@ -9,7 +9,7 @@ export default function RowWidget({ className, href, style, border, fill = true,
     const backgroundStyle = { [paddingDirection]: (basePadding + iconPadding) + "px" };
     const contentStyle = { [paddingDirection]: basePadding + "px" };
     return <div className={clsx(styles.root, fill && styles.fill, className)} style={style} {...props}>
-        <Link href={href} color="inherit" underline="none" className={clsx(styles.background, onClick && styles.clickable, border && styles.border)} style={backgroundStyle} onClick={onClick ? onClick : undefined}>
+        <Link href={href ? href : undefined} color="inherit" underline="none" className={clsx(styles.background, onClick && styles.clickable, border && styles.border)} style={backgroundStyle} onClick={onClick ? onClick : undefined}>
             {children}
         </Link>
         <div className={styles.icons} style={contentStyle}>
