@@ -1,5 +1,5 @@
-export function getTagSection({ sectionIndex, name, translations }) {
+export function getTagSection({ sectionIndex, path, translations }) {
     if (sectionIndex) {
-        return { name: name || translations.NEW_TAG };
+        return { name: path || translations.NEW_TAG };
     }
 };
