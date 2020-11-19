@@ -11,6 +11,7 @@ import { useLanguage } from "@util/language";
 import styles from "./Types.module.scss";
 import Row from "@widgets/Row";
 import ItemMenu from "./Types/ItemMenu";
+import { useLocalStorage } from "@util/store";
 
 export const TypesStoreDefaults = {
     mode: "",
@@ -27,6 +28,7 @@ export default function Types() {
     const translations = useTranslations();
     const { select, counter, viewMode } = TypesStore.useState();
     const [data, loading, , setData] = useTypes({ counter });
+    useLocalStorage("TypesStore", TypesStore, ["viewMode"]);
 
     useEffect(() => {
         TypesStore.update(s => {
