@@ -115,23 +115,26 @@ export function useListing(url, depends = [], options) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(null);
     const [error, setError] = useState(null);
-    const active = useRef(true);
+    const active = useRef(url);
     useEffect(() => {
         setError(null);
         setLoading(true);
+        active.current = url;
         storageMethods.getListing(url, options).then(listing => {
-            if (active.current) {
+            if (active.current === url) {
                 setListing(listing);
                 setLoading(false);
             }
         }).catch(err => {
-            setError(err);
-            setLoading(false);
+            if (active.current === url) {
+                setError(err);
+                setLoading(false);
+            }
         });
     }, [url, ...depends]);
     useEffect(() => {
         return () => {
-            active.current = false;
+            active.current = null;
         };
     }, []);
     return [listing, loading, error];
