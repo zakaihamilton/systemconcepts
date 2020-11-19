@@ -3,22 +3,22 @@ import { useFile } from "@util/storage";
 
 export const tagsFilePath = "/shared/library/tags.json";
 
-export function buildTree(items, path = "", item) {
+export function buildTree(items, separator = "/", path = "", item) {
     item = item || {};
     const { id } = item;
     let children = [];
     if (id) {
         children = (items || []).filter(item => {
             const { id, name } = item || {};
-            return id === path + "." + name;
+            return id === path + separator + name;
         });
     }
     else {
-        children = (items || []).filter(item => !item.id.includes("."));
+        children = (items || []).filter(item => !item.id.includes(separator));
     }
     children = children.map(item => {
         item = { ...item };
-        return buildTree(items, item.id, item);
+        return buildTree(items, separator, item.id, item);
     });
     children.sort((a, b) => b.id.localeCompare(a.id));
     return { ...item, items: children };
