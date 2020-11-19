@@ -3,8 +3,8 @@ import { useEffect, useMemo, useCallback } from "react";
 import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
-import { useTypes } from "@util/types";
-import { useTags, buildTree, tagsFilePath } from "@util/tags";
+import { useTypes, buildTree } from "@util/types";
+import { useTags, tagsFilePath } from "@util/tags";
 import Fab from "@widgets/Fab";
 import { useTranslations } from "@util/translations";
 import AddIcon from '@material-ui/icons/Add';
@@ -30,21 +30,7 @@ export default function Tags() {
     const loading = typesLoading || tagsLoading;
 
     const data = useMemo(() => {
-        const items = [];
-        if (!types) {
-            return [];
-        }
-        for (const type of types) {
-            if (type.parents) {
-                for (const parent of type.parents) {
-                    items.push({ ...type, id: parent + "/" + type.id, name: type.id });
-                }
-            }
-            else {
-                items.push({ ...type, name: type.id });
-            }
-        }
-        return items;
+        return types;
     }, [tags, types]);
 
     useEffect(() => {
