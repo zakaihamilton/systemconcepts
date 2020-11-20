@@ -952,6 +952,18 @@ export default {
         {
             "id": "PARENT_TYPES",
             "value": "סוגי הורים"
+        },
+        {
+            "id": "ARTICLES",
+            "value": "מאמרים"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "מאמר"
+        },
+        {
+            "id": "NEW_ARTICLE",
+            "value": "מאמר חדש"
         }
     ]
 };

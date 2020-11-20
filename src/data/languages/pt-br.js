@@ -956,6 +956,18 @@ export default {
         {
             "id": "PARENT_TYPES",
             "value": "Tipos de pais"
+        },
+        {
+            "id": "ARTICLES",
+            "value": "Artigos"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Artigo"
+        },
+        {
+            "id": "NEW_ARTICLE",
+            "value": "Novo Artigo"
         }
     ]
 };

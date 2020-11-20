@@ -18,10 +18,10 @@ export default function Tabs({ Container }) {
 
     const tabItems = [
         {
-            id: "librarian",
-            label: translations.LIBRARIAN,
+            id: "articles",
+            label: translations.ARTICLES,
             icon: <LibraryBooksIcon />,
-            value: basePath
+            value: basePath + "/" + encodeURIComponent("articles")
         },
         {
             id: "types",

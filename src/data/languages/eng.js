@@ -956,6 +956,18 @@ export default {
         {
             "id": "PARENT_TYPES",
             "value": "Parent Types"
+        },
+        {
+            "id": "ARTICLES",
+            "value": "Articles"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Article"
+        },
+        {
+            "id": "NEW_ARTICLE",
+            "value": "New Article"
         }
     ]
 };

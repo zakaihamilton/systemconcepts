@@ -99,6 +99,11 @@ const Types = dynamic(() => import("@pages/Types"), { loading: () => <PageLoad /
 const Type = dynamic(() => import("@pages/Type"), { loading: () => <PageLoad /> });
 import { getTypeSection } from "@pages/Type/Section";
 
+const Articles = dynamic(() => import("@pages/Articles"), { loading: () => <PageLoad /> });
+
+const Article = dynamic(() => import("@pages/Article"), { loading: () => <PageLoad /> });
+import { getArticleSection } from "@pages/Article/Section";
+
 import diagrams from "@data/diagrams";
 
 export default [
@@ -300,7 +305,8 @@ export default [
         Component: Librarian,
         category: "tools",
         sidebar: true,
-        tabs: LibrarianTabs
+        tabs: LibrarianTabs,
+        path: "librarian/articles"
     },
     {
         id: "content",
@@ -321,6 +327,19 @@ export default [
         name: "TYPES",
         Icon: StyleIcon,
         Component: Types
+    },
+    {
+        id: "article",
+        name: "ARTICLE",
+        section: getArticleSection,
+        Icon: StyleIcon,
+        Component: Article
+    },
+    {
+        id: "articles",
+        name: "ARTICLES",
+        Icon: StyleIcon,
+        Component: Articles
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;
