@@ -1,5 +1,5 @@
-export function getArticleSection({ sectionIndex, path, translations }) {
+export function getArticleSection({ sectionIndex, name, translations }) {
     if (sectionIndex) {
-        return { name: path || translations.NEW_ARTICLE };
+        return { name: name || translations.NEW_ARTICLE };
     }
 };

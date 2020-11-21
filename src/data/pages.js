@@ -86,12 +86,7 @@ const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> })
 import { getTagSection } from "@pages/Tag/Section";
 
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-const Librarian = dynamic(() => import("@pages/Librarian"), { loading: () => <PageLoad /> });
 const LibrarianTabs = dynamic(() => import("@pages/Librarian/Tabs"));
-
-import DescriptionIcon from '@material-ui/icons/Description';
-const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
-import { getContentSection } from "@pages/Content/Section";
 
 import StyleIcon from '@material-ui/icons/Style';
 const Types = dynamic(() => import("@pages/Types"), { loading: () => <PageLoad /> });
@@ -302,18 +297,10 @@ export default [
         id: "librarian",
         name: "LIBRARIAN",
         Icon: LibraryBooksIcon,
-        Component: Librarian,
         category: "tools",
         sidebar: true,
         tabs: LibrarianTabs,
         path: "librarian/articles"
-    },
-    {
-        id: "content",
-        name: "CONTENT",
-        section: getContentSection,
-        Icon: DescriptionIcon,
-        Component: Content
     },
     {
         id: "type",

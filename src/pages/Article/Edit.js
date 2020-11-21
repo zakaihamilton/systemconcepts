@@ -1,18 +1,17 @@
 import { useStoreState } from "@util/store";
 import Input from "@widgets/Input";
-import { ContentStore } from "../Content";
 import { useCallback } from "react";
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
-export default function EditWidget() {
-    const { icon, type, tooltip, onDone, onValidate, placeholder } = ContentStore.useState();
-    const { value } = useStoreState(ContentStore, s => ({ value: s.value }));
+export default function EditWidget({ store }) {
+    const { icon, type, tooltip, onDone, onValidate, placeholder } = store.useState();
+    const { value } = useStoreState(store, s => ({ value: s.value }));
     const complete = useCallback(async () => {
         let result = undefined;
         if (onDone) {
             result = await onDone(value[0]);
         }
-        ContentStore.update(s => {
+        store.update(s => {
             s.mode = "";
             s.item = null;
             s.editing = false;
@@ -26,7 +25,7 @@ export default function EditWidget() {
                 valid = onValidate(name[0]);
             }
             if (valid) {
-                ContentStore.update(s => {
+                store.update(s => {
                     s.editing = false;
                 });
                 await complete();
@@ -42,7 +41,7 @@ export default function EditWidget() {
             await complete();
         }
         else {
-            ContentStore.update(s => {
+            store.update(s => {
                 s.mode = "";
                 s.item = null;
                 s.editing = false;

@@ -1,7 +1,12 @@
 import { useCallback } from "react";
 import { useFile } from "@util/storage";
+import { v4 as uuidv4 } from 'uuid';
 
 export const articlesFilePath = "/shared/library/articles.json";
+
+export function createID() {
+    return uuidv4();
+}
 
 export function buildTree(items, path = "", item) {
     item = item || {};

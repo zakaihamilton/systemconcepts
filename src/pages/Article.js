@@ -1,87 +1,158 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
 import Button from '@material-ui/core/Button';
-import { goBackPage } from "@util/pages";
-import { useArticle } from "@util/articles";
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import languages from "@data/languages";
+import { goBackPage, addPath } from "@util/pages";
+import { useFile } from "@util/storage";
+import { createID, useArticle } from "@util/articles";
 import { useLanguage } from "@util/language";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
-import Row from "@widgets/Row";
-import Select from '@components/Widgets/Select';
+import { useLocalStorage } from "@util/store";
 import styles from "./Article.module.scss";
 import { MainStore } from "@components/Main";
 import { useSize } from "@util/size";
-import Typography from '@material-ui/core/Typography';
+import Edit from "@pages/Article/Edit";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import { useTags, uniqueTags } from "@util/tags";
+
+registerToolbar("Article");
 
 export const ArticleStoreDefaults = {
     mode: "",
-    select: [],
+    name: "",
+    value: "",
+    select: null,
     counter: 1,
     onDone: null,
+    order: "desc",
     offset: 0,
-    viewMode: "list"
+    orderBy: "",
+    roleFilter: "",
 };
 
 export const ArticleStore = new Store(ArticleStoreDefaults);
 
 export default function Article({ path = "" }) {
     const { showSideBar } = MainStore.useState();
-    const { select } = ArticleStore.useState();
     const language = useLanguage();
+    const articleId = path;
     const translations = useTranslations();
-    const [record, loading, setRecord, articles] = useArticle({ id: path });
-    const [validate, setValidate] = useState(false);
+    const { counter, viewMode = "table", mode, item: editedItem } = ArticleStore.useState();
+    const [tags] = useTags({ counter });
+    const { busy, toPath } = useArticle({ counter });
     const [inProgress, setProgress] = useState(false);
-    const [error, setError] = useState(false);
-    const [data, setData] = useState({});
+    const [data, loading, , setData] = useFile(articleId && (toPath(articleId) + "/tags.json"), [articleId], data => {
+        return data ? JSON.parse(data) : {};
+    });
     const ref = useRef();
+    const [record, setRecord] = useState({});
+    useLocalStorage("ArticleStore", ArticleStore, ["viewMode"]);
 
     useEffect(() => {
-        setData(record || {});
         ArticleStore.update(s => {
-            s.select = articles && articles.filter(item => record.parents && record.parents.includes(item.id)) || [];
+            Object.assign(s, ArticleStoreDefaults);
         });
-    }, [record, articles]);
+    }, []);
 
     useEffect(() => {
-        setData(data => {
-            const parents = select.filter(item => !data || item.id !== data.id).map(item => item.id);
-            return { ...data, parents };
-        });
-    }, [select, data && data.id]);
+        setRecord(data || {});
+    }, [data]);
 
-    const onValidateId = text => {
-        let error = "";
-        if (!text) {
-            error = translations.EMPTY_FIELD;
+    useEffect(() => {
+        if (!articleId) {
+            setRecord(record => {
+                record.id = createID();
+                return record;
+            });
         }
-        else if (!text.match(/^[a-z0-9]+$/i)) {
-            error = translations.BAD_ID;
-        }
-        return error;
-    };
-
-    const invalidFields = !data ||
-        onValidateId(data.id);
-    const isInvalid = validate && invalidFields;
+    }, [articleId]);
 
     const onSubmit = async () => {
-        setValidate(true);
-        if (!invalidFields && !inProgress) {
+        if (!inProgress) {
             setProgress(true);
-            await setRecord(data);
-            goBackPage();
+            await setData(record, toPath(record.id) + "/tags.json");
             setProgress(false);
-            setError("");
+            goBackPage();
         }
     };
 
     const onCancel = () => {
         goBackPage();
+    };
+
+    const renameItem = useCallback(item => {
+        ArticleStore.update(s => {
+            s.mode = "rename";
+            s.type = item.type;
+            s.value = item.value;
+            s.item = item;
+            s.icon = item.icon;
+            s.tooltip = item.tooltip;
+            s.placeholder = "";
+            s.editing = true;
+            s.onDone = async value => {
+                setRecord(record => {
+                    record = { ...record };
+                    record.tags = Object.assign({}, record.tags);
+                    const values = record.tags[item.id] = Object.assign({}, record.tags[item.id]);
+                    if (value) {
+                        values[language] = value;
+                    }
+                    else {
+                        delete values[language]
+                        if (!Object.keys(values).length) {
+                            delete record.tags[item.id];
+                        }
+                    }
+                    return record;
+                });
+            }
+        });
+    }, [language]);
+
+    const columns = [
+        {
+            id: "name",
+            title: translations.TAG,
+            sortable: "name"
+        },
+        {
+            id: "valueWidget",
+            title: translations.NAME,
+            sortable: "value",
+            onSelectable: () => mode !== "rename",
+            onClick: mode !== "rename" && renameItem
+        }
+    ];
+
+    const tagsData = useMemo(() => {
+        return uniqueTags(tags).map(tagId => {
+            const item = { id: tagId };
+            const recordTags = record.tags || {};
+            const values = recordTags[tagId] || {};
+            item.value = values[language];
+            return item;
+        });
+    }, [tags, record]);
+
+    const mapper = item => {
+        const tag = tags.find(tag => tag.id === item.id);
+        item = { ...tag, ...item };
+        const translation = item[language];
+        if (translation) {
+            item.name = translation;
+        }
+        if (!item.name) {
+            item.name = item.id.split(".").pop();
+        }
+        item.valueWidget = item.value;
+        if (mode === "rename" && editedItem.id === item.id) {
+            item.valueWidget = <Edit store={ArticleStore} key={item.id} />;
+        }
+        return item;
     };
 
     const actions = <>
@@ -90,7 +161,7 @@ export default function Article({ path = "" }) {
             variant="contained"
             color="primary"
             size="large"
-            disabled={!!(isInvalid || inProgress || !data)}
+            disabled={!!(inProgress || !record)}
         >
             {translations.SAVE}
         </Button>
@@ -104,79 +175,61 @@ export default function Article({ path = "" }) {
         </Button>
     </>;
 
-    const languageItem = languages.find(item => item.id === language) || {};
-    const languageName = languageItem.name;
-
-    const columns = [
-        {
-            id: "widget",
-            title: translations.NAME,
-            sortable: "name"
-        }
-    ];
-
-    const articleClick = useCallback(item => {
-        const { id } = item;
-        ArticleStore.update(s => {
-            const select = s.select || [];
-            const exists = select.find(item => item.id === id);
-            if (exists) {
-                s.select = select.filter(item => item.id !== id);
-            }
-            else {
-                s.select = [...select, item];
-            }
-        });
-    }, []);
-
-    const mapper = item => {
-        const label = item[language] || item.id;
-        const iconWidget = <Select select={select} item={item} store={ArticleStore} />;
-        return {
-            ...item,
-            widget: <Row onClick={articleClick.bind(this, item)} icons={iconWidget}>{label}</Row>
-        };
+    const onImport = data => {
+        setRecord(data);
     };
 
-    const filter = item => {
-        return item.id !== data.id;
+    const onExport = () => {
+        return JSON.stringify(record, null, 4);
     };
 
     const size = useSize(ref, [showSideBar]);
 
-    return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>
-        <FormGroup record={data} setRecord={setData}>
-            <Input
-                id="id"
-                label={translations.ID}
-                onValidate={onValidateId}
-                icon={<LocalOfferIcon />}
-            />
-            <Input
-                id={language}
-                label={languageName}
-            />
-        </FormGroup>
-        <Typography>
-            {translations.TAGS}
-        </Typography>
-        <div ref={ref} className={styles.table}>
-            <Table
-                name={data.id}
-                data={articles}
-                filter={filter}
-                loading={loading}
-                columns={columns}
-                mapper={mapper}
-                size={size}
-                viewModes={{
-                    list: {
-                        className: styles.listItem
-                    }
-                }}
-                depends={[select, data.id]}
-                store={ArticleStore}
-            />
-        </div>
-    </Form>;
+    const gotoEditor = () => {
+        addPath("editor/" + toPath(record.id) + "/" + language + ".txt");
+    };
+
+    const toolbarItems = [
+        articleId && {
+            id: "editor",
+            name: translations.EDITOR,
+            icon: <InsertDriveFileIcon />,
+            onClick: gotoEditor,
+            location: "header"
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "Article", items: toolbarItems, depends: [articleId, language] });
+
+    return <>
+        <Form actions={actions} loading={loading} data={record}>
+            <FormGroup record={record} setRecord={setRecord}>
+                <Input
+                    id="id"
+                    label={translations.ID}
+                    readOnly={true}
+                />
+            </FormGroup>
+            <div ref={ref} className={styles.table}>
+                <Table
+                    name={record.id}
+                    size={size}
+                    loading={busy}
+                    store={ArticleStore}
+                    onImport={onImport}
+                    onExport={onExport}
+                    columns={columns}
+                    data={tagsData}
+                    viewModes={{
+                        list: {
+                            className: styles.listItem
+                        },
+                        table: null
+                    }}
+                    mapper={mapper}
+                    depends={[mode, translations, record, tagsData, language, viewMode]}
+                />
+            </div>
+        </Form>
+    </>;
 }
