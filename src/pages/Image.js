@@ -4,11 +4,14 @@ import { useParentPath, useParentParams } from "@util/pages";
 import { readBinary } from "@util/binary";
 import Progress from "@widgets/Progress";
 import { useSync } from "@util/sync";
-import { PageSize } from "@components/Page";
+import { ContentSize } from "@components/Page/Content";
 import Download from "@widgets/Download";
 import { exportData, exportFile } from "@util/importExport";
 import { makePath } from "@util/path";
 import { useFetchJSON } from "@util/fetch";
+import Message from "@widgets/Message";
+import { useTranslations } from "@util/translations";
+import ErrorIcon from '@material-ui/icons/Error';
 
 function useImagePath(imageName = "") {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
@@ -26,7 +29,8 @@ function useImagePath(imageName = "") {
 }
 
 export default function ImagePage({ name }) {
-    const size = useContext(PageSize);
+    const translations = useTranslations();
+    const size = useContext(ContentSize);
     const [syncCounter] = useSync();
     const path = useImagePath(name);
     const busyRef = useRef(false);
@@ -101,8 +105,9 @@ export default function ImagePage({ name }) {
     const style = { height: size.height - 22, width: size.width - 22 };
 
     return <div className={styles.root}>
-        <Download visible={!loading && !imageLoading} onClick={downloadImage} />
+        <Download visible={!loading && !imageLoading && !error} onClick={downloadImage} />
         {!loading && !error && <img className={styles.img} onError={onError} onLoad={onLoad} style={style} src={src} />}
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
+        {!!error && <Message Icon={ErrorIcon} label={translations.CANNOT_LOAD_IMAGE} />}
     </div>;
 }

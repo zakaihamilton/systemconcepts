@@ -12,6 +12,7 @@ import { Store } from "pullstate";
 import Label from "@widgets/Label";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
+import Link from '@material-ui/core/Link';
 
 export const ToolbarStore = new Store({
     sections: [],
@@ -77,7 +78,6 @@ export function useToolbarItems({ location }) {
 
 export default function Toolbar({ className, location, dividerBefore, dividerAfter, collapsable }) {
     const isDesktop = useDeviceType() === "desktop";
-    const { sections } = ToolbarStore.useState();
     const translations = useTranslations();
     const sectionItems = useToolbarItems({ location });
     const toolbarItems = sectionItems.filter(item => {
@@ -95,10 +95,13 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
         return menu;
     });
 
-    return <div className={clsx(styles.toolbar, className)}>
-        {!!dividerBefore && !!(toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+    const toolbarVisible = !!toolbarItems.length || !!menuItems.length;
+
+    return <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
+        {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
         {toolbarItems.map((item, idx) => {
             const className = useStyles(styles, {
+                item: true,
                 selected: item.selected === item.id,
                 active: item.active
             });
@@ -109,7 +112,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
                     <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
                         {!!item.label ?
                             (<Label icon={item.icon} name={item.name} noBorder={true} />) :
-                            (<IconButton className={className} disabled={item.disabled}>
+                            (<IconButton component={Link} underline="none" color="inherit" href={item.target} className={className} disabled={item.disabled}>
                                 <Tooltip arrow title={item.name}>
                                     {item.icon}
                                 </Tooltip>
@@ -130,6 +133,6 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
             </Menu>
         </>
         }
-        {!!dividerAfter && !!(toolbarItems.length || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+        {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
     </div>
 }

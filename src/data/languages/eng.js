@@ -430,6 +430,10 @@ export default {
             "value": "Type"
         },
         {
+            "id": "TYPES",
+            "value": "Types"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Add Role"
         },
@@ -927,7 +931,43 @@ export default {
         },
         {
             "id": "RESTART",
-            "value":"Restart"
+            "value": "Restart"
+        },
+        {
+            "id": "DETAILS",
+            "value": "Details"
+        },
+        {
+            "id": "CANNOT_LOAD_IMAGE",
+            "value": "Cannot load image"
+        },
+        {
+            "id": "VALUE",
+            "value": "Value"
+        },
+        {
+            "id": "FULL_NAME",
+            "value": "Full Name"
+        },
+        {
+            "id": "NEW_TYPE",
+            "value": "New Type"
+        },
+        {
+            "id": "PARENT_TYPES",
+            "value": "Parent Types"
+        },
+        {
+            "id": "ARTICLES",
+            "value": "Articles"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Article"
+        },
+        {
+            "id": "NEW_ARTICLE",
+            "value": "New Article"
         }
     ]
 };

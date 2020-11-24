@@ -1,7 +1,11 @@
 .toolbar {
     display: flex;
     align-items: center;
-    height: 100%;
+}
+
+.toolbar.visible {
+    height: 4em;
+    padding: 0.5em;
 }
 
 .divider {
@@ -15,10 +19,10 @@
     margin-right: 0.1em !important;
 }
 
-.selected {
+.item.selected {
     box-shadow: 1px 1px 4px 1px var(--selected-color);
 }
 
-.active {
+.item.active {
     box-shadow: 1px 1px 2px 1px var(--active-color);
 }

@@ -430,6 +430,10 @@ export default {
             "value": "Tipo"
         },
         {
+            "id": "TYPES",
+            "value": "Tipos"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Adicionar função"
         },
@@ -928,6 +932,42 @@ export default {
         {
             "id": "RESTART",
             "value": "Reiniciar"
+        },
+        {
+            "id": "DETAILS",
+            "value": "Detalhes"
+        },
+        {
+            "id": "CANNOT_LOAD_IMAGE",
+            "value": "Não pode carregar imagem"
+        },
+        {
+            "id": "VALUE",
+            "value": "Valor"
+        },
+        {
+            "id": "FULL_NAME",
+            "value": "Nome Completo"
+        },
+        {
+            "id": "NEW_TYPE",
+            "value": "Novo Tipo"
+        },
+        {
+            "id": "PARENT_TYPES",
+            "value": "Tipos de pais"
+        },
+        {
+            "id": "ARTICLES",
+            "value": "Artigos"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Artigo"
+        },
+        {
+            "id": "NEW_ARTICLE",
+            "value": "Novo Artigo"
         }
     ]
 };

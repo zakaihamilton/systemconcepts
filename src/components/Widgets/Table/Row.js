@@ -26,7 +26,7 @@ export default function RowWidget({ className = "", viewMode, index, selected: s
                     viewModeClassName
                 )
             }}
-            style={viewModeStyle}
+            style={{ height: rowHeight, ...viewModeStyle }}
             key={columnId}
             {...viewModeProps}
         >

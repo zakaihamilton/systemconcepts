@@ -65,6 +65,7 @@ import { getPlayerSection } from "@pages/Player/Section";
 
 const Session = dynamic(() => import("@pages/Session"), { loading: () => <PageLoad /> });
 import { getSessionSection } from "@pages/Session/Section";
+const SessionTabs = dynamic(() => import("@pages/Session/Tabs"));
 
 import EventIcon from '@material-ui/icons/Event';
 const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
@@ -85,11 +86,18 @@ const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> })
 import { getTagSection } from "@pages/Tag/Section";
 
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-const Librarian = dynamic(() => import("@pages/Librarian"), { loading: () => <PageLoad /> });
+const LibrarianTabs = dynamic(() => import("@pages/Librarian/Tabs"));
 
-import DescriptionIcon from '@material-ui/icons/Description';
-const Content = dynamic(() => import("@pages/Content"), { loading: () => <PageLoad /> });
-import { getContentSection } from "@pages/Content/Section";
+import StyleIcon from '@material-ui/icons/Style';
+const Types = dynamic(() => import("@pages/Types"), { loading: () => <PageLoad /> });
+
+const Type = dynamic(() => import("@pages/Type"), { loading: () => <PageLoad /> });
+import { getTypeSection } from "@pages/Type/Section";
+
+const Articles = dynamic(() => import("@pages/Articles"), { loading: () => <PageLoad /> });
+
+const Article = dynamic(() => import("@pages/Article"), { loading: () => <PageLoad /> });
+import { getArticleSection } from "@pages/Article/Section";
 
 import diagrams from "@data/diagrams";
 
@@ -172,7 +180,8 @@ export default [
         Icon: ImageIcon,
         Component: Image,
         section: getImageSection,
-        showTooltip: true
+        showTooltip: true,
+        useParentName: 1
     },
     {
         id: "account",
@@ -241,7 +250,8 @@ export default [
         name: "SESSION",
         section: getSessionSection,
         Icon: VideoLabelIcon,
-        Component: Session
+        Component: Session,
+        tabs: SessionTabs
     },
     {
         id: "groups",
@@ -268,15 +278,13 @@ export default [
         name: "TIMESTAMPS",
         Icon: AccessTimeIcon,
         Component: Timestamps,
-        useParentName: 2
+        useParentName: 1
     },
     {
         id: "tags",
         name: "TAGS",
         Icon: LocalOfferIcon,
-        Component: Tags,
-        category: "tools",
-        sidebar: true
+        Component: Tags
     },
     {
         id: "tag",
@@ -289,16 +297,36 @@ export default [
         id: "librarian",
         name: "LIBRARIAN",
         Icon: LibraryBooksIcon,
-        Component: Librarian,
         category: "tools",
-        sidebar: true
+        sidebar: true,
+        tabs: LibrarianTabs,
+        path: "librarian/articles"
     },
     {
-        id: "content",
-        name: "CONTENT",
-        section: getContentSection,
-        Icon: DescriptionIcon,
-        Component: Content
+        id: "type",
+        name: "TYPE",
+        section: getTypeSection,
+        Icon: StyleIcon,
+        Component: Type
+    },
+    {
+        id: "types",
+        name: "TYPES",
+        Icon: StyleIcon,
+        Component: Types
+    },
+    {
+        id: "article",
+        name: "ARTICLE",
+        section: getArticleSection,
+        Icon: StyleIcon,
+        Component: Article
+    },
+    {
+        id: "articles",
+        name: "ARTICLES",
+        Icon: StyleIcon,
+        Component: Articles
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

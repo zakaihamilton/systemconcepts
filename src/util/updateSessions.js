@@ -128,5 +128,15 @@ export function useUpdateSessions() {
             s.busy = false;
         });
     }, []);
-    return { status, busy, start, updateSessions: !busy && updateSessions, updateGroup: !busy && updateGroup };
+    const updateSpecificGroup = useCallback(async (name) => {
+        UpdateSessionsStore.update(s => {
+            s.busy = true;
+            s.start = new Date().getTime()
+        });
+        await updateGroup(name);
+        UpdateSessionsStore.update(s => {
+            s.busy = false;
+        });
+    }, []);
+    return { status, busy, start, updateSessions: !busy && updateSessions, updateGroup: !busy && updateSpecificGroup };
 }

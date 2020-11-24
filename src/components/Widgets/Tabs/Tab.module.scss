@@ -1,0 +1,29 @@
+.root {
+    min-width: auto !important;
+    max-width: auto !important;
+}
+
+.content {
+    display: flex;
+    text-transform: none;
+    font-size: 100%;
+}
+
+.content.mobile {
+    flex-direction: column;
+    align-items: center;
+}
+
+.label {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+.label.mobile {
+    margin-left: 0em;
+    margin-right: 0em;
+    display: flex;
+    font-size: 50%;
+    margin-top: 0.5em;
+    align-items: center;
+}

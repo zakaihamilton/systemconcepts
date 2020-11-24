@@ -5,22 +5,22 @@ import Input from "@widgets/Input";
 import Button from '@material-ui/core/Button';
 import { goBackPage, addPath } from "@util/pages";
 import { useFile } from "@util/storage";
-import { createID, useContent } from "@util/content";
+import { createID, useArticle } from "@util/articles";
 import { useLanguage } from "@util/language";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
-import styles from "./Content.module.scss";
+import styles from "./Article.module.scss";
 import { MainStore } from "@components/Main";
 import { useSize } from "@util/size";
-import Edit from "@pages/Content/Edit";
+import Edit from "@pages/Article/Edit";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { useTags, uniqueTags } from "@util/tags";
 
-registerToolbar("Content");
+registerToolbar("Article");
 
-export const ContentStoreDefaults = {
+export const ArticleStoreDefaults = {
     mode: "",
     name: "",
     value: "",
@@ -33,27 +33,27 @@ export const ContentStoreDefaults = {
     roleFilter: "",
 };
 
-export const ContentStore = new Store(ContentStoreDefaults);
+export const ArticleStore = new Store(ArticleStoreDefaults);
 
-export default function Content({ path = "" }) {
+export default function Article({ path = "" }) {
     const { showSideBar } = MainStore.useState();
     const language = useLanguage();
-    const contentId = path;
+    const articleId = path;
     const translations = useTranslations();
-    const { counter, viewMode = "table", mode, item: editedItem } = ContentStore.useState();
+    const { counter, viewMode = "table", mode, item: editedItem } = ArticleStore.useState();
     const [tags] = useTags({ counter });
-    const { busy, toPath } = useContent({ counter });
+    const { busy, toPath } = useArticle({ counter });
     const [inProgress, setProgress] = useState(false);
-    const [data, loading, , setData] = useFile(contentId && (toPath(contentId) + "/tags.json"), [contentId], data => {
+    const [data, loading, , setData] = useFile(articleId && (toPath(articleId) + "/tags.json"), [articleId], data => {
         return data ? JSON.parse(data) : {};
     });
     const ref = useRef();
     const [record, setRecord] = useState({});
-    useLocalStorage("ContentStore", ContentStore, ["viewMode"]);
+    useLocalStorage("ArticleStore", ArticleStore, ["viewMode"]);
 
     useEffect(() => {
-        ContentStore.update(s => {
-            Object.assign(s, ContentStoreDefaults);
+        ArticleStore.update(s => {
+            Object.assign(s, ArticleStoreDefaults);
         });
     }, []);
 
@@ -62,13 +62,13 @@ export default function Content({ path = "" }) {
     }, [data]);
 
     useEffect(() => {
-        if (!contentId) {
+        if (!articleId) {
             setRecord(record => {
                 record.id = createID();
                 return record;
             });
         }
-    }, [contentId]);
+    }, [articleId]);
 
     const onSubmit = async () => {
         if (!inProgress) {
@@ -84,7 +84,7 @@ export default function Content({ path = "" }) {
     };
 
     const renameItem = useCallback(item => {
-        ContentStore.update(s => {
+        ArticleStore.update(s => {
             s.mode = "rename";
             s.type = item.type;
             s.value = item.value;
@@ -150,7 +150,7 @@ export default function Content({ path = "" }) {
         }
         item.valueWidget = item.value;
         if (mode === "rename" && editedItem.id === item.id) {
-            item.valueWidget = <Edit key={item.id} />;
+            item.valueWidget = <Edit store={ArticleStore} key={item.id} />;
         }
         return item;
     };
@@ -183,14 +183,14 @@ export default function Content({ path = "" }) {
         return JSON.stringify(record, null, 4);
     };
 
-    const size = useSize(ref, [showSideBar], false);
+    const size = useSize(ref, [showSideBar]);
 
     const gotoEditor = () => {
         addPath("editor/" + toPath(record.id) + "/" + language + ".txt");
     };
 
     const toolbarItems = [
-        contentId && {
+        articleId && {
             id: "editor",
             name: translations.EDITOR,
             icon: <InsertDriveFileIcon />,
@@ -199,7 +199,7 @@ export default function Content({ path = "" }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Content", items: toolbarItems, depends: [contentId, language] });
+    useToolbar({ id: "Article", items: toolbarItems, depends: [articleId, language] });
 
     return <>
         <Form actions={actions} loading={loading} data={record}>
@@ -215,7 +215,7 @@ export default function Content({ path = "" }) {
                     name={record.id}
                     size={size}
                     loading={busy}
-                    store={ContentStore}
+                    store={ArticleStore}
                     onImport={onImport}
                     onExport={onExport}
                     columns={columns}

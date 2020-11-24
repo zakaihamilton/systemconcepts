@@ -1,13 +1,13 @@
 import { useMemo, useContext, useEffect, useState } from "react";
 import { FixedSizeTree as Tree } from 'react-vtree';
-import { PageSize } from "@components/Page";
+import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
 import { importData, exportData } from "@util/importExport";
 import { useTranslations } from "@util/translations";
 import DataUsageIcon from '@material-ui/icons/DataUsage';
-import WarningIcon from '@material-ui/icons/Warning';
+import InfoIcon from '@material-ui/icons/Info';
 import Message from "@widgets/Message";
 import RefreshIcon from '@material-ui/icons/Refresh';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
@@ -143,7 +143,7 @@ export default function TreeWidget(props) {
     const { select } = store.useState();
     const translations = useTranslations();
     const statusBarIsActive = StatusBarStore.useState(s => s.active);
-    const size = useContext(PageSize);
+    const size = useContext(ContentSize);
     const [isEmpty, setEmpty] = useState(false);
     const search = useSearch(() => { });
     const boundTreeWalker = useMemo(() => {
@@ -190,7 +190,7 @@ export default function TreeWidget(props) {
     }
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
-    const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
+    const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
 
     itemSize = sizeToPixels(itemSize);
 
@@ -225,7 +225,8 @@ export default function TreeWidget(props) {
                     console.error(err);
                 }
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         data && name && {
             id: "export",
@@ -241,21 +242,24 @@ export default function TreeWidget(props) {
                 }
                 exportData(body, name, "application/json");
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         refresh && {
             id: "refresh",
             name: translations.REFRESH,
             icon: <RefreshIcon />,
             onClick: refresh,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         source && {
             id: "editor",
             name: translations.EDITOR,
             icon: <InsertDriveFileIcon />,
             onClick: gotoSource,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         }
     ].filter(Boolean);
 

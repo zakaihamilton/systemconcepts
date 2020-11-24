@@ -426,6 +426,10 @@ export default {
             "value": "סוג"
         },
         {
+            "id": "TYPES",
+            "value": "סוגים"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "הוסף תפקיד"
         },
@@ -923,7 +927,43 @@ export default {
         },
         {
             "id": "RESTART",
-            "value":"אתחול"
+            "value": "אתחול"
+        },
+        {
+            "id": "DETAILS",
+            "value": "פרטים"
+        },
+        {
+            "id": "CANNOT_LOAD_IMAGE",
+            "value": "תמונה לא נטענת"
+        },
+        {
+            "id": "VALUE",
+            "value": "ערך"
+        },
+        {
+            "id": "FULL_NAME",
+            "value": "שם מלא"
+        },
+        {
+            "id": "NEW_TYPE",
+            "value": "סוג חדש"
+        },
+        {
+            "id": "PARENT_TYPES",
+            "value": "סוגי הורים"
+        },
+        {
+            "id": "ARTICLES",
+            "value": "מאמרים"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "מאמר"
+        },
+        {
+            "id": "NEW_ARTICLE",
+            "value": "מאמר חדש"
         }
     ]
 };

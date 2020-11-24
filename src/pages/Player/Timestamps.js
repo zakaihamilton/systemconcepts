@@ -7,7 +7,7 @@ import ItemMenu from "./Timestamps/ItemMenu";
 import { useTranslations } from "@util/translations";
 import { makePath, fileTitle, fileFolder } from "@util/path";
 import { useFile } from "@util/storage";
-import { useParentParams, goBackPage } from "@util/pages";
+import { useParentParams } from "@util/pages";
 import { formatDuration } from "@util/string";
 import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
@@ -33,13 +33,12 @@ export default function TimestampsPage() {
         return s.player;
     });
     const translations = useTranslations();
-    const { suffix } = useParentParams();
-    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams(1);
-    let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
+    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams(0);
+    let components = [prefix, group, year, date + " " + name].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
-    const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
+    const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
     const { item: editedItem, mode, select, viewMode } = TimestampsStore.useState();
     const [metadata, loading, , setMetadata] = useFile(!!name && metadataPath, [name], data => {
         return data ? JSON.parse(data) : {};
@@ -74,7 +73,6 @@ export default function TimestampsPage() {
         if (player) {
             player.currentTime = id;
         }
-        goBackPage();
     }, [select]);
 
     const renameItem = useCallback(item => {
@@ -122,8 +120,6 @@ export default function TimestampsPage() {
     const mapper = item => {
         const timestamp = formatDuration(item.id * 1000, true);
         const iconWidget = <ItemMenu setMetadata={setMetadata} item={item} />;
-
-        console.log("item", item, "mode", mode, "editedItem", editedItem);
 
         let nameWidget = <Row
             className={styles.row}

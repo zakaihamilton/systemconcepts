@@ -6,7 +6,7 @@ import styles from "./Player.module.scss";
 import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@util/path";
 import Audio from "./Player/Audio";
 import Video from "./Player/Video";
-import { PageSize } from "@components/Page";
+import { ContentSize } from "@components/Page/Content";
 import Download from "@widgets/Download";
 import { exportFile } from "@util/importExport";
 import { useFetchJSON } from "@util/fetch";
@@ -38,7 +38,7 @@ export default function PlayerPage({ show = false, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const { hash, playerPath, mediaPath } = PlayerStore.useState();
-    const size = useContext(PageSize);
+    const size = useContext(ContentSize);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
@@ -81,6 +81,7 @@ export default function PlayerPage({ show = false, suffix }) {
             name: translations.PLAYER,
             icon: <VideoLabelIcon />,
             menu: false,
+            target: hash,
             onClick: gotoPlayer
         }
     ].filter(Boolean);

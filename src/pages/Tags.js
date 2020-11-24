@@ -3,7 +3,8 @@ import { useEffect, useMemo, useCallback } from "react";
 import Tree from "@widgets/Tree";
 import Tag from "./Tags/Tag";
 import { Store } from "pullstate";
-import { useTags, buildTree, tagsFilePath } from "@util/tags";
+import { useTypes, buildTree } from "@util/types";
+import { useTags, tagsFilePath } from "@util/tags";
 import Fab from "@widgets/Fab";
 import { useTranslations } from "@util/translations";
 import AddIcon from '@material-ui/icons/Add';
@@ -24,7 +25,13 @@ export default function Tags() {
     const language = useLanguage();
     const translations = useTranslations();
     const { counter } = TagsStore.useState();
-    const [data, loading, , setData] = useTags({ counter });
+    const [types, typesLoading] = useTypes({ counter });
+    const [tags, tagsLoading, , setData] = useTags({ counter });
+    const loading = typesLoading || tagsLoading;
+
+    const data = useMemo(() => {
+        return types;
+    }, [tags, types]);
 
     useEffect(() => {
         TagsStore.update(s => {
@@ -48,7 +55,7 @@ export default function Tags() {
     }, []);
 
     const addTag = () => {
-        addPath("tag");
+        addPath("tag/");
     };
 
     const onImport = data => {

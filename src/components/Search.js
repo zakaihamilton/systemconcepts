@@ -8,7 +8,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useTimeout } from "@util/timers";
 import { useDeviceType } from "@util/styles";
 
-registerToolbar("Search", 100);
+registerToolbar("Search", 200);
 
 export const SearchStore = new Store({
     search: ""

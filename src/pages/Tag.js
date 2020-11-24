@@ -12,7 +12,7 @@ import { useLanguage } from "@util/language";
 export default function Tag({ path = "" }) {
     const language = useLanguage();
     const translations = useTranslations();
-const [record, loading, setRecord] = useTag({ id: path });
+    const [record, loading, setRecord] = useTag({ id: path });
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
     const [error, setError] = useState(false);

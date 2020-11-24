@@ -4,7 +4,7 @@ import List from "@widgets/List";
 import Drawer from '@material-ui/core/Drawer';
 import { useDeviceType } from "@util/styles";
 import { MainStore } from "./Main";
-import { useActivePages, usePages, setPath } from "@util/pages";
+import { useActivePages, usePages, setHash } from "@util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
 import { useBookmarks } from "@components/Bookmarks";
 import BookmarkIcon from '@material-ui/icons/Bookmark';
@@ -23,7 +23,7 @@ export default function SideBar() {
     const setSelected = useCallback(id => {
         const page = pages.find(page => page.id === id);
         if (page) {
-            setPath(page.id);
+            setHash(page.path || page.id);
         }
         else {
             MainStore.update(s => {
@@ -45,13 +45,17 @@ export default function SideBar() {
         });
     };
 
-    const items = pages.filter(page => page.sidebar && !page.category);
+    const items = pages.filter(page => page.sidebar && !page.category).map(item => {
+        return { ...item, target: item.path || item.id };
+    });
     items.push({
         id: "bookmarks",
         name: translations.BOOKMARKS,
         icon: <BookmarkIcon />,
         items: [
-            ...pages.filter(page => page.sidebar && page.category === "bookmarks"),
+            ...pages.filter(page => page.sidebar && page.category === "bookmarks").map(item => {
+                return { ...item, target: item.path || item.id };
+            }),
             ...bookmarks],
         divider: true
     });

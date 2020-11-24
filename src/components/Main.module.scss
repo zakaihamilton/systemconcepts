@@ -22,9 +22,10 @@
 .main {
     background: var(--main-background);
     grid-column: 2 / 3;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    grid-template-rows: 4em auto 4em;
+    flex: 1;
 }
 
 .main.mobile {

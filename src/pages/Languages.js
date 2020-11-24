@@ -4,8 +4,9 @@ import { useTranslations } from "@util/translations";
 import FormatTextdirectionLToRIcon from '@material-ui/icons/FormatTextdirectionLToR';
 import FormatTextdirectionRToLIcon from '@material-ui/icons/FormatTextdirectionRToL';
 import Label from "@widgets/Label";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { Store } from "pullstate";
+import Row from "@widgets/Row";
 
 export const LanguagesStore = new Store({
     order: "desc",
@@ -18,9 +19,10 @@ export default function Languages() {
 
     const columns = [
         {
-            id: "name",
+            id: "nameWidget",
             title: translations.NAME,
-            sortable: true
+            sortable: "name",
+            padding:false
         },
         {
             id: "directionWidget",
@@ -42,24 +44,30 @@ export default function Languages() {
         }
     ];
 
+    const rowClick = item => {
+        addPath("translations?language=" + item.id);
+    };
+
+    const rowTarget = item => {
+        return "#" + toPath("settings", "languages", "translations?language=" + item.id);
+    };
+
     const mapper = item => {
         let { direction } = item;
         direction = directions.find(item => item.id === direction);
         return {
             ...item,
+            nameWidget: <Row onClick={rowClick.bind(this, item)} href={rowTarget(item)} key={item.id}>
+                {item.name}
+            </Row>,
             direction: direction.name,
             directionWidget: <Label icon={direction.icon} name={direction.name} />
         };
     };
 
-    const rowClick = (_, item) => {
-        addPath("translations?language=" + item.id);
-    };
-
     return <>
         <Table
             name="languages"
-            rowClick={rowClick}
             columns={columns}
             mapper={mapper}
             store={LanguagesStore}

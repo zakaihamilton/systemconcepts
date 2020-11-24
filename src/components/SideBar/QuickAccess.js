@@ -9,8 +9,6 @@ import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import ReplayIcon from '@material-ui/icons/Replay';
 import BuildIcon from '@material-ui/icons/Build';
-import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
-import { useToolbarItems } from "@components/Toolbar";
 import { useLanguage } from "@util/language";
 import useDarkMode from 'use-dark-mode';
 
@@ -18,7 +16,6 @@ export default function QuickAccess({ closeDrawer, state }) {
     const language = useLanguage();
     const translations = useTranslations();
     const pages = usePages();
-    const advancedToolbar = useToolbarItems({ location: "advanced" });
     const darkMode = useDarkMode(false);
 
     const toggleDarkMode = () => {
@@ -35,7 +32,9 @@ export default function QuickAccess({ closeDrawer, state }) {
         location.reload();
     };
 
-    const toolsItems = pages.filter(page => page.sidebar && page.category === "tools");
+    const toolsItems = pages.filter(page => page.sidebar && page.category === "tools").map(item => {
+        return { ...item, target: item.path || item.id };
+    });
 
     const quickAccessItems = [
         {
@@ -69,14 +68,7 @@ export default function QuickAccess({ closeDrawer, state }) {
             icon: <BuildIcon />,
             items: toolsItems
         },
-        ...pages.filter(page => page.sidebar && page.category === "quickaccess"),
-        advancedToolbar && advancedToolbar.length && {
-            id: "advanced",
-            name: translations.ADVANCED,
-            icon: <DeveloperModeIcon />,
-            items: [...advancedToolbar],
-            divider: true
-        }
+        ...pages.filter(page => page.sidebar && page.category === "quickaccess")
     ].filter(Boolean);
 
     return <>

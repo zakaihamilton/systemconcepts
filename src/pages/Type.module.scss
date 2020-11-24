@@ -1,0 +1,12 @@
+.listItem {
+    grid-template-columns: 1fr;
+}
+
+.table {
+    display: flex;
+    border: 1px solid var(--border-color);
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}

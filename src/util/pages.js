@@ -4,8 +4,26 @@ import { isRegEx } from "@util/string";
 import { useLanguage } from "@util/language";
 import { MainStore } from "@components/Main";
 
+export function usePathItems() {
+    let { hash } = MainStore.useState();
+    if (hash.startsWith("#")) {
+        hash = hash.substring(1);
+    }
+    const items = hash.split("/").filter(Boolean).map(item => decodeURIComponent(item));
+    return items;
+}
+
+export function toPath(...path) {
+    const hash = path.map(item => encodeURIComponent(item)).join("/");
+    return hash;
+}
+
 export function addPath(...path) {
-    const hash = window.location.hash + "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
+    const hash = window.location.hash + "/" + path.map(item => encodeURIComponent(item)).join("/");
+    setHash(hash);
+}
+
+export function setHash(hash) {
     MainStore.update(s => {
         s.hash = hash;
     });
@@ -13,11 +31,13 @@ export function addPath(...path) {
 }
 
 export function setPath(...path) {
-    const hash = encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
-    MainStore.update(s => {
-        s.hash = hash;
-    });
-    window.location.hash = hash;
+    let hash = path.map(item => {
+        if (item.startsWith("#")) {
+            item = item.substring(1);
+        }
+        return encodeURIComponent(item);
+    }).join("/");
+    setHash(hash);
 }
 
 export function replacePath(...path) {
@@ -25,12 +45,9 @@ export function replacePath(...path) {
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
     }
-    hash = encodeURI(decodeURI(hash).split("/").filter(Boolean).slice(0, -1).join("/"));
-    hash += "/" + encodeURI(path.map(item => encodeURIComponent(item)).join("/"));
-    MainStore.update(s => {
-        s.hash = hash;
-    });
-    window.location.hash = hash;
+    hash = hash.split("/").filter(Boolean).slice(0, -1).join("/");
+    hash += "/" + path.map(item => encodeURIComponent(item)).join("/");
+    setHash(hash);
 }
 
 export function goBackPage() {
@@ -38,22 +55,19 @@ export function goBackPage() {
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
     }
-    hash = encodeURI(decodeURI(hash).split("/").filter(Boolean).slice(0, -1).join("/"));
-    MainStore.update(s => {
-        s.hash = hash;
-    });
-    window.location.hash = hash;
+    hash = hash.split("/").filter(Boolean).slice(0, -1).join("/");
+    setHash(hash);
 }
 
 export function urlToParentPath(url) {
-    const items = decodeURI(url).split("/").filter(Boolean);
+    const items = url.split("/").filter(Boolean);
     const previousItem = items[items.length - 2] || "";
     return decodeURIComponent(previousItem);
 }
 
 export function useParentPath(index = 0) {
     const { hash } = MainStore.useState();
-    const items = decodeURI(hash).split("/").filter(Boolean);
+    const items = hash.split("/").filter(Boolean);
     const previousItem = items[items.length - 2 - index] || "";
     return decodeURIComponent(previousItem);
 }
@@ -70,7 +84,7 @@ export function getPagesFromHash({ hash, translations, pages }) {
     if (hash.startsWith("#")) {
         hash = hash.substring(1);
     }
-    const items = decodeURI(hash).split("/").filter(Boolean);
+    const items = hash.split("/").filter(Boolean);
     const root = pages.find(page => page.root);
     if (root) {
         if (items[0] && items[0].startsWith("?")) {
@@ -121,7 +135,7 @@ export function getPagesFromHash({ hash, translations, pages }) {
             if (page.root) {
                 subPath = subPath.substring(pageId.length);
             }
-            const url = encodeURI(path + encodeURIComponent(subPath));
+            const url = page.path || path + encodeURIComponent(subPath);
             const name = page.name;
             page = Object.assign({}, page, params);
             if (typeof page.section === "function") {
@@ -199,4 +213,19 @@ export function usePages(modeId) {
         };
     });
     return pages;
+}
+
+export function useCurrentPage() {
+    const pages = useActivePages();
+    const activePage = pages[pages.length - 1];
+    const page = pages[pages.length - 1 - (activePage.useParentName || 0)];
+    return page;
+}
+
+export function useCurrentPageTitle() {
+    const page = useCurrentPage();
+    if (page && !page.root) {
+        return page.label || page.name;
+    }
+    return "";
 }

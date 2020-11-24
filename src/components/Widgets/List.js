@@ -12,8 +12,9 @@ import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { MainStore } from "@components/Main";
+import Link from '@material-ui/core/Link';
 
-export function ListItemWidget({ id, divider, reverse, depth, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
+export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const isSelected = typeof selected === "function" ? selected(id) : selected === id;
@@ -60,7 +61,7 @@ export function ListItemWidget({ id, divider, reverse, depth, clickHandler, onCl
     }
     return <>
         {!!reverse && !!divider && <Divider />}
-        <ListItem style={style} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
+        <ListItem style={style} component={target ? Link : undefined} underline="none" href={target ? "#" + target : undefined} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
                     {actionIcon}

@@ -30,7 +30,7 @@ export default async (req, res) => {
     }
     catch (err) {
         console.error("login error: ", err);
-        res.status(401).json({ err: err.toString() });
+        res.status(403).json({ err: err.toString() });
     }
 };
 

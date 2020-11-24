@@ -24,9 +24,9 @@ export const GroupsStore = new Store({
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
-    const { viewMode, counter } = GroupsStore.useState();
+    const { counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
-    const { status, busy, start, updateSessions, updateGroup: syncGroup } = useUpdateSessions();
+    const { status, busy, start, updateSessions, updateGroup } = useUpdateSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -47,7 +47,9 @@ export default function Groups() {
             id: "sync_sessions",
             name,
             icon: <UpdateIcon className={className} />,
-            onClick: updateSessions
+            onClick: updateSessions,
+            location: "header",
+            menu: true
         }
     ];
 
@@ -61,14 +63,24 @@ export default function Groups() {
             title: translations.NAME,
             sortable: "name"
         },
-        {
-            id: "colorWidget",
-            title: translations.COLOR,
-            sortable: "color"
-        },
         withProgress && {
             id: "progress",
-            title: translations.PROGRESS
+            title: translations.PROGRESS,
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
+        },
+        !busy && {
+            id: "colorWidget",
+            title: translations.COLOR,
+            sortable: "color",
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
         }
     ];
 
@@ -89,14 +101,14 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "static" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
-        const iconWidget = <ItemMenu syncGroup={syncGroup} item={item} store={GroupsStore} />;
+        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} />;
 
         return {
             ...item,
             iconWidget,
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} />,
             progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? statusItem.progress : undefined} />,
-            colorWidget: <ColorPicker key={item.name} color={item.color} onChangeComplete={changeColor} />
+            colorWidget: <ColorPicker pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
         };
     };
 
@@ -112,11 +124,14 @@ export default function Groups() {
                 });
             }}
             viewModes={{
+                list: {
+                    className: withProgress && !busy ? styles.listItemWithProgress : styles.listItem
+                },
                 table: null
             }}
             mapper={mapper}
             loading={loading}
-            depends={[translations, status]}
+            depends={[translations, status, updateGroup]}
         />
     </>;
 }

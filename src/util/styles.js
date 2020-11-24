@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useSize } from "@util/size";
+import { useWindowSize } from "@util/size";
 
 export function getProperty(name) {
     return getComputedStyle(document.documentElement, null).getPropertyValue(name);
@@ -10,7 +10,6 @@ export function setProperty(name, value) {
 }
 
 export function toggleProperty(name, values) {
-    const current = (getProperty(name) || "").trim();
     const value = nextTrimmedString(values, name);
     setProperty(name, value);
     return value;
@@ -31,7 +30,7 @@ export function useStyles(styles, data) {
 }
 
 export function useDeviceType() {
-    const size = useSize();
+    const size = useWindowSize();
     const isPhone = size.width && size.width <= 768;
     const isTablet = size.width && size.width >= 768 && size.width <= 1024;
     if (!size.width) {

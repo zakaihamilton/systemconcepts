@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import useDimensions from "react-cool-dimensions";
 
 export function getEmValueFromElement(element) {
-    if (element.parentNode) {
+    if (element && element.parentNode) {
         var parentFontSize = parseFloat(window.getComputedStyle(element.parentNode).fontSize);
         var elementFontSize = parseFloat(window.getComputedStyle(element).fontSize);
         var pixelValueOfOneEm = (elementFontSize / parentFontSize) * elementFontSize;
         return pixelValueOfOneEm;
     }
+    return 16;
 };
 
 export function useResize(depends = []) {
@@ -32,30 +34,31 @@ export function useResize(depends = []) {
     return counter;
 }
 
-export function useSize(ref, depends = [], useParent = true) {
-    const counter = useResize(depends);
+export function useWindowSize() {
+    const counter = useResize();
     const [size, setSize] = useState({ width: 0, height: 0 });
 
     const handleResize = () => {
-        if (!ref) {
-            if (window) {
-                setSize({ width: window.innerWidth, height: window.innerHeight });
-            }
-            return;
+        if (typeof window !== "undefined") {
+            setSize({ width: window.innerWidth, height: window.innerHeight });
         }
-        if (!ref.current) {
-            setSize({ width: 0, height: 0, emPixels, ref });
-            return;
-        }
-        const element = useParent ? ref.current.parentElement : ref.current;
-        const { clientWidth, clientHeight } = element;
-        const emPixels = getEmValueFromElement(element);
-        setSize({ width: clientWidth, height: clientHeight, emPixels, ref });
     };
 
     useEffect(() => {
         handleResize();
-    }, [counter, ref && ref.current]);
+    }, [counter]);
 
     return size;
+}
+
+export function useSize(ref, depends = []) {
+    const counter = useResize(depends);
+    const emPixels = getEmValueFromElement(ref && ref.current);
+    const { width, height } = useDimensions({ ref: ref && ref.current && ref });
+
+    if (!ref || typeof window === "undefined") {
+        return { width: 0, height: 0, emPixels };
+    }
+
+    return { counter, width, height, emPixels, ref };
 }

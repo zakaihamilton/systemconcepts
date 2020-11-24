@@ -13,6 +13,7 @@ import Toolbar from "@components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
 import NoSsr from '@material-ui/core/NoSsr';
+import { setHash } from "@util/pages";
 
 export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
     const { direction } = MainStore.useState();
@@ -27,10 +28,13 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
     const title = !showLabel ? (label || name) : tooltip || label || name;
+    const gotoItem = () => {
+        setHash(href);
+    };
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
             const path = items.slice(2, -2).map(item => item.label || item.name).join("/");
-            return <Link className={styles.item} color="inherit" href={href}>
+            return <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
                 <IconButton className={styles.iconButton}>
                     <Tooltip arrow title={path}>
                         <MoreHorizIcon />
@@ -57,7 +61,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
                 </div>
             </Tooltip>
         </div>}
-        {(!isLast || navigateLast) && <Link className={styles.item} color="inherit" href={href}>
+        {(!isLast || navigateLast) && <Link className={styles.item} color="inherit" href={href} onClick={gotoItem}>
             {icon && <IconButton className={styles.iconButton}>
                 <Tooltip arrow title={title}>
                     {icon}

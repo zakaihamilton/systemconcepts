@@ -9,7 +9,7 @@ import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 import { formatDuration } from "@util/string";
 import Badge from '@material-ui/core/Badge';
 
-registerToolbar("Sync");
+registerToolbar("Sync", 1);
 
 export const SyncContext = createContext();
 
@@ -49,8 +49,8 @@ export default function Sync({ children }) {
             name: translations.FULL_SYNC,
             icon: <SyncIcon />,
             onClick: fullSync,
-            label: true,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         }
     ].filter(Boolean);
 

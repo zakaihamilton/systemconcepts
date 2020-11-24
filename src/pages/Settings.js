@@ -13,10 +13,11 @@ import { useCallback } from "react";
 import Dynamic from "@widgets/Dynamic";
 import { useDeviceType } from "@util/styles";
 import Button from "@material-ui/core/Button";
-import { addPath } from "@util/pages";
+import { addPath, toPath } from "@util/pages";
 import { Store } from "pullstate";
 import BuildIcon from '@material-ui/icons/Build';
 import useDarkMode from 'use-dark-mode';
+import Row from "@widgets/Row";
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -41,11 +42,20 @@ export default function Settings() {
     });
     const darkModeState = [darkModeSelected, setDarkMode];
 
+    const navigate = id => {
+        addPath(id);
+    };
+
+    const target = item => {
+        return "#" + toPath("settings", item.target);
+    };
+
     const columns = [
         {
             id: "title",
             title: translations.NAME,
-            sortable: "name"
+            sortable: "name",
+            padding: false
         },
         {
             id: "widget",
@@ -79,10 +89,6 @@ export default function Settings() {
         name: translations[item.name]
     }));
 
-    const navigate = id => {
-        addPath(id);
-    };
-
     const data = [
         {
             id: "language",
@@ -90,7 +96,7 @@ export default function Settings() {
             name: translations.LANGUAGE,
             value: states.language[0],
             widget: <Dynamic items={languageItems} state={states.language} />,
-            onClick: () => navigate("languages")
+            target: "languages"
         },
         {
             id: "darkMode",
@@ -105,7 +111,7 @@ export default function Settings() {
             name: translations.FONT_SIZE,
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
-            onClick: () => navigate("fontSizes")
+            target: "fontSizes"
         },
         {
             id: "reset",
@@ -124,8 +130,12 @@ export default function Settings() {
     ];
 
     const mapper = item => {
-        const { icon, onClick, ...props } = item;
-        props.title = <Label key={item.id} icon={icon} name={item.name} onClick={onClick} />;
+        const { icon, name, ...props } = item;
+        const href = item.target && target(item);
+        const onClick = () => navigate(item.target);
+        props.title = <Row onClick={item.target ? onClick : undefined} href={href} key={item.id} icons={icon}>
+            {name}
+        </Row>;
         return props;
     };
 

@@ -4,6 +4,7 @@ import { useTranslations } from "@util/translations";
 import PlayerButton from "./Button";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import ReplayIcon from '@material-ui/icons/Replay';
+import StopIcon from '@material-ui/icons/Stop';
 import PauseIcon from '@material-ui/icons/Pause';
 import { formatDuration } from "@util/string";
 import { MainStore } from "@components/Main";
@@ -198,6 +199,10 @@ export default function Controls({ show, playerRef, metadata, setMetadata }) {
                 {!!error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
                 {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
                 {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
+                {!error && <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={() => {
+                    playerRef.pause();
+                    playerRef.currentTime = 0;
+                }} />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
                 <PlayerButton active={hasTimestamp} icon={<AccessTimeIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>

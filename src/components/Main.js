@@ -10,12 +10,11 @@ import { useLanguage } from "@util/language";
 import Sync from "./Sync";
 import Head from "./Head";
 import Bookmarks from "./Bookmarks";
-import Header from "./Header";
-import Footer from "./Footer";
 import Title from "./Title";
 import { useResize } from "@util/size";
 import clsx from "clsx";
 import CssBaseline from '@material-ui/core/CssBaseline';
+import NoSsr from '@material-ui/core/NoSsr';
 
 export const MainStoreDefaults = {
     fontSize: "16",
@@ -67,20 +66,19 @@ export default function Main() {
     return <>
         <Head />
         <Theme>
-            <CssBaseline>
-                <div className={className}>
-                    <Title />
-                    <Sync>
-                        <Bookmarks />
-                        <SideBar />
-                        <div className={clsx(styles.main, isMobile && styles.mobile)}>
-                            <Header />
+            <CssBaseline />
+            <div className={className}>
+                <Title />
+                <Sync>
+                    <Bookmarks />
+                    <SideBar />
+                    <div className={clsx(styles.main, isMobile && styles.mobile)}>
+                        <NoSsr>
                             <Page />
-                            <Footer />
-                        </div>
-                    </Sync>
-                </div>
-            </CssBaseline>
+                        </NoSsr>
+                    </div>
+                </Sync>
+            </div>
         </Theme>
     </>;
 }

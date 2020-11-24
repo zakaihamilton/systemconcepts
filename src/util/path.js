@@ -50,8 +50,10 @@ export function fileTitle(path) {
     path = makePath(path);
     const last = path.split("/").pop();
     const components = last.split(".");
-    const extension = components[components.length - 1];
-    return last.slice(0, last.length - extension.length - 1);
+    const extension = components[components.length - 1] || "";
+    const extensionLength = components.length > 1 ? extension.length + 1 : 0;
+    const result = extensionLength ? last.slice(0, last.length - extensionLength) : last;
+    return result;
 }
 
 export function fileName(path) {

@@ -4,7 +4,7 @@ import TableBody from "@material-ui/core/TableBody";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { PageSize } from "../Page";
+import { ContentSize } from "@components/Page/Content";
 import styles from "./Table.module.scss";
 import { useTranslations } from "@util/translations";
 import { importData, exportData } from "@util/importExport";
@@ -28,13 +28,13 @@ import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DataUsageIcon from '@material-ui/icons/DataUsage';
-import WarningIcon from '@material-ui/icons/Warning';
+import InfoIcon from '@material-ui/icons/Info';
 import ViewStreamIcon from '@material-ui/icons/ViewStream';
 import { StatusBarStore } from "@widgets/StatusBar";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
-registerToolbar("Table");
+registerToolbar("Table", 100);
 
 function descendingComparator(a, b, orderBy) {
     const aText = a && a[orderBy] || "";
@@ -83,6 +83,7 @@ export default function TableWidget(props) {
         error,
         store,
         size,
+        showSort = true,
         viewModes = { table: null },
         ...otherProps
     } = props;
@@ -93,7 +94,7 @@ export default function TableWidget(props) {
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 10, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
-    const pageSize = useContext(PageSize);
+    const pageSize = useContext(ContentSize);
     const search = useSearch(() => {
         store.update(s => {
             s.offset = 0;
@@ -188,7 +189,8 @@ export default function TableWidget(props) {
                     console.error(err);
                 }
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         data && name && {
             id: "export",
@@ -204,16 +206,18 @@ export default function TableWidget(props) {
                 }
                 exportData(body, name, "application/json");
             },
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
         refresh && {
             id: "refresh",
             name: translations.REFRESH,
             icon: <RefreshIcon />,
             onClick: refresh,
-            location: "advanced"
+            location: "header",
+            menu: "true"
         },
-        viewMode !== "table" && !!sortItems.length && {
+        viewMode !== "table" && !!sortItems.length && showSort && {
             id: "sort",
             location: "header",
             name: translations.SORT,
@@ -292,7 +296,7 @@ export default function TableWidget(props) {
         });
 
         items = stableSort(items || [], getComparator(order, orderBy));
-        setEmpty(data && data.length && !items.length);
+        setEmpty(data && (!data.length || !items.length));
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
@@ -316,7 +320,7 @@ export default function TableWidget(props) {
     const numItems = items && items.length;
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
-    const emptyElement = <Message Icon={WarningIcon} label={translations.NO_ITEMS} />;
+    const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
 
     if (viewMode === "list") {
         const itemHeightInPixels = sizeToPixels(itemHeight);
