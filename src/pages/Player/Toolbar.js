@@ -72,8 +72,7 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             icon: <SpeedIcon />,
             items: rateMenuItems,
             selected: speed,
-            location: "footer",
-            label: true,
+            location: "header",
             divider: true
         },
         {
@@ -83,20 +82,6 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             items: volumeMenuItems,
             selected: volume,
             divider: true,
-            label: true,
-            location: "footer"
-        },
-        isMobile && {
-            id: "name",
-            element:
-                <>
-                    <Tooltip arrow title={name}>
-                        <div className={styles.name}>
-                            {name}
-                        </div>
-                    </Tooltip>
-                    <div style={{ flex: 1 }} />
-                </>,
             location: "header"
         },
         isVideo && {
@@ -104,7 +89,7 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             name: translations.FULLSCREEN,
             icon: <FullscreenIcon />,
             onClick: () => playerRef.requestFullscreen(),
-            location: "footer"
+            location: "header"
         }
     ].filter(Boolean);
 
