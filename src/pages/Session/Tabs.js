@@ -48,7 +48,7 @@ export default function Tabs({ Container }) {
         session.thumbnail && {
             label: translations.THUMBNAIL,
             icon: <ImageIcon />,
-            value: basePath + "/" + encodeURIComponent("image?label=THUMBNAIL")
+            value: basePath + "/" + encodeURIComponent("image")
         },
         {
             label: translations.TIMESTAMPS,

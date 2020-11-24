@@ -78,7 +78,8 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
 }
 
 export default function BreadcrumbsWidget({ className, items, border, bar, hideRoot, navigateLast }) {
-    const breadcrumbItems = (items || []).map((item, index, list) => {
+    let breadcrumbItems = (items || []).filter(({ breadcrumbs }) => typeof breadcrumbs === "undefined" || breadcrumbs);
+    breadcrumbItems = breadcrumbItems.map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
         return <BreadcrumbItem
