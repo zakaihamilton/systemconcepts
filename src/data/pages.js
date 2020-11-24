@@ -77,6 +77,7 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import { getTimestampsSection } from "@pages/Timestamps/Section";
 const Timestamps = dynamic(() => import("@pages/Player/Timestamps"), { loading: () => <PageLoad /> });
 
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
@@ -278,6 +279,7 @@ export default [
         name: "TIMESTAMPS",
         Icon: AccessTimeIcon,
         Component: Timestamps,
+        section: getTimestampsSection,
         useParentName: 1
     },
     {

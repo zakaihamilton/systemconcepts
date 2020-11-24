@@ -59,9 +59,15 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
     else {
         style.paddingLeft = (depth * 1.5) + "em";
     }
+    if (target && !target.startsWith("#")) {
+        target = "#" + target;
+    }
+    else if (!target) {
+        target = undefined;
+    }
     return <>
         {!!reverse && !!divider && <Divider />}
-        <ListItem style={style} component={target ? Link : undefined} underline="none" href={target ? "#" + target : undefined} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
+        <ListItem style={style} component={target ? Link : undefined} underline="none" href={target} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
             {!!avatar && icon && <ListItemAvatar>
                 <Avatar className={iconContainerClassName}>
                     {actionIcon}
