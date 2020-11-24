@@ -23,7 +23,7 @@ export function useBookmarks() {
         const page = pagesFromHash[pagesFromHash.length - 1];
         return {
             ...page,
-            target: page.id,
+            target: props.id,
             ...props
         }
     });
