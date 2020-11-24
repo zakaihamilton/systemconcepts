@@ -19,7 +19,8 @@ export const SyncActiveStore = new Store({
     lastSynced: 0
 });
 
-export function useSync() {
+export function useSync(options = {}) {
+    const { active = true } = options;
     const { counter, busy } = SyncActiveStore.useState(s => {
         return {
             counter: s.counter,
@@ -27,15 +28,17 @@ export function useSync() {
         };
     });
     useEffect(() => {
-        SyncActiveStore.update(s => {
-            s.active++;
-        });
-        return () => {
+        if (active) {
             SyncActiveStore.update(s => {
-                s.active--;
+                s.active++;
             });
-        };
-    }, []);
+            return () => {
+                SyncActiveStore.update(s => {
+                    s.active--;
+                });
+            };
+        }
+    }, [active]);
     return [counter, busy];
 }
 

@@ -17,7 +17,7 @@ export default function Tabs({ Container }) {
     });
     const parentIndex = items.length - baseIndex - 2;
     const params = useParentParams(parentIndex) || {};
-    const [sessions] = useSessions([], false);
+    const [sessions] = useSessions([], { filterSessions: false, active: false });
 
     const { group, year, date, name } = params;
 

@@ -19,8 +19,9 @@ export const SessionsStore = new Store({
     counter: 0
 });
 
-export function useSessions(depends = [], filterSessions = true) {
-    const [syncCounter, syncing] = useSync();
+export function useSessions(depends = [], options = {}) {
+    const { filterSessions = true } = options;
+    const [syncCounter, syncing] = useSync(options);
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
     const { busy, sessions, groups, groupFilter } = SessionsStore.useState();

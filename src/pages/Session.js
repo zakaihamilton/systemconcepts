@@ -13,7 +13,7 @@ export const SessionStore = new Store({
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
-    const [sessions, loading] = useSessions([], false);
+    const [sessions, loading] = useSessions([], { filterSessions: false });
     const dateFormatter = useDateFormatter({
         weekday: 'long',
         year: 'numeric',
