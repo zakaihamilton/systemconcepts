@@ -25,12 +25,12 @@
 
 .selectable {
     cursor: pointer !important;
-    border: 1px solid transparent;
+    border-bottom: 2px solid transparent;
 }
 
 .selectable:hover {
     background: var(--info-background) !important;
-    border: 1px solid var(--border-highlight);
+    border-bottom: 2px solid var(--border-highlight);
 }
 
 .row {

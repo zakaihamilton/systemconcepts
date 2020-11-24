@@ -43,7 +43,6 @@ export default function Tag({ data: { isLeaf, nestingLevel, item, setData }, isO
         <ItemMenu setData={setData} item={item} store={TagsStore} />
     </>;
     return <Row
-        border={true}
         className={styles.root}
         iconPadding={106}
         basePadding={basePadding}

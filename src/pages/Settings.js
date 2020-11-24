@@ -54,7 +54,8 @@ export default function Settings() {
         {
             id: "title",
             title: translations.NAME,
-            sortable: "name"
+            sortable: "name",
+            padding: false
         },
         {
             id: "widget",
