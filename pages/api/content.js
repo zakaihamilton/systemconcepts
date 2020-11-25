@@ -18,7 +18,7 @@ export default async (req, res) => {
         if (!user) {
             throw "ACCESS_DENIED";
         }
-        if (roleAuth(user.role, "admin")) {
+        if (roleAuth(user.role, "upper")) {
             readOnly = false;
         } else if (!roleAuth(user.role, "student")) {
             throw "ACCESS_DENIED";
