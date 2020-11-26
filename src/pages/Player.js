@@ -26,14 +26,6 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export function resetPlayer() {
-    PlayerStore.update(s => {
-        s.hash = "";
-        s.mediaPath = "";
-        s.playerPath = "";
-    });
-}
-
 export default function PlayerPage({ show = false, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
@@ -144,7 +136,7 @@ export default function PlayerPage({ show = false, suffix }) {
     return <div className={styles.root} style={style}>
         {statusBar}
         <Download visible={show && mediaPath} onClick={downloadFile} />
-        {MediaComponent && <MediaComponent key={mediaPath} style={mediaStyles} {...mediaProps}>
+        {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
         </MediaComponent>}
         {!!loading && !mediaPath && <Progress />}

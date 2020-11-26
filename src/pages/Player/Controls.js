@@ -17,7 +17,7 @@ import { usePageVisibility } from "@util/hooks";
 
 const skipPoints = 10;
 
-export default function Controls({ show, playerRef, metadata, setMetadata }) {
+export default function Controls({ show, path, playerRef, metadata, setMetadata }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
@@ -147,6 +147,10 @@ export default function Controls({ show, playerRef, metadata, setMetadata }) {
             console.error(err);
         });
     };
+    const stop = () => {
+        playerRef.pause();
+        playerRef.currentTime = 0;
+    };
 
     const timestamps = metadata && metadata.timestamps || [];
     const timestampPos = parseInt(currentTime);
@@ -199,10 +203,7 @@ export default function Controls({ show, playerRef, metadata, setMetadata }) {
                 {!!error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
                 {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
                 {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
-                {!error && <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={() => {
-                    playerRef.pause();
-                    playerRef.currentTime = 0;
-                }} />}
+                {!error && <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={stop} />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
                 <PlayerButton active={hasTimestamp} icon={<AccessTimeIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>
