@@ -45,8 +45,8 @@ export default function PlayerPage({ show = false, suffix }) {
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
-    const metadataPath = "local/personal/metadata/" + folder + "/" + sessionName + ".json";
-    const [metadata, , , setMetadata] = useFile(!!name && metadataPath, [name], data => {
+    const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
+    const [metadata, , , setMetadata] = useFile(!!name && metadataPath, [metadataPath], data => {
         return data ? JSON.parse(data) : {};
     });
 
@@ -144,7 +144,7 @@ export default function PlayerPage({ show = false, suffix }) {
     return <div className={styles.root} style={style}>
         {statusBar}
         <Download visible={show && mediaPath} onClick={downloadFile} />
-        {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
+        {MediaComponent && <MediaComponent key={mediaPath} style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
         </MediaComponent>}
         {!!loading && !mediaPath && <Progress />}

@@ -61,7 +61,7 @@ export function useLocalStorage(id, store, fields) {
 }
 
 export function useGlobalState(id, defaults) {
-    const state = StateStore.useState(s => s[id]);
+    const state = StateStore.useState(s => s[id], [id]);
     useEffect(() => {
         if (typeof state === "undefined" && id) {
             StateStore.update(s => {
