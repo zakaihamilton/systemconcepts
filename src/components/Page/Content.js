@@ -27,7 +27,7 @@ export default function Content() {
     return <ContentSize.Provider value={size}>
         <div className={styles.pageContainer}>
             <main ref={ref} className={styles.page}>
-                {playerPageRef.current && <Player show={showPlayer} {...playerPageRef.current} />}
+                {playerPageRef.current && <Player key={playerPageRef.current.url} show={showPlayer} {...playerPageRef.current} />}
                 {showPage && <Component {...activePage} />}
             </main>
         </div>
