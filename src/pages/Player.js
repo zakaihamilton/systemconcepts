@@ -18,7 +18,6 @@ import StatusBar from "@widgets/StatusBar";
 import Cookies from 'js-cookie';
 
 export const PlayerStore = new Store({
-    playerPath: "",
     mediaPath: "",
     hash: "",
     player: null
@@ -26,15 +25,15 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, suffix }) {
+export default function PlayerPage({ show = false, url, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, playerPath, mediaPath } = PlayerStore.useState();
+    const { hash, mediaPath } = PlayerStore.useState();
     const size = useContext(ContentSize);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
-    const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group && path !== playerPath);
+    const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
@@ -54,7 +53,6 @@ export default function PlayerPage({ show = false, suffix }) {
         if (show) {
             PlayerStore.update(s => {
                 s.hash = window.location.hash;
-                s.playerPath = path;
             });
         }
     }, [show, path]);

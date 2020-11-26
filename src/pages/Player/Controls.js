@@ -152,6 +152,11 @@ export default function Controls({ show, path, playerRef, metadata, setMetadata 
         playerRef.currentTime = 0;
     };
 
+    useEffect(() => {
+        stop();
+        playerRef.load();
+    }, [path]);
+
     const timestamps = metadata && metadata.timestamps || [];
     const timestampPos = parseInt(currentTime);
     const timestamp = timestamps.find(item => item.id === timestampPos);
