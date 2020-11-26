@@ -25,7 +25,7 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, url, suffix }) {
+export default function PlayerPage({ show = false, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const { hash, mediaPath } = PlayerStore.useState();
