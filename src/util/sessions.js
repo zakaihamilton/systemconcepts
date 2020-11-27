@@ -178,7 +178,7 @@ export function useSessions(depends = [], options = {}) {
         if (!groupFilter.length) {
             return sessions;
         }
-        return sessions.filter(session => groupFilter.includes(session.group));
+        return (sessions || []).filter(session => groupFilter.includes(session.group));
     }, [groupFilter, sessions]);
 
     const items = filterSessions ? filtered : sessions;
