@@ -81,16 +81,39 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
     const headers = req.headers || {};
     if (req.method === "GET") {
         try {
+            const body = req.body;
             const { id, query, fields } = headers;
             const parsedId = id && decodeURIComponent(id);
-            const parsedQuery = query && JSON.parse(decodeURIComponent(query));
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
-            if (id) {
+            if (body) {
+                const maxBytes = 4000 * 1000;
+                let records = await listCollection({
+                    dbName, collectionName, query: {
+                        "id": {
+                            "$in": body
+                        }
+                    }, fields: parsedFields
+                });
+                if (!records) {
+                    records = [];
+                }
+                const results = [];
+                for (const record of records) {
+                    if (JSON.stringify(results).length > maxBytes) {
+                        break;
+                    }
+                    results.push(record);
+                }
+                console.log("found", results.length, "items for collection", collectionName, "query", parsedQuery, "fields", parsedFields);
+                return results;
+            }
+            else if (id) {
                 const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
                 console.log("found an item for collection", collectionName, "id", parsedId, "fields", parsedFields);
                 return result;
             }
             else {
+                const parsedQuery = query && JSON.parse(decodeURIComponent(query));
                 let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
                 if (!result) {
                     result = [];
