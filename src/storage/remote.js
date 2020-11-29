@@ -173,6 +173,9 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 method: "POST",
                 body: JSON.stringify(files)
             });
+            if (!result || !result.length) {
+                break;
+            }
             files = files.filter(path => !result.find(item => item.id === path));
             for (const item of result) {
                 results[item.id] = item.body;

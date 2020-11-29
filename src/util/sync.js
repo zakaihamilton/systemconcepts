@@ -71,20 +71,31 @@ export async function syncLocal(endPoint, start, end) {
     await storage.createFolderPath(path, true);
     const listing = await storage.getRecursiveList(path);
     const changed = listing.filter(item => item.mtimeMs >= start && item.mtimeMs <= end);
+    const remoteFiles = [];
+    const files = {};
     for (const item of changed) {
         if (item.type === "file") {
-            const remote = makePath(item.path.replace(/^\/local\//, ""));
-            const localBuffer = await storage.readFile(item.path);
-            if (await storage.exists(remote)) {
-                const remoteBuffer = await storage.readFile(remote);
-                if (remoteBuffer === localBuffer) {
-                    continue;
-                }
-            }
-            await storage.createFolderPath(remote);
-            await storage.writeFile(remote, localBuffer);
+            const remote = makePath(item.path.replace(path, ""));
+            remoteFiles.push(remote);
         }
     }
+    const remoteBuffers = await storage.readFiles("/" + endPoint, remoteFiles);
+    if (!remoteBuffers) {
+        throw "Cannot read buffers";
+    }
+    for (const item of changed) {
+        if (item.type === "file") {
+            const remoteFolder = makePath(item.path.replace(/^\/local\//, ""));
+            const remoteFile = makePath(item.path.replace(path, ""));
+            const localBuffer = await storage.readFile(item.path);
+            if (remoteBuffers[remoteFile] === localBuffer) {
+                continue;
+            }
+            await storage.createFolderPath(remoteFolder);
+            files[remoteFile] = localBuffer;
+        }
+    }
+    await storage.writeFiles("/" + endPoint, files);
 }
 
 export function useSyncFeature() {
