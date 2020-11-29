@@ -79,7 +79,7 @@ export async function bulkWrite({ operations, ordered, ...params }) {
 
 export async function handleRequest({ dbName, collectionName, readOnly, req }) {
     const headers = req.headers || {};
-    if (req.method === "GET") {
+    if (req.method === "GET" || req.method === "POST") {
         try {
             const body = req.body;
             const { id, query, fields } = headers;

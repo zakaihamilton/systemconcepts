@@ -166,24 +166,19 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
     }
 
     async function readFiles(prefix, files) {
-        let batch = [];
-        for (const name of files) {
-            const path = prefix + name;
-            if (JSON.stringify(batch).length + body.length > maxBytes) {
-                await fetchJSON(fsEndPoint, {
-                    method: "GET",
-                    body: JSON.stringify(batch)
-                });
-                batch = [];
-            }
-            batch.push(path);
-        }
-        if (batch.length) {
-            await fetchJSON(fsEndPoint, {
-                method: "PUT",
-                body: JSON.stringify(batch)
+        let results = {};
+        files = files.map(name => prefix + name);
+        while (files) {
+            const result = await fetchJSON(fsEndPoint, {
+                method: "POST",
+                body: JSON.stringify(files)
             });
+            files = files.filter(path => result.find(item => item.id === path));
+            for (const item of result) {
+                results[item.id] = item.body;
+            }
         }
+        return results;
     }
 
     async function writeFile(path, body = "") {
