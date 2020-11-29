@@ -167,13 +167,13 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 
     async function readFiles(prefix, files) {
         let results = {};
-        files = files.map(name => prefix + name);
-        while (files) {
+        files = files.map(name => makePath(prefix + name));
+        while (files.length) {
             const result = await fetchJSON(fsEndPoint, {
                 method: "POST",
                 body: JSON.stringify(files)
             });
-            files = files.filter(path => result.find(item => item.id === path));
+            files = files.filter(path => !result.find(item => item.id === path));
             for (const item of result) {
                 results[item.id] = item.body;
             }

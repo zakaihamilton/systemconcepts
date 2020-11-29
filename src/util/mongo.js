@@ -85,7 +85,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             const { id, query, fields } = headers;
             const parsedId = id && decodeURIComponent(id);
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
-            if (body) {
+            if (Array.isArray(body)) {
                 const maxBytes = 4000 * 1000;
                 let records = await listCollection({
                     dbName, collectionName, query: {
@@ -104,7 +104,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                     }
                     results.push(record);
                 }
-                console.log("found", results.length, "items for collection", collectionName, "query", parsedQuery, "fields", parsedFields);
+                console.log("found", results.length, "items for collection", collectionName, "fields", parsedFields);
                 return results;
             }
             else if (id) {

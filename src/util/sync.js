@@ -124,7 +124,8 @@ export function useSyncFeature() {
             startRef.current = 0;
             return;
         }
-        const syncItems = async items => {
+        const syncItems = async (device, items) => {
+            const files = [];
             for (const item of items) {
                 const duration = new Date().getTime() - startRef.current;
                 try {
@@ -141,9 +142,8 @@ export function useSyncFeature() {
                         continue;
                     }
                     if (stat.type === "file") {
-                        const buffer = await storage.readFile(path);
+                        files.push({ local, path });
                         await storage.createFolderPath(local);
-                        await storage.writeFile(local, buffer);
                     }
                     else if (stat.type === "dir") {
                         await storage.createFolder(local);
@@ -155,6 +155,23 @@ export function useSyncFeature() {
                 }
                 setDuration(parseInt(duration / 1000) * 1000);
             }
+            try {
+                const paths = files.map(item => item.path.replace("/" + device, ""));
+                const results = await storage.readFiles("/" + device, paths);
+                const duration = new Date().getTime() - startRef.current;
+                setDuration(parseInt(duration / 1000) * 1000);
+                for (const path in results) {
+                    const item = files.find(item => item.path === "/" + device + path);
+                    if (!item) {
+                        continue;
+                    }
+                    await storage.writeFile(item.local, results[path]);
+                }
+            }
+            catch (err) {
+                setError("SYNC_FAILED");
+                console.error(err);
+            }
         };
         let updateCounter = 0;
         if (isSignedIn) {
@@ -162,7 +179,7 @@ export function useSyncFeature() {
                 const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
                 if (shared.length) {
                     await storage.createFolderPath(makePath("local", "shared"), true);
-                    await syncItems(shared);
+                    await syncItems("shared", shared);
                     updateCounter++;
                 }
             }
@@ -179,7 +196,7 @@ export function useSyncFeature() {
             try {
                 const personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
                 if (personal.length) {
-                    await syncItems(personal);
+                    await syncItems("personal", personal);
                     updateCounter++;
                 }
                 await syncLocal("personal", lastUpdated, currentTime);
