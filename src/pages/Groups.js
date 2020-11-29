@@ -98,7 +98,7 @@ export default function Groups() {
         const statusItem = (status || []).find(group => group.name === item.name) || {};
         const hasStatusItem = statusItem.progress !== "undefined";
 
-        const variant = statusItem.progress !== -1 ? "static" : undefined;
+        const variant = statusItem.progress !== -1 ? "determinate" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
         const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} />;
@@ -107,7 +107,7 @@ export default function Groups() {
             ...item,
             iconWidget,
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} />,
-            progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "static" ? statusItem.progress : undefined} />,
+            progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? statusItem.progress : undefined} />,
             colorWidget: <ColorPicker pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
         };
     };

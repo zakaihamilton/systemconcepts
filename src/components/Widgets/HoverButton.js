@@ -83,7 +83,7 @@ export default function HoverButton({ className, onClick, onHoverComplete, hover
                         size={52}
                         color="inherit"
                         className={styles.fabProgress}
-                        variant={loading ? "indeterminate" : "static"}
+                        variant={loading ? "indeterminate" : "determinate"}
                     />
                 </div>
             </div>
