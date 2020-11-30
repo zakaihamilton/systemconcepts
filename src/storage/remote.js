@@ -66,7 +66,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         const maxBytes = 4000 * 1000;
         let batch = [];
         for (const name of folders) {
-            const path = prefix + name;
+            const path = makePath(prefix + name);
             if (JSON.stringify(batch).length > maxBytes) {
                 await fetchJSON(fsEndPoint, {
                     method: "PUT",
@@ -206,7 +206,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         const maxBytes = 4000 * 1000;
         let batch = [];
         for (const name in files) {
-            const path = prefix + name;
+            const path = makePath(prefix + name);
             const body = files[name] || "";
             if (JSON.stringify(batch).length + body.length > maxBytes) {
                 await fetchJSON(fsEndPoint, {

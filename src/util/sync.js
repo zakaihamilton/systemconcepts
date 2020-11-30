@@ -73,6 +73,7 @@ export async function syncLocal(endPoint, start, end) {
     const changed = listing.filter(item => item.mtimeMs >= start && item.mtimeMs <= end);
     const remoteFiles = [];
     const files = {};
+    const folders = [];
     for (const item of changed) {
         if (item.type === "file") {
             const remote = makePath(item.path.replace(path, ""));
@@ -85,16 +86,24 @@ export async function syncLocal(endPoint, start, end) {
     }
     for (const item of changed) {
         if (item.type === "file") {
-            const remoteFolder = makePath(item.path.replace(/^\/local\//, ""));
+            let remoteFolder = makePath(item.path.replace(/^\/local\//, ""));
             const remoteFile = makePath(item.path.replace(path, ""));
             const localBuffer = await storage.readFile(item.path);
             if (remoteBuffers[remoteFile] === localBuffer) {
                 continue;
             }
-            await storage.createFolderPath(remoteFolder);
+            remoteFolder = makePath(remoteFolder);
+            const parts = remoteFolder.split("/").filter(Boolean);
+            for (let partIndex = 1; partIndex < parts.length; partIndex++) {
+                const subPath = parts.slice(1, partIndex).join("/");
+                if (subPath) {
+                    folders.push("/" + subPath);
+                }
+            }
             files[remoteFile] = localBuffer;
         }
     }
+    await storage.createFolders("/" + endPoint, folders);
     await storage.writeFiles("/" + endPoint, files);
 }
 

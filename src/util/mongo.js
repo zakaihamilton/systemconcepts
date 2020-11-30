@@ -143,6 +143,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             for (const record of records) {
                 const { id } = record;
                 delete record._id;
+                console.log(id);
                 if (req.method === "DELETE") {
                     operations.push({ deleteOne: { filter: { id } } });
                 }
