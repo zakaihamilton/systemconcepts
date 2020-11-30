@@ -66,7 +66,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         const maxBytes = 4000 * 1000;
         let batch = [];
         for (const name of folders) {
-            const path = prefix + name;
+            const path = makePath(prefix + name);
             if (JSON.stringify(batch).length > maxBytes) {
                 await fetchJSON(fsEndPoint, {
                     method: "PUT",
@@ -165,6 +165,25 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         return item && !item.deleted && item.body;
     }
 
+    async function readFiles(prefix, files) {
+        let results = {};
+        files = files.map(name => makePath(prefix + name));
+        while (files.length) {
+            const result = await fetchJSON(fsEndPoint, {
+                method: "POST",
+                body: JSON.stringify(files)
+            });
+            if (!result || !result.length) {
+                break;
+            }
+            files = files.filter(path => !result.find(item => item.id === path));
+            for (const item of result) {
+                results[item.id] = item.body;
+            }
+        }
+        return results;
+    }
+
     async function writeFile(path, body = "") {
         path = makePath(path);
         await fetchJSON(fsEndPoint, {
@@ -187,7 +206,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         const maxBytes = 4000 * 1000;
         let batch = [];
         for (const name in files) {
-            const path = prefix + name;
+            const path = makePath(prefix + name);
             const body = files[name] || "";
             if (JSON.stringify(batch).length + body.length > maxBytes) {
                 await fetchJSON(fsEndPoint, {
@@ -242,6 +261,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         deleteFolder,
         deleteFile,
         readFile,
+        readFiles,
         writeFile,
         writeFiles,
         exists

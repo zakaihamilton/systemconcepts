@@ -71,20 +71,40 @@ export async function syncLocal(endPoint, start, end) {
     await storage.createFolderPath(path, true);
     const listing = await storage.getRecursiveList(path);
     const changed = listing.filter(item => item.mtimeMs >= start && item.mtimeMs <= end);
+    const remoteFiles = [];
+    const files = {};
+    const folders = [];
     for (const item of changed) {
         if (item.type === "file") {
-            const remote = makePath(item.path.replace(/^\/local\//, ""));
-            const localBuffer = await storage.readFile(item.path);
-            if (await storage.exists(remote)) {
-                const remoteBuffer = await storage.readFile(remote);
-                if (remoteBuffer === localBuffer) {
-                    continue;
-                }
-            }
-            await storage.createFolderPath(remote);
-            await storage.writeFile(remote, localBuffer);
+            const remote = makePath(item.path.replace(path, ""));
+            remoteFiles.push(remote);
         }
     }
+    const remoteBuffers = await storage.readFiles("/" + endPoint, remoteFiles);
+    if (!remoteBuffers) {
+        throw "Cannot read buffers";
+    }
+    for (const item of changed) {
+        if (item.type === "file") {
+            let remoteFolder = makePath(item.path.replace(/^\/local\//, ""));
+            const remoteFile = makePath(item.path.replace(path, ""));
+            const localBuffer = await storage.readFile(item.path);
+            if (remoteBuffers[remoteFile] === localBuffer) {
+                continue;
+            }
+            remoteFolder = makePath(remoteFolder);
+            const parts = remoteFolder.split("/").filter(Boolean);
+            for (let partIndex = 1; partIndex < parts.length; partIndex++) {
+                const subPath = parts.slice(1, partIndex).join("/");
+                if (subPath) {
+                    folders.push("/" + subPath);
+                }
+            }
+            files[remoteFile] = localBuffer;
+        }
+    }
+    await storage.createFolders("/" + endPoint, folders);
+    await storage.writeFiles("/" + endPoint, files);
 }
 
 export function useSyncFeature() {
@@ -124,7 +144,8 @@ export function useSyncFeature() {
             startRef.current = 0;
             return;
         }
-        const syncItems = async items => {
+        const syncItems = async (device, items) => {
+            const files = [];
             for (const item of items) {
                 const duration = new Date().getTime() - startRef.current;
                 try {
@@ -141,9 +162,8 @@ export function useSyncFeature() {
                         continue;
                     }
                     if (stat.type === "file") {
-                        const buffer = await storage.readFile(path);
+                        files.push({ local, path });
                         await storage.createFolderPath(local);
-                        await storage.writeFile(local, buffer);
                     }
                     else if (stat.type === "dir") {
                         await storage.createFolder(local);
@@ -155,6 +175,23 @@ export function useSyncFeature() {
                 }
                 setDuration(parseInt(duration / 1000) * 1000);
             }
+            try {
+                const paths = files.map(item => item.path.replace("/" + device, ""));
+                const results = await storage.readFiles("/" + device, paths);
+                const duration = new Date().getTime() - startRef.current;
+                setDuration(parseInt(duration / 1000) * 1000);
+                for (const path in results) {
+                    const item = files.find(item => item.path === "/" + device + path);
+                    if (!item) {
+                        continue;
+                    }
+                    await storage.writeFile(item.local, results[path]);
+                }
+            }
+            catch (err) {
+                setError("SYNC_FAILED");
+                console.error(err);
+            }
         };
         let updateCounter = 0;
         if (isSignedIn) {
@@ -162,7 +199,7 @@ export function useSyncFeature() {
                 const shared = (await fetchUpdated("shared", lastUpdated, currentTime)) || [];
                 if (shared.length) {
                     await storage.createFolderPath(makePath("local", "shared"), true);
-                    await syncItems(shared);
+                    await syncItems("shared", shared);
                     updateCounter++;
                 }
             }
@@ -179,7 +216,7 @@ export function useSyncFeature() {
             try {
                 const personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
                 if (personal.length) {
-                    await syncItems(personal);
+                    await syncItems("personal", personal);
                     updateCounter++;
                 }
                 await syncLocal("personal", lastUpdated, currentTime);

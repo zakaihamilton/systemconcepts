@@ -82,6 +82,9 @@ const storageMethods = Object.fromEntries([
         name: "readFile"
     },
     {
+        name: "readFiles"
+    },
+    {
         name: "writeFile"
     },
     {

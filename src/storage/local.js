@@ -90,6 +90,14 @@ async function readFile(path) {
     return await fs.promises.readFile(path, "utf8");
 }
 
+async function readFiles(prefix, files) {
+    let results = {};
+    for (const name of files) {
+        results[name] = await readFile(prefix + name);
+    }
+    return files;
+}
+
 async function writeFile(path, body) {
     path = makePath(path);
     return await fs.promises.writeFile(path, body, "utf8");
@@ -120,6 +128,7 @@ export default {
     deleteFolder,
     deleteFile,
     readFile,
+    readFiles,
     writeFile,
     writeFiles,
     exists
