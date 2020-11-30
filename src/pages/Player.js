@@ -11,7 +11,6 @@ import Download from "@widgets/Download";
 import { exportFile } from "@util/importExport";
 import { useFetchJSON } from "@util/fetch";
 import Progress from "@widgets/Progress";
-import { useFile } from "@util/storage";
 import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
@@ -37,9 +36,6 @@ export default function PlayerPage({ show = false, suffix }) {
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
-    const [metadata, , , setMetadata] = useFile(!!name && metadataPath, [metadataPath], data => {
-        return data ? JSON.parse(data) : {};
-    });
 
     const gotoPlayer = () => {
         let hashPath = hash;
@@ -92,8 +88,7 @@ export default function PlayerPage({ show = false, suffix }) {
     let MediaComponent = null;
     let mediaType = undefined;
     const mediaProps = {
-        metadata,
-        setMetadata,
+        metadataPath,
         path: mediaPath,
         show,
         name: date + " " + name,

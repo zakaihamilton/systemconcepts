@@ -14,10 +14,11 @@ import Replay10Icon from '@material-ui/icons/Replay10';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Tooltip from '@material-ui/core/Tooltip';
 import { usePageVisibility } from "@util/hooks";
+import { useFile } from "@util/storage";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadata, setMetadata }) {
+export default function Controls({ show, path, playerRef, metadataPath }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
     const translations = useTranslations();
@@ -26,6 +27,9 @@ export default function Controls({ show, path, playerRef, metadata, setMetadata 
     const [currentTime, setCurrentTime] = useState(0);
     const [error, setError] = useState(null);
     const visible = usePageVisibility();
+    const [metadata, , , setMetadata] = useFile(!!name && metadataPath, [metadataPath], data => {
+        return data ? JSON.parse(data) : {};
+    });
 
     useEffect(() => {
         if (!visible || !show) {
@@ -179,7 +183,7 @@ export default function Controls({ show, path, playerRef, metadata, setMetadata 
         });
     };
 
-    return <div className={styles.root}>
+    return <>
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
         <div className={styles.toolbar}>
             <div className={styles.progress}>
@@ -214,5 +218,5 @@ export default function Controls({ show, path, playerRef, metadata, setMetadata 
                 <PlayerButton active={hasTimestamp} icon={<AccessTimeIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>
             </div>
         </div>
-    </div>;
+    </>;
 }
