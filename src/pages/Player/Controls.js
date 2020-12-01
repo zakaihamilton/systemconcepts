@@ -27,7 +27,7 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
     const [currentTime, setCurrentTime] = useState(0);
     const [error, setError] = useState(null);
     const visible = usePageVisibility();
-    const [metadata, , , setMetadata] = useFile(!!name && metadataPath, [metadataPath], data => {
+    const [metadata, , , setMetadata] = useFile(metadataPath, [metadataPath], data => {
         return data ? JSON.parse(data) : {};
     });
 
