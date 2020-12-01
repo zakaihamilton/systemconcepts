@@ -12,7 +12,7 @@
     "@material-ui/core": "^4.11.1",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
-    "aws-sdk": "^2.799.0",
+    "aws-sdk": "^2.801.0",
     "base64-arraybuffer-es6": "^0.6.0",
     "bcrypt": "^5.0.0",
     "cookie": "^0.4.1",
@@ -22,19 +22,22 @@
     "js-cookie": "^2.2.1",
     "jss-rtl": "^0.3.0",
     "mongodb": "^3.6.3",
-    "next": "10.0.3",
-    "next-pwa": "^3.1.1",
+    "next": "^10.0.3",
+    "next-pwa": "^3.1.5",
     "nodemailer": "^6.4.16",
-    "pullstate": "^1.20.3",
-    "react": "17.0.1",
+    "pullstate": "^1.20.4",
+    "react": "^17.0.1",
     "react-color": "^2.19.3",
     "react-cool-dimensions": "^1.1.10",
-    "react-dom": "17.0.1",
+    "react-dom": "^17.0.1",
     "react-vtree": "^2.0.4",
     "react-window": "^1.8.6",
     "sass": "^1.29.0",
     "swr": "^0.3.9",
     "use-dark-mode": "^2.3.1",
     "uuid": "^8.3.1"
+  },
+  "devDependencies": {
+    "yarn-upgrade-all": "^0.5.4"
   }
 }
