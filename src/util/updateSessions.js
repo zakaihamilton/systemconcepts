@@ -77,14 +77,14 @@ export function useUpdateSessions() {
                 s.status = [...s.status];
             });
         }
-        for (let yearIndex = 0; yearIndex < years.length; yearIndex++) {
+        for (let yearIndex = years.length - 1; yearIndex >= 0; yearIndex--) {
             const year = years[yearIndex];
-            const percentage = parseInt((yearIndex / years.length) * 100);
+            const percentage = parseInt(((years.length - 1 - yearIndex) / years.length) * 100);
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
                 s.status[itemIndex].count = years.length;
                 s.status[itemIndex].progress = percentage;
-                s.status[itemIndex].index = yearIndex;
+                s.status[itemIndex].index = years.length - yearIndex;
                 s.status = [...s.status];
             });
             try {

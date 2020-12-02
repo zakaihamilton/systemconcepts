@@ -1,6 +1,5 @@
 .root {
     display: flex;
-    border-right: 1px solid var(--border-color);
     color: var(--info-color);
     align-items: center;
     justify-content: center;
@@ -8,6 +7,18 @@
     position: sticky;
     background-color: var(--info-background);
     z-index: 1;
+    border-radius: 0.5em 0.5em 0 0;
+    margin-bottom: 0.25em;
+}
+
+.root:not(.last) {
+    [dir=ltr] & {
+        margin-right: 0.25em;
+    }
+
+    [dir=rtl] & {
+        margin-left: 0.25em;
+    }
 }
 
 .root.mobile {

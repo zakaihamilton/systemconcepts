@@ -37,13 +37,13 @@ export default function MonthView({ sessions, date, store }) {
     const numWeeks = 6;
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} dateFormatter={dayFormatter} />;
+        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} />;
     });
 
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
         const day = addDate(month, index);
-        return <DayHeader key={index} date={day} index={index} dateFormatter={dayHeaderFormatter} />
+        return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dayHeaderFormatter} />
     });
 
     const monthState = [month.getMonth() + 1, month => {
@@ -59,7 +59,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input background={false} select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);
@@ -76,7 +76,7 @@ export default function MonthView({ sessions, date, store }) {
             name
         };
     });
-    const yearWidget = <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input background={false} select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
 
     const gotoPreviousMonth = () => {
         const newDate = new Date(month);
@@ -121,7 +121,6 @@ export default function MonthView({ sessions, date, store }) {
             icon: direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />,
             onClick: gotoPreviousMonth,
             disabled: !hasPreviousMonth,
-            divider: true,
             location: "footer"
         },
         {
@@ -132,13 +131,11 @@ export default function MonthView({ sessions, date, store }) {
         },
         {
             id: "yearWidget",
-            divider: true,
             element: yearWidget,
             location: "footer"
         },
         {
             id: "nextMonth",
-            divider: true,
             name: translations.NEXT_MONTH,
             icon: direction === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />,
             onClick: gotoNextMonth,

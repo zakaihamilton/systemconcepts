@@ -3,7 +3,6 @@
     border-top: 1px solid transparent;
     border-bottom: 1px solid var(--border-color);
     border-left: 1px solid transparent;
-    border-right: 1px solid var(--border-color);
     color: var(--text-color);
     align-items: center;
     justify-content: center;
@@ -14,4 +13,8 @@
     color: var(--info-color);
     border-top: 1px solid var(--info-color);
     border-bottom: 1px solid var(--info-color);
+}
+
+.root:not(.last) {
+    border-right: 1px solid var(--border-color);
 }

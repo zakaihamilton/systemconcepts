@@ -10,7 +10,7 @@ import { addPath, toPath } from "@util/pages";
 import { useDeviceType } from "@util/styles";
 import HoverButton from "@widgets/HoverButton";
 
-export default function Day({ sessions, month, column, row, date, dateFormatter }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter }) {
     const style = {
         gridColumn: column,
         gridRow: row
@@ -35,7 +35,12 @@ export default function Day({ sessions, month, column, row, date, dateFormatter 
             onClick: () => addPath(path)
         };
     });
-    return <div className={styles.root} style={style}>
+    const className = clsx(
+        styles.root,
+        column === columnCount && styles.lastColumn,
+        row === rowCount && styles.lastRow
+    );
+    return <div className={className} style={style}>
         <div className={styles.title}>
             <Avatar className={clsx(styles.day, isToday && styles.today, isMonth && styles.active)}>
                 {dayNumber}

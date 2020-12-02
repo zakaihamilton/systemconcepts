@@ -10,6 +10,7 @@ import clsx from "clsx";
 import TextField from '@material-ui/core/TextField';
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
+import DelayInput from "@widgets/DelayInput";
 
 registerToolbar("Navigator");
 
@@ -68,7 +69,9 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
             location: "footer",
             element: (<>
                 <Tooltip title={translations.PAGE_INDEX} arrow>
-                    <TextField className={styles.pageIndex} onChange={handlePageChange} value={pageIndex + 1} />
+                    <DelayInput onChange={handlePageChange} value={pageIndex + 1}>
+                        <TextField className={styles.pageIndex} />
+                    </DelayInput>
                 </Tooltip>
                 <Typography className={clsx(styles.pageSeparator)}>
                     /

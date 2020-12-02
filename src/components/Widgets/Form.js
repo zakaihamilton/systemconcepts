@@ -4,18 +4,20 @@ import Progress from "./Progress";
 
 function FormItem({ child, record, setRecord, validate }) {
     const { props } = child;
-    const { id } = props;
+    const { id, field } = props;
 
     const setValue = useCallback(value => {
         setRecord(record => {
             return {
                 ...record,
-                [id]: value
+                ...!field && { [id]: value },
+                ...field && { [id]: { ...record[id], [field]: value } }
             };
         });
-    }, [id]);
+    }, [id, field]);
 
-    const state = [record && record[id], setValue];
+    const value = !!field ? record && record[id] && record[id][field] : record && record[id];
+    const state = [value, setValue];
 
     const element = cloneElement(child, {
         state,

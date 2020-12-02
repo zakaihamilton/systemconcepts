@@ -3,11 +3,17 @@
     flex-direction: column;
     border-left: 1px solid transparent;
     border-top: 1px solid transparent;
-    border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
     padding: 0.25em;
     min-width: 1em;
     min-height: 5.5em;
+}
+
+.root:not(.lastColumn) {
+    border-right: 1px solid var(--border-color);
+}
+
+.root:not(.lastRow) {
+    border-bottom: 1px solid var(--border-color);
 }
 
 .title {

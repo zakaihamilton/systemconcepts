@@ -968,6 +968,18 @@ export default {
         {
             "id": "NEW_ARTICLE",
             "value": "New Article"
+        },
+        {
+            "id": "NUMBER",
+            "value": "Number"
+        },
+        {
+            "id": "FIELD_TYPE",
+            "value": "Field Type"
+        },
+        {
+            "id": "TEXT",
+            "value": "Text"
         }
     ]
 };

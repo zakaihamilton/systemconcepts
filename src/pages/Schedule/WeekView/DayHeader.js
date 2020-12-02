@@ -3,7 +3,7 @@ import styles from "./DayHeader.module.scss";
 import { useDeviceType } from "@util/styles";
 import { isDateToday } from "@util/date";
 
-export default function DayHeader({ dateFormatter, dayFormatter, date, index }) {
+export default function DayHeader({ dateFormatter, dayFormatter, date, index, count }) {
     const isPhone = useDeviceType() === "phone";
     const style = {
         gridColumn: isPhone ? 1 : index + 1,
@@ -12,7 +12,13 @@ export default function DayHeader({ dateFormatter, dayFormatter, date, index }) 
     const dayName = dayFormatter.format(date);
     const dateName = dateFormatter.format(date);
     const isToday = isDateToday(date);
-    return <div className={clsx(styles.root, isToday && styles.today, isPhone && styles.mobile)} style={style}>
+    const className = clsx(
+        styles.root,
+        isToday && styles.today,
+        isPhone && styles.mobile,
+        index === count - 1 && styles.last
+    );
+    return <div className={className} style={style}>
         <div className={styles.day}>{dayName}</div>
         <div>{dateName}</div>
     </div>

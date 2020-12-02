@@ -964,6 +964,18 @@ export default {
         {
             "id": "NEW_ARTICLE",
             "value": "מאמר חדש"
+        },
+        {
+            "id": "NUMBER",
+            "value": "מספר"
+        },
+        {
+            "id": "FIELD_TYPE",
+            "value": "סוג שדה"
+        },
+        {
+            "id": "TEXT",
+            "value": "טֶקסט"
         }
     ]
 };

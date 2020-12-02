@@ -40,7 +40,8 @@ export default function Types() {
         {
             id: "idWidget",
             title: translations.ID,
-            sortable: "id"
+            sortable: "id",
+            padding: false
         },
         {
             id: "label",
@@ -51,6 +52,10 @@ export default function Types() {
             id: "parents",
             title: translations.PARENT_TYPES,
             sortable: true
+        },
+        {
+            id: "fieldWidget",
+            title: translations.FIELD_TYPE
         }
     ];
 
@@ -83,7 +88,8 @@ export default function Types() {
             ...item,
             label,
             parents,
-            idWidget: <Row href={href} onClick={typeClick.bind(this, item)} icons={iconWidget}>{item.id}</Row>
+            idWidget: <Row href={href} onClick={typeClick.bind(this, item)} icons={iconWidget}>{item.id}</Row>,
+            fieldWidget: translations[item.field]
         };
     };
 

@@ -78,7 +78,9 @@ export default function SideBar() {
     }
 
     return <div className={styles.root}>
-        <List items={items} state={state} />
-        <QuickAccess closeDrawer={closeDrawer} state={state} />
+        <div className={styles.container}>
+            <List items={items} state={state} />
+            <QuickAccess closeDrawer={closeDrawer} state={state} />
+        </div>
     </div>;
 }

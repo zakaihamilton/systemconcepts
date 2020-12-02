@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useContext, useEffect, useMemo, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -16,7 +16,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PublishIcon from '@material-ui/icons/Publish';
 import Error from "./Table/Error";
-import Column from "./Table/Column";
+import TableColumn from "./Table/TableColumn";
 import clsx from "clsx";
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Message from "@widgets/Message";
@@ -31,6 +31,7 @@ import DataUsageIcon from '@material-ui/icons/DataUsage';
 import InfoIcon from '@material-ui/icons/Info';
 import ViewStreamIcon from '@material-ui/icons/ViewStream';
 import { StatusBarStore } from "@widgets/StatusBar";
+import ListColumns from "./Table/ListColumns";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -324,20 +325,36 @@ export default function TableWidget(props) {
 
     if (viewMode === "list") {
         const itemHeightInPixels = sizeToPixels(itemHeight);
+        const itemCount = hideColumns ? numItems : numItems + 1;
+
+        const innerElementType = forwardRef(({ children, ...rest }, ref) => {
+            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+            const style = {
+                top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
+            };
+            return <div ref={ref} {...rest}>
+                {!hideColumns && <ListColumns key={0} columns={columns} style={{ ...style, ...itemStyles }} {...props} />}
+                {children}
+            </div>
+        });
 
         const Row = ({ index, style }) => {
-            const item = items[index];
-            const { id } = item;
-            const { style: itemStyles, ...props } = viewModes[viewMode] || {};
-            const selected = selectedRow && selectedRow(item);
+            const itemIndex = hideColumns ? index : index - 1;
+            const item = items[itemIndex];
+            const { id } = item || {};
+            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+            const selected = index && selectedRow && selectedRow(item);
+            if (!hideColumns && !index) {
+                return null;
+            }
             return <Item
-                key={id || index}
+                key={id || itemIndex}
                 style={{ ...style, ...itemStyles }}
                 {...props}
                 columns={columns}
                 rowClick={rowClick}
                 item={item}
-                index={index}
+                index={itemIndex}
                 viewMode={viewMode}
                 selected={selected}
             />;
@@ -350,7 +367,8 @@ export default function TableWidget(props) {
             {!loading && !!numItems && !error && <FixedSizeList
                 className={styles.tableList}
                 height={height}
-                itemCount={numItems}
+                innerElementType={innerElementType}
+                itemCount={itemCount}
                 itemSize={itemHeightInPixels}
                 width={size.width}
             >
@@ -361,7 +379,7 @@ export default function TableWidget(props) {
     }
     else if (viewMode === "table") {
         const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
-            return <Column
+            return <TableColumn
                 key={item.id || idx}
                 item={item}
                 order={order}

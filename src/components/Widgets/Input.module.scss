@@ -11,6 +11,10 @@
     }
 }
 
+.root.transparent div {
+    background-color: transparent !important;
+}
+
 .root:focus svg {
     background-color: rgba(0, 0, 0, 0.5);
 }
