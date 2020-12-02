@@ -1,0 +1,44 @@
+.root {
+    position: sticky !important;
+    z-index: 2;
+    display: flex;
+    flex: 1;
+}
+
+.item {
+    display: grid;
+    color: var(--text-color);
+    background-color: var(--main-background);
+    box-sizing: border-box;
+    min-width: 0;
+    overflow: hidden;
+    flex: 1;
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.cell.defaultAlign {
+    [dir=ltr] & {
+        text-align: left;
+    }
+
+    [dir=rtl] & {
+        text-align: right;
+    }
+}
+
+.ellipsisText {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.cell.head {
+    background: var(--main-background) !important;
+}

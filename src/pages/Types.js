@@ -40,7 +40,8 @@ export default function Types() {
         {
             id: "idWidget",
             title: translations.ID,
-            sortable: "id"
+            sortable: "id",
+            padding: false
         },
         {
             id: "label",
