@@ -11,7 +11,7 @@ export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default forwardRef(function InputWidget({ label, render, mapping, helperText = " ", validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
+export default forwardRef(function InputWidget({ background, label, render, mapping, helperText = " ", validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
     let [value, setValue] = state;
     const [error, setError] = useState("");
     const onChangeText = event => {
@@ -50,7 +50,7 @@ export default forwardRef(function InputWidget({ label, render, mapping, helperT
         return <TextField
             ref={ref}
             label={label}
-            className={styles.root}
+            className={clsx(styles.root, !background && styles.transparent)}
             InputProps={{
                 className: clsx(styles.input, className),
                 ...icon && {

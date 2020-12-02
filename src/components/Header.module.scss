@@ -1,8 +1,10 @@
 .root {
     display: flex;
     overflow: hidden;
-    background-color: var(--header-background);
+    background-color: var(--chrome-background);
     box-sizing: border-box;
+    border-radius: 0.75em;
+    margin: 0.5em;
 }
 
 .toolbar {

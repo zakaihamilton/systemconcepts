@@ -4,13 +4,24 @@
     overflow: auto;
     display: flex;
     flex-direction: column;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    border-radius: 0.75em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    border: 1px solid var(--main-background);
+    background-color: var(--chrome-background);
 
     [dir=ltr] & {
-        border-right: 1px solid var(--border-color);
+        margin-left: 0.5em;
     }
 
     [dir=rtl] & {
-        border-left: 1px solid var(--border-color);
+        margin-right: 0.5em;
     }
 }
 

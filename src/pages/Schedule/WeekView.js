@@ -42,7 +42,7 @@ export default function WeekView({ sessions, date, store }) {
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
         const day = addDate(firstDay, index);
-        return <DayHeader key={index} date={day} index={index} dateFormatter={dateFormatter} dayFormatter={dayHeaderFormatter} />
+        return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dateFormatter} dayFormatter={dayHeaderFormatter} />
     });
 
     const weekOfMonth = getWeekOfMonth(firstDay);
