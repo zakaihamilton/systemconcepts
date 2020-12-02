@@ -3,22 +3,23 @@ import { useFile } from "@util/storage";
 
 export const tagsFilePath = "/shared/library/tags.json";
 
-export function buildTree(items, separator = "/", path = "", item) {
+export function buildTree(items, path = "", item) {
     item = item || {};
-    const { id } = item;
+    const { id, name } = item;
     let children = [];
-    if (id) {
+    if (name) {
         children = (items || []).filter(item => {
-            const { id, name } = item || {};
-            return id === path + separator + name;
+            const { parents } = item || {};
+            return parents && parents.includes(name);
         });
     }
     else {
-        children = (items || []).filter(item => !item.id.includes(separator));
+        children = (items || []).filter(item => !item.parents || !item.parents.length);
     }
     children = children.map(item => {
-        item = { ...item };
-        return buildTree(items, separator, item.id, item);
+        const childId = path + "." + item.id;
+        item = { ...item, name: item.id, id: childId };
+        return buildTree(items, childId, item);
     });
     children.sort((a, b) => b.id.localeCompare(a.id));
     return { ...item, items: children };
@@ -29,10 +30,6 @@ export function useTags({ counter }) {
         return data ? JSON.parse(data) : [];
     });
     return result;
-}
-
-export function uniqueTags(tags) {
-    return Array.from(new Set((tags || []).filter(tag => tag.id === tag.name).map(tag => tag.name)));
 }
 
 export function useTag({ id, counter }) {
@@ -51,5 +48,5 @@ export function useTag({ id, counter }) {
             return data;
         });
     });
-    return [record, loading, setRecord];
+    return [record, loading, setRecord, data];
 }

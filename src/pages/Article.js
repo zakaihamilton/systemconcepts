@@ -16,7 +16,8 @@ import { useSize } from "@util/size";
 import Edit from "@pages/Article/Edit";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import { useTags, uniqueTags } from "@util/tags";
+import { useTags } from "@util/tags";
+import { useTypes } from "@util/types";
 
 registerToolbar("Article");
 
@@ -42,6 +43,7 @@ export default function Article({ path = "" }) {
     const translations = useTranslations();
     const { counter, viewMode = "table", mode, item: editedItem } = ArticleStore.useState();
     const [tags] = useTags({ counter });
+    const [types] = useTypes({ counter });
     const { busy, toPath } = useArticle({ counter });
     const [inProgress, setProgress] = useState(false);
     const [data, loading, , setData] = useFile(articleId && (toPath(articleId) + "/tags.json"), [articleId], data => {
@@ -129,7 +131,7 @@ export default function Article({ path = "" }) {
     ];
 
     const tagsData = useMemo(() => {
-        return uniqueTags(tags).map(tagId => {
+        return types.map(tagId => {
             const item = { id: tagId };
             const recordTags = record.tags || {};
             const values = recordTags[tagId] || {};
