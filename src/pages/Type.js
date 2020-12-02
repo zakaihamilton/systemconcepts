@@ -16,6 +16,7 @@ import styles from "./Type.module.scss";
 import { MainStore } from "@components/Main";
 import { useSize } from "@util/size";
 import Typography from '@material-ui/core/Typography';
+import fieldTypes from "@data/libraryFieldTypes";
 
 export const TypeStoreDefaults = {
     mode: "",
@@ -144,6 +145,14 @@ export default function Type({ path = "" }) {
 
     const size = useSize(ref, [showSideBar]);
 
+    const fieldTypeMapping = item => {
+        const name = translations[item.id];
+        return {
+            ...item,
+            name
+        }
+    };
+
     return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>
         <FormGroup record={data} setRecord={setData}>
             <Input
@@ -156,6 +165,12 @@ export default function Type({ path = "" }) {
                 id={language}
                 label={languageName}
             />
+            <Input
+                id="field"
+                label={translations.FIELD_TYPE}
+                items={fieldTypes}
+                mapping={fieldTypeMapping}
+                select={true} />
         </FormGroup>
         <Typography>
             {translations.PARENT_TYPES}
