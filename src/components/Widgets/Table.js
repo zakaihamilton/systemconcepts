@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useContext, useEffect, useMemo, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -327,6 +327,17 @@ export default function TableWidget(props) {
         const itemHeightInPixels = sizeToPixels(itemHeight);
         const itemCount = hideColumns ? numItems : numItems + 1;
 
+        const innerElementType = forwardRef(({ children, ...rest }, ref) => {
+            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+            const style = {
+                top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
+            };
+            return <div ref={ref} {...rest}>
+                {!hideColumns && <ListColumns key={0} columns={columns} style={{ ...style, ...itemStyles }} {...props} />}
+                {children}
+            </div>
+        });
+
         const Row = ({ index, style }) => {
             const itemIndex = hideColumns ? index : index - 1;
             const item = items[itemIndex];
@@ -334,7 +345,7 @@ export default function TableWidget(props) {
             const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
             const selected = index && selectedRow && selectedRow(item);
             if (!hideColumns && !index) {
-                return <ListColumns key={0} columns={columns} style={{ ...style, ...itemStyles }} {...props} />;
+                return null;
             }
             return <Item
                 key={id || itemIndex}
@@ -356,6 +367,7 @@ export default function TableWidget(props) {
             {!loading && !!numItems && !error && <FixedSizeList
                 className={styles.tableList}
                 height={height}
+                innerElementType={innerElementType}
                 itemCount={itemCount}
                 itemSize={itemHeightInPixels}
                 width={size.width}
