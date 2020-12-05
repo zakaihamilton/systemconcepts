@@ -887,15 +887,15 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "Sign in into your account to update the list of sessions"
+            "value": "Login to your account"
         },
         {
             "id": "REQUIRE_FULL_SYNC",
-            "value": "Do a full sync to update the list of sessions"
+            "value": "Do a full sync"
         },
         {
             "id": "WAIT_FOR_APPROVAL",
-            "value": "Wait for approval before you can access the sessions, try again later"
+            "value": "Approval required, try again later"
         },
         {
             "id": "PLAY_NOT_ALLOWED",

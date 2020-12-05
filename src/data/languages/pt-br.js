@@ -887,15 +887,15 @@ export default {
         },
         {
             "id": "REQUIRE_SIGNIN",
-            "value": "Faça login em sua conta para atualizar a lista de sessões"
+            "value": "Faça login na sua conta"
         },
         {
             "id": "REQUIRE_FULL_SYNC",
-            "value": "Faça uma sincronização completa para atualizar a lista de sessões"
+            "value": "Faça uma sincronização completa"
         },
         {
             "id": "WAIT_FOR_APPROVAL",
-            "value": "Aguarde a aprovação antes de acessar as sessões, tente novamente mais tarde"
+            "value": "Aprovação necessária, tente novamente mais tarde"
         },
         {
             "id": "PLAY_NOT_ALLOWED",
@@ -979,7 +979,7 @@ export default {
         },
         {
             "id": "TEXT",
-            "value":"Texto"
+            "value": "Texto"
         }
     ]
 };
