@@ -11,7 +11,7 @@ export default function Day({ sessions, column, row, count, date }) {
         gridRow: isPhone ? column : row
     }
     const sessionDate = getDateString(date);
-    const sessionItems = sessions.filter(session => session.date === sessionDate).map(session => {
+    const sessionItems = (sessions || []).filter(session => session.date === sessionDate).map(session => {
         return <Session key={session.name} {...session} />
     });
     return <div className={clsx(styles.root, column === count && styles.last)} style={style}>
