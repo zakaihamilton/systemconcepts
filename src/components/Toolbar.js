@@ -65,7 +65,7 @@ export function useToolbarItems({ location }) {
         return aKey - bKey;
     });
 
-    let sectionItems = toolbars.map(section => section.items.map((item, idx, list) => {
+    let sectionItems = toolbars.map(section => section.items.filter(item => item.id).map((item, idx, list) => {
         item = { ...item };
         if (idx === list.length - 1) {
             item.divider = true;
