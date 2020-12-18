@@ -108,7 +108,7 @@ export default function Tag({ path = "" }) {
             />
             <Input
                 id={language}
-                label={languageName}
+                label={translations.NAME}
             />
             <Input
                 id="type"
