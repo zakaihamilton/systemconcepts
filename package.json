@@ -17,7 +17,7 @@
     "bcrypt": "^5.0.0",
     "cookie": "^0.4.1",
     "eslint": "^7.15.0",
-    "fontsource-roboto": "^3.1.5",
+    "fontsource-roboto": "^4.0.0",
     "gmail-send": "^1.8.10",
     "js-cookie": "^2.2.1",
     "jss-rtl": "^0.3.0",
