@@ -44,7 +44,8 @@ export default function Tags() {
         {
             id: "idWidget",
             title: translations.ID,
-            sortable: "id"
+            sortable: "id",
+            padding: false
         },
         {
             id: "label",
