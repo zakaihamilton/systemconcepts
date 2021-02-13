@@ -3,6 +3,9 @@ const runtimeCaching = require("./runtimeCaching");
 
 module.exports = {
     reactStrictMode: true,
+    future: {
+        webpack5: true
+    },
     ...withPWA({
         pwa: {
             disable: process.env.NODE_ENV === 'development',
