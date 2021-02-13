@@ -1,4 +1,4 @@
-import 'fontsource-roboto';
+import '@fontsource/roboto';
 import '../src/scss/app.scss';
 import { useEffect } from "react";
 

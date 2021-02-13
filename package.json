@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fontsource/roboto": "^4.2.1",
     "@isomorphic-git/lightning-fs": "^4.4.1",
     "@material-ui/core": "^4.11.2",
     "@material-ui/icons": "^4.11.2",
@@ -17,7 +18,6 @@
     "bcrypt": "^5.0.0",
     "cookie": "^0.4.1",
     "eslint": "^7.15.0",
-    "fontsource-roboto": "^4.0.0",
     "gmail-send": "^1.8.10",
     "js-cookie": "^2.2.1",
     "jss-rtl": "^0.3.0",
@@ -33,9 +33,9 @@
     "react-vtree": "^3.0.0-beta.0",
     "react-window": "^1.8.6",
     "sass": "^1.30.0",
-    "swr": "^0.3.9",
     "use-dark-mode": "^2.3.1",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "webpack": "^5.21.2"
   },
   "devDependencies": {
     "yarn-upgrade-all": "^0.5.4"
