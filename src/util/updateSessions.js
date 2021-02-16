@@ -47,7 +47,7 @@ export function useUpdateSessions() {
         }
         await storage.writeFile(targetPath, sourceBody);
     }, []);
-    const updateGroup = useCallback(async (name) => {
+    const updateGroup = useCallback(async (name, updateAll) => {
         const path = prefix + name;
         let itemIndex = 0;
         UpdateSessionsStore.update(s => {
@@ -76,6 +76,9 @@ export function useUpdateSessions() {
                 s.status[itemIndex].errors.push(err);
                 s.status = [...s.status];
             });
+        }
+        if (!updateAll) {
+            years.splice(0, years.length - 1);
         }
         for (let yearIndex = years.length - 1; yearIndex >= 0; yearIndex--) {
             const year = years[yearIndex];
@@ -122,7 +125,7 @@ export function useUpdateSessions() {
         }
         for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
             let item = items[itemIndex];
-            await updateGroup(item.name);
+            await updateGroup(item.name, true);
         }
         UpdateSessionsStore.update(s => {
             s.busy = false;
