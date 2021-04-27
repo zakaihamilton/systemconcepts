@@ -28,7 +28,7 @@
     "pullstate": "^1.20.4",
     "react": "^17.0.1",
     "react-color": "^2.19.3",
-    "react-cool-dimensions": "^1.1.11",
+    "react-cool-dimensions": "^2.0.2",
     "react-dom": "^17.0.1",
     "react-vtree": "^3.0.0-beta.0",
     "react-window": "^1.8.6",
