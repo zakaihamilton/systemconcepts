@@ -7,7 +7,6 @@ import VideoLabelIcon from '@material-ui/icons/VideoLabel';
 import Tooltip from '@material-ui/core/Tooltip';
 import Menu from "@widgets/Menu";
 import { addPath, toPath } from "@util/pages";
-import { useDeviceType } from "@util/styles";
 import HoverButton from "@widgets/HoverButton";
 
 export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter }) {
@@ -15,7 +14,6 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         gridColumn: column,
         gridRow: row
     }
-    const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const dayNumber = dateFormatter.format(date);
     const isToday = isDateToday(date);

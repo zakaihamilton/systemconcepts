@@ -15,7 +15,7 @@
     "@material-ui/lab": "^4.0.0-alpha.57",
     "aws-sdk": "^2.808.0",
     "base64-arraybuffer-es6": "^0.6.0",
-    "bcrypt": "^5.0.0",
+    "bcryptjs": "^2.4.3",
     "cookie": "^0.4.1",
     "eslint": "^7.15.0",
     "gmail-send": "^1.8.10",

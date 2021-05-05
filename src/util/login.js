@@ -1,5 +1,5 @@
 import { findRecord, insertRecord, replaceRecord } from "./mongo";
-import { compare, hash } from "bcrypt";
+import { compare, hash } from "bcryptjs";
 import resetPasswordTemplate from '@data/resetPasswordTemplate';
 
 const sendResetMail = require('gmail-send')({
