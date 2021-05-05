@@ -24,7 +24,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
     const sessionItems = (sessions || []).filter(session => session.date === sessionDate);
     const items = sessionItems.filter(item => item.audio || item.video).map(item => {
         const groupName = item.group[0].toUpperCase() + item.group.slice(1);
-        const path = `session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`;
+        const path = `session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
         return {
             id: item.name,
             name: item.name,
