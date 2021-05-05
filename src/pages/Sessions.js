@@ -35,7 +35,7 @@ export default function SessionsPage() {
     const { viewMode, groupFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const itemPath = item => {
-        return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${item.name}`;
+        return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };
     const target = item => {
         return "#" + toPath("sessions", itemPath(item));
