@@ -4,7 +4,7 @@ import { useTranslations } from "@util/translations";
 
 registerToolbar("Download");
 
-export default function Download({ onClick, visible }) {
+export default function Download({ onClick, visible, target }) {
     const translations = useTranslations();
 
     const toolbarItems = [
@@ -13,7 +13,8 @@ export default function Download({ onClick, visible }) {
             name: translations.DOWNLOAD,
             icon: <GetAppIcon />,
             location: "header",
-            onClick
+            onClick,
+            target
         }
     ].filter(Boolean);
 

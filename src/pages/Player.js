@@ -128,7 +128,7 @@ export default function PlayerPage({ show = false, suffix }) {
 
     return <div className={styles.root} style={style}>
         {statusBar}
-        <Download visible={show && mediaPath} onClick={downloadFile} />
+        <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
         {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
         </MediaComponent>}
