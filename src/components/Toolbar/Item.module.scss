@@ -1,11 +1,9 @@
-.toolbar {
-    display: flex;
-    align-items: center;
+.root.selected {
+    box-shadow: 1px 1px 4px 1px var(--selected-color);
 }
 
-.toolbar.visible {
-    height: 4em;
-    padding: 0.5em;
+.root.active {
+    box-shadow: 1px 1px 2px 1px var(--active-color);
 }
 
 .divider {

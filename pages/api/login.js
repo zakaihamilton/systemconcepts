@@ -1,6 +1,6 @@
 const { login, register, changePassword, resetPassword, sendResetEmail } = require("@util/login");
 
-export default async (req, res) => {
+export default async function LOGIN_API(req, res) {
     if (req.method === "GET") {
         let error = null;
         let params = {};

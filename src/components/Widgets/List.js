@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Divider from '@material-ui/core/Divider';
+import React, { useState } from "react";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import Divider from "@material-ui/core/Divider";
 import styles from "./List.module.scss";
-import Avatar from '@material-ui/core/Avatar';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from "@material-ui/core/Avatar";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import { useStyles } from "@util/styles";
-import Collapse from '@material-ui/core/Collapse';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import Collapse from "@material-ui/core/Collapse";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
 import { MainStore } from "@components/Main";
-import Link from '@material-ui/core/Link';
+import Link from "@material-ui/core/Link";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import IconButton from "@material-ui/core/IconButton";
 
 export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
@@ -34,7 +36,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
             setSelected(id);
         }
         clickHandler && clickHandler(id);
-    }
+    };
     if (items && items.length) {
         expandIcon = open ? <ExpandLess className={styles.expandIcon} /> : <ExpandMore className={styles.expandIcon} />;
         rootItemClick = () => {
@@ -50,7 +52,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
             clickHandler={clickHandler}
             selected={selected}
             setSelected={setSelected}
-            {...props} />
+            {...props} />;
     });
     const style = {};
     if (direction === "rtl") {
@@ -77,7 +79,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
                 {icon}
             </ListItemIcon>}
             <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
-            {actionIcon && <ListItemSecondaryAction>
+            {!!actionIcon && <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback}>
                     {actionIcon}
                 </IconButton>
@@ -103,10 +105,10 @@ export default function ListWidget({ reverse, items, onClick, state }) {
 
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
-        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} reverse={reverse} selected={selected} setSelected={setSelected} {...props} />
+        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} reverse={reverse} selected={selected} setSelected={setSelected} {...props} />;
     });
 
     return <List className={className} component="nav">
         {elements}
-    </List>
+    </List>;
 }

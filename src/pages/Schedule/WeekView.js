@@ -5,9 +5,9 @@ import DayHeader from "./WeekView/DayHeader";
 import { getWeekViewStart, getMonthViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@util/date";
 import { useDateFormatter } from "@util/locale";
 import Input from "@widgets/Input";
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TodayIcon from '@material-ui/icons/Today';
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import TodayIcon from "@material-ui/icons/Today";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
@@ -23,13 +23,13 @@ export default function WeekView({ sessions, date, store }) {
     const monthStart = getMonthViewStart(date);
     const month = addDate(monthStart, 14);
     const dayHeaderFormatter = useDateFormatter({
-        weekday: 'short'
+        weekday: "short"
     });
     const dayFormatter = useDateFormatter({
-        day: 'numeric'
+        day: "numeric"
     });
     const dateFormatter = useDateFormatter({
-        day: 'numeric',
+        day: "numeric",
         month: "short"
     });
     const monthFormatter = useDateFormatter({
@@ -42,7 +42,7 @@ export default function WeekView({ sessions, date, store }) {
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
         const day = addDate(firstDay, index);
-        return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dateFormatter} dayFormatter={dayHeaderFormatter} />
+        return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dateFormatter} dayFormatter={dayHeaderFormatter} />;
     });
 
     const weekOfMonth = getWeekOfMonth(firstDay);
@@ -114,7 +114,7 @@ export default function WeekView({ sessions, date, store }) {
     const today = new Date();
     const hasPreviousWeek = weekOfMonth || month.getFullYear() !== yearStart;
     const hasNextWeek = weekOfMonth !== (numOfWeeksInMonth - 1) || month.getFullYear() !== yearEnd;
-    const isToday = weekOfMonth === getWeekOfMonth(today) && month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear()
+    const isToday = weekOfMonth === getWeekOfMonth(today) && month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear();
 
     const gotoToday = () => {
         store.update(s => {
@@ -177,5 +177,5 @@ export default function WeekView({ sessions, date, store }) {
             {dayTitles}
             <Week sessions={sessions} month={month} date={firstDay} row={2} dateFormatter={dayFormatter} />
         </div>
-    </div>
+    </div>;
 }

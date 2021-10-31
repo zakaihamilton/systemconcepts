@@ -6,14 +6,14 @@ import { Store } from "pullstate";
 import { useSessions } from "@util/sessions";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import ViewWeekIcon from '@material-ui/icons/ViewWeek';
+import DateRangeIcon from "@material-ui/icons/DateRange";
+import ViewWeekIcon from "@material-ui/icons/ViewWeek";
 import { useSearch } from "@components/Search";
 import Message from "@widgets/Message";
-import DataUsageIcon from '@material-ui/icons/DataUsage';
+import DataUsageIcon from "@material-ui/icons/DataUsage";
 import { useLocalStorage } from "@util/store";
 import StatusBar from "@widgets/StatusBar";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export const ScheduleStore = new Store({
     date: null,

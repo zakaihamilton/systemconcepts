@@ -1,31 +1,31 @@
-import React, { useState } from 'react';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import React, { useState } from "react";
+import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
 import { useTranslations } from "@util/translations";
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import VpnKeyIcon from "@material-ui/icons/VpnKey";
 import { fetchJSON } from "@util/fetch";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import Input from "@widgets/Input";
 import { setPath } from "@util/pages";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import clsx from "clsx";
 import { MainStore } from "@components/Main";
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from "@material-ui/core/Checkbox";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
         marginTop: theme.spacing(2),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
     },
     form: {
-        width: '100%', // Fix IE 11 issue.
+        width: "100%", // Fix IE 11 issue.
         marginTop: theme.spacing(3),
     },
     progress: {
@@ -179,7 +179,7 @@ export default function ChangePassword() {
                     <Grid item xs={12}>
                         <FormControlLabel
                             className={clsx(direction === "rtl" && classes.rtlLabel)}
-                            control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
+                            control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
                             label={translations.REMEMBER_ME}
                         />
                     </Grid>

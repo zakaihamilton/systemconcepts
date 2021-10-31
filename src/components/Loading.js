@@ -1,5 +1,5 @@
-import React from 'react';
-import LinearProgress from '@material-ui/core/LinearProgress';
+import React from "react";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import styles from "./Loading.module.scss";
 
 export default function Loading({ error }) {

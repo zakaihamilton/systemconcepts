@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
-import Button from '@material-ui/core/Button';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import React, { useState } from "react";
+import Button from "@material-ui/core/Button";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
+import Link from "@material-ui/core/Link";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
 import { useTranslations } from "@util/translations";
 import { MainStore } from "@components/Main";
 import clsx from "clsx";
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import VpnKeyIcon from "@material-ui/icons/VpnKey";
 import Input from "@widgets/Input";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import { fetchJSON } from "@util/fetch";
 import { setPath } from "@util/pages";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
         marginTop: theme.spacing(2),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
     },
     form: {
-        width: '100%',
+        width: "100%",
         marginTop: theme.spacing(2),
     },
     rtlLabel: {
@@ -181,7 +181,7 @@ export default function Account() {
                         {!isSignedIn && <Grid item xs={12}>
                             <FormControlLabel
                                 className={clsx(direction === "rtl" && classes.rtlLabel)}
-                                control={<Checkbox value="remember" color="primary" value={remember} onChange={changeRemember} />}
+                                control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
                                 label={translations.REMEMBER_ME}
                             />
                         </Grid>}

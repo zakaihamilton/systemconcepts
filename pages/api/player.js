@@ -6,7 +6,7 @@ import { error, log } from "@util/logger";
 
 const component = "player";
 
-export default async (req, res) => {
+export default async function PLAYER_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie, path } = headers || {};
@@ -33,4 +33,4 @@ export default async (req, res) => {
         error({ component, error: "login error", err });
         res.status(403).json({ err: err.toString() });
     }
-};
+}

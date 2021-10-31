@@ -1,16 +1,16 @@
 import { useMemo, useContext, useEffect, useState } from "react";
-import { FixedSizeTree as Tree } from 'react-vtree';
+import { FixedSizeTree as Tree } from "react-vtree";
 import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GetAppIcon from '@material-ui/icons/GetApp';
-import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from "@material-ui/icons/GetApp";
+import PublishIcon from "@material-ui/icons/Publish";
 import { importData, exportData } from "@util/importExport";
 import { useTranslations } from "@util/translations";
-import DataUsageIcon from '@material-ui/icons/DataUsage';
-import InfoIcon from '@material-ui/icons/Info';
+import DataUsageIcon from "@material-ui/icons/DataUsage";
+import InfoIcon from "@material-ui/icons/Info";
 import Message from "@widgets/Message";
-import RefreshIcon from '@material-ui/icons/Refresh';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import RefreshIcon from "@material-ui/icons/Refresh";
+import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import { addPath } from "@util/pages";
 import { StatusBarStore } from "@widgets/StatusBar";
 import { useSearch } from "@components/Search";
@@ -187,16 +187,12 @@ export default function TreeWidget(props) {
         const number = parseFloat(text);
         const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
         return sizeInPixels;
-    }
+    };
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
 
     itemSize = sizeToPixels(itemSize);
-
-    if (!Node) {
-        return null;
-    }
 
     const gotoSource = () => {
         addPath("editor" + source);
@@ -274,6 +270,10 @@ export default function TreeWidget(props) {
     const sizeValid = size && size.width && size.height;
     const statusBarVisible = !loading && !!statusBar;
     const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
+
+    if (!Node) {
+        return null;
+    }
 
     return <>
         {!!loading && loadingElement}

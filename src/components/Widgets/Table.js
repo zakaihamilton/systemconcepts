@@ -13,23 +13,23 @@ import Item from "./Table/Item";
 import Navigator from "./Table/Navigator";
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GetAppIcon from '@material-ui/icons/GetApp';
-import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from "@material-ui/icons/GetApp";
+import PublishIcon from "@material-ui/icons/Publish";
 import Error from "./Table/Error";
 import TableColumn from "./Table/TableColumn";
 import clsx from "clsx";
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from "@material-ui/icons/Refresh";
 import Message from "@widgets/Message";
-import { FixedSizeList, FixedSizeGrid } from 'react-window';
-import ViewListIcon from '@material-ui/icons/ViewList';
-import TableChartIcon from '@material-ui/icons/TableChart';
-import ViewComfyIcon from '@material-ui/icons/ViewComfy';
-import SortIcon from '@material-ui/icons/Sort';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import DataUsageIcon from '@material-ui/icons/DataUsage';
-import InfoIcon from '@material-ui/icons/Info';
-import ViewStreamIcon from '@material-ui/icons/ViewStream';
+import { FixedSizeList, FixedSizeGrid } from "react-window";
+import ViewListIcon from "@material-ui/icons/ViewList";
+import TableChartIcon from "@material-ui/icons/TableChart";
+import ViewComfyIcon from "@material-ui/icons/ViewComfy";
+import SortIcon from "@material-ui/icons/Sort";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import DataUsageIcon from "@material-ui/icons/DataUsage";
+import InfoIcon from "@material-ui/icons/Info";
+import ViewStreamIcon from "@material-ui/icons/ViewStream";
 import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
 
@@ -163,7 +163,7 @@ export default function TableWidget(props) {
                 onClick: () => store.update(s => {
                     s.itemsPerPage = num;
                 })
-            }
+            };
         });
     }, [itemsPerPage]);
 
@@ -243,7 +243,7 @@ export default function TableWidget(props) {
                         s.viewMode = item.id;
                     });
                 }
-            }
+            };
         }).filter(Boolean) : []
     ].filter(Boolean);
 
@@ -253,7 +253,7 @@ export default function TableWidget(props) {
         setEmpty(false);
         const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
         if (!hasColumn) {
-            store.update(s => { s.orderBy = defaultSort });
+            store.update(s => { s.orderBy = defaultSort; });
         }
     }, []);
 
@@ -309,7 +309,7 @@ export default function TableWidget(props) {
         const number = parseFloat(text);
         const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
         return sizeInPixels;
-    }
+    };
 
     const statusBarVisible = !loading && !error && !!statusBar;
     const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
@@ -335,7 +335,7 @@ export default function TableWidget(props) {
             return <div ref={ref} {...rest}>
                 {!hideColumns && <ListColumns key={0} columns={columns} style={{ ...style, ...itemStyles }} {...props} />}
                 {children}
-            </div>
+            </div>;
         });
 
         const Row = ({ index, style }) => {
@@ -384,7 +384,7 @@ export default function TableWidget(props) {
                 item={item}
                 order={order}
                 orderBy={orderBy}
-                createSortHandler={createSortHandler} />
+                createSortHandler={createSortHandler} />;
         });
 
         const pageCount = Math.ceil(numItems / itemsPerPage);

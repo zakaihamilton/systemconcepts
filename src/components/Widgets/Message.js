@@ -1,4 +1,4 @@
-import Typography from '@material-ui/core/Typography';
+import Typography from "@material-ui/core/Typography";
 import styles from "./Message.module.scss";
 import clsx from "clsx";
 

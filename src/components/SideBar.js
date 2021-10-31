@@ -1,13 +1,13 @@
 import React, { useCallback } from "react";
-import styles from "./SideBar.module.scss"
+import styles from "./SideBar.module.scss";
 import List from "@widgets/List";
-import Drawer from '@material-ui/core/Drawer';
+import Drawer from "@material-ui/core/Drawer";
 import { useDeviceType } from "@util/styles";
 import { MainStore } from "./Main";
 import { useActivePages, usePages, setHash } from "@util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
 import { useBookmarks } from "@components/Bookmarks";
-import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkIcon from "@material-ui/icons/Bookmark";
 import { useTranslations } from "@util/translations";
 
 export default function SideBar() {
@@ -62,7 +62,7 @@ export default function SideBar() {
 
     if (isMobile) {
         return <Drawer
-            anchor={direction === 'rtl' ? 'right' : 'left'}
+            anchor={direction === "rtl" ? "right" : "left"}
             open={showSlider}
             ModalProps={{
                 keepMounted: true

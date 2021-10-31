@@ -12,5 +12,5 @@ export default function Button({ id, name, icon, active, subHeading, onClick, ..
         {subHeading && <div className={styles.subHeading}>
             {subHeading}
         </div>}
-    </button>
+    </button>;
 }

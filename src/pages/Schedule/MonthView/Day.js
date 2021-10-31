@@ -2,9 +2,9 @@ import { useTranslations } from "@util/translations";
 import clsx from "clsx";
 import styles from "./Day.module.scss";
 import { isDateToday, isDateMonth, getDateString } from "@util/date";
-import Avatar from '@material-ui/core/Avatar';
-import VideoLabelIcon from '@material-ui/icons/VideoLabel';
-import Tooltip from '@material-ui/core/Tooltip';
+import Avatar from "@material-ui/core/Avatar";
+import VideoLabelIcon from "@material-ui/icons/VideoLabel";
+import Tooltip from "@material-ui/core/Tooltip";
 import Menu from "@widgets/Menu";
 import { addPath, toPath } from "@util/pages";
 import HoverButton from "@widgets/HoverButton";
@@ -13,7 +13,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
     const style = {
         gridColumn: column,
         gridRow: row
-    }
+    };
     const translations = useTranslations();
     const dayNumber = dateFormatter.format(date);
     const isToday = isDateToday(date);
@@ -51,5 +51,5 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
                 </HoverButton>
             </Menu>}
         </div>
-    </div>
+    </div>;
 }

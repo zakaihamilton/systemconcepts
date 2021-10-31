@@ -2,20 +2,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./Controls.module.scss";
 import { useTranslations } from "@util/translations";
 import PlayerButton from "./Button";
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import ReplayIcon from '@material-ui/icons/Replay';
-import StopIcon from '@material-ui/icons/Stop';
-import PauseIcon from '@material-ui/icons/Pause';
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import ReplayIcon from "@material-ui/icons/Replay";
+import StopIcon from "@material-ui/icons/Stop";
+import PauseIcon from "@material-ui/icons/Pause";
 import { formatDuration } from "@util/string";
 import { MainStore } from "@components/Main";
-import MuiAlert from '@material-ui/lab/Alert';
-import Forward10Icon from '@material-ui/icons/Forward10';
-import Replay10Icon from '@material-ui/icons/Replay10';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import Tooltip from '@material-ui/core/Tooltip';
+import MuiAlert from "@material-ui/lab/Alert";
+import Forward10Icon from "@material-ui/icons/Forward10";
+import Replay10Icon from "@material-ui/icons/Replay10";
+import AccessTimeIcon from "@material-ui/icons/AccessTime";
+import Tooltip from "@material-ui/core/Tooltip";
 import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
-import Button from '@material-ui/core/Button';
+import Button from "@material-ui/core/Button";
 
 const skipPoints = 10;
 
@@ -121,13 +121,13 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
         const handleUpEvent = e => {
             handlePosEvent(e);
             dragging.current = false;
-        }
+        };
         document.addEventListener("mousemove", handlePosEvent);
         document.addEventListener("mouseup", handleUpEvent);
         return () => {
             document.removeEventListener("mousemove", handlePosEvent);
             document.removeEventListener("mouseup", handleUpEvent);
-        }
+        };
     }, []);
     useEffect(() => {
         if (currentTime && !isNaN(currentTime)) {

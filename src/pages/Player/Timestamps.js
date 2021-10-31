@@ -13,7 +13,7 @@ import { PlayerStore } from "../Player";
 import Edit from "./Timestamps/Edit";
 import styles from "./Timestamps.module.scss";
 import { useLocalStorage } from "@util/store";
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import AccessTimeIcon from "@material-ui/icons/AccessTime";
 
 export const TimestampsStoreDefaults = {
     mode: "",
@@ -96,7 +96,7 @@ export default function TimestampsPage() {
                     });
                     return { ...metadata, timestamps };
                 });
-            }
+            };
         });
     }, []);
 

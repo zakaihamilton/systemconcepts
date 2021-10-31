@@ -13,8 +13,8 @@ import Bookmarks from "./Bookmarks";
 import Title from "./Title";
 import { useResize } from "@util/size";
 import clsx from "clsx";
-import CssBaseline from '@material-ui/core/CssBaseline';
-import NoSsr from '@material-ui/core/NoSsr';
+import CssBaseline from "@material-ui/core/CssBaseline";
+import NoSsr from "@material-ui/core/NoSsr";
 
 export const MainStoreDefaults = {
     fontSize: "16",
@@ -46,13 +46,13 @@ export default function Main() {
         };
         return () => {
             window.onhashchange = null;
-        }
+        };
     }, []);
 
     useEffect(() => {
         MainStore.update(s => {
             s.direction = language === "heb" ? "rtl" : "ltr";
-            document.getElementsByTagName('html')[0].setAttribute("dir", s.direction);
+            document.getElementsByTagName("html")[0].setAttribute("dir", s.direction);
         });
     }, [language]);
 

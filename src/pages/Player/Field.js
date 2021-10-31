@@ -8,5 +8,5 @@ export default function Field({ name, value }) {
         <div className={styles.value}>
             {value}
         </div>
-    </div>
+    </div>;
 }

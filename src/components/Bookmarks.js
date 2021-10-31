@@ -1,4 +1,4 @@
-import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkIcon from "@material-ui/icons/Bookmark";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { Store } from "pullstate";
@@ -25,7 +25,7 @@ export function useBookmarks() {
             ...page,
             target: props.id,
             ...props
-        }
+        };
     });
     return items;
 }

@@ -1,6 +1,6 @@
-import React from 'react';
-import Fab from '@material-ui/core/Fab';
-import Tooltip from '@material-ui/core/Tooltip';
+import React from "react";
+import Fab from "@material-ui/core/Fab";
+import Tooltip from "@material-ui/core/Tooltip";
 import styles from "./Fab.module.scss";
 import clsx from "clsx";
 

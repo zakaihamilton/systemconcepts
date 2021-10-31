@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from "@material-ui/icons/Delete";
 import { TimestampsStore } from "../Timestamps";
 import ItemMenu from "@components/ItemMenu";
 
@@ -23,7 +23,7 @@ export default function ItemMenuWidget({ setMetadata, item }) {
                             });
                             return { ...metadata };
                         });
-                    }
+                    };
                 });
             }
         }

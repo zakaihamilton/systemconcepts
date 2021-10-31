@@ -1,18 +1,18 @@
-import React from 'react';
-import Link from '@material-ui/core/Link';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
+import React from "react";
+import Link from "@material-ui/core/Link";
+import NavigateNextIcon from "@material-ui/icons/NavigateNext";
+import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import { Divider } from "@material-ui/core";
 import { MainStore } from "@components/Main";
 import styles from "./Breadcrumbs.module.scss";
 import { useDeviceType } from "@util/styles";
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import Toolbar from "@components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
-import NoSsr from '@material-ui/core/NoSsr';
+import NoSsr from "@material-ui/core/NoSsr";
 import { setHash } from "@util/pages";
 
 export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
@@ -90,7 +90,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
             href={href}
             navigateLast={navigateLast}
             hideRoot={hideRoot}
-            {...props} />
+            {...props} />;
     }).filter(Boolean);
 
     return (

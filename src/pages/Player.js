@@ -11,10 +11,10 @@ import Download from "@widgets/Download";
 import { exportFile } from "@util/importExport";
 import { useFetchJSON } from "@util/fetch";
 import Progress from "@widgets/Progress";
-import VideoLabelIcon from '@material-ui/icons/VideoLabel';
+import VideoLabelIcon from "@material-ui/icons/VideoLabel";
 import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export const PlayerStore = new Store({
     mediaPath: "",
@@ -82,7 +82,7 @@ export default function PlayerPage({ show = false, suffix }) {
     const mediaStyles = {
         width: size.width + "px",
         height: size.height - (size.emPixels * 11) + "px"
-    }
+    };
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
     let MediaComponent = null;
@@ -93,7 +93,7 @@ export default function PlayerPage({ show = false, suffix }) {
         show,
         name: date + " " + name,
         preload: "metadata"
-    }
+    };
     if (isAudio) {
         MediaComponent = Audio;
         mediaType = "audio/mp4";
@@ -105,7 +105,7 @@ export default function PlayerPage({ show = false, suffix }) {
 
     const downloadFile = () => {
         exportFile(mediaPath, fileName(path));
-    }
+    };
 
     const statusBar = <StatusBar store={PlayerStore} />;
 

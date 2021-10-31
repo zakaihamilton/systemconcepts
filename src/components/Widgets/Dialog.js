@@ -1,8 +1,8 @@
 import { useTranslations } from "@util/translations";
-import Typography from '@material-ui/core/Typography';
+import Typography from "@material-ui/core/Typography";
 import styles from "./Dialog.module.scss";
 import Tooltip from "@material-ui/core/Tooltip";
-import CancelIcon from '@material-ui/icons/Cancel';
+import CancelIcon from "@material-ui/icons/Cancel";
 import { IconButton } from "@material-ui/core";
 
 export default function Dialog({ title, children, actions, onClose }) {
@@ -30,5 +30,5 @@ export default function Dialog({ title, children, actions, onClose }) {
                 </div>
             </div>
         </div>
-    </div>
+    </div>;
 }

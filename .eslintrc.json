@@ -5,13 +5,13 @@
         "node": true
     },
     "extends": [
-        "eslint:recommended",
-        "plugin:react/recommended"
+        "next",
+        "next/core-web-vitals",
+        "prettier"
     ],
-    "parser": "babel-eslint",
     "parserOptions": {
         "sourceType": "module",
-        "ecmaVersion": 2018,
+        "ecmaVersion": 9,
         "ecmaFeatures": {
             "jsx": true
         },

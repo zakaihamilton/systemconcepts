@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
+import React, { useState, useEffect } from "react";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
 
 export default function SwitchWidget({ label, state, off = false, on = true }) {
     const [value, setValue] = state || [];

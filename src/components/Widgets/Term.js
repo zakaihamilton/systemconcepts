@@ -1,16 +1,16 @@
 import { Fragment } from "react";
 import styles from "./Term.module.scss";
 import { useTerms } from "@util/terms";
-import Tooltip from '@material-ui/core/Tooltip';
-import Badge from '@material-ui/core/Badge';
-import { makeStyles } from '@material-ui/core/styles';
+import Tooltip from "@material-ui/core/Tooltip";
+import Badge from "@material-ui/core/Badge";
+import { makeStyles } from "@material-ui/core/styles";
 import { MainStore } from "@components/Main";
 import clsx from "clsx";
 import { useLanguage } from "@util/language";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useLocalStorage } from "@util/store";
 
@@ -113,13 +113,13 @@ export default function Term({ id, onClick, ...props }) {
                 </div>
             </div>}
             {toLines(description)}
-        </div>
+        </div>;
     }
     if (explanation) {
         explanationTooltip = <div className={styles.tooltip}>
             <span className={styles.label}>{concept}</span>
             {toLines(explanation)}
-        </div>
+        </div>;
     }
     if (phase && phase.name) {
         iconTooltip = <div className={styles.tooltip}>
@@ -150,8 +150,8 @@ export default function Term({ id, onClick, ...props }) {
                 invisible={typeof phase === "undefined"}
                 overlap="circle"
                 anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: direction === "rtl" ? 'left' : 'right',
+                    vertical: "top",
+                    horizontal: direction === "rtl" ? "left" : "right",
                 }}
             >
                 {icon}
@@ -169,5 +169,5 @@ export default function Term({ id, onClick, ...props }) {
                 </div>
             </Tooltip>}
         </div>
-    </div>
+    </div>;
 }

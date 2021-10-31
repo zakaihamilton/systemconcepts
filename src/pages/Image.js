@@ -11,20 +11,25 @@ import { makePath } from "@util/path";
 import { useFetchJSON } from "@util/fetch";
 import Message from "@widgets/Message";
 import { useTranslations } from "@util/translations";
-import ErrorIcon from '@material-ui/icons/Error';
+import ErrorIcon from "@material-ui/icons/Error";
 
 function useImagePath(imageName = "") {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
+    const parentPath = useParentPath();
     let path = "";
+    let url = null;
     if (group) {
         let components = [prefix, group, year, date + " " + name + ".png"].filter(Boolean).join("/");
         path = makePath(components).split("/").join("/");
-        const [data] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path);
-        path = data && data.path || "";
     }
     else {
-        path = (useParentPath() + "/" + imageName).split("/").slice(1).join("/");
+        path = (parentPath + "/" + imageName).split("/").slice(1).join("/");
     }
+    const [data] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
+    if (path && group) {
+        path = data && data.path || "";
+    }
+
     return path;
 }
 
@@ -41,11 +46,11 @@ export default function ImagePage({ name }) {
     const [error, setError] = useState(null);
     const onLoad = () => {
         setImageLoading(false);
-    }
+    };
     const onError = () => {
         setError(true);
         setImageLoading(false);
-    }
+    };
 
     const readFile = useCallback(async () => {
         if (busyRef.current) {

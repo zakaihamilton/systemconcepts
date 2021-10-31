@@ -19,7 +19,8 @@ export const EditorStore = new Store(EditorStoreDefaults);
 export default function Editor({ name, path }) {
     const [syncCounter] = useSync();
     const timerRef = useRef();
-    path = path || (useParentPath() + "/" + name).split("/").slice(1).join("/");
+    const parentPath = useParentPath();
+    path = path || (parentPath + "/" + name).split("/").slice(1).join("/");
     const { content } = useStoreState(EditorStore, s => ({ content: s.content }));
     const [loading, setLoading] = useState(false);
     const readFile = useCallback(() => {
@@ -50,7 +51,7 @@ export default function Editor({ name, path }) {
         });
         return () => {
             unsubscribe();
-        }
+        };
     }, []);
 
     useEffect(() => {

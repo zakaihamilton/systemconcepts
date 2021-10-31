@@ -1,11 +1,11 @@
 import { useTranslations } from "@util/translations";
 import { usePathItems, useParentParams, toPath } from "@util/pages";
 import { useSessions } from "@util/sessions";
-import MovieIcon from '@material-ui/icons/Movie';
+import MovieIcon from "@material-ui/icons/Movie";
 import AudioIcon from "@icons/Audio";
-import InfoIcon from '@material-ui/icons/Info';
-import ImageIcon from '@material-ui/icons/Image';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import InfoIcon from "@material-ui/icons/Info";
+import ImageIcon from "@material-ui/icons/Image";
+import AccessTimeIcon from "@material-ui/icons/AccessTime";
 import Tab from "@components/Widgets/Tabs/Tab";
 
 export default function Tabs({ Container }) {

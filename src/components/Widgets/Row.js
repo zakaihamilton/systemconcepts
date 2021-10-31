@@ -1,7 +1,7 @@
 import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useDirection } from "@util/direction";
-import Link from '@material-ui/core/Link';
+import Link from "@material-ui/core/Link";
 
 export default function RowWidget({ className, href, style, fill = true, basePadding = 8, iconPadding = 60, onClick, children, icons, ...props }) {
     const direction = useDirection();
@@ -15,5 +15,5 @@ export default function RowWidget({ className, href, style, fill = true, basePad
         <div className={styles.icons} style={contentStyle}>
             {icons}
         </div>
-    </div>
+    </div>;
 }
