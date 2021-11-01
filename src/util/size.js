@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import useDimensions from "react-cool-dimensions";
 
 export function getEmValueFromElement(element) {
     if (element && element.parentNode) {
