@@ -1,16 +1,16 @@
-import { useState, forwardRef, Children, cloneElement } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Divider from '@material-ui/core/Divider';
+import { useState, forwardRef, Children, cloneElement } from "react";
+import { withStyles } from "@material-ui/core/styles";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import Divider from "@material-ui/core/Divider";
 import styles from "./Menu.module.scss";
-import Link from '@material-ui/core/Link';
+import Link from "@material-ui/core/Link";
 
 const StyledMenu = withStyles({
     paper: {
-        border: '1px solid #d3d4d5',
+        border: "1px solid #d3d4d5",
     },
 })((props) => (
     <Menu
@@ -89,7 +89,7 @@ const MenuWidget = forwardRef(function MenuComponent({ hover, items, children, o
             props.onHoverComplete = event => {
                 setHoverRef(event.currentTarget);
                 handleClick(event);
-            }
+            };
         }
         const element = cloneElement(child, props);
         return element;

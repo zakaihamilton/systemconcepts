@@ -3,7 +3,7 @@ import { login } from "@util/login";
 import Cookie from "cookie";
 import { roleAuth } from "@util/roles";
 
-export default async (req, res) => {
+export default async function AWS_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie } = headers || {};
@@ -32,12 +32,12 @@ export default async (req, res) => {
         console.error("login error: ", err);
         res.status(403).json({ err: err.toString() });
     }
-};
+}
 
 export const config = {
     api: {
         bodyParser: {
-            sizeLimit: '5mb',
+            sizeLimit: "5mb",
         }
     }
-}
+};

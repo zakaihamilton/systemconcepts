@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import clsx from 'clsx';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Fab from '@material-ui/core/Fab';
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import clsx from "clsx";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Fab from "@material-ui/core/Fab";
 import styles from "./HoverButton.module.scss";
 
 export default function HoverButton({ className, onClick, onHoverComplete, hoverDelay = 500, hoverDuration = 750, children }) {

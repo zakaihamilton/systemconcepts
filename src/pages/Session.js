@@ -15,10 +15,10 @@ export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
     const [sessions, loading] = useSessions([], { filterSessions: false });
     const dateFormatter = useDateFormatter({
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
     });
     const session = sessions && sessions.find(session =>
         session.group === group &&

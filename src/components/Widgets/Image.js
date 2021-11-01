@@ -3,25 +3,25 @@ import { useState, useEffect } from "react";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import { addPath } from "@util/pages";
-import Link from '@material-ui/core/Link';
+import Link from "@material-ui/core/Link";
 
 export default function ImageWidget({ clickForImage = true, onClick, href, loading, path, width, height, alt }) {
     const [imageLoading, setImageLoading] = useState(false);
     const [error, setError] = useState(false);
     const onLoad = () => {
         setImageLoading(false);
-    }
+    };
     const onError = () => {
         setError(true);
         setImageLoading(false);
-    }
+    };
 
     const buttonStyle = { minWidth: width, minHeight: height };
     const imageStyle = { width, height };
 
     const gotoImage = () => {
         addPath("image?label=THUMBNAIL");
-    }
+    };
 
     useEffect(() => {
         setImageLoading(!!path);

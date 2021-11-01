@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from "@material-ui/icons/Delete";
 import ItemMenu from "@components/ItemMenu";
 
 export default function ItemMenuWidget({ item, store, remove }) {
@@ -19,7 +19,7 @@ export default function ItemMenuWidget({ item, store, remove }) {
                         for (const item of select) {
                             await remove(item.name);
                         }
-                    }
+                    };
                 });
             }
         }

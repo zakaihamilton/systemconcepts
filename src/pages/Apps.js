@@ -1,6 +1,6 @@
 import styles from "./Apps.module.scss";
 import { usePages, setPath } from "@util/pages";
-import Link from '@material-ui/core/Link';
+import Link from "@material-ui/core/Link";
 
 export default function Apps() {
     const pages = usePages();
@@ -13,7 +13,7 @@ export default function Apps() {
             <div className={styles.label}>
                 {page.name}
             </div>
-        </Link>
+        </Link>;
     });
 
     return <div className={styles.root}>

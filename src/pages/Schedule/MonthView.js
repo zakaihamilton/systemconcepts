@@ -5,9 +5,9 @@ import DayHeader from "./MonthView/DayHeader";
 import { getMonthViewStart, addDate, getMonthNames, getYearNames } from "@util/date";
 import { useDateFormatter } from "@util/locale";
 import Input from "@widgets/Input";
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TodayIcon from '@material-ui/icons/Today';
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import TodayIcon from "@material-ui/icons/Today";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
@@ -23,7 +23,7 @@ export default function MonthView({ sessions, date, store }) {
         weekday: isPhone ? "narrow" : "short"
     }, [isPhone]);
     const dayFormatter = useDateFormatter({
-        day: 'numeric'
+        day: "numeric"
     });
     const monthFormatter = useDateFormatter({
         month: isPhone ? "numeric" : "long"
@@ -43,7 +43,7 @@ export default function MonthView({ sessions, date, store }) {
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
         const day = addDate(month, index);
-        return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dayHeaderFormatter} />
+        return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dayHeaderFormatter} />;
     });
 
     const monthState = [month.getMonth() + 1, month => {
@@ -97,7 +97,7 @@ export default function MonthView({ sessions, date, store }) {
     const today = new Date();
     const hasPreviousMonth = month.getMonth() || month.getFullYear() !== yearStart;
     const hasNextMonth = month.getMonth() !== 11 || month.getFullYear() !== yearEnd;
-    const isToday = month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear()
+    const isToday = month.getMonth() == today.getMonth() && month.getFullYear() == today.getFullYear();
 
     const gotoToday = () => {
         store.update(s => {
@@ -151,5 +151,5 @@ export default function MonthView({ sessions, date, store }) {
             {dayTitles}
             {weeks}
         </div>
-    </div>
+    </div>;
 }

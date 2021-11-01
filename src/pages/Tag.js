@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
-import Button from '@material-ui/core/Button';
+import Button from "@material-ui/core/Button";
 import { goBackPage } from "@util/pages";
 import { useTag } from "@util/tags";
 import { useTypes } from "@util/types";
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import LocalOfferIcon from "@material-ui/icons/LocalOffer";
 import languages from "@data/languages";
 import { useLanguage } from "@util/language";
 import { Store } from "pullstate";
-import StyleIcon from '@material-ui/icons/Style';
+import StyleIcon from "@material-ui/icons/Style";
 
 export const TagStoreDefaults = {
     mode: "",
@@ -95,7 +95,7 @@ export default function Tag({ path = "" }) {
         return {
             ...item,
             name: item[language]
-        }
+        };
     };
 
     return <Form actions={actions} loading={loading || inProgress} data={data} validate={validate}>

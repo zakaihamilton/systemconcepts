@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from "@material-ui/icons/Delete";
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
 import ItemMenu from "@components/ItemMenu";
 
@@ -22,7 +22,7 @@ export default function ItemMenuWidget({ item, store }) {
                                 return !select.find(item => item.id === bookmark.id);
                             });
                         });
-                    }
+                    };
                 });
             }
         }

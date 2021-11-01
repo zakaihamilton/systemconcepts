@@ -2,17 +2,17 @@ import { useCallback } from "react";
 import styles from "./Item.module.scss";
 import ItemMenu from "./ItemMenu";
 import { LibrarianStore } from "../Librarian";
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { useTranslations } from "@util/translations";
 import { addPath } from "@util/pages";
 import clsx from "clsx";
 import Row from "@widgets/Row";
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import DescriptionIcon from '@material-ui/icons/Description';
-import FolderIcon from '@material-ui/icons/Folder';
+import LocalOfferIcon from "@material-ui/icons/LocalOffer";
+import DescriptionIcon from "@material-ui/icons/Description";
+import FolderIcon from "@material-ui/icons/Folder";
 
 export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
     const { select } = LibrarianStore.useState();

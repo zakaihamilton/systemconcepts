@@ -74,8 +74,9 @@ export function useSessions(depends = [], options = {}) {
                     const createItem = ({ id, name, date }) => {
                         const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
                         const sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
-                        const { name: _, ...metadata } = sessionInfo;
-                        const item = { id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...metadata };
+                        sessionInfo = { ...sessionInfo };
+                        delete sessionInfo.name;
+                        const item = { id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo };
                         sessions.push(item);
                         return item;
                     };

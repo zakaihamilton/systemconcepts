@@ -8,17 +8,17 @@ import Group from "@widgets/Group";
 import styles from "./Sessions.module.scss";
 import Label from "@widgets/Label";
 import Row from "@widgets/Row";
-import MovieIcon from '@material-ui/icons/Movie';
+import MovieIcon from "@material-ui/icons/Movie";
 import AudioIcon from "@icons/Audio";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 import Image from "@widgets/Image";
-import GraphicEqIcon from '@material-ui/icons/GraphicEq';
+import GraphicEqIcon from "@material-ui/icons/GraphicEq";
 import clsx from "clsx";
 import { useLocalStorage } from "@util/store";
 import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export const SessionsStore = new Store({
     groupFilter: "",

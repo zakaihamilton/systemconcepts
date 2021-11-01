@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { SwatchesPicker } from 'react-color'
+import React, { useState } from "react";
+import { SwatchesPicker } from "react-color";
 import styles from "./ColorPicker.module.scss";
 import clsx from "clsx";
 

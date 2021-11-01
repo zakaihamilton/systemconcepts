@@ -1,5 +1,5 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GetAppIcon from '@material-ui/icons/GetApp';
+import GetAppIcon from "@material-ui/icons/GetApp";
 import { useTranslations } from "@util/translations";
 
 registerToolbar("Download");

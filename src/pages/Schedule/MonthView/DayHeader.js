@@ -6,7 +6,7 @@ export default function DayHeader({ dateFormatter, date, index, count }) {
     const style = {
         gridColumn: index + 1,
         gridRow: 1
-    }
+    };
     const dayName = dateFormatter.format(date);
     const isToday = isDayToday(date);
     const className = clsx(
@@ -16,5 +16,5 @@ export default function DayHeader({ dateFormatter, date, index, count }) {
     );
     return <div className={className} style={style}>
         {dayName}
-    </div>
+    </div>;
 }

@@ -1,13 +1,13 @@
 import styles from "./Toolbar.module.scss";
-import Avatar from '@material-ui/core/Avatar';
+import Avatar from "@material-ui/core/Avatar";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import VolumeDownIcon from '@material-ui/icons/VolumeDown';
-import FullscreenIcon from '@material-ui/icons/Fullscreen';
-import SpeedIcon from '@material-ui/icons/Speed';
+import VolumeDownIcon from "@material-ui/icons/VolumeDown";
+import FullscreenIcon from "@material-ui/icons/Fullscreen";
+import SpeedIcon from "@material-ui/icons/Speed";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@util/styles";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 
 registerToolbar("PlayerToolbar");
 
@@ -46,7 +46,7 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
             name: translations[name],
             onClick: () => playerRef.playbackRate = rate
-        }
+        };
     });
     const volumeItems = {
         LOW_VOLUME: 0.5,
@@ -59,7 +59,7 @@ export default function Toolbar({ show, playerRef, name, isVideo }) {
             icon: <Avatar className={styles.avatar} variant="square">{level.toFixed(2)}</Avatar>,
             name: translations[name],
             onClick: () => playerRef.volume = level
-        }
+        };
     });
 
     const speed = playerRef.playbackRate || 1.0;

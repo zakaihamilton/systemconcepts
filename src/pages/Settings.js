@@ -1,10 +1,10 @@
 import Table from "@widgets/Table";
 import { useStoreState } from "@util/store";
 import { MainStore } from "../components/Main";
-import LanguageIcon from '@material-ui/icons/Language';
-import InvertColorsIcon from '@material-ui/icons/InvertColors';
-import FormatSizeIcon from '@material-ui/icons/FormatSize';
-import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
+import LanguageIcon from "@material-ui/icons/Language";
+import InvertColorsIcon from "@material-ui/icons/InvertColors";
+import FormatSizeIcon from "@material-ui/icons/FormatSize";
+import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 import languages from "@data/languages";
 import fontSizes from "@data/fontSizes";
 import { useTranslations } from "@util/translations";
@@ -15,8 +15,8 @@ import { useDeviceType } from "@util/styles";
 import Button from "@material-ui/core/Button";
 import { addPath, toPath } from "@util/pages";
 import { Store } from "pullstate";
-import BuildIcon from '@material-ui/icons/Build';
-import useDarkMode from 'use-dark-mode';
+import BuildIcon from "@material-ui/icons/Build";
+import useDarkMode from "use-dark-mode";
 import Row from "@widgets/Row";
 
 export const SettingsStore = new Store({
@@ -71,7 +71,7 @@ export default function Settings() {
             tooltip: prefferedLanguage.name
         },
         ...languages
-    ]
+    ];
 
     const darkModeItems = [
         {

@@ -1,18 +1,15 @@
-import { Fragment } from "react";
 import { Divider } from "@material-ui/core";
 import { useDeviceType } from "@util/styles";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 import { useTranslations } from "@util/translations";
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import IconButton from '@material-ui/core/IconButton';
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import IconButton from "@material-ui/core/IconButton";
 import Menu from "@widgets/Menu";
 import { useEffect } from "react";
 import styles from "./Toolbar.module.scss";
 import { Store } from "pullstate";
-import Label from "@widgets/Label";
+import Item from "./Toolbar/Item";
 import clsx from "clsx";
-import { useStyles } from "@util/styles";
-import Link from '@material-ui/core/Link';
 
 export const ToolbarStore = new Store({
     sections: [],
@@ -99,29 +96,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
 
     return <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
         {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-        {toolbarItems.map((item, idx) => {
-            const className = useStyles(styles, {
-                item: true,
-                selected: item.selected === item.id,
-                active: item.active
-            });
-            const showDivider = !!item.divider && idx !== toolbarItems.length - 1;
-            return <Fragment key={item.id}>
-                {item.element}
-                {!item.element &&
-                    <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
-                        {!!item.label ?
-                            (<Label icon={item.icon} name={item.name} noBorder={true} />) :
-                            (<IconButton component={Link} underline="none" color="inherit" href={item.target} className={className} disabled={item.disabled}>
-                                <Tooltip arrow title={item.name}>
-                                    {item.icon}
-                                </Tooltip>
-                            </IconButton>)}
-                    </Menu>
-                }
-                <Divider classes={{ root: clsx(styles.divider, !showDivider && styles.hidden) }} orientation="vertical" />
-            </Fragment>
-        })}
+        {toolbarItems.map((item, idx) => (<Item key={item.id} item={item} idx={idx} count={toolbarItems.length} />))}
         {!!menuItems.length && <>
             {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
             <Menu items={menuItems}>
@@ -134,5 +109,5 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
         </>
         }
         {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-    </div>
+    </div>;
 }

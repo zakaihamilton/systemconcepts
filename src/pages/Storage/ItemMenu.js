@@ -2,10 +2,10 @@ import { StorageStore } from "../Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import { exportData } from "@util/importExport";
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import TrendingFlatIcon from '@material-ui/icons/TrendingFlat';
+import ImportExportIcon from "@material-ui/icons/ImportExport";
+import DeleteIcon from "@material-ui/icons/Delete";
+import FileCopyIcon from "@material-ui/icons/FileCopy";
+import TrendingFlatIcon from "@material-ui/icons/TrendingFlat";
 import { isBinaryFile, makePath, fileFolder } from "@util/path";
 import ItemMenu from "@components/ItemMenu";
 
@@ -58,7 +58,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                                 s.severity = "error";
                             });
                         }
-                    }
+                    };
                 });
             }
         },
@@ -76,7 +76,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                             s.destination = fileFolder(item.path);
                         });
                         return true;
-                    }
+                    };
                 });
             }
         },
@@ -94,7 +94,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                             s.destination = fileFolder(item.path);
                         });
                         return true;
-                    }
+                    };
                 });
             }
         },
@@ -116,7 +116,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                                 await storage.deleteFile(item.path);
                             }
                         }
-                    }
+                    };
                 });
             }
         },

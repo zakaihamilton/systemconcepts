@@ -5,7 +5,7 @@ import Cookie from "cookie";
 
 const collectionName = "users";
 
-export default async (req, res) => {
+export default async function USERS_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie, id: queryId } = headers || {};
@@ -38,4 +38,4 @@ export default async (req, res) => {
         console.error("login error: ", err);
         res.status(403).json({ err: err.toString() });
     }
-};
+}

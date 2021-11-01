@@ -9,5 +9,5 @@ export default function Week({ sessions, month, date, row, rowCount, dateFormatt
     });
     return <>
         {days}
-    </>
+    </>;
 }

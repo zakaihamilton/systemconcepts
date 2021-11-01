@@ -1,4 +1,4 @@
-import Head from "next/head"
+import Head from "next/head";
 import { useTranslations } from "@util/translations";
 import { useCurrentPageTitle } from "@util/pages";
 
@@ -13,5 +13,5 @@ export default function HeadComponent() {
     return <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-    </Head>
+    </Head>;
 }

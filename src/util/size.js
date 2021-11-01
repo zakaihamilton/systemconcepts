@@ -52,9 +52,28 @@ export function useWindowSize() {
 }
 
 export function useSize(ref, depends = []) {
+    const [, setObserverCounter] = useState(0);
     const counter = useResize(depends);
     const emPixels = getEmValueFromElement(ref && ref.current);
-    const { width, height } = useDimensions({ ref: ref && ref.current && ref });
+
+    useEffect(() => {
+        const handle = ref?.current;
+        if (!handle) {
+            return;
+        }
+        const resizeObserver = new ResizeObserver(entries => {
+            setObserverCounter(counter => counter + 1);
+        });
+        resizeObserver.observe(handle);
+        return () => {
+            resizeObserver.unobserve(handle);
+        }
+    }, [ref]);
+
+    const rect = ref?.current?.getBoundingClientRect() || {};
+    const width = rect.width, height = rect.height;
+
+    console.log("ref", ref.current, "width", width, "height", height);
 
     if (!ref || typeof window === "undefined") {
         return { width: 0, height: 0, emPixels };

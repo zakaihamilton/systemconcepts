@@ -2,7 +2,7 @@ import styles from "./Session.module.scss";
 import { addPath, toPath } from "@util/pages";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
-import Link from '@material-ui/core/Link';
+import Link from "@material-ui/core/Link";
 
 export default function Session({ group, year, date, name, color }) {
     const isPhone = useDeviceType() === "phone";

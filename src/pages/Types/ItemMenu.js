@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from "@material-ui/icons/Delete";
 import ItemMenu from "@components/ItemMenu";
 
 export default function ItemMenuWidget({ item, store, setData }) {
@@ -24,7 +24,7 @@ export default function ItemMenuWidget({ item, store, setData }) {
                             });
                             return data;
                         });
-                    }
+                    };
                 });
             }
         }

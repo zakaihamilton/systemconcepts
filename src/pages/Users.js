@@ -8,9 +8,9 @@ import { Store } from "pullstate";
 import ItemMenu from "./Users/ItemMenu";
 import { addPath, toPath } from "@util/pages";
 import roles from "@data/roles";
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import RecentActorsIcon from '@material-ui/icons/RecentActors';
-import EmailIcon from '@material-ui/icons/Email';
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import RecentActorsIcon from "@material-ui/icons/RecentActors";
+import EmailIcon from "@material-ui/icons/Email";
 import { isRTL } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import styles from "./Users.module.scss";
@@ -143,7 +143,7 @@ export default function Users() {
             setProgress(false);
             UsersStore.update(s => {
                 s.counter++;
-            })
+            });
         }).catch(err => {
             setError(translations[err] || String(err));
             setProgress(false);

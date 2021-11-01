@@ -8,7 +8,7 @@ export default function DayHeader({ dateFormatter, dayFormatter, date, index, co
     const style = {
         gridColumn: isPhone ? 1 : index + 1,
         gridRow: isPhone ? index + 1 : 1
-    }
+    };
     const dayName = dayFormatter.format(date);
     const dateName = dateFormatter.format(date);
     const isToday = isDateToday(date);
@@ -21,5 +21,5 @@ export default function DayHeader({ dateFormatter, dayFormatter, date, index, co
     return <div className={className} style={style}>
         <div className={styles.day}>{dayName}</div>
         <div>{dateName}</div>
-    </div>
+    </div>;
 }

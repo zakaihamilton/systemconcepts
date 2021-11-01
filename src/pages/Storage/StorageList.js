@@ -1,22 +1,22 @@
 import { Fragment } from "react";
 import { useTranslations } from "@util/translations";
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Collapse from '@material-ui/core/Collapse';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import StorageIcon from '@material-ui/icons/Storage';
-import FolderIcon from '@material-ui/icons/Folder';
+import { makeStyles } from "@material-ui/core/styles";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import Collapse from "@material-ui/core/Collapse";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import StorageIcon from "@material-ui/icons/Storage";
+import FolderIcon from "@material-ui/icons/Folder";
 import { useListing } from "@util/storage";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 import Progress from "@widgets/Progress";
 
 const useStyles = makeStyles((theme) => ({
     list: {
-        width: '100%',
+        width: "100%",
         backgroundColor: theme.palette.background.paper,
     }
 }));
@@ -75,7 +75,7 @@ export default function StorageList({ path = "", state }) {
                     {open && <StorageList path={id} state={state} />}
                 </List>
             </Collapse>}
-        </Fragment>
+        </Fragment>;
     }).filter(Boolean);
 
     return (

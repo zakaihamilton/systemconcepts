@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
 import Table from "@widgets/Table";
-import Tooltip from '@material-ui/core/Tooltip';
-import StorageIcon from '@material-ui/icons/Storage';
-import FolderIcon from '@material-ui/icons/Folder';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import Tooltip from "@material-ui/core/Tooltip";
+import StorageIcon from "@material-ui/icons/Storage";
+import FolderIcon from "@material-ui/icons/Folder";
+import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import { useTranslations } from "@util/translations";
 import Row from "@widgets/Row";
 import storage, { useListing } from "@util/storage";
@@ -14,7 +14,7 @@ import ItemMenu from "./Storage/ItemMenu";
 import Edit from "./Storage/Edit";
 import { Store } from "pullstate";
 import { abbreviateSize } from "@util/string";
-import Typography from '@material-ui/core/Typography';
+import Typography from "@material-ui/core/Typography";
 import StatusBar from "@widgets/StatusBar";
 import Destination from "./Storage/Destination";
 import { useDateFormatter } from "@util/locale";
@@ -55,10 +55,10 @@ export default function Storage({ path = "" }) {
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
     const dateFormatter = useDateFormatter({
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
         hour: "2-digit",
         minute: "2-digit"
     });

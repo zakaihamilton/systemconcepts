@@ -11,7 +11,7 @@ export default function ItemMenuWidget({ item, updateGroup, store }) {
             name: translations.SYNC,
             icon: <UpdateIcon />,
             onClick: () => {
-                updateGroup && updateGroup(item.name)
+                updateGroup && updateGroup(item.name);
             }
         }
     ];

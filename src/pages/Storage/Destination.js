@@ -1,45 +1,45 @@
-import { useState, forwardRef } from 'react';
-import { fade, makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-import Slide from '@material-ui/core/Slide';
+import { useState, forwardRef } from "react";
+import { fade, makeStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import IconButton from "@material-ui/core/IconButton";
+import Typography from "@material-ui/core/Typography";
+import CloseIcon from "@material-ui/icons/Close";
+import Slide from "@material-ui/core/Slide";
 import { StorageStore } from "../Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import StorageList from "./StorageList";
-import Tooltip from '@material-ui/core/Tooltip';
-import InputBase from '@material-ui/core/InputBase';
+import Tooltip from "@material-ui/core/Tooltip";
+import InputBase from "@material-ui/core/InputBase";
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
-        position: 'relative',
+        position: "relative",
     },
     title: {
         marginLeft: theme.spacing(2),
         marginRight: theme.spacing(4),
     },
     path: {
-        position: 'relative',
+        position: "relative",
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
-        '&:hover': {
+        "&:hover": {
             backgroundColor: fade(theme.palette.common.white, 0.25),
         },
         marginLeft: 0,
         flex: "1",
-        display: 'none',
-        [theme.breakpoints.up('sm')]: {
-            display: 'flex',
+        display: "none",
+        [theme.breakpoints.up("sm")]: {
+            display: "flex",
         }
     },
     inputRoot: {
-        color: 'inherit',
+        color: "inherit",
         width: "100%"
     },
     inputInput: {
