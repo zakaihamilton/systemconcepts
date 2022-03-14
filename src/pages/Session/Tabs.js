@@ -49,11 +49,6 @@ export default function Tabs({ Container }) {
             label: translations.THUMBNAIL,
             icon: <ImageIcon />,
             value: basePath + "/" + encodeURIComponent("image")
-        },
-        {
-            label: translations.TIMESTAMPS,
-            icon: <AccessTimeIcon />,
-            value: basePath + "/" + encodeURIComponent("timestamps")
         }
     ].filter(Boolean).map(item => {
         return <Tab key={item.label} {...item} />;

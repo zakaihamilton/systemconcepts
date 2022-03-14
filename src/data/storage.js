@@ -1,4 +1,4 @@
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import local from "@storage/local";
 import remote from "@storage/remote";
 import aws from "@storage/aws";

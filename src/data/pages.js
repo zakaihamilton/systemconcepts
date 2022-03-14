@@ -1,65 +1,65 @@
-import dynamic from 'next/dynamic'
-import Cookies from 'js-cookie';
+import dynamic from "next/dynamic";
+import Cookies from "js-cookie";
 import PageLoad from "@components/PageLoad";
 
-import AppsIcon from '@material-ui/icons/Apps';
+import AppsIcon from "@material-ui/icons/Apps";
 import Apps from "@pages/Apps";
 
-import PeopleIcon from '@material-ui/icons/People';
+import PeopleIcon from "@material-ui/icons/People";
 const Users = dynamic(() => import("@pages/Users"), { loading: () => <PageLoad /> });
 
 const User = dynamic(() => import("@pages/User"), { loading: () => <PageLoad /> });
 import { getUserSection } from "@pages/User/Section";
 
-import SettingsIcon from '@material-ui/icons/Settings';
+import SettingsIcon from "@material-ui/icons/Settings";
 const Settings = dynamic(() => import("@pages/Settings"), { loading: () => <PageLoad /> });
 
-import LanguageIcon from '@material-ui/icons/Language';
+import LanguageIcon from "@material-ui/icons/Language";
 const Languages = dynamic(() => import("@pages/Languages"), { loading: () => <PageLoad /> });
 
-import TranslateIcon from '@material-ui/icons/Translate';
+import TranslateIcon from "@material-ui/icons/Translate";
 const Translations = dynamic(() => import("@pages/Translations"), { loading: () => <PageLoad /> });
 import { getTranslationsSection } from "@pages/Translations/Section";
 
-import FormatSizeIcon from '@material-ui/icons/FormatSize';
+import FormatSizeIcon from "@material-ui/icons/FormatSize";
 const FontSizes = dynamic(() => import("@pages/FontSizes"), { loading: () => <PageLoad /> });
 
-import StorageIcon from '@material-ui/icons/Storage';
+import StorageIcon from "@material-ui/icons/Storage";
 const Storage = dynamic(() => import("@pages/Storage"), { loading: () => <PageLoad /> });
 import { getStorageSection } from "@pages/Storage/Section";
 
-import SettingsBackupRestoreIcon from '@material-ui/icons/SettingsBackupRestore';
+import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 const Reset = dynamic(() => import("@pages/Settings/Reset"), { loading: () => <PageLoad /> });
 
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from "@material-ui/icons/Edit";
 const Editor = dynamic(() => import("@pages/Editor"), { loading: () => <PageLoad /> });
 
-import ImageIcon from '@material-ui/icons/Image';
+import ImageIcon from "@material-ui/icons/Image";
 const Image = dynamic(() => import("@pages/Image"), { loading: () => <PageLoad /> });
 import { getImageSection } from "@pages/Image/Section";
 
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 const Account = dynamic(() => import("@pages/Account"), { loading: () => <PageLoad /> });
 
-import CreateIcon from '@material-ui/icons/Create';
+import CreateIcon from "@material-ui/icons/Create";
 const SignUp = dynamic(() => import("@pages/SignUp"), { loading: () => <PageLoad /> });
 
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import VpnKeyIcon from "@material-ui/icons/VpnKey";
 const ChangePassword = dynamic(() => import("@pages/ChangePassword"), { loading: () => <PageLoad /> });
 
 const ResetPassword = dynamic(() => import("@pages/ResetPassword"), { loading: () => <PageLoad /> });
 import { getResetSection } from "@pages/ResetPassword/Section";
 
-import TableChartIcon from '@material-ui/icons/TableChart';
+import TableChartIcon from "@material-ui/icons/TableChart";
 const Diagrams = dynamic(() => import("@pages/Diagrams"), { loading: () => <PageLoad /> });
 
-import LabelIcon from '@material-ui/icons/Label';
+import LabelIcon from "@material-ui/icons/Label";
 const Terms = dynamic(() => import("@pages/Terms"), { loading: () => <PageLoad /> });
 
-import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
+import VideoLibraryIcon from "@material-ui/icons/VideoLibrary";
 const Sessions = dynamic(() => import("@pages/Sessions"), { loading: () => <PageLoad /> });
 
-import VideoLabelIcon from '@material-ui/icons/VideoLabel';
+import VideoLabelIcon from "@material-ui/icons/VideoLabel";
 const Player = dynamic(() => import("@pages/Player"), { loading: () => <PageLoad /> });
 import { getPlayerSection } from "@pages/Player/Section";
 
@@ -67,29 +67,22 @@ const Session = dynamic(() => import("@pages/Session"), { loading: () => <PageLo
 import { getSessionSection } from "@pages/Session/Section";
 const SessionTabs = dynamic(() => import("@pages/Session/Tabs"));
 
-import EventIcon from '@material-ui/icons/Event';
+import EventIcon from "@material-ui/icons/Event";
 const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
 
-import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import GroupWorkIcon from "@material-ui/icons/GroupWork";
 const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad /> });
 
-import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkIcon from "@material-ui/icons/Bookmark";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import { getTimestampsSection } from "@pages/Timestamps/Section";
-const Timestamps = dynamic(() => import("@pages/Player/Timestamps"), { loading: () => <PageLoad /> });
-
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import LocalOfferIcon from "@material-ui/icons/LocalOffer";
 const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
 
 const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> });
 import { getTagSection } from "@pages/Tag/Section";
 
-import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-const LibrarianTabs = dynamic(() => import("@pages/Librarian/Tabs"));
-
-import StyleIcon from '@material-ui/icons/Style';
+import StyleIcon from "@material-ui/icons/Style";
 const Types = dynamic(() => import("@pages/Types"), { loading: () => <PageLoad /> });
 
 const Type = dynamic(() => import("@pages/Type"), { loading: () => <PageLoad /> });
@@ -275,14 +268,6 @@ export default [
         divider: true
     },
     {
-        id: "timestamps",
-        name: "TIMESTAMPS",
-        Icon: AccessTimeIcon,
-        Component: Timestamps,
-        section: getTimestampsSection,
-        useParentName: 1
-    },
-    {
         id: "tags",
         name: "TAGS",
         Icon: LocalOfferIcon,
@@ -294,15 +279,6 @@ export default [
         section: getTagSection,
         Icon: LocalOfferIcon,
         Component: Tag
-    },
-    {
-        id: "librarian",
-        name: "LIBRARIAN",
-        Icon: LibraryBooksIcon,
-        category: "tools",
-        sidebar: true,
-        tabs: LibrarianTabs,
-        path: "librarian/articles"
     },
     {
         id: "type",
