@@ -4,7 +4,7 @@
     "name": "System Concepts",
     "short_name": "System Concepts",
     "scope": "/",
-    "display": "fullscreen",
+    "display": "standalone",
     "start_url": "https://systemconcepts.app/",
     "background_color": "#013459",
     "theme_color": "#013459",
