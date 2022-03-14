@@ -66,13 +66,11 @@ export function useSize(ref, depends = []) {
         resizeObserver.observe(handle);
         return () => {
             resizeObserver.unobserve(handle);
-        }
+        };
     }, [ref]);
 
     const rect = ref?.current?.getBoundingClientRect() || {};
     const width = rect.width, height = rect.height;
-
-    console.log("ref", ref.current, "width", width, "height", height);
 
     if (!ref || typeof window === "undefined") {
         return { width: 0, height: 0, emPixels };
