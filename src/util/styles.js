@@ -18,7 +18,7 @@ export function toggleProperty(name, values) {
 export function useStyles(styles, data) {
     const classList = [];
     Object.keys(data || {}).map(key => {
-        const value = data[key];
+        let value = data[key];
         if (typeof value === "function") {
             value = value(data);
         }

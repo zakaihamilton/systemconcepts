@@ -337,6 +337,7 @@ export default function TableWidget(props) {
                 {children}
             </div>;
         });
+        innerElementType.displayName = "innerElementType";
 
         const Row = ({ index, style }) => {
             const itemIndex = hideColumns ? index : index - 1;
