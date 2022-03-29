@@ -40,6 +40,6 @@
     "eslint": "^8.11.0",
     "eslint-config-next": "^12.1.0",
     "eslint-config-prettier": "^8.5.0",
-    "yarn-upgrade-all": "^0.6.1"
+    "yarn-upgrade-all": "^0.7.0"
   }
 }
