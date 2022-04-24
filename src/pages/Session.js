@@ -38,6 +38,14 @@ export default function SessionPage({ group, year, date, name }) {
         }
     ];
 
+    let dateWidget = "";
+    try {
+        dateWidget = date && dateFormatter.format(new Date(date));
+    }
+    catch (err) {
+        console.error("err", err, "group", group, "year", year, "date", date, "name", name);
+    }
+
     const data = [
         {
             name: translations.NAME,
@@ -52,7 +60,7 @@ export default function SessionPage({ group, year, date, name }) {
         {
             name: translations.DATE,
             value: date,
-            widget: date && dateFormatter.format(new Date(date))
+            widget: dateWidget
         },
         {
             name: translations.DURATION,
