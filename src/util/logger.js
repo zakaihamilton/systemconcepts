@@ -38,5 +38,5 @@ if (typeof window !== "undefined") {
         error({ msg, url, lineNo, columnNo, error, throwError: false });
 
         return false;
-    }
+    };
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export function useCounter(defaultValue = 0) {
     const [counter, setCounter] = useState(defaultValue);
@@ -20,12 +20,12 @@ export function useHover() {
         () => {
             const node = ref.current;
             if (node) {
-                node.addEventListener('mouseenter', handleMouseEnter);
-                node.addEventListener('mouseleave', handleMouseLeave);
+                node.addEventListener("mouseenter", handleMouseEnter);
+                node.addEventListener("mouseleave", handleMouseLeave);
 
                 return () => {
-                    node.removeEventListener('mouseenter', handleMouseEnter);
-                    node.removeEventListener('mouseleave', handleMouseLeave);
+                    node.removeEventListener("mouseenter", handleMouseEnter);
+                    node.removeEventListener("mouseleave", handleMouseLeave);
                 };
             }
         }, [ref.current]);
@@ -50,7 +50,7 @@ export function usePageVisibility() {
         document.addEventListener("visibilitychange", onVisibilityChange);
         return () => {
             document.removeEventListener("visibilitychange", onVisibilityChange);
-        }
+        };
     }, []);
     return isVisible;
 }

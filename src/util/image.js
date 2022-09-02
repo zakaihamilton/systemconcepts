@@ -5,7 +5,7 @@ export async function thumbnailify(base64Image, by) {
         img.onload = () => {
             var width = img.width,
                 height = img.height,
-                canvas = document.createElement('canvas'),
+                canvas = document.createElement("canvas"),
                 ctx = canvas.getContext("2d");
 
             canvas.width = width / by;

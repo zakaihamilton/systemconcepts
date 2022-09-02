@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useLanguage } from "@util/language";
 import terms from "@data/terms";
-import useDarkMode from 'use-dark-mode';
+import useDarkMode from "use-dark-mode";
 
 export function useTerms() {
     const darkMode = useDarkMode(false);

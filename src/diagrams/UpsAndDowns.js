@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { MainStore } from "@components/Main";
 import Term from "@widgets/Term";
 import Zoom from "@components/Zoom";
-import useDarkMode from 'use-dark-mode';
+import useDarkMode from "use-dark-mode";
 
 function Worlds({ children, total }) {
     let offset = 0;
@@ -18,7 +18,7 @@ function Worlds({ children, total }) {
     });
     return <div className={styles.root}>
         {elements}
-    </div>
+    </div>;
 }
 
 function World({ id, total, row, style = {} }) {
@@ -39,7 +39,7 @@ function World({ id, total, row, style = {} }) {
         <div className={styles.worldInfo} style={{ ...style, gridColumn: 1 }} >
             <Term id={id} />
         </div>
-    </>
+    </>;
 }
 
 function Divider({ id, row, style, total }) {
@@ -53,7 +53,7 @@ function Divider({ id, row, style, total }) {
         <div className={styles.dividerInfo} style={{ ...style, gridColumn: total - 1 }}>
             <Term id={id} />
         </div>
-    </>
+    </>;
 }
 
 function Item({ className, style, start, end, column, term, type, selected, ...props }) {
@@ -124,5 +124,5 @@ export default function UpsAndDowns() {
         <Face id="face.animal" headStart={7} headEnd={10} bodyEnd={11} column={2} />
         <Face id="face.body" headStart={10} headEnd={11} bodyStart={11} column={1} />
         <Zoom />
-    </Worlds >
+    </Worlds >;
 }

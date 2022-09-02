@@ -111,7 +111,7 @@ const storageMethods = Object.fromEntries([
     const { name } = item;
     return [name, (...args) => {
         return callMethod(item, ...args);
-    }]
+    }];
 }));
 
 export function useListing(url, depends = [], options) {
@@ -249,7 +249,7 @@ async function getRecursiveList(path) {
             }
         }
         return data;
-    }
+    };
     await addListing(path);
     return listing;
 }
@@ -274,7 +274,7 @@ async function exportFolder(path) {
             }
         }
         return data;
-    }
+    };
     const data = await toData(path);
     return data;
 }

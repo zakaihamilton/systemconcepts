@@ -1,4 +1,4 @@
-import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
+import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 
 export default [
     {

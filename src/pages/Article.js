@@ -37,7 +37,7 @@ export default function Article({ path = "" }) {
     const { counter, viewMode = "table", mode } = ArticleStore.useState();
     const [tags] = useTags({ counter });
     const [types] = useTypes({ counter });
-    const { busy, toPath } = useArticle({ counter });
+    const { toPath } = useArticle({ counter });
     const [inProgress, setProgress] = useState(false);
     const [data, loading, , setData] = useFile(articleId && (toPath(articleId) + "/tags.json"), [articleId], data => {
         return data ? JSON.parse(data) : {};
@@ -125,6 +125,7 @@ export default function Article({ path = "" }) {
         if (type.field === "TAG") {
             const filteredTags = tags.filter(tag => tag.type === type.id);
             return <Input
+                key={type.id}
                 id={type.id}
                 icon={<StyleIcon />}
                 label={type[language]}
@@ -134,12 +135,14 @@ export default function Article({ path = "" }) {
         }
         else if (type.field === "NUMBER") {
             return <Input
+                key={type.id}
                 id={type.id}
                 label={type[language]}
                 type="number" />;
         }
         else if (type.field === "TEXT") {
             return <Input
+                key={type.id}
                 id={type.id}
                 field={language}
                 label={type[language]} />;

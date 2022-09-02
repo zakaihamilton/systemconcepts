@@ -1,4 +1,4 @@
-import PublicIcon from '@material-ui/icons/Public';
+import PublicIcon from "@material-ui/icons/Public";
 
 export default [
     {

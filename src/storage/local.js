@@ -1,4 +1,4 @@
-const FS = process.browser && require('@isomorphic-git/lightning-fs');
+const FS = process.browser && require("@isomorphic-git/lightning-fs");
 import { makePath } from "@util/path";
 
 const fs = process.browser && new FS("systemconcepts-fs");

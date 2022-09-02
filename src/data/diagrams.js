@@ -1,8 +1,8 @@
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 import PageLoad from "@components/PageLoad";
 const UpsAndDowns = dynamic(() => import("@diagrams/UpsAndDowns"), { loading: () => <PageLoad /> });
 
-export default [
+const diagrams = [
     {
         id: "upsanddowns",
         name: {
@@ -13,3 +13,5 @@ export default [
         Component: UpsAndDowns
     }
 ];
+
+export default diagrams;

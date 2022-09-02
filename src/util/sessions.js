@@ -3,7 +3,7 @@ import { makePath, fileTitle, isAudioFile, isVideoFile } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import GroupWorkIcon from "@material-ui/icons/GroupWork";
 import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
 import { useGroups } from "@util/groups";
@@ -51,15 +51,15 @@ export function useSessions(depends = [], options = {}) {
                 }
             }
             return data;
-        }
+        };
         const getListing = async path => {
             const localUrl = "local/" + path + "/listing.json";
             return await getJSON(localUrl);
-        }
+        };
         const getMetadata = async path => {
             const localUrl = "local/" + path + "/metadata.json";
             return await getJSON(localUrl);
-        }
+        };
         const basePath = "shared/sessions";
         const cdn = await getJSON("local/" + basePath + "/cdn.json") || {};
         try {

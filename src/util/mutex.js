@@ -1,6 +1,6 @@
 const locks = {};
 
-export function useMutex({ id }) {
+export function getMutex({ id }) {
     var lock = locks[id];
     if (!lock) {
         lock = locks[id] = {};
@@ -19,14 +19,14 @@ export function useMutex({ id }) {
 }
 
 export function isMutexLocked({ id }) {
-    var lock = useMutex({ id });
+    var lock = getMutex({ id });
     if (lock) {
         return lock._locks > 0;
     }
 }
 
 export function lockMutex({ id }) {
-    var lock = useMutex({ id });
+    var lock = getMutex({ id });
     if (lock) {
         lock._locks += 1;
         let unlockNext;

@@ -29,7 +29,7 @@ export function abbreviateSize(number) {
 }
 
 export function isRegEx(string) {
-    return Object.prototype.toString.call(string) === '[object RegExp]';
+    return Object.prototype.toString.call(string) === "[object RegExp]";
 }
 
 export function isRTL(string) {

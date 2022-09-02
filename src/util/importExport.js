@@ -41,10 +41,10 @@ export function importData() {
             };
             reader.onerror = () => {
                 reject(reader.error);
-            }
+            };
             reader.onabort = () => {
                 reject();
-            }
+            };
         });
         input.click();
     });

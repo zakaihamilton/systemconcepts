@@ -56,7 +56,7 @@ export function useLocalStorage(id, store, fields) {
         }
         return () => {
             unsubscribe();
-        }
+        };
     }, []);
 }
 

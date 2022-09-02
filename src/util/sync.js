@@ -3,7 +3,7 @@ import { Store } from "pullstate";
 import { fetchJSON } from "@util/fetch";
 import { useLocalStorage } from "@util/store";
 import storage from "@util/storage";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { makePath } from "@util/path";
 import { usePageVisibility } from "@util/hooks";

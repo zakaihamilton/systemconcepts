@@ -111,7 +111,7 @@ export function useUpdateSessions() {
     const updateSessions = useCallback(async () => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
-            s.start = new Date().getTime()
+            s.start = new Date().getTime();
         });
         let items = [];
         try {
@@ -134,7 +134,7 @@ export function useUpdateSessions() {
     const updateSpecificGroup = useCallback(async (name) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
-            s.start = new Date().getTime()
+            s.start = new Date().getTime();
         });
         await updateGroup(name);
         UpdateSessionsStore.update(s => {
