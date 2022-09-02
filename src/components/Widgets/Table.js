@@ -457,13 +457,13 @@ export default function TableWidget(props) {
             if (!item) {
                 return null;
             }
-            const { id } = item;
+            const { id, key } = item;
             const { style: itemStyles, ...props } = viewModes[viewMode] || {};
             const selected = selectedRow && selectedRow(item);
             style = { ...style };
             style.left += sidePadding;
             return <Item
-                key={id || index}
+                key={id || key || index}
                 style={{ ...style, ...itemStyles }}
                 {...props}
                 columns={columns}

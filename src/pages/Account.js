@@ -82,8 +82,9 @@ export default function Account() {
         else {
             setValidate(true);
             if (!invalidFields && !inProgress) {
-                const [id] = idState;
+                let [id] = idState;
                 const [password] = passwordState;
+                id = id.toLowerCase();
                 setProgress(true);
                 fetchJSON("/api/login", {
                     headers: {

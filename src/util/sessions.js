@@ -84,9 +84,9 @@ export function useSessions(depends = [], options = {}) {
                         const id = fileTitle(file.name);
                         const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                         if (isAudioFile(file.name)) {
-                            let item = sessions.find(session => session.id === id);
+                            let item = sessions.find(session => session.id === id && session.group === group.name);
                             if (!item) {
-                                item = createItem({ id, name, date });
+                                item = createItem({ id, name, date, group });
                             }
                             item.audio = file;
                         }
@@ -95,7 +95,7 @@ export function useSessions(depends = [], options = {}) {
                             if (isResolution) {
                                 const [, id, resolution] = isResolution;
                                 const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
-                                let item = sessions.find(session => session.id === id);
+                                let item = sessions.find(session => session.id === id && session.group === group.name);
                                 if (!item) {
                                     item = createItem({ id, name, date });
                                 }
@@ -105,7 +105,7 @@ export function useSessions(depends = [], options = {}) {
                                 item.resolutions[resolution] = file;
                             }
                             else {
-                                let item = sessions.find(session => session.id === id);
+                                let item = sessions.find(session => session.id === id && session.group === group.name);
                                 if (!item) {
                                     item = createItem({ id, name, date });
                                 }
