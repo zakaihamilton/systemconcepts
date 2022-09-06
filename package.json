@@ -33,7 +33,7 @@
     "react-window": "^1.8.7",
     "sass": "^1.54.8",
     "use-dark-mode": "^2.3.1",
-    "uuid": "^8.3.2",
+    "uuid": "^9.0.0",
     "webpack": "^5.74.0"
   },
   "devDependencies": {
