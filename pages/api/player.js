@@ -10,6 +10,10 @@ export default async function PLAYER_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie, path } = headers || {};
+        if (!cookie) {
+            error({ component, error: "Empty cookie provided" });
+            throw "ACCESS_DENIED";
+        }
         const cookies = Cookie.parse(cookie);
         const { id, hash } = cookies || {};
         if (!id || !hash) {
