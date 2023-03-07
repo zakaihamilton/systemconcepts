@@ -73,7 +73,7 @@ export function useSessions(depends = [], options = {}) {
                     files.sort((a, b) => a.name.localeCompare(b.name));
                     const createItem = ({ id, name, date }) => {
                         const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
-                        const sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
+                        let sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
                         sessionInfo = { ...sessionInfo };
                         delete sessionInfo.name;
                         const item = { id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo };
