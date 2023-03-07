@@ -83,6 +83,9 @@ export function useSessions(depends = [], options = {}) {
                     for (const file of files) {
                         const id = fileTitle(file.name);
                         const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
+                        if (!date || !name) {
+                            continue;
+                        }
                         if (isAudioFile(file.name)) {
                             let item = sessions.find(session => session.id === id && session.group === group.name);
                             if (!item) {
