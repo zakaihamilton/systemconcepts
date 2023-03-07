@@ -116,7 +116,8 @@ async function exists(path) {
         const stat = await fs.promises.stat(path);
         exists = stat !== null;
     }
-    catch (err) { }
+    catch (err) {
+    }
     return exists;
 }
 

@@ -1,4 +1,4 @@
-import React, { forwardRef, useContext, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -131,13 +131,13 @@ export default function TableWidget(props) {
         return true;
     });
 
-    const createSortHandler = (property) => () => {
+    const createSortHandler = useCallback((property) => () => {
         const isDesc = orderBy === property && order === "desc";
         store.update(s => {
             s.order = isDesc ? "asc" : "desc";
             s.orderBy = property;
         });
-    };
+    }, [order, orderBy, store]);
 
     const sortItems = useMemo(() => {
         return (columns || []).filter(column => column.sortable).map(column => {
@@ -151,7 +151,7 @@ export default function TableWidget(props) {
                 onClick: createSortHandler(sortId)
             };
         });
-    }, [orderBy, order]);
+    }, [columns, orderBy, order, createSortHandler]);
 
     const itemsPerPageItems = useMemo(() => {
         return [10, 25, 50, 75, 100].map(num => {
@@ -165,7 +165,7 @@ export default function TableWidget(props) {
                 })
             };
         });
-    }, [itemsPerPage]);
+    }, [itemsPerPage, store]);
 
     const toolbarItems = [
         data && name && onImport && {
@@ -342,14 +342,14 @@ export default function TableWidget(props) {
         const Row = ({ index, style }) => {
             const itemIndex = hideColumns ? index : index - 1;
             const item = items[itemIndex];
-            const { id } = item || {};
+            const { id, key } = item || {};
             const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
             const selected = index && selectedRow && selectedRow(item);
             if (!hideColumns && !index) {
                 return null;
             }
             return <Item
-                key={id || itemIndex}
+                key={key || id || itemIndex}
                 style={{ ...style, ...itemStyles }}
                 {...props}
                 columns={columns}
@@ -404,10 +404,10 @@ export default function TableWidget(props) {
 
         const tableRows = itemsOnPage.map((item, idx) => {
             const { style, ...props } = viewModes[viewMode] || {};
-            const { id } = item;
+            const { id, key } = item;
             const selected = selectedRow && selectedRow(item);
             return <Row
-                key={id || idx}
+                key={key || id || idx}
                 index={idx}
                 rowHeight={rowHeight}
                 columns={columns}

@@ -41,7 +41,7 @@ export function useSessions(depends = [], options = {}) {
             return;
         }
         const getJSON = async path => {
-            const exists = storage.exists(path);
+            const exists = await storage.exists(path);
             let data = [];
             if (exists) {
                 data = await storage.readFile(path);
@@ -71,17 +71,18 @@ export function useSessions(depends = [], options = {}) {
                     const files = await getListing(path);
                     const sessionsMetadata = await getMetadata(path);
                     files.sort((a, b) => a.name.localeCompare(b.name));
-                    const createItem = ({ id, name, date }) => {
+                    const createItem = ({ key, id, name, date }) => {
                         const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
                         let sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
                         sessionInfo = { ...sessionInfo };
                         delete sessionInfo.name;
-                        const item = { id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo };
+                        const item = { key, id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo };
                         sessions.push(item);
                         return item;
                     };
                     for (const file of files) {
                         const id = fileTitle(file.name);
+                        const key = group.name + "_" + id;
                         const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                         if (!date || !name) {
                             continue;
@@ -89,7 +90,7 @@ export function useSessions(depends = [], options = {}) {
                         if (isAudioFile(file.name)) {
                             let item = sessions.find(session => session.id === id && session.group === group.name);
                             if (!item) {
-                                item = createItem({ id, name, date, group });
+                                item = createItem({ key, id, name, date, group });
                             }
                             item.audio = file;
                         }
@@ -100,7 +101,7 @@ export function useSessions(depends = [], options = {}) {
                                 const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                                 let item = sessions.find(session => session.id === id && session.group === group.name);
                                 if (!item) {
-                                    item = createItem({ id, name, date });
+                                    item = createItem({ key, id, name, date });
                                 }
                                 if (!item.resolutions) {
                                     item.resolutions = {};
@@ -110,7 +111,7 @@ export function useSessions(depends = [], options = {}) {
                             else {
                                 let item = sessions.find(session => session.id === id && session.group === group.name);
                                 if (!item) {
-                                    item = createItem({ id, name, date });
+                                    item = createItem({ key, id, name, date });
                                 }
                                 item.video = file;
                                 if (cdn.url) {
@@ -133,13 +134,13 @@ export function useSessions(depends = [], options = {}) {
         SessionsStore.update(s => {
             s.busy = false;
         });
-    }, [groupMetadata]);
+    }, []);
 
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
             updateSessions(groupMetadata);
         }
-    }, [loading]);
+    }, [groupMetadata, loading, updateSessions]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
