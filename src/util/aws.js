@@ -1,11 +1,9 @@
-import AWS from "aws-sdk";
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, UploadPartCommand, CreateMultipartUploadCommand, CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
 import { lockMutex } from "./mutex";
 import fs from "fs";
 import { makePath } from "@util/path";
 
-let s3Object = null;
-
-const bufferSize = 10 * 1024 * 1024;
+let s3Client = null;
 
 export async function getS3({ accessKeyId = process.env.AWS_ID, secretAccessKey = process.env.AWS_SECRET, endpointUrl = process.env.AWS_ENDPOINT }) {
     if (!accessKeyId) {
@@ -18,136 +16,138 @@ export async function getS3({ accessKeyId = process.env.AWS_ID, secretAccessKey 
         throw "No End Point";
     }
     const unlock = await lockMutex({ id: "aws" });
-    if (!s3Object) {
-        const endpoint = new AWS.Endpoint(endpointUrl);
-        s3Object = new AWS.S3({
-            endpoint,
-            accessKeyId,
-            secretAccessKey
+    if (!s3Client) {
+        s3Client = new S3Client({
+            region: endpointUrl.split(".")[1],
+            endpoint: "https://" + endpointUrl,
+            credentials: {
+                accessKeyId,
+                secretAccessKey
+            }
         });
     }
     unlock();
-    return s3Object;
+    return s3Client;
 }
 
-export async function uplodFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    var params = {
+export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
+    const s3 = await getS3({});
+    const fileStream = fs.createReadStream(from);
+    const uploadParams = {
         Bucket: bucketName,
         Key: to,
-        Body: fs.createReadStream(from),
+        Body: fileStream,
         ACL: "public-read"
     };
-    var options = {
-        partSize: bufferSize,
-        queueSize: 10
-    };
-    const s3 = await getS3({});
-    return await s3.upload(params, options).promise();
-};
+    const response = await s3.send(new PutObjectCommand(uploadParams));
+    return response;
+}
 
 export async function downloadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    var params = {
+    const s3 = await getS3({});
+    const fileStream = fs.createWriteStream(to);
+    const downloadParams = {
         Bucket: bucketName,
         Key: from
     };
-    const writeStream = fs.createWriteStream(to);
-    const s3 = await getS3({});
-    return new Promise((resolve, reject) => {
-        let readStream = s3.getObject(params).createReadStream({ bufferSize: bufferSize });
-        readStream.on("error", reject);
-        readStream.on("end", resolve);
-        readStream.pipe(writeStream);
+    const response = await s3.send(new GetObjectCommand(downloadParams));
+    response.Body.pipe(fileStream);
+    await new Promise((resolve, reject) => {
+        fileStream.on("finish", resolve);
+        fileStream.on("error", reject);
     });
-};
+}
 
 export async function uploadData({ path, data, bucketName = process.env.AWS_BUCKET }) {
-    var params = {
+    const s3 = await getS3({});
+    const uploadParams = {
         Bucket: bucketName,
         Key: path,
         Body: data,
         ACL: "public-read"
     };
-    var options = {
-        partSize: bufferSize,
-        queueSize: 10
-    };
-    const s3 = await getS3({});
-    const result = await s3.upload(params, options).promise();
-    return result;
-};
+    const response = await s3.send(new PutObjectCommand(uploadParams));
+    return response;
+}
 
 export async function downloadData({ path, binary, bucketName = process.env.AWS_BUCKET }) {
-    var params = {
+    const s3 = await getS3({});
+    const downloadParams = {
         Bucket: bucketName,
         Key: path
     };
-    const s3 = await getS3({});
-    const data = await s3.getObject(params).promise();
+    const response = await s3.send(new GetObjectCommand(downloadParams));
+    const data = await new Promise((resolve, reject) => {
+        const chunks = [];
+        response.Body.on("data", (chunk) => chunks.push(chunk));
+        response.Body.on("end", () => resolve(Buffer.concat(chunks)));
+        response.Body.on("error", reject);
+    });
     if (binary) {
-        return Buffer.from(data.Body);
+        return data;
     }
-    return data.Body.toString();
-};
+    return data.toString();
+}
 
 export async function copyFile(from, to) {
     const [fromBucketName, fromPath] = parseUrl(from);
     const [toBucketName, toPath] = parseUrl(to);
-    var params = {
+    const s3 = await getS3({});
+    const copyParams = {
         Bucket: toBucketName,
-        CopySource: fromBucketName + "/" + fromPath,
+        CopySource: `${fromBucketName}/${fromPath}`,
         Key: toPath
     };
-    const s3 = await getS3({});
-    const data = await s3.copyObject(params).promise();
-    return data;
-};
+    const response = await s3.send(new CopyObjectCommand(copyParams));
+    return response;
+}
 
 export async function moveFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    var params = {
+    const s3 = await getS3({});
+    const copyParams = {
         Bucket: bucketName,
-        CopySource: encodeURIComponent(bucketName + "/" + from),
+        CopySource: encodeURIComponent(`${bucketName}/${from}`),
         Key: to
     };
-    const s3 = await getS3({});
-    const data = await s3.copyObject(params).promise();
-    await deleteFile(from);
-    return data;
-};
+    const copyResponse = await s3.send(new CopyObjectCommand(copyParams));
+    await deleteFile({ path: from, bucketName });
+    return copyResponse;
+}
 
 export async function deleteFile({ path, bucketName = process.env.AWS_BUCKET }) {
-    var params = {
+    const s3 = await getS3({});
+    const deleteParams = {
         Bucket: bucketName,
         Key: path
     };
-    const s3 = await getS3({});
-    const data = await s3.deleteObject(params).promise();
-    return data;
-};
+    const response = await s3.send(new DeleteObjectCommand(deleteParams));
+    return response;
+}
 
 export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }) {
-    const name = path.split("/").pop();
-    var params = {
+    const s3 = await getS3({});
+    const headParams = {
         Bucket: bucketName,
         Key: path
     };
-    const s3 = await getS3({});
     try {
-        const data = await s3.headObject(params).promise();
+        const headResponse = await s3.send(new HeadObjectCommand(headParams));
+        const name = path.split("/").pop();
         return {
-            type: data.ContentType,
+            type: headResponse.ContentType,
             name,
-            size: data.ContentLength,
-            date: data.LastModified.valueOf()
+            size: headResponse.ContentLength,
+            date: headResponse.LastModified.valueOf()
         };
-    }
-    catch (err) {
-        const params = {
+    } catch (err) {
+        const listParams = {
             Bucket: bucketName,
             Delimiter: "/",
-            ...path && { Prefix: path + "/" }
+            ...(path && { Prefix: path + "/" })
         };
-        const result = await s3.listObjects(params).promise();
-        if (result.Contents.length > 0 || result.CommonPrefixes.length > 0) {
+        const listResponse = await s3.send(new ListObjectsCommand(listParams));
+        if (listResponse.Contents.length > 0 || listResponse.CommonPrefixes.length > 0) {
+            const name = path.split("/").pop();
             return {
                 type: "application/x-directory",
                 name
@@ -155,19 +155,21 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
         }
     }
     return null;
-};
+}
 
 export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
-    const params = {
-        Bucket: bucketName,
-        Delimiter: "/",
-        ...path && { Prefix: path + "/" }
-    };
     const s3 = await getS3({});
     const items = [];
-    for (; ;) {
-        const result = await s3.listObjects(params).promise();
-        result.CommonPrefixes.forEach(prefix => {
+    let continuationToken = undefined;
+    do {
+        const listParams = {
+            Bucket: bucketName,
+            Delimiter: "/",
+            ...(path && { Prefix: path + "/" }),
+            ContinuationToken: continuationToken
+        };
+        const listResponse = await s3.send(new ListObjectsCommand(listParams));
+        listResponse.CommonPrefixes?.forEach(prefix => {
             const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1).split("/").pop();
             if (name === "private") {
                 return;
@@ -177,7 +179,7 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
                 name
             });
         });
-        result.Contents.forEach(content => {
+        listResponse.Contents?.forEach(content => {
             const name = content.Key.split("/").pop();
             if (!name) {
                 return;
@@ -193,24 +195,19 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
                 stat
             });
         });
-        if (result.IsTruncated && result.NextMarker) {
-            params.Marker = result.NextMarker;
-        }
-        else {
-            break;
-        }
-    }
+        continuationToken = listResponse.NextContinuationToken;
+    } while (continuationToken);
     return items;
-};
+}
 
 export function cdnUrl(path) {
     let tokens = makePath(path).split("/");
     tokens.shift();
     let fileName = tokens.pop();
     path = tokens.join("/");
-    var url = "https:/" + makePath(process.env.AWS_CDN, path, encodeURIComponent(fileName));
+    const url = `https:/${makePath(process.env.AWS_CDN, path, encodeURIComponent(fileName))}`;
     return url;
-};
+}
 
 export async function handleRequest({ readOnly, req }) {
     const headers = req.headers || {};
