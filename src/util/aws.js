@@ -205,7 +205,7 @@ export function cdnUrl(path) {
     tokens.shift();
     let fileName = tokens.pop();
     path = tokens.join("/");
-    const url = `https:/${makePath(process.env.AWS_CDN, path, encodeURIComponent(fileName))}`;
+    const url = `https://${makePath(process.env.AWS_CDN, path, encodeURIComponent(fileName))}`;
     return url;
 }
 
