@@ -8,7 +8,6 @@ import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore"
 import languages from "@data/languages";
 import fontSizes from "@data/fontSizes";
 import { useTranslations } from "@util/translations";
-import Label from "@widgets/Label";
 import { useCallback } from "react";
 import Dynamic from "@widgets/Dynamic";
 import { useDeviceType } from "@util/styles";
@@ -18,6 +17,7 @@ import { Store } from "pullstate";
 import BuildIcon from "@material-ui/icons/Build";
 import useDarkMode from "use-dark-mode";
 import Row from "@widgets/Row";
+import getConfig from "next/config";
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -26,6 +26,7 @@ export const SettingsStore = new Store({
 });
 
 export default function Settings() {
+    const config = getConfig();
     const prefferedLanguage = typeof navigator !== "undefined" && languages.find(item => navigator.language.includes(item.code)) || languages[0];
     const darkMode = useDarkMode(false);
     const translations = useTranslations();
@@ -40,6 +41,9 @@ export default function Settings() {
             darkMode.disable();
         }
     });
+
+    console.log("config", config);
+
     const darkModeState = [darkModeSelected, setDarkMode];
 
     const navigate = id => {
@@ -125,7 +129,7 @@ export default function Settings() {
             id: "version",
             icon: <BuildIcon />,
             name: translations.VERSION,
-            widget: VERSION
+            widget: config.publicRuntimeConfig.VERSION
         }
     ];
 
