@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { lockMutex } from "./mutex";
 import fs from "fs";
 import { makePath } from "@util/path";
@@ -168,7 +168,7 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
             ...(path && { Prefix: path + "/" }),
             ContinuationToken: continuationToken
         };
-        const listResponse = await s3.send(new ListObjectsCommand(listParams));
+        const listResponse = await s3.send(new ListObjectsV2Command(listParams));
         listResponse.CommonPrefixes?.forEach(prefix => {
             const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1).split("/").pop();
             if (name === "private") {
