@@ -162,28 +162,6 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
         playerRef.load();
     }, [path]);
 
-    const timestamps = metadata && metadata.timestamps || [];
-    const timestampPos = parseInt(currentTime);
-    const timestamp = timestamps.find(item => item.id === timestampPos);
-    const hasTimestamp = !!timestamp;
-
-    const toggleTimestamp = () => {
-        setMetadata(metadata => {
-            metadata.timestamps = metadata.timestamps || [];
-            if (hasTimestamp) {
-                metadata.timestamps = metadata.timestamps.filter(item => item.id !== timestampPos);
-            }
-            else {
-                metadata.timestamps = [...metadata.timestamps, {
-                    id: timestampPos
-                }];
-                metadata.timestamps.sort((a, b) => a.id - b.id);
-            }
-            setCounter(counter => counter + 1);
-            return { ...metadata };
-        });
-    };
-
     return <>
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
         <div className={styles.toolbar}>
@@ -193,18 +171,6 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
                     <div className={styles.progressText}>{progressText}</div>
                     <div className={styles.progressPlayed} style={{ width: left + "%" }} />
                     <div className={styles.progressPosition} style={{ left: progressPosition }} />
-                    {timestamps.map(item => {
-                        const pos = item.id / playerRef.duration * 100;
-                        const gotoTimestamp = () => {
-                            seekPosition(item.id);
-                        };
-                        return <Tooltip key={item.id} arrow title={<>
-                            <div>{item.name}</div>
-                            <div>{formatDuration(item.id * 1000, true)}</div>
-                        </>}>
-                            <div className={styles.progressTimestamp} onClick={gotoTimestamp} style={{ left: pos + "%" }} />
-                        </Tooltip>;
-                    })}
                 </div>
             </div>
             <div className={styles.buttons}>
@@ -216,7 +182,6 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
                 {!error && <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={stop} />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
-                <PlayerButton active={hasTimestamp} icon={<AccessTimeIcon />} name={hasTimestamp ? translations.REMOVE_TIMESTAMP : translations.ADD_TIMESTAMP} onClick={toggleTimestamp}></PlayerButton>
             </div>
         </div>
     </>;
