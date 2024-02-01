@@ -81,6 +81,12 @@ export default function Users() {
             sortable: true,
             icon: <EmailIcon />
         },
+        !isPhone && {
+            id: "date",
+            title: translations.DATE,
+            sortable: "utc",
+            icon: <TodayIcon />
+        },
         {
             id: "roleWidget",
             title: translations.ROLE,
@@ -97,12 +103,6 @@ export default function Users() {
                 }
                 s.offset = 0;
             })
-        },
-        !isPhone && {
-            id: "date",
-            title: translations.DATE,
-            sortable: "utc",
-            icon: <TodayIcon />
         }
     ];
 
