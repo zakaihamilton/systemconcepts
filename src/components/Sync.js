@@ -30,7 +30,7 @@ export default function Sync({ children }) {
     </span>;
 
     const syncIcon =
-        <Badge color="secondary" variant="dot" invisible={!changed}>
+        <Badge overlap="rectangular" color="secondary" variant="dot" invisible={!changed}>
             {error ? <SyncProblemIcon /> : <SyncIcon className={className} />}
         </Badge>;
 
