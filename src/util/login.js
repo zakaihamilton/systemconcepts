@@ -39,6 +39,18 @@ export async function login({ id, password, hash, api }) {
         console.error("wrong password for user", id);
         throw "WRONG_PASSWORD";
     }
+    const dateObj = new Date();
+    const date = dateObj.toString();
+    const utc = dateObj.getTime();
+    await replaceRecord({
+        collectionName: "users",
+        query: { id },
+        record: {
+            ...user,
+            date,
+            utc
+        }
+    });
     return user;
 }
 

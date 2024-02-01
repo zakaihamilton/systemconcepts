@@ -11,6 +11,7 @@ import roles from "@data/roles";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import RecentActorsIcon from "@material-ui/icons/RecentActors";
 import EmailIcon from "@material-ui/icons/Email";
+import TodayIcon from "@material-ui/icons/Today";
 import { isRTL } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import styles from "./Users.module.scss";
@@ -96,6 +97,12 @@ export default function Users() {
                 }
                 s.offset = 0;
             })
+        },
+        !isPhone && {
+            id: "date",
+            title: translations.DATE,
+            sortable: "utc",
+            icon: <TodayIcon />
         }
     ];
 
@@ -109,15 +116,16 @@ export default function Users() {
             <span>{lastName}</span>
             <b>{firstName}</b>
         </div> : <div className={styles.name}>
-                <b>{firstName}</b>
-                <span>{lastName}</span>
-            </div>;
+            <b>{firstName}</b>
+            <span>{lastName}</span>
+        </div>;
         const href = "#users/" + toPath("user/" + id + "?name=" + firstName + " " + lastName);
         return {
             ...item,
             nameWidget: <Row href={href} onClick={userClick.bind(this, item)} icons={iconWidget}>{labelName}</Row>,
             roleWidget: roleItem && translations[roleItem.name],
-            name
+            name,
+            date: new Date(item.utc).toLocaleDateString("en-GB")
         };
     };
 
