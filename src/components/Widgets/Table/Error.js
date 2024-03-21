@@ -1,7 +1,7 @@
 import styles from "./Error.module.scss";
-import ErrorIcon from "@material-ui/icons/Error";
+import ErrorIcon from "@mui/icons-material/Error";
 import Label from "@widgets/Label";
-import Tooltip from "@material-ui/core/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
 
 export default function Error({ error }) {

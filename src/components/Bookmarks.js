@@ -1,4 +1,4 @@
-import BookmarkIcon from "@material-ui/icons/Bookmark";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { Store } from "pullstate";

@@ -1,12 +1,12 @@
 import { useState, forwardRef, Children, cloneElement } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import Divider from "@material-ui/core/Divider";
+import withStyles from "@mui/styles/withStyles";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
 import styles from "./Menu.module.scss";
-import Link from "@material-ui/core/Link";
+import Link from "@mui/material/Link";
 
 const StyledMenu = withStyles({
     paper: {

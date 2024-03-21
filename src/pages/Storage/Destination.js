@@ -1,20 +1,21 @@
 import { forwardRef } from "react";
-import { alpha, makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import CloseIcon from "@material-ui/icons/Close";
-import Slide from "@material-ui/core/Slide";
+import { alpha } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
+import Slide from "@mui/material/Slide";
 import { StorageStore } from "../Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import StorageList from "./StorageList";
-import Tooltip from "@material-ui/core/Tooltip";
-import InputBase from "@material-ui/core/InputBase";
+import Tooltip from "@mui/material/Tooltip";
+import InputBase from "@mui/material/InputBase";
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -140,7 +141,7 @@ export default function Destination({ path }) {
         <Dialog fullScreen open={destination !== ""} onClose={handleClose} TransitionComponent={Transition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={handleClose}>
+                    <IconButton edge="start" color="inherit" onClick={handleClose} size="large">
                         <Tooltip arrow title={translations.CLOSE}>
                             <CloseIcon />
                         </Tooltip>

@@ -1,7 +1,7 @@
 import styles from "./ListColumns.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
-import Tooltip from "@material-ui/core/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import Label from "@widgets/Label";
 
 export default function ListColumns({ className = "", viewMode, columns, index, style, ...props }) {

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import { goBackPage, addPath } from "@util/pages";
 import { useFile } from "@util/storage";
 import { createID, useArticle } from "@util/articles";
@@ -10,10 +10,10 @@ import { useLanguage } from "@util/language";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { useTags } from "@util/tags";
 import { useTypes } from "@util/types";
-import StyleIcon from "@material-ui/icons/Style";
+import StyleIcon from "@mui/icons-material/Style";
 
 registerToolbar("Article");
 

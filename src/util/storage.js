@@ -22,7 +22,7 @@ export async function callMethod(item, url = "", ...params) {
                 }
                 const result = Object.assign({}, device);
                 if (useCount) {
-                    const items = await storageMethods.getListing(device.id, ...params) || [];
+                    const items = (await storageMethods.getListing(device.id, ...params)) || [];
                     result.count = items.length;
                 }
                 results.push(result);

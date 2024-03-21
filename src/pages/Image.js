@@ -11,7 +11,7 @@ import { makePath } from "@util/path";
 import { useFetchJSON } from "@util/fetch";
 import Message from "@widgets/Message";
 import { useTranslations } from "@util/translations";
-import ErrorIcon from "@material-ui/icons/Error";
+import ErrorIcon from "@mui/icons-material/Error";
 
 function useImagePath(imageName = "") {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();

@@ -1,4 +1,4 @@
-import FaceIcon from "@material-ui/icons/Face";
+import FaceIcon from "@mui/icons-material/Face";
 
 export default [
     {

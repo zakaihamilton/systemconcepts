@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import DeleteIcon from "@material-ui/icons/Delete";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { fetchJSON } from "@util/fetch";
 import ItemMenu from "@components/ItemMenu";
 

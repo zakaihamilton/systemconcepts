@@ -1,14 +1,14 @@
 import { MainStore } from "@components/Main";
 import { useTranslations } from "@util/translations";
 import List from "@widgets/List";
-import { Divider } from "@material-ui/core";
-import LanguageIcon from "@material-ui/icons/Language";
+import { Divider } from "@mui/material";
+import LanguageIcon from "@mui/icons-material/Language";
 import languages from "@data/languages";
 import { usePages } from "@util/pages";
-import Brightness7Icon from "@material-ui/icons/Brightness7";
-import Brightness4Icon from "@material-ui/icons/Brightness4";
-import ReplayIcon from "@material-ui/icons/Replay";
-import BuildIcon from "@material-ui/icons/Build";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import ReplayIcon from "@mui/icons-material/Replay";
+import BuildIcon from "@mui/icons-material/Build";
 import { useLanguage } from "@util/language";
 import useDarkMode from "use-dark-mode";
 

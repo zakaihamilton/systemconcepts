@@ -2,10 +2,10 @@ import { StorageStore } from "../Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import { exportData } from "@util/importExport";
-import ImportExportIcon from "@material-ui/icons/ImportExport";
-import DeleteIcon from "@material-ui/icons/Delete";
-import FileCopyIcon from "@material-ui/icons/FileCopy";
-import TrendingFlatIcon from "@material-ui/icons/TrendingFlat";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
 import { isBinaryFile, makePath, fileFolder } from "@util/path";
 import ItemMenu from "@components/ItemMenu";
 

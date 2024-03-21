@@ -1,18 +1,18 @@
 import React from "react";
-import Link from "@material-ui/core/Link";
-import NavigateNextIcon from "@material-ui/icons/NavigateNext";
-import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
-import { Divider } from "@material-ui/core";
+import Link from "@mui/material/Link";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import { Divider } from "@mui/material";
 import { MainStore } from "@components/Main";
 import styles from "./Breadcrumbs.module.scss";
 import { useDeviceType } from "@util/styles";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Toolbar from "@components/Toolbar";
 import MenuIcon from "./AppBar/MenuIcon";
 import clsx from "clsx";
-import NoSsr from "@material-ui/core/NoSsr";
+import NoSsr from "@mui/material/NoSsr";
 import { setHash } from "@util/pages";
 
 export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
@@ -34,14 +34,16 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
             const path = items.slice(2, -2).map(item => item.label || item.name).join("/");
-            return <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
-                <IconButton className={styles.iconButton}>
-                    <Tooltip arrow title={path}>
-                        <MoreHorizIcon />
-                    </Tooltip>
-                </IconButton>
-                <SeparatorIcon fontSize="small" />
-            </Link>;
+            return (
+                <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
+                    <IconButton className={styles.iconButton} size="large">
+                        <Tooltip arrow title={path}>
+                            <MoreHorizIcon />
+                        </Tooltip>
+                    </IconButton>
+                    <SeparatorIcon fontSize="small" />
+                </Link>
+            );
         }
         return null;
     }
@@ -62,7 +64,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
             </Tooltip>
         </div>}
         {(!isLast || navigateLast) && <Link className={styles.item} color="inherit" href={href} onClick={gotoItem}>
-            {icon && <IconButton className={styles.iconButton}>
+            {icon && <IconButton className={styles.iconButton} size="large">
                 <Tooltip arrow title={title}>
                     {icon}
                 </Tooltip>

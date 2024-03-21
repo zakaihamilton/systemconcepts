@@ -37,7 +37,7 @@ async function getListing(path, options = {}) {
 
 async function createFolder(path) {
     path = makePath(path);
-    if (!await exists(path)) {
+    if (!(await exists(path))) {
         await fs.promises.mkdir(path);
     }
 }

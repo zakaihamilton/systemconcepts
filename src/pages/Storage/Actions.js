@@ -1,10 +1,10 @@
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import SpeedDial from "@widgets/SpeedDial";
-import AddIcon from "@material-ui/icons/Add";
-import FolderIcon from "@material-ui/icons/Folder";
-import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
-import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
+import AddIcon from "@mui/icons-material/Add";
+import FolderIcon from "@mui/icons-material/Folder";
+import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { StorageStore } from "../Storage";
 import { importData } from "@util/importExport";
 import { makePath } from "@util/path";

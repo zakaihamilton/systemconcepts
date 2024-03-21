@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import { addPath } from "@util/pages";
-import Link from "@material-ui/core/Link";
+import Link from "@mui/material/Link";
 
 export default function ImageWidget({ clickForImage = true, onClick, href, loading, path, width, height, alt }) {
     const [imageLoading, setImageLoading] = useState(false);

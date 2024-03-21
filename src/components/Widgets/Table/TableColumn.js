@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import TableCell from "@material-ui/core/TableCell";
-import TableSortLabel from "@material-ui/core/TableSortLabel";
+import TableCell from "@mui/material/TableCell";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import Label from "@widgets/Label";
 import styles from "./TableColumn.module.scss";
 

@@ -1,9 +1,9 @@
-import { Divider } from "@material-ui/core";
+import { Divider } from "@mui/material";
 import { useDeviceType } from "@util/styles";
-import Tooltip from "@material-ui/core/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import IconButton from "@material-ui/core/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import IconButton from "@mui/material/IconButton";
 import Menu from "@widgets/Menu";
 import { useEffect } from "react";
 import styles from "./Toolbar.module.scss";
@@ -94,20 +94,22 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
 
     const toolbarVisible = !!toolbarItems.length || !!menuItems.length;
 
-    return <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
-        {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-        {toolbarItems.map((item, idx) => (<Item key={item.id} item={item} idx={idx} count={toolbarItems.length} />))}
-        {!!menuItems.length && <>
-            {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-            <Menu items={menuItems}>
-                <IconButton>
-                    <Tooltip arrow title={translations.MENU}>
-                        <MoreVertIcon />
-                    </Tooltip>
-                </IconButton>
-            </Menu>
-        </>
-        }
-        {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
-    </div>;
+    return (
+        <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
+            {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+            {toolbarItems.map((item, idx) => (<Item key={item.id} item={item} idx={idx} count={toolbarItems.length} />))}
+            {!!menuItems.length && <>
+                {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                <Menu items={menuItems}>
+                    <IconButton size="large">
+                        <Tooltip arrow title={translations.MENU}>
+                            <MoreVertIcon />
+                        </Tooltip>
+                    </IconButton>
+                </Menu>
+            </>
+            }
+            {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+        </div>
+    );
 }

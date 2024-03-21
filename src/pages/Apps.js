@@ -1,6 +1,6 @@
 import styles from "./Apps.module.scss";
 import { usePages, setPath } from "@util/pages";
-import Link from "@material-ui/core/Link";
+import Link from "@mui/material/Link";
 
 export default function Apps() {
     const pages = usePages();

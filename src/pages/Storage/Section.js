@@ -1,6 +1,6 @@
 import devices from "@data/storage";
-import StorageIcon from "@material-ui/icons/Storage";
-import FolderIcon from "@material-ui/icons/Folder";
+import StorageIcon from "@mui/icons-material/Storage";
+import FolderIcon from "@mui/icons-material/Folder";
 
 export function getStorageSection({ sectionIndex, id, translations }) {
     let icon = <FolderIcon />;

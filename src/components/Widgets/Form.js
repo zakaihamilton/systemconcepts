@@ -10,8 +10,8 @@ function FormItem({ child, record, setRecord, validate }) {
         setRecord(record => {
             return {
                 ...record,
-                ...!field && { [id]: value },
-                ...field && { [id]: { ...record[id], [field]: value } }
+                ...(!field && { [id]: value }),
+                ...(field && { [id]: { ...record[id], [field]: value } })
             };
         });
     }, [id, field]);

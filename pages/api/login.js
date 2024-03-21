@@ -22,7 +22,7 @@ export default async function LOGIN_API(req, res) {
         else {
             console.log("login success", params);
         }
-        res.status(200).json({ ...error && { err: error.toString() }, ...params });
+        res.status(200).json({ ...(error && { err: error.toString() }), ...params });
     }
     else if (req.method === "PUT") {
         const headers = req.headers || {};

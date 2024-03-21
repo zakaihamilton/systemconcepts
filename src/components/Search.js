@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import InputBase from "@material-ui/core/InputBase";
+import InputBase from "@mui/material/InputBase";
 import styles from "./Search.module.scss";
-import SearchIcon from "@material-ui/icons/Search";
+import SearchIcon from "@mui/icons-material/Search";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import { registerToolbar, useToolbar } from "@components/Toolbar";

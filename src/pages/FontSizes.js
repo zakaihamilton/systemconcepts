@@ -1,9 +1,9 @@
 import Table from "@widgets/Table";
 import data from "@data/fontSizes";
 import { useTranslations } from "@util/translations";
-import SmartphoneIcon from "@material-ui/icons/Smartphone";
-import TabletIcon from "@material-ui/icons/Tablet";
-import DesktopMacIcon from "@material-ui/icons/DesktopMac";
+import SmartphoneIcon from "@mui/icons-material/Smartphone";
+import TabletIcon from "@mui/icons-material/Tablet";
+import DesktopMacIcon from "@mui/icons-material/DesktopMac";
 import Label from "@widgets/Label";
 import { Store } from "pullstate";
 
