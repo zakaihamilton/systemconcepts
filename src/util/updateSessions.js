@@ -123,10 +123,12 @@ export function useUpdateSessions() {
         if (!items) {
             return;
         }
+        const promises = [];
         for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
             let item = items[itemIndex];
-            await updateGroup(item.name, true);
+            promises.push(updateGroup(item.name, true));
         }
+        await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
