@@ -546,6 +546,10 @@ export default {
             "value": "סנכרון שיעורים"
         },
         {
+            "id": "SYNC_ALL_SESSIONS",
+            "value": "סנכרון כל השיעורים"
+        },
+        {
             "id": "IMAGE",
             "value": "תמונה"
         },

@@ -126,6 +126,31 @@ export function useUpdateSessions() {
         const promises = [];
         for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
             let item = items[itemIndex];
+            promises.push(updateGroup(item.name));
+        }
+        await Promise.all(promises);
+        UpdateSessionsStore.update(s => {
+            s.busy = false;
+        });
+    }, []);
+    const updateAllSessions = useCallback(async () => {
+        UpdateSessionsStore.update(s => {
+            s.busy = true;
+            s.start = new Date().getTime();
+        });
+        let items = [];
+        try {
+            items = await getListing(prefix);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        if (!items) {
+            return;
+        }
+        const promises = [];
+        for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+            let item = items[itemIndex];
             promises.push(updateGroup(item.name, true));
         }
         await Promise.all(promises);
@@ -143,5 +168,5 @@ export function useUpdateSessions() {
             s.busy = false;
         });
     }, []);
-    return { status, busy, start, updateSessions: !busy && updateSessions, updateGroup: !busy && updateSpecificGroup };
+    return { status, busy, start, updateSessions: !busy && updateSessions, updateAllSessions: !busy && updateAllSessions, updateGroup: !busy && updateSpecificGroup };
 }

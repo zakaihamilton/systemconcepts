@@ -26,7 +26,7 @@ export default function Groups() {
     const translations = useTranslations();
     const { counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
-    const { status, busy, start, updateSessions, updateGroup } = useUpdateSessions();
+    const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -36,18 +36,32 @@ export default function Groups() {
 
     const duration = start && new Date().getTime() - start;
     const formattedDuration = formatDuration(duration);
-    const name = <span>
-        {busy ? translations.SYNCING : translations.SYNC_SESSIONS}
-        <br />
-        {!!duration && formattedDuration}
-    </span>;
 
     const toolbarItems = [
-        syncEnabled && {
+        !!busy && {
+            id: "busy",
+            name: <span>
+                {translations.SYNCING}
+                <br />
+                {!!duration && formattedDuration}
+            </span>,
+            icon: <UpdateIcon className={className} />,
+            location: "header",
+            menu: true
+        },
+        !busy && syncEnabled && {
             id: "sync_sessions",
-            name,
+            name: translations.SYNC_SESSIONS,
             icon: <UpdateIcon className={className} />,
             onClick: updateSessions,
+            location: "header",
+            menu: true
+        },
+        !busy && syncEnabled && {
+            id: "sync_all_sessions",
+            name: translations.SYNC_ALL_SESSIONS,
+            icon: <UpdateIcon className={className} />,
+            onClick: updateAllSessions,
             location: "header",
             menu: true
         }

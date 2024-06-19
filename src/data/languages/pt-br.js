@@ -550,6 +550,10 @@ export default {
             "value": "Sincronizar Sessões"
         },
         {
+            "id": "SYNC_ALL_SESSIONS",
+            "value": "Sincronizar Todas as Sessões"
+        },
+        {
             "id": "IMAGE",
             "value": "Imagem"
         },

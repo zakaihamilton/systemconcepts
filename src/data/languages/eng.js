@@ -550,6 +550,10 @@ export default {
             "value": "Sync Sessions"
         },
         {
+            "id": "SYNC_ALL_SESSIONS",
+            "value": "Sync All Sessions"
+        },
+        {
             "id": "IMAGE",
             "value": "Image"
         },
