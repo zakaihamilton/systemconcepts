@@ -7,11 +7,10 @@ import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import SpeedIcon from "@material-ui/icons/Speed";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@util/styles";
-import Tooltip from "@material-ui/core/Tooltip";
 
 registerToolbar("PlayerToolbar");
 
-export default function Toolbar({ show, playerRef, name, isVideo }) {
+export default function Toolbar({ show, playerRef, isVideo }) {
     const isMobile = useDeviceType() !== "desktop";
     const translations = useTranslations();
     const [, setCounter] = useState(0);

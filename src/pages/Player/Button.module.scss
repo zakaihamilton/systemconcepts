@@ -6,6 +6,10 @@
     color: var(--text-color);
     padding: 0.5em;
     height: 5.5em;
+    width: 5.5em;
+    margin: 0.5em;
+    justify-items: center;
+    align-items: center;
 }
 
 .root.active {
@@ -26,6 +30,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    margin-top: 6px;
 }
 
 .label {
@@ -34,7 +39,8 @@
     justify-content: center;
     width: 100%;
     user-select: none;
-    font-size: 75%;
+    font-size: 85%;
+    margin-top: 6px;
 }
 
 .subHeading {

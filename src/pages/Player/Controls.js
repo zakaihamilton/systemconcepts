@@ -11,8 +11,6 @@ import { MainStore } from "@components/Main";
 import MuiAlert from "@material-ui/lab/Alert";
 import Forward10Icon from "@material-ui/icons/Forward10";
 import Replay10Icon from "@material-ui/icons/Replay10";
-import AccessTimeIcon from "@material-ui/icons/AccessTime";
-import Tooltip from "@material-ui/core/Tooltip";
 import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
 import Button from "@material-ui/core/Button";

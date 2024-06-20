@@ -6,3 +6,15 @@
     align-items: center;
     position: relative;
 }
+
+.name {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    justify-self: flex-start;
+}

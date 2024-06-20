@@ -15,6 +15,7 @@ import VideoLabelIcon from "@material-ui/icons/VideoLabel";
 import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
+import { useGroups } from "@util/groups";
 
 export const PlayerStore = new Store({
     mediaPath: "",
@@ -29,6 +30,7 @@ export default function PlayerPage({ show = false, suffix }) {
     const translations = useTranslations();
     const { hash, mediaPath } = PlayerStore.useState();
     const size = useContext(ContentSize);
+    const [groups] = useGroups([]);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
@@ -61,6 +63,8 @@ export default function PlayerPage({ show = false, suffix }) {
         }
     }, [data && data.path]);
 
+    const color = groups.find(item => item.name === group)?.color;
+
     const toolbarItems = [
         hash && {
             id: "player",
@@ -91,6 +95,8 @@ export default function PlayerPage({ show = false, suffix }) {
         metadataPath,
         path: mediaPath,
         show,
+        group,
+        color,
         name: date + " " + name,
         preload: "metadata"
     };
