@@ -1,23 +1,23 @@
 import React, { useState } from "react";
-import Button from "@material-ui/core/Button";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import Button from "@mui/material/Button";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import makeStyles from '@mui/styles/makeStyles';
+import Container from "@mui/material/Container";
 import { useTranslations } from "@util/translations";
-import EmailIcon from "@material-ui/icons/Email";
-import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import EmailIcon from "@mui/icons-material/Email";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { fetchJSON } from "@util/fetch";
 import Cookies from "js-cookie";
 import Input from "@widgets/Input";
 import { setPath } from "@util/pages";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import clsx from "clsx";
 import { MainStore } from "@components/Main";
-import Checkbox from "@material-ui/core/Checkbox";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import Checkbox from "@mui/material/Checkbox";
+import LinearProgress from "@mui/material/LinearProgress";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -154,7 +154,7 @@ export default function SignUp() {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
+        (<Container component="main" maxWidth="xs">
             <div className={classes.paper}>
                 <Typography component="h1" variant="h5">
                     {translations.SIGN_UP}
@@ -252,7 +252,7 @@ export default function SignUp() {
                     >
                         {translations.SIGN_UP}
                     </Button>
-                    <Grid container justify="flex-end">
+                    <Grid container justifyContent="flex-end">
                         <Grid item>
                             <Link href="#signin" variant="body2">
                                 {translations.HAVE_ACCOUNT}
@@ -261,6 +261,6 @@ export default function SignUp() {
                     </Grid>
                 </form>
             </div>
-        </Container>
+        </Container>)
     );
 }

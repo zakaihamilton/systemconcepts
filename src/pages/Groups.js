@@ -9,7 +9,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { formatDuration } from "@util/string";
-import UpdateIcon from "@material-ui/icons/Update";
+import UpdateIcon from "@mui/icons-material/Update";
 import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";

@@ -1,13 +1,13 @@
 import React, { useCallback } from "react";
 import styles from "./SideBar.module.scss";
 import List from "@widgets/List";
-import Drawer from "@material-ui/core/Drawer";
+import Drawer from "@mui/material/Drawer";
 import { useDeviceType } from "@util/styles";
 import { MainStore } from "./Main";
 import { useActivePages, usePages, setHash } from "@util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
 import { useBookmarks } from "@components/Bookmarks";
-import BookmarkIcon from "@material-ui/icons/Bookmark";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useTranslations } from "@util/translations";
 
 export default function SideBar() {

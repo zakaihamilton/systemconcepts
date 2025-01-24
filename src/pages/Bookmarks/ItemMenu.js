@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import DeleteIcon from "@material-ui/icons/Delete";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
 import ItemMenu from "@components/ItemMenu";
 

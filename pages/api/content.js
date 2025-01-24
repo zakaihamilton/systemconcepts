@@ -1,13 +1,13 @@
 import { handleRequest } from "@util/mongo";
 import { login } from "@util/login";
-import Cookie from "cookie";
+import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 
 export default async function CONTENT_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie } = headers || {};
-        const cookies = Cookie.parse(cookie);
+        const cookies = parseCookie(cookie);
         const { id, hash } = cookies || {};
         let collectionName = "content";
         let readOnly = true;

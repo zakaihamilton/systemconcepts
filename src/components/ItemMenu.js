@@ -1,8 +1,8 @@
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import IconButton from "@material-ui/core/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import IconButton from "@mui/material/IconButton";
 import Menu from "@widgets/Menu";
 import { useTranslations } from "@util/translations";
-import Tooltip from "@material-ui/core/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import Select from "@components/Widgets/Select";
 
 export default function ItemMenuWidget({ item, menuItems, store }) {
@@ -12,7 +12,7 @@ export default function ItemMenuWidget({ item, menuItems, store }) {
     return (<>
         {!!select && <Select select={select} item={item} store={store} />}
         {!select && <Menu items={menuItems}>
-            <IconButton>
+            <IconButton size="large">
                 <Tooltip title={translations.MENU}>
                     <MoreVertIcon />
                 </Tooltip>

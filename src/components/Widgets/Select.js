@@ -1,5 +1,5 @@
 import React from "react";
-import Checkbox from "@material-ui/core/Checkbox";
+import Checkbox from "@mui/material/Checkbox";
 import styles from "./Select.module.scss";
 
 export default function SelectWidget({ item, store, select }) {

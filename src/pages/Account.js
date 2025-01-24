@@ -1,22 +1,22 @@
 import React, { useState } from "react";
-import Button from "@material-ui/core/Button";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import Button from "@mui/material/Button";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import makeStyles from '@mui/styles/makeStyles';
+import Container from "@mui/material/Container";
 import { useTranslations } from "@util/translations";
 import { MainStore } from "@components/Main";
 import clsx from "clsx";
-import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import Input from "@widgets/Input";
 import Cookies from "js-cookie";
 import { fetchJSON } from "@util/fetch";
 import { setPath } from "@util/pages";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import LinearProgress from "@mui/material/LinearProgress";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const useStyles = makeStyles((theme) => ({
     paper: {

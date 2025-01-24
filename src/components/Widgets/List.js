@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import Divider from "@material-ui/core/Divider";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
 import styles from "./List.module.scss";
-import Avatar from "@material-ui/core/Avatar";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@mui/material/Avatar";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
 import { useStyles } from "@util/styles";
-import Collapse from "@material-ui/core/Collapse";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
+import Collapse from "@mui/material/Collapse";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { MainStore } from "@components/Main";
-import Link from "@material-ui/core/Link";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import IconButton from "@material-ui/core/IconButton";
+import Link from "@mui/material/Link";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import IconButton from "@mui/material/IconButton";
 
 export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
@@ -80,7 +80,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
             </ListItemIcon>}
             <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
             {!!actionIcon && <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback}>
+                <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback} size="large">
                     {actionIcon}
                 </IconButton>
             </ListItemSecondaryAction>}

@@ -1,10 +1,10 @@
 import styles from "./Toolbar.module.scss";
-import Avatar from "@material-ui/core/Avatar";
+import Avatar from "@mui/material/Avatar";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import VolumeDownIcon from "@material-ui/icons/VolumeDown";
-import FullscreenIcon from "@material-ui/icons/Fullscreen";
-import SpeedIcon from "@material-ui/icons/Speed";
+import VolumeDownIcon from "@mui/icons-material/VolumeDown";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import SpeedIcon from "@mui/icons-material/Speed";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@util/styles";
 

@@ -1,17 +1,17 @@
 import { Fragment } from "react";
 import { useTranslations } from "@util/translations";
-import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import Collapse from "@material-ui/core/Collapse";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import StorageIcon from "@material-ui/icons/Storage";
-import FolderIcon from "@material-ui/icons/Folder";
+import makeStyles from '@mui/styles/makeStyles';
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Collapse from "@mui/material/Collapse";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import StorageIcon from "@mui/icons-material/Storage";
+import FolderIcon from "@mui/icons-material/Folder";
 import { useListing } from "@util/storage";
-import Tooltip from "@material-ui/core/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import Progress from "@widgets/Progress";
 
 const useStyles = makeStyles((theme) => ({

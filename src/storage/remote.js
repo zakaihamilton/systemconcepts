@@ -46,7 +46,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 
     async function createFolder(path) {
         path = makePath(path);
-        if (!await exists(path)) {
+        if (!(await exists(path))) {
             await fetchJSON(fsEndPoint, {
                 method: "PUT",
                 body: JSON.stringify([{

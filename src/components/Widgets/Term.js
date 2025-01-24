@@ -1,16 +1,16 @@
 import { Fragment } from "react";
 import styles from "./Term.module.scss";
 import { useTerms } from "@util/terms";
-import Tooltip from "@material-ui/core/Tooltip";
-import Badge from "@material-ui/core/Badge";
-import { makeStyles } from "@material-ui/core/styles";
+import Tooltip from "@mui/material/Tooltip";
+import Badge from "@mui/material/Badge";
+import makeStyles from '@mui/styles/makeStyles';
 import { MainStore } from "@components/Main";
 import clsx from "clsx";
 import { useLanguage } from "@util/language";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useLocalStorage } from "@util/store";
 
@@ -142,32 +142,34 @@ export default function Term({ id, onClick, ...props }) {
             {toLines(iconDescription)}
         </div >;
     }
-    return <div className={clsx(styles.root, classes.hover)} onClick={onClick ? onClick : undefined} {...props}>
-        {icon && <Tooltip arrow title={iconTooltip}>
-            <Badge
-                classes={{ badge: classes.phase }}
-                badgeContent={phase && phase.id}
-                invisible={typeof phase === "undefined"}
-                overlap="circle"
-                anchorOrigin={{
-                    vertical: "top",
-                    horizontal: direction === "rtl" ? "left" : "right",
-                }}
-            >
-                {icon}
-            </Badge>
-        </Tooltip>}
-        <div className={styles.fields}>
-            <Tooltip arrow title={nameTooltip}>
-                <div className={styles.name}>
-                    {name}
-                </div>
-            </Tooltip>
-            {showConcepts && <Tooltip arrow title={explanationTooltip}>
-                <div className={styles.concept}>
-                    {concept}
-                </div>
+    return (
+        <div className={clsx(styles.root, classes.hover)} onClick={onClick ? onClick : undefined} {...props}>
+            {icon && <Tooltip arrow title={iconTooltip}>
+                <Badge
+                    classes={{ badge: classes.phase }}
+                    badgeContent={phase && phase.id}
+                    invisible={typeof phase === "undefined"}
+                    overlap="circular"
+                    anchorOrigin={{
+                        vertical: "top",
+                        horizontal: direction === "rtl" ? "left" : "right",
+                    }}
+                >
+                    {icon}
+                </Badge>
             </Tooltip>}
+            <div className={styles.fields}>
+                <Tooltip arrow title={nameTooltip}>
+                    <div className={styles.name}>
+                        {name}
+                    </div>
+                </Tooltip>
+                {showConcepts && <Tooltip arrow title={explanationTooltip}>
+                    <div className={styles.concept}>
+                        {concept}
+                    </div>
+                </Tooltip>}
+            </div>
         </div>
-    </div>;
+    );
 }

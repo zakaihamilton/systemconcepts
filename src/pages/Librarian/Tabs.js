@@ -1,8 +1,8 @@
 import { useTranslations } from "@util/translations";
 import { usePathItems, toPath } from "@util/pages";
-import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import StyleIcon from "@material-ui/icons/Style";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import StyleIcon from "@mui/icons-material/Style";
 import Tab from "@components/Widgets/Tabs/Tab";
 
 export default function Tabs({ Container }) {

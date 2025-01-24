@@ -6,14 +6,14 @@ import { useTags } from "@util/tags";
 import { useTypes } from "@util/types";
 import Fab from "@widgets/Fab";
 import { useTranslations } from "@util/translations";
-import AddIcon from "@material-ui/icons/Add";
+import AddIcon from "@mui/icons-material/Add";
 import { addPath, toPath } from "@util/pages";
 import { useLanguage } from "@util/language";
 import styles from "./Tags.module.scss";
 import Row from "@widgets/Row";
 import ItemMenu from "./Tags/ItemMenu";
 import { useLocalStorage } from "@util/store";
-import StyleIcon from "@material-ui/icons/Style";
+import StyleIcon from "@mui/icons-material/Style";
 
 export const TagsStoreDefaults = {
     mode: "",

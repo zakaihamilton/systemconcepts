@@ -2,17 +2,17 @@ import { useCallback } from "react";
 import styles from "./Item.module.scss";
 import ItemMenu from "./ItemMenu";
 import { LibrarianStore } from "../Librarian";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { useTranslations } from "@util/translations";
 import { addPath } from "@util/pages";
 import clsx from "clsx";
 import Row from "@widgets/Row";
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import DescriptionIcon from "@material-ui/icons/Description";
-import FolderIcon from "@material-ui/icons/Folder";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import DescriptionIcon from "@mui/icons-material/Description";
+import FolderIcon from "@mui/icons-material/Folder";
 
 export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isOpen, style, toggle }) {
     const { select } = LibrarianStore.useState();
@@ -43,7 +43,7 @@ export default function Item({ data: { isLeaf, nestingLevel, item, remove }, isO
     const basePadding = (nestingLevel * 32) + 8;
     const { label = "" } = item;
     const icons = <>
-        <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle}>
+        <IconButton className={clsx(isLeaf && styles.hidden)} onClick={toggle} size="large">
             <Tooltip arrow title={isOpen ? translations.COLLAPSE : translations.EXPAND}>
                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Tooltip>

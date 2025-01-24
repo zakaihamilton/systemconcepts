@@ -1,7 +1,7 @@
 import { handleRequest, findRecord } from "@util/mongo";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
-import Cookie from "cookie";
+import parseCookie from "@util/cookie";
 
 const collectionName = "users";
 
@@ -9,7 +9,7 @@ export default async function USERS_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie, id: queryId } = headers || {};
-        const cookies = Cookie.parse(cookie);
+        const cookies = parseCookie(cookie);
         const { id, hash } = cookies || {};
         if (!id || !hash) {
             throw "ACCESS_DENIED";

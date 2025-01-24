@@ -1,7 +1,7 @@
 import { useStoreState } from "@util/store";
 import Input from "@widgets/Input";
 import { useCallback } from "react";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 
 export default function EditWidget({ store }) {
     const { icon, type, tooltip, onDone, onValidate, placeholder } = store.useState();

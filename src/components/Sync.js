@@ -4,10 +4,10 @@ import { useDeviceType, useStyles } from "@util/styles";
 import { useSyncFeature } from "@util/sync";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import SyncIcon from "@material-ui/icons/Sync";
-import SyncProblemIcon from "@material-ui/icons/SyncProblem";
+import SyncIcon from "@mui/icons-material/Sync";
+import SyncProblemIcon from "@mui/icons-material/SyncProblem";
 import { formatDuration } from "@util/string";
-import Badge from "@material-ui/core/Badge";
+import Badge from "@mui/material/Badge";
 
 registerToolbar("Sync", 1);
 

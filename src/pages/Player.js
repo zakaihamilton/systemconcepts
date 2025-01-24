@@ -11,7 +11,7 @@ import Download from "@widgets/Download";
 import { exportFile } from "@util/importExport";
 import { useFetchJSON } from "@util/fetch";
 import Progress from "@widgets/Progress";
-import VideoLabelIcon from "@material-ui/icons/VideoLabel";
+import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
@@ -81,7 +81,7 @@ export default function PlayerPage({ show = false, suffix }) {
     const style = {
         visibility: show ? "visible" : "hidden",
         flex: show ? "1" : "",
-        ...!show && { maxHeight: "0px" }
+        ...(!show && { maxHeight: "0px" })
     };
     const mediaStyles = {
         width: size.width + "px",

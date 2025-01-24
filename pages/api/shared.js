@@ -1,13 +1,13 @@
 import { handleRequest } from "@util/mongo";
 import { login } from "@util/login";
-import Cookie from "cookie";
+import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 
 export default async function SHARED_API(req, res) {
     try {
         const { headers } = req || {};
-        const { cookie } = headers || {};
-        const cookies = Cookie.parse(cookie);
+        const { cookie: cookieHeader } = headers || {};
+        const cookies = parseCookie(cookieHeader);
         const { id, hash } = cookies || {};
         let collectionName = "fs";
         let readOnly = true;
