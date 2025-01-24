@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { MainStore } from '@components/Main';
 import rtl from 'jss-rtl';
 import useDarkMode from 'use-dark-mode';
-import createCache from '@emotion/cache'
+import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
