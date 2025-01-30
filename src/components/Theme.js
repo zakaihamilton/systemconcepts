@@ -7,6 +7,7 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
+import { useDirection } from "@util/direction";
 
 // Create RTL cache
 const cacheRtl = createCache({
@@ -21,6 +22,7 @@ const cacheLtr = createCache({
 });
 
 export default function Theme({ children }) {
+    const direction = useDirection();
     const darkMode = useDarkMode(false);
     const { fontSize } = MainStore.useState((s) => ({
         fontSize: s.fontSize,
@@ -46,7 +48,7 @@ export default function Theme({ children }) {
                     // tonalOffset is deprecated in MUI v5, use contrastThreshold instead or remove it if not needed
                     // contrastThreshold: 3,
                 },
-                direction: rtl() ? 'rtl' : 'ltr', // Set direction based on RTL
+                direction: direction
             }),
         [darkMode.value, fontSize]
     );
@@ -60,7 +62,7 @@ export default function Theme({ children }) {
     }, [darkMode.value]);
 
     return (
-        <CacheProvider value={rtl() ? cacheRtl : cacheLtr}>
+        <CacheProvider value={direction === "rtl" ? cacheRtl : cacheLtr}>
             <ThemeProvider theme={theme}>
                 {children}
             </ThemeProvider>
