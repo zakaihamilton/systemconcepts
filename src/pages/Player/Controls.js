@@ -2,18 +2,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./Controls.module.scss";
 import { useTranslations } from "@util/translations";
 import PlayerButton from "./Button";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import ReplayIcon from "@material-ui/icons/Replay";
-import StopIcon from "@material-ui/icons/Stop";
-import PauseIcon from "@material-ui/icons/Pause";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ReplayIcon from "@mui/icons-material/Replay";
+import StopIcon from "@mui/icons-material/Stop";
+import PauseIcon from "@mui/icons-material/Pause";
 import { formatDuration } from "@util/string";
 import { MainStore } from "@components/Main";
-import MuiAlert from "@material-ui/lab/Alert";
-import Forward10Icon from "@material-ui/icons/Forward10";
-import Replay10Icon from "@material-ui/icons/Replay10";
+import MuiAlert from '@mui/material/Alert';
+import Forward10Icon from "@mui/icons-material/Forward10";
+import Replay10Icon from "@mui/icons-material/Replay10";
 import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 
 const skipPoints = 10;
 

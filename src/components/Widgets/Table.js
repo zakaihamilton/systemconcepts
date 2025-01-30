@@ -1,9 +1,9 @@
 import React, { forwardRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 import { ContentSize } from "@components/Page/Content";
 import styles from "./Table.module.scss";
 import { useTranslations } from "@util/translations";
@@ -13,23 +13,23 @@ import Item from "./Table/Item";
 import Navigator from "./Table/Navigator";
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import PublishIcon from "@material-ui/icons/Publish";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import PublishIcon from "@mui/icons-material/Publish";
 import Error from "./Table/Error";
 import TableColumn from "./Table/TableColumn";
 import clsx from "clsx";
-import RefreshIcon from "@material-ui/icons/Refresh";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import Message from "@widgets/Message";
 import { FixedSizeList, FixedSizeGrid } from "react-window";
-import ViewListIcon from "@material-ui/icons/ViewList";
-import TableChartIcon from "@material-ui/icons/TableChart";
-import ViewComfyIcon from "@material-ui/icons/ViewComfy";
-import SortIcon from "@material-ui/icons/Sort";
-import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
-import DataUsageIcon from "@material-ui/icons/DataUsage";
-import InfoIcon from "@material-ui/icons/Info";
-import ViewStreamIcon from "@material-ui/icons/ViewStream";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import ViewComfyIcon from "@mui/icons-material/ViewComfy";
+import SortIcon from "@mui/icons-material/Sort";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import DataUsageIcon from "@mui/icons-material/DataUsage";
+import InfoIcon from "@mui/icons-material/Info";
+import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
 
@@ -234,7 +234,7 @@ export default function TableWidget(props) {
             items: itemsPerPageItems,
             divider: true
         },
-        ...viewModesList.length > 1 ? viewModesList.map(item => {
+        ...(viewModesList.length > 1 ? viewModesList.map(item => {
             return {
                 ...item,
                 selected: viewMode,
@@ -244,7 +244,7 @@ export default function TableWidget(props) {
                     });
                 }
             };
-        }).filter(Boolean) : []
+        }).filter(Boolean) : [])
     ].filter(Boolean);
 
     useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems, itemsPerPage] });

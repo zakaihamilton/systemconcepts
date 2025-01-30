@@ -1,19 +1,19 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslations } from "@util/translations";
-import Typography from "@material-ui/core/Typography";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBox";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@mui/material/Typography";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import IndeterminateCheckBoxIcon from "@mui/icons-material/IndeterminateCheckBox";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import styles from "./StatusBar.module.scss";
-import CancelIcon from "@material-ui/icons/Cancel";
+import CancelIcon from "@mui/icons-material/Cancel";
 import clsx from "clsx";
 import ButtonSelector from "@components/Widgets/ButtonSelector";
-import DeleteIcon from "@material-ui/icons/Delete";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { setPath } from "@util/pages";
 import { SyncContext } from "@components/Sync";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import { Store } from "pullstate";
 
 export const StatusBarStore = new Store({ active: 0 });
@@ -129,13 +129,13 @@ export default function StatusBar({ data, mapper, store }) {
     };
 
     return (
-        <div className={clsx(styles.root, styles[severity])}>
-            {selectTitle && selectIcon && <IconButton variant="contained" onClick={selectClick}>
+        (<div className={clsx(styles.root, styles[severity])}>
+            {selectTitle && selectIcon && <IconButton variant="contained" onClick={selectClick} size="large">
                 <Tooltip title={selectTitle} arrow>
                     {selectIcon}
                 </Tooltip>
             </IconButton>}
-            {mode === "delete" && !busy && <IconButton variant="contained" onClick={onClick}>
+            {mode === "delete" && !busy && <IconButton variant="contained" onClick={onClick} size="large">
                 <Tooltip title={translations[mode.toUpperCase()]} arrow>
                     <DeleteIcon />
                 </Tooltip>
@@ -154,11 +154,11 @@ export default function StatusBar({ data, mapper, store }) {
             {mode && mode === "sync" && !syncContext.error && <Button variant="contained" disabled={!syncContext.fullSync} onClick={syncContext.fullSync}>
                 {translations.FULL_SYNC}
             </Button>}
-            {!busy && <IconButton variant="contained" onClick={handleClose}>
+            {!busy && <IconButton variant="contained" onClick={handleClose} size="large">
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />
                 </Tooltip>
             </IconButton>}
-        </div >
+        </div >)
     );
 }

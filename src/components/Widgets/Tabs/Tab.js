@@ -1,7 +1,7 @@
 import styles from "./Tab.module.scss";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
-import Tab from "@material-ui/core/Tab";
+import Tab from "@mui/material/Tab";
 
 export default function TabWidget({ icon, label, value, ...props }) {
     const isPhone = useDeviceType() === "phone";

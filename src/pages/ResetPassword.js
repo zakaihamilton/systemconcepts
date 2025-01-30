@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import makeStyles from '@mui/styles/makeStyles';
+import Container from "@mui/material/Container";
 import { useTranslations } from "@util/translations";
-import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { fetchJSON } from "@util/fetch";
 import Cookies from "js-cookie";
 import Input from "@widgets/Input";
 import { setPath } from "@util/pages";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import clsx from "clsx";
 import { MainStore } from "@components/Main";
-import Checkbox from "@material-ui/core/Checkbox";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import Checkbox from "@mui/material/Checkbox";
+import LinearProgress from "@mui/material/LinearProgress";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -99,11 +99,11 @@ export default function ResetPassword({ path = "" }) {
                 method: "PUT",
                 headers: {
                     id,
-                    ...!hasCode && { reset: true },
-                    ...hasCode && {
+                    ...(!hasCode && { reset: true }),
+                    ...(hasCode && {
                         newpassword: encodeURIComponent(newPassword),
                         code
-                    }
+                    })
                 }
             }).then(({ err, hash }) => {
                 if (err) {

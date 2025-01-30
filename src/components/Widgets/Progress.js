@@ -1,8 +1,8 @@
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./Progress.module.scss";;
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
 import clsx from "clsx";
 
 export default function Progress({ size, value, tooltip = "", fullscreen, variant, ...props }) {

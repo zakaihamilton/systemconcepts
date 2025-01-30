@@ -1,13 +1,13 @@
 import { handleRequest } from "@util/aws";
 import { login } from "@util/login";
-import Cookie from "cookie";
+import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 
 export default async function AWS_API(req, res) {
     try {
         const { headers } = req || {};
         const { cookie } = headers || {};
-        const cookies = Cookie.parse(cookie);
+        const cookies = parseCookie(cookie);
         const { id, hash } = cookies || {};
         let readOnly = true;
         if (!id || !hash) {

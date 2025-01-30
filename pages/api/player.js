@@ -1,6 +1,6 @@
 import { cdnUrl } from "@util/aws";
 import { login } from "@util/login";
-import Cookie from "cookie";
+import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 import { error, log } from "@util/logger";
 
@@ -14,7 +14,7 @@ export default async function PLAYER_API(req, res) {
             error({ component, error: "Empty cookie provided" });
             throw "ACCESS_DENIED";
         }
-        const cookies = Cookie.parse(cookie);
+        const cookies = parseCookie(cookie);
         const { id, hash } = cookies || {};
         if (!id || !hash) {
             error({ component, error: "No ID or hash provided in cookies" });

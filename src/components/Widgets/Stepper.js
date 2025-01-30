@@ -1,11 +1,12 @@
 import React from "react";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import Typography from "@material-ui/core/Typography";
-import StepLabel from "@material-ui/core/StepLabel";
-import StepConnector from "@material-ui/core/StepConnector";
-import Button from "@material-ui/core/Button";
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import Typography from "@mui/material/Typography";
+import StepLabel from "@mui/material/StepLabel";
+import StepConnector from "@mui/material/StepConnector";
+import Button from "@mui/material/Button";
 import clsx from "clsx";
 
 const useStyles = makeStyles((theme) => ({
@@ -89,16 +90,18 @@ export default function StepperWidget({ className, steps, state, actions, ...pro
                 setStepId(step.id);
             }
         };
-        return (<Button
-            key={action.id}
-            variant="contained"
-            color="primary"
-            onClick={onClick}
-            className={classes.button}
-            style={{...!visible && {visibility:"hidden"}}}
-        >
-            {title}
-        </Button>);
+        return (
+            (<Button
+                key={action.id}
+                variant="contained"
+                color="primary"
+                onClick={onClick}
+                className={classes.button}
+                style={{...(!visible && {visibility:"hidden"})}}
+            >
+                {title}
+            </Button>)
+        );
     });
 
     className = clsx(className, classes.root);

@@ -13,8 +13,8 @@ import Bookmarks from "./Bookmarks";
 import Title from "./Title";
 import { useResize } from "@util/size";
 import clsx from "clsx";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import NoSsr from "@material-ui/core/NoSsr";
+import CssBaseline from "@mui/material/CssBaseline";
+import NoSsr from "@mui/material/NoSsr";
 
 export const MainStoreDefaults = {
     fontSize: "16",

@@ -1,7 +1,7 @@
 import React from "react";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
-import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import Tooltip from "@mui/material/Tooltip";
 import { MainStore } from "../Main";
 import { useDeviceType } from "@util/styles";
 import { useTranslations } from "@util/translations";
@@ -21,9 +21,11 @@ export default function Menu() {
         });
     };
 
-    return <IconButton onClick={toggleMenu}>
-        <Tooltip arrow title={translations.MENU}>
-            <MenuIcon />
-        </Tooltip>
-    </IconButton>;
+    return (
+        <IconButton onClick={toggleMenu} size="large">
+            <Tooltip arrow title={translations.MENU}>
+                <MenuIcon />
+            </Tooltip>
+        </IconButton>
+    );
 }

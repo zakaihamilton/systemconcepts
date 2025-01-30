@@ -1,12 +1,12 @@
-import { useState, forwardRef, Children, cloneElement } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import Divider from "@material-ui/core/Divider";
+import { useState, Children, cloneElement } from "react";
+import withStyles from '@mui/styles/withStyles';
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
 import styles from "./Menu.module.scss";
-import Link from "@material-ui/core/Link";
+import Link from "@mui/material/Link";
 
 const StyledMenu = withStyles({
     paper: {
@@ -16,12 +16,11 @@ const StyledMenu = withStyles({
     <Menu
         transitionDuration={0}
         elevation={0}
-        getContentAnchorEl={null}
         {...props}
     />
 ));
 
-const MenuWidget = forwardRef(function MenuComponent({ hover, items, children, onClick, selected: menuSelected, onVisible, ...props }, ref) {
+export default function MenuWidget({ hover, items, children, onClick, selected: menuSelected, onVisible, ...props }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const clickEnabled = items && items.length || onClick;
@@ -111,6 +110,4 @@ const MenuWidget = forwardRef(function MenuComponent({ hover, items, children, o
             </StyledMenu>
         </>
     );
-});
-
-export default MenuWidget;
+}

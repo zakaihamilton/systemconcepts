@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import ItemMenu from "@components/ItemMenu";
-import UpdateIcon from "@material-ui/icons/Update";
+import UpdateIcon from "@mui/icons-material/Update";
 
 export default function ItemMenuWidget({ item, updateGroup, store }) {
     const translations = useTranslations();

@@ -1,53 +1,71 @@
-import React, { useMemo, useEffect } from "react";
-import { StylesProvider, ThemeProvider, jssPreset } from "@material-ui/styles";
-import { create } from "jss";
-import { createTheme } from "@material-ui/core/styles";
-import { MainStore } from "@components/Main";
-import rtl from "jss-rtl";
-import useDarkMode from "use-dark-mode";
+import React, { useMemo, useEffect } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { MainStore } from '@components/Main';
+import rtl from 'jss-rtl';
+import useDarkMode from 'use-dark-mode';
+import createCache from '@emotion/cache';
+import { CacheProvider } from '@emotion/react';
+import { prefixer } from 'stylis';
+import rtlPlugin from 'stylis-plugin-rtl';
+import { useDirection } from "@util/direction";
 
-const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
+// Create RTL cache
+const cacheRtl = createCache({
+    key: 'muirtl',
+    stylisPlugins: [prefixer, rtlPlugin],
+});
+
+// Create LTR cache
+const cacheLtr = createCache({
+    key: 'muiltr',
+    stylisPlugins: [prefixer],
+});
 
 export default function Theme({ children }) {
+    const direction = useDirection();
     const darkMode = useDarkMode(false);
-    const { fontSize } = MainStore.useState(s => {
-        return {
-            fontSize: s.fontSize
-        };
-    });
+    const { fontSize } = MainStore.useState((s) => ({
+        fontSize: s.fontSize,
+    }));
 
-    const theme = useMemo(() =>
-        createTheme({
-            typography: {
-                fontSize: parseInt(fontSize)
-            },
-            palette: {
-                type: darkMode.value ? "dark" : "light",
-                primary: {
-                    main: "#1e88e5",
-                    light: "#4b9fea",
-                    dark: "#155fa0"
+    const theme = useMemo(
+        () =>
+            createTheme({
+                typography: {
+                    fontSize: parseInt(fontSize, 10), // Important: Parse with radix
                 },
-                secondary: {
-                    main: "#0044ff",
-                    contrastText: "#ffcc00",
+                palette: {
+                    mode: darkMode.value ? 'dark' : 'light',
+                    primary: {
+                        main: '#1e88e5',
+                        light: '#4b9fea',
+                        dark: '#155fa0',
+                    },
+                    secondary: {
+                        main: '#0044ff',
+                        contrastText: '#ffcc00',
+                    },
+                    // tonalOffset is deprecated in MUI v5, use contrastThreshold instead or remove it if not needed
+                    // contrastThreshold: 3,
                 },
-                tonalOffset: 0.2,
-            },
-        }), [darkMode.value, fontSize]);
+                direction: direction
+            }),
+        [darkMode.value, fontSize]
+    );
 
     useEffect(() => {
-        const body = document.getElementsByTagName("body");
-        body[0].style.fontSize = fontSize + "px";
+        document.body.style.fontSize = `${fontSize}px`; // More concise
     }, [fontSize]);
 
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", darkMode.value ? "dark" : "light");
+        document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light');
     }, [darkMode.value]);
 
-    return <StylesProvider jss={jss}>
-        <ThemeProvider theme={theme}>
-            {children}
-        </ThemeProvider>
-    </StylesProvider>;
+    return (
+        <CacheProvider value={direction === "rtl" ? cacheRtl : cacheLtr}>
+            <ThemeProvider theme={theme}>
+                {children}
+            </ThemeProvider>
+        </CacheProvider>
+    );
 }

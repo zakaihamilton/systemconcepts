@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "@util/translations";
 import Form, { FormGroup } from "@widgets/Form";
 import Input from "@widgets/Input";
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import { goBackPage } from "@util/pages";
 import { useType } from "@util/types";
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import languages from "@data/languages";
 import { useLanguage } from "@util/language";
 import Table from "@widgets/Table";
@@ -15,7 +15,7 @@ import Select from "@components/Widgets/Select";
 import styles from "./Type.module.scss";
 import { MainStore } from "@components/Main";
 import { useSize } from "@util/size";
-import Typography from "@material-ui/core/Typography";
+import Typography from "@mui/material/Typography";
 import fieldTypes from "@data/libraryFieldTypes";
 
 export const TypeStoreDefaults = {
