@@ -14,7 +14,9 @@
     margin-bottom: 40px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
     text-align: center;
     justify-self: flex-start;
+    --webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
 }

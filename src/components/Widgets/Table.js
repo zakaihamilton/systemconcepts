@@ -383,6 +383,7 @@ export default function TableWidget(props) {
             return <TableColumn
                 key={item.id || idx}
                 item={item}
+                showSort={showSort}
                 order={order}
                 orderBy={orderBy}
                 createSortHandler={createSortHandler} />;

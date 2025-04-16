@@ -4,7 +4,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Label from "@widgets/Label";
 import styles from "./TableColumn.module.scss";
 
-export default function TableColumn({ item, order, orderBy, createSortHandler }) {
+export default function TableColumn({ item, order, orderBy, showSort, createSortHandler }) {
     const { id, title, icon, dir, align, sortable, columnProps = {}, labelProps = {} } = item;
     const sortId = typeof sortable === "string" ? sortable : id;
     const label = <Label icon={icon} name={title} />;
@@ -18,9 +18,9 @@ export default function TableColumn({ item, order, orderBy, createSortHandler })
         <div className={styles.headerRow}>
             {sortable && <TableSortLabel
                 className={styles.sortLabel}
-                active={orderBy === sortId}
+                active={showSort && orderBy === sortId}
                 direction={orderBy === sortId ? order : "desc"}
-                onClick={createSortHandler(sortId)}
+                onClick={showSort ? createSortHandler(sortId) : undefined}
                 {...labelProps}
                 dir={dir}
             >

@@ -5,10 +5,9 @@ import Group from "@widgets/Group";
 import { formatDuration } from "@util/string";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
-import styles from "./Session.module.scss";
 
 export const SessionStore = new Store({
-    viewMode: "list"
+    viewMode: "table"
 });
 
 export default function SessionPage({ group, year, date, name }) {
@@ -55,7 +54,7 @@ export default function SessionPage({ group, year, date, name }) {
         {
             name: translations.GROUP,
             value: group,
-            widget: <Group name={group} color={session && session.color} />
+            widget: <Group name={group} fit={true} color={session && session.color} />
         },
         {
             name: translations.DATE,
@@ -91,9 +90,7 @@ export default function SessionPage({ group, year, date, name }) {
         showSort={false}
         onExport={onExport}
         viewModes={{
-            list: {
-                className: styles.listItem
-            }
+            table: null
         }}
         store={SessionStore}
     />;
