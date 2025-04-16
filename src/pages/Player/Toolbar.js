@@ -35,7 +35,8 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         SPEED_NORMAL: 1.0,
         SPEED_FASTER: 1.1,
         SPEED_FAST: 1.25,
-        SPEED_SUPER_FAST: 1.5,
+        SPEED_VERY_FAST: 1.5,
+        SPEED_SUPER_FAST: 1.75,
         SPEED_DOUBLE: 2.0,
         SPEED_TRIPLE: 3.0
     };
