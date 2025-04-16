@@ -1,6 +1,6 @@
 import { Fragment } from "react";
+import { styled } from '@mui/material/styles';
 import { useTranslations } from "@util/translations";
-import makeStyles from '@mui/styles/makeStyles';
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -14,15 +14,25 @@ import { useListing } from "@util/storage";
 import Tooltip from "@mui/material/Tooltip";
 import Progress from "@widgets/Progress";
 
-const useStyles = makeStyles((theme) => ({
-    list: {
+const PREFIX = 'StorageList';
+
+const classes = {
+    list: `${PREFIX}-list`
+};
+
+const StyledList = styled(List)((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.list}`]: {
         width: "100%",
         backgroundColor: theme.palette.background.paper,
     }
 }));
 
 export default function StorageList({ path = "", state }) {
-    const classes = useStyles();
+
     const translations = useTranslations();
     const [data, loading] = useListing(path, [], { useCount: true });
     const depth = path ? path.split("/").length : 0;
@@ -60,22 +70,24 @@ export default function StorageList({ path = "", state }) {
             onClick = () => setDestination(id);
         }
 
-        return <Fragment key={id}>
-            <ListItem button selected={selected} style={{ paddingLeft }} onClick={onClick}>
-                <ListItemIcon>
-                    <Tooltip title={tooltip} arrow>
-                        {icon}
-                    </Tooltip>
-                </ListItemIcon>
-                <ListItemText primary={name} />
-                {expandIcon}
-            </ListItem>
-            {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                    {open && <StorageList path={id} state={state} />}
-                </List>
-            </Collapse>}
-        </Fragment>;
+        return (
+            <Fragment key={id}>
+                <ListItem button selected={selected} style={{ paddingLeft }} onClick={onClick}>
+                    <ListItemIcon>
+                        <Tooltip title={tooltip} arrow>
+                            {icon}
+                        </Tooltip>
+                    </ListItemIcon>
+                    <ListItemText primary={name} />
+                    {expandIcon}
+                </ListItem>
+                {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
+                    <StyledList component="div" disablePadding>
+                        {open && <StorageList path={id} state={state} />}
+                    </StyledList>
+                </Collapse>}
+            </Fragment>
+        );
     }).filter(Boolean);
 
     return (

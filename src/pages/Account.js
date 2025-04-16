@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+import { styled } from '@mui/material/styles';
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import makeStyles from '@mui/styles/makeStyles';
 import Container from "@mui/material/Container";
 import { useTranslations } from "@util/translations";
 import { MainStore } from "@components/Main";
@@ -18,32 +18,54 @@ import { setPath } from "@util/pages";
 import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-const useStyles = makeStyles((theme) => ({
-    paper: {
+const PREFIX = 'Account';
+
+const classes = {
+    paper: `${PREFIX}-paper`,
+    form: `${PREFIX}-form`,
+    rtlLabel: `${PREFIX}-rtlLabel`,
+    submit: `${PREFIX}-submit`,
+    progress: `${PREFIX}-progress`,
+    link: `${PREFIX}-link`,
+    error: `${PREFIX}-error`
+};
+
+const StyledContainer = styled(Container)((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.paper}`]: {
         marginTop: theme.spacing(2),
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
     },
-    form: {
+
+    [`& .${classes.form}`]: {
         width: "100%",
         marginTop: theme.spacing(2),
     },
-    rtlLabel: {
+
+    [`& .${classes.rtlLabel}`]: {
         marginRight: "-11px",
         marginLeft: "16px"
     },
-    submit: {
+
+    [`& .${classes.submit}`]: {
         margin: theme.spacing(0.5, 0, 2),
         display: "flex"
     },
-    progress: {
+
+    [`& .${classes.progress}`]: {
         width: "100%"
     },
-    link: {
+
+    [`& .${classes.link}`]: {
         whiteSpace: "nowrap"
     },
-    error: {
+
+    [`& .${classes.error}`]: {
         color: "var(--error-color)",
         backgroundColor: "var(--error-background)",
         borderRadius: "0.3em",
@@ -52,12 +74,11 @@ const useStyles = makeStyles((theme) => ({
         width: "100%",
         textAlign: "center"
     }
-
 }));
 
 export default function Account() {
     const { direction } = MainStore.useState();
-    const classes = useStyles();
+
     const translations = useTranslations();
     const idState = useState(Cookies.get("id"));
     const passwordState = useState("");
@@ -139,7 +160,7 @@ export default function Account() {
     const isInvalid = validate && invalidFields;
 
     return (
-        <Container component="main" maxWidth="xs">
+        (<StyledContainer component="main" maxWidth="xs">
             <div className={classes.paper}>
                 <Typography component="h1" variant="h5">
                     {translations[isSignedIn ? "SIGNED_IN" : "SIGN_IN"]}
@@ -222,6 +243,6 @@ export default function Account() {
                     </Grid>
                 </form>
             </div>
-        </Container>
+        </StyledContainer>)
     );
 }

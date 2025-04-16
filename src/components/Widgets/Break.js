@@ -1,16 +1,19 @@
 import React from "react";
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
+const PREFIX = 'Break';
 
-const useStyles = makeStyles({
-    root: {
+const classes = {
+    root: `${PREFIX}-root`
+};
+
+const Root = styled('div')({
+    [`&.${classes.root}`]: {
         flexBasis: "100%",
         height: 0
     },
 });
 
 export default function GroupWidget() {
-    const classes = useStyles();
-    return (
-        <div className={classes.root} />
-    );
+
+    return (<Root className={classes.root} />);
 }

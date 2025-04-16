@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
+import { styled } from '@mui/material/styles';
 import { alpha } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -17,15 +17,31 @@ import StorageList from "./StorageList";
 import Tooltip from "@mui/material/Tooltip";
 import InputBase from "@mui/material/InputBase";
 
-const useStyles = makeStyles((theme) => ({
-    appBar: {
+const PREFIX = 'Destination';
+
+const classes = {
+    appBar: `${PREFIX}-appBar`,
+    title: `${PREFIX}-title`,
+    path: `${PREFIX}-path`,
+    inputRoot: `${PREFIX}-inputRoot`,
+    inputInput: `${PREFIX}-inputInput`
+};
+
+const StyledDialog = styled(Dialog)((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.appBar}`]: {
         position: "relative",
     },
-    title: {
+
+    [`& .${classes.title}`]: {
         marginLeft: theme.spacing(2),
         marginRight: theme.spacing(4),
     },
-    path: {
+
+    [`& .${classes.path}`]: {
         position: "relative",
         borderRadius: theme.shape.borderRadius,
         backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -39,11 +55,13 @@ const useStyles = makeStyles((theme) => ({
             display: "flex",
         }
     },
-    inputRoot: {
+
+    [`& .${classes.inputRoot}`]: {
         color: "inherit",
         width: "100%"
     },
-    inputInput: {
+
+    [`& .${classes.inputInput}`]: {
         padding: theme.spacing(1, 1, 1, 0),
         paddingLeft: "0.5em",
         paddingRight: "0.5em"
@@ -56,7 +74,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 export default function Destination({ path }) {
     const translations = useTranslations();
-    const classes = useStyles();
+
     const { destination, mode, select } = StorageStore.useState();
     const destinationState = [destination, destination => {
         StorageStore.update(s => {
@@ -138,7 +156,7 @@ export default function Destination({ path }) {
     const disableAction = destination === path;
 
     return (
-        (<Dialog fullScreen open={destination !== ""} onClose={handleClose} TransitionComponent={Transition}>
+        (<StyledDialog fullScreen open={destination !== ""} onClose={handleClose} TransitionComponent={Transition}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={handleClose} size="large">
@@ -168,6 +186,6 @@ export default function Destination({ path }) {
             <DialogContent dividers={true}>
                 {destination && <StorageList state={destinationState} />}
             </DialogContent>
-        </Dialog>)
+        </StyledDialog>)
     );
 }

@@ -1,9 +1,9 @@
 import { Fragment } from "react";
+import { styled } from '@mui/material/styles';
 import styles from "./Term.module.scss";
 import { useTerms } from "@util/terms";
 import Tooltip from "@mui/material/Tooltip";
 import Badge from "@mui/material/Badge";
-import makeStyles from '@mui/styles/makeStyles';
 import { MainStore } from "@components/Main";
 import clsx from "clsx";
 import { useLanguage } from "@util/language";
@@ -14,23 +14,27 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useLocalStorage } from "@util/store";
 
-export const TermStore = new Store({
-    showConcepts: true
-});
+const PREFIX = 'TermStore';
 
-const useStyles = makeStyles({
-    phase: {
+const classes = {
+    phase: `${PREFIX}-phase`,
+    phaseTooltip: `${PREFIX}-phaseTooltip`,
+    hover: `${PREFIX}-hover`
+};
+
+const Root = styled('div')({
+    [`& .${classes.phase}`]: {
         backgroundColor: ({ fill }) => fill,
         color: "var(--text-color)",
         border: ({ border }) => border
     },
-    phaseTooltip: {
+    [`& .${classes.phaseTooltip}`]: {
         borderRadius: "0.5em",
         padding: "0.5em",
         backgroundColor: ({ fill }) => fill,
         border: ({ border }) => border
     },
-    hover: {
+    [`& .${classes.hover}`]: {
         borderRadius: "0.5em",
         padding: "0.5em",
         border: "1px solid transparent",
@@ -40,6 +44,10 @@ const useStyles = makeStyles({
             border: ({ border }) => border
         }
     }
+});
+
+export const TermStore = new Store({
+    showConcepts: true
 });
 
 registerToolbar("Term");
@@ -80,7 +88,7 @@ export default function Term({ id, onClick, ...props }) {
     let explanationTooltip = "";
     let iconDescription = "";
     const hebrew = language !== "heb" && term.original.name && term.original.name.heb;
-    const classes = useStyles({ ...phase });
+
     const { name = "", explanation = "", description = "", concept = "", transliteration = "" } = term;
     let { icon } = term;
     const toLines = (text, ...props) => (text || "").split("\n").map((line, index) => <Fragment key={index}><span {...props}>{line}</span><br /></Fragment>);
@@ -95,7 +103,7 @@ export default function Term({ id, onClick, ...props }) {
         iconTooltip = name;
     }
     if (description || transliteration || hebrew) {
-        nameTooltip = <div className={styles.tooltip}>
+        nameTooltip = <Root className={styles.tooltip}>
             {transliteration && <div className={styles.field}>
                 <div className={styles.fieldLabel}>
                     {translations.TRANSLITERATION}
@@ -113,7 +121,7 @@ export default function Term({ id, onClick, ...props }) {
                 </div>
             </div>}
             {toLines(description)}
-        </div>;
+        </Root>;
     }
     if (explanation) {
         explanationTooltip = <div className={styles.tooltip}>

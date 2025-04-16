@@ -1,5 +1,5 @@
 import { useState, Children, cloneElement } from "react";
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -8,11 +8,20 @@ import Divider from "@mui/material/Divider";
 import styles from "./Menu.module.scss";
 import Link from "@mui/material/Link";
 
-const StyledMenu = withStyles({
-    paper: {
+const PREFIX = 'Menu';
+
+const classes = {
+    paper: `${PREFIX}-paper`
+};
+
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled('div')({
+    [`& .${classes.paper}`]: {
         border: "1px solid #d3d4d5",
     },
-})((props) => (
+});
+
+const StyledMenu = ((props) => (
     <Menu
         transitionDuration={0}
         elevation={0}
@@ -95,7 +104,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
     });
 
     return (
-        <>
+        (<Root>
             {children}
             <StyledMenu
                 id="menu"
@@ -105,9 +114,11 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                 onClose={handleClose}
                 {...hoverEnabled && hoverRef && { MenuListProps: { onMouseLeave: handleClose } }}
                 {...props}
-            >
+                classes={{
+                    paper: classes.paper
+                }}>
                 {menuItems}
             </StyledMenu>
-        </>
+        </Root>)
     );
 }

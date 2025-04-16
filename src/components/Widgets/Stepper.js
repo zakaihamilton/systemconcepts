@@ -1,6 +1,5 @@
 import React from "react";
-import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material/styles';
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import Typography from "@mui/material/Typography";
@@ -9,19 +8,41 @@ import StepConnector from "@mui/material/StepConnector";
 import Button from "@mui/material/Button";
 import clsx from "clsx";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
+const PREFIX = 'Stepper';
+
+const classes = {
+    alternativeLabel: `${PREFIX}-alternativeLabel`,
+    disabled: `${PREFIX}-disabled`,
+    completed: `${PREFIX}-completed`,
+    line: `${PREFIX}-line`,
+    root: `${PREFIX}-root`,
+    button: `${PREFIX}-button`,
+    actions: `${PREFIX}-actions`,
+    icon: `${PREFIX}-icon`,
+    active: `${PREFIX}-active`,
+    completed2: `${PREFIX}-completed2`
+};
+
+const Root = styled('div')((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.root}`]: {
 
     },
-    button: {
+
+    [`& .${classes.button}`]: {
         marginRight: theme.spacing(1),
     },
-    actions: {
+
+    [`& .${classes.actions}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between"
     },
-    icon: {
+
+    [`&.${classes.icon}`]: {
         backgroundColor: "#ccc",
         zIndex: 1,
         color: "#fff",
@@ -32,40 +53,21 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: "center",
         alignItems: "center",
     },
-    active: {
+
+    [`&.${classes.active}`]: {
         backgroundImage: "linear-gradient( 136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
         boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)"
     },
-    completed: {
+
+    [`& .${classes.completed2}`]: {
         backgroundImage: "linear-gradient( 136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
     }
 }));
 
-const Connector = withStyles({
-    alternativeLabel: {
-        top: 22,
-    },
-    disabled: {
-        "& $line": {
-            backgroundColor: "red"
-        }
-    },
-    completed: {
-        "& $line": {
-            backgroundImage:
-                "linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)",
-        },
-    },
-    line: {
-        height: 3,
-        border: 0,
-        backgroundColor: "#eaeaf0",
-        borderRadius: 1,
-    },
-})(StepConnector);
+const Connector = StepConnector;
 
 export default function StepperWidget({ className, steps, state, actions, ...props }) {
-    const classes = useStyles();
+
     const [stepId, setStepId] = state;
     steps = steps.filter(step => {
         if (typeof step.visible === "undefined") {
@@ -107,7 +109,7 @@ export default function StepperWidget({ className, steps, state, actions, ...pro
     className = clsx(className, classes.root);
 
     function Icon({ active, completed, disabled, icon }) {
-        const classes = useStyles();
+
         const stepIdx = parseInt(icon) - 1;
         const step = steps[stepIdx];
 
@@ -116,7 +118,7 @@ export default function StepperWidget({ className, steps, state, actions, ...pro
         }
 
         return (
-            <div
+            (<Root
                 className={clsx(classes.icon, {
                     [classes.disabled]: disabled,
                     [classes.active]: active,
@@ -125,13 +127,19 @@ export default function StepperWidget({ className, steps, state, actions, ...pro
                 })}
             >
                 {step.icon}
-            </div>
+            </Root>)
         );
     }
 
     return (
-        <div className={className} {...props}>
-            <Stepper alternativeLabel nonLinear activeStep={stepIdx} connector={<Connector />}>
+        (<div className={className} {...props}>
+            <Stepper alternativeLabel nonLinear activeStep={stepIdx} connector={<Connector
+                classes={{
+                    alternativeLabel: classes.alternativeLabel,
+                    disabled: classes.disabled,
+                    completed: classes.completed,
+                    line: classes.line
+                }} />}>
                 {steps.map((step, idx) => {
                     let { id, label, subLabel } = step;
                     const previousStep = steps[idx - 1];
@@ -172,6 +180,6 @@ export default function StepperWidget({ className, steps, state, actions, ...pro
             <div className={classes.actions}>
                 {actionItems}
             </div>
-        </div>
+        </div>)
     );
 }

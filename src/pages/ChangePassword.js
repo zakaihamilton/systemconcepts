@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { styled } from '@mui/material/styles';
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import makeStyles from '@mui/styles/makeStyles';
 import Container from "@mui/material/Container";
 import { useTranslations } from "@util/translations";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
@@ -17,24 +17,42 @@ import Checkbox from "@mui/material/Checkbox";
 import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-const useStyles = makeStyles((theme) => ({
-    paper: {
+const PREFIX = 'ChangePassword';
+
+const classes = {
+    paper: `${PREFIX}-paper`,
+    form: `${PREFIX}-form`,
+    progress: `${PREFIX}-progress`,
+    submit: `${PREFIX}-submit`,
+    error: `${PREFIX}-error`
+};
+
+const StyledContainer = styled(Container)((
+    {
+        theme
+    }
+) => ({
+    [`& .${classes.paper}`]: {
         marginTop: theme.spacing(2),
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
     },
-    form: {
+
+    [`& .${classes.form}`]: {
         width: "100%", // Fix IE 11 issue.
         marginTop: theme.spacing(3),
     },
-    progress: {
+
+    [`& .${classes.progress}`]: {
         width: "100%"
     },
-    submit: {
+
+    [`& .${classes.submit}`]: {
         margin: theme.spacing(0.5, 0, 2),
     },
-    error: {
+
+    [`& .${classes.error}`]: {
         color: "var(--error-color)",
         backgroundColor: "var(--error-background)",
         borderRadius: "0.3em",
@@ -47,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ChangePassword() {
     const { direction } = MainStore.useState();
-    const classes = useStyles();
+
     const translations = useTranslations();
     const idState = useState(Cookies.get("id"));
     const oldPasswordState = useState("");
@@ -118,7 +136,7 @@ export default function ChangePassword() {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
+        (<StyledContainer component="main" maxWidth="xs">
             <div className={classes.paper}>
                 <Typography component="h1" variant="h5">
                     {translations.CHANGE_PASSWORD}
@@ -196,6 +214,6 @@ export default function ChangePassword() {
                     </Button>
                 </form>
             </div>
-        </Container>
+        </StyledContainer>)
     );
 }

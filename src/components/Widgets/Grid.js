@@ -1,17 +1,25 @@
 import React from "react";
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import Grid from "@mui/material/Grid";
 
-const useStyles = makeStyles({
-    root: {
+const PREFIX = 'Grid';
+
+const classes = {
+    root: `${PREFIX}-root`,
+    gridContainer: `${PREFIX}-gridContainer`,
+    checkBox: `${PREFIX}-checkBox`
+};
+
+const Root = styled('div')({
+    [`&.${classes.root}`]: {
         display: "flex",
         flexDirection: "column",
         flex: "1"
     },
-    gridContainer: {
+    [`& .${classes.gridContainer}`]: {
         flexGrow: 1
     },
-    checkBox: {
+    [`& .${classes.checkBox}`]: {
         display: "flex",
         alignItems: "center",
         marginLeft: "1em"
@@ -19,14 +27,14 @@ const useStyles = makeStyles({
 });
 
 export default function GridWidget({ header, footer, children }) {
-    const classes = useStyles();
+
     return (
-        <div className={classes.root}>
+        (<Root className={classes.root}>
             {header}
             <Grid className={classes.gridContainer} container spacing={2}>
                 {children}
             </Grid>
             {footer}
-        </div>
+        </Root>)
     );
 }
