@@ -74,7 +74,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
             <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClick}>
                 <MenuItem color="initial" component={Link} underline="none" href={target} selected={isSelected} {...props}>
                     <div key={id + "_background"} className={styles.background} style={style} />
-                    <ListItemIcon>
+                    <ListItemIcon className={styles.itemIcon}>
                         {icon}
                     </ListItemIcon>
                     <ListItemText className={styles.itemText} primary={name} secondary={description} />
