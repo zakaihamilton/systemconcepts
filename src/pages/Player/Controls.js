@@ -62,7 +62,7 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
         return () => {
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, [visible, show]);
+    }, [visible, show, metadata]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;
@@ -128,7 +128,7 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
         };
     }, []);
     useEffect(() => {
-        if (currentTime && !isNaN(currentTime)) {
+        if (currentTime && !isNaN(currentTime) && playerRef.duration) {
             setMetadata(data => {
                 if (!data) {
                     data = {};
