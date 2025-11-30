@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback } from "react";
+import pLimit from "./p-limit";
 
 export const UpdateSessionsStore = new Store({
     busy: false,
@@ -80,14 +82,14 @@ export function useUpdateSessions() {
         if (!updateAll) {
             years.splice(0, years.length - 1);
         }
-        for (let yearIndex = years.length - 1; yearIndex >= 0; yearIndex--) {
-            const year = years[yearIndex];
-            const percentage = parseInt(((years.length - 1 - yearIndex) / years.length) * 100);
+        const limit = pLimit(4);
+        const promises = years.map((year, yearIndex) => limit(async () => {
+            const percentage = parseInt(((yearIndex) / years.length) * 100);
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
                 s.status[itemIndex].count = years.length;
                 s.status[itemIndex].progress = percentage;
-                s.status[itemIndex].index = years.length - yearIndex;
+                s.status[itemIndex].index = yearIndex + 1;
                 s.status = [...s.status];
             });
             try {
@@ -101,7 +103,8 @@ export function useUpdateSessions() {
                     s.status = [...s.status];
                 });
             }
-        }
+        }));
+        await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.status[itemIndex].index = years.length;
             s.status[itemIndex].progress = 100;
@@ -123,11 +126,8 @@ export function useUpdateSessions() {
         if (!items) {
             return;
         }
-        const promises = [];
-        for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-            let item = items[itemIndex];
-            promises.push(updateGroup(item.name));
-        }
+        const limit = pLimit(2);
+        const promises = items.map(item => limit(() => updateGroup(item.name)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;
@@ -148,11 +148,8 @@ export function useUpdateSessions() {
         if (!items) {
             return;
         }
-        const promises = [];
-        for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-            let item = items[itemIndex];
-            promises.push(updateGroup(item.name, true));
-        }
+        const limit = pLimit(2);
+        const promises = items.map(item => limit(() => updateGroup(item.name, true)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;
@@ -168,5 +165,12 @@ export function useUpdateSessions() {
             s.busy = false;
         });
     }, []);
-    return { status, busy, start, updateSessions: !busy && updateSessions, updateAllSessions: !busy && updateAllSessions, updateGroup: !busy && updateSpecificGroup };
+    return useMemo(() => ({
+        status,
+        busy,
+        start,
+        updateSessions: !busy && updateSessions,
+        updateAllSessions: !busy && updateAllSessions,
+        updateGroup: !busy && updateSpecificGroup
+    }), [status, busy, start, updateSessions, updateAllSessions, updateSpecificGroup]);
 }
