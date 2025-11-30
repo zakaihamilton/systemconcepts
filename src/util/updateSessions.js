@@ -20,7 +20,6 @@ export function useUpdateSessions() {
             return [];
         }
         const sharedPath = "shared/sessions/" + path.substring(prefix.length) + "/listing.json";
-        await storage.createFolderPath(sharedPath);
         const listingBody = JSON.stringify(listing, null, 4);
         const exists = await storage.exists(sharedPath);
         if (exists) {
@@ -29,23 +28,36 @@ export function useUpdateSessions() {
                 return listing;
             }
         }
+        else {
+            await storage.createFolderPath(sharedPath);
+        }
         await storage.writeFile(sharedPath, listingBody);
         return listing;
     }, []);
     const copyFile = useCallback(async (path, name) => {
         const sourcePath = path + name;
         const targetPath = "shared/sessions/" + path.substring(prefix.length) + name;
-        await storage.createFolderPath(targetPath);
-        if (!(await storage.exists(sourcePath))) {
+        let sourceBody = null;
+        try {
+            sourceBody = await storage.readFile(sourcePath);
+        } catch (err) {
+            console.warn(`File not found: ${sourcePath}`);
             return;
         }
-        const sourceBody = await storage.readFile(sourcePath);
+
+        if (!sourceBody) {
+            return;
+        }
+
         const exists = await storage.exists(targetPath);
         if (exists) {
             const targetBody = await storage.readFile(targetPath);
             if (targetBody === sourceBody) {
                 return;
             }
+        }
+        else {
+            await storage.createFolderPath(targetPath);
         }
         await storage.writeFile(targetPath, sourceBody);
     }, []);
@@ -80,7 +92,11 @@ export function useUpdateSessions() {
             });
         }
         if (!updateAll) {
-            years.splice(0, years.length - 1);
+            const currentYear = new Date().getFullYear();
+            years = years.filter(year => {
+                const yearName = parseInt(year.name);
+                return yearName === currentYear;
+            });
         }
         const limit = pLimit(4);
         const promises = years.map((year, yearIndex) => limit(async () => {
