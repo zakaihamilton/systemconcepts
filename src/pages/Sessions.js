@@ -144,13 +144,23 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
+        const { position, duration } = item;
+        const percentage = duration && (position / duration * 100);
+        const style = {
+            background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
+        };
         const icon = <Tooltip arrow title={item.video ? translations.VIDEO : translations.AUDIO}>
-            {item.video ? <MovieIcon /> : <AudioIcon />}
+            <div style={style} className={styles.progress}>
+                {item.video ? <MovieIcon /> : <AudioIcon />}
+            </div>
         </Tooltip>;
         const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
         const nameContent = <Tooltip arrow title={item.name}>
             <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                 {item.name}
+                <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
+                    <div className={styles.percentage} style={{ width: percentage + "%" }} />
+                </div>
             </div>
         </Tooltip>;
         const href = target(item);

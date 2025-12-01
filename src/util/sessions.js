@@ -45,7 +45,14 @@ export function useSessions(depends = [], options = {}) {
             let data = [];
             if (exists) {
                 data = await storage.readFile(path);
-                data = JSON.parse(data);
+                try {
+                    if (data) {
+                        data = JSON.parse(data);
+                    }
+                }
+                catch (err) {
+                    console.error("failed to parse", path, err, "data", data);
+                }
                 if (!data) {
                     data = [];
                 }
@@ -71,12 +78,14 @@ export function useSessions(depends = [], options = {}) {
                     const files = await getListing(path);
                     const sessionsMetadata = await getMetadata(path);
                     files.sort((a, b) => a.name.localeCompare(b.name));
-                    const createItem = ({ key, id, name, date }) => {
+                    const createItem = async ({ key, id, name, date }) => {
                         const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
                         let sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
-                        sessionInfo = { ...sessionInfo };
+                        const metadataPath = "local/personal/metadata/sessions/" + group.name + "/" + year.name + "/" + date + " " + name + ".json";
+                        const sessionMetadata = await getJSON(metadataPath);
+                        sessionInfo = { ...sessionInfo, ...sessionMetadata };
                         delete sessionInfo.name;
-                        const item = { key, id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo };
+                        const item = { key, id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo, ...sessionMetadata };
                         sessions.push(item);
                         return item;
                     };
@@ -90,7 +99,7 @@ export function useSessions(depends = [], options = {}) {
                         if (isAudioFile(file.name)) {
                             let item = sessions.find(session => session.id === id && session.group === group.name);
                             if (!item) {
-                                item = createItem({ key, id, name, date, group });
+                                item = await createItem({ key, id, name, date, group });
                             }
                             item.audio = file;
                         }
@@ -101,7 +110,7 @@ export function useSessions(depends = [], options = {}) {
                                 const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
                                 let item = sessions.find(session => session.id === id && session.group === group.name);
                                 if (!item) {
-                                    item = createItem({ key, id, name, date });
+                                    item = await createItem({ key, id, name, date });
                                 }
                                 if (!item.resolutions) {
                                     item.resolutions = {};
@@ -111,7 +120,7 @@ export function useSessions(depends = [], options = {}) {
                             else {
                                 let item = sessions.find(session => session.id === id && session.group === group.name);
                                 if (!item) {
-                                    item = createItem({ key, id, name, date });
+                                    item = await createItem({ key, id, name, date });
                                 }
                                 item.video = file;
                                 if (cdn.url) {

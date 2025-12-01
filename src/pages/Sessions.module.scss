@@ -76,3 +76,20 @@
     white-space: nowrap;
     overflow: hidden
 }
+
+.percentageContainer {
+    width: 10vw;
+    border: 1px solid transparent;
+    height: 0.2em;
+    margin: 0.1em;
+}
+
+.percentageContainer.visible {
+    border: 1px solid black;
+}
+
+.percentage {
+    background-color: black;
+    width: 0%;
+    height: 0.1em;
+}
