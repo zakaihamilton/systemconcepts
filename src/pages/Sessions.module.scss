@@ -85,11 +85,11 @@
 }
 
 .percentageContainer.visible {
-    border: 1px solid black;
+    border: 1px solid var(--text-color);
 }
 
 .percentage {
-    background-color: black;
+    background-color: var(--text-color);
     width: 0%;
     height: 0.1em;
 }
