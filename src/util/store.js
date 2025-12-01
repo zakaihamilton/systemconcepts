@@ -27,6 +27,9 @@ export function useStoreState(store, filter) {
 
 export function useLocalStorage(id, store, fields) {
     useEffect(() => {
+        if (typeof window === "undefined") {
+            return;
+        }
         const unsubscribe = store.subscribe(s => s, s => {
             if (s._loaded) {
                 let values = Object.assign({}, s);

@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { MainStore } from '@components/Main';
-import rtl from 'jss-rtl';
+import 'jss-rtl';
 import useDarkMode from 'use-dark-mode';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
