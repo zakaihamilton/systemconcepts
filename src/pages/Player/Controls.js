@@ -60,7 +60,6 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
             return { name, callback };
         });
         update("timeupdate");
-        update("visibility");
         return () => {
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
