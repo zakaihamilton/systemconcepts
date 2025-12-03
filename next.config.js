@@ -12,12 +12,8 @@ const nextConfig = {
     env: {
         NEXT_PUBLIC_VERSION: version
     },
-    webpack: (config, { webpack }) => {
-        config.plugins.push(new webpack.DefinePlugin({
-            VERSION: JSON.stringify(version)
-        }));
-        return config;
-    }
+    // Silence Turbopack error for existing webpack config (from next-pwa)
+    turbopack: {}
 };
 
 module.exports = withPWA(nextConfig);
