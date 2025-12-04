@@ -156,7 +156,7 @@ export default function Destination({ path }) {
     const disableAction = destination === path;
 
     return (
-        (<StyledDialog fullScreen open={destination !== ""} onClose={handleClose} TransitionComponent={Transition}>
+        (<StyledDialog fullScreen open={destination !== ""} onClose={handleClose} slots={{ transition: Transition }}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={handleClose} size="large">

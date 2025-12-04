@@ -182,7 +182,7 @@ export default function SignUp() {
                 </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={idState}
                                 required
@@ -197,7 +197,7 @@ export default function SignUp() {
                                 icon={<AccountCircleIcon />}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                             <Input
                                 state={firstNameState}
                                 required
@@ -209,7 +209,7 @@ export default function SignUp() {
                                 onValidate={onValidateField}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                             <Input
                                 state={lastNameState}
                                 required
@@ -221,7 +221,7 @@ export default function SignUp() {
                                 onValidate={onValidateField}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={emailState}
                                 required
@@ -235,7 +235,7 @@ export default function SignUp() {
                                 icon={<EmailIcon />}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={passwordState}
                                 required
@@ -252,7 +252,7 @@ export default function SignUp() {
 
                         </Grid>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <FormControlLabel
                             className={clsx(direction === "rtl" && classes.rtlLabel)}
                             control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
@@ -271,7 +271,7 @@ export default function SignUp() {
                         {translations.SIGN_UP}
                     </Button>
                     <Grid container justifyContent="flex-end">
-                        <Grid item>
+                        <Grid>
                             <Link href="#signin" variant="body2">
                                 {translations.HAVE_ACCOUNT}
                             </Link>

@@ -170,7 +170,7 @@ export default function Account() {
                 </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={1}>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={idState}
                                 required
@@ -185,7 +185,7 @@ export default function Account() {
                                 icon={<AccountCircleIcon />}
                             />
                         </Grid>
-                        {!isSignedIn && <Grid item xs={12}>
+                        {!isSignedIn && <Grid size={12}>
                             <Input
                                 state={passwordState}
                                 required
@@ -200,7 +200,7 @@ export default function Account() {
                                 onKeyDown={onKeyDown}
                             />
                         </Grid>}
-                        {!isSignedIn && <Grid item xs={12}>
+                        {!isSignedIn && <Grid size={12}>
                             <FormControlLabel
                                 className={clsx(direction === "rtl" && classes.rtlLabel)}
                                 control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
@@ -208,7 +208,7 @@ export default function Account() {
                             />
                         </Grid>}
                         {inProgress && <LinearProgress className={classes.progress} />}
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Button
                                 onClick={onSubmit}
                                 disabled={isInvalid || inProgress}
@@ -220,22 +220,22 @@ export default function Account() {
                                 {translations[isSignedIn ? "SIGN_OUT" : "SIGN_IN"]}
                             </Button>
                         </Grid>
-                        {!isSignedIn && <Grid item xs={5}>
+                        {!isSignedIn && <Grid size={5}>
                             <Link className={classes.link} href="#resetpassword" variant="body2">
                                 {translations.FORGET_PASSWORD}
                             </Link>
                         </Grid>}
-                        {!isSignedIn && <Grid item xs={7}>
+                        {!isSignedIn && <Grid size={7}>
                             <Link className={classes.link} href="#signup" variant="body2">
                                 {translations.SIGN_UP_TEXT}
                             </Link>
                         </Grid>}
-                        {isSignedIn && <Grid item xs={8}>
+                        {isSignedIn && <Grid size={8}>
                             <Link className={classes.link} href="#changepassword" variant="body2">
                                 {translations.CHANGE_PASSWORD}
                             </Link>
                         </Grid>}
-                        {isSignedIn && <Grid item xs={4}>
+                        {isSignedIn && <Grid size={4}>
                             <Link className={classes.link} href={"#account/" + encodeURIComponent(`user/${userId}`)} variant="body2">
                                 {translations.EDIT_ACCOUNT}
                             </Link>
