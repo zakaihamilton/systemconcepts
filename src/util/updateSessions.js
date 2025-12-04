@@ -142,7 +142,7 @@ export function useUpdateSessions() {
         if (!items) {
             return;
         }
-        const limit = pLimit(2);
+        const limit = pLimit(4);
         const promises = items.map(item => limit(() => updateGroup(item.name)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
@@ -164,7 +164,7 @@ export function useUpdateSessions() {
         if (!items) {
             return;
         }
-        const limit = pLimit(2);
+        const limit = pLimit(4);
         const promises = items.map(item => limit(() => updateGroup(item.name, true)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
