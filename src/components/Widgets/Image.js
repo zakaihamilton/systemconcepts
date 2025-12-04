@@ -23,20 +23,22 @@ export default function ImageWidget({ clickForImage = true, onClick, href, loadi
         addPath("image?label=THUMBNAIL");
     };
 
-    useEffect(() => {
-        setImageLoading(!!path);
-    }, [path]);
+    const hasPath = typeof path === "string" && path;
 
-    const showAlt = (!path || !!error) && (!loading && !imageLoading);
+    useEffect(() => {
+        setImageLoading(!!hasPath);
+    }, [hasPath]);
+
+    const showAlt = (!hasPath || !!error) && (!loading && !imageLoading);
     const clickable = clickForImage && !showAlt || onClick;
 
     if (clickForImage) {
         onClick = gotoImage;
     }
 
-    return <Link underline="none" href={href} color="initial" style={buttonStyle} className={clsx(styles.root, clickable && styles.clickable)} disabled={clickForImage && (!path || !!error)} onClick={clickable ? onClick : undefined}>
+    return <Link underline="none" href={href} color="initial" style={buttonStyle} className={clsx(styles.root, clickable && styles.clickable)} disabled={clickForImage && (!hasPath || !!error)} onClick={clickable ? onClick : undefined}>
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
-        {path && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
+        {hasPath && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
         {showAlt && <div className={styles.alt}>{alt}</div>}
     </Link>;
 }

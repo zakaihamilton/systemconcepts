@@ -1,5 +1,5 @@
 import storage from "@util/storage";
-import { makePath, fileTitle, isAudioFile, isVideoFile } from "@util/path";
+import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -123,9 +123,18 @@ export function useSessions(depends = [], options = {}) {
                                     item = await createItem({ key, id, name, date });
                                 }
                                 item.video = file;
-                                if (cdn.url) {
-                                    item.thumbnail = cdn.url + encodeURI(file.path.replace("/aws", "").replace(".mp4", ".png"));
-                                }
+                            }
+                        }
+                        else if (isImageFile(file.name)) {
+                            let item = sessions.find(session => session.id === id && session.group === group.name);
+                            if (!item) {
+                                item = await createItem({ key, id, name, date, group });
+                            }
+                            if (cdn.url) {
+                                item.thumbnail = cdn.url + encodeURI(file.path.replace("/aws", ""));
+                            }
+                            else {
+                                item.thumbnail = true;
                             }
                         }
                     }
