@@ -17,8 +17,6 @@ import { Store } from "pullstate";
 import BuildIcon from "@mui/icons-material/Build";
 import useDarkMode from "use-dark-mode";
 import Row from "@widgets/Row";
-import getConfig from "next/config";
-
 export const SettingsStore = new Store({
     order: "desc",
     offset: 0,
@@ -26,7 +24,6 @@ export const SettingsStore = new Store({
 });
 
 export default function Settings() {
-    const config = getConfig();
     const prefferedLanguage = typeof navigator !== "undefined" && languages.find(item => navigator.language.includes(item.code)) || languages[0];
     const darkMode = useDarkMode(false);
     const translations = useTranslations();
@@ -41,8 +38,6 @@ export default function Settings() {
             darkMode.disable();
         }
     });
-
-    console.log("config", config);
 
     const darkModeState = [darkModeSelected, setDarkMode];
 
@@ -129,7 +124,7 @@ export default function Settings() {
             id: "version",
             icon: <BuildIcon />,
             name: translations.VERSION,
-            widget: config.publicRuntimeConfig.VERSION
+            widget: process.env.NEXT_PUBLIC_VERSION
         }
     ];
 
