@@ -146,7 +146,7 @@ export default function ChangePassword() {
                 </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={idState}
                                 required
@@ -161,7 +161,7 @@ export default function ChangePassword() {
                                 icon={<AccountCircleIcon />}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={oldPasswordState}
                                 required
@@ -177,7 +177,7 @@ export default function ChangePassword() {
                             />
 
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={newPasswordState}
                                 required
@@ -194,7 +194,7 @@ export default function ChangePassword() {
 
                         </Grid>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <FormControlLabel
                             className={clsx(direction === "rtl" && classes.rtlLabel)}
                             control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}

@@ -170,7 +170,7 @@ export default function ResetPassword({ path = "" }) {
                 </Typography>}
                 <form className={classes.form} noValidate>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <Input
                                 state={idState}
                                 required
@@ -184,7 +184,7 @@ export default function ResetPassword({ path = "" }) {
                                 icon={<AccountCircleIcon />}
                             />
                         </Grid>
-                        {hasCode && <Grid item xs={12}>
+                        {hasCode && <Grid size={12}>
                             <Input
                                 state={newPasswordState}
                                 required
@@ -200,7 +200,7 @@ export default function ResetPassword({ path = "" }) {
                             />
                         </Grid>}
                     </Grid>
-                    {hasCode && <Grid item xs={12}>
+                    {hasCode && <Grid size={12}>
                         <FormControlLabel
                             className={clsx(direction === "rtl" && classes.rtlLabel)}
                             control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
