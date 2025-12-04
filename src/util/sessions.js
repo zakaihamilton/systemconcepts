@@ -27,7 +27,6 @@ export function useSessions(depends = [], options = {}) {
     const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const updateSessions = useCallback(async groupMetadata => {
-        const sessions = [];
         let continueUpdate = true;
         SessionsStore.update(s => {
             if (s.busy) {
@@ -68,90 +67,138 @@ export function useSessions(depends = [], options = {}) {
             return await getJSON(localUrl);
         };
         const basePath = "shared/sessions";
-        const cdn = (await getJSON("local/" + basePath + "/cdn.json")) || {};
         try {
-            const groups = await getListing(basePath);
-            for (const group of groups) {
+            const [cdnData, groups] = await Promise.all([
+                getJSON("local/" + basePath + "/cdn.json"),
+                getListing(basePath)
+            ]);
+            const cdn = cdnData || {};
+            const groupsWithYears = await Promise.all(groups.map(async group => {
                 const years = await getListing(makePath(basePath, group.name));
-                for (const year of years) {
-                    const path = makePath(basePath, group.name, year.name);
-                    const files = await getListing(path);
-                    const sessionsMetadata = await getMetadata(path);
-                    files.sort((a, b) => a.name.localeCompare(b.name));
-                    const createItem = async ({ key, id, name, date }) => {
-                        const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
-                        let sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
-                        const metadataPath = "local/personal/metadata/sessions/" + group.name + "/" + year.name + "/" + date + " " + name + ".json";
-                        const sessionMetadata = await getJSON(metadataPath);
-                        sessionInfo = { ...sessionInfo, ...sessionMetadata };
-                        delete sessionInfo.name;
-                        const item = { key, id, name, date, year: year.name, group: group.name, color: groupInfo.color, ...sessionInfo, ...sessionMetadata };
-                        sessions.push(item);
-                        return item;
+                return { group, years };
+            }));
+
+            const tasks = groupsWithYears.flatMap(({ group, years }) =>
+                years.map(year => ({ group, year }))
+            );
+
+            const processedYears = await Promise.all(tasks.map(async ({ group, year }) => {
+                const path = makePath(basePath, group.name, year.name);
+                const [files, sessionsMetadata] = await Promise.all([
+                    getListing(path),
+                    getMetadata(path)
+                ]);
+
+                files.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Group files by session ID
+                const sessionFilesMap = {};
+                for (const file of files) {
+                    let id = fileTitle(file.name);
+                    // Handle resolution suffix for video files
+                    if (isVideoFile(file.name)) {
+                        const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
+                        if (resolutionMatch) {
+                            id = resolutionMatch[1];
+                        }
+                    }
+                    if (!sessionFilesMap[id]) {
+                        sessionFilesMap[id] = [];
+                    }
+                    sessionFilesMap[id].push(file);
+                }
+
+                const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
+
+                const yearSessions = await Promise.all(sortedIds.map(async id => {
+                    const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
+                    if (!date || !name) {
+                        return null;
+                    }
+
+                    const fileList = sessionFilesMap[id];
+
+                    const audioFiles = fileList.filter(f => isAudioFile(f.name));
+                    const audioFile = audioFiles.length ? audioFiles[audioFiles.length - 1] : null;
+
+                    const videoFiles = fileList.filter(f => isVideoFile(f.name));
+
+                    const imageFiles = fileList.filter(f => isImageFile(f.name));
+                    const imageFile = imageFiles.length ? imageFiles[imageFiles.length - 1] : null;
+
+                    if (!audioFile && !videoFiles.length && !imageFile) {
+                        return null;
+                    }
+
+                    const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
+                    let sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
+                    const metadataPath = "local/personal/metadata/sessions/" + group.name + "/" + year.name + "/" + date + " " + name + ".json";
+                    const sessionMetadata = await getJSON(metadataPath);
+
+                    sessionInfo = { ...sessionInfo, ...sessionMetadata };
+                    delete sessionInfo.name;
+
+                    const key = group.name + "_" + id;
+                    const item = {
+                        key,
+                        id,
+                        name,
+                        date,
+                        year: year.name,
+                        group: group.name,
+                        color: groupInfo.color,
+                        ...sessionInfo,
+                        ...sessionMetadata
                     };
-                    for (const file of files) {
-                        const id = fileTitle(file.name);
-                        const key = group.name + "_" + id;
-                        const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
-                        if (!date || !name) {
-                            continue;
-                        }
-                        if (isAudioFile(file.name)) {
-                            let item = sessions.find(session => session.id === id && session.group === group.name);
-                            if (!item) {
-                                item = await createItem({ key, id, name, date, group });
-                            }
-                            item.audio = file;
-                        }
-                        else if (isVideoFile(file.name)) {
-                            const isResolution = id.match(/(.*)_(\d+x\d+)/);
-                            if (isResolution) {
-                                const [, id, resolution] = isResolution;
-                                const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
-                                let item = sessions.find(session => session.id === id && session.group === group.name);
-                                if (!item) {
-                                    item = await createItem({ key, id, name, date });
-                                }
+
+                    if (audioFile) {
+                        item.audio = audioFile;
+                    }
+
+                    if (videoFiles.length) {
+                         for (const file of videoFiles) {
+                            const fileId = fileTitle(file.name);
+                            const resolutionMatch = fileId.match(/(.*)_(\d+x\d+)/);
+                            if (resolutionMatch) {
+                                const [, , resolution] = resolutionMatch;
                                 if (!item.resolutions) {
                                     item.resolutions = {};
                                 }
                                 item.resolutions[resolution] = file;
-                            }
-                            else {
-                                let item = sessions.find(session => session.id === id && session.group === group.name);
-                                if (!item) {
-                                    item = await createItem({ key, id, name, date });
-                                }
+                            } else {
                                 item.video = file;
                             }
-                        }
-                        else if (isImageFile(file.name)) {
-                            let item = sessions.find(session => session.id === id && session.group === group.name);
-                            if (!item) {
-                                item = await createItem({ key, id, name, date, group });
-                            }
-                            if (cdn.url) {
-                                item.thumbnail = cdn.url + encodeURI(file.path.replace("/aws", ""));
-                            }
-                            else {
-                                item.thumbnail = true;
-                            }
+                         }
+                    }
+
+                    if (imageFile) {
+                        if (cdn.url) {
+                            item.thumbnail = cdn.url + encodeURI(imageFile.path.replace("/aws", ""));
+                        } else {
+                            item.thumbnail = true;
                         }
                     }
-                }
-            }
+
+                    return item;
+                }));
+
+                return yearSessions.filter(Boolean);
+            }));
+
+            const allSessions = processedYears.flat();
+
             SessionsStore.update(s => {
-                s.sessions = sessions;
+                s.sessions = allSessions;
                 s.groups = groups;
                 s.busy = false;
             });
         }
         catch (err) {
             console.error(err);
+            SessionsStore.update(s => {
+                s.busy = false;
+            });
         }
-        SessionsStore.update(s => {
-            s.busy = false;
-        });
     }, []);
 
     useEffect(() => {
