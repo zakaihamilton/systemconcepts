@@ -55,19 +55,20 @@ export function useSize(ref, depends = []) {
     const counter = useResize(depends);
     const emPixels = getEmValueFromElement(ref && ref.current);
 
+    const handle = ref?.current;
     useEffect(() => {
-        const handle = ref?.current;
         if (!handle) {
             return;
         }
         const resizeObserver = new ResizeObserver(entries => {
             setObserverCounter(counter => counter + 1);
         });
+        setObserverCounter(counter => counter + 1);
         resizeObserver.observe(handle);
         return () => {
             resizeObserver.unobserve(handle);
         };
-    }, [ref]);
+    }, [handle]);
 
     const rect = ref?.current?.getBoundingClientRect() || {};
     const width = rect.width, height = rect.height;
