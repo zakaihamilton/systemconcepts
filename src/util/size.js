@@ -67,7 +67,7 @@ export function useSize(ref, depends = []) {
         return () => {
             resizeObserver.unobserve(handle);
         };
-    }, [ref]);
+    }, [ref.current]);
 
     const rect = ref?.current?.getBoundingClientRect() || {};
     const width = rect.width, height = rect.height;
