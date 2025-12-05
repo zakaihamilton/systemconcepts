@@ -25,8 +25,8 @@ export default function Content() {
     }
     const Player = pages.find(page => page.id === "player").Component;
     return <ContentSize.Provider value={size}>
-        <div className={styles.pageContainer}>
-            <main ref={ref} className={styles.page}>
+        <div ref={ref} className={styles.pageContainer}>
+            <main className={styles.page}>
                 {playerPageRef.current && <Player key={playerPageRef.current.url} show={showPlayer} {...playerPageRef.current} />}
                 {showPage && <Component {...activePage} />}
             </main>
