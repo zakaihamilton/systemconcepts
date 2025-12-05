@@ -103,6 +103,8 @@ export default function TableWidget(props) {
     });
     size = size || pageSize;
 
+    // console.log("TableWidget size:", size.width, size.height);
+
     const viewModesList = [
         {
             id: "table",
@@ -360,6 +362,8 @@ export default function TableWidget(props) {
                 selected={selected}
             />;
         };
+
+        console.log("Rendering FixedSizeList with width:", size.width);
 
         return <>
             {!!loading && loadingElement}
