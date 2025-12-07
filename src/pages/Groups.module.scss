@@ -23,3 +23,7 @@
 .listItemWithProgress {
     grid-template-columns: 1fr 6em 6em;
 }
+
+.disabled {
+    opacity: 0.5;
+}

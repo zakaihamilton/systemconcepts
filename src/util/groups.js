@@ -38,7 +38,8 @@ export function useGroups(depends) {
                         name: item.name,
                         color: "",
                         translations: [],
-                        user: ""
+                        user: "",
+                        disabled: false
                     });
                 }
             });

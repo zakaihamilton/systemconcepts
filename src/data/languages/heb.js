@@ -968,6 +968,22 @@ export default {
         {
             "id": "TEXT",
             "value": "טֶקסט"
+        },
+        {
+            "id": "ENABLED",
+            "value": "מופעל"
+        },
+        {
+            "id": "DISABLED",
+            "value": "מנוטרל"
+        },
+        {
+            "id": "ENABLE",
+            "value": "אפשר"
+        },
+        {
+            "id": "DISABLE",
+            "value": "השבת"
         }
     ]
 };

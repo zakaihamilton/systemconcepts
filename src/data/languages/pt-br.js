@@ -972,6 +972,22 @@ export default {
         {
             "id": "TEXT",
             "value": "Texto"
+        },
+        {
+            "id": "ENABLED",
+            "value": "Habilitado"
+        },
+        {
+            "id": "DISABLED",
+            "value": "Desabilitado"
+        },
+        {
+            "id": "ENABLE",
+            "value": "Habilitar"
+        },
+        {
+            "id": "DISABLE",
+            "value": "Desabilitar"
         }
     ]
 };

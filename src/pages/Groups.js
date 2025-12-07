@@ -26,7 +26,7 @@ export default function Groups() {
     const translations = useTranslations();
     const { counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
-    const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions();
+    const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -67,7 +67,7 @@ export default function Groups() {
         }
     ];
 
-    useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000)] });
+    useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000), groups] });
 
     const withProgress = status && !!status.length;
 
@@ -115,12 +115,12 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "determinate" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
-        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} />;
+        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} setGroups={setGroups} />;
 
         return {
             ...item,
             iconWidget,
-            nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} />,
+            nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} className={item.disabled && styles.disabled} />,
             progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? statusItem.progress : undefined} />,
             colorWidget: <ColorPicker pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
         };

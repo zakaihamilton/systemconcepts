@@ -11,7 +11,7 @@ export const UpdateSessionsStore = new Store({
     start: 0
 });
 
-export function useUpdateSessions() {
+export function useUpdateSessions(groups) {
     const { busy, status, start } = UpdateSessionsStore.useState();
     const prefix = makePath("aws/sessions") + "/";
     const getListing = useCallback(async path => {
@@ -143,12 +143,13 @@ export function useUpdateSessions() {
             return;
         }
         const limit = pLimit(4);
-        const promises = items.map(item => limit(() => updateGroup(item.name)));
+        console.log("groups", groups, "items", items);
+        const promises = items.filter(item => !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
-    }, []);
+    }, [groups]);
     const updateAllSessions = useCallback(async () => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
@@ -165,12 +166,12 @@ export function useUpdateSessions() {
             return;
         }
         const limit = pLimit(4);
-        const promises = items.map(item => limit(() => updateGroup(item.name, true)));
+        const promises = items.filter(item => !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name, true)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
-    }, []);
+    }, [groups]);
     const updateSpecificGroup = useCallback(async (name) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
