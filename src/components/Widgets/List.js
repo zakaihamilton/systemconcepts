@@ -21,6 +21,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const isSelected = typeof selected === "function" ? selected(id) : selected === id;
     const itemClassName = useStyles(styles, {
+        item: true,
         selected: isSelected
     });
     const iconContainerClassName = useStyles(styles, {

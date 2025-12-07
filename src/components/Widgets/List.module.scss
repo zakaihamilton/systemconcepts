@@ -23,3 +23,8 @@
 .reverse {
     flex-direction: column-reverse;
 }
+
+.item {
+    cursor: pointer;
+    user-select: none;
+}
