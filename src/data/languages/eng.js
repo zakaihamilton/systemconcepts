@@ -988,6 +988,10 @@ export default {
         {
             "id": "DISABLED",
             "value": "Disabled"
+        },
+        {
+            "id": "STATISTICS",
+            "value": "Statistics"
         }
     ]
 };
