@@ -45,7 +45,7 @@ export default function Tabs({ Container }) {
             value: basePath + "/" + encodeURIComponent("player?suffix=.mp4")
         },
         session.thumbnail && {
-            label: translations.THUMBNAIL,
+            label: session.video ? translations.THUMBNAIL : translations.IMAGE,
             icon: <ImageIcon />,
             value: basePath + "/" + encodeURIComponent("image")
         }

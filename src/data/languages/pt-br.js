@@ -802,6 +802,10 @@ export default {
             "value": "Miniatura"
         },
         {
+            "id": "IMAGE",
+            "value": "Imagem"
+        },
+        {
             "id": "NO_ITEMS",
             "value": "Sem itens"
         },

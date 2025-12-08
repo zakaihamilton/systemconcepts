@@ -20,6 +20,7 @@ import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import ImageIcon from '@mui/icons-material/Image';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -153,7 +154,9 @@ export default function SessionsPage() {
         };
         const icon = <Tooltip arrow title={item.video ? translations.VIDEO : translations.AUDIO}>
             <div style={style} className={styles.icon}>
-                {item.video ? <MovieIcon /> : <AudioIcon />}
+                {!!item.video && <MovieIcon />}
+                {!!item.audio && !item.video && <AudioIcon />}
+                {!!item.thumbnail && !item.video && !item.audio && <ImageIcon />}
                 {!!item.ai && <div className={styles.ai + " " + (item.video ? styles.video : "")}>
                     <AutoAwesomeIcon />
                 </div>}

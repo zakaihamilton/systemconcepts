@@ -802,6 +802,10 @@ export default {
             "value": "Thumbnail"
         },
         {
+            "id": "IMAGE",
+            "value": "Image"
+        },
+        {
             "id": "NO_ITEMS",
             "value": "No Items"
         },

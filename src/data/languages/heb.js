@@ -798,6 +798,10 @@ export default {
             "value": "תמונה ממוזערת"
         },
         {
+            "id": "IMAGE",
+            "value": "תמונה"
+        },
+        {
             "id": "NO_ITEMS",
             "value": "אין פריטים"
         },
