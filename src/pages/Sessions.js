@@ -24,7 +24,8 @@ export const SessionsStore = new Store({
     groupFilter: "",
     order: "asc",
     orderBy: "date",
-    viewMode: "list"
+    viewMode: "list",
+    scrollOffset: 0
 });
 
 export default function SessionsPage() {
