@@ -14,6 +14,7 @@ import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
+import { useSessions } from "@util/sessions";
 
 registerToolbar("Groups");
 
@@ -27,6 +28,7 @@ export default function Groups() {
     const { counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
+    const [sessions, loadingSessions] = useSessions();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
@@ -115,7 +117,7 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "determinate" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
-        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} setGroups={setGroups} />;
+        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
 
         return {
             ...item,
@@ -144,8 +146,8 @@ export default function Groups() {
                 table: null
             }}
             mapper={mapper}
-            loading={loading}
-            depends={[translations, status, updateGroup]}
+            loading={loading || loadingSessions}
+            depends={[translations, status, updateGroup, sessions]}
         />
     </>;
 }

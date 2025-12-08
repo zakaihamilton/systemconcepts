@@ -7,7 +7,7 @@ import Statistics from "./Statistics";
 import { useState } from "react";
 import DataUsageIcon from "@mui/icons-material/DataUsage";
 
-export default function ItemMenuWidget({ item, updateGroup, store, setGroups }) {
+export default function ItemMenuWidget({ item, updateGroup, store, setGroups, sessions }) {
     const translations = useTranslations();
     const [showStatistics, setShowStatistics] = useState(false);
 
@@ -45,6 +45,6 @@ export default function ItemMenuWidget({ item, updateGroup, store, setGroups }) 
 
     return <>
         <ItemMenu item={item} menuItems={menuItems} store={store} />
-        {showStatistics && <Statistics open={showStatistics} onClose={() => setShowStatistics(false)} group={item} />}
+        {showStatistics && <Statistics open={showStatistics} onClose={() => setShowStatistics(false)} group={item} sessions={sessions} />}
     </>;
 }

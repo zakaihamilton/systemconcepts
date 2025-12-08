@@ -3,8 +3,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useTranslations } from "@util/translations";
-import storage from "@util/storage";
-import { makePath, fileTitle } from "@util/path";
 import Message from "@widgets/Message";
 import DataUsageIcon from "@mui/icons-material/DataUsage";
 import Table from "@mui/material/Table";
@@ -15,65 +13,46 @@ import TableRow from "@mui/material/TableRow";
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from "@mui/icons-material/Cancel";
 import Tooltip from "@mui/material/Tooltip";
+import { Divider } from '@mui/material';
 
-export default function Statistics({ group, open, onClose }) {
+export default function Statistics({ group, open, onClose, sessions }) {
     const translations = useTranslations();
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState(null);
 
     useEffect(() => {
-        if (!open || !group) {
+        if (!open || !group || !sessions) {
             return;
         }
         setLoading(true);
         const loadStats = async () => {
             try {
-                const basePath = "shared/sessions";
-                const years = await storage.getListing(makePath("local", basePath, group.name));
+                let total = 0;
+                let ai = 0;
+                let standard = 0;
+                let overviews = 0;
 
-                let totalSessions = 0;
-                let aiSessions = 0;
-                let nonAiSessions = 0;
+                const groupSessions = sessions.filter(session => session.group === group.name);
 
-                if (years) {
-                    for (const year of years) {
-                        const files = await storage.getListing(makePath("local", basePath, group.name, year.name));
-                        if (!files) continue;
+                if (groupSessions) {
+                    for (const session of groupSessions) {
+                        total++;
 
-                        const sessionFilesMap = {};
-                        for (const file of files) {
-                            let id = fileTitle(file.name);
-                            // Handle resolution suffix for video files
-                            const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
-                            if (resolutionMatch) {
-                                id = resolutionMatch[1];
-                            }
-                            if (!sessionFilesMap[id]) {
-                                sessionFilesMap[id] = [];
-                            }
-                            sessionFilesMap[id].push(file);
-                        }
-
-                        for (const id of Object.keys(sessionFilesMap)) {
-                            const match = id.trim().match(/(\d+-\d+-\d+)\ (.*)/);
-                            if (!match) continue;
-                            const [, , name] = match;
-
-                            totalSessions++;
-
-                            if (name.endsWith(" - AI") || name.startsWith("Overview - ")) {
-                                aiSessions++;
-                            } else {
-                                nonAiSessions++;
-                            }
+                        if (session.name.endsWith(" - AI")) {
+                            ai++;
+                        } else if (session.name.startsWith("Overview - ")) {
+                            overviews++;
+                        } else {
+                            standard++;
                         }
                     }
                 }
 
                 setStats({
-                    totalSessions,
-                    aiSessions,
-                    nonAiSessions
+                    total,
+                    ai,
+                    standard,
+                    overviews
                 });
             } catch (err) {
                 console.error(err);
@@ -83,7 +62,7 @@ export default function Statistics({ group, open, onClose }) {
         };
 
         loadStats();
-    }, [open, group]);
+    }, [open, group, sessions]);
 
     return (
         <Dialog
@@ -92,14 +71,15 @@ export default function Statistics({ group, open, onClose }) {
             fullWidth
             maxWidth="xs"
         >
-            <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                {translations.STATISTICS}
+            <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--app-bar-background)" }}>
+                <b>{group.name[0].toUpperCase() + group.name.slice(1)}</b> {translations.STATISTICS}
                 <IconButton onClick={onClose} size="large">
                     <Tooltip title={translations.CLOSE} arrow>
                         <CancelIcon />
                     </Tooltip>
                 </IconButton>
             </DialogTitle>
+            <Divider />
             <DialogContent>
                 {loading && <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />}
                 {!loading && stats && (
@@ -108,21 +88,25 @@ export default function Statistics({ group, open, onClose }) {
                             <TableBody>
                                 <TableRow>
                                     <TableCell>{translations.SESSIONS}</TableCell>
-                                    <TableCell align="right">{stats.totalSessions}</TableCell>
+                                    <TableCell align="right">{stats.total}</TableCell>
                                 </TableRow>
-                                <TableRow>
+                                <TableRow sx={{ '& td, & th': { border: 0 } }}>
+                                    <TableCell>Standard</TableCell>
+                                    <TableCell align="right">{stats.standard}</TableCell>
+                                </TableRow>
+                                <TableRow sx={{ '& td, & th': { border: 0 } }}>
+                                    <TableCell>Overview</TableCell>
+                                    <TableCell align="right">{stats.overviews}</TableCell>
+                                </TableRow>
+                                <TableRow sx={{ '& td, & th': { border: 0 } }}>
                                     <TableCell>AI</TableCell>
-                                    <TableCell align="right">{stats.aiSessions}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Non-AI</TableCell>
-                                    <TableCell align="right">{stats.nonAiSessions}</TableCell>
+                                    <TableCell align="right">{stats.ai}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
                     </TableContainer>
                 )}
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }

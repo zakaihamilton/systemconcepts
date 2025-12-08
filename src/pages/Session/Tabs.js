@@ -5,7 +5,6 @@ import MovieIcon from "@mui/icons-material/Movie";
 import AudioIcon from "@icons/Audio";
 import InfoIcon from "@mui/icons-material/Info";
 import ImageIcon from "@mui/icons-material/Image";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Tab from "@components/Widgets/Tabs/Tab";
 
 export default function Tabs({ Container }) {

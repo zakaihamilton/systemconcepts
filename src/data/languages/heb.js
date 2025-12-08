@@ -984,6 +984,10 @@ export default {
         {
             "id": "DISABLE",
             "value": "השבת"
+        },
+        {
+            "id": "STATISTICS",
+            "value": "סטטיסטיקות"
         }
     ]
 };
