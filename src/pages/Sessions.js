@@ -152,7 +152,8 @@ export default function SessionsPage() {
         const style = {
             background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
         };
-        const icon = <Tooltip arrow title={item.video ? translations.VIDEO : translations.AUDIO}>
+        const title = item.video ? translations.VIDEO : (item.audio ? translations.AUDIO : translations.IMAGE);
+        const icon = <Tooltip arrow title={title}>
             <div style={style} className={styles.icon}>
                 {!!item.video && <MovieIcon />}
                 {!!item.audio && !item.video && <AudioIcon />}
