@@ -93,3 +93,30 @@
     width: 0%;
     height: 0.1em;
 }
+
+.icon {
+    position: relative;
+}
+
+.ai {
+    position: absolute;
+    margin-left: 0.3em;
+    vertical-align: middle;
+    bottom: 0px;
+    right: 0px;
+    transform: scale(0.5);
+}
+
+.ai.altIcon {
+    transform: scale(1);
+    bottom: 10px;
+    right: 10px;
+}
+
+.ai.video {
+    filter: invert(1);
+}
+
+.ai:not(.video):not(.altIcon) {
+    transform: scale(0.5) translate(50%, 50%);
+}

@@ -140,6 +140,7 @@ export function useSessions(depends = [], options = {}) {
                     sessionInfo = { ...sessionInfo, ...sessionMetadata };
                     delete sessionInfo.name;
 
+                    const ai = name.endsWith(" - AI") || name.startsWith("Overview - ");
                     const key = group.name + "_" + id;
                     const item = {
                         key,
@@ -149,6 +150,7 @@ export function useSessions(depends = [], options = {}) {
                         year: year.name,
                         group: group.name,
                         color: groupInfo.color,
+                        ai,
                         ...sessionInfo,
                         ...sessionMetadata
                     };
@@ -158,7 +160,7 @@ export function useSessions(depends = [], options = {}) {
                     }
 
                     if (videoFiles.length) {
-                         for (const file of videoFiles) {
+                        for (const file of videoFiles) {
                             const fileId = fileTitle(file.name);
                             const resolutionMatch = fileId.match(/(.*)_(\d+x\d+)/);
                             if (resolutionMatch) {
@@ -170,7 +172,7 @@ export function useSessions(depends = [], options = {}) {
                             } else {
                                 item.video = file;
                             }
-                         }
+                        }
                     }
 
                     if (imageFile) {
