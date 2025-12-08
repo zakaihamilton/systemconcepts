@@ -226,6 +226,7 @@ export default function SessionsPage() {
                 }
             }}
             depends={[groupFilter, translations, viewMode]}
+            resetScrollDeps={[groupFilter]}
         />
     </>;
 }

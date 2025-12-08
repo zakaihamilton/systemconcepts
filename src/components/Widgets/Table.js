@@ -86,6 +86,7 @@ export default function TableWidget(props) {
         size,
         showSort = true,
         viewModes = { table: null },
+        resetScrollDeps = [],
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -97,12 +98,27 @@ export default function TableWidget(props) {
     const { itemsPerPage = 100, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const { scrollOffset = 0 } = store.useState(s => ({ scrollOffset: s.scrollOffset }));
     const scrollOffsetRef = React.useRef(scrollOffset);
+    const listRef = React.useRef();
+    const gridRef = React.useRef();
+
     useEffect(() => {
         const { current: offset } = scrollOffsetRef;
         if (offset !== scrollOffset) {
             scrollOffsetRef.current = scrollOffset;
         }
     }, [scrollOffset]);
+
+    useEffect(() => {
+        if (listRef.current) {
+            listRef.current.scrollTo(0);
+            scrollOffsetRef.current = 0;
+        }
+        if (gridRef.current) {
+            gridRef.current.scrollTo({ scrollTop: 0 });
+            scrollOffsetRef.current = 0;
+        }
+    }, resetScrollDeps);
+
     const updateScrollOffset = useCallback(() => {
         const { current: offset } = scrollOffsetRef;
         if (offset !== scrollOffset) {
@@ -388,6 +404,7 @@ export default function TableWidget(props) {
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
                 className={styles.tableList}
+                ref={listRef}
                 height={height}
                 innerElementType={innerElementType}
                 itemCount={itemCount}
@@ -507,6 +524,7 @@ export default function TableWidget(props) {
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeGrid
                 className={styles.grid}
+                ref={gridRef}
                 columnCount={columnCount}
                 columnWidth={cellWidthInPixels}
                 rowCount={rowCount}
