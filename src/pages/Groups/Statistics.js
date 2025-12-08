@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import Dialog from "@widgets/Dialog";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import { makePath, fileTitle } from "@util/path";
@@ -9,8 +11,10 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import IconButton from "@mui/material/IconButton";
+import CancelIcon from "@mui/icons-material/Cancel";
+import Tooltip from "@mui/material/Tooltip";
 
 export default function Statistics({ group, open, onClose }) {
     const translations = useTranslations();
@@ -85,29 +89,40 @@ export default function Statistics({ group, open, onClose }) {
         <Dialog
             open={open}
             onClose={onClose}
-            title={translations.STATISTICS}
+            fullWidth
+            maxWidth="xs"
         >
-            {loading && <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />}
-            {!loading && stats && (
-                <TableContainer>
-                    <Table>
-                        <TableBody>
-                            <TableRow>
-                                <TableCell>{translations.SESSIONS}</TableCell>
-                                <TableCell align="right">{stats.totalSessions}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>AI</TableCell>
-                                <TableCell align="right">{stats.aiSessions}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Non-AI</TableCell>
-                                <TableCell align="right">{stats.nonAiSessions}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+            <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                {translations.STATISTICS}
+                <IconButton onClick={onClose} size="large">
+                    <Tooltip title={translations.CLOSE} arrow>
+                        <CancelIcon />
+                    </Tooltip>
+                </IconButton>
+            </DialogTitle>
+            <DialogContent>
+                {loading && <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />}
+                {!loading && stats && (
+                    <TableContainer>
+                        <Table>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>{translations.SESSIONS}</TableCell>
+                                    <TableCell align="right">{stats.totalSessions}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>AI</TableCell>
+                                    <TableCell align="right">{stats.aiSessions}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Non-AI</TableCell>
+                                    <TableCell align="right">{stats.nonAiSessions}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
+            </DialogContent>
         </Dialog>
     );
 }
