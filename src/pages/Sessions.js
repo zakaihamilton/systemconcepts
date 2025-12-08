@@ -19,6 +19,7 @@ import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -151,11 +152,19 @@ export default function SessionsPage() {
             background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
         };
         const icon = <Tooltip arrow title={item.video ? translations.VIDEO : translations.AUDIO}>
-            <div style={style} className={styles.progress}>
+            <div style={style} className={styles.icon}>
                 {item.video ? <MovieIcon /> : <AudioIcon />}
+                {!!item.ai && <div className={styles.ai + " " + (item.video ? styles.video : "")}>
+                    <AutoAwesomeIcon />
+                </div>}
             </div>
         </Tooltip>;
-        const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
+        const altIcon = <>
+            {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
+            {!!item.ai && <div className={styles.altIcon + " " + styles.ai + " " + (item.video ? styles.video : "")}>
+                <AutoAwesomeIcon />
+            </div>}
+        </>;
         const nameContent = <Tooltip arrow title={item.name}>
             <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                 {item.name}
