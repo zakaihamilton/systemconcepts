@@ -28,7 +28,7 @@ export default function ItemMenuWidget({ item, updateGroup, store, setGroups, se
         },
         {
             id: "sync_all",
-            name: translations.SYNC_ALL,
+            name: translations.SYNC_ALL_SESSIONS,
             icon: <UpdateIcon />,
             onClick: () => {
                 updateGroup && updateGroup(item.name, true);
