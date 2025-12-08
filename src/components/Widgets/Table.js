@@ -95,6 +95,27 @@ export default function TableWidget(props) {
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 100, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
+    const { scrollOffset = 0 } = store.useState(s => ({ scrollOffset: s.scrollOffset }));
+    const scrollOffsetRef = React.useRef(scrollOffset);
+    useEffect(() => {
+        const { current: offset } = scrollOffsetRef;
+        if (offset !== scrollOffset) {
+            scrollOffsetRef.current = scrollOffset;
+        }
+    }, [scrollOffset]);
+    const updateScrollOffset = useCallback(() => {
+        const { current: offset } = scrollOffsetRef;
+        if (offset !== scrollOffset) {
+            store.update(s => {
+                s.scrollOffset = offset;
+            });
+        }
+    }, [store, scrollOffset]);
+    useEffect(() => {
+        return () => {
+            updateScrollOffset();
+        };
+    }, [updateScrollOffset]);
     const pageSize = useContext(ContentSize);
     const search = useSearch(() => {
         store.update(s => {
@@ -372,6 +393,10 @@ export default function TableWidget(props) {
                 itemCount={itemCount}
                 itemSize={itemHeightInPixels}
                 width={size.width}
+                initialScrollOffset={scrollOffset}
+                onScroll={({ scrollOffset }) => {
+                    scrollOffsetRef.current = scrollOffset;
+                }}
             >
                 {Row}
             </FixedSizeList>}
@@ -488,6 +513,10 @@ export default function TableWidget(props) {
                 rowHeight={cellHeightInPixels}
                 height={size.height}
                 width={size.width}
+                initialScrollTop={scrollOffset}
+                onScroll={({ scrollTop }) => {
+                    scrollOffsetRef.current = scrollTop;
+                }}
             >
                 {Cell}
             </FixedSizeGrid>}
