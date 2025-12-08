@@ -16,7 +16,9 @@ export const SessionsStore = new Store({
     groups: [],
     groupFilter: [],
     busy: false,
-    counter: 0
+    counter: 0,
+    syncCounter: 0,
+    groupsMetadata: ""
 });
 
 export function useSessions(depends = [], options = {}) {
@@ -24,9 +26,9 @@ export function useSessions(depends = [], options = {}) {
     const [syncCounter, syncing] = useSync(options);
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter } = SessionsStore.useState();
+    const { busy, sessions, groups, groupFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
-    const updateSessions = useCallback(async groupMetadata => {
+    const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
         SessionsStore.update(s => {
             if (s.busy) {
@@ -191,6 +193,8 @@ export function useSessions(depends = [], options = {}) {
                 s.sessions = allSessions;
                 s.groups = groups;
                 s.busy = false;
+                s.syncCounter = syncCounter;
+                s.groupsMetadata = JSON.stringify(groupMetadata);
             });
         }
         catch (err) {
@@ -203,9 +207,15 @@ export function useSessions(depends = [], options = {}) {
 
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
-            updateSessions(groupMetadata);
+            const groupsChanged = JSON.stringify(groupMetadata) !== groupsMetadata;
+            const syncChanged = syncCounter !== savedSyncCounter;
+            const noSessions = !sessions || !sessions.length;
+
+            if (noSessions || syncChanged || groupsChanged) {
+                updateSessions(groupMetadata, syncCounter);
+            }
         }
-    }, [groupMetadata, loading, updateSessions]);
+    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata, sessions]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {

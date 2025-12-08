@@ -86,6 +86,7 @@ export default function TableWidget(props) {
         size,
         showSort = true,
         viewModes = { table: null },
+        resetScrollDeps = [],
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -95,6 +96,42 @@ export default function TableWidget(props) {
     const firstColumn = columns[0];
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 100, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
+    const { scrollOffset = 0 } = store.useState(s => ({ scrollOffset: s.scrollOffset }));
+    const scrollOffsetRef = React.useRef(scrollOffset);
+    const listRef = React.useRef();
+    const gridRef = React.useRef();
+
+    useEffect(() => {
+        const { current: offset } = scrollOffsetRef;
+        if (offset !== scrollOffset) {
+            scrollOffsetRef.current = scrollOffset;
+        }
+    }, [scrollOffset]);
+
+    useEffect(() => {
+        if (listRef.current) {
+            listRef.current.scrollTo(0);
+            scrollOffsetRef.current = 0;
+        }
+        if (gridRef.current) {
+            gridRef.current.scrollTo({ scrollTop: 0 });
+            scrollOffsetRef.current = 0;
+        }
+    }, resetScrollDeps);
+
+    const updateScrollOffset = useCallback(() => {
+        const { current: offset } = scrollOffsetRef;
+        if (offset !== scrollOffset) {
+            store.update(s => {
+                s.scrollOffset = offset;
+            });
+        }
+    }, [store, scrollOffset]);
+    useEffect(() => {
+        return () => {
+            updateScrollOffset();
+        };
+    }, [updateScrollOffset]);
     const pageSize = useContext(ContentSize);
     const search = useSearch(() => {
         store.update(s => {
@@ -367,11 +404,16 @@ export default function TableWidget(props) {
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
                 className={styles.tableList}
+                ref={listRef}
                 height={height}
                 innerElementType={innerElementType}
                 itemCount={itemCount}
                 itemSize={itemHeightInPixels}
                 width={size.width}
+                initialScrollOffset={scrollOffset}
+                onScroll={({ scrollOffset }) => {
+                    scrollOffsetRef.current = scrollOffset;
+                }}
             >
                 {Row}
             </FixedSizeList>}
@@ -482,12 +524,17 @@ export default function TableWidget(props) {
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeGrid
                 className={styles.grid}
+                ref={gridRef}
                 columnCount={columnCount}
                 columnWidth={cellWidthInPixels}
                 rowCount={rowCount}
                 rowHeight={cellHeightInPixels}
                 height={size.height}
                 width={size.width}
+                initialScrollTop={scrollOffset}
+                onScroll={({ scrollTop }) => {
+                    scrollOffsetRef.current = scrollTop;
+                }}
             >
                 {Cell}
             </FixedSizeGrid>}
