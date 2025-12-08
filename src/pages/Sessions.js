@@ -153,9 +153,23 @@ export default function SessionsPage() {
         const style = {
             background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
         };
-        const title = item.video ? translations.VIDEO : (item.audio ? translations.AUDIO : translations.IMAGE);
+        let title = item.video ? translations.VIDEO : (item.audio ? translations.AUDIO : translations.IMAGE);
+        if (item.ai) {
+            title += " " + translations.AI;
+        }
+        const onClickIcon = () => {
+            SessionsStore.update(s => {
+                if (s.typeFilter) {
+                    s.typeFilter = "";
+                }
+                else {
+                    s.typeFilter = item.type;
+                }
+                s.offset = 0;
+            });
+        };
         const icon = <Tooltip arrow title={title}>
-            <div style={style} className={styles.icon}>
+            <div style={style} className={styles.icon} onClick={onClickIcon}>
                 {!!item.video && <MovieIcon />}
                 {!!item.audio && !item.video && <AudioIcon />}
                 {!!item.thumbnail && !item.video && !item.audio && <ImageIcon />}

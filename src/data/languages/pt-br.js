@@ -996,6 +996,10 @@ export default {
         {
             "id": "STATISTICS",
             "value": "Estatísticas"
+        },
+        {
+            "id": "AI",
+            "value": "AI"
         }
     ]
 };

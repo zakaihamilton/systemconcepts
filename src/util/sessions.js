@@ -183,6 +183,20 @@ export function useSessions(depends = [], options = {}) {
                         }
                     }
 
+                    if (videoFiles.length) {
+                        item.type = "video";
+                    } else if (audioFile) {
+                        item.type = "audio";
+                    } else if (imageFile) {
+                        item.type = "image";
+                    } else {
+                        item.type = "unknown";
+                    }
+
+                    if (ai) {
+                        item.type = item.type + "-ai";
+                    }
+
                     return item;
                 }));
 
