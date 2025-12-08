@@ -24,6 +24,7 @@ import ImageIcon from '@mui/icons-material/Image';
 
 export const SessionsStore = new Store({
     groupFilter: "",
+    typeFilter: "",
     order: "asc",
     orderBy: "date",
     viewMode: "list",
@@ -35,7 +36,7 @@ export default function SessionsPage() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading, askForFullSync] = useSessions();
-    const { viewMode, groupFilter } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
@@ -193,8 +194,11 @@ export default function SessionsPage() {
     };
 
     const filter = item => {
-        let { group } = item;
+        let { group, type } = item;
         let show = (!groupFilter || groupFilter === (group[0].toUpperCase() + group.slice(1)));
+        if (typeFilter) {
+            show = show && type === typeFilter;
+        }
         return show;
     };
 
@@ -238,8 +242,8 @@ export default function SessionsPage() {
                     className: styles.gridItem
                 }
             }}
-            depends={[groupFilter, translations, viewMode]}
-            resetScrollDeps={[groupFilter]}
+            depends={[groupFilter, typeFilter, translations, viewMode]}
+            resetScrollDeps={[groupFilter, typeFilter]}
         />
     </>;
 }
