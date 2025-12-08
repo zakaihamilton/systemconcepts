@@ -27,6 +27,14 @@ export default function ItemMenuWidget({ item, updateGroup, store, setGroups, se
             }
         },
         {
+            id: "sync_all",
+            name: translations.SYNC_ALL,
+            icon: <UpdateIcon />,
+            onClick: () => {
+                updateGroup && updateGroup(item.name, true);
+            }
+        },
+        {
             id: "enable_disable",
             name: item.disabled ? translations.ENABLE : translations.DISABLE,
             icon: item.disabled ? <CloudQueueIcon /> : <CloudOffIcon />,

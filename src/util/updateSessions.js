@@ -143,7 +143,6 @@ export function useUpdateSessions(groups) {
             return;
         }
         const limit = pLimit(4);
-        console.log("groups", groups, "items", items);
         const promises = items.filter(item => !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
@@ -172,12 +171,12 @@ export function useUpdateSessions(groups) {
             s.busy = false;
         });
     }, [groups]);
-    const updateSpecificGroup = useCallback(async (name) => {
+    const updateSpecificGroup = useCallback(async (name, updateAll) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
         });
-        await updateGroup(name);
+        await updateGroup(name, updateAll);
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
