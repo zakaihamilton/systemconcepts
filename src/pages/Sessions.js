@@ -169,7 +169,7 @@ export default function SessionsPage() {
             });
         };
         const icon = <Tooltip arrow title={title}>
-            <div style={style} className={styles.icon} onClick={onClickIcon}>
+            <div style={style} className={styles.icon} onClick={onClickIcon} id={item.type}>
                 {!!item.video && <MovieIcon />}
                 {!!item.audio && !item.video && <AudioIcon />}
                 {!!item.thumbnail && !item.video && !item.audio && <ImageIcon />}
