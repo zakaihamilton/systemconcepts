@@ -30,6 +30,7 @@
     "mongodb": "^6.21.0",
     "next": "^16.0.7",
     "nodemailer": "^6.10.1",
+    "playwright": "^1.57.0",
     "pullstate": "^1.25.0",
     "react": "^19.2.1",
     "react-color": "^2.19.3",
