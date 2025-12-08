@@ -5,14 +5,26 @@ import Tooltip from "@mui/material/Tooltip";
 
 export default function ItemWidget({ className = "", viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
-        const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
+        const {
+            id: columnId, dir, align, padding = true, viewModes = {},
+            onSelectable, ellipsis, selected, style,
+            onClick, onMouseDown, onMouseUp, onMouseLeave,
+            onTouchStart, onTouchEnd, onTouchCancel, onContextMenu
+        } = column;
         const value = item[columnId];
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const isSelected = selected && selected(item);
         return (<div
             dir={dir}
             style={{ ...style, ...viewModeStyle }}
-            onClick={onClick ? () => onClick(item) : undefined}
+            onClick={onClick ? (e) => onClick(item, e) : undefined}
+            onMouseDown={onMouseDown ? (e) => onMouseDown(item, e) : undefined}
+            onMouseUp={onMouseUp ? (e) => onMouseUp(item, e) : undefined}
+            onMouseLeave={onMouseLeave ? (e) => onMouseLeave(item, e) : undefined}
+            onTouchStart={onTouchStart ? (e) => onTouchStart(item, e) : undefined}
+            onTouchEnd={onTouchEnd ? (e) => onTouchEnd(item, e) : undefined}
+            onTouchCancel={onTouchCancel ? (e) => onTouchCancel(item, e) : undefined}
+            onContextMenu={onContextMenu ? (e) => onContextMenu(item, e) : undefined}
             className={clsx(
                 styles.cell,
                 padding && styles.padding,

@@ -19,15 +19,13 @@ import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 
 export const SessionsStore = new Store({
     groupFilter: "",
     order: "asc",
     orderBy: "date",
     viewMode: "list",
-    expanded: []
+    holding: null
 });
 
 export default function SessionsPage() {
@@ -35,19 +33,14 @@ export default function SessionsPage() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading, askForFullSync] = useSessions();
-    const { viewMode, groupFilter, expanded } = SessionsStore.useState();
+    const { viewMode, groupFilter, holding } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };
-    const toggleExpanded = item => {
-        const path = itemPath(item);
+    const setHolding = path => {
         SessionsStore.update(s => {
-            if (s.expanded.includes(path)) {
-                s.expanded = s.expanded.filter(p => p !== path);
-            } else {
-                s.expanded = [...s.expanded, path];
-            }
+            s.holding = path;
         });
     };
     const target = item => {
@@ -72,11 +65,8 @@ export default function SessionsPage() {
             title: translations.NAME,
             sortable: "name",
             padding: false,
-            selected: item => viewMode === "list" && expanded.includes(itemPath(item)),
             viewModes: {
-                "list": {
-                    selectedClassName: styles.expandedName
-                },
+                "list": null,
                 "table": null,
                 "grid": {
                     className: styles.gridName
@@ -95,12 +85,35 @@ export default function SessionsPage() {
                     width: "7em"
                 }
             },
-            onClick: item => toggleExpanded(item),
+            onMouseDown: item => viewMode === "list" && setHolding(itemPath(item)),
+            onMouseUp: () => setHolding(null),
+            onMouseLeave: () => setHolding(null),
+            onTouchStart: item => viewMode === "list" && setHolding(itemPath(item)),
+            onTouchEnd: () => setHolding(null),
+            onTouchCancel: () => setHolding(null),
+            onClick: (item, e) => viewMode === "list" && e.stopPropagation(),
+            onContextMenu: (item, e) => viewMode === "list" && e.preventDefault(),
             viewModes: {
-                "list": null,
+                "list": {
+                    style: {
+                        cursor: "pointer",
+                        userSelect: "none"
+                    }
+                },
                 "table": null,
                 "grid": {
                     className: styles.gridDate
+                }
+            }
+        },
+        {
+            id: "overlayWidget",
+            title: "",
+            selected: item => holding === itemPath(item),
+            viewModes: {
+                "list": {
+                    className: styles.overlay,
+                    selectedClassName: styles.overlayVisible
                 }
             }
         },
@@ -166,8 +179,6 @@ export default function SessionsPage() {
         const style = {
             background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
         };
-        const path = itemPath(item);
-        const isExpanded = viewMode === "list" && expanded.includes(path);
         const icon = <Tooltip arrow title={item.video ? translations.VIDEO : translations.AUDIO}>
             <div style={style} className={styles.progress}>
                 {item.video ? <MovieIcon /> : <AudioIcon />}
@@ -175,7 +186,7 @@ export default function SessionsPage() {
         </Tooltip>;
         const altIcon = item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />;
         const nameContent = <Tooltip arrow title={item.name}>
-            <div className={clsx(styles.labelText, viewMode !== "table" && !isExpanded && styles.singleLine)}>
+            <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                 {item.name}
                 <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
                     <div className={styles.percentage} style={{ width: percentage + "%" }} />
@@ -183,19 +194,15 @@ export default function SessionsPage() {
             </div>
         </Tooltip>;
         const href = target(item);
-        const closeIcon = isExpanded && <IconButton onClick={(e) => {
-            e.stopPropagation();
-            toggleExpanded(item);
-        }} size="small">
-            <CloseIcon fontSize="small" />
-        </IconButton>;
-        let nameWidget = <Row href={href} onClick={gotoItem.bind(this, item)} icons={<>{icon}{closeIcon}</>}>{nameContent}</Row>;
+        let nameWidget = <Row href={href} onClick={gotoItem.bind(this, item)} icons={icon}>{nameContent}</Row>;
         if (viewMode === "grid") {
             nameWidget = <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />;
         }
+        const overlayWidget = holding === itemPath(item) && <Row href={href} onClick={gotoItem.bind(this, item)} icons={icon}>{item.name}</Row>;
         return {
             ...item,
             nameWidget,
+            overlayWidget,
             group: item.group,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
             thumbnailWidget: <Image href={href} onClick={gotoItem.bind(this, item)} clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,

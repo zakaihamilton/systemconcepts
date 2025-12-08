@@ -93,8 +93,19 @@
     width: 0%;
     height: 0.1em;
 }
-.expandedName {
-    grid-column: 1 / -1;
-    z-index: 2;
-    background-color: var(--main-background);
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--main-background) !important;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    pointer-events: none;
+}
+
+.overlayVisible {
+    display: flex;
 }
