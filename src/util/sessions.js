@@ -23,6 +23,7 @@ export const SessionsStore = new Store({
     groups: [],
     groupFilter: [],
     typeFilter: [],
+    yearFilter: [],
     busy: false,
     counter: 0,
     syncCounter: 0,
@@ -34,7 +35,7 @@ export function useSessions(depends = [], options = {}) {
     const [syncCounter, syncing] = useSync(options);
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, typeFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
+    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
@@ -325,10 +326,33 @@ export function useSessions(depends = [], options = {}) {
                 name: translations.AI,
                 onClick: onClick.bind(this, "ai"),
                 selected: typeFilter,
-                icon: <AutoAwesomeIcon />
-            }
+                icon: <AutoAwesomeIcon />,
+                divider: true
+            },
+            ...(sessions || [])?.reduce((years, session) => {
+                if (session.year && !years.includes(session.year)) {
+                    years.push(session.year);
+                }
+                return years;
+            }, [])?.sort((a, b) => b.localeCompare(a))?.map(year => ({
+                id: year,
+                name: year,
+                selected: yearFilter,
+                onClick: () => {
+                    SessionsStore.update(s => {
+                        const yearFilter = s.yearFilter || [];
+                        if (yearFilter.includes(year)) {
+                            s.yearFilter = yearFilter.filter(y => y !== year);
+                        }
+                        else {
+                            s.yearFilter = [...yearFilter, year];
+                        }
+                    });
+                },
+                selected: yearFilter,
+            }))
         ];
-    }, [typeFilter, translations]);
+    }, [translations, typeFilter, yearFilter, sessions]);
 
     const toolbarItems = [
         {
@@ -344,17 +368,18 @@ export function useSessions(depends = [], options = {}) {
             name: translations.FILTER,
             icon: <FilterAltIcon />,
             items: filterItems,
-            active: typeFilter?.length,
-            disabled: !filterItems.length,
+            active: typeFilter?.length || yearFilter?.length,
+            disabled: !filterItems.length && !yearFilter?.length,
             divider: true,
         },
-        typeFilter?.length && {
+        (typeFilter?.length || yearFilter?.length) && {
             id: "clearFilters",
             name: translations.CLEAR_FILTERS,
             icon: <FilterAltOffIcon />,
             onClick: () => {
                 SessionsStore.update(s => {
                     s.typeFilter = [];
+                    s.yearFilter = [];
                 });
             },
             location: "header"
@@ -371,8 +396,11 @@ export function useSessions(depends = [], options = {}) {
         if (typeFilter?.length) {
             results = results.filter(session => typeFilter.includes(session.type));
         }
+        if (yearFilter?.length) {
+            results = results.filter(session => yearFilter.includes(session.year));
+        }
         return results;
-    }, [groupFilter, typeFilter, sessions]);
+    }, [groupFilter, typeFilter, yearFilter, sessions]);
 
     const items = filterSessions ? filtered : sessions;
 
