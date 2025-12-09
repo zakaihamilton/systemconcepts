@@ -158,7 +158,7 @@ export default function TableWidget(props) {
         }
     ].filter(item => viewModes.hasOwnProperty(item.id));
 
-    columns = columns.filter(column => {
+    const visibleColumns = columns.filter(column => {
         if (!column) {
             return false;
         }
@@ -188,7 +188,7 @@ export default function TableWidget(props) {
                 onClick: createSortHandler(sortId)
             };
         });
-    }, [columns, orderBy, order, createSortHandler]);
+    }, [visibleColumns, orderBy, order, createSortHandler]);
 
     const itemsPerPageItems = useMemo(() => {
         return [10, 25, 50, 75, 100].map(num => {
@@ -288,7 +288,7 @@ export default function TableWidget(props) {
 
     useEffect(() => {
         setEmpty(false);
-        const hasColumn = columns.some(column => column.id === orderBy || column.sortable === orderBy);
+        const hasColumn = visibleColumns.some(column => column.id === orderBy || column.sortable === orderBy);
         if (!hasColumn) {
             store.update(s => { s.orderBy = defaultSort; });
         }
@@ -313,7 +313,7 @@ export default function TableWidget(props) {
             if (!search) {
                 return true;
             }
-            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
+            const keys = visibleColumns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
                 if (typeof item.searchable === "string") {
                     return item.searchable;
                 }
@@ -370,7 +370,7 @@ export default function TableWidget(props) {
                 top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
             };
             return <div ref={ref} {...rest}>
-                {!hideColumns && <ListColumns key={0} columns={columns} style={{ ...style, ...itemStyles }} {...props} />}
+                {!hideColumns && <ListColumns key={0} columns={visibleColumns} style={{ ...style, ...itemStyles }} {...props} />}
                 {children}
             </div>;
         });
@@ -389,7 +389,7 @@ export default function TableWidget(props) {
                 key={key || id || itemIndex}
                 style={{ ...style, ...itemStyles }}
                 {...props}
-                columns={columns}
+                columns={visibleColumns}
                 rowClick={rowClick}
                 item={item}
                 index={itemIndex}
@@ -421,7 +421,7 @@ export default function TableWidget(props) {
         </>;
     }
     else if (viewMode === "table") {
-        const tableColumns = !hideColumns && (columns || []).map((item, idx) => {
+        const tableColumns = !hideColumns && (visibleColumns || []).map((item, idx) => {
             return <TableColumn
                 key={item.id || idx}
                 item={item}
@@ -453,7 +453,7 @@ export default function TableWidget(props) {
                 key={key || id || idx}
                 index={idx}
                 rowHeight={rowHeight}
-                columns={columns}
+                columns={visibleColumns}
                 rowClick={rowClick}
                 item={item}
                 viewMode={viewMode}
@@ -509,7 +509,7 @@ export default function TableWidget(props) {
                 key={id || key || index}
                 style={{ ...style, ...itemStyles }}
                 {...props}
-                columns={columns}
+                columns={visibleColumns}
                 rowClick={rowClick}
                 item={item}
                 index={index}
