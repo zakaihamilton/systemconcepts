@@ -7,6 +7,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import styles from "./Menu.module.scss";
 import Link from "@mui/material/Link";
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 const PREFIX = 'Menu';
 
@@ -54,7 +56,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
 
     const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
-        const { divider, name, target, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
+        const { checked, divider, name, target, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
         const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
         const selectedArray = Array.isArray(selectedItem);
         const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
@@ -74,6 +76,11 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
             <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClick}>
                 <MenuItem color="initial" component={Link} underline="none" href={target} selected={isSelected} {...props}>
                     <div key={id + "_background"} className={styles.background} style={style} />
+                    {typeof checked !== "undefined" &&
+                        <ListItemIcon className={styles.itemIcon}>
+                            {checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+                        </ListItemIcon>
+                    }
                     <ListItemIcon className={styles.itemIcon}>
                         {icon}
                     </ListItemIcon>

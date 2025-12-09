@@ -28,7 +28,7 @@ export default function Groups() {
     const { counter } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
-    const [sessions, loadingSessions] = useSessions();
+    const [sessions, loadingSessions] = useSessions([], { filterSessions: false });
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 

@@ -21,6 +21,7 @@ import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
+import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -158,10 +159,7 @@ export default function SessionsPage() {
         const style = {
             background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
         };
-        let title = item.video ? translations.VIDEO : (item.audio ? translations.AUDIO : translations.IMAGE);
-        if (item.ai) {
-            title += " " + translations.AI;
-        }
+        let title = translations[item.type.toUpperCase()];
         const onClickIcon = () => {
             SessionsStore.update(s => {
                 if (s.typeFilter) {
@@ -175,12 +173,11 @@ export default function SessionsPage() {
         };
         const icon = <Tooltip arrow title={title}>
             <div style={style} className={styles.icon + " " + (typeFilter ? styles.active : "")} onClick={onClickIcon} id={item.type}>
-                {!!item.video && <MovieIcon />}
-                {!!item.audio && !item.video && <AudioIcon />}
-                {!!item.thumbnail && !item.video && !item.audio && <InsertPhotoOutlinedIcon />}
-                {!!item.ai && <div className={styles.ai + " " + (item.video ? styles.video : "")}>
-                    <AutoAwesomeIcon />
-                </div>}
+                {item.type === "video" && <MovieIcon />}
+                {item.type === "audio" && <AudioIcon />}
+                {item.type === "image" && <InsertPhotoOutlinedIcon />}
+                {item.type === "overview" && <MovieFilterIcon />}
+                {item.type === "ai" && <AutoAwesomeIcon />}
             </div>
         </Tooltip>;
         const altIcon = <>
@@ -215,8 +212,8 @@ export default function SessionsPage() {
     const filter = item => {
         let { group, type } = item;
         let show = (!groupFilter || groupFilter === (group[0].toUpperCase() + group.slice(1)));
-        if (typeFilter) {
-            show = show && type === typeFilter;
+        if (typeFilter?.length) {
+            show = show && typeFilter?.includes(type);
         }
         return show;
     };

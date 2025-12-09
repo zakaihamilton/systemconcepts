@@ -996,6 +996,14 @@ export default {
         {
             "id": "AI",
             "value": "AI"
+        },
+        {
+            "id": "OVERVIEW",
+            "value": "סקירה כללית"
+        },
+        {
+            "id": "FILTER",
+            "value": "סינון"
         }
     ]
 };

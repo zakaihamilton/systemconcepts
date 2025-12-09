@@ -4,10 +4,16 @@ import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
 import { useGroups } from "@util/groups";
 import { useSync } from "@util/sync";
+import MovieIcon from "@mui/icons-material/Movie";
+import AudioIcon from "@icons/Audio";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
+import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 
 registerToolbar("Sessions");
 
@@ -15,6 +21,7 @@ export const SessionsStore = new Store({
     sessions: null,
     groups: [],
     groupFilter: [],
+    typeFilter: [],
     busy: false,
     counter: 0,
     syncCounter: 0,
@@ -26,7 +33,7 @@ export function useSessions(depends = [], options = {}) {
     const [syncCounter, syncing] = useSync(options);
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
+    const { busy, sessions, groups, groupFilter, typeFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
@@ -203,7 +210,12 @@ export function useSessions(depends = [], options = {}) {
                     }
 
                     if (ai) {
-                        item.type = item.type + "-ai";
+                        if (name.endsWith(" - AI")) {
+                            item.type = "ai";
+                        }
+                        else if (name.startsWith("Overview - ")) {
+                            item.type = "overview";
+                        }
                         item.typeOrder -= 5;
                     }
 
@@ -266,6 +278,57 @@ export function useSessions(depends = [], options = {}) {
         });
     }, [groupMetadata, groups, groupFilter]);
 
+    const filterItems = useMemo(() => {
+        const filter = typeof typeFilter === "string" ? [typeFilter] : (typeFilter || []);
+        const onClick = (id) => {
+            SessionsStore.update(s => {
+                if (filter.includes(id)) {
+                    s.typeFilter = filter.filter(name => name !== id);
+                }
+                else {
+                    s.typeFilter = [...filter, id];
+                }
+            });
+        };
+        return [
+            {
+                id: "audio",
+                name: translations.AUDIO,
+                onClick: onClick.bind(this, "audio"),
+                selected: typeFilter,
+                icon: <AudioIcon />
+            },
+            {
+                id: "video",
+                name: translations.VIDEO,
+                onClick: onClick.bind(this, "video"),
+                selected: typeFilter,
+                icon: <MovieIcon />
+            },
+            {
+                id: "image",
+                name: translations.IMAGE,
+                onClick: onClick.bind(this, "image"),
+                selected: typeFilter,
+                icon: <InsertPhotoOutlinedIcon />
+            },
+            {
+                id: "overview",
+                name: translations.OVERVIEW,
+                onClick: onClick.bind(this, "overview"),
+                selected: typeFilter,
+                icon: <MovieFilterIcon />
+            },
+            {
+                id: "ai",
+                name: translations.AI,
+                onClick: onClick.bind(this, "ai"),
+                selected: typeFilter,
+                icon: <AutoAwesomeIcon />
+            }
+        ];
+    }, [typeFilter, translations]);
+
     const toolbarItems = [
         {
             id: "group",
@@ -273,19 +336,31 @@ export function useSessions(depends = [], options = {}) {
             icon: <GroupWorkIcon />,
             items: groupsItems,
             active: groupFilter.length,
-            divider: true,
             disabled: !groupsItems.length
+        },
+        {
+            id: "filter",
+            name: translations.FILTER,
+            icon: <FilterAltIcon />,
+            items: filterItems,
+            active: typeFilter?.length,
+            disabled: !filterItems.length,
+            divider: true,
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter] });
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, filterItems] });
 
     const filtered = useMemo(() => {
-        if (!groupFilter.length) {
-            return sessions;
+        let results = [...sessions || []];
+        if (groupFilter?.length) {
+            results = results.filter(session => groupFilter.includes(session.group));
         }
-        return (sessions || []).filter(session => groupFilter.includes(session.group));
-    }, [groupFilter, sessions]);
+        if (typeFilter?.length) {
+            results = results.filter(session => typeFilter.includes(session.type));
+        }
+        return results;
+    }, [groupFilter, typeFilter, sessions]);
 
     const items = filterSessions ? filtered : sessions;
 

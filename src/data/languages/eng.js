@@ -1000,6 +1000,14 @@ export default {
         {
             "id": "AI",
             "value": "AI"
+        },
+        {
+            "id": "OVERVIEW",
+            "value": "Overview"
+        },
+        {
+            "id": "FILTER",
+            "value": "Filter"
         }
     ]
 };
