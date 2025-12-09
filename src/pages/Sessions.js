@@ -203,7 +203,7 @@ export default function SessionsPage() {
             group: item.group,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
             thumbnailWidget: <Image href={href} onClick={gotoItem.bind(this, item)} clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
-            durationWidget: item.duration ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN
+            durationWidget: item.type === "image" ? "" : (item.duration ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN)
         };
     };
 
