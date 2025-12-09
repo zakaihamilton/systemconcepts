@@ -91,6 +91,12 @@ export default function SessionsPage() {
             }
         },
         {
+            id: "type",
+            title: translations.TYPE,
+            sortable: "typeOrder",
+            viewModes: {}
+        },
+        {
             id: "durationWidget",
             title: translations.DURATION,
             sortable: "duration",

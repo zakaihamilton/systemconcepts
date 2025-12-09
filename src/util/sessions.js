@@ -185,13 +185,17 @@ export function useSessions(depends = [], options = {}) {
 
                     if (videoFiles.length) {
                         item.type = "video";
+                        item.typeOrder = 1;
                     } else if (audioFile) {
                         item.type = "audio";
+                        item.typeOrder = 2;
                     } else if (imageFile) {
                         item.type = "image";
                         item.duration = 0.1;
+                        item.typeOrder = 3;
                     } else {
                         item.type = "unknown";
+                        item.typeOrder = 4;
                     }
 
                     if (!item.duration) {
