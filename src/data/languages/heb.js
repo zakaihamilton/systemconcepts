@@ -1008,6 +1008,10 @@ export default {
         {
             "id": "CLEAR_FILTERS",
             "value": "נקה סינונים"
+        },
+        {
+            "id": "CLEAR_GROUPS",
+            "value": "נקה קבוצות"
         }
     ]
 };

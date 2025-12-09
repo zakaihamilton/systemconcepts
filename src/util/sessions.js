@@ -3,7 +3,7 @@ import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile } from "@uti
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GroupWorkIcon from "@mui/icons-material/GroupWork";
+import GroupIcon from '@mui/icons-material/Group';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
@@ -15,6 +15,8 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
+import GroupOffIcon from '@mui/icons-material/GroupOff';
+import GroupWorkIcon from '@mui/icons-material/GroupWork';
 
 registerToolbar("Sessions");
 
@@ -358,7 +360,7 @@ export function useSessions(depends = [], options = {}) {
         {
             id: "group",
             name: translations.GROUPS,
-            icon: <GroupWorkIcon />,
+            icon: <GroupIcon />,
             items: groupsItems,
             active: groupFilter.length,
             disabled: !groupsItems.length
@@ -371,6 +373,17 @@ export function useSessions(depends = [], options = {}) {
             active: typeFilter?.length || yearFilter?.length,
             disabled: !filterItems.length && !yearFilter?.length,
             divider: true,
+        },
+        groupFilter.length && {
+            id: "clearGroups",
+            name: translations.CLEAR_GROUPS,
+            icon: <GroupOffIcon />,
+            onClick: () => {
+                SessionsStore.update(s => {
+                    s.groupFilter = [];
+                });
+            },
+            location: "header"
         },
         (typeFilter?.length || yearFilter?.length) && {
             id: "clearFilters",

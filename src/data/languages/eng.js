@@ -1012,6 +1012,10 @@ export default {
         {
             "id": "CLEAR_FILTERS",
             "value": "Clear Filters"
+        },
+        {
+            "id": "CLEAR_GROUPS",
+            "value": "Clear Groups"
         }
     ]
 };
