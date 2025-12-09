@@ -14,6 +14,7 @@ import AudioIcon from "@icons/Audio";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 
 registerToolbar("Sessions");
 
@@ -350,7 +351,7 @@ export function useSessions(depends = [], options = {}) {
         typeFilter?.length && {
             id: "clearFilters",
             name: translations.CLEAR_FILTERS,
-            icon: <FilterAltIcon />,
+            icon: <FilterAltOffIcon />,
             onClick: () => {
                 SessionsStore.update(s => {
                     s.typeFilter = [];
