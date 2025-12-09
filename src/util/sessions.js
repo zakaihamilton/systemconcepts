@@ -346,6 +346,17 @@ export function useSessions(depends = [], options = {}) {
             active: typeFilter?.length,
             disabled: !filterItems.length,
             divider: true,
+        },
+        typeFilter?.length && {
+            id: "clearFilters",
+            name: translations.CLEAR_FILTERS,
+            icon: <FilterAltIcon />,
+            onClick: () => {
+                SessionsStore.update(s => {
+                    s.typeFilter = [];
+                });
+            },
+            location: "header"
         }
     ].filter(Boolean);
 

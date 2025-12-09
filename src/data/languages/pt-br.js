@@ -1008,6 +1008,10 @@ export default {
         {
             "id": "FILTER",
             "value": "Filtro"
+        },
+        {
+            "id": "CLEAR_FILTERS",
+            "value": "Limpar Filtros"
         }
     ]
 };

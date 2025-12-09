@@ -1004,6 +1004,10 @@ export default {
         {
             "id": "FILTER",
             "value": "סינון"
+        },
+        {
+            "id": "CLEAR_FILTERS",
+            "value": "נקה סינונים"
         }
     ]
 };
