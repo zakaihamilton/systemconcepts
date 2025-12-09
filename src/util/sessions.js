@@ -185,17 +185,17 @@ export function useSessions(depends = [], options = {}) {
 
                     if (videoFiles.length) {
                         item.type = "video";
-                        item.typeOrder = 1;
+                        item.typeOrder = 10;
                     } else if (audioFile) {
                         item.type = "audio";
-                        item.typeOrder = 2;
+                        item.typeOrder = 20;
                     } else if (imageFile) {
                         item.type = "image";
                         item.duration = 0.1;
-                        item.typeOrder = 3;
+                        item.typeOrder = 30;
                     } else {
                         item.type = "unknown";
-                        item.typeOrder = 4;
+                        item.typeOrder = 40;
                     }
 
                     if (!item.duration) {
@@ -204,6 +204,7 @@ export function useSessions(depends = [], options = {}) {
 
                     if (ai) {
                         item.type = item.type + "-ai";
+                        item.typeOrder -= 5;
                     }
 
                     return item;
