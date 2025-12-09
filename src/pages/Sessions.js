@@ -20,7 +20,7 @@ import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import ImageIcon from '@mui/icons-material/Image';
+import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -171,7 +171,7 @@ export default function SessionsPage() {
             <div style={style} className={styles.icon + " " + (typeFilter ? styles.active : "")} onClick={onClickIcon} id={item.type}>
                 {!!item.video && <MovieIcon />}
                 {!!item.audio && !item.video && <AudioIcon />}
-                {!!item.thumbnail && !item.video && !item.audio && <ImageIcon />}
+                {!!item.thumbnail && !item.video && !item.audio && <InsertPhotoOutlinedIcon />}
                 {!!item.ai && <div className={styles.ai + " " + (item.video ? styles.video : "")}>
                     <AutoAwesomeIcon />
                 </div>}
