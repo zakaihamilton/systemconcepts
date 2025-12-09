@@ -63,8 +63,8 @@ export default function SessionPage({ group, year, date, name }) {
         },
         {
             name: translations.DURATION,
-            value: session && session.duration,
-            widget: session && session.duration ? formatDuration(session.duration * 1000, true) : translations.UNKNOWN
+            value: session && (session.type === "image" ? -1 : session.duration || 0),
+            widget: session && (session.duration ? formatDuration(session.duration * 1000, true) : session.type === "image" ? "" : translations.UNKNOWN)
         },
         {
             name: translations.FULL_NAME,

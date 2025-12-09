@@ -23,7 +23,7 @@ export default function ListColumns({ className = "", viewMode, columns, index, 
             {...viewModeProps}
         >
             <Tooltip arrow title={title}>
-                <div className={styles.ellipsisText}>{label}</div>
+                {label}
             </Tooltip>
         </div>);
     });

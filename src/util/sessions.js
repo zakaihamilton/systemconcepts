@@ -189,8 +189,13 @@ export function useSessions(depends = [], options = {}) {
                         item.type = "audio";
                     } else if (imageFile) {
                         item.type = "image";
+                        item.duration = 0.1;
                     } else {
                         item.type = "unknown";
+                    }
+
+                    if (!item.duration) {
+                        item.duration = 0.5;
                     }
 
                     if (ai) {

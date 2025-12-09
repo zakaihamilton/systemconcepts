@@ -36,7 +36,7 @@ export default function SessionsPage() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading, askForFullSync] = useSessions();
-    const { viewMode, groupFilter, typeFilter } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter, orderBy } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
@@ -84,8 +84,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                "list": null,
-                "table": null,
+                ...((!isPhone || orderBy !== "duration") && { "list": null, "table": null }),
                 "grid": {
                     className: styles.gridDate
                 }
@@ -104,7 +103,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                ...(!isPhone && { "list": null, "table": null }),
+                ...((!isPhone || orderBy === "duration") && { "list": null, "table": null }),
                 "grid": {
                     className: styles.gridDuration
                 }
@@ -203,7 +202,7 @@ export default function SessionsPage() {
             group: item.group,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
             thumbnailWidget: <Image href={href} onClick={gotoItem.bind(this, item)} clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
-            durationWidget: item.type === "image" ? "" : (item.duration ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN)
+            durationWidget: item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN)
         };
     };
 
