@@ -97,14 +97,24 @@
 .icon {
     position: relative;
     cursor: pointer;
+    height: 100%;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.icon.active {
+    background: var(--info-background) !important;
 }
 
 .ai {
     position: absolute;
     margin-left: 0.3em;
     vertical-align: middle;
-    bottom: 0px;
-    right: 0px;
+    bottom: 5px;
+    right: 5px;
     transform: scale(0.5);
 }
 
@@ -116,6 +126,10 @@
 
 .ai.video {
     filter: invert(1);
+}
+
+.ai.video:not(.altIcon) {
+    bottom: 10px;
 }
 
 .ai:not(.video):not(.altIcon) {
