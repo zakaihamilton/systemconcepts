@@ -930,6 +930,14 @@ export default {
             "value": "פרטים"
         },
         {
+            "id": "SUBTITLES",
+            "value": "כתוביות"
+        },
+        {
+            "id": "SUBTITLES_OFF",
+            "value": "הסר כתיביות"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "תמונה לא נטענת"
         },

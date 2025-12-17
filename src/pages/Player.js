@@ -16,9 +16,13 @@ import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import { useGroups } from "@util/groups";
+import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
+import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 
 export const PlayerStore = new Store({
     mediaPath: "",
+    subtitles: "",
+    showSubtitles: true,
     hash: "",
     player: null
 });
@@ -28,7 +32,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath } = PlayerStore.useState();
+    const { hash, mediaPath, subtitles, showSubtitles } = PlayerStore.useState();
     const size = useContext(ContentSize);
     const [groups] = useGroups([]);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
@@ -59,6 +63,7 @@ export default function PlayerPage({ show = false, suffix }) {
         if (data && data.path) {
             PlayerStore.update(s => {
                 s.mediaPath = data && data.path;
+                s.subtitles = data && data.subtitles;
             });
         }
     }, [data && data.path]);
@@ -66,17 +71,29 @@ export default function PlayerPage({ show = false, suffix }) {
     const color = groups.find(item => item.name === group)?.color;
 
     const toolbarItems = [
-        hash && {
+        hash && !show && {
             id: "player",
             name: translations.PLAYER,
             icon: <VideoLabelIcon />,
             menu: false,
             target: hash,
             onClick: gotoPlayer
+        },
+        subtitles && {
+            id: "subtitles",
+            location: "header",
+            menu: false,
+            name: showSubtitles ? translations.SUBTITLES : translations.SUBTITLES_OFF,
+            icon: showSubtitles ? <ClosedCaptionIcon /> : <ClosedCaptionOffIcon />,
+            onClick: () => {
+                PlayerStore.update(s => {
+                    s.showSubtitles = !s.showSubtitles;
+                });
+            }
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: toolbarItems, visible: !show, depends: [hash, translations] });
+    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
@@ -98,7 +115,8 @@ export default function PlayerPage({ show = false, suffix }) {
         group,
         color,
         name: date + " " + name,
-        preload: "metadata"
+        preload: "metadata",
+        crossOrigin: "anonymous"
     };
     if (isAudio) {
         MediaComponent = Audio;
@@ -135,8 +153,9 @@ export default function PlayerPage({ show = false, suffix }) {
     return <div className={styles.root} style={style}>
         {statusBar}
         <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
-        {MediaComponent && <MediaComponent style={mediaStyles} {...mediaProps}>
+        {MediaComponent && <MediaComponent key={subtitles + ":" + showSubtitles} style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
+            {subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
         </MediaComponent>}
         {!!loading && !mediaPath && <Progress />}
     </div>;

@@ -934,6 +934,14 @@ export default {
             "value": "Detalhes"
         },
         {
+            "id": "SUBTITLES",
+            "value": "Legendas"
+        },
+        {
+            "id": "SUBTITLES_OFF",
+            "value": "Legendas Desativadas"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Não pode carregar imagem"
         },

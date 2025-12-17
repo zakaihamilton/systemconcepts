@@ -934,6 +934,14 @@ export default {
             "value": "Details"
         },
         {
+            "id": "SUBTITLES",
+            "value": "Subtitles"
+        },
+        {
+            "id": "SUBTITLES_OFF",
+            "value": "Subtitles Off"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Cannot load image"
         },

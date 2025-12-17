@@ -17,9 +17,11 @@ import Button from "@mui/material/Button";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadataPath }) {
+export default function Controls({ show, path, playerRef, metadataPath, zIndex }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
+
+
     const translations = useTranslations();
     const dragging = useRef(false);
     const [, setCounter] = useState(0);
@@ -163,7 +165,7 @@ export default function Controls({ show, path, playerRef, metadataPath }) {
 
     return <>
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
-        <div className={styles.toolbar}>
+        <div className={styles.toolbar} style={{ zIndex }}>
             <div className={styles.progress}>
                 <div className={styles.progressLine}>
                     <div className={styles.progressBack} ref={progressRef} {...events} />

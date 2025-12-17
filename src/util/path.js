@@ -40,6 +40,13 @@ export function isImageFile(path) {
     return hasImageExt;
 }
 
+export function isSubtitleFile(path) {
+    path = makePath(path);
+    const subtitleExtensions = [".vtt"];
+    const hasSubtitleExt = !!subtitleExtensions.find(ext => path.endsWith(ext));
+    return hasSubtitleExt;
+}
+
 export function fileExtension(path) {
     path = makePath(path);
     const components = path.split(".");

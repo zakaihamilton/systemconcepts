@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, ListObjectsCommand } from "@aws-sdk/client-s3";
 import { lockMutex } from "./mutex";
 import fs from "fs";
 import { makePath } from "@util/path";
@@ -146,7 +146,7 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
             ...(path && { Prefix: path + "/" })
         };
         const listResponse = await s3.send(new ListObjectsCommand(listParams));
-        if (listResponse?.Contents.length > 0 || listResponse?.CommonPrefixes.length > 0) {
+        if (listResponse?.Contents?.length > 0 || listResponse?.CommonPrefixes?.length > 0) {
             const name = path.split("/").pop();
             return {
                 type: "application/x-directory",

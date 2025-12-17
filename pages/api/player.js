@@ -1,4 +1,4 @@
-import { cdnUrl } from "@util/aws";
+import { cdnUrl, metadataInfo } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
@@ -29,9 +29,20 @@ export default async function PLAYER_API(req, res) {
             error({ component, error: `User: ${id} does not match the student role. role is: ${user.role}` });
             throw "ACCESS_DENIED";
         }
-        const sessionUrl = cdnUrl(decodeURIComponent(path));
+        const decodedPath = decodeURIComponent(path);
+        const sessionUrl = cdnUrl(decodedPath);
+        let subtitles = null;
+        const dotIndex = decodedPath.lastIndexOf(".");
+        if (dotIndex !== -1) {
+            const vttPath = decodedPath.substring(0, dotIndex) + ".vtt";
+            const s3Key = vttPath.startsWith("/") ? vttPath.substring(1) : vttPath;
+            const exists = await metadataInfo({ path: s3Key });
+            if (exists) {
+                subtitles = "/api/subtitle?path=" + encodeURIComponent(s3Key);
+            }
+        }
         log({ component, message: `User ${id} is playing session: ${sessionUrl}` });
-        res.status(200).json({ path: sessionUrl });
+        res.status(200).json({ path: sessionUrl, subtitles });
     }
     catch (err) {
         error({ component, error: "login error", err });

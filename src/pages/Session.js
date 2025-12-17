@@ -70,8 +70,13 @@ export default function SessionPage({ group, year, date, name }) {
             name: translations.FULL_NAME,
             value: date + " " + name,
             widget: date + " " + name
+        },
+        session && session.subtitles && {
+            name: translations.SUBTITLES,
+            value: translations.ON,
+            widget: translations.ON
         }
-    ];
+    ].filter(Boolean);
 
     const mapper = (item, idx) => {
         return { ...item, idx };
