@@ -5,6 +5,7 @@ import MovieIcon from "@mui/icons-material/Movie";
 import AudioIcon from "@icons/Audio";
 import InfoIcon from "@mui/icons-material/Info";
 import ImageIcon from "@mui/icons-material/Image";
+import DescriptionIcon from "@mui/icons-material/Description";
 import Tab from "@components/Widgets/Tabs/Tab";
 
 export default function Tabs({ Container }) {
@@ -48,6 +49,11 @@ export default function Tabs({ Container }) {
             label: session.video ? translations.THUMBNAIL : translations.IMAGE,
             icon: <ImageIcon />,
             value: basePath + "/" + encodeURIComponent("image")
+        },
+        session.subtitles && {
+            label: translations.TRANSCRIPT,
+            icon: <DescriptionIcon />,
+            value: basePath + "/" + encodeURIComponent("transcript")
         }
     ].filter(Boolean).map(item => {
         return <Tab key={item.label} {...item} />;

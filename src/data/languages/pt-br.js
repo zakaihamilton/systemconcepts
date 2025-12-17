@@ -942,6 +942,10 @@ export default {
             "value": "Legendas Desativadas"
         },
         {
+            "id": "TRANSCRIPT",
+            "value": "Transcrição"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Não pode carregar imagem"
         },

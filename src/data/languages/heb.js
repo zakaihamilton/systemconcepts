@@ -938,6 +938,10 @@ export default {
             "value": "הסר כתיביות"
         },
         {
+            "id": "TRANSCRIPT",
+            "value": "תמליל"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "תמונה לא נטענת"
         },

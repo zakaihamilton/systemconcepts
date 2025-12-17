@@ -120,3 +120,45 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     }, [...depends]);
     return [result, setResult, inProgress, error];
 }
+
+export function useFetch(url, options, depends = [], cond = true, delay = 0) {
+    const isOnline = useOnline();
+    const [inProgress, setProgress] = useState(false);
+    const [result, setResult] = useState(null);
+    const [, setTimeoutHandle] = useState(null);
+    const [error, setError] = useState("");
+    useEffect(() => {
+        if (cond && isOnline && url) {
+            setResult(null);
+            setError("");
+            setProgress(true);
+            setTimeoutHandle(handle => {
+                if (handle) {
+                    clearTimeout(handle);
+                    handle = null;
+                }
+                handle = setTimeout(() => {
+                    setTimeoutHandle(null);
+                    fetchText(url, options).then(data => {
+                        setResult(data);
+                        setProgress(false);
+                    }).catch(err => {
+                        setProgress(false);
+                        setError(err);
+                    });
+                }, delay);
+                return handle;
+            });
+        }
+        else {
+            setTimeoutHandle(handle => {
+                if (handle) {
+                    clearTimeout(handle);
+                    handle = null;
+                }
+                return handle;
+            });
+        }
+    }, [url, ...depends]);
+    return [result, setResult, inProgress, error];
+}

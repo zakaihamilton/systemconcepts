@@ -32,6 +32,8 @@
     --icon-focus-color: black;
     --input-icon-color: darkgray;
     --overlay: rgb(240, 240, 240, 0.5);
+    --select-color: #8EC5FC;
+    --select-text-color: black;
 }
 
 [data-theme="dark"] {
@@ -68,4 +70,6 @@
     --icon-focus-color: rgb(166, 213, 250);
     --input-icon-color: lightgray;
     --overlay: rgb(12, 12, 27, 0.75);
+    --select-color: rgba(0, 168, 232, 1);
+    --select-text-color: black;
 }

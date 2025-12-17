@@ -158,7 +158,12 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         playerRef.currentTime = 0;
     };
 
+    const prevPath = useRef(path);
     useEffect(() => {
+        if (prevPath.current === path) {
+            return;
+        }
+        prevPath.current = path;
         stop();
         playerRef.load();
     }, [path]);

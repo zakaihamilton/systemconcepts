@@ -20,14 +20,20 @@ export default function Content() {
     const { Component } = activePage;
     const showPage = activePage.id !== "player" && Component;
     const showPlayer = activePage.id === "player";
+    const showTranscript = activePage.id === "transcript";
     if (showPlayer) {
-        playerPageRef.current = { ...activePage };
+        if (!showTranscript) {
+            playerPageRef.current = { ...activePage };
+        }
+    }
+    else if (showTranscript && !playerPageRef.current) {
+        playerPageRef.current = { ...activePage, suffix: ".m4a" };
     }
     const Player = pages.find(page => page.id === "player").Component;
     return <ContentSize.Provider value={size}>
         <div ref={ref} className={styles.pageContainer}>
             <main className={styles.page}>
-                {playerPageRef.current && <Player key={playerPageRef.current.url} show={showPlayer} {...playerPageRef.current} />}
+                {playerPageRef.current && <Player key="player" show={showPlayer} {...playerPageRef.current} />}
                 {showPage && <Component {...activePage} />}
             </main>
         </div>

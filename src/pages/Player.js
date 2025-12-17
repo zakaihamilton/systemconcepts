@@ -79,7 +79,7 @@ export default function PlayerPage({ show = false, suffix }) {
             target: hash,
             onClick: gotoPlayer
         },
-        subtitles && {
+        subtitles && show && {
             id: "subtitles",
             location: "header",
             menu: false,
@@ -93,7 +93,7 @@ export default function PlayerPage({ show = false, suffix }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations] });
+    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
@@ -153,7 +153,7 @@ export default function PlayerPage({ show = false, suffix }) {
     return <div className={styles.root} style={style}>
         {statusBar}
         <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
-        {MediaComponent && <MediaComponent key={subtitles + ":" + showSubtitles} style={mediaStyles} {...mediaProps}>
+        {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
             {subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
         </MediaComponent>}

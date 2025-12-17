@@ -942,6 +942,10 @@ export default {
             "value": "Subtitles Off"
         },
         {
+            "id": "TRANSCRIPT",
+            "value": "Transcript"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Cannot load image"
         },
