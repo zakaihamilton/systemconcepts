@@ -5,6 +5,7 @@ import Controls from "./Player/Controls";
 import { useFetch } from "@util/fetch";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import Progress from "@widgets/Progress";
 
 registerToolbar("Transcript");
 
@@ -12,7 +13,7 @@ export default function Transcript() {
     const { subtitles, player } = PlayerStore.useState();
     const [transcript, setTranscript] = useState([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(-1);
-    const [data] = useFetch(subtitles);
+    const [data, , loading, error] = useFetch(subtitles);
     const scrollRef = useRef();
     const lineRefs = useRef({});
 
@@ -98,6 +99,9 @@ export default function Transcript() {
     };
 
     return <div className={styles.root}>
+        {loading && <div className={styles.loadingContainer}>
+            <Progress fullscreen />
+        </div>}
         <div className={styles.transcript} ref={scrollRef}>
             {transcript.map((line, index) => {
                 const isCurrent = index === currentLineIndex;
