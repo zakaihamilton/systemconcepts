@@ -4,6 +4,7 @@ import { PlayerStore } from "./Player";
 import Controls from "./Player/Controls";
 import { useFetch } from "@util/fetch";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 registerToolbar("Transcript");
 
@@ -85,6 +86,17 @@ export default function Transcript() {
 
     useToolbar({ id: "Transcript", items: [], visible: true });
 
+    const formatTime = (seconds) => {
+        const date = new Date(seconds * 1000);
+        const hh = date.getUTCHours();
+        const mm = date.getUTCMinutes();
+        const ss = date.getUTCSeconds();
+        if (hh > 0) {
+            return `${hh}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
+        }
+        return `${mm}:${ss.toString().padStart(2, '0')}`;
+    };
+
     return <div className={styles.root}>
         <div className={styles.transcript} ref={scrollRef}>
             {transcript.map((line, index) => {
@@ -95,8 +107,13 @@ export default function Transcript() {
                     className={`${styles.line} ${isCurrent ? styles.current : ""}`}
                     onClick={() => jumpTo(line.start)}
                 >
-                    <div className={styles.time}>{new Date(line.start * 1000).toISOString().substr(11, 8)}</div>
+                    <div className={styles.time}>
+                        {formatTime(line.start)}
+                    </div>
                     <div className={styles.text}>{line.text}</div>
+                    <div className={styles.playIcon}>
+                        <PlayArrowIcon fontSize="small" />
+                    </div>
                 </div>;
             })}
         </div>
@@ -105,3 +122,4 @@ export default function Transcript() {
         </div>
     </div>;
 }
+
