@@ -1,10 +1,9 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
 import styles from "./Transcript.module.scss";
 import { PlayerStore } from "./Player";
 import Controls from "./Player/Controls";
 import { useFetch } from "@util/fetch";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Progress from "@widgets/Progress";
 
 registerToolbar("Transcript");
@@ -115,9 +114,6 @@ export default function Transcript() {
                         {formatTime(line.start)}
                     </div>
                     <div className={styles.text}>{line.text}</div>
-                    <div className={styles.playIcon}>
-                        <PlayArrowIcon fontSize="small" />
-                    </div>
                 </div>;
             })}
         </div>

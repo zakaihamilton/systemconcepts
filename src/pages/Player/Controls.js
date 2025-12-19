@@ -32,8 +32,10 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         return data ? JSON.parse(data) : {};
     });
 
+    const lastUpdateTimeRef = useRef(0);
+
     useEffect(() => {
-        if (!visible || !show) {
+        if (!show) {
             return;
         }
         const update = name => {
@@ -49,7 +51,18 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
             }
             if (name === "timeupdate" && !dragging.current) {
                 const currentTime = parseInt(playerRef.currentTime);
-                setCurrentTime(currentTime);
+
+                if (visible) {
+                    // When visible, update on every timeupdate
+                    setCurrentTime(currentTime);
+                    lastUpdateTimeRef.current = currentTime;
+                } else {
+                    // When not visible, only update every 10 seconds
+                    if (Math.abs(currentTime - lastUpdateTimeRef.current) >= 10) {
+                        setCurrentTime(currentTime);
+                        lastUpdateTimeRef.current = currentTime;
+                    }
+                }
             }
             else {
                 setCounter(counter => counter + 1);

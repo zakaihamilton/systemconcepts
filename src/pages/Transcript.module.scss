@@ -37,8 +37,8 @@
 
 .line {
     display: flex;
-    align-items: flex-start;
-    padding: 0.6rem 0.8rem;
+    align-items: center;
+    padding: 0.3rem 0.8rem;
     cursor: pointer;
     border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -75,7 +75,7 @@
     font-size: 0.8rem;
     opacity: 0.6;
     margin-right: 0.75rem;
-    padding: 0.2rem 0.5rem;
+    padding: 0.2rem 0.2rem;
     border-radius: 6px;
     background: var(--border-color);
     min-width: 5.5rem;
@@ -94,27 +94,6 @@
     line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-word;
-}
-
-.playIcon {
-    opacity: 0;
-    margin-left: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    color: var(--icon-color);
-    flex-shrink: 0;
-}
-
-.line:hover .playIcon,
-.line.current .playIcon {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-.line.current .playIcon {
-    color: var(--select-text-color);
 }
 
 .controls {
