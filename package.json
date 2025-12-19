@@ -35,6 +35,7 @@
     "react": "^19.2.1",
     "react-color": "^2.19.3",
     "react-dom": "^19.2.1",
+    "react-markdown": "^10.1.0",
     "react-vtree": "^2.0.4",
     "react-window": "^1.8.10",
     "sass": "^1.83.4",

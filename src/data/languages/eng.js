@@ -946,6 +946,10 @@ export default {
             "value": "Transcript"
         },
         {
+            "id": "SUMMARY",
+            "value": "Summary"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Cannot load image"
         },

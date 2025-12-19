@@ -4,6 +4,7 @@ import { useDateFormatter } from "@util/locale";
 import Group from "@widgets/Group";
 import { formatDuration } from "@util/string";
 import Table from "@widgets/Table";
+import Summary from "@widgets/Summary";
 import { Store } from "pullstate";
 
 export const SessionStore = new Store({
@@ -71,10 +72,9 @@ export default function SessionPage({ group, year, date, name }) {
             value: date + " " + name,
             widget: date + " " + name
         },
-        session && session.subtitles && {
-            name: translations.SUBTITLES,
-            value: translations.ON,
-            widget: translations.ON
+        session && session.summary && {
+            name: translations.SUMMARY,
+            widget: <Summary path={session.summary.path.replace(/^\/aws/, "").replace(/^\//, "")} />
         }
     ].filter(Boolean);
 
@@ -92,6 +92,7 @@ export default function SessionPage({ group, year, date, name }) {
         loading={loading}
         columns={columns}
         mapper={mapper}
+        hideColumns={true}
         showSort={false}
         onExport={onExport}
         viewModes={{

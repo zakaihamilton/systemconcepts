@@ -1,0 +1,42 @@
+.root {
+    padding: 1rem;
+    overflow: auto;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.root :global(h1),
+.root :global(h2),
+.root :global(h3),
+.root :global(h4),
+.root :global(h5),
+.root :global(h6) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.root :global(p) {
+    margin-bottom: 1rem;
+}
+
+.root :global(ul),
+.root :global(ol) {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.root :global(li) {
+    margin-bottom: 0.5rem;
+}
+
+.root :global(pre) {
+    background: #222;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.root :global(code) {
+    font-family: monospace;
+}

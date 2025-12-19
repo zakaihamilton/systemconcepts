@@ -946,6 +946,10 @@ export default {
             "value": "Transcrição"
         },
         {
+            "id": "SUMMARY",
+            "value": "Resumo"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "Não pode carregar imagem"
         },

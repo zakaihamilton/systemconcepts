@@ -1,5 +1,5 @@
 import storage from "@util/storage";
-import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleFile } from "@util/path";
+import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleFile, isSummaryFile } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -142,6 +142,9 @@ export function useSessions(depends = [], options = {}) {
                     const subtitleFiles = fileList.filter(f => isSubtitleFile(f.name));
                     const subtitleFile = subtitleFiles.length ? subtitleFiles[subtitleFiles.length - 1] : null;
 
+                    const summaryFiles = fileList.filter(f => isSummaryFile(f.name));
+                    const summaryFile = summaryFiles.length ? summaryFiles[summaryFiles.length - 1] : null;
+
                     if (!audioFile && !videoFiles.length && !imageFile) {
                         return null;
                     }
@@ -199,6 +202,10 @@ export function useSessions(depends = [], options = {}) {
 
                     if (subtitleFile) {
                         item.subtitles = subtitleFile;
+                    }
+
+                    if (summaryFile) {
+                        item.summary = summaryFile;
                     }
 
                     if (videoFiles.length) {

@@ -47,6 +47,13 @@ export function isSubtitleFile(path) {
     return hasSubtitleExt;
 }
 
+export function isSummaryFile(path) {
+    path = makePath(path);
+    const summaryExtensions = [".md"];
+    const hasSummaryExt = !!summaryExtensions.find(ext => path.endsWith(ext));
+    return hasSummaryExt;
+}
+
 export function fileExtension(path) {
     path = makePath(path);
     const components = path.split(".");

@@ -942,6 +942,10 @@ export default {
             "value": "תמליל"
         },
         {
+            "id": "SUMMARY",
+            "value": "סיכום"
+        },
+        {
             "id": "CANNOT_LOAD_IMAGE",
             "value": "תמונה לא נטענת"
         },
