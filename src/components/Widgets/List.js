@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
@@ -69,23 +70,24 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
         target = undefined;
     }
     return <>
-        {!!reverse && !!divider && <Divider />}
-        <ListItem style={style} component={target ? Link : undefined} underline="none" href={target} className={itemClassName} button selected={isSelected} onClick={rootItemClick}>
-            {!!avatar && icon && <ListItemAvatar>
-                <Avatar className={iconContainerClassName}>
-                    {actionIcon}
-                </Avatar>
-            </ListItemAvatar>}
-            {!avatar && icon && <ListItemIcon className={iconContainerClassName}>
-                {icon}
-            </ListItemIcon>}
-            <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
+        <ListItem disablePadding className={itemClassName} divider={!!reverse && !!divider}>
+            <ListItemButton style={style} component={target ? Link : undefined} underline="none" href={target} selected={isSelected} onClick={rootItemClick}>
+                {!!avatar && icon && <ListItemAvatar>
+                    <Avatar className={iconContainerClassName}>
+                        {actionIcon}
+                    </Avatar>
+                </ListItemAvatar>}
+                {!avatar && icon && <ListItemIcon className={iconContainerClassName}>
+                    {icon}
+                </ListItemIcon>}
+                <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
+                {expandIcon}
+            </ListItemButton>
             {!!actionIcon && <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback} size="large">
                     {actionIcon}
                 </IconButton>
             </ListItemSecondaryAction>}
-            {expandIcon}
         </ListItem>
         {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>

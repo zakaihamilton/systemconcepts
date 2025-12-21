@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import pageList from "@data/pages";
 import { useTranslations } from "@util/translations";
 import { isRegEx } from "@util/string";
@@ -172,46 +173,51 @@ export function useActivePages() {
     let { hash = "" } = MainStore.useState();
     const translations = useTranslations();
     const pages = usePages();
-    return getPagesFromHash({ hash, translations, pages });
+    const activePages = useMemo(() => {
+        return getPagesFromHash({ hash, translations, pages });
+    }, [hash, translations, pages]);
+    return activePages;
 }
 
 export function usePages(modeId) {
     const translations = useTranslations();
     const language = useLanguage();
-    const mapText = text => {
-        if (typeof text === "object") {
-            text = text[language];
-        }
-        else if (typeof text === "string") {
-            text = translations[text] || text;
-        }
-        return text;
-    };
-    const pages = pageList.filter(page => {
-        let visible = page.visible;
-        if (typeof visible === "function") {
-            visible = visible(page);
-        }
-        if (typeof visible === "undefined") {
-            visible = true;
-        }
-        return visible;
-    }).map(page => {
-        let { name, label, tooltip, ...props } = page;
-        let { Icon } = page;
-        if (modeId) {
-            Icon = page[modeId] && page[modeId].Icon || Icon;
-            name = page[modeId] && page[modeId].name || name;
-            label = page[modeId] && page[modeId].name || label;
-        }
-        return {
-            ...props,
-            icon: !!Icon && <Icon />,
-            name: mapText(name),
-            label: mapText(label),
-            tooltip: mapText(tooltip)
+    const pages = useMemo(() => {
+        const mapText = text => {
+            if (typeof text === "object") {
+                text = text[language];
+            }
+            else if (typeof text === "string") {
+                text = translations[text] || text;
+            }
+            return text;
         };
-    });
+        return pageList.filter(page => {
+            let visible = page.visible;
+            if (typeof visible === "function") {
+                visible = visible(page);
+            }
+            if (typeof visible === "undefined") {
+                visible = true;
+            }
+            return visible;
+        }).map(page => {
+            let { name, label, tooltip, ...props } = page;
+            let { Icon } = page;
+            if (modeId) {
+                Icon = page[modeId] && page[modeId].Icon || Icon;
+                name = page[modeId] && page[modeId].name || name;
+                label = page[modeId] && page[modeId].name || label;
+            }
+            return {
+                ...props,
+                icon: !!Icon && <Icon />,
+                name: mapText(name),
+                label: mapText(label),
+                tooltip: mapText(tooltip)
+            };
+        });
+    }, [translations, language, modeId]);
     return pages;
 }
 

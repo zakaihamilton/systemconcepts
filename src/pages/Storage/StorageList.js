@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import { useTranslations } from "@util/translations";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Collapse from "@mui/material/Collapse";
@@ -72,14 +73,16 @@ export default function StorageList({ path = "", state }) {
 
         return (
             <Fragment key={id}>
-                <ListItem button selected={selected} style={{ paddingLeft }} onClick={onClick}>
-                    <ListItemIcon>
-                        <Tooltip title={tooltip} arrow>
-                            {icon}
-                        </Tooltip>
-                    </ListItemIcon>
-                    <ListItemText primary={name} />
-                    {expandIcon}
+                <ListItem disablePadding>
+                    <ListItemButton selected={selected} style={{ paddingLeft }} onClick={onClick}>
+                        <ListItemIcon>
+                            <Tooltip title={tooltip} arrow>
+                                {icon}
+                            </Tooltip>
+                        </ListItemIcon>
+                        <ListItemText primary={name} />
+                        {expandIcon}
+                    </ListItemButton>
                 </ListItem>
                 {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
                     <StyledList component="div" disablePadding>

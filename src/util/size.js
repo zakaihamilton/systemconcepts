@@ -21,6 +21,7 @@ export function useResize(depends = []) {
         setCounter(counter => counter + 1);
     };
 
+    const dependsString = JSON.stringify(depends);
     useEffect(() => {
         const handler = () => handleResize();
         window.addEventListener("resize", handler);
@@ -29,7 +30,7 @@ export function useResize(depends = []) {
             window.removeEventListener("resize", handler);
             clearTimeout(timerHandle);
         };
-    }, depends);
+    }, [dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return counter;
 }

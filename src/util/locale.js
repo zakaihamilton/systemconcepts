@@ -10,6 +10,7 @@ export function useLocale() {
 
 export function useDateFormatter(options, depends = []) {
     const locale = useLocale();
-    const dateObj = useMemo(() => new Intl.DateTimeFormat(locale, options), [locale, options, ...depends]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/use-memo
+    const optionsString = JSON.stringify(options);
+    const dateObj = useMemo(() => new Intl.DateTimeFormat(locale, options), [locale, optionsString, ...depends]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/use-memo
     return dateObj;
 }

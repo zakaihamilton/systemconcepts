@@ -119,24 +119,45 @@ export function useListing(url, depends = [], options) {
     const [loading, setLoading] = useState(null);
     const [error, setError] = useState(null);
     const active = useRef(url);
+    const dependsString = JSON.stringify(depends);
+    const optionsString = JSON.stringify(options);
     useEffect(() => {
         const timerHandle = setTimeout(() => {
-            setError(null);
-            setLoading(true);
+            setError(listing => {
+                if (listing === null) return listing;
+                return null;
+            });
+            setLoading(loading => {
+                if (loading === true) return loading;
+                return true;
+            });
         }, 0);
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
             if (active.current === url) {
-                setListing(listing);
-                setLoading(false);
+                setListing(prev => {
+                    if (prev === listing) return prev;
+                    return listing;
+                });
+                setLoading(loading => {
+                    if (loading === false) return loading;
+                    return false;
+                });
             }
         }).catch(err => {
             if (active.current === url) {
-                setError(err);
-                setLoading(false);
+                setError(prev => {
+                    if (prev === err) return prev;
+                    return err;
+                });
+                setLoading(loading => {
+                    if (loading === false) return loading;
+                    return false;
+                });
             }
         });
-    }, [url, options, ...depends]);
+        return () => clearTimeout(timerHandle);
+    }, [url, optionsString, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     useEffect(() => {
         return () => {
             active.current = null;
@@ -179,12 +200,16 @@ export function useFile(urlArgument, depends = [], mapping) {
             });
         }
     }, [url, setState]);
+    const dependsString = JSON.stringify(depends);
+    const mappingString = mapping?.toString();
     useEffect(() => {
         const timerHandle = setTimeout(() => {
             setState(state => {
                 state = state || {};
-                state.error = null;
-                return { ...state };
+                if (state.error === null) {
+                    return state;
+                }
+                return { ...state, error: null };
             });
         }, 0);
         if (!url) {
@@ -192,8 +217,10 @@ export function useFile(urlArgument, depends = [], mapping) {
         }
         setState(state => {
             state = state || {};
-            state.loading = true;
-            return { ...state };
+            if (state.loading === true) {
+                return state;
+            }
+            return { ...state, loading: true };
         });
         storageMethods.exists(url).then(exists => {
             if (!exists) {
@@ -202,9 +229,10 @@ export function useFile(urlArgument, depends = [], mapping) {
                     data = mapping(data, url);
                 }
                 setState(state => {
-                    state.loading = false;
-                    state.data = data;
-                    return { ...state };
+                    if (state.data === data && state.loading === false) {
+                        return state;
+                    }
+                    return { ...state, loading: false, data };
                 });
                 return;
             }
@@ -213,26 +241,29 @@ export function useFile(urlArgument, depends = [], mapping) {
                     data = mapping(data, url);
                 }
                 setState(state => {
-                    state.data = data;
-                    state.loading = false;
-                    return { ...state };
+                    if (state.data === data && state.loading === false) {
+                        return state;
+                    }
+                    return { ...state, data, loading: false };
                 });
             }).catch(err => {
                 setState(state => {
-                    state.error = err;
-                    state.loading = false;
-                    return { ...state };
+                    if (state.error === err && state.loading === false) {
+                        return state;
+                    }
+                    return { ...state, error: err, loading: false };
                 });
             });
         }).catch(err => {
             setState(state => {
-                state.error = err;
-                state.loading = false;
-                return { ...state };
+                if (state.error === err && state.loading === false) {
+                    return state;
+                }
+                return { ...state, error: err, loading: false };
             });
         });
         return () => clearTimeout(timerHandle);
-    }, [url, mapping, setState, ...depends]);
+    }, [url, mappingString, setState, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [data, loading, error, write];
 }
 

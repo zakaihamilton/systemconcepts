@@ -85,12 +85,23 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const [result, setResult] = useState(null);
     const [, setTimeoutHandle] = useState(null);
     const [error, setError] = useState("");
+    const dependsString = JSON.stringify(depends);
+    const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline) {
             const timerHandle = setTimeout(() => {
-                setResult(null);
-                setError("");
-                setProgress(true);
+                setResult(prev => {
+                    if (prev === null) return prev;
+                    return null;
+                });
+                setError(prev => {
+                    if (prev === "") return prev;
+                    return "";
+                });
+                setProgress(prev => {
+                    if (prev === true) return prev;
+                    return true;
+                });
                 setTimeoutHandle(handle => {
                     if (handle) {
                         clearTimeout(handle);
@@ -125,7 +136,7 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
             }, 0);
             return () => clearTimeout(timerHandle);
         }
-    }, [url, cond, options, isOnline, delay, ...depends]);
+    }, [url, cond, optionsString, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [result, setResult, inProgress, error];
 }
 
@@ -135,12 +146,23 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const [result, setResult] = useState(null);
     const [, setTimeoutHandle] = useState(null);
     const [error, setError] = useState("");
+    const dependsString = JSON.stringify(depends);
+    const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline && url) {
             const timerHandle = setTimeout(() => {
-                setResult(null);
-                setError("");
-                setProgress(true);
+                setResult(prev => {
+                    if (prev === null) return prev;
+                    return null;
+                });
+                setError(prev => {
+                    if (prev === "") return prev;
+                    return "";
+                });
+                setProgress(prev => {
+                    if (prev === true) return prev;
+                    return true;
+                });
                 setTimeoutHandle(handle => {
                     if (handle) {
                         clearTimeout(handle);
@@ -175,6 +197,6 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
             }, 0);
             return () => clearTimeout(timerHandle);
         }
-    }, [url, options, cond, isOnline, delay, ...depends]);
+    }, [url, optionsString, cond, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [result, setResult, inProgress, error];
 }
