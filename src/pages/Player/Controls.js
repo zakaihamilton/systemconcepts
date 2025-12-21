@@ -4,6 +4,7 @@ import { useTranslations } from "@util/translations";
 import PlayerButton from "./Button";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
+import StopIcon from "@mui/icons-material/Stop";
 import PauseIcon from "@mui/icons-material/Pause";
 import { formatDuration } from "@util/string";
 import { MainStore } from "@components/Main";
@@ -171,13 +172,11 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
     };
 
     const longPressTimerRef = useRef(null);
-    const longPressTriggeredRef = useRef(false);
+    const [isStop, setIsStop] = useState(false);
 
     const handlePauseStart = () => {
-        longPressTriggeredRef.current = false;
         longPressTimerRef.current = setTimeout(() => {
-            stop();
-            longPressTriggeredRef.current = true;
+            setIsStop(true);
         }, 1000);
     };
 
@@ -188,13 +187,20 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         }
     };
 
+    const handlePauseCancel = () => {
+        handlePauseEnd();
+        setIsStop(false);
+    };
+
     const handlePauseClick = (e) => {
-        if (longPressTriggeredRef.current) {
-            e.preventDefault();
-            e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
+        if (isStop) {
+            stop();
         } else {
             playerRef.pause();
         }
+        setIsStop(false);
     };
 
     const prevPath = useRef(path);
@@ -224,14 +230,15 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 {!!error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
                 {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
                 {!playerRef.paused && !error && <PlayerButton
-                    icon={<PauseIcon />}
-                    name={translations.PAUSE}
+                    icon={isStop ? <StopIcon /> : <PauseIcon />}
+                    name={isStop ? translations.STOP : translations.PAUSE}
                     onMouseDown={handlePauseStart}
                     onTouchStart={handlePauseStart}
                     onMouseUp={handlePauseEnd}
                     onTouchEnd={handlePauseEnd}
-                    onMouseLeave={handlePauseEnd}
+                    onMouseLeave={handlePauseCancel}
                     onClick={handlePauseClick}
+                    onContextMenu={e => e.preventDefault()}
                 />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
