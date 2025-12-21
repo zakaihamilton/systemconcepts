@@ -68,6 +68,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, isMobile, translations] });
+    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, isMobile, isVideo, translations] });
     return null;
 }

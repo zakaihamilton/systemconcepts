@@ -43,6 +43,6 @@ export default function Audio({ show, metadataPath, name, path, group, color, ch
             show={show}
             zIndex={1}
         />}
-        {playerRef && <Toolbar show={show} name={name} playerRef={playerRef} isVideo={true} />}
+        {playerRef && <Toolbar show={show} name={name} playerRef={playerRef} isVideo={false} />}
     </div>;
 }
