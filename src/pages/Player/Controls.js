@@ -192,24 +192,15 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         setIsStop(false);
     };
 
-    const handlePauseClick = (e) => {
+    const handleMainClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (isStop) {
             stop();
+        } else if (playerRef.paused) {
+            play();
         } else {
             playerRef.pause();
-        }
-        setIsStop(false);
-    };
-
-    const handlePlayClick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isStop) {
-            stop();
-        } else {
-            play();
         }
         setIsStop(false);
     };
@@ -239,26 +230,15 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 {direction === "ltr" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
                 {direction === "rtl" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {!!error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
-                {playerRef.paused && !error && <PlayerButton
-                    icon={isStop ? <StopIcon /> : <PlayArrowIcon />}
-                    name={isStop ? translations.STOP : translations.PLAY}
+                {!error && <PlayerButton
+                    icon={isStop ? <StopIcon /> : (playerRef.paused ? <PlayArrowIcon /> : <PauseIcon />)}
+                    name={isStop ? translations.STOP : (playerRef.paused ? translations.PLAY : translations.PAUSE)}
                     onMouseDown={handleLongPressStart}
                     onTouchStart={handleLongPressStart}
                     onMouseUp={handleLongPressEnd}
                     onTouchEnd={handleLongPressEnd}
                     onMouseLeave={handleLongPressCancel}
-                    onClick={handlePlayClick}
-                    onContextMenu={e => e.preventDefault()}
-                />}
-                {!playerRef.paused && !error && <PlayerButton
-                    icon={isStop ? <StopIcon /> : <PauseIcon />}
-                    name={isStop ? translations.STOP : translations.PAUSE}
-                    onMouseDown={handleLongPressStart}
-                    onTouchStart={handleLongPressStart}
-                    onMouseUp={handleLongPressEnd}
-                    onTouchEnd={handleLongPressEnd}
-                    onMouseLeave={handleLongPressCancel}
-                    onClick={handlePauseClick}
+                    onClick={handleMainClick}
                     onContextMenu={e => e.preventDefault()}
                 />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
