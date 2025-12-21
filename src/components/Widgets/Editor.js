@@ -6,12 +6,12 @@ export default function EditorWidget({ state }) {
     const ref = useRef();
     useEffect(() => {
         ref.current.focus();
-    }, [ref.current]);
+    }, []);
 
     const onChange = useCallback(event => {
         const { value } = event.target;
         setValue(value);
-    }, []);
+    }, [setValue]);
 
     return <textarea ref={ref} className={styles.root} value={value} onChange={onChange} />;
 }

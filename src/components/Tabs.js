@@ -12,17 +12,17 @@ export default function Tabs() {
         window.location.hash = hash;
     }, []);
     const { hash } = MainStore.useState();
-    const pageState = [hash, setHash];
     const activePages = useActivePages();
     const page = activePages.reverse().find(page => page.tabs);
 
     const Container = useCallback(function Container({ children }) {
+        const pageState = [hash, setHash];
         return <div className={styles.root}>
             <TabsWidget state={pageState}>
                 {children}
             </TabsWidget>
         </div>;
-    });
+    }, [hash, setHash]);
 
     if (!page) {
         return null;

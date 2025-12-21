@@ -34,6 +34,7 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
         else {
             setError("");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [validate]);
     if (select && multiple && !Array.isArray(value)) {
         value = [value];

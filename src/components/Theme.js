@@ -27,30 +27,27 @@ export default function Theme({ children }) {
         fontSize: s.fontSize,
     }));
 
-    const theme = useMemo(
-        () =>
-            createTheme({
-                typography: {
-                    fontSize: parseInt(fontSize, 10), // Important: Parse with radix
+    const theme = useMemo(() =>
+        createTheme({
+            typography: {
+                fontSize: parseInt(fontSize, 10), // Important: Parse with radix
+            },
+            palette: {
+                mode: darkMode.value ? 'dark' : 'light',
+                primary: {
+                    main: '#1e88e5',
+                    light: '#4b9fea',
+                    dark: '#155fa0',
                 },
-                palette: {
-                    mode: darkMode.value ? 'dark' : 'light',
-                    primary: {
-                        main: '#1e88e5',
-                        light: '#4b9fea',
-                        dark: '#155fa0',
-                    },
-                    secondary: {
-                        main: '#0044ff',
-                        contrastText: '#ffcc00',
-                    },
-                    // tonalOffset is deprecated in MUI v5, use contrastThreshold instead or remove it if not needed
-                    // contrastThreshold: 3,
+                secondary: {
+                    main: '#0044ff',
+                    contrastText: '#ffcc00',
                 },
-                direction: direction
-            }),
-        [darkMode.value, fontSize]
-    );
+                // tonalOffset is deprecated in MUI v5, use contrastThreshold instead or remove it if not needed
+                // contrastThreshold: 3,
+            },
+            direction: direction
+        }), [darkMode.value, fontSize, direction]);
 
     useEffect(() => {
         document.body.style.fontSize = `${fontSize}px`; // More concise

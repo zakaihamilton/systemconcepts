@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 module.exports = [
     // if you are customizing your runtime cache rules, please note that the

@@ -29,7 +29,7 @@ export default function HoverButton({ className, onClick, onHoverComplete, hover
             clearTimeout(delayTimer.current);
             delayTimer.current = null;
         }
-    }, []);
+    }, [onClick]);
 
     const handleButtonOver = useCallback(event => {
         setLoading(false);
@@ -51,7 +51,7 @@ export default function HoverButton({ className, onClick, onHoverComplete, hover
                 }
             }, hoverDuration);
         }, hoverDelay);
-    }, []);
+    }, [onHoverComplete, hoverDelay, hoverDuration]);
 
     const handleButtonLeave = useCallback(event => {
         setLoading(false);

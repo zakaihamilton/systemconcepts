@@ -31,7 +31,7 @@ export default function SideBar() {
             });
             window.location.hash = id;
         }
-    }, []);
+    }, [pages]);
     const state = [selected, setSelected];
 
     const closeDrawer = () => {

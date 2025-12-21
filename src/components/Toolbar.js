@@ -39,6 +39,7 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
                 }
             });
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     useEffect(() => {
         ToolbarStore.update(s => {
@@ -48,6 +49,7 @@ export function useToolbar({ id, items, visible = true, depends = [] }) {
                 section.items = items;
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [...depends, visible]);
 }
 

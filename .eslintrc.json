@@ -17,9 +17,7 @@
         },
         "allowImportExportEverywhere": true
     },
-    "plugins": [
-        "react"
-    ],
+    "plugins": [],
     "rules": {
         "import/no-anonymous-default-export": [
             "error",

@@ -38,7 +38,8 @@ export default function ImageWidget({ clickForImage = true, onClick, href, loadi
 
     return <Link underline="none" href={href} color="initial" style={buttonStyle} className={clsx(styles.root, clickable && styles.clickable)} disabled={clickForImage && (!hasPath || !!error)} onClick={clickable ? onClick : undefined}>
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
-        {hasPath && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} />}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {hasPath && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} alt={alt} />}
         {showAlt && <div className={styles.alt}>{alt}</div>}
     </Link>;
 }

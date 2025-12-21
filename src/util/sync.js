@@ -262,15 +262,15 @@ export function useSyncFeature() {
             s.lastSynced = 0;
         });
         updateSync(false, 0);
-    }, []);
+    }, [updateSync]);
     const syncNow = useCallback(pollSync => {
         updateSync(pollSync, lastUpdated);
-    }, [lastUpdated]);
+    }, [lastUpdated, updateSync]);
     useEffect(() => {
         if (online && _loaded && isSignedIn) {
             syncNow(true);
         }
-    }, [online, _loaded, isSignedIn, visible]);
+    }, [online, _loaded, isSignedIn, visible, syncNow]);
 
     return {
         sync: online && _loaded && syncNow,

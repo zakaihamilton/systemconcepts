@@ -79,23 +79,6 @@ const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
-
-const Tag = dynamic(() => import("@pages/Tag"), { loading: () => <PageLoad /> });
-import { getTagSection } from "@pages/Tag/Section";
-
-import StyleIcon from "@mui/icons-material/Style";
-const Types = dynamic(() => import("@pages/Types"), { loading: () => <PageLoad /> });
-
-const Type = dynamic(() => import("@pages/Type"), { loading: () => <PageLoad /> });
-import { getTypeSection } from "@pages/Type/Section";
-
-const Articles = dynamic(() => import("@pages/Articles"), { loading: () => <PageLoad /> });
-
-const Article = dynamic(() => import("@pages/Article"), { loading: () => <PageLoad /> });
-import { getArticleSection } from "@pages/Article/Section";
-
 import diagrams from "@data/diagrams";
 
 export default [
@@ -278,45 +261,6 @@ export default [
         Component: Bookmarks,
         category: "bookmarks",
         divider: true
-    },
-    {
-        id: "tags",
-        name: "TAGS",
-        Icon: LocalOfferIcon,
-        Component: Tags
-    },
-    {
-        id: "tag",
-        name: "TAG",
-        section: getTagSection,
-        Icon: LocalOfferIcon,
-        Component: Tag
-    },
-    {
-        id: "type",
-        name: "TYPE",
-        section: getTypeSection,
-        Icon: StyleIcon,
-        Component: Type
-    },
-    {
-        id: "types",
-        name: "TYPES",
-        Icon: StyleIcon,
-        Component: Types
-    },
-    {
-        id: "article",
-        name: "ARTICLE",
-        section: getArticleSection,
-        Icon: StyleIcon,
-        Component: Article
-    },
-    {
-        id: "articles",
-        name: "ARTICLES",
-        Icon: StyleIcon,
-        Component: Articles
     },
     ...diagrams.map(diagram => {
         let { Icon } = diagram;

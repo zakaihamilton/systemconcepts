@@ -14,7 +14,7 @@ function FormItem({ child, record, setRecord, validate }) {
                 ...(field && { [id]: { ...record[id], [field]: value } })
             };
         });
-    }, [id, field]);
+    }, [id, field, setRecord]);
 
     const value = !!field ? record && record[id] && record[id][field] : record && record[id];
     const state = [value, setValue];

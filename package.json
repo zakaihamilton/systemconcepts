@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.734.0",
@@ -46,9 +46,11 @@
     "webpack": "^5.97.1"
   },
   "devDependencies": {
-    "eslint": "^9.18.0",
-    "eslint-config-next": "^16.0.7",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.15",
     "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-react": "^7.34.3",
+    "typescript": "^5.9.3",
     "yarn-upgrade-all": "^0.7.4"
   }
 }

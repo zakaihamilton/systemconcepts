@@ -33,7 +33,7 @@ export function useUpdateSessions(groups) {
         }
         await storage.writeFile(sharedPath, listingBody);
         return listing;
-    }, []);
+    }, [prefix]);
     const copyFile = useCallback(async (path, name) => {
         const sourcePath = path + name;
         const targetPath = "shared/sessions/" + path.substring(prefix.length) + name;
@@ -60,7 +60,7 @@ export function useUpdateSessions(groups) {
             await storage.createFolderPath(targetPath);
         }
         await storage.writeFile(targetPath, sourceBody);
-    }, []);
+    }, [prefix]);
     const updateGroup = useCallback(async (name, updateAll) => {
         const path = prefix + name;
         let itemIndex = 0;
@@ -126,7 +126,7 @@ export function useUpdateSessions(groups) {
             s.status[itemIndex].progress = 100;
             s.status = [...s.status];
         });
-    }, []);
+    }, [prefix, copyFile, getListing]);
     const updateSessions = useCallback(async () => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
@@ -148,7 +148,7 @@ export function useUpdateSessions(groups) {
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
-    }, [groups]);
+    }, [groups, prefix, getListing, updateGroup]);
     const updateAllSessions = useCallback(async () => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
@@ -170,7 +170,7 @@ export function useUpdateSessions(groups) {
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
-    }, [groups]);
+    }, [groups, prefix, getListing, updateGroup]);
     const updateSpecificGroup = useCallback(async (name, updateAll) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
@@ -180,7 +180,7 @@ export function useUpdateSessions(groups) {
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
-    }, []);
+    }, [updateGroup]);
     return useMemo(() => ({
         status,
         busy,

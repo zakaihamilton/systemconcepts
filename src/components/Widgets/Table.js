@@ -117,7 +117,8 @@ export default function TableWidget(props) {
             gridRef.current.scrollTo({ scrollTop: 0 });
             scrollOffsetRef.current = 0;
         }
-    }, resetScrollDeps);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [...resetScrollDeps]);
 
     const updateScrollOffset = useCallback(() => {
         const { current: offset } = scrollOffsetRef;
@@ -188,7 +189,7 @@ export default function TableWidget(props) {
                 onClick: createSortHandler(sortId)
             };
         });
-    }, [visibleColumns, orderBy, order, createSortHandler]);
+    }, [columns, orderBy, order, createSortHandler]);
 
     const itemsPerPageItems = useMemo(() => {
         return [10, 25, 50, 75, 100].map(num => {
