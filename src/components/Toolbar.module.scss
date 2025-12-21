@@ -18,3 +18,15 @@
     margin-left: 0.1em !important;
     margin-right: 0.1em !important;
 }
+
+@media (max-width: 768px) {
+    .toolbar {
+        overflow-x: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+}
