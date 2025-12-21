@@ -49,7 +49,7 @@ export default function Content() {
     return <ContentSize.Provider value={size}>
         <div ref={ref} className={styles.pageContainer}>
             <main className={styles.page}>
-                {playerPage && <Player key="player" show={showPlayer} {...playerPage} />}
+                {playerPage && <Player key={playerPage.url} show={showPlayer} {...playerPage} />}
                 {showPage && <Component {...activePage} />}
             </main>
         </div>

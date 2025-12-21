@@ -55,6 +55,8 @@ export default function PlayerPage({ show = false, suffix }) {
         if (show) {
             PlayerStore.update(s => {
                 s.hash = window.location.hash;
+                s.mediaPath = "";
+                s.subtitles = "";
             });
         }
     }, [show, path]);
