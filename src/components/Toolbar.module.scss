@@ -24,9 +24,16 @@
         overflow-x: auto;
         -ms-overflow-style: none;
         scrollbar-width: none;
+        /* Ensure content starts from the left so overflow goes to the right */
+        justify-content: flex-start;
 
         &::-webkit-scrollbar {
             display: none;
+        }
+
+        /* Ensure items don't shrink, forcing overflow and scroll */
+        & > * {
+            flex-shrink: 0;
         }
     }
 }
