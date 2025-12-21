@@ -4,7 +4,6 @@ import { useTranslations } from "@util/translations";
 import PlayerButton from "./Button";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
-import StopIcon from "@mui/icons-material/Stop";
 import PauseIcon from "@mui/icons-material/Pause";
 import { formatDuration } from "@util/string";
 import { MainStore } from "@components/Main";
@@ -171,6 +170,33 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         playerRef.currentTime = 0;
     };
 
+    const longPressTimerRef = useRef(null);
+    const longPressTriggeredRef = useRef(false);
+
+    const handlePauseStart = () => {
+        longPressTriggeredRef.current = false;
+        longPressTimerRef.current = setTimeout(() => {
+            stop();
+            longPressTriggeredRef.current = true;
+        }, 1000);
+    };
+
+    const handlePauseEnd = () => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    };
+
+    const handlePauseClick = (e) => {
+        if (longPressTriggeredRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+        } else {
+            playerRef.pause();
+        }
+    };
+
     const prevPath = useRef(path);
     useEffect(() => {
         if (prevPath.current === path) {
@@ -197,8 +223,16 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 {direction === "rtl" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {!!error && <PlayerButton icon={<ReplayIcon />} name={translations.RELOAD} onClick={() => playerRef.load()} />}
                 {playerRef.paused && !error && <PlayerButton icon={<PlayArrowIcon />} name={translations.PLAY} onClick={play} />}
-                {!playerRef.paused && !error && <PlayerButton icon={<PauseIcon />} name={translations.PAUSE} onClick={() => playerRef.pause()} />}
-                {!error && <PlayerButton icon={<StopIcon />} name={translations.STOP} onClick={stop} />}
+                {!playerRef.paused && !error && <PlayerButton
+                    icon={<PauseIcon />}
+                    name={translations.PAUSE}
+                    onMouseDown={handlePauseStart}
+                    onTouchStart={handlePauseStart}
+                    onMouseUp={handlePauseEnd}
+                    onTouchEnd={handlePauseEnd}
+                    onMouseLeave={handlePauseEnd}
+                    onClick={handlePauseClick}
+                />}
                 {direction === "ltr" && <PlayerButton icon={<Forward10Icon />} name={translations.FORWARD + " 10"} onClick={forward} />}
                 {direction === "rtl" && <PlayerButton icon={<Replay10Icon />} name={translations.REPLAY + " 10"} onClick={replay} />}
             </div>
