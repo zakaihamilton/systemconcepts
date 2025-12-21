@@ -24,9 +24,10 @@ export function useResize(depends = []) {
     useEffect(() => {
         const handler = () => handleResize();
         window.addEventListener("resize", handler);
-        handleResize();
+        const timerHandle = setTimeout(handleResize, 0);
         return () => {
             window.removeEventListener("resize", handler);
+            clearTimeout(timerHandle);
         };
     }, depends);
 
@@ -44,38 +45,40 @@ export function useWindowSize() {
     };
 
     useEffect(() => {
-        handleResize();
+        const timerHandle = setTimeout(handleResize, 0);
+        return () => clearTimeout(timerHandle);
     }, [counter]);
 
     return size;
 }
 
 export function useSize(ref, depends = []) {
-    const [, setObserverCounter] = useState(0);
+    const [size, setSize] = useState({ width: 0, height: 0, emPixels: 16 });
     const counter = useResize(depends);
-    const emPixels = getEmValueFromElement(ref && ref.current);
 
-    const handle = ref?.current;
     useEffect(() => {
+        const handle = ref?.current;
         if (!handle) {
             return;
         }
+        const updateSize = () => {
+            const rect = handle.getBoundingClientRect();
+            const emPixels = getEmValueFromElement(handle);
+            setSize({ width: rect.width, height: rect.height, emPixels });
+        };
         const resizeObserver = new ResizeObserver(entries => {
-            setObserverCounter(counter => counter + 1);
+            updateSize();
         });
-        setObserverCounter(counter => counter + 1);
+        updateSize();
         resizeObserver.observe(handle);
         return () => {
             resizeObserver.unobserve(handle);
         };
-    }, [handle]);
-
-    const rect = ref?.current?.getBoundingClientRect() || {};
-    const width = rect.width, height = rect.height;
+    }, [ref, counter]);
 
     if (!ref || typeof window === "undefined") {
-        return { width: 0, height: 0, emPixels };
+        return { width: 0, height: 0, emPixels: size.emPixels };
     }
 
-    return { counter, width, height, emPixels, ref };
+    return { counter, ...size, ref };
 }

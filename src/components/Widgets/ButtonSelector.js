@@ -11,7 +11,7 @@ import MenuList from "@mui/material/MenuList";
 
 export default function ButtonSelector({ state, items, onClick, children, ...props }) {
   const [open, setOpen] = useState(false);
-  const anchorRef = useRef(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = state;
 
   const handleMenuItemClick = (event, id) => {
@@ -24,7 +24,7 @@ export default function ButtonSelector({ state, items, onClick, children, ...pro
   };
 
   const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+    if (anchorEl && anchorEl.contains(event.target)) {
       return;
     }
 
@@ -33,7 +33,7 @@ export default function ButtonSelector({ state, items, onClick, children, ...pro
 
   return (
     <>
-      <ButtonGroup ref={anchorRef} {...props}>
+      <ButtonGroup ref={setAnchorEl} {...props}>
         <Button disabled={!onClick} onClick={onClick}>{children}</Button>
         {items && <Button
           onClick={handleToggle}
@@ -41,7 +41,7 @@ export default function ButtonSelector({ state, items, onClick, children, ...pro
           <ArrowDropDownIcon />
         </Button>}
       </ButtonGroup>
-      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition>
+      <Popper open={open} anchorEl={anchorEl} role={undefined} transition>
         {({ TransitionProps, placement }) => (
           <Grow
             {...TransitionProps}

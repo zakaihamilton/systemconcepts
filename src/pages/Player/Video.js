@@ -12,7 +12,7 @@ export default function Video({ show, metadataPath, name, path, children, ...pro
         return () => {
             setPlayerRef(null);
         };
-    }, [ref.current]);
+    }, []);
     useEffect(() => {
         PlayerStore.update(s => {
             s.player = playerRef;

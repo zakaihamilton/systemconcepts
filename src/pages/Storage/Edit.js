@@ -19,7 +19,7 @@ export default function EditWidget() {
             s.counter++;
         });
         return result;
-    }, [name[0]]);
+    }, [name, onDone]);
     const keyDown = async event => {
         if (event.keyCode == 13) {
             let valid = true;

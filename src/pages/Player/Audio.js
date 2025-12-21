@@ -13,7 +13,7 @@ export default function Audio({ show, metadataPath, name, path, group, color, ch
         return () => {
             setPlayerRef(null);
         };
-    }, [ref.current]);
+    }, []);
     useEffect(() => {
         PlayerStore.update(s => {
             s.player = playerRef;

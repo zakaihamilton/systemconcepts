@@ -120,8 +120,10 @@ export function useListing(url, depends = [], options) {
     const [error, setError] = useState(null);
     const active = useRef(url);
     useEffect(() => {
-        setError(null);
-        setLoading(true);
+        const timerHandle = setTimeout(() => {
+            setError(null);
+            setLoading(true);
+        }, 0);
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
             if (active.current === url) {
@@ -134,7 +136,7 @@ export function useListing(url, depends = [], options) {
                 setLoading(false);
             }
         });
-    }, [url, ...depends]);
+    }, [url, options, ...depends]);
     useEffect(() => {
         return () => {
             active.current = null;
@@ -143,8 +145,8 @@ export function useListing(url, depends = [], options) {
     return [listing, loading, error];
 }
 
-export function useFile(url, depends = [], mapping) {
-    url = url && makePath(url);
+export function useFile(urlArgument, depends = [], mapping) {
+    const url = urlArgument && makePath(urlArgument);
     const [state, setState] = useGlobalState(url && "useFile:" + url, {});
     const { data, loading, error } = state || {};
     const write = useCallback(async (data, path) => {
@@ -176,15 +178,17 @@ export function useFile(url, depends = [], mapping) {
                 return { ...state };
             });
         }
-    }, [url]);
+    }, [url, setState]);
     useEffect(() => {
-        setState(state => {
-            state = state || {};
-            state.error = null;
-            return { ...state };
-        });
+        const timerHandle = setTimeout(() => {
+            setState(state => {
+                state = state || {};
+                state.error = null;
+                return { ...state };
+            });
+        }, 0);
         if (!url) {
-            return;
+            return () => clearTimeout(timerHandle);
         }
         setState(state => {
             state = state || {};
@@ -227,7 +231,8 @@ export function useFile(url, depends = [], mapping) {
                 return { ...state };
             });
         });
-    }, [url, ...depends]);
+        return () => clearTimeout(timerHandle);
+    }, [url, mapping, setState, ...depends]);
     return [data, loading, error, write];
 }
 

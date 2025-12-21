@@ -8,11 +8,11 @@ export default function Summary({ path }) {
     const url = path ? "/api/summary?path=" + encodeURIComponent(path) : null;
     const [data] = useFetch(url);
 
-    useEffect(() => {
-        if (data) {
-            setContent(data);
-        }
-    }, [data]);
+    const [prevData, setPrevData] = useState(null);
+    if (data && data !== prevData) {
+        setPrevData(data);
+        setContent(data);
+    }
 
     if (!content) {
         return null;

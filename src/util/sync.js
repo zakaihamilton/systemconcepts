@@ -268,7 +268,10 @@ export function useSyncFeature() {
     }, [lastUpdated, updateSync]);
     useEffect(() => {
         if (online && _loaded && isSignedIn) {
-            syncNow(true);
+            const timerHandle = setTimeout(() => {
+                syncNow(true);
+            }, 1000);
+            return () => clearTimeout(timerHandle);
         }
     }, [online, _loaded, isSignedIn, visible, syncNow]);
 

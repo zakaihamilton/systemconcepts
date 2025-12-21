@@ -25,9 +25,11 @@ export default function ImageWidget({ clickForImage = true, onClick, href, loadi
 
     const hasPath = typeof path === "string" && path;
 
-    useEffect(() => {
+    const [prevHasPath, setPrevHasPath] = useState(hasPath);
+    if (hasPath !== prevHasPath) {
+        setPrevHasPath(hasPath);
         setImageLoading(!!hasPath);
-    }, [hasPath]);
+    }
 
     const showAlt = (!hasPath || !!error) && (!loading && !imageLoading);
     const clickable = clickForImage && !showAlt || onClick;

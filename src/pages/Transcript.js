@@ -79,7 +79,7 @@ export default function Transcript() {
 
     const jumpTo = (time) => {
         if (player) {
-            player.currentTime = time;
+            player.currentTime = time; // eslint-disable-line react-hooks/immutability
             player.play();
         }
     };

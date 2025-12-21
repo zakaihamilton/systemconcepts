@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 
 export function useCounter(defaultValue = 0) {
     const [counter, setCounter] = useState(defaultValue);
@@ -10,37 +10,30 @@ export function useCounter(defaultValue = 0) {
 
 export function useHover() {
     const [value, setValue] = useState(false);
+    const [node, setNode] = useState(null);
 
-    const ref = useRef(null);
+    const handleMouseEnter = useCallback(() => setValue(true), []);
+    const handleMouseLeave = useCallback(() => setValue(false), []);
 
-    const handleMouseEnter = () => setValue(true);
-    const handleMouseLeave = () => setValue(false);
+    useEffect(() => {
+        if (node) {
+            node.addEventListener("mouseenter", handleMouseEnter);
+            node.addEventListener("mouseleave", handleMouseLeave);
+            return () => {
+                node.removeEventListener("mouseenter", handleMouseEnter);
+                node.removeEventListener("mouseleave", handleMouseLeave);
+            };
+        }
+    }, [node, handleMouseEnter, handleMouseLeave]);
 
-    useEffect(
-        () => {
-            const node = ref.current;
-            if (node) {
-                node.addEventListener("mouseenter", handleMouseEnter);
-                node.addEventListener("mouseleave", handleMouseLeave);
-
-                return () => {
-                    node.removeEventListener("mouseenter", handleMouseEnter);
-                    node.removeEventListener("mouseleave", handleMouseLeave);
-                };
-            }
-        }, [ref.current]);
-
-    return [ref, value];
+    return [setNode, value];
 }
 
 let uniqueId = 1;
 
 export function useUnique() {
-    const idRef = useRef(null);
-    if (idRef.current === null) {
-        idRef.current = uniqueId++;
-    }
-    return idRef.current;
+    const id = useMemo(() => uniqueId++, []);
+    return id;
 }
 
 export function usePageVisibility() {

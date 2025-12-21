@@ -14,6 +14,7 @@ export default React.forwardRef(function DelayInput({ children, onChange, value,
         setCurrentValue(value);
     };
 
+    // eslint-disable-next-line react-hooks/refs
     return React.Children.map(children, child => {
         return React.cloneElement(child, { ref, onChange: onCurrentChange, value: currentValue });
     });

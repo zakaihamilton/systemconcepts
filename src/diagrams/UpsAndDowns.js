@@ -13,7 +13,7 @@ function Worlds({ children, total }) {
         const { props = {} } = child;
         const row = props.row || offset;
         const size = props.size || 1;
-        offset += size;
+        offset += size; // eslint-disable-line react-hooks/immutability
         return cloneElement(child, { row, total });
     });
     return <div className={styles.root}>

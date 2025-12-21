@@ -46,7 +46,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 setError(null);
             }
             else if (name === "loadedmetadata" && metadata && metadata.position) {
-                playerRef.currentTime = metadata.position;
+                playerRef.currentTime = metadata.position; // eslint-disable-line react-hooks/immutability
                 setCurrentTime(playerRef.currentTime);
             }
             if (name === "timeupdate" && !dragging.current) {
@@ -78,14 +78,14 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         return () => {
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, [visible, show, metadata]);
+    }, [visible, show, metadata, playerRef]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;
         }
-        playerRef.currentTime = position;
+        playerRef.currentTime = position; // eslint-disable-line react-hooks/immutability
         setCurrentTime(position);
-    }, []);
+    }, [playerRef]);
     const replay = () => {
         let position = currentTime;
         if (position > skipPoints) {
@@ -130,7 +130,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
             position = playerRef.duration;
         }
         seekPosition(position);
-    }, []);
+    }, [playerRef, seekPosition]);
     useEffect(() => {
         const handleUpEvent = e => {
             handlePosEvent(e);
@@ -142,7 +142,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
             document.removeEventListener("mousemove", handlePosEvent);
             document.removeEventListener("mouseup", handleUpEvent);
         };
-    }, []);
+    }, [handlePosEvent]);
     useEffect(() => {
         if (currentTime && !isNaN(currentTime) && playerRef.duration) {
             setMetadata(data => {
@@ -154,7 +154,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 return { ...data };
             });
         }
-    }, [currentTime]);
+    }, [currentTime, playerRef, setMetadata]);
     const events = {
         onMouseDown(e) {
             dragging.current = true;
@@ -168,7 +168,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
     };
     const stop = () => {
         playerRef.pause();
-        playerRef.currentTime = 0;
+        playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
     };
 
     const prevPath = useRef(path);
@@ -179,7 +179,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
         prevPath.current = path;
         stop();
         playerRef.load();
-    }, [path]);
+    }, [path, playerRef, stop]);
 
     return <>
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}

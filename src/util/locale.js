@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import languages from "@data/languages";
 import { useLanguage } from "@util/language";
 
@@ -10,9 +10,6 @@ export function useLocale() {
 
 export function useDateFormatter(options, depends = []) {
     const locale = useLocale();
-    const [dateObj, setDateObj] = useState(new Intl.DateTimeFormat(locale, options));
-    useEffect(() => {
-        setDateObj(new Intl.DateTimeFormat(locale, options));
-    }, [locale, ...depends]);
+    const dateObj = useMemo(() => new Intl.DateTimeFormat(locale, options), [locale, options, ...depends]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/use-memo
     return dateObj;
 }

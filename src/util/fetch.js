@@ -87,37 +87,45 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const [error, setError] = useState("");
     useEffect(() => {
         if (cond && isOnline) {
-            setResult(null);
-            setError("");
-            setProgress(true);
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                handle = setTimeout(() => {
-                    setTimeoutHandle(null);
-                    fetchJSON(url, options).then(data => {
-                        setResult(data);
-                        setProgress(false);
-                    }).catch(err => {
-                        setProgress(false);
-                        setError(err);
-                    });
-                }, delay);
-                return handle;
-            });
+            const timerHandle = setTimeout(() => {
+                setResult(null);
+                setError("");
+                setProgress(true);
+                setTimeoutHandle(handle => {
+                    if (handle) {
+                        clearTimeout(handle);
+                        handle = null;
+                    }
+                    handle = setTimeout(() => {
+                        setTimeoutHandle(null);
+                        fetchJSON(url, options).then(data => {
+                            setResult(data);
+                            setProgress(false);
+                        }).catch(err => {
+                            setProgress(false);
+                            setError(err);
+                        });
+                    }, delay);
+                    return handle;
+                });
+            }, 0);
+            return () => {
+                clearTimeout(timerHandle);
+            };
         }
         else {
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                return handle;
-            });
+            const timerHandle = setTimeout(() => {
+                setTimeoutHandle(handle => {
+                    if (handle) {
+                        clearTimeout(handle);
+                        handle = null;
+                    }
+                    return handle;
+                });
+            }, 0);
+            return () => clearTimeout(timerHandle);
         }
-    }, [...depends]);
+    }, [url, cond, options, isOnline, delay, ...depends]);
     return [result, setResult, inProgress, error];
 }
 
@@ -129,36 +137,44 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const [error, setError] = useState("");
     useEffect(() => {
         if (cond && isOnline && url) {
-            setResult(null);
-            setError("");
-            setProgress(true);
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                handle = setTimeout(() => {
-                    setTimeoutHandle(null);
-                    fetchText(url, options).then(data => {
-                        setResult(data);
-                        setProgress(false);
-                    }).catch(err => {
-                        setProgress(false);
-                        setError(err);
-                    });
-                }, delay);
-                return handle;
-            });
+            const timerHandle = setTimeout(() => {
+                setResult(null);
+                setError("");
+                setProgress(true);
+                setTimeoutHandle(handle => {
+                    if (handle) {
+                        clearTimeout(handle);
+                        handle = null;
+                    }
+                    handle = setTimeout(() => {
+                        setTimeoutHandle(null);
+                        fetchText(url, options).then(data => {
+                            setResult(data);
+                            setProgress(false);
+                        }).catch(err => {
+                            setProgress(false);
+                            setError(err);
+                        });
+                    }, delay);
+                    return handle;
+                });
+            }, 0);
+            return () => {
+                clearTimeout(timerHandle);
+            };
         }
         else {
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                return handle;
-            });
+            const timerHandle = setTimeout(() => {
+                setTimeoutHandle(handle => {
+                    if (handle) {
+                        clearTimeout(handle);
+                        handle = null;
+                    }
+                    return handle;
+                });
+            }, 0);
+            return () => clearTimeout(timerHandle);
         }
-    }, [url, ...depends]);
+    }, [url, options, cond, isOnline, delay, ...depends]);
     return [result, setResult, inProgress, error];
 }

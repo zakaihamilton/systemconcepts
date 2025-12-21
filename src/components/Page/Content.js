@@ -1,4 +1,4 @@
-import { useRef, createContext } from "react";
+import { useRef, createContext, useState, useEffect } from "react";
 import styles from "./Content.module.scss";
 import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
@@ -13,27 +13,43 @@ export default function Content() {
     const activePage = activePages[activePages.length - 1];
     const ref = useRef();
     const size = useSize(ref, [showSideBar, hash]);
-    const playerPageRef = useRef(null);
+    const [playerPage, setPlayerPage] = useState(null);
+    const showPlayer = activePage?.id === "player";
+    const showTranscript = activePage?.id === "transcript";
+    useEffect(() => {
+        if (!activePage) {
+            return;
+        }
+        const timerHandle = setTimeout(() => {
+            if (showPlayer && !showTranscript) {
+                setPlayerPage(prev => {
+                    if (prev && prev.id === activePage.id && prev.path === activePage.path) {
+                        return prev;
+                    }
+                    return { ...activePage };
+                });
+            }
+            else if (showTranscript) {
+                setPlayerPage(prev => {
+                    if (prev) {
+                        return prev;
+                    }
+                    return { ...activePage, suffix: ".m4a" };
+                });
+            }
+        }, 0);
+        return () => clearTimeout(timerHandle);
+    }, [showPlayer, showTranscript, activePage]);
     if (!activePage) {
         return null;
     }
     const { Component } = activePage;
     const showPage = activePage.id !== "player" && Component;
-    const showPlayer = activePage.id === "player";
-    const showTranscript = activePage.id === "transcript";
-    if (showPlayer) {
-        if (!showTranscript) {
-            playerPageRef.current = { ...activePage };
-        }
-    }
-    else if (showTranscript && !playerPageRef.current) {
-        playerPageRef.current = { ...activePage, suffix: ".m4a" };
-    }
     const Player = pages.find(page => page.id === "player").Component;
     return <ContentSize.Provider value={size}>
         <div ref={ref} className={styles.pageContainer}>
             <main className={styles.page}>
-                {playerPageRef.current && <Player key="player" show={showPlayer} {...playerPageRef.current} />}
+                {playerPage && <Player key="player" show={showPlayer} {...playerPage} />}
                 {showPage && <Component {...activePage} />}
             </main>
         </div>
