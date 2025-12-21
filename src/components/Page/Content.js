@@ -23,7 +23,7 @@ export default function Content() {
         const timerHandle = setTimeout(() => {
             if (showPlayer && !showTranscript) {
                 setPlayerPage(prev => {
-                    if (prev && prev.id === activePage.id && prev.path === activePage.path) {
+                    if (prev && prev.id === activePage.id && prev.url === activePage.url) {
                         return prev;
                     }
                     return { ...activePage };
@@ -31,7 +31,7 @@ export default function Content() {
             }
             else if (showTranscript) {
                 setPlayerPage(prev => {
-                    if (prev) {
+                    if (prev && prev.url === activePage.url) {
                         return prev;
                     }
                     return { ...activePage, suffix: ".m4a" };

@@ -13,7 +13,7 @@ export default function Tabs() {
     }, []);
     const { hash } = MainStore.useState();
     const activePages = useActivePages();
-    const page = activePages.reverse().find(page => page.tabs);
+    const page = [...activePages].reverse().find(page => page.tabs);
 
     const Container = useCallback(function Container({ children }) {
         const pageState = [hash, setHash];
