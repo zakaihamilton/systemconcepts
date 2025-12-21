@@ -2,7 +2,6 @@ import styles from "./Toolbar.module.scss";
 import Avatar from "@mui/material/Avatar";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import VolumeDownIcon from "@mui/icons-material/VolumeDown";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import SpeedIcon from "@mui/icons-material/Speed";
 import { useState, useEffect } from "react";
@@ -18,7 +17,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         const update = name => {
             setCounter(counter => counter + 1);
         };
-        const events = ["ratechange", "volumechange"];
+        const events = ["ratechange"];
         const listeners = events.map(name => {
             const callback = () => update(name);
             playerRef.addEventListener(name, callback);
@@ -48,22 +47,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             onClick: () => playerRef.playbackRate = rate
         };
     });
-    const volumeItems = {
-        LOW_VOLUME: 0.5,
-        MEDIUM_VOLUME: 0.75,
-        HIGH_VOLUME: 1.0
-    };
-    const volumeMenuItems = Object.entries(volumeItems).map(([name, level]) => {
-        return {
-            id: level,
-            icon: <Avatar className={styles.avatar} variant="square">{level.toFixed(2)}</Avatar>,
-            name: translations[name],
-            onClick: () => playerRef.volume = level
-        };
-    });
-
     const speed = playerRef.playbackRate || 1.0;
-    const volume = playerRef.volume;
 
     const menuItems = [
         {
@@ -75,15 +59,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             location: "header",
             divider: true
         },
-        {
-            id: "volume",
-            name: translations.VOLUME,
-            icon: <VolumeDownIcon />,
-            items: volumeMenuItems,
-            selected: volume,
-            divider: true,
-            location: "header"
-        },
         isVideo && {
             id: "fullscreen",
             name: translations.FULLSCREEN,
@@ -93,6 +68,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, volume, isMobile, translations] });
+    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, isMobile, translations] });
     return null;
 }
