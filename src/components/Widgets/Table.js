@@ -339,15 +339,49 @@ export default function TableWidget(props) {
         return items;
     }, [search, data, order, orderBy, ...depends]);
 
+    const sizeToPixels = text => {
+        const number = parseFloat(text);
+        const sizeInPixels = text.trim().endsWith("em") ? number * (size && size.emPixels) : number;
+        return sizeInPixels;
+    };
+
+    const itemHeightInPixels = sizeToPixels(itemHeight);
+    const cellHeightInPixels = sizeToPixels(cellHeight);
+    const cellWidthInPixels = sizeToPixels(cellWidth);
+    const columnCount = size && size.width ? (Math.floor(size.width / (cellWidthInPixels + 1)) || 1) : 0;
+    const rowCount = columnCount ? Math.ceil((items && items.length || 0) / columnCount) : 0;
+    const sidePadding = size && size.width ? ((size.width - (columnCount * cellWidthInPixels)) / 2) : 0;
+
+    const itemData = useMemo(() => ({
+        hideColumns,
+        items,
+        viewModes,
+        viewMode,
+        selectedRow,
+        visibleColumns,
+        rowClick,
+        columnCount,
+        sidePadding
+    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding]);
+
+    const innerElementType = useMemo(() => {
+        const Inner = forwardRef(({ children, ...rest }, ref) => {
+            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+            const style = {
+                top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
+            };
+            return <div ref={ref} {...rest}>
+                {!hideColumns && <ListColumns key={0} columns={visibleColumns} style={{ ...style, ...itemStyles }} {...props} />}
+                {children}
+            </div>;
+        });
+        Inner.displayName = "innerElementType";
+        return Inner;
+    }, [viewMode, viewModes, itemHeightInPixels, hideColumns, visibleColumns]);
+
     if (!size.height) {
         return null;
     }
-
-    const sizeToPixels = text => {
-        const number = parseFloat(text);
-        const sizeInPixels = text.trim().endsWith("em") ? number * size.emPixels : number;
-        return sizeInPixels;
-    };
 
     const statusBarVisible = !loading && !error && !!statusBar;
     const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
@@ -362,42 +396,7 @@ export default function TableWidget(props) {
     const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
 
     if (viewMode === "list") {
-        const itemHeightInPixels = sizeToPixels(itemHeight);
         const itemCount = hideColumns ? numItems : numItems + 1;
-
-        const innerElementType = forwardRef(({ children, ...rest }, ref) => {
-            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
-            const style = {
-                top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
-            };
-            return <div ref={ref} {...rest}>
-                {!hideColumns && <ListColumns key={0} columns={visibleColumns} style={{ ...style, ...itemStyles }} {...props} />}
-                {children}
-            </div>;
-        });
-        innerElementType.displayName = "innerElementType";
-
-        const Row = ({ index, style }) => {
-            const itemIndex = hideColumns ? index : index - 1;
-            const item = items[itemIndex];
-            const { id, key } = item || {};
-            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
-            const selected = index && selectedRow && selectedRow(item);
-            if (!hideColumns && !index) {
-                return null;
-            }
-            return <Item
-                key={key || id || itemIndex}
-                style={{ ...style, ...itemStyles }}
-                {...props}
-                columns={visibleColumns}
-                rowClick={rowClick}
-                item={item}
-                index={itemIndex}
-                viewMode={viewMode}
-                selected={selected}
-            />;
-        };
 
         return <>
             {!!loading && loadingElement}
@@ -415,8 +414,9 @@ export default function TableWidget(props) {
                 onScroll={({ scrollOffset }) => {
                     scrollOffsetRef.current = scrollOffset;
                 }}
+                itemData={itemData}
             >
-                {Row}
+                {TableListRow}
             </FixedSizeList>}
             {!!error && <Error error={error} />}
         </>;
@@ -489,36 +489,6 @@ export default function TableWidget(props) {
         </>);
     }
     else if (viewMode === "grid") {
-        const cellHeightInPixels = sizeToPixels(cellHeight);
-        const cellWidthInPixels = sizeToPixels(cellWidth);
-        const columnCount = Math.floor(size.width / (cellWidthInPixels + 1));
-        const rowCount = Math.ceil(numItems / columnCount);
-        const sidePadding = (size.width - (columnCount * cellWidthInPixels)) / 2;
-
-        const Cell = ({ columnIndex, rowIndex, style }) => {
-            const index = (rowIndex * columnCount) + columnIndex;
-            const item = items[index];
-            if (!item) {
-                return null;
-            }
-            const { id, key } = item;
-            const { style: itemStyles, ...props } = viewModes[viewMode] || {};
-            const selected = selectedRow && selectedRow(item);
-            style = { ...style };
-            style.left += sidePadding;
-            return <Item
-                key={id || key || index}
-                style={{ ...style, ...itemStyles }}
-                {...props}
-                columns={visibleColumns}
-                rowClick={rowClick}
-                item={item}
-                index={index}
-                viewMode={viewMode}
-                selected={selected}
-            />;
-        };
-
         return <>
             {!!loading && loadingElement}
             {!!isEmpty && !loading && emptyElement}
@@ -536,8 +506,9 @@ export default function TableWidget(props) {
                 onScroll={({ scrollTop }) => {
                     scrollOffsetRef.current = scrollTop;
                 }}
+                itemData={itemData}
             >
-                {Cell}
+                {TableGridCell}
             </FixedSizeGrid>}
             {!!error && <Error error={error} />}
         </>;
@@ -546,3 +517,55 @@ export default function TableWidget(props) {
         return null;
     }
 }
+
+const TableListRow = ({ index, style, data }) => {
+    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick } = data;
+    const itemIndex = hideColumns ? index : index - 1;
+    const item = items[itemIndex];
+    const { id, key } = item || {};
+    const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+    const selected = index && selectedRow && selectedRow(item);
+
+    if (!hideColumns && !index) {
+        return null;
+    }
+
+    return <Item
+        key={key || id || itemIndex}
+        style={{ ...style, ...itemStyles }}
+        {...props}
+        columns={visibleColumns}
+        rowClick={rowClick}
+        item={item}
+        index={itemIndex}
+        viewMode={viewMode}
+        selected={selected}
+    />;
+};
+
+const TableGridCell = ({ columnIndex, rowIndex, style, data }) => {
+    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick } = data;
+    const index = (rowIndex * columnCount) + columnIndex;
+    const item = items[index];
+    if (!item) {
+        return null;
+    }
+    const { id, key } = item;
+    const { style: itemStyles, ...props } = viewModes[viewMode] || {};
+    const selected = selectedRow && selectedRow(item);
+
+    const finalStyle = { ...style };
+    finalStyle.left += sidePadding;
+
+    return <Item
+        key={id || key || index}
+        style={{ ...finalStyle, ...itemStyles }}
+        {...props}
+        columns={visibleColumns}
+        rowClick={rowClick}
+        item={item}
+        index={index}
+        viewMode={viewMode}
+        selected={selected}
+    />;
+};
