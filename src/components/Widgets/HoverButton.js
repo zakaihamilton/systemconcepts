@@ -4,7 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Fab from "@mui/material/Fab";
 import styles from "./HoverButton.module.scss";
 
-export default function HoverButton({ className, onClick, onHoverComplete, hoverDelay = 500, hoverDuration = 750, children }) {
+export default function HoverButton({ className, onClick, onHoverComplete, hoverDelay = 500, hoverDuration = 750, children, ...props }) {
     const [loading, setLoading] = useState(false);
     const activeTimer = useRef();
     const delayTimer = useRef();
@@ -75,6 +75,7 @@ export default function HoverButton({ className, onClick, onHoverComplete, hover
                     onClick={handleButtonClick}
                     onMouseEnter={handleButtonOver}
                     onMouseLeave={handleButtonLeave}
+                    {...props}
                 >
                     {children}
                 </Fab>
