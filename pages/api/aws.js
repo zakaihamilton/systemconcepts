@@ -2,6 +2,7 @@ import { handleRequest } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
+import { getSafeError } from "@util/safeError";
 
 export default async function AWS_API(req, res) {
     try {
@@ -30,7 +31,7 @@ export default async function AWS_API(req, res) {
     }
     catch (err) {
         console.error("login error: ", err);
-        res.status(403).json({ err: err.toString() });
+        res.status(403).json({ err: getSafeError(err) });
     }
 }
 

@@ -1,4 +1,5 @@
 const { login, register, changePassword, resetPassword, sendResetEmail } = require("@util/login");
+import { getSafeError } from "@util/safeError";
 
 export default async function LOGIN_API(req, res) {
     if (req.method === "GET") {
@@ -22,7 +23,7 @@ export default async function LOGIN_API(req, res) {
         else {
             console.log("login success", params);
         }
-        res.status(200).json({ ...(error && { err: error.toString() }), ...params });
+        res.status(200).json({ ...(error && { err: getSafeError(error) }), ...params });
     }
     else if (req.method === "PUT") {
         const headers = req.headers || {};
@@ -34,7 +35,7 @@ export default async function LOGIN_API(req, res) {
             }
             catch (err) {
                 console.error("login error: ", err);
-                res.status(200).json({ err: err.toString() });
+                res.status(200).json({ err: getSafeError(err) });
             }
         }
         else if (headers.newpassword && headers.code) {
@@ -50,7 +51,7 @@ export default async function LOGIN_API(req, res) {
             }
             catch (err) {
                 console.error("login error: ", err);
-                res.status(200).json({ err: err.toString() });
+                res.status(200).json({ err: getSafeError(err) });
             }
         }
         else if (headers.oldpassword && headers.newpassword) {
@@ -66,7 +67,7 @@ export default async function LOGIN_API(req, res) {
             }
             catch (err) {
                 console.error("login error: ", err);
-                res.status(200).json({ err: err.toString() });
+                res.status(200).json({ err: getSafeError(err) });
             }
         }
         else {
@@ -83,7 +84,7 @@ export default async function LOGIN_API(req, res) {
             }
             catch (err) {
                 console.error("login error: ", err);
-                res.status(200).json({ err: err.toString() });
+                res.status(200).json({ err: getSafeError(err) });
             }
         }
     }

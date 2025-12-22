@@ -3,6 +3,7 @@ import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 import { error, log } from "@util/logger";
+import { getSafeError } from "@util/safeError";
 
 const component = "player";
 
@@ -46,6 +47,6 @@ export default async function PLAYER_API(req, res) {
     }
     catch (err) {
         error({ component, error: "login error", err });
-        res.status(403).json({ err: err.toString() });
+        res.status(403).json({ err: getSafeError(err) });
     }
 }
