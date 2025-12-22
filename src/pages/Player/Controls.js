@@ -35,9 +35,6 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
     const lastUpdateTimeRef = useRef(0);
 
     useEffect(() => {
-        if (!show) {
-            return;
-        }
         const update = name => {
             if (name === "error") {
                 setError("PLAYING_ERROR");
@@ -52,7 +49,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
             if (name === "timeupdate" && !dragging.current) {
                 const currentTime = parseInt(playerRef.currentTime);
 
-                if (visible) {
+                if (visible && show) {
                     // When visible, update on every timeupdate
                     setCurrentTime(currentTime);
                     lastUpdateTimeRef.current = currentTime;
