@@ -2,6 +2,7 @@ import { handleRequest, findRecord } from "@util/mongo";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import parseCookie from "@util/cookie";
+import { getSafeError } from "@util/safeError";
 
 const collectionName = "users";
 
@@ -36,6 +37,6 @@ export default async function USERS_API(req, res) {
     }
     catch (err) {
         console.error("login error: ", err);
-        res.status(403).json({ err: err.toString() });
+        res.status(403).json({ err: getSafeError(err) });
     }
 }

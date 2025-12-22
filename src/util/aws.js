@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, Delete
 import { lockMutex } from "./mutex";
 import fs from "fs";
 import { makePath } from "@util/path";
+import { getSafeError } from "./safeError";
 
 let s3Client = null;
 
@@ -237,7 +238,7 @@ export async function handleRequest({ readOnly, req }) {
         }
         catch (err) {
             console.error("get error: ", err);
-            return { err: err.toString() };
+            return { err: getSafeError(err) };
         }
     } else if (!readOnly && req.method === "PUT") {
         for (const item of req.body) {

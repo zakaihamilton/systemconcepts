@@ -1,5 +1,6 @@
 const MongoClient = require("mongodb").MongoClient;
 const { lockMutex } = require("./mutex");
+import { getSafeError } from "./safeError";
 
 const _clusters = [];
 
@@ -124,7 +125,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
         }
         catch (err) {
             console.error("get error: ", err);
-            return { err: err.toString() };
+            return { err: getSafeError(err) };
         }
     } else if (!readOnly && (req.method === "PUT" || req.method === "DELETE")) {
         try {
@@ -156,7 +157,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
         }
         catch (err) {
             console.error("put error: ", err);
-            return { err: err.toString() };
+            return { err: getSafeError(err) };
         }
     }
 }
