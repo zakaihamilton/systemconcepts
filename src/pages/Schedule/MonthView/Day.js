@@ -46,7 +46,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         </div>
         <div className={styles.sessions}>
             {!!items.length && <Menu hover={true} items={items}>
-                <HoverButton size={48}>
+                <HoverButton size={48} aria-label={translations.SESSION}>
                     <VideoLabelIcon fontSize="small" />
                 </HoverButton>
             </Menu>}
