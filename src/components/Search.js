@@ -63,5 +63,5 @@ export function useSearch(name, updateCallback) {
 
     useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations] });
 
-    return search;
+    return searchTerm;
 }
