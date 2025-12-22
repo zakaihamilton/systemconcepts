@@ -26,7 +26,7 @@ export default function SchedulePage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     let [sessions, loading, askForFullSync] = useSessions();
-    const search = useSearch();
+    const search = useSearch("schedule");
     let { date, viewMode } = ScheduleStore.useState();
     if (!date) {
         date = new Date();
