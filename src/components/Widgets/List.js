@@ -20,7 +20,7 @@ import IconButton from "@mui/material/IconButton";
 export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
-    const isSelected = typeof selected === "function" ? selected(id) : selected === id;
+    const isSelected = typeof selected === "function" ? selected(id) : (Array.isArray(selected) ? selected.includes(id) : selected === id);
     const itemClassName = useStyles(styles, {
         item: true,
         selected: isSelected

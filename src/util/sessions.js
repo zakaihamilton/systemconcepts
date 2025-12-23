@@ -9,11 +9,6 @@ import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
 import { useGroups } from "@util/groups";
 import { useSync } from "@util/sync";
-import MovieIcon from "@mui/icons-material/Movie";
-import AudioIcon from "@icons/Audio";
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
-import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import GroupOffIcon from '@mui/icons-material/GroupOff';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
@@ -29,7 +24,12 @@ export const SessionsStore = new Store({
     busy: false,
     counter: 0,
     syncCounter: 0,
-    groupsMetadata: ""
+    groupsMetadata: "",
+    showFilterDialog: false,
+    order: "asc",
+    orderBy: "date",
+    viewMode: "list",
+    scrollOffset: 0
 });
 
 export function useSessions(depends = [], options = {}) {
@@ -38,7 +38,7 @@ export function useSessions(depends = [], options = {}) {
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
     const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
-    useLocalStorage("sessions", SessionsStore, ["groupFilter"]);
+    useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
         SessionsStore.update(s => {
@@ -296,96 +296,19 @@ export function useSessions(depends = [], options = {}) {
         });
     }, [groupMetadata, groups, groupFilter]);
 
-    const filterItems = useMemo(() => {
-        const filter = typeof typeFilter === "string" ? [typeFilter] : (typeFilter || []);
-        const onClick = (id) => {
-            SessionsStore.update(s => {
-                if (filter.includes(id)) {
-                    s.typeFilter = filter.filter(name => name !== id);
-                }
-                else {
-                    s.typeFilter = [...filter, id];
-                }
-            });
-        };
-        return [
-            {
-                id: "audio",
-                name: translations.AUDIO,
-                onClick: onClick.bind(this, "audio"),
-                selected: typeFilter,
-                icon: <AudioIcon />
-            },
-            {
-                id: "video",
-                name: translations.VIDEO,
-                onClick: onClick.bind(this, "video"),
-                selected: typeFilter,
-                icon: <MovieIcon />
-            },
-            {
-                id: "image",
-                name: translations.IMAGE,
-                onClick: onClick.bind(this, "image"),
-                selected: typeFilter,
-                icon: <InsertPhotoOutlinedIcon />
-            },
-            {
-                id: "overview",
-                name: translations.OVERVIEW,
-                onClick: onClick.bind(this, "overview"),
-                selected: typeFilter,
-                icon: <MovieFilterIcon />
-            },
-            {
-                id: "ai",
-                name: translations.AI,
-                onClick: onClick.bind(this, "ai"),
-                selected: typeFilter,
-                icon: <AutoAwesomeIcon />,
-                divider: true
-            },
-            ...(sessions || [])?.reduce((years, session) => {
-                if (session.year && !years.includes(session.year)) {
-                    years.push(session.year);
-                }
-                return years;
-            }, [])?.sort((a, b) => b.localeCompare(a))?.map(year => ({
-                id: year,
-                name: year,
-                selected: yearFilter,
-                onClick: () => {
-                    SessionsStore.update(s => {
-                        const yearFilter = s.yearFilter || [];
-                        if (yearFilter.includes(year)) {
-                            s.yearFilter = yearFilter.filter(y => y !== year);
-                        }
-                        else {
-                            s.yearFilter = [...yearFilter, year];
-                        }
-                    });
-                },
-                selected: yearFilter,
-            }))
-        ];
-    }, [translations, typeFilter, yearFilter, sessions]);
+
 
     const toolbarItems = [
-        {
-            id: "group",
-            name: translations.GROUPS,
-            icon: <GroupIcon />,
-            items: groupsItems,
-            active: groupFilter.length,
-            disabled: !groupsItems.length
-        },
         {
             id: "filter",
             name: translations.FILTER,
             icon: <FilterAltIcon />,
-            items: filterItems,
-            active: typeFilter?.length || yearFilter?.length,
-            disabled: !filterItems.length && !yearFilter?.length,
+            onClick: () => {
+                SessionsStore.update(s => {
+                    s.showFilterDialog = !s.showFilterDialog;
+                });
+            },
+            active: typeFilter?.length || yearFilter?.length || groupFilter?.length,
             divider: true,
         },
         groupFilter.length && {
@@ -413,7 +336,7 @@ export function useSessions(depends = [], options = {}) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, filterItems] });
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, yearFilter] });
 
     const filtered = useMemo(() => {
         let results = [...sessions || []];

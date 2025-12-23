@@ -80,9 +80,11 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                             {checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
                         </ListItemIcon>
                     }
-                    <ListItemIcon className={styles.itemIcon}>
-                        {icon}
-                    </ListItemIcon>
+                    {icon &&
+                        <ListItemIcon className={styles.itemIcon}>
+                            {icon}
+                        </ListItemIcon>
+                    }
                     <ListItemText className={styles.itemText} primary={name} secondary={description} />
                     <div key={id + "_border"} className={styles.backgroundBorder} style={style} />
                 </MenuItem>

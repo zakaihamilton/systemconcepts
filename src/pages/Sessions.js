@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { addPath, toPath } from "@util/pages";
-import { useSessions } from "@util/sessions";
-import { Store } from "pullstate";
+import { useSessions, SessionsStore } from "@util/sessions";
+import FilterBar from "@pages/Sessions/FilterBar";
 import Group from "@widgets/Group";
 import styles from "./Sessions.module.scss";
 import Label from "@widgets/Label";
@@ -23,21 +23,12 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 
-export const SessionsStore = new Store({
-    groupFilter: "",
-    typeFilter: "",
-    order: "asc",
-    orderBy: "date",
-    viewMode: "list",
-    scrollOffset: 0
-});
-
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading, askForFullSync] = useSessions();
-    const { viewMode, groupFilter, typeFilter, orderBy } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, showFilterDialog } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
@@ -123,11 +114,12 @@ export default function SessionsPage() {
             selected: () => groupFilter,
             onSelectable: item => typeof item.group !== "undefined",
             onClick: item => SessionsStore.update(s => {
-                if (s.groupFilter) {
-                    s.groupFilter = "";
+                const group = typeof item.group !== "undefined" && (item.group[0].toUpperCase() + item.group.slice(1));
+                if (s.groupFilter.includes(group)) {
+                    s.groupFilter = s.groupFilter.filter(g => g !== group);
                 }
                 else {
-                    s.groupFilter = typeof item.group !== "undefined" && (item.group[0].toUpperCase() + item.group.slice(1));
+                    s.groupFilter = [...s.groupFilter, group];
                 }
                 s.offset = 0;
             }),
@@ -162,11 +154,11 @@ export default function SessionsPage() {
         let title = translations[item.type.toUpperCase()];
         const onClickIcon = () => {
             SessionsStore.update(s => {
-                if (s.typeFilter) {
-                    s.typeFilter = "";
+                if (s.typeFilter.includes(item.type)) {
+                    s.typeFilter = s.typeFilter.filter(t => t !== item.type);
                 }
                 else {
-                    s.typeFilter = item.type;
+                    s.typeFilter = [...s.typeFilter, item.type];
                 }
                 s.offset = 0;
             });
@@ -210,10 +202,13 @@ export default function SessionsPage() {
     };
 
     const filter = item => {
-        let { group, type } = item;
-        let show = (!groupFilter || groupFilter === (group[0].toUpperCase() + group.slice(1)));
+        let { group, type, year } = item;
+        let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
             show = show && typeFilter?.includes(type);
+        }
+        if (yearFilter?.length) {
+            show = show && yearFilter?.includes(year);
         }
         return show;
     };
@@ -238,6 +233,7 @@ export default function SessionsPage() {
     }, [isSignedIn, askForFullSync, translations]);
 
     return <>
+        {!!showFilterDialog && <FilterBar />}
         <Table
             cellWidth="16em"
             cellHeight="20em"
@@ -258,8 +254,8 @@ export default function SessionsPage() {
                     className: styles.gridItem
                 }
             }}
-            depends={[groupFilter, typeFilter, translations, viewMode]}
-            resetScrollDeps={[groupFilter, typeFilter]}
+            depends={[groupFilter, typeFilter, yearFilter, translations, viewMode]}
+            resetScrollDeps={[groupFilter, typeFilter, yearFilter]}
             getSeparator={(item, prevItem, orderBy, viewMode) => {
                 if (orderBy === "date") {
                     return item.date !== prevItem.date;

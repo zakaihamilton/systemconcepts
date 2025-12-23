@@ -9,8 +9,8 @@ export default function Dialog({ title, children, actions, onClose }) {
     const translations = useTranslations();
 
     return (
-        <div className={styles.root}>
-            <div className={styles.background}>
+        <div className={styles.root} onClick={onClose}>
+            <div className={styles.background} onClick={e => e.stopPropagation()}>
                 <div className={styles.dialog}>
                     <div className={styles.title}>
                         <Typography variant="h6">
