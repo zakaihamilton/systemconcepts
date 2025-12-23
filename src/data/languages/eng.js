@@ -1026,6 +1026,10 @@ export default {
             "value": "Filter"
         },
         {
+            "id": "CLEAR_FILTER",
+            "value": "Clear Filter"
+        },
+        {
             "id": "CLEAR_FILTERS",
             "value": "Clear Filters"
         },

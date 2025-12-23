@@ -6,12 +6,13 @@ import AudioIcon from "@icons/Audio";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
-import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
 import Menu from "@widgets/Menu";
 import styles from "./FilterBar.module.scss";
 import clsx from "clsx";
+
 
 export default function FilterBar() {
     const translations = useTranslations();
@@ -49,7 +50,6 @@ export default function FilterBar() {
             const capitalizedName = group.name[0].toUpperCase() + group.name.slice(1);
             return {
                 id: group.name,
-                icon: <GroupWorkIcon />,
                 name: capitalizedName,
                 checked: groupFilter.includes(group.name),
                 selected: groupFilter,
@@ -189,10 +189,12 @@ export default function FilterBar() {
                             )}
                         </div>
                         {groupFilter.length > 0 && (
-                            <CloseIcon
-                                className={styles.clearIcon}
-                                onClick={handleClearGroup}
-                            />
+                            <Tooltip title={translations.CLEAR_FILTER}>
+                                <CloseIcon
+                                    className={styles.clearIcon}
+                                    onClick={handleClearGroup}
+                                />
+                            </Tooltip>
                         )}
                     </button>
                 </Menu>
@@ -212,10 +214,12 @@ export default function FilterBar() {
                             )}
                         </div>
                         {typeFilter.length > 0 && (
-                            <CloseIcon
-                                className={styles.clearIcon}
-                                onClick={handleClearType}
-                            />
+                            <Tooltip title={translations.CLEAR_FILTER}>
+                                <CloseIcon
+                                    className={styles.clearIcon}
+                                    onClick={handleClearType}
+                                />
+                            </Tooltip>
                         )}
                     </button>
                 </Menu>
@@ -235,10 +239,12 @@ export default function FilterBar() {
                             )}
                         </div>
                         {yearFilter.length > 0 && (
-                            <CloseIcon
-                                className={styles.clearIcon}
-                                onClick={handleClearYear}
-                            />
+                            <Tooltip title={translations.CLEAR_FILTER}>
+                                <CloseIcon
+                                    className={styles.clearIcon}
+                                    onClick={handleClearYear}
+                                />
+                            </Tooltip>
                         )}
                     </button>
                 </Menu>

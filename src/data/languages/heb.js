@@ -1022,6 +1022,10 @@ export default {
             "value": "סינון"
         },
         {
+            "id": "CLEAR_FILTER",
+            "value": "נקה סינון"
+        },
+        {
             "id": "CLEAR_FILTERS",
             "value": "נקה סינונים"
         },

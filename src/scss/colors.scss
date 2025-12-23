@@ -59,7 +59,7 @@
     --hover-fill: var(--primary-500);
 
     --selected-color: var(--primary-100);
-    --active-color: var(--primary-200);
+    --active-color: var(--primary-500);
 
     --overlay: rgba(255, 255, 255, 0.8);
     --select-color: var(--primary-500);
@@ -79,8 +79,10 @@
     --neutral-800: #f1f5f9;
     --neutral-900: #f8fafc;
 
-    --main-background: #0f172a; /* Slate 900 */
-    --main-background-alternative: #1e293b; /* Slate 800 */
+    --main-background: #0f172a;
+    /* Slate 900 */
+    --main-background-alternative: #1e293b;
+    /* Slate 800 */
     --chrome-background: #1e293b;
     --side-bar-background: #0f172a;
     --bar-background: #1e293b;
@@ -119,7 +121,7 @@
     --hover-fill: var(--primary-400);
 
     --selected-color: var(--neutral-200);
-    --active-color: var(--neutral-300);
+    --active-color: var(--neutral-400);
 
     --overlay: rgba(15, 23, 42, 0.8);
     --select-color: var(--primary-500);
