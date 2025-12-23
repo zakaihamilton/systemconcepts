@@ -11,8 +11,19 @@
 }
 
 .toolbar {
-    width: 100%;
+    flex: 1;
     justify-content: flex-end;
     /* Reset Toolbar defaults if necessary */
     min-height: auto;
+}
+
+.iconToolbar {
+    width: auto;
+    justify-content: flex-end;
+    min-height: auto;
+}
+
+.divider {
+    margin: 0 1em;
+    height: 2em;
 }
