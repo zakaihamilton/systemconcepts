@@ -1,5 +1,7 @@
 import { insertRecord, findRecord, deleteRecord, replaceRecord } from "./mongo";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
+import { hash } from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
 
 const rpName = "App"; // Should be configurable
 
@@ -14,6 +16,9 @@ export async function storeChallenge(userId) {
 }
 
 export async function getPasskeyRegistrationOptions({ id, email, firstName, lastName, origin, rpID, authenticated }) {
+    if (!id) {
+        throw "MISSING_ID";
+    }
     id = id.toLowerCase();
     const user = await findRecord({ collectionName: "users", query: { id } });
 
@@ -46,6 +51,13 @@ export async function getPasskeyRegistrationOptions({ id, email, firstName, last
         },
     });
 
+    // Clean userInfo to avoid undefined values
+    const userInfo = !user ? {
+        email: email || null,
+        firstName: firstName || null,
+        lastName: lastName || null
+    } : null;
+
     // Store challenge
     await insertRecord({
         collectionName: "challenges",
@@ -54,8 +66,7 @@ export async function getPasskeyRegistrationOptions({ id, email, firstName, last
             challenge: options.challenge,
             createdAt: new Date(),
             type: 'register',
-            // Store user info for new user creation
-            userInfo: !user ? { email, firstName, lastName } : null
+            userInfo
         }
     });
 
@@ -63,6 +74,9 @@ export async function getPasskeyRegistrationOptions({ id, email, firstName, last
 }
 
 export async function verifyPasskeyRegistration({ id, response, name, origin, rpID, authenticated }) {
+    if (!id) {
+        throw "MISSING_ID";
+    }
     id = id.toLowerCase();
     const challengeRecord = await findRecord({
         collectionName: "challenges",
@@ -114,15 +128,20 @@ export async function verifyPasskeyRegistration({ id, response, name, origin, rp
             const utc = dateObj.getTime();
             const role = "visitor";
 
+            // Generate a random hash for the user (as session token)
+            const password = uuidv4();
+            const result = await hash(password, 10);
+
             user = {
                 id,
                 email: userInfo.email || id, // Default to id if email missing
-                firstName: userInfo.firstName,
-                lastName: userInfo.lastName,
+                firstName: userInfo.firstName || null,
+                lastName: userInfo.lastName || null,
                 credentials: [newCredential],
                 date,
                 utc,
-                role
+                role,
+                hash: result
             };
 
             await insertRecord({
@@ -150,13 +169,17 @@ export async function verifyPasskeyRegistration({ id, response, name, origin, rp
             query: { userId: id, type: 'register' }
         });
 
-        return { verified: true };
+        // Return user so we can access user.hash if needed (though API might not use it for reg verify)
+        return { verified: true, user };
     }
 
     throw "VERIFICATION_FAILED";
 }
 
 export async function getPasskeys({ id }) {
+    if (!id) {
+        throw "MISSING_ID";
+    }
     id = id.toLowerCase();
     const user = await findRecord({ collectionName: "users", query: { id } });
     if (!user) {
@@ -170,6 +193,9 @@ export async function getPasskeys({ id }) {
 }
 
 export async function deletePasskey({ id, credentialId }) {
+    if (!id) {
+        throw "MISSING_ID";
+    }
     id = id.toLowerCase();
     const user = await findRecord({ collectionName: "users", query: { id } });
     if (!user) {
@@ -247,6 +273,9 @@ export async function getPasskeyAuthOptions({ id, origin, rpID }) {
 }
 
 export async function verifyPasskeyAuth({ id, response, origin, rpID }) {
+    if (!id) {
+        throw "MISSING_ID";
+    }
     id = id.toLowerCase();
     const challengeRecord = await findRecord({
         collectionName: "challenges",
