@@ -70,10 +70,24 @@ function ItemWidget({ className = "", viewMode, selected: selectedItem, columns,
         selected: selectedItem,
         even: index % 2 === 0
     });
+
+    let content = <div className={classes + " " + className} {...rowClick && { onClick }} {...props}>
+        {cells}
+    </div>;
+
+    if (item && item.tooltip) {
+        content = <Tooltip
+            title={item.tooltip}
+            enterDelay={1000}
+            leaveDelay={500}
+            interactive={true}
+        >
+            {content}
+        </Tooltip>;
+    }
+
     return <div className={styles.root} style={style}>
-        <div className={classes + " " + className} {...rowClick && { onClick }} {...props}>
-            {cells}
-        </div>
+        {content}
     </div>;
 }
 

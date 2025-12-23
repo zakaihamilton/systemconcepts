@@ -12,6 +12,7 @@ import MovieIcon from "@mui/icons-material/Movie";
 import AudioIcon from "@icons/Audio";
 import Tooltip from "@mui/material/Tooltip";
 import Image from "@widgets/Image";
+import Summary from "@widgets/Summary";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import clsx from "clsx";
 import { useLocalStorage } from "@util/store";
@@ -201,6 +202,9 @@ export default function SessionsPage() {
         }
         return {
             ...item,
+            tooltip: item.summary ? <div style={{ maxWidth: "30em" }}>
+                <Summary path={item.summary.path.replace(/^\/aws/, "").replace(/^\//, "")} />
+            </div> : null,
             nameWidget,
             group: item.group,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
