@@ -15,6 +15,12 @@
     border-bottom: 2px solid var(--info-color);
 }
 
+.root:focus-visible {
+    outline: 2px solid var(--hover-color);
+    outline-offset: -2px;
+    border: 1px solid var(--hover-color);
+}
+
 .root:hover {
     border: 1px solid var(--hover-color);
 }
