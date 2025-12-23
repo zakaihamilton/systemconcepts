@@ -1040,6 +1040,14 @@ export default {
         {
             "id": "SELECTED",
             "value": "Selected"
+        },
+        {
+            "id": "SHOW_DISABLED_GROUPS",
+            "value": "Show Disabled Groups"
+        },
+        {
+            "id": "HIDE_DISABLED_GROUPS",
+            "value": "Hide Disabled Groups"
         }
     ]
 };
