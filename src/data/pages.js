@@ -135,7 +135,6 @@ export default [
         category: "tools"
     },
     {
-        apps: true,
         sidebar: true,
         id: "settings",
         name: "SETTINGS",
