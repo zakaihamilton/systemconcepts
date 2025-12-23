@@ -4,27 +4,18 @@
     overflow: auto;
     display: flex;
     flex-direction: column;
+    border-right: 1px solid var(--border-color); /* Add a separator */
 }
 
 .container {
     display: flex;
     flex-direction: column;
     flex: 1;
-    border-radius: 0.5em;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    border: 1px solid var(--main-background);
-    background-color: var(--chrome-background);
-
-    [dir=ltr] & {
-        margin-left: 0.5em;
-    }
-
-    [dir=rtl] & {
-        margin-right: 0.5em;
-    }
+    /* Removed margins, borders, and radius for full-height sidebar */
+    background-color: transparent; /* Let the root background show through */
 }
 
 .popupDrawer {
     width: 15em;
+    background-color: var(--side-bar-background);
 }
