@@ -45,6 +45,15 @@
     color: var(--disabled-color);
 }
 
+.duration {
+    font-weight: bold;
+    font-size: 1.1em;
+    background-color: var(--active-background);
+    color: var(--active-text-color);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+}
+
 .content {
     display: flex;
     flex-direction: row;

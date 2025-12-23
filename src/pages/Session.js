@@ -9,10 +9,7 @@ import Image from "@widgets/Image";
 import styles from "./Session.module.scss";
 import Button from "@mui/material/Button";
 import { addPath } from "@util/pages";
-import MovieIcon from "@mui/icons-material/Movie";
-import AudioIcon from "@icons/Audio";
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
-import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
@@ -38,22 +35,10 @@ export default function SessionPage({ group, year, date, name }) {
         return <div className={styles.root}>{translations.NOT_FOUND}</div>;
     }
 
-    const { duration, thumbnail, video, audio, summary } = session;
-
-    const playVideo = () => {
-         addPath("player?suffix=.mp4");
-    };
-
-    const playAudio = () => {
-        addPath("player?suffix=.m4a");
-    };
+    const { duration, thumbnail, video } = session;
 
     const viewImage = () => {
         addPath("image");
-    };
-
-    const viewTranscript = () => {
-        addPath("transcript");
     };
 
     let dateWidget = "";
@@ -65,9 +50,7 @@ export default function SessionPage({ group, year, date, name }) {
     }
 
     const hasVideo = !!video;
-    const hasAudio = !!audio;
     const hasImage = !!thumbnail;
-    const hasTranscript = !!session.subtitles;
 
     return <div className={styles.root}>
         <div className={styles.card}>
@@ -76,7 +59,7 @@ export default function SessionPage({ group, year, date, name }) {
                 <div className={styles.metadata}>
                     <Group name={group} color={session.color} />
                     <span>{dateWidget}</span>
-                    {duration > 1 && <span>{formatDuration(duration * 1000, true)}</span>}
+                    {duration > 1 && <span className={styles.duration}>{formatDuration(duration * 1000, true)}</span>}
                 </div>
             </div>
             <div className={styles.content}>
@@ -90,24 +73,6 @@ export default function SessionPage({ group, year, date, name }) {
                         clickForImage={false}
                     />}
                     <div className={styles.actions}>
-                        {hasVideo && <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<MovieIcon />}
-                            onClick={playVideo}
-                            fullWidth
-                        >
-                            {translations.VIDEO}
-                        </Button>}
-                        {hasAudio && <Button
-                            variant="contained"
-                            color="secondary"
-                            startIcon={<AudioIcon />}
-                            onClick={playAudio}
-                            fullWidth={!hasVideo}
-                        >
-                            {translations.AUDIO}
-                        </Button>}
                          {hasImage && !hasVideo && <Button
                             variant="outlined"
                             startIcon={<InsertPhotoIcon />}
@@ -115,20 +80,13 @@ export default function SessionPage({ group, year, date, name }) {
                         >
                             {translations.IMAGE}
                         </Button>}
-                         {hasTranscript && <Button
-                            variant="outlined"
-                            startIcon={<DescriptionIcon />}
-                            onClick={viewTranscript}
-                        >
-                            {translations.TRANSCRIPT}
-                        </Button>}
                     </div>
                 </div>
                 <div className={styles.details}>
-                    {summary && <div className={styles.summary}>
-                        <Summary path={summary.path.replace(/^\/aws/, "").replace(/^\//, "")} />
+                    {session.summary && <div className={styles.summary}>
+                        <Summary path={session.summary.path.replace(/^\/aws/, "").replace(/^\//, "")} />
                     </div>}
-                    {!summary && <div className={styles.summary}>{translations.NO_SUMMARY}</div>}
+                    {!session.summary && <div className={styles.summary}>{translations.NO_SUMMARY}</div>}
                 </div>
             </div>
         </div>
