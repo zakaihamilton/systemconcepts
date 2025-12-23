@@ -1,6 +1,7 @@
 const MongoClient = require("mongodb").MongoClient;
 const { lockMutex } = require("./mutex");
 import { getSafeError } from "./safeError";
+import { sanitizeQuery } from "./mongoSanitize";
 
 const _clusters = [];
 
@@ -115,6 +116,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             }
             else {
                 const parsedQuery = query && JSON.parse(decodeURIComponent(query));
+                sanitizeQuery(parsedQuery);
                 let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
                 if (!result) {
                     result = [];
