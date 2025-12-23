@@ -7,6 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import { ContentSize } from "@components/Page/Content";
 import styles from "./Table.module.scss";
 import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/styles";
 import { importData, exportData } from "@util/importExport";
 import Row from "./Table/Row";
 import Item from "./Table/Item";
@@ -90,6 +91,7 @@ export default function TableWidget(props) {
         ...otherProps
     } = props;
     const translations = useTranslations();
+    const isDesktop = useDeviceType() === "desktop";
     const [isEmpty, setEmpty] = useState(false);
     const statusBarIsActive = StatusBarStore.useState(s => s.active);
     columns = columns || [];
@@ -262,7 +264,8 @@ export default function TableWidget(props) {
             name: translations.SORT,
             icon: <SortIcon />,
             items: sortItems,
-            divider: true
+            divider: true,
+            menu: !isDesktop
         },
         viewMode === "table" && data && data.length >= 10 && {
             id: "itemsPerPage",
@@ -270,7 +273,8 @@ export default function TableWidget(props) {
             name: translations.ROWS_PER_PAGE,
             icon: <ViewStreamIcon />,
             items: itemsPerPageItems,
-            divider: true
+            divider: true,
+            menu: !isDesktop
         },
         ...(viewModesList.length > 1 ? viewModesList.map(item => {
             return {

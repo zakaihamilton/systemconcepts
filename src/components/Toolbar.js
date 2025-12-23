@@ -71,7 +71,15 @@ export function useToolbarItems({ location }) {
         }
         return item;
     })).flat();
-    sectionItems = sectionItems.filter(item => item && (item.location === location || (!location && !item.location)));
+    sectionItems = sectionItems.filter(item => {
+        if (!item) {
+            return false;
+        }
+        if (Array.isArray(location)) {
+            return location.includes(item.location) || (!item.location && location.includes(undefined));
+        }
+        return item.location === location || (!location && !item.location);
+    });
     return sectionItems;
 }
 
