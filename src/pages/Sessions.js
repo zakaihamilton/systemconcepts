@@ -111,10 +111,10 @@ export default function SessionsPage() {
             id: "groupWidget",
             title: translations.GROUP,
             sortable: "group",
-            selected: () => groupFilter,
+            selected: () => groupFilter.length,
             onSelectable: item => typeof item.group !== "undefined",
             onClick: item => SessionsStore.update(s => {
-                const group = typeof item.group !== "undefined" && (item.group[0].toUpperCase() + item.group.slice(1));
+                const group = typeof item.group !== "undefined" && item.group;
                 if (s.groupFilter.includes(group)) {
                     s.groupFilter = s.groupFilter.filter(g => g !== group);
                 }
@@ -164,7 +164,7 @@ export default function SessionsPage() {
             });
         };
         const icon = <Tooltip arrow title={title}>
-            <div style={style} className={styles.icon + " " + (typeFilter ? styles.active : "")} onClick={onClickIcon} id={item.type}>
+            <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
                 {item.type === "video" && <MovieIcon />}
                 {item.type === "audio" && <AudioIcon />}
                 {item.type === "image" && <InsertPhotoOutlinedIcon />}

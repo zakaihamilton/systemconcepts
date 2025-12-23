@@ -136,7 +136,7 @@ export default function FilterBar() {
     const getGroupLabel = () => {
         if (groupFilter.length === 0) return translations.GROUPS;
         if (groupFilter.length === 1) {
-            const capitalizedName = groupFilter[0][0].toUpperCase() + groupFilter[0].slice(1);
+            const capitalizedName = groupFilter?.[0]?.[0]?.toUpperCase() + groupFilter?.[0]?.slice(1);
             return {
                 main: capitalizedName,
                 sub: translations.GROUP
