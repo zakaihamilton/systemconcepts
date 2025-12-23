@@ -260,9 +260,15 @@ export default function SessionsPage() {
             }}
             depends={[groupFilter, typeFilter, translations, viewMode]}
             resetScrollDeps={[groupFilter, typeFilter]}
-            getSeparator={(item, prevItem, orderBy, order, viewMode) => {
-                if (viewMode === "list" && orderBy === "date") {
+            getSeparator={(item, prevItem, orderBy, viewMode) => {
+                if (orderBy === "date") {
                     return item.date !== prevItem.date;
+                }
+                if (orderBy === "group") {
+                    return item.group !== prevItem.group;
+                }
+                if (orderBy === "typeOrder") {
+                    return item.type !== prevItem.type;
                 }
                 return false;
             }}

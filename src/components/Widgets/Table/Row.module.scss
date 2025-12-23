@@ -4,6 +4,10 @@
     border: none !important;
 }
 
+.cell.separator {
+    border-top: 2px solid var(--neutral-300) !important;
+}
+
 .cell.padding {
     padding-left: 0.5em !important;
     padding-right: 0.5em !important;
@@ -39,6 +43,10 @@
 
 .row.even {
     background-color: var(--main-background-alternative);
+}
+
+.row.separator {
+    border-top: 2px solid var(--neutral-300);
 }
 
 .row.hover {

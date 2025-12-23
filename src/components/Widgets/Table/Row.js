@@ -4,7 +4,7 @@ import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
 
-export default function RowWidget({ className = "", viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
+export default function RowWidget({ className = "", separator, viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, onClick, selected } = column;
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
@@ -23,7 +23,8 @@ export default function RowWidget({ className = "", viewMode, index, selected: s
                     onSelectable && onSelectable(item) && styles.selectable,
                     isSelected && styles.selected,
                     isSelected && selectedClassName,
-                    viewModeClassName
+                    viewModeClassName,
+                    separator && styles.separator
                 )
             }}
             style={{ height: rowHeight, ...viewModeStyle }}
@@ -38,6 +39,7 @@ export default function RowWidget({ className = "", viewMode, index, selected: s
     };
     const classes = useStyles(styles, {
         row: true,
+        separator,
         hover: !!rowClick,
         selected: selectedRow,
         even: index % 2 === 0

@@ -458,6 +458,14 @@ export default function TableWidget(props) {
             const { style, ...props } = viewModes[viewMode] || {};
             const { id, key } = item;
             const selected = selectedRow && selectedRow(item);
+            const itemIndex = startIdx + idx;
+            let separator = false;
+            if (getSeparator && itemIndex > 0) {
+                const prevItem = items[itemIndex - 1];
+                if (item && prevItem) {
+                    separator = getSeparator(item, prevItem, orderBy, viewMode);
+                }
+            }
             return <Row
                 key={key || id || idx}
                 index={idx}
@@ -468,6 +476,7 @@ export default function TableWidget(props) {
                 viewMode={viewMode}
                 style={style}
                 selected={selected}
+                separator={separator}
                 {...props}
             />;
         });
@@ -477,7 +486,7 @@ export default function TableWidget(props) {
             {!!isEmpty && !loading && emptyElement}
             {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
                 {!!statusBarVisible && statusBar}
-                {!error && <Table className={styles.table} stickyHeader style={style}>
+                {!error && <Table classes={{ root: styles.table }} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
                             {tableColumns}
@@ -527,7 +536,7 @@ export default function TableWidget(props) {
 }
 
 const TableListRow = ({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, order, getSeparator } = data;
+    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator } = data;
     const itemIndex = hideColumns ? index : index - 1;
     const item = items[itemIndex];
     const { id, key } = item || {};
@@ -542,7 +551,7 @@ const TableListRow = ({ index, style, data }) => {
     if (getSeparator && itemIndex > 0) {
         const prevItem = items[itemIndex - 1];
         if (item && prevItem) {
-            separator = getSeparator(item, prevItem, orderBy, order, viewMode);
+            separator = getSeparator(item, prevItem, orderBy, viewMode);
         }
     }
 
