@@ -61,7 +61,7 @@ export default function WeekView({ sessions, date, store }) {
         };
     });
 
-    const weekWidget = <Input select={true} label={translations.WEEK} helperText="" fullWidth={false} style={{ minWidth: "3em" }} items={weekItems} state={weekState} />;
+    const weekWidget = <Input select={true} label={translations.WEEK} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={weekItems} state={weekState} />;
 
     const monthState = [month.getMonth() + 1, month => {
         const newDate = new Date(date);
