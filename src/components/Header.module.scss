@@ -1,6 +1,7 @@
 .root {
     display: flex;
     overflow: hidden;
+    background: var(--app-bar-background-gradient);
     background-color: var(--app-bar-background); /* Use the new app bar background */
     box-sizing: border-box;
     /* Removed margin and border-radius for a sleek, full-width look */
