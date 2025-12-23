@@ -136,6 +136,7 @@ export default [
     },
     {
         apps: true,
+        sidebar: true,
         id: "settings",
         name: "SETTINGS",
         Icon: SettingsIcon,
