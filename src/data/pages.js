@@ -50,12 +50,6 @@ const ChangePassword = dynamic(() => import("@pages/ChangePassword"), { loading:
 const ResetPassword = dynamic(() => import("@pages/ResetPassword"), { loading: () => <PageLoad /> });
 import { getResetSection } from "@pages/ResetPassword/Section";
 
-import TableChartIcon from "@mui/icons-material/TableChart";
-const Diagrams = dynamic(() => import("@pages/Diagrams"), { loading: () => <PageLoad /> });
-
-import LabelIcon from "@mui/icons-material/Label";
-const Terms = dynamic(() => import("@pages/Terms"), { loading: () => <PageLoad /> });
-
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 const Sessions = dynamic(() => import("@pages/Sessions"), { loading: () => <PageLoad /> });
 
@@ -78,8 +72,6 @@ const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad
 
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
-
-import diagrams from "@data/diagrams";
 
 export default [
     {
@@ -191,20 +183,6 @@ export default [
     },
     {
         apps: true,
-        id: "diagrams",
-        name: "DIAGRAMS",
-        Icon: TableChartIcon,
-        Component: Diagrams
-    },
-    {
-        apps: true,
-        id: "terms",
-        name: "TERMS",
-        Icon: LabelIcon,
-        Component: Terms
-    },
-    {
-        apps: true,
         id: "sessions",
         name: "SESSIONS",
         Icon: VideoLibraryIcon,
@@ -261,16 +239,5 @@ export default [
         Component: Bookmarks,
         category: "bookmarks",
         divider: true
-    },
-    ...diagrams.map(diagram => {
-        let { Icon } = diagram;
-        if (!Icon) {
-            Icon = TableChartIcon;
-        }
-        return {
-            ...diagram,
-            tooltip: "DIAGRAM",
-            Icon
-        };
-    })
+    }
 ];
