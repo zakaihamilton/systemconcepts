@@ -310,29 +310,6 @@ export function useSessions(depends = [], options = {}) {
             },
             active: typeFilter?.length || yearFilter?.length || groupFilter?.length,
             divider: true,
-        },
-        groupFilter.length && {
-            id: "clearGroups",
-            name: translations.CLEAR_GROUPS,
-            icon: <GroupOffIcon />,
-            onClick: () => {
-                SessionsStore.update(s => {
-                    s.groupFilter = [];
-                });
-            },
-            location: "header"
-        },
-        (typeFilter?.length || yearFilter?.length) && {
-            id: "clearFilters",
-            name: translations.CLEAR_FILTERS,
-            icon: <FilterAltOffIcon />,
-            onClick: () => {
-                SessionsStore.update(s => {
-                    s.typeFilter = [];
-                    s.yearFilter = [];
-                });
-            },
-            location: "header"
         }
     ].filter(Boolean);
 

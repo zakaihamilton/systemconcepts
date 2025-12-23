@@ -1028,6 +1028,10 @@ export default {
         {
             "id": "CLEAR_GROUPS",
             "value": "נקה קבוצות"
+        },
+        {
+            "id": "SELECTED",
+            "value": "נבחר"
         }
     ]
 };

@@ -1032,6 +1032,10 @@ export default {
         {
             "id": "CLEAR_GROUPS",
             "value": "Clear Groups"
+        },
+        {
+            "id": "SELECTED",
+            "value": "Selected"
         }
     ]
 };

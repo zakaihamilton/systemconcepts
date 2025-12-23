@@ -1032,6 +1032,10 @@ export default {
         {
             "id": "APPLY_FILTERS",
             "value": "Aplicar Filtros"
+        },
+        {
+            "id": "SELECTED",
+            "value": "Selecionado"
         }
     ]
 };

@@ -8,6 +8,7 @@ import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CloseIcon from "@mui/icons-material/Close";
 import Menu from "@widgets/Menu";
 import styles from "./FilterBar.module.scss";
 import clsx from "clsx";
@@ -43,7 +44,7 @@ export default function FilterBar() {
     }, [sessions]);
 
     const groupMenuItems = useMemo(() => {
-        const items = (groups || []).map(group => {
+        return (groups || []).map(group => {
             const metadata = (groupMetadata || []).find(item => item.name === group.name) || {};
             const capitalizedName = group.name[0].toUpperCase() + group.name.slice(1);
             return {
@@ -64,26 +65,10 @@ export default function FilterBar() {
                 }
             };
         });
-
-        // Add clear all option if filters are active
-        if (groupFilter.length > 0) {
-            items.unshift({
-                id: "_clear",
-                name: translations.CLEAR_ALL || "Clear all",
-                divider: true,
-                onClick: () => {
-                    SessionsStore.update(s => {
-                        s.groupFilter = [];
-                    });
-                }
-            });
-        }
-
-        return items;
-    }, [groups, groupMetadata, groupFilter, translations]);
+    }, [groups, groupMetadata, groupFilter]);
 
     const typeMenuItems = useMemo(() => {
-        const items = types.map(type => ({
+        return types.map(type => ({
             id: type.id,
             name: type.name,
             icon: type.icon,
@@ -99,26 +84,10 @@ export default function FilterBar() {
                 });
             }
         }));
-
-        // Add clear all option if filters are active
-        if (typeFilter.length > 0) {
-            items.unshift({
-                id: "_clear",
-                name: translations.CLEAR_ALL || "Clear all",
-                divider: true,
-                onClick: () => {
-                    SessionsStore.update(s => {
-                        s.typeFilter = [];
-                    });
-                }
-            });
-        }
-
-        return items;
-    }, [types, typeFilter, translations]);
+    }, [types, typeFilter]);
 
     const yearMenuItems = useMemo(() => {
-        const items = years.map(year => ({
+        return years.map(year => ({
             id: year,
             name: year,
             checked: yearFilter.includes(year),
@@ -133,45 +102,50 @@ export default function FilterBar() {
                 });
             }
         }));
-
-        // Add clear all option if filters are active
-        if (yearFilter.length > 0) {
-            items.unshift({
-                id: "_clear",
-                name: translations.CLEAR_ALL || "Clear all",
-                divider: true,
-                onClick: () => {
-                    SessionsStore.update(s => {
-                        s.yearFilter = [];
-                    });
-                }
-            });
-        }
-
-        return items;
-    }, [years, yearFilter, translations]);
+    }, [years, yearFilter]);
 
     const getTypeLabel = () => {
-        if (typeFilter.length === 0) return translations.TYPE || "Type";
+        if (typeFilter.length === 0) return translations.TYPE;
         if (typeFilter.length === 1) {
             const type = types.find(t => t.id === typeFilter[0]);
             return type?.name || typeFilter[0];
         }
-        return `${typeFilter.length} ${translations.SELECTED || "selected"}`;
+        return `${typeFilter.length} ${translations.SELECTED}`;
     };
 
     const getYearLabel = () => {
-        if (yearFilter.length === 0) return translations.YEARS || translations.YEAR || "Years";
+        if (yearFilter.length === 0) return translations.YEARS;
         if (yearFilter.length === 1) return yearFilter[0];
-        return `${yearFilter.length} ${translations.SELECTED || "selected"}`;
+        return `${yearFilter.length} ${translations.SELECTED}`;
     };
 
     const getGroupLabel = () => {
-        if (groupFilter.length === 0) return translations.GROUPS || "Groups";
+        if (groupFilter.length === 0) return translations.GROUPS;
         if (groupFilter.length === 1) {
             return groupFilter[0][0].toUpperCase() + groupFilter[0].slice(1);
         }
-        return `${groupFilter.length} ${translations.SELECTED || "selected"}`;
+        return `${groupFilter.length} ${translations.SELECTED}`;
+    };
+
+    const handleClearGroup = (e) => {
+        e.stopPropagation();
+        SessionsStore.update(s => {
+            s.groupFilter = [];
+        });
+    };
+
+    const handleClearType = (e) => {
+        e.stopPropagation();
+        SessionsStore.update(s => {
+            s.typeFilter = [];
+        });
+    };
+
+    const handleClearYear = (e) => {
+        e.stopPropagation();
+        SessionsStore.update(s => {
+            s.yearFilter = [];
+        });
     };
 
     return (
@@ -182,24 +156,42 @@ export default function FilterBar() {
                 {/* Groups Filter Dropdown */}
                 <Menu items={groupMenuItems} selected={groupFilter}>
                     <button className={clsx(styles.dropdownButton, groupFilter.length > 0 && styles.active)}>
-                        <span>{getGroupLabel()}</span>
                         <ArrowDropDownIcon className={styles.arrow} />
+                        <span>{getGroupLabel()}</span>
+                        {groupFilter.length > 0 && (
+                            <CloseIcon
+                                className={styles.clearIcon}
+                                onClick={handleClearGroup}
+                            />
+                        )}
                     </button>
                 </Menu>
 
                 {/* Type Filter Dropdown */}
                 <Menu items={typeMenuItems} selected={typeFilter}>
                     <button className={clsx(styles.dropdownButton, typeFilter.length > 0 && styles.active)}>
-                        <span>{getTypeLabel()}</span>
                         <ArrowDropDownIcon className={styles.arrow} />
+                        <span>{getTypeLabel()}</span>
+                        {typeFilter.length > 0 && (
+                            <CloseIcon
+                                className={styles.clearIcon}
+                                onClick={handleClearType}
+                            />
+                        )}
                     </button>
                 </Menu>
 
                 {/* Year Filter Dropdown */}
                 <Menu items={yearMenuItems} selected={yearFilter}>
                     <button className={clsx(styles.dropdownButton, yearFilter.length > 0 && styles.active)}>
-                        <span>{getYearLabel()}</span>
                         <ArrowDropDownIcon className={styles.arrow} />
+                        <span>{getYearLabel()}</span>
+                        {yearFilter.length > 0 && (
+                            <CloseIcon
+                                className={styles.clearIcon}
+                                onClick={handleClearYear}
+                            />
+                        )}
                     </button>
                 </Menu>
             </div>

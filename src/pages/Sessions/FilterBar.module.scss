@@ -39,7 +39,7 @@
 .dropdownButton {
     display: flex;
     align-items: center;
-    gap: 0.5em;
+    gap: 0.4em;
     padding: 0.6em 1.2em;
     background: var(--toolbar-background);
     border: 2px solid transparent;
@@ -50,28 +50,41 @@
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
-    min-width: 140px;
-    justify-content: space-between;
+    min-width: 160px;
 
     &:hover {
         background: var(--hover-background);
         border-color: rgba(var(--primary-color-rgb, 66, 133, 244), 0.3);
     }
 
-    &.active {
-        background: var(--primary-color);
-        color: var(--primary-color-text);
-        border-color: rgba(var(--primary-color-text-rgb, 255, 255, 255), 0.2);
-
-        .arrow {
-            color: var(--primary-color-text);
-        }
-    }
-
     @media (max-width: 768px) {
         min-width: 110px;
         padding: 0.5em 1em;
         font-size: 0.85em;
+    }
+}
+
+.clearIcon {
+    font-size: 1.1em;
+    opacity: 0.7;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    transform: scale(1);
+    transition: all 0.1s ease;
+
+    &:hover {
+        opacity: 1;
+        background: var(--inverse-main-background);
+        color: var(--inverse-text-color);
+    }
+
+    &:active {
+        transform: scale(1.2);
     }
 }
 
