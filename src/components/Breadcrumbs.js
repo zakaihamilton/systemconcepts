@@ -83,6 +83,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
+    const isTablet = deviceType === "tablet";
     let breadcrumbItems = (items || []).filter(({ breadcrumbs }) => typeof breadcrumbs === "undefined" || breadcrumbs);
     breadcrumbItems = breadcrumbItems.map((item, index, list) => {
         const { id, url, ...props } = item;
@@ -103,14 +104,14 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
             <div className={styles.row}>
                 <NoSsr>
                     {!!bar && <MenuIcon />}
-                    {<Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                    {<Divider orientation="vertical" />}
                     <div className={styles.breadcrumbs}>
                         {breadcrumbItems}
                     </div>
                     {!!bar && <>
+                        <Toolbar collapsable={true} location={isPhone || isTablet ? ["header", undefined] : undefined} />
+                        {isDesktop && <Divider orientation="vertical" />}
                         {isDesktop && <Toolbar collapsable={true} location="header" />}
-                        {isDesktop && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
-                        <Toolbar collapsable={true} location={isPhone ? ["header", undefined] : undefined} />
                     </>}
                 </NoSsr>
             </div>
