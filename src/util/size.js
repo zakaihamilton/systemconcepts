@@ -30,7 +30,7 @@ export function useResize(depends = []) {
             window.removeEventListener("resize", handler);
             clearTimeout(timerHandle);
         };
-    }, [dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [dependsString]);
 
     return counter;
 }
