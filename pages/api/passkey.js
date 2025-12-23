@@ -1,24 +1,49 @@
 import { getSafeError } from "@util/safeError";
-import { getPasskeyRegistrationOptions, verifyPasskeyRegistration, getPasskeyAuthOptions, verifyPasskeyAuth } from "@util/passkey";
+import { 
+    getPasskeyRegistrationOptions, 
+    verifyPasskeyRegistration, 
+    getPasskeyAuthOptions, 
+    verifyPasskeyAuth 
+} from "@util/passkey";
 import { login } from "@util/login";
 
+/**
+ * Dynamically determines the RP_ID and Origin based on the request.
+ * This ensures Vercel Preview URLs and Localhost work without changing Env Vars.
+ */
+const getWebAuthnConfig = (req) => {
+    // Get host from Vercel headers or standard host header
+    const host = req.headers['x-forwarded-host'] || req.headers['host'];
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    
+    return {
+        origin: `${protocol}://${host}`,
+        rpID: host.split(':')[0] // Removes port if present (e.g., localhost:3000 -> localhost)
+    };
+};
+
 export default async function PASSKEY_API(req, res) {
+    // 1. Extract dynamic configuration
+    const { origin, rpID } = getWebAuthnConfig(req);
+
     if (req.method === "GET") {
         const { action, id, email } = req.query;
         try {
             if (action === "register-options") {
-                // Require authentication
                 const { hash } = req.headers || req.cookies;
-                if (!hash) {
-                    return res.status(401).json({ error: "Unauthorized" });
-                }
+                if (!hash) return res.status(401).json({ error: "Unauthorized" });
+                
                 await login({ id, hash, api: "passkey-register-options" });
 
-                const options = await getPasskeyRegistrationOptions({ id, email });
+                // 2. Pass rpID to options generator
+                const options = await getPasskeyRegistrationOptions({ id, email, rpID });
                 res.status(200).json(options);
+
             } else if (action === "auth-options") {
-                const options = await getPasskeyAuthOptions({ id });
+                // 3. Pass rpID to auth generator
+                const options = await getPasskeyAuthOptions({ id, rpID });
                 res.status(200).json(options);
+
             } else {
                 res.status(400).json({ error: "Invalid action" });
             }
@@ -32,19 +57,20 @@ export default async function PASSKEY_API(req, res) {
 
         try {
             if (action === "register-verify") {
-                // Require authentication
                 const { hash } = req.headers || req.cookies;
-                 if (!hash) {
-                    return res.status(401).json({ error: "Unauthorized" });
-                }
+                if (!hash) return res.status(401).json({ error: "Unauthorized" });
+                
                 await login({ id, hash, api: "passkey-register-verify" });
 
-                const result = await verifyPasskeyRegistration({ id, response });
+                // 4. Pass origin and rpID to verification
+                const result = await verifyPasskeyRegistration({ id, response, origin, rpID });
                 res.status(200).json(result);
+
             } else if (action === "auth-verify") {
-                const user = await verifyPasskeyAuth({ id, response });
-                // Return the hash (session token) just like normal login
+                // 5. Pass origin and rpID to auth verification
+                const user = await verifyPasskeyAuth({ id, response, origin, rpID });
                 res.status(200).json({ hash: user.hash });
+
             } else {
                 res.status(400).json({ error: "Invalid action" });
             }
