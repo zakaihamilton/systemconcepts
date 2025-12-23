@@ -8,8 +8,11 @@ import Tooltip from "@mui/material/Tooltip";
 import Menu from "@widgets/Menu";
 import { addPath, toPath } from "@util/pages";
 import HoverButton from "@widgets/HoverButton";
+import { getSessionTextColor } from "@util/colors";
+import { useTheme } from "@mui/material/styles";
 
 export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter }) {
+    const theme = useTheme();
     const style = {
         gridColumn: column,
         gridRow: row
@@ -27,6 +30,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
             id: item.name,
             name: item.name,
             backgroundColor: item.color,
+            style: { color: getSessionTextColor(item.color, theme) },
             icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
             description: groupName,
             target: "#schedule/" + toPath(path),
