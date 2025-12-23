@@ -13,7 +13,7 @@
 }
 
 .searchExpanded {
-    width: 15em;
+    width: 10em;
     cursor: text;
 }
 
@@ -37,6 +37,7 @@
 .searchExpanded .inputRoot {
     opacity: 1;
 }
+
 @media (max-width: 768px) {
     .searchExpanded {
         width: 10em;

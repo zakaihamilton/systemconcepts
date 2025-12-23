@@ -16,7 +16,9 @@ export const SearchStore = new Store({
 });
 
 export function useSearch(name, updateCallback) {
-    const isPhone = useDeviceType() === "phone";
+    const deviceType = useDeviceType();
+    const isPhone = deviceType === "phone";
+    const isDesktop = deviceType === "desktop";
     if (typeof name === "function") {
         updateCallback = name;
         name = "default";
@@ -46,7 +48,7 @@ export function useSearch(name, updateCallback) {
             divider: true,
             menu: false,
             location: isPhone && "header",
-            element: <div className={clsx(styles.search, (focused || value) && styles.searchExpanded)} onClick={() => {
+            element: <div className={clsx(styles.search, (isDesktop || focused || value) && styles.searchExpanded)} onClick={() => {
                 if (!focused && inputRef.current) {
                     inputRef.current.focus();
                 }
@@ -73,7 +75,7 @@ export function useSearch(name, updateCallback) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations, focused] });
+    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations, focused, deviceType] });
 
     return searchTerm;
 }
