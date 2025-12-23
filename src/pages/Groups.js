@@ -10,6 +10,8 @@ import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { formatDuration } from "@util/string";
 import UpdateIcon from "@mui/icons-material/Update";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
@@ -19,13 +21,14 @@ import { useSessions } from "@util/sessions";
 registerToolbar("Groups");
 
 export const GroupsStore = new Store({
-    counter: 0
+    counter: 0,
+    showDisabled: false
 });
 
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
-    const { counter } = GroupsStore.useState();
+    const { counter, showDisabled } = GroupsStore.useState();
     const [groups, loading, setGroups] = useGroups([counter]);
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
     const [sessions, loadingSessions] = useSessions([], { filterSessions: false });
@@ -66,10 +69,18 @@ export default function Groups() {
             onClick: updateAllSessions,
             location: "header",
             menu: true
+        },
+        {
+            id: "showDisabled",
+            name: showDisabled ? translations.HIDE_DISABLED_GROUPS : translations.SHOW_DISABLED_GROUPS,
+            icon: showDisabled ? <VisibilityOffIcon className={className} /> : <VisibilityIcon className={className} />,
+            onClick: () => GroupsStore.update(s => { s.showDisabled = !s.showDisabled; }),
+            location: "header",
+            menu: true
         }
     ];
 
-    useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000), groups] });
+    useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000), groups, showDisabled] });
 
     const withProgress = status && !!status.length;
 
@@ -133,7 +144,7 @@ export default function Groups() {
             name="groups"
             store={GroupsStore}
             columns={columns}
-            data={groups}
+            data={groups.filter(item => !item.disabled || showDisabled)}
             refresh={() => {
                 GroupsStore.update(s => {
                     s.counter++;
@@ -147,7 +158,7 @@ export default function Groups() {
             }}
             mapper={mapper}
             loading={loading || loadingSessions}
-            depends={[translations, status, updateGroup, sessions]}
+            depends={[translations, status, updateGroup, sessions, showDisabled]}
         />
     </>;
 }
