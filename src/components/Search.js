@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import InputBase from "@mui/material/InputBase";
 import styles from "./Search.module.scss";
 import SearchIcon from "@mui/icons-material/Search";
@@ -7,6 +7,7 @@ import { Store } from "pullstate";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useTimeout } from "@util/timers";
 import { useDeviceType } from "@util/styles";
+import clsx from "clsx";
 
 registerToolbar("Search", 200);
 
@@ -24,7 +25,9 @@ export function useSearch(name, updateCallback) {
     const { search } = SearchStore.useState();
     const searchTerm = search[name] || "";
     const [value, setValue] = useState(searchTerm);
+    const [focused, setFocused] = useState(false);
     const translations = useTranslations();
+    const inputRef = useRef(null);
     useTimeout(() => {
         SearchStore.update(s => {
             s.search[name] = value;
@@ -43,14 +46,23 @@ export function useSearch(name, updateCallback) {
             divider: true,
             menu: false,
             location: isPhone && "header",
-            element: <div className={styles.search}>
+            element: <div className={clsx(styles.search, (focused || value) && styles.searchExpanded)} onClick={() => {
+                if (!focused && inputRef.current) {
+                    inputRef.current.focus();
+                }
+            }}>
                 <div className={styles.searchIcon}>
                     <SearchIcon />
                 </div>
                 <InputBase
+                    inputRef={node => {
+                        inputRef.current = node;
+                    }}
                     placeholder={translations.SEARCH + "…"}
                     value={value}
                     onChange={onChangeText}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
                     type="search"
                     classes={{
                         root: styles.inputRoot
@@ -61,7 +73,7 @@ export function useSearch(name, updateCallback) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations] });
+    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations, focused] });
 
     return searchTerm;
 }
