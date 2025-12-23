@@ -6,6 +6,15 @@
     margin-left: 0.5em;
     margin-right: 0.5em;
     height: 3em;
+    width: 3em;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.searchExpanded {
+    width: 15em;
+    cursor: text;
 }
 
 .searchIcon {
@@ -20,4 +29,11 @@
 .inputRoot {
     color: inherit;
     margin: 0.3em;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchExpanded .inputRoot {
+    opacity: 1;
 }
