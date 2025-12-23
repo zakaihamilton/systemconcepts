@@ -2,8 +2,6 @@ import { insertRecord, findRecord, deleteRecord, replaceRecord } from "./mongo";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
 
 const rpName = "App"; // Should be configurable
-const rpID = process.env.WEBAUTHN_RP_ID || "localhost";
-const origin = process.env.WEBAUTHN_ORIGIN || "http://localhost:3000";
 
 export async function storeChallenge(userId) {
     // We store the challenge in a separate collection or within the user if we want to ensure only one challenge per user.
@@ -15,7 +13,7 @@ export async function storeChallenge(userId) {
     // Actually @simplewebauthn generates the challenge.
 }
 
-export async function getPasskeyRegistrationOptions({ id, email }) {
+export async function getPasskeyRegistrationOptions({ id, email, origin, rpID }) {
     id = id.toLowerCase();
     const user = await findRecord({ collectionName: "users", query: { id } });
     if (!user) {
@@ -61,7 +59,7 @@ export async function getPasskeyRegistrationOptions({ id, email }) {
     return options;
 }
 
-export async function verifyPasskeyRegistration({ id, response, name }) {
+export async function verifyPasskeyRegistration({ id, response, name, origin, rpID }) {
     id = id.toLowerCase();
     const challengeRecord = await findRecord({
         collectionName: "challenges",
@@ -156,7 +154,7 @@ export async function deletePasskey({ id, credentialId }) {
     return { success: true };
 }
 
-export async function getPasskeyAuthOptions({ id }) {
+export async function getPasskeyAuthOptions({ id, origin, rpID }) {
     let user = null;
     if (id) {
         id = id.toLowerCase();
@@ -213,7 +211,7 @@ export async function getPasskeyAuthOptions({ id }) {
     return options;
 }
 
-export async function verifyPasskeyAuth({ id, response }) {
+export async function verifyPasskeyAuth({ id, response, origin, rpID }) {
     id = id.toLowerCase();
     const challengeRecord = await findRecord({
         collectionName: "challenges",

@@ -3,6 +3,12 @@ import { getPasskeyRegistrationOptions, verifyPasskeyRegistration, getPasskeyAut
 import { login } from "@util/login";
 
 export default async function PASSKEY_API(req, res) {
+    // Determine RP ID and Origin from the request
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const origin = `${protocol}://${host}`;
+    const rpID = host.split(":")[0]; // Remove port if present
+
     if (req.method === "GET") {
         const { action, id, email } = req.query;
         try {
@@ -14,10 +20,10 @@ export default async function PASSKEY_API(req, res) {
                 }
                 await login({ id, hash, api: "passkey-register-options" });
 
-                const options = await getPasskeyRegistrationOptions({ id, email });
+                const options = await getPasskeyRegistrationOptions({ id, email, origin, rpID });
                 res.status(200).json(options);
             } else if (action === "auth-options") {
-                const options = await getPasskeyAuthOptions({ id });
+                const options = await getPasskeyAuthOptions({ id, origin, rpID });
                 res.status(200).json(options);
             } else if (action === "list") {
                 // Require authentication
@@ -68,10 +74,10 @@ export default async function PASSKEY_API(req, res) {
                 // response body contains the attestation and optionally a name
                 const { name, ...attResp } = response;
 
-                const result = await verifyPasskeyRegistration({ id, response: attResp, name });
+                const result = await verifyPasskeyRegistration({ id, response: attResp, name, origin, rpID });
                 res.status(200).json(result);
             } else if (action === "auth-verify") {
-                const user = await verifyPasskeyAuth({ id, response });
+                const user = await verifyPasskeyAuth({ id, response, origin, rpID });
                 // Return the hash (session token) just like normal login
                 res.status(200).json({ hash: user.hash });
             } else {
