@@ -55,17 +55,19 @@ export default function SideBar() {
         }
         return { ...item, target };
     });
-    items.push({
-        id: "bookmarks",
-        name: translations.BOOKMARKS,
-        icon: <BookmarkIcon />,
-        items: [
-            ...pages.filter(page => page.sidebar && page.category === "bookmarks").map(item => {
-                return { ...item, target: item.path || item.id };
-            }),
-            ...bookmarks],
-        divider: true
-    });
+    if (bookmarks && bookmarks.length) {
+        items.push({
+            id: "bookmarks",
+            name: translations.BOOKMARKS,
+            icon: <BookmarkIcon />,
+            items: [
+                ...pages.filter(page => page.sidebar && page.category === "bookmarks").map(item => {
+                    return { ...item, target: item.path || item.id };
+                }),
+                ...bookmarks],
+            divider: true
+        });
+    }
 
     if (isMobile) {
         return <Drawer
