@@ -107,7 +107,11 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
                     <div className={styles.breadcrumbs}>
                         {breadcrumbItems}
                     </div>
-                    {!!bar && !isDesktop && <Toolbar collapsable={true} location={isPhone ? ["header", undefined] : undefined} />}
+                    {!!bar && <>
+                        {isDesktop && <Toolbar collapsable={true} location="header" />}
+                        {isDesktop && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
+                        <Toolbar collapsable={true} location={isPhone ? ["header", undefined] : undefined} />
+                    </>}
                 </NoSsr>
             </div>
         </div>
