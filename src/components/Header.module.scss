@@ -1,13 +1,17 @@
 .root {
     display: flex;
     overflow: hidden;
-    background-color: var(--chrome-background);
+    background-color: var(--app-bar-background); /* Use the new app bar background */
     box-sizing: border-box;
-    border-radius: 0.5em;
-    margin: 0.5em;
+    /* Removed margin and border-radius for a sleek, full-width look */
+    border-bottom: 1px solid var(--border-color); /* Add a subtle separator */
+    align-items: center;
+    padding: 0 1rem; /* Add horizontal padding */
 }
 
 .toolbar {
     width: 100%;
     justify-content: flex-end;
+    /* Reset Toolbar defaults if necessary */
+    min-height: auto;
 }

@@ -11,14 +11,16 @@
     min-width: 0;
     overflow: hidden;
     flex: 1;
+    transition: background-color 0.15s ease-in-out; /* Smooth hover */
 }
 
 .item.selected {
-    background: var(--info-background) !important;
+    background: var(--selected-color) !important;
 }
 
 .item.even {
-    background-color: var(--main-background-alternative);
+    /* Subtle striping or just allow transparent for cleaner look */
+    background-color: transparent;
 }
 
 .cell {
@@ -50,19 +52,19 @@
 
 .cell.head {
     background: var(--main-background) !important;
+    font-weight: 600;
+    color: var(--neutral-500);
 }
 
 .selectable {
     cursor: pointer !important;
-    border-bottom: 2px solid transparent;
     user-select: none;
 }
 
 .selectable:hover {
-    background: var(--info-background) !important;
-    border-bottom: 2px solid var(--hover-color);
+    background: var(--hover-color) !important;
 }
 
 .cell.selected {
-    background: var(--info-background) !important;
+    background: var(--selected-color) !important;
 }
