@@ -37,7 +37,7 @@ export async function getPasskeyRegistrationOptions({ id, email, firstName, last
     const options = await generateRegistrationOptions({
         rpName,
         rpID,
-        userID: id,
+        userID: Buffer.from(id), // Encode string ID to Buffer
         userName: email || (user && user.email) || id,
         // Don't exclude credentials for now, or fetch them from user.credentials
         excludeCredentials: credentials.map(cred => ({
