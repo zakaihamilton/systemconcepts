@@ -105,26 +105,47 @@ export default function FilterBar() {
     }, [years, yearFilter]);
 
     const getTypeLabel = () => {
-        if (typeFilter.length === 0) return translations.TYPE;
+        if (typeFilter.length === 0) return translations.TYPES;
         if (typeFilter.length === 1) {
             const type = types.find(t => t.id === typeFilter[0]);
-            return type?.name || typeFilter[0];
+            return {
+                main: type?.name || typeFilter[0],
+                sub: translations.TYPE
+            };
         }
-        return `${typeFilter.length} ${translations.SELECTED}`;
+        return {
+            main: `${typeFilter.length} ${translations.SELECTED}`,
+            sub: translations.TYPES
+        };
     };
 
     const getYearLabel = () => {
         if (yearFilter.length === 0) return translations.YEARS;
-        if (yearFilter.length === 1) return yearFilter[0];
-        return `${yearFilter.length} ${translations.SELECTED}`;
+        if (yearFilter.length === 1) {
+            return {
+                main: yearFilter[0],
+                sub: translations.YEAR
+            };
+        }
+        return {
+            main: `${yearFilter.length} ${translations.SELECTED}`,
+            sub: translations.YEARS
+        };
     };
 
     const getGroupLabel = () => {
         if (groupFilter.length === 0) return translations.GROUPS;
         if (groupFilter.length === 1) {
-            return groupFilter[0][0].toUpperCase() + groupFilter[0].slice(1);
+            const capitalizedName = groupFilter[0][0].toUpperCase() + groupFilter[0].slice(1);
+            return {
+                main: capitalizedName,
+                sub: translations.GROUP
+            };
         }
-        return `${groupFilter.length} ${translations.SELECTED}`;
+        return {
+            main: `${groupFilter.length} ${translations.SELECTED}`,
+            sub: translations.GROUPS
+        };
     };
 
     const handleClearGroup = (e) => {
@@ -157,7 +178,16 @@ export default function FilterBar() {
                 <Menu items={groupMenuItems} selected={groupFilter}>
                     <button className={clsx(styles.dropdownButton, groupFilter.length > 0 && styles.active)}>
                         <ArrowDropDownIcon className={styles.arrow} />
-                        <span>{getGroupLabel()}</span>
+                        <div className={styles.labelContent}>
+                            {typeof getGroupLabel() === 'string' ? (
+                                <span>{getGroupLabel()}</span>
+                            ) : (
+                                <>
+                                    <span className={styles.mainLabel}>{getGroupLabel().main}</span>
+                                    <span className={styles.subLabel}>{getGroupLabel().sub}</span>
+                                </>
+                            )}
+                        </div>
                         {groupFilter.length > 0 && (
                             <CloseIcon
                                 className={styles.clearIcon}
@@ -171,7 +201,16 @@ export default function FilterBar() {
                 <Menu items={typeMenuItems} selected={typeFilter}>
                     <button className={clsx(styles.dropdownButton, typeFilter.length > 0 && styles.active)}>
                         <ArrowDropDownIcon className={styles.arrow} />
-                        <span>{getTypeLabel()}</span>
+                        <div className={styles.labelContent}>
+                            {typeof getTypeLabel() === 'string' ? (
+                                <span>{getTypeLabel()}</span>
+                            ) : (
+                                <>
+                                    <span className={styles.mainLabel}>{getTypeLabel().main}</span>
+                                    <span className={styles.subLabel}>{getTypeLabel().sub}</span>
+                                </>
+                            )}
+                        </div>
                         {typeFilter.length > 0 && (
                             <CloseIcon
                                 className={styles.clearIcon}
@@ -185,7 +224,16 @@ export default function FilterBar() {
                 <Menu items={yearMenuItems} selected={yearFilter}>
                     <button className={clsx(styles.dropdownButton, yearFilter.length > 0 && styles.active)}>
                         <ArrowDropDownIcon className={styles.arrow} />
-                        <span>{getYearLabel()}</span>
+                        <div className={styles.labelContent}>
+                            {typeof getYearLabel() === 'string' ? (
+                                <span>{getYearLabel()}</span>
+                            ) : (
+                                <>
+                                    <span className={styles.mainLabel}>{getYearLabel().main}</span>
+                                    <span className={styles.subLabel}>{getYearLabel().sub}</span>
+                                </>
+                            )}
+                        </div>
                         {yearFilter.length > 0 && (
                             <CloseIcon
                                 className={styles.clearIcon}
