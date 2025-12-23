@@ -55,7 +55,9 @@ export function useSearch(name, updateCallback) {
                     <SearchIcon />
                 </div>
                 <InputBase
-                    inputRef={inputRef}
+                    inputRef={node => {
+                        inputRef.current = node;
+                    }}
                     placeholder={translations.SEARCH + "…"}
                     value={value}
                     onChange={onChangeText}
