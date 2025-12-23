@@ -10,17 +10,30 @@ export default async function PASSKEY_API(req, res) {
     const rpID = host.split(":")[0]; // Remove port if present
 
     if (req.method === "GET") {
-        const { action, id, email } = req.query;
+        const { action, id, email, first_name, last_name } = req.query;
         try {
             if (action === "register-options") {
-                // Require authentication
+                // Check authentication but don't strictly require it (allow new users)
+                let authenticated = false;
                 const hash = req.headers.hash || req.cookies.hash;
-                if (!hash) {
-                    return res.status(401).json({ error: "Unauthorized" });
+                if (hash) {
+                    try {
+                        await login({ id, hash, api: "passkey-register-options" });
+                        authenticated = true;
+                    } catch (e) {
+                        // ignore error, treat as unauthenticated
+                    }
                 }
-                await login({ id, hash, api: "passkey-register-options" });
 
-                const options = await getPasskeyRegistrationOptions({ id, email, origin, rpID });
+                const options = await getPasskeyRegistrationOptions({
+                    id,
+                    email,
+                    firstName: first_name,
+                    lastName: last_name,
+                    origin,
+                    rpID,
+                    authenticated
+                });
                 res.status(200).json(options);
             } else if (action === "auth-options") {
                 const options = await getPasskeyAuthOptions({ id, origin, rpID });
@@ -64,17 +77,22 @@ export default async function PASSKEY_API(req, res) {
 
         try {
             if (action === "register-verify") {
-                // Require authentication
+                // Check authentication
+                let authenticated = false;
                 const hash = req.headers.hash || req.cookies.hash;
-                 if (!hash) {
-                    return res.status(401).json({ error: "Unauthorized" });
+                if (hash) {
+                    try {
+                        await login({ id, hash, api: "passkey-register-verify" });
+                        authenticated = true;
+                    } catch (e) {
+                         // ignore
+                    }
                 }
-                await login({ id, hash, api: "passkey-register-verify" });
 
                 // response body contains the attestation and optionally a name
                 const { name, ...attResp } = response;
 
-                const result = await verifyPasskeyRegistration({ id, response: attResp, name, origin, rpID });
+                const result = await verifyPasskeyRegistration({ id, response: attResp, name, origin, rpID, authenticated });
                 res.status(200).json(result);
             } else if (action === "auth-verify") {
                 const user = await verifyPasskeyAuth({ id, response, origin, rpID });

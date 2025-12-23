@@ -13,14 +13,15 @@ export async function storeChallenge(userId) {
     // Actually @simplewebauthn generates the challenge.
 }
 
-export async function getPasskeyRegistrationOptions({ id, email, origin, rpID }) {
+export async function getPasskeyRegistrationOptions({ id, email, firstName, lastName, origin, rpID, authenticated }) {
     id = id.toLowerCase();
     const user = await findRecord({ collectionName: "users", query: { id } });
-    if (!user) {
-        throw "USER_NOT_FOUND";
+
+    if (user && !authenticated) {
+        throw "USER_ALREADY_EXISTS";
     }
 
-    const credentials = user.credentials || [];
+    const credentials = user ? (user.credentials || []) : [];
 
     // Cleanup existing challenges for this user and action
     await deleteRecord({
@@ -32,7 +33,7 @@ export async function getPasskeyRegistrationOptions({ id, email, origin, rpID })
         rpName,
         rpID,
         userID: id,
-        userName: email || user.email,
+        userName: email || (user && user.email) || id,
         // Don't exclude credentials for now, or fetch them from user.credentials
         excludeCredentials: credentials.map(cred => ({
             id: cred.id,
@@ -52,14 +53,16 @@ export async function getPasskeyRegistrationOptions({ id, email, origin, rpID })
             userId: id,
             challenge: options.challenge,
             createdAt: new Date(),
-            type: 'register'
+            type: 'register',
+            // Store user info for new user creation
+            userInfo: !user ? { email, firstName, lastName } : null
         }
     });
 
     return options;
 }
 
-export async function verifyPasskeyRegistration({ id, response, name, origin, rpID }) {
+export async function verifyPasskeyRegistration({ id, response, name, origin, rpID, authenticated }) {
     id = id.toLowerCase();
     const challengeRecord = await findRecord({
         collectionName: "challenges",
@@ -81,11 +84,16 @@ export async function verifyPasskeyRegistration({ id, response, name, origin, rp
         const { registrationInfo } = verification;
         const { credential } = registrationInfo;
 
-        // Add credential to user
-        const user = await findRecord({ collectionName: "users", query: { id } });
-        const credentials = user.credentials || [];
+        let user = await findRecord({ collectionName: "users", query: { id } });
 
-        // Check if credential already exists (shouldn't if excluded, but safe check)
+        // Security check: If user exists, we must be authenticated to add a passkey
+        if (user && !authenticated) {
+            // This case should be caught by getPasskeyRegistrationOptions usually,
+            // but if an attacker got a challenge for a new user, and then the user was created in the meantime?
+            // Or if getPasskeyRegistrationOptions allowed it (race condition?)
+            // We should strictly enforce it here.
+            throw "USER_ALREADY_EXISTS";
+        }
 
         const newCredential = {
             id: credential.id,
@@ -94,20 +102,47 @@ export async function verifyPasskeyRegistration({ id, response, name, origin, rp
             transports: credential.transports,
             deviceType: registrationInfo.credentialDeviceType,
             backedUp: registrationInfo.credentialBackedUp,
-            name: name || `Passkey ${credentials.length + 1}`,
+            name: name || `Passkey ${user && user.credentials ? user.credentials.length + 1 : 1}`,
             createdAt: new Date().toISOString()
         };
 
-        credentials.push(newCredential);
+        if (!user) {
+            // Create new user
+            const userInfo = challengeRecord.userInfo || {};
+            const dateObj = new Date();
+            const date = dateObj.toString();
+            const utc = dateObj.getTime();
+            const role = "visitor";
 
-        await replaceRecord({
-            collectionName: "users",
-            query: { id },
-            record: {
-                ...user,
-                credentials
-            }
-        });
+            user = {
+                id,
+                email: userInfo.email || id, // Default to id if email missing
+                firstName: userInfo.firstName,
+                lastName: userInfo.lastName,
+                credentials: [newCredential],
+                date,
+                utc,
+                role
+            };
+
+            await insertRecord({
+                collectionName: "users",
+                record: user
+            });
+        } else {
+            // Update existing user
+            const credentials = user.credentials || [];
+            credentials.push(newCredential);
+
+            await replaceRecord({
+                collectionName: "users",
+                query: { id },
+                record: {
+                    ...user,
+                    credentials
+                }
+            });
+        }
 
         // Delete challenge
         await deleteRecord({
