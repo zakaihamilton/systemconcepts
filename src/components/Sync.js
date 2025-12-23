@@ -39,7 +39,7 @@ export default function Sync({ children }) {
             id: "sync",
             name,
             location: "header",
-            menu: false,
+            menu: !isDesktop,
             icon: syncIcon,
             onClick: sync,
             divider: isDesktop
