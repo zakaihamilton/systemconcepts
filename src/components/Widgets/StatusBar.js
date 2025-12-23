@@ -125,7 +125,9 @@ export default function StatusBar({ data, mapper, store }) {
     };
 
     const gotoAccount = () => {
-        setPath("account");
+        const hash = window.location.hash;
+        const currentPath = hash.startsWith("#") ? hash.substring(1) : hash;
+        setPath("account?redirect=" + encodeURIComponent(currentPath));
     };
 
     return (

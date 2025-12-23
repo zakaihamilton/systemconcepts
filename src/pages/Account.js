@@ -20,7 +20,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import Input from "@widgets/Input";
 import Cookies from "js-cookie";
 import { fetchJSON } from "@util/fetch";
-import { setPath } from "@util/pages";
+import { setPath, setHash } from "@util/pages";
 import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -84,7 +84,7 @@ const StyledContainer = styled(Container)((
     }
 }));
 
-export default function Account() {
+export default function Account({ redirect }) {
     const { direction } = MainStore.useState();
 
     const translations = useTranslations();
@@ -200,7 +200,12 @@ export default function Account() {
             if (verification.hash) {
                 Cookies.set("id", id, remember && { expires: 60 });
                 Cookies.set("hash", verification.hash, remember && { expires: 60 });
-                setPath("");
+                if (redirect) {
+                    setHash(decodeURIComponent(redirect));
+                }
+                else {
+                    setPath("");
+                }
             } else {
                 throw "PASSKEY_LOGIN_FAILED";
             }
@@ -256,7 +261,12 @@ export default function Account() {
 
                     setProgress(false);
                     setError("");
-                    setPath("");
+                    if (redirect) {
+                        setHash(decodeURIComponent(redirect));
+                    }
+                    else {
+                        setPath("");
+                    }
                 }).catch(err => {
                     Cookies.set("id", "");
                     Cookies.set("hash", "");

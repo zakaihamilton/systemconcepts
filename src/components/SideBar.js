@@ -13,7 +13,7 @@ import { useTranslations } from "@util/translations";
 export default function SideBar() {
     const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
-    const { direction, showSlider } = MainStore.useState();
+    const { direction, showSlider, hash } = MainStore.useState();
     const bookmarks = useBookmarks();
     const activePages = useActivePages();
     const pages = usePages("sidebar");
@@ -46,7 +46,14 @@ export default function SideBar() {
     };
 
     const items = pages.filter(page => page.sidebar && !page.category).map(item => {
-        return { ...item, target: item.path || item.id };
+        let target = item.path || item.id;
+        if (item.id === "account") {
+            const currentPath = hash && (hash.startsWith("#") ? hash.substring(1) : hash);
+            if (currentPath && !currentPath.startsWith("account") && !currentPath.startsWith("signup") && !currentPath.startsWith("signin")) {
+                target += "?redirect=" + encodeURIComponent(currentPath);
+            }
+        }
+        return { ...item, target };
     });
     items.push({
         id: "bookmarks",
