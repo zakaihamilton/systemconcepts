@@ -37,3 +37,8 @@
 .searchExpanded .inputRoot {
     opacity: 1;
 }
+@media (max-width: 768px) {
+    .searchExpanded {
+        width: 10em;
+    }
+}
