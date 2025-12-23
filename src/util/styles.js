@@ -17,7 +17,8 @@ export function toggleProperty(name, values) {
 
 export function useStyles(styles, data) {
     const classList = [];
-    Object.keys(data || {}).map(key => {
+    // Optimization: Use for...of instead of map to avoid creating unnecessary arrays
+    for (const key of Object.keys(data || {})) {
         let value = data[key];
         if (typeof value === "function") {
             value = value(data);
@@ -25,7 +26,7 @@ export function useStyles(styles, data) {
         if (value) {
             classList.push(styles[key]);
         }
-    });
+    }
     return clsx(...classList);
 }
 
