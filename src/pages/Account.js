@@ -17,6 +17,8 @@ import { fetchJSON } from "@util/fetch";
 import { setPath } from "@util/pages";
 import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 
 const PREFIX = 'Account';
 
@@ -92,6 +94,72 @@ export default function Account() {
     const isSignedIn = userId && Cookies.get("hash");
 
     const changeRemember = event => setRemember(event.target.value);
+
+    const onRegisterPasskey = async () => {
+        setProgress(true);
+        try {
+            const options = await fetchJSON("/api/passkey?action=register-options&id=" + userId);
+
+            if (options.err) {
+                throw options.err;
+            }
+
+            const attResp = await startRegistration({ optionsJSON: options });
+
+            const verification = await fetchJSON("/api/passkey?action=register-verify&id=" + userId, {
+                method: "POST",
+                body: JSON.stringify(attResp)
+            });
+
+            if (verification.verified) {
+                setError("PASSKEY_REGISTERED");
+            } else {
+                throw "PASSKEY_REGISTRATION_FAILED";
+            }
+        } catch (err) {
+            console.error(err);
+            setError(translations[err] || String(err));
+        } finally {
+            setProgress(false);
+        }
+    };
+
+    const onLoginPasskey = async () => {
+        setValidate(true);
+        if (onValidateField(idState[0])) {
+            return;
+        }
+        setProgress(true);
+        try {
+            let [id] = idState;
+            id = id.toLowerCase();
+            const options = await fetchJSON("/api/passkey?action=auth-options&id=" + id);
+
+            if (options.err) {
+                throw options.err;
+            }
+
+            const asseResp = await startAuthentication({ optionsJSON: options });
+
+            const verification = await fetchJSON("/api/passkey?action=auth-verify&id=" + id, {
+                method: "POST",
+                body: JSON.stringify(asseResp)
+            });
+
+            if (verification.hash) {
+                Cookies.set("id", id, remember && { expires: 60 });
+                Cookies.set("hash", verification.hash, remember && { expires: 60 });
+                setPath("");
+            } else {
+                throw "PASSKEY_LOGIN_FAILED";
+            }
+        } catch (err) {
+            console.error(err);
+            setError(translations[err] || String(err));
+        } finally {
+            setProgress(false);
+        }
+    };
 
     const onSubmit = () => {
         if (isSignedIn) {
@@ -220,6 +288,32 @@ export default function Account() {
                                 {translations[isSignedIn ? "SIGN_OUT" : "SIGN_IN"]}
                             </Button>
                         </Grid>
+                        {!isSignedIn && <Grid size={12}>
+                            <Button
+                                onClick={onLoginPasskey}
+                                disabled={inProgress}
+                                fullWidth
+                                variant="contained"
+                                color="secondary"
+                                className={classes.submit}
+                                startIcon={<FingerprintIcon />}
+                            >
+                                {translations.SIGN_IN_WITH_PASSKEY || "Sign in with Passkey"}
+                            </Button>
+                        </Grid>}
+                        {isSignedIn && <Grid size={12}>
+                            <Button
+                                onClick={onRegisterPasskey}
+                                disabled={inProgress}
+                                fullWidth
+                                variant="outlined"
+                                color="primary"
+                                className={classes.submit}
+                                startIcon={<FingerprintIcon />}
+                            >
+                                {translations.REGISTER_PASSKEY || "Register Passkey"}
+                            </Button>
+                        </Grid>}
                         {!isSignedIn && <Grid size={5}>
                             <Link className={classes.link} href="#resetpassword" variant="body2">
                                 {translations.FORGET_PASSWORD}
