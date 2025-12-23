@@ -134,7 +134,7 @@ export default function TableWidget(props) {
         };
     }, [updateScrollOffset]);
     const pageSize = useContext(ContentSize);
-    const search = useSearch(() => {
+    const search = useSearch(name, () => {
         store.update(s => {
             s.offset = 0;
         });

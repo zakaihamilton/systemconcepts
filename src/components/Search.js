@@ -11,17 +11,23 @@ import { useDeviceType } from "@util/styles";
 registerToolbar("Search", 200);
 
 export const SearchStore = new Store({
-    search: ""
+    search: {}
 });
 
-export function useSearch(updateCallback) {
+export function useSearch(name, updateCallback) {
     const isPhone = useDeviceType() === "phone";
+    if (typeof name === "function") {
+        updateCallback = name;
+        name = "default";
+    }
+    name = name || "default";
     const { search } = SearchStore.useState();
-    const [value, setValue] = useState(search || "");
+    const searchTerm = search[name] || "";
+    const [value, setValue] = useState(searchTerm);
     const translations = useTranslations();
     useTimeout(() => {
         SearchStore.update(s => {
-            s.search = value;
+            s.search[name] = value;
         });
         updateCallback && updateCallback(value);
     }, 500, [value]);
@@ -57,5 +63,5 @@ export function useSearch(updateCallback) {
 
     useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations] });
 
-    return search;
+    return searchTerm;
 }
