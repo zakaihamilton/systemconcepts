@@ -14,6 +14,10 @@
     transition: background-color 0.15s ease-in-out; /* Smooth hover */
 }
 
+.item.separator {
+    border-top: 2px solid var(--neutral-300);
+}
+
 .item.selected {
     background: var(--selected-color) !important;
 }

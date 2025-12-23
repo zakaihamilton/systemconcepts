@@ -31,7 +31,7 @@ function arePropsEqual(prev, next) {
     return true;
 }
 
-function ItemWidget({ className = "", viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {
+function ItemWidget({ className = "", separator, viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
         const value = item[columnId];
@@ -66,6 +66,7 @@ function ItemWidget({ className = "", viewMode, selected: selectedItem, columns,
     };
     const classes = useStyles(styles, {
         item: true,
+        separator,
         hover: !!rowClick,
         selected: selectedItem,
         even: index % 2 === 0

@@ -88,6 +88,7 @@ export default function TableWidget(props) {
         showSort = true,
         viewModes = { table: null },
         resetScrollDeps = [],
+        getSeparator,
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -365,8 +366,11 @@ export default function TableWidget(props) {
         visibleColumns,
         rowClick,
         columnCount,
-        sidePadding
-    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding]);
+        sidePadding,
+        orderBy,
+        order,
+        getSeparator
+    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator]);
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
@@ -523,7 +527,7 @@ export default function TableWidget(props) {
 }
 
 const TableListRow = ({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick } = data;
+    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, order, getSeparator } = data;
     const itemIndex = hideColumns ? index : index - 1;
     const item = items[itemIndex];
     const { id, key } = item || {};
@@ -532,6 +536,14 @@ const TableListRow = ({ index, style, data }) => {
 
     if (!hideColumns && !index) {
         return null;
+    }
+
+    let separator = false;
+    if (getSeparator && itemIndex > 0) {
+        const prevItem = items[itemIndex - 1];
+        if (item && prevItem) {
+            separator = getSeparator(item, prevItem, orderBy, order, viewMode);
+        }
     }
 
     return <Item
@@ -544,6 +556,7 @@ const TableListRow = ({ index, style, data }) => {
         index={itemIndex}
         viewMode={viewMode}
         selected={selected}
+        separator={separator}
     />;
 };
 
