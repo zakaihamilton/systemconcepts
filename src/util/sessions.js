@@ -26,6 +26,7 @@ export const SessionsStore = new Store({
     groupFilter: [],
     typeFilter: [],
     yearFilter: [],
+    showFilterDialog: false,
     busy: false,
     counter: 0,
     syncCounter: 0,
@@ -383,7 +384,11 @@ export function useSessions(depends = [], options = {}) {
             id: "filter",
             name: translations.FILTER,
             icon: <FilterAltIcon />,
-            items: filterItems,
+            onClick: () => {
+                SessionsStore.update(s => {
+                    s.showFilterDialog = true;
+                });
+            },
             active: typeFilter?.length || yearFilter?.length,
             disabled: !filterItems.length && !yearFilter?.length,
             divider: true,

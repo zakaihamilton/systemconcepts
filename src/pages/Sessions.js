@@ -22,6 +22,7 @@ import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
+import Filter from "./Sessions/Filter";
 
 export const SessionsStore = new Store({
     groupFilter: "",
@@ -238,6 +239,7 @@ export default function SessionsPage() {
     }, [isSignedIn, askForFullSync, translations]);
 
     return <>
+        <Filter />
         <Table
             cellWidth="16em"
             cellHeight="20em"
