@@ -3,7 +3,7 @@ import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
 import { Store } from "pullstate";
-import { useSessions } from "@util/sessions";
+import { useSessions, SessionsStore } from "@util/sessions";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import DateRangeIcon from "@mui/icons-material/DateRange";
@@ -14,6 +14,7 @@ import DataUsageIcon from "@mui/icons-material/DataUsage";
 import { useLocalStorage } from "@util/store";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
+import FilterBar from "@pages/Sessions/FilterBar";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -28,6 +29,7 @@ export default function SchedulePage() {
     let [sessions, loading, askForFullSync] = useSessions();
     const search = useSearch("schedule");
     let { date, viewMode } = ScheduleStore.useState();
+    const { showFilterDialog } = SessionsStore.useState();
     if (!date) {
         date = new Date();
     }
@@ -92,6 +94,7 @@ export default function SchedulePage() {
 
     return <div className={styles.root}>
         {statusBar}
+        {!!showFilterDialog && <FilterBar />}
         {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         {!!loading && loadingElement}
