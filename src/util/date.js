@@ -80,7 +80,11 @@ export function setWeekOfMonth(date, weekNum) {
 }
 
 export function getNumberOfWeeksInMonth(date) {
+    if (!date || isNaN(date.getTime())) {
+        return 0;
+    }
     let maxIndex = getWeekOfMonth(date);
+    let counter = 0;
     while (true) {
         date = addDate(date, 7);
         const index = getWeekOfMonth(date);
@@ -88,6 +92,10 @@ export function getNumberOfWeeksInMonth(date) {
             break;
         }
         maxIndex = index;
+        counter++;
+        if (counter > 10) {
+            break;
+        }
     }
     return maxIndex + 1;
 }
