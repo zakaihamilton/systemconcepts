@@ -8,8 +8,10 @@ import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
+import { useTranslations } from "@util/translations";
 
-export default function ButtonSelector({ state, items, onClick, children, ...props }) {
+export default function ButtonSelector({ state, items, onClick, children, label, ...props }) {
+  const translations = useTranslations();
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = state;
@@ -36,6 +38,7 @@ export default function ButtonSelector({ state, items, onClick, children, ...pro
       <ButtonGroup ref={setAnchorEl} {...props}>
         <Button disabled={!onClick} onClick={onClick}>{children}</Button>
         {items && <Button
+          aria-label={label || translations.OPTIONS}
           onClick={handleToggle}
         >
           <ArrowDropDownIcon />

@@ -1044,6 +1044,10 @@ export default {
         {
             "id": "HIDE_DISABLED_GROUPS",
             "value": "הסתר קבוצות מנוטרלות"
+        },
+        {
+            "id": "OPTIONS",
+            "value": "אפשרויות"
         }
     ]
 };
