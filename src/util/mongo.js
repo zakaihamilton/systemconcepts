@@ -145,6 +145,9 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             const operations = [];
             for (const record of records) {
                 const { id } = record;
+                if (typeof id !== "string") {
+                    continue;
+                }
                 delete record._id;
                 console.log(id);
                 if (req.method === "DELETE") {
