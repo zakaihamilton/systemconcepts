@@ -106,12 +106,12 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                     }
                     results.push(record);
                 }
-                console.log("found", results.length, "items for collection", collectionName, "fields", parsedFields);
+                console.log("found", results.length, "items for collection", collectionName, "id", parsedId, "database", dbName, "fields", parsedFields);
                 return results;
             }
             else if (id) {
                 const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
-                console.log("found an item for collection", collectionName, "id", parsedId, "fields", parsedFields);
+                console.log("found an item for collection", collectionName, "id", parsedId, "database", dbName, "fields", parsedFields);
                 return result;
             }
             else {
@@ -121,7 +121,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                 if (!result) {
                     result = [];
                 }
-                console.log("found", result.length, "items for collection", collectionName, "query", parsedQuery, "fields", parsedFields);
+                console.log("found", result.length, "items for collection", collectionName, "query", parsedQuery, "id", parsedId, "database", dbName, "fields", parsedFields);
                 return result;
             }
         }
