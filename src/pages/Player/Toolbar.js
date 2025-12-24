@@ -1,17 +1,17 @@
-import styles from "./Toolbar.module.scss";
-import Avatar from "@mui/material/Avatar";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import SpeedIcon from "@mui/icons-material/Speed";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@util/styles";
+import { PlayerStore } from "../Player";
 
 registerToolbar("PlayerToolbar");
 
 export default function Toolbar({ show, playerRef, isVideo }) {
     const isMobile = useDeviceType() !== "desktop";
     const translations = useTranslations();
+    const { showSpeed } = PlayerStore.useState();
     const [, setCounter] = useState(0);
     useEffect(() => {
         const update = name => {
@@ -28,25 +28,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         };
     }, []);
 
-    const rateItems = {
-        SPEED_SLOW: 0.5,
-        SPEED_SLOWER: 0.75,
-        SPEED_NORMAL: 1.0,
-        SPEED_FASTER: 1.1,
-        SPEED_FAST: 1.25,
-        SPEED_VERY_FAST: 1.5,
-        SPEED_SUPER_FAST: 1.75,
-        SPEED_DOUBLE: 2.0,
-        SPEED_TRIPLE: 3.0
-    };
-    const rateMenuItems = Object.entries(rateItems).map(([name, rate]) => {
-        return {
-            id: rate,
-            icon: <Avatar className={styles.avatar} variant="square">{rate.toFixed(2)}</Avatar>,
-            name: translations[name],
-            onClick: () => playerRef.playbackRate = rate
-        };
-    });
     const speed = playerRef.playbackRate || 1.0;
 
     const menuItems = [
@@ -54,8 +35,12 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             id: "speed",
             name: translations.SPEED,
             icon: <SpeedIcon />,
-            items: rateMenuItems,
-            selected: speed,
+            active: showSpeed,
+            onClick: () => {
+                PlayerStore.update(s => {
+                    s.showSpeed = !s.showSpeed;
+                });
+            },
             location: "header",
             divider: true
         },
@@ -68,6 +53,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, isMobile, isVideo, translations] });
+    useToolbar({ id: "PlayerToolbar", visible: show, items: menuItems, depends: [speed, showSpeed, isMobile, isVideo, translations] });
     return null;
 }

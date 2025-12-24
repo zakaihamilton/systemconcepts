@@ -14,13 +14,13 @@ import Replay10Icon from "@mui/icons-material/Replay10";
 import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
 import Button from "@mui/material/Button";
+import { PlayerStore } from "../Player";
 
 const skipPoints = 10;
 
 export default function Controls({ show, path, playerRef, metadataPath, zIndex }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
-
 
     const translations = useTranslations();
     const dragging = useRef(false);
@@ -65,7 +65,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 setCounter(counter => counter + 1);
             }
         };
-        const events = ["loadedmetadata", "pause", "error", "loadstart", "play", "playing", "timeupdate"];
+        const events = ["loadedmetadata", "pause", "error", "loadstart", "play", "playing", "timeupdate", "ratechange"];
         const listeners = events.map(name => {
             const callback = () => update(name);
             playerRef.addEventListener(name, callback);

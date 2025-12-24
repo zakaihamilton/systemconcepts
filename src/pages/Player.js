@@ -18,11 +18,13 @@ import Cookies from "js-cookie";
 import { useGroups } from "@util/groups";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
+import SpeedSlider from "./Player/SpeedSlider";
 
 export const PlayerStore = new Store({
     mediaPath: "",
     subtitles: "",
     showSubtitles: true,
+    showSpeed: false,
     hash: "",
     player: null
 });
@@ -32,7 +34,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath, subtitles, showSubtitles } = PlayerStore.useState();
+    const { hash, mediaPath, subtitles, showSubtitles, showSpeed } = PlayerStore.useState();
     const size = useContext(ContentSize);
     const [groups] = useGroups([]);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
@@ -100,9 +102,16 @@ export default function PlayerPage({ show = false, suffix }) {
         flex: show ? "1" : "",
         ...(!show && { maxHeight: "0px" })
     };
+
+    // Account for: header (4em), tabs (4em), speed slider (120px when visible), controls (~3em)
+    // Total: ~11em base + 120px for speed slider when visible + 2em for video margins
+    const baseEmSubtraction = 13; // Increased from 11 to account for 2em margins (top + bottom)
+    const speedSliderHeight = showSpeed ? 120 : 0;
     const mediaStyles = {
         width: size.width + "px",
-        height: size.height - (size.emPixels * 11) + "px"
+        height: (size.height - (size.emPixels * baseEmSubtraction) - speedSliderHeight) + "px",
+        marginTop: "1em",
+        marginBottom: "1em"
     };
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
@@ -152,6 +161,7 @@ export default function PlayerPage({ show = false, suffix }) {
 
     return <div className={styles.root} style={style}>
         {statusBar}
+        <SpeedSlider />
         <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
         {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
