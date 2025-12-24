@@ -166,7 +166,7 @@ export function useSyncFeature() {
                         await storage.createFolderPath(local);
                     }
                     else if (stat.type === "dir") {
-                        await storage.createFolder(local);
+                        await storage.createFolderPath(local);
                     }
                 }
                 catch (err) {

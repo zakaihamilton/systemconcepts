@@ -168,17 +168,35 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
     async function readFiles(prefix, files) {
         let results = {};
         files = files.map(name => makePath(prefix + name));
+        const batchSize = 50; // Process files in batches to avoid exceeding API response size limit
+
         while (files.length) {
-            const result = await fetchJSON(fsEndPoint, {
-                method: "POST",
-                body: JSON.stringify(files)
-            });
-            if (!result || !result.length) {
-                break;
-            }
-            files = files.filter(path => !result.find(item => item.id === path));
-            for (const item of result) {
-                results[item.id] = item.body;
+            // Take a batch of files
+            const batch = files.slice(0, batchSize);
+
+            try {
+                const result = await fetchJSON(fsEndPoint, {
+                    method: "POST",
+                    body: JSON.stringify(batch)
+                });
+
+                if (!result || !result.length) {
+                    // Remove failed files from the list
+                    files = files.filter(path => !batch.includes(path));
+                    continue;
+                }
+
+                // Store results
+                for (const item of result) {
+                    results[item.id] = item.body;
+                }
+
+                // Remove successfully fetched files
+                files = files.filter(path => !result.find(item => item.id === path));
+            } catch (err) {
+                console.error("Error reading batch:", err);
+                // Remove failed batch from the list to avoid infinite loop
+                files = files.filter(path => !batch.includes(path));
             }
         }
         return results;
