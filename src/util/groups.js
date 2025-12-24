@@ -11,7 +11,7 @@ export const GroupsStore = new Store({
 export function useGroups(depends) {
     const { busy, groups } = GroupsStore.useState();
 
-    const localMetadataPath = "local/shared/sessions/groups.json";
+    const localMetadataPath = "local/shared/groups.json";
     const loadGroups = useCallback(async () => {
         let busy = false;
         GroupsStore.update(s => {
@@ -27,8 +27,17 @@ export function useGroups(depends) {
         try {
             const listingFile = await storage.readFile("local/shared/sessions/listing.json");
             const listing = JSON.parse(listingFile) || [];
-            const hasMetadata = await storage.exists(localMetadataPath);
-            const metadataFile = hasMetadata ? await storage.readFile(localMetadataPath) : "[]";
+
+            let metadataFile = "[]";
+            if (await storage.exists(localMetadataPath)) {
+                metadataFile = await storage.readFile(localMetadataPath);
+            } else if (await storage.exists("local/shared/sessions/groups.json")) {
+                console.log("Migrating groups.json to new location...");
+                metadataFile = await storage.readFile("local/shared/sessions/groups.json");
+                // Save to new location immediately
+                await storage.createFolderPath(localMetadataPath);
+                await storage.writeFile(localMetadataPath, metadataFile);
+            }
             const metadata = JSON.parse(metadataFile);
             listing.map(item => {
                 const metadataItem = metadata.find(el => el.name === item.name);

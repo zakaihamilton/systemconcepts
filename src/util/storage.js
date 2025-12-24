@@ -269,22 +269,14 @@ export function useFile(urlArgument, depends = [], mapping) {
 
 async function getRecursiveList(path) {
     let listing = [];
-    const addListing = async path => {
-        const data = {};
-        const items = await storageMethods.getListing(path);
+    const addListing = async (dirPath) => {
+        const items = await storageMethods.getListing(dirPath);
+        if (!items) return;
+
         listing.push(...items);
-        for (const item of items) {
-            const { type, path } = item;
-            try {
-                if (type === "dir") {
-                    await addListing(path);
-                }
-            }
-            catch (err) {
-                console.error(err);
-            }
-        }
-        return data;
+
+        const subDirs = items.filter(item => item.type === "dir");
+        await Promise.all(subDirs.map(dir => addListing(dir.path)));
     };
     await addListing(path);
     return listing;

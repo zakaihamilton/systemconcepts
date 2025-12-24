@@ -90,81 +90,86 @@ export function useSyncFeature() {
 
             let updateCounter = 0;
             if (isSignedIn) {
-                // Bundles: Shared + Personal
-                const totalItems = 2;
-                console.log("Total items to sync:", totalItems);
+                // 1. Define Bundles
+                const bundles = [
+                    {
+                        name: "personal",
+                        path: makePath("local", "personal")
+                    },
+                    {
+                        name: "shared/bundles/meta",
+                        path: makePath("local", "shared"),
+                        ignore: ["sessions"]
+                    }
+                ];
+
+                // 2. Add Dynamic Group Bundles
+                try {
+                    const groupsPath = makePath("local", "shared", "groups.json");
+                    if (await storage.exists(groupsPath)) {
+                        const groupsContent = await storage.readFile(groupsPath);
+                        const groups = JSON.parse(groupsContent);
+                        for (const group of groups) {
+                            if (group.name) {
+                                bundles.push({
+                                    name: `shared/bundles/sessions/${group.name}`,
+                                    path: makePath("local", "shared", "sessions", group.name)
+                                });
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error loading groups for sync:", err);
+                }
+
+
+
                 SyncActiveStore.update(s => {
-                    s.progress = { total: totalItems, processed: 0 };
+                    s.progress = { total: bundles.length, processed: 0 };
                 });
 
-                // Now process the items
-                try {
-                    console.log("Syncing shared bundle...");
-                    // Download & Apply (Sync Items)
-                    const remoteBundle = await bundle.getRemoteBundle("shared");
-                    let downloadedCount = 0;
-                    if (remoteBundle) {
-                        downloadedCount = await bundle.applyBundle(makePath("local", "shared"), remoteBundle);
-                    }
+                // 3. Define Sync Task
+                const runTask = async (bundleDef) => {
+                    const { name, path, ignore } = bundleDef;
+                    try {
+                        let localUpdated = false;
+                        let downloadCount = 0;
 
-                    // Upload & Merge (Sync Local)
-                    const localBundle = await bundle.scanLocal(makePath("local", "shared"));
-                    const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle);
-                    if (updated) {
-                        await bundle.saveRemoteBundle("shared", merged);
-                    }
+                        // Download & Apply
+                        const remoteBundle = await bundle.getRemoteBundle(name);
+                        if (remoteBundle) {
+                            downloadCount = await bundle.applyBundle(path, remoteBundle);
+                        }
 
-                    if (downloadedCount > 0 || updated) {
-                        updateCounter++;
-                    }
-                    SyncActiveStore.update(s => {
-                        s.progress.processed++;
-                    });
-                }
-                catch (err) {
-                    updateCounter--;
-                    if (err === 403) {
-                        setError("ACCESS_DENIED");
-                    }
-                    else {
-                        setError("SYNC_FAILED");
-                    }
-                    console.error(err);
-                }
-                try {
-                    console.log("Syncing personal bundle...");
-                    // Download & Apply (Sync Items)
-                    const remoteBundle = await bundle.getRemoteBundle("personal");
-                    let downloadedCount = 0;
-                    if (remoteBundle) {
-                        downloadedCount = await bundle.applyBundle(makePath("local", "personal"), remoteBundle);
-                    }
+                        // Upload & Merge
+                        const localBundle = await bundle.scanLocal(path, ignore);
+                        const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
 
-                    // Upload & Merge (Sync Local)
-                    const localBundle = await bundle.scanLocal(makePath("local", "personal"));
-                    // If no remote bundle (first run/migration), treat as empty
-                    const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle);
-                    if (updated) {
-                        await bundle.saveRemoteBundle("personal", merged);
-                    }
+                        if (updated) {
+                            await bundle.saveRemoteBundle(name, merged);
+                            localUpdated = true;
+                        }
 
-                    if (downloadedCount > 0 || updated) {
-                        updateCounter++;
+                        if (downloadCount > 0 || localUpdated) {
+                            updateCounter++;
+                        }
+                    } catch (err) {
+                        console.error(`Error syncing bundle ${name}:`, err);
+                        if (err === 403) {
+                            setError("ACCESS_DENIED");
+                        } else {
+                            setError("SYNC_FAILED");
+                        }
+                    } finally {
+                        SyncActiveStore.update(s => {
+                            s.progress.processed++;
+                        });
                     }
-                    SyncActiveStore.update(s => {
-                        s.progress.processed++;
-                    });
-                }
-                catch (err) {
-                    updateCounter--;
-                    if (err === 403) {
-                        setError("ACCESS_DENIED");
-                    }
-                    else {
-                        setError("SYNC_FAILED");
-                    }
-                    console.error(err);
-                }
+                };
+
+                // 4. Execute concurrently
+                const limit = (await import("p-limit")).default(5);
+                await Promise.all(bundles.map(b => limit(() => runTask(b))));
             }
             if (updateCounter > 0) {
                 SyncStore.update(s => {

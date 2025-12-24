@@ -7,7 +7,7 @@ export function makePath(...components) {
 
 export function isBinaryFile(path) {
     path = makePath(path);
-    const mediaExtensions = [".m4a", ".mp4", ".png", ".jpg", ".jpeg"];
+    const mediaExtensions = [".m4a", ".mp4", ".png", ".jpg", ".jpeg", ".DS_Store", ".gz", ".zip"];
     const hasMediaExt = !!mediaExtensions.find(ext => path.endsWith(ext));
     return hasMediaExt;
 }
