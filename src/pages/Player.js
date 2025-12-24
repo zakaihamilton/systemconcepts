@@ -23,6 +23,7 @@ export const PlayerStore = new Store({
     mediaPath: "",
     subtitles: "",
     showSubtitles: true,
+    showSpeed: false,
     hash: "",
     player: null
 });
