@@ -58,22 +58,22 @@ export default function SessionPage({ group, year, date, name }) {
                 <div className={styles.title}>{name}</div>
                 <div className={styles.metadata}>
                     <Group name={group} color={session.color} />
-                    <span>{dateWidget}</span>
+                    <span className={styles.date}>{dateWidget}</span>
                     {duration > 1 && <span className={styles.duration}>{formatDuration(duration * 1000, true)}</span>}
                 </div>
             </div>
             <div className={styles.content}>
-                <div className={styles.media}>
-                    {thumbnail && <Image
+                {thumbnail && <div className={styles.media}>
+                    <Image
                         path={thumbnail}
                         className={styles.thumbnail}
                         width="100%"
                         height="auto"
                         alt={name}
                         clickForImage={false}
-                    />}
+                    />
                     <div className={styles.actions}>
-                         {hasImage && !hasVideo && <Button
+                        {hasImage && !hasVideo && <Button
                             variant="outlined"
                             startIcon={<InsertPhotoIcon />}
                             onClick={viewImage}
@@ -81,7 +81,7 @@ export default function SessionPage({ group, year, date, name }) {
                             {translations.IMAGE}
                         </Button>}
                     </div>
-                </div>
+                </div>}
                 <div className={styles.details}>
                     {session.summary && <div className={styles.summary}>
                         <Summary path={session.summary.path.replace(/^\/aws/, "").replace(/^\//, "")} />

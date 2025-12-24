@@ -34,6 +34,7 @@
     font-size: 1.5em;
     font-weight: bold;
     margin-bottom: 0.5em;
+    text-align: center;
 }
 
 .metadata {
@@ -45,6 +46,11 @@
     color: var(--disabled-color);
 }
 
+.date {
+    flex: 1;
+    text-align: center;
+}
+
 .duration {
     font-weight: bold;
     font-size: 1.1em;
@@ -52,6 +58,7 @@
     color: var(--active-text-color);
     padding: 0.2em 0.5em;
     border-radius: 4px;
+    margin-left: auto;
 }
 
 .content {
@@ -78,10 +85,12 @@
 .thumbnail {
     width: 100%;
     height: auto;
-    border-radius: 4px;
-    background: black;
     object-fit: contain;
     aspect-ratio: 16/9;
+    border: 8px solid var(--main-background);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5),
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .actions {
