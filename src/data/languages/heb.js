@@ -1036,6 +1036,14 @@ export default {
         {
             "id": "SELECTED",
             "value": "נבחר"
+        },
+        {
+            "id": "SHOW_DISABLED_GROUPS",
+            "value": "הראה קבוצות מנוטרלות"
+        },
+        {
+            "id": "HIDE_DISABLED_GROUPS",
+            "value": "הסתר קבוצות מנוטרלות"
         }
     ]
 };
