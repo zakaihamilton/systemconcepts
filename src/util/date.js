@@ -58,7 +58,9 @@ export function isDateMonth(date, month) {
 };
 
 export function diffDays(from, to) {
-    const diffTime = Math.abs(to - from);
+    const utc1 = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
+    const utc2 = Date.UTC(to.getFullYear(), to.getMonth(), to.getDate());
+    const diffTime = Math.abs(utc2 - utc1);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
 }
@@ -82,7 +84,7 @@ export function getNumberOfWeeksInMonth(date) {
     while (true) {
         date = addDate(date, 7);
         const index = getWeekOfMonth(date);
-        if (index < maxIndex) {
+        if (index <= maxIndex) {
             break;
         }
         maxIndex = index;
