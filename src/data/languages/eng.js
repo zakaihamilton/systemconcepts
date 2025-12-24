@@ -1048,6 +1048,10 @@ export default {
         {
             "id": "HIDE_DISABLED_GROUPS",
             "value": "Hide Disabled Groups"
+        },
+        {
+            "id": "OPTIONS",
+            "value": "Options"
         }
     ]
 };
