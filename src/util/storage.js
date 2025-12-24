@@ -2,6 +2,9 @@ import storage from "@data/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { makePath, isBinaryFile } from "@util/path";
 import { useGlobalState } from "@util/store";
+import pLimit from "p-limit";
+
+const limit = pLimit(20);
 
 export async function callMethod(item, url = "", ...params) {
     const { name, types } = item;
@@ -270,7 +273,7 @@ export function useFile(urlArgument, depends = [], mapping) {
 async function getRecursiveList(path) {
     let listing = [];
     const addListing = async (dirPath) => {
-        const items = await storageMethods.getListing(dirPath);
+        const items = await limit(() => storageMethods.getListing(dirPath));
         if (!items) return;
 
         listing.push(...items);

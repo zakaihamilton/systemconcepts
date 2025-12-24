@@ -24,6 +24,13 @@ async function getListing(path, options = {}) {
                 item.count = count;
             }
             Object.assign(item, itemStat);
+            let mtimeMs = itemStat.mtimeMs;
+            if (typeof itemStat.mtime === "object" && itemStat.mtime.getTime) {
+                mtimeMs = itemStat.mtime.getTime();
+            } else if (typeof itemStat.mtime === "number") {
+                mtimeMs = itemStat.mtime;
+            }
+            item.mtimeMs = mtimeMs || 0;
             item.id = item.path = makePath("local", itemPath);
             item.name = name;
             listing.push(item);

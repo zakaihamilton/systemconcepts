@@ -6,6 +6,9 @@ import { Base64 } from "js-base64";
 const BUNDLE_CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB limit to stay under 4MB API limit
 const BUNDLE_PREFIX = "bundle.gz.part.";
 
+// In-memory cache to avoid expensive IndexedDB reads
+const bundleMemoryCache = new Map();
+
 function normalizeContent(content) {
     const sortKeys = (obj) => {
         if (Array.isArray(obj)) {
@@ -30,9 +33,16 @@ function normalizeContent(content) {
     return JSON.stringify(sortKeys(content), null, 4);
 }
 
-export async function getRemoteBundle(endPoint) {
-    const listing = await storage.getListing(endPoint) || [];
-    const bundleParts = listing.filter(item => item.name.startsWith(BUNDLE_PREFIX));
+export async function getRemoteBundle(endPoint, listing = null) {
+    // AGGRESSIVE CACHE: If we have it in memory, return it immediately (no network calls)
+    if (bundleMemoryCache.has(endPoint)) {
+        return bundleMemoryCache.get(endPoint).bundle;
+    }
+
+    if (!listing) {
+        listing = await storage.getListing(endPoint) || [];
+    }
+    const bundleParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
 
     if (!bundleParts.length) {
         return null;
@@ -60,10 +70,14 @@ export async function getRemoteBundle(endPoint) {
             cachedInventoryStr = await storage.readFile(inventoryPath);
         }
         const cachedInventory = cachedInventoryStr ? JSON.parse(cachedInventoryStr) : [];
+
         if (JSON.stringify(inventory) === JSON.stringify(cachedInventory)) {
             const cachedBundleStr = await storage.readFile(cachePath);
             if (cachedBundleStr) {
-                return JSON.parse(cachedBundleStr);
+                const bundle = JSON.parse(cachedBundleStr);
+                // Store in memory cache
+                bundleMemoryCache.set(endPoint, { inventory, bundle });
+                return bundle;
             }
         }
     } catch (err) {
@@ -98,7 +112,8 @@ export async function getRemoteBundle(endPoint) {
         await storage.writeFile(inventoryPath, JSON.stringify(inventory));
 
         const bundle = JSON.parse(jsonString);
-
+        // Store in memory cache
+        bundleMemoryCache.set(endPoint, { inventory, bundle });
         return bundle;
     } catch (err) {
         console.error("getRemoteBundle: Error parsing bundle:", err);
@@ -132,7 +147,7 @@ export async function saveRemoteBundle(endPoint, bundle) {
 
         // Clean up old chunks (logic: list again, if any part index >= chunks.length, delete it)
         const listing = await storage.getListing(endPoint) || [];
-        const oldParts = listing.filter(item => item.name.startsWith(BUNDLE_PREFIX));
+        const oldParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
         for (const part of oldParts) {
             const index = parseInt(part.name.split(BUNDLE_PREFIX)[1]);
             if (index >= chunks.length) {
@@ -143,7 +158,7 @@ export async function saveRemoteBundle(endPoint, bundle) {
         // Refresh cache after upload to prevent next sync from downloading it
 
         const newListing = await storage.getListing(endPoint) || [];
-        const newParts = newListing.filter(item => item.name.startsWith(BUNDLE_PREFIX));
+        const newParts = newListing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
         newParts.sort((a, b) => {
             const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
             const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
@@ -162,15 +177,20 @@ export async function saveRemoteBundle(endPoint, bundle) {
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(newInventory));
 
+        // Update memory cache
+        bundleMemoryCache.set(endPoint, { inventory: newInventory, bundle });
+
     } catch (err) {
         console.error("saveRemoteBundle: Error saving bundle:", err);
         throw err;
     }
 }
 
-export async function scanLocal(path, ignore = []) {
+export async function scanLocal(path, ignore = [], listing = null, remote = null) {
     const bundle = {};
-    const listing = await storage.getRecursiveList(path);
+    if (!listing) {
+        listing = await storage.getRecursiveList(path);
+    }
 
     const files = listing.filter(item => item.type === "file");
 
@@ -189,16 +209,27 @@ export async function scanLocal(path, ignore = []) {
                 return;
             }
 
+            const localMtime = item.mtimeMs || 0;
+            const remoteItem = remote && remote[relativePath];
+
+            // optimization: reuse remote content if mtime hasn't changed AND we have valid remote mtime
+            if (remoteItem && remoteItem.mtime && Math.floor(remoteItem.mtime) >= Math.floor(localMtime)) {
+                bundle[relativePath] = {
+                    content: remoteItem.content,
+                    mtime: localMtime  // Use local mtime to ensure consistency
+                };
+                return;
+            }
+
             const content = await storage.readFile(item.path);
             bundle[relativePath] = {
                 content,
-                mtime: item.mtimeMs || 0
+                mtime: localMtime
             };
         } catch (err) {
             console.error(`scanLocal: Error reading ${item.path}:`, err);
         }
     }));
-
 
     return bundle;
 }
@@ -221,6 +252,21 @@ export function mergeBundles(remote, local, name = "") {
                 if (normalizeContent(remoteItem.content) === normalizeContent(localItem.content)) {
                     continue;
                 }
+                // Debug first mismatch
+                if (updateCount === 0) {
+                    console.log(`DEBUG ${name}: First mismatch at "${path}"`, {
+                        hasRemote: !!remoteItem,
+                        localMtime: localItem.mtime,
+                        remoteMtime: remoteItem?.mtime,
+                        localFloor: Math.floor(localItem.mtime),
+                        remoteFloor: remoteItem?.mtime ? Math.floor(remoteItem.mtime) : 'N/A',
+                        mtimeCheck: !remoteItem || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime),
+                        contentEqual: remoteItem?.content === localItem.content,
+                        contentLengths: { local: localItem.content?.length, remote: remoteItem?.content?.length }
+                    });
+                }
+            } else if (updateCount === 0) {
+                console.log(`DEBUG ${name}: First file has no remote at "${path}"`);
             }
             merged[path] = localItem;
             // console.log(`mergeBundles: Update ${path} (Local newer)`);
@@ -233,8 +279,8 @@ export function mergeBundles(remote, local, name = "") {
     return { merged, updated: updateCount > 0 };
 }
 
-export async function applyBundle(root, bundle) {
-    if (!bundle) return;
+export async function applyBundle(root, bundle, listing = null) {
+    if (!bundle) return { updateCount: 0, listing: listing || [] };
 
     // Ensure root exists
     await storage.createFolderPath(root, true);
@@ -242,7 +288,9 @@ export async function applyBundle(root, bundle) {
     // Get local stats for safety check
     const localFiles = {};
     try {
-        const listing = await storage.getRecursiveList(root);
+        if (!listing) {
+            listing = await storage.getRecursiveList(root);
+        }
         for (const item of listing) {
             if (item.type === "file") {
                 const relativePath = item.path.replace(new RegExp(`^${root}/`), "");
@@ -282,5 +330,5 @@ export async function applyBundle(root, bundle) {
     if (updateCount > 0) {
         console.log(`applyBundle: Finished. Updated ${updateCount} files for ${root}.`);
     }
-    return updateCount;
+    return { updateCount, listing };
 }

@@ -128,26 +128,50 @@ export function useSyncFeature() {
                     s.progress = { total: bundles.length, processed: 0 };
                 });
 
-                // 3. Define Sync Task
+                // 3. Pre-scan local directories
+                const personalRoot = makePath("local", "personal");
+                const sharedRoot = makePath("local", "shared");
+                const [personalListing, sharedListing] = await Promise.all([
+                    storage.getRecursiveList(personalRoot),
+                    storage.getRecursiveList(sharedRoot)
+                ]);
+                const fullLocalListing = [...personalListing, ...sharedListing];
+
+                // 4. Define Sync Task
                 const runTask = async (bundleDef) => {
                     const { name, path, ignore } = bundleDef;
+                    const startTime = Date.now();
                     try {
                         let localUpdated = false;
-                        let downloadCount = 0;
+
+                        // Filter the pre-scanned listing for this bundle's path
+                        const normalizedPath = path.endsWith("/") ? path : path + "/";
+                        const bundleListing = fullLocalListing.filter(item =>
+                            item.path === path || item.path.startsWith(normalizedPath));
+                        const t1 = Date.now();
 
                         // Download & Apply
                         const remoteBundle = await bundle.getRemoteBundle(name);
-                        if (remoteBundle) {
-                            downloadCount = await bundle.applyBundle(path, remoteBundle);
-                        }
+                        const t2 = Date.now();
+                        const { downloadCount, listing: updatedListing } = await bundle.applyBundle(path, remoteBundle, bundleListing);
+                        const t3 = Date.now();
 
                         // Upload & Merge
-                        const localBundle = await bundle.scanLocal(path, ignore);
+                        const localBundle = await bundle.scanLocal(path, ignore, updatedListing, remoteBundle);
+                        const t4 = Date.now();
                         const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
+                        const t5 = Date.now();
 
                         if (updated) {
                             await bundle.saveRemoteBundle(name, merged);
+                            const t6 = Date.now();
+                            console.log(`TIMING ${name}: getRemote=${t2 - t1}ms, apply=${t3 - t2}ms, scan=${t4 - t3}ms, merge=${t5 - t4}ms, save=${t6 - t5}ms, TOTAL=${t6 - startTime}ms`);
                             localUpdated = true;
+                        } else {
+                            const totalTime = Date.now() - startTime;
+                            if (totalTime > 100) {
+                                console.log(`TIMING ${name} (no update): getRemote=${t2 - t1}ms, apply=${t3 - t2}ms, scan=${t4 - t3}ms, merge=${t5 - t4}ms, TOTAL=${totalTime}ms`);
+                            }
                         }
 
                         if (downloadCount > 0 || localUpdated) {
@@ -167,8 +191,8 @@ export function useSyncFeature() {
                     }
                 };
 
-                // 4. Execute concurrently
-                const limit = (await import("p-limit")).default(5);
+                // 5. Execute concurrently
+                const limit = (await import("p-limit")).default(10);
                 await Promise.all(bundles.map(b => limit(() => runTask(b))));
             }
             if (updateCounter > 0) {
