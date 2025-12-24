@@ -173,13 +173,13 @@ export function useSyncFeature() {
                     setError("SYNC_FAILED");
                     console.error(err);
                 }
-                setDuration(parseInt(duration / 1000) * 1000);
+                setDuration(duration);
             }
             try {
                 const paths = files.map(item => item.path.replace("/" + device, ""));
                 const results = await storage.readFiles("/" + device, paths);
                 const duration = new Date().getTime() - startRef.current;
-                setDuration(parseInt(duration / 1000) * 1000);
+                setDuration(duration);
                 for (const path in results) {
                     const item = files.find(item => item.path === "/" + device + path);
                     if (!item) {
@@ -274,6 +274,18 @@ export function useSyncFeature() {
             return () => clearTimeout(timerHandle);
         }
     }, [online, _loaded, isSignedIn, visible, syncNow]);
+
+    // Update duration continuously while syncing
+    useEffect(() => {
+        if (!busy || !startRef.current) {
+            return;
+        }
+        const intervalHandle = setInterval(() => {
+            const currentDuration = new Date().getTime() - startRef.current;
+            setDuration(currentDuration);
+        }, 100); // Update every 100ms for smooth updates
+        return () => clearInterval(intervalHandle);
+    }, [busy]);
 
     return {
         sync: online && _loaded && syncNow,
