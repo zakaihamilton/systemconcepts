@@ -29,14 +29,24 @@ export default function SpeedSlider() {
         SPEED_FAST: 1.25,
         SPEED_VERY_FAST: 1.5,
         SPEED_SUPER_FAST: 1.75,
-        SPEED_DOUBLE: 2.0,
-        SPEED_TRIPLE: 3.0
+        SPEED_DOUBLE: 2.0
     };
 
     const speedMarks = Object.entries(rateItems).map(([name, value]) => ({
         value,
         label: value + "x"
     })).sort((a, b) => a.value - b.value);
+
+    const getSpeedName = (value) => {
+        const entry = Object.entries(rateItems).find(([, val]) => val === value);
+        if (entry) {
+            const [name] = entry;
+            return translations[name] || name.replace('SPEED_', '').split('_').map(word =>
+                word.charAt(0) + word.slice(1).toLowerCase()
+            ).join(' ');
+        }
+        return value + "x";
+    };
 
     const handleSpeedChange = (event, newValue) => {
         player.playbackRate = newValue;
@@ -49,10 +59,11 @@ export default function SpeedSlider() {
                     aria-label={translations.SPEED}
                     value={player.playbackRate || 1.0}
                     valueLabelDisplay="auto"
+                    valueLabelFormat={getSpeedName}
                     step={null}
                     marks={speedMarks}
                     min={0.5}
-                    max={3.0}
+                    max={2.0}
                     onChange={handleSpeedChange}
                 />
             </div>
