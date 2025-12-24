@@ -35,11 +35,17 @@ export async function getCollection({ dbName, collectionName, ...params }) {
     return collection;
 }
 
-export async function listCollection({ collectionName, query = {}, fields, ...params }) {
+export async function listCollection({ collectionName, query = {}, fields, skip, limit, ...params }) {
     const collection = await getCollection({ collectionName, ...params });
     let cursor = collection.find(query, fields);
     if (fields) {
         cursor = cursor.project(fields);
+    }
+    if (skip) {
+        cursor = cursor.skip(skip);
+    }
+    if (limit) {
+        cursor = cursor.limit(limit);
     }
     const results = await cursor.toArray();
     return results;
@@ -84,9 +90,11 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
     if (req.method === "GET" || req.method === "POST") {
         try {
             const body = req.body;
-            const { id, query, fields } = headers;
+            const { id, query, fields, limit, skip } = headers;
             const parsedId = id && decodeURIComponent(id);
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
+            const parsedLimit = limit && parseInt(limit);
+            const parsedSkip = skip && parseInt(skip);
             if (Array.isArray(body)) {
                 const maxBytes = 4000 * 1000;
                 let records = await listCollection({
@@ -94,7 +102,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                         "id": {
                             "$in": body
                         }
-                    }, fields: parsedFields
+                    }, fields: parsedFields, limit: parsedLimit, skip: parsedSkip
                 });
                 if (!records) {
                     records = [];
@@ -117,7 +125,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             else {
                 const parsedQuery = query && JSON.parse(decodeURIComponent(query));
                 sanitizeQuery(parsedQuery);
-                let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
+                let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields, limit: parsedLimit, skip: parsedSkip });
                 if (!result) {
                     result = [];
                 }

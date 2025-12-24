@@ -44,24 +44,34 @@ export function useSync(options = {}) {
 
 export async function fetchUpdated(endPoint, start, end) {
     const listing = [];
-    const items = await fetchJSON("/api/" + endPoint, {
-        method: "GET",
-        headers: {
-            sync: true,
-            query: encodeURIComponent(JSON.stringify({ "stat.mtimeMs": { $gte: start, $lte: end } })),
-            fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 }))
+    const limit = 500;
+    let skip = 0;
+    while (true) {
+        const items = await fetchJSON("/api/" + endPoint, {
+            method: "GET",
+            headers: {
+                sync: true,
+                query: encodeURIComponent(JSON.stringify({ "stat.mtimeMs": { $gte: start, $lte: end } })),
+                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 })),
+                limit,
+                skip
+            }
+        });
+        if (items) {
+            for (const item of items) {
+                const { name, stat, folder } = item;
+                const itemPath = makePath(folder, name);
+                Object.assign(item, stat);
+                item.id = item.path = makePath(endPoint, itemPath);
+                item.name = name;
+                item.local = makePath("local", endPoint, itemPath);
+                listing.push(item);
+            }
         }
-    });
-    if (items) {
-        for (const item of items) {
-            const { name, stat, folder } = item;
-            const itemPath = makePath(folder, name);
-            Object.assign(item, stat);
-            item.id = item.path = makePath(endPoint, itemPath);
-            item.name = name;
-            item.local = makePath("local", endPoint, itemPath);
-            listing.push(item);
+        if (!items || items.length < limit) {
+            break;
         }
+        skip += limit;
     }
     return listing;
 }
