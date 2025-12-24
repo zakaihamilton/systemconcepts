@@ -18,6 +18,7 @@ import Cookies from "js-cookie";
 import { useGroups } from "@util/groups";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
+import SpeedSlider from "./Player/SpeedSlider";
 
 export const PlayerStore = new Store({
     mediaPath: "",
@@ -153,6 +154,7 @@ export default function PlayerPage({ show = false, suffix }) {
 
     return <div className={styles.root} style={style}>
         {statusBar}
+        <SpeedSlider />
         <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
         {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
