@@ -54,7 +54,7 @@ export default function WeekView({ sessions, date, store }) {
             s.date = newDate;
         });
     }];
-    const weekItems = new Array(numOfWeeksInMonth).fill(0).map((_, index) => {
+    const weekItems = new Array(numOfWeeksInMonth || 0).fill(0).map((_, index) => {
         return {
             id: index + 1,
             name: index + 1
@@ -86,7 +86,10 @@ export default function WeekView({ sessions, date, store }) {
         });
     }];
     const yearStart = 2015;
-    const yearEnd = new Date().getFullYear() + 2;
+    let yearEnd = new Date().getFullYear() + 2;
+    if (yearEnd < yearStart) {
+        yearEnd = yearStart + 1;
+    }
     const yearItems = getYearNames(month, yearFormatter, yearStart, yearEnd).map((name, index) => {
         return {
             id: yearStart + index,
