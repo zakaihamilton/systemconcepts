@@ -35,7 +35,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
             id: "speed",
             name: translations.SPEED,
             icon: <SpeedIcon />,
-            selected: showSpeed,
+            active: showSpeed,
             onClick: () => {
                 PlayerStore.update(s => {
                     s.showSpeed = !s.showSpeed;
