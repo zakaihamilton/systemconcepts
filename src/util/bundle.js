@@ -23,6 +23,34 @@ export async function getRemoteBundle(endPoint) {
         return indexA - indexB;
     });
 
+    // Create inventory signature (name, mtime)
+    const inventory = bundleParts.map(p => ({
+        name: p.name,
+        mtime: p.mtimeMs || 0
+    }));
+
+    const cachePath = `local/cache/${endPoint}_bundle.json`;
+    const inventoryPath = `local/cache/${endPoint}_inventory.json`;
+
+    try {
+        const cachedInventoryStr = await storage.readFile(inventoryPath);
+        const cachedInventory = cachedInventoryStr ? JSON.parse(cachedInventoryStr) : [];
+        console.log(`getRemoteBundle: Checking inventory against cache...`);
+
+        if (JSON.stringify(inventory) === JSON.stringify(cachedInventory)) {
+            console.log("getRemoteBundle: Cache hit! Inventory matches. Loading from disk...");
+            const cachedBundleStr = await storage.readFile(cachePath);
+            if (cachedBundleStr) {
+                return JSON.parse(cachedBundleStr);
+            }
+        } else {
+            console.log("getRemoteBundle: Cache miss. Inventory mismatch.");
+        }
+    } catch (err) {
+        // Cache miss or error, proceed to download
+        console.log("getRemoteBundle: Cache miss or invalid (error).", err);
+    }
+
     // Download parts
     const parts = [];
     for (const part of bundleParts) {
@@ -43,6 +71,13 @@ export async function getRemoteBundle(endPoint) {
         const binaryString = Base64.atob(joinedBase64);
         const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
         const jsonString = pako.ungzip(bytes, { to: "string" });
+
+        // Update Cache
+        console.log("getRemoteBundle: Updating cache...");
+        await storage.createFolderPath(cachePath);
+        await storage.writeFile(cachePath, jsonString);
+        await storage.writeFile(inventoryPath, JSON.stringify(inventory));
+
         const bundle = JSON.parse(jsonString);
         console.log(`getRemoteBundle: Successfully fetched and parsed bundle with ${Object.keys(bundle).length} items.`);
         return bundle;
@@ -85,6 +120,28 @@ export async function saveRemoteBundle(endPoint, bundle) {
                 await storage.deleteFile(part.path);
             }
         }
+
+        // Refresh cache after upload to prevent next sync from downloading it
+        console.log("saveRemoteBundle: Refreshing cache after upload...");
+        const newListing = await storage.getListing(endPoint);
+        const newParts = newListing.filter(item => item.name.startsWith(BUNDLE_PREFIX));
+        newParts.sort((a, b) => {
+            const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
+            const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
+            return indexA - indexB;
+        });
+
+        const newInventory = newParts.map(p => ({
+            name: p.name,
+            mtime: p.mtimeMs || 0
+        }));
+
+        const cachePath = `local/cache/${endPoint}_bundle.json`;
+        const inventoryPath = `local/cache/${endPoint}_inventory.json`;
+
+        await storage.createFolderPath(cachePath);
+        await storage.writeFile(cachePath, jsonString);
+        await storage.writeFile(inventoryPath, JSON.stringify(newInventory));
 
     } catch (err) {
         console.error("saveRemoteBundle: Error saving bundle:", err);
@@ -135,7 +192,7 @@ export function mergeBundles(remote, local) {
         }
     }
     console.log(`mergeBundles: Merged. Updated ${updateCount} items from local.`);
-    return merged;
+    return { merged, updated: updateCount > 0 };
 }
 
 export async function applyBundle(root, bundle) {
@@ -173,4 +230,5 @@ export async function applyBundle(root, bundle) {
         }
     }
     console.log(`applyBundle: Finished. Updated ${updateCount} files.`);
+    return updateCount;
 }

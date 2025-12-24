@@ -12,7 +12,6 @@ export function useGroups(depends) {
     const { busy, groups } = GroupsStore.useState();
 
     const localMetadataPath = "local/shared/sessions/groups.json";
-    const remoteMetadataPath = "shared/sessions/groups.json";
     const loadGroups = useCallback(async () => {
         let busy = false;
         GroupsStore.update(s => {
@@ -66,7 +65,7 @@ export function useGroups(depends) {
             if (typeof data === "function") {
                 data = data(s.groups);
             }
-            storage.writeFile(remoteMetadataPath, JSON.stringify(data, null, 4));
+
             storage.writeFile(localMetadataPath, JSON.stringify(data, null, 4));
             s.groups = data;
         });

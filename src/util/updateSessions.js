@@ -19,7 +19,7 @@ export function useUpdateSessions(groups) {
         if (!listing) {
             return [];
         }
-        const sharedPath = "shared/sessions/" + path.substring(prefix.length) + "/listing.json";
+        const sharedPath = "local/shared/sessions/" + path.substring(prefix.length) + "/listing.json";
         const listingBody = JSON.stringify(listing, null, 4);
         const exists = await storage.exists(sharedPath);
         if (exists) {
@@ -36,7 +36,7 @@ export function useUpdateSessions(groups) {
     }, [prefix]);
     const copyFile = useCallback(async (path, name) => {
         const sourcePath = path + name;
-        const targetPath = "shared/sessions/" + path.substring(prefix.length) + name;
+        const targetPath = "local/shared/sessions/" + path.substring(prefix.length) + name;
         let sourceBody = null;
         try {
             sourceBody = await storage.readFile(sourcePath);
