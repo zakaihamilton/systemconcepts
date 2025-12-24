@@ -8,7 +8,7 @@ import Link from "@mui/material/Link";
 export default function Session({ group, year, date, name, color }) {
     const isPhone = useDeviceType() === "phone";
     const textColor = useSessionTextColor(color);
-    const groupName = group[0].toUpperCase() + group.slice(1);
+    const groupName = group && (group[0].toUpperCase() + group.slice(1));
     const path = `session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`;
 
     const onClick = () => {
