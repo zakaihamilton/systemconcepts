@@ -6,6 +6,7 @@ import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { makePath } from "@util/path";
+import * as bundle from "./bundle";
 import { usePageVisibility } from "@util/hooks";
 
 export const SyncStore = new Store({
@@ -123,6 +124,24 @@ export async function syncLocal(endPoint, start, end) {
     const changed = listing.filter(item => item.mtimeMs >= start && item.mtimeMs <= end);
     console.log(`syncLocal: Found ${changed.length} changed items locally.`);
 
+    const uniqueFolders = new Set();
+    for (const item of changed) {
+        if (item.type === "file") {
+            let remoteFolder = makePath(item.path.replace(/^\/local\//, ""));
+            const parts = remoteFolder.split("/").filter(Boolean);
+            for (let partIndex = 1; partIndex < parts.length; partIndex++) {
+                const subPath = parts.slice(1, partIndex).join("/");
+                if (subPath) {
+                    uniqueFolders.add("/" + subPath);
+                }
+            }
+        }
+    }
+    if (uniqueFolders.size) {
+        await storage.createFolders("/" + endPoint, Array.from(uniqueFolders));
+    }
+
+    let count = 0;
     await runConcurrent(changed, 10, async (item) => {
         if (item.type === "file") {
             if (item.size && item.size > 4 * 1024 * 1024) {
@@ -131,41 +150,16 @@ export async function syncLocal(endPoint, start, end) {
             }
             const remoteFile = makePath(item.path.replace(path, ""));
             const localBuffer = await storage.readFile(item.path);
-            let remoteBuffer = null;
-            try {
-                remoteBuffer = await storage.readFile("/" + endPoint + remoteFile);
-            }
-            catch (err) {
-                console.log("syncLocal: remote file likely does not exist or error reading:", remoteFile);
-            }
 
-            if (remoteBuffer === localBuffer) {
-                console.log("syncLocal: File unchanged:", remoteFile);
-                return;
-            }
 
-            console.log("syncLocal: Uploading file:", remoteFile);
-
-            // Ensure remote folders exist
-            let remoteFolder = makePath(item.path.replace(/^\/local\//, ""));
-            remoteFolder = makePath(remoteFolder);
-            const parts = remoteFolder.split("/").filter(Boolean);
-            const folders = [];
-            for (let partIndex = 1; partIndex < parts.length; partIndex++) {
-                const subPath = parts.slice(1, partIndex).join("/");
-                if (subPath) {
-                    folders.push("/" + subPath);
-                }
-            }
-            if (folders.length) {
-                await storage.createFolders("/" + endPoint, folders);
-            }
 
             // Upload file
             await storage.writeFile("/" + endPoint + remoteFile, localBuffer);
+            count++;
         }
     });
     console.log(`syncLocal finished for ${endPoint}`);
+    return count > 0;
 }
 
 export function useSyncFeature() {
@@ -210,6 +204,33 @@ export function useSyncFeature() {
         try {
 
             const syncItems = async (device, items) => {
+                const uniqueFolders = new Set();
+                for (const item of items) {
+                    if (item.deleted) continue;
+                    const { stat, local } = item;
+                    const root = makePath("local", device);
+                    if (local.startsWith(root)) {
+                        let relative = local.substring(root.length);
+                        if (stat.type === "file") {
+                            const lastSlash = relative.lastIndexOf("/");
+                            if (lastSlash !== -1) {
+                                relative = relative.substring(0, lastSlash);
+                            } else {
+                                relative = "";
+                            }
+                        }
+                        if (relative) {
+                            const parts = relative.split("/").filter(Boolean);
+                            for (let i = 0; i < parts.length; i++) {
+                                uniqueFolders.add("/" + parts.slice(0, i + 1).join("/"));
+                            }
+                        }
+                    }
+                }
+                if (uniqueFolders.size) {
+                    await storage.createFolders(makePath("local", device), Array.from(uniqueFolders));
+                }
+
                 await runConcurrent(items, 10, async (item) => {
                     try {
                         const { deleted, stat, local, path } = item;
@@ -228,7 +249,6 @@ export function useSyncFeature() {
                                 console.warn("Skipping file larger than 4MB:", path);
                                 return;
                             }
-                            await storage.createFolderPath(local);
                             const remotePath = path.replace("/" + device, "");
                             try {
                                 const data = await storage.readFile("/" + device + remotePath);
@@ -242,7 +262,7 @@ export function useSyncFeature() {
                             }
                         }
                         else if (stat.type === "dir") {
-                            await storage.createFolder(local);
+                            // Folder update handled by batch creation
                         }
                     }
                     catch (err) {
@@ -275,23 +295,24 @@ export function useSyncFeature() {
                     console.error(err);
                 }
 
-                try {
-                    console.log("Fetching personal items...");
-                    personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
-                    console.log("Fetched personal items:", personal.length);
-                }
-                catch (err) {
-                    if (err === 403) {
-                        setError("ACCESS_DENIED");
-                    }
-                    else {
-                        setError("SYNC_FAILED");
-                    }
-                    console.error(err);
-                }
+                // Personal items handled via bundle
+                // try {
+                //     console.log("Fetching personal items...");
+                //     personal = (await fetchUpdated("personal", lastUpdated, currentTime)) || [];
+                //     console.log("Fetched personal items:", personal.length);
+                // }
+                // catch (err) {
+                //     if (err === 403) {
+                //         setError("ACCESS_DENIED");
+                //     }
+                //     else {
+                //         setError("SYNC_FAILED");
+                //     }
+                //     console.error(err);
+                // }
 
                 // Set total count before processing
-                const totalItems = shared.length + personal.length;
+                const totalItems = shared.length + 1; // +1 for personal bundle
                 console.log("Total items to sync:", totalItems);
                 SyncActiveStore.update(s => {
                     s.progress = { total: totalItems, processed: 0 };
@@ -318,13 +339,20 @@ export function useSyncFeature() {
                     console.error(err);
                 }
                 try {
-                    if (personal.length) {
-                        console.log("Processing personal items...");
-                        await syncItems("personal", personal);
-                        console.log("Personal items processed.");
-                        updateCounter++;
+                    console.log("Syncing personal bundle...");
+                    // Download & Apply (Sync Items)
+                    const remoteBundle = await bundle.getRemoteBundle("personal");
+                    if (remoteBundle) {
+                        await bundle.applyBundle(makePath("local", "personal"), remoteBundle);
                     }
-                    await syncLocal("personal", lastUpdated, currentTime);
+
+                    // Upload & Merge (Sync Local)
+                    const localBundle = await bundle.scanLocal(makePath("local", "personal"));
+                    // If no remote bundle (first run/migration), treat as empty
+                    const merged = bundle.mergeBundles(remoteBundle || {}, localBundle);
+                    await bundle.saveRemoteBundle("personal", merged);
+
+                    updateCounter++;
                 }
                 catch (err) {
                     updateCounter--;
