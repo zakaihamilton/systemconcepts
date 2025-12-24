@@ -19,22 +19,24 @@ export function useSearch(name, updateCallback) {
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
-    if (typeof name === "function") {
-        updateCallback = name;
-        name = "default";
+    let effectiveName = name;
+    let effectiveUpdateCallback = updateCallback;
+    if (typeof effectiveName === "function") {
+        effectiveUpdateCallback = effectiveName;
+        effectiveName = "default";
     }
-    name = name || "default";
+    effectiveName = effectiveName || "default";
     const { search } = SearchStore.useState();
-    const searchTerm = search[name] || "";
+    const searchTerm = search[effectiveName] || "";
     const [value, setValue] = useState(searchTerm);
     const [focused, setFocused] = useState(false);
     const translations = useTranslations();
     const inputRef = useRef(null);
     useTimeout(() => {
         SearchStore.update(s => {
-            s.search[name] = value;
+            s.search[effectiveName] = value;
         });
-        updateCallback && updateCallback(value);
+        effectiveUpdateCallback && effectiveUpdateCallback(value);
     }, 500, [value]);
 
     const onChangeText = event => {
