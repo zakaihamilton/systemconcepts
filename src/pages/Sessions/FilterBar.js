@@ -14,7 +14,7 @@ import styles from "./FilterBar.module.scss";
 import clsx from "clsx";
 
 
-export default function FilterBar() {
+export default function FilterBar({ hideYears = false }) {
     const translations = useTranslations();
     const { typeFilter, yearFilter, groupFilter, sessions, groups, groupsMetadata } = SessionsStore.useState();
 
@@ -225,7 +225,7 @@ export default function FilterBar() {
                 </Menu>
 
                 {/* Year Filter Dropdown */}
-                <Menu items={yearMenuItems} selected={yearFilter}>
+                {!hideYears && <Menu items={yearMenuItems} selected={yearFilter}>
                     <button className={clsx(styles.dropdownButton, yearFilter.length > 0 && styles.active)}>
                         <ArrowDropDownIcon className={styles.arrow} />
                         <div className={styles.labelContent}>
@@ -247,7 +247,7 @@ export default function FilterBar() {
                             </Tooltip>
                         )}
                     </button>
-                </Menu>
+                </Menu>}
             </div>
         </div>
     );

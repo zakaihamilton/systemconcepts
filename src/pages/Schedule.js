@@ -94,7 +94,7 @@ export default function SchedulePage() {
 
     return <div className={styles.root}>
         {statusBar}
-        {!!showFilterDialog && <FilterBar />}
+        {!!showFilterDialog && <FilterBar hideYears={true} />}
         {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         {!!loading && loadingElement}
