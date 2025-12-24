@@ -12,7 +12,8 @@ export default function Day({ sessions, column, row, count, date }) {
     };
     const sessionDate = getDateString(date);
     const sessionItems = (sessions || []).filter(session => session.date === sessionDate).map(session => {
-        return <Session key={session.name} {...session} />;
+        const { key, ...sessionProps } = session;
+        return <Session key={session.name} {...sessionProps} />;
     });
     return <div className={clsx(styles.root, column === count && styles.last)} style={style}>
         <div className={clsx(styles.sessions, isPhone && styles.mobile)}>
