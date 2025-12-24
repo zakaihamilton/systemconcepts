@@ -26,7 +26,7 @@ registerToolbar("Schedule");
 export default function SchedulePage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    let [sessions, loading, askForFullSync] = useSessions();
+    let [sessions, loading] = useSessions();
     const search = useSearch("schedule");
     let { date, viewMode } = ScheduleStore.useState();
     const { showFilterDialog } = SessionsStore.useState();
@@ -81,16 +81,13 @@ export default function SchedulePage() {
                 s.mode = "signin";
                 s.message = translations.REQUIRE_SIGNIN;
             }
-            else if (askForFullSync) {
-                s.mode = "sync";
-                s.message = translations.REQUIRE_FULL_SYNC;
-            }
+
             else {
                 s.mode = "";
                 s.message = "";
             }
         });
-    }, [isSignedIn, askForFullSync, translations]);
+    }, [isSignedIn, translations]);
 
     return <div className={styles.root}>
         {statusBar}

@@ -192,15 +192,7 @@ export function useSyncFeature() {
             setComplete(true);
         }
     }, [online]);
-    const fullSync = useCallback(async () => {
-        SyncStore.update(s => {
-            s.lastUpdated = 0;
-        });
-        SyncActiveStore.update(s => {
-            s.lastSynced = 0;
-        });
-        updateSync(false, 0);
-    }, [updateSync]);
+
     const syncNow = useCallback(pollSync => {
         updateSync(pollSync, lastUpdated);
     }, [lastUpdated, updateSync]);
@@ -229,7 +221,6 @@ export function useSyncFeature() {
 
     return {
         sync: online && _loaded && syncNow,
-        fullSync: online && _loaded && fullSync,
         busy,
         error,
         active,

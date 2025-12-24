@@ -153,9 +153,6 @@ export default function StatusBar({ data, mapper, store }) {
             {mode && mode === "signin" && <Button variant="contained" onClick={gotoAccount}>
                 {translations.ACCOUNT}
             </Button>}
-            {mode && mode === "sync" && !syncContext.error && <Button variant="contained" disabled={!syncContext.fullSync} onClick={syncContext.fullSync}>
-                {translations.FULL_SYNC}
-            </Button>}
             {!busy && <IconButton variant="contained" onClick={handleClose} size="large">
                 <Tooltip title={translations.CLOSE} arrow>
                     <CancelIcon />

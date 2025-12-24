@@ -16,7 +16,7 @@ export const SyncContext = createContext();
 export default function Sync({ children }) {
     const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
-    const { sync, fullSync, busy, error, active, duration, changed, percentage, progress } = useSyncFeature();
+    const { sync, busy, error, active, duration, changed, percentage, progress } = useSyncFeature();
     const className = useStyles(styles, {
         animated: busy
     });
@@ -45,21 +45,14 @@ export default function Sync({ children }) {
             onClick: sync,
             divider: isDesktop
         },
-        active && fullSync && {
-            id: "fullSync",
-            name: translations.FULL_SYNC,
-            icon: <SyncIcon />,
-            onClick: fullSync,
-            location: "header",
-            menu: "true"
-        }
+
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, fullSync, changed, active, duration, error, isDesktop, percentage, progress] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, active, duration, error, isDesktop, percentage, progress] });
 
     const syncContext = useMemo(() => {
-        return { updateSync: sync, fullSync, error };
-    }, [sync, fullSync, error]);
+        return { updateSync: sync, error };
+    }, [sync, error]);
 
     return <SyncContext.Provider value={syncContext}>
         {children}

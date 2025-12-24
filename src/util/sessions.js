@@ -332,7 +332,5 @@ export function useSessions(depends = [], options = {}) {
     const items = filterSessions ? filtered : sessions;
 
     const isLoading = busy || loading || (syncing && (!sessions || !sessions.length));
-    const askForFullSync = !isLoading && (!sessions || !sessions.length);
-
-    return [items, isLoading, askForFullSync];
+    return [items, isLoading];
 }

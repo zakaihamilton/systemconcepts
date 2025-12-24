@@ -27,7 +27,7 @@ export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
-    const [sessions, loading, askForFullSync] = useSessions();
+    const [sessions, loading] = useSessions();
     const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, showFilterDialog } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
     const itemPath = item => {
@@ -221,16 +221,13 @@ export default function SessionsPage() {
                 s.mode = "signin";
                 s.message = translations.REQUIRE_SIGNIN;
             }
-            else if (askForFullSync) {
-                s.mode = "sync";
-                s.message = translations.REQUIRE_FULL_SYNC;
-            }
+
             else {
                 s.mode = "";
                 s.message = "";
             }
         });
-    }, [isSignedIn, askForFullSync, translations]);
+    }, [isSignedIn, translations]);
 
     return <>
         {!!showFilterDialog && <FilterBar />}
