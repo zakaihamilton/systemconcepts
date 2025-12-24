@@ -162,7 +162,7 @@ export default function TableWidget(props) {
         }
     ].filter(item => viewModes.hasOwnProperty(item.id));
 
-    const visibleColumns = columns.filter(column => {
+    const visibleColumns = useMemo(() => columns.filter(column => {
         if (!column) {
             return false;
         }
@@ -170,7 +170,7 @@ export default function TableWidget(props) {
             return column.viewModes.hasOwnProperty(viewMode);
         }
         return true;
-    });
+    }), [columns, viewMode]);
 
     const createSortHandler = useCallback((property) => () => {
         const isDesc = orderBy === property && order === "desc";
@@ -315,10 +315,7 @@ export default function TableWidget(props) {
             items = items.map(mapper);
         }
 
-        items = items.filter(item => {
-            if (!search) {
-                return true;
-            }
+        if (search) {
             const keys = visibleColumns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
                 if (typeof item.searchable === "string") {
                     return item.searchable;
@@ -328,21 +325,23 @@ export default function TableWidget(props) {
                 }
                 return item.id;
             });
-            for (const key of keys) {
-                if (typeof item[key] === "string") {
-                    const match = item[key].toLowerCase().includes(search.toLowerCase());
-                    if (match) {
-                        return true;
+            items = items.filter(item => {
+                for (const key of keys) {
+                    if (typeof item[key] === "string") {
+                        const match = item[key].toLowerCase().includes(search.toLowerCase());
+                        if (match) {
+                            return true;
+                        }
                     }
                 }
-            }
-            return false;
-        });
+                return false;
+            });
+        }
 
         items = stableSort(items || [], getComparator(order, orderBy));
         setEmpty(data && (!data.length || !items.length));
         return items;
-    }, [search, data, order, orderBy, ...depends]);
+    }, [search, data, order, orderBy, visibleColumns, filter, mapper, ...depends]);
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
