@@ -35,11 +35,17 @@ export async function getCollection({ dbName, collectionName, ...params }) {
     return collection;
 }
 
-export async function listCollection({ collectionName, query = {}, fields, ...params }) {
+export async function listCollection({ collectionName, query = {}, fields, skip, limit, ...params }) {
     const collection = await getCollection({ collectionName, ...params });
     let cursor = collection.find(query, fields);
     if (fields) {
         cursor = cursor.project(fields);
+    }
+    if (skip !== undefined) {
+        cursor = cursor.skip(skip);
+    }
+    if (limit !== undefined) {
+        cursor = cursor.limit(limit);
     }
     const results = await cursor.toArray();
     return results;
@@ -117,11 +123,20 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             else {
                 const parsedQuery = query && JSON.parse(decodeURIComponent(query));
                 sanitizeQuery(parsedQuery);
-                let result = await listCollection({ dbName, collectionName, query: parsedQuery, fields: parsedFields });
+                const skip = headers.skip ? parseInt(headers.skip) : undefined;
+                const limit = headers.limit ? parseInt(headers.limit) : undefined;
+                let result = await listCollection({
+                    dbName,
+                    collectionName,
+                    query: parsedQuery,
+                    fields: parsedFields,
+                    skip,
+                    limit
+                });
                 if (!result) {
                     result = [];
                 }
-                console.log("found", result.length, "items for collection", collectionName, "query", parsedQuery, "fields", parsedFields);
+                console.log("found", result.length, "items for collection", collectionName, "query", parsedQuery, "fields", parsedFields, "skip", skip, "limit", limit);
                 return result;
             }
         }

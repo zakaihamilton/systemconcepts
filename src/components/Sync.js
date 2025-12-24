@@ -16,7 +16,7 @@ export const SyncContext = createContext();
 export default function Sync({ children }) {
     const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
-    const { sync, fullSync, busy, error, active, duration, changed } = useSyncFeature();
+    const { sync, fullSync, busy, error, active, duration, changed, percentage, progress } = useSyncFeature();
     const className = useStyles(styles, {
         animated: busy
     });
@@ -25,6 +25,7 @@ export default function Sync({ children }) {
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!error && (busy ? translations.SYNCING : translations.SYNC)}
+        {busy && progress.total > 0 && percentage > 0 && percentage < 100 && ` (${percentage}%)`}
         <br />
         {!!duration && formattedDuration}
     </span>;
@@ -54,7 +55,7 @@ export default function Sync({ children }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, fullSync, changed, active, duration, error, isDesktop] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, fullSync, changed, active, duration, error, isDesktop, percentage, progress] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, fullSync, error };
