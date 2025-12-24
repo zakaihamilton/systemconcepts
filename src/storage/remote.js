@@ -168,13 +168,21 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
     async function readFiles(prefix, files) {
         let results = {};
         files = files.map(name => makePath(prefix + name));
-        const batchSize = 50; // Process files in batches to avoid exceeding API response size limit
+
+        // Dynamic batching: start with larger batch size and adjust based on response
+        const maxBatchSize = 100; // Increased from 50 to reduce API calls
+        const maxResponseSize = 3.5 * 1024 * 1024; // 3.5MB to stay safely under 4MB limit
+        let currentBatchSize = maxBatchSize;
+        let batchCount = 0;
 
         while (files.length) {
             // Take a batch of files
-            const batch = files.slice(0, batchSize);
+            const batch = files.slice(0, currentBatchSize);
+            batchCount++;
 
             try {
+                console.log(`[readFiles] Fetching batch ${batchCount} with ${batch.length} files from ${deviceId}`);
+
                 const result = await fetchJSON(fsEndPoint, {
                     method: "POST",
                     body: JSON.stringify(batch)
@@ -183,7 +191,19 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 if (!result || !result.length) {
                     // Remove failed files from the list
                     files = files.filter(path => !batch.includes(path));
+                    console.log(`[readFiles] Batch ${batchCount} returned no results, ${files.length} files remaining`);
                     continue;
+                }
+
+                // Estimate response size for dynamic batch adjustment
+                const responseSize = JSON.stringify(result).length;
+
+                // Adjust batch size for next iteration if response is too large or too small
+                if (responseSize > maxResponseSize && currentBatchSize > 10) {
+                    currentBatchSize = Math.max(10, Math.floor(currentBatchSize * 0.7));
+                    console.log(`[readFiles] Response size ${(responseSize / 1024 / 1024).toFixed(2)}MB, reducing batch size to ${currentBatchSize}`);
+                } else if (responseSize < maxResponseSize * 0.5 && currentBatchSize < maxBatchSize) {
+                    currentBatchSize = Math.min(maxBatchSize, Math.floor(currentBatchSize * 1.3));
                 }
 
                 // Store results
@@ -191,14 +211,23 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                     results[item.id] = item.body;
                 }
 
+                console.log(`[readFiles] Batch ${batchCount} completed: ${result.length} files fetched, ${files.length - batch.length} remaining`);
+
                 // Remove successfully fetched files
                 files = files.filter(path => !result.find(item => item.id === path));
             } catch (err) {
-                console.error("Error reading batch:", err);
+                console.error(`[readFiles] Error reading batch ${batchCount}:`, err);
+                // Reduce batch size on error
+                if (currentBatchSize > 10) {
+                    currentBatchSize = Math.max(10, Math.floor(currentBatchSize * 0.5));
+                    console.log(`[readFiles] Reducing batch size to ${currentBatchSize} after error`);
+                }
                 // Remove failed batch from the list to avoid infinite loop
                 files = files.filter(path => !batch.includes(path));
             }
         }
+
+        console.log(`[readFiles] Completed: ${Object.keys(results).length} files fetched in ${batchCount} batches from ${deviceId}`);
         return results;
     }
 
