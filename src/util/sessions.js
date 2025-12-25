@@ -33,7 +33,7 @@ export const SessionsStore = new Store({
 });
 
 export function useSessions(depends = [], options = {}) {
-    const { filterSessions = true, skipSync = false } = options;
+    const { filterSessions = true, skipSync = false, showToolbar } = options;
     const [syncCounter, syncing] = useSync({ ...options, active: !skipSync });
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
@@ -324,7 +324,7 @@ export function useSessions(depends = [], options = {}) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, yearFilter] });
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: showToolbar !== undefined ? showToolbar : filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, yearFilter] });
 
     const filtered = useMemo(() => {
         if (!sessions) return [];

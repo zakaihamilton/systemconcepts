@@ -21,7 +21,7 @@ export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
     const { order, orderBy } = SessionsStore.useState();
     const [sessions, loading] = useSessions([], { filterSessions: false, skipSync: true });
-    const [filteredSessions] = useSessions([], { filterSessions: true, active: false, skipSync: true });
+    const [filteredSessions] = useSessions([], { filterSessions: true, active: false, skipSync: true, showToolbar: false });
 
     const sortedFilteredSessions = useMemo(() => {
         if (!filteredSessions) return [];
@@ -41,21 +41,25 @@ export default function SessionPage({ group, year, date, name }) {
     }
 
     const toolbarItems = [
-        prevSession && {
+        {
             id: "prevSession",
             name: translations.PREVIOUS,
             icon: <ArrowBackIcon />,
-            onClick: () => gotoSession(prevSession),
-            location: "header"
+            onClick: () => prevSession && gotoSession(prevSession),
+            menu: false,
+            location: "header",
+            disabled: !prevSession
         },
-        nextSession && {
+        {
             id: "nextSession",
             name: translations.NEXT,
             icon: <ArrowForwardIcon />,
-            onClick: () => gotoSession(nextSession),
-            location: "header"
+            onClick: () => nextSession && gotoSession(nextSession),
+            menu: false,
+            location: "header",
+            disabled: !nextSession
         }
-    ].filter(Boolean);
+    ];
 
     useToolbar({ id: "Session", items: toolbarItems, depends: [prevSession, nextSession, translations] });
     const dateFormatter = useDateFormatter({
