@@ -10,6 +10,10 @@
     padding-right: 0.5em;
 }
 
+.root.border {
+    border-bottom: 1px solid var(--border-color);
+}
+
 .row {
     display: flex;
     align-items: center;
