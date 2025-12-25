@@ -69,7 +69,10 @@
     --overlay: rgba(255, 255, 255, 0.8);
     --select-color: var(--primary-500);
     --select-text-color: #ffffff;
+
+    --cue-color: white;
 }
+
 
 [data-theme="dark"] {
     /* Neutral Colors (Dark Slate-ish) */
@@ -135,4 +138,6 @@
     --overlay: rgba(15, 23, 42, 0.8);
     --select-color: var(--primary-500);
     --select-text-color: #ffffff;
+
+    --cue-color: white;
 }

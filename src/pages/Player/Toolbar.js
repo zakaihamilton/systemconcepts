@@ -41,7 +41,6 @@ export default function Toolbar({ show, playerRef, isVideo }) {
                     s.showSpeed = !s.showSpeed;
                 });
             },
-            menu: false,
             location: "header",
             divider: true
         },

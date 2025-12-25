@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import { SessionsStore } from "@util/sessions";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import MovieIcon from "@mui/icons-material/Movie";
 import AudioIcon from "@icons/Audio";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -17,6 +17,25 @@ import clsx from "clsx";
 export default function FilterBar({ hideYears = false }) {
     const translations = useTranslations();
     const { typeFilter, yearFilter, groupFilter, sessions, groups, groupsMetadata } = SessionsStore.useState();
+    const ref = useRef();
+
+    useEffect(() => {
+        const observer = new ResizeObserver(() => {
+            if (ref.current) {
+                const height = ref.current.offsetHeight;
+                document.documentElement.style.setProperty('--filter-height', height + 'px');
+            }
+        });
+
+        if (ref.current) {
+            observer.observe(ref.current);
+        }
+
+        return () => {
+            observer.disconnect();
+            document.documentElement.style.setProperty('--filter-height', '0px');
+        };
+    }, []);
 
     // Parse groups metadata
     const groupMetadata = useMemo(() => {
@@ -170,7 +189,7 @@ export default function FilterBar({ hideYears = false }) {
     };
 
     return (
-        <div className={styles.root}>
+        <div className={styles.root} ref={ref}>
             <div className={styles.container}>
                 <div className={styles.label}>{translations.FILTER}</div>
 

@@ -2,6 +2,10 @@
     width: 100%;
     table-layout: fixed;
     border-collapse: separate;
+
+    :global(.MuiTableCell-stickyHeader) {
+        top: var(--filter-height, 0);
+    }
 }
 
 .tableContainer {

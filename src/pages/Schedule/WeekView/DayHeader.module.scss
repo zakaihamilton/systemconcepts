@@ -19,7 +19,7 @@
 }
 
 .root:not(.mobile) {
-    top: 0;
+    top: var(--filter-height, 0);
     min-width: 10em;
 }
 
