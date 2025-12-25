@@ -77,6 +77,7 @@ export function useGroups(depends) {
 
             storage.writeFile(localMetadataPath, JSON.stringify(data, null, 4));
             s.groups = data;
+            s.counter++; // Increment counter to trigger sync
         });
     }, []);
 

@@ -127,7 +127,7 @@ export function useSessions(depends = [], options = {}) {
                 const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
 
                 const yearSessions = await Promise.all(sortedIds.map(async id => {
-                    const [, date, name] = id.trim().match(/(\d+-\d+-\d+)\ (.*)/) || [];
+                    const [, date, name] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
                     if (!date || !name) {
                         return null;
                     }
@@ -259,6 +259,10 @@ export function useSessions(depends = [], options = {}) {
         catch (err) {
             console.error(err);
             SessionsStore.update(s => {
+                // Set to empty array instead of leaving undefined
+                if (!s.sessions) {
+                    s.sessions = [];
+                }
                 s.busy = false;
             });
         }
@@ -268,21 +272,17 @@ export function useSessions(depends = [], options = {}) {
         if (groupMetadata && groupMetadata.length && !loading) {
             const groupsChanged = JSON.stringify(groupMetadata) !== groupsMetadata;
             const noSessions = !sessions || !sessions.length;
+            const syncChanged = syncCounter !== savedSyncCounter;
 
-            // Only update if we have no sessions OR if groups metadata actually changed
-            // Don't update just because sync counter changed - that causes unnecessary rebuilds
-            if (noSessions || groupsChanged) {
+            // Update sessions if:
+            // 1. We have no sessions yet (initial load)
+            // 2. Groups metadata changed (group colors, names, etc.)
+            // 3. Sync counter changed (new session data was synced)
+            if (noSessions || groupsChanged || syncChanged) {
                 updateSessions(groupMetadata, syncCounter);
             }
-            // If sync counter changed but we have sessions and groups didn't change,
-            // just update the saved counter without rebuilding
-            else if (syncCounter !== savedSyncCounter) {
-                SessionsStore.update(s => {
-                    s.syncCounter = syncCounter;
-                });
-            }
         }
-    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata, sessions]);
+    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {

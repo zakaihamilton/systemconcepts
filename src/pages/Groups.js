@@ -3,6 +3,7 @@ import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import { useGroups } from "@util/groups";
+import { useSyncFeature } from "@util/sync";
 import ColorPicker from "./Groups/ColorPicker";
 import styles from "./Groups.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -17,6 +18,7 @@ import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
 import { useSessions } from "@util/sessions";
+import { useEffect, useRef } from "react";
 
 registerToolbar("Groups");
 
@@ -32,12 +34,57 @@ export default function Groups() {
     const [groups, loading, setGroups] = useGroups([counter]);
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
     const [sessions, loadingSessions] = useSessions([], { filterSessions: false });
+    const { sync } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
+    const syncTimerRef = useRef(null);
 
     const animatedClassName = useStyles(styles, {
         animated: busy
     });
+
+    // Auto-sync after group updates (debounced)
+    useEffect(() => {
+        if (!syncEnabled || counter === 0) {
+            return;
+        }
+
+        // Clear any existing timer
+        if (syncTimerRef.current) {
+            clearTimeout(syncTimerRef.current);
+        }
+
+        // Debounce sync by 2 seconds to avoid excessive syncing
+        syncTimerRef.current = setTimeout(() => {
+            console.log("[Groups] Auto-syncing after group update...");
+            sync && sync();
+        }, 2000);
+
+        return () => {
+            if (syncTimerRef.current) {
+                clearTimeout(syncTimerRef.current);
+            }
+        };
+    }, [counter, syncEnabled, sync]);
+
+    // Wrap update functions to trigger sync after completion
+    const updateSessionsWithSync = async () => {
+        await updateSessions(showDisabled);
+        console.log("[Groups] Auto-syncing after session update...");
+        sync && sync();
+    };
+
+    const updateAllSessionsWithSync = async () => {
+        await updateAllSessions(showDisabled);
+        console.log("[Groups] Auto-syncing after all sessions update...");
+        sync && sync();
+    };
+
+    const updateGroupWithSync = async (name, updateAll) => {
+        await updateGroup(name, updateAll);
+        console.log(`[Groups] Auto-syncing after updating group: ${name}...`);
+        sync && sync();
+    };
 
     const duration = start && new Date().getTime() - start;
     const formattedDuration = formatDuration(duration);
@@ -58,7 +105,7 @@ export default function Groups() {
             id: "sync_sessions",
             name: translations.SYNC_SESSIONS,
             icon: <UpdateIcon className={animatedClassName} />,
-            onClick: updateSessions,
+            onClick: updateSessionsWithSync,
             location: "header",
             menu: true
         },
@@ -66,7 +113,7 @@ export default function Groups() {
             id: "sync_all_sessions",
             name: translations.SYNC_ALL_SESSIONS,
             icon: <UpdateIcon className={animatedClassName} />,
-            onClick: updateAllSessions,
+            onClick: updateAllSessionsWithSync,
             location: "header",
             menu: true
         },
@@ -128,7 +175,7 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "determinate" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
-        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
+        const iconWidget = <ItemMenu updateGroup={updateGroupWithSync} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
 
         return {
             ...item,
@@ -158,7 +205,7 @@ export default function Groups() {
             }}
             mapper={mapper}
             loading={loading || loadingSessions}
-            depends={[translations, status, updateGroup, sessions, showDisabled]}
+            depends={[translations, status, updateGroupWithSync, sessions, showDisabled]}
         />
     </>;
 }

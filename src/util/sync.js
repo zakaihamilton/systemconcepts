@@ -17,6 +17,23 @@ export const SyncActiveStore = new Store({
     currentBundle: null  // Track which bundle is currently being synced
 });
 
+// Clear bundle cache to force fresh sync
+export async function clearBundleCache() {
+    try {
+        const manifestPath = 'local/cache/_bundle_manifest.json';
+        if (await storage.exists(manifestPath)) {
+            await storage.deleteFile(manifestPath);
+            console.log('[Sync] Bundle cache cleared');
+        }
+        // Also clear the lastSynced to force immediate re-sync
+        SyncActiveStore.update(s => {
+            s.lastSynced = 0;
+        });
+    } catch (err) {
+        console.error('[Sync] Error clearing bundle cache:', err);
+    }
+}
+
 export function useSync(options = {}) {
     const { active = true } = options;
     const { counter, busy } = SyncActiveStore.useState(s => {
@@ -129,17 +146,13 @@ export function useSyncFeature() {
                             s.currentBundle = name;
                         });
 
-                        // OPTIMIZATION: Check version first - skip processing if unchanged
+                        // Check version for logging, but don't skip sync based on it
+                        // The bundle file mtimes might not change even when content changes
                         const t1 = Date.now();
                         const { changed } = await bundle.checkBundleVersion(name);
                         console.log(`[Sync] ${name} - Version check: ${Date.now() - t1}ms, changed: ${changed}`);
 
-                        if (!changed) {
-                            // Bundle hasn't changed - skip all processing
-                            return;
-                        }
-
-                        // Only scan local directories if bundle has changed
+                        // Always scan local directories and download bundle to detect content changes
                         const t2 = Date.now();
                         const bundleListing = await storage.getRecursiveList(path);
                         console.log(`[Sync] ${name} - Directory scan: ${Date.now() - t2}ms, files: ${bundleListing.length}`);
@@ -150,12 +163,15 @@ export function useSyncFeature() {
                         console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
 
                         const t4 = Date.now();
-                        const { downloadCount, listing: updatedListing } = await bundle.applyBundle(path, remoteBundle, bundleListing);
+                        const { downloadCount, listing: updatedListing, isBundleCorrupted } = await bundle.applyBundle(path, remoteBundle, bundleListing, ignore);
                         console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
 
                         // Upload & Merge
                         const t5 = Date.now();
-                        const localBundle = await bundle.scanLocal(path, ignore, updatedListing, remoteBundle);
+                        // If bundle is corrupted, force a complete rescan (both remote bundle and listing)
+                        const bundleForScan = isBundleCorrupted ? null : remoteBundle;
+                        const listingForScan = isBundleCorrupted ? null : updatedListing;
+                        const localBundle = await bundle.scanLocal(path, ignore, listingForScan, bundleForScan);
                         console.log(`[Sync] ${name} - Scan local: ${Date.now() - t5}ms`);
 
                         const t6 = Date.now();

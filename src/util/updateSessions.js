@@ -127,7 +127,7 @@ export function useUpdateSessions(groups) {
             s.status = [...s.status];
         });
     }, [prefix, copyFile, getListing]);
-    const updateSessions = useCallback(async () => {
+    const updateSessions = useCallback(async (includeDisabled) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
@@ -143,13 +143,13 @@ export function useUpdateSessions(groups) {
             return;
         }
         const limit = pLimit(4);
-        const promises = items.filter(item => !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
+        const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;
         });
     }, [groups, prefix, getListing, updateGroup]);
-    const updateAllSessions = useCallback(async () => {
+    const updateAllSessions = useCallback(async (includeDisabled) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
@@ -165,7 +165,7 @@ export function useUpdateSessions(groups) {
             return;
         }
         const limit = pLimit(4);
-        const promises = items.filter(item => !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name, true)));
+        const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name, true)));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
             s.busy = false;

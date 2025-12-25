@@ -305,12 +305,14 @@ export async function saveRemoteBundle(endPoint, bundle) {
 
 
 export async function scanLocal(path, ignore = [], listing = null, remote = null) {
+    console.log(`[scanLocal] Starting scan for ${path}, remote is ${remote ? 'provided' : 'NULL'}`);
     const bundle = {};
     if (!listing) {
         listing = await storage.getRecursiveList(path);
     }
 
     const files = listing.filter(item => item.type === "file");
+    console.log(`[scanLocal] Found ${files.length} files to process`);
 
     await Promise.all(files.map(async (item) => {
         try {
@@ -331,7 +333,8 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
             const remoteItem = remote && remote[relativePath];
 
             // OPTIMIZATION 1: Trust exact timestamp matches (skip content read entirely)
-            if (remoteItem && remoteItem.mtime && Math.floor(remoteItem.mtime) === Math.floor(localMtime)) {
+            // BUT: Only if remote content is not null (to handle corrupted bundles)
+            if (remoteItem && remoteItem.mtime && remoteItem.content != null && Math.floor(remoteItem.mtime) === Math.floor(localMtime)) {
                 bundle[relativePath] = {
                     content: remoteItem.content,
                     mtime: localMtime  // Use local mtime to ensure consistency
@@ -340,7 +343,8 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
             }
 
             // OPTIMIZATION 2: Reuse remote content if remote is newer (avoid read)
-            if (remoteItem && remoteItem.mtime && Math.floor(remoteItem.mtime) > Math.floor(localMtime)) {
+            // BUT: Only if remote content is not null (to handle corrupted bundles)
+            if (remoteItem && remoteItem.mtime && remoteItem.content != null && Math.floor(remoteItem.mtime) > Math.floor(localMtime)) {
                 bundle[relativePath] = {
                     content: remoteItem.content,
                     mtime: localMtime  // Use local mtime to ensure consistency
@@ -373,14 +377,15 @@ export function mergeBundles(remote, local, name = "") {
         const remoteItem = merged[path];
 
         // OPTIMIZATION: Trust exact timestamp matches (skip content comparison)
-        if (remoteItem && Math.floor(localItem.mtime) === Math.floor(remoteItem.mtime)) {
+        // BUT: Only if remote content is not null (to handle corrupted bundles)
+        if (remoteItem && remoteItem.content != null && Math.floor(localItem.mtime) === Math.floor(remoteItem.mtime)) {
             // Timestamps match exactly - trust that content is the same
             continue;
         }
 
-        if (!remoteItem || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime)) {
+        if (!remoteItem || (remoteItem && remoteItem.content == null) || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime)) {
             // Check content equality to avoid redundant updates
-            if (remoteItem) {
+            if (remoteItem && remoteItem.content != null) {
                 // Quick check: exact content match
                 if (remoteItem.content === localItem.content) {
                     continue;
@@ -400,11 +405,20 @@ export function mergeBundles(remote, local, name = "") {
     return { merged, updated: updateCount > 0 };
 }
 
-export async function applyBundle(root, bundle, listing = null) {
+export async function applyBundle(root, bundle, listing = null, ignore = []) {
     if (!bundle) return { downloadCount: 0, listing: listing || [] };
 
     // Ensure root exists
     await storage.createFolderPath(root, true);
+
+    // Check if bundle is corrupted (has null content)
+    const bundleEntries = Object.entries(bundle);
+    const nullContentCount = bundleEntries.filter(([_, item]) => item.content == null).length;
+    const isBundleCorrupted = nullContentCount > 0;
+
+    if (isBundleCorrupted) {
+        console.warn(`[applyBundle] WARNING: Bundle is corrupted with ${nullContentCount}/${bundleEntries.length} files having null content. Skipping deletion to prevent data loss.`);
+    }
 
     // Get local stats for safety check
     const localFiles = {};
@@ -415,7 +429,10 @@ export async function applyBundle(root, bundle, listing = null) {
         for (const item of listing) {
             if (item.type === "file") {
                 const relativePath = item.path.replace(new RegExp(`^${root}/`), "");
-                localFiles[relativePath] = item.mtimeMs || 0;
+                // Filter out ignored files from localFiles
+                if (!ignore.some(pattern => relativePath.includes(pattern))) {
+                    localFiles[relativePath] = item.mtimeMs || 0;
+                }
             }
         }
     } catch (err) {
@@ -423,6 +440,11 @@ export async function applyBundle(root, bundle, listing = null) {
     }
 
     let downloadCount = 0;
+    let skipCount = 0;
+    let deleteCount = 0;
+    let skipReasons = { timestampMatch: 0, localNewer: 0, contentMatch: 0 };
+
+    // Process files in bundle (add/update)
     for (const [relativePath, item] of Object.entries(bundle)) {
         const fullPath = makePath(root, relativePath);
         const localMtime = localFiles[relativePath] || 0; // 0 if not exists
@@ -430,32 +452,86 @@ export async function applyBundle(root, bundle, listing = null) {
         // OPTIMIZATION: Trust exact timestamp matches (skip entirely)
         if (localMtime > 0 && Math.floor(item.mtime) === Math.floor(localMtime)) {
             // Timestamps match exactly - skip this file
+            skipCount++;
+            skipReasons.timestampMatch++;
             continue;
         }
 
-        // Strict > check. If equal, don't write (saves IO).
-        // If local is newer, don't write (saves local work).
-        if (Math.floor(item.mtime) > Math.floor(localMtime)) {
-            // Check content equality to avoid redundant updates (breaking the timestamp loop)
-            let contentChanged = true;
-            if (localMtime > 0) {
-                const localContent = await storage.readFile(fullPath);
-                if (localContent === item.content) {
-                    contentChanged = false;
-                } else if (normalizeContent(localContent) === normalizeContent(item.content)) {
-                    contentChanged = false;
+        // Check content to decide what to do
+        let shouldWrite = false;
+        let contentChanged = true;
+
+        if (localMtime > 0) {
+            // File exists locally - check if content differs
+            const localContent = await storage.readFile(fullPath);
+            if (localContent === item.content) {
+                contentChanged = false;
+                skipCount++;
+                skipReasons.contentMatch++;
+            } else if (normalizeContent(localContent) === normalizeContent(item.content)) {
+                contentChanged = false;
+                skipCount++;
+                skipReasons.contentMatch++;
+            } else {
+                // Content differs - decide based on timestamp
+                if (Math.floor(item.mtime) > Math.floor(localMtime)) {
+                    // Remote is newer - use remote
+                    shouldWrite = true;
+                } else {
+                    // Local is newer or equal - keep local
+                    // This could mean: local changes, or stale bundle timestamps
+                    skipCount++;
+                    skipReasons.localNewer++;
                 }
             }
+        } else {
+            // File doesn't exist locally - always write
+            shouldWrite = true;
+        }
 
-            if (contentChanged) {
-                await storage.createFolderPath(fullPath);
-                await storage.writeFile(fullPath, item.content);
-                downloadCount++;
+        if (shouldWrite) {
+            // Skip if content is null or undefined
+            if (item.content == null) {
+                console.warn(`[applyBundle] Skipping ${relativePath} - content is null/undefined`);
+                skipCount++;
+                continue;
+            }
+            await storage.createFolderPath(fullPath);
+            await storage.writeFile(fullPath, item.content);
+            downloadCount++;
+        }
+    }
+
+    // Delete local files that are no longer in the bundle
+    // BUT: Skip deletion if bundle is corrupted (has null content)
+    if (!isBundleCorrupted) {
+        const bundleFiles = new Set(Object.keys(bundle));
+        for (const relativePath of Object.keys(localFiles)) {
+            if (!bundleFiles.has(relativePath)) {
+                // Double check if file should be ignored (though localFiles should already be filtered)
+                if (ignore.some(pattern => relativePath.includes(pattern))) {
+                    continue;
+                }
+                const fullPath = makePath(root, relativePath);
+                try {
+                    // Check if file exists before trying to delete
+                    if (await storage.exists(fullPath)) {
+                        console.log(`[applyBundle] Deleting removed file: ${relativePath}`);
+                        await storage.deleteFile(fullPath);
+                        deleteCount++;
+                    }
+                } catch (err) {
+                    console.error(`[applyBundle] Error deleting ${relativePath}:`, err);
+                }
             }
         }
     }
-    if (downloadCount > 0) {
-        console.log(`applyBundle: Finished. Updated ${downloadCount} files for ${root}.`);
+
+    const totalFiles = Object.keys(bundle).length;
+    console.log(`[applyBundle] ${root}: ${totalFiles} files in bundle, ${downloadCount} written, ${skipCount} skipped, ${deleteCount} deleted`, skipReasons);
+
+    if (downloadCount > 0 || deleteCount > 0) {
+        console.log(`applyBundle: Finished. Updated ${downloadCount} files, deleted ${deleteCount} files for ${root}.`);
     }
-    return { downloadCount, listing };
+    return { downloadCount: downloadCount + deleteCount, listing, isBundleCorrupted };
 }
