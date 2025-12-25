@@ -48,13 +48,15 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
 
     const { style, ...rest } = props;
     return <div className={styles.root} style={style}>
-        <div className={styles.card} style={{ '--group-color': color }}>
-            <div className={styles.header}>
-                <div className={styles.title}>{name}</div>
-                <div className={styles.metadata}>
-                    <Group fill={false} name={group} color={color} />
-                    <span className={styles.date}>{dateWidget}</span>
-                    {playerRef && playerRef.duration > 1 && <span className={styles.duration}>{formatDuration(playerRef.duration * 1000, true)}</span>}
+        <div className={styles.container}>
+            <div className={styles.card} style={{ '--group-color': color }}>
+                <div className={styles.header}>
+                    <div className={styles.title}>{name}</div>
+                    <div className={styles.metadata}>
+                        <Group fill={false} name={group} color={color} />
+                        <span className={styles.date}>{dateWidget}</span>
+                        {playerRef && playerRef.duration > 1 && <span className={styles.duration}>{formatDuration(playerRef.duration * 1000, true)}</span>}
+                    </div>
                 </div>
             </div>
         </div>

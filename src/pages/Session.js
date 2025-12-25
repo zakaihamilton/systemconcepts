@@ -95,9 +95,6 @@ export default function SessionPage({ group, year, date, name }) {
         console.error("err", err);
     }
 
-    const hasVideo = !!video;
-    const hasImage = !!thumbnail;
-
     return <div className={styles.root}>
         <div className={styles.card} style={{ "--group-color": session.color }}>
             <div className={styles.header}>
