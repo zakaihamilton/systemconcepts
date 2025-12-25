@@ -18,7 +18,7 @@ import { PlayerStore } from "../Player";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadataPath, zIndex }) {
+export default function Controls({ show, path, playerRef, metadataPath, zIndex, color }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
 
@@ -185,8 +185,8 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex }
                 <div className={styles.progressLine}>
                     <div className={styles.progressBack} ref={progressRef} {...events} />
                     <div className={styles.progressText}>{progressText}</div>
-                    <div className={styles.progressPlayed} style={{ width: left + "%" }} />
-                    <div className={styles.progressPosition} style={{ left: progressPosition }} />
+                    <div className={styles.progressPlayed} style={{ width: left + "%", backgroundColor: color }} />
+                    <div className={styles.progressPosition} style={{ left: progressPosition, backgroundColor: color }} />
                 </div>
             </div>
             <div className={styles.buttons}>

@@ -88,7 +88,6 @@ export default function PlayerPage({ show = false, suffix }) {
         subtitles && show && {
             id: "subtitles",
             location: "header",
-            menu: false,
             name: showSubtitles ? translations.SUBTITLES : translations.SUBTITLES_OFF,
             icon: showSubtitles ? <ClosedCaptionIcon /> : <ClosedCaptionOffIcon />,
             onClick: () => {
@@ -124,10 +123,12 @@ export default function PlayerPage({ show = false, suffix }) {
     const mediaProps = {
         metadataPath,
         path: mediaPath,
+        date,
+        year,
         show,
         group,
         color,
-        name: date + " " + name,
+        name,
         preload: "metadata",
         crossOrigin: "anonymous"
     };

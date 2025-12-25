@@ -4,8 +4,10 @@ import Toolbar from "./Toolbar";
 import { PlayerStore } from "../Player";
 import styles from "./Audio.module.scss";
 import Group from "@components/Widgets/Group";
+import { useDateFormatter } from "@util/locale";
+import { formatDuration } from "@util/string";
 
-export default function Audio({ show, metadataPath, name, path, group, color, children, ...props }) {
+export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -29,15 +31,39 @@ export default function Audio({ show, metadataPath, name, path, group, color, ch
         }
     }, [children]);
 
+    const dateFormatter = useDateFormatter({
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
+    let dateWidget = "";
+    try {
+        dateWidget = date && dateFormatter.format(new Date(date));
+    }
+    catch (err) {
+        console.error("err", err);
+    }
+
     const { style, ...rest } = props;
     return <div className={styles.root} style={style}>
+        <div className={styles.card} style={{ '--group-color': color }}>
+            <div className={styles.header}>
+                <div className={styles.title}>{name}</div>
+                <div className={styles.metadata}>
+                    <Group fill={false} name={group} color={color} />
+                    <span className={styles.date}>{dateWidget}</span>
+                    {playerRef && playerRef.duration > 1 && <span className={styles.duration}>{formatDuration(playerRef.duration * 1000, true)}</span>}
+                </div>
+            </div>
+        </div>
         <video ref={ref} className={styles.video} {...rest}>
             {children}
         </video>
-        <div className={styles.group}><Group fill={false} name={group} color={color} /></div>
-        <div className={styles.name}>{name}</div>
         {playerRef && <Controls
             playerRef={playerRef}
+            color={color}
             metadataPath={metadataPath}
             path={path}
             show={show}

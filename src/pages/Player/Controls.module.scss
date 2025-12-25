@@ -14,12 +14,15 @@
     height: 4em;
     border: 1px solid var(--border-color);
     margin-bottom: 0.5em;
-    background-color: var(--main-background);
+    background: var(--bar-background);
     color: var(--text-color);
     overflow: hidden;
     position: relative;
     width: 100%;
     direction: ltr;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px var(--box-shadow-color);
+    transition: border-color 0.2s ease;
 }
 
 .progressBack {
@@ -27,6 +30,7 @@
     height: 4em;
     position: absolute;
     width: 100%;
+    cursor: pointer;
 }
 
 .progressPlayed {
@@ -35,6 +39,7 @@
     position: absolute;
     background-color: var(--hover-color);
     opacity: 0.5;
+    opacity: 0.3;
     pointer-events: none;
 }
 
@@ -43,10 +48,11 @@
     width: 0.4em;
     height: 4em;
     position: absolute;
+    pointer-events: none;
+    opacity: 0.6;
     background-color: var(--hover-fill);
     border: 1px solid var(--hover-color);
     opacity: 0.5;
-    pointer-events: none;
 }
 
 .progressText {
@@ -57,6 +63,7 @@
     font-variant-numeric: tabular-nums;
     pointer-events: none;
     user-select: none;
+    font-weight: 600;
 }
 
 .buttons {
@@ -65,11 +72,17 @@
     align-items: center;
     margin-top: 0.5em;
     margin-bottom: 1em;
+    gap: 0.5em;
 }
 
 .avatar {
     font-size: 100% !important;
-    background-color: var(--hover-fill) !important;
+    background: var(--hover-color) !important;
+    transition: background 0.2s ease !important;
+
+    &:hover {
+        background: var(--selected-color) !important;
+    }
 }
 
 .error {
@@ -77,6 +90,11 @@
     top: 0px;
     z-index: 1000;
     user-select: none;
+    background: var(--error-background);
+    color: var(--error-color);
+    border-radius: 0 0 4px 4px;
+    padding: 0.75em 1.5em;
+    box-shadow: 0 2px 8px var(--box-shadow-color);
 }
 
 .error>* {

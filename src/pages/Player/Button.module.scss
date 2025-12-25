@@ -2,32 +2,36 @@
     display: flex;
     flex-direction: column;
     border: 1px solid var(--border-color);
-    background-color: var(--main-background);
+    background: var(--bar-background);
     color: var(--text-color);
     padding: 0.5em;
     height: 5.5em;
     width: 5.5em;
     justify-items: center;
     align-items: center;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px var(--box-shadow-color);
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .root.active {
-    border-bottom: 2px solid var(--info-color);
+    border: 2px solid var(--primary-color);
+    background: var(--selected-color);
 }
 
 .root:focus-visible {
-    outline: 2px solid var(--hover-color);
-    outline-offset: -2px;
-    border: 1px solid var(--hover-color);
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .root:hover {
-    border: 1px solid var(--hover-color);
+    border-color: var(--border-highlight);
+    background: var(--hover-color);
 }
 
 .root:hover:active {
-    color: var(--hover-color);
-    background-color: var(--hover-fill);
+    background: var(--selected-color);
 }
 
 .icon {
@@ -46,6 +50,8 @@
     user-select: none;
     font-size: 75%;
     margin-top: 6px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 .subHeading {
@@ -54,6 +60,8 @@
     justify-content: center;
     width: 100%;
     user-select: none;
-    font-size: 75%;
+    font-size: 70%;
     margin-top: 0.3em;
+    opacity: 0.8;
+    font-weight: 500;
 }
