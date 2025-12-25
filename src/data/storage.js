@@ -36,7 +36,6 @@ export default [
         enabled: () => {
             return Cookies.get("id") && Cookies.get("hash");
         },
-        readOnly: true,
         ...aws
     }
 ];

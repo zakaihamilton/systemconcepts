@@ -10,7 +10,6 @@ export default async function AWS_API(req, res) {
         const { cookie } = headers || {};
         const cookies = parseCookie(cookie);
         const { id, hash } = cookies || {};
-        let readOnly = true;
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
@@ -18,9 +17,16 @@ export default async function AWS_API(req, res) {
         if (!user) {
             throw "ACCESS_DENIED";
         }
-        if (!roleAuth(user.role, "admin")) {
+
+        // Determine access level
+        const isAdmin = roleAuth(user.role, "admin");
+        let readOnly = !isAdmin; // Admins can write, non-admins are read-only
+
+        // Additional check: non-admins cannot write to shared metadata
+        if (!readOnly && !isAdmin) {
             throw "ACCESS_DENIED";
         }
+
         const result = await handleRequest({ req, readOnly });
         if (typeof result === "object") {
             res.status(200).json(result);

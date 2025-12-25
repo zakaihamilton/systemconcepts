@@ -18,7 +18,8 @@ export const SyncActiveStore = new Store({
     counter: 0,
     busy: false,
     lastSynced: 0,
-    progress: { total: 0, processed: 0 }
+    progress: { total: 0, processed: 0 },
+    currentBundle: null  // Track which bundle is currently being synced
 });
 
 export function useSync(options = {}) {
@@ -57,6 +58,7 @@ export function useSyncFeature() {
     useLocalStorage("sync", SyncStore);
     const visible = usePageVisibility();
     const { active, busy, progress } = SyncActiveStore.useState();
+    const currentBundle = SyncActiveStore.useState(s => s.currentBundle);
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const updateSync = useCallback(async (pollSync, lastUpdated) => {
         if (startRef.current || !online) {
@@ -91,36 +93,29 @@ export function useSyncFeature() {
             let updateCounter = 0;
             if (isSignedIn) {
                 // 1. Define Bundles
+                // - MongoDB (personal) for per-user data (read/write for all)
+                // - S3 (aws/metadata/shared) for shared metadata (read-only for non-admins)
+                // - S3 (aws/metadata/shared/sessions) for ALL session data (consolidated)
                 const bundles = [
                     {
                         name: "personal",
                         path: makePath("local", "personal")
                     },
                     {
-                        name: "shared/bundles/meta",
+                        name: "aws/metadata/shared",  // S3 - shared metadata (read-only for non-admins)
                         path: makePath("local", "shared"),
                         ignore: ["sessions"]
+                    },
+                    {
+                        name: "aws/metadata/shared/sessions",  // S3 - ALL sessions consolidated
+                        path: makePath("local", "shared", "sessions")
                     }
                 ];
 
-                // 2. Add Dynamic Group Bundles
-                try {
-                    const groupsPath = makePath("local", "shared", "groups.json");
-                    if (await storage.exists(groupsPath)) {
-                        const groupsContent = await storage.readFile(groupsPath);
-                        const groups = JSON.parse(groupsContent);
-                        for (const group of groups) {
-                            if (group.name) {
-                                bundles.push({
-                                    name: `shared/bundles/sessions/${group.name}`,
-                                    path: makePath("local", "shared", "sessions", group.name)
-                                });
-                            }
-                        }
-                    }
-                } catch (err) {
-                    console.error("Error loading groups for sync:", err);
-                }
+                // Consolidated sessions bundle automatically handles all groups
+                // - Adding new groups: new files under sessions/{group}/ are included
+                // - Removing groups: deleted files trigger bundle update
+                // - Modifying groups: any file changes trigger bundle update
 
 
 
@@ -128,44 +123,63 @@ export function useSyncFeature() {
                     s.progress = { total: bundles.length, processed: 0 };
                 });
 
-                // 3. Pre-scan local directories
-                const personalRoot = makePath("local", "personal");
-                const sharedRoot = makePath("local", "shared");
-                const [personalListing, sharedListing] = await Promise.all([
-                    storage.getRecursiveList(personalRoot),
-                    storage.getRecursiveList(sharedRoot)
-                ]);
-                const fullLocalListing = [...personalListing, ...sharedListing];
-
-                // 4. Define Sync Task
+                // 3. Define Sync Task
                 const runTask = async (bundleDef) => {
                     const { name, path, ignore } = bundleDef;
                     const startTime = Date.now();
                     try {
                         let localUpdated = false;
 
-                        // Filter the pre-scanned listing for this bundle's path
-                        const normalizedPath = path.endsWith("/") ? path : path + "/";
-                        const bundleListing = fullLocalListing.filter(item =>
-                            item.path === path || item.path.startsWith(normalizedPath));
+                        // Update current bundle being synced
+                        SyncActiveStore.update(s => {
+                            s.currentBundle = name;
+                        });
+
+                        // OPTIMIZATION: Check version first - skip processing if unchanged
                         const t1 = Date.now();
+                        const { changed } = await bundle.checkBundleVersion(name);
+                        console.log(`[Sync] ${name} - Version check: ${Date.now() - t1}ms, changed: ${changed}`);
+
+                        if (!changed) {
+                            // Bundle hasn't changed - skip all processing
+                            return;
+                        }
+
+                        // Only scan local directories if bundle has changed
+                        const t2 = Date.now();
+                        const bundleListing = await storage.getRecursiveList(path);
+                        console.log(`[Sync] ${name} - Directory scan: ${Date.now() - t2}ms, files: ${bundleListing.length}`);
 
                         // Download & Apply
+                        const t3 = Date.now();
                         const remoteBundle = await bundle.getRemoteBundle(name);
+                        console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
+
+                        const t4 = Date.now();
                         const { downloadCount, listing: updatedListing } = await bundle.applyBundle(path, remoteBundle, bundleListing);
+                        console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
 
                         // Upload & Merge
+                        const t5 = Date.now();
                         const localBundle = await bundle.scanLocal(path, ignore, updatedListing, remoteBundle);
+                        console.log(`[Sync] ${name} - Scan local: ${Date.now() - t5}ms`);
+
+                        const t6 = Date.now();
                         const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
+                        console.log(`[Sync] ${name} - Merge bundles: ${Date.now() - t6}ms, updated: ${updated}`);
 
                         if (updated) {
+                            const t7 = Date.now();
                             await bundle.saveRemoteBundle(name, merged);
+                            console.log(`[Sync] ${name} - Save bundle: ${Date.now() - t7}ms`);
                             localUpdated = true;
                         }
 
                         if (downloadCount > 0 || localUpdated) {
                             updateCounter++;
                         }
+
+                        console.log(`[Sync] ${name} - Total time: ${Date.now() - startTime}ms`);
                     } catch (err) {
                         console.error(`Error syncing bundle ${name}:`, err);
                         if (err === 403) {
@@ -246,6 +260,7 @@ export function useSyncFeature() {
         complete,
         changed,
         progress,
-        percentage
+        percentage,
+        currentBundle
     };
 }

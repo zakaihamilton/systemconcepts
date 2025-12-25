@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { addPath, toPath } from "@util/pages";
@@ -142,7 +142,19 @@ export default function SessionsPage() {
         }
     ].filter(Boolean);
 
-    const mapper = item => {
+    const handleIconClick = useCallback((itemType) => {
+        SessionsStore.update(s => {
+            if (s.typeFilter.includes(itemType)) {
+                s.typeFilter = s.typeFilter.filter(t => t !== itemType);
+            }
+            else {
+                s.typeFilter = [...s.typeFilter, itemType];
+            }
+            s.offset = 0;
+        });
+    }, []);
+
+    const mapper = useCallback(item => {
         if (!item) {
             return null;
         }
@@ -151,18 +163,9 @@ export default function SessionsPage() {
         const style = {
             background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
         };
-        let title = translations[item.type.toUpperCase()];
-        const onClickIcon = () => {
-            SessionsStore.update(s => {
-                if (s.typeFilter.includes(item.type)) {
-                    s.typeFilter = s.typeFilter.filter(t => t !== item.type);
-                }
-                else {
-                    s.typeFilter = [...s.typeFilter, item.type];
-                }
-                s.offset = 0;
-            });
-        };
+        const title = translations[item.type.toUpperCase()];
+        const onClickIcon = () => handleIconClick(item.type);
+
         const icon = <Tooltip arrow title={title}>
             <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
                 {item.type === "video" && <MovieIcon />}
@@ -172,12 +175,14 @@ export default function SessionsPage() {
                 {item.type === "ai" && <AutoAwesomeIcon />}
             </div>
         </Tooltip>;
+
         const altIcon = <>
             {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
             {!!item.ai && <div className={styles.altIcon + " " + styles.ai + " " + (item.video ? styles.video : "")}>
                 <AutoAwesomeIcon />
             </div>}
         </>;
+
         const nameContent = <Tooltip arrow title={item.name}>
             <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                 {item.name}
@@ -186,20 +191,40 @@ export default function SessionsPage() {
                 </div>
             </div>
         </Tooltip>;
+
         const href = target(item);
-        let nameWidget = <Row href={href} onClick={gotoItem.bind(this, item)} icons={icon}>{nameContent}</Row>;
+        let nameWidget = <Row href={href} onClick={gotoItem.bind(null, item)} icons={icon}>{nameContent}</Row>;
         if (viewMode === "grid") {
             nameWidget = <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />;
         }
+
+        // Don't spread the entire item object - only add what's needed
+        const durationWidget = item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN);
+
+        // Return new object with only essential properties, not all file metadata
         return {
-            ...item,
-            nameWidget,
+            // Core properties needed for display
+            key: item.key,
+            id: item.id,
+            name: item.name,
+            date: item.date,
+            year: item.year,
             group: item.group,
+            color: item.color,
+            type: item.type,
+            typeOrder: item.typeOrder,
+            duration: item.duration,
+            position: item.position,
+            thumbnail: item.thumbnail,
+            video: item.video,
+            ai: item.ai,
+            // Computed widgets
+            nameWidget,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
-            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(this, item)} clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
-            durationWidget: item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN)
+            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(null, item)} clickForImage={false} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
+            durationWidget
         };
-    };
+    }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick]);
 
     const filter = item => {
         let { group, type, year } = item;

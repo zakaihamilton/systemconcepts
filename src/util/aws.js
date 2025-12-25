@@ -31,12 +31,23 @@ export async function getS3({ accessKeyId = process.env.AWS_ID, secretAccessKey 
     return s3Client;
 }
 
+/**
+ * Normalize path by removing leading slash to avoid creating folders with slash names
+ * @param {string} path - Path to normalize
+ * @returns {string} Normalized path
+ */
+function normalizePath(path) {
+    if (!path) return path;
+    // Remove leading slash
+    return path.startsWith('/') ? path.substring(1) : path;
+}
+
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
     const s3 = await getS3({});
     const fileStream = fs.createReadStream(from);
     const uploadParams = {
         Bucket: bucketName,
-        Key: to,
+        Key: normalizePath(to),
         Body: fileStream,
         ACL: "public-read"
     };
@@ -63,7 +74,7 @@ export async function uploadData({ path, data, bucketName = process.env.AWS_BUCK
     const s3 = await getS3({});
     const uploadParams = {
         Bucket: bucketName,
-        Key: path,
+        Key: normalizePath(path),
         Body: data,
         ACL: "public-read"
     };
@@ -75,7 +86,7 @@ export async function downloadData({ path, binary, bucketName = process.env.AWS_
     const s3 = await getS3({});
     const downloadParams = {
         Bucket: bucketName,
-        Key: path
+        Key: normalizePath(path)
     };
     const response = await s3.send(new GetObjectCommand(downloadParams));
     const data = await new Promise((resolve, reject) => {
@@ -119,13 +130,14 @@ export async function deleteFile({ path, bucketName = process.env.AWS_BUCKET }) 
     const s3 = await getS3({});
     const deleteParams = {
         Bucket: bucketName,
-        Key: path
+        Key: normalizePath(path)
     };
     const response = await s3.send(new DeleteObjectCommand(deleteParams));
     return response;
 }
 
 export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }) {
+    path = normalizePath(path);
     const s3 = await getS3({});
     const headParams = {
         Bucket: bucketName,
@@ -159,6 +171,7 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
 }
 
 export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
+    path = normalizePath(path);
     const s3 = await getS3({});
     const items = [];
     let continuationToken = undefined;

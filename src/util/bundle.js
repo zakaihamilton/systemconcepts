@@ -6,11 +6,7 @@ import { Base64 } from "js-base64";
 const BUNDLE_CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB limit to stay under 4MB API limit
 const BUNDLE_PREFIX = "bundle.gz.part.";
 
-// In-memory cache to avoid expensive IndexedDB reads
-const bundleMemoryCache = new Map();
-
-// Metadata cache for quick bundle comparison
-const metadataCache = new Map();
+// Memory caches removed to reduce memory usage
 
 /**
  * Generate a hash from bundle inventory for quick comparison
@@ -36,63 +32,89 @@ function generateInventoryHash(inventory) {
     return hash.toString(36);
 }
 
+// Metadata cache functions removed to reduce memory usage
+
 /**
- * Get bundle metadata for quick comparison
- * @param {string} endPoint - Bundle endpoint
- * @returns {Object|null} Metadata object with hash and timestamp
+ * Get or create master manifest with all bundle versions
+ * This avoids making individual API calls for each bundle
  */
-async function getBundleMetadata(endPoint) {
+async function getMasterManifest() {
+    const manifestPath = 'local/cache/_bundle_manifest.json';
     try {
-        const metadataPath = `${endPoint}/bundle.meta.json`;
-
-        // Check memory cache first
-        if (metadataCache.has(endPoint)) {
-            return metadataCache.get(endPoint);
+        if (await storage.exists(manifestPath)) {
+            const manifestStr = await storage.readFile(manifestPath);
+            return JSON.parse(manifestStr);
         }
-
-        // Try to read from storage
-        if (await storage.exists(metadataPath)) {
-            const metadataStr = await storage.readFile(metadataPath);
-            const metadata = JSON.parse(metadataStr);
-            metadataCache.set(endPoint, metadata);
-            return metadata;
-        }
-
-        return null;
     } catch (err) {
-        console.error(`getBundleMetadata: Error reading metadata for ${endPoint}:`, err);
-        return null;
+        console.error("getMasterManifest: Error reading manifest:", err);
+    }
+    return {};
+}
+
+/**
+ * Update master manifest with bundle version
+ */
+async function updateMasterManifest(endPoint, versionInfo) {
+    const manifestPath = 'local/cache/_bundle_manifest.json';
+    try {
+        const manifest = await getMasterManifest();
+        manifest[endPoint] = versionInfo;
+        await storage.writeFile(manifestPath, JSON.stringify(manifest));
+    } catch (err) {
+        console.error("updateMasterManifest: Error updating manifest:", err);
     }
 }
 
 /**
- * Save bundle metadata for quick future comparisons
+ * Check if bundle version has changed using master manifest
  * @param {string} endPoint - Bundle endpoint
- * @param {Object} metadata - Metadata object to save
+ * @param {Array} listing - Remote listing (optional)
+ * @returns {Object} { changed: boolean, versionInfo: object }
  */
-async function saveBundleMetadata(endPoint, metadata) {
+export async function checkBundleVersion(endPoint, listing = null) {
     try {
-        const metadataPath = `${endPoint}/bundle.meta.json`;
-        await storage.createFolderPath(metadataPath);
-        await storage.writeFile(metadataPath, JSON.stringify(metadata));
-        metadataCache.set(endPoint, metadata);
+        if (!listing) {
+            listing = await storage.getListing(endPoint) || [];
+        }
+        const bundleParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
+
+        if (!bundleParts.length) {
+            return { changed: true, versionInfo: null };
+        }
+
+        // Sort parts by index
+        bundleParts.sort((a, b) => {
+            const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
+            const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
+            return indexA - indexB;
+        });
+
+        // Create inventory signature
+        const inventory = bundleParts.map(p => ({
+            name: p.name,
+            mtime: p.mtimeMs || 0
+        }));
+
+        const currentInventoryHash = JSON.stringify(inventory);
+
+        // Check master manifest instead of individual version files
+        const manifest = await getMasterManifest();
+        const cachedVersion = manifest[endPoint];
+
+        if (cachedVersion && cachedVersion.inventoryHash === currentInventoryHash) {
+            // Version matches - no changes
+            return { changed: false, versionInfo: cachedVersion };
+        }
+
+        // Version doesn't match or doesn't exist
+        return { changed: true, versionInfo: { inventoryHash: currentInventoryHash, timestamp: Date.now() } };
     } catch (err) {
-        console.error(`saveBundleMetadata: Error saving metadata for ${endPoint}:`, err);
+        console.error("checkBundleVersion: Error checking version:", err);
+        // On error, assume changed to be safe
+        return { changed: true, versionInfo: null };
     }
 }
 
-/**
- * Compare local cached metadata with remote inventory
- * @param {Object} cachedMetadata - Cached metadata
- * @param {Array} remoteInventory - Remote bundle inventory
- * @returns {boolean} True if metadata indicates bundle has changed
- */
-function hasMetadataChanged(cachedMetadata, remoteInventory) {
-    if (!cachedMetadata) return true;
-
-    const remoteHash = generateInventoryHash(remoteInventory);
-    return cachedMetadata.hash !== remoteHash;
-}
 
 function normalizeContent(content) {
     const sortKeys = (obj) => {
@@ -119,11 +141,6 @@ function normalizeContent(content) {
 }
 
 export async function getRemoteBundle(endPoint, listing = null) {
-    // AGGRESSIVE CACHE: If we have it in memory, return it immediately (no network calls)
-    if (bundleMemoryCache.has(endPoint)) {
-        return bundleMemoryCache.get(endPoint).bundle;
-    }
-
     if (!listing) {
         listing = await storage.getListing(endPoint) || [];
     }
@@ -146,54 +163,36 @@ export async function getRemoteBundle(endPoint, listing = null) {
         mtime: p.mtimeMs || 0
     }));
 
-    // FAST PATH: Check metadata first
-    const cachedMetadata = await getBundleMetadata(endPoint);
-    if (!hasMetadataChanged(cachedMetadata, inventory)) {
-        // Metadata matches - try to use cached bundle
-        const cachePath = `local/cache/${endPoint}_bundle.json`;
-        try {
-            if (await storage.exists(cachePath)) {
-                const cachedBundleStr = await storage.readFile(cachePath);
-                if (cachedBundleStr) {
-                    const bundle = JSON.parse(cachedBundleStr);
-                    // Store in memory cache
-                    bundleMemoryCache.set(endPoint, { inventory, bundle });
-                    return bundle;
-                }
-            }
-        } catch (err) {
-            console.error("getRemoteBundle: Fast path failed, falling back to download:", err);
-        }
-    }
-
+    // VERSION-BASED OPTIMIZATION: Check if remote version matches cached version
+    const versionPath = `local/cache/${endPoint}_version.json`;
     const cachePath = `local/cache/${endPoint}_bundle.json`;
     const inventoryPath = `local/cache/${endPoint}_inventory.json`;
 
     try {
-        let cachedInventoryStr = null;
-        if (await storage.exists(inventoryPath)) {
-            cachedInventoryStr = await storage.readFile(inventoryPath);
-        }
-        const cachedInventory = cachedInventoryStr ? JSON.parse(cachedInventoryStr) : [];
+        // Read cached version info
+        if (await storage.exists(versionPath)) {
+            const versionStr = await storage.readFile(versionPath);
+            const versionInfo = JSON.parse(versionStr);
 
-        if (JSON.stringify(inventory) === JSON.stringify(cachedInventory)) {
-            const cachedBundleStr = await storage.readFile(cachePath);
-            if (cachedBundleStr) {
-                const bundle = JSON.parse(cachedBundleStr);
-                // Store in memory cache
-                bundleMemoryCache.set(endPoint, { inventory, bundle });
-                return bundle;
+            // Simple version check - if inventory matches, use cache
+            const currentInventoryHash = JSON.stringify(inventory);
+            if (versionInfo.inventoryHash === currentInventoryHash) {
+                // Version matches - use cached bundle without any processing
+                if (await storage.exists(cachePath)) {
+                    const cachedBundleStr = await storage.readFile(cachePath);
+                    if (cachedBundleStr) {
+                        return JSON.parse(cachedBundleStr);
+                    }
+                }
             }
         }
     } catch (err) {
-        // Cache miss or error, proceed to download
-        console.error("getRemoteBundle: Cache miss or invalid (error).", err);
+        console.error("getRemoteBundle: Version check failed, proceeding with download:", err);
     }
 
-    // Download parts
+    // Download and decompress bundle
     const parts = [];
     for (const part of bundleParts) {
-
         const content = await storage.readFile(part.path);
         if (content) {
             parts.push(content);
@@ -216,19 +215,15 @@ export async function getRemoteBundle(endPoint, listing = null) {
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(inventory));
 
-        const bundle = JSON.parse(jsonString);
-
-        // Save metadata for future fast-path checks
-        const metadata = {
-            hash: generateInventoryHash(inventory),
-            timestamp: Date.now(),
-            fileCount: Object.keys(bundle).length
+        // Update master manifest for fast future checks
+        const inventoryHash = JSON.stringify(inventory);
+        const versionInfo = {
+            inventoryHash,
+            timestamp: Date.now()
         };
-        await saveBundleMetadata(endPoint, metadata);
+        await updateMasterManifest(endPoint, versionInfo);
 
-        // Store in memory cache
-        bundleMemoryCache.set(endPoint, { inventory, bundle });
-        return bundle;
+        return JSON.parse(jsonString);
     } catch (err) {
         console.error("getRemoteBundle: Error parsing bundle:", err);
         return null;
@@ -287,21 +282,20 @@ export async function saveRemoteBundle(endPoint, bundle) {
 
         const cachePath = `local/cache/${endPoint}_bundle.json`;
         const inventoryPath = `local/cache/${endPoint}_inventory.json`;
+        const versionPath = `local/cache/${endPoint}_version.json`;
 
         await storage.createFolderPath(cachePath);
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(newInventory));
 
-        // Save metadata for future fast-path checks
-        const metadata = {
-            hash: generateInventoryHash(newInventory),
-            timestamp: Date.now(),
-            fileCount: Object.keys(bundle).length
+        // Update master manifest for fast future checks
+        const inventoryHash = JSON.stringify(newInventory);
+        const versionInfo = {
+            inventoryHash,
+            timestamp: Date.now()
         };
-        await saveBundleMetadata(endPoint, metadata);
+        await updateMasterManifest(endPoint, versionInfo);
 
-        // Update memory cache
-        bundleMemoryCache.set(endPoint, { inventory: newInventory, bundle });
 
     } catch (err) {
         console.error("saveRemoteBundle: Error saving bundle:", err);

@@ -316,7 +316,9 @@ export function useSessions(depends = [], options = {}) {
     useToolbar({ id: "Sessions", items: toolbarItems, visible: filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, yearFilter] });
 
     const filtered = useMemo(() => {
-        let results = [...sessions || []];
+        if (!sessions) return [];
+
+        let results = sessions; // No copy needed
         if (groupFilter?.length) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
