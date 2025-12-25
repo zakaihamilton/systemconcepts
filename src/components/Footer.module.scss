@@ -17,12 +17,6 @@
     z-index: 100;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.15);
-        border-color: rgba(var(--primary-color-rgb), 0.3);
-    }
-
     [dir=rtl] & {
         flex-direction: row-reverse;
     }

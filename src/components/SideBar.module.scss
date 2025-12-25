@@ -1,5 +1,5 @@
 .root {
-    background: var(--side-bar-background);
+    background-color: var(--side-bar-background);
     grid-column: 1 / 2;
     overflow-x: hidden;
     overflow-y: auto;
@@ -7,20 +7,23 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
-    /* Add a separator */
+    transition: width 0.3s ease;
 }
 
 .container {
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-width: 16em;
-    /* Removed margins, borders, and radius for full-height sidebar */
+    min-width: 16rem;
     background-color: transparent;
-    /* Let the root background show through */
+    padding: 0.5rem 0;
 }
 
 .popupDrawer {
-    width: 15em;
-    background-color: var(--side-bar-background);
+    :global(.MuiPaper-root) {
+        width: 18rem;
+        background-color: var(--side-bar-background);
+        border-radius: 0 16px 16px 0;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+    }
 }

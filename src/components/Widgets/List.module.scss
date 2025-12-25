@@ -1,15 +1,72 @@
 .root {
     display: flex;
-    padding: 0px !important;
+    padding: 0.5rem !important;
     flex-direction: column;
+    gap: 0.25rem;
+}
+
+.item {
+    cursor: pointer;
+    user-select: none;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0 !important;
+
+    :global(.MuiListItemButton-root) {
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--text-color);
+        opacity: 0.8;
+
+        &:hover {
+            background-color: var(--hover-color);
+            opacity: 1;
+        }
+
+        &.Mui-selected {
+            background-color: rgba(var(--primary-color-rgb), 0.12) !important;
+            color: var(--primary-color);
+            opacity: 1;
+            font-weight: 600;
+
+            &:hover {
+                background-color: rgba(var(--primary-color-rgb), 0.18) !important;
+            }
+
+            .iconContainer {
+                color: var(--primary-color);
+                opacity: 1;
+            }
+        }
+    }
 }
 
 .iconContainer {
-    font-size: 24px !important;
+    min-width: 40px !important;
+    color: var(--text-color);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+
+    svg {
+        font-size: 1.25rem;
+    }
 }
 
 .itemLabel {
-    color: var(--text-color);
+    margin: 0 !important;
+
+    :global(.MuiListItemText-primary) {
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+    }
+
+    :global(.MuiListItemText-secondary) {
+        font-size: 0.8rem;
+        opacity: 0.6;
+    }
 
     [dir=rtl] & {
         text-align: right;
@@ -18,13 +75,10 @@
 
 .expandIcon {
     color: var(--text-color);
+    opacity: 0.5;
+    font-size: 1.25rem !important;
 }
 
 .reverse {
     flex-direction: column-reverse;
-}
-
-.item {
-    cursor: pointer;
-    user-select: none;
 }
