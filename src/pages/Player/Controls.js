@@ -134,16 +134,28 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
             handlePosEvent(e);
             dragging.current = false;
         };
+
+        // Wrapper for touch events to prevent default
+        const handleTouchMove = e => {
+            e.preventDefault();
+            handlePosEvent(e);
+        };
+
+        const handleTouchEnd = e => {
+            e.preventDefault();
+            handleUpEvent(e);
+        };
+
         // Add both mouse and touch event listeners
         document.addEventListener("mousemove", handlePosEvent);
         document.addEventListener("mouseup", handleUpEvent);
-        document.addEventListener("touchmove", handlePosEvent);
-        document.addEventListener("touchend", handleUpEvent);
+        document.addEventListener("touchmove", handleTouchMove, { passive: false });
+        document.addEventListener("touchend", handleTouchEnd, { passive: false });
         return () => {
             document.removeEventListener("mousemove", handlePosEvent);
             document.removeEventListener("mouseup", handleUpEvent);
-            document.removeEventListener("touchmove", handlePosEvent);
-            document.removeEventListener("touchend", handleUpEvent);
+            document.removeEventListener("touchmove", handleTouchMove);
+            document.removeEventListener("touchend", handleTouchEnd);
         };
     }, [handlePosEvent]);
     useEffect(() => {
@@ -164,7 +176,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
             handlePosEvent(e);
         },
         onTouchStart(e) {
-            e.preventDefault(); // Prevent context menu on long press
+            // Don't call preventDefault here - it's handled in document-level listeners
             dragging.current = true;
             handlePosEvent(e);
         },
