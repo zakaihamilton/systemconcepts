@@ -135,15 +135,19 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
             dragging.current = false;
         };
 
-        // Wrapper for touch events to prevent default
+        // Wrapper for touch events to prevent default only when dragging
         const handleTouchMove = e => {
-            e.preventDefault();
-            handlePosEvent(e);
+            if (dragging.current) {
+                e.preventDefault();
+                handlePosEvent(e);
+            }
         };
 
         const handleTouchEnd = e => {
-            e.preventDefault();
-            handleUpEvent(e);
+            if (dragging.current) {
+                e.preventDefault();
+                handleUpEvent(e);
+            }
         };
 
         // Add both mouse and touch event listeners
