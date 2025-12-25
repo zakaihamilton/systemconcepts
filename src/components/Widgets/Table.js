@@ -352,9 +352,16 @@ export default function TableWidget(props) {
     const itemHeightInPixels = sizeToPixels(itemHeight);
     const cellHeightInPixels = sizeToPixels(cellHeight);
     const cellWidthInPixels = sizeToPixels(cellWidth);
-    const columnCount = size && size.width ? (Math.floor(size.width / (cellWidthInPixels + 1)) || 1) : 0;
-    const rowCount = columnCount ? Math.ceil((items && items.length || 0) / columnCount) : 0;
-    const sidePadding = size && size.width ? ((size.width - (columnCount * cellWidthInPixels)) / 2) : 0;
+
+    // Memoize expensive grid calculations
+    const gridLayout = useMemo(() => {
+        const columnCount = size && size.width ? (Math.floor(size.width / (cellWidthInPixels + 1)) || 1) : 0;
+        const rowCount = columnCount ? Math.ceil((items && items.length || 0) / columnCount) : 0;
+        const sidePadding = size && size.width ? ((size.width - (columnCount * cellWidthInPixels)) / 2) : 0;
+        return { columnCount, rowCount, sidePadding };
+    }, [size?.width, cellWidthInPixels, items?.length]);
+
+    const { columnCount, rowCount, sidePadding } = gridLayout;
 
     const itemData = useMemo(() => ({
         hideColumns,
@@ -516,7 +523,7 @@ export default function TableWidget(props) {
                 columnWidth={cellWidthInPixels}
                 rowCount={rowCount}
                 rowHeight={cellHeightInPixels}
-                height={size.height}
+                height={height}
                 width={size.width}
                 initialScrollTop={scrollOffset}
                 onScroll={({ scrollTop }) => {

@@ -23,12 +23,39 @@ export function useResize(depends = []) {
 
     const dependsString = JSON.stringify(depends);
     useEffect(() => {
-        const handler = () => handleResize();
-        window.addEventListener("resize", handler);
-        const timerHandle = setTimeout(handleResize, 0);
+        let rafId = null;
+        let timeoutId = null;
+
+        const debouncedHandler = () => {
+            // Cancel any pending animation frame
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+
+            // Use requestAnimationFrame to throttle updates
+            rafId = requestAnimationFrame(() => {
+                // Clear any pending timeout
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+
+                // Debounce with a small delay to batch rapid resize events
+                timeoutId = setTimeout(handleResize, 100);
+            });
+        };
+
+        window.addEventListener("resize", debouncedHandler);
+        const initialTimerHandle = setTimeout(handleResize, 0);
+
         return () => {
-            window.removeEventListener("resize", handler);
-            clearTimeout(timerHandle);
+            window.removeEventListener("resize", debouncedHandler);
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            clearTimeout(initialTimerHandle);
         };
     }, [dependsString]);
 
@@ -62,18 +89,55 @@ export function useSize(ref, depends = []) {
         if (!handle) {
             return;
         }
+
+        let rafId = null;
+        let timeoutId = null;
+        let lastWidth = 0;
+        let lastHeight = 0;
+
         const updateSize = () => {
             const rect = handle.getBoundingClientRect();
             const emPixels = getEmValueFromElement(handle);
-            setSize({ width: rect.width, height: rect.height, emPixels });
+            const newWidth = rect.width;
+            const newHeight = rect.height;
+
+            // Only update if size has actually changed by a meaningful amount
+            if (Math.abs(newWidth - lastWidth) > 1 || Math.abs(newHeight - lastHeight) > 1) {
+                lastWidth = newWidth;
+                lastHeight = newHeight;
+                setSize({ width: newWidth, height: newHeight, emPixels });
+            }
         };
+
+        const debouncedUpdate = () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+
+            rafId = requestAnimationFrame(() => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+
+                timeoutId = setTimeout(updateSize, 50);
+            });
+        };
+
         const resizeObserver = new ResizeObserver(entries => {
-            updateSize();
+            debouncedUpdate();
         });
+
         updateSize();
         resizeObserver.observe(handle);
+
         return () => {
             resizeObserver.unobserve(handle);
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
         };
     }, [ref, counter]);
 

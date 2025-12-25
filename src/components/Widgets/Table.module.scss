@@ -21,3 +21,15 @@
         direction: rtl !important;
     }
 }
+
+.grid {
+    display: flex;
+
+    [dir=ltr] & {
+        direction: ltr !important;
+    }
+
+    [dir=rtl] & {
+        direction: rtl !important;
+    }
+}
