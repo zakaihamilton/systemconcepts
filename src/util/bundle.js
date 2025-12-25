@@ -9,6 +9,91 @@ const BUNDLE_PREFIX = "bundle.gz.part.";
 // In-memory cache to avoid expensive IndexedDB reads
 const bundleMemoryCache = new Map();
 
+// Metadata cache for quick bundle comparison
+const metadataCache = new Map();
+
+/**
+ * Generate a hash from bundle inventory for quick comparison
+ * @param {Array} inventory - Array of {name, mtime} objects
+ * @returns {string} Hash string
+ */
+function generateInventoryHash(inventory) {
+    if (!inventory || !inventory.length) return "";
+
+    // Create a stable string representation
+    const stable = inventory
+        .map(item => `${item.name}:${Math.floor(item.mtime || 0)}`)
+        .sort()
+        .join("|");
+
+    // Simple hash function (good enough for change detection)
+    let hash = 0;
+    for (let i = 0; i < stable.length; i++) {
+        const char = stable.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash.toString(36);
+}
+
+/**
+ * Get bundle metadata for quick comparison
+ * @param {string} endPoint - Bundle endpoint
+ * @returns {Object|null} Metadata object with hash and timestamp
+ */
+async function getBundleMetadata(endPoint) {
+    try {
+        const metadataPath = `${endPoint}/bundle.meta.json`;
+
+        // Check memory cache first
+        if (metadataCache.has(endPoint)) {
+            return metadataCache.get(endPoint);
+        }
+
+        // Try to read from storage
+        if (await storage.exists(metadataPath)) {
+            const metadataStr = await storage.readFile(metadataPath);
+            const metadata = JSON.parse(metadataStr);
+            metadataCache.set(endPoint, metadata);
+            return metadata;
+        }
+
+        return null;
+    } catch (err) {
+        console.error(`getBundleMetadata: Error reading metadata for ${endPoint}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Save bundle metadata for quick future comparisons
+ * @param {string} endPoint - Bundle endpoint
+ * @param {Object} metadata - Metadata object to save
+ */
+async function saveBundleMetadata(endPoint, metadata) {
+    try {
+        const metadataPath = `${endPoint}/bundle.meta.json`;
+        await storage.createFolderPath(metadataPath);
+        await storage.writeFile(metadataPath, JSON.stringify(metadata));
+        metadataCache.set(endPoint, metadata);
+    } catch (err) {
+        console.error(`saveBundleMetadata: Error saving metadata for ${endPoint}:`, err);
+    }
+}
+
+/**
+ * Compare local cached metadata with remote inventory
+ * @param {Object} cachedMetadata - Cached metadata
+ * @param {Array} remoteInventory - Remote bundle inventory
+ * @returns {boolean} True if metadata indicates bundle has changed
+ */
+function hasMetadataChanged(cachedMetadata, remoteInventory) {
+    if (!cachedMetadata) return true;
+
+    const remoteHash = generateInventoryHash(remoteInventory);
+    return cachedMetadata.hash !== remoteHash;
+}
+
 function normalizeContent(content) {
     const sortKeys = (obj) => {
         if (Array.isArray(obj)) {
@@ -61,6 +146,26 @@ export async function getRemoteBundle(endPoint, listing = null) {
         mtime: p.mtimeMs || 0
     }));
 
+    // FAST PATH: Check metadata first
+    const cachedMetadata = await getBundleMetadata(endPoint);
+    if (!hasMetadataChanged(cachedMetadata, inventory)) {
+        // Metadata matches - try to use cached bundle
+        const cachePath = `local/cache/${endPoint}_bundle.json`;
+        try {
+            if (await storage.exists(cachePath)) {
+                const cachedBundleStr = await storage.readFile(cachePath);
+                if (cachedBundleStr) {
+                    const bundle = JSON.parse(cachedBundleStr);
+                    // Store in memory cache
+                    bundleMemoryCache.set(endPoint, { inventory, bundle });
+                    return bundle;
+                }
+            }
+        } catch (err) {
+            console.error("getRemoteBundle: Fast path failed, falling back to download:", err);
+        }
+    }
+
     const cachePath = `local/cache/${endPoint}_bundle.json`;
     const inventoryPath = `local/cache/${endPoint}_inventory.json`;
 
@@ -112,6 +217,15 @@ export async function getRemoteBundle(endPoint, listing = null) {
         await storage.writeFile(inventoryPath, JSON.stringify(inventory));
 
         const bundle = JSON.parse(jsonString);
+
+        // Save metadata for future fast-path checks
+        const metadata = {
+            hash: generateInventoryHash(inventory),
+            timestamp: Date.now(),
+            fileCount: Object.keys(bundle).length
+        };
+        await saveBundleMetadata(endPoint, metadata);
+
         // Store in memory cache
         bundleMemoryCache.set(endPoint, { inventory, bundle });
         return bundle;
@@ -120,6 +234,7 @@ export async function getRemoteBundle(endPoint, listing = null) {
         return null;
     }
 }
+
 
 export async function saveRemoteBundle(endPoint, bundle) {
 
@@ -177,6 +292,14 @@ export async function saveRemoteBundle(endPoint, bundle) {
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(newInventory));
 
+        // Save metadata for future fast-path checks
+        const metadata = {
+            hash: generateInventoryHash(newInventory),
+            timestamp: Date.now(),
+            fileCount: Object.keys(bundle).length
+        };
+        await saveBundleMetadata(endPoint, metadata);
+
         // Update memory cache
         bundleMemoryCache.set(endPoint, { inventory: newInventory, bundle });
 
@@ -185,6 +308,7 @@ export async function saveRemoteBundle(endPoint, bundle) {
         throw err;
     }
 }
+
 
 export async function scanLocal(path, ignore = [], listing = null, remote = null) {
     const bundle = {};
@@ -212,8 +336,8 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
             const localMtime = item.mtimeMs || 0;
             const remoteItem = remote && remote[relativePath];
 
-            // optimization: reuse remote content if mtime hasn't changed AND we have valid remote mtime
-            if (remoteItem && remoteItem.mtime && Math.floor(remoteItem.mtime) >= Math.floor(localMtime)) {
+            // OPTIMIZATION 1: Trust exact timestamp matches (skip content read entirely)
+            if (remoteItem && remoteItem.mtime && Math.floor(remoteItem.mtime) === Math.floor(localMtime)) {
                 bundle[relativePath] = {
                     content: remoteItem.content,
                     mtime: localMtime  // Use local mtime to ensure consistency
@@ -221,6 +345,16 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
                 return;
             }
 
+            // OPTIMIZATION 2: Reuse remote content if remote is newer (avoid read)
+            if (remoteItem && remoteItem.mtime && Math.floor(remoteItem.mtime) > Math.floor(localMtime)) {
+                bundle[relativePath] = {
+                    content: remoteItem.content,
+                    mtime: localMtime  // Use local mtime to ensure consistency
+                };
+                return;
+            }
+
+            // Only read content if we don't have a valid remote version
             const content = await storage.readFile(item.path);
             bundle[relativePath] = {
                 content,
@@ -243,33 +377,26 @@ export function mergeBundles(remote, local, name = "") {
 
     for (const [path, localItem] of Object.entries(local)) {
         const remoteItem = merged[path];
+
+        // OPTIMIZATION: Trust exact timestamp matches (skip content comparison)
+        if (remoteItem && Math.floor(localItem.mtime) === Math.floor(remoteItem.mtime)) {
+            // Timestamps match exactly - trust that content is the same
+            continue;
+        }
+
         if (!remoteItem || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime)) {
             // Check content equality to avoid redundant updates
             if (remoteItem) {
+                // Quick check: exact content match
                 if (remoteItem.content === localItem.content) {
                     continue;
                 }
+                // Expensive check: normalized content match (only if needed)
                 if (normalizeContent(remoteItem.content) === normalizeContent(localItem.content)) {
                     continue;
                 }
-                // Debug first mismatch
-                if (updateCount === 0) {
-                    console.log(`DEBUG ${name}: First mismatch at "${path}"`, {
-                        hasRemote: !!remoteItem,
-                        localMtime: localItem.mtime,
-                        remoteMtime: remoteItem?.mtime,
-                        localFloor: Math.floor(localItem.mtime),
-                        remoteFloor: remoteItem?.mtime ? Math.floor(remoteItem.mtime) : 'N/A',
-                        mtimeCheck: !remoteItem || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime),
-                        contentEqual: remoteItem?.content === localItem.content,
-                        contentLengths: { local: localItem.content?.length, remote: remoteItem?.content?.length }
-                    });
-                }
-            } else if (updateCount === 0) {
-                console.log(`DEBUG ${name}: First file has no remote at "${path}"`);
             }
             merged[path] = localItem;
-            // console.log(`mergeBundles: Update ${path} (Local newer)`);
             updateCount++;
         }
     }
@@ -280,7 +407,7 @@ export function mergeBundles(remote, local, name = "") {
 }
 
 export async function applyBundle(root, bundle, listing = null) {
-    if (!bundle) return { updateCount: 0, listing: listing || [] };
+    if (!bundle) return { downloadCount: 0, listing: listing || [] };
 
     // Ensure root exists
     await storage.createFolderPath(root, true);
@@ -301,10 +428,16 @@ export async function applyBundle(root, bundle, listing = null) {
         // Likely first run, folder empty
     }
 
-    let updateCount = 0;
+    let downloadCount = 0;
     for (const [relativePath, item] of Object.entries(bundle)) {
         const fullPath = makePath(root, relativePath);
         const localMtime = localFiles[relativePath] || 0; // 0 if not exists
+
+        // OPTIMIZATION: Trust exact timestamp matches (skip entirely)
+        if (localMtime > 0 && Math.floor(item.mtime) === Math.floor(localMtime)) {
+            // Timestamps match exactly - skip this file
+            continue;
+        }
 
         // Strict > check. If equal, don't write (saves IO).
         // If local is newer, don't write (saves local work).
@@ -323,12 +456,12 @@ export async function applyBundle(root, bundle, listing = null) {
             if (contentChanged) {
                 await storage.createFolderPath(fullPath);
                 await storage.writeFile(fullPath, item.content);
-                updateCount++;
+                downloadCount++;
             }
         }
     }
-    if (updateCount > 0) {
-        console.log(`applyBundle: Finished. Updated ${updateCount} files for ${root}.`);
+    if (downloadCount > 0) {
+        console.log(`applyBundle: Finished. Updated ${downloadCount} files for ${root}.`);
     }
-    return { updateCount, listing };
+    return { downloadCount, listing };
 }

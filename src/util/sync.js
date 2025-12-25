@@ -152,26 +152,15 @@ export function useSyncFeature() {
 
                         // Download & Apply
                         const remoteBundle = await bundle.getRemoteBundle(name);
-                        const t2 = Date.now();
                         const { downloadCount, listing: updatedListing } = await bundle.applyBundle(path, remoteBundle, bundleListing);
-                        const t3 = Date.now();
 
                         // Upload & Merge
                         const localBundle = await bundle.scanLocal(path, ignore, updatedListing, remoteBundle);
-                        const t4 = Date.now();
                         const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
-                        const t5 = Date.now();
 
                         if (updated) {
                             await bundle.saveRemoteBundle(name, merged);
-                            const t6 = Date.now();
-                            console.log(`TIMING ${name}: getRemote=${t2 - t1}ms, apply=${t3 - t2}ms, scan=${t4 - t3}ms, merge=${t5 - t4}ms, save=${t6 - t5}ms, TOTAL=${t6 - startTime}ms`);
                             localUpdated = true;
-                        } else {
-                            const totalTime = Date.now() - startTime;
-                            if (totalTime > 100) {
-                                console.log(`TIMING ${name} (no update): getRemote=${t2 - t1}ms, apply=${t3 - t2}ms, scan=${t4 - t3}ms, merge=${t5 - t4}ms, TOTAL=${totalTime}ms`);
-                            }
                         }
 
                         if (downloadCount > 0 || localUpdated) {
