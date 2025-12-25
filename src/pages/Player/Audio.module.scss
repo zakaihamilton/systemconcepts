@@ -30,6 +30,13 @@
     font-weight: 500;
 }
 
+@media (pointer: coarse) {
+    :global(html:not([data-theme='dark'])) .video::cue {
+        color: #000 !important;
+        background: rgba(255, 255, 255, 0.95);
+    }
+}
+
 .container {
     position: absolute;
     top: 0;
