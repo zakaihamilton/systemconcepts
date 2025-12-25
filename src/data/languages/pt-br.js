@@ -30,6 +30,14 @@ export default {
             "value": "Tamanhos Fonte"
         },
         {
+            "id": "OK",
+            "value": "OK"
+        },
+        {
+            "id": "NONE",
+            "value": "Nenhum"
+        },
+        {
             "id": "SETTINGS",
             "value": "Configurações"
         },

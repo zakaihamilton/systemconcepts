@@ -30,6 +30,14 @@ export default {
             "value": "גודל גופנים"
         },
         {
+            "id": "OK",
+            "value": "אישור"
+        },
+        {
+            "id": "NONE",
+            "value": "ללא"
+        },
+        {
             "id": "SETTINGS",
             "value": "הגדרות"
         },

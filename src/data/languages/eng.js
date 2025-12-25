@@ -30,6 +30,14 @@ export default {
             "value": "Font Sizes"
         },
         {
+            "id": "OK",
+            "value": "OK"
+        },
+        {
+            "id": "NONE",
+            "value": "None"
+        },
+        {
             "id": "SETTINGS",
             "value": "Settings"
         },
