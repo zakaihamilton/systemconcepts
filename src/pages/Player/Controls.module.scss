@@ -23,6 +23,10 @@
     border-radius: 4px;
     box-shadow: 0 2px 4px var(--box-shadow-color);
     transition: border-color 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
 }
 
 .progressBack {

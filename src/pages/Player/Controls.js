@@ -112,8 +112,9 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
     }
     const progressPosition = left + "%";
     const handlePosEvent = useCallback(e => {
-        const { clientX } = e;
-        if (!dragging.current) {
+        // Extract clientX from either mouse or touch event
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        if (!dragging.current || !clientX) {
             return;
         }
         const width = progressRef.current.clientWidth;
@@ -133,11 +134,16 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
             handlePosEvent(e);
             dragging.current = false;
         };
+        // Add both mouse and touch event listeners
         document.addEventListener("mousemove", handlePosEvent);
         document.addEventListener("mouseup", handleUpEvent);
+        document.addEventListener("touchmove", handlePosEvent);
+        document.addEventListener("touchend", handleUpEvent);
         return () => {
             document.removeEventListener("mousemove", handlePosEvent);
             document.removeEventListener("mouseup", handleUpEvent);
+            document.removeEventListener("touchmove", handlePosEvent);
+            document.removeEventListener("touchend", handleUpEvent);
         };
     }, [handlePosEvent]);
     useEffect(() => {
@@ -155,7 +161,15 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
     const events = {
         onMouseDown(e) {
             dragging.current = true;
-            handlePosEvent(e, true);
+            handlePosEvent(e);
+        },
+        onTouchStart(e) {
+            e.preventDefault(); // Prevent context menu on long press
+            dragging.current = true;
+            handlePosEvent(e);
+        },
+        onContextMenu(e) {
+            e.preventDefault(); // Prevent right-click menu
         }
     };
     const play = () => {
