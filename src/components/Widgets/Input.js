@@ -1,4 +1,4 @@
-import { useEffect, useState, forwardRef } from "react";
+import { useEffect, useState, forwardRef, useCallback } from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from "@mui/material/InputAdornment";
@@ -12,9 +12,10 @@ export function arrayToMenuItems(list) {
 }
 
 export default forwardRef(function InputWidget({ background, label, render, mapping, helperText = " ", validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
-    let [value, setValue] = state;
+    let [value, setValue] = state || [];
     const [error, setError] = useState("");
-    const onChangeText = event => {
+
+    const onChangeText = useCallback(event => {
         const { value } = event.target;
         setValue(value);
         if (validate && onValidate) {
@@ -26,7 +27,8 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
         if (onChange) {
             onChange(event);
         }
-    };
+    }, [setValue, validate, onValidate, onChange]);
+
     useEffect(() => {
         if (validate && onValidate) {
             setError(onValidate(value));
@@ -34,8 +36,8 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
         else {
             setError("");
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [validate]);
+    }, [validate, onValidate, value]);
+
     if (select && multiple && !Array.isArray(value)) {
         value = [value];
     }
@@ -43,16 +45,13 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
         renderValue = renderValue || (selected => selected.filter(Boolean).join(", "));
     }
 
-    if (!autocomplete) {
-        if (mapping) {
-            items = (items || []).map(mapping);
-        }
-        const children = items && ((render && render(items)) || arrayToMenuItems(items));
+    const textField = (params = {}) => {
+        const { slotProps: paramsSlotProps = {}, ...otherParams } = params;
         return (
-            (<TextField
+            <TextField
                 ref={ref}
                 label={label}
-                className={clsx(styles.root, !background && styles.transparent)}
+                className={clsx(styles.root, !background && styles.transparent, className)}
                 value={value || ""}
                 onChange={onChangeText}
                 select={select}
@@ -61,12 +60,17 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                 variant="filled"
                 fullWidth={fullWidth}
                 {...props}
+                {...otherParams}
                 slotProps={{
+                    ...props.slotProps,
+                    ...paramsSlotProps,
                     input: {
-                        className: clsx(styles.input, className),
+                        ...(props.slotProps?.input || {}),
+                        ...(paramsSlotProps?.input || {}),
+                        className: clsx(styles.input, props.slotProps?.input?.className, paramsSlotProps?.input?.className),
                         ...(icon && {
                             startAdornment: (
-                                <InputAdornment position="start">
+                                <InputAdornment position="start" className={styles.icon}>
                                     <Tooltip title={tooltip} arrow>
                                         {icon}
                                     </Tooltip>
@@ -75,9 +79,9 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                         }),
                         readOnly: Boolean(readOnly)
                     },
-
                     select: {
-                        className: clsx(styles.select, className),
+                        ...(props.slotProps?.select || {}),
+                        className: clsx(styles.select, props.slotProps?.select?.className),
                         multiple,
                         renderValue,
                         MenuProps: {
@@ -88,36 +92,50 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                             transformOrigin: {
                                 vertical: "top",
                                 horizontal: "left"
+                            },
+                            PaperProps: {
+                                style: {
+                                    marginTop: 8,
+                                    borderRadius: 12,
+                                    border: '1px solid var(--border-color)',
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                                }
                             }
                         }
                     }
-                }}>
-                {children}
-            </TextField >)
+                }}
+            />
         );
+    };
+
+    if (!autocomplete) {
+        if (mapping) {
+            items = (items || []).map(mapping);
+        }
+        const children = items && ((render && render(items)) || arrayToMenuItems(items));
+        return textField({ children });
     }
 
     const options = (items || []).map(item => item.name);
 
     return (
         <Autocomplete
-            ref={ref}
             options={options}
             value={value || ""}
             isOptionEqualToValue={(option, value) => option === value}
             onChange={(event, newValue) => {
-                event.target = { ...event.target };
-                if (typeof event.target.value === "undefined") {
-                    event.target.value = newValue;
-                }
-                else {
-                    event.target.value = options[event.target.value];
-                }
-                onChangeText(event);
+                const customEvent = {
+                    target: {
+                        ...event.target,
+                        value: newValue
+                    }
+                };
+                onChangeText(customEvent);
             }}
             renderInput={params => textField(params)}
+            className={clsx(styles.autocomplete, className)}
             {...props}
         />
     );
-
 });
+

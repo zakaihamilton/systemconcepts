@@ -1,56 +1,108 @@
-.root svg {
-    top: calc(50% - 0.45em);
+.root {
+    margin: 0.5rem 0;
 
-    [dir=ltr] & {
-        right: 0.2em;
+    :global(.MuiFilledInput-root) {
+        background-color: var(--neutral-100);
+        border-radius: 8px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        padding-top: 20px;
+
+        &:hover {
+            background-color: var(--neutral-200);
+        }
+
+        &::before,
+        &::after {
+            display: none !important;
+        }
+
+        &.Mui-focused {
+            background-color: var(--bar-background);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        &.Mui-error {
+            border-color: var(--error-color);
+            background-color: var(--error-background);
+
+            &.Mui-focused {
+                box-shadow: 0 0 0 4px rgba(var(--error-color-rgb), 0.1);
+            }
+        }
     }
+
+    :global(.MuiInputLabel-root) {
+        transform: translate(12px, 12px) scale(1);
+        font-size: 0.95rem;
+        color: var(--neutral-500);
+        font-weight: 500;
+        pointer-events: none;
+        transition: all 0.2s ease;
+
+        &.Mui-focused,
+        &.MuiFormLabel-filled {
+            transform: translate(12px, 6px) scale(0.75);
+            color: var(--primary-color);
+        }
+
+        &.Mui-error {
+            color: var(--error-color);
+        }
+    }
+
+    :global(.MuiFormHelperText-root) {
+        margin: 4px 12px 0;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+}
+
+.transparent {
+    :global(.MuiFilledInput-root) {
+        background-color: transparent !important;
+
+        &:hover {
+            background-color: rgba(var(--primary-color-rgb), 0.04) !important;
+        }
+
+        &.Mui-focused {
+            background-color: transparent !important;
+        }
+    }
+}
+
+.input {
+    input {
+        padding: 8px 12px !important;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+}
+
+.select {
+    :global(.MuiSelect-select) {
+        padding: 8px 12px !important;
+        font-size: 0.95rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        min-height: 1.5rem;
+    }
+}
+
+.icon {
+    color: var(--neutral-500);
+    margin-right: 4px;
 
     [dir=rtl] & {
-        left: 0.2em;
-        right: initial;
-    }
-}
-
-.root.transparent div {
-    background-color: transparent !important;
-}
-
-.root:focus svg {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.select div {
-    [dir=ltr] & {
-        padding-left: 0.5em !important;
-        padding-right: 0.5em !important;
+        margin-right: 0;
+        margin-left: 4px;
     }
 
-    [dir=rtl] & {
-        padding-left: 0.5em !important;
-        padding-right: 0.5em !important;
-    }
-}
-
-.root label {
-    margin-top: 0.2em;
-    left: 0px !important;
-    right: 0px !important;
-    text-align: center;
-    transform: none !important;
-}
-
-.input div {
-    cursor: default;
-}
-
-.input input {
-    [dir=ltr] & {
-        padding-left: 0.5em !important;
-        padding-right: 0.5em !important;
-    }
-
-    [dir=rtl] & {
-        padding-left: 0.5em !important;
-        padding-right: 0.5em !important;
+    svg {
+        font-size: 1.25rem;
     }
 }

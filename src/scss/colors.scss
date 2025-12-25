@@ -26,6 +26,8 @@
     --side-bar-background: var(--neutral-50);
     --bar-background: #ffffff;
     --footer-background: var(--neutral-50);
+    --bar-background-rgb: 255, 255, 255;
+    --primary-color-rgb: 59, 130, 246;
 
     --text-color: var(--neutral-800);
     --inverse-text-color: #ffffff;
@@ -54,6 +56,8 @@
     --error-background: #fef2f2;
     --info-color: #3b82f6;
     --info-background: #eff6ff;
+    --error-color-rgb: 239, 68, 68;
+    --info-color-rgb: 59, 130, 246;
 
     --hover-color: var(--primary-100);
     --hover-text-color: var(--primary-700);
@@ -88,6 +92,8 @@
     --side-bar-background: #0f172a;
     --bar-background: #1e293b;
     --footer-background: #0f172a;
+    --bar-background-rgb: 30, 41, 59;
+    --primary-color-rgb: 59, 130, 246;
 
     --text-color: var(--neutral-800);
     --inverse-text-color: #000000;
@@ -116,6 +122,8 @@
     --error-background: #450a0a;
     --info-color: #60a5fa;
     --info-background: #172554;
+    --error-color-rgb: 248, 113, 113;
+    --info-color-rgb: 96, 165, 250;
 
     --hover-color: var(--neutral-200);
     --hover-text-color: var(--primary-500);
