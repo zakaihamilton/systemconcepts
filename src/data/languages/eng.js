@@ -375,7 +375,7 @@ export default {
         },
         {
             "id": "SIGN_UP_TEXT",
-            "value": "Don't have an account? Sign Up"
+            "value": "Sign Up"
         },
         {
             "id": "FIRST_NAME",
@@ -1084,6 +1084,22 @@ export default {
         {
             "id": "OPTIONS",
             "value": "Options"
+        },
+        {
+            "id": "SIGN_IN_WITH_PASSKEY",
+            "value": "Sign in with Passkey"
+        },
+        {
+            "id": "REGISTER_PASSKEY",
+            "value": "Register Passkey"
+        },
+        {
+            "id": "CREATE_PASSKEY",
+            "value": "Create Passkey for this device"
+        },
+        {
+            "id": "PASSKEYS",
+            "value": "Passkeys"
         }
     ]
 };

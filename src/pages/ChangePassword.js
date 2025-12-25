@@ -1,67 +1,23 @@
 import React, { useState } from "react";
-import { styled } from '@mui/material/styles';
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
 import { useTranslations } from "@util/translations";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { fetchJSON } from "@util/fetch";
 import Cookies from "js-cookie";
 import Input from "@widgets/Input";
-import { setPath } from "@util/pages";
+import { setPath, setHash } from "@util/pages";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import clsx from "clsx";
 import { MainStore } from "@components/Main";
 import Checkbox from "@mui/material/Checkbox";
 import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
-const PREFIX = 'ChangePassword';
-
-const classes = {
-    paper: `${PREFIX}-paper`,
-    form: `${PREFIX}-form`,
-    progress: `${PREFIX}-progress`,
-    submit: `${PREFIX}-submit`,
-    error: `${PREFIX}-error`
-};
-
-const StyledContainer = styled(Container)((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.paper}`]: {
-        marginTop: theme.spacing(2),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-
-    [`& .${classes.form}`]: {
-        width: "100%", // Fix IE 11 issue.
-        marginTop: theme.spacing(3),
-    },
-
-    [`& .${classes.progress}`]: {
-        width: "100%"
-    },
-
-    [`& .${classes.submit}`]: {
-        margin: theme.spacing(0.5, 0, 2),
-    },
-
-    [`& .${classes.error}`]: {
-        color: "var(--error-color)",
-        backgroundColor: "var(--error-background)",
-        borderRadius: "0.3em",
-        padding: "0.5em",
-        margin: "0.5em",
-        width: "100%",
-        textAlign: "center"
-    }
-}));
+import styles from "./Account.module.scss";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 export default function ChangePassword() {
     const { direction } = MainStore.useState();
@@ -135,16 +91,28 @@ export default function ChangePassword() {
         }
     };
 
+    const goBack = () => {
+        setHash("account");
+    };
+
     return (
-        (<StyledContainer component="main" maxWidth="xs">
-            <div className={classes.paper}>
-                <Typography component="h1" variant="h5">
-                    {translations.CHANGE_PASSWORD}
-                </Typography>
-                {error && <Typography variant="h6" className={classes.error}>
+        <div className={styles.root}>
+            <div className={styles.card}>
+                {inProgress && <LinearProgress className={styles.progress} />}
+                <div className={styles.header}>
+                    <Tooltip title={translations.BACK} arrow>
+                        <IconButton className={clsx(styles.backButton, direction === "rtl" && styles.rtl)} onClick={goBack}>
+                            <ArrowBackIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Typography component="h1" className={styles.title}>
+                        {translations.CHANGE_PASSWORD}
+                    </Typography>
+                </div>
+                {error && <Typography className={styles.error}>
                     {error}
                 </Typography>}
-                <form className={classes.form} noValidate>
+                <div className={styles.form}>
                     <Grid container spacing={2}>
                         <Grid size={12}>
                             <Input
@@ -159,6 +127,7 @@ export default function ChangePassword() {
                                 onValidate={onValidateField}
                                 autoFocus
                                 icon={<AccountCircleIcon />}
+                                background={true}
                             />
                         </Grid>
                         <Grid size={12}>
@@ -174,8 +143,8 @@ export default function ChangePassword() {
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
                                 onKeyDown={onKeyDown}
+                                background={true}
                             />
-
                         </Grid>
                         <Grid size={12}>
                             <Input
@@ -190,30 +159,31 @@ export default function ChangePassword() {
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
                                 onKeyDown={onKeyDown}
+                                background={true}
                             />
-
+                        </Grid>
+                        <Grid size={12}>
+                            <FormControlLabel
+                                className={clsx(styles.checkboxLabel, direction === "rtl" && styles.rtlLabel)}
+                                control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
+                                label={translations.REMEMBER_ME}
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                className={styles.submit}
+                                disabled={!!(isInvalid || inProgress)}
+                                onClick={onSubmit}
+                            >
+                                {translations.CHANGE_PASSWORD}
+                            </Button>
                         </Grid>
                     </Grid>
-                    <Grid size={12}>
-                        <FormControlLabel
-                            className={clsx(direction === "rtl" && classes.rtlLabel)}
-                            control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
-                            label={translations.REMEMBER_ME}
-                        />
-                    </Grid>
-                    {inProgress && <LinearProgress className={classes.progress} />}
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}
-                        disabled={!!(isInvalid || inProgress)}
-                        onClick={onSubmit}
-                    >
-                        {translations.CHANGE_PASSWORD}
-                    </Button>
-                </form>
+                </div>
             </div>
-        </StyledContainer>)
+        </div>
     );
 }

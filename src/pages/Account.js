@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { styled } from '@mui/material/styles';
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -25,64 +23,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { startRegistration, startAuthentication, browserSupportsWebAuthn } from '@simplewebauthn/browser';
-
-const PREFIX = 'Account';
-
-const classes = {
-    paper: `${PREFIX}-paper`,
-    form: `${PREFIX}-form`,
-    rtlLabel: `${PREFIX}-rtlLabel`,
-    submit: `${PREFIX}-submit`,
-    progress: `${PREFIX}-progress`,
-    link: `${PREFIX}-link`,
-    error: `${PREFIX}-error`
-};
-
-const StyledContainer = styled(Container)((
-    {
-        theme
-    }
-) => ({
-    [`& .${classes.paper}`]: {
-        marginTop: theme.spacing(2),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-
-    [`& .${classes.form}`]: {
-        width: "100%",
-        marginTop: theme.spacing(2),
-    },
-
-    [`& .${classes.rtlLabel}`]: {
-        marginRight: "-11px",
-        marginLeft: "16px"
-    },
-
-    [`& .${classes.submit}`]: {
-        margin: theme.spacing(0.5, 0, 2),
-        display: "flex"
-    },
-
-    [`& .${classes.progress}`]: {
-        width: "100%"
-    },
-
-    [`& .${classes.link}`]: {
-        whiteSpace: "nowrap"
-    },
-
-    [`& .${classes.error}`]: {
-        color: "var(--error-color)",
-        backgroundColor: "var(--error-background)",
-        borderRadius: "0.3em",
-        padding: "0.5em",
-        margin: "0.5em",
-        width: "100%",
-        textAlign: "center"
-    }
-}));
+import styles from "./Account.module.scss";
 
 export default function Account({ redirect }) {
     const { direction } = MainStore.useState();
@@ -249,13 +190,6 @@ export default function Account({ redirect }) {
                             await onRegisterPasskey(id);
                         } catch (e) {
                             console.error("Failed to create passkey after login", e);
-                            // We don't block login, but maybe show an error?
-                            // The error state might be overwritten by setPath("") if we are not careful.
-                            // But onRegisterPasskey sets error state.
-                            // Let's delay the redirect slightly if there was an error?
-                            // Actually onRegisterPasskey sets error to PASSKEY_REGISTERED on success.
-                            // We can check that?
-                            // For now, let's just proceed.
                         }
                     }
 
@@ -305,16 +239,19 @@ export default function Account({ redirect }) {
     const isInvalid = validate && invalidFields;
 
     return (
-        (<StyledContainer component="main" maxWidth="xs">
-            <div className={classes.paper}>
-                <Typography component="h1" variant="h5">
-                    {translations[isSignedIn ? "SIGNED_IN" : "SIGN_IN"]}
-                </Typography>
-                {error && <Typography variant="h6" className={classes.error}>
+        <div className={styles.root}>
+            <div className={styles.card}>
+                {inProgress && <LinearProgress className={styles.progress} />}
+                <div className={styles.header}>
+                    <Typography component="h1" className={styles.title}>
+                        {translations[isSignedIn ? "SIGNED_IN" : "SIGN_IN"]}
+                    </Typography>
+                </div>
+                {error && <Typography className={styles.error}>
                     {error}
                 </Typography>}
-                <form className={classes.form} noValidate>
-                    <Grid container spacing={1}>
+                <div className={styles.form}>
+                    <Grid container spacing={2}>
                         <Grid size={12}>
                             <Input
                                 state={idState}
@@ -328,6 +265,7 @@ export default function Account({ redirect }) {
                                 onValidate={onValidateField}
                                 autoFocus
                                 icon={<AccountCircleIcon />}
+                                background={true}
                             />
                         </Grid>
                         {!isSignedIn && <Grid size={12}>
@@ -343,23 +281,23 @@ export default function Account({ redirect }) {
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
                                 onKeyDown={onKeyDown}
+                                background={true}
                             />
                         </Grid>}
                         {!isSignedIn && <Grid size={12}>
                             <FormControlLabel
-                                className={clsx(direction === "rtl" && classes.rtlLabel)}
+                                className={clsx(styles.checkboxLabel, direction === "rtl" && styles.rtlLabel)}
                                 control={<Checkbox color="primary" value={remember} onChange={changeRemember} />}
                                 label={translations.REMEMBER_ME}
                             />
                         </Grid>}
                         {!isSignedIn && browserSupportsWebAuthn() && <Grid size={12}>
                             <FormControlLabel
-                                className={clsx(direction === "rtl" && classes.rtlLabel)}
+                                className={clsx(styles.checkboxLabel, direction === "rtl" && styles.rtlLabel)}
                                 control={<Checkbox color="primary" checked={createPasskey} onChange={changeCreatePasskey} />}
                                 label={translations.CREATE_PASSKEY || "Create Passkey for this device"}
                             />
                         </Grid>}
-                        {inProgress && <LinearProgress className={classes.progress} />}
                         <Grid size={12}>
                             <Button
                                 onClick={onSubmit}
@@ -367,7 +305,7 @@ export default function Account({ redirect }) {
                                 fullWidth
                                 variant="contained"
                                 color="primary"
-                                className={classes.submit}
+                                className={styles.submit}
                             >
                                 {translations[isSignedIn ? "SIGN_OUT" : "SIGN_IN"]}
                             </Button>
@@ -378,11 +316,10 @@ export default function Account({ redirect }) {
                                 disabled={inProgress}
                                 fullWidth
                                 variant="contained"
-                                color="secondary"
-                                className={classes.submit}
+                                className={styles.secondaryButton}
                                 startIcon={<FingerprintIcon />}
                             >
-                                {translations.SIGN_IN_WITH_PASSKEY || "Sign in with Passkey"}
+                                {translations.SIGN_IN_WITH_PASSKEY}
                             </Button>
                         </Grid>}
                         {isSignedIn && <Grid size={12}>
@@ -392,15 +329,15 @@ export default function Account({ redirect }) {
                                 fullWidth
                                 variant="outlined"
                                 color="primary"
-                                className={classes.submit}
+                                className={styles.secondaryButton}
                                 startIcon={<FingerprintIcon />}
                             >
-                                {translations.REGISTER_PASSKEY || "Register Passkey"}
+                                {translations.REGISTER_PASSKEY}
                             </Button>
                         </Grid>}
                         {isSignedIn && passkeys.length > 0 && <Grid size={12}>
-                            <Typography variant="h6">{translations.PASSKEYS || "Passkeys"}</Typography>
-                            <List dense>
+                            <Typography className={styles.passkeyTitle}>{translations.PASSKEYS}</Typography>
+                            <List dense className={styles.passkeyList}>
                                 {passkeys.map(pk => (
                                     <ListItem key={pk.id}>
                                         <ListItemText primary={pk.name} secondary={new Date(pk.createdAt).toLocaleDateString()} />
@@ -413,29 +350,33 @@ export default function Account({ redirect }) {
                                 ))}
                             </List>
                         </Grid>}
-                        {!isSignedIn && <Grid size={5}>
-                            <Link className={classes.link} href="#resetpassword" variant="body2">
-                                {translations.FORGET_PASSWORD}
-                            </Link>
-                        </Grid>}
-                        {!isSignedIn && <Grid size={7}>
-                            <Link className={classes.link} href="#signup" variant="body2">
-                                {translations.SIGN_UP_TEXT}
-                            </Link>
-                        </Grid>}
-                        {isSignedIn && <Grid size={8}>
-                            <Link className={classes.link} href="#changepassword" variant="body2">
-                                {translations.CHANGE_PASSWORD}
-                            </Link>
-                        </Grid>}
-                        {isSignedIn && <Grid size={4}>
-                            <Link className={classes.link} href={"#account/" + encodeURIComponent(`user/${userId}`)} variant="body2">
-                                {translations.EDIT_ACCOUNT}
-                            </Link>
-                        </Grid>}
+                        <Grid size={12}>
+                            <div className={styles.links}>
+                                {!isSignedIn && (
+                                    <>
+                                        <Link href="#resetpassword">
+                                            {translations.FORGET_PASSWORD}
+                                        </Link>
+                                        <Link href="#signup">
+                                            {translations.SIGN_UP_TEXT}
+                                        </Link>
+                                    </>
+                                )}
+                                {isSignedIn && (
+                                    <>
+                                        <Link href="#changepassword">
+                                            {translations.CHANGE_PASSWORD}
+                                        </Link>
+                                        <Link href={"#account/" + encodeURIComponent(`user/${userId}`)}>
+                                            {translations.EDIT_ACCOUNT}
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
+                        </Grid>
                     </Grid>
-                </form>
+                </div>
             </div>
-        </StyledContainer>)
+        </div>
     );
 }

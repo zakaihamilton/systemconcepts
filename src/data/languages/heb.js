@@ -375,7 +375,7 @@ export default {
         },
         {
             "id": "SIGN_UP_TEXT",
-            "value": "אין לך חשבון? הרשם"
+            "value": "הרשם"
         },
         {
             "id": "FIRST_NAME",
@@ -1072,6 +1072,22 @@ export default {
         {
             "id": "OPTIONS",
             "value": "אפשרויות"
+        },
+        {
+            "id": "SIGN_IN_WITH_PASSKEY",
+            "value": "התחברות עם מפתח גישה"
+        },
+        {
+            "id": "REGISTER_PASSKEY",
+            "value": "רישום מפתח גישה"
+        },
+        {
+            "id": "CREATE_PASSKEY",
+            "value": "צור מפתח גישה למכשיר זה"
+        },
+        {
+            "id": "PASSKEYS",
+            "value": "מפתחות גישה"
         }
     ]
 };

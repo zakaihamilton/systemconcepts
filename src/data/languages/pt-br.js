@@ -379,7 +379,7 @@ export default {
         },
         {
             "id": "SIGN_UP_TEXT",
-            "value": "Não tem conta? Inscreva-se"
+            "value": "Inscreva-se"
         },
         {
             "id": "FIRST_NAME",
@@ -1076,6 +1076,22 @@ export default {
         {
             "id": "OPTIONS",
             "value": "Opções"
+        },
+        {
+            "id": "SIGN_IN_WITH_PASSKEY",
+            "value": "Entrar com Chave de Acesso"
+        },
+        {
+            "id": "REGISTER_PASSKEY",
+            "value": "Registrar Chave de Acesso"
+        },
+        {
+            "id": "CREATE_PASSKEY",
+            "value": "Criar Chave de Acesso para este dispositivo"
+        },
+        {
+            "id": "PASSKEYS",
+            "value": "Chaves de Acesso"
         }
     ]
 };
