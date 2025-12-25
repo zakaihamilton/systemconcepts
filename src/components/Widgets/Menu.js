@@ -9,6 +9,7 @@ import styles from "./Menu.module.scss";
 import Link from "@mui/material/Link";
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import clsx from "clsx";
 
 const PREFIX = 'Menu';
 
@@ -16,16 +17,32 @@ const classes = {
     paper: `${PREFIX}-paper`
 };
 
-const StyledMenuRoot = styled(Menu)({
+const StyledMenuRoot = styled(Menu)(({ theme }) => ({
     [`& .${classes.paper}`]: {
-        border: "1px solid #d3d4d5",
+        borderRadius: 12,
+        marginTop: 8,
+        minWidth: 200,
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        border: `1px solid var(--border-color)`,
+        backgroundColor: 'var(--bar-background)',
+        '& .MuiList-root': {
+            padding: '4px 0',
+        },
     },
-});
+}));
 
 const StyledMenu = ((props) => (
     <StyledMenuRoot
-        transitionDuration={0}
+        transitionDuration={150}
         elevation={0}
+        anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+        }}
+        transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+        }}
         {...props}
     />
 ));
@@ -53,14 +70,16 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         setHoverRef(null);
     };
 
-    const hasIcon = (items || []).some(item => item.icon);
+    const hasIcon = (items || []).some(item => item.icon || typeof item.checked !== "undefined");
     const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
         const { checked, divider, name, target, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
         const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
         const selectedArray = Array.isArray(selectedItem);
         const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
-        const handleClick = event => {
+        const isSelectedFinal = isSelected || checked;
+
+        const handleClickItem = event => {
             if (!selectedArray) {
                 handleClose();
             }
@@ -73,24 +92,37 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         };
         const style = { backgroundColor };
         return [
-            <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClick}>
-                <MenuItem color="initial" component={Link} underline="none" href={target} selected={isSelected} {...props}>
+            <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClickItem}>
+                <MenuItem
+                    className={clsx(styles.menuItem, isSelectedFinal && styles.selected)}
+                    component={target ? Link : "div"}
+                    underline="none"
+                    href={target}
+                    {...props}
+                >
                     <div key={id + "_background"} className={styles.background} style={style} />
-                    {typeof checked !== "undefined" &&
+                    {hasIcon && (
                         <ListItemIcon className={styles.itemIcon}>
-                            {checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+                            {typeof checked !== "undefined" ? (
+                                checked ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />
+                            ) : (
+                                icon
+                            )}
                         </ListItemIcon>
-                    }
-                    {hasIcon &&
-                        <ListItemIcon className={styles.itemIcon}>
-                            {icon}
-                        </ListItemIcon>
-                    }
-                    <ListItemText className={styles.itemText} primary={name} secondary={description} />
-                    <div key={id + "_border"} className={styles.backgroundBorder} style={style} />
+                    )}
+                    <ListItemText
+                        className={styles.itemText}
+                        primary={name}
+                        secondary={description}
+                        classes={{
+                            primary: styles.primaryText,
+                            secondary: styles.secondaryText
+                        }}
+                    />
+                    {backgroundColor && <div key={id + "_border"} className={styles.backgroundBorder} style={style} />}
                 </MenuItem>
             </MenuWidget>,
-            divider && !isLast && <Divider key={"_" + id + "_"} />
+            divider && !isLast && <Divider key={"_" + id + "_"} className={styles.divider} />
         ];
     });
 
@@ -98,17 +130,17 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         if (!child) {
             return null;
         }
-        const props = {};
+        const childProps = {};
         if (clickEnabled) {
-            props.onClick = handleClick;
+            childProps.onClick = handleClick;
         }
         if (hoverEnabled) {
-            props.onHoverComplete = event => {
+            childProps.onHoverComplete = event => {
                 setHoverRef(event.currentTarget);
                 handleClick(event);
             };
         }
-        const element = cloneElement(child, props);
+        const element = cloneElement(child, childProps);
         return element;
     });
 
@@ -131,3 +163,4 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         </>
     );
 }
+
