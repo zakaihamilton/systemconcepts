@@ -7,13 +7,16 @@ import Link from "@mui/material/Link";
 
 export default function ImageWidget({ className, clickForImage = true, onClick, href, loading, path, width, height, alt }) {
     const [imageLoading, setImageLoading] = useState(false);
+    const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
     const onLoad = () => {
         setImageLoading(false);
+        setLoaded(true);
     };
     const onError = () => {
         setError(true);
         setImageLoading(false);
+        setLoaded(false);
     };
 
     const buttonStyle = { minWidth: width, minHeight: height };
@@ -29,6 +32,7 @@ export default function ImageWidget({ className, clickForImage = true, onClick, 
     if (hasPath !== prevHasPath) {
         setPrevHasPath(hasPath);
         setImageLoading(!!hasPath);
+        setLoaded(false);
     }
 
     const showAlt = (!hasPath || !!error) && (!loading && !imageLoading);
@@ -41,7 +45,7 @@ export default function ImageWidget({ className, clickForImage = true, onClick, 
     return <Link underline="none" href={href} color="initial" style={buttonStyle} className={clsx(styles.root, className, clickable && styles.clickable)} disabled={clickForImage && (!hasPath || !!error)} onClick={clickable ? onClick : undefined}>
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {hasPath && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, loading && styles.loading)} onError={onError} onLoad={onLoad} src={path} alt={alt} />}
+        {hasPath && !error && <img draggable={false} style={imageStyle} className={clsx(styles.img, !loaded && styles.hidden)} onError={onError} onLoad={onLoad} src={path} alt={alt} />}
         {showAlt && <div className={styles.alt}>{alt}</div>}
     </Link>;
 }

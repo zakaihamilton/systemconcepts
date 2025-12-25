@@ -35,10 +35,11 @@
 .img {
     object-fit: fill;
     overflow: hidden;
+    transition: opacity 0.2s ease-in;
 }
 
-.img.loading {
-    display: none;
+.img.hidden {
+    opacity: 0;
 }
 
 .alt {
