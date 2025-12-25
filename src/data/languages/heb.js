@@ -294,6 +294,14 @@ export default {
             "value": "עמוד הבא"
         },
         {
+            "id": "PREVIOUS",
+            "value": "הקודם"
+        },
+        {
+            "id": "NEXT",
+            "value": "הבא"
+        },
+        {
             "id": "PAGE_INDEX",
             "value": "מספר עמוד"
         },

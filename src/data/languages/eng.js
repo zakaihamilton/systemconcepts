@@ -294,6 +294,14 @@ export default {
             "value": "Next Page"
         },
         {
+            "id": "PREVIOUS",
+            "value": "Previous"
+        },
+        {
+            "id": "NEXT",
+            "value": "Next"
+        },
+        {
             "id": "PAGE_INDEX",
             "value": "Page No."
         },

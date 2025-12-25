@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "@util/translations";
-import { useSessions } from "@util/sessions";
+import { useSessions, SessionsStore } from "@util/sessions";
+import { getComparator, stableSort } from "@util/sort";
 import { useDateFormatter } from "@util/locale";
 import Group from "@widgets/Group";
 import { formatDuration } from "@util/string";
@@ -8,12 +9,55 @@ import Summary from "@widgets/Summary";
 import Image from "@widgets/Image";
 import styles from "./Session.module.scss";
 import Button from "@mui/material/Button";
-import { addPath } from "@util/pages";
+import { addPath, replacePath } from "@util/pages";
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+
+registerToolbar("Session");
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
+    const { order, orderBy } = SessionsStore.useState();
     const [sessions, loading] = useSessions([], { filterSessions: false, skipSync: true });
+    const [filteredSessions] = useSessions([], { filterSessions: true, active: false, skipSync: true });
+
+    const sortedFilteredSessions = useMemo(() => {
+        if (!filteredSessions) return [];
+        return stableSort(filteredSessions, getComparator(order, orderBy));
+    }, [filteredSessions, order, orderBy]);
+
+    const currentIndex = sortedFilteredSessions.findIndex(session =>
+        session.group === group &&
+        session.name === name &&
+        session.date === date &&
+        session.year === year);
+    const prevSession = currentIndex > 0 && sortedFilteredSessions[currentIndex - 1];
+    const nextSession = currentIndex !== -1 && currentIndex < sortedFilteredSessions.length - 1 && sortedFilteredSessions[currentIndex + 1];
+
+    const gotoSession = session => {
+        replacePath(`session?group=${session.group}&year=${session.year}&date=${session.date}&name=${encodeURIComponent(session.name)}`);
+    }
+
+    const toolbarItems = [
+        prevSession && {
+            id: "prevSession",
+            name: translations.PREVIOUS,
+            icon: <ArrowBackIcon />,
+            onClick: () => gotoSession(prevSession),
+            location: "header"
+        },
+        nextSession && {
+            id: "nextSession",
+            name: translations.NEXT,
+            icon: <ArrowForwardIcon />,
+            onClick: () => gotoSession(nextSession),
+            location: "header"
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "Session", items: toolbarItems, depends: [prevSession, nextSession, translations] });
     const dateFormatter = useDateFormatter({
         weekday: "long",
         year: "numeric",
