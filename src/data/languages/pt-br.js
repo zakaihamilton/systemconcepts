@@ -766,6 +766,14 @@ export default {
             "value": "Vista Anual"
         },
         {
+            "id": "DAY_VIEW",
+            "value": "Vista Diária"
+        },
+        {
+            "id": "BACK",
+            "value": "Voltar"
+        },
+        {
             "id": "WEEK",
             "value": "Semana"
         },

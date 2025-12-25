@@ -9,7 +9,9 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
+import CalendarViewDayIcon from "@mui/icons-material/CalendarViewDay";
 import YearView from "./Schedule/YearView";
+import DayView from "./Schedule/DayView";
 import { useSearch } from "@components/Search";
 import Message from "@widgets/Message";
 import DataUsageIcon from "@mui/icons-material/DataUsage";
@@ -71,6 +73,17 @@ export default function SchedulePage() {
                 });
             },
             divider: true
+        },
+        {
+            id: "day",
+            name: translations.DAY_VIEW,
+            selected: viewMode,
+            icon: <CalendarViewDayIcon />,
+            onClick: () => {
+                ScheduleStore.update(s => {
+                    s.viewMode = "day";
+                });
+            }
         }
     ].filter(Boolean);
 
@@ -108,6 +121,7 @@ export default function SchedulePage() {
         {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
         {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+        {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
         {!!loading && loadingElement}
     </div>;
 }

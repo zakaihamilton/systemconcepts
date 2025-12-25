@@ -762,6 +762,14 @@ export default {
             "value": "תצוגה שנתית"
         },
         {
+            "id": "DAY_VIEW",
+            "value": "תצוגה יומית"
+        },
+        {
+            "id": "BACK",
+            "value": "חזור"
+        },
+        {
             "id": "WEEK",
             "value": "שבוע"
         },

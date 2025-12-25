@@ -11,11 +11,18 @@ import { addPath, toPath } from "@util/pages";
 import { getSessionTextColor } from "@util/colors";
 import { useTheme } from "@mui/material/styles";
 
-export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store }) {
     const theme = useTheme();
     const style = {
         gridColumn: column,
         gridRow: row
+    };
+    const onDayClick = () => {
+        store.update(s => {
+            s.date = date;
+            s.viewMode = "day";
+            s.lastViewMode = "month";
+        });
     };
     const translations = useTranslations();
     const dayNumber = dateFormatter.format(date);
@@ -30,6 +37,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
             id: item.name,
             name: item.name,
             date: item.date,
+            description: groupName,
             backgroundColor: item.color,
             style: { color: getSessionTextColor(item.color, theme) },
             icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
@@ -45,7 +53,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
     );
     return <div className={className} style={style}>
         <div className={styles.title}>
-            <Avatar className={clsx(styles.day, isToday && styles.today, isMonth && styles.active)}>
+            <Avatar className={clsx(styles.day, isToday && styles.today, isMonth && styles.active)} onClick={onDayClick} style={{ cursor: "pointer" }}>
                 {dayNumber}
             </Avatar>
         </div>

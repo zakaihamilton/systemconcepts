@@ -8,6 +8,8 @@ import Input from "@widgets/Input";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
@@ -17,6 +19,7 @@ registerToolbar("MonthView");
 export default function MonthView({ sessions, date, store }) {
     const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
+    const { lastViewMode } = store.useState();
     const translations = useTranslations();
     const firstDay = getMonthViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
@@ -37,7 +40,7 @@ export default function MonthView({ sessions, date, store }) {
     const numWeeks = 6;
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} />;
+        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} />;
     });
 
     const numDaysInWeek = 7;
@@ -105,7 +108,23 @@ export default function MonthView({ sessions, date, store }) {
         });
     };
 
+    const goBack = () => {
+        if (lastViewMode) {
+            store.update(s => {
+                s.viewMode = lastViewMode;
+                s.lastViewMode = null;
+            });
+        }
+    };
+
     const toolbarItems = [
+        lastViewMode && {
+            id: "back",
+            name: translations.BACK,
+            icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
+            onClick: goBack,
+            location: "header"
+        },
         {
             id: "today",
             name: translations.TODAY,

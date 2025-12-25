@@ -17,8 +17,15 @@ export default function Month({ date, sessions, store }) {
         const dayLabel = dayFormatter.format(dayDate);
         const sessionDate = getDateString(dayDate);
         const hasSession = sessions && sessions.some(s => s.date === sessionDate);
+        const onClick = () => {
+            store.update(s => {
+                s.date = dayDate;
+                s.viewMode = "day";
+                s.lastViewMode = "year";
+            });
+        };
 
-        return <div key={index} className={clsx(styles.day, !isMonth && styles.otherMonth, isToday && styles.today, hasSession && styles.hasSession)}>
+        return <div key={index} className={clsx(styles.day, !isMonth && styles.otherMonth, isToday && styles.today, hasSession && styles.hasSession)} onClick={onClick}>
             {dayLabel}
         </div>;
     });
@@ -27,6 +34,7 @@ export default function Month({ date, sessions, store }) {
         store.update(s => {
             s.date = date;
             s.viewMode = "month";
+            s.lastViewMode = "year";
         });
     };
 

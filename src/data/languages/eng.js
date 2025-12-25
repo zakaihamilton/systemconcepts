@@ -766,6 +766,22 @@ export default {
             "value": "Year View"
         },
         {
+            "id": "DAY_VIEW",
+            "value": "Day View"
+        },
+        {
+            "id": "BACK",
+            "value": "Back"
+        },
+        {
+            "id": "PREVIOUS_DAY",
+            "value": "Previous Day"
+        },
+        {
+            "id": "NEXT_DAY",
+            "value": "Next Day"
+        },
+        {
             "id": "WEEK",
             "value": "Week"
         },

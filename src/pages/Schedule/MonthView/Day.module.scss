@@ -29,6 +29,15 @@
     font-size: 100% !important;
     background-color: var(--main-background) !important;
     color: var(--text-color) !important;
+    transition: all 0.2s ease;
+}
+
+.day:hover {
+    background-color: var(--primary-500) !important;
+    color: white !important;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
 }
 
 .day.today {
