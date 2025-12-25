@@ -1,17 +1,26 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTranslations } from "@util/translations";
-import Form, { FormGroup } from "@widgets/Form";
 import EmailIcon from "@mui/icons-material/Email";
 import Input from "@widgets/Input";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import LinearProgress from "@mui/material/LinearProgress";
+import clsx from "clsx";
 import { goBackPage } from "@util/pages";
 import roles from "@data/roles";
 import { useFetchJSON, fetchJSON } from "@util/fetch";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import RecentActorsIcon from "@mui/icons-material/RecentActors";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useParentPath } from "@util/pages";
+import { MainStore } from "@components/Main";
+import styles from "./User.module.scss";
 
 export default function User({ path = "" }) {
+    const { direction } = MainStore.useState();
     const translations = useTranslations();
     const parentPath = useParentPath();
     const editAccount = parentPath === "#account";
@@ -91,59 +100,108 @@ export default function User({ path = "" }) {
         goBackPage();
     };
 
-    const actions = <>
-        <Button
-            onClick={onSubmit}
-            variant="contained"
-            color="primary"
-            size="large"
-            disabled={!!(isInvalid || inProgress || !data)}
-        >
-            {translations.SAVE}
-        </Button>
-        <Button
-            onClick={onCancel}
-            variant="contained"
-            color="primary"
-            size="large"
-        >
-            {translations.CANCEL}
-        </Button>
-    </>;
+    const getState = (id) => {
+        const value = data && data[id];
+        const setValue = (value) => {
+            setData(prev => ({ ...prev, [id]: value }));
+        };
+        return [value, setValue];
+    };
 
-    return <Form actions={actions} loading={loading} data={data} validate={validate}>
-        <FormGroup record={data} setRecord={setData}>
-            {!editAccount && <Input
-                id="id"
-                label={translations.ID}
-                onValidate={onValidateId}
-                icon={<AccountCircleIcon />}
-            />}
-            <Input
-                id="email"
-                label={translations.EMAIL_ADDRESS}
-                icon={<EmailIcon />}
-                onValidate={onValidateEmail}
-            />
-        </FormGroup>
-        <FormGroup record={data} setRecord={setData}>
-            <Input
-                id="firstName"
-                label={translations.FIRST_NAME}
-                onValidate={onValidateField}
-            />
-            <Input
-                id="lastName"
-                label={translations.LAST_NAME}
-                onValidate={onValidateField}
-            />
-            {!editAccount && <Input
-                id="role"
-                icon={<RecentActorsIcon />}
-                label={translations.ROLE}
-                items={roles}
-                mapping={roleTypeMapping}
-                select={true} />}
-        </FormGroup>
-    </Form>;
+    return (
+        <div className={styles.root}>
+            <div className={styles.card}>
+                {(loading || inProgress) && <LinearProgress className={styles.progress} />}
+                <div className={styles.header}>
+                    <Tooltip title={translations.BACK} arrow>
+                        <IconButton className={clsx(styles.backButton, direction === "rtl" && styles.rtl)} onClick={onCancel}>
+                            <ArrowBackIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Typography component="h1" className={styles.title}>
+                        {translations[editAccount ? "EDIT_ACCOUNT" : "USER"]}
+                    </Typography>
+                </div>
+                {error && <Typography className={styles.error}>
+                    {error}
+                </Typography>}
+                <div className={styles.form}>
+                    <Grid container spacing={2}>
+                        {!editAccount && <Grid size={12}>
+                            <Input
+                                id="id"
+                                state={getState("id")}
+                                label={translations.ID}
+                                onValidate={onValidateId}
+                                validate={validate}
+                                icon={<AccountCircleIcon />}
+                                background={true}
+                            />
+                        </Grid>}
+                        <Grid size={12}>
+                            <Input
+                                id="email"
+                                state={getState("email")}
+                                label={translations.EMAIL_ADDRESS}
+                                icon={<EmailIcon />}
+                                onValidate={onValidateEmail}
+                                validate={validate}
+                                background={true}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <Input
+                                id="firstName"
+                                state={getState("firstName")}
+                                label={translations.FIRST_NAME}
+                                onValidate={onValidateField}
+                                validate={validate}
+                                background={true}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <Input
+                                id="lastName"
+                                state={getState("lastName")}
+                                label={translations.LAST_NAME}
+                                onValidate={onValidateField}
+                                validate={validate}
+                                background={true}
+                            />
+                        </Grid>
+                        {!editAccount && <Grid size={12}>
+                            <Input
+                                id="role"
+                                state={getState("role")}
+                                icon={<RecentActorsIcon />}
+                                label={translations.ROLE}
+                                items={roles}
+                                mapping={roleTypeMapping}
+                                select={true}
+                                background={true}
+                            />
+                        </Grid>}
+                    </Grid>
+                </div>
+                <div className={styles.actions}>
+                    <Button
+                        onClick={onSubmit}
+                        variant="contained"
+                        color="primary"
+                        className={clsx(styles.submit, styles.actionButton)}
+                        disabled={!!(isInvalid || inProgress || !data)}
+                    >
+                        {translations.SAVE}
+                    </Button>
+                    <Button
+                        onClick={onCancel}
+                        variant="contained"
+                        className={clsx(styles.secondaryButton, styles.actionButton)}
+                    >
+                        {translations.CANCEL}
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
 }

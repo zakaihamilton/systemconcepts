@@ -803,7 +803,7 @@ export default {
         },
         {
             "id": "EDIT_ACCOUNT",
-            "value": "עדכון חשבון"
+            "value": "Editar Conta"
         },
         {
             "id": "PLAYING_ERROR",
