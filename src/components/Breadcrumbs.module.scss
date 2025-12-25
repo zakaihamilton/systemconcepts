@@ -2,12 +2,17 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .root.bar {
     background: var(--app-bar-background);
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .root.border {
@@ -18,6 +23,7 @@
     display: flex;
     align-items: center;
     flex: 1;
+    height: 3.5rem;
 }
 
 .breadcrumbs {
@@ -26,51 +32,87 @@
     flex: 1;
     color: var(--text-color);
     overflow: hidden;
-}
-
-.divider {
-    margin-left: 0.3em !important;
-    margin-right: 0.3em !important;
+    gap: 0.25rem;
+    padding: 0 0.5rem;
 }
 
 .item {
     display: flex;
     align-items: center;
-    overflow: hidden;
-    height: 3.70em;
-    min-width: 3em;
-    max-width: 30em;
-    user-select: none;
+    height: 2.25rem;
+    padding: 0 0.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color);
+    text-decoration: none !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    cursor: pointer;
+    opacity: 0.75;
+
+    &:hover {
+        background-color: var(--hover-background);
+        opacity: 1;
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+}
+
+.itemContent {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.item:last-child {
+    opacity: 1;
+    font-weight: 600;
+    cursor: default;
+
+    &:hover {
+        background-color: transparent;
+    }
 }
 
 .name {
-    color: var(--text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: center;
 }
 
 .icon {
-    padding: 12px;
-    margin-top: 0.3em;
-    font-size: 1.7rem;
-
-    [dir=ltr] & {
-        margin-right: 0.1em;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.35rem;
 
     [dir=rtl] & {
-        margin-left: 0.1em;
+        margin-right: 0;
+        margin-left: 0.35rem;
+    }
+
+    svg {
+        font-size: 1.25rem;
     }
 }
 
 .iconButton {
-    [dir=ltr] & {
-        margin-right: 0.1em;
-    }
+    padding: 6px !important;
+    color: inherit !important;
+}
 
-    [dir=rtl] & {
-        margin-left: 0.1em;
+.separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    opacity: 0.3;
+    pointer-events: none;
+
+    svg {
+        font-size: 1.1rem;
     }
 }

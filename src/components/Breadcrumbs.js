@@ -20,63 +20,88 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
+
     const showLabel =
         deviceType === "phone" && index && (count <= 2 || index === count - 1) ||
         deviceType === "tablet" && index && (count <= 3 || index === count - 1) ||
         deviceType === "desktop" && index && (count <= 6 || index === count - 1);
+
     const collapse = deviceType === "phone" && count >= 6 ||
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
+
     const title = !showLabel ? (label || name) : tooltip || label || name;
-    const gotoItem = () => {
+
+    const gotoItem = (event) => {
+        if (isLast && !navigateLast) {
+            event.preventDefault();
+            return;
+        }
         setHash(href);
     };
+
     if (collapse && index > 1 && index < count - 2) {
         if (index === count - 3) {
             const path = items.slice(2, -2).map(item => item.label || item.name).join("/");
             return (
-                <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
-                    <IconButton className={styles.iconButton} size="large">
-                        <Tooltip arrow title={path}>
-                            <MoreHorizIcon />
-                        </Tooltip>
-                    </IconButton>
-                    <SeparatorIcon fontSize="small" />
-                </Link>
+                <>
+                    <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
+                        <IconButton className={styles.iconButton} size="small">
+                            <Tooltip arrow title={path}>
+                                <MoreHorizIcon />
+                            </Tooltip>
+                        </IconButton>
+                    </Link>
+                    <div className={styles.separator}>
+                        <SeparatorIcon fontSize="small" />
+                    </div>
+                </>
             );
         }
         return null;
     }
+
     if (hideRoot && !index) {
         return null;
     }
-    return <>
-        {isLast && !navigateLast && <div className={styles.item}>
-            <Tooltip arrow title={title}>
+
+    const content = (
+        <>
+            {icon && (
                 <div className={styles.icon}>
                     {icon}
                 </div>
-            </Tooltip>
-            <Tooltip arrow title={label || name}>
+            )}
+            {(showLabel || isLast) && (
                 <div className={styles.name}>
                     {label || name}
                 </div>
-            </Tooltip>
-        </div>}
-        {(!isLast || navigateLast) && <Link className={styles.item} color="inherit" href={href} onClick={gotoItem}>
-            {icon && <IconButton className={styles.iconButton} size="large">
+            )}
+        </>
+    );
+
+    return (
+        <>
+            <Link
+                className={clsx(styles.item, isLast && !navigateLast && styles.last)}
+                color="inherit"
+                href={href}
+                onClick={gotoItem}
+                underline="none"
+            >
                 <Tooltip arrow title={title}>
-                    {icon}
+                    <div className={styles.itemContent}>
+                        {content}
+                    </div>
                 </Tooltip>
-            </IconButton>}
-            {!!showLabel && <Tooltip arrow title={label || name}>
-                <div className={styles.name}>
-                    {label || name}
+            </Link>
+            {!isLast && (
+                <div className={styles.separator}>
+                    <SeparatorIcon fontSize="small" />
                 </div>
-            </Tooltip>}
-        </Link>}
-        {!isLast && <SeparatorIcon fontSize="small" />}
-    </>;
+            )}
+        </>
+    );
 }
 
 export default function BreadcrumbsWidget({ className, items, border, bar, hideRoot, navigateLast }) {
@@ -84,6 +109,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
     const isTablet = deviceType === "tablet";
+
     let breadcrumbItems = (items || []).filter(({ breadcrumbs }) => typeof breadcrumbs === "undefined" || breadcrumbs);
     breadcrumbItems = breadcrumbItems.map((item, index, list) => {
         const { id, url, ...props } = item;
@@ -104,17 +130,20 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
             <div className={styles.row}>
                 <NoSsr>
                     {!!bar && <MenuIcon />}
-                    {<Divider orientation="vertical" />}
+                    {<Divider orientation="vertical" flexItem style={{ margin: "0 0.5rem" }} />}
                     <div className={styles.breadcrumbs}>
                         {breadcrumbItems}
                     </div>
-                    {!!bar && <>
-                        <Toolbar collapsable={true} location={isPhone || isTablet ? ["header", undefined] : undefined} />
-                        {isDesktop && <Divider orientation="vertical" />}
-                        {isDesktop && <Toolbar collapsable={true} location="header" />}
-                    </>}
+                    {!!bar && (
+                        <>
+                            <Toolbar collapsable={true} location={isPhone || isTablet ? ["header", undefined] : undefined} />
+                            {isDesktop && <Divider orientation="vertical" flexItem style={{ margin: "0 0.5rem" }} />}
+                            {isDesktop && <Toolbar collapsable={true} location="header" />}
+                        </>
+                    )}
                 </NoSsr>
             </div>
         </div>
     );
 }
+
