@@ -35,7 +35,7 @@ export default function Groups() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
 
-    const className = useStyles(styles, {
+    const animatedClassName = useStyles(styles, {
         animated: busy
     });
 
@@ -50,14 +50,14 @@ export default function Groups() {
                 <br />
                 {!!duration && formattedDuration}
             </span>,
-            icon: <UpdateIcon className={className} />,
+            icon: <UpdateIcon className={animatedClassName} />,
             location: "header",
             menu: true
         },
         !busy && syncEnabled && {
             id: "sync_sessions",
             name: translations.SYNC_SESSIONS,
-            icon: <UpdateIcon className={className} />,
+            icon: <UpdateIcon className={animatedClassName} />,
             onClick: updateSessions,
             location: "header",
             menu: true
@@ -65,7 +65,7 @@ export default function Groups() {
         !busy && syncEnabled && {
             id: "sync_all_sessions",
             name: translations.SYNC_ALL_SESSIONS,
-            icon: <UpdateIcon className={className} />,
+            icon: <UpdateIcon className={animatedClassName} />,
             onClick: updateAllSessions,
             location: "header",
             menu: true
@@ -73,7 +73,7 @@ export default function Groups() {
         {
             id: "showDisabled",
             name: showDisabled ? translations.HIDE_DISABLED_GROUPS : translations.SHOW_DISABLED_GROUPS,
-            icon: showDisabled ? <VisibilityOffIcon className={className} /> : <VisibilityIcon className={className} />,
+            icon: showDisabled ? <VisibilityOffIcon /> : <VisibilityIcon />,
             onClick: () => GroupsStore.update(s => { s.showDisabled = !s.showDisabled; }),
             location: "header",
             menu: true

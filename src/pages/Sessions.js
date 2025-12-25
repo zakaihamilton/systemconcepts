@@ -28,11 +28,11 @@ export default function SessionsPage() {
     const isPhone = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
-    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, showFilterDialog } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order, showFilterDialog } = SessionsStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset"]);
 
     // Memoize dependencies to prevent unnecessary resets
-    const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter], [groupFilter, typeFilter, yearFilter]);
+    const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode]);
     const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode], [groupFilter, typeFilter, yearFilter, translations, viewMode]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;

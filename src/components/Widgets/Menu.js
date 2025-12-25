@@ -53,6 +53,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         setHoverRef(null);
     };
 
+    const hasIcon = (items || []).some(item => item.icon);
     const menuItems = open && (items || []).flatMap((item, index, list) => {
         const isLast = list.length - 1 === index;
         const { checked, divider, name, target, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
@@ -80,7 +81,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                             {checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
                         </ListItemIcon>
                     }
-                    {icon &&
+                    {hasIcon &&
                         <ListItemIcon className={styles.itemIcon}>
                             {icon}
                         </ListItemIcon>
