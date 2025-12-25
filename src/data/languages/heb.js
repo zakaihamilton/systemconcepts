@@ -758,6 +758,10 @@ export default {
             "value": "מבט חודשי"
         },
         {
+            "id": "YEAR_VIEW",
+            "value": "תצוגה שנתית"
+        },
+        {
             "id": "WEEK",
             "value": "שבוע"
         },

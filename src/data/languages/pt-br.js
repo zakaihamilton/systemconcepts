@@ -762,6 +762,10 @@ export default {
             "value": "Vista Mensal"
         },
         {
+            "id": "YEAR_VIEW",
+            "value": "Vista Anual"
+        },
+        {
             "id": "WEEK",
             "value": "Semana"
         },

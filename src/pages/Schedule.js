@@ -8,6 +8,8 @@ import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
+import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
+import YearView from "./Schedule/YearView";
 import { useSearch } from "@components/Search";
 import Message from "@widgets/Message";
 import DataUsageIcon from "@mui/icons-material/DataUsage";
@@ -36,6 +38,17 @@ export default function SchedulePage() {
     useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode"]);
 
     const toolbarItems = [
+        {
+            id: "year",
+            name: translations.YEAR_VIEW,
+            selected: viewMode,
+            icon: <CalendarViewMonthIcon />,
+            onClick: () => {
+                ScheduleStore.update(s => {
+                    s.viewMode = "year";
+                });
+            }
+        },
         {
             id: "month",
             name: translations.MONTH_VIEW,
@@ -92,6 +105,7 @@ export default function SchedulePage() {
     return <div className={styles.root}>
         {statusBar}
         {!!showFilterDialog && <FilterBar hideYears={true} />}
+        {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
         {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
         {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
         {!!loading && loadingElement}

@@ -762,6 +762,10 @@ export default {
             "value": "Month View"
         },
         {
+            "id": "YEAR_VIEW",
+            "value": "Year View"
+        },
+        {
             "id": "WEEK",
             "value": "Week"
         },

@@ -1,0 +1,64 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 0.75em;
+    cursor: pointer;
+    font-size: 1em;
+    color: var(--text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.title:hover {
+    color: var(--primary-500);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    justify-items: center;
+}
+
+.day {
+    font-size: 0.75em;
+    text-align: center;
+    border-radius: 50%;
+    color: var(--text-color);
+    cursor: default;
+    width: 2em;
+    height: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.otherMonth {
+    color: var(--neutral-300);
+    opacity: 0.3;
+}
+
+.today {
+    background-color: var(--primary-500);
+    color: white !important;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hasSession:not(.today) {
+    background-color: var(--main-background-alternative);
+    color: var(--primary-600);
+    font-weight: bold;
+    box-shadow: inset 0 0 0 1px var(--primary-200);
+}
