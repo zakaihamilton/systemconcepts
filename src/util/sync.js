@@ -1,17 +1,12 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { Store } from "pullstate";
 import { fetchJSON } from "@util/fetch";
-import { useLocalStorage } from "@util/store";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { makePath } from "@util/path";
 import * as bundle from "./bundle";
 import { usePageVisibility } from "@util/hooks";
-
-export const SyncStore = new Store({
-    lastUpdated: 0
-});
 
 export const SyncActiveStore = new Store({
     active: 0,
@@ -54,13 +49,12 @@ export function useSyncFeature() {
     const [changed, setChanged] = useState(false);
     const online = useOnline();
     const [error, setError] = useState(null);
-    const { lastUpdated, _loaded } = SyncStore.useState();
-    useLocalStorage("sync", SyncStore);
+
     const visible = usePageVisibility();
     const { active, busy, progress } = SyncActiveStore.useState();
     const currentBundle = SyncActiveStore.useState(s => s.currentBundle);
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-    const updateSync = useCallback(async (pollSync, lastUpdated) => {
+    const updateSync = useCallback(async (pollSync) => {
         if (startRef.current || !online) {
             return;
         }
@@ -199,9 +193,6 @@ export function useSyncFeature() {
                 await Promise.all(bundles.map(b => limit(() => runTask(b))));
             }
             if (updateCounter > 0) {
-                SyncStore.update(s => {
-                    s.lastUpdated = currentTime;
-                });
                 SyncActiveStore.update(s => {
                     s.counter++;
                     s.lastSynced = currentTime;
@@ -226,16 +217,16 @@ export function useSyncFeature() {
     }, [online]);
 
     const syncNow = useCallback(pollSync => {
-        updateSync(pollSync, lastUpdated);
-    }, [lastUpdated, updateSync]);
+        updateSync(pollSync);
+    }, [updateSync]);
     useEffect(() => {
-        if (online && _loaded && isSignedIn) {
+        if (online && isSignedIn) {
             const timerHandle = setTimeout(() => {
                 syncNow(true);
             }, 1000);
             return () => clearTimeout(timerHandle);
         }
-    }, [online, _loaded, isSignedIn, visible, syncNow]);
+    }, [online, isSignedIn, visible, syncNow]);
 
     // Update duration continuously while syncing
     useEffect(() => {
@@ -252,7 +243,7 @@ export function useSyncFeature() {
     const percentage = progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0;
 
     return {
-        sync: online && _loaded && syncNow,
+        sync: online && syncNow,
         busy,
         error,
         active,

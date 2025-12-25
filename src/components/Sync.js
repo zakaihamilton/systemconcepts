@@ -16,23 +16,16 @@ export const SyncContext = createContext();
 export default function Sync({ children }) {
     const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
-    const { sync, busy, error, active, duration, changed, percentage, progress, currentBundle } = useSyncFeature();
+    const { sync, busy, error, active, duration, changed, percentage, currentBundle } = useSyncFeature();
     const className = useStyles(styles, {
         animated: busy
     });
 
     const formattedDuration = formatDuration(duration);
 
-    // Format bundle name for display
-    const bundleName = currentBundle ? (
-        currentBundle.includes('shared') ? 'Shared' : 'Personal'
-    ) : '';
-
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!error && (busy ? translations.SYNCING : translations.SYNC)}
-        {busy && bundleName && ` (${bundleName})`}
-        {busy && progress.total > 0 && percentage > 0 && percentage < 100 && ` ${percentage}%`}
         <br />
         {!!duration && formattedDuration}
     </span>;
@@ -55,7 +48,7 @@ export default function Sync({ children }) {
 
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, active, duration, error, isDesktop, percentage, progress, currentBundle, bundleName] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, active, duration, error, isDesktop, percentage, currentBundle] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, error };
