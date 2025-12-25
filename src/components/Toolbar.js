@@ -106,12 +106,12 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
 
     return (
         <div className={clsx(styles.toolbar, toolbarVisible && styles.visible, className)}>
-            {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+            {!!dividerBefore && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
             {toolbarItems.map((item, idx) => (<Item key={item.id} item={item} idx={idx} count={toolbarItems.length} />))}
             {!!menuItems.length && <>
-                {menuItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+                {!!toolbarItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
                 <Menu items={menuItems}>
-                    <IconButton size="large">
+                    <IconButton className={styles.menuButton} size="small">
                         <Tooltip arrow title={translations.MENU}>
                             <MoreVertIcon />
                         </Tooltip>
@@ -119,7 +119,8 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
                 </Menu>
             </>
             }
-            {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" />}
+            {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
         </div>
     );
 }
+

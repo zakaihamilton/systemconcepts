@@ -9,32 +9,42 @@ import { Divider } from "@mui/material";
 import clsx from "clsx";
 
 export default function ToolbarItem({ item, idx, count }) {
-    const className = useStyles(styles, {
+    const classes = useStyles(styles, {
         item: true,
-        selected: item.selected === item.id,
+        selected: item.selected === item.id || item.selected === true,
         active: item.active
     });
     const showDivider = !!item.divider && idx !== count - 1;
+
     return <>
         {item.element}
         {!item.element &&
             <Menu items={item.items} selected={item.selected} onClick={item.onClick ? item.onClick : undefined}>
                 {!!item.label ?
-                    (<Label icon={item.icon} name={item.name} noBorder={true} />) :
+                    (<Label
+                        className={classes}
+                        icon={item.icon}
+                        name={item.name}
+                        noBorder={true}
+                    />) :
                     (<IconButton
-                    component={Link}
-                    underline="none"
-                    color="inherit"
-                    href={item.target}
-                    className={className}
-                    disabled={item.disabled}
-                    size="large">
+                        component={item.target ? Link : "button"}
+                        underline="none"
+                        color="inherit"
+                        href={item.target}
+                        className={classes}
+                        disabled={item.disabled}
+                        size="small"
+                        id={item.id}
+                    >
                         <Tooltip arrow title={item.name}>
-                            {item.icon}
+                            <div className={styles.iconWrapper}>
+                                {item.icon}
+                            </div>
                         </Tooltip>
                     </IconButton>)}
             </Menu>
         }
-        <Divider classes={{ root: clsx(styles.divider, !showDivider && styles.hidden) }} orientation="vertical" />
+        <Divider classes={{ root: clsx(styles.divider, !showDivider && styles.hidden) }} orientation="vertical" flexItem />
     </>;
 }
