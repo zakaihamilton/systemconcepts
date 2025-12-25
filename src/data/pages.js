@@ -183,6 +183,7 @@ export default [
     },
     {
         apps: true,
+        sidebar: true,
         id: "sessions",
         name: "SESSIONS",
         Icon: VideoLibraryIcon,
@@ -207,6 +208,7 @@ export default [
     },
     {
         apps: true,
+        sidebar: true,
         id: "schedule",
         name: "SCHEDULE",
         Icon: EventIcon,

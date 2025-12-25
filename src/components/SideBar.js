@@ -45,7 +45,18 @@ export default function SideBar() {
         });
     };
 
-    const items = pages.filter(page => page.sidebar && !page.category).map(item => {
+    const sidebarPages = pages.filter(page => page.sidebar && !page.category);
+
+    const apps = sidebarPages.filter(page => page.apps);
+    const other = sidebarPages.filter(page => !page.apps);
+
+    const items = [
+        ...apps.map((item, index) => ({
+            ...item,
+            divider: index === apps.length - 1 && other.length > 0
+        })),
+        ...other
+    ].map(item => {
         let target = item.path || item.id;
         if (item.id === "account") {
             const currentPath = hash && (hash.startsWith("#") ? hash.substring(1) : hash);
@@ -55,6 +66,8 @@ export default function SideBar() {
         }
         return { ...item, target };
     });
+
+
     if (bookmarks && bookmarks.length) {
         items.push({
             id: "bookmarks",
@@ -68,7 +81,6 @@ export default function SideBar() {
             divider: true
         });
     }
-
     if (isMobile) {
         return <Drawer
             anchor={direction === "rtl" ? "right" : "left"}
