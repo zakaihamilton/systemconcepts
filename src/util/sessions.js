@@ -115,6 +115,9 @@ export function useSessions(depends = [], options = {}) {
                             id = resolutionMatch[1];
                         }
                     }
+                    if (isSubtitleFile(file.name)) {
+                        id = id.replace(/\.[a-z]{2,3}$/, "");
+                    }
                     if (!sessionFilesMap[id]) {
                         sessionFilesMap[id] = [];
                     }
