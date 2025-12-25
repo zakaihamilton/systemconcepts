@@ -37,7 +37,7 @@ export function useSessions(depends = [], options = {}) {
     const [syncCounter, syncing] = useSync({ ...options, active: !skipSync });
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
+    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata, showFilterDialog } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
@@ -319,12 +319,12 @@ export function useSessions(depends = [], options = {}) {
                     s.showFilterDialog = !s.showFilterDialog;
                 });
             },
-            active: typeFilter?.length || yearFilter?.length || groupFilter?.length,
+            active: showFilterDialog,
             divider: true,
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sessions", items: toolbarItems, visible: showToolbar !== undefined ? showToolbar : filterSessions, depends: [translations, groupsItems, groupFilter, typeFilter, yearFilter] });
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: showToolbar !== undefined ? showToolbar : filterSessions, depends: [translations, groupsItems, showFilterDialog] });
 
     const filtered = useMemo(() => {
         if (!sessions) return [];

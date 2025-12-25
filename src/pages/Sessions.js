@@ -37,14 +37,16 @@ export default function SessionsPage() {
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };
-    const target = item => {
-        return "#" + toPath("sessions", itemPath(item));
-    };
-    const gotoItem = item => {
-        addPath(itemPath(item));
-    };
 
-    const columns = [
+    const target = useCallback(item => {
+        return "#" + toPath("sessions", itemPath(item));
+    }, []);
+
+    const gotoItem = useCallback(item => {
+        addPath(itemPath(item));
+    }, []);
+
+    const columns = useMemo(() => [
         {
             id: "thumbnailWidget",
             title: translations.THUMBNAIL,
@@ -144,7 +146,7 @@ export default function SessionsPage() {
                 }
             }
         }
-    ].filter(Boolean);
+    ].filter(Boolean), [translations, isPhone, orderBy, groupFilter]);
 
     const handleIconClick = useCallback((itemType) => {
         SessionsStore.update(s => {
@@ -230,7 +232,7 @@ export default function SessionsPage() {
         };
     }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick]);
 
-    const filter = item => {
+    const filter = useCallback(item => {
         let { group, type, year } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
@@ -240,9 +242,32 @@ export default function SessionsPage() {
             show = show && yearFilter?.includes(year);
         }
         return show;
-    };
+    }, [groupFilter, typeFilter, yearFilter]);
 
-    const statusBar = <StatusBar store={SessionsStore} />;
+    const getSeparator = useCallback((item, prevItem, orderBy) => {
+        if (orderBy === "date") {
+            return item.date !== prevItem.date;
+        }
+        if (orderBy === "group") {
+            return item.group !== prevItem.group;
+        }
+        if (orderBy === "typeOrder") {
+            return item.type !== prevItem.type;
+        }
+        return false;
+    }, []);
+
+    const viewModes = useMemo(() => ({
+        list: {
+            className: isPhone ? styles.listPhoneItem : styles.listItem
+        },
+        table: null,
+        grid: {
+            className: styles.gridItem
+        }
+    }), [isPhone]);
+
+    const statusBar = useMemo(() => <StatusBar store={SessionsStore} />, []);
 
     useEffect(() => {
         SessionsStore.update(s => {
@@ -271,29 +296,10 @@ export default function SessionsPage() {
             statusBar={statusBar}
             mapper={mapper}
             filter={filter}
-            viewModes={{
-                list: {
-                    className: isPhone ? styles.listPhoneItem : styles.listItem
-                },
-                table: null,
-                grid: {
-                    className: styles.gridItem
-                }
-            }}
+            viewModes={viewModes}
             depends={tableDeps}
             resetScrollDeps={resetScrollDeps}
-            getSeparator={(item, prevItem, orderBy) => {
-                if (orderBy === "date") {
-                    return item.date !== prevItem.date;
-                }
-                if (orderBy === "group") {
-                    return item.group !== prevItem.group;
-                }
-                if (orderBy === "typeOrder") {
-                    return item.type !== prevItem.type;
-                }
-                return false;
-            }}
+            getSeparator={getSeparator}
         />
     </>;
 }

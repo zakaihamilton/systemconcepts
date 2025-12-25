@@ -101,7 +101,7 @@ export default function SessionPage({ group, year, date, name }) {
     const hasImage = !!thumbnail;
 
     return <div className={styles.root}>
-        <div className={styles.card}>
+        <div className={styles.card} style={{ "--group-color": session.color }}>
             <div className={styles.header}>
                 <div className={styles.title}>{name}</div>
                 <div className={styles.metadata}>
