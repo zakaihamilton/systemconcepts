@@ -50,16 +50,6 @@ function getComparator(order, orderBy) {
         : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort(array, comparator) {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-        const order = comparator(a[0], b[0]);
-        if (order !== 0) return order;
-        return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-}
-
 export default function TableWidget(props) {
     let {
         name,
@@ -316,6 +306,7 @@ export default function TableWidget(props) {
         }
 
         if (search) {
+            const lowerSearch = search.toLowerCase();
             const keys = visibleColumns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
                 if (typeof item.searchable === "string") {
                     return item.searchable;
@@ -328,7 +319,7 @@ export default function TableWidget(props) {
             items = items.filter(item => {
                 for (const key of keys) {
                     if (typeof item[key] === "string") {
-                        const match = item[key].toLowerCase().includes(search.toLowerCase());
+                        const match = item[key].toLowerCase().includes(lowerSearch);
                         if (match) {
                             return true;
                         }
@@ -338,7 +329,13 @@ export default function TableWidget(props) {
             });
         }
 
-        items = stableSort(items || [], getComparator(order, orderBy));
+        items = items || [];
+        // Ensure items is a copy before sorting if it hasn't been modified yet
+        if (items === data) {
+            items = [...items];
+        }
+        items.sort(getComparator(order, orderBy));
+
         setEmpty(data && (!data.length || !items.length));
         return items;
     }, [search, data, order, orderBy, visibleColumns, filter, mapper, ...depends]);
