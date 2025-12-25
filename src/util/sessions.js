@@ -33,8 +33,8 @@ export const SessionsStore = new Store({
 });
 
 export function useSessions(depends = [], options = {}) {
-    const { filterSessions = true } = options;
-    const [syncCounter, syncing] = useSync(options);
+    const { filterSessions = true, skipSync = false } = options;
+    const [syncCounter, syncing] = useSync({ ...options, active: !skipSync });
     const translations = useTranslations();
     const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
     const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata } = SessionsStore.useState();
@@ -264,11 +264,19 @@ export function useSessions(depends = [], options = {}) {
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
             const groupsChanged = JSON.stringify(groupMetadata) !== groupsMetadata;
-            const syncChanged = syncCounter !== savedSyncCounter;
             const noSessions = !sessions || !sessions.length;
 
-            if (noSessions || syncChanged || groupsChanged) {
+            // Only update if we have no sessions OR if groups metadata actually changed
+            // Don't update just because sync counter changed - that causes unnecessary rebuilds
+            if (noSessions || groupsChanged) {
                 updateSessions(groupMetadata, syncCounter);
+            }
+            // If sync counter changed but we have sessions and groups didn't change,
+            // just update the saved counter without rebuilding
+            else if (syncCounter !== savedSyncCounter) {
+                SessionsStore.update(s => {
+                    s.syncCounter = syncCounter;
+                });
             }
         }
     }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata, sessions]);
@@ -333,6 +341,8 @@ export function useSessions(depends = [], options = {}) {
 
     const items = filterSessions ? filtered : sessions;
 
-    const isLoading = busy || loading || (syncing && (!sessions || !sessions.length));
+    // Only show loading if we don't have sessions yet
+    // Don't show loading when navigating back if we already have data
+    const isLoading = (busy || loading || syncing) && (!sessions || !sessions.length);
     return [items, isLoading];
 }

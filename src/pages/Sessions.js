@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useMemo } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { addPath, toPath } from "@util/pages";
@@ -29,7 +29,11 @@ export default function SessionsPage() {
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
     const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, showFilterDialog } = SessionsStore.useState();
-    useLocalStorage("SessionsStore", SessionsStore, ["viewMode"]);
+    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset"]);
+
+    // Memoize dependencies to prevent unnecessary resets
+    const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter], [groupFilter, typeFilter, yearFilter]);
+    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode], [groupFilter, typeFilter, yearFilter, translations, viewMode]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };
@@ -276,9 +280,9 @@ export default function SessionsPage() {
                     className: styles.gridItem
                 }
             }}
-            depends={[groupFilter, typeFilter, yearFilter, translations, viewMode]}
-            resetScrollDeps={[groupFilter, typeFilter, yearFilter]}
-            getSeparator={(item, prevItem, orderBy, viewMode) => {
+            depends={tableDeps}
+            resetScrollDeps={resetScrollDeps}
+            getSeparator={(item, prevItem, orderBy) => {
                 if (orderBy === "date") {
                     return item.date !== prevItem.date;
                 }

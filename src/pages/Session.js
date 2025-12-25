@@ -13,7 +13,7 @@ import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 
 export default function SessionPage({ group, year, date, name }) {
     const translations = useTranslations();
-    const [sessions, loading] = useSessions([], { filterSessions: false });
+    const [sessions, loading] = useSessions([], { filterSessions: false, skipSync: true });
     const dateFormatter = useDateFormatter({
         weekday: "long",
         year: "numeric",

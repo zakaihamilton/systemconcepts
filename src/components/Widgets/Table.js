@@ -36,6 +36,9 @@ import ListColumns from "./Table/ListColumns";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
+// Stable empty array to prevent unnecessary re-renders
+const EMPTY_ARRAY = [];
+
 registerToolbar("Table", 100);
 
 function descendingComparator(a, b, orderBy) {
@@ -87,7 +90,7 @@ export default function TableWidget(props) {
         size,
         showSort = true,
         viewModes = { table: null },
-        resetScrollDeps = [],
+        resetScrollDeps = EMPTY_ARRAY,
         getSeparator,
         ...otherProps
     } = props;
@@ -100,42 +103,65 @@ export default function TableWidget(props) {
     const defaultSort = firstColumn && (firstColumn.sortable || firstColumn.id);
     const { itemsPerPage = 100, order = "desc", offset = 0, orderBy = defaultSort, viewMode = "table" } = store.useState();
     const { scrollOffset = 0 } = store.useState(s => ({ scrollOffset: s.scrollOffset }));
-    const scrollOffsetRef = React.useRef(scrollOffset);
     const listRef = React.useRef();
     const gridRef = React.useRef();
+    const hasRestoredScrollRef = React.useRef(false);
+    const lastResetDepsRef = React.useRef(resetScrollDeps);
 
+    // Handle scroll position restoration after component mounts or data loads
     useEffect(() => {
-        const { current: offset } = scrollOffsetRef;
-        if (offset !== scrollOffset) {
-            scrollOffsetRef.current = scrollOffset;
+        if (!loading && scrollOffset > 0 && !hasRestoredScrollRef.current) {
+            // Restore scroll position after a brief delay to ensure DOM is ready
+            const timer = setTimeout(() => {
+                if (listRef.current) {
+                    listRef.current.scrollTo(scrollOffset);
+                }
+                if (gridRef.current) {
+                    gridRef.current.scrollTo({ scrollTop: scrollOffset });
+                }
+                hasRestoredScrollRef.current = true;
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    }, [scrollOffset]);
+    }, [loading, scrollOffset]);
 
+    // Reset scroll position when filters change
     useEffect(() => {
-        if (listRef.current) {
-            listRef.current.scrollTo(0);
-            scrollOffsetRef.current = 0;
-        }
-        if (gridRef.current) {
-            gridRef.current.scrollTo({ scrollTop: 0 });
-            scrollOffsetRef.current = 0;
+        // Check if resetScrollDeps actually changed (deep comparison)
+        const depsChanged = JSON.stringify(lastResetDepsRef.current) !== JSON.stringify(resetScrollDeps);
+        lastResetDepsRef.current = resetScrollDeps;
+
+        if (depsChanged && resetScrollDeps.length > 0) {
+            // Reset scroll position
+            if (listRef.current) {
+                listRef.current.scrollTo(0);
+            }
+            if (gridRef.current) {
+                gridRef.current.scrollTo({ scrollTop: 0 });
+            }
+            // Update store
+            store.update(s => {
+                s.scrollOffset = 0;
+            });
+            hasRestoredScrollRef.current = true; // Prevent restoration after reset
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [...resetScrollDeps]);
 
-    const updateScrollOffset = useCallback(() => {
-        const { current: offset } = scrollOffsetRef;
-        if (offset !== scrollOffset) {
-            store.update(s => {
-                s.scrollOffset = offset;
-            });
-        }
-    }, [store, scrollOffset]);
-    useEffect(() => {
-        return () => {
-            updateScrollOffset();
+    // Save scroll position on user scroll (debounced)
+    const saveScrollPosition = React.useCallback((offset) => {
+        store.update(s => {
+            s.scrollOffset = offset;
+        });
+    }, [store]);
+
+    const debouncedSaveScroll = React.useMemo(() => {
+        let timeoutId;
+        return (offset) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => saveScrollPosition(offset), 300);
         };
-    }, [updateScrollOffset]);
+    }, [saveScrollPosition]);
     const pageSize = useContext(ContentSize);
     const search = useSearch(name, () => {
         store.update(s => {
@@ -426,7 +452,7 @@ export default function TableWidget(props) {
                 width={size.width}
                 initialScrollOffset={scrollOffset}
                 onScroll={({ scrollOffset }) => {
-                    scrollOffsetRef.current = scrollOffset;
+                    debouncedSaveScroll(scrollOffset);
                 }}
                 itemData={itemData}
             >
@@ -527,7 +553,7 @@ export default function TableWidget(props) {
                 width={size.width}
                 initialScrollTop={scrollOffset}
                 onScroll={({ scrollTop }) => {
-                    scrollOffsetRef.current = scrollTop;
+                    debouncedSaveScroll(scrollTop);
                 }}
                 itemData={itemData}
             >
