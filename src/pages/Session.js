@@ -12,10 +12,12 @@ import { addPath, replacePath } from "@util/pages";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useDeviceType } from "@util/styles";
 
 registerToolbar("Session");
 
 export default function SessionPage({ group, year, date, name }) {
+    const isMobile = useDeviceType() !== "desktop";
     const translations = useTranslations();
     const { order, orderBy } = SessionsStore.useState();
     const [sessions, loading] = useSessions([], { filterSessions: false, skipSync: true });
@@ -63,7 +65,7 @@ export default function SessionPage({ group, year, date, name }) {
     const dateFormatter = useDateFormatter({
         weekday: "long",
         year: "numeric",
-        month: "long",
+        month: isMobile ? "short" : "long",
         day: "numeric"
     });
 

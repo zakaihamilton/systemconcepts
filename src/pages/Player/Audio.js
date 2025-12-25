@@ -6,8 +6,10 @@ import styles from "./Audio.module.scss";
 import Group from "@components/Widgets/Group";
 import { useDateFormatter } from "@util/locale";
 import { formatDuration } from "@util/string";
+import { useDeviceType } from "@util/styles";
 
 export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, ...props }) {
+    const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -34,7 +36,7 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
     const dateFormatter = useDateFormatter({
         weekday: "long",
         year: "numeric",
-        month: "long",
+        month: isMobile ? "short" : "long",
         day: "numeric"
     });
 
@@ -66,6 +68,7 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
         {playerRef && <Controls
             playerRef={playerRef}
             color={color}
+            noDuration={true}
             metadataPath={metadataPath}
             path={path}
             show={show}

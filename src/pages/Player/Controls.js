@@ -18,7 +18,7 @@ import { PlayerStore } from "../Player";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadataPath, zIndex, color }) {
+export default function Controls({ show, path, playerRef, metadataPath, zIndex, color, noDuration }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
 
@@ -107,7 +107,9 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
     const audioPos = isNaN(currentTime) ? 0 : currentTime;
     let progressText = formatDuration(audioPos * 1000);
     if (!isNaN(playerRef.duration)) {
-        progressText += " / " + formatDuration(playerRef.duration * 1000);
+        if (!noDuration) {
+            progressText += " / " + formatDuration(playerRef.duration * 1000);
+        }
         progressText += " ( " + translations.TIME_LEFT + " " + formatDuration((playerRef.duration - audioPos) * 1000) + " )";
     }
     const progressPosition = left + "%";
