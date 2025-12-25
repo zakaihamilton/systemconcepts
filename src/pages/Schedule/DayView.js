@@ -97,12 +97,13 @@ export default function DayView({ sessions, date, store }) {
     const goYear = () => store.update(s => { s.viewMode = "year"; s.lastViewMode = "day"; });
 
     const toolbarItems = [
-        lastViewMode && {
+        {
             id: "back",
             name: translations.BACK,
             icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
             onClick: goBack,
-            location: "header"
+            location: "header",
+            disabled: !lastViewMode
         },
         {
             id: "today",

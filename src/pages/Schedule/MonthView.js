@@ -118,12 +118,13 @@ export default function MonthView({ sessions, date, store }) {
     };
 
     const toolbarItems = [
-        lastViewMode && {
+        {
             id: "back",
             name: translations.BACK,
             icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
             onClick: goBack,
-            location: "header"
+            location: "header",
+            disabled: !lastViewMode
         },
         {
             id: "today",
@@ -163,7 +164,7 @@ export default function MonthView({ sessions, date, store }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "MonthView", items: toolbarItems, depends: [translations, month] });
+    useToolbar({ id: "MonthView", items: toolbarItems, depends: [translations, month, lastViewMode] });
 
     return <div className={styles.root}>
         <div className={styles.grid}>

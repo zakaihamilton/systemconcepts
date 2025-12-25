@@ -9,12 +9,13 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
-import { useDeviceType } from "@util/styles";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 registerToolbar("YearView");
 
 export default function YearView({ sessions, date, store }) {
-    const isPhone = useDeviceType() === "phone";
+    const { lastViewMode } = store.useState();
     const direction = useDirection();
     const translations = useTranslations();
     const yearFormatter = useDateFormatter({ year: "numeric" });
@@ -63,7 +64,24 @@ export default function YearView({ sessions, date, store }) {
         });
     };
 
+    const goBack = () => {
+        if (lastViewMode) {
+            store.update(s => {
+                s.viewMode = lastViewMode;
+                s.lastViewMode = null;
+            });
+        }
+    };
+
     const toolbarItems = [
+        {
+            id: "back",
+            name: translations.BACK,
+            icon: direction === "rtl" ? <ArrowForwardIcon /> : <ArrowBackIcon />,
+            onClick: goBack,
+            location: "header",
+            disabled: !lastViewMode
+        },
         {
             id: "today",
             name: translations.TODAY,
@@ -93,7 +111,7 @@ export default function YearView({ sessions, date, store }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "YearView", items: toolbarItems, depends: [translations, currentYear] });
+    useToolbar({ id: "YearView", items: toolbarItems, depends: [translations, currentYear, lastViewMode] });
 
     return <div className={styles.root}>
         {months}

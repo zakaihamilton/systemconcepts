@@ -25,9 +25,28 @@
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 4px;
     justify-items: center;
+}
+
+.weekIndicator {
+    font-size: 0.75em;
+    width: 2em;
+    height: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--neutral-400);
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
+
+.weekIndicator:hover {
+    color: var(--primary-500);
+    opacity: 1;
+    background-color: transparent;
 }
 
 .day {
