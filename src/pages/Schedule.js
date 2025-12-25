@@ -71,8 +71,7 @@ export default function SchedulePage() {
                 ScheduleStore.update(s => {
                     s.viewMode = "week";
                 });
-            },
-            divider: true
+            }
         },
         {
             id: "day",
