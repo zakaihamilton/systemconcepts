@@ -87,17 +87,17 @@
     height: auto;
     object-fit: contain;
     aspect-ratio: 16/9;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease;
 }
 
-.actions {
-    display: flex;
-    gap: 1em;
-    margin-top: 1em;
+.thumbnail:hover {
+    border-color: var(--border-focus);
 }
 
 .summary {
     line-height: 1.6;
-    white-space: pre-wrap;
 }
 
 .row {

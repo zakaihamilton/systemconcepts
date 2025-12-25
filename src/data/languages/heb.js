@@ -302,6 +302,10 @@ export default {
             "value": "הבא"
         },
         {
+            "id": "NO_SUMMARY",
+            "value": "אין סיכום זמין"
+        },
+        {
             "id": "PAGE_INDEX",
             "value": "מספר עמוד"
         },

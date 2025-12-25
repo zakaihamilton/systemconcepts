@@ -208,7 +208,7 @@ export function useSessions(depends = [], options = {}) {
                     }
 
                     if (summaryFile) {
-                        item.summary = summaryFile;
+                        item.summary = { ...summaryFile, path: summaryFile.path.replace(/^\/aws/, "").replace(/^\//, "") };
                     }
 
                     if (videoFiles.length) {

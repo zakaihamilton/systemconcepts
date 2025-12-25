@@ -302,6 +302,10 @@ export default {
             "value": "Próximo"
         },
         {
+            "id": "NO_SUMMARY",
+            "value": "Nenhum resumo disponível"
+        },
+        {
             "id": "PAGE_INDEX",
             "value": "No. Página"
         },

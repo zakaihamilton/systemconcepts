@@ -40,3 +40,20 @@
 .root :global(code) {
     font-family: monospace;
 }
+
+.progress {
+    padding: 1rem;
+}
+
+.noSummary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    font-weight: 500;
+    color: var(--neutral-500);
+    background: var(--neutral-100);
+    border: 1px solid var(--neutral-200);
+    border-radius: 8px;
+    margin: 1rem 0;
+}

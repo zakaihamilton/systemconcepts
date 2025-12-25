@@ -302,6 +302,10 @@ export default {
             "value": "Next"
         },
         {
+            "id": "NO_SUMMARY",
+            "value": "No summary available"
+        },
+        {
             "id": "PAGE_INDEX",
             "value": "Page No."
         },

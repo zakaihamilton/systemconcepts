@@ -1,24 +1,26 @@
-import { useEffect, useState } from "react";
+import LinearProgress from "@mui/material/LinearProgress";
 import ReactMarkdown from "react-markdown";
 import { useFetch } from "@util/fetch";
 import styles from "./Summary.module.scss";
+import { useTranslations } from "@util/translations";
 
 export default function Summary({ path }) {
-    const [content, setContent] = useState("");
+    const translations = useTranslations();
     const url = path ? "/api/summary?path=" + encodeURIComponent(path) : null;
-    const [data] = useFetch(url);
+    const [data, , loading] = useFetch(url);
+    const displayedContent = path && !loading && data;
 
-    const [prevData, setPrevData] = useState(null);
-    if (data && data !== prevData) {
-        setPrevData(data);
-        setContent(data);
+    if (loading) {
+        return <div className={styles.progress}>
+            <LinearProgress />
+        </div>;
     }
 
-    if (!content) {
-        return null;
+    if (!displayedContent) {
+        return <div className={styles.noSummary}>{translations.NO_SUMMARY}</div>;
     }
 
     return <div className={styles.root}>
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <ReactMarkdown>{displayedContent}</ReactMarkdown>
     </div>;
 }

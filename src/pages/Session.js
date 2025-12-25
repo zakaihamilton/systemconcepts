@@ -117,24 +117,15 @@ export default function SessionPage({ group, year, date, name }) {
                         className={styles.thumbnail}
                         width="100%"
                         height="auto"
+                        onClick={viewImage}
                         alt={name}
                         clickForImage={false}
                     />
-                    <div className={styles.actions}>
-                        {hasImage && !hasVideo && <Button
-                            variant="outlined"
-                            startIcon={<InsertPhotoIcon />}
-                            onClick={viewImage}
-                        >
-                            {translations.IMAGE}
-                        </Button>}
-                    </div>
                 </div>}
                 <div className={styles.details}>
-                    {session.summary && <div className={styles.summary}>
-                        <Summary path={session.summary.path.replace(/^\/aws/, "").replace(/^\//, "")} />
-                    </div>}
-                    {!session.summary && <div className={styles.summary}>{translations.NO_SUMMARY}</div>}
+                    <div className={styles.summary}>
+                        <Summary path={session.summary?.path} key={session.summary?.path} />
+                    </div>
                 </div>
             </div>
         </div>
