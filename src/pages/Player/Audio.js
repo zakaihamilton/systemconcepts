@@ -12,16 +12,38 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
     const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
+    const [duration, setDuration] = useState(0);
+
     useEffect(() => {
         setPlayerRef(ref.current);
         return () => {
             setPlayerRef(null);
         };
     }, []);
+
     useEffect(() => {
         PlayerStore.update(s => {
             s.player = playerRef;
         });
+    }, [playerRef]);
+
+    useEffect(() => {
+        if (!playerRef) return;
+
+        const handleDurationChange = () => {
+            setDuration(playerRef.duration || 0);
+        };
+
+        // Set initial duration if already loaded
+        if (playerRef.duration) {
+            setDuration(playerRef.duration);
+        }
+
+        playerRef.addEventListener('durationchange', handleDurationChange);
+
+        return () => {
+            playerRef.removeEventListener('durationchange', handleDurationChange);
+        };
     }, [playerRef]);
 
     useEffect(() => {
@@ -57,7 +79,7 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
                     <div className={styles.metadata}>
                         <Group fill={false} name={group} color={color} />
                         <span className={styles.date}>{dateWidget}</span>
-                        {playerRef && playerRef.duration > 1 && <span className={styles.duration}>{formatDuration(playerRef.duration * 1000, true)}</span>}
+                        {duration > 1 && <span className={styles.duration}>{formatDuration(duration * 1000, true)}</span>}
                     </div>
                 </div>
             </div>
