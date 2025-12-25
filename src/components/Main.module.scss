@@ -3,7 +3,8 @@
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
     grid-template-rows: 4em auto;
-    grid-template-columns: 0em auto;
+    grid-template-columns: 0em 1fr;
+    transition: grid-template-columns 0.3s ease-in-out;
 
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--text-color);
@@ -11,7 +12,8 @@
 }
 
 .root.sidebar {
-    grid-template-columns: 16em auto; /* Increased width slightly for better readability */
+    grid-template-columns: 16em 1fr;
+    /* Increased width slightly for better readability */
 }
 
 .root.mobile {

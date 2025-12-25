@@ -1,18 +1,23 @@
 .root {
     background: var(--side-bar-background);
     grid-column: 1 / 2;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border-color); /* Add a separator */
+    border-right: 1px solid var(--border-color);
+    /* Add a separator */
 }
 
 .container {
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-width: 16em;
     /* Removed margins, borders, and radius for full-height sidebar */
-    background-color: transparent; /* Let the root background show through */
+    background-color: transparent;
+    /* Let the root background show through */
 }
 
 .popupDrawer {
