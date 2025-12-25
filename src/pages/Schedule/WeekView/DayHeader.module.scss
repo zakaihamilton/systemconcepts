@@ -1,46 +1,58 @@
 .root {
     display: flex;
-    color: var(--info-color);
+    color: var(--text-color);
     align-items: center;
     justify-content: center;
     flex-direction: column;
     position: sticky;
-    background-color: var(--info-background);
-    z-index: 1;
-    border-radius: 0.5em 0.5em 0 0;
-    margin-bottom: 0.25em;
-}
-
-.root:not(.last) {
-    [dir=ltr] & {
-        margin-right: 0.25em;
-    }
-
-    [dir=rtl] & {
-        margin-left: 0.25em;
-    }
+    background-color: var(--main-background);
+    z-index: 10;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75em 0;
+    transition: background-color 0.2s;
 }
 
 .root.mobile {
     left: 0;
     border-bottom: 1px solid var(--border-color);
+    padding: 0.5em;
 }
 
 .root:not(.mobile) {
     top: 0;
-    min-width: 12em;
-}
-
-.root *:not(:last-child) {
-    margin-bottom: 0.5em;
+    min-width: 10em;
 }
 
 .day {
-    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--neutral-500);
+    margin-bottom: 0.25em;
+    letter-spacing: 0.05em;
 }
 
-.root.today {
-    color: var(--info-background);
-    background-color: var(--info-color);
-    border-bottom: 1px solid var(--info-color);
+.date {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text-color);
+    min-width: 2em;
+    height: 2em;
+    padding: 0 0.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 99px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.root.today .date {
+    background-color: var(--primary-500);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.root.today .day {
+    color: var(--primary-500);
 }

@@ -20,6 +20,6 @@ export default function DayHeader({ dateFormatter, dayFormatter, date, index, co
     );
     return <div className={className} style={style}>
         <div className={styles.day}>{dayName}</div>
-        <div>{dateName}</div>
+        <div className={styles.date}>{dateName}</div>
     </div>;
 }
