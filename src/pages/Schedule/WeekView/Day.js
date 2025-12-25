@@ -11,10 +11,17 @@ export default function Day({ sessions, column, row, count, date }) {
         gridRow: isPhone ? column : row
     };
     const sessionDate = getDateString(date);
-    const sessionItems = (sessions || []).filter(session => session.date === sessionDate).map(session => {
-        const { key, ...sessionProps } = session;
-        return <Session key={session.name} {...sessionProps} />;
-    });
+    const sessionItems = (sessions || [])
+        .filter(session => session.date === sessionDate)
+        .sort((a, b) => {
+            const groupCompare = (a.group || "").localeCompare(b.group || "");
+            if (groupCompare !== 0) return groupCompare;
+            return (a.typeOrder || 0) - (b.typeOrder || 0);
+        })
+        .map(session => {
+            const { key, ...sessionProps } = session;
+            return <Session key={session.name} {...sessionProps} />;
+        });
     return <div className={clsx(styles.root, column === count && styles.last)} style={style}>
         <div className={clsx(styles.sessions, isPhone && styles.mobile)}>
             {sessionItems}
