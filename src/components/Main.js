@@ -21,7 +21,8 @@ export const MainStoreDefaults = {
     direction: "ltr",
     language: "auto",
     showSideBar: true,
-    showDrawer: false
+    showDrawer: false,
+    speedToolbar: "top"
 };
 
 export const MainStore = new Store(MainStoreDefaults);

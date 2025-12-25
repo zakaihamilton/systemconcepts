@@ -646,6 +646,18 @@ export default {
             "value": "מהירות"
         },
         {
+            "id": "SPEED_TOOLBAR",
+            "value": "סרגל מהירות"
+        },
+        {
+            "id": "TOP",
+            "value": "למעלה"
+        },
+        {
+            "id": "BOTTOM",
+            "value": "למטה"
+        },
+        {
             "id": "SPEED_SLOW",
             "value": "הכי לאט"
         },
@@ -675,7 +687,7 @@ export default {
         },
         {
             "id": "SPEED_DOUBLE",
-            "value": "מהירות כפולה"
+            "value": "x2"
         },
         {
             "id": "SPEED_TRIPLE",

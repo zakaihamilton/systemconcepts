@@ -1,6 +1,8 @@
 import { useContext, useEffect } from "react";
 import { Store } from "pullstate";
+import { useLocalStorage } from "@util/store";
 import { useTranslations } from "@util/translations";
+import { MainStore } from "../components/Main";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import styles from "./Player.module.scss";
 import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@util/path";
@@ -35,7 +37,9 @@ export default function PlayerPage({ show = false, suffix }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const { hash, mediaPath, subtitles, showSubtitles, showSpeed } = PlayerStore.useState();
+    const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
+    useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles"]);
     const [groups] = useGroups([]);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
@@ -161,12 +165,13 @@ export default function PlayerPage({ show = false, suffix }) {
 
     return <div className={styles.root} style={style}>
         {statusBar}
-        <SpeedSlider />
+        {speedToolbar === "top" && <SpeedSlider />}
         <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
         {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
             {subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
         </MediaComponent>}
+        {speedToolbar === "bottom" && <SpeedSlider />}
         {!!loading && !mediaPath && <Progress />}
     </div>;
 }

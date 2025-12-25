@@ -2,11 +2,14 @@ import React, { useEffect } from "react";
 import Slider from "@mui/material/Slider";
 import { useTranslations } from "@util/translations";
 import { PlayerStore } from "../Player";
+import clsx from "clsx";
 import styles from "./SpeedSlider.module.scss";
+import { MainStore } from "../../components/Main";
 
 export default function SpeedSlider() {
     const translations = useTranslations();
     const { player, showSpeed } = PlayerStore.useState();
+    const { speedToolbar } = MainStore.useState();
 
     const [, setCounter] = React.useState(0);
 
@@ -53,7 +56,7 @@ export default function SpeedSlider() {
     };
 
     return (
-        <div className={styles.root}>
+        <div className={clsx(styles.root, styles[speedToolbar])}>
             <div className={styles.sliderContainer}>
                 <Slider
                     aria-label={translations.SPEED}

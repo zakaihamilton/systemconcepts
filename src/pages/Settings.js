@@ -5,6 +5,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import InvertColorsIcon from "@mui/icons-material/InvertColors";
 import FormatSizeIcon from "@mui/icons-material/FormatSize";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
 import languages from "@data/languages";
 import fontSizes from "@data/fontSizes";
 import { useTranslations } from "@util/translations";
@@ -83,6 +84,17 @@ export default function Settings() {
         }
     ];
 
+    const speedToolbarItems = [
+        {
+            id: "top",
+            name: translations.TOP
+        },
+        {
+            id: "bottom",
+            name: translations.BOTTOM
+        }
+    ];
+
     const fontSizeItems = fontSizes.filter(item => item.devices.includes(deviceType)).map(item => ({
         id: item.id,
         name: translations[item.name]
@@ -103,6 +115,13 @@ export default function Settings() {
             name: translations.DARK_MODE,
             value: darkModeSelected,
             widget: <Dynamic items={darkModeItems} state={darkModeState} />
+        },
+        {
+            id: "speedToolbar",
+            icon: <SlowMotionVideoIcon />,
+            name: translations.SPEED_TOOLBAR,
+            value: states.speedToolbar[0],
+            widget: <Dynamic items={speedToolbarItems} state={states.speedToolbar} />
         },
         {
             id: "fontSize",

@@ -650,6 +650,18 @@ export default {
             "value": "Speed"
         },
         {
+            "id": "SPEED_TOOLBAR",
+            "value": "Speed Toolbar"
+        },
+        {
+            "id": "TOP",
+            "value": "Top"
+        },
+        {
+            "id": "BOTTOM",
+            "value": "Bottom"
+        },
+        {
             "id": "SPEED_SLOW",
             "value": "Slow"
         },
@@ -679,7 +691,7 @@ export default {
         },
         {
             "id": "SPEED_DOUBLE",
-            "value": "Double Speed"
+            "value": "x2"
         },
         {
             "id": "SPEED_TRIPLE",

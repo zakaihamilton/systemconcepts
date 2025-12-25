@@ -650,6 +650,18 @@ export default {
             "value": "Rapidez"
         },
         {
+            "id": "SPEED_TOOLBAR",
+            "value": "Barra de Velocidade"
+        },
+        {
+            "id": "TOP",
+            "value": "Topo"
+        },
+        {
+            "id": "BOTTOM",
+            "value": "Fundo"
+        },
+        {
             "id": "SPEED_SLOW",
             "value": "Mais Lenta"
         },
@@ -679,7 +691,7 @@ export default {
         },
         {
             "id": "SPEED_DOUBLE",
-            "value": "Velocidade Dupla"
+            "value": "x2"
         },
         {
             "id": "SPEED_TRIPLE",
