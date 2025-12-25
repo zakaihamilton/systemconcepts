@@ -9,18 +9,20 @@
     color: var(--text-color);
     position: relative;
     overflow: hidden;
+    border-radius: 8px;
+    margin: 4px;
+    box-shadow: 0 1px 3px var(--box-shadow-color);
+    transition: all 0.2s ease;
 }
 
 .root.mobile {
-    border-left: 1px solid transparent;
-    border-right: 1px solid var(--border-color);
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
+    border: 1px solid var(--border-color);
 }
 
 .root:hover {
-    border: 1px solid var(--hover-fill);
-    box-shadow: 0 2px 2px 0 var(--box-shadow-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px var(--box-shadow-color);
+    z-index: 1;
 }
 
 .root:hover:active {
@@ -56,7 +58,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    opacity: 0.3;
+    opacity: 0.15;
 }
 
 .backgroundBorder {

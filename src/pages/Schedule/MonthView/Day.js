@@ -7,7 +7,7 @@ import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@widgets/Menu";
 import { addPath, toPath } from "@util/pages";
-import HoverButton from "@widgets/HoverButton";
+
 import { getSessionTextColor } from "@util/colors";
 import { useTheme } from "@mui/material/styles";
 
@@ -29,6 +29,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         return {
             id: item.name,
             name: item.name,
+            date: item.date,
             backgroundColor: item.color,
             style: { color: getSessionTextColor(item.color, theme) },
             icon: <Tooltip title={translations.SESSION}><VideoLabelIcon /></Tooltip>,
@@ -50,9 +51,14 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         </div>
         <div className={styles.sessions}>
             {!!items.length && <Menu hover={true} items={items}>
-                <HoverButton aria-label={translations.SESSION}>
-                    <VideoLabelIcon fontSize="small" />
-                </HoverButton>
+                <div className={styles.indicators}>
+                    {items.slice(0, 12).map((item, index) => <Tooltip arrow title={<div style={{ textAlign: "center" }}>
+                        {item.description && <div style={{ fontWeight: "bold" }}>{item.description}</div>}
+                        <div>{item.name}</div>
+                    </div>} key={index}>
+                        <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} />
+                    </Tooltip>)}
+                </div>
             </Menu>}
         </div>
     </div>;
