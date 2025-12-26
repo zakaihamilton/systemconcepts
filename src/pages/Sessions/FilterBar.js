@@ -191,8 +191,6 @@ export default function FilterBar({ hideYears = false }) {
     return (
         <div className={styles.root} ref={ref}>
             <div className={styles.container}>
-                <div className={styles.label}>{translations.FILTER}</div>
-
                 {/* Groups Filter Dropdown */}
                 <Menu items={groupMenuItems} selected={groupFilter}>
                     <button className={clsx(styles.dropdownButton, groupFilter.length > 0 && styles.active)}>

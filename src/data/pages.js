@@ -66,6 +66,7 @@ const SessionTabs = dynamic(() => import("@pages/Session/Tabs"));
 
 import EventIcon from "@mui/icons-material/Event";
 const Schedule = dynamic(() => import("@pages/Schedule"), { loading: () => <PageLoad /> });
+import { getScheduleSection } from "@pages/Schedule/Section";
 
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
 const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad /> });
@@ -212,7 +213,8 @@ export default [
         id: "schedule",
         name: "SCHEDULE",
         Icon: EventIcon,
-        Component: Schedule
+        Component: Schedule,
+        section: getScheduleSection
     },
     {
         id: "session",

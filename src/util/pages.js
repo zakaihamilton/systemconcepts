@@ -169,13 +169,13 @@ export function getPagesFromHash({ hash, translations, pages }) {
     return results;
 }
 
-export function useActivePages() {
+export function useActivePages(depends = []) {
     let { hash = "" } = MainStore.useState();
     const translations = useTranslations();
     const pages = usePages();
     const activePages = useMemo(() => {
         return getPagesFromHash({ hash, translations, pages });
-    }, [hash, translations, pages]);
+    }, [hash, translations, pages, ...depends]);
     return activePages;
 }
 

@@ -15,7 +15,7 @@ import clsx from "clsx";
 import NoSsr from "@mui/material/NoSsr";
 import { setHash } from "@util/pages";
 
-export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast }) {
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast, description }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
@@ -73,8 +73,13 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
                 </div>
             )}
             {(showLabel || isLast) && (
-                <div className={styles.name}>
-                    {label || name}
+                <div className={styles.column}>
+                    <div className={styles.name}>
+                        {label || name}
+                    </div>
+                    {description && <div className={styles.description}>
+                        {description}
+                    </div>}
                 </div>
             )}
         </>

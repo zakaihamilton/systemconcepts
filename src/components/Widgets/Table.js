@@ -281,18 +281,40 @@ export default function TableWidget(props) {
             divider: true,
             menu: !isDesktop
         },
-        ...(viewModesList.length > 1 ? viewModesList.map(item => {
-            return {
+    ].filter(Boolean);
+
+    const viewOptions = viewModesList.map(item => ({
+        ...item,
+        onClick: () => {
+            store.update(s => {
+                s.viewMode = item.id;
+            });
+        }
+    }));
+
+    const currentViewOption = viewOptions.find(item => item.id === viewMode);
+    const isMobile = useDeviceType() === "phone";
+
+    if (viewOptions.length > 1) {
+        if (isMobile) {
+            toolbarItems.push({
+                id: "view",
+                name: currentViewOption ? currentViewOption.name : translations.TABLE_VIEW,
+                icon: currentViewOption ? currentViewOption.icon : <TableChartIcon />,
+                location: "mobile",
+                menu: false,
+                items: viewOptions,
+                selected: viewMode
+            });
+        } else {
+            toolbarItems.push(...viewOptions.map(item => ({
                 ...item,
                 selected: viewMode,
-                onClick: () => {
-                    store.update(s => {
-                        s.viewMode = item.id;
-                    });
-                }
-            };
-        }).filter(Boolean) : [])
-    ].filter(Boolean);
+                location: "header",
+                menu: false
+            })));
+        }
+    }
 
     useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems, itemsPerPage] });
 

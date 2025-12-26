@@ -4,8 +4,9 @@ import { useDeviceType } from "@util/styles";
 
 export default function Footer() {
     const isMobile = useDeviceType() === "phone";
-    const items = useToolbarItems({ location: "footer" });
-    if (!items || !items.length) {
+    const footerItems = useToolbarItems({ location: "footer" });
+    const mobileItems = useToolbarItems({ location: "mobile" });
+    if (!footerItems?.length && !mobileItems?.length) {
         return null;
     }
     return <div className={styles.root}>
