@@ -48,7 +48,7 @@ export default function SessionPage({ group, year, date, name }) {
             name: translations.PREVIOUS,
             icon: <ArrowBackIcon />,
             onClick: () => prevSession && gotoSession(prevSession),
-            menu: false,
+            menu: isMobile,
             location: "header",
             disabled: !prevSession
         },
@@ -57,7 +57,7 @@ export default function SessionPage({ group, year, date, name }) {
             name: translations.NEXT,
             icon: <ArrowForwardIcon />,
             onClick: () => nextSession && gotoSession(nextSession),
-            menu: false,
+            menu: isMobile,
             location: "header",
             disabled: !nextSession
         }

@@ -26,3 +26,35 @@
     backdrop-filter: blur(4px);
     display: flex;
 }
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(-50px) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideLeft {
+    0% {
+        transform: translateX(50px) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.visible[data-direction='left'] .icon {
+    animation: slideRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.visible[data-direction='right'] .icon {
+    animation: slideLeft 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
