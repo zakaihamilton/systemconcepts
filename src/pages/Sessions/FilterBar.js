@@ -16,7 +16,6 @@ import clsx from "clsx";
 export default function FilterBar({ hideYears = false }) {
     const translations = useTranslations();
     const { typeFilter, yearFilter, groupFilter, sessions, groups, groupsMetadata } = SessionsStore.useState();
-    const ref = useRef();
 
     // Parse groups metadata
     const groupMetadata = useMemo(() => {
@@ -170,7 +169,7 @@ export default function FilterBar({ hideYears = false }) {
     };
 
     return (
-        <div className={styles.root} ref={ref}>
+        <div className={styles.root}>
             <div className={styles.container}>
                 {/* Type Filter Dropdown */}
                 <Menu items={typeMenuItems} selected={typeFilter}>
