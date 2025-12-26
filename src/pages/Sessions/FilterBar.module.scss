@@ -5,15 +5,14 @@
     border-bottom: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     position: sticky;
-    top: 0;
+    bottom: 0;
     z-index: 20;
 }
 
 .container {
     display: flex;
     align-items: center;
-    padding-left: 1em;
-    padding-right: 1em;
+    justify-content: center;
     gap: 1em;
     max-width: 100%;
     overflow-x: auto;

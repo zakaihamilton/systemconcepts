@@ -12,6 +12,7 @@ import { useSync } from "@util/sync";
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import GroupOffIcon from '@mui/icons-material/GroupOff';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
+import { useDeviceType } from "./styles";
 
 registerToolbar("Sessions");
 
@@ -33,6 +34,7 @@ export const SessionsStore = new Store({
 });
 
 export function useSessions(depends = [], options = {}) {
+    const isMobile = useDeviceType() !== "desktop";
     const { filterSessions = true, skipSync = false, showToolbar } = options;
     const [syncCounter, syncing] = useSync({ ...options, active: !skipSync });
     const translations = useTranslations();
@@ -314,6 +316,7 @@ export function useSessions(depends = [], options = {}) {
             id: "filter",
             name: translations.FILTER,
             icon: <FilterAltIcon />,
+            location: isMobile ? "mobile" : "header",
             onClick: () => {
                 SessionsStore.update(s => {
                     s.showFilterDialog = !s.showFilterDialog;
@@ -324,7 +327,7 @@ export function useSessions(depends = [], options = {}) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Sessions", items: toolbarItems, visible: showToolbar !== undefined ? showToolbar : filterSessions, depends: [translations, groupsItems, showFilterDialog] });
+    useToolbar({ id: "Sessions", items: toolbarItems, visible: showToolbar !== undefined ? showToolbar : filterSessions, depends: [translations, groupsItems, showFilterDialog, isMobile] });
 
     const filtered = useMemo(() => {
         if (!sessions) return [];

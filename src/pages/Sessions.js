@@ -23,7 +23,7 @@ import SessionIcon from "@widgets/SessionIcon";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-    const isPhone = useDeviceType() === "phone";
+    const isMobile = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
     const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order, showFilterDialog } = SessionsStore.useState();
@@ -80,7 +80,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                ...((!isPhone || orderBy !== "duration") && { "list": null, "table": null }),
+                ...((!isMobile || orderBy !== "duration") && { "list": null, "table": null }),
                 "grid": {
                     className: styles.gridDate
                 }
@@ -105,7 +105,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                ...((!isPhone || orderBy === "duration") && { "list": null, "table": null }),
+                ...((!isMobile || orderBy === "duration") && { "list": null, "table": null }),
                 "grid": {
                     className: styles.gridDuration
                 }
@@ -144,7 +144,7 @@ export default function SessionsPage() {
                 }
             }
         }
-    ].filter(Boolean), [translations, isPhone, orderBy, groupFilter]);
+    ].filter(Boolean), [translations, isMobile, orderBy, groupFilter]);
 
     const handleIconClick = useCallback((itemType) => {
         SessionsStore.update(s => {
@@ -251,13 +251,13 @@ export default function SessionsPage() {
 
     const viewModes = useMemo(() => ({
         list: {
-            className: isPhone ? styles.listPhoneItem : styles.listItem
+            className: isMobile ? styles.listPhoneItem : styles.listItem
         },
         table: null,
         grid: {
             className: styles.gridItem
         }
-    }), [isPhone]);
+    }), [isMobile]);
 
     const statusBar = useMemo(() => <StatusBar store={SessionsStore} />, []);
 
@@ -276,7 +276,7 @@ export default function SessionsPage() {
     }, [isSignedIn, translations]);
 
     return <>
-        {!!showFilterDialog && <FilterBar />}
+        {!!showFilterDialog && !isMobile && <FilterBar />}
         <Table
             cellWidth="16em"
             cellHeight="20em"
@@ -293,5 +293,6 @@ export default function SessionsPage() {
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
         />
+        {!!showFilterDialog && !!isMobile && <FilterBar />}
     </>;
 }

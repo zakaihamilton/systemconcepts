@@ -73,7 +73,7 @@ export default function TableWidget(props) {
         ...otherProps
     } = props;
     const translations = useTranslations();
-    const isDesktop = useDeviceType() === "desktop";
+    const isMobile = useDeviceType() !== "desktop";
     const [isEmpty, setEmpty] = useState(false);
     const statusBarIsActive = StatusBarStore.useState(s => s.active);
     columns = columns || [];
@@ -265,12 +265,11 @@ export default function TableWidget(props) {
         },
         viewMode !== "table" && !!sortItems.length && showSort && {
             id: "sort",
-            location: "header",
+            location: isMobile ? "mobile" : "header",
             name: translations.SORT,
             icon: <SortIcon />,
             items: sortItems,
-            divider: true,
-            menu: !isDesktop
+            divider: true
         },
         viewMode === "table" && data && data.length >= 10 && {
             id: "itemsPerPage",
@@ -279,7 +278,7 @@ export default function TableWidget(props) {
             icon: <ViewStreamIcon />,
             items: itemsPerPageItems,
             divider: true,
-            menu: !isDesktop
+            menu: isMobile
         },
     ].filter(Boolean);
 
@@ -293,7 +292,6 @@ export default function TableWidget(props) {
     }));
 
     const currentViewOption = viewOptions.find(item => item.id === viewMode);
-    const isMobile = useDeviceType() === "phone";
 
     if (viewOptions.length > 1) {
         if (isMobile) {

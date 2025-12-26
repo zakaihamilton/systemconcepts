@@ -72,6 +72,7 @@ import GroupWorkIcon from "@mui/icons-material/GroupWork";
 const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad /> });
 
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import { getSessionsSection } from "@pages/Sessions/Section";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
 export default [
@@ -187,6 +188,7 @@ export default [
         sidebar: true,
         id: "sessions",
         name: "SESSIONS",
+        section: getSessionsSection,
         Icon: VideoLibraryIcon,
         Component: Sessions
     },

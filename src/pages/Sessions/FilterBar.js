@@ -191,31 +191,6 @@ export default function FilterBar({ hideYears = false }) {
     return (
         <div className={styles.root} ref={ref}>
             <div className={styles.container}>
-                {/* Groups Filter Dropdown */}
-                <Menu items={groupMenuItems} selected={groupFilter}>
-                    <button className={clsx(styles.dropdownButton, groupFilter.length > 0 && styles.active)}>
-                        <ArrowDropDownIcon className={styles.arrow} />
-                        <div className={styles.labelContent}>
-                            {typeof getGroupLabel() === 'string' ? (
-                                <span>{getGroupLabel()}</span>
-                            ) : (
-                                <>
-                                    <span className={styles.mainLabel}>{getGroupLabel().main}</span>
-                                    <span className={styles.subLabel}>{getGroupLabel().sub}</span>
-                                </>
-                            )}
-                        </div>
-                        {groupFilter.length > 0 && (
-                            <Tooltip title={translations.CLEAR_FILTER}>
-                                <CloseIcon
-                                    className={styles.clearIcon}
-                                    onClick={handleClearGroup}
-                                />
-                            </Tooltip>
-                        )}
-                    </button>
-                </Menu>
-
                 {/* Type Filter Dropdown */}
                 <Menu items={typeMenuItems} selected={typeFilter}>
                     <button className={clsx(styles.dropdownButton, typeFilter.length > 0 && styles.active)}>
@@ -265,6 +240,31 @@ export default function FilterBar({ hideYears = false }) {
                         )}
                     </button>
                 </Menu>}
+
+                {/* Groups Filter Dropdown */}
+                <Menu items={groupMenuItems} selected={groupFilter}>
+                    <button className={clsx(styles.dropdownButton, groupFilter.length > 0 && styles.active)}>
+                        <ArrowDropDownIcon className={styles.arrow} />
+                        <div className={styles.labelContent}>
+                            {typeof getGroupLabel() === 'string' ? (
+                                <span>{getGroupLabel()}</span>
+                            ) : (
+                                <>
+                                    <span className={styles.mainLabel}>{getGroupLabel().main}</span>
+                                    <span className={styles.subLabel}>{getGroupLabel().sub}</span>
+                                </>
+                            )}
+                        </div>
+                        {groupFilter.length > 0 && (
+                            <Tooltip title={translations.CLEAR_FILTER}>
+                                <CloseIcon
+                                    className={styles.clearIcon}
+                                    onClick={handleClearGroup}
+                                />
+                            </Tooltip>
+                        )}
+                    </button>
+                </Menu>
             </div>
         </div>
     );
