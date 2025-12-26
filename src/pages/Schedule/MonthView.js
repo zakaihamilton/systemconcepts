@@ -24,13 +24,13 @@ export default function MonthView({ sessions, date, store }) {
     const firstDay = getMonthViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
         weekday: isPhone ? "narrow" : "short"
-    }, [isPhone]);
+    });
     const dayFormatter = useDateFormatter({
         day: "numeric"
     });
     const monthFormatter = useDateFormatter({
         month: isPhone ? "numeric" : "long"
-    }, [isPhone]);
+    });
     const yearFormatter = useDateFormatter({
         year: "numeric"
     });

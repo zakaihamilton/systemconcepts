@@ -9,7 +9,6 @@ import styles from "./Sessions.module.scss";
 import Label from "@widgets/Label";
 import Row from "@widgets/Row";
 import MovieIcon from "@mui/icons-material/Movie";
-import AudioIcon from "@icons/Audio";
 import Tooltip from "@mui/material/Tooltip";
 import Image from "@widgets/Image";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
@@ -20,8 +19,7 @@ import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
-import MovieFilterIcon from '@mui/icons-material/MovieFilter';
+import SessionIcon from "@widgets/SessionIcon";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -172,15 +170,9 @@ export default function SessionsPage() {
         const title = translations[item.type.toUpperCase()];
         const onClickIcon = () => handleIconClick(item.type);
 
-        const icon = <Tooltip arrow title={title}>
-            <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
-                {item.type === "video" && <MovieIcon />}
-                {item.type === "audio" && <AudioIcon />}
-                {item.type === "image" && <InsertPhotoOutlinedIcon />}
-                {item.type === "overview" && <MovieFilterIcon />}
-                {item.type === "ai" && <AutoAwesomeIcon />}
-            </div>
-        </Tooltip>;
+        const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
+            <SessionIcon type={item.type} />
+        </div>;
 
         const altIcon = <>
             {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}

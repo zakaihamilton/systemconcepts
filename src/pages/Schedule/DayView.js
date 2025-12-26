@@ -27,11 +27,13 @@ export default function DayView({ sessions, date, store }) {
     const monthFormatter = useDateFormatter({
         month: isPhone ? "short" : "long"
     });
+    const dayFormatter = useDateFormatter({ day: "2-digit" });
     const yearFormatter = useDateFormatter({ year: "numeric" });
 
     const weekday = weekdayFormatter.format(date);
     const monthDay = monthFormatter.format(date);
     const year = yearFormatter.format(date);
+    const day = dayFormatter.formatWithOrdinal(date);
 
     const sessionDate = getDateString(date);
     const { lastViewMode } = store.useState();
@@ -222,7 +224,7 @@ export default function DayView({ sessions, date, store }) {
             </Tooltip>
             <span className={styles.separator}>, </span>
             <Tooltip title={translations.MONTH_VIEW}>
-                <span onClick={goMonth} className={styles.link}>{monthDay}</span>
+                <span onClick={goMonth} className={styles.link}>{day} {monthDay}</span>
             </Tooltip>
             <span className={styles.separator}>, </span>
             <Tooltip title={translations.YEAR_VIEW}>

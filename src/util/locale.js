@@ -8,9 +8,28 @@ export function useLocale() {
     return locale;
 }
 
-export function useDateFormatter(options, depends = []) {
-    const locale = useLocale();
-    const optionsString = JSON.stringify(options);
-    const dateObj = useMemo(() => new Intl.DateTimeFormat(locale, options), [locale, optionsString, ...depends]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/use-memo
-    return dateObj;
+
+// 1. Separate ordinal logic
+const getOrdinal = (n) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
+export function useDateFormatter(options, locale = 'en-US') {
+    // 2. Memoize the formatter object itself for performance
+    const formatter = useMemo(() => {
+        return new Intl.DateTimeFormat(locale, options);
+    }, [locale, JSON.stringify(options)]); // Only stringify if options are highly dynamic
+
+    // 3. Return a formatting function that includes ordinal logic
+    return {
+        format: (date) => formatter.format(date),
+        formatWithOrdinal: (date) => {
+            const parts = formatter.formatToParts(date);
+            return parts.map(part =>
+                part.type === 'day' ? getOrdinal(parseInt(part.value)) : part.value
+            ).join('');
+        }
+    };
 }

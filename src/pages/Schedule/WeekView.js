@@ -37,7 +37,7 @@ export default function WeekView({ sessions, date, store }) {
     });
     const monthFormatter = useDateFormatter({
         month: isPhone ? "short" : "long"
-    }, [isPhone]);
+    });
     const yearFormatter = useDateFormatter({
         year: "numeric"
     });

@@ -4,11 +4,7 @@ import { useDeviceType } from "@util/styles";
 import { useSessionTextColor } from "@util/colors";
 import clsx from "clsx";
 import Link from "@mui/material/Link";
-import MovieIcon from "@mui/icons-material/Movie";
-import AudioIcon from "@components/Icons/Audio";
-import InsertPhotoOutlinedIcon from "@mui/icons-material/InsertPhotoOutlined";
-import MovieFilterIcon from "@mui/icons-material/MovieFilter";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import SessionIcon from "@widgets/SessionIcon";
 
 export default function Session({ group, year, date, name, color, type, showGroup = true }) {
     const isPhone = useDeviceType() === "phone";
@@ -33,11 +29,7 @@ export default function Session({ group, year, date, name, color, type, showGrou
         </div>}
         <div className={styles.container}>
             <div className={styles.icons}>
-                {type === "video" && <MovieIcon />}
-                {type === "audio" && <AudioIcon />}
-                {type === "image" && <InsertPhotoOutlinedIcon />}
-                {type === "overview" && <MovieFilterIcon />}
-                {type === "ai" && <AutoAwesomeIcon />}
+                <SessionIcon type={type} />
             </div>
             <div className={styles.name} dir="auto">
                 {name}
