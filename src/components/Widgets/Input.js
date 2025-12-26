@@ -94,12 +94,7 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                                 horizontal: "left"
                             },
                             PaperProps: {
-                                style: {
-                                    marginTop: 8,
-                                    borderRadius: 12,
-                                    border: '1px solid var(--border-color)',
-                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                                }
+                                className: styles.menuPaper
                             }
                         }
                     }

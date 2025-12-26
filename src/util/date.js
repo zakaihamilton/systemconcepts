@@ -130,3 +130,10 @@ export function getDateString(date) {
 
     return [year, month, day].join("-");
 }
+
+export function getDaysInMonth(date) {
+    const month = new Date(date);
+    month.setMonth(month.getMonth() + 1);
+    month.setDate(0);
+    return month.getDate();
+}

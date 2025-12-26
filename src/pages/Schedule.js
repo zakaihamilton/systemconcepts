@@ -19,6 +19,7 @@ import { useLocalStorage } from "@util/store";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import FilterBar from "@pages/Sessions/FilterBar";
+import { useDeviceType } from "@util/styles";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -28,6 +29,7 @@ export const ScheduleStore = new Store({
 registerToolbar("Schedule");
 
 export default function SchedulePage() {
+    const isMobile = useDeviceType() === "phone";
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     let [sessions, loading] = useSessions();
@@ -39,11 +41,10 @@ export default function SchedulePage() {
     }
     useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode"]);
 
-    const toolbarItems = [
+    const viewOptions = [
         {
             id: "year",
             name: translations.YEAR_VIEW,
-            selected: viewMode,
             icon: <CalendarViewMonthIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
@@ -54,7 +55,6 @@ export default function SchedulePage() {
         {
             id: "month",
             name: translations.MONTH_VIEW,
-            selected: viewMode,
             icon: <DateRangeIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
@@ -65,7 +65,6 @@ export default function SchedulePage() {
         {
             id: "week",
             name: translations.WEEK_VIEW,
-            selected: viewMode,
             icon: <ViewWeekIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
@@ -76,7 +75,6 @@ export default function SchedulePage() {
         {
             id: "day",
             name: translations.DAY_VIEW,
-            selected: viewMode,
             icon: <CalendarViewDayIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
@@ -84,9 +82,31 @@ export default function SchedulePage() {
                 });
             }
         }
-    ].filter(Boolean);
+    ];
 
-    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode] });
+    const currentViewOption = viewOptions.find(item => item.id === viewMode);
+
+    const toolbarItems = [];
+    if (isMobile) {
+        toolbarItems.push({
+            id: "view",
+            name: currentViewOption ? currentViewOption.name : translations.MONTH_VIEW,
+            icon: currentViewOption ? currentViewOption.icon : <DateRangeIcon />,
+            location: "mobile",
+            menu: false,
+            items: viewOptions,
+            selected: viewMode
+        });
+    } else {
+        toolbarItems.push(...viewOptions.map(item => ({
+            ...item,
+            selected: viewMode,
+            location: "header",
+            menu: false
+        })));
+    }
+
+    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode, isMobile] });
 
     const items = useMemo(() => {
         let items = sessions;

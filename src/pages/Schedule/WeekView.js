@@ -36,7 +36,7 @@ export default function WeekView({ sessions, date, store }) {
         month: "short"
     });
     const monthFormatter = useDateFormatter({
-        month: isPhone ? "numeric" : "long"
+        month: isPhone ? "short" : "long"
     }, [isPhone]);
     const yearFormatter = useDateFormatter({
         year: "numeric"
@@ -64,7 +64,7 @@ export default function WeekView({ sessions, date, store }) {
         };
     });
 
-    const weekWidget = <Input select={true} label={translations.WEEK} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={weekItems} state={weekState} />;
+    const weekWidget = <Input select={true} label={translations.WEEK} helperText="" fullWidth={false} items={weekItems} state={weekState} />;
 
     const monthState = [month.getMonth() + 1, month => {
         const newDate = new Date(date);
@@ -79,7 +79,7 @@ export default function WeekView({ sessions, date, store }) {
             name
         };
     });
-    const monthWidget = <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: isPhone ? "3.7em" : "10em" }} items={monthItems} state={monthState} />;
+    const monthWidget = <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} items={monthItems} state={monthState} />;
 
     const yearState = [month.getFullYear(), year => {
         const newDate = new Date(date);
@@ -88,10 +88,14 @@ export default function WeekView({ sessions, date, store }) {
             s.date = newDate;
         });
     }];
+    const currentYear = month.getFullYear();
     const yearStart = 2015;
     let yearEnd = new Date().getFullYear() + 2;
     if (yearEnd < yearStart) {
         yearEnd = yearStart + 1;
+    }
+    if (currentYear > yearEnd) {
+        yearEnd = currentYear;
     }
     const yearItems = getYearNames(month, yearFormatter, yearStart, yearEnd).map((name, index) => {
         return {
@@ -99,7 +103,7 @@ export default function WeekView({ sessions, date, store }) {
             name
         };
     });
-    const yearWidget = <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={yearItems} state={yearState} />;
+    const yearWidget = <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} items={yearItems} state={yearState} />;
 
     const gotoPreviousWeek = () => {
         const newDate = new Date(firstDay);
@@ -161,24 +165,20 @@ export default function WeekView({ sessions, date, store }) {
             icon: direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />,
             onClick: gotoPreviousWeek,
             disabled: !hasPreviousWeek,
-            divider: true,
             location: "footer"
         },
         {
             id: "weekWidget",
-            divider: true,
             element: weekWidget,
             location: "footer"
         },
         {
             id: "monthWidget",
-            divider: true,
             element: monthWidget,
             location: "footer"
         },
         {
             id: "yearWidget",
-            divider: true,
             element: yearWidget,
             location: "footer"
         },

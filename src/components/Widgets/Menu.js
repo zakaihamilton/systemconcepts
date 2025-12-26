@@ -135,7 +135,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
             childProps.onClick = handleClick;
         }
         if (hoverEnabled) {
-            childProps.onHoverComplete = event => {
+            childProps.onMouseEnter = event => {
                 setHoverRef(event.currentTarget);
                 handleClick(event);
             };

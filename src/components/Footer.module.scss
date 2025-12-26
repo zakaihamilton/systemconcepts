@@ -2,7 +2,6 @@
     display: flex;
     overflow: hidden;
     box-sizing: border-box;
-    justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, var(--footer-background), rgba(var(--bar-background-rgb), 0.95));
     backdrop-filter: blur(12px) saturate(180%);
@@ -15,9 +14,39 @@
     position: sticky;
     bottom: 1rem;
     z-index: 100;
+
+    @media (max-width: 600px) {
+        margin: 0;
+        bottom: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        background: var(--footer-background);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        width: 100%;
+        max-width: 100%;
+    }
+
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     [dir=rtl] & {
         flex-direction: row-reverse;
     }
+}
+
+.footer {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+}
+
+.footer.spaced {
+    justify-content: space-between;
+}
+
+.mobile {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 1rem;
 }

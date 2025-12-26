@@ -18,6 +18,10 @@ export default {
             "value": "Users"
         },
         {
+            "id": "DAY",
+            "value": "Day"
+        },
+        {
             "id": "ROLES",
             "value": "Roles"
         },

@@ -18,6 +18,10 @@ export default {
             "value": "משתמשים"
         },
         {
+            "id": "DAY",
+            "value": "יום"
+        },
+        {
             "id": "ROLES",
             "value": "תפקידים"
         },

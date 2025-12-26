@@ -19,8 +19,8 @@ export default function Day({ sessions, column, row, count, date }) {
             return (a.typeOrder || 0) - (b.typeOrder || 0);
         })
         .map(session => {
-            const { key, ...sessionProps } = session;
-            return <Session key={session.name} {...sessionProps} />;
+            const { name, key, ...sessionProps } = session;
+            return <Session key={name} name={name} {...sessionProps} />;
         });
     return <div className={clsx(styles.root, column === count && styles.last)} style={style}>
         <div className={clsx(styles.sessions, isPhone && styles.mobile)}>
