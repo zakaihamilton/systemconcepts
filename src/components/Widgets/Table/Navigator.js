@@ -70,7 +70,7 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
             element: (<>
                 <Tooltip title={translations.PAGE_INDEX} arrow>
                     <DelayInput onChange={handlePageChange} value={pageIndex + 1}>
-                        <TextField className={styles.pageIndex} />
+                        <TextField className={styles.pageIndex} variant="standard" />
                     </DelayInput>
                 </Tooltip>
                 <Typography className={clsx(styles.pageSeparator)}>

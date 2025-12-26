@@ -3,14 +3,11 @@ import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleF
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GroupIcon from '@mui/icons-material/Group';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
 import { useGroups } from "@util/groups";
 import { useSync } from "@util/sync";
-import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
-import GroupOffIcon from '@mui/icons-material/GroupOff';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import { useDeviceType } from "./styles";
 
@@ -322,8 +319,7 @@ export function useSessions(depends = [], options = {}) {
                     s.showFilterDialog = !s.showFilterDialog;
                 });
             },
-            active: showFilterDialog,
-            divider: true,
+            active: showFilterDialog
         }
     ].filter(Boolean);
 
