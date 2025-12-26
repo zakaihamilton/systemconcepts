@@ -11,6 +11,8 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useSwipe } from "@util/touch";
+import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("YearView");
 
@@ -113,7 +115,13 @@ export default function YearView({ sessions, date, store }) {
 
     useToolbar({ id: "YearView", items: toolbarItems, depends: [translations, currentYear, lastViewMode] });
 
-    return <div className={styles.root}>
+    const { swipeDirection, ...swipeHandlers } = useSwipe({
+        onSwipeLeft: direction === "rtl" ? gotoPreviousYear : gotoNextYear,
+        onSwipeRight: direction === "rtl" ? gotoNextYear : gotoPreviousYear
+    });
+
+    return <div className={styles.root} {...swipeHandlers}>
+        <SwipeIndicator direction={swipeDirection} />
         {months}
     </div>;
 }

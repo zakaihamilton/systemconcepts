@@ -13,6 +13,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
+import { useSwipe } from "@util/touch";
+import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("MonthView");
 
@@ -166,7 +168,13 @@ export default function MonthView({ sessions, date, store }) {
 
     useToolbar({ id: "MonthView", items: toolbarItems, depends: [translations, month, lastViewMode] });
 
-    return <div className={styles.root}>
+    const { swipeDirection, ...swipeHandlers } = useSwipe({
+        onSwipeLeft: direction === "rtl" ? gotoPreviousMonth : gotoNextMonth,
+        onSwipeRight: direction === "rtl" ? gotoNextMonth : gotoPreviousMonth
+    });
+
+    return <div className={styles.root} {...swipeHandlers}>
+        <SwipeIndicator direction={swipeDirection} />
         <div className={styles.grid}>
             {dayTitles}
             {weeks}

@@ -13,6 +13,8 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useDeviceType } from "@util/styles";
+import { useSwipe } from "@util/touch";
+import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("Session");
 
@@ -69,6 +71,11 @@ export default function SessionPage({ group, year, date, name }) {
         day: "numeric"
     });
 
+    const { swipeDirection, ...swipeHandlers } = useSwipe({
+        onSwipeLeft: () => nextSession && gotoSession(nextSession),
+        onSwipeRight: () => prevSession && gotoSession(prevSession)
+    });
+
     const session = sessions && sessions.find(session =>
         session.group === group &&
         session.name === name &&
@@ -97,7 +104,10 @@ export default function SessionPage({ group, year, date, name }) {
         console.error("err", err);
     }
 
-    return <div className={styles.root}>
+
+
+    return <div className={styles.root} {...swipeHandlers}>
+        <SwipeIndicator direction={swipeDirection} />
         <div className={styles.card} style={{ "--group-color": session.color }}>
             <div className={styles.header}>
                 <div className={styles.title}>{name}</div>

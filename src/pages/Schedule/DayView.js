@@ -14,6 +14,8 @@ import { useDeviceType } from "@util/styles";
 import { useTheme, getContrastRatio } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
 import Input from "@components/Widgets/Input";
+import { useSwipe } from "@util/touch";
+import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("DayView");
 
@@ -71,7 +73,7 @@ export default function DayView({ sessions, date, store }) {
                     .sort((a, b) => (a.typeOrder || 0) - (b.typeOrder || 0))
                     .sort((a, b) => (a.typeOrder || 0) - (b.typeOrder || 0))
                     .map(session => {
-                        const { name, ...props } = session;
+                        const { name, key, ...props } = session;
                         return <Session key={name} name={name} {...props} showGroup={false} />;
                     })}
             </div>
@@ -217,7 +219,13 @@ export default function DayView({ sessions, date, store }) {
 
     useToolbar({ id: "DayView", items: toolbarItems, depends: [translations, date, lastViewMode] });
 
-    return <div className={styles.root}>
+    const { swipeDirection, ...swipeHandlers } = useSwipe({
+        onSwipeLeft: direction === "rtl" ? gotoPreviousDay : gotoNextDay,
+        onSwipeRight: direction === "rtl" ? gotoNextDay : gotoPreviousDay
+    });
+
+    return <div className={styles.root} {...swipeHandlers}>
+        <SwipeIndicator direction={swipeDirection} />
         <div className={styles.title}>
             <Tooltip title={translations.WEEK_VIEW}>
                 <span onClick={goWeek} className={styles.link}>{weekday}</span>
