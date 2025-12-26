@@ -37,7 +37,7 @@ export default function DayView({ sessions, date, store }) {
 
     // Group sessions
     const groups = daySessions.reduce((acc, session) => {
-        const groupKey = session.group || "Other";
+        const groupKey = session.group;
         if (!acc[groupKey]) {
             acc[groupKey] = [];
         }
