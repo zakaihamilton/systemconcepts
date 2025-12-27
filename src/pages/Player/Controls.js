@@ -186,6 +186,39 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
             dragging.current = true;
             handlePosEvent(e);
         },
+        onKeyDown(e) {
+            const duration = playerRef.duration;
+            if (!duration) return;
+
+            let newPos = currentTime;
+            let changed = false;
+
+            switch (e.key) {
+                case "ArrowLeft":
+                case "ArrowDown":
+                    newPos = Math.max(0, currentTime - skipPoints);
+                    changed = true;
+                    break;
+                case "ArrowRight":
+                case "ArrowUp":
+                    newPos = Math.min(duration, currentTime + skipPoints);
+                    changed = true;
+                    break;
+                case "Home":
+                    newPos = 0;
+                    changed = true;
+                    break;
+                case "End":
+                    newPos = duration;
+                    changed = true;
+                    break;
+            }
+
+            if (changed) {
+                e.preventDefault();
+                seekPosition(newPos);
+            }
+        },
         onContextMenu(e) {
             e.preventDefault(); // Prevent right-click menu
         }
@@ -215,7 +248,18 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
         <div className={styles.toolbar} style={{ zIndex }}>
             <div className={styles.progress}>
                 <div className={styles.progressLine}>
-                    <div className={styles.progressBack} ref={progressRef} {...events} />
+                    <div
+                        className={styles.progressBack}
+                        ref={progressRef}
+                        {...events}
+                        tabIndex={0}
+                        role="slider"
+                        aria-label={translations.SEEK}
+                        aria-valuemin={0}
+                        aria-valuemax={playerRef.duration || 0}
+                        aria-valuenow={currentTime}
+                        aria-valuetext={progressText}
+                    />
                     <div className={styles.progressText}>{progressText}</div>
                     <div className={styles.progressPlayed} style={{ width: left + "%", backgroundColor: color }} />
                     <div className={styles.progressPosition} style={{ left: progressPosition, backgroundColor: color }} />
