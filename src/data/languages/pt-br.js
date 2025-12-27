@@ -398,8 +398,8 @@ export default {
             "value": "Primeiro nome"
         },
         {
-            "id": "LAST",
-            "value": "Último nome"
+            "id": "LAST_NAME",
+            "value": "Sobrenome"
         },
         {
             "id": "HAVE_ACCOUNT",
@@ -798,6 +798,14 @@ export default {
             "value": "Voltar"
         },
         {
+            "id": "PREVIOUS_DAY",
+            "value": "Dia Anterior"
+        },
+        {
+            "id": "NEXT_DAY",
+            "value": "Próximo Dia"
+        },
+        {
             "id": "WEEK",
             "value": "Semana"
         },
@@ -1082,6 +1090,10 @@ export default {
             "value": "Limpar Filtros"
         },
         {
+            "id": "CLEAR_GROUPS",
+            "value": "Limpar Grupos"
+        },
+        {
             "id": "APPLY_FILTERS",
             "value": "Aplicar Filtros"
         },
@@ -1116,6 +1128,10 @@ export default {
         {
             "id": "PASSKEYS",
             "value": "Chaves de Acesso"
+        },
+        {
+            "id": "SEEK",
+            "value": "Buscar"
         }
     ]
 };
