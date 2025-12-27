@@ -159,6 +159,7 @@ export default function Settings() {
 
     return <>
         <Table
+            hideColumns={true}
             store={SettingsStore}
             columns={columns}
             data={data}
