@@ -1124,6 +1124,10 @@ export default {
         {
             "id": "PASSKEYS",
             "value": "Passkeys"
+        },
+        {
+            "id": "SEEK",
+            "value": "Seek"
         }
     ]
 };
