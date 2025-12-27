@@ -1,6 +1,7 @@
 import { findRecord, insertRecord, replaceRecord } from "./mongo";
 import { compare, hash } from "bcryptjs";
 import resetPasswordTemplate from "@data/resetPasswordTemplate";
+import { v4 as uuidv4 } from 'uuid';
 
 const sendResetMail = require("gmail-send")({
     user: process.env.GMAIL_USER,
@@ -112,7 +113,30 @@ export async function changePassword({ api, id, oldPassword, newPassword, salt =
 
 export async function resetPassword({ api, id, code, newPassword, salt = 10 }) {
     id = id.toLowerCase();
-    let user = await login({ api, id, hash: code });
+    let user = null;
+    try {
+        user = await findRecord({ collectionName: "users", query: { id } });
+    }
+    catch (err) {
+        console.error("Error finding record for user", id, err);
+        throw "USER_NOT_FOUND";
+    }
+
+    if (!user) {
+        throw "USER_NOT_FOUND";
+    }
+
+    // Verify reset token
+    if (!user.resetToken || user.resetToken !== code) {
+        console.error("Invalid reset token for user", id);
+        throw "INVALID_TOKEN";
+    }
+
+    if (!user.resetTokenExpiry || Date.now() > user.resetTokenExpiry) {
+        console.error("Expired reset token for user", id);
+        throw "TOKEN_EXPIRED";
+    }
+
     let result = null;
     try {
         result = await hash(newPassword, salt);
@@ -121,13 +145,16 @@ export async function resetPassword({ api, id, code, newPassword, salt = 10 }) {
         console.error(err);
         throw err;
     }
+
+    // Clear reset token and update password
+    const updatedUser = { ...user, hash: result };
+    delete updatedUser.resetToken;
+    delete updatedUser.resetTokenExpiry;
+
     await replaceRecord({
         collectionName: "users",
         query: { id },
-        record: {
-            ...user,
-            hash: result
-        }
+        record: updatedUser
     });
     return result;
 }
@@ -145,9 +172,25 @@ export async function sendResetEmail({ id }) {
     if (!user) {
         throw "USER_NOT_FOUND";
     }
+
+    const resetToken = uuidv4();
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour
+
+    // Save reset token to user
+    await replaceRecord({
+        collectionName: "users",
+        query: { id },
+        record: {
+            ...user,
+            resetToken,
+            resetTokenExpiry
+        }
+    });
+
     let emailText = resetPasswordTemplate;
     const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
     emailText = emailText.replace(/{{name}}/g, fullName);
-    emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/" + encodeURIComponent("resetpassword/" + user.hash));
+    // Use resetToken instead of user.hash
+    emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/" + encodeURIComponent("resetpassword/" + resetToken));
     await sendResetMail({ to: user.email, text: emailText });
 }
