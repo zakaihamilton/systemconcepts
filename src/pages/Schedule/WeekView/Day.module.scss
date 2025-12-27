@@ -3,6 +3,10 @@
     flex-direction: column;
 }
 
+.root:not(.mobile) {
+    min-width: 0;
+}
+
 .root:not(.last) {
     [dir=ltr] & {
         margin-right: 0.25em;

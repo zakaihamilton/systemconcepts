@@ -51,7 +51,7 @@
 }
 
 .name {
-    width: 10em;
+    min-width: 0;
     text-align: center;
     padding-right: 1em;
     overflow: hidden;
@@ -60,6 +60,7 @@
 
 .name.mobile {
     width: 12em;
+    min-width: unset;
 }
 
 .background {

@@ -20,6 +20,7 @@ import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import FilterBar from "@pages/Sessions/FilterBar";
 import { useDeviceType } from "@util/styles";
+import clsx from "clsx";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -125,7 +126,7 @@ export default function SchedulePage() {
     return <div className={styles.root}>
         {statusBar}
         {!!showFilterDialog && !isMobile && <FilterBar hideYears={true} />}
-        <div className={styles.content}>
+        <div className={clsx(styles.content, isMobile && styles.mobile)}>
             {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
