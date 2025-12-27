@@ -229,6 +229,7 @@ export function useSyncFeature() {
                 s.busy = false;
             });
             setComplete(true);
+            setDuration(0); // Reset duration for next sync
         }
     }, [online]);
 
