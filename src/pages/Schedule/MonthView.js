@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslations } from "@util/translations";
 import styles from "./MonthView.module.scss";
 import Week from "./MonthView/Week";
@@ -19,6 +20,7 @@ import SwipeIndicator from "@widgets/SwipeIndicator";
 registerToolbar("MonthView");
 
 export default function MonthView({ sessions, date, store }) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
     const { lastViewMode } = store.useState();
@@ -42,7 +44,7 @@ export default function MonthView({ sessions, date, store }) {
     const numWeeks = 6;
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} />;
+        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} onMenuVisible={setIsMenuOpen} />;
     });
 
     const numDaysInWeek = 7;
@@ -173,7 +175,7 @@ export default function MonthView({ sessions, date, store }) {
         onSwipeRight: direction === "rtl" ? gotoNextMonth : gotoPreviousMonth
     });
 
-    return <div className={styles.root} {...swipeHandlers}>
+    return <div className={styles.root} {...(!isMenuOpen && swipeHandlers)}>
         <SwipeIndicator direction={swipeDirection} />
         <div className={styles.grid}>
             {dayTitles}

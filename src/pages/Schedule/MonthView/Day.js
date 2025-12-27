@@ -12,7 +12,7 @@ import { useTheme } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslations } from "@util/translations";
 
-export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible }) {
     const translations = useTranslations();
     const theme = useTheme();
     const style = {
@@ -71,7 +71,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
                         <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
                     </Tooltip>)}
                 </div>
-                <Menu items={items}>
+                <Menu items={items} onVisible={onMenuVisible}>
                     <Tooltip arrow title={translations.SESSIONS}>
                         <div className={styles.button}>
                             <ExpandMoreIcon className={styles.icon} />
