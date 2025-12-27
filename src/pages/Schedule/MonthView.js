@@ -200,11 +200,11 @@ export default function MonthView({ sessions, date, store }) {
             id: item.name,
             name: item.name,
             date: item.date,
+            type: item.type,
             description: groupName,
             backgroundColor: item.color,
             style: { color: getSessionTextColor(item.color, theme) },
             icon,
-            description: groupName,
             target: "#schedule/" + toPath(path),
             onClick: () => addPath(path)
         };
