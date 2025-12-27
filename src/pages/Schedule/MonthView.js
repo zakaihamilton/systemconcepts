@@ -15,7 +15,6 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
 import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
 import Sessions from "./MonthView/Sessions";
 import { addPath, toPath } from "@util/pages";
 import SessionIcon from "@widgets/SessionIcon";
@@ -223,6 +222,5 @@ export default function MonthView({ sessions, date, store }) {
             onSwipeLeft={direction === "rtl" ? gotoPreviousDay : gotoNextDay}
             onSwipeRight={direction === "rtl" ? gotoNextDay : gotoPreviousDay}
             direction={direction} />
-        <SwipeIndicator direction={swipeDirection} />
     </div>;
 }

@@ -3,7 +3,6 @@ import Dialog from "@widgets/Dialog";
 import Session from "./Sessions/Session";
 import styles from "./Sessions.module.scss";
 import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
 import clsx from "clsx";
 import { useDeviceType } from "@util/styles";
 
@@ -53,6 +52,5 @@ export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSw
                 {sessionElements}
             </div>
         </Dialog>
-        <SwipeIndicator direction={swipeDirection} />
     </>;
 }

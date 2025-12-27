@@ -14,7 +14,6 @@ import { useDeviceType } from "@util/styles";
 import Tooltip from "@mui/material/Tooltip";
 import Input from "@components/Widgets/Input";
 import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("DayView");
 
@@ -217,6 +216,5 @@ export default function DayView({ sessions, date, store }) {
         <div className={styles.list}>
             {items.length ? items : <div className={styles.empty}>{translations.NO_SESSIONS || "No sessions"}</div>}
         </div>
-        <SwipeIndicator direction={swipeDirection} />
     </div>;
 }

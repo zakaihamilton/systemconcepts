@@ -12,7 +12,6 @@ import { useDirection } from "@util/direction";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("YearView");
 
@@ -122,6 +121,5 @@ export default function YearView({ sessions, date, store }) {
 
     return <div className={styles.root} {...swipeHandlers}>
         {months}
-        <SwipeIndicator direction={swipeDirection} />
     </div>;
 }
