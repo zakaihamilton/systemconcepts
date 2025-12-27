@@ -125,11 +125,13 @@ export default function SchedulePage() {
     return <div className={styles.root}>
         {statusBar}
         {!!showFilterDialog && !isMobile && <FilterBar hideYears={true} />}
-        {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
-        {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-        {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
-        {!!loading && loadingElement}
+        <div className={styles.content}>
+            {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
+            {!!loading && loadingElement}
+        </div>
         {!!showFilterDialog && !!isMobile && <FilterBar hideYears={true} />}
     </div>;
 }
