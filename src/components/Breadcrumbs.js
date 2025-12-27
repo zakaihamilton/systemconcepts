@@ -15,11 +15,16 @@ import clsx from "clsx";
 import NoSsr from "@mui/material/NoSsr";
 import { setHash } from "@util/pages";
 
-export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon, href, hideRoot, navigateLast, description }) {
+import { Menu, MenuItem } from "@mui/material";
+import { useState } from "react";
+
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, href, hideRoot, navigateLast, description, menuItems }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
 
     const showLabel =
         deviceType === "phone" && index && (count <= 2 || index === count - 1) ||
@@ -33,11 +38,27 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
     const title = !showLabel ? (label || name) : tooltip || label || name;
 
     const gotoItem = (event) => {
+        if (isLast && menuItems) {
+            event.preventDefault();
+            setAnchorEl(event.currentTarget);
+            return;
+        }
         if (isLast && !navigateLast) {
             event.preventDefault();
             return;
         }
         setHash(href);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleMenuClick = (item) => {
+        handleClose();
+        if (item.onClick) {
+            item.onClick();
+        }
     };
 
     if (collapse && index > 1 && index < count - 2) {
@@ -67,9 +88,9 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
 
     const content = (
         <>
-            {icon && (
+            {Icon && (
                 <div className={styles.icon}>
-                    {icon}
+                    <Icon />
                 </div>
             )}
             {(showLabel || isLast) && (
@@ -88,7 +109,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
     return (
         <>
             <Link
-                className={clsx(styles.item, isLast && !navigateLast && styles.last)}
+                className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last)}
                 color="inherit"
                 href={href}
                 onClick={gotoItem}
@@ -100,6 +121,18 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, icon
                     </div>
                 </Tooltip>
             </Link>
+            {!!menuItems && <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+            >
+                {menuItems.map((item, index) => (
+                    <MenuItem key={index} onClick={() => handleMenuClick(item)}>
+                        {item.icon && <div style={{ marginRight: "0.5em", display: "flex" }}>{item.icon}</div>}
+                        {item.name}
+                    </MenuItem>
+                ))}
+            </Menu>}
             {!isLast && (
                 <div className={styles.separator}>
                     <SeparatorIcon fontSize="small" />

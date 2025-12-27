@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useTranslations } from "@util/translations";
 import styles from "./MonthView.module.scss";
 import Week from "./MonthView/Week";
 import DayHeader from "./MonthView/DayHeader";
-import { getMonthViewStart, addDate, getMonthNames, getYearNames } from "@util/date";
+import { getMonthViewStart, addDate, getMonthNames, getYearNames, getDateString } from "@util/date";
 import { useDateFormatter } from "@util/locale";
 import Input from "@widgets/Input";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -14,15 +15,22 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
 import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
+import Sessions from "./MonthView/Sessions";
+import { addPath, toPath } from "@util/pages";
+import SessionIcon from "@widgets/SessionIcon";
+import { getSessionTextColor } from "@util/colors";
+import { useTheme } from "@mui/material/styles";
 
 registerToolbar("MonthView");
 
 export default function MonthView({ sessions, date, store }) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [popupDate, setPopupDate] = useState(null);
     const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
     const { lastViewMode } = store.useState();
     const translations = useTranslations();
+    const theme = useTheme();
     const firstDay = getMonthViewStart(date);
     const dayHeaderFormatter = useDateFormatter({
         weekday: isPhone ? "narrow" : "short"
@@ -42,7 +50,7 @@ export default function MonthView({ sessions, date, store }) {
     const numWeeks = 6;
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} />;
+        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} onMenuVisible={setIsMenuOpen} onOpenDay={setPopupDate} />;
     });
 
     const numDaysInWeek = 7;
@@ -173,11 +181,46 @@ export default function MonthView({ sessions, date, store }) {
         onSwipeRight: direction === "rtl" ? gotoNextMonth : gotoPreviousMonth
     });
 
-    return <div className={styles.root} {...swipeHandlers}>
-        <SwipeIndicator direction={swipeDirection} />
+    const gotoPreviousDay = () => {
+        setPopupDate(addDate(popupDate, -1));
+    };
+
+    const gotoNextDay = () => {
+        setPopupDate(addDate(popupDate, 1));
+    };
+
+    const sessionDate = popupDate && getDateString(popupDate);
+    const sessionItems = (sessions || []).filter(session => session.date === sessionDate);
+    const popupItems = sessionItems.map(item => {
+        const groupName = item.group && (item.group[0].toUpperCase() + item.group.slice(1));
+        const path = `session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
+        const icon = <SessionIcon type={item.type} />;
+        return {
+            id: item.name,
+            name: item.name,
+            date: item.date,
+            type: item.type,
+            description: groupName,
+            backgroundColor: item.color,
+            style: { color: getSessionTextColor(item.color, theme) },
+            icon,
+            target: "#schedule/" + toPath(path),
+            onClick: () => addPath(path)
+        };
+    });
+
+    return <div className={styles.root} {...(!isMenuOpen && !popupDate && swipeHandlers)}>
         <div className={styles.grid}>
             {dayTitles}
             {weeks}
         </div>
+        <Sessions
+            open={!!popupDate}
+            onClose={() => setPopupDate(null)}
+            date={popupDate}
+            items={popupItems}
+            onSwipeLeft={direction === "rtl" ? gotoPreviousDay : gotoNextDay}
+            onSwipeRight={direction === "rtl" ? gotoNextDay : gotoPreviousDay}
+            direction={direction} />
     </div>;
 }

@@ -11,6 +11,10 @@
     background-color: var(--main-background);
 }
 
+.rtl {
+    direction: rtl;
+}
+
 .root.sidebar {
     grid-template-columns: 16em 1fr;
     /* Increased width slightly for better readability */

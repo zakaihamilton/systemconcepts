@@ -49,6 +49,7 @@ export function useSearch(name, updateCallback) {
             id: "search",
             divider: true,
             menu: false,
+            sortKey: -1,
             location: isPhone && "header",
             element: <div className={clsx(styles.search, (isDesktop || focused || value) && styles.searchExpanded)} onClick={() => {
                 if (!focused && inputRef.current) {

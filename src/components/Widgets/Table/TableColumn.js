@@ -15,7 +15,7 @@ export default function TableColumn({ item, order, orderBy, showSort, createSort
         padding="none"
         sortDirection={orderBy === sortId ? order : false}
         {...columnProps}>
-        <div className={styles.headerRow}>
+        <div className={styles.root}>
             {sortable && <TableSortLabel
                 className={styles.sortLabel}
                 active={showSort && orderBy === sortId}

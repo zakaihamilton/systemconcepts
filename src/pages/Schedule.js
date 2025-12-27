@@ -20,6 +20,7 @@ import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import FilterBar from "@pages/Sessions/FilterBar";
 import { useDeviceType } from "@util/styles";
+import clsx from "clsx";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -84,20 +85,8 @@ export default function SchedulePage() {
         }
     ];
 
-    const currentViewOption = viewOptions.find(item => item.id === viewMode);
-
     const toolbarItems = [];
-    if (isMobile) {
-        toolbarItems.push({
-            id: "view",
-            name: currentViewOption ? currentViewOption.name : translations.MONTH_VIEW,
-            icon: currentViewOption ? currentViewOption.icon : <DateRangeIcon />,
-            location: "mobile",
-            menu: false,
-            items: viewOptions,
-            selected: viewMode
-        });
-    } else {
+    if (!isMobile) {
         toolbarItems.push(...viewOptions.map(item => ({
             ...item,
             selected: viewMode,
@@ -137,11 +126,13 @@ export default function SchedulePage() {
     return <div className={styles.root}>
         {statusBar}
         {!!showFilterDialog && !isMobile && <FilterBar hideYears={true} />}
-        {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
-        {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-        {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-        {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
-        {!!loading && loadingElement}
+        <div className={clsx(styles.content, isMobile && styles.mobile)}>
+            {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
+            {!!loading && loadingElement}
+        </div>
         {!!showFilterDialog && !!isMobile && <FilterBar hideYears={true} />}
     </div>;
 }

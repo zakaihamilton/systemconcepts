@@ -80,6 +80,13 @@ export function useToolbarItems({ location }) {
         }
         return item.location === location || (!location && !item.location);
     });
+
+    sectionItems.sort((a, b) => {
+        const aKey = a.sortKey || 0;
+        const bKey = b.sortKey || 0;
+        return aKey - bKey;
+    });
+
     return sectionItems;
 }
 

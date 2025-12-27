@@ -27,3 +27,13 @@
         box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
     }
 }
+
+.rtl {
+    border-right: none;
+    border-left: 1px solid var(--border-color);
+
+    :global(.MuiPaper-root) {
+        border-radius: 16px 0 0 16px;
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    }
+}

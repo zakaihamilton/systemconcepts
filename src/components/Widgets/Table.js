@@ -291,20 +291,8 @@ export default function TableWidget(props) {
         }
     }));
 
-    const currentViewOption = viewOptions.find(item => item.id === viewMode);
-
     if (viewOptions.length > 1) {
-        if (isMobile) {
-            toolbarItems.push({
-                id: "view",
-                name: currentViewOption ? currentViewOption.name : translations.TABLE_VIEW,
-                icon: currentViewOption ? currentViewOption.icon : <TableChartIcon />,
-                location: "mobile",
-                menu: false,
-                items: viewOptions,
-                selected: viewMode
-            });
-        } else {
+        if (!isMobile) {
             toolbarItems.push(...viewOptions.map(item => ({
                 ...item,
                 selected: viewMode,
@@ -340,6 +328,7 @@ export default function TableWidget(props) {
         }
 
         if (search) {
+            const lowerSearch = search.toLowerCase();
             const keys = visibleColumns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
                 if (typeof item.searchable === "string") {
                     return item.searchable;
@@ -352,7 +341,7 @@ export default function TableWidget(props) {
             items = items.filter(item => {
                 for (const key of keys) {
                     if (typeof item[key] === "string") {
-                        const match = item[key].toLowerCase().includes(search.toLowerCase());
+                        const match = item[key].toLowerCase().includes(lowerSearch);
                         if (match) {
                             return true;
                         }

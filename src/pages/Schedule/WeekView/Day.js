@@ -22,7 +22,7 @@ export default function Day({ sessions, column, row, count, date }) {
             const { name, key, ...sessionProps } = session;
             return <Session key={name} name={name} {...sessionProps} />;
         });
-    return <div className={clsx(styles.root, column === count && styles.last)} style={style}>
+    return <div className={clsx(styles.root, column === count && styles.last, isPhone && styles.mobile)} style={style}>
         <div className={clsx(styles.sessions, isPhone && styles.mobile)}>
             {sessionItems}
         </div>

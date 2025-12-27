@@ -312,6 +312,7 @@ export function useSessions(depends = [], options = {}) {
         {
             id: "filter",
             name: translations.FILTER,
+            sortKey: 1,
             icon: <FilterAltIcon />,
             location: isMobile ? "mobile" : "header",
             onClick: () => {

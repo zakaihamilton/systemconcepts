@@ -42,32 +42,12 @@
 .list {
     display: flex;
     flex-direction: column;
-    gap: 2em;
+    gap: 1em;
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
 }
 
-.group {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-}
-
-.groupTitle {
-    font-size: 1.25em;
-    font-weight: 700;
-    color: var(--primary-600);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 0.5em;
-    margin-top: 0.5em;
-}
-
-.groupItems {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1em;
-}
 
 .empty {
     text-align: center;

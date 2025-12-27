@@ -3,28 +3,22 @@ import styles from "./Day.module.scss";
 import { isDateToday, isDateMonth, getDateString } from "@util/date";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
-import Menu from "@widgets/Menu";
 import { addPath, toPath } from "@util/pages";
 import SessionIcon from "@widgets/SessionIcon";
 
 import { getSessionTextColor } from "@util/colors";
 import { useTheme } from "@mui/material/styles";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslations } from "@util/translations";
-
-export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible, onOpenDay }) {
     const translations = useTranslations();
     const theme = useTheme();
+
     const style = {
         gridColumn: column,
         gridRow: row
     };
     const onDayClick = () => {
-        store.update(s => {
-            s.date = date;
-            s.viewMode = "day";
-            s.lastViewMode = "month";
-        });
+        onOpenDay && onOpenDay(date);
     };
     const dayNumber = dateFormatter.format(date);
     const isToday = isDateToday(date);
@@ -53,9 +47,10 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         column === columnCount && styles.lastColumn,
         row === rowCount && styles.lastRow
     );
+
     return <div className={className} style={style}>
         <div className={styles.title}>
-            <Tooltip arrow title={translations.DAY_VIEW}>
+            <Tooltip arrow title={translations.SESSIONS}>
                 <Avatar className={clsx(styles.day, isToday && styles.today, isMonth && styles.active)} onClick={onDayClick} style={{ cursor: "pointer" }}>
                     {dayNumber}
                 </Avatar>
@@ -71,13 +66,6 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
                         <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
                     </Tooltip>)}
                 </div>
-                <Menu items={items}>
-                    <Tooltip arrow title={translations.SESSIONS}>
-                        <div className={styles.button}>
-                            <ExpandMoreIcon className={styles.icon} />
-                        </div>
-                    </Tooltip>
-                </Menu>
             </div>}
         </div>
     </div>;

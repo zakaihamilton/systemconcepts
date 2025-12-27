@@ -57,12 +57,12 @@ export default function Main() {
         });
     }, [language]);
 
-    const className = useStyles(styles, {
-        root: true,
-        sidebar: showSideBar && !isMobile,
-        mobile: isMobile,
-        rtl: direction === "rtl"
-    });
+    const className = clsx(
+        styles.root,
+        showSideBar && !isMobile && styles.sidebar,
+        isMobile && styles.mobile,
+        direction === "rtl" && styles.rtl
+    );
 
     return <>
         <Head />

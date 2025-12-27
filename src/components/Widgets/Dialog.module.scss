@@ -43,7 +43,6 @@
 .dialog {
     border-radius: 8px;
     overflow: hidden;
-    align-self: center;
     display: flex;
     flex-direction: column;
     color: var(--text-color);
@@ -82,9 +81,4 @@
     display: flex;
     align-items: center;
     background: var(--app-bar-background);
-}
-
-.closeDialog {
-    position: absolute;
-    right: 0px;
 }
