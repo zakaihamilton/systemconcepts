@@ -84,20 +84,8 @@ export default function SchedulePage() {
         }
     ];
 
-    const currentViewOption = viewOptions.find(item => item.id === viewMode);
-
     const toolbarItems = [];
-    if (isMobile) {
-        toolbarItems.push({
-            id: "view",
-            name: currentViewOption ? currentViewOption.name : translations.MONTH_VIEW,
-            icon: currentViewOption ? currentViewOption.icon : <DateRangeIcon />,
-            location: "mobile",
-            menu: false,
-            items: viewOptions,
-            selected: viewMode
-        });
-    } else {
+    if (!isMobile) {
         toolbarItems.push(...viewOptions.map(item => ({
             ...item,
             selected: viewMode,

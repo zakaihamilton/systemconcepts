@@ -291,20 +291,8 @@ export default function TableWidget(props) {
         }
     }));
 
-    const currentViewOption = viewOptions.find(item => item.id === viewMode);
-
     if (viewOptions.length > 1) {
-        if (isMobile) {
-            toolbarItems.push({
-                id: "view",
-                name: currentViewOption ? currentViewOption.name : translations.TABLE_VIEW,
-                icon: currentViewOption ? currentViewOption.icon : <TableChartIcon />,
-                location: "mobile",
-                menu: false,
-                items: viewOptions,
-                selected: viewMode
-            });
-        } else {
+        if (!isMobile) {
             toolbarItems.push(...viewOptions.map(item => ({
                 ...item,
                 selected: viewMode,

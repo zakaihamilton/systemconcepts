@@ -207,7 +207,7 @@ export function usePages(modeId) {
             if (modeId) {
                 Icon = page[modeId] && page[modeId].Icon || Icon;
                 name = page[modeId] && page[modeId].name || name;
-                label = page[modeId] && page[modeId].name || label;
+                label = page[modeId] && page[modeId].label || label;
             }
             return {
                 ...props,

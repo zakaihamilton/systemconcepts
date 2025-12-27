@@ -9,7 +9,7 @@ export default function Apps() {
     const elements = items.map(page => {
         const { Icon } = page;
         return <Link href={"#" + page.id} underline="none" key={page.id} className={styles.item} onClick={() => setPath(page.id)}>
-            <Icon className={styles.icon} fontSize="large" />
+            {Icon && <Icon className={styles.icon} fontSize="large" />}
             <div className={styles.label}>
                 {page.name}
             </div>

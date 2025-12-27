@@ -39,6 +39,7 @@ export default function Sync({ children }) {
             id: "sync",
             name,
             location: "header",
+            sortKey: 1,
             menu: false,
             icon: syncIcon,
             onClick: sync
