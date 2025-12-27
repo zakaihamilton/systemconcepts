@@ -1,0 +1,89 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid transparent;
+    background: var(--background);
+    font: inherit;
+    align-items: center;
+    justify-content: center;
+    min-height: 7em;
+    color: var(--text-color);
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    margin: 4px;
+    box-shadow: 0 1px 3px var(--box-shadow-color);
+    transition: all 0.2s ease;
+    min-height: 3.5em;
+}
+
+.root:hover {
+    z-index: 1;
+    cursor: pointer;
+}
+
+.root:hover:active {
+    transform: translateY(2px) scale(1.02);
+    box-shadow: 0 2px 4px var(--box-shadow-color);
+}
+
+.media {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+.group {
+    font-weight: bold;
+    display: flex;
+    align-self: flex-end;
+    font-weight: normal;
+    padding-right: 0.5em;
+    padding-bottom: 0.1em;
+    font-size: 0.8em;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    height: 2em;
+    width: 100%;
+    justify-content: stretch;
+}
+
+.name {
+    min-width: 0;
+    text-align: center;
+    padding-right: 1em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    width: 100% !important;
+}
+
+.background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+}
+
+.backgroundBorder {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 2px;
+    opacity: 0.3;
+}
+
+.icons {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 4px;
+    opacity: 0.8;
+    margin: 0.5em;
+}

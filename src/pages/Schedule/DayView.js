@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import styles from "./DayView.module.scss";
-import Session from "./WeekView/Session";
+import SessionGroup from "./DayView/SessionGroup";
 import { addDate, getDateString, getDaysInMonth, getMonthNames, getYearNames } from "@util/date";
 import { useDateFormatter } from "@util/locale";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -11,7 +11,6 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useDirection } from "@util/direction";
 import { useDeviceType } from "@util/styles";
-import { useTheme, getContrastRatio } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
 import Input from "@components/Widgets/Input";
 import { useSwipe } from "@util/touch";
@@ -20,7 +19,6 @@ import SwipeIndicator from "@widgets/SwipeIndicator";
 registerToolbar("DayView");
 
 export default function DayView({ sessions, date, store }) {
-    const theme = useTheme();
     const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
     const translations = useTranslations();
@@ -55,29 +53,7 @@ export default function DayView({ sessions, date, store }) {
     const sortedGroups = Object.keys(groups).sort();
 
     const items = sortedGroups.map(group => {
-        const groupLabel = group[0].toUpperCase() + group.slice(1);
-        const firstSession = groups[group][0];
-        const groupColor = firstSession.color;
-        let textColor = theme.palette.text.primary;
-        if (groupColor) {
-            const contrastWhite = getContrastRatio(groupColor, '#ffffff');
-            const contrastBlack = getContrastRatio(groupColor, '#000000');
-            textColor = contrastWhite >= contrastBlack ? '#ffffff' : '#000000';
-        }
-        return <div key={group} className={styles.group}>
-            <div className={styles.groupTitle} style={{ backgroundColor: groupColor, color: textColor, padding: "0.5em", borderRadius: "8px" }}>
-                {groupLabel}
-            </div>
-            <div className={styles.groupItems}>
-                {groups[group]
-                    .sort((a, b) => (a.typeOrder || 0) - (b.typeOrder || 0))
-                    .sort((a, b) => (a.typeOrder || 0) - (b.typeOrder || 0))
-                    .map(session => {
-                        const { name, key, ...props } = session;
-                        return <Session key={name} name={name} {...props} showGroup={false} />;
-                    })}
-            </div>
-        </div>;
+        return <SessionGroup key={group} group={group} sessions={groups[group]} />;
     });
 
     const gotoPreviousDay = () => {
