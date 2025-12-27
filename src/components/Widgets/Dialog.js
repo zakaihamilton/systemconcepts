@@ -6,11 +6,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { IconButton } from "@mui/material";
 import clsx from "clsx";
 
-export default function Dialog({ title, children, actions, onClose, className }) {
+export default function Dialog({ title, children, actions, onClose, className, ...props }) {
     const translations = useTranslations();
 
     return (
-        <div className={styles.root} onClick={onClose}>
+        <div className={styles.root} onClick={onClose} {...props}>
             <div className={styles.background} onClick={e => e.stopPropagation()}>
                 <div className={clsx(styles.dialog, className)}>
                     <div className={styles.title}>

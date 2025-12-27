@@ -107,7 +107,6 @@ export default function SessionPage({ group, year, date, name }) {
 
 
     return <div className={styles.root} {...swipeHandlers}>
-        <SwipeIndicator direction={swipeDirection} />
         <div className={styles.card} style={{ "--group-color": session.color }}>
             <div className={styles.header}>
                 <div className={styles.title}>{name}</div>
@@ -136,5 +135,6 @@ export default function SessionPage({ group, year, date, name }) {
                 </div>
             </div>
         </div>
+        <SwipeIndicator direction={swipeDirection} />
     </div>;
 }

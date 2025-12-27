@@ -225,7 +225,6 @@ export default function DayView({ sessions, date, store }) {
     });
 
     return <div className={styles.root} {...swipeHandlers}>
-        <SwipeIndicator direction={swipeDirection} />
         <div className={styles.title}>
             <Tooltip title={translations.WEEK_VIEW}>
                 <span onClick={goWeek} className={styles.link}>{weekday}</span>
@@ -242,5 +241,6 @@ export default function DayView({ sessions, date, store }) {
         <div className={styles.list}>
             {items.length ? items : <div className={styles.empty}>{translations.NO_SESSIONS || "No sessions"}</div>}
         </div>
+        <SwipeIndicator direction={swipeDirection} />
     </div>;
 }

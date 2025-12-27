@@ -8,33 +8,44 @@ import ListItemButton from "@mui/material/ListItemButton";
 import Link from "@mui/material/Link";
 import Avatar from "@mui/material/Avatar";
 import styles from "./Sessions.module.scss";
+import { useSwipe } from "@util/touch";
+import SwipeIndicator from "@widgets/SwipeIndicator";
+import clsx from "clsx";
 
-export default function Sessions({ open, onClose, date, items }) {
+export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSwipeRight, direction }) {
     const dialogDateFormatter = useDateFormatter({ dateStyle: "full" });
+    const { swipeDirection, ...swipeHandlers } = useSwipe({
+        onSwipeLeft,
+        onSwipeRight
+    });
 
     if (!open) {
         return null;
     }
 
-    return <Dialog
-        title={dialogDateFormatter.format(date)}
-        onClose={onClose}
-        className={styles.root}
-    >
-        <List className={styles.list}>
-            {items.map(item => {
-                const { id, name, description, icon, backgroundColor, style, target, onClick } = item;
-                return <ListItem disablePadding key={id}>
-                    <ListItemButton onClick={(e) => { onClick(e); onClose(); }} component={target ? Link : "div"} underline="none" href={target}>
-                        <ListItemAvatar>
-                            <Avatar style={{ backgroundColor, ...style }}>
-                                {icon}
-                            </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText primary={name} secondary={description} />
-                    </ListItemButton>
-                </ListItem>;
-            })}
-        </List>
-    </Dialog>;
+    return <>
+        <Dialog
+            title={dialogDateFormatter.format(date)}
+            onClose={onClose}
+            className={clsx(styles.root, direction === "rtl" && styles.rtl)}
+            {...swipeHandlers}
+        >
+            <List className={styles.list}>
+                {items.map(item => {
+                    const { id, name, description, icon, backgroundColor, style, target, onClick } = item;
+                    return <ListItem disablePadding key={id}>
+                        <ListItemButton onClick={(e) => { onClick(e); onClose(); }} component={target ? Link : "div"} underline="none" href={target}>
+                            <ListItemAvatar>
+                                <Avatar style={{ backgroundColor, ...style }}>
+                                    {icon}
+                                </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary={name} secondary={description} />
+                        </ListItemButton>
+                    </ListItem>;
+                })}
+            </List>
+        </Dialog>
+        <SwipeIndicator direction={swipeDirection} />
+    </>;
 }

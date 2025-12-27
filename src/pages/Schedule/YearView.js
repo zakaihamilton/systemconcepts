@@ -121,7 +121,7 @@ export default function YearView({ sessions, date, store }) {
     });
 
     return <div className={styles.root} {...swipeHandlers}>
-        <SwipeIndicator direction={swipeDirection} />
         {months}
+        <SwipeIndicator direction={swipeDirection} />
     </div>;
 }

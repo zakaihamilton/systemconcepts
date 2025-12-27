@@ -28,7 +28,7 @@ export function useSwipe({ onSwipeLeft, onSwipeRight, threshold = 50 }) {
             onSwipeRight && onSwipeRight();
         }
         if (isLeftSwipe || isRightSwipe) {
-            setTimeout(() => setSwipeDirection(null), 250);
+            setTimeout(() => setSwipeDirection(null), 500);
         }
     };
 

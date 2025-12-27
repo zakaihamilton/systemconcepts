@@ -10,6 +10,8 @@ import { useBookmarks } from "@components/Bookmarks";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useTranslations } from "@util/translations";
 
+import clsx from "clsx";
+
 export default function SideBar() {
     const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
@@ -83,13 +85,10 @@ export default function SideBar() {
     }
     if (isMobile) {
         return <Drawer
-            anchor={direction === "rtl" ? "right" : "left"}
+            anchor="left"
             open={showSlider}
             ModalProps={{
                 keepMounted: true
-            }}
-            PaperProps={{
-                className: styles.popupDrawer
             }}
             onClose={closeDrawer}
         >
@@ -98,7 +97,7 @@ export default function SideBar() {
         </Drawer>;
     }
 
-    return <div className={styles.root}>
+    return <div className={clsx(styles.root, direction === "rtl" && styles.rtl)}>
         <div className={styles.container}>
             <List items={items} state={state} />
             <QuickAccess closeDrawer={closeDrawer} state={state} />

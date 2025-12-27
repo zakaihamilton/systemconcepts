@@ -8,24 +8,17 @@ import SessionIcon from "@widgets/SessionIcon";
 
 import { getSessionTextColor } from "@util/colors";
 import { useTheme } from "@mui/material/styles";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslations } from "@util/translations";
-import { useState } from "react";
-import Sessions from "./Sessions";
-
-export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible, onOpenDay }) {
     const translations = useTranslations();
     const theme = useTheme();
-    const [isOpen, setIsOpen] = useState(false);
 
     const style = {
         gridColumn: column,
         gridRow: row
     };
     const onDayClick = () => {
-        const newIsOpen = !isOpen;
-        setIsOpen(newIsOpen);
-        onMenuVisible && onMenuVisible(newIsOpen);
+        onOpenDay && onOpenDay(date);
     };
     const dayNumber = dateFormatter.format(date);
     const isToday = isDateToday(date);
@@ -55,10 +48,6 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         row === rowCount && styles.lastRow
     );
 
-    const closeMenu = () => {
-        setIsOpen(false);
-        onMenuVisible && onMenuVisible(false);
-    };
     return <div className={className} style={style}>
         <div className={styles.title}>
             <Tooltip arrow title={translations.SESSIONS}>
@@ -77,7 +66,6 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
                         <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
                     </Tooltip>)}
                 </div>
-                <Sessions open={isOpen} onClose={closeMenu} items={items} date={date} />
             </div>}
         </div>
     </div>;
