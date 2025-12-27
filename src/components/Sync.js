@@ -1,6 +1,6 @@
 import { createContext, useMemo } from "react";
 import styles from "./Sync.module.scss";
-import { useDeviceType, useStyles } from "@util/styles";
+import { useStyles } from "@util/styles";
 import { useSyncFeature } from "@util/sync";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -14,9 +14,8 @@ registerToolbar("Sync", 1);
 export const SyncContext = createContext();
 
 export default function Sync({ children }) {
-    const isDesktop = useDeviceType() === "desktop";
     const translations = useTranslations();
-    const { sync, busy, error, active, duration, changed, percentage, currentBundle } = useSyncFeature();
+    const { sync, busy, error, duration, changed, percentage, currentBundle } = useSyncFeature();
     const className = useStyles(styles, {
         animated: busy
     });
@@ -36,19 +35,18 @@ export default function Sync({ children }) {
         </Badge>;
 
     const toolbarItems = [
-        active && sync && {
+        {
             id: "sync",
             name,
             location: "header",
-            menu: !isDesktop,
+            menu: false,
             icon: syncIcon,
-            onClick: sync,
-            divider: isDesktop
+            onClick: sync
         },
 
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, active, duration, error, isDesktop, percentage, currentBundle] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, error };
