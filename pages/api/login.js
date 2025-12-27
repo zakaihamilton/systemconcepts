@@ -21,7 +21,8 @@ export default async function LOGIN_API(req, res) {
             console.error("login error: ", error);
         }
         else {
-            console.log("login success", params);
+            // Log only ID to avoid leaking sensitive data (hash, PII)
+            console.log("login success", params && params.id);
         }
         res.status(200).json({ ...(error && { err: getSafeError(error) }), ...params });
     }
