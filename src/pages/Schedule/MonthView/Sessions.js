@@ -1,12 +1,14 @@
 import { useDateFormatter } from "@util/locale";
 import Dialog from "@widgets/Dialog";
-import Session from "../WeekView/Session";
+import Session from "./Sessions/Session";
 import styles from "./Sessions.module.scss";
 import { useSwipe } from "@util/touch";
 import SwipeIndicator from "@widgets/SwipeIndicator";
 import clsx from "clsx";
+import { useDeviceType } from "@util/styles";
 
 export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSwipeRight, direction }) {
+    const isMobile = useDeviceType() === "phone";
     const dialogDateFormatter = useDateFormatter({ dateStyle: "full" });
     const { swipeDirection, ...swipeHandlers } = useSwipe({
         onSwipeLeft,
@@ -27,17 +29,17 @@ export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSw
     });
 
     const sessionElements = sortedItems.map(item => {
-        // Extract session data from the item
-        const sessionProps = {
-            name: item.name,
-            group: item.description?.toLowerCase(),
-            color: item.backgroundColor,
-            type: item.type,
-            year: new Date(item.date).getFullYear(),
-            date: item.date,
-            showGroup: true
-        };
-        return <Session key={item.id} {...sessionProps} />;
+        return <Session
+            key={item.id}
+            name={item.name}
+            group={item.description?.toLowerCase()}
+            color={item.backgroundColor}
+            type={item.type}
+            year={new Date(item.date).getFullYear()}
+            date={item.date}
+            showGroup={true}
+            small={true}
+        />;
     });
 
     return <>
@@ -47,7 +49,7 @@ export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSw
             className={clsx(styles.root, direction === "rtl" && styles.rtl)}
             {...swipeHandlers}
         >
-            <div className={styles.list}>
+            <div className={clsx(styles.list, isMobile && styles.mobile)}>
                 {sessionElements}
             </div>
         </Dialog>

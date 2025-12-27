@@ -34,4 +34,10 @@
     overflow-y: auto;
     flex: 1;
     min-height: 0;
+    max-height: 55vh;
+}
+
+.list.mobile {
+    gap: 0.2em;
+    padding: 0.5em;
 }
