@@ -24,14 +24,14 @@ export default function Session({ group, year, date, name, color, type, showGrou
 
     return <Link underline="none" color="initial" href={href} className={clsx(styles.root, isPhone && styles.mobile)} style={{ color: textColor }} onClick={onClick}>
         <div className={styles.background} style={style} />
-        {showGroup && <div className={styles.group} dir="auto">
+        {showGroup && <div className={clsx(styles.group, isPhone && styles.mobile)} dir="auto">
             {groupName}
         </div>}
         <div className={styles.container}>
             <div className={styles.icons}>
                 <SessionIcon type={type} />
             </div>
-            <div className={styles.name} dir="auto">
+            <div className={clsx(styles.name, isPhone && styles.mobile)} dir="auto">
                 {name}
             </div>
         </div>

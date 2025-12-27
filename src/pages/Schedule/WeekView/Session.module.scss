@@ -6,7 +6,7 @@
     font: inherit;
     align-items: center;
     justify-content: center;
-    min-height: 5.5em;
+    min-height: 7em;
     color: var(--text-color);
     position: relative;
     overflow: hidden;
@@ -17,7 +17,8 @@
 }
 
 .root.mobile {
-    border: 1px solid var(--border-color);
+    margin: 3px;
+    min-height: 5.5em;
 }
 
 .root:hover {
@@ -41,12 +42,10 @@
     font-weight: bold;
     justify-content: center;
     display: flex;
-    padding: 0.5em;
 }
 
 .container {
     display: flex;
-    margin-bottom: 0.5em;
     justify-content: center;
     align-items: center;
 }
@@ -55,6 +54,12 @@
     width: 10em;
     text-align: center;
     padding-right: 1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.name.mobile {
+    width: 12em;
 }
 
 .background {
@@ -78,5 +83,5 @@
     gap: 4px;
     margin-top: 4px;
     opacity: 0.8;
-    margin: 1em;
+    margin: 0.5em;
 }
