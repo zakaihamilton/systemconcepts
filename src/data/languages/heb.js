@@ -270,7 +270,7 @@ export default {
             "value": "יבוא תיקייה"
         },
         {
-            "id": "IMPORT_FOLDER",
+            "id": "IMPORT_FILE",
             "value": "יבוא קובץ"
         },
         {
@@ -794,6 +794,14 @@ export default {
             "value": "חזור"
         },
         {
+            "id": "PREVIOUS_DAY",
+            "value": "יום קודם"
+        },
+        {
+            "id": "NEXT_DAY",
+            "value": "יום הבא"
+        },
+        {
             "id": "WEEK",
             "value": "שבוע"
         },
@@ -1112,6 +1120,10 @@ export default {
         {
             "id": "PASSKEYS",
             "value": "מפתחות גישה"
+        },
+        {
+            "id": "SEEK",
+            "value": "חיפוש"
         }
     ]
 };
