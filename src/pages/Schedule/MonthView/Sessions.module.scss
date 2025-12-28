@@ -29,15 +29,8 @@
 .list {
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
-    padding: 1em;
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0;
-    max-height: 55vh;
-}
-
-.list.mobile {
     gap: 0.2em;
     padding: 0.5em;
+    overflow-y: auto;
+    height: 90%;
 }

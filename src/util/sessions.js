@@ -278,10 +278,17 @@ export function useSessions(depends = [], options = {}) {
             // 2. Groups metadata changed (group colors, names, etc.)
             // 3. Sync counter changed (new session data was synced)
             if (noSessions || groupsChanged || syncChanged) {
+                console.log('[Sessions] Updating sessions:', { 
+                    noSessions, 
+                    groupsChanged, 
+                    syncChanged, 
+                    syncCounter, 
+                    savedSyncCounter 
+                });
                 updateSessions(groupMetadata, syncCounter);
             }
         }
-    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata]);
+    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata, sessions]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
