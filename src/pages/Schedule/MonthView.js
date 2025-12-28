@@ -3,7 +3,7 @@ import { useTranslations } from "@util/translations";
 import styles from "./MonthView.module.scss";
 import Week from "./MonthView/Week";
 import DayHeader from "./MonthView/DayHeader";
-import { getMonthViewStart, addDate, getMonthNames, getYearNames, getDateString } from "@util/date";
+import { getMonthViewStart, addDate, getMonthNames, getYearNames, getDateString, getNumberOfWeeksInMonth } from "@util/date";
 import { useDateFormatter } from "@util/locale";
 import Input from "@widgets/Input";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -39,15 +39,17 @@ export default function MonthView({ sessions, date, store }) {
         day: "numeric"
     });
     const monthFormatter = useDateFormatter({
-        month: isPhone ? "numeric" : "long"
+        month: isPhone ? "short" : "long"
     });
     const yearFormatter = useDateFormatter({
         year: "numeric"
     });
 
-    const month = addDate(firstDay, 14);
+    // Get the first day of the month from the date prop
+    const month = new Date(date);
+    month.setDate(1);
 
-    const numWeeks = 6;
+    const numWeeks = getNumberOfWeeksInMonth(month);
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
         return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} onMenuVisible={setIsMenuOpen} onOpenDay={setPopupDate} />;
@@ -55,7 +57,7 @@ export default function MonthView({ sessions, date, store }) {
 
     const numDaysInWeek = 7;
     const dayTitles = new Array(numDaysInWeek).fill(0).map((_, index) => {
-        const day = addDate(month, index);
+        const day = addDate(firstDay, index);
         return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dayHeaderFormatter} />;
     });
 
@@ -94,6 +96,10 @@ export default function MonthView({ sessions, date, store }) {
     const gotoPreviousMonth = () => {
         const newDate = new Date(month);
         newDate.setMonth(newDate.getMonth() - 1);
+        // Don't go before January of yearStart
+        if (newDate.getFullYear() < yearStart || (newDate.getFullYear() === yearStart && newDate.getMonth() < 0)) {
+            return;
+        }
         store.update(s => {
             s.date = newDate;
         });
@@ -102,6 +108,10 @@ export default function MonthView({ sessions, date, store }) {
     const gotoNextMonth = () => {
         const newDate = new Date(month);
         newDate.setMonth(newDate.getMonth() + 1);
+        // Don't go after December of yearEnd
+        if (newDate.getFullYear() > yearEnd || (newDate.getFullYear() === yearEnd && newDate.getMonth() > 11)) {
+            return;
+        }
         store.update(s => {
             s.date = newDate;
         });
@@ -210,7 +220,7 @@ export default function MonthView({ sessions, date, store }) {
     });
 
     return <div className={styles.root} {...(!isMenuOpen && !popupDate && swipeHandlers)}>
-        <div className={styles.grid}>
+        <div className={styles.grid} style={{ gridTemplateRows: `3em repeat(${numWeeks}, 1fr)` }}>
             {dayTitles}
             {weeks}
         </div>
