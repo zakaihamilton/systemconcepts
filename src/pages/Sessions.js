@@ -150,9 +150,7 @@ export default function SessionsPage() {
             title: translations.TAGS,
             searchable: "tags",
             sortable: false,
-            viewModes: {
-                // Hidden in all views but still searchable
-            }
+            visible: false
         }
     ].filter(Boolean), [translations, isMobile, orderBy, groupFilter]);
 

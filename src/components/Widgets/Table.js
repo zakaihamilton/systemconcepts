@@ -172,6 +172,9 @@ export default function TableWidget(props) {
         if (!column) {
             return false;
         }
+        if (typeof column.visible !== "undefined" && !column.visible) {
+            return false;
+        }
         if (column.viewModes) {
             return column.viewModes.hasOwnProperty(viewMode);
         }
