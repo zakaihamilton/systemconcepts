@@ -3,19 +3,15 @@
     flex-direction: column;
     flex: 1;
     user-select: none;
+    overflow: auto;
 }
 
 .grid {
     display: grid;
-    flex-direction: column;
     flex: 1;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: 4em auto;
-}
-
-.grid.mobile {
-    grid-template-rows: repeat(7, 1fr);
-    grid-template-columns: 6em auto;
+    column-gap: 0.25em;
 }
 
 .input {

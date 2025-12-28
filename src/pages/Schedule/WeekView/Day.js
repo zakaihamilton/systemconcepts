@@ -7,8 +7,8 @@ import clsx from "clsx";
 export default function Day({ sessions, column, row, count, date }) {
     const isPhone = useDeviceType() === "phone";
     const style = {
-        gridColumn: isPhone ? row : column,
-        gridRow: isPhone ? column : row
+        gridColumn: column,
+        gridRow: row
     };
     const sessionDate = getDateString(date);
     const sessionItems = (sessions || [])

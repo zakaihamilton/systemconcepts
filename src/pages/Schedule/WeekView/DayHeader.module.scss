@@ -10,16 +10,12 @@
     border-bottom: 1px solid var(--border-color);
     padding: 0.75em 0;
     transition: background-color 0.2s;
+    top: 0;
 }
 
 .root.mobile {
-    left: 0;
     border-bottom: 1px solid var(--border-color);
     padding: 0.5em;
-}
-
-.root:not(.mobile) {
-    top: var(--filter-height, 0);
 }
 
 .day {

@@ -6,8 +6,8 @@ import { isDateToday } from "@util/date";
 export default function DayHeader({ dateFormatter, dayFormatter, date, index, count, store }) {
     const isPhone = useDeviceType() === "phone";
     const style = {
-        gridColumn: isPhone ? 1 : index + 1,
-        gridRow: isPhone ? index + 1 : 1
+        gridColumn: index + 1,
+        gridRow: 1
     };
     const onClick = () => {
         store.update(s => {

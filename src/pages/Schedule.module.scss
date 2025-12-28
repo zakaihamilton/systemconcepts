@@ -7,9 +7,9 @@
 .content {
     display: flex;
     flex-direction: column;
-    overflow-x: auto;
-    width: 100%;
+    overflow: hidden;
     height: 100%;
+    width: 100%;
 }
 
 .content.mobile {

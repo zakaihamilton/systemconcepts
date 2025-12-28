@@ -16,6 +16,7 @@
     z-index: 100;
 
     @media (max-width: 600px) {
+        position: fixed;
         margin: 0;
         bottom: 0;
         border-radius: 0;
@@ -34,6 +35,10 @@
     [dir=rtl] & {
         flex-direction: row-reverse;
     }
+}
+
+.root.relative {
+    position: relative;
 }
 
 .footer {
