@@ -127,7 +127,13 @@ export async function resetPassword({ api, id, code, newPassword, salt = 10 }) {
     }
 
     // Verify reset token
-    if (!user.resetToken || user.resetToken !== code) {
+    if (!user.resetToken) {
+        console.error("Invalid reset token for user", id);
+        throw "INVALID_TOKEN";
+    }
+
+    const match = await compare(code, user.resetToken);
+    if (!match) {
         console.error("Invalid reset token for user", id);
         throw "INVALID_TOKEN";
     }
@@ -174,6 +180,7 @@ export async function sendResetEmail({ id }) {
     }
 
     const resetToken = uuidv4();
+    const resetTokenHash = await hash(resetToken, 10);
     const resetTokenExpiry = Date.now() + 3600000; // 1 hour
 
     // Save reset token to user
@@ -182,7 +189,7 @@ export async function sendResetEmail({ id }) {
         query: { id },
         record: {
             ...user,
-            resetToken,
+            resetToken: resetTokenHash,
             resetTokenExpiry
         }
     });
