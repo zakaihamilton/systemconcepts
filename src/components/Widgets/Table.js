@@ -275,12 +275,11 @@ export default function TableWidget(props) {
         },
         viewMode === "table" && data && data.length >= 10 && {
             id: "itemsPerPage",
-            location: "header",
+            location: isMobile ? "mobile" : "header",
             name: translations.ROWS_PER_PAGE,
             icon: <ViewStreamIcon />,
             items: itemsPerPageItems,
-            divider: true,
-            menu: isMobile
+            divider: true
         },
     ].filter(Boolean);
 
