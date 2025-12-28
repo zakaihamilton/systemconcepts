@@ -5,6 +5,7 @@ import Controls from "./Player/Controls";
 import { useFetch } from "@util/fetch";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Progress from "@widgets/Progress";
+import Download from "@widgets/Download";
 
 registerToolbar("Transcript");
 
@@ -97,10 +98,22 @@ export default function Transcript() {
         return `${mm}:${ss.toString().padStart(2, '0')}`;
     };
 
+    const handleDownload = () => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement("a");
+        link.href = url;
+        const name = decodeURIComponent(subtitles).split("/").pop();
+        link.setAttribute("download", name);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return <div className={styles.root}>
         {loading && <div className={styles.loadingContainer}>
             <Progress fullscreen />
         </div>}
+        <Download onClick={handleDownload} visible={!loading && !!data} />
         <div className={styles.transcript} ref={scrollRef}>
             {transcript.map((line, index) => {
                 const isCurrent = index === currentLineIndex;
