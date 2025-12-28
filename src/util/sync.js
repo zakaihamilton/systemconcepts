@@ -119,7 +119,8 @@ export function useSyncFeature() {
                     },
                     {
                         name: "aws/metadata/shared/sessions",  // S3 - ALL sessions consolidated
-                        path: makePath("local", "shared", "sessions")
+                        path: makePath("local", "shared", "sessions"),
+                        preserve: ["tags.json"]
                     }
                 ];
 
@@ -136,7 +137,7 @@ export function useSyncFeature() {
 
                 // 3. Define Sync Task
                 const runTask = async (bundleDef) => {
-                    const { name, path, ignore } = bundleDef;
+                    const { name, path, ignore, preserve } = bundleDef;
                     const startTime = Date.now();
                     try {
                         let localUpdated = false;
@@ -163,7 +164,7 @@ export function useSyncFeature() {
                         console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
 
                         const t4 = Date.now();
-                        const { downloadCount, listing: updatedListing, isBundleCorrupted } = await bundle.applyBundle(path, remoteBundle, bundleListing, ignore);
+                        const { downloadCount, listing: updatedListing, isBundleCorrupted } = await bundle.applyBundle(path, remoteBundle, bundleListing, ignore, preserve);
                         console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
 
                         // Upload & Merge

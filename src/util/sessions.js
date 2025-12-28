@@ -78,6 +78,10 @@ export function useSessions(depends = [], options = {}) {
             const localUrl = "local/" + path + "/metadata.json";
             return await getJSON(localUrl);
         };
+        const getTags = async path => {
+            const localUrl = "local/" + path + "/tags.json";
+            return await getJSON(localUrl);
+        };
         const basePath = "shared/sessions";
         try {
             const [cdnData, groups] = await Promise.all([
@@ -96,9 +100,10 @@ export function useSessions(depends = [], options = {}) {
 
             const processedYears = await Promise.all(tasks.map(async ({ group, year }) => {
                 const path = makePath(basePath, group.name, year.name);
-                const [files, sessionsMetadata] = await Promise.all([
+                const [files, sessionsMetadata, tagsMap] = await Promise.all([
                     getListing(path),
-                    getMetadata(path)
+                    getMetadata(path),
+                    getTags(path)
                 ]);
 
                 files.sort((a, b) => a.name.localeCompare(b.name));
@@ -170,6 +175,7 @@ export function useSessions(depends = [], options = {}) {
                         group: group.name,
                         color: groupInfo.color,
                         ai,
+                        tags: [...new Set(tagsMap[id] || [])],
                         ...sessionInfo,
                         ...sessionMetadata
                     };
@@ -278,12 +284,12 @@ export function useSessions(depends = [], options = {}) {
             // 2. Groups metadata changed (group colors, names, etc.)
             // 3. Sync counter changed (new session data was synced)
             if (noSessions || groupsChanged || syncChanged) {
-                console.log('[Sessions] Updating sessions:', { 
-                    noSessions, 
-                    groupsChanged, 
-                    syncChanged, 
-                    syncCounter, 
-                    savedSyncCounter 
+                console.log('[Sessions] Updating sessions:', {
+                    noSessions,
+                    groupsChanged,
+                    syncChanged,
+                    syncCounter,
+                    savedSyncCounter
                 });
                 updateSessions(groupMetadata, syncCounter);
             }

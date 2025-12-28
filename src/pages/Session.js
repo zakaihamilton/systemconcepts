@@ -15,6 +15,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useDeviceType } from "@util/styles";
 import { useSwipe } from "@util/touch";
 import SwipeIndicator from "@widgets/SwipeIndicator";
+import Chip from "@mui/material/Chip";
 
 registerToolbar("Session");
 
@@ -115,6 +116,13 @@ export default function SessionPage({ group, year, date, name }) {
                     <span className={styles.date}>{dateWidget}</span>
                     {duration > 1 && <span className={styles.duration}>{formatDuration(duration * 1000, true)}</span>}
                 </div>
+                {session.tags && session.tags.length > 0 && (
+                    <div className={styles.tags}>
+                        {session.tags.map(tag => (
+                            <Chip key={tag} label={tag} size="small" className={styles.tag} />
+                        ))}
+                    </div>
+                )}
             </div>
             <div className={styles.content}>
                 {thumbnail && <div className={styles.media}>

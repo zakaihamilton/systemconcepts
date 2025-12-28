@@ -347,7 +347,7 @@ export default function TableWidget(props) {
 
         if (search) {
             const lowerSearch = search.toLowerCase();
-            const keys = visibleColumns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
+            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
                 if (typeof item.searchable === "string") {
                     return item.searchable;
                 }

@@ -405,7 +405,7 @@ export function mergeBundles(remote, local, name = "") {
     return { merged, updated: updateCount > 0 };
 }
 
-export async function applyBundle(root, bundle, listing = null, ignore = []) {
+export async function applyBundle(root, bundle, listing = null, ignore = [], preserve = []) {
     if (!bundle) return { downloadCount: 0, listing: listing || [] };
 
     // Ensure root exists
@@ -510,6 +510,10 @@ export async function applyBundle(root, bundle, listing = null, ignore = []) {
             if (!bundleFiles.has(relativePath)) {
                 // Double check if file should be ignored (though localFiles should already be filtered)
                 if (ignore.some(pattern => relativePath.includes(pattern))) {
+                    continue;
+                }
+                // Check if file should be preserved
+                if (preserve.some(pattern => relativePath.includes(pattern))) {
                     continue;
                 }
                 const fullPath = makePath(root, relativePath);

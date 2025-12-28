@@ -113,6 +113,22 @@
     min-width: 5em;
 }
 
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-top: 1em;
+    justify-content: center;
+    width: 100%;
+}
+
+.tag {
+    cursor: default;
+    background-color: var(--chrome-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
 @media (max-width: 768px) {
     .content {
         flex-direction: column;

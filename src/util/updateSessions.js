@@ -110,6 +110,31 @@ export function useUpdateSessions(groups) {
             });
             try {
                 await getListing(year.path);
+                const yearItems = await getListing(year.path);
+                const tagsFiles = yearItems.filter(item => item.name.endsWith(".tags"));
+                if (tagsFiles.length) {
+                    console.log(`Found ${tagsFiles.length} tags files in ${year.path}`);
+                }
+                const tagsMap = {};
+                const results = await storage.readFiles(year.path + "/", tagsFiles.map(file => file.name));
+                for (const name in results) {
+                    const content = results[name];
+                    const fileName = name.replace(".tags", "");
+                    try {
+                        const json = JSON.parse(content);
+                        if (json.tags) {
+                            tagsMap[fileName] = json.tags;
+                        }
+                    } catch (err) {
+                        console.error("Failed to parse tags file", name, err);
+                    }
+                }
+                const targetTagsPath = "local/shared/sessions/" + year.path.substring(prefix.length) + "/tags.json";
+                if (Object.keys(tagsMap).length > 0) {
+                    await storage.writeFile(targetTagsPath, JSON.stringify(tagsMap, null, 4));
+                } else if (await storage.exists(targetTagsPath)) {
+                    await storage.deleteFile(targetTagsPath);
+                }
                 await copyFile(year.path, "/metadata.json");
             }
             catch (err) {
