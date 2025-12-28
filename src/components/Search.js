@@ -47,7 +47,6 @@ export function useSearch(name, updateCallback) {
     const toolbarItems = [
         {
             id: "search",
-            divider: true,
             menu: false,
             sortKey: -1,
             location: isPhone && "header",

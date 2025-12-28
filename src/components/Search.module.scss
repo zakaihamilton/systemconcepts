@@ -3,8 +3,6 @@
     position: relative;
     border-radius: 0.5em;
     background-color: var(--main-background);
-    margin-left: 0.5em;
-    margin-right: 0.5em;
     height: 3em;
     width: 3em;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -29,17 +27,18 @@
 .inputRoot {
     color: inherit;
     margin: 0.3em;
-    width: 100%;
+    width: 0%;
     opacity: 0;
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .searchExpanded .inputRoot {
     opacity: 1;
+    width: 100%;
 }
 
 @media (max-width: 768px) {
     .searchExpanded {
-        width: 10em;
+        width: 6em;
     }
 }

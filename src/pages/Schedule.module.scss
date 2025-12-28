@@ -15,3 +15,31 @@
 .content.mobile {
     width: 100vw;
 }
+
+.viewGroup {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2px;
+    gap: 2px;
+    align-items: center;
+}
+
+.viewGroupButton {
+    border-radius: 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-color);
+    opacity: 0.75;
+
+    &:hover {
+        background-color: var(--hover-background);
+        opacity: 1;
+    }
+}
+
+.selected {
+    background-color: rgba(var(--primary-rgb), 0.15) !important;
+    color: var(--primary-main) !important;
+    opacity: 1;
+    font-weight: 600;
+}

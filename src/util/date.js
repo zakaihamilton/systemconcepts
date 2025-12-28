@@ -1,7 +1,10 @@
 export function getMonthViewStart(date) {
-    date = getWeekViewEnd(date);
+    date = new Date(date);
+    // Set to the 1st of the month
     date.setDate(1);
+    // Get the day of week (0 = Sunday, 6 = Saturday)
     const day = date.getDay();
+    // Go back to the Sunday before or on the 1st
     const diff = date.getDate() - day;
     date.setDate(diff);
     return date;
@@ -83,21 +86,26 @@ export function getNumberOfWeeksInMonth(date) {
     if (!date || isNaN(date.getTime())) {
         return 0;
     }
-    let maxIndex = getWeekOfMonth(date);
-    let counter = 0;
-    while (true) {
-        date = addDate(date, 7);
-        const index = getWeekOfMonth(date);
-        if (index <= maxIndex) {
-            break;
-        }
-        maxIndex = index;
-        counter++;
-        if (counter > 10) {
-            break;
-        }
+
+    // Get the first day shown in the month view (Sunday before or on the 1st)
+    const startDate = getMonthViewStart(date);
+
+    // Get the last day of the month
+    const monthDate = new Date(date);
+    monthDate.setDate(1);
+    monthDate.setMonth(monthDate.getMonth() + 1);
+    monthDate.setDate(0); // Last day of the current month
+
+    // Count weeks from start until we've covered the entire month
+    let currentDate = new Date(startDate);
+    let weekCount = 0;
+
+    while (currentDate <= monthDate) {
+        weekCount++;
+        currentDate = addDate(currentDate, 7);
     }
-    return maxIndex + 1;
+
+    return weekCount;
 }
 
 export function getMonthNames(date, formatter) {
@@ -111,7 +119,7 @@ export function getMonthNames(date, formatter) {
 
 export function getYearNames(date, formatter, start, end) {
     date = new Date(date);
-    const years = new Array(end - start).fill(0).map((_, index) => {
+    const years = new Array(end - start + 1).fill(0).map((_, index) => {
         date.setFullYear(start + index);
         return formatter.format(date);
     });
