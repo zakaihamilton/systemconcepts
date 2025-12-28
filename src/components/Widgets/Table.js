@@ -33,6 +33,8 @@ import InfoIcon from "@mui/icons-material/Info";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 import { getComparator, stableSort } from "@util/sort";
 
@@ -293,12 +295,29 @@ export default function TableWidget(props) {
 
     if (viewOptions.length > 1) {
         if (!isMobile) {
-            toolbarItems.push(...viewOptions.map(item => ({
-                ...item,
-                selected: viewMode,
-                location: "header",
-                menu: false
-            })));
+            const viewGroup = (
+                <div className={styles.viewGroup}>
+                    {viewOptions.map(item => {
+                        const isSelected = viewMode === item.id;
+                        return (
+                            <Tooltip title={item.name} key={item.id}>
+                                <IconButton
+                                    onClick={item.onClick}
+                                    className={clsx(styles.viewGroupButton, isSelected && styles.selected)}
+                                    size="small"
+                                >
+                                    {item.icon}
+                                </IconButton>
+                            </Tooltip>
+                        );
+                    })}
+                </div>
+            );
+            toolbarItems.push({
+                id: "viewGroup",
+                element: viewGroup,
+                location: "header"
+            });
         }
     }
 

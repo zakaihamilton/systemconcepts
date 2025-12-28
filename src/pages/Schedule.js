@@ -21,6 +21,8 @@ import Cookies from "js-cookie";
 import FilterBar from "@pages/Sessions/FilterBar";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -87,12 +89,29 @@ export default function SchedulePage() {
 
     const toolbarItems = [];
     if (!isMobile) {
-        toolbarItems.push(...viewOptions.map(item => ({
-            ...item,
-            selected: viewMode,
-            location: "header",
-            menu: false
-        })));
+        const viewGroup = (
+            <div className={styles.viewGroup}>
+                {viewOptions.map(item => {
+                    const isSelected = viewMode === item.id;
+                    return (
+                        <Tooltip title={item.name} key={item.id}>
+                            <IconButton
+                                onClick={item.onClick}
+                                className={clsx(styles.viewGroupButton, isSelected && styles.selected)}
+                                size="small"
+                            >
+                                {item.icon}
+                            </IconButton>
+                        </Tooltip>
+                    );
+                })}
+            </div>
+        );
+        toolbarItems.push({
+            id: "viewGroup",
+            element: viewGroup,
+            location: "header"
+        });
     }
 
     useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode, isMobile] });
