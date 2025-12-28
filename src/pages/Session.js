@@ -1,10 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslations } from "@util/translations";
 import { useSessions, SessionsStore } from "@util/sessions";
 import { getComparator, stableSort } from "@util/sort";
 import { useDateFormatter } from "@util/locale";
 import Group from "@widgets/Group";
-import { formatDuration } from "@util/string";
+import { formatDuration, copyToClipboard } from "@util/string";
 import Summary from "@widgets/Summary";
 import Image from "@widgets/Image";
 import styles from "./Session.module.scss";
@@ -16,6 +16,8 @@ import { useDeviceType } from "@util/styles";
 import { useSwipe } from "@util/touch";
 import SwipeIndicator from "@widgets/SwipeIndicator";
 import Chip from "@mui/material/Chip";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 registerToolbar("Session");
 
@@ -25,6 +27,8 @@ export default function SessionPage({ group, year, date, name }) {
     const { order, orderBy } = SessionsStore.useState();
     const [sessions, loading] = useSessions([], { filterSessions: false, skipSync: true });
     const [filteredSessions] = useSessions([], { filterSessions: true, active: false, skipSync: true, showToolbar: false });
+    const [copiedTag, setCopiedTag] = useState(null);
+    const [showClipboard, setShowClipboard] = useState(false);
 
     const sortedFilteredSessions = useMemo(() => {
         if (!filteredSessions) return [];
@@ -119,7 +123,11 @@ export default function SessionPage({ group, year, date, name }) {
                 {session.tags && session.tags.length > 0 && (
                     <div className={styles.tags}>
                         {session.tags.map(tag => (
-                            <Chip key={tag} label={tag} size="small" className={styles.tag} />
+                            <Chip key={tag} label={tag} onClick={() => {
+                                copyToClipboard(tag);
+                                setCopiedTag(tag);
+                                setShowClipboard(true);
+                            }} className={styles.tag} />
                         ))}
                     </div>
                 )}
@@ -144,5 +152,15 @@ export default function SessionPage({ group, year, date, name }) {
             </div>
         </div>
         <SwipeIndicator direction={swipeDirection} />
+        <Snackbar
+            open={showClipboard}
+            autoHideDuration={3000}
+            onClose={() => setShowClipboard(false)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+            <Alert onClose={() => setShowClipboard(false)} severity="success" sx={{ width: '100%' }}>
+                {(translations.COPIED_TO_CLIPBOARD || "Copied to clipboard") + ": " + (copiedTag || "")}
+            </Alert>
+        </Snackbar>
     </div>;
 }

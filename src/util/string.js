@@ -48,3 +48,9 @@ export function formatDuration(duration, includeHours = false) {
 
     return hoursString + minutesString + ":" + secondsString;
 }
+
+export function copyToClipboard(text) {
+    if (navigator && navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+    }
+}

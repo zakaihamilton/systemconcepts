@@ -123,10 +123,26 @@
 }
 
 .tag {
-    cursor: default;
+    cursor: pointer;
+    // Fallback for browsers that don't support color-mix
     background-color: var(--chrome-background) !important;
     color: var(--text-color) !important;
     border: 1px solid var(--border-color) !important;
+
+    // Modern styling using group color
+    background-color: color-mix(in srgb, var(--group-color) 10%, transparent) !important;
+    color: var(--group-color) !important;
+    border: 1px solid var(--group-color) !important;
+
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+        background-color: var(--group-color) !important;
+        color: var(--white-text, #fff) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px var(--box-shadow-color);
+    }
 }
 
 @media (max-width: 768px) {
