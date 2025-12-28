@@ -286,7 +286,7 @@ export default function SessionsPage() {
     }, [isSignedIn, translations]);
 
     return <>
-        {!!showFilterDialog && !isMobile && <FilterBar />}
+        {!isMobile && <FilterBar />}
         <Table
             cellWidth="16em"
             cellHeight="20em"
@@ -303,6 +303,6 @@ export default function SessionsPage() {
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
         />
-        {!!showFilterDialog && !!isMobile && <FilterBar />}
+        {!!isMobile && <FilterBar />}
     </>;
 }
