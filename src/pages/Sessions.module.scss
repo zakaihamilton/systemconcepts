@@ -160,7 +160,14 @@
     font-size: 0.7em !important;
     height: 1.5em !important;
     cursor: default;
+
+    // Fallback for browsers that don't support color-mix
     background-color: var(--chrome-background) !important;
     color: var(--text-color) !important;
     border: 1px solid var(--border-color) !important;
+
+    // Modern styling using group color with default fallback
+    background-color: color-mix(in srgb, var(--group-color, var(--primary-500)) 10%, transparent) !important;
+    color: var(--group-color, var(--primary-500)) !important;
+    border: 1px solid var(--group-color, var(--primary-500)) !important;
 }

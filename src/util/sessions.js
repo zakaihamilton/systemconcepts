@@ -71,16 +71,21 @@ export function useSessions(depends = [], options = {}) {
             return data;
         };
         const getListing = async path => {
-            const localUrl = "local/" + path + "/listing.json";
+            const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+            const localUrl = "local/" + normalizedPath + "/listing.json";
             return await getJSON(localUrl);
         };
         const getMetadata = async path => {
-            const localUrl = "local/" + path + "/metadata.json";
+            const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+            const localUrl = "local/" + normalizedPath + "/metadata.json";
             return await getJSON(localUrl);
         };
         const getTags = async path => {
-            const localUrl = "local/" + path + "/tags.json";
-            return await getJSON(localUrl);
+            // Remove leading slash from path to avoid double slashes (makePath returns /shared/sessions/...)
+            const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+            const localUrl = "local/" + normalizedPath + "/tags.json";
+            const tags = await getJSON(localUrl);
+            return tags;
         };
         const basePath = "shared/sessions";
         try {
@@ -166,6 +171,7 @@ export function useSessions(depends = [], options = {}) {
 
                     const ai = name.endsWith(" - AI") || name.startsWith("Overview - ");
                     const key = group.name + "_" + id;
+                    const sessionTags = [...new Set(tagsMap[id] || [])];
                     const item = {
                         key,
                         id,
@@ -175,7 +181,7 @@ export function useSessions(depends = [], options = {}) {
                         group: group.name,
                         color: groupInfo.color,
                         ai,
-                        tags: [...new Set(tagsMap[id] || [])],
+                        tags: sessionTags,
                         ...sessionInfo,
                         ...sessionMetadata
                     };
@@ -284,13 +290,6 @@ export function useSessions(depends = [], options = {}) {
             // 2. Groups metadata changed (group colors, names, etc.)
             // 3. Sync counter changed (new session data was synced)
             if (noSessions || groupsChanged || syncChanged) {
-                console.log('[Sessions] Updating sessions:', {
-                    noSessions,
-                    groupsChanged,
-                    syncChanged,
-                    syncCounter,
-                    savedSyncCounter
-                });
                 updateSessions(groupMetadata, syncCounter);
             }
         }

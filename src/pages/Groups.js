@@ -56,7 +56,6 @@ export default function Groups() {
 
         // Debounce sync by 2 seconds to avoid excessive syncing
         syncTimerRef.current = setTimeout(() => {
-            console.log("[Groups] Auto-syncing after group update...");
             sync && sync();
         }, 2000);
 
@@ -70,19 +69,16 @@ export default function Groups() {
     // Wrap update functions to trigger sync after completion
     const updateSessionsWithSync = async () => {
         await updateSessions(showDisabled);
-        console.log("[Groups] Auto-syncing after session update...");
         sync && sync();
     };
 
     const updateAllSessionsWithSync = async () => {
         await updateAllSessions(showDisabled);
-        console.log("[Groups] Auto-syncing after all sessions update...");
         sync && sync();
     };
 
     const updateGroupWithSync = async (name, updateAll) => {
         await updateGroup(name, updateAll);
-        console.log(`[Groups] Auto-syncing after updating group: ${name}...`);
         sync && sync();
     };
 

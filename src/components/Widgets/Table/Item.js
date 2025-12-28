@@ -71,7 +71,7 @@ function ItemWidget({ className = "", separator, viewMode, selected: selectedIte
         selected: selectedItem,
         even: index % 2 === 0
     });
-    return <div className={styles.root} style={style}>
+    return <div className={styles.root} style={{ ...style, '--group-color': item.color }}>
         <div className={classes + " " + className} {...rowClick && { onClick }} {...props}>
             {cells}
         </div>

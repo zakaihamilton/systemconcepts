@@ -195,7 +195,8 @@ export async function getRemoteBundle(endPoint, listing = null) {
     for (const part of bundleParts) {
         const content = await storage.readFile(part.path);
         if (content) {
-            parts.push(content);
+            // Trim whitespace to avoid Base64 corruption
+            parts.push(content.trim());
         }
     }
 
@@ -206,8 +207,33 @@ export async function getRemoteBundle(endPoint, listing = null) {
     // Join parts (Base64 strings) -> Single Base64 String -> Uint8Array -> Gunzip -> JSON String -> Object
     try {
         const joinedBase64 = parts.join("");
+
+        // Validate Base64 string
+        if (!joinedBase64 || joinedBase64.length === 0) {
+            console.error("getRemoteBundle: Empty Base64 string");
+            return null;
+        }
+
         const binaryString = Base64.atob(joinedBase64);
         const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+
+        // Validate gzip header (should start with 0x1f 0x8b)
+        if (bytes.length < 2 || bytes[0] !== 0x1f || bytes[1] !== 0x8b) {
+            console.error("getRemoteBundle: Invalid gzip header. First bytes:", bytes.slice(0, 10));
+            // Clear corrupted cache
+            try {
+                if (await storage.exists(cachePath)) {
+                    await storage.deleteFile(cachePath);
+                }
+                if (await storage.exists(versionPath)) {
+                    await storage.deleteFile(versionPath);
+                }
+            } catch (cleanupErr) {
+                console.error("getRemoteBundle: Error cleaning up corrupted cache:", cleanupErr);
+            }
+            return null;
+        }
+
         const jsonString = pako.ungzip(bytes, { to: "string" });
 
         // Update Cache
@@ -226,6 +252,20 @@ export async function getRemoteBundle(endPoint, listing = null) {
         return JSON.parse(jsonString);
     } catch (err) {
         console.error("getRemoteBundle: Error parsing bundle:", err);
+        console.error("getRemoteBundle: Bundle parts count:", parts.length, "Total length:", parts.join("").length);
+
+        // Clear corrupted cache on any error
+        try {
+            if (await storage.exists(cachePath)) {
+                await storage.deleteFile(cachePath);
+            }
+            if (await storage.exists(versionPath)) {
+                await storage.deleteFile(versionPath);
+            }
+        } catch (cleanupErr) {
+            console.error("getRemoteBundle: Error cleaning up corrupted cache:", cleanupErr);
+        }
+
         return null;
     }
 }
@@ -305,14 +345,12 @@ export async function saveRemoteBundle(endPoint, bundle) {
 
 
 export async function scanLocal(path, ignore = [], listing = null, remote = null) {
-    console.log(`[scanLocal] Starting scan for ${path}, remote is ${remote ? 'provided' : 'NULL'}`);
     const bundle = {};
     if (!listing) {
         listing = await storage.getRecursiveList(path);
     }
 
     const files = listing.filter(item => item.type === "file");
-    console.log(`[scanLocal] Found ${files.length} files to process`);
 
     await Promise.all(files.map(async (item) => {
         try {
@@ -398,9 +436,6 @@ export function mergeBundles(remote, local, name = "") {
             merged[path] = localItem;
             updateCount++;
         }
-    }
-    if (updateCount > 0) {
-        console.log(`mergeBundles: Merged. Updated ${updateCount} items from local for ${name}.`);
     }
     return { merged, updated: updateCount > 0 };
 }
@@ -531,11 +566,5 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
         }
     }
 
-    const totalFiles = Object.keys(bundle).length;
-    console.log(`[applyBundle] ${root}: ${totalFiles} files in bundle, ${downloadCount} written, ${skipCount} skipped, ${deleteCount} deleted`, skipReasons);
-
-    if (downloadCount > 0 || deleteCount > 0) {
-        console.log(`applyBundle: Finished. Updated ${downloadCount} files, deleted ${deleteCount} files for ${root}.`);
-    }
     return { downloadCount: downloadCount + deleteCount, listing, isBundleCorrupted };
 }

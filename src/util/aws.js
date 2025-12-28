@@ -241,6 +241,7 @@ export async function handleRequest({ readOnly, req }) {
         }
         try {
             path = decodeURIComponent(path);
+
             if (type === "dir") {
                 const items = await list({ path, useCount: true });
                 return items;
@@ -250,6 +251,12 @@ export async function handleRequest({ readOnly, req }) {
             }
         }
         catch (err) {
+            // Silently handle NoSuchKey errors (files that don't exist)
+            // This is expected when reading .tags files that may not exist
+            if (err?.name === 'NoSuchKey' || err?.Code === 'NoSuchKey' || err?.$metadata?.httpStatusCode === 404) {
+                return "";  // Return empty string instead of null to avoid JSON stringification issues
+            }
+            // Log other unexpected errors
             console.error("get error: ", err);
             return { err: getSafeError(err) };
         }

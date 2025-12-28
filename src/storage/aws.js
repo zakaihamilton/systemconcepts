@@ -112,6 +112,33 @@ async function readFile(path) {
     return body;
 }
 
+async function readFiles(prefix, files) {
+    const results = {};
+    // Ensure prefix ends with / for proper path construction
+    if (!prefix.endsWith('/')) {
+        prefix = prefix + '/';
+    }
+    // Read files in parallel with a concurrency limit
+    const limit = (await import("p-limit")).default(10);
+    await Promise.all(files.map(name => limit(async () => {
+        try {
+            const path = prefix + name;
+
+            const content = await readFile(path);
+            if (content !== null && content !== undefined) {
+                results[name] = content;
+            }
+        } catch (err) {
+            // Silently skip files that don't exist (NoSuchKey is expected for .tags files)
+            // Only log unexpected errors
+            if (err && !err.message?.includes('NoSuchKey') && !err.message?.includes('404')) {
+                console.warn(`Failed to read file ${prefix}${name}:`, err.message || err);
+            }
+        }
+    })));
+    return results;
+}
+
 async function writeFile(path, body) {
     path = makePath(path);
     await fetchJSON(fsEndPoint, {
@@ -176,6 +203,7 @@ export default {
     deleteFolder,
     deleteFile,
     readFile,
+    readFiles,
     writeFile,
     writeFiles,
     exists
