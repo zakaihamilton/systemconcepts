@@ -70,11 +70,14 @@
 .item:last-child {
     opacity: 1;
     font-weight: 600;
-    cursor: default;
 
     &:hover {
         background-color: transparent;
     }
+}
+
+.item:not(.menuItems):last-child {
+    cursor: default;
 }
 
 .name {

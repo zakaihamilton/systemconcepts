@@ -1,23 +1,18 @@
 import styles from "./SessionGroup.module.scss";
 import Session from "./Session";
-import { useTheme, getContrastRatio } from "@mui/material/styles";
+import { useSessionTextColor } from "@util/colors";
 
 export default function SessionGroup({ group, sessions }) {
-    const theme = useTheme();
     const groupLabel = group[0].toUpperCase() + group.slice(1);
     const firstSession = sessions[0];
     const groupColor = firstSession.color;
 
-    let textColor = theme.palette.text.primary;
-    if (groupColor) {
-        const contrastWhite = getContrastRatio(groupColor, '#ffffff');
-        const contrastBlack = getContrastRatio(groupColor, '#000000');
-        textColor = contrastWhite >= contrastBlack ? '#ffffff' : '#000000';
-    }
+    const textColor = useSessionTextColor(groupColor);
 
     return <div className={styles.root}>
-        <div className={styles.title} style={{ backgroundColor: groupColor, color: textColor }}>
-            {groupLabel}
+        <div className={styles.title} style={{ color: textColor }}>
+            <div className={styles.background} style={{ backgroundColor: groupColor }} />
+            <span style={{ position: "relative" }}>{groupLabel}</span>
         </div>
         <div className={styles.items}>
             {sessions

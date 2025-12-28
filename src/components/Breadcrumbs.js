@@ -109,7 +109,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
     return (
         <>
             <Link
-                className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last)}
+                className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
                 color="inherit"
                 href={href}
                 onClick={gotoItem}
