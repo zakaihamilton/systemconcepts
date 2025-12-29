@@ -8,7 +8,7 @@ import { useDateFormatter } from "@util/locale";
 import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 
-export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, ...props }) {
+export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, elements, ...props }) {
     const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
@@ -84,6 +84,7 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
                 </div>
             </div>
         </div>
+        {elements}
         <video ref={ref} className={styles.video} {...rest}>
             {children}
         </video>

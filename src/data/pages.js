@@ -57,9 +57,6 @@ import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 const Player = dynamic(() => import("@pages/Player"), { loading: () => <PageLoad /> });
 import { getPlayerSection } from "@pages/Player/Section";
 
-import DescriptionIcon from "@mui/icons-material/Description";
-const Transcript = dynamic(() => import("@pages/Transcript"), { loading: () => <PageLoad /> });
-import { getTranscriptSection } from "@pages/Transcript/Section";
 const Session = dynamic(() => import("@pages/Session"), { loading: () => <PageLoad /> });
 import { getSessionSection } from "@pages/Session/Section";
 const SessionTabs = dynamic(() => import("@pages/Session/Tabs"));
@@ -199,15 +196,6 @@ export default [
         section: getPlayerSection,
         Component: Player,
         useParentName: 1
-    },
-    {
-        id: "transcript",
-        name: "TRANSCRIPT",
-        Icon: DescriptionIcon,
-        Component: Transcript,
-        useParentName: 1,
-        tabs: SessionTabs,
-        section: getTranscriptSection
     },
     {
         apps: true,

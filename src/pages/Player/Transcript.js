@@ -1,19 +1,16 @@
 import { useRef, useEffect, useState } from "react";
 import styles from "./Transcript.module.scss";
-import { PlayerStore } from "./Player";
-import Controls from "./Player/Controls";
+import { PlayerStore } from "../Player";
+import Controls from "./Controls";
 import { useFetch } from "@util/fetch";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Progress from "@widgets/Progress";
 import Download from "@widgets/Download";
 
-registerToolbar("Transcript");
-
-export default function Transcript() {
+export default function Transcript({ mode }) {
     const { subtitles, player } = PlayerStore.useState();
     const [transcript, setTranscript] = useState([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(-1);
-    const [data, , loading, error] = useFetch(subtitles);
+    const [data, , loading] = useFetch(subtitles);
     const scrollRef = useRef();
     const lineRefs = useRef({});
 
@@ -85,8 +82,6 @@ export default function Transcript() {
         }
     };
 
-    useToolbar({ id: "Transcript", items: [], visible: true });
-
     const formatTime = (seconds) => {
         const date = new Date(seconds * 1000);
         const hh = date.getUTCHours();
@@ -130,9 +125,5 @@ export default function Transcript() {
                 </div>;
             })}
         </div>
-        <div className={styles.controls}>
-            {player && <Controls playerRef={player} show={true} path={subtitles} />}
-        </div>
     </div>;
 }
-

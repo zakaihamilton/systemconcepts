@@ -21,6 +21,7 @@ import { useGroups } from "@util/groups";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 import SpeedSlider from "./Player/SpeedSlider";
+import Transcript from "./Player/Transcript";
 
 export const PlayerStore = new Store({
     mediaPath: "",
@@ -33,7 +34,7 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, suffix }) {
+export default function PlayerPage({ show = false, suffix, mode }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const { hash, mediaPath, subtitles, showSubtitles, showSpeed } = PlayerStore.useState();
@@ -102,20 +103,31 @@ export default function PlayerPage({ show = false, suffix }) {
 
     const style = {
         visibility: show ? "visible" : "hidden",
-        flex: show ? "1" : "",
+        height: show ? size.height + "px" : "auto",
+        overflow: "hidden",
         ...(!show && { maxHeight: "0px" })
     };
 
     // Account for: header (4em), tabs (4em), speed slider (120px when visible), controls (~3em)
     // Total: ~11em base + 120px for speed slider when visible + 2em for video margins
     const baseEmSubtraction = 13; // Increased from 11 to account for 2em margins (top + bottom)
+    const isTranscript = mode === "transcript";
     const speedSliderHeight = showSpeed ? 120 : 0;
     const mediaStyles = {
         width: size.width + "px",
-        height: (size.height - (size.emPixels * baseEmSubtraction) - speedSliderHeight) + "px",
         marginTop: "1em",
         marginBottom: "1em"
     };
+
+    if (isTranscript) {
+        mediaStyles.flex = "1";
+        mediaStyles.minHeight = "0";
+        mediaStyles.display = "flex";
+        mediaStyles.flexDirection = "column";
+    }
+    else {
+        mediaStyles.height = (size.height - (size.emPixels * baseEmSubtraction) - speedSliderHeight) + "px";
+    }
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
     let MediaComponent = null;
@@ -164,13 +176,15 @@ export default function PlayerPage({ show = false, suffix }) {
         });
     }, [isSignedIn, translations, error]);
 
+    const elements = isTranscript ? <Transcript /> : null;
+
     return <div className={styles.root} style={style}>
         {statusBar}
         {speedToolbar === "top" && <SpeedSlider />}
         <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
-        {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps}>
+        {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps} elements={elements}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
-            {subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
+            {!isTranscript && subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
         </MediaComponent>}
         {speedToolbar === "bottom" && <SpeedSlider />}
         {!!loading && !mediaPath && <Progress />}
