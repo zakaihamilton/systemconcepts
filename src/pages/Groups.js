@@ -18,7 +18,8 @@ import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
 import { useSessions } from "@util/sessions";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import ProgressDialog from "./Groups/ProgressDialog";
 
 registerToolbar("Groups");
 
@@ -82,7 +83,18 @@ export default function Groups() {
         sync && sync();
     };
 
-    const duration = start && new Date().getTime() - start;
+    const [currentTime, setCurrentTime] = useState(new Date().getTime());
+
+    useEffect(() => {
+        if (busy) {
+            const interval = setInterval(() => {
+                setCurrentTime(new Date().getTime());
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [busy]);
+
+    const duration = start && currentTime - start;
     const formattedDuration = formatDuration(duration);
 
     const toolbarItems = [
@@ -123,7 +135,7 @@ export default function Groups() {
         }
     ];
 
-    useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000), groups, showDisabled] });
+    useToolbar({ id: "Groups", items: toolbarItems, depends: [syncEnabled, busy, translations, parseInt(duration / 1000), groups, showDisabled, currentTime] });
 
     const withProgress = status && !!status.length;
 
@@ -171,13 +183,15 @@ export default function Groups() {
         const variant = statusItem.progress !== -1 ? "determinate" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
 
+        const percentage = statusItem.count > 0 ? (statusItem.progress / statusItem.count) * 100 : 0;
+
         const iconWidget = <ItemMenu updateGroup={updateGroupWithSync} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
 
         return {
             ...item,
             iconWidget,
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} className={item.disabled && styles.disabled} />,
-            progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? statusItem.progress : undefined} />,
+            progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? percentage : undefined} />,
             colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
         };
     };
@@ -203,5 +217,6 @@ export default function Groups() {
             loading={loading || loadingSessions}
             depends={[translations, status, updateGroupWithSync, sessions, showDisabled]}
         />
+        <ProgressDialog />
     </>;
 }

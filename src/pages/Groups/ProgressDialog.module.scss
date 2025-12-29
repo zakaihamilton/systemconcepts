@@ -1,0 +1,122 @@
+.dialog {
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.timer {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5em 1em;
+    background: #000000;
+    border: 4px solid #333;
+    border-radius: 8px;
+    box-shadow:
+        inset 0 0 20px rgba(0, 0, 0, 0.9),
+        0 2px 4px rgba(255, 255, 255, 0.1);
+    margin-bottom: 0.5em;
+    position: relative;
+    overflow: hidden;
+    height: 5em;
+    flex-shrink: 0;
+    color: white;
+}
+
+.timer.busy {
+    color: red;
+}
+
+.timerText,
+.timerGhost {
+    grid-area: 1 / 1;
+    font-size: 3em;
+    font-weight: bold;
+    font-family: "DSEG7", monospace;
+    letter-spacing: 0.1em;
+    line-height: 1;
+}
+
+.timerText {
+    z-index: 2;
+}
+
+.timerGhost {
+    color: #2a0000;
+    /* Darker faint red for inactive segments */
+    z-index: 1;
+    user-select: none;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding: 1em;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--paper-background);
+    transition: transform 0.2s ease-in-out;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.name {
+    font-weight: bold;
+    font-size: 1.1em;
+    text-transform: capitalize;
+}
+
+.progressContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.progressBar {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.progressText {
+    font-size: 0.85em;
+    text-align: right;
+    color: var(--text-color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+}
+
+.countChip {
+    height: 20px;
+    font-size: 0.9em;
+}
+
+.errors {
+    margin-top: 0.5em;
+    padding: 0.5em;
+    background: rgba(255, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.error {
+    color: #d32f2f;
+    font-size: 0.9em;
+}
+
+.empty {
+    text-align: center;
+    padding: 2em;
+    color: var(--text-color-secondary);
+}

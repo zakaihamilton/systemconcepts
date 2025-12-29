@@ -12,12 +12,12 @@ const sendResetMail = gmailSend({
     subject: "Reset Password",
 });
 
-export async function login({ id, password, hash, api }) {
+export async function login({ id, password, hash, api, path }) {
     if (!id) {
         console.error("empty user id");
         throw "USER_NOT_FOUND";
     }
-    console.log("user:", id, "api:", api);
+    console.log("user:", id, "api:", api, "path", path);
     id = id.toLowerCase();
     let user = null;
     try {

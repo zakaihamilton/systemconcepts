@@ -69,6 +69,12 @@ export function useUpdateSessions(groups) {
             const statusItem = {
                 name: name,
                 years: [],
+                year: null,
+                addedCount: 0,
+                removedCount: 0,
+                progress: 0,
+                count: 0,
+                tagCount: 0,
                 errors: []
             };
             if (itemIndex === -1) {
@@ -100,63 +106,123 @@ export function useUpdateSessions(groups) {
         }
         const limit = pLimit(4);
         const promises = years.map((year, yearIndex) => limit(async () => {
-            const percentage = parseInt(((yearIndex) / years.length) * 100);
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
+                s.status[itemIndex].year = year.name;
                 s.status[itemIndex].count = years.length;
-                s.status[itemIndex].progress = percentage;
-                s.status[itemIndex].index = yearIndex + 1;
+                s.status[itemIndex].progress++;
                 s.status = [...s.status];
             });
             try {
-                await getListing(year.path);
                 const yearItems = await getListing(year.path);
-                const tagsFiles = yearItems.filter(item => item.name.endsWith(".tags"));
-                const tagsMap = {};
-                const yearPrefix = year.path + "/";
-                const fileNames = tagsFiles.map(file => file.name);
-                const results = await storage.readFiles(yearPrefix, fileNames);
+                const targetYearPath = "local/shared/sessions/" + year.path.substring(prefix.length);
+                const targetTagsPath = targetYearPath + "/tags.json";
+                let tagsMap = {};
+                let tagsJsonMtime = 0;
+                let targetItems = [];
 
-                // Handle case where readFiles returns null/undefined (e.g., network error, permission issue)
-                if (!results) {
-                    console.warn(`[Tags] ${year.path}: storage.readFiles returned null/undefined for ${tagsFiles.length} files - skipping tags for this year`);
-                } else {
-                    let parsedCount = 0;
-                    let validTagsCount = 0;
-                    for (const name in results) {
-                        const content = results[name];
-
-                        // Skip null or empty content (files that don't exist)
-                        if (!content) {
-                            continue;
-                        }
-
-                        const fileName = name.replace(".tags", "");
+                try {
+                    targetItems = await storage.getListing(targetYearPath) || [];
+                    const tagsJsonItem = targetItems && targetItems.find(item => item.name === "tags.json");
+                    if (tagsJsonItem) {
                         try {
-                            const json = JSON.parse(content);
-                            parsedCount++;
+                            const tagsContent = await storage.readFile(targetTagsPath);
+                            tagsMap = JSON.parse(tagsContent) || {};
+                        } catch (err) {
+                            console.error("Failed to read/parse tags.json", err);
+                        }
+                    }
+                } catch (err) {
+                    // Ignore errors if file doesn't exist or is invalid
+                }
 
-                            // Handle case where JSON.parse returns null (server returned "null" string)
-                            if (!json) {
+                const tagsFiles = yearItems.filter(item => item.name.endsWith(".tags"));
+                const yearPrefix = year.path + "/";
+
+                // Determine which files to read
+                const filesToRead = tagsFiles.filter(file => {
+                    const fileName = file.name.replace(".tags", "");
+                    // Read if we don't have it
+                    return !tagsMap[fileName];
+                }).map(file => file.name);
+
+                if (filesToRead.length > 0) {
+                    UpdateSessionsStore.update(s => {
+                        s.status[itemIndex].addedCount += filesToRead.length;
+                        s.status = [...s.status];
+                    });
+                }
+
+                // Remove deleted tags from map
+                const currentTagFileNames = tagsFiles.map(f => f.name.replace(".tags", ""));
+                let removedCount = 0;
+                Object.keys(tagsMap).forEach(key => {
+                    if (!currentTagFileNames.includes(key)) {
+                        delete tagsMap[key];
+                        removedCount++;
+                    }
+                });
+                if (removedCount > 0) {
+                    UpdateSessionsStore.update(s => {
+                        s.status[itemIndex].removedCount += removedCount;
+                        s.status = [...s.status];
+                    });
+                }
+
+                if (filesToRead.length > 0) {
+                    const results = await storage.readFiles(yearPrefix, filesToRead);
+
+                    // Handle case where readFiles returns null/undefined (e.g., network error, permission issue)
+                    if (!results) {
+                        console.warn(`[Tags] ${year.path}: storage.readFiles returned null/undefined for ${filesToRead.length} files - skipping tags for this year`);
+                    } else {
+                        for (const name in results) {
+                            const content = results[name];
+
+                            // Skip null or empty content (files that don't exist)
+                            if (!content) {
                                 continue;
                             }
 
-                            if (json.tags) {
-                                tagsMap[fileName] = json.tags;
-                                validTagsCount++;
-                            } else {
-                                console.warn(`[Tags] ${name} has no 'tags' property:`, json);
+                            const fileName = name.replace(".tags", "");
+                            try {
+                                const json = JSON.parse(content);
+
+                                // Handle case where JSON.parse returns null (server returned "null" string)
+                                if (!json) {
+                                    continue;
+                                }
+
+                                if (json.tags) {
+                                    tagsMap[fileName] = json.tags;
+                                } else {
+                                    console.warn(`[Tags] ${name} has no 'tags' property:`, json);
+                                }
+                            } catch (err) {
+                                console.error("Failed to parse tags file", name, err);
                             }
-                        } catch (err) {
-                            console.error("Failed to parse tags file", name, err);
                         }
                     }
-                    const targetTagsPath = "local/shared/sessions/" + year.path.substring(prefix.length) + "/tags.json";
-                    if (Object.keys(tagsMap).length > 0) {
-                        await storage.writeFile(targetTagsPath, JSON.stringify(tagsMap, null, 4));
+                }
+
+                if (Object.keys(tagsMap).length > 0) {
+                    await storage.writeFile(targetTagsPath, JSON.stringify(tagsMap, null, 4));
+                    UpdateSessionsStore.update(s => {
+                        s.status[itemIndex].tagCount += Object.keys(tagsMap).length;
+                        s.status = [...s.status];
+                    });
+                }
+
+                const s3MetadataItem = yearItems.find(i => i.name === "metadata.json");
+                if (s3MetadataItem) {
+                    const localMetadataItem = targetItems.find(i => i.name === "metadata.json");
+                    const s3Mtime = s3MetadataItem.mtime ? new Date(s3MetadataItem.mtime).getTime() : 0;
+                    const localMtime = localMetadataItem && localMetadataItem.mtime ? new Date(localMetadataItem.mtime).getTime() : 0;
+
+                    if (!localMetadataItem || s3Mtime > localMtime) {
+                        await copyFile(year.path, "/metadata.json");
                     }
                 }
-                await copyFile(year.path, "/metadata.json");
             }
             catch (err) {
                 console.error(err);
@@ -168,8 +234,8 @@ export function useUpdateSessions(groups) {
         }));
         await Promise.all(promises);
         UpdateSessionsStore.update(s => {
-            s.status[itemIndex].index = years.length;
-            s.status[itemIndex].progress = 100;
+            s.status[itemIndex].progress = years.length;
+            s.status[itemIndex].year = null;
             s.status = [...s.status];
         });
     }, [prefix, copyFile, getListing]);
