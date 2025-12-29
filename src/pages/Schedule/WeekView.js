@@ -163,7 +163,7 @@ export default function WeekView({ sessions, date, store }) {
             onClick: gotoToday,
             location: "header",
             disabled: isToday,
-            divider: true
+            menu: false
         },
         {
             id: "previousWeek",

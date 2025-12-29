@@ -159,7 +159,7 @@ export default function DayView({ sessions, date, store }) {
             icon: <TodayIcon />,
             onClick: gotoToday,
             location: "header",
-            divider: true
+            menu: false
         },
         {
             id: "previousDay",

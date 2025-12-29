@@ -89,7 +89,7 @@ export default function YearView({ sessions, date, store }) {
             icon: <TodayIcon />,
             onClick: gotoToday,
             location: "header",
-            divider: true
+            menu: false
         },
         {
             id: "previousYear",

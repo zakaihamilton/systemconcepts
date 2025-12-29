@@ -152,8 +152,8 @@ export default function MonthView({ sessions, date, store }) {
             icon: <TodayIcon />,
             onClick: gotoToday,
             disabled: isToday,
-            divider: true,
-            location: "header"
+            location: "header",
+            menu: false
         },
         {
             id: "previousMonth",
