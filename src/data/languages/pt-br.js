@@ -342,6 +342,10 @@ export default {
             "value": "Menu"
         },
         {
+            "id": "SIDEBAR",
+            "value": "Barra Lateral"
+        },
+        {
             "id": "LOGIN",
             "value": "Login"
         },

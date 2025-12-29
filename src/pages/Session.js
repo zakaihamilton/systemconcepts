@@ -48,27 +48,25 @@ export default function SessionPage({ group, year, date, name }) {
     }
 
     const toolbarItems = [
-        {
+        !isMobile && {
             id: "prevSession",
             name: translations.PREVIOUS,
             icon: <ArrowBackIcon />,
             onClick: () => prevSession && gotoSession(prevSession),
-            menu: isMobile,
             location: "header",
             disabled: !prevSession
         },
-        {
+        !isMobile && {
             id: "nextSession",
             name: translations.NEXT,
             icon: <ArrowForwardIcon />,
             onClick: () => nextSession && gotoSession(nextSession),
-            menu: isMobile,
             location: "header",
             disabled: !nextSession
         }
     ];
 
-    useToolbar({ id: "Session", items: toolbarItems, depends: [prevSession, nextSession, translations] });
+    useToolbar({ id: "Session", items: toolbarItems, depends: [prevSession, nextSession, translations, isMobile] });
     const dateFormatter = useDateFormatter({
         weekday: "long",
         year: "numeric",

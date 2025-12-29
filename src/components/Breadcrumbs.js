@@ -10,7 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Toolbar from "@components/Toolbar";
-import MenuIcon from "./AppBar/MenuIcon";
+import SidebarIcon from "./AppBar/SidebarIcon";
 import clsx from "clsx";
 import NoSsr from "@mui/material/NoSsr";
 import { setHash } from "@util/pages";
@@ -167,7 +167,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
         <div className={clsx(styles.root, bar && styles.bar, border && styles.border, className)}>
             <div className={styles.row}>
                 <NoSsr>
-                    {!!bar && <MenuIcon />}
+                    {!!bar && <SidebarIcon />}
                     {<Divider orientation="vertical" flexItem style={{ margin: "0 0.5rem" }} />}
                     <div className={styles.breadcrumbs}>
                         {breadcrumbItems}

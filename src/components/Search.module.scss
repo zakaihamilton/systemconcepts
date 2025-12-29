@@ -35,10 +35,28 @@
 .searchExpanded .inputRoot {
     opacity: 1;
     width: 100%;
+
+    // Increase size of the clear (X) button with modern circular background
+    input[type="search"]::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 1.5em;
+        width: 1.5em;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%23e0e0e0" opacity="0.8"/><path d="M16 8.41L14.59 7 12 9.59 9.41 7 8 8.41 10.59 11 8 13.59 9.41 15 12 12.41 14.59 15 16 13.59 13.41 11z" fill="%23666"/></svg>');
+        background-size: 1.5em 1.5em;
+        background-repeat: no-repeat;
+        background-position: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%23bdbdbd"/><path d="M16 8.41L14.59 7 12 9.59 9.41 7 8 8.41 10.59 11 8 13.59 9.41 15 12 12.41 14.59 15 16 13.59 13.41 11z" fill="%23333"/></svg>');
+        }
+    }
 }
 
 @media (max-width: 768px) {
     .searchExpanded {
-        width: 6em;
+        width: 10em;
     }
 }

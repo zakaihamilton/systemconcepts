@@ -342,6 +342,10 @@ export default {
             "value": "תפריט"
         },
         {
+            "id": "SIDEBAR",
+            "value": "סרגל צד"
+        },
+        {
             "id": "ACCOUNT",
             "value": "חשבון"
         },

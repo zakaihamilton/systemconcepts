@@ -342,6 +342,10 @@ export default {
             "value": "Menu"
         },
         {
+            "id": "SIDEBAR",
+            "value": "Sidebar"
+        },
+        {
             "id": "ACCOUNT",
             "value": "Account"
         },
