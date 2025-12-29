@@ -68,11 +68,22 @@ import { getScheduleSection } from "@pages/Schedule/Section";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
 const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad /> });
 
+import LabelIcon from "@mui/icons-material/Label";
+const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
+
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { getSessionsSection } from "@pages/Sessions/Section";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
 export default [
+    {
+        id: "tags",
+        name: "TAGS",
+        Icon: LabelIcon,
+        Component: Tags,
+        sidebar: true,
+        category: "tools"
+    },
     {
         id: "apps",
         name: "APPS",

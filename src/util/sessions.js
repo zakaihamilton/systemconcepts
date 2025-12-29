@@ -171,7 +171,8 @@ export function useSessions(depends = [], options = {}) {
 
                     const ai = name.endsWith(" - AI") || name.startsWith("Overview - ");
                     const key = group.name + "_" + id;
-                    const sessionTags = [...new Set(tagsMap[id] || [])];
+                    const rawTags = tagsMap[id] || [];
+                    const sessionTags = Array.isArray(rawTags) ? [...new Set(rawTags)] : Object.keys(rawTags);
                     const item = {
                         key,
                         id,
