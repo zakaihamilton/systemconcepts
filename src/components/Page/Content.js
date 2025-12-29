@@ -31,9 +31,13 @@ export default function Content() {
             }
             else if (showTranscript) {
                 setPlayerPage(prev => {
-                    if (prev && prev.url === activePage.url) {
+                    // Keep the existing playerPage if we're viewing the same session
+                    // Compare parentPath to check if it's the same session
+                    // This prevents the player from reloading when switching to transcript
+                    if (prev && prev.parentPath === activePage.parentPath) {
                         return prev;
                     }
+                    // Only create a new playerPage with .m4a suffix if it's a different session
                     return { ...activePage, suffix: ".m4a" };
                 });
             }

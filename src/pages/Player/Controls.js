@@ -245,7 +245,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
 
     return <>
         {error && <MuiAlert className={styles.error} elevation={6} variant="filled" severity="error" action={<Button variant="contained" onClick={() => playerRef.load()} size="small">{translations.RELOAD}</Button>}>{translations[error]}</MuiAlert>}
-        <div className={styles.toolbar} style={{ zIndex }}>
+        <div className={styles.root} style={{ zIndex }}>
             <div className={styles.progress}>
                 <div className={styles.progressLine}>
                     <div
