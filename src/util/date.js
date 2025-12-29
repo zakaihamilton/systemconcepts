@@ -72,7 +72,11 @@ export function getWeekOfMonth(date) {
     const firstDayOfWeek = getWeekViewStart(date);
     const firstDayOfMonth = getMonthViewStart(date);
     const offsetDate = diffDays(firstDayOfWeek, firstDayOfMonth);
-    const result = Math.floor(offsetDate / 7);
+    let result = Math.floor(offsetDate / 7);
+
+    // Cap at week 4 (0-indexed, so 0-4 = weeks 1-5)
+    result = Math.min(result, 4);
+
     return result;
 }
 
@@ -105,7 +109,8 @@ export function getNumberOfWeeksInMonth(date) {
         currentDate = addDate(currentDate, 7);
     }
 
-    return weekCount;
+    // Cap at 5 weeks maximum - week 6 should be the first week of next month
+    return Math.min(weekCount, 5);
 }
 
 export function getMonthNames(date, formatter) {

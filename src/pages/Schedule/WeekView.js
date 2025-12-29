@@ -26,7 +26,9 @@ export default function WeekView({ sessions, date, store }) {
     const translations = useTranslations();
     const firstDay = getWeekViewStart(date);
     const monthStart = getMonthViewStart(date);
-    const month = addDate(monthStart, 14);
+    // Use the middle of the current week (Wednesday) to determine which month we're in
+    // This ensures that weeks spanning two months are assigned to the month with more days
+    const month = addDate(firstDay, 3);
     const dayHeaderFormatter = useDateFormatter({
         weekday: "short"
     });
@@ -50,10 +52,12 @@ export default function WeekView({ sessions, date, store }) {
         return <DayHeader key={index} date={day} index={index} count={numDaysInWeek} dateFormatter={dateFormatter} dayFormatter={dayHeaderFormatter} store={store} />;
     });
 
-    const weekOfMonth = getWeekOfMonth(firstDay);
+    // Calculate week number based on the month (middle of week), not the original date
+    // This ensures weeks spanning months show the correct week number for the displayed month
+    const weekOfMonth = getWeekOfMonth(month);
     const numOfWeeksInMonth = getNumberOfWeeksInMonth(month);
     const weekState = [weekOfMonth + 1, week => {
-        const newDate = new Date(date);
+        const newDate = new Date(month);
         setWeekOfMonth(newDate, week - 1);
         store.update(s => {
             s.date = newDate;
@@ -68,11 +72,14 @@ export default function WeekView({ sessions, date, store }) {
 
     const weekWidget = <Input select={true} label={translations.WEEK} helperText="" fullWidth={false} items={weekItems} state={weekState} />;
 
-    const monthState = [month.getMonth() + 1, month => {
+    const monthState = [month.getMonth() + 1, newMonth => {
         const newDate = new Date(date);
-        newDate.setMonth(month - 1);
+        newDate.setMonth(newMonth - 1);
+        newDate.setDate(1);
+        // Get the first day of the first week of this month (Sunday before or on the 1st)
+        const firstWeekStart = getMonthViewStart(newDate);
         store.update(s => {
-            s.date = newDate;
+            s.date = firstWeekStart;
         });
     }];
     const monthItems = getMonthNames(month, monthFormatter).map((name, index) => {
