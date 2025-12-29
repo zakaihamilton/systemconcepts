@@ -14,7 +14,7 @@
     padding: 1rem 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.1rem;
     scroll-behavior: smooth;
 
     &::-webkit-scrollbar {
@@ -42,7 +42,7 @@
     border: 1px solid transparent;
     background: transparent;
     position: relative;
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.5rem;
 
     &:hover {
         background-color: var(--main-background-alternative);
@@ -73,7 +73,7 @@
     margin-right: 0.5rem;
     font-size: 0.8rem;
     opacity: 0.6;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem;
     border-radius: 6px;
     background: var(--border-color);
     min-width: 5.5rem;
