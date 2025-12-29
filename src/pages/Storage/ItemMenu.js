@@ -109,11 +109,19 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.severity = "error";
                     s.onDone = async select => {
                         for (const item of select) {
-                            if (item.type === "dir") {
-                                await storage.deleteFolder(item.path);
+                            try {
+                                if (item.type === "dir") {
+                                    await storage.deleteFolder(item.path);
+                                }
+                                else {
+                                    await storage.deleteFile(item.path);
+                                }
                             }
-                            else {
-                                await storage.deleteFile(item.path);
+                            catch (err) {
+                                StorageStore.update(s => {
+                                    s.message = err;
+                                    s.severity = "error";
+                                });
                             }
                         }
                     };

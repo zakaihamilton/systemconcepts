@@ -52,8 +52,18 @@ export default function StatusBar({ data, mapper, store }) {
         let result = false;
         if (onDone) {
             setBusy(true);
-            result = await onDone(select);
-            setBusy(false);
+            try {
+                result = await onDone(select);
+            }
+            catch (err) {
+                store.update(s => {
+                    s.message = err;
+                    s.severity = "error";
+                });
+            }
+            finally {
+                setBusy(false);
+            }
         }
         if (!result) {
             store.update(s => {

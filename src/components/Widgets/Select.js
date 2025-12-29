@@ -22,5 +22,6 @@ export default function SelectWidget({ item, store, select }) {
     color="default"
     classes={{ root: styles.root }}
     checked={checked}
+    onClick={e => e.stopPropagation()}
     onChange={selectItem} />);
 }
