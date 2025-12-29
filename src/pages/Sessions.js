@@ -190,12 +190,12 @@ export default function SessionsPage() {
         </>;
 
         const nameContent = <Tooltip arrow title={item.name}>
-            <div className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
+            <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                 {item.name}
                 <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
                     <div className={styles.percentage} style={{ width: percentage + "%" }} />
                 </div>
-            </div>
+            </span>
         </Tooltip>;
 
         const href = target(item);
