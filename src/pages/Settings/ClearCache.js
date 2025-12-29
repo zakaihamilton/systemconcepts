@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import Dialog from "@widgets/Dialog";
 import { goBackPage } from "@util/pages";
 import storage from "@util/storage";
-import { UpdateSessionsStore } from "@util/updateSessions";
+import { UpdateSessionsStore } from "@util/syncState";
 import { SyncContext } from "@components/Sync";
 import { clearBundleCache } from "@util/sync";
 

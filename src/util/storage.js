@@ -2,11 +2,14 @@ import storage from "@data/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { makePath, isBinaryFile } from "@util/path";
 import { useGlobalState } from "@util/store";
-import pLimit from "p-limit";
+import pLimit from "./p-limit";
 
 const limit = pLimit(20);
 
 export async function callMethod(item, url = "", ...params) {
+    if (!url) {
+        url = "";
+    }
     const { name, types } = item;
     const [deviceId, ...other] = url.split("/").filter(Boolean);
     const path = other.join("/");
@@ -141,16 +144,8 @@ export function useListing(url, depends = [], options) {
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
-        const timerHandle = setTimeout(() => {
-            setError(listing => {
-                if (listing === null) return listing;
-                return null;
-            });
-            setLoading(loading => {
-                if (loading === true) return loading;
-                return true;
-            });
-        }, 0);
+        setLoading(true);
+        setError(null);
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
             if (active.current === url) {
@@ -175,7 +170,6 @@ export function useListing(url, depends = [], options) {
                 });
             }
         });
-        return () => clearTimeout(timerHandle);
     }, [url, optionsString, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     useEffect(() => {
         return () => {
@@ -299,7 +293,7 @@ async function getRecursiveList(path) {
 
         listing.push(...items);
 
-        const subDirs = items.filter(item => item.type === "dir");
+        const subDirs = items.filter(item => item.type === "dir" || item.stat?.type === "dir");
         await Promise.all(subDirs.map(dir => addListing(dir.path)));
     };
     await addListing(path);

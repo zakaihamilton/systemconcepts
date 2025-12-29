@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { Store } from "pullstate";
 import { fetchJSON } from "@util/fetch";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
@@ -7,15 +6,7 @@ import { useOnline } from "@util/online";
 import { makePath } from "@util/path";
 import * as bundle from "./bundle";
 import { usePageVisibility } from "@util/hooks";
-
-export const SyncActiveStore = new Store({
-    active: 0,
-    counter: 0,
-    busy: false,
-    lastSynced: 0,
-    progress: { total: 0, processed: 0 },
-    currentBundle: null  // Track which bundle is currently being synced
-});
+import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
 
 // Clear bundle cache to force fresh sync
 export async function clearBundleCache() {
@@ -137,7 +128,12 @@ export function useSyncFeature() {
         SyncActiveStore.update(s => {
             s.progress = { total: 0, processed: 0 };
             const diff = (currentTime - s.lastSynced) / 1000;
+            const updateBusy = UpdateSessionsStore.getRawState().busy;
             if (pollSync && s.lastSynced && diff < 60) {
+                continueSync = false;
+            }
+            else if (updateBusy) {
+                console.log("[Sync] Session update in progress, skipping background sync");
                 continueSync = false;
             }
             else {
@@ -154,31 +150,70 @@ export function useSyncFeature() {
 
             let updateCounter = 0;
             if (isSignedIn) {
-                // 1. Define Bundles
-                // - MongoDB (personal) for per-user data (read/write for all)
-                // - S3 (aws/metadata/shared) for shared metadata (read-only for non-admins)
-                // - S3 (aws/metadata/shared/sessions) for ALL session data (consolidated)
+                // 1. Define Groups
+                const sessionPath = makePath("local", "shared", "sessions");
+                let groups = [];
+                try {
+                    const listingPath = makePath(sessionPath, "listing.json");
+                    if (await storage.exists(listingPath)) {
+                        const listingBody = await storage.readFile(listingPath);
+                        try {
+                            groups = JSON.parse(listingBody) || [];
+                        } catch (e) {
+                            console.error("[Sync] Failed to parse local listing.json:", e);
+                        }
+                    }
+
+                    if (await storage.exists(sessionPath)) {
+                        const items = await storage.getListing(sessionPath);
+                        const localGroups = items.filter(item => item.type === "dir" || item.stat?.type === "dir").map(item => ({ name: item.name }));
+                        localGroups.forEach(lg => {
+                            if (!groups.find(g => g.name === lg.name)) {
+                                groups.push(lg);
+                            }
+                        });
+                    }
+
+                    // Always try to supplement with S3 discovery if local is empty/sparse
+                    if (groups.length < 5) { // Arbitrary low number to trigger S3 scan
+                        console.log("[Sync] Discovering groups from S3...");
+                        // Try to find group folders in S3
+                        const remoteItems = await storage.getListing("aws/metadata/sessions") || [];
+                        const discoveredGroups = remoteItems
+                            .filter(item => item.type === "dir" || item.stat?.type === "dir")
+                            .map(item => ({ name: item.name }))
+                            .filter(g => g.name !== "bundle.gz" && !g.name.startsWith("bundle.gz.part"));
+
+                        discoveredGroups.forEach(dg => {
+                            if (!groups.find(g => g.name === dg.name)) {
+                                groups.push(dg);
+                            }
+                        });
+                        console.log(`[Sync] Found ${groups.length} groups total after discovery:`, groups.map(g => g.name).join(", "));
+                    }
+                } catch (err) {
+                    console.error("[Sync] Failed to load groups for sync:", err);
+                }
+
+                // 2. Define Bundles
                 const bundles = [
                     {
                         name: "personal",
                         path: makePath("local", "personal")
                     },
                     {
-                        name: "aws/metadata/shared",  // S3 - shared metadata (read-only for non-admins)
+                        name: "aws/metadata",
                         path: makePath("local", "shared"),
-                        ignore: ["sessions"]
+                        // Only ignore the group subfolders, not the sessions folder itself
+                        // This ensures listing.json and other root files are synced here
+                        ignore: groups.map(g => `sessions/${g.name}`)
                     },
-                    {
-                        name: "aws/metadata/shared/sessions",  // S3 - ALL sessions consolidated
-                        path: makePath("local", "shared", "sessions"),
-                        preserve: ["tags.json", "listing.json"]
-                    }
+                    ...groups.map(group => ({
+                        name: `aws/metadata/sessions/${group.name}`, // Group bundle name
+                        path: makePath("local", "shared", "sessions", group.name),
+                        preserve: ["tags.json", "listing.json", "metadata.json"]
+                    }))
                 ];
-
-                // Consolidated sessions bundle automatically handles all groups
-                // - Adding new groups: new files under sessions/{group}/ are included
-                // - Removing groups: deleted files trigger bundle update
-                // - Modifying groups: any file changes trigger bundle update
 
 
 
@@ -209,37 +244,46 @@ export function useSyncFeature() {
                         const bundleListing = await storage.getRecursiveList(path);
                         console.log(`[Sync] ${name} - Directory scan: ${Date.now() - t2}ms, files: ${bundleListing.length}`);
 
-                        // Download & Apply
+                        // 1. Download current remote bundle
                         const t3 = Date.now();
                         let remoteBundle = await bundle.getRemoteBundle(name);
                         console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
 
-                        const t4 = Date.now();
-                        let { downloadCount, listing: updatedListing, isBundleCorrupted } = await bundle.applyBundle(path, remoteBundle, bundleListing, ignore, preserve);
-
+                        // Check for corruption (null content) in downloaded bundle
+                        const isBundleCorrupted = remoteBundle && Object.values(remoteBundle).some(item => item.content == null);
                         if (isBundleCorrupted) {
-                            console.warn(`[Sync] ${name} - Bundle corrupted. Skipping application of corrupted files.`);
-                        } else {
-                            console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
+                            console.warn(`[Sync] ${name} - Remote bundle appears corrupted.`);
                         }
 
-                        // Upload & Merge
+                        // 2. Scan local files (including any new ones from updateSessions.js)
                         const t5 = Date.now();
-                        // If bundle is corrupted, force a complete rescan (both remote bundle and listing)
-                        const bundleForScan = isBundleCorrupted ? null : remoteBundle;
-                        const listingForScan = isBundleCorrupted ? null : updatedListing;
-                        const localBundle = await bundle.scanLocal(path, ignore, listingForScan, bundleForScan);
+                        // If remote bundle is corrupted, force a complete rescan to repair
+                        const localBundle = await bundle.scanLocal(path, ignore, isBundleCorrupted ? null : bundleListing, isBundleCorrupted ? null : remoteBundle);
                         console.log(`[Sync] ${name} - Scan local: ${Date.now() - t5}ms`);
 
+                        // 3. Merge local changes into the remote bundle base
                         const t6 = Date.now();
                         const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
                         console.log(`[Sync] ${name} - Merge bundles: ${Date.now() - t6}ms, updated: ${updated}`);
 
-                        if (updated) {
+                        // 4. Save merged bundle to remote if changed (or to fix corruption)
+                        if (updated || (isBundleCorrupted && Object.keys(merged).length > 0)) {
                             const t7 = Date.now();
                             await bundle.saveRemoteBundle(name, merged);
                             console.log(`[Sync] ${name} - Save bundle: ${Date.now() - t7}ms`);
                             localUpdated = true;
+                        }
+
+                        // 5. Apply the bundle (now containing merged changes) to local storage
+                        // This handles downloading remote changes and deleting removed files
+                        const t4 = Date.now();
+                        // Use the merged bundle to ensure local additions are preserved
+                        let { downloadCount, isBundleCorrupted: appliedCorruption } = await bundle.applyBundle(path, merged, isBundleCorrupted ? null : bundleListing, ignore, preserve);
+
+                        if (appliedCorruption) {
+                            console.warn(`[Sync] ${name} - Bundle application detected corruption.`);
+                        } else {
+                            console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
                         }
 
                         if (downloadCount > 0 || localUpdated) {

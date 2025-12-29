@@ -597,11 +597,14 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
 
     // Delete local files that are no longer in the bundle
     // BUT: Skip deletion if bundle is corrupted (has null content)
+    // AND: Avoid mass deletions (more than 50% of local files) if we have a significant number of files
     if (!isBundleCorrupted) {
         const bundleFiles = new Set(Object.keys(bundle));
+        const toDelete = [];
+
         for (const relativePath of Object.keys(localFiles)) {
             if (!bundleFiles.has(relativePath)) {
-                // Double check if file should be ignored (though localFiles should already be filtered)
+                // Check if file should be ignored
                 if (ignore.some(pattern => relativePath.includes(pattern))) {
                     continue;
                 }
@@ -609,11 +612,22 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
                 if (preserve.some(pattern => relativePath.includes(pattern))) {
                     continue;
                 }
+                toDelete.push(relativePath);
+            }
+        }
+
+        const localFileCount = Object.keys(localFiles).length;
+        if (localFileCount > 20 && toDelete.length > localFileCount * 0.5) {
+            console.warn(`[applyBundle] SAFETY TRIGGERED: Attempting to delete ${toDelete.length}/${localFileCount} files (${Math.round(toDelete.length / localFileCount * 100)}%). This looks like a corrupted sync. Skipping deletion phase.`);
+            return { downloadCount, listing, isBundleCorrupted };
+        }
+
+        if (toDelete.length > 0) {
+            console.log(`[applyBundle] Cleaning up ${toDelete.length} removed files...`);
+            for (const relativePath of toDelete) {
                 const fullPath = makePath(root, relativePath);
                 try {
-                    // Check if file exists before trying to delete
                     if (await storage.exists(fullPath)) {
-                        console.log(`[applyBundle] Deleting removed file: ${relativePath}`);
                         await storage.deleteFile(fullPath);
                         deleteCount++;
                     }

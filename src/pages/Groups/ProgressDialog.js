@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { UpdateSessionsStore } from "@util/updateSessions";
+import { UpdateSessionsStore } from "@util/syncState";
 import { useTranslations } from "@util/translations";
 import styles from "./ProgressDialog.module.scss";
 import { formatDuration } from "@util/string";

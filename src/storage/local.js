@@ -6,18 +6,27 @@ const fs = process.browser && new FS("systemconcepts-fs");
 async function getListing(path, options = {}) {
     const { useCount } = options;
     let listing = [];
-    const names = await fs.promises.readdir(path);
+    let names = [];
+    try {
+        names = await fs.promises.readdir(path);
+    }
+    catch (err) {
+        return [];
+    }
     for (const name of names) {
         const item = {};
         const itemPath = makePath(path, name);
         try {
             const itemStat = await fs.promises.stat(itemPath);
-            if (useCount && itemStat.type === "dir") {
+            const isDir = itemStat.type === "dir" || (itemStat.isDirectory && itemStat.isDirectory());
+            item.type = isDir ? "dir" : "file";
+            if (useCount && isDir) {
                 const children = await fs.promises.readdir(itemPath);
                 let count = 0;
                 for (const name of children) {
-                    const itemStat = await fs.promises.stat(makePath(itemPath, name));
-                    if (itemStat.type === "dir") {
+                    const childStat = await fs.promises.stat(makePath(itemPath, name));
+                    const childIsDir = childStat.type === "dir" || (childStat.isDirectory && childStat.isDirectory());
+                    if (childIsDir) {
                         count++;
                     }
                 }
@@ -79,6 +88,9 @@ async function createFolderPath(path, isFolder = false) {
 
 async function deleteFolder(root) {
     root = makePath(root);
+    if (!(await exists(root))) {
+        return;
+    }
     const names = await fs.promises.readdir(root);
     for (const name of names) {
         const path = [root, name].filter(Boolean).join("/");
@@ -108,7 +120,7 @@ async function readFiles(prefix, files) {
     for (const name of files) {
         results[name] = await readFile(prefix + name);
     }
-    return files;
+    return results;
 }
 
 async function writeFile(path, body) {

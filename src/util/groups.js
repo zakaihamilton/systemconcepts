@@ -32,14 +32,26 @@ export function useGroups(depends) {
             }
 
             if (!listing.length) {
-                console.warn("listing.json empty or missing, scanning directory for groups...");
-                const items = await storage.getListing("local/shared/sessions") || [];
-                listing = items
-                    .filter(item => item.stat && item.stat.type === "dir")
-                    .map(item => ({ name: item.name }));
+                console.warn("listing.json empty or missing, scanning local directory for groups...");
+                if (await storage.exists("local/shared/sessions")) {
+                    const items = await storage.getListing("local/shared/sessions") || [];
+                    listing = items
+                        .filter(item => item.type === "dir" || item.stat?.type === "dir")
+                        .map(item => ({ name: item.name }));
+                }
+
+                if (!listing.length) {
+                    console.log("Local directory empty, scanning S3 for groups...");
+                    const remoteItems = await storage.getListing("aws/metadata/sessions") || [];
+                    listing = remoteItems
+                        .filter(item => item.type === "dir" || item.stat?.type === "dir")
+                        .map(item => ({ name: item.name }))
+                        .filter(g => g.name !== "bundle.gz" && !g.name.startsWith("bundle.gz.part"));
+                }
 
                 if (listing.length > 0) {
-                    console.log("Restored listing from directory scan:", listing);
+                    console.log("Restored listing from scan:", listing);
+                    await storage.createFolderPath("local/shared/sessions/listing.json");
                     await storage.writeFile("local/shared/sessions/listing.json", JSON.stringify(listing, null, 4));
                 }
             }

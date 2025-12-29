@@ -13,7 +13,7 @@ export default async function AWS_API(req, res) {
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
-        const path = (req.body && req.body.path) || (req.headers && req.headers.path);
+        const path = decodeURIComponent((req.body && req.body.path) || (req.headers && req.headers.path));
         const user = await login({ id, hash, api: "aws", path });
         if (!user) {
             throw "ACCESS_DENIED";
@@ -28,7 +28,6 @@ export default async function AWS_API(req, res) {
             throw "ACCESS_DENIED";
         }
 
-        console.log("aws api path: ", decodeURIComponent(path));
         const result = await handleRequest({ req, readOnly });
         if (typeof result === "object") {
             res.status(200).json(result);

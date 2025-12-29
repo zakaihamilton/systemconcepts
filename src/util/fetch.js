@@ -89,52 +89,35 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline) {
-            const timerHandle = setTimeout(() => {
-                setResult(prev => {
-                    if (prev === null) return prev;
-                    return null;
-                });
-                setError(prev => {
-                    if (prev === "") return prev;
-                    return "";
-                });
-                setProgress(prev => {
-                    if (prev === true) return prev;
-                    return true;
-                });
-                setTimeoutHandle(handle => {
-                    if (handle) {
-                        clearTimeout(handle);
-                        handle = null;
-                    }
-                    handle = setTimeout(() => {
-                        setTimeoutHandle(null);
-                        fetchJSON(url, options).then(data => {
-                            setResult(data);
-                            setProgress(false);
-                        }).catch(err => {
-                            setProgress(false);
-                            setError(err);
-                        });
-                    }, delay);
-                    return handle;
-                });
-            }, 0);
-            return () => {
-                clearTimeout(timerHandle);
-            };
+            setResult(null);
+            setError("");
+            setProgress(true);
+            setTimeoutHandle(handle => {
+                if (handle) {
+                    clearTimeout(handle);
+                    handle = null;
+                }
+                handle = setTimeout(() => {
+                    setTimeoutHandle(null);
+                    fetchJSON(url, options).then(data => {
+                        setResult(data);
+                        setProgress(false);
+                    }).catch(err => {
+                        setProgress(false);
+                        setError(err);
+                    });
+                }, delay);
+                return handle;
+            });
         }
         else {
-            const timerHandle = setTimeout(() => {
-                setTimeoutHandle(handle => {
-                    if (handle) {
-                        clearTimeout(handle);
-                        handle = null;
-                    }
-                    return handle;
-                });
-            }, 0);
-            return () => clearTimeout(timerHandle);
+            setTimeoutHandle(handle => {
+                if (handle) {
+                    clearTimeout(handle);
+                    handle = null;
+                }
+                return handle;
+            });
         }
     }, [url, cond, optionsString, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [result, setResult, inProgress, error];
@@ -150,52 +133,35 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline && url) {
-            const timerHandle = setTimeout(() => {
-                setResult(prev => {
-                    if (prev === null) return prev;
-                    return null;
-                });
-                setError(prev => {
-                    if (prev === "") return prev;
-                    return "";
-                });
-                setProgress(prev => {
-                    if (prev === true) return prev;
-                    return true;
-                });
-                setTimeoutHandle(handle => {
-                    if (handle) {
-                        clearTimeout(handle);
-                        handle = null;
-                    }
-                    handle = setTimeout(() => {
-                        setTimeoutHandle(null);
-                        fetchText(url, options).then(data => {
-                            setResult(data);
-                            setProgress(false);
-                        }).catch(err => {
-                            setProgress(false);
-                            setError(err);
-                        });
-                    }, delay);
-                    return handle;
-                });
-            }, 0);
-            return () => {
-                clearTimeout(timerHandle);
-            };
+            setResult(null);
+            setError("");
+            setProgress(true);
+            setTimeoutHandle(handle => {
+                if (handle) {
+                    clearTimeout(handle);
+                    handle = null;
+                }
+                handle = setTimeout(() => {
+                    setTimeoutHandle(null);
+                    fetchText(url, options).then(data => {
+                        setResult(data);
+                        setProgress(false);
+                    }).catch(err => {
+                        setProgress(false);
+                        setError(err);
+                    });
+                }, delay);
+                return handle;
+            });
         }
         else {
-            const timerHandle = setTimeout(() => {
-                setTimeoutHandle(handle => {
-                    if (handle) {
-                        clearTimeout(handle);
-                        handle = null;
-                    }
-                    return handle;
-                });
-            }, 0);
-            return () => clearTimeout(timerHandle);
+            setTimeoutHandle(handle => {
+                if (handle) {
+                    clearTimeout(handle);
+                    handle = null;
+                }
+                return handle;
+            });
         }
     }, [url, optionsString, cond, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [result, setResult, inProgress, error];

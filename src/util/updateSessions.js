@@ -5,11 +5,7 @@ import { Store } from "pullstate";
 import { useCallback } from "react";
 import pLimit from "./p-limit";
 
-export const UpdateSessionsStore = new Store({
-    busy: false,
-    status: [],
-    start: 0
-});
+import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
 
 export function useUpdateSessions(groups) {
     const { busy, status, start } = UpdateSessionsStore.useState();
@@ -257,6 +253,11 @@ export function useUpdateSessions(groups) {
         });
     }, [prefix, copyFile, getListing]);
     const updateSessions = useCallback(async (includeDisabled) => {
+        const isSyncBusy = SyncActiveStore.getRawState().busy;
+        if (isSyncBusy) {
+            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
+            return;
+        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
@@ -279,6 +280,11 @@ export function useUpdateSessions(groups) {
         });
     }, [groups, prefix, getListing, updateGroup]);
     const updateAllSessions = useCallback(async (includeDisabled) => {
+        const isSyncBusy = SyncActiveStore.getRawState().busy;
+        if (isSyncBusy) {
+            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
+            return;
+        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
@@ -301,6 +307,11 @@ export function useUpdateSessions(groups) {
         });
     }, [groups, prefix, getListing, updateGroup]);
     const updateSpecificGroup = useCallback(async (name, updateAll) => {
+        const isSyncBusy = SyncActiveStore.getRawState().busy;
+        if (isSyncBusy) {
+            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
+            return;
+        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
