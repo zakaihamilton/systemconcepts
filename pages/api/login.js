@@ -1,4 +1,4 @@
-const { login, register, changePassword, resetPassword, sendResetEmail } = require("@util/login");
+import { login, register, changePassword, resetPassword, sendResetEmail } from "@util/login";
 import { getSafeError } from "@util/safeError";
 
 export default async function LOGIN_API(req, res) {

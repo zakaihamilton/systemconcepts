@@ -3,7 +3,9 @@ import { compare, hash } from "bcryptjs";
 import resetPasswordTemplate from "@data/resetPasswordTemplate";
 import { v4 as uuidv4 } from 'uuid';
 
-const sendResetMail = require("gmail-send")({
+import gmailSend from "gmail-send";
+
+const sendResetMail = gmailSend({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASSWORD,
     from: process.env.GMAIL_FROM,
@@ -199,5 +201,11 @@ export async function sendResetEmail({ id }) {
     emailText = emailText.replace(/{{name}}/g, fullName);
     // Use resetToken instead of user.hash
     emailText = emailText.replace(/{{resetlink}}/g, process.env.SITE_URL + "#/" + encodeURIComponent("resetpassword/" + resetToken));
+
+    if (!sendResetMail || typeof sendResetMail !== 'function') {
+        console.error("Email service not configured properly");
+        throw "EMAIL_SERVICE_ERROR";
+    }
+
     await sendResetMail({ to: user.email, text: emailText });
 }
