@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "@util/translations";
-import { useSessions, SessionsStore } from "@util/sessions";
+import { useSessions } from "@util/sessions";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
 import FilterBar from "@pages/Sessions/FilterBar";
@@ -17,23 +17,38 @@ export const TagsStore = new Store({
 export default function Tags() {
     const translations = useTranslations();
     const [sessions] = useSessions([], true);
-    const { order, offset, orderBy } = TagsStore.useState();
+    const { order, orderBy } = TagsStore.useState();
 
     const columns = [
         {
             id: "group",
             title: translations.GROUP,
-            sortable: true
+            sortable: true,
+            columnProps: {
+                style: {
+                    width: "8em"
+                }
+            }
         },
         {
             id: "date",
             title: translations.DATE,
-            sortable: true
+            sortable: true,
+            columnProps: {
+                style: {
+                    width: "10em"
+                }
+            }
         },
         {
             id: "name",
             title: translations.SESSION,
-            sortable: true
+            sortable: true,
+            columnProps: {
+                style: {
+                    width: "20em"
+                }
+            }
         },
         {
             id: "tags",
