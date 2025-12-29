@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useContext, useEffect, useMemo } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
@@ -76,7 +76,6 @@ export default function TableWidget(props) {
     } = props;
     const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
-    const [isEmpty, setEmpty] = useState(false);
     const statusBarIsActive = StatusBarStore.useState(s => s.active);
     columns = columns || [];
     const firstColumn = columns[0];
@@ -326,18 +325,11 @@ export default function TableWidget(props) {
     useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems, itemsPerPage] });
 
     useEffect(() => {
-        setEmpty(false);
         const hasColumn = visibleColumns.some(column => column.id === orderBy || column.sortable === orderBy);
         if (!hasColumn) {
             store.update(s => { s.orderBy = defaultSort; });
         }
     }, []);
-
-    useEffect(() => {
-        if (loading) {
-            setEmpty(false);
-        }
-    }, [loading]);
 
     const items = useMemo(() => {
         let items = data || [];
@@ -373,7 +365,6 @@ export default function TableWidget(props) {
         }
 
         items = stableSort(items || [], getComparator(order, orderBy));
-        setEmpty(data && (!data.length || !items.length));
         return items;
     }, [search, data, order, orderBy, visibleColumns, filter, mapper, ...depends]);
 
@@ -439,6 +430,10 @@ export default function TableWidget(props) {
     };
 
     const numItems = items && items.length;
+
+    // Derived state for empty condition
+    // Optimization: Derive isEmpty from data and items to avoid state synchronization and extra renders
+    const isEmpty = !loading && data && (!data.length || !items.length);
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
