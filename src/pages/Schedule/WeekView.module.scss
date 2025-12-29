@@ -14,6 +14,12 @@
     column-gap: 3px;
 }
 
+.grid.mobile {
+    grid-template-columns: repeat(7, 150px);
+    width: max-content;
+    min-width: 100%;
+}
+
 .input {
     margin-left: 0em;
     margin-right: 0em;
