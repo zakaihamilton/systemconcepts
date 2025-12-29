@@ -123,10 +123,10 @@ export default function Transcript() {
                     className={`${styles.line} ${isCurrent ? styles.current : ""}`}
                     onClick={() => jumpTo(line.start)}
                 >
-                    <div className={styles.time}>
+                    <span className={styles.time}>
                         {formatTime(line.start)}
-                    </div>
-                    <div className={styles.text}>{line.text}</div>
+                    </span>
+                    {line.text}
                 </div>;
             })}
         </div>

@@ -36,15 +36,13 @@
 }
 
 .line {
-    display: flex;
-    align-items: center;
-    padding: 0.3rem 0.8rem;
     cursor: pointer;
     border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
     background: transparent;
     position: relative;
+    padding: 0.25rem 0.5rem;
 
     &:hover {
         background-color: var(--main-background-alternative);
@@ -72,28 +70,16 @@
 
 .time {
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    margin-right: 0.5rem;
     font-size: 0.8rem;
     opacity: 0.6;
-    margin-right: 0.75rem;
-    padding: 0.2rem 0.2rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 6px;
     background: var(--border-color);
     min-width: 5.5rem;
     text-align: center;
     transition: all 0.2s ease;
-    flex-shrink: 0;
     line-height: 1.4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.text {
-    flex: 1;
-    font-size: 1.05rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    word-break: break-word;
 }
 
 .controls {
