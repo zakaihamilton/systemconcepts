@@ -538,10 +538,11 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
 
             // Skip if path is malformed (contains duplicate path segments)
             if (fullPath.includes('local/shared/sessions') && relativePath.includes('local/shared/sessions')) {
-                console.warn(`[applyBundle] Skipping ${relativePath} - malformed path detected`);
+                // Silently skip malformed paths from corrupted bundles
                 skipCount++;
                 continue;
             }
+
 
             try {
                 const parentPath = fullPath.split("/").slice(0, -1).join("/");
