@@ -6,7 +6,9 @@ import { Base64 } from "js-base64";
 const BUNDLE_CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB limit to stay under 4MB API limit
 const BUNDLE_PREFIX = "bundle.gz.part.";
 
-// Memory caches removed to reduce memory usage
+// Memory cache for bundles to avoid redundant parsing
+const REMOTE_BUNDLE_CACHE = new Map();
+let globalSyncLock = false;
 
 /**
  * Generate a hash from bundle inventory for quick comparison
@@ -103,15 +105,15 @@ export async function checkBundleVersion(endPoint, listing = null) {
 
         if (cachedVersion && cachedVersion.inventoryHash === currentInventoryHash) {
             // Version matches - no changes
-            return { changed: false, versionInfo: cachedVersion };
+            return { changed: false, versionInfo: cachedVersion, listing };
         }
 
         // Version doesn't match or doesn't exist
-        return { changed: true, versionInfo: { inventoryHash: currentInventoryHash, timestamp: Date.now() } };
+        return { changed: true, versionInfo: { inventoryHash: currentInventoryHash, timestamp: Date.now() }, listing };
     } catch (err) {
         console.error("checkBundleVersion: Error checking version:", err);
         // On error, assume changed to be safe
-        return { changed: true, versionInfo: null };
+        return { changed: true, versionInfo: null, listing: null };
     }
 }
 
@@ -141,6 +143,12 @@ function normalizeContent(content) {
 }
 
 export async function getRemoteBundle(endPoint, listing = null) {
+    // Check memory cache first
+    const cachedInMemory = REMOTE_BUNDLE_CACHE.get(endPoint);
+    if (cachedInMemory && !listing) {
+        return cachedInMemory;
+    }
+
     if (!listing) {
         listing = await storage.getListing(endPoint) || [];
     }
@@ -178,11 +186,28 @@ export async function getRemoteBundle(endPoint, listing = null) {
             // Simple version check - if inventory matches, use cache
             const currentInventoryHash = JSON.stringify(inventory);
             if (versionInfo.inventoryHash === currentInventoryHash) {
+                // Check memory cache again with specific verification
+                if (cachedInMemory && cachedInMemory._inventoryHash === currentInventoryHash) {
+                    return cachedInMemory;
+                }
+
                 // Version matches - use cached bundle without any processing
                 if (await storage.exists(cachePath)) {
                     const cachedBundleStr = await storage.readFile(cachePath);
                     if (cachedBundleStr) {
-                        return JSON.parse(cachedBundleStr);
+                        try {
+                            const bundle = JSON.parse(cachedBundleStr);
+                            // Use non-enumerable property
+                            Object.defineProperty(bundle, "_inventoryHash", {
+                                value: currentInventoryHash,
+                                enumerable: false,
+                                writable: true
+                            });
+                            REMOTE_BUNDLE_CACHE.set(endPoint, bundle);
+                            return bundle;
+                        } catch (e) {
+                            console.error("getRemoteBundle: Failed to parse cached JSON:", e);
+                        }
                     }
                 }
             }
@@ -226,53 +251,33 @@ export async function getRemoteBundle(endPoint, listing = null) {
 
         // Validate gzip header (should start with 0x1f 0x8b)
         if (bytes.length < 2 || bytes[0] !== 0x1f || bytes[1] !== 0x8b) {
-            console.error("getRemoteBundle: Invalid gzip header. First bytes:", bytes.slice(0, 10));
-            // Clear corrupted cache
-            try {
-                if (await storage.exists(cachePath)) {
-                    await storage.deleteFile(cachePath);
-                }
-                if (await storage.exists(versionPath)) {
-                    await storage.deleteFile(versionPath);
-                }
-            } catch (cleanupErr) {
-                console.error("getRemoteBundle: Error cleaning up corrupted cache:", cleanupErr);
-            }
+            console.error("getRemoteBundle: Invalid gzip header.");
             return null;
         }
 
         const jsonString = pako.ungzip(bytes, { to: "string" });
+        const bundle = JSON.parse(jsonString);
+
+        // Use non-enumerable property so it doesn't interfere with file iteration
+        Object.defineProperty(bundle, "_inventoryHash", {
+            value: JSON.stringify(inventory),
+            enumerable: false,
+            writable: true
+        });
 
         // Update Cache
         await storage.createFolderPath(cachePath);
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(inventory));
 
-        // Update master manifest for fast future checks
-        const inventoryHash = JSON.stringify(inventory);
-        const versionInfo = {
-            inventoryHash,
-            timestamp: Date.now()
-        };
+        const versionInfo = { inventoryHash: bundle._inventoryHash, timestamp: Date.now() };
+        await storage.writeFile(versionPath, JSON.stringify(versionInfo));
         await updateMasterManifest(endPoint, versionInfo);
 
-        return JSON.parse(jsonString);
+        REMOTE_BUNDLE_CACHE.set(endPoint, bundle);
+        return bundle;
     } catch (err) {
         console.error("getRemoteBundle: Error parsing bundle:", err);
-        console.error("getRemoteBundle: Bundle parts count:", parts.length, "Total length:", parts.join("").length);
-
-        // Clear corrupted cache on any error
-        try {
-            if (await storage.exists(cachePath)) {
-                await storage.deleteFile(cachePath);
-            }
-            if (await storage.exists(versionPath)) {
-                await storage.deleteFile(versionPath);
-            }
-        } catch (cleanupErr) {
-            console.error("getRemoteBundle: Error cleaning up corrupted cache:", cleanupErr);
-        }
-
         return null;
     }
 }

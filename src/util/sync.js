@@ -236,7 +236,7 @@ export function useSyncFeature() {
                         // Check version for logging, but don't skip sync based on it
                         // The bundle file mtimes might not change even when content changes
                         const t1 = Date.now();
-                        const { changed } = await bundle.checkBundleVersion(name);
+                        const { changed, versionInfo, listing: remoteListing } = await bundle.checkBundleVersion(name);
                         console.log(`[Sync] ${name} - Version check: ${Date.now() - t1}ms, changed: ${changed}`);
 
                         // Always scan local directories and download bundle to detect content changes
@@ -246,7 +246,7 @@ export function useSyncFeature() {
 
                         // 1. Download current remote bundle
                         const t3 = Date.now();
-                        let remoteBundle = await bundle.getRemoteBundle(name);
+                        let remoteBundle = await bundle.getRemoteBundle(name, remoteListing);
                         console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
 
                         // Check for corruption (null content) in downloaded bundle
