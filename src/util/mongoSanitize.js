@@ -14,10 +14,13 @@ export function sanitizeQuery(query) {
         // Check for dangerous operators
         if (key.startsWith('$')) {
             const lowerKey = key.toLowerCase();
-            // Block $where (JS execution), $function, $accumulator (aggregation JS)
+            // Block operators that allow code execution or ReDoS
             if (lowerKey === '$where' ||
                 lowerKey === '$function' ||
-                lowerKey === '$accumulator') {
+                lowerKey === '$accumulator' ||
+                lowerKey === '$regex' ||
+                lowerKey === '$expr' ||
+                lowerKey === '$jsonschema') {
                  throw new Error("Invalid query operator: " + key);
             }
         }
