@@ -53,7 +53,7 @@ export default function Tabs({ Container }) {
         session.subtitles && {
             label: translations.TRANSCRIPT,
             icon: <DescriptionIcon />,
-            value: basePath + "/" + encodeURIComponent("player?suffix=" + (session.video ? ".mp4" : ".m4a") + "&mode=transcript")
+            value: basePath + "/" + encodeURIComponent("player?suffix=" + (session.audio ? ".m4a" : ".mp4") + "&mode=transcript")
         }
     ].filter(Boolean).map(item => {
         return <Tab key={item.label} {...item} />;

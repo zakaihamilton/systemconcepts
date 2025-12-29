@@ -20,6 +20,7 @@ import Cookies from "js-cookie";
 import { useGroups } from "@util/groups";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
+import InfoIcon from "@mui/icons-material/Info";
 import SpeedSlider from "./Player/SpeedSlider";
 import Transcript from "./Player/Transcript";
 
@@ -27,6 +28,7 @@ export const PlayerStore = new Store({
     mediaPath: "",
     subtitles: "",
     showSubtitles: true,
+    showDetails: true,
     showSpeed: false,
     hash: "",
     player: null
@@ -37,10 +39,10 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath, subtitles, showSubtitles, showSpeed } = PlayerStore.useState();
+    const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
-    useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles"]);
+    useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
     const [groups] = useGroups([]);
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
@@ -49,6 +51,8 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
+    const isAudio = isAudioFile(mediaPath);
+    const isVideo = isVideoFile(mediaPath);
 
     const gotoPlayer = () => {
         let hashPath = hash;
@@ -96,10 +100,22 @@ export default function PlayerPage({ show = false, suffix, mode }) {
                     s.showSubtitles = !s.showSubtitles;
                 });
             }
+        },
+        show && !isVideo && {
+            id: "details",
+            location: "header",
+            name: translations.DETAILS,
+            icon: <InfoIcon />,
+            active: showDetails,
+            onClick: () => {
+                PlayerStore.update(s => {
+                    s.showDetails = !s.showDetails;
+                });
+            }
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show] });
+    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show, showDetails, isVideo] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
@@ -128,8 +144,6 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     else {
         mediaStyles.height = (size.height - (size.emPixels * baseEmSubtraction) - speedSliderHeight) + "px";
     }
-    const isAudio = isAudioFile(mediaPath);
-    const isVideo = isVideoFile(mediaPath);
     let MediaComponent = null;
     let mediaType = undefined;
     const mediaProps = {
@@ -141,6 +155,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         group,
         color,
         name,
+        showDetails,
         preload: "metadata",
         crossOrigin: "anonymous"
     };

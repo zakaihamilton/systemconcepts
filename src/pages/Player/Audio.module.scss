@@ -38,11 +38,28 @@
 
 .container {
     position: relative;
-    top: 0px;
-    left: 0px;
     width: 100%;
     padding-left: 1em;
     padding-right: 1em;
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+    opacity: 1;
+    margin-bottom: 1em;
+}
+
+.container.collapsed {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-bottom: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+}
+
+/* Ensure the inner content is hidden when parent collapses */
+.container>* {
+    overflow: hidden;
+    min-height: 0;
 }
 
 .card {
@@ -53,7 +70,6 @@
     background: var(--paper-background);
     border-radius: 8px;
     box-shadow: 0 4px 6px var(--box-shadow-color);
-    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
 }
@@ -65,6 +81,22 @@
     border-bottom: 1px solid var(--border-color);
     background: var(--app-bar-background);
     border-radius: 8px 8px 0 0;
+}
+
+.headerRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    justify-content: center;
+    min-height: 2em;
+}
+
+.actions {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .title {

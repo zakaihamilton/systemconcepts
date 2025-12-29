@@ -7,8 +7,9 @@ import Group from "@components/Widgets/Group";
 import { useDateFormatter } from "@util/locale";
 import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
+import clsx from "clsx";
 
-export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, elements, ...props }) {
+export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, elements, showDetails, ...props }) {
     const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
@@ -72,10 +73,12 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
 
     const { style, ...rest } = props;
     return <div className={styles.root} style={style}>
-        <div className={styles.container}>
+        <div className={clsx(styles.container, !showDetails && styles.collapsed)}>
             <div className={styles.card} style={{ '--group-color': color }}>
                 <div className={styles.header}>
-                    <div className={styles.title}>{name}</div>
+                    <div className={styles.headerRow}>
+                        <div className={styles.title}>{name}</div>
+                    </div>
                     <div className={styles.metadata}>
                         <Group fill={false} name={group} color={color} />
                         <span className={styles.date}>{dateWidget}</span>
