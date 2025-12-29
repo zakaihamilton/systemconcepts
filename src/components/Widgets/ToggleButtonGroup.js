@@ -17,7 +17,12 @@ export default function ToggleButtonGroupWidget({ items, state, ...props }) {
         const { icon, id, name, tooltip = "", ...props } = button;
         return (
             <Tooltip key={id} title={tooltip} arrow>
-                <ToggleButton selected={selected === id} value={id} {...props}>
+                <ToggleButton
+                    selected={selected === id}
+                    value={id}
+                    aria-label={name || tooltip || id}
+                    {...props}
+                >
                     {icon || name}
                 </ToggleButton>
             </Tooltip>
