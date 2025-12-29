@@ -75,7 +75,8 @@ export function useUpdateSessions(groups) {
                 progress: 0,
                 count: 0,
                 tagCount: 0,
-                errors: []
+                errors: [],
+                newSessions: []
             };
             if (itemIndex === -1) {
                 s.status = [...s.status, statusItem];
@@ -139,16 +140,32 @@ export function useUpdateSessions(groups) {
                 const tagsFiles = yearItems.filter(item => item.name.endsWith(".tags"));
                 const yearPrefix = year.path + "/";
 
+
+
                 // Determine which files to read
                 const filesToRead = tagsFiles.filter(file => {
                     const fileName = file.name.replace(".tags", "");
                     // Read if we don't have it
-                    return !tagsMap[fileName];
+                    const shouldRead = !tagsMap[fileName];
+                    return shouldRead;
                 }).map(file => file.name);
 
                 if (filesToRead.length > 0) {
+                    // For each new session, find all associated files
+                    const newSessionsData = filesToRead.map(tagsFile => {
+                        const sessionName = tagsFile.replace(".tags", "");
+                        const sessionFiles = yearItems
+                            .filter(item => item.name.startsWith(sessionName))
+                            .map(item => item.name);
+                        return {
+                            name: sessionName,
+                            files: sessionFiles
+                        };
+                    });
+
                     UpdateSessionsStore.update(s => {
                         s.status[itemIndex].addedCount += filesToRead.length;
+                        s.status[itemIndex].newSessions = [...s.status[itemIndex].newSessions, ...newSessionsData];
                         s.status = [...s.status];
                     });
                 }

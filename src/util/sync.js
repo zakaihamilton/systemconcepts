@@ -171,7 +171,7 @@ export function useSyncFeature() {
                     {
                         name: "aws/metadata/shared/sessions",  // S3 - ALL sessions consolidated
                         path: makePath("local", "shared", "sessions"),
-                        preserve: ["tags.json"]
+                        preserve: ["tags.json", "listing.json"]
                     }
                 ];
 

@@ -111,6 +111,8 @@ export function useSessions(depends = [], options = {}) {
                     getTags(path)
                 ]);
 
+
+
                 files.sort((a, b) => a.name.localeCompare(b.name));
 
                 // Group files by session ID
@@ -255,7 +257,8 @@ export function useSessions(depends = [], options = {}) {
                     return item;
                 }));
 
-                return yearSessions.filter(Boolean);
+                const validSessions = yearSessions.filter(Boolean);
+                return validSessions;
             }));
 
             const allSessions = processedYears.flat();

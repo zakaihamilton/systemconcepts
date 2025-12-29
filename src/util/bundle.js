@@ -543,6 +543,11 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
                 continue;
             }
 
+            // Check if file should be preserved (skip writing to keep local changes)
+            if (preserve.some(pattern => relativePath.includes(pattern))) {
+                skipCount++;
+                continue;
+            }
 
             try {
                 const parentPath = fullPath.split("/").slice(0, -1).join("/");

@@ -3,7 +3,7 @@ import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
 import { useGroups } from "@util/groups";
-import { useSyncFeature } from "@util/sync";
+import { useSyncFeature, SyncActiveStore } from "@util/sync";
 import ColorPicker from "./Groups/ColorPicker";
 import styles from "./Groups.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -17,7 +17,7 @@ import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
-import { useSessions } from "@util/sessions";
+import { useSessions, SessionsStore } from "@util/sessions";
 import { useEffect, useRef, useState } from "react";
 import ProgressDialog from "./Groups/ProgressDialog";
 
@@ -80,7 +80,18 @@ export default function Groups() {
 
     const updateGroupWithSync = async (name, updateAll) => {
         await updateGroup(name, updateAll);
-        sync && sync();
+
+        // Trigger sync - it will upload local changes
+        if (sync) {
+            sync();
+        }
+
+        // Wait for sync to upload, then force reload
+        setTimeout(() => {
+            SyncActiveStore.update(s => {
+                s.counter++;
+            });
+        }, 2000);
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());

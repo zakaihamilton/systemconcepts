@@ -53,6 +53,7 @@ export default function ProgressDialog() {
         const hasErrors = item.errors && item.errors.length > 0;
         const progress = item.count > 0 ? (item.progress / item.count) * 100 : 0;
         const isDone = item.count > 0 && item.progress === item.count;
+        const hasNewSessions = item.newSessions && item.newSessions.length > 0;
 
         return (
             <div key={item.name} className={styles.item}>
@@ -72,6 +73,23 @@ export default function ProgressDialog() {
                         {item.year && `${item.year} - `}{item.progress} / {item.count} {translations.YEARS}
                     </div>
                 </div>
+                {hasNewSessions && (
+                    <div className={styles.newSessions}>
+                        <div className={styles.newSessionsTitle}>{translations.NEW_SESSIONS || "New Sessions"}:</div>
+                        <div className={styles.sessionsList}>
+                            {item.newSessions.map((session, idx) => (
+                                <div key={idx} className={styles.sessionItem}>
+                                    <div className={styles.sessionName}>{session.name}</div>
+                                    <div className={styles.sessionFiles}>
+                                        {session.files.map((file, fileIdx) => (
+                                            <div key={fileIdx} className={styles.fileName}>{file}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {hasErrors && (
                     <div className={styles.errors}>
                         {item.errors.map((err, idx) => (
