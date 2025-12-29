@@ -57,7 +57,20 @@ export async function callMethod(item, url = "", ...params) {
         result = await method(makePath(path), ...params);
     }
     catch (err) {
-        console.error(err);
+        // Only log errors that aren't common filesystem conflicts
+        // These are handled by callers (e.g., bundle.js)
+        const errorStr = (err ? (err.code || err.message || "" + err) : "").toLowerCase();
+        const isCommonFsError = errorStr.includes('eisdir') ||
+            errorStr.includes('enotdir') ||
+            errorStr.includes('eexist') ||
+            errorStr.includes('enoent');
+
+        if (!isCommonFsError) {
+            console.error(err);
+        }
+
+        // Re-throw so callers can handle the error
+        throw err;
     }
     return result;
 }
