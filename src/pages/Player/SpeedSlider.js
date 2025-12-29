@@ -35,9 +35,12 @@ export default function SpeedSlider() {
         SPEED_DOUBLE: 2.0
     };
 
-    const speedMarks = Object.entries(rateItems).map(([name, value]) => ({
+    // Hide labels for intermediate speeds
+    const hiddenLabels = [1.1, 1.25];
+
+    const speedMarks = Object.entries(rateItems).map(([, value]) => ({
         value,
-        label: value + "x"
+        label: hiddenLabels.includes(value) ? "" : value + "x"
     })).sort((a, b) => a.value - b.value);
 
     const getSpeedName = (value) => {
@@ -55,6 +58,8 @@ export default function SpeedSlider() {
         player.playbackRate = newValue;
     };
 
+    const max = Math.max(...Object.values(rateItems));
+
     return (
         <div className={clsx(styles.root, styles[speedToolbar])}>
             <div className={styles.sliderContainer}>
@@ -66,8 +71,30 @@ export default function SpeedSlider() {
                     step={null}
                     marks={speedMarks}
                     min={0.5}
-                    max={2.0}
+                    max={max}
                     onChange={handleSpeedChange}
+                    sx={{
+                        '& .MuiSlider-rail': {
+                            height: 8,
+                        },
+                        '& .MuiSlider-track': {
+                            height: 8,
+                        },
+                        '& .MuiSlider-thumb': {
+                            width: 24,
+                            height: 24,
+                        },
+                        '& .MuiSlider-mark': {
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            backgroundColor: 'currentColor',
+                        },
+                        '& .MuiSlider-markActive': {
+                            backgroundColor: 'currentColor',
+                            opacity: 1,
+                        }
+                    }}
                 />
             </div>
         </div>

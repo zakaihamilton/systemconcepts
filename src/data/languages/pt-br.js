@@ -703,7 +703,7 @@ export default {
         },
         {
             "id": "SPEED_TRIPLE",
-            "value": "Velocidade Tripla"
+            "value": "x3"
         },
         {
             "id": "GROUP",

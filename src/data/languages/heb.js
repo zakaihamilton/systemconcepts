@@ -699,7 +699,7 @@ export default {
         },
         {
             "id": "SPEED_TRIPLE",
-            "value": "מהירות משולשת"
+            "value": "x3"
         },
         {
             "id": "GROUP",
