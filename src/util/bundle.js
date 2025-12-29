@@ -147,6 +147,7 @@ export async function getRemoteBundle(endPoint, listing = null) {
     const bundleParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
 
     if (!bundleParts.length) {
+        console.warn(`[getRemoteBundle] No bundle parts found for ${endPoint}`);
         return null;
     }
 
@@ -193,10 +194,16 @@ export async function getRemoteBundle(endPoint, listing = null) {
     // Download and decompress bundle
     const parts = [];
     for (const part of bundleParts) {
-        const content = await storage.readFile(part.path);
-        if (content) {
-            // Trim whitespace to avoid Base64 corruption
-            parts.push(content.trim());
+        try {
+            const content = await storage.readFile(part.path);
+            if (content) {
+                // Trim whitespace to avoid Base64 corruption
+                parts.push(content.trim());
+            } else {
+                console.error(`[getRemoteBundle] Empty content for part ${part.path}`);
+            }
+        } catch (err) {
+            console.error(`[getRemoteBundle] Error reading part ${part.path}:`, err);
         }
     }
 
@@ -544,7 +551,8 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
             }
 
             // Check if file should be preserved (skip writing to keep local changes)
-            if (preserve.some(pattern => relativePath.includes(pattern))) {
+            // Only apply preservation if the file actually exists locally
+            if (localMtime > 0 && preserve.some(pattern => relativePath.includes(pattern))) {
                 skipCount++;
                 continue;
             }
