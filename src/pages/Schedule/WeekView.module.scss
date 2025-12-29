@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    user-select: none;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .grid {
