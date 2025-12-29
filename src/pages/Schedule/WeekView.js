@@ -23,7 +23,6 @@ export default function WeekView({ sessions, date, store }) {
     const direction = useDirection();
     const translations = useTranslations();
     const firstDay = getWeekViewStart(date);
-    const monthStart = getMonthViewStart(date);
     // Use Thursday (day 4) of the current week to determine which month we're in
     // This follows the ISO week date standard where a week belongs to the month containing Thursday
     const month = addDate(firstDay, 4);
