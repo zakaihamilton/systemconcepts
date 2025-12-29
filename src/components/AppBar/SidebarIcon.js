@@ -22,10 +22,10 @@ export default function SidebarIcon() {
     };
 
     return (
-        <IconButton onClick={toggleMenu} size="large">
-            <Tooltip arrow title={translations.SIDEBAR}>
+        <Tooltip arrow title={translations.SIDEBAR}>
+            <IconButton onClick={toggleMenu} size="large">
                 <MenuIcon />
-            </Tooltip>
-        </IconButton>
+            </IconButton>
+        </Tooltip>
     );
 }

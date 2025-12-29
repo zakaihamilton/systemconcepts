@@ -18,11 +18,11 @@ export default function Dialog({ title, children, actions, onClose, className, .
                             {title}
                         </Typography>
                         <div style={{ flex: 1 }} />
-                        <IconButton className={styles.closeDialog} onClick={onClose} size="large">
-                            <Tooltip title={translations.CLOSE} arrow>
+                        <Tooltip title={translations.CLOSE} arrow>
+                            <IconButton className={styles.closeDialog} onClick={onClose} size="large">
                                 <CancelIcon />
-                            </Tooltip>
-                        </IconButton>
+                            </IconButton>
+                        </Tooltip>
                     </div>
                     <div className={styles.content}>
                         {children}

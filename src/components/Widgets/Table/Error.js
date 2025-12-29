@@ -10,7 +10,7 @@ export default function Error({ error }) {
     return <Label
         className={styles.root}
         icon={<Tooltip title={translations.ERROR} arrow>
-            <ErrorIcon />
+            <span><ErrorIcon /></span>
         </Tooltip>}
         name={text} />;
 }

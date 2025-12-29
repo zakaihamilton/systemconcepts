@@ -159,11 +159,11 @@ export default function Destination({ path }) {
         (<StyledDialog fullScreen open={destination !== ""} onClose={handleClose} slots={{ transition: Transition }}>
             <AppBar className={classes.appBar}>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={handleClose} size="large">
-                        <Tooltip arrow title={translations.CLOSE}>
+                    <Tooltip arrow title={translations.CLOSE}>
+                        <IconButton edge="start" color="inherit" onClick={handleClose} size="large">
                             <CloseIcon />
-                        </Tooltip>
-                    </IconButton>
+                        </IconButton>
+                    </Tooltip>
                     <Typography variant="h6" className={classes.title}>
                         {translations.SELECT_DESTINATION}
                     </Typography>

@@ -148,7 +148,7 @@ export default function Storage({ path = "" }) {
                 icons={<>
                     {item.type && <ItemMenu readOnly={readOnly} item={result} />}
                     <Tooltip title={tooltip} arrow>
-                        {icon}
+                        <span>{icon}</span>
                     </Tooltip>
                 </>}>
                 {name}

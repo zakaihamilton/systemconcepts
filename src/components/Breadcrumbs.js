@@ -67,11 +67,11 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
             return (
                 <>
                     <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
-                        <IconButton className={styles.iconButton} size="small">
-                            <Tooltip arrow title={path}>
+                        <Tooltip arrow title={path}>
+                            <IconButton className={styles.iconButton} size="small">
                                 <MoreHorizIcon />
-                            </Tooltip>
-                        </IconButton>
+                            </IconButton>
+                        </Tooltip>
                     </Link>
                     <div className={styles.separator}>
                         <SeparatorIcon fontSize="small" />
@@ -116,9 +116,9 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
                 underline="none"
             >
                 <Tooltip arrow title={title}>
-                    <div className={styles.itemContent}>
+                    <span className={styles.itemContent}>
                         {content}
-                    </div>
+                    </span>
                 </Tooltip>
             </Link>
             {!!menuItems && <Menu

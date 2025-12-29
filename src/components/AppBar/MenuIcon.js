@@ -22,10 +22,10 @@ export default function Menu() {
     };
 
     return (
-        <IconButton onClick={toggleMenu} size="large">
-            <Tooltip arrow title={translations.MENU}>
+        <Tooltip arrow title={translations.MENU}>
+            <IconButton onClick={toggleMenu} size="large">
                 <MenuIcon />
-            </Tooltip>
-        </IconButton>
+            </IconButton>
+        </Tooltip>
     );
 }

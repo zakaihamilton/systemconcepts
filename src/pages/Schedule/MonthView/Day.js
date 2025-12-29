@@ -63,7 +63,9 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
                         {item.description && <div style={{ fontWeight: "bold" }}>{item.description}</div>}
                         <div>{item.name}</div>
                     </div>} key={index}>
-                        <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
+                        <span>
+                            <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
+                        </span>
                     </Tooltip>)}
                 </div>
             </div>}

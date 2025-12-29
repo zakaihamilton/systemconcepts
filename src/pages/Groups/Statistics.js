@@ -73,11 +73,11 @@ export default function Statistics({ group, open, onClose, sessions }) {
         >
             <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--app-bar-background)" }}>
                 <b>{group.name[0].toUpperCase() + group.name.slice(1)}</b> {translations.STATISTICS}
-                <IconButton onClick={onClose} size="large">
-                    <Tooltip title={translations.CLOSE} arrow>
+                <Tooltip title={translations.CLOSE} arrow>
+                    <IconButton onClick={onClose} size="large">
                         <CancelIcon />
-                    </Tooltip>
-                </IconButton>
+                    </IconButton>
+                </Tooltip>
             </DialogTitle>
             <Divider />
             <DialogContent>

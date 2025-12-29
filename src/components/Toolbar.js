@@ -118,11 +118,11 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
             {!!menuItems.length && <>
                 {!!toolbarItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
                 <Menu items={menuItems}>
-                    <IconButton className={styles.menuButton} size="small">
-                        <Tooltip arrow title={translations.MENU}>
+                    <Tooltip arrow title={translations.MENU}>
+                        <IconButton className={styles.menuButton} size="small">
                             <MoreVertIcon />
-                        </Tooltip>
-                    </IconButton>
+                        </IconButton>
+                    </Tooltip>
                 </Menu>
             </>
             }

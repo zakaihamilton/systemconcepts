@@ -72,7 +72,7 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                             startAdornment: (
                                 <InputAdornment position="start" className={styles.icon}>
                                     <Tooltip title={tooltip} arrow>
-                                        {icon}
+                                        <span>{icon}</span>
                                     </Tooltip>
                                 </InputAdornment>
                             )

@@ -23,9 +23,11 @@ export default function Month({ date, sessions, store }) {
             });
         };
         const weekIndicator = <Tooltip key={`week-${weekIndex}`} title={translations.WEEK_VIEW} disableInteractive>
-            <div className={styles.weekIndicator} onClick={onWeekClick}>
-                <ViewWeekIcon fontSize="inherit" />
-            </div>
+            <span>
+                <div className={styles.weekIndicator} onClick={onWeekClick}>
+                    <ViewWeekIcon fontSize="inherit" />
+                </div>
+            </span>
         </Tooltip>;
 
         const weekDays = new Array(7).fill(0).map((_, dayIndex) => {
@@ -60,7 +62,9 @@ export default function Month({ date, sessions, store }) {
 
     return <div className={styles.root}>
         <Tooltip title={translations.MONTH_VIEW} disableInteractive>
-            <div className={styles.title} onClick={onClick}>{monthName}</div>
+            <span>
+                <div className={styles.title} onClick={onClick}>{monthName}</div>
+            </span>
         </Tooltip>
         <div className={styles.grid}>
             {items}

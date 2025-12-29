@@ -69,9 +69,11 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
             location: "footer",
             element: (<>
                 <Tooltip title={translations.PAGE_INDEX} arrow>
-                    <DelayInput onChange={handlePageChange} value={pageIndex + 1}>
-                        <TextField className={styles.pageIndex} variant="standard" />
-                    </DelayInput>
+                    <span>
+                        <DelayInput onChange={handlePageChange} value={pageIndex + 1}>
+                            <TextField className={styles.pageIndex} variant="standard" />
+                        </DelayInput>
+                    </span>
                 </Tooltip>
                 <Typography className={clsx(styles.pageSeparator)}>
                     /

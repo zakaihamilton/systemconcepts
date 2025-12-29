@@ -56,7 +56,9 @@ function ItemWidget({ className = "", separator, viewMode, selected: selectedIte
             {...viewModeProps}
         >
             {!!ellipsis && <Tooltip arrow title={item[ellipsis]}>
-                <div className={styles.ellipsisText}>{value}</div>
+                <span>
+                    <div className={styles.ellipsisText}>{value}</div>
+                </span>
             </Tooltip>}
             {!ellipsis && value}
         </div>);

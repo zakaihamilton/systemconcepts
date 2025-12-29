@@ -77,7 +77,7 @@ export default function StorageList({ path = "", state }) {
                     <ListItemButton selected={selected} style={{ paddingLeft }} onClick={onClick}>
                         <ListItemIcon>
                             <Tooltip title={tooltip} arrow>
-                                {icon}
+                                <span>{icon}</span>
                             </Tooltip>
                         </ListItemIcon>
                         <ListItemText primary={name} />

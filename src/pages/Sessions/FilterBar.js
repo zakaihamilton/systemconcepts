@@ -187,10 +187,12 @@ export default function FilterBar({ hideYears = false }) {
                         </div>
                         {typeFilter.length > 0 && (
                             <Tooltip title={translations.CLEAR_FILTER}>
-                                <CloseIcon
-                                    className={styles.clearIcon}
-                                    onClick={handleClearType}
-                                />
+                                <span>
+                                    <CloseIcon
+                                        className={styles.clearIcon}
+                                        onClick={handleClearType}
+                                    />
+                                </span>
                             </Tooltip>
                         )}
                     </button>
@@ -212,10 +214,12 @@ export default function FilterBar({ hideYears = false }) {
                         </div>
                         {yearFilter.length > 0 && (
                             <Tooltip title={translations.CLEAR_FILTER}>
-                                <CloseIcon
-                                    className={styles.clearIcon}
-                                    onClick={handleClearYear}
-                                />
+                                <span>
+                                    <CloseIcon
+                                        className={styles.clearIcon}
+                                        onClick={handleClearYear}
+                                    />
+                                </span>
                             </Tooltip>
                         )}
                     </button>
@@ -237,10 +241,12 @@ export default function FilterBar({ hideYears = false }) {
                         </div>
                         {groupFilter.length > 0 && (
                             <Tooltip title={translations.CLEAR_FILTER}>
-                                <CloseIcon
-                                    className={styles.clearIcon}
-                                    onClick={handleClearGroup}
-                                />
+                                <span>
+                                    <CloseIcon
+                                        className={styles.clearIcon}
+                                        onClick={handleClearGroup}
+                                    />
+                                </span>
                             </Tooltip>
                         )}
                     </button>

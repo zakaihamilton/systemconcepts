@@ -12,11 +12,11 @@ export default function ItemMenuWidget({ item, menuItems, store }) {
     return (<>
         {!!select && <Select select={select} item={item} store={store} />}
         {!select && <Menu items={menuItems}>
-            <IconButton size="large">
-                <Tooltip title={translations.MENU}>
+            <Tooltip title={translations.MENU}>
+                <IconButton size="large">
                     <MoreVertIcon />
-                </Tooltip>
-            </IconButton>
+                </IconButton>
+            </Tooltip>
         </Menu>}
     </>);
 }

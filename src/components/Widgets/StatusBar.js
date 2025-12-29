@@ -132,16 +132,16 @@ export default function StatusBar({ data, mapper, store }) {
 
     return (
         (<div className={clsx(styles.root, styles[severity])}>
-            {selectTitle && selectIcon && <IconButton variant="contained" onClick={selectClick} size="large">
-                <Tooltip title={selectTitle} arrow>
+            {selectTitle && selectIcon && <Tooltip title={selectTitle} arrow>
+                <IconButton variant="contained" onClick={selectClick} size="large">
                     {selectIcon}
-                </Tooltip>
-            </IconButton>}
-            {mode === "delete" && !busy && <IconButton variant="contained" onClick={onClick} size="large">
-                <Tooltip title={translations[mode.toUpperCase()]} arrow>
+                </IconButton>
+            </Tooltip>}
+            {mode === "delete" && !busy && <Tooltip title={translations[mode.toUpperCase()]} arrow>
+                <IconButton variant="contained" onClick={onClick} size="large">
                     <DeleteIcon />
-                </Tooltip>
-            </IconButton>}
+                </IconButton>
+            </Tooltip>}
             {mode && (mode === "copy" || mode === "move") && <ButtonSelector items={modeItems} state={[mode, setMode]} disabled={disabled} variant="contained" onClick={onClick}>
                 {translations[mode.toUpperCase()]}
                 {modeItems && "\u2026"}
@@ -153,11 +153,11 @@ export default function StatusBar({ data, mapper, store }) {
             {mode && mode === "signin" && <Button variant="contained" onClick={gotoAccount}>
                 {translations.ACCOUNT}
             </Button>}
-            {!busy && <IconButton variant="contained" onClick={handleClose} size="large">
-                <Tooltip title={translations.CLOSE} arrow>
+            {!busy && <Tooltip title={translations.CLOSE} arrow>
+                <IconButton variant="contained" onClick={handleClose} size="large">
                     <CancelIcon />
-                </Tooltip>
-            </IconButton>}
+                </IconButton>
+            </Tooltip>}
         </div >)
     );
 }

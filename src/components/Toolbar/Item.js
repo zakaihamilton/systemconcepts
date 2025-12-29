@@ -27,22 +27,26 @@ export default function ToolbarItem({ item, idx, count }) {
                         name={item.name}
                         noBorder={true}
                     />) :
-                    (<IconButton
-                        component={item.target ? Link : "button"}
-                        underline="none"
-                        color="inherit"
-                        href={item.target}
-                        className={classes}
-                        disabled={item.disabled}
-                        size="small"
-                        id={item.id}
-                    >
+                    (<span>
                         <Tooltip arrow title={item.name}>
-                            <div className={styles.iconWrapper}>
-                                {item.icon}
-                            </div>
+                            <span>
+                                <IconButton
+                                    component={item.target ? Link : "button"}
+                                    underline="none"
+                                    color="inherit"
+                                    href={item.target}
+                                    className={classes}
+                                    disabled={item.disabled}
+                                    size="small"
+                                    id={item.id}
+                                >
+                                    <div className={styles.iconWrapper}>
+                                        {item.icon}
+                                    </div>
+                                </IconButton>
+                            </span>
                         </Tooltip>
-                    </IconButton>)}
+                    </span>)}
             </Menu>
         }
         <Divider classes={{ root: clsx(styles.divider, !showDivider && styles.hidden) }} orientation="vertical" flexItem />
