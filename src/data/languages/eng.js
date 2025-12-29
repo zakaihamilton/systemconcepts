@@ -142,6 +142,14 @@ export default {
             "value": "Do you want to reset the settings to their original values?"
         },
         {
+            "id": "CLEAR_CACHE",
+            "value": "Clear Cache"
+        },
+        {
+            "id": "CLEAR_CACHE_MESSAGE",
+            "value": "Do you want to clear the local session cache? This will re-download the session data from the server."
+        },
+        {
             "id": "VERY_SMALL",
             "value": "Very Small"
         },

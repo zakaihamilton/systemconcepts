@@ -30,6 +30,7 @@ import { getStorageSection } from "@pages/Storage/Section";
 
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 const Reset = dynamic(() => import("@pages/Settings/Reset"), { loading: () => <PageLoad /> });
+const ClearCache = dynamic(() => import("@pages/Settings/ClearCache"), { loading: () => <PageLoad /> });
 
 import EditIcon from "@mui/icons-material/Edit";
 const Editor = dynamic(() => import("@pages/Editor"), { loading: () => <PageLoad /> });
@@ -144,9 +145,14 @@ export default [
         Component: Settings
     },
     {
-        id: "settings/reset",
-        name: "RESET",
-        Icon: SettingsBackupRestoreIcon,
+        id: "clearCache",
+        name: "CLEAR_CACHE",
+        Icon: StorageIcon,
+        Component: ClearCache
+    },
+    {
+        id: "reset",
+        icon: <SettingsBackupRestoreIcon />,
         Component: Reset
     },
     {

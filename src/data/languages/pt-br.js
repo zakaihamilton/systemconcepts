@@ -142,6 +142,14 @@ export default {
             "value": "Você deseja voltar as configurações para os valores originais?"
         },
         {
+            "id": "CLEAR_CACHE",
+            "value": "Limpar Cache"
+        },
+        {
+            "id": "CLEAR_CACHE_MESSAGE",
+            "value": "Deseja realmente limpar o cache da sessão local? Isso baixará novamente os dados da sessão do servidor."
+        },
+        {
             "id": "VERY_SMALL",
             "value": "Muito Pequena"
         },

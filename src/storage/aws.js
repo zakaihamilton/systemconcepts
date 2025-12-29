@@ -80,7 +80,7 @@ async function deleteFile(path) {
     await fetchJSON(fsEndPoint, {
         method: "DELETE",
         headers: {
-            path: encodeURIComponent(root.slice(1))
+            path: encodeURIComponent(path.slice(1))
         }
     });
 }

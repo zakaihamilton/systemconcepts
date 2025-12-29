@@ -79,6 +79,9 @@ const storageMethods = Object.fromEntries([
         name: "deleteFolder"
     },
     {
+        name: "deleteFolderPath"
+    },
+    {
         name: "deleteFile"
     },
     {

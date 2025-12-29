@@ -531,9 +531,53 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
                 skipCount++;
                 continue;
             }
-            await storage.createFolderPath(fullPath);
-            await storage.writeFile(fullPath, item.content);
-            downloadCount++;
+            try {
+                const parentPath = fullPath.split("/").slice(0, -1).join("/");
+                if (parentPath) {
+                    await storage.createFolderPath(parentPath);
+                }
+                await storage.writeFile(fullPath, item.content);
+                downloadCount++;
+            } catch (err) {
+                const errorStr = err ? (err.code || err.message || err.toString()) : "";
+                const isConflict = errorStr.includes('EISDIR') || errorStr.includes('ENOTDIR') || errorStr.includes('EEXIST');
+
+                if (isConflict) {
+                    console.warn(`[applyBundle] FS conflict (${errorStr}) for ${relativePath}. Attempting recovery...`);
+                    try {
+                        // Aggressive cleanup: delete target AND parent to be safe?
+                        // If EISDIR: target is a dir. Delete it.
+                        // If ENOTDIR/EEXIST: parent is a file? Delete parent.
+                        // Let's rely on deleteFolder which handles both files and folders mostly.
+
+                        if (errorStr.includes('EISDIR')) {
+                            await storage.deleteFolder(fullPath);
+                        } else {
+                            // Likely parent path issue. 
+                            // Try to clean up the parent path if it's a file blocking a directory
+                            const parentPath = fullPath.split("/").slice(0, -1).join("/");
+                            if (await storage.exists(parentPath)) {
+                                // This is risky if parent is a legit file we need? 
+                                // But we occupy the same namespace, so collision = overwrite in our model.
+                                await storage.deleteFile(parentPath);
+                            }
+                        }
+
+                        // Retry creation and write
+                        const parentPath = fullPath.split("/").slice(0, -1).join("/");
+                        if (parentPath) {
+                            await storage.createFolderPath(parentPath);
+                        }
+                        await storage.writeFile(fullPath, item.content);
+                        downloadCount++;
+                        console.log(`[applyBundle] Recovery successful for ${relativePath}`);
+                    } catch (retryErr) {
+                        console.error(`[applyBundle] Failed to recover ${relativePath}:`, retryErr);
+                    }
+                } else {
+                    console.error(`[applyBundle] Error writing ${relativePath}:`, err);
+                }
+            }
         }
     }
 

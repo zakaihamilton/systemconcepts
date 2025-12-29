@@ -276,6 +276,7 @@ export function useSessions(depends = [], options = {}) {
                     s.sessions = [];
                 }
                 s.busy = false;
+                s.syncCounter = syncCounter;
             });
         }
     }, []);
@@ -283,7 +284,7 @@ export function useSessions(depends = [], options = {}) {
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
             const groupsChanged = JSON.stringify(groupMetadata) !== groupsMetadata;
-            const noSessions = !sessions || !sessions.length;
+            const noSessions = sessions === null;
             const syncChanged = syncCounter !== savedSyncCounter;
 
             // Update sessions if:

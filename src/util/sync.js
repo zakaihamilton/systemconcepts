@@ -20,15 +20,12 @@ export const SyncActiveStore = new Store({
 // Clear bundle cache to force fresh sync
 export async function clearBundleCache() {
     try {
-        const manifestPath = 'local/cache/_bundle_manifest.json';
-        if (await storage.exists(manifestPath)) {
-            await storage.deleteFile(manifestPath);
-            console.log('[Sync] Bundle cache cleared');
-        }
-        // Also clear the lastSynced to force immediate re-sync
+        await storage.deleteFolder("local/cache");
         SyncActiveStore.update(s => {
             s.lastSynced = 0;
+            s.progress = { total: 0, processed: 0 };
         });
+        console.log('[Sync] Bundle cache cleared');
     } catch (err) {
         console.error('[Sync] Error clearing bundle cache:', err);
     }
@@ -57,6 +54,60 @@ export function useSync(options = {}) {
     return [counter, busy];
 }
 
+
+
+// Helper to repair corrupted remote bundles by crawling the files directly
+async function repairRemoteBundle(bundleDef) {
+    console.log(`[Sync] Repairing corrupted bundle for ${bundleDef.name}...`);
+    const { name: root, ignore = [] } = bundleDef;
+    const files = {};
+
+    const crawl = async (currentPath, relativeBase = "") => {
+        const listing = await storage.getListing(currentPath) || [];
+        for (const item of listing) {
+            const itemRelativePath = relativeBase ? relativeBase + "/" + item.name : item.name;
+
+            // Check ignore
+            if (ignore.some(pattern => itemRelativePath.includes(pattern))) {
+                continue;
+            }
+
+            // Skip bundle parts
+            if (item.name.startsWith("bundle.gz.part")) {
+                try {
+                    await storage.deleteFile(item.path);
+                } catch (e) { } // ignore delete errors
+                continue;
+            }
+
+            if (item.stat && item.stat.type === "dir") {
+                await crawl(item.path, itemRelativePath);
+            } else {
+                try {
+                    const content = await storage.readFile(item.path);
+                    if (content !== null && content !== undefined) {
+                        files[itemRelativePath] = {
+                            content,
+                            mtime: (item.stat && item.stat.mtimeMs) || item.mtimeMs || Date.now()
+                        };
+                    }
+                } catch (err) {
+                    console.error(`[Sync] Failed to read ${item.path} during repair:`, err);
+                }
+            }
+        }
+    };
+
+    await crawl(root);
+
+    // Save the new valid bundle
+    if (Object.keys(files).length > 0) {
+        await bundle.saveRemoteBundle(root, files);
+        console.log(`[Sync] Repair complete. Uploaded ${Object.keys(files).length} files.`);
+    } else {
+        console.warn(`[Sync] Repair found no files to restore for ${root}`);
+    }
+}
 
 
 export function useSyncFeature() {
@@ -160,12 +211,17 @@ export function useSyncFeature() {
 
                         // Download & Apply
                         const t3 = Date.now();
-                        const remoteBundle = await bundle.getRemoteBundle(name);
+                        let remoteBundle = await bundle.getRemoteBundle(name);
                         console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
 
                         const t4 = Date.now();
-                        const { downloadCount, listing: updatedListing, isBundleCorrupted } = await bundle.applyBundle(path, remoteBundle, bundleListing, ignore, preserve);
-                        console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
+                        let { downloadCount, listing: updatedListing, isBundleCorrupted } = await bundle.applyBundle(path, remoteBundle, bundleListing, ignore, preserve);
+
+                        if (isBundleCorrupted) {
+                            console.warn(`[Sync] ${name} - Bundle corrupted. Skipping application of corrupted files.`);
+                        } else {
+                            console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
+                        }
 
                         // Upload & Merge
                         const t5 = Date.now();

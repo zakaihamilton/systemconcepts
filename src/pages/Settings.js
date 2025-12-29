@@ -18,6 +18,7 @@ import { Store } from "pullstate";
 import BuildIcon from "@mui/icons-material/Build";
 import useDarkMode from "use-dark-mode";
 import Row from "@widgets/Row";
+import StorageIcon from "@mui/icons-material/Storage";
 export const SettingsStore = new Store({
     order: "desc",
     offset: 0,
@@ -130,6 +131,14 @@ export default function Settings() {
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
             target: "fontSizes"
+        },
+        {
+            id: "clearCache",
+            icon: <StorageIcon />,
+            name: translations.CLEAR_CACHE,
+            widget: <Button variant="contained" onClick={() => addPath("clearCache")}>
+                {translations.CLEAR_CACHE}
+            </Button>
         },
         {
             id: "reset",

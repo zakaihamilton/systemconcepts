@@ -25,8 +25,24 @@ export function useGroups(depends) {
             return;
         }
         try {
-            const listingFile = await storage.readFile("local/shared/sessions/listing.json");
-            const listing = JSON.parse(listingFile) || [];
+            let listing = [];
+            if (await storage.exists("local/shared/sessions/listing.json")) {
+                const listingFile = await storage.readFile("local/shared/sessions/listing.json");
+                listing = JSON.parse(listingFile) || [];
+            }
+
+            if (!listing.length) {
+                console.warn("listing.json empty or missing, scanning directory for groups...");
+                const items = await storage.getListing("local/shared/sessions") || [];
+                listing = items
+                    .filter(item => item.stat && item.stat.type === "dir")
+                    .map(item => ({ name: item.name }));
+
+                if (listing.length > 0) {
+                    console.log("Restored listing from directory scan:", listing);
+                    await storage.writeFile("local/shared/sessions/listing.json", JSON.stringify(listing, null, 4));
+                }
+            }
 
             let metadataFile = "[]";
             if (await storage.exists(localMetadataPath)) {
