@@ -131,7 +131,8 @@
 
     // Modern styling using group color with default fallback
     background-color: color-mix(in srgb, var(--group-color, var(--primary-500)) 10%, transparent) !important;
-    color: var(--group-color, var(--primary-500)) !important;
+    // Use a darker version of the group color for better contrast
+    color: color-mix(in srgb, var(--group-color, var(--primary-500)) 60%, black) !important;
     border: 1px solid var(--group-color, var(--primary-500)) !important;
 
     font-weight: 500 !important;
