@@ -122,9 +122,11 @@ export default function SessionPage({ group, year, date, name }) {
                     <div className={styles.tags}>
                         {session.tags.map(tag => (
                             <Chip key={tag} label={tag} onClick={() => {
-                                copyToClipboard(tag);
-                                setCopiedTag(tag);
-                                setShowClipboard(true);
+                                const success = copyToClipboard(tag);
+                                if (success) {
+                                    setCopiedTag(tag);
+                                    setShowClipboard(true);
+                                }
                             }} className={styles.tag} />
                         ))}
                     </div>

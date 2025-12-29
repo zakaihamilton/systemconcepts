@@ -52,5 +52,7 @@ export function formatDuration(duration, includeHours = false) {
 export function copyToClipboard(text) {
     if (navigator && navigator.clipboard) {
         navigator.clipboard.writeText(text);
+        return true;
     }
+    return false;
 }
