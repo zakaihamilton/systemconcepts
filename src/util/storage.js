@@ -287,6 +287,11 @@ export function useFile(urlArgument, depends = [], mapping) {
 }
 
 async function getRecursiveList(path) {
+    // Return empty array if directory doesn't exist (e.g., after cache clear)
+    if (!await storageMethods.exists(path)) {
+        return [];
+    }
+
     let listing = [];
     const addListing = async (dirPath) => {
         const items = await limit(() => storageMethods.getListing(dirPath));
