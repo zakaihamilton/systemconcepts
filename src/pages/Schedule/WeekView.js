@@ -26,9 +26,9 @@ export default function WeekView({ sessions, date, store }) {
     const translations = useTranslations();
     const firstDay = getWeekViewStart(date);
     const monthStart = getMonthViewStart(date);
-    // Use the middle of the current week (Wednesday) to determine which month we're in
-    // This ensures that weeks spanning two months are assigned to the month with more days
-    const month = addDate(firstDay, 3);
+    // Use Thursday (day 4) of the current week to determine which month we're in
+    // This follows the ISO week date standard where a week belongs to the month containing Thursday
+    const month = addDate(firstDay, 4);
     const dayHeaderFormatter = useDateFormatter({
         weekday: "short"
     });
