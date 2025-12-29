@@ -55,6 +55,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
     const [hoverRef, setHoverRef] = useState(null);
 
     const handleClick = (event) => {
+        event && event.stopPropagation && event.stopPropagation();
         if (items && items.length) {
             onVisible && onVisible(true);
             setAnchorEl(event.currentTarget);
