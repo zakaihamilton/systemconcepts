@@ -14,8 +14,6 @@ import { useDeviceType } from "@util/styles";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import clsx from "clsx";
-import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
 
 registerToolbar("WeekView");
 
