@@ -119,27 +119,20 @@ export async function checkBundleVersion(endPoint, listing = null) {
 
 
 function normalizeContent(content) {
-    const sortKeys = (obj) => {
-        if (Array.isArray(obj)) {
-            return obj.map(sortKeys);
-        } else if (obj !== null && typeof obj === 'object') {
-            return Object.keys(obj).sort().reduce((sorted, key) => {
-                sorted[key] = sortKeys(obj[key]);
-                return sorted;
-            }, {});
-        }
-        return obj;
-    };
-
-    if (typeof content === "string") {
+    if (typeof content !== "string") {
+        return content;
+    }
+    // Just trim and handle simple JSON normalization without deep recursion
+    const trimmed = content.trim();
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
         try {
-            const obj = JSON.parse(content);
-            return JSON.stringify(sortKeys(obj), null, 4);
+            // Minify JSON to normalize whitespace without sorting keys (safer)
+            return JSON.stringify(JSON.parse(trimmed));
         } catch (e) {
-            return content;
+            return trimmed;
         }
     }
-    return JSON.stringify(sortKeys(content), null, 4);
+    return trimmed;
 }
 
 export async function getRemoteBundle(endPoint, listing = null) {
