@@ -2,8 +2,14 @@ import React, { useRef, useEffect, useMemo, useCallback, forwardRef } from 'reac
 import styles from './Row.module.scss';
 import TrackCard from './Card';
 import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
 import { FixedSizeList } from "react-window";
 import { useDateFormatter } from "@util/locale";
+import { GroupsStore } from "@util/groups";
+import IconButton from '@mui/material/IconButton';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { ScheduleStore } from "@pages/Schedule";
 
 const InnerList = forwardRef(({ style, ...rest }, ref) => (
     <div
@@ -16,7 +22,7 @@ const InnerList = forwardRef(({ style, ...rest }, ref) => (
     />
 ));
 
-export default function TrackRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store }) {
+export default function TrackRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store, translations = {} }) {
     const listRef = useRef(null);
     const outerRef = useRef(null);
     const dateFormatter = useDateFormatter({ year: 'numeric', month: 'long' });
@@ -27,6 +33,31 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
     const formattedDate = useMemo(() => {
         return dateFormatter.format(dateObj);
     }, [dateObj, dateFormatter]);
+
+    const groups = GroupsStore.useState(s => s.groups);
+    const showBadges = ScheduleStore.useState(s => s.showBadges);
+
+    const toggleBadges = (e) => {
+        e.stopPropagation();
+        ScheduleStore.update(s => {
+            s.showBadges = !s.showBadges;
+        });
+    };
+
+    const groupCounts = useMemo(() => {
+        const counts = {};
+        sessions.forEach(session => {
+            counts[session.group] = (counts[session.group] || 0) + 1;
+        });
+        return Object.entries(counts).map(([name, count]) => {
+            const groupMetadata = groups.find(g => g.name === name) || {};
+            return {
+                name,
+                count,
+                color: groupMetadata.color
+            };
+        }).sort((a, b) => a.name.localeCompare(b.name));
+    }, [sessions, groups]);
 
     const handleHeaderClick = () => {
         if (store) {
@@ -90,10 +121,27 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
 
     return (
         <div className={styles.row}>
-            <div className={styles.header}>
+            <div className={styles.header} style={{ maxWidth: Math.min(safeWidth, sessions.length * itemSize + 40) }}>
                 <Typography variant="h6" className={styles.dateTitle} onClick={handleHeaderClick}>
                     {formattedDate}
                 </Typography>
+                <div className={styles.badges}>
+                    {showBadges && groupCounts.map(group => (
+                        <Tooltip key={group.name} title={group.name.charAt(0).toUpperCase() + group.name.slice(1)} arrow>
+                            <div
+                                className={styles.badge}
+                                style={{ '--badge-bg': group.color || '#888' }}
+                            >
+                                {group.count}
+                            </div>
+                        </Tooltip>
+                    ))}
+                    <Tooltip title={showBadges ? translations.COLLAPSE : translations.EXPAND} arrow>
+                        <IconButton className={styles.toggleButton} onClick={toggleBadges} size="small">
+                            {showBadges ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                        </IconButton>
+                    </Tooltip>
+                </div>
             </div>
             <div className={styles.lane}>
                 {safeWidth > 0 && (

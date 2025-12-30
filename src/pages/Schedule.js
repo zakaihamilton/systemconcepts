@@ -30,7 +30,8 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 export const ScheduleStore = new Store({
     date: null,
     viewMode: "week",
-    lastViewMode: null
+    lastViewMode: null,
+    showBadges: false
 });
 
 registerToolbar("Schedule");
@@ -46,7 +47,7 @@ export default function SchedulePage() {
     if (!date) {
         date = new Date();
     }
-    useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode", "lastViewMode"]);
+    useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode", "lastViewMode", "showBadges"]);
 
     const viewOptions = [
         {

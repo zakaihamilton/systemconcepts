@@ -304,8 +304,9 @@ export default function TracksView({ sessions = [], loading, store, translations
         handleSessionClick,
         width: (pageSize && pageSize.width ? pageSize.width - 18 : 0),
         itemSize: CARD_WIDTH,
-        store
-    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store]);
+        store,
+        translations
+    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store, translations]);
 
     const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0"));
 
@@ -343,7 +344,7 @@ export default function TracksView({ sessions = [], loading, store, translations
 }
 
 const Row = ({ index, style, data }) => {
-    const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store } = data;
+    const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store, translations } = data;
     const group = groupedSessions[index];
 
     return (
@@ -357,6 +358,7 @@ const Row = ({ index, style, data }) => {
                 width={width}
                 itemSize={itemSize}
                 store={store}
+                translations={translations}
             />
         </div>
     );
