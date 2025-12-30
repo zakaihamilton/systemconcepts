@@ -152,7 +152,11 @@ export default function SchedulePage() {
     const items = useMemo(() => {
         let items = sessions;
         if (search) {
-            items = items.filter(item => item.name.toLowerCase().includes(search.toLowerCase()));
+            const searchLower = search.toLowerCase();
+            items = items.filter(item =>
+                item.name.toLowerCase().includes(searchLower) ||
+                (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+            );
         }
         return items;
     }, [search, sessions]);
