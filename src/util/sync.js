@@ -81,7 +81,7 @@ async function checkAndMigrateDataStructure() {
 
 export async function clearBundleCache() {
     try {
-        addSyncLog('Clearing cache...', "warning");
+        addSyncLog('Full sync started...', "warning");
 
         // Clear all cached bundle data
         await storage.deleteFolder("local/cache");
@@ -117,7 +117,7 @@ export async function clearBundleCache() {
             timestamp: Date.now()
         }));
 
-        addSyncLog('Cache cleared successfully.', "success");
+        addSyncLog('Full sync initialized successfully.', "success");
         return true;
     } catch (err) {
         addSyncLog(`Error clearing cache: ${err.message}`, "error");
