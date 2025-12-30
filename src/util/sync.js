@@ -16,7 +16,7 @@ const SYNC_CONCURRENCY_LIMIT = 10;
 const DATA_STRUCTURE_VERSION = 3; // Increment when data structure changes - v3: listing.json no longer preserved
 const VERSION_KEY = "local/cache/_data_version.json";
 
-function addSyncLog(message, type = "info") {
+export function addSyncLog(message, type = "info") {
     SyncActiveStore.update(s => {
         s.logs = [...(s.logs || []), {
             id: Date.now() + Math.random(),
@@ -266,8 +266,14 @@ async function syncBundle(bundleDef, manifest) {
         if (appliedCorruption) {
             addSyncLog(`[${shortName}] Sync issues detected.`, "warning");
         } else {
+            const sessionIds = [...new Set(Object.keys(merged || {})
+                .map(p => p.split('/')[0])
+                .filter(p => p && !p.includes('.') && p !== "listing.json" && p !== "metadata.json" && p !== "tags.json")
+            )].sort();
+            const lastSession = sessionIds[sessionIds.length - 1];
+            const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
             const duration = Math.round(performance.now() - workStartTime);
-            addSyncLog(`[${shortName}] ✓ Done (${downloadCount} files in ${duration}ms).`, "success");
+            addSyncLog(`[${shortName}] ✓ Done (${downloadCount} files${lastSessionMsg} in ${duration}ms).`, "success");
         }
 
         const hasChanges = downloadCount > 0 || localUpdated;

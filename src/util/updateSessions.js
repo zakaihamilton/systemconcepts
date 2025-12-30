@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import pLimit from "./p-limit";
 
 import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
+import { addSyncLog } from "./sync";
 
 export function useUpdateSessions(groups) {
     const { busy, status, start } = UpdateSessionsStore.useState();
@@ -83,6 +84,7 @@ export function useUpdateSessions(groups) {
                 s.status = [...s.status];
             }
         });
+        const allSessionNames = new Set();
         let years = [];
         try {
             years = await getListing(path);
@@ -208,6 +210,7 @@ export function useUpdateSessions(groups) {
 
                                 if (json.tags) {
                                     tagsMap[fileName] = json.tags;
+                                    allSessionNames.add(fileName);
                                 } else {
                                     console.warn(`[Tags] ${name} has no 'tags' property:`, json);
                                 }
@@ -217,6 +220,9 @@ export function useUpdateSessions(groups) {
                         }
                     }
                 }
+
+                // Also collect from existing tags if any
+                Object.keys(tagsMap).forEach(name => allSessionNames.add(name));
 
                 if (Object.keys(tagsMap).length > 0) {
                     await storage.writeFile(targetTagsPath, JSON.stringify(tagsMap, null, 4));
@@ -251,6 +257,11 @@ export function useUpdateSessions(groups) {
             s.status[itemIndex].year = null;
             s.status = [...s.status];
         });
+
+        const sortedSessions = [...allSessionNames].sort();
+        const lastSession = sortedSessions[sortedSessions.length - 1];
+        const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
+        addSyncLog(`[${name}] ✓ Updated (${sortedSessions.length} sessions${lastSessionMsg}).`, "success");
     }, [prefix, copyFile, getListing]);
     const updateSessions = useCallback(async (includeDisabled) => {
         const isSyncBusy = SyncActiveStore.getRawState().busy;
@@ -262,22 +273,25 @@ export function useUpdateSessions(groups) {
             s.busy = true;
             s.start = new Date().getTime();
         });
-        let items = [];
         try {
-            items = await getListing(prefix);
+            let items = [];
+            try {
+                items = await getListing(prefix);
+            }
+            catch (err) {
+                console.error(err);
+            }
+            if (!items) {
+                return;
+            }
+            const limit = pLimit(4);
+            const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
+            await Promise.all(promises);
+        } finally {
+            UpdateSessionsStore.update(s => {
+                s.busy = false;
+            });
         }
-        catch (err) {
-            console.error(err);
-        }
-        if (!items) {
-            return;
-        }
-        const limit = pLimit(4);
-        const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
-        await Promise.all(promises);
-        UpdateSessionsStore.update(s => {
-            s.busy = false;
-        });
     }, [groups, prefix, getListing, updateGroup]);
     const updateAllSessions = useCallback(async (includeDisabled) => {
         const isSyncBusy = SyncActiveStore.getRawState().busy;
@@ -289,37 +303,38 @@ export function useUpdateSessions(groups) {
             s.busy = true;
             s.start = new Date().getTime();
         });
-        let items = [];
         try {
-            items = await getListing(prefix);
+            let items = [];
+            try {
+                items = await getListing(prefix);
+            }
+            catch (err) {
+                console.error(err);
+            }
+            if (!items) {
+                return;
+            }
+            const limit = pLimit(4);
+            const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name, true)));
+            await Promise.all(promises);
+        } finally {
+            UpdateSessionsStore.update(s => {
+                s.busy = false;
+            });
         }
-        catch (err) {
-            console.error(err);
-        }
-        if (!items) {
-            return;
-        }
-        const limit = pLimit(4);
-        const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name, true)));
-        await Promise.all(promises);
-        UpdateSessionsStore.update(s => {
-            s.busy = false;
-        });
     }, [groups, prefix, getListing, updateGroup]);
     const updateSpecificGroup = useCallback(async (name, updateAll) => {
-        const isSyncBusy = SyncActiveStore.getRawState().busy;
-        if (isSyncBusy) {
-            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
-            return;
-        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
         });
-        await updateGroup(name, updateAll);
-        UpdateSessionsStore.update(s => {
-            s.busy = false;
-        });
+        try {
+            await updateGroup(name, updateAll);
+        } finally {
+            UpdateSessionsStore.update(s => {
+                s.busy = false;
+            });
+        }
     }, [updateGroup]);
     return useMemo(() => ({
         status,
