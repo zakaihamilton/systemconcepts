@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import { SessionsStore } from "@util/sessions";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import MovieIcon from "@mui/icons-material/Movie";
 import AudioIcon from "@icons/Audio";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -8,9 +8,6 @@ import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
-import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
-import HideImageIcon from '@mui/icons-material/HideImage';
-import ListIcon from '@mui/icons-material/List';
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@widgets/Menu";
 import styles from "./FilterBar.module.scss";
@@ -41,12 +38,34 @@ export default function FilterBar({ hideYears = false }) {
             header: true,
             expanded: typeFilter.includes("with_thumbnail") || typeFilter.includes("without_thumbnail"),
             items: [
-                { id: "thumbnails_all", name: translations.THUMBNAILS_ALL, icon: <ListIcon />, radio: true },
-                { id: "with_thumbnail", name: translations.WITH_THUMBNAIL, icon: <InsertPhotoIcon />, radio: true },
-                { id: "without_thumbnail", name: translations.WITHOUT_THUMBNAIL, icon: <HideImageIcon />, radio: true }
+                { id: "thumbnails_all", name: translations.THUMBNAILS_ALL, radio: true },
+                { id: "with_thumbnail", name: translations.WITH_THUMBNAIL, radio: true },
+                { id: "without_thumbnail", name: translations.WITHOUT_THUMBNAIL, radio: true }
+            ]
+        },
+        {
+            id: "summary_header",
+            name: translations.SUMMARY,
+            header: true,
+            expanded: typeFilter.includes("with_summary") || typeFilter.includes("without_summary"),
+            items: [
+                { id: "summaries_all", name: translations.THUMBNAILS_ALL, radio: true },
+                { id: "with_summary", name: translations.WITH_SUMMARY, radio: true },
+                { id: "without_summary", name: translations.WITHOUT_SUMMARY, radio: true }
+            ]
+        },
+        {
+            id: "tags_header",
+            name: translations.TAGS,
+            header: true,
+            expanded: typeFilter.includes("with_tags") || typeFilter.includes("without_tags"),
+            items: [
+                { id: "tags_all", name: translations.THUMBNAILS_ALL, radio: true },
+                { id: "with_tags", name: translations.WITH_TAGS, radio: true },
+                { id: "without_tags", name: translations.WITHOUT_TAGS, radio: true }
             ]
         }
-    ], [translations]);
+    ], [translations, typeFilter]);
 
     const years = useMemo(() => {
         return (sessions || [])?.reduce((years, session) => {
@@ -88,7 +107,10 @@ export default function FilterBar({ hideYears = false }) {
                 icon: type.icon,
                 divider: type.divider,
                 header: type.header,
-                radio: type.id === "thumbnails_all" ? (!typeFilter.includes("with_thumbnail") && !typeFilter.includes("without_thumbnail")) : (type.radio && typeFilter.includes(type.id)),
+                radio: (type.id === "thumbnails_all" && !typeFilter.includes("with_thumbnail") && !typeFilter.includes("without_thumbnail")) ||
+                    (type.id === "summaries_all" && !typeFilter.includes("with_summary") && !typeFilter.includes("without_summary")) ||
+                    (type.id === "tags_all" && !typeFilter.includes("with_tags") && !typeFilter.includes("without_tags")) ||
+                    (type.radio && typeFilter.includes(type.id)),
                 checked: !type.radio && typeFilter.includes(type.id),
                 selected: typeFilter,
                 items: mapItems(type.items),
@@ -98,12 +120,25 @@ export default function FilterBar({ hideYears = false }) {
                         return;
                     }
                     SessionsStore.update(s => {
-                        if (type.id === "thumbnails_all") {
-                            s.typeFilter = s.typeFilter.filter(t => t !== "with_thumbnail" && t !== "without_thumbnail");
+                        const allRadios = {
+                            thumbnails_all: ["with_thumbnail", "without_thumbnail"],
+                            summaries_all: ["with_summary", "without_summary"],
+                            tags_all: ["with_tags", "without_tags"]
+                        };
+                        if (allRadios[type.id]) {
+                            s.typeFilter = s.typeFilter.filter(t => !allRadios[type.id].includes(t));
                             return;
                         }
                         else if (type.radio) {
-                            const otherRadio = type.id === "with_thumbnail" ? "without_thumbnail" : "with_thumbnail";
+                            const otherRadios = {
+                                with_thumbnail: "without_thumbnail",
+                                without_thumbnail: "with_thumbnail",
+                                with_summary: "without_summary",
+                                without_summary: "with_summary",
+                                with_tags: "without_tags",
+                                without_tags: "with_tags"
+                            };
+                            const otherRadio = otherRadios[type.id];
                             s.typeFilter = s.typeFilter.filter(t => t !== otherRadio);
                             if (!s.typeFilter.includes(type.id)) {
                                 s.typeFilter = [...s.typeFilter, type.id];

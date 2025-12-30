@@ -351,16 +351,20 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            const types = typeFilter.filter(t => !["with_thumbnail", "without_thumbnail", "thumbnails_all"].includes(t));
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all"];
+            const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
+            const withSummary = typeFilter.includes("with_summary");
+            const withoutSummary = typeFilter.includes("without_summary");
+            const withTags = typeFilter.includes("with_tags");
+            const withoutTags = typeFilter.includes("without_tags");
 
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
 
                 const hasThumbnail = !!session.thumbnail;
                 let matchThumbnail = true;
-
                 if (withThumbnail && withoutThumbnail) {
                     matchThumbnail = true;
                 } else if (withThumbnail) {
@@ -369,7 +373,27 @@ export function useSessions(depends = [], options = {}) {
                     matchThumbnail = !hasThumbnail;
                 }
 
-                return matchType && matchThumbnail;
+                const hasSummary = !!session.summary;
+                let matchSummary = true;
+                if (withSummary && withoutSummary) {
+                    matchSummary = true;
+                } else if (withSummary) {
+                    matchSummary = hasSummary;
+                } else if (withoutSummary) {
+                    matchSummary = !hasSummary;
+                }
+
+                const hasTags = !!session.tags?.length;
+                let matchTags = true;
+                if (withTags && withoutTags) {
+                    matchTags = true;
+                } else if (withTags) {
+                    matchTags = hasTags;
+                } else if (withoutTags) {
+                    matchTags = !hasTags;
+                }
+
+                return matchType && matchThumbnail && matchSummary && matchTags;
             });
         }
         if (yearFilter?.length) {

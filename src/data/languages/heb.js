@@ -478,6 +478,22 @@ export default {
             "value": "הכל"
         },
         {
+            "id": "WITH_SUMMARY",
+            "value": "עם סיכום"
+        },
+        {
+            "id": "WITHOUT_SUMMARY",
+            "value": "ללא סיכום"
+        },
+        {
+            "id": "WITH_TAGS",
+            "value": "עם תגיות"
+        },
+        {
+            "id": "WITHOUT_TAGS",
+            "value": "ללא תגיות"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "הוסף תפקיד"
         },

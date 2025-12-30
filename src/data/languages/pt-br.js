@@ -482,6 +482,22 @@ export default {
             "value": "Todos"
         },
         {
+            "id": "WITH_SUMMARY",
+            "value": "Com resumo"
+        },
+        {
+            "id": "WITHOUT_SUMMARY",
+            "value": "Sem resumo"
+        },
+        {
+            "id": "WITH_TAGS",
+            "value": "Com tags"
+        },
+        {
+            "id": "WITHOUT_TAGS",
+            "value": "Sem tags"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Adicionar função"
         },

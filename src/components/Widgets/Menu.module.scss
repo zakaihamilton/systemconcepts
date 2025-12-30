@@ -26,7 +26,7 @@
 }
 
 .itemIcon {
-    min-width: 54px !important;
+    min-width: unset !important;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -65,7 +65,6 @@
     margin: 0.2rem 0.5rem !important;
     border-radius: 8px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    min-width: 180px;
 
     &:hover {
         background-color: var(--hover-background) !important;

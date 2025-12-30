@@ -482,6 +482,22 @@ export default {
             "value": "All"
         },
         {
+            "id": "WITH_SUMMARY",
+            "value": "With Summary"
+        },
+        {
+            "id": "WITHOUT_SUMMARY",
+            "value": "No Summary"
+        },
+        {
+            "id": "WITH_TAGS",
+            "value": "With Tags"
+        },
+        {
+            "id": "WITHOUT_TAGS",
+            "value": "No Tags"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Add Role"
         },

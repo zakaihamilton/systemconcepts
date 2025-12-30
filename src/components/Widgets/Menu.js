@@ -25,7 +25,6 @@ const StyledMenuRoot = styled(Menu)(({ theme }) => ({
     [`& .${classes.paper}`]: {
         borderRadius: 12,
         marginTop: 8,
-        minWidth: 200,
         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         border: `1px solid var(--border-color)`,
         backgroundColor: 'var(--bar-background)',
@@ -84,17 +83,19 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         setExpanded({});
     };
 
-    const checkHasIcon = (list) => {
-        return (list || []).some(item =>
-            item.icon ||
-            typeof item.checked !== "undefined" ||
-            typeof item.radio !== "undefined" ||
-            checkHasIcon(item.items)
-        );
+    const checkListFeatures = (list) => {
+        let hasSelector = false;
+        let hasIcon = false;
+        (list || []).forEach(item => {
+            if (item.icon) hasIcon = true;
+            if (typeof item.checked !== "undefined" || typeof item.radio !== "undefined") hasSelector = true;
+        });
+        return { hasSelector, hasIcon };
     };
-    const hasIcon = checkHasIcon(items);
 
     const renderItems = (itemsList) => {
+        const { hasSelector, hasIcon } = checkListFeatures(itemsList);
+        const hasAnyIcon = hasSelector || hasIcon;
         return (itemsList || []).flatMap((item, index, list) => {
             const isLast = list.length - 1 === index;
             const { checked, radio, header, divider, name, target, icon, items: subItems, onClick: itemOnClick, id, menu, backgroundColor, description, selected, expanded: itemExpanded, ...props } = item;
@@ -138,20 +139,24 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                     {...props}
                 >
                     <div className={styles.background} style={style} />
-                    {hasIcon && (
+                    {hasAnyIcon && (
                         <ListItemIcon className={styles.itemIcon}>
-                            <div className={styles.selector}>
-                                {!header && (typeof radio !== "undefined" || typeof checked !== "undefined") && (
-                                    typeof radio !== "undefined" ? (
-                                        radio ? <RadioButtonCheckedIcon color="primary" /> : <RadioButtonUncheckedIcon />
-                                    ) : (
-                                        checked ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />
-                                    )
-                                )}
-                            </div>
-                            <div className={styles.icon}>
-                                {icon}
-                            </div>
+                            {hasSelector && (
+                                <div className={styles.selector}>
+                                    {!header && (typeof radio !== "undefined" || typeof checked !== "undefined") && (
+                                        typeof radio !== "undefined" ? (
+                                            radio ? <RadioButtonCheckedIcon color="primary" /> : <RadioButtonUncheckedIcon />
+                                        ) : (
+                                            checked ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />
+                                        )
+                                    )}
+                                </div>
+                            )}
+                            {hasIcon && (
+                                <div className={styles.icon}>
+                                    {icon}
+                                </div>
+                            )}
                         </ListItemIcon>
                     )}
                     <ListItemText
@@ -211,6 +216,12 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                 open={!!open}
                 onClose={handleClose}
                 {...hoverEnabled && hoverRef && { MenuListProps: { onMouseLeave: handleClose } }}
+                PaperProps={{
+                    style: {
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important',
+                        minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
+                    }
+                }}
                 {...props}
                 classes={{
                     paper: classes.paper

@@ -238,9 +238,14 @@ export default function SessionsPage() {
         let { group, type, year, thumbnail } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
-            const types = typeFilter.filter(t => !["with_thumbnail", "without_thumbnail", "thumbnails_all"].includes(t));
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all"];
+            const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
+            const withSummary = typeFilter.includes("with_summary");
+            const withoutSummary = typeFilter.includes("without_summary");
+            const withTags = typeFilter.includes("with_tags");
+            const withoutTags = typeFilter.includes("without_tags");
 
             const matchType = !types.length || types.includes(type);
 
@@ -253,7 +258,27 @@ export default function SessionsPage() {
                 matchThumbnail = !thumbnail;
             }
 
-            show = show && matchType && matchThumbnail;
+            let matchSummary = true;
+            const hasSummary = !!item.summary;
+            if (withSummary && withoutSummary) {
+                matchSummary = true;
+            } else if (withSummary) {
+                matchSummary = hasSummary;
+            } else if (withoutSummary) {
+                matchSummary = !hasSummary;
+            }
+
+            let matchTags = true;
+            const hasTags = !!item.tags?.length;
+            if (withTags && withoutTags) {
+                matchTags = true;
+            } else if (withTags) {
+                matchTags = hasTags;
+            } else if (withoutTags) {
+                matchTags = !hasTags;
+            }
+
+            show = show && matchType && matchThumbnail && matchSummary && matchTags;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);
