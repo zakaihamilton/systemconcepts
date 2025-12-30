@@ -24,8 +24,8 @@ export default function TracksView({ sessions = [], loading, store, translations
 
     // Dimensions
     // Card width target: ~320px
-    const CARD_WIDTH = 320;
-    const ROW_HEIGHT = 270; // Header + Card Height + Padding
+    const CARD_WIDTH = 260;
+    const ROW_HEIGHT = 210; // Header + Card Height + Padding
 
     // Group sessions by month (year-month)
     const groupedSessions = useMemo(() => {
