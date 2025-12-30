@@ -8,111 +8,78 @@ const BUNDLE_PREFIX = "bundle.gz.part.";
 
 // Memory cache for bundles to avoid redundant parsing
 const REMOTE_BUNDLE_CACHE = new Map();
-let globalSyncLock = false;
 
-/**
- * Generate a hash from bundle inventory for quick comparison
- * @param {Array} inventory - Array of {name, mtime} objects
- * @returns {string} Hash string
- */
-function generateInventoryHash(inventory) {
-    if (!inventory || !inventory.length) return "";
+// Cache file paths
+const CACHE_DIR = 'local/cache';
+const getCachePath = (endPoint, type) => `${CACHE_DIR}/${endPoint}_${type}.json`;
+const MASTER_MANIFEST_PATH = `${CACHE_DIR}/_bundle_manifest.json`;
 
-    // Create a stable string representation
-    const stable = inventory
-        .map(item => `${item.name}:${Math.floor(item.mtime || 0)}`)
-        .sort()
-        .join("|");
-
-    // Simple hash function (good enough for change detection)
-    let hash = 0;
-    for (let i = 0; i < stable.length; i++) {
-        const char = stable.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-    }
-    return hash.toString(36);
-}
-
-// Metadata cache functions removed to reduce memory usage
-
-/**
- * Get or create master manifest with all bundle versions
- * This avoids making individual API calls for each bundle
- */
 async function getMasterManifest() {
-    const manifestPath = 'local/cache/_bundle_manifest.json';
     try {
-        if (await storage.exists(manifestPath)) {
-            const manifestStr = await storage.readFile(manifestPath);
+        if (await storage.exists(MASTER_MANIFEST_PATH)) {
+            const manifestStr = await storage.readFile(MASTER_MANIFEST_PATH);
             return JSON.parse(manifestStr);
         }
     } catch (err) {
-        console.error("getMasterManifest: Error reading manifest:", err);
+        console.error("[Bundle] Error reading master manifest:", err);
     }
     return {};
 }
 
-/**
- * Update master manifest with bundle version
- */
 async function updateMasterManifest(endPoint, versionInfo) {
-    const manifestPath = 'local/cache/_bundle_manifest.json';
     try {
         const manifest = await getMasterManifest();
         manifest[endPoint] = versionInfo;
-        await storage.writeFile(manifestPath, JSON.stringify(manifest));
+        await storage.writeFile(MASTER_MANIFEST_PATH, JSON.stringify(manifest));
     } catch (err) {
-        console.error("updateMasterManifest: Error updating manifest:", err);
+        console.error("[Bundle] Error updating master manifest:", err);
     }
 }
 
-/**
- * Check if bundle version has changed using master manifest
- * @param {string} endPoint - Bundle endpoint
- * @param {Array} listing - Remote listing (optional)
- * @returns {Object} { changed: boolean, versionInfo: object }
- */
+function createInventoryFromParts(bundleParts) {
+    return bundleParts.map(p => ({
+        name: p.name,
+        mtime: p.mtimeMs || 0
+    }));
+}
+
+function sortBundleParts(bundleParts) {
+    return bundleParts.sort((a, b) => {
+        const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
+        const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
+        return indexA - indexB;
+    });
+}
+
 export async function checkBundleVersion(endPoint, listing = null) {
     try {
         if (!listing) {
             listing = await storage.getListing(endPoint) || [];
         }
-        const bundleParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
+        const bundleParts = listing.filter(item => item.name?.startsWith(BUNDLE_PREFIX));
 
         if (!bundleParts.length) {
-            return { changed: true, versionInfo: null };
+            return { changed: true, versionInfo: null, listing };
         }
 
-        // Sort parts by index
-        bundleParts.sort((a, b) => {
-            const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
-            const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
-            return indexA - indexB;
-        });
-
-        // Create inventory signature
-        const inventory = bundleParts.map(p => ({
-            name: p.name,
-            mtime: p.mtimeMs || 0
-        }));
-
+        sortBundleParts(bundleParts);
+        const inventory = createInventoryFromParts(bundleParts);
         const currentInventoryHash = JSON.stringify(inventory);
 
-        // Check master manifest instead of individual version files
         const manifest = await getMasterManifest();
         const cachedVersion = manifest[endPoint];
 
-        if (cachedVersion && cachedVersion.inventoryHash === currentInventoryHash) {
-            // Version matches - no changes
+        if (cachedVersion?.inventoryHash === currentInventoryHash) {
             return { changed: false, versionInfo: cachedVersion, listing };
         }
 
-        // Version doesn't match or doesn't exist
-        return { changed: true, versionInfo: { inventoryHash: currentInventoryHash, timestamp: Date.now() }, listing };
+        return {
+            changed: true,
+            versionInfo: { inventoryHash: currentInventoryHash, timestamp: Date.now() },
+            listing
+        };
     } catch (err) {
-        console.error("checkBundleVersion: Error checking version:", err);
-        // On error, assume changed to be safe
+        console.error("[Bundle] Error checking version:", err);
         return { changed: true, versionInfo: null, listing: null };
     }
 }
@@ -122,13 +89,11 @@ function normalizeContent(content) {
     if (typeof content !== "string") {
         return content;
     }
-    // Just trim and handle simple JSON normalization without deep recursion
     const trimmed = content.trim();
     if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
         try {
-            // Minify JSON to normalize whitespace without sorting keys (safer)
             return JSON.stringify(JSON.parse(trimmed));
-        } catch (e) {
+        } catch {
             return trimmed;
         }
     }
@@ -136,7 +101,6 @@ function normalizeContent(content) {
 }
 
 export async function getRemoteBundle(endPoint, listing = null) {
-    // Check memory cache first
     const cachedInMemory = REMOTE_BUNDLE_CACHE.get(endPoint);
     if (cachedInMemory && !listing) {
         return cachedInMemory;
@@ -145,52 +109,36 @@ export async function getRemoteBundle(endPoint, listing = null) {
     if (!listing) {
         listing = await storage.getListing(endPoint) || [];
     }
-    const bundleParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
+    const bundleParts = listing.filter(item => item.name?.startsWith(BUNDLE_PREFIX));
 
     if (!bundleParts.length) {
-        console.warn(`[getRemoteBundle] No bundle parts found for ${endPoint}`);
+        console.warn(`[Bundle] No bundle parts found for ${endPoint}`);
         return null;
     }
 
-    // Sort parts by index
-    bundleParts.sort((a, b) => {
-        const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
-        const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
-        return indexA - indexB;
-    });
+    sortBundleParts(bundleParts);
+    const inventory = createInventoryFromParts(bundleParts);
 
-    // Create inventory signature (name, mtime)
-    const inventory = bundleParts.map(p => ({
-        name: p.name,
-        mtime: p.mtimeMs || 0
-    }));
+    const versionPath = getCachePath(endPoint, 'version');
+    const cachePath = getCachePath(endPoint, 'bundle');
+    const inventoryPath = getCachePath(endPoint, 'inventory');
 
-    // VERSION-BASED OPTIMIZATION: Check if remote version matches cached version
-    const versionPath = `local/cache/${endPoint}_version.json`;
-    const cachePath = `local/cache/${endPoint}_bundle.json`;
-    const inventoryPath = `local/cache/${endPoint}_inventory.json`;
+    const currentInventoryHash = JSON.stringify(inventory);
 
     try {
-        // Read cached version info
         if (await storage.exists(versionPath)) {
-            const versionStr = await storage.readFile(versionPath);
-            const versionInfo = JSON.parse(versionStr);
+            const versionInfo = JSON.parse(await storage.readFile(versionPath));
 
-            // Simple version check - if inventory matches, use cache
-            const currentInventoryHash = JSON.stringify(inventory);
             if (versionInfo.inventoryHash === currentInventoryHash) {
-                // Check memory cache again with specific verification
-                if (cachedInMemory && cachedInMemory._inventoryHash === currentInventoryHash) {
+                if (cachedInMemory?._inventoryHash === currentInventoryHash) {
                     return cachedInMemory;
                 }
 
-                // Version matches - use cached bundle without any processing
                 if (await storage.exists(cachePath)) {
                     const cachedBundleStr = await storage.readFile(cachePath);
                     if (cachedBundleStr) {
                         try {
                             const bundle = JSON.parse(cachedBundleStr);
-                            // Use non-enumerable property
                             Object.defineProperty(bundle, "_inventoryHash", {
                                 value: currentInventoryHash,
                                 enumerable: false,
@@ -199,29 +147,27 @@ export async function getRemoteBundle(endPoint, listing = null) {
                             REMOTE_BUNDLE_CACHE.set(endPoint, bundle);
                             return bundle;
                         } catch (e) {
-                            console.error("getRemoteBundle: Failed to parse cached JSON:", e);
+                            console.error("[Bundle] Failed to parse cached bundle:", e);
                         }
                     }
                 }
             }
         }
     } catch (err) {
-        console.error("getRemoteBundle: Version check failed, proceeding with download:", err);
+        console.error("[Bundle] Cache check failed, downloading:", err);
     }
 
-    // Download and decompress bundle
     const parts = [];
     for (const part of bundleParts) {
         try {
             const content = await storage.readFile(part.path);
             if (content) {
-                // Trim whitespace to avoid Base64 corruption
                 parts.push(content.trim());
             } else {
-                console.error(`[getRemoteBundle] Empty content for part ${part.path}`);
+                console.error(`[Bundle] Empty content for part ${part.path}`);
             }
         } catch (err) {
-            console.error(`[getRemoteBundle] Error reading part ${part.path}:`, err);
+            console.error(`[Bundle] Error reading part ${part.path}:`, err);
         }
     }
 
@@ -229,59 +175,51 @@ export async function getRemoteBundle(endPoint, listing = null) {
         return null;
     }
 
-    // Join parts (Base64 strings) -> Single Base64 String -> Uint8Array -> Gunzip -> JSON String -> Object
     try {
         const joinedBase64 = parts.join("");
-
-        // Validate Base64 string
-        if (!joinedBase64 || joinedBase64.length === 0) {
-            console.error("getRemoteBundle: Empty Base64 string");
+        if (!joinedBase64) {
+            console.error("[Bundle] Empty Base64 string");
             return null;
         }
 
         const binaryString = Base64.atob(joinedBase64);
         const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
 
-        // Validate gzip header (should start with 0x1f 0x8b)
         if (bytes.length < 2 || bytes[0] !== 0x1f || bytes[1] !== 0x8b) {
-            console.error("getRemoteBundle: Invalid gzip header.");
+            console.error("[Bundle] Invalid gzip header");
             return null;
         }
 
         const jsonString = pako.ungzip(bytes, { to: "string" });
         const bundle = JSON.parse(jsonString);
 
-        // Use non-enumerable property so it doesn't interfere with file iteration
         Object.defineProperty(bundle, "_inventoryHash", {
-            value: JSON.stringify(inventory),
+            value: currentInventoryHash,
             enumerable: false,
             writable: true
         });
 
-        // Update Cache
         await storage.createFolderPath(cachePath);
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(inventory));
 
-        const versionInfo = { inventoryHash: bundle._inventoryHash, timestamp: Date.now() };
+        const versionInfo = { inventoryHash: currentInventoryHash, timestamp: Date.now() };
         await storage.writeFile(versionPath, JSON.stringify(versionInfo));
         await updateMasterManifest(endPoint, versionInfo);
 
         REMOTE_BUNDLE_CACHE.set(endPoint, bundle);
         return bundle;
     } catch (err) {
-        console.error("getRemoteBundle: Error parsing bundle:", err);
+        console.error("[Bundle] Error parsing bundle:", err);
         return null;
     }
 }
 
 
 export async function saveRemoteBundle(endPoint, bundle) {
-
     try {
         const jsonString = JSON.stringify(bundle);
         const bytes = pako.gzip(jsonString);
-        // Convert to Base64 to safely transport via JSON API
         const base64String = Base64.fromUint8Array(bytes);
 
         const chunks = [];
@@ -289,20 +227,14 @@ export async function saveRemoteBundle(endPoint, bundle) {
             chunks.push(base64String.substring(i, i + BUNDLE_CHUNK_SIZE));
         }
 
-
-
-        // Upload new chunks
         await storage.createFolderPath(endPoint, true);
         for (let i = 0; i < chunks.length; i++) {
-            const chunkName = `${BUNDLE_PREFIX}${i}`;
-            const chunkPath = makePath(endPoint, chunkName);
-
+            const chunkPath = makePath(endPoint, `${BUNDLE_PREFIX}${i}`);
             await storage.writeFile(chunkPath, chunks[i]);
         }
 
-        // Clean up old chunks (logic: list again, if any part index >= chunks.length, delete it)
         const listing = await storage.getListing(endPoint) || [];
-        const oldParts = listing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
+        const oldParts = listing.filter(item => item.name?.startsWith(BUNDLE_PREFIX));
         for (const part of oldParts) {
             const index = parseInt(part.name.split(BUNDLE_PREFIX)[1]);
             if (index >= chunks.length) {
@@ -310,40 +242,27 @@ export async function saveRemoteBundle(endPoint, bundle) {
             }
         }
 
-        // Refresh cache after upload to prevent next sync from downloading it
-
         const newListing = await storage.getListing(endPoint) || [];
-        const newParts = newListing.filter(item => item.name && item.name.startsWith(BUNDLE_PREFIX));
-        newParts.sort((a, b) => {
-            const indexA = parseInt(a.name.split(BUNDLE_PREFIX)[1]);
-            const indexB = parseInt(b.name.split(BUNDLE_PREFIX)[1]);
-            return indexA - indexB;
-        });
+        const newParts = newListing.filter(item => item.name?.startsWith(BUNDLE_PREFIX));
+        sortBundleParts(newParts);
+        const newInventory = createInventoryFromParts(newParts);
 
-        const newInventory = newParts.map(p => ({
-            name: p.name,
-            mtime: p.mtimeMs || 0
-        }));
-
-        const cachePath = `local/cache/${endPoint}_bundle.json`;
-        const inventoryPath = `local/cache/${endPoint}_inventory.json`;
-        const versionPath = `local/cache/${endPoint}_version.json`;
+        const cachePath = getCachePath(endPoint, 'bundle');
+        const inventoryPath = getCachePath(endPoint, 'inventory');
+        const versionPath = getCachePath(endPoint, 'version');
 
         await storage.createFolderPath(cachePath);
         await storage.writeFile(cachePath, jsonString);
         await storage.writeFile(inventoryPath, JSON.stringify(newInventory));
 
-        // Update master manifest for fast future checks
-        const inventoryHash = JSON.stringify(newInventory);
         const versionInfo = {
-            inventoryHash,
+            inventoryHash: JSON.stringify(newInventory),
             timestamp: Date.now()
         };
+        await storage.writeFile(versionPath, JSON.stringify(versionInfo));
         await updateMasterManifest(endPoint, versionInfo);
-
-
     } catch (err) {
-        console.error("saveRemoteBundle: Error saving bundle:", err);
+        console.error("[Bundle] Error saving bundle:", err);
         throw err;
     }
 }
@@ -356,56 +275,42 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
     }
 
     const files = listing.filter(item => item.type === "file");
+    const pathRegex = new RegExp(`^${path}/`);
 
     await Promise.all(files.map(async (item) => {
         try {
-            // Store relative path
-            const relativePath = item.path.replace(new RegExp(`^${path}/`), "");
+            const relativePath = item.path.replace(pathRegex, "");
 
-            // Check ignore list
             if (ignore.some(pattern => relativePath.includes(pattern))) {
                 return;
             }
 
-            // Skip binary files
             if (isBinaryFile(item.path)) {
                 return;
             }
 
             const localMtime = item.mtimeMs || 0;
-            const remoteItem = remote && remote[relativePath];
+            const remoteItem = remote?.[relativePath];
 
-            // OPTIMIZATION 1: Trust exact timestamp matches (skip content read entirely)
-            // BUT: Only if remote content is not null (to handle corrupted bundles)
-            if (remoteItem && remoteItem.mtime && remoteItem.content != null && Math.floor(remoteItem.mtime) === Math.floor(localMtime)) {
-                bundle[relativePath] = {
-                    content: remoteItem.content,
-                    mtime: localMtime  // Use local mtime to ensure consistency
-                };
-                return;
+            // Use remote content if timestamps match or remote is newer (with valid content)
+            if (remoteItem?.content != null) {
+                const remoteMtime = Math.floor(remoteItem.mtime || 0);
+                const localFloorMtime = Math.floor(localMtime);
+
+                if (remoteMtime === localFloorMtime || remoteMtime > localFloorMtime) {
+                    bundle[relativePath] = {
+                        content: remoteItem.content,
+                        mtime: localMtime
+                    };
+                    return;
+                }
             }
 
-            // OPTIMIZATION 2: Reuse remote content if remote is newer (avoid read)
-            // BUT: Only if remote content is not null (to handle corrupted bundles)
-            if (remoteItem && remoteItem.mtime && remoteItem.content != null && Math.floor(remoteItem.mtime) > Math.floor(localMtime)) {
-                bundle[relativePath] = {
-                    content: remoteItem.content,
-                    mtime: localMtime  // Use local mtime to ensure consistency
-                };
-                return;
-            }
-
-            // Only read content if we don't have a valid remote version
             const content = await storage.readFile(item.path);
-            bundle[relativePath] = {
-                content,
-                mtime: localMtime
-            };
+            bundle[relativePath] = { content, mtime: localMtime };
         } catch (err) {
-            if (err.code === 'ENOENT' || (err.message && err.message.includes('ENOENT'))) {
-                // File deleted or missing, ignore
-            } else {
-                console.error(`scanLocal: Error reading ${item.path}:`, err);
+            if (err.code !== 'ENOENT' && !err.message?.includes('ENOENT')) {
+                console.error(`[Bundle] Error reading ${item.path}:`, err);
             }
         }
     }));
@@ -413,32 +318,21 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
     return bundle;
 }
 
-export function mergeBundles(remote, local, name = "") {
-    if (!remote) remote = {};
-    if (!local) local = {};
-
+export function mergeBundles(remote = {}, local = {}, name = "") {
     const merged = { ...remote };
     let updateCount = 0;
 
     for (const [path, localItem] of Object.entries(local)) {
         const remoteItem = merged[path];
 
-        // OPTIMIZATION: Trust exact timestamp matches (skip content comparison)
-        // BUT: Only if remote content is not null (to handle corrupted bundles)
-        if (remoteItem && remoteItem.content != null && Math.floor(localItem.mtime) === Math.floor(remoteItem.mtime)) {
-            // Timestamps match exactly - trust that content is the same
+        if (remoteItem?.content != null && Math.floor(localItem.mtime) === Math.floor(remoteItem.mtime)) {
             continue;
         }
 
-        if (!remoteItem || (remoteItem && remoteItem.content == null) || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime)) {
-            // Check content equality to avoid redundant updates
-            if (remoteItem && remoteItem.content != null) {
-                // Quick check: exact content match
-                if (remoteItem.content === localItem.content) {
-                    continue;
-                }
-                // Expensive check: normalized content match (only if needed)
-                if (normalizeContent(remoteItem.content) === normalizeContent(localItem.content)) {
+        if (!remoteItem || remoteItem.content == null || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime)) {
+            if (remoteItem?.content != null) {
+                if (remoteItem.content === localItem.content ||
+                    normalizeContent(remoteItem.content) === normalizeContent(localItem.content)) {
                     continue;
                 }
             }
