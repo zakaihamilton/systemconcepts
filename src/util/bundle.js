@@ -14,6 +14,11 @@ const CACHE_DIR = 'local/cache';
 const getCachePath = (endPoint, type) => `${CACHE_DIR}/${endPoint}_${type}.json`;
 const MASTER_MANIFEST_PATH = `${CACHE_DIR}/_bundle_manifest.json`;
 
+// Lock to prevent concurrent updates to master manifest
+let manifestUpdateLock = Promise.resolve();
+let pendingManifestUpdates = {};
+let manifestUpdateTimer = null;
+
 async function getMasterManifest() {
     try {
         if (await storage.exists(MASTER_MANIFEST_PATH)) {
@@ -27,14 +32,48 @@ async function getMasterManifest() {
 }
 
 async function updateMasterManifest(endPoint, versionInfo) {
-    try {
-        const manifest = await getMasterManifest();
-        manifest[endPoint] = versionInfo;
-        await storage.writeFile(MASTER_MANIFEST_PATH, JSON.stringify(manifest));
-    } catch (err) {
-        console.error("[Bundle] Error updating master manifest:", err);
+    // Batch updates to avoid race conditions
+    pendingManifestUpdates[endPoint] = versionInfo;
+
+    // Debounce writes - wait 50ms for more updates to batch together
+    if (manifestUpdateTimer) {
+        clearTimeout(manifestUpdateTimer);
     }
+
+    manifestUpdateTimer = setTimeout(flushManifestUpdates, 50);
 }
+
+async function flushManifestUpdates() {
+    if (manifestUpdateTimer) {
+        clearTimeout(manifestUpdateTimer);
+        manifestUpdateTimer = null;
+    }
+
+    if (Object.keys(pendingManifestUpdates).length === 0) {
+        return manifestUpdateLock;
+    }
+
+    // Execute write with lock to prevent concurrent modifications
+    manifestUpdateLock = manifestUpdateLock.then(async () => {
+        try {
+            const updates = { ...pendingManifestUpdates };
+            pendingManifestUpdates = {};
+
+            if (Object.keys(updates).length > 0) {
+                const manifest = await getMasterManifest();
+                Object.assign(manifest, updates);
+                await storage.writeFile(MASTER_MANIFEST_PATH, JSON.stringify(manifest));
+            }
+        } catch (err) {
+            console.error("[Bundle] Error updating master manifest:", err);
+        }
+    });
+
+    return manifestUpdateLock;
+}
+
+// Export flush function so sync can ensure manifest is saved before finishing
+export { flushManifestUpdates };
 
 function createInventoryFromParts(bundleParts) {
     return bundleParts.map(p => ({
@@ -56,9 +95,9 @@ export async function checkBundleVersion(endPoint, listing = null) {
         const manifest = await getMasterManifest();
         const cachedVersion = manifest[endPoint];
 
-        // OPTIMIZATION: If we have a recent version check (within last 60 seconds), trust it
+        // OPTIMIZATION: If we have a recent version check (within last 10 minutes), trust it
         // This avoids expensive remote listing calls for recently synced bundles
-        const CACHE_VALIDITY_MS = 60 * 1000; // 60 seconds
+        const CACHE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes
         if (cachedVersion?.timestamp && (Date.now() - cachedVersion.timestamp) < CACHE_VALIDITY_MS) {
             // Trust the cached version without checking remote
             return { changed: false, versionInfo: cachedVersion, listing: null };

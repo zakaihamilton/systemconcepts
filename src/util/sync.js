@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { makePath } from "@util/path";
 import * as bundle from "./bundle";
+import { flushManifestUpdates } from "./bundle";
 import { usePageVisibility } from "@util/hooks";
 import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
 
@@ -281,6 +282,9 @@ export function useSyncFeature() {
                 });
             }
         } finally {
+            // Ensure all pending manifest updates are written before finishing
+            await flushManifestUpdates();
+
             startRef.current = 0;
             SyncActiveStore.update(s => {
                 s.busy = false;
