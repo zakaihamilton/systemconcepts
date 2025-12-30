@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useLocalStorage } from "@util/store";
 import { fetchJSON } from "@util/fetch";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
@@ -14,6 +15,17 @@ const MIN_GROUPS_FOR_S3_SCAN = 5;
 const SYNC_CONCURRENCY_LIMIT = 10;
 const DATA_STRUCTURE_VERSION = 3; // Increment when data structure changes - v3: listing.json no longer preserved
 const VERSION_KEY = "local/cache/_data_version.json";
+
+function addSyncLog(message, type = "info") {
+    SyncActiveStore.update(s => {
+        s.logs = [...(s.logs || []), {
+            id: Date.now() + Math.random(),
+            timestamp: Date.now(),
+            message,
+            type
+        }].slice(-100); // Keep last 100 logs
+    });
+}
 
 async function checkAndMigrateDataStructure() {
     try {
@@ -32,7 +44,7 @@ async function checkAndMigrateDataStructure() {
 
         // If version mismatch, clear old data
         if (currentVersion !== DATA_STRUCTURE_VERSION) {
-            console.log(`[Sync] Data structure mismatch (current: ${currentVersion}, expected: ${DATA_STRUCTURE_VERSION}). Clearing old data...`);
+            addSyncLog(`Data structure mismatch (v${currentVersion} vs v${DATA_STRUCTURE_VERSION}). Migrating...`, "warning");
 
             try {
                 // Clear all cached data
@@ -52,11 +64,10 @@ async function checkAndMigrateDataStructure() {
                     timestamp: Date.now()
                 }));
 
-                console.log('[Sync] Old data cleared, fresh sync will begin');
+                addSyncLog('Migration completed successfully.', "success");
                 return true; // Indicates migration occurred
             } catch (migrationErr) {
-                console.error('[Sync] Migration failed:', migrationErr);
-                // Don't update version if migration failed
+                addSyncLog(`Migration failed: ${migrationErr.message}`, "error");
                 return false;
             }
         }
@@ -70,49 +81,46 @@ async function checkAndMigrateDataStructure() {
 
 export async function clearBundleCache() {
     try {
-        console.log('[Clear Cache] Starting comprehensive cache clear...');
+        addSyncLog('Clearing cache...', "warning");
 
         // Clear all cached bundle data
-        console.log('[Clear Cache] Clearing bundle cache...');
         await storage.deleteFolder("local/cache");
 
         // Clear all session data
-        console.log('[Clear Cache] Clearing session data...');
         await storage.deleteFolder("local/shared/sessions");
 
         // Clear personal data cache
-        console.log('[Clear Cache] Clearing personal data...');
         await storage.deleteFolder("local/personal");
 
         // Reset sync state completely
-        console.log('[Clear Cache] Resetting sync state...');
         SyncActiveStore.update(s => {
             s.lastSynced = 0;
             s.progress = { total: 0, processed: 0 };
             s.counter = 0;
             s.busy = false;
             s.currentBundle = null;
+            s.logs = [];
+            s.lastDuration = 0;
         });
 
         // Reset update sessions state
-        console.log('[Clear Cache] Resetting update sessions state...');
         UpdateSessionsStore.update(s => {
             s.busy = false;
             s.status = [];
             s.start = 0;
         });
 
-        // Clear the data version file to force migration on next sync
-        console.log('[Clear Cache] Clearing version file...');
-        if (await storage.exists(VERSION_KEY)) {
-            await storage.deleteFile(VERSION_KEY);
-        }
+        // Initialize the data version file after clearing
+        await storage.createFolderPath(VERSION_KEY);
+        await storage.writeFile(VERSION_KEY, JSON.stringify({
+            version: DATA_STRUCTURE_VERSION,
+            timestamp: Date.now()
+        }));
 
-        console.log('[Clear Cache] ✓ Cache cleared successfully - fresh sync will occur on next load');
+        addSyncLog('Cache cleared successfully.', "success");
         return true;
     } catch (err) {
-        console.error('[Clear Cache] Error clearing cache:', err);
-        console.error('[Clear Cache] Error details:', err.message, err.stack);
+        addSyncLog(`Error clearing cache: ${err.message}`, "error");
         return false;
     }
 }
@@ -162,7 +170,7 @@ async function discoverGroups(sessionPath) {
         }
 
         if (groups.length < MIN_GROUPS_FOR_S3_SCAN) {
-            console.log("[Sync] Discovering groups from S3...");
+            addSyncLog("Discovering groups from server...", "info");
             const remoteItems = await storage.getListing("aws/metadata/sessions") || [];
             const discoveredGroups = remoteItems
                 .filter(item => item.type === "dir" || item.stat?.type === "dir")
@@ -174,10 +182,10 @@ async function discoverGroups(sessionPath) {
                     groups.push(dg);
                 }
             }
-            console.log(`[Sync] Found ${groups.length} groups:`, groups.map(g => g.name).join(", "));
+            addSyncLog(`Found ${groups.length} groups.`, "success");
         }
     } catch (err) {
-        console.error("[Sync] Failed to discover groups:", err);
+        addSyncLog(`Failed to discover groups: ${err.message}`, "error");
     }
 
     return groups;
@@ -202,60 +210,51 @@ function createBundles(groups) {
     ];
 }
 
-async function syncBundle(bundleDef) {
+async function syncBundle(bundleDef, manifest) {
     const { name, path, ignore, preserve } = bundleDef;
-    const startTime = Date.now();
+    const startTime = performance.now();
+    const shortName = name.split('/').pop();
 
     try {
         SyncActiveStore.update(s => { s.currentBundle = name; });
 
         // Step 1: Quick version check using bundle metadata
-        const t1 = Date.now();
-        const { changed, versionInfo, listing: remoteListing } = await bundle.checkBundleVersion(name);
-        console.log(`[Sync] ${name} - Version check: ${Date.now() - t1}ms, changed: ${changed}`);
+        const { changed, versionInfo, listing: remoteListing } = await bundle.checkBundleVersion(name, null, manifest);
 
         // OPTIMIZATION: If bundle hasn't changed remotely, skip all expensive operations
         if (!changed) {
-            console.log(`[Sync] ${name} - No remote changes, skipping sync (${Date.now() - startTime}ms)`);
+            const duration = Math.round(performance.now() - startTime);
+            addSyncLog(`[${shortName}] Up to date (${duration}ms).`, "info");
             return false;
         }
 
-        // Step 2: Only scan directory if we detected changes
-        const t2 = Date.now();
-        const bundleListing = await storage.getRecursiveList(path);
-        console.log(`[Sync] ${name} - Directory scan: ${Date.now() - t2}ms, files: ${bundleListing.length}`);
+        addSyncLog(`[${shortName}] Syncing changes...`, "info");
+        const workStartTime = performance.now();
 
-        const t3 = Date.now();
+        // Step 2: Only scan directory if we detected changes
+        const bundleListing = await storage.getRecursiveList(path);
         let remoteBundle = await bundle.getRemoteBundle(name, remoteListing);
-        console.log(`[Sync] ${name} - Download bundle: ${Date.now() - t3}ms`);
 
         const isBundleCorrupted = remoteBundle && Object.values(remoteBundle).some(item => item.content == null);
         if (isBundleCorrupted) {
-            console.warn(`[Sync] ${name} - Remote bundle corrupted`);
+            addSyncLog(`[${shortName}] Remote bundle corrupted.`, "warning");
         }
 
-        const t5 = Date.now();
         const localBundle = await bundle.scanLocal(
             path,
             ignore,
             isBundleCorrupted ? null : bundleListing,
             isBundleCorrupted ? null : remoteBundle
         );
-        console.log(`[Sync] ${name} - Scan local: ${Date.now() - t5}ms`);
 
-        const t6 = Date.now();
         const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
-        console.log(`[Sync] ${name} - Merge bundles: ${Date.now() - t6}ms, updated: ${updated}`);
 
         let localUpdated = false;
         if (updated || (isBundleCorrupted && Object.keys(merged).length > 0)) {
-            const t7 = Date.now();
             await bundle.saveRemoteBundle(name, merged);
-            console.log(`[Sync] ${name} - Save bundle: ${Date.now() - t7}ms`);
             localUpdated = true;
         }
 
-        const t4 = Date.now();
         const { downloadCount, isBundleCorrupted: appliedCorruption } = await bundle.applyBundle(
             path,
             merged,
@@ -265,20 +264,16 @@ async function syncBundle(bundleDef) {
         );
 
         if (appliedCorruption) {
-            console.warn(`[Sync] ${name} - Bundle application detected corruption`);
+            addSyncLog(`[${shortName}] Sync issues detected.`, "warning");
         } else {
-            console.log(`[Sync] ${name} - Apply bundle: ${Date.now() - t4}ms, downloaded: ${downloadCount}`);
+            const duration = Math.round(performance.now() - workStartTime);
+            addSyncLog(`[${shortName}] ✓ Done (${downloadCount} files in ${duration}ms).`, "success");
         }
 
         const hasChanges = downloadCount > 0 || localUpdated;
-        console.log(`[Sync] ${name} - Total time: ${Date.now() - startTime}ms`);
         return hasChanges;
     } catch (err) {
-        console.error(`[Sync] Error syncing bundle ${name}:`, err);
-        console.error(`[Sync] Error details - Message: ${err?.message}, Code: ${err?.code}, Status: ${err?.status}`);
-        if (err?.stack) {
-            console.error(`[Sync] Stack trace:`, err.stack);
-        }
+        addSyncLog(`[${shortName}] Failed: ${err.message}`, "error");
         throw err;
     } finally {
         SyncActiveStore.update(s => { s.progress.processed++; });
@@ -294,12 +289,13 @@ export function useSyncFeature() {
     const [error, setError] = useState(null);
 
     const visible = usePageVisibility();
-    const { active, busy, progress } = SyncActiveStore.useState();
+    const { active, busy, progress, lastSynced, logs, lastDuration, startTime } = SyncActiveStore.useState();
+    useLocalStorage("sync_active", SyncActiveStore, ["lastSynced", "lastDuration", "startTime"]);
     const currentBundle = SyncActiveStore.useState(s => s.currentBundle);
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
 
     const updateSync = useCallback(async (pollSync) => {
-        if (startRef.current || !online) {
+        if (startRef.current || SyncActiveStore.getRawState().busy || !online) {
             return;
         }
 
@@ -313,7 +309,6 @@ export function useSyncFeature() {
 
         let continueSync = true;
         SyncActiveStore.update(s => {
-            s.progress = { total: 0, processed: 0 };
             const diff = (currentTime - s.lastSynced) / 1000;
             const updateBusy = UpdateSessionsStore.getRawState().busy;
 
@@ -322,8 +317,6 @@ export function useSyncFeature() {
             } else if (updateBusy) {
                 console.log("[Sync] Session update in progress, skipping sync");
                 continueSync = false;
-            } else {
-                s.busy = true;
             }
         });
 
@@ -332,19 +325,26 @@ export function useSyncFeature() {
         }
 
         // Now we're committed to syncing - set state
-        startRef.current = Date.now();
+        const syncStartTime = Date.now();
+        startRef.current = syncStartTime;
+        SyncActiveStore.update(s => {
+            s.busy = true;
+            s.startTime = syncStartTime;
+            s.progress = { total: 0, processed: 0 };
+        });
         setComplete(false);
         setDuration(0);
         setError(null);
         setChanged(false);
 
+        // Reset logs for new sync if it's a manual sync or a significant one
+        SyncActiveStore.update(s => { s.logs = []; });
+        addSyncLog("Synchronization started...", "info");
+
         let syncSucceeded = false;
         try {
             // Check for data structure version and migrate if needed
             const wasMigrated = await checkAndMigrateDataStructure();
-            if (wasMigrated) {
-                console.log('[Sync] Starting fresh sync after data migration');
-            }
 
             const sessionPath = makePath("local", "shared", "sessions");
             const groups = await discoverGroups(sessionPath);
@@ -354,22 +354,15 @@ export function useSyncFeature() {
                 s.progress = { total: bundles.length, processed: 0 };
             });
 
+            addSyncLog(`Syncing ${bundles.length} data bundles.`, "info");
+
+            const masterManifest = await bundle.getMasterManifest();
             const limit = (await import("p-limit")).default(SYNC_CONCURRENCY_LIMIT);
             const results = await Promise.all(bundles.map(b =>
                 limit(async () => {
                     try {
-                        return await syncBundle(b);
+                        return await syncBundle(b, masterManifest);
                     } catch (err) {
-                        console.error(`[Sync] Bundle ${b.name} failed:`, err);
-                        console.error(`[Sync] Error type: ${typeof err}, Value: ${err}`);
-
-                        // Check for specific error types
-                        if (err === 403 || err?.status === 403 || err?.code === 403) {
-                            setError("ACCESS_DENIED");
-                        } else {
-                            // Log the error but don't fail the entire sync
-                            console.error(`[Sync] Non-critical error in bundle ${b.name}, continuing with other bundles`);
-                        }
                         return false;
                     }
                 })
@@ -377,30 +370,34 @@ export function useSyncFeature() {
 
             const updateCounter = results.filter(Boolean).length;
             syncSucceeded = true;
+            const finalDuration = Date.now() - syncStartTime;
 
             if (updateCounter > 0) {
                 SyncActiveStore.update(s => {
                     s.counter++;
                     s.lastSynced = currentTime;
+                    s.lastDuration = finalDuration;
                     s.waitForApproval = false;
                 });
                 setChanged(true);
+                addSyncLog(`Synchronization completed. Applied ${updateCounter} updates.`, "success");
             } else {
-                // Only update lastSynced if sync actually completed successfully
                 SyncActiveStore.update(s => {
                     s.lastSynced = currentTime;
+                    s.lastDuration = finalDuration;
                 });
+                addSyncLog("Synchronization completed. No changes found.", "info");
             }
         } catch (err) {
-            console.error('[Sync] Unexpected error in sync:', err);
+            addSyncLog(`Critical sync error: ${err.message}`, "error");
             setError("SYNC_FAILED");
         } finally {
-            // Ensure all pending manifest updates are written before finishing
             await flushManifestUpdates();
 
             startRef.current = 0;
             SyncActiveStore.update(s => {
                 s.busy = false;
+                s.startTime = 0;
             });
             setComplete(true);
         }
@@ -420,27 +417,32 @@ export function useSyncFeature() {
     }, [online, isSignedIn, visible, syncNow]);
 
     useEffect(() => {
-        if (!busy || !startRef.current) return;
+        if (!busy || !startTime) return;
+
+        // Initialize duration immediately on mount if already busy
+        setDuration(Date.now() - startTime);
 
         const intervalHandle = setInterval(() => {
-            setDuration(Date.now() - startRef.current);
+            setDuration(Date.now() - startTime);
         }, 100);
 
         return () => clearInterval(intervalHandle);
-    }, [busy]);
+    }, [busy, startTime]);
 
-    const percentage = progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0;
+    const percentage = progress.total > 0 ? Math.min(100, Math.round((progress.processed / progress.total) * 100)) : 0;
 
     return {
         sync: online && syncNow,
         busy,
         error,
         active,
-        duration,
+        duration: busy ? (startTime ? Date.now() - startTime : (startRef.current ? Date.now() - startRef.current : 0)) : lastDuration,
         complete,
         changed,
         progress,
         percentage,
-        currentBundle
+        currentBundle,
+        lastSynced,
+        logs
     };
 }

@@ -143,11 +143,11 @@ export default {
         },
         {
             "id": "CLEAR_CACHE",
-            "value": "Clear Cache"
+            "value": "Full Sync"
         },
         {
             "id": "CLEAR_CACHE_MESSAGE",
-            "value": "Do you want to clear the local session cache? This will re-download the session data from the server."
+            "value": "Do you want to perform a full synchronization? This will re-download all session data from the server."
         },
         {
             "id": "VERY_SMALL",
@@ -571,7 +571,7 @@ export default {
         },
         {
             "id": "FULL_SYNC",
-            "value": "Full Sync",
+            "value": "Sync All Sessions",
         },
         {
             "id": "SYNC_FAILED",
@@ -1144,6 +1144,50 @@ export default {
         {
             "id": "SEEK",
             "value": "Seek"
+        },
+        {
+            "id": "SYNC_STATUS",
+            "value": "Sync Status"
+        },
+        {
+            "id": "LAST_SYNCED",
+            "value": "Last Synced"
+        },
+        {
+            "id": "DURATION",
+            "value": "Duration"
+        },
+        {
+            "id": "GROUPS_SYNCED",
+            "value": "Groups Synced"
+        },
+        {
+            "id": "ADDED_SESSIONS",
+            "value": "Added Sessions"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "Removed Sessions"
+        },
+        {
+            "id": "TAGS_SYNCED",
+            "value": "Tags Synced"
+        },
+        {
+            "id": "IDLE",
+            "value": "Idle"
+        },
+        {
+            "id": "NEVER",
+            "value": "Never"
+        },
+        {
+            "id": "COPY_LOG",
+            "value": "Copy Log"
+        },
+        {
+            "id": "LOG_COPIED",
+            "value": "Log Copied to Clipboard"
         }
     ]
 };

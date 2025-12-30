@@ -76,6 +76,9 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { getSessionsSection } from "@pages/Sessions/Section";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
 
+import SyncIcon from "@mui/icons-material/Sync";
+const Sync = dynamic(() => import("@pages/Sync"), { loading: () => <PageLoad /> });
+
 export default [
     {
         id: "tags",
@@ -236,6 +239,14 @@ export default [
         name: "GROUPS",
         Icon: GroupWorkIcon,
         Component: Groups,
+        sidebar: true,
+        category: "tools"
+    },
+    {
+        id: "sync",
+        name: "SYNC",
+        Icon: SyncIcon,
+        Component: Sync,
         sidebar: true,
         category: "tools"
     },

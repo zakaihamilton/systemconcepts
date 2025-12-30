@@ -143,11 +143,11 @@ export default {
         },
         {
             "id": "CLEAR_CACHE",
-            "value": "Limpar Cache"
+            "value": "Sincronização Completa"
         },
         {
             "id": "CLEAR_CACHE_MESSAGE",
-            "value": "Deseja realmente limpar o cache da sessão local? Isso baixará novamente os dados da sessão do servidor."
+            "value": "Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor."
         },
         {
             "id": "VERY_SMALL",
@@ -571,7 +571,7 @@ export default {
         },
         {
             "id": "FULL_SYNC",
-            "value": "Sincronização Completa",
+            "value": "Sincronizar Todas as Sessões",
         },
         {
             "id": "SYNC_FAILED",

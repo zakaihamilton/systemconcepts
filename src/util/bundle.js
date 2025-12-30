@@ -19,7 +19,7 @@ let manifestUpdateLock = Promise.resolve();
 let pendingManifestUpdates = {};
 let manifestUpdateTimer = null;
 
-async function getMasterManifest() {
+export async function getMasterManifest() {
     try {
         if (await storage.exists(MASTER_MANIFEST_PATH)) {
             const manifestStr = await storage.readFile(MASTER_MANIFEST_PATH);
@@ -92,13 +92,15 @@ function sortBundleParts(bundleParts) {
     });
 }
 
-export async function checkBundleVersion(endPoint, listing = null) {
+export async function checkBundleVersion(endPoint, listing = null, manifest = null) {
     try {
-        // Wait for any pending manifest updates to complete before reading
-        // This ensures timestamps from previous sync are available
-        await manifestUpdateLock;
+        if (!manifest) {
+            // Wait for any pending manifest updates to complete before reading
+            // This ensures timestamps from previous sync are available
+            await manifestUpdateLock;
+            manifest = await getMasterManifest();
+        }
 
-        const manifest = await getMasterManifest();
         const cachedVersion = manifest[endPoint];
 
         // OPTIMIZATION: If we have a recent version check (within last 10 minutes), trust it

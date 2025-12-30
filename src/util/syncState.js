@@ -6,7 +6,10 @@ export const SyncActiveStore = new Store({
     busy: false,
     lastSynced: 0,
     progress: { total: 0, processed: 0 },
-    currentBundle: null  // Track which bundle is currently being synced
+    currentBundle: null,  // Track which bundle is currently being synced
+    logs: [], // Store sync milestones
+    lastDuration: 0, // Track duration of last successful sync
+    startTime: 0 // Track when current sync started
 });
 
 export const UpdateSessionsStore = new Store({

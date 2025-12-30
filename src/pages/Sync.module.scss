@@ -1,0 +1,108 @@
+.root {
+    padding: 1.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    height: 100%;
+    overflow: hidden;
+}
+
+.headerCard {
+    flex-shrink: 0;
+    background: var(--background-paper);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+    backdrop-filter: blur(10px);
+}
+
+.animated {
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.terminal {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Fira Code', 'Roboto Mono', monospace;
+    padding: 1em;
+    border-radius: 8px;
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    min-height: 0;
+
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    }
+}
+
+.terminalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.logEntry {
+    font-family: inherit !important;
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+    display: block;
+    word-break: break-all;
+
+    &[data-type="success"] {
+        color: #4caf50;
+    }
+
+    &[data-type="warning"] {
+        color: #ff9800;
+    }
+
+    &[data-type="error"] {
+        color: #f44336;
+    }
+
+    &[data-type="info"] {
+        color: #2196f3;
+    }
+}
+
+.logTimestamp {
+    color: #6a9955;
+    margin-right: 8px;
+    user-select: none;
+}
+
+:global(.rtl) {
+    .headerCard {
+        background: linear-gradient(-135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+    }
+
+    .logTimestamp {
+        margin-right: 0;
+        margin-left: 8px;
+    }
+}
