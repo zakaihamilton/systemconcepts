@@ -62,6 +62,8 @@ async function flushManifestUpdates() {
             if (Object.keys(updates).length > 0) {
                 const manifest = await getMasterManifest();
                 Object.assign(manifest, updates);
+                // Ensure cache directory exists before writing
+                await storage.createFolderPath(MASTER_MANIFEST_PATH);
                 await storage.writeFile(MASTER_MANIFEST_PATH, JSON.stringify(manifest));
             }
         } catch (err) {
