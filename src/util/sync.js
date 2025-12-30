@@ -70,14 +70,50 @@ async function checkAndMigrateDataStructure() {
 
 export async function clearBundleCache() {
     try {
+        console.log('[Clear Cache] Starting comprehensive cache clear...');
+
+        // Clear all cached bundle data
+        console.log('[Clear Cache] Clearing bundle cache...');
         await storage.deleteFolder("local/cache");
+
+        // Clear all session data
+        console.log('[Clear Cache] Clearing session data...');
+        await storage.deleteFolder("local/shared/sessions");
+
+        // Clear personal data cache
+        console.log('[Clear Cache] Clearing personal data...');
+        await storage.deleteFolder("local/personal");
+
+        // Reset sync state completely
+        console.log('[Clear Cache] Resetting sync state...');
         SyncActiveStore.update(s => {
             s.lastSynced = 0;
             s.progress = { total: 0, processed: 0 };
+            s.counter = 0;
+            s.busy = false;
+            s.currentBundle = null;
         });
-        console.log('[Sync] Bundle cache cleared');
+
+        // Reset update sessions state
+        console.log('[Clear Cache] Resetting update sessions state...');
+        UpdateSessionsStore.update(s => {
+            s.busy = false;
+            s.status = [];
+            s.start = 0;
+        });
+
+        // Clear the data version file to force migration on next sync
+        console.log('[Clear Cache] Clearing version file...');
+        if (await storage.exists(VERSION_KEY)) {
+            await storage.deleteFile(VERSION_KEY);
+        }
+
+        console.log('[Clear Cache] ✓ Cache cleared successfully - fresh sync will occur on next load');
+        return true;
     } catch (err) {
-        console.error('[Sync] Error clearing bundle cache:', err);
+        console.error('[Clear Cache] Error clearing cache:', err);
+        console.error('[Clear Cache] Error details:', err.message, err.stack);
+        return false;
     }
 }
 

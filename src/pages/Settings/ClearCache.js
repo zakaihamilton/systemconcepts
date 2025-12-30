@@ -4,8 +4,6 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Dialog from "@widgets/Dialog";
 import { goBackPage } from "@util/pages";
-import storage from "@util/storage";
-import { UpdateSessionsStore } from "@util/syncState";
 import { SyncContext } from "@components/Sync";
 import { clearBundleCache } from "@util/sync";
 
@@ -15,20 +13,19 @@ export default function ClearCache() {
 
     const reset = async () => {
         try {
-            await clearBundleCache();
-            await storage.deleteFolder("local/shared/sessions");
-            if (await storage.exists("local/shared/sessions")) {
-                console.error("Failed to delete local shared sessions folder");
-                return;
+            const success = await clearBundleCache();
+            if (!success) {
+                console.error("Failed to clear cache completely");
+                // Still try to sync even if clear had issues
             }
-            UpdateSessionsStore.update(s => {
-                s.busy = false; // Reset busy state to allow re-fetching
-                s.status = [];
-            });
+
+            // Force a fresh sync after clearing
             await updateSync(false); // Force full sync (not poll)
             goBackPage();
         } catch (err) {
-            console.error("Failed to reset sessions", err);
+            console.error("Failed to reset cache and sync", err);
+            // Still go back even on error so user isn't stuck
+            goBackPage();
         }
     };
 
