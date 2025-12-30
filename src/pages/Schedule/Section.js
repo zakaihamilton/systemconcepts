@@ -25,8 +25,8 @@ export function getScheduleSection({ translations }) {
         description = translations.DAY_VIEW;
         Icon = CalendarViewDayIcon;
     }
-    else if (viewMode === "swimlanes") {
-        description = translations.SWIMLANES_VIEW;
+    else if (viewMode === "tracks") {
+        description = translations.TRACKS_VIEW;
         Icon = ViewStreamIcon;
     }
     const menuItems = [
@@ -59,10 +59,10 @@ export function getScheduleSection({ translations }) {
             }
         },
         {
-            name: translations.SWIMLANES_VIEW,
+            name: translations.TRACKS_VIEW,
             icon: <ViewStreamIcon />,
             onClick: () => {
-                ScheduleStore.update(s => { s.viewMode = "swimlanes"; });
+                ScheduleStore.update(s => { s.viewMode = "tracks"; });
             }
         }
     ];

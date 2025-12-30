@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
-import styles from './SwimlaneRow.module.scss';
-import SwimlaneCard from './SwimlaneCard';
+import styles from './Row.module.scss';
+import TrackCard from './Card';
 import Typography from '@mui/material/Typography';
 import { FixedSizeList } from "react-window";
 import { useDateFormatter } from "@util/locale";
@@ -16,7 +16,7 @@ const InnerList = forwardRef(({ style, ...rest }, ref) => (
     />
 ));
 
-export default function SwimlaneRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store }) {
+export default function TrackRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store }) {
     const listRef = useRef(null);
     const outerRef = useRef(null);
     const dateFormatter = useDateFormatter({ year: 'numeric', month: 'long' });
@@ -76,7 +76,7 @@ export default function SwimlaneRow({ date, sessions, focusedSessionId, onSessio
         };
         return (
             <div style={newStyle} className={styles.cardContainer}>
-                <SwimlaneCard
+                <TrackCard
                     session={session}
                     isActive={session.id === focusedSessionId}
                     onSessionClick={onSessionClick}

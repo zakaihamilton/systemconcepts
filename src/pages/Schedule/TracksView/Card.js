@@ -1,5 +1,5 @@
 import React, { useRef, memo, useCallback, useState, useEffect } from 'react';
-import styles from './SwimlaneCard.module.scss';
+import styles from './Card.module.scss';
 import clsx from 'clsx';
 import Image from "@widgets/Image";
 import Typography from '@mui/material/Typography';
@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { getContrastColor } from "@util/color";
 import SessionIcon from "@widgets/SessionIcon";
 
-const SwimlaneCard = memo(function SwimlaneCard({ session, isActive, onSessionClick }) {
+const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick }) {
     const rootRef = useRef(null);
     const [showThumbnail, setShowThumbnail] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -86,4 +86,4 @@ const SwimlaneCard = memo(function SwimlaneCard({ session, isActive, onSessionCl
     );
 });
 
-export default SwimlaneCard;
+export default TrackCard;

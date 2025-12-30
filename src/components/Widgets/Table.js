@@ -167,9 +167,9 @@ export default function TableWidget(props) {
             name: translations.GRID_VIEW
         },
         {
-            id: "swimlanes",
+            id: "tracks",
             icon: <ViewWeekIcon />,
-            name: translations.SWIMLANES_VIEW
+            name: translations.TRACKS_VIEW
         }
     ].filter(item => viewModes.hasOwnProperty(item.id));
 

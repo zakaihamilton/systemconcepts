@@ -23,7 +23,7 @@ import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import SwimlanesView from "@pages/Schedule/SwimlanesView";
+import TracksView from "@pages/Schedule/TracksView";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 
 export const ScheduleStore = new Store({
@@ -93,12 +93,12 @@ export default function SchedulePage() {
             }
         },
         {
-            id: "swimlanes",
-            name: translations.SWIMLANES_VIEW,
+            id: "tracks",
+            name: translations.TRACKS_VIEW,
             icon: <ViewStreamIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
-                    s.viewMode = "swimlanes";
+                    s.viewMode = "tracks";
                     s.lastViewMode = null;
                 });
             }
@@ -168,12 +168,12 @@ export default function SchedulePage() {
             {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
-            {!loading && viewMode === "swimlanes" && <SwimlanesView
+            {!loading && viewMode === "tracks" && <TracksView
                 sessions={items}
                 loading={loading}
                 store={ScheduleStore}
                 translations={translations}
-                viewModes={{ swimlanes: {} }}
+                viewModes={{ tracks: {} }}
             />}
             {!!loading && loadingElement}
         </div>

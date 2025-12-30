@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef, useContext } from "react";
-import styles from "./SwimlanesView.module.scss";
-import SwimlaneRow from "./SwimlanesView/SwimlaneRow";
+import styles from "./TracksView.module.scss";
+import TrackRow from "./TracksView/Row";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { useDeviceType } from "@util/styles";
 import { addPath } from "@util/pages";
@@ -9,11 +9,10 @@ import { ContentSize } from "@components/Page/Content";
 import Input from "@components/Widgets/Input";
 import { useDateFormatter } from "@util/locale";
 import TodayIcon from '@mui/icons-material/Today';
-import { getDateString, isDateToday } from "@util/date";
 
-registerToolbar("SwimlanesView");
+registerToolbar("TracksView");
 
-export default function SwimlanesView({ sessions = [], loading, store, translations, viewModes }) {
+export default function TracksView({ sessions = [], loading, store, translations, viewModes }) {
     const isMobile = useDeviceType() !== "desktop";
     const [focusedSessionId, setFocusedSessionId] = useState(null);
     const listRef = useRef(null);
@@ -297,7 +296,7 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "SwimlanesView", items: toolbarItems, depends: [translations, selectedYear, selectedMonth, isMobile, isAtTop] });
+    useToolbar({ id: "TracksView", items: toolbarItems, depends: [translations, selectedYear, selectedMonth, isMobile, isAtTop] });
 
     const itemData = useMemo(() => ({
         groupedSessions,
@@ -308,11 +307,11 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
         store
     }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store]);
 
-    const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("swimlanes_vertical_offset") || "0"));
+    const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0"));
 
     useEffect(() => {
         return () => {
-            sessionStorage.setItem("swimlanes_vertical_offset", scrollOffsetRef.current);
+            sessionStorage.setItem("tracks_vertical_offset", scrollOffsetRef.current);
         };
     }, []);
 
@@ -349,7 +348,7 @@ const Row = ({ index, style, data }) => {
 
     return (
         <div style={style}>
-            <SwimlaneRow
+            <TrackRow
                 key={group.yearMonth}
                 date={group.yearMonth}
                 sessions={group.sessions}
