@@ -798,6 +798,10 @@ export default {
             "value": "Vista Mensal"
         },
         {
+            "id": "SWIMLANES_VIEW",
+            "value": "Vista de Raias"
+        },
+        {
             "id": "YEAR_VIEW",
             "value": "Vista Anual"
         },

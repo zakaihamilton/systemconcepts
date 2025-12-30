@@ -794,6 +794,10 @@ export default {
             "value": "מבט חודשי"
         },
         {
+            "id": "SWIMLANES_VIEW",
+            "value": "תצוגת נתיבים"
+        },
+        {
             "id": "YEAR_VIEW",
             "value": "תצוגה שנתית"
         },

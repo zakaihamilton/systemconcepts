@@ -31,6 +31,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import DataUsageIcon from "@mui/icons-material/DataUsage";
 import InfoIcon from "@mui/icons-material/Info";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
 import IconButton from "@mui/material/IconButton";
@@ -164,6 +165,11 @@ export default function TableWidget(props) {
             id: "grid",
             icon: <ViewComfyIcon />,
             name: translations.GRID_VIEW
+        },
+        {
+            id: "swimlanes",
+            icon: <ViewWeekIcon />,
+            name: translations.SWIMLANES_VIEW
         }
     ].filter(item => viewModes.hasOwnProperty(item.id));
 

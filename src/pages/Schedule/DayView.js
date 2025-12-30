@@ -35,6 +35,7 @@ export default function DayView({ sessions, date, store }) {
     const day = dayFormatter.formatWithOrdinal(date);
 
     const sessionDate = getDateString(date);
+    const isToday = sessionDate === getDateString(new Date());
     const { lastViewMode } = store.useState();
 
     const daySessions = sessions.filter(s => s.date === sessionDate);
@@ -158,6 +159,7 @@ export default function DayView({ sessions, date, store }) {
             name: translations.TODAY,
             icon: <TodayIcon />,
             onClick: gotoToday,
+            disabled: isToday,
             location: "header",
             menu: false
         },

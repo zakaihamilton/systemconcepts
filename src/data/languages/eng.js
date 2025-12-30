@@ -798,6 +798,10 @@ export default {
             "value": "Month View"
         },
         {
+            "id": "SWIMLANES_VIEW",
+            "value": "Swimlanes View"
+        },
+        {
             "id": "YEAR_VIEW",
             "value": "Year View"
         },

@@ -2,6 +2,7 @@ import DateRangeIcon from "@mui/icons-material/DateRange";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import CalendarViewDayIcon from "@mui/icons-material/CalendarViewDay";
+import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import { ScheduleStore } from "@pages/Schedule";
 
 export function getScheduleSection({ translations }) {
@@ -23,6 +24,10 @@ export function getScheduleSection({ translations }) {
     else if (viewMode === "day") {
         description = translations.DAY_VIEW;
         Icon = CalendarViewDayIcon;
+    }
+    else if (viewMode === "swimlanes") {
+        description = translations.SWIMLANES_VIEW;
+        Icon = ViewStreamIcon;
     }
     const menuItems = [
         {
@@ -51,6 +56,13 @@ export function getScheduleSection({ translations }) {
             icon: <CalendarViewDayIcon />,
             onClick: () => {
                 ScheduleStore.update(s => { s.viewMode = "day"; });
+            }
+        },
+        {
+            name: translations.SWIMLANES_VIEW,
+            icon: <ViewStreamIcon />,
+            onClick: () => {
+                ScheduleStore.update(s => { s.viewMode = "swimlanes"; });
             }
         }
     ];

@@ -249,3 +249,10 @@ export function getColorName(hex, translations) {
 
     return closestName;
 }
+
+export function getContrastColor(hex) {
+    if (!hex) return 'inherit';
+    const { r, g, b } = hexToRgb(hex);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? 'black' : 'white';
+}

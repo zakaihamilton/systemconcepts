@@ -141,7 +141,6 @@ export default function SessionPage({ group, year, date, name }) {
                         height="auto"
                         onClick={viewImage}
                         alt={name}
-                        clickForImage={false}
                     />
                 </div>}
                 <div className={styles.details}>

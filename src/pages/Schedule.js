@@ -23,6 +23,8 @@ import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import SwimlanesView from "@pages/Schedule/SwimlanesView";
+import ViewStreamIcon from "@mui/icons-material/ViewStream";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -82,6 +84,16 @@ export default function SchedulePage() {
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "day";
+                });
+            }
+        },
+        {
+            id: "swimlanes",
+            name: translations.SWIMLANES_VIEW,
+            icon: <ViewStreamIcon />,
+            onClick: () => {
+                ScheduleStore.update(s => {
+                    s.viewMode = "swimlanes";
                 });
             }
         }
@@ -150,6 +162,13 @@ export default function SchedulePage() {
             {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "swimlanes" && <SwimlanesView
+                sessions={items}
+                loading={loading}
+                store={ScheduleStore}
+                translations={translations}
+                viewModes={{ swimlanes: {} }}
+            />}
             {!!loading && loadingElement}
         </div>
         {!!isMobile && <FilterBar hideYears={true} />}
