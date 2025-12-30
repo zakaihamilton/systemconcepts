@@ -92,6 +92,10 @@ function sortBundleParts(bundleParts) {
 
 export async function checkBundleVersion(endPoint, listing = null) {
     try {
+        // Wait for any pending manifest updates to complete before reading
+        // This ensures timestamps from previous sync are available
+        await manifestUpdateLock;
+
         const manifest = await getMasterManifest();
         const cachedVersion = manifest[endPoint];
 
