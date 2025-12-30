@@ -39,10 +39,10 @@ export default function TracksView({ sessions = [], loading, store, translations
             groups[yearMonth].push(session);
         });
 
-        // Sort year-months descending
+        // Sort year-months descending and sort sessions within each group descending by date
         return Object.keys(groups).sort((a, b) => b.localeCompare(a)).map(yearMonth => ({
             yearMonth,
-            sessions: groups[yearMonth]
+            sessions: groups[yearMonth].sort((a, b) => b.date.localeCompare(a.date))
         }));
     }, [sessions]);
 
