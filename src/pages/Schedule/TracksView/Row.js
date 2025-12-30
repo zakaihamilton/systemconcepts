@@ -108,9 +108,9 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
                         className={styles.horizontalList}
                         itemData={itemData}
                         innerElementType={InnerList}
-                        initialScrollOffset={parseInt(sessionStorage.getItem(`swimlane_scroll_${date}`) || "0")}
+                        initialScrollOffset={parseInt(sessionStorage.getItem(`track_scroll_${date}`) || "0")}
                         onScroll={({ scrollOffset }) => {
-                            sessionStorage.setItem(`swimlane_scroll_${date}`, scrollOffset);
+                            sessionStorage.setItem(`track_scroll_${date}`, scrollOffset);
                         }}
                     >
                         {RowItem}
