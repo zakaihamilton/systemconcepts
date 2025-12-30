@@ -121,7 +121,7 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
 
     return (
         <div className={styles.row}>
-            <div className={styles.header} style={{ maxWidth: Math.min(safeWidth, sessions.length * itemSize + 40) }}>
+            <div className={styles.header}>
                 <Typography variant="h6" className={styles.dateTitle} onClick={handleHeaderClick}>
                     {formattedDate}
                 </Typography>

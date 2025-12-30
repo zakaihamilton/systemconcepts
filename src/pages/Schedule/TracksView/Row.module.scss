@@ -24,8 +24,8 @@
 
 .header {
     padding: 0.5em 1.5em;
-    padding-right: 0.5em;
-    /* Added small padding to prevent clipping */
+    padding-right: 1.5em;
+    /* Aligned with left padding for a balanced look */
     height: 3em;
     /* Fixed height for calculations */
     display: flex;

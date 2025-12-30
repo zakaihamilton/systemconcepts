@@ -302,7 +302,7 @@ export default function TracksView({ sessions = [], loading, store, translations
         groupedSessions,
         focusedSessionId,
         handleSessionClick,
-        width: (pageSize && pageSize.width ? pageSize.width - 18 : 0),
+        width: (pageSize && pageSize.width ? pageSize.width : 0),
         itemSize: CARD_WIDTH,
         store,
         translations
@@ -324,7 +324,7 @@ export default function TracksView({ sessions = [], loading, store, translations
                 height={pageSize.height}
                 itemCount={groupedSessions.length}
                 itemSize={ROW_HEIGHT}
-                width={pageSize.width - 18}
+                width={pageSize.width}
                 ref={listRef}
                 outerRef={outerRef}
                 overscanCount={2}

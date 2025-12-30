@@ -182,7 +182,7 @@ export default function SchedulePage() {
     return <div className={styles.root}>
         {statusBar}
         {!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}
-        <div className={clsx(styles.content, isMobile && styles.mobile)}>
+        <div className={clsx(styles.content, isMobile && styles.mobile, viewMode === "tracks" && styles.noScroll)}>
             {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
