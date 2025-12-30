@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useOnline } from "@util/online";
 
 export function fetchBlob(url, options) {
@@ -83,7 +83,7 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const isOnline = useOnline();
     const [inProgress, setProgress] = useState(!!url && cond && isOnline);
     const [result, setResult] = useState(null);
-    const [, setTimeoutHandle] = useState(null);
+    const timeoutRef = useRef(null);
     const [error, setError] = useState("");
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
@@ -92,33 +92,34 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
             setResult(null);
             setError("");
             setProgress(true);
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                handle = setTimeout(() => {
-                    setTimeoutHandle(null);
-                    fetchJSON(url, options).then(data => {
-                        setResult(data);
-                        setProgress(false);
-                    }).catch(err => {
-                        setProgress(false);
-                        setError(err);
-                    });
-                }, delay);
-                return handle;
-            });
+
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+
+            timeoutRef.current = setTimeout(() => {
+                timeoutRef.current = null;
+                fetchJSON(url, options).then(data => {
+                    setResult(data);
+                    setProgress(false);
+                }).catch(err => {
+                    setProgress(false);
+                    setError(err);
+                });
+            }, delay);
         }
         else {
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                return handle;
-            });
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
         }
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+        };
     }, [url, cond, optionsString, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [result, setResult, inProgress, error];
 }
@@ -127,7 +128,7 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const isOnline = useOnline();
     const [inProgress, setProgress] = useState(!!url && cond && isOnline);
     const [result, setResult] = useState(null);
-    const [, setTimeoutHandle] = useState(null);
+    const timeoutRef = useRef(null);
     const [error, setError] = useState("");
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
@@ -136,33 +137,34 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
             setResult(null);
             setError("");
             setProgress(true);
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                handle = setTimeout(() => {
-                    setTimeoutHandle(null);
-                    fetchText(url, options).then(data => {
-                        setResult(data);
-                        setProgress(false);
-                    }).catch(err => {
-                        setProgress(false);
-                        setError(err);
-                    });
-                }, delay);
-                return handle;
-            });
+
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+
+            timeoutRef.current = setTimeout(() => {
+                timeoutRef.current = null;
+                fetchText(url, options).then(data => {
+                    setResult(data);
+                    setProgress(false);
+                }).catch(err => {
+                    setProgress(false);
+                    setError(err);
+                });
+            }, delay);
         }
         else {
-            setTimeoutHandle(handle => {
-                if (handle) {
-                    clearTimeout(handle);
-                    handle = null;
-                }
-                return handle;
-            });
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
         }
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+        };
     }, [url, optionsString, cond, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [result, setResult, inProgress, error];
 }
