@@ -23,7 +23,10 @@ import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { startRegistration, startAuthentication, browserSupportsWebAuthn } from '@simplewebauthn/browser';
+import { clearBundleCache } from '@util/sync';
 import styles from "./Account.module.scss";
+import storage from "@util/storage";
+import { UpdateSessionsStore } from "@util/syncState";
 
 export default function Account({ redirect }) {
     const { direction } = MainStore.useState();
@@ -158,11 +161,21 @@ export default function Account({ redirect }) {
         }
     };
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         if (isSignedIn) {
+            // Clear cookies
             Cookies.set("id", "");
             Cookies.set("hash", "");
             idState[1]("");
+
+            // Clear bundle cache on logout
+            await clearBundleCache();
+            await storage.deleteFolder("local/shared/sessions");
+
+            UpdateSessionsStore.update(s => {
+                s.busy = false; // Reset busy state to allow re-fetching
+                s.status = [];
+            });
             setCounter(counter => counter + 1);
         }
         else {
