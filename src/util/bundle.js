@@ -53,9 +53,22 @@ function sortBundleParts(bundleParts) {
 
 export async function checkBundleVersion(endPoint, listing = null) {
     try {
+        const manifest = await getMasterManifest();
+        const cachedVersion = manifest[endPoint];
+
+        // OPTIMIZATION: If we have a recent version check (within last 60 seconds), trust it
+        // This avoids expensive remote listing calls for recently synced bundles
+        const CACHE_VALIDITY_MS = 60 * 1000; // 60 seconds
+        if (cachedVersion?.timestamp && (Date.now() - cachedVersion.timestamp) < CACHE_VALIDITY_MS) {
+            // Trust the cached version without checking remote
+            return { changed: false, versionInfo: cachedVersion, listing: null };
+        }
+
+        // Need to check remote - fetch listing if not provided
         if (!listing) {
             listing = await storage.getListing(endPoint) || [];
         }
+
         const bundleParts = listing.filter(item => item.name?.startsWith(BUNDLE_PREFIX));
 
         if (!bundleParts.length) {
@@ -66,16 +79,21 @@ export async function checkBundleVersion(endPoint, listing = null) {
         const inventory = createInventoryFromParts(bundleParts);
         const currentInventoryHash = JSON.stringify(inventory);
 
-        const manifest = await getMasterManifest();
-        const cachedVersion = manifest[endPoint];
+        const now = Date.now();
 
         if (cachedVersion?.inventoryHash === currentInventoryHash) {
-            return { changed: false, versionInfo: cachedVersion, listing };
+            // Hash matches - no changes
+            const updatedVersion = { inventoryHash: currentInventoryHash, timestamp: now };
+            await updateMasterManifest(endPoint, updatedVersion);
+            return { changed: false, versionInfo: updatedVersion, listing };
         }
 
+        // Hash changed - update manifest with new hash and timestamp for next time
+        const newVersion = { inventoryHash: currentInventoryHash, timestamp: now };
+        await updateMasterManifest(endPoint, newVersion);
         return {
             changed: true,
-            versionInfo: { inventoryHash: currentInventoryHash, timestamp: Date.now() },
+            versionInfo: newVersion,
             listing
         };
     } catch (err) {
