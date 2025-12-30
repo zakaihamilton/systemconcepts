@@ -278,7 +278,6 @@ export function useSyncFeature() {
                 s.busy = false;
             });
             setComplete(true);
-            setDuration(0);
         }
     }, [online]);
 
