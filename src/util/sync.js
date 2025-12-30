@@ -12,7 +12,7 @@ import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
 const SYNC_INTERVAL = 60; // seconds
 const MIN_GROUPS_FOR_S3_SCAN = 5;
 const SYNC_CONCURRENCY_LIMIT = 10;
-const DATA_STRUCTURE_VERSION = 2; // Increment when data structure changes
+const DATA_STRUCTURE_VERSION = 3; // Increment when data structure changes - v3: listing.json no longer preserved
 const VERSION_KEY = "local/cache/_data_version.json";
 
 async function checkAndMigrateDataStructure() {
@@ -34,25 +34,31 @@ async function checkAndMigrateDataStructure() {
         if (currentVersion !== DATA_STRUCTURE_VERSION) {
             console.log(`[Sync] Data structure mismatch (current: ${currentVersion}, expected: ${DATA_STRUCTURE_VERSION}). Clearing old data...`);
 
-            // Clear all cached data
-            await storage.deleteFolder("local/cache");
-            await storage.deleteFolder("local/shared/sessions");
+            try {
+                // Clear all cached data
+                await storage.deleteFolder("local/cache");
+                await storage.deleteFolder("local/shared/sessions");
 
-            // Reset sync state
-            SyncActiveStore.update(s => {
-                s.lastSynced = 0;
-                s.progress = { total: 0, processed: 0 };
-            });
+                // Reset sync state
+                SyncActiveStore.update(s => {
+                    s.lastSynced = 0;
+                    s.progress = { total: 0, processed: 0 };
+                });
 
-            // Save new version
-            await storage.createFolderPath(VERSION_KEY);
-            await storage.writeFile(VERSION_KEY, JSON.stringify({
-                version: DATA_STRUCTURE_VERSION,
-                timestamp: Date.now()
-            }));
+                // Save new version
+                await storage.createFolderPath(VERSION_KEY);
+                await storage.writeFile(VERSION_KEY, JSON.stringify({
+                    version: DATA_STRUCTURE_VERSION,
+                    timestamp: Date.now()
+                }));
 
-            console.log('[Sync] Old data cleared, fresh sync will begin');
-            return true; // Indicates migration occurred
+                console.log('[Sync] Old data cleared, fresh sync will begin');
+                return true; // Indicates migration occurred
+            } catch (migrationErr) {
+                console.error('[Sync] Migration failed:', migrationErr);
+                // Don't update version if migration failed
+                return false;
+            }
         }
 
         return false; // No migration needed
@@ -233,6 +239,10 @@ async function syncBundle(bundleDef) {
         return hasChanges;
     } catch (err) {
         console.error(`[Sync] Error syncing bundle ${name}:`, err);
+        console.error(`[Sync] Error details - Message: ${err?.message}, Code: ${err?.code}, Status: ${err?.status}`);
+        if (err?.stack) {
+            console.error(`[Sync] Stack trace:`, err.stack);
+        }
         throw err;
     } finally {
         SyncActiveStore.update(s => { s.progress.processed++; });
@@ -257,16 +267,15 @@ export function useSyncFeature() {
             return;
         }
 
-        startRef.current = Date.now();
-        setComplete(false);
-        setDuration(0);
-        setError(null);
-        setChanged(false);
-
         const currentTime = Date.now();
         const isSignedIn = Cookies.get("id") && Cookies.get("hash");
-        let continueSync = true;
 
+        // Early return checks before setting any state
+        if (!isSignedIn) {
+            return;
+        }
+
+        let continueSync = true;
         SyncActiveStore.update(s => {
             s.progress = { total: 0, processed: 0 };
             const diff = (currentTime - s.lastSynced) / 1000;
@@ -283,15 +292,18 @@ export function useSyncFeature() {
         });
 
         if (!continueSync) {
-            startRef.current = 0;
             return;
         }
 
-        try {
-            if (!isSignedIn) {
-                return;
-            }
+        // Now we're committed to syncing - set state
+        startRef.current = Date.now();
+        setComplete(false);
+        setDuration(0);
+        setError(null);
+        setChanged(false);
 
+        let syncSucceeded = false;
+        try {
             // Check for data structure version and migrate if needed
             const wasMigrated = await checkAndMigrateDataStructure();
             if (wasMigrated) {
@@ -312,10 +324,15 @@ export function useSyncFeature() {
                     try {
                         return await syncBundle(b);
                     } catch (err) {
-                        if (err === 403) {
+                        console.error(`[Sync] Bundle ${b.name} failed:`, err);
+                        console.error(`[Sync] Error type: ${typeof err}, Value: ${err}`);
+
+                        // Check for specific error types
+                        if (err === 403 || err?.status === 403 || err?.code === 403) {
                             setError("ACCESS_DENIED");
                         } else {
-                            setError("SYNC_FAILED");
+                            // Log the error but don't fail the entire sync
+                            console.error(`[Sync] Non-critical error in bundle ${b.name}, continuing with other bundles`);
                         }
                         return false;
                     }
@@ -323,6 +340,7 @@ export function useSyncFeature() {
             ));
 
             const updateCounter = results.filter(Boolean).length;
+            syncSucceeded = true;
 
             if (updateCounter > 0) {
                 SyncActiveStore.update(s => {
@@ -332,10 +350,14 @@ export function useSyncFeature() {
                 });
                 setChanged(true);
             } else {
+                // Only update lastSynced if sync actually completed successfully
                 SyncActiveStore.update(s => {
                     s.lastSynced = currentTime;
                 });
             }
+        } catch (err) {
+            console.error('[Sync] Unexpected error in sync:', err);
+            setError("SYNC_FAILED");
         } finally {
             // Ensure all pending manifest updates are written before finishing
             await flushManifestUpdates();

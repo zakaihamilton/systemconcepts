@@ -507,7 +507,8 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
 
             // Check if file should be preserved (skip writing to keep local changes)
             // Only apply preservation if the file actually exists locally
-            if (localMtime > 0 && preserve.some(pattern => relativePath.includes(pattern))) {
+            // Use exact filename matching to avoid false positives
+            if (localMtime > 0 && preserve.some(pattern => relativePath.endsWith(pattern))) {
                 skipCount++;
                 continue;
             }
@@ -564,7 +565,8 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
                     continue;
                 }
                 // Check if file should be preserved
-                if (preserve.some(pattern => relativePath.includes(pattern))) {
+                // Use exact filename matching to avoid false positives
+                if (preserve.some(pattern => relativePath.endsWith(pattern))) {
                     continue;
                 }
                 toDelete.push(relativePath);
