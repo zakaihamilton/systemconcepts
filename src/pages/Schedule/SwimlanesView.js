@@ -21,7 +21,6 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
     const pageSize = useContext(ContentSize);
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
-    const [selectedDay, setSelectedDay] = useState("");
     const dateFormatter = useDateFormatter({ month: "long" });
 
     // Dimensions
@@ -29,59 +28,53 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
     const CARD_WIDTH = 320;
     const ROW_HEIGHT = 270; // Header + Card Height + Padding
 
-    // Group sessions by date
+    // Group sessions by month (year-month)
     const groupedSessions = useMemo(() => {
         const groups = {};
         sessions.forEach(session => {
-            const date = session.date;
-            if (!groups[date]) {
-                groups[date] = [];
+            const [year, month] = session.date.split('-');
+            const yearMonth = `${year}-${month}`;
+            if (!groups[yearMonth]) {
+                groups[yearMonth] = [];
             }
-            groups[date].push(session);
+            groups[yearMonth].push(session);
         });
 
-        // Sort dates descending
-        return Object.keys(groups).sort((a, b) => b.localeCompare(a)).map(date => ({
-            date,
-            sessions: groups[date]
+        // Sort year-months descending
+        return Object.keys(groups).sort((a, b) => b.localeCompare(a)).map(yearMonth => ({
+            yearMonth,
+            sessions: groups[yearMonth]
         }));
     }, [sessions]);
 
-    // Extract available years/months/days
+    // Extract available years/months
     const dateOptions = useMemo(() => {
         const years = new Set();
         const monthsByYear = {}; // { 2023: Set(01, 02) }
-        const daysByYearMonth = {}; // { 2023-01: Set(01, 02) }
 
         groupedSessions.forEach(group => {
-            const [y, m, d] = group.date.split('-');
+            const [y, m] = group.yearMonth.split('-');
             years.add(y);
 
             if (!monthsByYear[y]) monthsByYear[y] = new Set();
             monthsByYear[y].add(m);
-
-            const ym = `${y}-${m}`;
-            if (!daysByYearMonth[ym]) daysByYearMonth[ym] = new Set();
-            daysByYearMonth[ym].add(d);
         });
 
         return {
             years: Array.from(years).sort((a, b) => b.localeCompare(a)),
-            monthsByYear,
-            daysByYearMonth
+            monthsByYear
         };
     }, [groupedSessions]);
 
     // Sync footer with scrolling
     const onItemsRendered = useCallback(({ visibleStartIndex }) => {
         if (visibleStartIndex >= 0 && visibleStartIndex < groupedSessions.length) {
-            const date = groupedSessions[visibleStartIndex].date;
-            const [y, m, d] = date.split('-');
+            const yearMonth = groupedSessions[visibleStartIndex].yearMonth;
+            const [y, m] = yearMonth.split('-');
 
             // Only update if changed to prevent unnecessary renders/loops
             setSelectedYear(prev => prev !== y ? y : prev);
             setSelectedMonth(prev => prev !== m ? m : prev);
-            setSelectedDay(prev => prev !== d ? d : prev);
         }
     }, [groupedSessions]);
 
@@ -199,12 +192,11 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
         addPath(itemPath);
     }, []);
 
-    const scrollToDate = (year, month, day) => {
+    const scrollToDate = (year, month) => {
         let prefix = `${year}`;
         if (month) prefix += `-${month}`;
-        if (day) prefix += `-${day}`;
 
-        const index = groupedSessions.findIndex(g => g.date.startsWith(prefix));
+        const index = groupedSessions.findIndex(g => g.yearMonth.startsWith(prefix));
         if (index !== -1 && listRef.current) {
             listRef.current.scrollToItem(index, "start");
         }
@@ -220,22 +212,13 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
     const yearState = [selectedYear, (year) => {
         setSelectedYear(year);
         setSelectedMonth("");
-        setSelectedDay("");
-        scrollToDate(year, "", "");
+        scrollToDate(year, "");
     }];
 
     const monthState = [selectedMonth, (month) => {
         setSelectedMonth(month);
-        setSelectedDay("");
         if (selectedYear) {
-            scrollToDate(selectedYear, month, "");
-        }
-    }];
-
-    const dayState = [selectedDay, (day) => {
-        setSelectedDay(day);
-        if (selectedYear && selectedMonth) {
-            scrollToDate(selectedYear, selectedMonth, day);
+            scrollToDate(selectedYear, month);
         }
     }];
 
@@ -245,10 +228,9 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
         if (selectedYear === "" && dateOptions.years.length > 0) {
             const firstGroup = groupedSessions[0];
             if (firstGroup) {
-                const [y, m, d] = firstGroup.date.split('-');
+                const [y, m] = firstGroup.yearMonth.split('-');
                 setSelectedYear(y);
                 setSelectedMonth(m);
-                setSelectedDay(d);
             }
         }
     }, [dateOptions.years, selectedYear, groupedSessions]);
@@ -269,19 +251,8 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
         ...availableMonths
     ];
 
-    const availableDays = useMemo(() => {
-        const key = `${selectedYear}-${selectedMonth}`;
-        if (!selectedYear || !selectedMonth || !dateOptions.daysByYearMonth[key]) return [];
-        return Array.from(dateOptions.daysByYearMonth[key]).sort((a, b) => b.localeCompare(a));
-    }, [selectedYear, selectedMonth, dateOptions]);
-
-    const dayItems = [
-        ...availableDays.map(d => ({ id: d, name: d }))
-    ];
-
     const yearWidget = <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "6em" }} items={yearItems} state={yearState} />;
     const monthWidget = <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: "8em" }} items={monthItems} state={monthState} disabled={!selectedYear} />;
-    const dayWidget = <Input select={true} label={translations.DAY} helperText="" fullWidth={false} style={{ minWidth: "5em" }} items={dayItems} state={dayState} disabled={!selectedMonth} />;
 
     // Disable Today button when already at the top of the list
     const [isAtTop, setIsAtTop] = useState(true);
@@ -315,11 +286,6 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
             menu: false
         },
         {
-            id: "dayWidget",
-            element: dayWidget,
-            location: "footer"
-        },
-        {
             id: "monthWidget",
             element: monthWidget,
             location: "footer"
@@ -331,15 +297,16 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "SwimlanesView", items: toolbarItems, depends: [translations, selectedYear, selectedMonth, selectedDay, isMobile, isAtTop] });
+    useToolbar({ id: "SwimlanesView", items: toolbarItems, depends: [translations, selectedYear, selectedMonth, isMobile, isAtTop] });
 
     const itemData = useMemo(() => ({
         groupedSessions,
         focusedSessionId,
         handleSessionClick,
         width: (pageSize && pageSize.width ? pageSize.width - 18 : 0),
-        itemSize: CARD_WIDTH
-    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH]);
+        itemSize: CARD_WIDTH,
+        store
+    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store]);
 
     const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("swimlanes_vertical_offset") || "0"));
 
@@ -377,19 +344,20 @@ export default function SwimlanesView({ sessions = [], loading, store, translati
 }
 
 const Row = ({ index, style, data }) => {
-    const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize } = data;
+    const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store } = data;
     const group = groupedSessions[index];
 
     return (
         <div style={style}>
             <SwimlaneRow
-                key={group.date}
-                date={group.date}
+                key={group.yearMonth}
+                date={group.yearMonth}
                 sessions={group.sessions}
                 focusedSessionId={focusedSessionId}
                 onSessionClick={handleSessionClick}
                 width={width}
                 itemSize={itemSize}
+                store={store}
             />
         </div>
     );

@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { formatDuration } from "@util/string";
 import Tooltip from '@mui/material/Tooltip';
 import { getContrastColor } from "@util/color";
+import SessionIcon from "@widgets/SessionIcon";
 
 const SwimlaneCard = memo(function SwimlaneCard({ session, isActive, onSessionClick }) {
     const rootRef = useRef(null);
@@ -64,13 +65,21 @@ const SwimlaneCard = memo(function SwimlaneCard({ session, isActive, onSessionCl
                                 {name}
                             </Typography>
                         </Tooltip>
-                        <Typography variant="caption" className={styles.duration}>
-                            {duration ? formatDuration(duration * 1000, true) : ''}
-                        </Typography>
+                        <div className={styles.details}>
+                            <Typography variant="caption" className={styles.date}>
+                                {session.date}
+                            </Typography>
+                            <Typography variant="caption" className={styles.duration}>
+                                {duration ? formatDuration(duration * 1000, true) : ''}
+                            </Typography>
+                        </div>
                     </div>
                 </div>
                 <div className={styles.groupPill} style={{ backgroundColor: groupColor, color: textColor }}>
                     {group}
+                </div>
+                <div className={styles.typeIcon}>
+                    <SessionIcon type={session.type} />
                 </div>
             </div>
         </div>

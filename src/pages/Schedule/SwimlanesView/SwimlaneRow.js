@@ -16,15 +16,27 @@ const InnerList = forwardRef(({ style, ...rest }, ref) => (
     />
 ));
 
-export default function SwimlaneRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350 }) {
+export default function SwimlaneRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store }) {
     const listRef = useRef(null);
     const outerRef = useRef(null);
-    const dateFormatter = useDateFormatter({ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const dateFormatter = useDateFormatter({ year: 'numeric', month: 'long' });
+    const dateObj = useMemo(() => {
+        const [y, m] = date.split('-');
+        return new Date(y, parseInt(m) - 1, 1);
+    }, [date]);
     const formattedDate = useMemo(() => {
-        const [y, m, d] = date.split('-');
-        const dateObj = new Date(y, parseInt(m) - 1, d);
         return dateFormatter.format(dateObj);
-    }, [date, dateFormatter]);
+    }, [dateObj, dateFormatter]);
+
+    const handleHeaderClick = () => {
+        if (store) {
+            store.update(s => {
+                s.lastViewMode = s.viewMode;
+                s.viewMode = "month";
+                s.date = dateObj;
+            });
+        }
+    };
     const safeWidth = typeof width === "number" && width > 0 ? width : 0;
 
     // Scroll to focused item
@@ -79,7 +91,7 @@ export default function SwimlaneRow({ date, sessions, focusedSessionId, onSessio
     return (
         <div className={styles.row}>
             <div className={styles.header}>
-                <Typography variant="h6" className={styles.dateTitle}>
+                <Typography variant="h6" className={styles.dateTitle} onClick={handleHeaderClick}>
                     {formattedDate}
                 </Typography>
             </div>

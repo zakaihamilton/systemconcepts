@@ -43,6 +43,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: var(--primary-color, #2196f3);
+        opacity: 1;
+        transform: translateX(4px);
+    }
 
     &::before {
         content: '';

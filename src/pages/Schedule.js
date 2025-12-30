@@ -28,7 +28,8 @@ import ViewStreamIcon from "@mui/icons-material/ViewStream";
 
 export const ScheduleStore = new Store({
     date: null,
-    viewMode: "week"
+    viewMode: "week",
+    lastViewMode: null
 });
 
 registerToolbar("Schedule");
@@ -44,7 +45,7 @@ export default function SchedulePage() {
     if (!date) {
         date = new Date();
     }
-    useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode"]);
+    useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode", "lastViewMode"]);
 
     const viewOptions = [
         {
@@ -54,6 +55,7 @@ export default function SchedulePage() {
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "year";
+                    s.lastViewMode = null;
                 });
             }
         },
@@ -64,6 +66,7 @@ export default function SchedulePage() {
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "month";
+                    s.lastViewMode = null;
                 });
             }
         },
@@ -74,6 +77,7 @@ export default function SchedulePage() {
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "week";
+                    s.lastViewMode = null;
                 });
             }
         },
@@ -84,6 +88,7 @@ export default function SchedulePage() {
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "day";
+                    s.lastViewMode = null;
                 });
             }
         },
@@ -94,6 +99,7 @@ export default function SchedulePage() {
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "swimlanes";
+                    s.lastViewMode = null;
                 });
             }
         }
