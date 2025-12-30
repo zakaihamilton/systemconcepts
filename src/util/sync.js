@@ -155,7 +155,7 @@ function createBundles(groups) {
         ...groups.map(group => ({
             name: `aws/metadata/sessions/${group.name}`,
             path: makePath("local", "shared", "sessions", group.name),
-            preserve: ["tags.json", "listing.json", "metadata.json"]
+            preserve: ["tags.json", "metadata.json"]
         }))
     ];
 }
