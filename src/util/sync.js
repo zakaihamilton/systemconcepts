@@ -117,10 +117,18 @@ async function syncBundle(bundleDef) {
     try {
         SyncActiveStore.update(s => { s.currentBundle = name; });
 
+        // Step 1: Quick version check using bundle metadata
         const t1 = Date.now();
         const { changed, versionInfo, listing: remoteListing } = await bundle.checkBundleVersion(name);
         console.log(`[Sync] ${name} - Version check: ${Date.now() - t1}ms, changed: ${changed}`);
 
+        // OPTIMIZATION: If bundle hasn't changed remotely, skip all expensive operations
+        if (!changed) {
+            console.log(`[Sync] ${name} - No remote changes, skipping sync (${Date.now() - startTime}ms)`);
+            return false;
+        }
+
+        // Step 2: Only scan directory if we detected changes
         const t2 = Date.now();
         const bundleListing = await storage.getRecursiveList(path);
         console.log(`[Sync] ${name} - Directory scan: ${Date.now() - t2}ms, files: ${bundleListing.length}`);
