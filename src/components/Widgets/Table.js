@@ -222,6 +222,49 @@ export default function TableWidget(props) {
         });
     }, [itemsPerPage, store]);
 
+    const { items, rawItems } = useMemo(() => {
+        let raw = data || [];
+        if (filter) {
+            raw = raw.filter(filter);
+        }
+
+        let processed = raw.map(item => ({
+            raw: item,
+            mapped: mapper ? mapper(item) : item
+        }));
+
+        if (search) {
+            const lowerSearch = search.toLowerCase();
+            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
+                if (typeof item.searchable === "string") {
+                    return item.searchable;
+                }
+                if (typeof item.sortable === "string") {
+                    return item.sortable;
+                }
+                return item.id;
+            });
+            processed = processed.filter(({ mapped }) => {
+                for (const key of keys) {
+                    if (typeof mapped[key] === "string") {
+                        const match = mapped[key].toLowerCase().includes(lowerSearch);
+                        if (match) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+        }
+
+        processed = stableSort(processed || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
+
+        return {
+            items: processed.map(p => p.mapped),
+            rawItems: processed.map(p => p.raw)
+        };
+    }, [search, data, order, orderBy, columns, filter, mapper, ...depends]);
+
     const toolbarItems = [
         data && name && onImport && {
             id: "import",
@@ -258,7 +301,7 @@ export default function TableWidget(props) {
                     body = await onExport();
                 }
                 else {
-                    body = JSON.stringify({ [name]: data }, null, 4);
+                    body = JSON.stringify({ [name]: rawItems }, null, 4);
                 }
                 exportData(body, name, "application/json");
             },
@@ -328,7 +371,7 @@ export default function TableWidget(props) {
         }
     }
 
-    useToolbar({ id: "Table", items: toolbarItems, depends: [data, name, translations, viewMode, sortItems, itemsPerPage] });
+    useToolbar({ id: "Table", items: toolbarItems, depends: [rawItems, name, translations, viewMode, sortItems, itemsPerPage] });
 
     useEffect(() => {
         const hasColumn = visibleColumns.some(column => column.id === orderBy || column.sortable === orderBy);
@@ -337,42 +380,7 @@ export default function TableWidget(props) {
         }
     }, []);
 
-    const items = useMemo(() => {
-        let items = data || [];
-        if (filter) {
-            items = items.filter(filter);
-        }
-        if (mapper) {
-            items = items.map(mapper);
-        }
 
-        if (search) {
-            const lowerSearch = search.toLowerCase();
-            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
-                if (typeof item.searchable === "string") {
-                    return item.searchable;
-                }
-                if (typeof item.sortable === "string") {
-                    return item.sortable;
-                }
-                return item.id;
-            });
-            items = items.filter(item => {
-                for (const key of keys) {
-                    if (typeof item[key] === "string") {
-                        const match = item[key].toLowerCase().includes(lowerSearch);
-                        if (match) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
-        }
-
-        items = stableSort(items || [], getComparator(order, orderBy));
-        return items;
-    }, [search, data, order, orderBy, visibleColumns, filter, mapper, ...depends]);
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
