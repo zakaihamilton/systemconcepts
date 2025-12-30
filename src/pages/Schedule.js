@@ -9,7 +9,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
-import CalendarViewDayIcon from "@mui/icons-material/CalendarViewDay";
+import ViewDayIcon from "@mui/icons-material/ViewDay";
 import YearView from "./Schedule/YearView";
 import DayView from "./Schedule/DayView";
 import { useSearch } from "@components/Search";
@@ -85,7 +85,7 @@ export default function SchedulePage() {
         {
             id: "day",
             name: translations.DAY_VIEW,
-            icon: <CalendarViewDayIcon />,
+            icon: <ViewDayIcon />,
             onClick: () => {
                 ScheduleStore.update(s => {
                     s.viewMode = "day";

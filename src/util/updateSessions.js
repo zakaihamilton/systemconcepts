@@ -252,16 +252,37 @@ export function useUpdateSessions(groups) {
             }
         }));
         await Promise.all(promises);
+
+        // Retrieve the final status for this group to avoid stale index issues
+        const finalStatus = (UpdateSessionsStore.getRawState().status || []).find(s => s.name === name) || {};
+        const addedCount = finalStatus.addedCount || 0;
+        const newSessions = finalStatus.newSessions || [];
+
         UpdateSessionsStore.update(s => {
-            s.status[itemIndex].progress = years.length;
-            s.status[itemIndex].year = null;
-            s.status = [...s.status];
+            const idx = s.status.findIndex(item => item.name === name);
+            if (idx !== -1) {
+                s.status[idx].progress = years.length;
+                s.status[idx].year = null;
+                s.status = [...s.status];
+            }
         });
 
         const sortedSessions = [...allSessionNames].sort();
-        const lastSession = sortedSessions[sortedSessions.length - 1];
+        const totalCount = sortedSessions.length;
+
+        // Use the last newly added session if available, otherwise fallback to last overall
+        let lastSession = "";
+        if (newSessions.length > 0) {
+            const sortedNew = newSessions.map(s => s.name).sort();
+            lastSession = sortedNew[sortedNew.length - 1];
+        } else if (totalCount > 0) {
+            lastSession = sortedSessions[totalCount - 1];
+        }
+
         const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
-        addSyncLog(`[${name}] ✓ Updated (${sortedSessions.length} sessions${lastSessionMsg}).`, "success");
+        const newMsg = addedCount > 0 ? `, ${addedCount} new` : ", no new sessions";
+
+        addSyncLog(`[${name}] ✓ Updated (${totalCount} sessions${newMsg}${lastSessionMsg}).`, "success");
     }, [prefix, copyFile, getListing]);
     const updateSessions = useCallback(async (includeDisabled) => {
         const isSyncBusy = SyncActiveStore.getRawState().busy;

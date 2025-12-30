@@ -293,9 +293,13 @@ export async function saveRemoteBundle(endPoint, bundle) {
         }
 
         await storage.createFolderPath(endPoint, true);
+        console.log(`[Bundle] Saving ${endPoint} (${chunks.length} parts)...`);
         for (let i = 0; i < chunks.length; i++) {
             const chunkPath = makePath(endPoint, `${BUNDLE_PREFIX}${i}`);
             await storage.writeFile(chunkPath, chunks[i]);
+            if (i % 5 === 0 || i === chunks.length - 1) {
+                console.log(`[Bundle]   - ${chunkPath} saved.`);
+            }
         }
 
         const listing = await storage.getListing(endPoint) || [];
@@ -359,16 +363,17 @@ export async function scanLocal(path, ignore = [], listing = null, remote = null
 
             // Use remote content if timestamps match or remote is newer (with valid content)
             if (remoteItem?.content != null) {
-                const remoteMtime = Math.floor(remoteItem.mtime || 0);
-                const localFloorMtime = Math.floor(localMtime);
+                const remoteMtime = Math.floor((remoteItem.mtime || 0) / 1000);
+                const localMtimeSec = Math.floor(localMtime / 1000);
 
-                if (remoteMtime === localFloorMtime || remoteMtime > localFloorMtime) {
+                if (remoteMtime >= localMtimeSec) {
                     bundle[relativePath] = {
                         content: remoteItem.content,
                         mtime: localMtime
                     };
                     return;
                 }
+                console.log(`[Bundle] Local file newer: ${item.path} (Remote: ${remoteMtime}s, Local: ${localMtimeSec}s)`);
             }
 
             const content = await storage.readFile(item.path);
@@ -390,11 +395,11 @@ export function mergeBundles(remote = {}, local = {}, name = "") {
     for (const [path, localItem] of Object.entries(local)) {
         const remoteItem = merged[path];
 
-        if (remoteItem?.content != null && Math.floor(localItem.mtime) === Math.floor(remoteItem.mtime)) {
+        if (remoteItem?.content != null && Math.floor(localItem.mtime / 1000) === Math.floor(remoteItem.mtime / 1000)) {
             continue;
         }
 
-        if (!remoteItem || remoteItem.content == null || Math.floor(localItem.mtime) > Math.floor(remoteItem.mtime)) {
+        if (!remoteItem || remoteItem.content == null || Math.floor(localItem.mtime / 1000) > Math.floor(remoteItem.mtime / 1000)) {
             if (remoteItem?.content != null) {
                 if (remoteItem.content === localItem.content ||
                     normalizeContent(remoteItem.content) === normalizeContent(localItem.content)) {

@@ -221,14 +221,9 @@ async function syncBundle(bundleDef, manifest) {
         // Step 1: Quick version check using bundle metadata
         const { changed, versionInfo, listing: remoteListing } = await bundle.checkBundleVersion(name, null, manifest);
 
-        // OPTIMIZATION: If bundle hasn't changed remotely, skip all expensive operations
-        if (!changed) {
-            const duration = Math.round(performance.now() - startTime);
-            addSyncLog(`[${shortName}] Up to date (${duration}ms).`, "info");
-            return false;
+        if (changed) {
+            addSyncLog(`[${shortName}] Syncing changes...`, "info");
         }
-
-        addSyncLog(`[${shortName}] Syncing changes...`, "info");
         const workStartTime = performance.now();
 
         // Step 2: Only scan directory if we detected changes
@@ -247,12 +242,18 @@ async function syncBundle(bundleDef, manifest) {
             isBundleCorrupted ? null : remoteBundle
         );
 
+        const localFileCount = Object.keys(localBundle || {}).length;
+        console.log(`[Sync] ${shortName}: Scanned ${localFileCount} local files.`);
+
         const { merged, updated } = bundle.mergeBundles(remoteBundle || {}, localBundle, name);
 
         let localUpdated = false;
         if (updated || (isBundleCorrupted && Object.keys(merged).length > 0)) {
+            console.log(`[Sync] ${shortName}: ${updated} changes detected. Uploading to server...`);
             await bundle.saveRemoteBundle(name, merged);
             localUpdated = true;
+        } else {
+            console.log(`[Sync] ${shortName}: No local changes to upload.`);
         }
 
         const { downloadCount, isBundleCorrupted: appliedCorruption } = await bundle.applyBundle(
@@ -267,8 +268,12 @@ async function syncBundle(bundleDef, manifest) {
             addSyncLog(`[${shortName}] Sync issues detected.`, "warning");
         } else {
             const sessionIds = [...new Set(Object.keys(merged || {})
-                .map(p => p.split('/')[0])
-                .filter(p => p && !p.includes('.') && p !== "listing.json" && p !== "metadata.json" && p !== "tags.json")
+                .map(p => {
+                    const parts = p.split('/');
+                    const name = parts.length > 1 ? parts[1] : parts[0];
+                    return name.split('.')[0];
+                })
+                .filter(p => p && p !== "listing" && p !== "metadata" && p !== "tags")
             )].sort();
             const lastSession = sessionIds[sessionIds.length - 1];
             const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
