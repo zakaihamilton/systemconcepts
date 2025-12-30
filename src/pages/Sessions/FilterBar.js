@@ -8,6 +8,9 @@ import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
+import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
+import HideImageIcon from '@mui/icons-material/HideImage';
+import ListIcon from '@mui/icons-material/List';
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@widgets/Menu";
 import styles from "./FilterBar.module.scss";
@@ -31,7 +34,18 @@ export default function FilterBar({ hideYears = false }) {
         { id: "video", name: translations.VIDEO, icon: <MovieIcon /> },
         { id: "image", name: translations.IMAGE, icon: <InsertPhotoOutlinedIcon /> },
         { id: "overview", name: translations.OVERVIEW, icon: <MovieFilterIcon /> },
-        { id: "ai", name: translations.AI, icon: <AutoAwesomeIcon /> }
+        { id: "ai", name: translations.AI, icon: <AutoAwesomeIcon />, divider: true },
+        {
+            id: "thumbnail_header",
+            name: translations.THUMBNAIL,
+            header: true,
+            expanded: typeFilter.includes("with_thumbnail") || typeFilter.includes("without_thumbnail"),
+            items: [
+                { id: "thumbnails_all", name: translations.THUMBNAILS_ALL, icon: <ListIcon />, radio: true },
+                { id: "with_thumbnail", name: translations.WITH_THUMBNAIL, icon: <InsertPhotoIcon />, radio: true },
+                { id: "without_thumbnail", name: translations.WITHOUT_THUMBNAIL, icon: <HideImageIcon />, radio: true }
+            ]
+        }
     ], [translations]);
 
     const years = useMemo(() => {
@@ -67,22 +81,46 @@ export default function FilterBar({ hideYears = false }) {
     }, [groups, groupMetadata, groupFilter]);
 
     const typeMenuItems = useMemo(() => {
-        return types.map(type => ({
-            id: type.id,
-            name: type.name,
-            icon: type.icon,
-            checked: typeFilter.includes(type.id),
-            selected: typeFilter,
-            onClick: () => {
-                SessionsStore.update(s => {
-                    if (s.typeFilter.includes(type.id)) {
-                        s.typeFilter = s.typeFilter.filter(t => t !== type.id);
-                    } else {
-                        s.typeFilter = [...s.typeFilter, type.id];
+        const mapItems = (list) => {
+            return (list || []).map(type => ({
+                id: type.id,
+                name: type.name,
+                icon: type.icon,
+                divider: type.divider,
+                header: type.header,
+                radio: type.id === "thumbnails_all" ? (!typeFilter.includes("with_thumbnail") && !typeFilter.includes("without_thumbnail")) : (type.radio && typeFilter.includes(type.id)),
+                checked: !type.radio && typeFilter.includes(type.id),
+                selected: typeFilter,
+                items: mapItems(type.items),
+                onClick: (event) => {
+                    if (type.onClick) {
+                        type.onClick(event);
+                        return;
                     }
-                });
-            }
-        }));
+                    SessionsStore.update(s => {
+                        if (type.id === "thumbnails_all") {
+                            s.typeFilter = s.typeFilter.filter(t => t !== "with_thumbnail" && t !== "without_thumbnail");
+                            return;
+                        }
+                        else if (type.radio) {
+                            const otherRadio = type.id === "with_thumbnail" ? "without_thumbnail" : "with_thumbnail";
+                            s.typeFilter = s.typeFilter.filter(t => t !== otherRadio);
+                            if (!s.typeFilter.includes(type.id)) {
+                                s.typeFilter = [...s.typeFilter, type.id];
+                            }
+                        }
+                        else if (!type.header) {
+                            if (s.typeFilter.includes(type.id)) {
+                                s.typeFilter = s.typeFilter.filter(t => t !== type.id);
+                            } else {
+                                s.typeFilter = [...s.typeFilter, type.id];
+                            }
+                        }
+                    });
+                }
+            }));
+        };
+        return mapItems(types);
     }, [types, typeFilter]);
 
     const yearMenuItems = useMemo(() => {
@@ -106,9 +144,19 @@ export default function FilterBar({ hideYears = false }) {
     const getTypeLabel = () => {
         if (typeFilter.length === 0) return translations.TYPES;
         if (typeFilter.length === 1) {
-            const type = types.find(t => t.id === typeFilter[0]);
+            const findType = (list) => {
+                for (const item of list) {
+                    if (item.id === typeFilter[0]) return item;
+                    if (item.items) {
+                        const subItem = findType(item.items);
+                        if (subItem) return subItem;
+                    }
+                }
+                return null;
+            };
+            const type = findType(types);
             return {
-                main: type?.name || typeFilter[0],
+                main: type?.name,
                 sub: translations.TYPE
             };
         }

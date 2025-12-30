@@ -470,6 +470,18 @@ export default {
             "value": "Types"
         },
         {
+            "id": "WITH_THUMBNAIL",
+            "value": "With Thumbnail"
+        },
+        {
+            "id": "WITHOUT_THUMBNAIL",
+            "value": "No Thumbnail"
+        },
+        {
+            "id": "THUMBNAILS_ALL",
+            "value": "All"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Add Role"
         },

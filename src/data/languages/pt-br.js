@@ -470,6 +470,18 @@ export default {
             "value": "Tipos"
         },
         {
+            "id": "WITH_THUMBNAIL",
+            "value": "Com miniatura"
+        },
+        {
+            "id": "WITHOUT_THUMBNAIL",
+            "value": "Sem miniatura"
+        },
+        {
+            "id": "THUMBNAILS_ALL",
+            "value": "Todos"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "Adicionar função"
         },

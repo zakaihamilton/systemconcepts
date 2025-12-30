@@ -9,6 +9,10 @@ import styles from "./Menu.module.scss";
 import Link from "@mui/material/Link";
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import clsx from "clsx";
 
 const PREFIX = 'Menu';
@@ -53,6 +57,14 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
     const clickEnabled = items && items.length || onClick;
     const hoverEnabled = clickEnabled && hover;
     const [hoverRef, setHoverRef] = useState(null);
+    const [expanded, setExpanded] = useState({});
+
+    const handleToggleExpand = (id) => {
+        setExpanded(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
+    };
 
     const handleClick = (event) => {
         event && event.stopPropagation && event.stopPropagation();
@@ -61,7 +73,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
             setAnchorEl(event.currentTarget);
         }
         else if (onClick) {
-            onClick();
+            onClick(event);
         }
     };
 
@@ -69,63 +81,107 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         onVisible && onVisible(false);
         setAnchorEl(null);
         setHoverRef(null);
+        setExpanded({});
     };
 
-    const hasIcon = (items || []).some(item => item.icon || typeof item.checked !== "undefined");
-    const menuItems = open && (items || []).flatMap((item, index, list) => {
-        const isLast = list.length - 1 === index;
-        const { checked, divider, name, target, icon, items, onClick, id, menu, backgroundColor, description, selected, ...props } = item;
-        const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
-        const selectedArray = Array.isArray(selectedItem);
-        const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
-        const isSelectedFinal = isSelected || checked;
+    const checkHasIcon = (list) => {
+        return (list || []).some(item =>
+            item.icon ||
+            typeof item.checked !== "undefined" ||
+            typeof item.radio !== "undefined" ||
+            checkHasIcon(item.items)
+        );
+    };
+    const hasIcon = checkHasIcon(items);
 
-        const handleClickItem = event => {
-            if (!selectedArray) {
-                handleClose();
-            }
-            if (onClick) {
-                event = { ...event };
-                event.target = { ...event.target };
-                event.target.value = id;
-                onClick(event);
-            }
-        };
-        const style = { backgroundColor };
-        return [
-            <MenuWidget key={id} items={items} selected={isSelected} onClick={handleClickItem}>
+    const renderItems = (itemsList) => {
+        return (itemsList || []).flatMap((item, index, list) => {
+            const isLast = list.length - 1 === index;
+            const { checked, radio, header, divider, name, target, icon, items: subItems, onClick: itemOnClick, id, menu, backgroundColor, description, selected, expanded: itemExpanded, ...props } = item;
+            const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
+            const selectedArray = Array.isArray(selectedItem);
+            const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
+            const isSelectedFinal = !header && (isSelected || checked);
+
+            const isExpanded = typeof expanded[id] !== "undefined" ? expanded[id] : itemExpanded;
+            const hasSubItems = subItems && subItems.length;
+
+            const handleClickItem = event => {
+                if (header && hasSubItems) {
+                    handleToggleExpand(id);
+                    return;
+                }
+                if (!selectedArray && !header) {
+                    handleClose();
+                }
+                if (itemOnClick) {
+                    if (event) {
+                        event = { ...event };
+                        event.target = { ...event.target };
+                        event.target.value = id;
+                    }
+                    itemOnClick(event);
+                }
+            };
+            const style = { backgroundColor };
+
+            const rightIcon = header && hasSubItems ? (isExpanded ? <ExpandMoreIcon /> : <ChevronRightIcon />) : null;
+
+            const result = [
                 <MenuItem
-                    className={clsx(styles.menuItem, isSelectedFinal && styles.selected)}
+                    key={id}
+                    className={clsx(styles.menuItem, isSelectedFinal && styles.selected, header && styles.headerItem)}
                     component={target ? Link : "div"}
                     underline="none"
                     href={target}
+                    onClick={handleClickItem}
                     {...props}
                 >
-                    <div key={id + "_background"} className={styles.background} style={style} />
+                    <div className={styles.background} style={style} />
                     {hasIcon && (
                         <ListItemIcon className={styles.itemIcon}>
-                            {typeof checked !== "undefined" ? (
-                                checked ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />
-                            ) : (
-                                icon
-                            )}
+                            <div className={styles.selector}>
+                                {!header && (typeof radio !== "undefined" || typeof checked !== "undefined") && (
+                                    typeof radio !== "undefined" ? (
+                                        radio ? <RadioButtonCheckedIcon color="primary" /> : <RadioButtonUncheckedIcon />
+                                    ) : (
+                                        checked ? <CheckBoxIcon color="primary" /> : <CheckBoxOutlineBlankIcon />
+                                    )
+                                )}
+                            </div>
+                            <div className={styles.icon}>
+                                {icon}
+                            </div>
                         </ListItemIcon>
                     )}
                     <ListItemText
-                        className={styles.itemText}
+                        className={clsx(styles.itemText, header && styles.headerText)}
                         primary={name}
                         secondary={description}
                         classes={{
-                            primary: styles.primaryText,
+                            primary: clsx(styles.primaryText, header && styles.headerPrimary),
                             secondary: styles.secondaryText
                         }}
                     />
-                    {backgroundColor && <div key={id + "_border"} className={styles.backgroundBorder} style={style} />}
-                </MenuItem>
-            </MenuWidget>,
-            divider && !isLast && <Divider key={"_" + id + "_"} className={styles.divider} />
-        ];
-    });
+                    {rightIcon && (
+                        <ListItemIcon className={styles.headerIcon}>
+                            {rightIcon}
+                        </ListItemIcon>
+                    )}
+                    {backgroundColor && <div className={styles.backgroundBorder} style={style} />}
+                </MenuItem>,
+                divider && !isLast && <Divider key={"_" + id + "_"} className={styles.divider} />
+            ];
+
+            if (header && hasSubItems && isExpanded) {
+                result.push(...renderItems(subItems));
+            }
+
+            return result;
+        });
+    };
+
+    const menuItems = open && renderItems(items);
 
     children = Children.map(children, child => {
         if (!child) {

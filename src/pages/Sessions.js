@@ -235,10 +235,25 @@ export default function SessionsPage() {
     }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick]);
 
     const filter = useCallback(item => {
-        let { group, type, year } = item;
+        let { group, type, year, thumbnail } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
-            show = show && typeFilter?.includes(type);
+            const types = typeFilter.filter(t => !["with_thumbnail", "without_thumbnail", "thumbnails_all"].includes(t));
+            const withThumbnail = typeFilter.includes("with_thumbnail");
+            const withoutThumbnail = typeFilter.includes("without_thumbnail");
+
+            const matchType = !types.length || types.includes(type);
+
+            let matchThumbnail = true;
+            if (withThumbnail && withoutThumbnail) {
+                matchThumbnail = true;
+            } else if (withThumbnail) {
+                matchThumbnail = !!thumbnail;
+            } else if (withoutThumbnail) {
+                matchThumbnail = !thumbnail;
+            }
+
+            show = show && matchType && matchThumbnail;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);

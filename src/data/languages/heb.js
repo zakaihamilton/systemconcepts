@@ -466,6 +466,18 @@ export default {
             "value": "סוגים"
         },
         {
+            "id": "WITH_THUMBNAIL",
+            "value": "עם תמונה"
+        },
+        {
+            "id": "WITHOUT_THUMBNAIL",
+            "value": "ללא תמונה"
+        },
+        {
+            "id": "THUMBNAILS_ALL",
+            "value": "הכל"
+        },
+        {
             "id": "ADD_ROLE",
             "value": "הוסף תפקיד"
         },

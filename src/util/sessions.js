@@ -351,7 +351,26 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            results = results.filter(session => typeFilter.includes(session.type));
+            const types = typeFilter.filter(t => !["with_thumbnail", "without_thumbnail", "thumbnails_all"].includes(t));
+            const withThumbnail = typeFilter.includes("with_thumbnail");
+            const withoutThumbnail = typeFilter.includes("without_thumbnail");
+
+            results = results.filter(session => {
+                const matchType = !types.length || types.includes(session.type);
+
+                const hasThumbnail = !!session.thumbnail;
+                let matchThumbnail = true;
+
+                if (withThumbnail && withoutThumbnail) {
+                    matchThumbnail = true;
+                } else if (withThumbnail) {
+                    matchThumbnail = hasThumbnail;
+                } else if (withoutThumbnail) {
+                    matchThumbnail = !hasThumbnail;
+                }
+
+                return matchType && matchThumbnail;
+            });
         }
         if (yearFilter?.length) {
             results = results.filter(session => yearFilter.includes(session.year));
