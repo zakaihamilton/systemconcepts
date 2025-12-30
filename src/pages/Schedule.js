@@ -25,6 +25,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import TracksView from "@pages/Schedule/TracksView";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 export const ScheduleStore = new Store({
     date: null,
@@ -38,7 +39,7 @@ export default function SchedulePage() {
     const isMobile = useDeviceType() === "phone";
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    let [sessions, loading] = useSessions();
+    let [sessions, loading] = useSessions([], { showToolbar: false });
     const search = useSearch("schedule");
     let { date, viewMode } = ScheduleStore.useState();
     const { showFilterDialog } = SessionsStore.useState();
@@ -132,7 +133,20 @@ export default function SchedulePage() {
         });
     }
 
-    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode, isMobile] });
+    toolbarItems.push({
+        id: "filter",
+        name: translations.FILTER,
+        icon: <FilterAltIcon />,
+        location: isMobile ? "mobile" : "header",
+        onClick: () => {
+            SessionsStore.update(s => {
+                s.showFilterDialog = !s.showFilterDialog;
+            });
+        },
+        active: showFilterDialog
+    });
+
+    useToolbar({ id: "Schedule", items: toolbarItems, depends: [translations, viewMode, isMobile, showFilterDialog] });
 
     const items = useMemo(() => {
         let items = sessions;
@@ -162,7 +176,7 @@ export default function SchedulePage() {
 
     return <div className={styles.root}>
         {statusBar}
-        {!isMobile && <FilterBar hideYears={true} />}
+        {!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}
         <div className={clsx(styles.content, isMobile && styles.mobile)}>
             {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
             {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
@@ -177,6 +191,6 @@ export default function SchedulePage() {
             />}
             {!!loading && loadingElement}
         </div>
-        {!!isMobile && <FilterBar hideYears={true} />}
+        {!!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}
     </div>;
 }
