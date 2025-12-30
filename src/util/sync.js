@@ -12,6 +12,55 @@ import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
 const SYNC_INTERVAL = 60; // seconds
 const MIN_GROUPS_FOR_S3_SCAN = 5;
 const SYNC_CONCURRENCY_LIMIT = 10;
+const DATA_STRUCTURE_VERSION = 2; // Increment when data structure changes
+const VERSION_KEY = "local/cache/_data_version.json";
+
+async function checkAndMigrateDataStructure() {
+    try {
+        let currentVersion = 0;
+
+        // Check existing version
+        if (await storage.exists(VERSION_KEY)) {
+            const versionData = await storage.readFile(VERSION_KEY);
+            try {
+                const parsed = JSON.parse(versionData);
+                currentVersion = parsed.version || 0;
+            } catch (e) {
+                console.warn('[Sync] Invalid version file, treating as version 0');
+            }
+        }
+
+        // If version mismatch, clear old data
+        if (currentVersion !== DATA_STRUCTURE_VERSION) {
+            console.log(`[Sync] Data structure mismatch (current: ${currentVersion}, expected: ${DATA_STRUCTURE_VERSION}). Clearing old data...`);
+
+            // Clear all cached data
+            await storage.deleteFolder("local/cache");
+            await storage.deleteFolder("local/shared/sessions");
+
+            // Reset sync state
+            SyncActiveStore.update(s => {
+                s.lastSynced = 0;
+                s.progress = { total: 0, processed: 0 };
+            });
+
+            // Save new version
+            await storage.createFolderPath(VERSION_KEY);
+            await storage.writeFile(VERSION_KEY, JSON.stringify({
+                version: DATA_STRUCTURE_VERSION,
+                timestamp: Date.now()
+            }));
+
+            console.log('[Sync] Old data cleared, fresh sync will begin');
+            return true; // Indicates migration occurred
+        }
+
+        return false; // No migration needed
+    } catch (err) {
+        console.error('[Sync] Error checking data structure version:', err);
+        return false;
+    }
+}
 
 export async function clearBundleCache() {
     try {
@@ -241,6 +290,12 @@ export function useSyncFeature() {
         try {
             if (!isSignedIn) {
                 return;
+            }
+
+            // Check for data structure version and migrate if needed
+            const wasMigrated = await checkAndMigrateDataStructure();
+            if (wasMigrated) {
+                console.log('[Sync] Starting fresh sync after data migration');
             }
 
             const sessionPath = makePath("local", "shared", "sessions");
