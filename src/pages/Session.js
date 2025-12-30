@@ -18,6 +18,7 @@ import SwipeIndicator from "@widgets/SwipeIndicator";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { getContrastColor } from "@util/color";
 
 registerToolbar("Session");
 
@@ -127,7 +128,7 @@ export default function SessionPage({ group, year, date, name }) {
                                     setCopiedTag(tag);
                                     setShowClipboard(true);
                                 }
-                            }} className={styles.tag} />
+                            }} className={styles.tag} style={{ "--tag-contrast": getContrastColor(session.color || "#3b82f6") }} />
                         ))}
                     </div>
                 )}

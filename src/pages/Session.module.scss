@@ -129,17 +129,19 @@
     border: 1px solid var(--border-color) !important;
 
     // Modern styling using group color with default fallback
-    background-color: color-mix(in srgb, var(--group-color, var(--primary-500)) 10%, transparent) !important;
-    // Use a darker version of the group color for better contrast
-    color: color-mix(in srgb, var(--group-color, var(--primary-500)) 60%, black) !important;
-    border: 1px solid var(--group-color, var(--primary-500)) !important;
+    // Use a translucent background that doesn't wash out the text
+    background-color: color-mix(in srgb, var(--group-color, var(--primary-500)), transparent 85%) !important;
+    // Use theme-aware text color for guaranteed contrast
+    color: var(--text-color) !important;
+    border: 1px solid color-mix(in srgb, var(--group-color, var(--primary-500)), transparent 50%) !important;
 
-    font-weight: 500 !important;
+    font-weight: 600 !important;
     transition: all 0.2s ease !important;
+    user-select: none;
 
     &:hover {
         background-color: var(--group-color, var(--primary-500)) !important;
-        color: var(--white-text, #fff) !important;
+        color: var(--tag-contrast, white) !important;
         transform: translateY(-1px);
         box-shadow: 0 2px 4px var(--box-shadow-color);
     }
