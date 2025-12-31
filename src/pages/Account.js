@@ -23,10 +23,10 @@ import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { startRegistration, startAuthentication, browserSupportsWebAuthn } from '@simplewebauthn/browser';
-import { clearBundleCache } from '@util/sync';
+import { clearBundleCache } from '@sync/sync';
 import styles from "./Account.module.scss";
 import storage from "@util/storage";
-import { UpdateSessionsStore } from "@util/syncState";
+import { UpdateSessionsStore } from "@sync/syncState";
 
 export default function Account({ redirect }) {
     const { direction } = MainStore.useState();
@@ -170,7 +170,7 @@ export default function Account({ redirect }) {
 
             // Clear bundle cache on logout
             await clearBundleCache();
-            await storage.deleteFolder("local/shared/sessions");
+            await storage.deleteFolder("local");
 
             UpdateSessionsStore.update(s => {
                 s.busy = false; // Reset busy state to allow re-fetching

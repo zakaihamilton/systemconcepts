@@ -116,58 +116,136 @@
 }
 
 .newSessions {
-    margin-top: 0.5em;
-    padding: 0.5em;
-    background: rgba(76, 175, 80, 0.1);
-    border-radius: 4px;
-    border-left: 3px solid #4caf50;
+    margin-top: 0.75em;
+    padding: 0.75em;
+    background: rgba(76, 175, 80, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
 }
 
 .newSessionsTitle {
-    font-weight: 600;
+    font-weight: 700;
     color: #4caf50;
-    font-size: 0.9em;
-    margin-bottom: 0.5em;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.25em;
+
+    .titleIcon {
+        font-size: 1.2em;
+    }
 }
 
 .sessionsList {
     display: flex;
     flex-direction: column;
-    gap: 0.25em;
-    max-height: 200px;
+    gap: 0.5em;
+    max-height: 250px;
     overflow-y: auto;
-}
+    padding-right: 0.5em;
 
-.sessionName {
-    font-size: 0.85em;
-    color: var(--text-color);
-    padding: 0.25em 0.5em;
-    background: var(--background-color);
-    border-radius: 3px;
-    font-family: monospace;
-    font-weight: 500;
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(76, 175, 80, 0.2);
+        border-radius: 2px;
+    }
 }
 
 .sessionItem {
     display: flex;
     flex-direction: column;
+    gap: 0.4em;
+    padding: 0.6em;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(76, 175, 80, 0.3);
+    }
+}
+
+.sessionName {
+    font-size: 0.9em;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
     gap: 0.5em;
-    padding: 0.5em;
-    background: rgba(255, 255, 255, 0.03);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    user-select: none;
+    padding: 0.25em;
     border-radius: 4px;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sessionIcon {
+        font-size: 1.1em;
+        opacity: 0.7;
+    }
+
+    .expandIcon {
+        font-size: 1.2em;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+.sessionItem.expanded {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .sessionFiles {
     display: flex;
     flex-direction: column;
-    gap: 0.2em;
-    padding-left: 1em;
+    gap: 0.25em;
+    padding-left: 1.8em;
+    margin-top: 0.25em;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .fileName {
-    font-size: 0.75em;
-    font-family: 'Courier New', monospace;
-    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.8em;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: var(--text-color-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.2em 0.4em;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+
+    .fileIcon {
+        font-size: 1.1em;
+        opacity: 0.5;
+    }
 }
 
 .empty {

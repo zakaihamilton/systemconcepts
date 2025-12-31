@@ -1,10 +1,8 @@
 import Table from "@widgets/Table";
 import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
-import { Store } from "pullstate";
-import { useGroups } from "@util/groups";
-import { useSyncFeature } from "@util/sync";
-import { SyncActiveStore, UpdateSessionsStore } from "@util/syncState";
+import { GroupsStore } from "@util/groups";
+import { useSyncFeature } from "@sync/sync";
 import ColorPicker from "./Groups/ColorPicker";
 import styles from "./Groups.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -18,28 +16,24 @@ import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
-import { useSessions, SessionsStore } from "@util/sessions";
+import { useSessions } from "@util/sessions";
 import { useEffect, useRef, useState } from "react";
 import ProgressDialog from "./Groups/ProgressDialog";
+import UploadIcon from "@mui/icons-material/Upload";
 
 registerToolbar("Groups");
-
-export const GroupsStore = new Store({
-    counter: 0,
-    showDisabled: false
-});
 
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
     const { counter, showDisabled } = GroupsStore.useState();
-    const [groups, loading, setGroups] = useGroups([counter]);
+    const [sessions, loading, groups, setGroups] = useSessions([counter], { filterSessions: false });
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
-    const [sessions, loadingSessions] = useSessions([], { filterSessions: false });
     const { sync } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const syncTimerRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     const animatedClassName = useStyles(styles, {
         animated: busy
@@ -86,13 +80,6 @@ export default function Groups() {
         if (sync) {
             sync();
         }
-
-        // Wait for sync to upload, then force reload
-        setTimeout(() => {
-            SyncActiveStore.update(s => {
-                s.counter++;
-            });
-        }, 2000);
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
@@ -108,6 +95,59 @@ export default function Groups() {
 
     const duration = start && currentTime - start;
     const formattedDuration = formatDuration(duration);
+
+    const handleImportGroups = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const importedData = JSON.parse(text);
+
+            // Handle multiple formats: array, or object { groups: [...] }, or object { "groupName": { ... } }
+            let importedGroups = [];
+            if (Array.isArray(importedData)) {
+                importedGroups = importedData;
+            } else if (importedData.groups && Array.isArray(importedData.groups)) {
+                importedGroups = importedData.groups;
+            } else {
+                // Convert object map { "name": { ... } } to array
+                importedGroups = Object.entries(importedData).map(([name, info]) => ({
+                    name,
+                    ...info
+                }));
+            }
+
+            if (!importedGroups.length) {
+                throw new Error("Invalid format: no groups found in the imported file");
+            }
+
+            // Replace existing groups with imported data
+            setGroups(currentGroups => {
+                // Map imported groups to the standard format
+                const updated = importedGroups.map(imported => {
+                    const existing = currentGroups.find(g => g.name === imported.name) || {};
+                    return {
+                        ...existing, // Preserve existing internal fields if any
+                        name: imported.name,
+                        color: imported.color !== undefined ? imported.color : (existing.color || ""),
+                        disabled: imported.disabled !== undefined ? !!imported.disabled : (existing.disabled || false)
+                    };
+                });
+                return updated;
+            });
+        } catch (err) {
+            console.error("Error importing groups:", err);
+            alert("Failed to import groups.json: " + err.message);
+        }
+
+        // Reset file input
+        event.target.value = '';
+    };
 
     const toolbarItems = [
         !!busy && {
@@ -142,6 +182,14 @@ export default function Groups() {
             name: showDisabled ? translations.HIDE_DISABLED_GROUPS : translations.SHOW_DISABLED_GROUPS,
             icon: showDisabled ? <VisibilityOffIcon /> : <VisibilityIcon />,
             onClick: () => GroupsStore.update(s => { s.showDisabled = !s.showDisabled; }),
+            location: "header",
+            menu: true
+        },
+        !busy && {
+            id: "import_groups",
+            name: translations.IMPORT_GROUPS || "Import Groups",
+            icon: <UploadIcon />,
+            onClick: handleImportGroups,
             location: "header",
             menu: true
         }
@@ -209,6 +257,13 @@ export default function Groups() {
     };
 
     return <>
+        <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+        />
         <Table
             name="groups"
             store={GroupsStore}
@@ -226,7 +281,7 @@ export default function Groups() {
                 table: null
             }}
             mapper={mapper}
-            loading={loading || loadingSessions}
+            loading={loading}
             depends={[translations, status, updateGroupWithSync, sessions, showDisabled]}
         />
         <ProgressDialog />

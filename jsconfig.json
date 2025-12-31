@@ -26,6 +26,9 @@
             "@diagrams/*": [
                 "src/diagrams/*"
             ],
+            "@sync/*": [
+                "src/sync/*"
+            ]
         }
     }
 }

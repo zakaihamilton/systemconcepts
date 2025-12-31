@@ -14,7 +14,7 @@ export default async function PERSONAL_API(req, res) {
         res.status(200).json(result);
     }
     catch (err) {
-        console.error("login error: ", err);
+        console.error("personal error: ", err);
         res.status(403).json({ err: getSafeError(err) });
     }
 }

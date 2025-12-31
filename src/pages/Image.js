@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useContext, useRef } from "react";
 import { useParentPath, useParentParams } from "@util/pages";
 import { readBinary } from "@util/binary";
 import Progress from "@widgets/Progress";
-import { useSync } from "@util/sync";
+import { useSync } from "@sync/sync";
 import { ContentSize } from "@components/Page/Content";
 import Download from "@widgets/Download";
 import { exportData, exportFile } from "@util/importExport";

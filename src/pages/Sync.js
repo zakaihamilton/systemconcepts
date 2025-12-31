@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
 import { useGroups } from "@util/groups";
-import { useSyncFeature } from "@util/sync";
+import { useSyncFeature } from "@sync/sync";
 import styles from "./Sync.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
@@ -20,7 +20,7 @@ import Button from "@mui/material/Button";
 import CachedIcon from "@mui/icons-material/Cached";
 import { useContext } from "react";
 import { SyncContext } from "@components/Sync";
-import { clearBundleCache } from "@util/sync";
+import { clearBundleCache } from "@sync/sync";
 import Dialog from "@widgets/Dialog";
 
 import IconButton from "@mui/material/IconButton";

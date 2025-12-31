@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { Store } from "pullstate";
 import { useCallback } from "react";
 import pLimit from "./p-limit";
 
-import { SyncActiveStore, UpdateSessionsStore } from "./syncState";
-import { addSyncLog } from "./sync";
+import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { addSyncLog } from "@sync/sync";
+import { writeCompressedFile } from "@sync/bundle";
+import { LOCAL_SYNC_PATH } from "@sync/constants";
 
 export function useUpdateSessions(groups) {
     const { busy, status, start } = UpdateSessionsStore.useState();
@@ -226,6 +227,10 @@ export function useUpdateSessions(groups) {
 
                 if (Object.keys(tagsMap).length > 0) {
                     await storage.writeFile(targetTagsPath, JSON.stringify(tagsMap, null, 4));
+
+                    // Update sync metadata for this year
+                    await updateYearSync(name, year.name, tagsMap);
+
                     UpdateSessionsStore.update(s => {
                         s.status[itemIndex].tagCount += Object.keys(tagsMap).length;
                         s.status = [...s.status];
@@ -252,6 +257,9 @@ export function useUpdateSessions(groups) {
             }
         }));
         await Promise.all(promises);
+
+        // Finalize sync metadata for the whole group
+        await finalizeGroupSync(name);
 
         // Retrieve the final status for this group to avoid stale index issues
         const finalStatus = (UpdateSessionsStore.getRawState().status || []).find(s => s.name === name) || {};
@@ -365,4 +373,55 @@ export function useUpdateSessions(groups) {
         updateAllSessions: !busy && updateAllSessions,
         updateGroup: !busy && updateSpecificGroup
     }), [status, busy, start, updateSessions, updateAllSessions, updateSpecificGroup]);
+}
+
+async function updateYearSync(groupName, year, tagsMap) {
+    const localPath = `${LOCAL_SYNC_PATH}/${groupName}/${year}.json`;
+    try {
+        const data = {
+            version: 1,
+            group: groupName,
+            year: year,
+            sessions: Object.keys(tagsMap).sort().map(name => ({ name })),
+            counter: Date.now()
+        };
+        await writeCompressedFile(localPath, data);
+        return data.counter;
+    } catch (err) {
+        console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
+        return 0;
+    }
+}
+
+async function finalizeGroupSync(groupName) {
+    const localGroupPath = `${LOCAL_SYNC_PATH}/${groupName}.json`;
+    const localYearsPath = `${LOCAL_SYNC_PATH}/${groupName}`;
+
+    try {
+        const yearsListing = await storage.getListing(localYearsPath);
+        const years = [];
+        if (yearsListing) {
+            for (const item of yearsListing) {
+                if (item.name.endsWith(".json")) {
+                    years.push({
+                        name: item.name.replace(".json", ""),
+                        counter: 0
+                    });
+                }
+            }
+        }
+
+        const groupData = {
+            version: 1,
+            group: groupName,
+            date: Date.now(),
+            years: years
+        };
+
+        await writeCompressedFile(localGroupPath, groupData);
+        return true;
+    } catch (err) {
+        console.error(`[Sync] Error finalizing group ${groupName}:`, err);
+        return false;
+    }
 }

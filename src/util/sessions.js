@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { readCompressedFile } from "@sync/bundle";
 import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleFile, isSummaryFile } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
@@ -6,8 +7,8 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
-import { useGroups } from "@util/groups";
-import { useSync } from "@util/sync";
+import { useGroups, GroupsStore } from "@util/groups";
+import { useSync } from "@sync/sync";
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import { useDeviceType } from "./styles";
 
@@ -23,6 +24,7 @@ export const SessionsStore = new Store({
     counter: 0,
     syncCounter: 0,
     groupsMetadata: "",
+    groupsHash: "",
     showFilterDialog: false,
     order: "asc",
     orderBy: "date",
@@ -33,10 +35,11 @@ export const SessionsStore = new Store({
 export function useSessions(depends = [], options = {}) {
     const isMobile = useDeviceType() !== "desktop";
     const { filterSessions = true, skipSync = false, showToolbar } = options;
-    const [syncCounter, syncing] = useSync({ ...options, active: !skipSync });
+    const [syncCounter] = useSync({ ...options, active: !skipSync });
     const translations = useTranslations();
-    const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata, showFilterDialog } = SessionsStore.useState();
+    const { settings: groupsSettings } = GroupsStore.useState();
+    const [groupMetadata, loading, setGroups] = useGroups([syncCounter, ...depends]);
+    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter", "showFilterDialog"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
@@ -89,13 +92,17 @@ export function useSessions(depends = [], options = {}) {
         };
         const basePath = "shared/sessions";
         try {
-            const [cdnData, groups] = await Promise.all([
-                getJSON("local/" + basePath + "/cdn.json"),
-                getListing(basePath)
+            const [groupsSyncData] = await Promise.all([
+                readCompressedFile("local/sync/groups.json")
             ]);
-            const cdn = cdnData || {};
+            const cdn = groupsSettings?.cdn || {};
+
+            // groupsSyncData.groups is now an array of { name, counter }
+            const groups = Array.isArray(groupsSyncData?.groups) ? groupsSyncData.groups : [];
             const groupsWithYears = await Promise.all(groups.map(async group => {
-                const years = await getListing(makePath(basePath, group.name));
+                const groupSyncData = await readCompressedFile(`local/sync/${group.name}.json`);
+                // groupSyncData.years is now an array of { name, counter }
+                const years = Array.isArray(groupSyncData?.years) ? groupSyncData.years : [];
                 return { group, years };
             }));
 
@@ -268,7 +275,7 @@ export function useSessions(depends = [], options = {}) {
                 s.groups = groups;
                 s.busy = false;
                 s.syncCounter = syncCounter;
-                s.groupsMetadata = JSON.stringify(groupMetadata);
+                s.groupsHash = JSON.stringify({ metadata: groupMetadata, settings: groupsSettings });
             });
         }
         catch (err) {
@@ -286,19 +293,20 @@ export function useSessions(depends = [], options = {}) {
 
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
-            const groupsChanged = JSON.stringify(groupMetadata) !== groupsMetadata;
+            const currentHash = JSON.stringify({ metadata: groupMetadata, settings: groupsSettings });
+            const groupsChanged = currentHash !== groupsHash;
             const noSessions = sessions === null;
             const syncChanged = syncCounter !== savedSyncCounter;
 
             // Update sessions if:
             // 1. We have no sessions yet (initial load)
-            // 2. Groups metadata changed (group colors, names, etc.)
+            // 2. Groups metadata/settings changed (group colors, names, CDN, etc.)
             // 3. Sync counter changed (new session data was synced)
             if (noSessions || groupsChanged || syncChanged) {
                 updateSessions(groupMetadata, syncCounter);
             }
         }
-    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata, sessions]);
+    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsHash, sessions, groupsSettings]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
@@ -406,6 +414,6 @@ export function useSessions(depends = [], options = {}) {
 
     // Only show loading if we don't have sessions yet
     // Don't show loading during sync if we already have data
-    const isLoading = (busy || loading) && (!sessions || !sessions.length);
-    return [items, isLoading];
+    const isLoading = (busy || loading) && sessions === null;
+    return [items, isLoading, groupMetadata, setGroups];
 }

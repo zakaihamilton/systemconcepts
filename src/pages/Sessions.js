@@ -21,7 +21,7 @@ import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SessionIcon from "@widgets/SessionIcon";
 import Chip from "@mui/material/Chip";
-import { SyncActiveStore } from "@util/syncState";
+import { SyncActiveStore } from "@sync/syncState";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");

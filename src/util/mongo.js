@@ -1,5 +1,5 @@
 const MongoClient = require("mongodb").MongoClient;
-const { lockMutex } = require("./mutex");
+const { lockMutex } = require("@sync/mutex");
 import { getSafeError } from "./safeError";
 import { sanitizeQuery } from "./mongoSanitize";
 

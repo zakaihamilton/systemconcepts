@@ -1,7 +1,7 @@
 import { createContext, useMemo } from "react";
 import styles from "./Sync.module.scss";
 import { useStyles } from "@util/styles";
-import { useSyncFeature } from "@util/sync";
+import { useSyncFeature } from "@sync/sync";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import SyncIcon from "@mui/icons-material/Sync";
