@@ -19,8 +19,8 @@ export async function syncManifest(localManifest) {
             remoteManifest = await readCompressedFile(remoteManifestPath) || [];
         }
 
-        const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 3 finished in ${duration}ms. Remote manifest size: ${remoteManifest.length}`);
+        const duration = ((performance.now() - start) / 1000).toFixed(1);
+        addSyncLog(`✓ Synced manifest in ${duration}s`, "info");
         return remoteManifest;
     } catch (err) {
         console.error("[Sync] Step 3 error:", err);

@@ -14,8 +14,8 @@ export async function uploadManifest(remoteManifest) {
         const remoteManifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
         await writeCompressedFile(remoteManifestPath, remoteManifest);
 
-        const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 7 finished in ${duration}ms. Manifest uploaded.`);
+        const duration = ((performance.now() - start) / 1000).toFixed(1);
+        addSyncLog(`✓ Uploaded manifest in ${duration}s`, "info");
     } catch (err) {
         console.error("[Sync] Step 7 error:", err);
         throw err;

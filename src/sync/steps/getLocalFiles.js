@@ -23,8 +23,8 @@ export async function getLocalFiles() {
             };
         });
 
-        const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 1 finished in ${duration}ms. Found ${files.length} files.`);
+        const duration = ((performance.now() - start) / 1000).toFixed(1);
+        addSyncLog(`✓ Found ${files.length} local file(s) in ${duration}s`, "info");
         return files;
     } catch (err) {
         console.error("[Sync] Step 1 error:", err);

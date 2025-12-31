@@ -1,11 +1,26 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
+import { LOCAL_SYNC_PATH, FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
 import { getFileInfo } from "../hash";
 
 /**
- * Step 2: If a local file exists that does not exist in the listing, add it to the files.json with a version of 1
+ * Helper function to compute file info for a single file
+ */
+async function computeFileInfo(file) {
+    try {
+        const content = await storage.readFile(file.fullPath);
+        const info = await getFileInfo(content);
+        return { file, info };
+    } catch (err) {
+        console.error(`[Sync] Error reading ${file.path}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Step 2: Update local manifest with file hashes
+ * Uses parallel batch processing for performance
  */
 export async function updateLocalManifest(localFiles) {
     const start = performance.now();
@@ -20,31 +35,45 @@ export async function updateLocalManifest(localFiles) {
             manifest = JSON.parse(content);
         }
 
-        let changed = false;
-
         // Create a map for faster lookup
         const manifestMap = new Map(manifest.map(f => [f.path, f]));
 
-        for (const file of localFiles) {
-            // Read file info
-            const content = await storage.readFile(file.fullPath);
-            const info = await getFileInfo(content);
+        // Compute file info in parallel batches
+        addSyncLog(`Computing hashes for ${localFiles.length} file(s)...`, "info");
+        const fileInfos = [];
 
-            // Check if file is in manifest
+        for (let i = 0; i < localFiles.length; i += SYNC_BATCH_SIZE) {
+            const batch = localFiles.slice(i, i + SYNC_BATCH_SIZE);
+            const progress = Math.min(i + batch.length, localFiles.length);
+            const percent = Math.round((progress / localFiles.length) * 100);
+
+            addSyncLog(`Computing hashes ${progress}/${localFiles.length} (${percent}%)...`, "info");
+
+            const results = await Promise.all(
+                batch.map(file => computeFileInfo(file))
+            );
+
+            fileInfos.push(...results.filter(Boolean));
+        }
+
+        let changed = false;
+
+        // Update manifest with computed info
+        for (const { file, info } of fileInfos) {
             if (!manifestMap.has(file.path)) {
+                // New file
                 const newEntry = {
                     path: file.path,
                     hash: info.hash,
                     size: info.size,
                     version: "1"
                 };
-
                 manifest.push(newEntry);
                 manifestMap.set(file.path, newEntry);
                 changed = true;
                 console.log(`[Sync] Added new file to manifest: ${file.path}`);
             } else {
-                // File exists, check if modified
+                // Existing file - check if modified
                 const existingEntry = manifestMap.get(file.path);
                 if (existingEntry.hash !== info.hash) {
                     existingEntry.hash = info.hash;
@@ -56,7 +85,7 @@ export async function updateLocalManifest(localFiles) {
             }
         }
 
-        // Also remove files from manifest that no longer exist locally
+        // Remove files from manifest that no longer exist locally
         const localFilePaths = new Set(localFiles.map(f => f.path));
         const filteredManifest = manifest.filter(f => {
             if (!localFilePaths.has(f.path)) {
@@ -71,11 +100,13 @@ export async function updateLocalManifest(localFiles) {
             await storage.writeFile(localManifestPath, JSON.stringify(filteredManifest, null, 4));
         }
 
-        const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 2 finished in ${duration}ms. Manifest size: ${filteredManifest.length}`);
+        const duration = ((performance.now() - start) / 1000).toFixed(1);
+        addSyncLog(`✓ Updated manifest in ${duration}s (${filteredManifest.length} files)`, "info");
         return filteredManifest;
+
     } catch (err) {
         console.error("[Sync] Step 2 error:", err);
+        addSyncLog(`Step 2 failed: ${err.message}`, "error");
         throw err;
     }
 }
