@@ -247,7 +247,11 @@ export default function SessionsPage() {
             },
 
             get thumbnailWidget() {
-                if (widgetCache.thumbnailWidget) return widgetCache.thumbnailWidget;
+                // Invalidate cache if scroll state changed for grid view
+                const cacheKey = (viewMode === "grid" && this.isScrolling) ? 'scrolling' : 'stopped';
+                if (widgetCache.thumbnailWidget && widgetCache.thumbnailWidgetState === cacheKey) {
+                    return widgetCache.thumbnailWidget;
+                }
 
                 const altIcon = <>
                     {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
@@ -256,7 +260,21 @@ export default function SessionsPage() {
                     </div>}
                 </>;
                 const href = target(item);
-                widgetCache.thumbnailWidget = <Image href={href} onClick={boundGotoItem} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} loading="lazy" />;
+
+                // In grid view, don't load images while scrolling (wait 1s after scroll stops)
+                const imagePath = (viewMode === "grid" && this.isScrolling) ? null : item.thumbnail;
+
+                widgetCache.thumbnailWidget = <Image
+                    href={href}
+                    onClick={boundGotoItem}
+                    path={imagePath}
+                    width={isMobile && viewMode === "grid" ? "100%" : "12em"}
+                    height={isMobile && viewMode === "grid" ? "7em" : "10em"}
+                    alt={altIcon}
+                    loading="lazy"
+                />;
+
+                widgetCache.thumbnailWidgetState = cacheKey;
                 return widgetCache.thumbnailWidget;
             },
 

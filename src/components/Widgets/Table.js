@@ -160,10 +160,10 @@ export default function TableWidget(props) {
             clearTimeout(scrollTimeoutRef.current);
         }
 
-        // Mark scroll as stopped after 2 seconds of no scroll
+        // Mark scroll as stopped after 1 second of no scroll
         scrollTimeoutRef.current = setTimeout(() => {
             setIsScrolling(false);
-        }, 2000);
+        }, 1000);
     }, [debouncedSaveScroll, isScrolling]);
     const pageSize = useContext(ContentSize);
     const search = useSearch(name, () => {
