@@ -1,10 +1,9 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST_GZ } from "../constants";
+import { SYNC_BASE_PATH, LOCAL_SYNC_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
-import { updateManifestEntry } from "../manifest";
 
 /**
  * Step 5: If the version is lower on the remote file we upload the corresponding .gz file and compress it and replace the remote file
@@ -46,8 +45,13 @@ export async function uploadUpdates(localManifest, remoteManifest) {
                         throw new Error(`Upload verification failed for ${fileBasename}. Hash mismatch.`);
                     }
 
-                    // Update remote manifest
-                    updatedRemoteManifest = await updateManifestEntry(makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ), localFile);
+                    // Update remote manifest (in-memory)
+                    const index = updatedRemoteManifest.findIndex(f => f.path === localFile.path);
+                    if (index !== -1) {
+                        updatedRemoteManifest[index] = localFile;
+                    } else {
+                        updatedRemoteManifest.push(localFile);
+                    }
                     uploadCount++;
                 }
             }

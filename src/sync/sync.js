@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 
 import { usePageVisibility } from "@util/hooks";
-import { SyncActiveStore } from "@sync/syncState";
+import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { lockMutex } from "@sync/mutex";
 import { LOCAL_SYNC_PATH } from "./constants";
 import { addSyncLog } from "./logs";
@@ -16,6 +16,7 @@ import { syncManifest } from "./steps/syncManifest";
 import { downloadUpdates } from "./steps/downloadUpdates";
 import { uploadUpdates } from "./steps/uploadUpdates";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
+import { uploadManifest } from "./steps/uploadManifest";
 
 const SYNC_INTERVAL = 60; // seconds
 
@@ -44,7 +45,10 @@ export async function performSync() {
         remoteManifest = await uploadUpdates(localManifest, remoteManifest);
 
         // Step 6
-        await uploadNewFiles(localManifest, remoteManifest);
+        remoteManifest = await uploadNewFiles(localManifest, remoteManifest);
+
+        // Step 7
+        await uploadManifest(remoteManifest);
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
         addSyncLog(`Sync complete in ${duration}s`, "success");
@@ -63,61 +67,55 @@ export async function performSync() {
     }
 }
 
-export function useSyncFeature() {
-    const [lastSynced, setLastSynced] = useState(0);
-    const [busy, setBusy] = useState(false);
-    const [percentage, setPercentage] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [logs, setLogs] = useState([]);
+export async function requestSync() {
+    const isBusy = SyncActiveStore.getRawState().busy;
+    const isSessionsBusy = UpdateSessionsStore.getRawState().busy;
+    if (isBusy || isSessionsBusy) return;
 
-    useEffect(() => {
-        const unsubscribe = SyncActiveStore.subscribe(
-            s => s,
-            state => {
-                setBusy(state.busy);
-                setLastSynced(state.lastSynced);
-                setLogs(state.logs || []);
-                setDuration(state.lastDuration);
-            }
-        );
-        return unsubscribe;
-    }, []);
+    SyncActiveStore.update(s => {
+        s.busy = true;
+        s.startTime = Date.now();
+        s.logs = [];
+    });
 
-    const sync = useCallback(async () => {
-        const isBusy = SyncActiveStore.getRawState().busy;
-        if (isBusy) return;
+    try {
+        await performSync();
 
+        const endTime = Date.now();
+        const syncDuration = endTime - SyncActiveStore.getRawState().startTime;
         SyncActiveStore.update(s => {
-            s.busy = true;
-            s.startTime = Date.now();
-            s.logs = [];
+            s.busy = false;
+            s.lastSynced = endTime;
+            s.lastDuration = syncDuration;
+            s.counter++;
         });
+    } catch (err) {
+        SyncActiveStore.update(s => {
+            s.busy = false;
+        });
+    }
+}
 
-        try {
-            await performSync();
+export function useSyncFeature() {
+    const state = SyncActiveStore.useState(s => ({
+        busy: s.busy,
+        lastSynced: s.lastSynced,
+        logs: s.logs,
+        lastDuration: s.lastDuration,
+        startTime: s.startTime
+    }));
 
-            const endTime = Date.now();
-            const syncDuration = endTime - SyncActiveStore.getRawState().startTime;
-            SyncActiveStore.update(s => {
-                s.busy = false;
-                s.lastSynced = endTime;
-                s.lastDuration = syncDuration;
-                s.counter++;
-            });
-        } catch (err) {
-            SyncActiveStore.update(s => {
-                s.busy = false;
-            });
-        }
-    }, []);
+    const { busy, lastSynced, logs, lastDuration: duration, startTime } = state;
+    const [percentage, setPercentage] = useState(0);
 
     return {
-        sync,
+        sync: requestSync,
         busy,
         lastSynced,
         duration,
         logs,
-        percentage
+        percentage,
+        startTime
     };
 }
 
@@ -126,7 +124,7 @@ export function useSync(options = {}) {
     const online = useOnline();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isVisible = usePageVisibility();
-    const { sync, busy } = useSyncFeature();
+    const { busy } = SyncActiveStore.useState(s => ({ busy: s.busy }));
     const [counter, setCounter] = useState(0);
     const lastSyncRef = useRef(0);
     const timerRef = useRef(null);
@@ -139,16 +137,20 @@ export function useSync(options = {}) {
         const checkSync = () => {
             const now = Date.now();
             const timeSinceLastSync = (now - lastSyncRef.current) / 1000;
+            const sessionsBusy = UpdateSessionsStore.getRawState().busy;
 
-            if (timeSinceLastSync >= SYNC_INTERVAL && !busy) {
+            if (timeSinceLastSync >= SYNC_INTERVAL && !busy && !sessionsBusy) {
                 lastSyncRef.current = now;
-                sync();
+                requestSync();
             }
         };
 
         if (lastSyncRef.current === 0) {
-            lastSyncRef.current = Date.now();
-            sync();
+            const sessionsBusy = UpdateSessionsStore.getRawState().busy;
+            if (!sessionsBusy) {
+                lastSyncRef.current = Date.now();
+                requestSync();
+            }
         }
 
         timerRef.current = setInterval(checkSync, 10000);
@@ -158,7 +160,7 @@ export function useSync(options = {}) {
                 clearInterval(timerRef.current);
             }
         };
-    }, [active, online, isSignedIn, isVisible, sync, busy]);
+    }, [active, online, isSignedIn, isVisible, busy]);
 
     useEffect(() => {
         const unsubscribe = SyncActiveStore.subscribe(
@@ -170,6 +172,8 @@ export function useSync(options = {}) {
 
     return [counter, busy];
 }
+
+
 
 export async function clearBundleCache() {
     try {

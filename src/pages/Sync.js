@@ -36,10 +36,25 @@ export default function Sync() {
     const { updateSync } = useContext(SyncContext);
     const [groups] = useGroups([]);
     const { busy: sessionsBusy, updateSessions, updateAllSessions } = useUpdateSessions(groups);
-    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs } = useSyncFeature();
+    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
+    const [currentTime, setCurrentTime] = React.useState(Date.now());
+
+    React.useEffect(() => {
+        let interval;
+        if (syncBusy) {
+            interval = setInterval(() => {
+                setCurrentTime(Date.now());
+            }, 1000);
+        } else {
+            setCurrentTime(Date.now());
+        }
+        return () => clearInterval(interval);
+    }, [syncBusy]);
+
+    const liveDuration = syncBusy && startTime ? (currentTime - startTime) : (syncDuration || 0);
 
     React.useEffect(() => {
         if (logRef.current) {
@@ -139,7 +154,7 @@ export default function Sync() {
                                     {translations.DURATION}
                                 </Typography>
                                 <Typography variant="h6" noWrap>
-                                    {(syncBusy || syncDuration) ? formatDuration(syncDuration) : "--:--"}
+                                    {(syncBusy || syncDuration) ? formatDuration(liveDuration) : "--:--"}
                                 </Typography>
                             </Box>
 

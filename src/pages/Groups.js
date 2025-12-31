@@ -2,7 +2,7 @@ import Table from "@widgets/Table";
 import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
 import { GroupsStore } from "@util/groups";
-import { useSyncFeature } from "@sync/sync";
+import { requestSync } from "@sync/sync";
 import ColorPicker from "./Groups/ColorPicker";
 import styles from "./Groups.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -29,7 +29,7 @@ export default function Groups() {
     const { counter, showDisabled } = GroupsStore.useState();
     const [sessions, loading, groups, setGroups] = useSessions([counter], { filterSessions: false });
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
-    const { sync } = useSyncFeature();
+    const sync = requestSync;
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const syncTimerRef = useRef(null);

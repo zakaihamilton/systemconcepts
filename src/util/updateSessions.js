@@ -371,13 +371,18 @@ export function useUpdateSessions(groups) {
             });
         }
     }, [groups, prefix, getListing, updateGroup]);
-    const updateSpecificGroup = useCallback(async (name, updateAll) => {
+    const updateSpecificGroup = useCallback(async (name, updateAll, updateTags) => {
+        const isSyncBusy = SyncActiveStore.getRawState().busy;
+        if (isSyncBusy) {
+            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
+            return;
+        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
         });
         try {
-            await updateGroup(name, updateAll);
+            await updateGroup(name, updateAll, updateTags);
         } finally {
             UpdateSessionsStore.update(s => {
                 s.busy = false;
