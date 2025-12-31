@@ -584,11 +584,14 @@ export default function TableWidget(props) {
     }
 }
 
-const TableListRow = ({ index, style, data }) => {
+const TableListRow = React.memo(({ index, style, data }) => {
     const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator } = data;
     const itemIndex = hideColumns ? index : index - 1;
-    const item = items[itemIndex];
-    const { id, key } = item || {};
+    const item = items?.[itemIndex];
+
+    if (!item) return null;
+
+    const { id, key } = item;
     const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
     const selected = index && selectedRow && selectedRow(item);
 
@@ -616,12 +619,12 @@ const TableListRow = ({ index, style, data }) => {
         selected={selected}
         separator={separator}
     />;
-};
+});
 
-const TableGridCell = ({ columnIndex, rowIndex, style, data }) => {
+const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
     const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick } = data;
     const index = (rowIndex * columnCount) + columnIndex;
-    const item = items[index];
+    const item = items?.[index];
     if (!item) {
         return null;
     }
@@ -643,4 +646,4 @@ const TableGridCell = ({ columnIndex, rowIndex, style, data }) => {
         viewMode={viewMode}
         selected={selected}
     />;
-};
+});

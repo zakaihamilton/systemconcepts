@@ -171,46 +171,14 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
-        const { position, duration } = item;
-        const percentage = duration && (position / duration * 100);
-        const style = {
-            background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
-        };
-        const title = translations[item.type.toUpperCase()];
-        const onClickIcon = () => handleIconClick(item.type);
 
-        const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
-            <SessionIcon type={item.type} />
-        </div>;
+        // Cache object to store created widgets
+        const widgetCache = {};
 
-        const altIcon = <>
-            {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
-            {!!item.ai && <div className={styles.altIcon + " " + styles.ai + " " + (item.video ? styles.video : "")}>
-                <AutoAwesomeIcon />
-            </div>}
-        </>;
-
-        const nameContent = <Tooltip arrow title={item.name}>
-            <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
-                {item.name}
-                <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
-                    <div className={styles.percentage} style={{ width: percentage + "%" }} />
-                </div>
-            </span>
-        </Tooltip>;
-
-        const href = target(item);
-        let nameWidget = <Row href={href} onClick={gotoItem.bind(null, item)} icons={icon}>{nameContent}</Row>;
-        if (viewMode === "grid") {
-            nameWidget = <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />;
-        }
-
-        // Don't spread the entire item object - only add what's needed
-        const durationWidget = item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN);
-
-        // Return new object with only essential properties, not all file metadata
+        // Return object with core properties and cached getter functions
+        // Widgets are created once on first access and then reused
         return {
-            // Core properties needed for display
+            // Core properties needed for display and sorting
             key: item.key,
             id: item.id,
             name: item.name,
@@ -225,15 +193,74 @@ export default function SessionsPage() {
             thumbnail: item.thumbnail,
             video: item.video,
             ai: item.ai,
-            // Computed widgets
-            nameWidget,
-            groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
-            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(null, item)} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} />,
-            durationWidget,
-            tagsWidget: (item.tags || []).length ? <div className={styles.tags}>{item.tags.map(tag => <Chip key={tag} label={tag} size="small" className={styles.tag} />)}</div> : null,
-            tags: (item.tags || []).join(" ")
+            summary: item.summary,
+            tags: item.tags ? item.tags.join(" ") : "",
+
+            // Cached getters - create once, reuse forever
+            get nameWidget() {
+                if (widgetCache.nameWidget) return widgetCache.nameWidget;
+
+                const { position, duration } = item;
+                const percentage = duration && (position / duration * 100);
+                const style = {
+                    background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
+                };
+
+                const onClickIcon = () => handleIconClick(item.type);
+                const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
+                    <SessionIcon type={item.type} />
+                </div>;
+
+                const nameContent = <Tooltip arrow title={item.name}>
+                    <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
+                        {item.name}
+                        <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
+                            <div className={styles.percentage} style={{ width: percentage + "%" }} />
+                        </div>
+                    </span>
+                </Tooltip>;
+
+                const href = target(item);
+                widgetCache.nameWidget = viewMode === "grid"
+                    ? <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />
+                    : <Row href={href} onClick={gotoItem.bind(null, item)} icons={icon}>{nameContent}</Row>;
+
+                return widgetCache.nameWidget;
+            },
+
+            get groupWidget() {
+                if (widgetCache.groupWidget) return widgetCache.groupWidget;
+                widgetCache.groupWidget = <Group fill={viewMode === "grid"} name={item.group} color={item.color} />;
+                return widgetCache.groupWidget;
+            },
+
+            get thumbnailWidget() {
+                if (widgetCache.thumbnailWidget) return widgetCache.thumbnailWidget;
+
+                const altIcon = <>
+                    {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
+                    {!!item.ai && <div className={styles.altIcon + " " + styles.ai + " " + (item.video ? styles.video : "")}>
+                        <AutoAwesomeIcon />
+                    </div>}
+                </>;
+                const href = target(item);
+                widgetCache.thumbnailWidget = <Image href={href} onClick={gotoItem.bind(null, item)} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} />;
+                return widgetCache.thumbnailWidget;
+            },
+
+            get durationWidget() {
+                if (widgetCache.durationWidget !== undefined) return widgetCache.durationWidget;
+                widgetCache.durationWidget = item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN);
+                return widgetCache.durationWidget;
+            },
+
+            get tagsWidget() {
+                if (widgetCache.tagsWidget !== undefined) return widgetCache.tagsWidget;
+                widgetCache.tagsWidget = (item.tags || []).length ? <div className={styles.tags}>{item.tags.map(tag => <Chip key={tag} label={tag} size="small" className={styles.tag} />)}</div> : null;
+                return widgetCache.tagsWidget;
+            }
         };
-    }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick]);
+    }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick, isMobile]);
 
     const filter = useCallback(item => {
         let { group, type, year, thumbnail } = item;
