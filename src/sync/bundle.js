@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import pako from "pako";
 
 /**
@@ -28,6 +29,7 @@ export function decompressJSON(buffer) {
  * @returns {Object|null} - Parsed JSON data or null if file doesn't exist
  */
 export async function readCompressedFile(path) {
+    path = makePath(path);
     try {
         if (!await storage.exists(path)) {
             return null;
@@ -66,6 +68,7 @@ export async function readCompressedFile(path) {
  * @param {Object} data - JSON data to write
  */
 export async function writeCompressedFile(path, data) {
+    path = makePath(path);
     try {
         await storage.createFolderPath(path);
 

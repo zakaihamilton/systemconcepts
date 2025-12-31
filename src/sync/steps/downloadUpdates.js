@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile } from "../bundle";
@@ -22,8 +23,8 @@ export async function downloadUpdates(localManifest, remoteManifest) {
             const localFile = localMap.get(remoteFile.path);
 
             const fileBasename = remoteFile.path;
-            const localFilePath = `${LOCAL_SYNC_PATH}/${fileBasename}`;
-            const remoteFilePath = `${SYNC_BASE_PATH}/${fileBasename}.gz`;
+            const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
+            const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
 
             const remoteVer = parseInt(remoteFile.version);
             const localVer = localFile ? parseInt(localFile.version) : 0;
@@ -48,7 +49,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
                     }
 
                     // Update local manifest
-                    updatedLocalManifest = await updateManifestEntry(`${LOCAL_SYNC_PATH}/${FILES_MANIFEST}`, remoteFile);
+                    updatedLocalManifest = await updateManifestEntry(makePath(LOCAL_SYNC_PATH, FILES_MANIFEST), remoteFile);
                     downloadCount++;
                 }
             }

@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { SYNC_BASE_PATH, FILES_MANIFEST_GZ } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile } from "../bundle";
@@ -10,7 +11,7 @@ export async function syncManifest(localManifest) {
     const start = performance.now();
     addSyncLog("Step 3: Syncing manifest...", "info");
 
-    const remoteManifestPath = `${SYNC_BASE_PATH}/${FILES_MANIFEST_GZ}`;
+    const remoteManifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
 
     try {
         let remoteManifest = [];

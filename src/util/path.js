@@ -54,6 +54,13 @@ export function isSummaryFile(path) {
     return hasSummaryExt;
 }
 
+export function isTagsFile(path) {
+    path = makePath(path);
+    const tagsExtensions = [".tags"];
+    const hasTagsExt = !!tagsExtensions.find(ext => path.endsWith(ext));
+    return hasTagsExt;
+}
+
 export function fileExtension(path) {
     path = makePath(path);
     const components = path.split(".");

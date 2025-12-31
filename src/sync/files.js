@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { readCompressedFile, writeCompressedFile } from "./bundle";
 import { lockMutex } from "./mutex";
 
@@ -11,7 +12,7 @@ const BASE_PATH = "local/sync";
  * @returns {Promise<Object>}
  */
 export async function readFile(fileName, defaultValue = {}) {
-    const filePath = `${BASE_PATH}/${fileName}`;
+    const filePath = makePath(BASE_PATH, fileName);
     const unlock = await lockMutex({ id: filePath });
     try {
         if (!await storage.exists(filePath)) {
@@ -34,7 +35,7 @@ export async function readFile(fileName, defaultValue = {}) {
  * @param {Object} data - Content to write
  */
 export async function writeFile(fileName, data) {
-    const filePath = `${BASE_PATH}/${fileName}`;
+    const filePath = makePath(BASE_PATH, fileName);
     const unlock = await lockMutex({ id: filePath });
     try {
         await writeCompressedFile(filePath, data);

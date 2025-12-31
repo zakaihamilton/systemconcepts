@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import storage from "@util/storage";
-import { makePath } from "@util/path";
+import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleFile, isSummaryFile, isTagsFile } from "@util/path";
 import { useCallback } from "react";
 import pLimit from "./p-limit";
 
@@ -17,48 +17,9 @@ export function useUpdateSessions(groups) {
         if (!listing) {
             return [];
         }
-        const sharedPath = "local/shared/sessions/" + path.substring(prefix.length) + "/listing.json";
-        const listingBody = JSON.stringify(listing, null, 4);
-        const exists = await storage.exists(sharedPath);
-        if (exists) {
-            const body = await storage.readFile(sharedPath);
-            if (body === listingBody) {
-                return listing;
-            }
-        }
-        else {
-            await storage.createFolderPath(sharedPath);
-        }
-        await storage.writeFile(sharedPath, listingBody);
         return listing;
-    }, [prefix]);
-    const copyFile = useCallback(async (path, name) => {
-        const sourcePath = path + name;
-        const targetPath = "local/shared/sessions/" + path.substring(prefix.length) + name;
-        let sourceBody = null;
-        try {
-            sourceBody = await storage.readFile(sourcePath);
-        } catch (err) {
-            console.warn(`File not found: ${sourcePath}`);
-            return;
-        }
+    }, []);
 
-        if (!sourceBody) {
-            return;
-        }
-
-        const exists = await storage.exists(targetPath);
-        if (exists) {
-            const targetBody = await storage.readFile(targetPath);
-            if (targetBody === sourceBody) {
-                return;
-            }
-        }
-        else {
-            await storage.createFolderPath(targetPath);
-        }
-        await storage.writeFile(targetPath, sourceBody);
-    }, [prefix]);
     const updateGroup = useCallback(async (name, updateAll) => {
         const path = prefix + name;
         let itemIndex = 0;
@@ -105,7 +66,7 @@ export function useUpdateSessions(groups) {
             });
         }
         const limit = pLimit(4);
-        const promises = years.map((year, yearIndex) => limit(async () => {
+        const promises = years.map((year) => limit(async () => {
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
                 s.status[itemIndex].year = year.name;
@@ -115,137 +76,163 @@ export function useUpdateSessions(groups) {
             });
             try {
                 const yearItems = await getListing(year.path);
-                const targetYearPath = "local/shared/sessions/" + year.path.substring(prefix.length);
-                const targetTagsPath = targetYearPath + "/tags.json";
-                let tagsMap = {};
-                let tagsJsonMtime = 0;
-                let targetItems = [];
 
-                try {
-                    targetItems = await storage.getListing(targetYearPath) || [];
-                    const tagsJsonItem = targetItems && targetItems.find(item => item.name === "tags.json");
-                    if (tagsJsonItem) {
+                yearItems.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Read tags from .tags files
+                const sessionTagsMap = {};
+
+                // Group files by session ID
+                const sessionFilesMap = {};
+                for (const file of yearItems) {
+                    let id = fileTitle(file.name);
+                    // Handle resolution suffix for video files
+                    if (isVideoFile(file.name)) {
+                        const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
+                        if (resolutionMatch) {
+                            id = resolutionMatch[1];
+                        }
+                    }
+                    if (isSubtitleFile(file.name)) {
+                        id = id.replace(/\.[a-z]{2,3}$/, "");
+                    }
+                    if (isTagsFile(file.name)) {
+                        id = id.replace(/\.tags$/, "");
                         try {
-                            const tagsContent = await storage.readFile(targetTagsPath);
-                            tagsMap = JSON.parse(tagsContent) || {};
+                            const content = await storage.readFile(file.path);
+                            const data = JSON.parse(content);
+                            if (data && Array.isArray(data.tags)) {
+                                sessionTagsMap[id] = data.tags;
+                            }
                         } catch (err) {
-                            console.error("Failed to read/parse tags.json", err);
+                            console.error(`Error reading tags file ${file.path}:`, err);
+                        }
+                        continue;
+                    }
+
+                    if (!sessionFilesMap[id]) {
+                        sessionFilesMap[id] = [];
+                    }
+                    sessionFilesMap[id].push(file);
+                }
+
+                const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
+
+                const yearSessions = sortedIds.map(id => {
+                    const [, date, sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
+                    if (!date || !sessionName) {
+                        return null;
+                    }
+
+                    const fileList = sessionFilesMap[id];
+
+                    const audioFiles = fileList.filter(f => isAudioFile(f.name));
+                    const audioFile = audioFiles.length ? audioFiles[audioFiles.length - 1] : null;
+
+                    const videoFiles = fileList.filter(f => isVideoFile(f.name));
+
+                    const imageFiles = fileList.filter(f => isImageFile(f.name));
+                    const imageFile = imageFiles.length ? imageFiles[imageFiles.length - 1] : null;
+
+                    const subtitleFiles = fileList.filter(f => isSubtitleFile(f.name));
+                    const subtitleFile = subtitleFiles.length ? subtitleFiles[subtitleFiles.length - 1] : null;
+
+                    const summaryFiles = fileList.filter(f => isSummaryFile(f.name));
+                    const summaryFile = summaryFiles.length ? summaryFiles[summaryFiles.length - 1] : null;
+
+                    if (!audioFile && !videoFiles.length && !imageFile) {
+                        return null;
+                    }
+
+                    const ai = sessionName.endsWith(" - AI") || sessionName.startsWith("Overview - ");
+                    const key = name + "_" + id;
+                    // Use tags from map
+                    const rawTags = sessionTagsMap[id] || [];
+                    const sessionTags = Array.isArray(rawTags) ? [...new Set(rawTags)] : Object.keys(rawTags);
+                    const item = {
+                        key,
+                        id,
+                        name: sessionName,
+                        date,
+                        year: year.name,
+                        group: name,
+                        ai,
+                        tags: sessionTags
+                    };
+
+                    if (audioFile) {
+                        item.audio = audioFile;
+                    }
+
+                    if (videoFiles.length) {
+                        for (const file of videoFiles) {
+                            const fileId = fileTitle(file.name);
+                            const resolutionMatch = fileId.match(/(.*)_(\d+x\d+)/);
+                            if (resolutionMatch) {
+                                const [, , resolution] = resolutionMatch;
+                                if (!item.resolutions) {
+                                    item.resolutions = {};
+                                }
+                                item.resolutions[resolution] = file;
+                            } else {
+                                item.video = file;
+                            }
                         }
                     }
-                } catch (err) {
-                    // Ignore errors if file doesn't exist or is invalid
-                }
 
-                const tagsFiles = yearItems.filter(item => item.name.endsWith(".tags"));
-                const yearPrefix = year.path + "/";
-
-
-
-                // Determine which files to read
-                const filesToRead = tagsFiles.filter(file => {
-                    const fileName = file.name.replace(".tags", "");
-                    // Read if we don't have it
-                    const shouldRead = !tagsMap[fileName];
-                    return shouldRead;
-                }).map(file => file.name);
-
-                if (filesToRead.length > 0) {
-                    // For each new session, find all associated files
-                    const newSessionsData = filesToRead.map(tagsFile => {
-                        const sessionName = tagsFile.replace(".tags", "");
-                        const sessionFiles = yearItems
-                            .filter(item => item.name.startsWith(sessionName))
-                            .map(item => item.name);
-                        return {
-                            name: sessionName,
-                            files: sessionFiles
-                        };
-                    });
-
-                    UpdateSessionsStore.update(s => {
-                        s.status[itemIndex].addedCount += filesToRead.length;
-                        s.status[itemIndex].newSessions = [...s.status[itemIndex].newSessions, ...newSessionsData];
-                        s.status = [...s.status];
-                    });
-                }
-
-                // Remove deleted tags from map
-                const currentTagFileNames = tagsFiles.map(f => f.name.replace(".tags", ""));
-                let removedCount = 0;
-                Object.keys(tagsMap).forEach(key => {
-                    if (!currentTagFileNames.includes(key)) {
-                        delete tagsMap[key];
-                        removedCount++;
+                    if (imageFile) {
+                        item.thumbnail = true;
+                        item.image = imageFile;
                     }
-                });
-                if (removedCount > 0) {
-                    UpdateSessionsStore.update(s => {
-                        s.status[itemIndex].removedCount += removedCount;
-                        s.status = [...s.status];
-                    });
-                }
 
-                if (filesToRead.length > 0) {
-                    const results = await storage.readFiles(yearPrefix, filesToRead);
+                    if (subtitleFile) {
+                        item.subtitles = subtitleFile;
+                    }
 
-                    // Handle case where readFiles returns null/undefined (e.g., network error, permission issue)
-                    if (!results) {
-                        console.warn(`[Tags] ${year.path}: storage.readFiles returned null/undefined for ${filesToRead.length} files - skipping tags for this year`);
+                    if (summaryFile) {
+                        item.summary = { ...summaryFile, path: summaryFile.path.replace(/^\/aws/, "").replace(/^\//, "") };
+                    }
+
+                    if (videoFiles.length) {
+                        item.type = "video";
+                        item.typeOrder = 10;
+                    } else if (audioFile) {
+                        item.type = "audio";
+                        item.typeOrder = 20;
+                    } else if (imageFile) {
+                        item.type = "image";
+                        item.duration = 0.1;
+                        item.typeOrder = 30;
                     } else {
-                        for (const name in results) {
-                            const content = results[name];
-
-                            // Skip null or empty content (files that don't exist)
-                            if (!content) {
-                                continue;
-                            }
-
-                            const fileName = name.replace(".tags", "");
-                            try {
-                                const json = JSON.parse(content);
-
-                                // Handle case where JSON.parse returns null (server returned "null" string)
-                                if (!json) {
-                                    continue;
-                                }
-
-                                if (json.tags) {
-                                    tagsMap[fileName] = json.tags;
-                                    allSessionNames.add(fileName);
-                                } else {
-                                    console.warn(`[Tags] ${name} has no 'tags' property:`, json);
-                                }
-                            } catch (err) {
-                                console.error("Failed to parse tags file", name, err);
-                            }
-                        }
+                        item.type = "unknown";
+                        item.typeOrder = 40;
                     }
-                }
 
-                // Also collect from existing tags if any
-                Object.keys(tagsMap).forEach(name => allSessionNames.add(name));
+                    if (!item.duration) {
+                        item.duration = 0.5;
+                    }
 
-                if (Object.keys(tagsMap).length > 0) {
-                    await storage.writeFile(targetTagsPath, JSON.stringify(tagsMap, null, 4));
+                    if (ai) {
+                        if (sessionName.endsWith(" - AI")) {
+                            item.type = "ai";
+                        }
+                        else if (sessionName.startsWith("Overview - ")) {
+                            item.type = "overview";
+                        }
+                        item.typeOrder -= 5;
+                    }
 
-                    // Update sync metadata for this year
-                    await updateYearSync(name, year.name, tagsMap);
+                    return item;
+                }).filter(Boolean);
 
+                const count = await updateYearSync(name, year.name, yearSessions);
+
+                if (count > 0) {
+                    yearSessions.forEach(session => allSessionNames.add(session.id));
                     UpdateSessionsStore.update(s => {
-                        s.status[itemIndex].tagCount += Object.keys(tagsMap).length;
+                        s.status[itemIndex].addedCount += yearSessions.length;
                         s.status = [...s.status];
                     });
-                }
-
-                const s3MetadataItem = yearItems.find(i => i.name === "metadata.json");
-                if (s3MetadataItem) {
-                    const localMetadataItem = targetItems.find(i => i.name === "metadata.json");
-                    const s3Mtime = s3MetadataItem.mtime ? new Date(s3MetadataItem.mtime).getTime() : 0;
-                    const localMtime = localMetadataItem && localMetadataItem.mtime ? new Date(localMetadataItem.mtime).getTime() : 0;
-
-                    if (!localMetadataItem || s3Mtime > localMtime) {
-                        await copyFile(year.path, "/metadata.json");
-                    }
                 }
             }
             catch (err) {
@@ -288,10 +275,10 @@ export function useUpdateSessions(groups) {
         }
 
         const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
-        const newMsg = addedCount > 0 ? `, ${addedCount} new` : ", no new sessions";
+        const newMsg = addedCount > 0 ? `, ${addedCount} updated` : ", no updates";
 
         addSyncLog(`[${name}] ✓ Updated (${totalCount} sessions${newMsg}${lastSessionMsg}).`, "success");
-    }, [prefix, copyFile, getListing]);
+    }, [prefix, getListing]);
     const updateSessions = useCallback(async (includeDisabled) => {
         const isSyncBusy = SyncActiveStore.getRawState().busy;
         if (isSyncBusy) {
@@ -375,16 +362,50 @@ export function useUpdateSessions(groups) {
     }), [status, busy, start, updateSessions, updateAllSessions, updateSpecificGroup]);
 }
 
-async function updateYearSync(groupName, year, tagsMap) {
-    const localPath = `${LOCAL_SYNC_PATH}/${groupName}/${year}.json`;
+async function updateYearSync(groupName, year, sessions) {
+    const localPath = makePath(LOCAL_SYNC_PATH, groupName, `${year}.json`);
     try {
+        let version = 1;
+
+        // Check for existing version
+        if (await storage.exists(localPath)) {
+            const existingContent = await storage.readFile(localPath);
+            try {
+                const existingData = JSON.parse(existingContent);
+                if (existingData && existingData.version) {
+                    version = existingData.version + 1;
+                }
+            } catch (e) {
+                // Ignore parse errors, start fresh
+            }
+        }
+
         const data = {
-            version: 1,
+            version,
             group: groupName,
             year: year,
-            sessions: Object.keys(tagsMap).sort().map(name => ({ name })),
+            sessions: sessions.sort((a, b) => a.id.localeCompare(b.id)).map(s => ({ name: s.id, ...s })),
             counter: Date.now()
         };
+        // Check if content changed
+        if (await storage.exists(localPath)) {
+            const existingContent = await storage.readFile(localPath);
+            // We need to compare w/o version and counter to see if actual data changed,
+            // but since we already incremented version, simple string compare won't work if we want to avoid bumps for no reason.
+            // Let's compare "sessions" and "group" and "year".
+            try {
+                const existingObj = JSON.parse(existingContent);
+                const exSessions = JSON.stringify(existingObj.sessions);
+                const newSessions = JSON.stringify(data.sessions);
+                if (exSessions === newSessions && existingObj.group === data.group) {
+                    return 0;
+                }
+                // If we are here, something changed.
+                // We typically use the version we calculated earlier.
+            } catch (e) {
+                // if parse fails, overwrite
+            }
+        }
         await writeCompressedFile(localPath, data);
         return data.counter;
     } catch (err) {
@@ -394,8 +415,8 @@ async function updateYearSync(groupName, year, tagsMap) {
 }
 
 async function finalizeGroupSync(groupName) {
-    const localGroupPath = `${LOCAL_SYNC_PATH}/${groupName}.json`;
-    const localYearsPath = `${LOCAL_SYNC_PATH}/${groupName}`;
+    const localGroupPath = makePath(LOCAL_SYNC_PATH, `${groupName}.json`);
+    const localYearsPath = makePath(LOCAL_SYNC_PATH, groupName);
 
     try {
         const yearsListing = await storage.getListing(localYearsPath);
@@ -411,8 +432,19 @@ async function finalizeGroupSync(groupName) {
             }
         }
 
+        let version = 1;
+        if (await storage.exists(localGroupPath)) {
+            const existingContent = await storage.readFile(localGroupPath);
+            try {
+                const existingData = JSON.parse(existingContent);
+                if (existingData && existingData.version) {
+                    version = existingData.version + 1;
+                }
+            } catch (e) { }
+        }
+
         const groupData = {
-            version: 1,
+            version,
             group: groupName,
             date: Date.now(),
             years: years

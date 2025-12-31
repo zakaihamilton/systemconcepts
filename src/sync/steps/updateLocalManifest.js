@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
 import { getFileInfo } from "../hash";
@@ -10,7 +11,7 @@ export async function updateLocalManifest(localFiles) {
     const start = performance.now();
     addSyncLog("Step 2: Updating local manifest...", "info");
 
-    const localManifestPath = `${LOCAL_SYNC_PATH}/${FILES_MANIFEST}`;
+    const localManifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
 
     try {
         let manifest = [];

@@ -1,4 +1,5 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST_GZ } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
@@ -26,8 +27,8 @@ export async function uploadUpdates(localManifest, remoteManifest) {
 
             if (remoteFile && localVer > remoteVer) {
                 const fileBasename = localFile.path;
-                const localFilePath = `${LOCAL_SYNC_PATH}/${fileBasename}`;
-                const remoteFilePath = `${SYNC_BASE_PATH}/${fileBasename}.gz`;
+                const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
+                const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
 
                 addSyncLog(`Uploading ${fileBasename} (v${localVer})...`, "info");
 
@@ -46,7 +47,7 @@ export async function uploadUpdates(localManifest, remoteManifest) {
                     }
 
                     // Update remote manifest
-                    updatedRemoteManifest = await updateManifestEntry(`${SYNC_BASE_PATH}/${FILES_MANIFEST_GZ}`, localFile);
+                    updatedRemoteManifest = await updateManifestEntry(makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ), localFile);
                     uploadCount++;
                 }
             }
