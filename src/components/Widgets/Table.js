@@ -87,6 +87,8 @@ export default function TableWidget(props) {
     const gridRef = React.useRef();
     const hasRestoredScrollRef = React.useRef(false);
     const lastResetDepsRef = React.useRef(resetScrollDeps);
+    const [isScrolling, setIsScrolling] = React.useState(false);
+    const scrollTimeoutRef = React.useRef(null);
 
     // Handle scroll position restoration after component mounts or data loads
     useEffect(() => {
@@ -142,6 +144,27 @@ export default function TableWidget(props) {
             timeoutId = setTimeout(() => saveScrollPosition(offset), 300);
         };
     }, [saveScrollPosition]);
+
+    // Handle scroll state for performance optimization
+    const handleScrollState = React.useCallback((offset) => {
+        // Save scroll position
+        debouncedSaveScroll(offset);
+
+        // Mark as scrolling immediately
+        if (!isScrolling) {
+            setIsScrolling(true);
+        }
+
+        // Clear previous timeout
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+
+        // Mark scroll as stopped after 2 seconds of no scroll
+        scrollTimeoutRef.current = setTimeout(() => {
+            setIsScrolling(false);
+        }, 2000);
+    }, [debouncedSaveScroll, isScrolling]);
     const pageSize = useContext(ContentSize);
     const search = useSearch(name, () => {
         store.update(s => {
@@ -414,8 +437,9 @@ export default function TableWidget(props) {
         sidePadding,
         orderBy,
         order,
-        getSeparator
-    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator]);
+        getSeparator,
+        isScrolling
+    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, isScrolling]);
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
@@ -470,7 +494,7 @@ export default function TableWidget(props) {
                 overscanCount={1}
                 initialScrollOffset={scrollOffset}
                 onScroll={({ scrollOffset }) => {
-                    debouncedSaveScroll(scrollOffset);
+                    handleScrollState(scrollOffset);
                 }}
                 itemData={itemData}
             >
@@ -573,7 +597,7 @@ export default function TableWidget(props) {
                 overscanColumnCount={0}
                 initialScrollTop={scrollOffset}
                 onScroll={({ scrollTop }) => {
-                    debouncedSaveScroll(scrollTop);
+                    handleScrollState(scrollTop);
                 }}
                 itemData={itemData}
             >
@@ -588,7 +612,7 @@ export default function TableWidget(props) {
 }
 
 const TableListRow = React.memo(({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator } = data;
+    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, isScrolling } = data;
     const itemIndex = hideColumns ? index : index - 1;
     const item = items?.[itemIndex];
 
@@ -610,13 +634,16 @@ const TableListRow = React.memo(({ index, style, data }) => {
         }
     }
 
+    // Inject isScrolling into item for getter access
+    const itemWithScrollState = { ...item, isScrolling };
+
     return <Item
         key={key || id || itemIndex}
         style={{ ...style, ...itemStyles }}
         {...props}
         columns={visibleColumns}
         rowClick={rowClick}
-        item={item}
+        item={itemWithScrollState}
         index={itemIndex}
         viewMode={viewMode}
         selected={selected}

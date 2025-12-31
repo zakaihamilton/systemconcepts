@@ -201,7 +201,11 @@ export default function SessionsPage() {
 
             // Cached getters - create once, reuse forever
             get nameWidget() {
-                if (widgetCache.nameWidget) return widgetCache.nameWidget;
+                // Invalidate cache if scroll state changed
+                const cacheKey = this.isScrolling ? 'scrolling' : 'stopped';
+                if (widgetCache.nameWidget && widgetCache.nameWidgetState === cacheKey) {
+                    return widgetCache.nameWidget;
+                }
 
                 const { position, duration } = item;
                 const percentage = duration && (position / duration * 100);
@@ -213,20 +217,26 @@ export default function SessionsPage() {
                     <SessionIcon type={item.type} />
                 </div>;
 
-                const nameContent = <Tooltip arrow title={item.name}>
+                const nameContentInner = (
                     <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                         {item.name}
                         <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
                             <div className={styles.percentage} style={{ width: percentage + "%" }} />
                         </div>
                     </span>
-                </Tooltip>;
+                );
+
+                // Hybrid approach: native tooltip during scroll (fast), MUI tooltip when stopped (fancy)
+                const nameContent = this.isScrolling
+                    ? <span title={item.name}>{nameContentInner}</span>  // Native browser tooltip
+                    : <Tooltip arrow title={item.name}>{nameContentInner}</Tooltip>;  // MUI tooltip
 
                 const href = target(item);
                 widgetCache.nameWidget = viewMode === "grid"
                     ? <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />
                     : <Row href={href} onClick={boundGotoItem} icons={icon}>{nameContent}</Row>;
 
+                widgetCache.nameWidgetState = cacheKey;
                 return widgetCache.nameWidget;
             },
 
