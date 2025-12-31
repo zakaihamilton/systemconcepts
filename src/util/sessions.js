@@ -54,6 +54,10 @@ export function useSessions(depends = [], options = {}) {
         if (!continueUpdate) {
             return;
         }
+
+        // Helper to yield to the event loop
+        const yieldToEventLoop = () => new Promise(resolve => setTimeout(resolve, 0));
+
         try {
             const [groupsSyncData] = await Promise.all([
                 readCompressedFile(makePath("local/sync/groups.json"))
@@ -62,46 +66,71 @@ export function useSessions(depends = [], options = {}) {
 
             // groupsSyncData.groups is now an array of { name, counter }
             const groups = Array.isArray(groupsSyncData?.groups) ? groupsSyncData.groups : [];
-            const groupsWithYears = await Promise.all(groups.map(async group => {
-                const groupSyncData = await readCompressedFile(makePath("local/sync", `${group.name}.json`));
-                // groupSyncData.years is now an array of { name, counter }
-                const years = Array.isArray(groupSyncData?.years) ? groupSyncData.years : [];
-                return { group, years };
-            }));
+
+            // Process groups in chunks to avoid blocking
+            const CHUNK_SIZE = 3;
+            let groupsWithYears = [];
+
+            for (let i = 0; i < groups.length; i += CHUNK_SIZE) {
+                const chunk = groups.slice(i, i + CHUNK_SIZE);
+                const chunkResults = await Promise.all(chunk.map(async group => {
+                    const groupSyncData = await readCompressedFile(makePath("local/sync", `${group.name}.json`));
+                    const years = Array.isArray(groupSyncData?.years) ? groupSyncData.years : [];
+                    return { group, years };
+                }));
+                groupsWithYears.push(...chunkResults);
+
+                // Yield to UI after each chunk
+                if (i + CHUNK_SIZE < groups.length) {
+                    await yieldToEventLoop();
+                }
+            }
 
             const tasks = groupsWithYears.flatMap(({ group, years }) =>
                 years.map(year => ({ group, year }))
             );
 
-            const processedYears = await Promise.all(tasks.map(async ({ group, year }) => {
-                const path = makePath("local/sync", group.name, `${year.name}.json`);
-                try {
-                    const data = await readCompressedFile(path);
-                    if (!data || !data.sessions) {
-                        return [];
-                    }
+            // Process year files in chunks
+            const YEAR_CHUNK_SIZE = 5;
+            let allSessions = [];
 
-                    const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
-
-                    return data.sessions.map(session => {
-                        let thumbnail = session.thumbnail;
-                        if (session.image && cdn.url) {
-                            thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+            for (let i = 0; i < tasks.length; i += YEAR_CHUNK_SIZE) {
+                const chunk = tasks.slice(i, i + YEAR_CHUNK_SIZE);
+                const chunkResults = await Promise.all(chunk.map(async ({ group, year }) => {
+                    const path = makePath("local/sync", group.name, `${year.name}.json`);
+                    try {
+                        const data = await readCompressedFile(path);
+                        if (!data || !data.sessions) {
+                            return [];
                         }
 
-                        return {
-                            ...session,
-                            color: groupInfo.color,
-                            thumbnail
-                        };
-                    });
-                } catch (err) {
-                    console.error("Error reading sessions file", path, err);
-                    return [];
-                }
-            }));
+                        const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
 
-            const allSessions = processedYears.flat();
+                        return data.sessions.map(session => {
+                            let thumbnail = session.thumbnail;
+                            if (session.image && cdn.url) {
+                                thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                            }
+
+                            return {
+                                ...session,
+                                color: groupInfo.color,
+                                thumbnail
+                            };
+                        });
+                    } catch (err) {
+                        console.error("Error reading sessions file", path, err);
+                        return [];
+                    }
+                }));
+
+                allSessions.push(...chunkResults.flat());
+
+                // Yield to UI after each chunk
+                if (i + YEAR_CHUNK_SIZE < tasks.length) {
+                    await yieldToEventLoop();
+                }
+            }
 
             SessionsStore.update(s => {
                 s.sessions = allSessions;
@@ -122,7 +151,7 @@ export function useSessions(depends = [], options = {}) {
                 s.syncCounter = syncCounter;
             });
         }
-    }, []);
+    }, [groupsSettings]);
 
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {

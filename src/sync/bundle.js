@@ -40,8 +40,6 @@ export async function readCompressedFile(path) {
             return typeof data === "string" ? JSON.parse(data) : data;
         }
 
-        console.log(`[Bundle] Reading ${path}, type: ${typeof data}, length: ${data?.length}`);
-
         // All storage returns base64 string (both local and AWS)
         let buffer;
         if (typeof data === 'string') {
