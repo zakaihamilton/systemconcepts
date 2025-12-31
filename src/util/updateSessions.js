@@ -54,7 +54,7 @@ export function useUpdateSessions(groups) {
         catch (err) {
             console.error(err);
             UpdateSessionsStore.update(s => {
-                s.status[itemIndex].errors.push(err);
+                s.status[itemIndex].errors.push(err.message || String(err));
                 s.status = [...s.status];
             });
         }
@@ -265,7 +265,7 @@ export function useUpdateSessions(groups) {
             catch (err) {
                 console.error(err);
                 UpdateSessionsStore.update(s => {
-                    s.status[itemIndex].errors.push(err);
+                    s.status[itemIndex].errors.push(err.message || String(err));
                     s.status = [...s.status];
                 });
             } finally {
