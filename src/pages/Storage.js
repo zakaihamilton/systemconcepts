@@ -238,6 +238,7 @@ export default function Storage({ path = "" }) {
                 });
             }}
             depends={[mode, select, path, editing, dateFormatter]}
+            resetScrollDeps={[path]}
             onExport={onExport}
             onImport={!readOnly && onImport}
             statusBar={statusBar}
