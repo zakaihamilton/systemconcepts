@@ -119,7 +119,7 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
                 {!!toolbarItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
                 <Menu items={menuItems}>
                     <Tooltip arrow title={translations.MENU}>
-                        <IconButton className={styles.menuButton} size="small">
+                        <IconButton className={styles.menuButton} size="small" aria-label={translations.MENU}>
                             <MoreVertIcon />
                         </IconButton>
                     </Tooltip>
