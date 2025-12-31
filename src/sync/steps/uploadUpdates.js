@@ -2,7 +2,7 @@ import storage from "@util/storage";
 import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST_GZ } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
-import { getFileInfo } from "../fileUtils";
+import { getFileInfo } from "../hash";
 import { updateManifestEntry } from "../manifestUtils";
 
 /**

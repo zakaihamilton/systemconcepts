@@ -1,7 +1,7 @@
 import storage from "@util/storage";
 import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
-import { getFileInfo } from "../fileUtils";
+import { getFileInfo } from "../hash";
 
 /**
  * Step 2: If a local file exists that does not exist in the listing, add it to the files.json with a version of 1
