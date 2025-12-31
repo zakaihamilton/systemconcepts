@@ -3,7 +3,7 @@ import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST_GZ } from "../constants
 import { addSyncLog } from "../logs";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
-import { updateManifestEntry } from "../manifestUtils";
+import { updateManifestEntry } from "../manifest";
 
 /**
  * Step 6: If the local sync has a file that is not in the remote files.json we upload the corresponding .gz file and compress it, upload it to the aws sync folder and add it to the files.json

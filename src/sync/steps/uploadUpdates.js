@@ -3,7 +3,7 @@ import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST_GZ } from "../constants
 import { addSyncLog } from "../logs";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
-import { updateManifestEntry } from "../manifestUtils";
+import { updateManifestEntry } from "../manifest";
 
 /**
  * Step 5: If the version is lower on the remote file we upload the corresponding .gz file and compress it and replace the remote file

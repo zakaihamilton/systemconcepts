@@ -3,7 +3,7 @@ import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
-import { updateManifestEntry } from "../manifestUtils";
+import { updateManifestEntry } from "../manifest";
 
 /**
  * Step 4: If the version is higher on the remote file we download the corresponding .gz file and decompress it and replace the local file
