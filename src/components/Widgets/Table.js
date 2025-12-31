@@ -392,7 +392,8 @@ export default function TableWidget(props) {
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
-        const sizeInPixels = text.trim().endsWith("em") ? number * (size && size.emPixels) : number;
+        const emPixels = (size && size.emPixels) || 16;
+        const sizeInPixels = text.trim().endsWith("em") ? number * emPixels : number;
         return sizeInPixels;
     };
 
@@ -536,6 +537,7 @@ export default function TableWidget(props) {
                 style={style}
                 selected={selected}
                 separator={separator}
+                renderColumn={renderColumn}
                 {...props}
             />;
         });

@@ -4,11 +4,11 @@ import styles from "./Row.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
 
-export default function RowWidget({ className = "", separator, viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, ...props }) {
+export default function RowWidget({ className = "", separator, viewMode, index, selected: selectedRow, rowHeight, columns, rowClick, item, style = {}, renderColumn, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, onClick, selected } = column;
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
-        const value = item[columnId];
+        const value = renderColumn ? renderColumn(columnId, item) : item[columnId];
         const isSelected = selected && selected(item);
         return (<TableCell
             dir={dir}
