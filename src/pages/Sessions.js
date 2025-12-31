@@ -175,6 +175,9 @@ export default function SessionsPage() {
         // Cache object to store created widgets
         const widgetCache = {};
 
+        // Cache bound event handlers once to avoid recreation
+        const boundGotoItem = () => gotoItem(item);
+        const boundHandleIconClick = () => handleIconClick(item.type);
         // Return object with core properties and cached getter functions
         // Widgets are created once on first access and then reused
         return {
@@ -206,8 +209,7 @@ export default function SessionsPage() {
                     background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
                 };
 
-                const onClickIcon = () => handleIconClick(item.type);
-                const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
+                const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={boundHandleIconClick} id={item.type}>
                     <SessionIcon type={item.type} />
                 </div>;
 
@@ -223,7 +225,7 @@ export default function SessionsPage() {
                 const href = target(item);
                 widgetCache.nameWidget = viewMode === "grid"
                     ? <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />
-                    : <Row href={href} onClick={gotoItem.bind(null, item)} icons={icon}>{nameContent}</Row>;
+                    : <Row href={href} onClick={boundGotoItem} icons={icon}>{nameContent}</Row>;
 
                 return widgetCache.nameWidget;
             },
@@ -244,7 +246,7 @@ export default function SessionsPage() {
                     </div>}
                 </>;
                 const href = target(item);
-                widgetCache.thumbnailWidget = <Image href={href} onClick={gotoItem.bind(null, item)} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} />;
+                widgetCache.thumbnailWidget = <Image href={href} onClick={boundGotoItem} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} loading="lazy" />;
                 return widgetCache.thumbnailWidget;
             },
 

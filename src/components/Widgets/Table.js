@@ -467,6 +467,7 @@ export default function TableWidget(props) {
                 itemCount={itemCount}
                 itemSize={itemHeightInPixels}
                 width={size.width}
+                overscanCount={1}
                 initialScrollOffset={scrollOffset}
                 onScroll={({ scrollOffset }) => {
                     debouncedSaveScroll(scrollOffset);
@@ -568,6 +569,8 @@ export default function TableWidget(props) {
                 rowHeight={cellHeightInPixels}
                 height={height}
                 width={size.width}
+                overscanRowCount={1}
+                overscanColumnCount={0}
                 initialScrollTop={scrollOffset}
                 onScroll={({ scrollTop }) => {
                     debouncedSaveScroll(scrollTop);
