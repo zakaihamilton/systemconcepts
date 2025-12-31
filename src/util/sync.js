@@ -227,9 +227,22 @@ async function syncBundle(bundleDef, manifest) {
         }
         const workStartTime = performance.now();
 
-        // Step 2: Only scan directory if we detected changes
-        const bundleListing = await storage.getRecursiveList(path);
-        let remoteBundle = await bundle.getRemoteBundle(name, remoteListing);
+        // Step 2: Only scan directory if we detected changes or need to verify
+        // Skip expensive directory scan when bundle version indicates no changes
+        let bundleListing = null;
+        let remoteBundle = null;
+
+        if (changed) {
+            bundleListing = await storage.getRecursiveList(path);
+            remoteBundle = await bundle.getRemoteBundle(name, remoteListing);
+        } else {
+            // No changes detected - skip local scan and use cached remote bundle
+            remoteBundle = await bundle.getRemoteBundle(name, remoteListing);
+            // Return early - no work needed
+            const duration = Math.round(performance.now() - workStartTime);
+            addSyncLog(`[${shortName}] ✓ Up to date (${duration}ms).`, "success");
+            return false;
+        }
 
         const isBundleCorrupted = remoteBundle && Object.values(remoteBundle).some(item => item.content == null);
         if (isBundleCorrupted) {
@@ -250,11 +263,11 @@ async function syncBundle(bundleDef, manifest) {
 
         let localUpdated = false;
         if (updated || (isBundleCorrupted && Object.keys(merged).length > 0)) {
-            console.log(`[Sync] ${shortName}: ${updated} changes detected. Uploading to server...`);
+            addSyncLog(`[${shortName}] ${updated} changes detected. Uploading to server...`, "info");
             await bundle.saveRemoteBundle(name, merged);
             localUpdated = true;
         } else {
-            console.log(`[Sync] ${shortName}: No local changes to upload.`);
+            addSyncLog(`[${shortName}] No local changes to upload.`, "info");
         }
 
         const { downloadCount, isBundleCorrupted: appliedCorruption } = await bundle.applyBundle(
@@ -327,7 +340,7 @@ export function useSyncFeature() {
             if (pollSync && s.lastSynced && diff < SYNC_INTERVAL) {
                 continueSync = false;
             } else if (updateBusy) {
-                console.log("[Sync] Session update in progress, skipping sync");
+                addSyncLog("Session update in progress, skipping sync", "info");
                 continueSync = false;
             }
         });

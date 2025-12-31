@@ -21,6 +21,7 @@ import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SessionIcon from "@widgets/SessionIcon";
 import Chip from "@mui/material/Chip";
+import { SyncActiveStore } from "@util/syncState";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -324,6 +325,21 @@ export default function SessionsPage() {
             }
         });
     }, [isSignedIn, translations]);
+
+    // Watch for sync completion and reload sessions if needed
+    const needsSessionReload = SyncActiveStore.useState(s => s.needsSessionReload);
+    useEffect(() => {
+        if (needsSessionReload) {
+            // Trigger session reload by incrementing the sessions counter
+            SessionsStore.update(s => {
+                s.counter = (s.counter || 0) + 1;
+            });
+            // Clear the flag to acknowledge the reload
+            SyncActiveStore.update(s => {
+                s.needsSessionReload = false;
+            });
+        }
+    }, [needsSessionReload]);
 
     return <>
         {!isMobile && <FilterBar />}
