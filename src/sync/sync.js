@@ -75,6 +75,7 @@ export async function requestSync() {
     SyncActiveStore.update(s => {
         s.busy = true;
         s.startTime = Date.now();
+        s.lastSyncTime = Date.now(); // Track when we started this sync
         s.logs = [];
     });
 
@@ -126,7 +127,6 @@ export function useSync(options = {}) {
     const isVisible = usePageVisibility();
     const { busy } = SyncActiveStore.useState(s => ({ busy: s.busy }));
     const [counter, setCounter] = useState(0);
-    const lastSyncRef = useRef(0);
     const timerRef = useRef(null);
 
     useEffect(() => {
@@ -136,19 +136,20 @@ export function useSync(options = {}) {
 
         const checkSync = () => {
             const now = Date.now();
-            const timeSinceLastSync = (now - lastSyncRef.current) / 1000;
+            const lastSyncTime = SyncActiveStore.getRawState().lastSyncTime;
+            const timeSinceLastSync = (now - lastSyncTime) / 1000;
             const sessionsBusy = UpdateSessionsStore.getRawState().busy;
 
             if (timeSinceLastSync >= SYNC_INTERVAL && !busy && !sessionsBusy) {
-                lastSyncRef.current = now;
                 requestSync();
             }
         };
 
-        if (lastSyncRef.current === 0) {
+        // Only sync immediately if we've NEVER synced before (fresh session)
+        const lastSyncTime = SyncActiveStore.getRawState().lastSyncTime;
+        if (lastSyncTime === 0) {
             const sessionsBusy = UpdateSessionsStore.getRawState().busy;
             if (!sessionsBusy) {
-                lastSyncRef.current = Date.now();
                 requestSync();
             }
         }

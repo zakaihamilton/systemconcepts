@@ -5,6 +5,7 @@ export const SyncActiveStore = new Store({
     counter: 0,
     busy: false,
     lastSynced: 0,
+    lastSyncTime: 0, // Track when we last attempted/completed a sync for auto-sync logic
     progress: { total: 0, processed: 0 },
     currentBundle: null,  // Track which bundle is currently being synced
     logs: [], // Store sync milestones
