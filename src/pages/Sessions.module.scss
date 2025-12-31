@@ -1,6 +1,10 @@
 .gridThumbnail {
     grid-row: 3 / 7;
     grid-column: 1 / 6;
+
+    @media (max-width: 768px) {
+        grid-row: 3 / 4;
+    }
 }
 
 .gridName {
@@ -32,6 +36,12 @@
     z-index: 1;
     font-weight: bold;
     border-radius: 0em 0em 0em 0.5em;
+
+    @media (max-width: 768px) {
+        grid-row: 4/5;
+        padding-left: 3px;
+        font-weight: normal;
+    }
 }
 
 .gridDuration {
@@ -40,6 +50,10 @@
     background-color: var(--chrome-background);
     z-index: 1;
     border-radius: 0em 0em 0.5em 0em;
+
+    @media (max-width: 768px) {
+        grid-row: 4/5;
+    }
 }
 
 .gridGroup {
@@ -63,6 +77,12 @@
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 4px 0 var(--box-shadow-color);
     border-radius: 0.5em;
+
+    @media (max-width: 768px) {
+        grid-template-rows: 2em 2em 1fr 2em;
+        margin-bottom: 0.5em;
+        font-size: 0.9em;
+    }
 }
 
 .listItem {

@@ -227,7 +227,7 @@ export default function SessionsPage() {
             // Computed widgets
             nameWidget,
             groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
-            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(null, item)} path={item.thumbnail} width="15em" height="10em" alt={altIcon} />,
+            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(null, item)} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} />,
             durationWidget,
             tagsWidget: (item.tags || []).length ? <div className={styles.tags}>{item.tags.map(tag => <Chip key={tag} label={tag} size="small" className={styles.tag} />)}</div> : null,
             tags: (item.tags || []).join(" ")
@@ -328,8 +328,8 @@ export default function SessionsPage() {
     return <>
         {!isMobile && <FilterBar />}
         <Table
-            cellWidth="16em"
-            cellHeight="20em"
+            cellWidth={isMobile ? "11em" : "16em"}
+            cellHeight={isMobile ? "12em" : "20em"}
             name="sessions"
             store={SessionsStore}
             columns={columns}

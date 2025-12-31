@@ -9,7 +9,8 @@ export const SyncActiveStore = new Store({
     currentBundle: null,  // Track which bundle is currently being synced
     logs: [], // Store sync milestones
     lastDuration: 0, // Track duration of last successful sync
-    startTime: 0 // Track when current sync started
+    startTime: 0, // Track when current sync started
+    needsSessionReload: false // Signal that sessions should be reloaded
 });
 
 export const UpdateSessionsStore = new Store({

@@ -101,6 +101,7 @@ export async function clearBundleCache() {
             s.currentBundle = null;
             s.logs = [];
             s.lastDuration = 0;
+            s.needsSessionReload = false;
         });
 
         // Reset update sessions state
@@ -383,20 +384,22 @@ export function useSyncFeature() {
             syncSucceeded = true;
             const finalDuration = Date.now() - syncStartTime;
 
+            // Always increment counter on successful sync so components know sync completed
+            SyncActiveStore.update(s => {
+                s.counter++;
+                s.lastSynced = currentTime;
+                s.lastDuration = finalDuration;
+                s.waitForApproval = false;
+                // Signal session reload if changes were detected
+                if (updateCounter > 0) {
+                    s.needsSessionReload = true;
+                }
+            });
+
             if (updateCounter > 0) {
-                SyncActiveStore.update(s => {
-                    s.counter++;
-                    s.lastSynced = currentTime;
-                    s.lastDuration = finalDuration;
-                    s.waitForApproval = false;
-                });
                 setChanged(true);
                 addSyncLog(`Synchronization completed. Applied ${updateCounter} updates.`, "success");
             } else {
-                SyncActiveStore.update(s => {
-                    s.lastSynced = currentTime;
-                    s.lastDuration = finalDuration;
-                });
                 addSyncLog("Synchronization completed. No changes found.", "info");
             }
         } catch (err) {
