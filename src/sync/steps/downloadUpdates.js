@@ -1,67 +1,101 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
+import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
-import { updateManifestEntry } from "../manifest";
+import { applyManifestUpdates } from "../manifest";
 
 /**
- * Step 4: If the version is higher on the remote file we download the corresponding .gz file and decompress it and replace the local file
+ * Helper function to download a single file
+ */
+async function downloadFile(remoteFile) {
+    const fileBasename = remoteFile.path;
+    const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
+    const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
+
+    try {
+        const data = await readCompressedFile(remoteFilePath);
+        if (!data) return null;
+
+        await storage.createFolderPath(localFilePath);
+        const content = JSON.stringify(data, null, 4);
+        await storage.writeFile(localFilePath, content);
+
+        // Verify hash
+        const info = await getFileInfo(content);
+        if (info.hash !== remoteFile.hash) {
+            console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
+        }
+
+        return remoteFile;
+    } catch (err) {
+        console.error(`[Sync] Failed to download ${fileBasename}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Step 4: Download files that have higher version on remote
+ * Uses parallel batch processing for performance
  */
 export async function downloadUpdates(localManifest, remoteManifest) {
     const start = performance.now();
     addSyncLog("Step 4: Downloading updates...", "info");
 
-    let updatedLocalManifest = [...localManifest];
-    let downloadCount = 0;
-
     try {
         const localMap = new Map(localManifest.map(f => [f.path, f]));
+        const toDownload = [];
 
+        // Collect files that need downloading
         for (const remoteFile of remoteManifest) {
             const localFile = localMap.get(remoteFile.path);
-
-            const fileBasename = remoteFile.path;
-            const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
-            const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
-
             const remoteVer = parseInt(remoteFile.version);
             const localVer = localFile ? parseInt(localFile.version) : 0;
 
             if (remoteVer > localVer) {
-                addSyncLog(`Downloading ${fileBasename} (v${remoteVer})...`, "info");
-
-                // Download and decompress
-                const data = await readCompressedFile(remoteFilePath);
-                if (data) {
-                    // Write to local
-                    await storage.createFolderPath(localFilePath);
-
-                    // If it's an object, stringify it
-                    const content = JSON.stringify(data, null, 4);
-                    await storage.writeFile(localFilePath, content);
-
-                    // Verify hash
-                    const info = await getFileInfo(content);
-                    if (info.hash !== remoteFile.hash) {
-                        console.warn(`[Sync] Hash mismatch for downloaded file ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
-                    }
-
-                    // Update local manifest
-                    updatedLocalManifest = await updateManifestEntry(makePath(LOCAL_SYNC_PATH, FILES_MANIFEST), remoteFile);
-                    downloadCount++;
-                }
+                toDownload.push(remoteFile);
             }
         }
 
-        const duration = (performance.now() - start).toFixed(1);
-        addSyncLog(`✓ Downloaded ${downloadCount} file(s) in ${duration}s`, downloadCount > 0 ? "success" : "info");
+        if (toDownload.length === 0) {
+            addSyncLog("✓ No downloads needed", "info");
+            return { manifest: localManifest, hasChanges: false };
+        }
+
+        addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
+
+        // Download in parallel batches
+        const updates = [];
+        for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
+            const batch = toDownload.slice(i, i + SYNC_BATCH_SIZE);
+            const progress = Math.min(i + batch.length, toDownload.length);
+            const percent = Math.round((progress / toDownload.length) * 100);
+
+            addSyncLog(`Downloading ${progress}/${toDownload.length} (${percent}%)...`, "info");
+
+            const results = await Promise.all(
+                batch.map(remoteFile => downloadFile(remoteFile))
+            );
+
+            updates.push(...results.filter(Boolean));
+        }
+
+        // Apply all updates in a single operation
+        const updatedManifest = await applyManifestUpdates(localManifest, updates);
+
+        // Write updated manifest to disk
+        const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+        await storage.writeFile(manifestPath, JSON.stringify(updatedManifest, null, 4));
+
+        const duration = ((performance.now() - start) / 1000).toFixed(1);
+        addSyncLog(`✓ Downloaded ${updates.length} file(s) in ${duration}s`, updates.length > 0 ? "success" : "info");
+
+        return { manifest: updatedManifest, hasChanges: updates.length > 0 };
+
     } catch (err) {
         console.error("[Sync] Download failed:", err);
         addSyncLog(`Download failed: ${err.message}`, "error");
         throw err;
     }
-
-    return { manifest: updatedLocalManifest, hasChanges: downloadCount > 0 };
 }

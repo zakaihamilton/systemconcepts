@@ -30,3 +30,26 @@ export async function updateManifestEntry(manifestPath, entry) {
     }
     return manifest;
 }
+
+/**
+ * Apply multiple manifest updates in a single write operation
+ * More efficient than calling updateManifestEntry multiple times
+ */
+export async function applyManifestUpdates(baseManifest, updates) {
+    if (!updates || updates.length === 0) return baseManifest;
+
+    const manifest = [...baseManifest];
+    const pathMap = new Map(manifest.map((f, i) => [f.path, i]));
+
+    for (const update of updates) {
+        const index = pathMap.get(update.path);
+        if (index !== undefined) {
+            manifest[index] = update;
+        } else {
+            manifest.push(update);
+            pathMap.set(update.path, manifest.length - 1);
+        }
+    }
+
+    return manifest;
+}

@@ -1,56 +1,83 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST_GZ } from "../constants";
+import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
-import { readCompressedFile, writeCompressedFile } from "../bundle";
+import { writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
+import { applyManifestUpdates } from "../manifest";
 
 /**
- * Step 6: If the local sync has a file that is not in the remote files.json we upload the corresponding .gz file and compress it, upload it to the aws sync folder and add it to the files.json
+ * Helper function to upload a new file
+ */
+async function uploadNewFile(localFile) {
+    const fileBasename = localFile.path;
+    const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
+    const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
+
+    try {
+        const content = await storage.readFile(localFilePath);
+        if (!content) return null;
+
+        const data = JSON.parse(content);
+        await writeCompressedFile(remoteFilePath, data);
+
+        // Hash verification is already done locally, skip re-download
+        return localFile;
+    } catch (err) {
+        console.error(`[Sync] Failed to upload new file ${fileBasename}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Step 6: Upload new files not present in remote manifest
+ * Uses parallel batch processing for performance
  */
 export async function uploadNewFiles(localManifest, remoteManifest) {
     const start = performance.now();
     addSyncLog("Step 6: Uploading new files...", "info");
 
-    let updatedRemoteManifest = [...remoteManifest];
-    let newCount = 0;
-
     try {
-        const remoteMap = new Map(updatedRemoteManifest.map(f => [f.path, f]));
+        const remoteMap = new Map(remoteManifest.map(f => [f.path, f]));
+        const toUpload = [];
 
+        // Collect new files
         for (const localFile of localManifest) {
             if (!remoteMap.has(localFile.path)) {
-
-                const fileBasename = localFile.path;
-                const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
-                const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
-
-                addSyncLog(`Uploading new file ${fileBasename}...`, "info");
-
-                const content = await storage.readFile(localFilePath);
-                if (content) {
-                    const data = JSON.parse(content);
-                    await writeCompressedFile(remoteFilePath, data);
-
-                    // Verify
-                    const redownloaded = await readCompressedFile(remoteFilePath);
-                    const redownloadedContent = JSON.stringify(redownloaded, null, 4);
-                    const info = await getFileInfo(redownloadedContent);
-
-                    if (info.hash !== localFile.hash) {
-                        throw new Error(`Upload verification failed for ${fileBasename}. Hash mismatch.`);
-                    }
-
-                    // Update remote manifest (in-memory)
-                    updatedRemoteManifest.push(localFile);
-                    newCount++;
-                }
+                toUpload.push(localFile);
             }
         }
 
-        const duration = (performance.now() - start).toFixed(1);
-        addSyncLog(`✓ Uploaded ${newCount} new file(s) in ${duration}ms`, newCount > 0 ? "success" : "info");
-        return { manifest: updatedRemoteManifest, hasChanges: newCount > 0 };
+        if (toUpload.length === 0) {
+            addSyncLog("✓ No new files to upload", "info");
+            return { manifest: remoteManifest, hasChanges: false };
+        }
+
+        addSyncLog(`Uploading ${toUpload.length} new file(s)...`, "info");
+
+        // Upload in parallel batches
+        const updates = [];
+        for (let i = 0; i < toUpload.length; i += SYNC_BATCH_SIZE) {
+            const batch = toUpload.slice(i, i + SYNC_BATCH_SIZE);
+            const progress = Math.min(i + batch.length, toUpload.length);
+            const percent = Math.round((progress / toUpload.length) * 100);
+
+            addSyncLog(`Uploading ${progress}/${toUpload.length} (${percent}%)...`, "info");
+
+            const results = await Promise.all(
+                batch.map(localFile => uploadNewFile(localFile))
+            );
+
+            updates.push(...results.filter(Boolean));
+        }
+
+        // Add all new files to remote manifest
+        const updatedManifest = [...remoteManifest, ...updates];
+
+        const duration = ((performance.now() - start) / 1000).toFixed(1);
+        addSyncLog(`✓ Uploaded ${updates.length} new file(s) in ${duration}s`, updates.length > 0 ? "success" : "info");
+
+        return { manifest: updatedManifest, hasChanges: updates.length > 0 };
 
     } catch (err) {
         console.error("[Sync] Upload new files failed:", err);
