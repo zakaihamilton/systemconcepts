@@ -88,8 +88,8 @@ export default function Sync() {
     const clearCache = async () => {
         try {
             await clearBundleCache();
-            await updateSync(false);
             setConfirmClearCache(false);
+            await updateSync(false);
         } catch (err) {
             console.error("Failed to clear cache", err);
         }
