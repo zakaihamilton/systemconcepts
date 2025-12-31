@@ -88,24 +88,6 @@ export default function Sync() {
             onClick: () => sync && sync(),
             disabled: !syncEnabled || isBusy,
             location: "header"
-        },
-        {
-            id: "update_sessions",
-            name: translations.UPDATE_SESSIONS,
-            icon: <UpdateIcon className={animatedClassName} />,
-            onClick: () => updateSessions && updateSessions(true),
-            disabled: !syncEnabled || isBusy,
-            location: "header",
-            menu: true
-        },
-        {
-            id: "full_sync",
-            name: translations.FULL_SYNC,
-            icon: <UpdateIcon className={animatedClassName} />,
-            onClick: () => updateAllSessions && updateAllSessions(true),
-            disabled: !syncEnabled || isBusy,
-            location: "header",
-            menu: true
         }
     ];
 

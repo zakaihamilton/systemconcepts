@@ -405,7 +405,7 @@ export function useSessions(depends = [], options = {}) {
     const items = filterSessions ? filtered : sessions;
 
     // Only show loading if we don't have sessions yet
-    // Don't show loading when navigating back if we already have data
-    const isLoading = (busy || loading || syncing) && (!sessions || !sessions.length);
+    // Don't show loading during sync if we already have data
+    const isLoading = (busy || loading) && (!sessions || !sessions.length);
     return [items, isLoading];
 }

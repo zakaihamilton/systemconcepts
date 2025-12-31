@@ -13,17 +13,28 @@ export function useGroups(depends) {
 
     const localMetadataPath = "local/shared/groups.json";
     const loadGroups = useCallback(async () => {
-        let busy = false;
+        let isBusy = false;
+        let hasGroups = false;
         GroupsStore.update(s => {
-            busy = s.busy;
-            if (s.busy) {
-                return;
-            }
-            s.busy = true;
+            isBusy = s.busy;
+            hasGroups = s.groups && s.groups.length > 0;
         });
-        if (busy) {
+
+        // If already loading and we have cached groups, just return
+        // This prevents waiting during sync when groups are already loaded
+        if (isBusy && hasGroups) {
             return;
         }
+
+        // If already loading and no groups yet, wait for it to complete
+        if (isBusy) {
+            return;
+        }
+
+        // Now we can set busy since we're actually going to load
+        GroupsStore.update(s => {
+            s.busy = true;
+        });
         try {
             let listing = [];
             if (await storage.exists("local/shared/sessions/listing.json")) {
@@ -109,5 +120,8 @@ export function useGroups(depends) {
         });
     }, []);
 
-    return [groups, busy, updateGroups];
+    // Only show busy if we're loading AND don't have groups yet
+    // This prevents showing loading during sync when groups are already cached
+    const isLoading = busy && (!groups || groups.length === 0);
+    return [groups, isLoading, updateGroups];
 }

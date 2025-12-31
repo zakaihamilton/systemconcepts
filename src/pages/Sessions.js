@@ -328,18 +328,22 @@ export default function SessionsPage() {
 
     // Watch for sync completion and reload sessions if needed
     const needsSessionReload = SyncActiveStore.useState(s => s.needsSessionReload);
+    const syncBusy = SyncActiveStore.useState(s => s.busy);
     useEffect(() => {
-        if (needsSessionReload) {
-            // Trigger session reload by incrementing the sessions counter
+        // Only reload after sync completes (not during)
+        if (needsSessionReload && !syncBusy) {
+            // Force session reload by clearing sessions and marking as not busy
+            // This will trigger the useSessions hook to reload data
             SessionsStore.update(s => {
-                s.counter = (s.counter || 0) + 1;
+                s.sessions = null;
+                s.busy = false;
             });
             // Clear the flag to acknowledge the reload
             SyncActiveStore.update(s => {
                 s.needsSessionReload = false;
             });
         }
-    }, [needsSessionReload]);
+    }, [needsSessionReload, syncBusy]);
 
     return <>
         {!isMobile && <FilterBar />}
