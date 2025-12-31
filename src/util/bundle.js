@@ -5,6 +5,11 @@ import { Base64 } from "js-base64";
 
 const BUNDLE_CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB limit to stay under 4MB API limit
 const BUNDLE_PREFIX = "bundle.gz.part.";
+const CACHE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes
+const BUNDLE_PART_FAILURE_THRESHOLD = 0.1; // 10% max failure rate
+const CRITICAL_PARTS_COUNT = 2; // First 2 parts are critical
+const MASS_DELETION_THRESHOLD = 0.5; // 50% of files
+const MIN_FILES_FOR_SAFETY_CHECK = 20;
 
 // Memory cache for bundles to avoid redundant parsing
 const REMOTE_BUNDLE_CACHE = new Map();
@@ -105,7 +110,6 @@ export async function checkBundleVersion(endPoint, listing = null, manifest = nu
 
         // OPTIMIZATION: If we have a recent version check (within last 10 minutes), trust it
         // This avoids expensive remote listing calls for recently synced bundles
-        const CACHE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes
         if (cachedVersion?.timestamp && (Date.now() - cachedVersion.timestamp) < CACHE_VALIDITY_MS) {
             // Trust the cached version without checking remote
             return { changed: false, versionInfo: cachedVersion, listing: null };
@@ -223,6 +227,7 @@ export async function getRemoteBundle(endPoint, listing = null) {
     }
 
     const parts = [];
+    const failedParts = [];
     for (const part of bundleParts) {
         try {
             const content = await storage.readFile(part.path);
@@ -230,9 +235,25 @@ export async function getRemoteBundle(endPoint, listing = null) {
                 parts.push(content.trim());
             } else {
                 console.error(`[Bundle] Empty content for part ${part.path}`);
+                failedParts.push(part.name);
             }
         } catch (err) {
             console.error(`[Bundle] Error reading part ${part.path}:`, err);
+            failedParts.push(part.name);
+        }
+    }
+
+    // Abort if too many parts failed (more than 10% or any of first 2 parts)
+    if (failedParts.length > 0) {
+        const failureRate = failedParts.length / bundleParts.length;
+        const criticalPartsFailed = failedParts.some(name => {
+            const index = parseInt(name.split(BUNDLE_PREFIX)[1]);
+            return index < CRITICAL_PARTS_COUNT;
+        });
+
+        if (failureRate > BUNDLE_PART_FAILURE_THRESHOLD || criticalPartsFailed) {
+            console.error(`[Bundle] Too many parts failed (${failedParts.length}/${bundleParts.length}). Failed parts:`, failedParts);
+            return null;
         }
     }
 
@@ -276,6 +297,23 @@ export async function getRemoteBundle(endPoint, listing = null) {
         return bundle;
     } catch (err) {
         console.error("[Bundle] Error parsing bundle:", err);
+
+        // Clean up corrupted cache files to force re-download next time
+        try {
+            if (await storage.exists(cachePath)) {
+                await storage.deleteFile(cachePath);
+                console.log("[Bundle] Deleted corrupted cache file");
+            }
+            if (await storage.exists(versionPath)) {
+                await storage.deleteFile(versionPath);
+            }
+            if (await storage.exists(inventoryPath)) {
+                await storage.deleteFile(inventoryPath);
+            }
+        } catch (cleanupErr) {
+            console.error("[Bundle] Error cleaning up cache:", cleanupErr);
+        }
+
         return null;
     }
 }
@@ -515,7 +553,10 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
             // Check if file should be preserved (skip writing to keep local changes)
             // Only apply preservation if the file actually exists locally
             // Use exact filename matching to avoid false positives
-            if (localMtime > 0 && preserve.some(pattern => relativePath.endsWith(pattern))) {
+            if (localMtime > 0 && preserve.some(pattern => {
+                const fileName = relativePath.split('/').pop();
+                return fileName === pattern;
+            })) {
                 skipCount++;
                 continue;
             }
@@ -573,7 +614,10 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
                 }
                 // Check if file should be preserved
                 // Use exact filename matching to avoid false positives
-                if (preserve.some(pattern => relativePath.endsWith(pattern))) {
+                if (preserve.some(pattern => {
+                    const fileName = relativePath.split('/').pop();
+                    return fileName === pattern;
+                })) {
                     continue;
                 }
                 toDelete.push(relativePath);
@@ -581,7 +625,7 @@ export async function applyBundle(root, bundle, listing = null, ignore = [], pre
         }
 
         const localFileCount = Object.keys(localFiles).length;
-        if (localFileCount > 20 && toDelete.length > localFileCount * 0.5) {
+        if (localFileCount > MIN_FILES_FOR_SAFETY_CHECK && toDelete.length > localFileCount * MASS_DELETION_THRESHOLD) {
             console.warn(`[applyBundle] SAFETY TRIGGERED: Attempting to delete ${toDelete.length}/${localFileCount} files (${Math.round(toDelete.length / localFileCount * 100)}%). This looks like a corrupted sync. Skipping deletion phase.`);
             return { downloadCount, listing, isBundleCorrupted };
         }
