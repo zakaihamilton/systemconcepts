@@ -172,16 +172,10 @@ export default function SessionsPage() {
             return null;
         }
 
-        // Cache object to store created widgets
-        const widgetCache = {};
+        const percentage = item.duration && (item.position / item.duration * 100);
 
-        // Cache bound event handlers once to avoid recreation
-        const boundGotoItem = () => gotoItem(item);
-        const boundHandleIconClick = () => handleIconClick(item.type);
-        // Return object with core properties and cached getter functions
-        // Widgets are created once on first access and then reused
         return {
-            // Core properties needed for display and sorting
+            // Identity & core data
             key: item.key,
             id: item.id,
             name: item.name,
@@ -191,106 +185,112 @@ export default function SessionsPage() {
             color: item.color,
             type: item.type,
             typeOrder: item.typeOrder,
-            duration: item.duration,
-            position: item.position,
+
+            // Media properties
             thumbnail: item.thumbnail,
             video: item.video,
             ai: item.ai,
+            duration: item.duration,
+            position: item.position,
+            percentage,
+
+            // Pre-computed display values
             summary: item.summary,
-            tags: item.tags ? item.tags.join(" ") : "",
+            tags: item.tags || [],
+            tagsString: (item.tags || []).join(" "),
+            formattedDuration: item.type === "image"
+                ? ""
+                : (item.duration > 1
+                    ? formatDuration(item.duration * 1000, true)
+                    : translations.UNKNOWN)
+        };
+    }, [formatDuration, translations]);
 
-            // Cached getters - create once, reuse forever
-            get nameWidget() {
-                // Invalidate cache if scroll state changed
-                const cacheKey = this.isScrolling ? 'scrolling' : 'stopped';
-                if (widgetCache.nameWidget && widgetCache.nameWidgetState === cacheKey) {
-                    return widgetCache.nameWidget;
-                }
-
-                const { position, duration } = item;
-                const percentage = duration && (position / duration * 100);
+    const renderColumn = useCallback((columnId, item) => {
+        switch (columnId) {
+            case 'name':
+            case 'nameWidget': {
                 const style = {
-                    background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
+                    background: `conic-gradient(var(--primary-color) ${item.percentage}%, transparent 0)`
                 };
 
-                const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={boundHandleIconClick} id={item.type}>
-                    <SessionIcon type={item.type} />
-                </div>;
+                const icon = (
+                    <div
+                        style={style}
+                        className={clsx(styles.icon, typeFilter.length && styles.active)}
+                        onClick={() => handleIconClick(item.type)}
+                        id={item.type}
+                    >
+                        <SessionIcon type={item.type} />
+                    </div>
+                );
 
                 const nameContentInner = (
                     <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
                         {item.name}
-                        <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
-                            <div className={styles.percentage} style={{ width: percentage + "%" }} />
+                        <div className={clsx(styles.percentageContainer, item.percentage && styles.visible)}>
+                            <div className={styles.percentage} style={{ width: item.percentage + "%" }} />
                         </div>
                     </span>
                 );
 
-                // Hybrid approach: native tooltip during scroll (fast), MUI tooltip when stopped (fancy)
-                const nameContent = this.isScrolling
-                    ? <span title={item.name}>{nameContentInner}</span>  // Native browser tooltip
-                    : <Tooltip arrow title={item.name}>{nameContentInner}</Tooltip>;  // MUI tooltip
+                const nameContent = <Tooltip enterDelay={500} enterNextDelay={500} arrow title={item.name}>{nameContentInner}</Tooltip>;
 
                 const href = target(item);
-                widgetCache.nameWidget = viewMode === "grid"
+                return viewMode === "grid"
                     ? <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />
-                    : <Row href={href} onClick={boundGotoItem} icons={icon}>{nameContent}</Row>;
-
-                widgetCache.nameWidgetState = cacheKey;
-                return widgetCache.nameWidget;
-            },
-
-            get groupWidget() {
-                if (widgetCache.groupWidget) return widgetCache.groupWidget;
-                widgetCache.groupWidget = <Group fill={viewMode === "grid"} name={item.group} color={item.color} />;
-                return widgetCache.groupWidget;
-            },
-
-            get thumbnailWidget() {
-                // Invalidate cache if scroll state changed for grid view
-                const cacheKey = (viewMode === "grid" && this.isScrolling) ? 'scrolling' : 'stopped';
-                if (widgetCache.thumbnailWidget && widgetCache.thumbnailWidgetState === cacheKey) {
-                    return widgetCache.thumbnailWidget;
-                }
-
-                const altIcon = <>
-                    {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
-                    {!!item.ai && <div className={styles.altIcon + " " + styles.ai + " " + (item.video ? styles.video : "")}>
-                        <AutoAwesomeIcon />
-                    </div>}
-                </>;
-                const href = target(item);
-
-                // In grid view, don't load images while scrolling (wait 1s after scroll stops)
-                const imagePath = (viewMode === "grid" && this.isScrolling) ? null : item.thumbnail;
-
-                widgetCache.thumbnailWidget = <Image
-                    href={href}
-                    onClick={boundGotoItem}
-                    path={imagePath}
-                    width={isMobile && viewMode === "grid" ? "100%" : "12em"}
-                    height={isMobile && viewMode === "grid" ? "7em" : "10em"}
-                    alt={altIcon}
-                    loading="lazy"
-                />;
-
-                widgetCache.thumbnailWidgetState = cacheKey;
-                return widgetCache.thumbnailWidget;
-            },
-
-            get durationWidget() {
-                if (widgetCache.durationWidget !== undefined) return widgetCache.durationWidget;
-                widgetCache.durationWidget = item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN);
-                return widgetCache.durationWidget;
-            },
-
-            get tagsWidget() {
-                if (widgetCache.tagsWidget !== undefined) return widgetCache.tagsWidget;
-                widgetCache.tagsWidget = (item.tags || []).length ? <div className={styles.tags}>{item.tags.map(tag => <Chip key={tag} label={tag} size="small" className={styles.tag} />)}</div> : null;
-                return widgetCache.tagsWidget;
+                    : <Row href={href} onClick={() => gotoItem(item)} icons={icon}>{nameContent}</Row>;
             }
-        };
-    }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick, isMobile]);
+
+            case 'thumbnail':
+            case 'thumbnailWidget': {
+                const shouldShowImage = viewMode === "grid";
+                const altIcon = (
+                    <>
+                        {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
+                        {item.ai && (
+                            <div className={clsx(styles.altIcon, styles.ai, item.video && styles.video)}>
+                                <AutoAwesomeIcon />
+                            </div>
+                        )}
+                    </>
+                );
+
+                return (
+                    <Image
+                        href={target(item)}
+                        onClick={() => gotoItem(item)}
+                        path={shouldShowImage ? item.thumbnail : null}
+                        width={isMobile && viewMode === "grid" ? "100%" : "12em"}
+                        height={isMobile && viewMode === "grid" ? "7em" : "10em"}
+                        alt={altIcon}
+                        loading="lazy"
+                    />
+                );
+            }
+
+            case 'group':
+            case 'groupWidget':
+                return <Group fill={viewMode === "grid"} name={item.group} color={item.color} />;
+
+            case 'duration':
+            case 'durationWidget':
+                return item.formattedDuration;
+
+            case 'tags':
+            case 'tagsWidget':
+                return item.tags.length ? (
+                    <div className={styles.tags}>
+                        {item.tags.map(tag => (
+                            <Chip key={tag} label={tag} size="small" className={styles.tag} />
+                        ))}
+                    </div>
+                ) : null;
+
+            default:
+                return item[columnId];
+        }
+    }, [viewMode, typeFilter, target, gotoItem, handleIconClick, isMobile]);
 
     const filter = useCallback(item => {
         let { group, type, year, thumbnail } = item;
@@ -419,6 +419,7 @@ export default function SessionsPage() {
             depends={tableDeps}
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
+            renderColumn={renderColumn}
         />
 
         {!!isMobile && <FilterBar />}

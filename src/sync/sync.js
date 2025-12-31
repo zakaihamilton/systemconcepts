@@ -27,6 +27,7 @@ export async function performSync() {
     const unlock = await lockMutex({ id: "sync_process" });
     addSyncLog("Starting sync process...", "info");
     const startTime = performance.now();
+    let hasChanges = false;
 
     try {
         // Step 1
@@ -39,13 +40,19 @@ export async function performSync() {
         let remoteManifest = await syncManifest(localManifest);
 
         // Step 4
-        localManifest = await downloadUpdates(localManifest, remoteManifest);
+        const downloadResult = await downloadUpdates(localManifest, remoteManifest);
+        localManifest = downloadResult.manifest;
+        hasChanges = hasChanges || downloadResult.hasChanges;
 
         // Step 5
-        remoteManifest = await uploadUpdates(localManifest, remoteManifest);
+        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest);
+        remoteManifest = uploadUpdatesResult.manifest;
+        hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
 
         // Step 6
-        remoteManifest = await uploadNewFiles(localManifest, remoteManifest);
+        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest);
+        remoteManifest = uploadNewResult.manifest;
+        hasChanges = hasChanges || uploadNewResult.hasChanges;
 
         // Step 7
         await uploadManifest(remoteManifest);
@@ -53,10 +60,15 @@ export async function performSync() {
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
         addSyncLog(`Sync complete in ${duration}s`, "success");
 
-        // Trigger reload
-        SyncActiveStore.update(s => {
-            s.needsSessionReload = true;
-        });
+        // Only trigger reload if sync actually changed something
+        if (hasChanges) {
+            SyncActiveStore.update(s => {
+                s.needsSessionReload = true;
+            });
+            addSyncLog(`Changes detected - reloading sessions`, "info");
+        } else {
+            addSyncLog(`No changes detected`, "info");
+        }
 
     } catch (err) {
         console.error("[Sync] Sync failed:", err);

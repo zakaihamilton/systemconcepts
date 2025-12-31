@@ -31,10 +31,15 @@ function arePropsEqual(prev, next) {
     return true;
 }
 
-function ItemWidget({ className = "", separator, viewMode, selected: selectedItem, columns, rowClick, item, index, style, ...props }) {
+function ItemWidget({ className = "", separator, viewMode, selected: selectedItem, columns, rowClick, item, index, style, renderColumn, ...props }) {
     const cells = (columns || []).filter(Boolean).map(column => {
         const { id: columnId, dir, align, padding = true, viewModes = {}, onSelectable, ellipsis, selected, onClick, style } = column;
-        const value = item[columnId];
+
+        // Use renderColumn if provided, otherwise fall back to direct property access
+        const value = renderColumn
+            ? renderColumn(columnId, item)
+            : item[columnId];
+
         const { className: viewModeClassName = "", selectedClassName = "", style: viewModeStyle = {}, ...viewModeProps } = viewModes[viewMode] || {};
         const isSelected = selected && selected(item);
         return (<div

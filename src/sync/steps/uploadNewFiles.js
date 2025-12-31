@@ -49,11 +49,12 @@ export async function uploadNewFiles(localManifest, remoteManifest) {
         }
 
         const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 6 finished in ${duration}ms. Uploaded ${newCount} new files.`);
-        return updatedRemoteManifest;
+        addSyncLog(`✓ Uploaded ${newCount} new file(s) in ${duration}ms`, newCount > 0 ? "success" : "info");
+        return { manifest: updatedRemoteManifest, hasChanges: newCount > 0 };
 
     } catch (err) {
-        console.error("[Sync] Step 6 error:", err);
+        console.error("[Sync] Upload new files failed:", err);
+        addSyncLog(`Upload new files failed: ${err.message}`, "error");
         throw err;
     }
 }

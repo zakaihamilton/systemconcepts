@@ -56,10 +56,12 @@ export async function downloadUpdates(localManifest, remoteManifest) {
         }
 
         const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 4 finished in ${duration}ms. Downloaded ${downloadCount} files.`);
-        return updatedLocalManifest;
+        addSyncLog(`✓ Downloaded ${downloadCount} file(s) in ${duration}s`, downloadCount > 0 ? "success" : "info");
     } catch (err) {
-        console.error("[Sync] Step 4 error:", err);
+        console.error("[Sync] Download failed:", err);
+        addSyncLog(`Download failed: ${err.message}`, "error");
         throw err;
     }
+
+    return { manifest: updatedLocalManifest, hasChanges: downloadCount > 0 };
 }

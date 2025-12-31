@@ -58,11 +58,12 @@ export async function uploadUpdates(localManifest, remoteManifest) {
         }
 
         const duration = (performance.now() - start).toFixed(1);
-        console.log(`[Sync] Step 5 finished in ${duration}ms. Uploaded ${uploadCount} files.`);
-        return updatedRemoteManifest;
+        addSyncLog(`✓ Uploaded ${uploadCount} update(s) in ${duration}ms`, uploadCount > 0 ? "success" : "info");
+        return { manifest: updatedRemoteManifest, hasChanges: uploadCount > 0 };
 
     } catch (err) {
-        console.error("[Sync] Step 5 error:", err);
+        console.error("[Sync] Upload updates failed:", err);
+        addSyncLog(`Upload updates failed: ${err.message}`, "error");
         throw err;
     }
 }
