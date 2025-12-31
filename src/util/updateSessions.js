@@ -66,14 +66,19 @@ export function useUpdateSessions(groups) {
             });
         }
         const limit = pLimit(4);
+
+        UpdateSessionsStore.update(s => {
+            s.status[itemIndex].count = years.length;
+            s.status = [...s.status];
+        });
+
         const promises = years.map((year) => limit(async () => {
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
                 s.status[itemIndex].year = year.name;
-                s.status[itemIndex].count = years.length;
-                s.status[itemIndex].progress++;
                 s.status = [...s.status];
             });
+
             try {
                 const yearItems = await getListing(year.path);
 
@@ -239,6 +244,11 @@ export function useUpdateSessions(groups) {
                 console.error(err);
                 UpdateSessionsStore.update(s => {
                     s.status[itemIndex].errors.push(err);
+                    s.status = [...s.status];
+                });
+            } finally {
+                UpdateSessionsStore.update(s => {
+                    s.status[itemIndex].progress++;
                     s.status = [...s.status];
                 });
             }
