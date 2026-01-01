@@ -1114,6 +1114,14 @@ export default {
             "value": "השבת"
         },
         {
+            "id": "MERGE",
+            "value": "מזג"
+        },
+        {
+            "id": "SPLIT",
+            "value": "פצל"
+        },
+        {
             "id": "STATISTICS",
             "value": "סטטיסטיקות"
         },

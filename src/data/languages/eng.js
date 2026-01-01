@@ -1118,6 +1118,14 @@ export default {
             "value": "Disabled"
         },
         {
+            "id": "MERGE",
+            "value": "Merge"
+        },
+        {
+            "id": "SPLIT",
+            "value": "Split"
+        },
+        {
             "id": "STATISTICS",
             "value": "Statistics"
         },

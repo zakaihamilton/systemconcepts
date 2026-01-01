@@ -77,16 +77,16 @@ export function useSessions(depends = [], options = {}) {
                 const chunk = groups.slice(i, i + CHUNK_SIZE);
                 const chunkResults = await Promise.all(chunk.map(async group => {
                     const groupName = group.name;
-                    // Check manifest for consolidated file first (Disabled Groups)
-                    const consolidatedPath = `local/sync/${groupName}.json`;
+                    // Check manifest for merged file first (Disabled Groups)
+                    const mergedPath = `local/sync/${groupName}.json`;
                     // Check if file is in manifest (prefer manifest over fs check for perf) or fallback to fs if manifest missing
-                    let isConsolidated = filesManifest && filesManifest.some(f => f.path === consolidatedPath);
+                    let isMerged = filesManifest && filesManifest.some(f => f.path === mergedPath);
                     if (!filesManifest) {
-                        isConsolidated = await storage.exists(makePath(consolidatedPath));
+                        isMerged = await storage.exists(makePath(mergedPath));
                     }
 
-                    if (isConsolidated) {
-                        const groupData = await readCompressedFile(makePath(consolidatedPath));
+                    if (isMerged) {
+                        const groupData = await readCompressedFile(makePath(mergedPath));
                         if (groupData && groupData.sessions) {
                             return { group, sessions: groupData.sessions };
                         }
@@ -141,7 +141,7 @@ export function useSessions(depends = [], options = {}) {
                         let dataSessions = sessions;
                         let path = "";
 
-                        // If we don't have pre-loaded sessions (from consolidated file), load year file
+                        // If we don't have pre-loaded sessions (from merged file), load year file
                         if (!dataSessions) {
                             path = makePath("local/sync", group.name, `${year.name}.json`);
                             const data = await readCompressedFile(path);

@@ -7,7 +7,7 @@ import pLimit from "./p-limit";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { addSyncLog } from "@sync/sync";
 import { writeCompressedFile } from "@sync/bundle";
-import { LOCAL_SYNC_PATH } from "@sync/constants";
+import { LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "@sync/constants";
 
 export function useUpdateSessions(groups) {
     const { busy, status, start } = UpdateSessionsStore.useState();
@@ -20,7 +20,7 @@ export function useUpdateSessions(groups) {
         return listing;
     }, []);
 
-    const updateGroup = useCallback(async (name, updateAll, updateTags = false, isDisabled = false) => {
+    const updateGroup = useCallback(async (name, updateAll, updateTags = false, isMerged = false) => {
         const path = prefix + name;
         let itemIndex = 0;
         UpdateSessionsStore.update(s => {
@@ -48,6 +48,23 @@ export function useUpdateSessions(groups) {
         });
         const allSessionNames = new Set();
         const allSessions = [];
+
+        // If merged and incremental update, load existing sessions first to preserve history
+        if (isMerged && !updateAll) {
+            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+            try {
+                if (await storage.exists(localGroupPath)) {
+                    const content = await storage.readFile(localGroupPath);
+                    const data = JSON.parse(content);
+                    if (data && Array.isArray(data.sessions)) {
+                        allSessions.push(...data.sessions);
+                    }
+                }
+            } catch (err) {
+                console.warn(`[Sync] Failed to read existing group file ${localGroupPath}`, err);
+            }
+        }
+
         let years = [];
         try {
             years = await getListing(path);
@@ -256,7 +273,7 @@ export function useUpdateSessions(groups) {
                     return item;
                 }).filter(Boolean);
 
-                if (isDisabled) {
+                if (isMerged) {
                     allSessions.push(...yearSessions);
                 } else {
                     const count = await updateYearSync(name, year.name, yearSessions);
@@ -284,35 +301,117 @@ export function useUpdateSessions(groups) {
         }));
         await Promise.all(promises);
 
-        if (isDisabled) {
-            // For disabled groups, write ONE consolidated file
+        if (isMerged) {
+            // For merged groups:
+            // 1. Deduplicate sessions (preferring fresh ones from this sync)
+            const sessionMap = new Map();
+            // Load start-state sessions
+            allSessions.forEach(s => sessionMap.set(s.id, s));
+
+            // 2. Write ONE merged file
+            const uniqueSessions = Array.from(sessionMap.values());
             const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
             const groupData = {
                 version: 1,
                 group: name,
                 date: Date.now(),
-                sessions: allSessions
+                sessions: uniqueSessions
             };
             await writeCompressedFile(localGroupPath, groupData);
 
-            // Cleanup: Ensure no year folder exists for disabled groups
+            // 3. Cleanup: Delete individual year files (both local and remote)
             const localYearsPath = makePath(LOCAL_SYNC_PATH, name);
-            if (await storage.exists(localYearsPath)) {
-                await storage.deleteFolder(localYearsPath);
+            const remoteYearsPath = makePath(SYNC_BASE_PATH, name);
+            try {
+                // Delete local year files
+                if (await storage.exists(localYearsPath)) {
+                    console.log(`[Sync] Deleting local split files for merged group: ${name}`);
+                    const yearFiles = await storage.getListing(localYearsPath);
+                    if (yearFiles && yearFiles.length > 0) {
+                        for (const yearFile of yearFiles) {
+                            if (yearFile.name.endsWith('.json')) {
+                                const yearFilePath = makePath(localYearsPath, yearFile.name);
+                                console.log(`[Sync] Deleting local year file: ${yearFilePath}`);
+                                await storage.deleteFile(yearFilePath);
+                            }
+                        }
+                    }
+                    // Delete the empty local folder
+                    await storage.deleteFolder(localYearsPath);
+                    console.log(`[Sync] Successfully deleted local split folder: ${localYearsPath}`);
+                }
+
+                // Delete remote year files from AWS
+                if (await storage.exists(remoteYearsPath)) {
+                    console.log(`[Sync] Deleting remote split files for merged group: ${name}`);
+                    const remoteYearFiles = await storage.getListing(remoteYearsPath);
+                    if (remoteYearFiles && remoteYearFiles.length > 0) {
+                        for (const yearFile of remoteYearFiles) {
+                            if (yearFile.name.endsWith('.gz')) {
+                                const remoteFilePath = makePath(remoteYearsPath, yearFile.name);
+                                console.log(`[Sync] Deleting remote year file: ${remoteFilePath}`);
+                                await storage.deleteFile(remoteFilePath);
+                            }
+                        }
+                    }
+                    // Delete the empty remote folder
+                    await storage.deleteFolder(remoteYearsPath);
+                    console.log(`[Sync] Successfully deleted remote split folder: ${remoteYearsPath}`);
+                }
+            } catch (err) {
+                console.error(`[Sync] Error deleting split files for ${name}:`, err);
+                addSyncLog(`[${name}] Warning: Could not delete old split files`, "warning");
             }
 
-            const totalSessions = allSessions.sort((a, b) => a.id.localeCompare(b.id));
+            const totalSessions = uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
             const addedCount = totalSessions.length;
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].addedCount = addedCount;
                 s.status = [...s.status];
             });
-            allSessions.forEach(session => allSessionNames.add(session.id));
+            uniqueSessions.forEach(session => allSessionNames.add(session.id));
         } else {
-            // For enabled groups, ensure NO consolidated file exists (avoid confusion)
+            // For split (enabled) groups:
+            // 1. Check if we need to migrate from a merged file (e.g. settings changed or first sync after migration)
             const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
             if (await storage.exists(localGroupPath)) {
+                try {
+                    const content = await storage.readFile(localGroupPath);
+                    const data = JSON.parse(content);
+                    if (data && data.sessions) {
+                        // Group by year
+                        const byYear = {};
+                        data.sessions.forEach(s => {
+                            if (!byYear[s.year]) byYear[s.year] = [];
+                            byYear[s.year].push(s);
+                        });
+
+                        // Write year files for years NOT processed in this sync
+                        // (Processed years are already written by updateYearSync above)
+                        const processedYears = new Set(years.map(y => y.name));
+                        for (const [year, sessions] of Object.entries(byYear)) {
+                            if (!processedYears.has(year)) {
+                                await updateYearSync(name, year, sessions);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error migrating from merged file", err);
+                }
+                // 2. Delete local merged file
                 await storage.deleteFile(localGroupPath);
+
+                // 3. Delete remote merged file from AWS
+                const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
+                try {
+                    if (await storage.exists(remoteGroupPath)) {
+                        console.log(`[Sync] Deleting remote merged file: ${remoteGroupPath}`);
+                        await storage.deleteFile(remoteGroupPath);
+                        console.log(`[Sync] Successfully deleted remote merged file`);
+                    }
+                } catch (err) {
+                    console.error(`[Sync] Error deleting remote merged file for ${name}:`, err);
+                }
             }
         }
 
@@ -372,10 +471,11 @@ export function useUpdateSessions(groups) {
             const promises = items.map(item => {
                 const groupInfo = groups.find(group => group.name === item.name);
                 const isDisabled = groupInfo?.disabled;
+                const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
-                return limit(() => updateGroup(item.name, false, false, isDisabled));
+                return limit(() => updateGroup(item.name, false, false, isMerged));
             }).filter(Boolean);
             await Promise.all(promises);
         } finally {
@@ -409,10 +509,11 @@ export function useUpdateSessions(groups) {
             const promises = items.map(item => {
                 const groupInfo = groups.find(group => group.name === item.name);
                 const isDisabled = groupInfo?.disabled;
+                const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
-                return limit(() => updateGroup(item.name, true, false, isDisabled));
+                return limit(() => updateGroup(item.name, true, false, isMerged));
             }).filter(Boolean);
             await Promise.all(promises);
         } finally {

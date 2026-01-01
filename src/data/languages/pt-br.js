@@ -1118,6 +1118,14 @@ export default {
             "value": "Desabilitar"
         },
         {
+            "id": "MERGE",
+            "value": "Mesclar"
+        },
+        {
+            "id": "SPLIT",
+            "value": "Dividir"
+        },
+        {
             "id": "STATISTICS",
             "value": "Estatísticas"
         },
