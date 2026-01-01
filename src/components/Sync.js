@@ -13,18 +13,22 @@ registerToolbar("Sync", 1);
 
 export const SyncContext = createContext();
 
+import { UpdateSessionsStore } from "@sync/syncState";
+
 export default function Sync({ children }) {
     const translations = useTranslations();
     const { sync, busy, error, duration, changed, percentage, currentBundle } = useSyncFeature();
+    const { busy: sessionsBusy } = UpdateSessionsStore.useState();
+    const isBusy = busy || sessionsBusy;
     const className = useStyles(styles, {
-        animated: busy
+        animated: isBusy
     });
 
     const formattedDuration = formatDuration(duration);
 
     const name = <span>
         {!!error && translations.SYNC_FAILED}
-        {!error && (busy ? translations.SYNCING : translations.SYNC)}
+        {!error && (isBusy ? translations.SYNCING : translations.SYNC)}
         <br />
         {!!duration && formattedDuration}
     </span>;
@@ -42,12 +46,20 @@ export default function Sync({ children }) {
             sortKey: 1,
             menu: false,
             icon: syncIcon,
-            onClick: sync
+            onClick: () => {
+                if (sessionsBusy) {
+                    UpdateSessionsStore.update(s => {
+                        s.showUpdateDialog = true;
+                    });
+                } else {
+                    sync();
+                }
+            }
         },
 
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle, sessionsBusy] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, error };

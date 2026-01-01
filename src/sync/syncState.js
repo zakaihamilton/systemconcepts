@@ -17,5 +17,6 @@ export const SyncActiveStore = new Store({
 export const UpdateSessionsStore = new Store({
     busy: false,
     status: [],
-    start: 0
+    start: 0,
+    showUpdateDialog: false
 });

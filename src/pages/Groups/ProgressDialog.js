@@ -41,8 +41,7 @@ function NewSessionItem({ session }) {
 
 export default function ProgressDialog() {
     const translations = useTranslations();
-    const { busy, status, start } = UpdateSessionsStore.useState();
-    const [open, setOpen] = useState(false);
+    const { busy, status, start, showUpdateDialog } = UpdateSessionsStore.useState();
     const wasBusyRef = useRef(false);
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
 
@@ -58,13 +57,17 @@ export default function ProgressDialog() {
 
     useEffect(() => {
         if (busy && !wasBusyRef.current) {
-            setOpen(true);
+            UpdateSessionsStore.update(s => {
+                s.showUpdateDialog = true;
+            });
         }
         wasBusyRef.current = busy;
     }, [busy]);
 
     const handleClose = () => {
-        setOpen(false);
+        UpdateSessionsStore.update(s => {
+            s.showUpdateDialog = false;
+        });
     };
 
     const renderItem = (item) => {
@@ -115,7 +118,7 @@ export default function ProgressDialog() {
         );
     };
 
-    if (!open) {
+    if (!showUpdateDialog) {
         return null;
     }
 
