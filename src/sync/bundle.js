@@ -65,10 +65,16 @@ export async function readCompressedFile(path) {
  * @param {string} path - Path to write the file
  * @param {Object} data - JSON data to write
  */
-export async function writeCompressedFile(path, data) {
+export async function writeCompressedFile(path, data, folderCache = null) {
     path = makePath(path);
     try {
-        await storage.createFolderPath(path);
+        const folder = path.substring(0, path.lastIndexOf("/"));
+        if (!folderCache || !folderCache.has(folder)) {
+            await storage.createFolderPath(path);
+            if (folderCache) {
+                folderCache.add(folder);
+            }
+        }
 
         if (path.endsWith(".json")) {
             const jsonString = JSON.stringify(data, null, 4);

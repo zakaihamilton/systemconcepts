@@ -9,7 +9,7 @@ import { applyManifestUpdates } from "../manifest";
 /**
  * Helper function to upload a single file
  */
-async function uploadFile(localFile) {
+async function uploadFile(localFile, createdFolders) {
     const fileBasename = localFile.path;
     const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
     const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
@@ -19,7 +19,7 @@ async function uploadFile(localFile) {
         if (!content) return null;
 
         const data = JSON.parse(content);
-        await writeCompressedFile(remoteFilePath, data);
+        await writeCompressedFile(remoteFilePath, data, createdFolders);
 
         // Hash verification is already done locally, skip re-download
         return localFile;
@@ -40,6 +40,7 @@ export async function uploadUpdates(localManifest, remoteManifest) {
     try {
         const remoteMap = new Map(remoteManifest.map(f => [f.path, f]));
         const toUpload = [];
+        const createdFolders = new Set();
 
         // Collect files that need uploading
         for (const localFile of localManifest) {
@@ -69,7 +70,7 @@ export async function uploadUpdates(localManifest, remoteManifest) {
             addSyncLog(`Uploading ${progress}/${toUpload.length} (${percent}%)...`, "info");
 
             const results = await Promise.all(
-                batch.map(localFile => uploadFile(localFile))
+                batch.map(localFile => uploadFile(localFile, createdFolders))
             );
 
             updates.push(...results.filter(Boolean));

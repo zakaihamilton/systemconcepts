@@ -9,7 +9,7 @@ import { applyManifestUpdates } from "../manifest";
 /**
  * Helper function to download a single file
  */
-async function downloadFile(remoteFile) {
+async function downloadFile(remoteFile, createdFolders) {
     const fileBasename = remoteFile.path;
     const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
     const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
@@ -18,7 +18,15 @@ async function downloadFile(remoteFile) {
         const data = await readCompressedFile(remoteFilePath);
         if (!data) return null;
 
-        await storage.createFolderPath(localFilePath);
+        if (createdFolders) {
+            const folder = localFilePath.substring(0, localFilePath.lastIndexOf("/"));
+            if (!createdFolders.has(folder)) {
+                await storage.createFolderPath(localFilePath);
+                createdFolders.add(folder);
+            }
+        } else {
+            await storage.createFolderPath(localFilePath);
+        }
         const content = JSON.stringify(data, null, 4);
         await storage.writeFile(localFilePath, content);
 
@@ -46,6 +54,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
     try {
         const localMap = new Map(localManifest.map(f => [f.path, f]));
         const toDownload = [];
+        const createdFolders = new Set();
 
         // Collect files that need downloading
         for (const remoteFile of remoteManifest) {
@@ -75,7 +84,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
             addSyncLog(`Downloading ${progress}/${toDownload.length} (${percent}%)...`, "info");
 
             const results = await Promise.all(
-                batch.map(remoteFile => downloadFile(remoteFile))
+                batch.map(remoteFile => downloadFile(remoteFile, createdFolders))
             );
 
             updates.push(...results.filter(Boolean));
