@@ -9,6 +9,7 @@ import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
 import { useGroups, GroupsStore } from "@util/groups";
 import { useSync } from "@sync/sync";
+import { FILES_MANIFEST } from "@sync/constants";
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import { useDeviceType } from "./styles";
 
@@ -59,8 +60,9 @@ export function useSessions(depends = [], options = {}) {
         const yieldToEventLoop = () => new Promise(resolve => setTimeout(resolve, 0));
 
         try {
-            const [groupsSyncData] = await Promise.all([
-                readCompressedFile(makePath("local/sync/groups.json"))
+            const [groupsSyncData, filesManifest] = await Promise.all([
+                readCompressedFile(makePath("local/sync/groups.json")),
+                readCompressedFile(makePath("local/sync", FILES_MANIFEST))
             ]);
             const cdn = groupsSettings?.cdn || {};
 
@@ -74,8 +76,43 @@ export function useSessions(depends = [], options = {}) {
             for (let i = 0; i < groups.length; i += CHUNK_SIZE) {
                 const chunk = groups.slice(i, i + CHUNK_SIZE);
                 const chunkResults = await Promise.all(chunk.map(async group => {
-                    const groupSyncData = await readCompressedFile(makePath("local/sync", `${group.name}.json`));
-                    const years = Array.isArray(groupSyncData?.years) ? groupSyncData.years : [];
+                    const groupName = group.name;
+                    // Check manifest for consolidated file first (Disabled Groups)
+                    const consolidatedPath = `local/sync/${groupName}.json`;
+                    // Check if file is in manifest (prefer manifest over fs check for perf) or fallback to fs if manifest missing
+                    let isConsolidated = filesManifest && filesManifest.some(f => f.path === consolidatedPath);
+                    if (!filesManifest) {
+                        isConsolidated = await storage.exists(makePath(consolidatedPath));
+                    }
+
+                    if (isConsolidated) {
+                        const groupData = await readCompressedFile(makePath(consolidatedPath));
+                        if (groupData && groupData.sessions) {
+                            return { group, sessions: groupData.sessions };
+                        }
+                    }
+
+                    // Standard enabled groups: Find year files
+                    // If manifest exists, use it to find year files
+                    let years = [];
+                    if (filesManifest) {
+                        const yearRegex = new RegExp(`^local/sync/${groupName}/(\\d+)\\.json$`);
+                        years = filesManifest
+                            .filter(f => yearRegex.test(f.path))
+                            .map(f => ({ name: f.path.match(yearRegex)[1] }));
+                    } else {
+                        // Fallback to reading summary file (legacy/during transition) or directory listing
+                        try {
+                            // Try listing first as summary file is deprecated
+                            const listing = await storage.getListing(makePath("local/sync", groupName));
+                            if (listing) {
+                                years = listing.filter(f => f.name.endsWith(".json")).map(f => ({ name: f.name.replace(".json", "") }));
+                            }
+                        } catch (err) {
+                            // ignore missing dir
+                        }
+                    }
+
                     return { group, years };
                 }));
                 groupsWithYears.push(...chunkResults);
@@ -86,9 +123,12 @@ export function useSessions(depends = [], options = {}) {
                 }
             }
 
-            const tasks = groupsWithYears.flatMap(({ group, years }) =>
-                years.map(year => ({ group, year }))
-            );
+            const tasks = groupsWithYears.flatMap(({ group, years, sessions }) => {
+                if (sessions) {
+                    return [{ group, sessions }];
+                }
+                return years.map(year => ({ group, year }));
+            });
 
             // Process year files in chunks
             const YEAR_CHUNK_SIZE = 5;
@@ -96,17 +136,27 @@ export function useSessions(depends = [], options = {}) {
 
             for (let i = 0; i < tasks.length; i += YEAR_CHUNK_SIZE) {
                 const chunk = tasks.slice(i, i + YEAR_CHUNK_SIZE);
-                const chunkResults = await Promise.all(chunk.map(async ({ group, year }) => {
-                    const path = makePath("local/sync", group.name, `${year.name}.json`);
+                const chunkResults = await Promise.all(chunk.map(async ({ group, year, sessions }) => {
                     try {
-                        const data = await readCompressedFile(path);
-                        if (!data || !data.sessions) {
+                        let dataSessions = sessions;
+                        let path = "";
+
+                        // If we don't have pre-loaded sessions (from consolidated file), load year file
+                        if (!dataSessions) {
+                            path = makePath("local/sync", group.name, `${year.name}.json`);
+                            const data = await readCompressedFile(path);
+                            if (data && data.sessions) {
+                                dataSessions = data.sessions;
+                            }
+                        }
+
+                        if (!dataSessions) {
                             return [];
                         }
 
                         const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
 
-                        return data.sessions.map(session => {
+                        return dataSessions.map(session => {
                             let thumbnail = session.thumbnail;
                             if (session.image && cdn.url) {
                                 thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));

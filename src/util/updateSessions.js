@@ -20,7 +20,7 @@ export function useUpdateSessions(groups) {
         return listing;
     }, []);
 
-    const updateGroup = useCallback(async (name, updateAll, updateTags = false) => {
+    const updateGroup = useCallback(async (name, updateAll, updateTags = false, isDisabled = false) => {
         const path = prefix + name;
         let itemIndex = 0;
         UpdateSessionsStore.update(s => {
@@ -47,6 +47,7 @@ export function useUpdateSessions(groups) {
             }
         });
         const allSessionNames = new Set();
+        const allSessions = [];
         let years = [];
         try {
             years = await getListing(path);
@@ -255,14 +256,17 @@ export function useUpdateSessions(groups) {
                     return item;
                 }).filter(Boolean);
 
-                const count = await updateYearSync(name, year.name, yearSessions);
-
-                if (count > 0) {
-                    yearSessions.forEach(session => allSessionNames.add(session.id));
-                    UpdateSessionsStore.update(s => {
-                        s.status[itemIndex].addedCount += yearSessions.length;
-                        s.status = [...s.status];
-                    });
+                if (isDisabled) {
+                    allSessions.push(...yearSessions);
+                } else {
+                    const count = await updateYearSync(name, year.name, yearSessions);
+                    if (count > 0) {
+                        yearSessions.forEach(session => allSessionNames.add(session.id));
+                        UpdateSessionsStore.update(s => {
+                            s.status[itemIndex].addedCount += yearSessions.length;
+                            s.status = [...s.status];
+                        });
+                    }
                 }
             }
             catch (err) {
@@ -280,8 +284,37 @@ export function useUpdateSessions(groups) {
         }));
         await Promise.all(promises);
 
-        // Finalize sync metadata for the whole group
-        await finalizeGroupSync(name);
+        if (isDisabled) {
+            // For disabled groups, write ONE consolidated file
+            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+            const groupData = {
+                version: 1,
+                group: name,
+                date: Date.now(),
+                sessions: allSessions
+            };
+            await writeCompressedFile(localGroupPath, groupData);
+
+            // Cleanup: Ensure no year folder exists for disabled groups
+            const localYearsPath = makePath(LOCAL_SYNC_PATH, name);
+            if (await storage.exists(localYearsPath)) {
+                await storage.deleteFolder(localYearsPath);
+            }
+
+            const totalSessions = allSessions.sort((a, b) => a.id.localeCompare(b.id));
+            const addedCount = totalSessions.length;
+            UpdateSessionsStore.update(s => {
+                s.status[itemIndex].addedCount = addedCount;
+                s.status = [...s.status];
+            });
+            allSessions.forEach(session => allSessionNames.add(session.id));
+        } else {
+            // For enabled groups, ensure NO consolidated file exists (avoid confusion)
+            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+            if (await storage.exists(localGroupPath)) {
+                await storage.deleteFile(localGroupPath);
+            }
+        }
 
         // Retrieve the final status for this group to avoid stale index issues
         const finalStatus = (UpdateSessionsStore.getRawState().status || []).find(s => s.name === name) || {};
@@ -336,7 +369,14 @@ export function useUpdateSessions(groups) {
                 return;
             }
             const limit = pLimit(4);
-            const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name)));
+            const promises = items.map(item => {
+                const groupInfo = groups.find(group => group.name === item.name);
+                const isDisabled = groupInfo?.disabled;
+                if (!includeDisabled && isDisabled) {
+                    return null;
+                }
+                return limit(() => updateGroup(item.name, false, false, isDisabled));
+            }).filter(Boolean);
             await Promise.all(promises);
         } finally {
             UpdateSessionsStore.update(s => {
@@ -366,7 +406,14 @@ export function useUpdateSessions(groups) {
                 return;
             }
             const limit = pLimit(4);
-            const promises = items.filter(item => includeDisabled || !groups.find(group => group.name === item.name)?.disabled).map(item => limit(() => updateGroup(item.name, true)));
+            const promises = items.map(item => {
+                const groupInfo = groups.find(group => group.name === item.name);
+                const isDisabled = groupInfo?.disabled;
+                if (!includeDisabled && isDisabled) {
+                    return null;
+                }
+                return limit(() => updateGroup(item.name, true, false, isDisabled));
+            }).filter(Boolean);
             await Promise.all(promises);
         } finally {
             UpdateSessionsStore.update(s => {
