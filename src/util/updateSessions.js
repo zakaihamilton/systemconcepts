@@ -20,7 +20,7 @@ export function useUpdateSessions(groups) {
         return listing;
     }, []);
 
-    const updateGroup = useCallback(async (name, updateAll, updateTags = false, isMerged = false) => {
+    const updateGroup = useCallback(async (name, updateAll, updateTags = false, isMerged = false, isBundled = false) => {
         const path = prefix + name;
         let itemIndex = 0;
         UpdateSessionsStore.update(s => {
@@ -49,25 +49,44 @@ export function useUpdateSessions(groups) {
         const allSessionNames = new Set();
         const allSessions = [];
 
-        // If merged and incremental update, load existing sessions first to preserve history
-        if (isMerged && !updateAll) {
-            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-            try {
-                if (await storage.exists(localGroupPath)) {
-                    const content = await storage.readFile(localGroupPath);
-                    const data = JSON.parse(content);
-                    if (data && Array.isArray(data.sessions)) {
-                        allSessions.push(...data.sessions);
+        // If merged/bundled and incremental update, load existing sessions first to preserve history
+        if ((isMerged || isBundled) && !updateAll) {
+            let existingSessions = [];
+            if (isBundled) {
+                const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+                try {
+                    if (await storage.exists(bundlePath)) {
+                        const content = await storage.readFile(bundlePath);
+                        const data = JSON.parse(content);
+                        if (data && Array.isArray(data.sessions)) {
+                            existingSessions = data.sessions.filter(s => s.group === name);
+                        }
                     }
+                } catch (err) {
+                    console.warn(`[Sync] Failed to read existing bundle file ${bundlePath}`, err);
                 }
-            } catch (err) {
-                console.warn(`[Sync] Failed to read existing group file ${localGroupPath}`, err);
+            } else {
+                const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+                try {
+                    if (await storage.exists(localGroupPath)) {
+                        const content = await storage.readFile(localGroupPath);
+                        const data = JSON.parse(content);
+                        if (data && Array.isArray(data.sessions)) {
+                            existingSessions = data.sessions;
+                        }
+                    }
+                } catch (err) {
+                    console.warn(`[Sync] Failed to read existing group file ${localGroupPath}`, err);
+                }
+            }
+            if (existingSessions.length > 0) {
+                allSessions.push(...existingSessions);
             }
         }
 
         let years = [];
         try {
-            years = await getListing(path);
+            years = (await getListing(path)).filter(year => !year.name.endsWith(".tags"));
         }
         catch (err) {
             console.error(err);
@@ -90,7 +109,7 @@ export function useUpdateSessions(groups) {
             s.status = [...s.status];
         });
 
-        const promises = years.filter(year => !year.name.endsWith(".tags")).map((year) => limit(async () => {
+        const promises = years.map((year) => limit(async () => {
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
                 s.status[itemIndex].year = year.name;
@@ -282,7 +301,7 @@ export function useUpdateSessions(groups) {
                     return item;
                 }).filter(Boolean);
 
-                if (isMerged) {
+                if (isMerged || isBundled) {
                     allSessions.push(...yearSessions);
                 } else {
                     const count = await updateYearSync(name, year.name, yearSessions);
@@ -309,6 +328,76 @@ export function useUpdateSessions(groups) {
             }
         }));
         await Promise.all(promises);
+
+        if (isBundled) {
+            // For bundled groups:
+            // 1. Deduplicate sessions (preferring fresh ones from this sync)
+            const sessionMap = new Map();
+            allSessions.forEach(s => sessionMap.set(s.id, s));
+            const uniqueSessions = Array.from(sessionMap.values());
+
+            // 2. Cleanup: Delete individual year files (both local and remote)
+            const localYearsPath = makePath(LOCAL_SYNC_PATH, name);
+            const remoteYearsPath = makePath(SYNC_BASE_PATH, name);
+            try {
+                // Delete local year files
+                if (await storage.exists(localYearsPath)) {
+                    console.log(`[Sync] Deleting local split files for bundled group: ${name}`);
+                    const yearFiles = await storage.getListing(localYearsPath);
+                    if (yearFiles && yearFiles.length > 0) {
+                        for (const yearFile of yearFiles) {
+                            if (yearFile.name.endsWith('.json')) {
+                                const yearFilePath = makePath(localYearsPath, yearFile.name);
+                                console.log(`[Sync] Deleting local year file: ${yearFilePath}`);
+                                await storage.deleteFile(yearFilePath);
+                            }
+                        }
+                    }
+                    // Delete the empty local folder
+                    await storage.deleteFolder(localYearsPath);
+                }
+
+                // Delete remote year files from AWS
+                if (await storage.exists(remoteYearsPath)) {
+                    console.log(`[Sync] Deleting remote split files for bundled group: ${name}`);
+                    const remoteYearFiles = await storage.getListing(remoteYearsPath);
+                    if (remoteYearFiles && remoteYearFiles.length > 0) {
+                        for (const yearFile of remoteYearFiles) {
+                            if (yearFile.name.endsWith('.gz')) {
+                                const remoteFilePath = makePath(remoteYearsPath, yearFile.name);
+                                console.log(`[Sync] Deleting remote year file: ${remoteFilePath}`);
+                                await storage.deleteFile(remoteFilePath);
+                            }
+                        }
+                    }
+                    // Delete the empty remote folder
+                    await storage.deleteFolder(remoteYearsPath);
+                }
+            } catch (err) {
+                console.error(`[Sync] Error deleting split files for ${name}:`, err);
+                addSyncLog(`[${name}] Warning: Could not delete old split files`, "warning");
+            }
+
+            // 3. Cleanup: Delete merged file if exists (migration)
+            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+            if (await storage.exists(localGroupPath)) {
+                await storage.deleteFile(localGroupPath);
+            }
+            const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
+            if (await storage.exists(remoteGroupPath)) {
+                await storage.deleteFile(remoteGroupPath);
+            }
+
+            const totalSessions = uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
+            const addedCount = totalSessions.length;
+            UpdateSessionsStore.update(s => {
+                s.status[itemIndex].addedCount = addedCount;
+                s.status = [...s.status];
+            });
+            uniqueSessions.forEach(session => allSessionNames.add(session.id));
+
+            return uniqueSessions;
+        }
 
         if (isMerged) {
             // For merged groups:
@@ -481,12 +570,17 @@ export function useUpdateSessions(groups) {
                 const groupInfo = groups.find(group => group.name === item.name);
                 const isDisabled = groupInfo?.disabled;
                 const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
+                const isBundled = groupInfo?.bundled;
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
-                return limit(() => updateGroup(item.name, false, false, isMerged));
+                return limit(() => updateGroup(item.name, false, false, isMerged, isBundled));
             }).filter(Boolean);
-            await Promise.all(promises);
+            const results = await Promise.all(promises);
+            const bundledSessions = results.filter(r => r && Array.isArray(r)).flat();
+            if (bundledSessions.length > 0) {
+                await updateBundleFile(bundledSessions);
+            }
         } finally {
             UpdateSessionsStore.update(s => {
                 s.busy = false;
@@ -519,12 +613,17 @@ export function useUpdateSessions(groups) {
                 const groupInfo = groups.find(group => group.name === item.name);
                 const isDisabled = groupInfo?.disabled;
                 const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
+                const isBundled = groupInfo?.bundled;
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
-                return limit(() => updateGroup(item.name, true, false, isMerged));
+                return limit(() => updateGroup(item.name, true, false, isMerged, isBundled));
             }).filter(Boolean);
-            await Promise.all(promises);
+            const results = await Promise.all(promises);
+            const bundledSessions = results.filter(r => r && Array.isArray(r)).flat();
+            if (bundledSessions.length > 0) {
+                await updateBundleFile(bundledSessions);
+            }
         } finally {
             UpdateSessionsStore.update(s => {
                 s.busy = false;
@@ -542,7 +641,13 @@ export function useUpdateSessions(groups) {
             s.start = new Date().getTime();
         });
         try {
-            await updateGroup(name, updateAll, updateTags);
+            const groupInfo = groups.find(g => g.name === name);
+            const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
+            const isBundled = groupInfo?.bundled;
+            const result = await updateGroup(name, updateAll, updateTags, isMerged, isBundled);
+            if (isBundled && Array.isArray(result)) {
+                await updateBundleFile(result);
+            }
         } finally {
             UpdateSessionsStore.update(s => {
                 s.busy = false;
@@ -653,4 +758,38 @@ async function finalizeGroupSync(groupName) {
         console.error(`[Sync] Error finalizing group ${groupName}:`, err);
         return false;
     }
+}
+
+async function updateBundleFile(newSessions) {
+    const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+    let allSessions = [];
+
+    // 1. Read existing bundle
+    try {
+        if (await storage.exists(bundlePath)) {
+            const content = await storage.readFile(bundlePath);
+            const data = JSON.parse(content);
+            if (data && Array.isArray(data.sessions)) {
+                allSessions = data.sessions;
+            }
+        }
+    } catch (err) {
+        console.warn("[Sync] Failed to read existing bundle for update", err);
+    }
+
+    // 2. Remove old sessions for groups that we are updating
+    const updatedGroups = new Set(newSessions.map(s => s.group));
+    allSessions = allSessions.filter(s => !updatedGroups.has(s.group));
+
+    // 3. Add new sessions
+    allSessions.push(...newSessions);
+
+    // 4. Write bundle
+    const bundleData = {
+        version: 1,
+        date: Date.now(),
+        sessions: allSessions
+    };
+    await writeCompressedFile(bundlePath, bundleData);
+    console.log(`[Sync] Updated bundle.json with ${newSessions.length} new sessions. Total: ${allSessions.length}`);
 }

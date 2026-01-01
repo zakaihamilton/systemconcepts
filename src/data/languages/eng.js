@@ -62,6 +62,18 @@ export default {
             "value": "Complete"
         },
         {
+            "id": "BUNDLE",
+            "value": "Bundle"
+        },
+        {
+            "id": "SEPARATE",
+            "value": "Separate"
+        },
+        {
+            "id": "BUNDLED",
+            "value": "Bundled"
+        },
+        {
             "id": "LANGUAGE",
             "value": "Language"
         },

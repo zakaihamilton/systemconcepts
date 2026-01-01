@@ -90,6 +90,18 @@ export function useSessions(depends = [], options = {}) {
                 const chunk = groups.slice(i, i + CHUNK_SIZE);
                 const chunkResults = await Promise.all(chunk.map(async group => {
                     const groupName = group.name;
+                    if (group.bundled) {
+                        const path = makePath("local/sync/bundle.json");
+                        if (await storage.exists(path)) {
+                            const content = await storage.readFile(path);
+                            const data = JSON.parse(content);
+                            if (data && Array.isArray(data.sessions)) {
+                                const groupSessions = data.sessions.filter(s => s.group === groupName);
+                                return { group, sessions: groupSessions };
+                            }
+                        }
+                    }
+
                     // Check manifest for merged file first
                     const mergedPath = `/${groupName}.json`;
                     // Check if file is in manifest (prefer manifest over fs check for perf) or fallback to fs if manifest missing

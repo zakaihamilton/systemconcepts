@@ -72,6 +72,20 @@ export default function ItemMenuWidget({ item, updateGroup, store, setGroups, se
                     return groups;
                 });
             }
+        },
+        {
+            id: "toggle_bundled",
+            name: item.bundled ? translations.SEPARATE : translations.BUNDLE,
+            icon: item.bundled ? <FolderIcon /> : <CloudQueueIcon />,
+            onClick: () => {
+                setGroups(groups => {
+                    groups = [...groups];
+                    const index = groups.findIndex(group => group.name === item.name);
+                    const currentBundled = groups[index].bundled;
+                    groups[index] = { ...groups[index], bundled: !currentBundled };
+                    return groups;
+                });
+            }
         }
     ];
 

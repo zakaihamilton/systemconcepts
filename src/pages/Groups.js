@@ -334,7 +334,7 @@ export default function Groups() {
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} className={item.disabled && styles.disabled} />,
             progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? percentage : undefined} />,
             colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />,
-            storageMode: (item.merged ?? item.disabled) ? translations.MERGED : translations.SPLIT,
+            storageMode: item.bundled ? translations.BUNDLED : ((item.merged ?? item.disabled) ? translations.MERGED : translations.SPLIT),
             storageSize: sizeDisplay,
             storageSizeBytes: sizeBytes
         };
