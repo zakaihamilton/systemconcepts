@@ -82,6 +82,18 @@ export function useSessions(depends = [], options = {}) {
             // groupsSyncData.groups is now an array of { name, counter }
             const groups = Array.isArray(groupsSyncData?.groups) ? groupsSyncData.groups : [];
 
+            // Cache bundle.json to avoid reading it multiple times for bundled groups
+            let bundleData = null;
+            const bundlePath = makePath("local/sync/bundle.json");
+            if (await storage.exists(bundlePath)) {
+                try {
+                    const content = await storage.readFile(bundlePath);
+                    bundleData = JSON.parse(content);
+                } catch (err) {
+                    console.error("[Sessions] Error reading bundle.json:", err);
+                }
+            }
+
             // Process groups in chunks to avoid blocking
             const CHUNK_SIZE = 3;
             let groupsWithYears = [];
@@ -90,16 +102,10 @@ export function useSessions(depends = [], options = {}) {
                 const chunk = groups.slice(i, i + CHUNK_SIZE);
                 const chunkResults = await Promise.all(chunk.map(async group => {
                     const groupName = group.name;
-                    if (group.bundled) {
-                        const path = makePath("local/sync/bundle.json");
-                        if (await storage.exists(path)) {
-                            const content = await storage.readFile(path);
-                            const data = JSON.parse(content);
-                            if (data && Array.isArray(data.sessions)) {
-                                const groupSessions = data.sessions.filter(s => s.group === groupName);
-                                return { group, sessions: groupSessions };
-                            }
-                        }
+                    if (group.bundled && bundleData?.sessions) {
+                        // Use cached bundle data instead of reading file again
+                        const groupSessions = bundleData.sessions.filter(s => s.group === groupName);
+                        return { group, sessions: groupSessions };
                     }
 
                     // Check manifest for merged file first
