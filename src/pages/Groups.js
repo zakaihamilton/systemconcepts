@@ -42,12 +42,36 @@ export default function Groups() {
     useEffect(() => {
         const calculateSizes = async () => {
             const sizes = {};
+            let bundleData = null;
+
+            // Check if we need to load bundle
+            const hasBundled = groups.some(g => g.bundled);
+            if (hasBundled) {
+                const bundlePath = "local/sync/bundle.json";
+                try {
+                    if (await storage.exists(bundlePath)) {
+                        const content = await storage.readFile(bundlePath);
+                        bundleData = JSON.parse(content);
+                    }
+                } catch (err) {
+                    console.error("Error reading bundle for size check:", err);
+                }
+            }
+
             for (const group of groups) {
                 try {
                     const isMerged = group.merged ?? group.disabled;
                     let totalSize = 0;
 
-                    if (isMerged) {
+                    if (group.bundled) {
+                        if (bundleData && Array.isArray(bundleData.sessions)) {
+                            const groupSessions = bundleData.sessions.filter(s => s.group === group.name);
+                            // We approximate the size by stringifying the sessions belonging to this group
+                            if (groupSessions.length > 0) {
+                                totalSize = JSON.stringify(groupSessions).length;
+                            }
+                        }
+                    } else if (isMerged) {
                         // Check merged file
                         const mergedPath = `local/sync/${group.name}.json`;
                         if (await storage.exists(mergedPath)) {
