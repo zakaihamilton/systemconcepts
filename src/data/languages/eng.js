@@ -1126,6 +1126,14 @@ export default {
             "value": "Split"
         },
         {
+            "id": "STORAGE",
+            "value": "Storage"
+        },
+        {
+            "id": "MERGED",
+            "value": "Merged"
+        },
+        {
             "id": "STATISTICS",
             "value": "Statistics"
         },

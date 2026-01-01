@@ -1126,6 +1126,14 @@ export default {
             "value": "Dividir"
         },
         {
+            "id": "STORAGE",
+            "value": "Armazenamento"
+        },
+        {
+            "id": "MERGED",
+            "value": "Mesclado"
+        },
+        {
             "id": "STATISTICS",
             "value": "Estatísticas"
         },

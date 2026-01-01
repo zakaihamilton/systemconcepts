@@ -1122,6 +1122,14 @@ export default {
             "value": "פצל"
         },
         {
+            "id": "STORAGE",
+            "value": "אחסון"
+        },
+        {
+            "id": "MERGED",
+            "value": "ממוזג"
+        },
+        {
             "id": "STATISTICS",
             "value": "סטטיסטיקות"
         },

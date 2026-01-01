@@ -214,6 +214,16 @@ export default function Groups() {
                 }
             }
         },
+        {
+            id: "storageMode",
+            title: translations.STORAGE,
+            sortable: "storageMode",
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
+        },
         !busy && {
             id: "colorWidget",
             title: translations.COLOR,
@@ -252,7 +262,8 @@ export default function Groups() {
             iconWidget,
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} className={item.disabled && styles.disabled} />,
             progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? percentage : undefined} />,
-            colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
+            colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />,
+            storageMode: (item.merged ?? item.disabled) ? translations.MERGED : translations.SPLIT
         };
     };
 
