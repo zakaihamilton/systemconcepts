@@ -166,6 +166,14 @@ export function useSessions(depends = [], options = {}) {
                 return years.map(year => ({ group, year }));
             });
 
+            // Pre-compute groupInfo map to avoid repeated lookups
+            const groupInfoMap = new Map();
+            if (groupMetadata) {
+                for (const info of groupMetadata) {
+                    groupInfoMap.set(info.name, info);
+                }
+            }
+
             // Process year files in chunks
             const YEAR_CHUNK_SIZE = 5;
             let allSessions = [];
@@ -193,27 +201,33 @@ export function useSessions(depends = [], options = {}) {
                             return [];
                         }
 
-                        const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
+                        const groupInfo = groupInfoMap.get(group.name);
+                        const groupColor = groupInfo?.color;
 
-                        return dataSessions.map(session => {
-                            let thumbnail = session.thumbnail;
+                        // Mutate sessions in-place instead of creating new objects
+                        for (let i = 0; i < dataSessions.length; i++) {
+                            const session = dataSessions[i];
+
+                            // Update thumbnail if CDN URL exists
                             if (session.image && cdn.url) {
-                                thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                                session.thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
                             }
 
-                            return {
-                                ...session,
-                                color: groupInfo.color,
-                                thumbnail
-                            };
-                        });
+                            // Add color if available and not already set
+                            if (groupColor && !session.color) {
+                                session.color = groupColor;
+                            }
+                        }
+
+                        return dataSessions;
                     } catch (err) {
                         console.error("Error reading sessions file", path, err);
                         return [];
                     }
                 }));
 
-                allSessions.push(...chunkResults.flat());
+                // Use concat to avoid spread operator overhead
+                allSessions = allSessions.concat(chunkResults.flat());
 
                 // Yield to UI after each chunk
                 if (i + YEAR_CHUNK_SIZE < tasks.length) {
