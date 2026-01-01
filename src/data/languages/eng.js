@@ -1182,10 +1182,6 @@ export default {
             "value": "Last Synced"
         },
         {
-            "id": "DURATION",
-            "value": "Duration"
-        },
-        {
             "id": "GROUPS_SYNCED",
             "value": "Groups Synced"
         },

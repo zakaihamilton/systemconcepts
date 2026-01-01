@@ -1138,10 +1138,6 @@ export default {
             "value": "Limpar Grupos"
         },
         {
-            "id": "APPLY_FILTERS",
-            "value": "Aplicar Filtros"
-        },
-        {
             "id": "SELECTED",
             "value": "Selecionado"
         },
@@ -1176,6 +1172,46 @@ export default {
         {
             "id": "SEEK",
             "value": "Buscar"
+        },
+        {
+            "id": "SYNC_STATUS",
+            "value": "Sync Status"
+        },
+        {
+            "id": "LAST_SYNCED",
+            "value": "Last Synced"
+        },
+        {
+            "id": "GROUPS_SYNCED",
+            "value": "Groups Synced"
+        },
+        {
+            "id": "ADDED_SESSIONS",
+            "value": "Added Sessions"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "Removed Sessions"
+        },
+        {
+            "id": "TAGS_SYNCED",
+            "value": "Tags Synced"
+        },
+        {
+            "id": "IDLE",
+            "value": "Idle"
+        },
+        {
+            "id": "NEVER",
+            "value": "Never"
+        },
+        {
+            "id": "COPY_LOG",
+            "value": "Copy Log"
+        },
+        {
+            "id": "LOG_COPIED",
+            "value": "Log Copied to Clipboard"
         }
     ]
 };
