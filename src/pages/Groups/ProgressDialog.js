@@ -109,7 +109,6 @@ export default function ProgressDialog() {
                 <div className={styles.progressContainer}>
                     <LinearProgress variant="determinate" value={progress} className={styles.progressBar} color={hasErrors ? "error" : "primary"} />
                     <div className={styles.progressText}>
-                        {item.tagCount > 0 && <Chip label={`${item.tagCount}`} color="primary" size="small" className={styles.countChip} />}
                         {item.addedCount > 0 && <Chip label={`+${item.addedCount}`} color="success" size="small" className={styles.countChip} />}
                         {item.removedCount > 0 && <Chip label={`-${item.removedCount}`} color="error" size="small" className={styles.countChip} />}
                         <div style={{ flex: 1 }} />

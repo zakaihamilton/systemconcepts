@@ -25,7 +25,6 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             removedCount: 0,
             progress: 0,
             count: 0,
-            tagCount: 0,
             errors: [],
             newSessions: []
         };
