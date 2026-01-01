@@ -122,11 +122,15 @@ export function useSyncFeature() {
         lastSynced: s.lastSynced,
         logs: s.logs,
         lastDuration: s.lastDuration,
-        startTime: s.startTime
+        startTime: s.startTime,
+        progress: s.progress
     }));
 
-    const { busy, lastSynced, logs, lastDuration: duration, startTime } = state;
-    const [percentage, setPercentage] = useState(0);
+    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress } = state;
+
+    const percentage = progress && progress.total > 0
+        ? Math.round((progress.processed / progress.total) * 100)
+        : 0;
 
     return {
         sync: requestSync,

@@ -2,6 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
+import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
@@ -58,6 +59,10 @@ export async function uploadNewFiles(localManifest, remoteManifest) {
 
         addSyncLog(`Uploading ${toUpload.length} new file(s)...`, "info");
 
+        SyncActiveStore.update(s => {
+            s.progress = { total: toUpload.length, processed: 0 };
+        });
+
         // Upload in parallel batches
         const updates = [];
         for (let i = 0; i < toUpload.length; i += SYNC_BATCH_SIZE) {
@@ -66,6 +71,10 @@ export async function uploadNewFiles(localManifest, remoteManifest) {
             const percent = Math.round((progress / toUpload.length) * 100);
 
             addSyncLog(`Uploading ${progress}/${toUpload.length} (${percent}%)...`, "info");
+
+            SyncActiveStore.update(s => {
+                s.progress = { total: toUpload.length, processed: progress };
+            });
 
             const results = await Promise.all(
                 batch.map(localFile => uploadNewFile(localFile, createdFolders))

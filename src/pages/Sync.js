@@ -164,7 +164,7 @@ export default function Sync() {
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Typography variant="h6" noWrap>
-                                        {syncBusy ? translations.SYNCING : translations.IDLE}
+                                        {syncBusy ? translations.SYNCING : (lastSynced ? translations.COMPLETE : translations.IDLE)}
                                     </Typography>
                                     {syncBusy && <UpdateIcon className={animatedClassName} sx={{ fontSize: 20 }} />}
                                 </Box>

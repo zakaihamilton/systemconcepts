@@ -5,6 +5,7 @@ import { addSyncLog } from "../logs";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
+import { SyncActiveStore } from "../syncState";
 
 /**
  * Helper function to download a single file
@@ -77,6 +78,10 @@ export async function downloadUpdates(localManifest, remoteManifest) {
 
         addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
 
+        SyncActiveStore.update(s => {
+            s.progress = { total: toDownload.length, processed: 0 };
+        });
+
         // Download in parallel batches
         const updates = [];
         for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
@@ -85,6 +90,10 @@ export async function downloadUpdates(localManifest, remoteManifest) {
             const percent = Math.round((progress / toDownload.length) * 100);
 
             addSyncLog(`Downloading ${progress}/${toDownload.length} (${percent}%)...`, "info");
+
+            SyncActiveStore.update(s => {
+                s.progress = { total: toDownload.length, processed: progress };
+            });
 
             const results = await Promise.all(
                 batch.map(async remoteFile => {

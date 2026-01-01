@@ -58,6 +58,10 @@ export default {
             "value": "Setting"
         },
         {
+            "id": "COMPLETE",
+            "value": "Complete"
+        },
+        {
             "id": "LANGUAGE",
             "value": "Language"
         },

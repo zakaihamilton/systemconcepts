@@ -2,6 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { LOCAL_SYNC_PATH, FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
+import { SyncActiveStore } from "../syncState";
 import { getFileInfo } from "../hash";
 
 /**
@@ -45,12 +46,20 @@ export async function updateLocalManifest(localFiles) {
         addSyncLog(`Computing hashes for ${localFiles.length} file(s)...`, "info");
         const fileInfos = [];
 
+        SyncActiveStore.update(s => {
+            s.progress = { total: localFiles.length, processed: 0 };
+        });
+
         for (let i = 0; i < localFiles.length; i += SYNC_BATCH_SIZE) {
             const batch = localFiles.slice(i, i + SYNC_BATCH_SIZE);
             const progress = Math.min(i + batch.length, localFiles.length);
             const percent = Math.round((progress / localFiles.length) * 100);
 
             addSyncLog(`Computing hashes ${progress}/${localFiles.length} (${percent}%)...`, "info");
+
+            SyncActiveStore.update(s => {
+                s.progress = { total: localFiles.length, processed: progress };
+            });
 
             const results = await Promise.all(
                 batch.map(file => computeFileInfo(file))
