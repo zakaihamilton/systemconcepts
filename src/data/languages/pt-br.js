@@ -1134,6 +1134,10 @@ export default {
             "value": "Mesclado"
         },
         {
+            "id": "SIZE",
+            "value": "Tamanho"
+        },
+        {
             "id": "STATISTICS",
             "value": "Estatísticas"
         },

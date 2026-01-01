@@ -1134,6 +1134,10 @@ export default {
             "value": "Merged"
         },
         {
+            "id": "SIZE",
+            "value": "Size"
+        },
+        {
             "id": "STATISTICS",
             "value": "Statistics"
         },

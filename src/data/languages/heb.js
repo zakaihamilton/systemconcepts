@@ -1130,6 +1130,10 @@ export default {
             "value": "ממוזג"
         },
         {
+            "id": "SIZE",
+            "value": "גודל"
+        },
+        {
             "id": "STATISTICS",
             "value": "סטטיסטיקות"
         },
