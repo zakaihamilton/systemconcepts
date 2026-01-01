@@ -22,18 +22,20 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SessionIcon from "@widgets/SessionIcon";
 import Chip from "@mui/material/Chip";
 import { SyncActiveStore } from "@sync/syncState";
+import { PlayerStore } from "@pages/Player";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isMobile = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
-    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order, showFilterDialog } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order } = SessionsStore.useState();
+    const { session } = PlayerStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset"]);
 
     // Memoize dependencies to prevent unnecessary resets
     const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode]);
-    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode], [groupFilter, typeFilter, yearFilter, translations, viewMode]);
+    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode, session], [groupFilter, typeFilter, yearFilter, translations, viewMode, session]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };
@@ -78,7 +80,7 @@ export default function SessionsPage() {
             },
             columnProps: {
                 style: {
-                    width: "7em"
+                    width: "9em"
                 }
             },
             viewModes: {
@@ -173,6 +175,7 @@ export default function SessionsPage() {
         }
 
         const percentage = item.duration && (item.position / item.duration * 100);
+        const isPlaying = session && session.group === item.group && session.date === item.date && session.name === item.name;
 
         return {
             // Identity & core data
@@ -202,9 +205,10 @@ export default function SessionsPage() {
                 ? ""
                 : (item.duration > 1
                     ? formatDuration(item.duration * 1000, true)
-                    : translations.UNKNOWN)
+                    : translations.UNKNOWN),
+            isPlaying
         };
-    }, [formatDuration, translations]);
+    }, [formatDuration, translations, session]);
 
     const renderColumn = useCallback((columnId, item) => {
         switch (columnId) {
@@ -234,7 +238,11 @@ export default function SessionsPage() {
                     </span>
                 );
 
-                const nameContent = <Tooltip enterDelay={500} enterNextDelay={500} arrow title={item.name}>{nameContentInner}</Tooltip>;
+                const nameContent = <Tooltip enterDelay={500} enterNextDelay={500} arrow title={item.name}>
+                    <div className={styles.nameContainer}>
+                        {nameContentInner}
+                    </div>
+                </Tooltip>;
 
                 const href = target(item);
                 return viewMode === "grid"
@@ -420,6 +428,7 @@ export default function SessionsPage() {
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
             renderColumn={renderColumn}
+            rowClassName={item => item.isPlaying ? styles.playing : null}
         />
 
         {!!isMobile && <FilterBar />}

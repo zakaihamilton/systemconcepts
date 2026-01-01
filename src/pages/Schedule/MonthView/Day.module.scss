@@ -1,3 +1,5 @@
+@import "../../../scss/mixins";
+
 .root {
     display: flex;
     flex-direction: column;
@@ -118,4 +120,10 @@
 
 .root:hover .icon {
     opacity: 1;
+}
+
+
+
+.playing {
+    @include playing;
 }

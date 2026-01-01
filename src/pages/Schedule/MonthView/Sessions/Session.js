@@ -4,7 +4,9 @@ import { useSessionTextColor } from "@util/colors";
 import Link from "@mui/material/Link";
 import SessionIcon from "@widgets/SessionIcon";
 
-export default function Session({ group, year, date, name, color, type }) {
+import clsx from "clsx";
+
+export default function Session({ group, year, date, name, color, type, isPlaying }) {
     const textColor = useSessionTextColor(color);
     const groupName = group && (group[0].toUpperCase() + group.slice(1));
     const path = `session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`;
@@ -19,7 +21,7 @@ export default function Session({ group, year, date, name, color, type }) {
         backgroundColor: color
     };
 
-    return <Link underline="none" color="initial" href={href} className={styles.root} style={{ color: textColor }} onClick={onClick}>
+    return <Link underline="none" color="initial" href={href} className={clsx(styles.root, isPlaying && styles.playing)} style={{ color: textColor }} onClick={onClick}>
         <div className={styles.background} style={style} />
         <div className={styles.container}>
             <div className={styles.icons}>

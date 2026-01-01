@@ -1,3 +1,24 @@
+.root {
+    background-color: var(--main-background);
+}
+
+.root.even {
+    background-color: var(--main-background-alternative);
+}
+
+.root.separator {
+    border-top: 4px solid var(--neutral-300);
+}
+
+.root.hover {
+    cursor: pointer;
+    user-select: none;
+}
+
+.root.selected {
+    background: var(--info-background) !important;
+}
+
 .cell {
     font-size: 16px;
     padding: 0em !important;
@@ -5,19 +26,29 @@
 }
 
 .cell.separator {
-    border-top: 1px solid var(--neutral-700) !important;
+    border-top: 2px solid var(--neutral-700) !important;
 }
 
-.cell.padding {
+.cellContent.padding {
     padding-left: 0.5em !important;
     padding-right: 0.5em !important;
 }
 
-.cell.head {
+.cellContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+    margin: 4px;
+    box-sizing: border-box;
+}
+
+.cellContent.head {
     background: var(--main-background) !important;
 }
 
-.cell.defaultAlign {
+.cellContent.defaultAlign {
     [dir=ltr] & {
         text-align: left;
     }
@@ -27,37 +58,14 @@
     }
 }
 
-.selectable {
+.cellContent.selected {
+    background: var(--info-background) !important;
+}
+
+.cellContent.selectable {
     cursor: pointer !important;
-    border-bottom: 2px solid transparent !important;
 }
 
-.selectable:hover {
-    background: var(--info-background) !important;
-    border-bottom: 2px solid var(--hover-color) !important;
-}
-
-.row {
-    background-color: var(--main-background);
-}
-
-.row.even {
-    background-color: var(--main-background-alternative);
-}
-
-.row.separator {
-    border-top: 2px solid var(--neutral-300);
-}
-
-.row.hover {
-    cursor: pointer;
-    user-select: none;
-}
-
-.cell.selected {
-    background: var(--info-background) !important;
-}
-
-.row.selected {
+.cellContent.selectable:hover {
     background: var(--info-background) !important;
 }

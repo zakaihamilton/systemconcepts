@@ -74,6 +74,7 @@ export default function TableWidget(props) {
         resetScrollDeps = EMPTY_ARRAY,
         getSeparator,
         renderColumn,
+        rowClassName,
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -425,7 +426,8 @@ export default function TableWidget(props) {
         order,
         getSeparator,
         renderColumn,
-    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn]);
+        rowClassName
+    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn, rowClassName]);
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
@@ -548,6 +550,7 @@ export default function TableWidget(props) {
                     separator = getSeparator(item, prevItem, orderBy, viewMode);
                 }
             }
+            const className = rowClassName ? rowClassName(item) : "";
             return <Row
                 key={key || id || idx}
                 index={idx}
@@ -560,6 +563,7 @@ export default function TableWidget(props) {
                 selected={selected}
                 separator={separator}
                 renderColumn={renderColumn}
+                className={clsx(props.className, className)}
                 {...props}
             />;
         });
@@ -621,7 +625,7 @@ export default function TableWidget(props) {
 }
 
 const TableListRow = React.memo(({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn } = data;
+    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn, rowClassName } = data;
     const itemIndex = hideColumns ? index : index - 1;
     const item = items?.[itemIndex];
 
@@ -630,6 +634,7 @@ const TableListRow = React.memo(({ index, style, data }) => {
     const { id, key } = item;
     const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
     const selected = index && selectedRow && selectedRow(item);
+    const className = rowClassName ? rowClassName(item) : "";
 
     if (!hideColumns && !index) {
         return null;
@@ -647,6 +652,7 @@ const TableListRow = React.memo(({ index, style, data }) => {
         key={key || id || itemIndex}
         style={{ ...style, ...itemStyles }}
         {...props}
+        className={clsx(props.className, className)}
         columns={visibleColumns}
         rowClick={rowClick}
         item={item}
@@ -659,7 +665,7 @@ const TableListRow = React.memo(({ index, style, data }) => {
 });
 
 const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
-    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn } = data;
+    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
     const index = (rowIndex * columnCount) + columnIndex;
     const item = items?.[index];
     if (!item) {
@@ -668,6 +674,7 @@ const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
     const { id, key } = item;
     const { style: itemStyles, ...props } = viewModes[viewMode] || {};
     const selected = selectedRow && selectedRow(item);
+    const className = rowClassName ? rowClassName(item) : "";
 
     const finalStyle = { ...style };
     finalStyle.left += sidePadding;
@@ -676,6 +683,7 @@ const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
         key={id || key || index}
         style={{ ...finalStyle, ...itemStyles }}
         {...props}
+        className={clsx(props.className, className)}
         columns={visibleColumns}
         rowClick={rowClick}
         item={item}

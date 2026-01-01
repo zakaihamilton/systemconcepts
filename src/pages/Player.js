@@ -31,7 +31,8 @@ export const PlayerStore = new Store({
     showDetails: true,
     showSpeed: false,
     hash: "",
-    player: null
+    player: null,
+    session: null
 });
 
 registerToolbar("Player");
@@ -79,6 +80,16 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         }
     }, [data && data.path]);
 
+    useEffect(() => {
+        if (group && date && name) {
+            PlayerStore.update(s => {
+                const session = { group, date, name };
+                console.log("sesion playing", session);
+                s.session = session;
+            });
+        }
+    }, [group, date, name]);
+
     const color = groups.find(item => item.name === group)?.color;
 
     const toolbarItems = [
@@ -88,7 +99,8 @@ export default function PlayerPage({ show = false, suffix, mode }) {
             icon: <VideoLabelIcon />,
             menu: false,
             target: hash,
-            onClick: gotoPlayer
+            onClick: gotoPlayer,
+            className: styles.playerIcon
         },
         subtitles && show && {
             id: "subtitles",

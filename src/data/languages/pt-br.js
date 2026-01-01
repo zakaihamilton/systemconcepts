@@ -802,6 +802,10 @@ export default {
             "value": "Tocador"
         },
         {
+            "id": "PLAYING",
+            "value": "Tocando"
+        },
+        {
             "id": "SCHEDULE",
             "value": "Cronograma"
         },

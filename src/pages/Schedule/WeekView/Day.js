@@ -4,7 +4,7 @@ import { getDateString } from "@util/date";
 import Session from "./Session";
 import clsx from "clsx";
 
-export default function Day({ sessions, column, row, count, date }) {
+export default function Day({ sessions, column, row, count, date, playingSession }) {
     const isPhone = useDeviceType() === "phone";
     const style = {
         gridColumn: column,
@@ -20,7 +20,7 @@ export default function Day({ sessions, column, row, count, date }) {
         })
         .map(session => {
             const { name, key, ...sessionProps } = session;
-            return <Session key={key} name={name} {...sessionProps} />;
+            return <Session key={key} name={name} {...sessionProps} isPlaying={playingSession && playingSession.name === name && playingSession.group === session.group && playingSession.date === session.date} />;
         });
     return <div className={clsx(styles.root, column === count && styles.last, isPhone && styles.mobile)} style={style}>
         <div className={clsx(styles.sessions, isPhone && styles.mobile)}>

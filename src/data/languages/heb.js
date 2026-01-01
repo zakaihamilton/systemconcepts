@@ -798,6 +798,10 @@ export default {
             "value": "נגן"
         },
         {
+            "id": "PLAYING",
+            "value": "מנגן"
+        },
+        {
             "id": "SCHEDULE",
             "value": "יומן"
         },

@@ -7,7 +7,7 @@ import Link from "@mui/material/Link";
 import SessionIcon from "@widgets/SessionIcon";
 import { Tooltip } from "@mui/material";
 
-export default function Session({ group, year, date, name, color, type }) {
+export default function Session({ group, year, date, name, color, type, isPlaying }) {
     const isPhone = useDeviceType() === "phone";
     const textColor = useSessionTextColor(color);
     const groupName = group && (group[0].toUpperCase() + group.slice(1));
@@ -24,7 +24,7 @@ export default function Session({ group, year, date, name, color, type }) {
     };
 
     return <Tooltip title={name}>
-        <Link underline="none" color="initial" href={href} className={clsx(styles.root, isPhone && styles.mobile)} style={{ color: textColor }} onClick={onClick}>
+        <Link underline="none" color="initial" href={href} className={clsx(styles.root, isPhone && styles.mobile, isPlaying && styles.playing)} style={{ color: textColor }} onClick={onClick}>
             <div className={styles.background} style={style} />
             <div className={clsx(styles.group, isPhone && styles.mobile)} dir="auto">
                 {groupName}

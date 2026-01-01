@@ -818,6 +818,10 @@ export default {
             "value": "Player"
         },
         {
+            "id": "PLAYING",
+            "value": "Playing"
+        },
+        {
             "id": "SCHEDULE",
             "value": "Schedule"
         },

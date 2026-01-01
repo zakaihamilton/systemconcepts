@@ -12,7 +12,7 @@ import TodayIcon from '@mui/icons-material/Today';
 
 registerToolbar("TracksView");
 
-export default function TracksView({ sessions = [], loading, store, translations, viewModes }) {
+export default function TracksView({ sessions = [], loading, store, translations, viewModes, playingSession }) {
     const isMobile = useDeviceType() !== "desktop";
     const [focusedSessionId, setFocusedSessionId] = useState(null);
     const listRef = useRef(null);
@@ -305,8 +305,9 @@ export default function TracksView({ sessions = [], loading, store, translations
         width: (pageSize && pageSize.width ? pageSize.width : 0),
         itemSize: CARD_WIDTH,
         store,
-        translations
-    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store, translations]);
+        translations,
+        playingSession
+    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store, translations, playingSession]);
 
     const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0"));
 
@@ -344,7 +345,7 @@ export default function TracksView({ sessions = [], loading, store, translations
 }
 
 const Row = ({ index, style, data }) => {
-    const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store, translations } = data;
+    const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store, translations, playingSession } = data;
     const group = groupedSessions[index];
 
     return (
@@ -359,6 +360,7 @@ const Row = ({ index, style, data }) => {
                 itemSize={itemSize}
                 store={store}
                 translations={translations}
+                playingSession={playingSession}
             />
         </div>
     );

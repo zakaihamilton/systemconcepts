@@ -35,7 +35,7 @@ export default function ToolbarItem({ item, idx, count }) {
                                     underline="none"
                                     color="inherit"
                                     href={item.target}
-                                    className={classes}
+                                    className={`${classes} ${item.className || ""}`}
                                     disabled={item.disabled}
                                     size="small"
                                     id={item.id}

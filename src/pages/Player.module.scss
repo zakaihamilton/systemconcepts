@@ -1,5 +1,11 @@
+@import "../scss/mixins";
+
 .root {
     display: flex;
     flex-direction: column;
     color: var(--text-color);
+}
+
+.playerIcon {
+    @include playing;
 }

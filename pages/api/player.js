@@ -42,7 +42,7 @@ export default async function PLAYER_API(req, res) {
                 subtitles = "/api/subtitle?path=" + encodeURIComponent(s3Key);
             }
         }
-        log({ component, message: `User ${id} is playing session: ${sessionUrl}` });
+        log({ component, message: `User ${id} is playing session: ${decodeURIComponent(sessionUrl)}` });
         res.status(200).json({ path: sessionUrl, subtitles });
     }
     catch (err) {
