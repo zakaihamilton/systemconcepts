@@ -90,7 +90,7 @@ export function useUpdateSessions(groups) {
             s.status = [...s.status];
         });
 
-        const promises = years.map((year) => limit(async () => {
+        const promises = years.filter(year => !year.name.endsWith(".tags")).map((year) => limit(async () => {
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].years.push(year.name);
                 s.status[itemIndex].year = year.name;
@@ -105,6 +105,7 @@ export function useUpdateSessions(groups) {
                 // Read tags from .tags files
                 const sessionTagsMap = {};
                 // If not forcing update, try to load from cache
+                let updateLocalTags = updateTags;
                 if (!updateTags) {
                     const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
                     try {
@@ -119,8 +120,32 @@ export function useUpdateSessions(groups) {
                                 });
                             }
                         }
+                        else {
+                            updateLocalTags = true;
+                        }
                     } catch (err) {
                         console.warn(`[Sync] Failed to read cache from ${localYearPath}`, err);
+                    }
+                }
+
+                if (updateLocalTags) {
+                    const tagFile = yearItems.find(f => f.name.endsWith(".tags"));
+                    if (tagFile) {
+                        try {
+                            const content = await storage.readFile(tagFile.path);
+                            const data = JSON.parse(content);
+                            if (data && Array.isArray(data.sessions)) {
+                                let count = 0;
+                                data.sessions.forEach(session => {
+                                    if (session.sessionName && session.tags) {
+                                        sessionTagsMap[session.sessionName] = session.tags;
+                                        count++;
+                                    }
+                                });
+                            }
+                        } catch (err) {
+                            console.error(`[Sync] Error reading tags file ${tagFile.path}:`, err);
+                        }
                     }
                 }
 
@@ -139,22 +164,6 @@ export function useUpdateSessions(groups) {
                         id = id.replace(/\.[a-z]{2,3}$/, "");
                     }
                     if (isTagsFile(file.name)) {
-                        id = id.replace(/\.tags$/, "");
-                        // Only read tag file if forcing update or tag missing from cache
-                        if (updateTags || !sessionTagsMap[id]) {
-                            continue;
-                            /*
-                            try {
-                                const content = await storage.readFile(file.path);
-                                const data = JSON.parse(content);
-                                if (data && Array.isArray(data.tags)) {
-                                    sessionTagsMap[id] = data.tags;
-                                }
-                            } catch (err) {
-                                console.error(`Error reading tags file ${file.path}:`, err);
-                            }
-                            */
-                        }
                         continue;
                     }
 
