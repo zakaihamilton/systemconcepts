@@ -3,10 +3,12 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import { MainStore } from "@components/Main";
+import { useTranslations } from "@util/translations";
 import styles from "./SpeedDial.module.scss";
 
 export default function SpeedDialWidget({ visible = true, items }) {
     const { direction } = MainStore.useState();
+    const translations = useTranslations();
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => {
@@ -41,7 +43,7 @@ export default function SpeedDialWidget({ visible = true, items }) {
 
     return (
         <SpeedDial
-            ariaLabel=""
+            ariaLabel={translations.MENU}
             classes={{
                 root: direction === "rtl" ? styles.speedDialRtl : styles.speedDial,
                 fab: styles.fab

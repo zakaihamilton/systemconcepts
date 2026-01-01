@@ -10,7 +10,12 @@ export default function FloatingActionButtons({ onClick, title, icon, ...props }
     return (
         <div className={className}>
             <Tooltip arrow title={title}>
-                <Fab color="primary" onClick={onClick} {...props}>
+                <Fab
+                    color="primary"
+                    onClick={onClick}
+                    aria-label={props["aria-label"] || title}
+                    {...props}
+                >
                     {icon}
                 </Fab>
             </Tooltip>
