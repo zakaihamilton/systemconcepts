@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useContext, useEffect, useMemo } from "react";
+import React, { forwardRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
@@ -457,7 +457,29 @@ export default function TableWidget(props) {
 
     // Derived state for empty condition
     // Optimization: Derive isEmpty from data and items to avoid state synchronization and extra renders
-    const isEmpty = !loading && data && (!data.length || !items.length);
+    const isEmpty = !loading && data !== null && (!data.length || !items.length);
+
+    // Delay showing "Loading" to prevent flicker on quick loads
+    const [showLoading, setShowLoading] = useState(false);
+    useEffect(() => {
+        if (loading) {
+            const timer = setTimeout(() => setShowLoading(true), 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setShowLoading(false);
+        }
+    }, [loading]);
+
+    // Delay showing "No Items" to prevent flicker on initial load
+    const [showEmpty, setShowEmpty] = useState(false);
+    useEffect(() => {
+        if (isEmpty) {
+            const timer = setTimeout(() => setShowEmpty(true), 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setShowEmpty(false);
+        }
+    }, [isEmpty]);
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
@@ -466,8 +488,8 @@ export default function TableWidget(props) {
         const itemCount = hideColumns ? numItems : numItems + 1;
 
         return <>
-            {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
+            {!!showLoading && loadingElement}
+            {!!showEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
                 className={styles.tableList}
@@ -543,8 +565,8 @@ export default function TableWidget(props) {
         });
 
         return (<>
-            {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
+            {!!showLoading && loadingElement}
+            {!!showEmpty && !loading && emptyElement}
             {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
                 {!!statusBarVisible && statusBar}
                 {!error && <Table classes={{ root: styles.table }} stickyHeader style={style}>
@@ -568,8 +590,8 @@ export default function TableWidget(props) {
     }
     else if (viewMode === "grid") {
         return <>
-            {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
+            {!!showLoading && loadingElement}
+            {!!showEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeGrid
                 className={styles.grid}

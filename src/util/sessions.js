@@ -1,5 +1,4 @@
 import storage from "@util/storage";
-import { readCompressedFile } from "@sync/bundle";
 import { makePath } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
