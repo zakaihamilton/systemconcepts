@@ -413,6 +413,23 @@ export function useUpdateSessions(groups) {
                 addSyncLog(`[${name}] Warning: Could not delete old split files`, "warning");
             }
 
+            // Update manifests to remove deleted files
+            try {
+                const localManifestPath = makePath(LOCAL_SYNC_PATH, "files.json");
+                if (await storage.exists(localManifestPath)) {
+                    const content = await storage.readFile(localManifestPath);
+                    const manifest = JSON.parse(content);
+                    const yearPathPrefix = `/${name}/`;
+                    const updatedManifest = manifest.filter(f => !f.path.startsWith(yearPathPrefix));
+                    if (updatedManifest.length < manifest.length) {
+                        await storage.writeFile(localManifestPath, JSON.stringify(updatedManifest, null, 4));
+                        console.log(`[Sync] Removed ${manifest.length - updatedManifest.length} year files from local manifest`);
+                    }
+                }
+            } catch (err) {
+                console.error(`[Sync] Error updating manifest for ${name}:`, err);
+            }
+
             // 3. Cleanup: Delete merged file if exists (migration)
             const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
             if (await storage.exists(localGroupPath)) {
