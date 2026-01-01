@@ -1,8 +1,8 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
+import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST, FILES_MANIFEST_GZ, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
-import { readCompressedFile } from "../bundle";
+import { readCompressedFile, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 
@@ -36,9 +36,11 @@ async function downloadFile(remoteFile, createdFolders) {
             console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
         }
 
+        addSyncLog(`Downloaded: ${fileBasename}`, "info");
         return remoteFile;
     } catch (err) {
         console.error(`[Sync] Failed to download ${fileBasename}:`, err);
+        addSyncLog(`Failed to download: ${fileBasename}`, "error");
         return null;
     }
 }
@@ -55,6 +57,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
         const localMap = new Map(localManifest.map(f => [f.path, f]));
         const toDownload = [];
         const createdFolders = new Set();
+        const missingOnRemote = [];
 
         // Collect files that need downloading
         for (const remoteFile of remoteManifest) {
@@ -69,10 +72,15 @@ export async function downloadUpdates(localManifest, remoteManifest) {
 
         if (toDownload.length === 0) {
             addSyncLog("✓ No downloads needed", "info");
-            return { manifest: localManifest, hasChanges: false };
+            return { manifest: localManifest, hasChanges: false, cleanedRemoteManifest: remoteManifest };
         }
 
         addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
+
+        // Log the files that will be downloaded
+        toDownload.forEach(file => {
+            addSyncLog(`Queued for download: ${file.path}`, "info");
+        });
 
         // Download in parallel batches
         const updates = [];
@@ -84,10 +92,36 @@ export async function downloadUpdates(localManifest, remoteManifest) {
             addSyncLog(`Downloading ${progress}/${toDownload.length} (${percent}%)...`, "info");
 
             const results = await Promise.all(
-                batch.map(remoteFile => downloadFile(remoteFile, createdFolders))
+                batch.map(async remoteFile => {
+                    const result = await downloadFile(remoteFile, createdFolders);
+                    // If download returned null, the file doesn't exist on remote
+                    if (result === null) {
+                        missingOnRemote.push(remoteFile);
+                    }
+                    return result;
+                })
             );
 
             updates.push(...results.filter(Boolean));
+        }
+
+        // Clean remote manifest if we found missing files
+        let cleanedRemoteManifest = remoteManifest;
+        if (missingOnRemote.length > 0) {
+            addSyncLog(`Found ${missingOnRemote.length} missing file(s) on remote, cleaning manifest...`, "info");
+
+            const missingPaths = new Set(missingOnRemote.map(f => f.path));
+            cleanedRemoteManifest = remoteManifest.filter(f => !missingPaths.has(f.path));
+
+            // Log each missing file
+            missingOnRemote.forEach(file => {
+                addSyncLog(`Removed from remote manifest: ${file.path} (file not found)`, "info");
+            });
+
+            // Upload the cleaned manifest immediately
+            const manifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
+            await writeCompressedFile(manifestPath, cleanedRemoteManifest);
+            addSyncLog(`✓ Cleaned remote manifest (removed ${missingOnRemote.length} missing files)`, "success");
         }
 
         // Apply all updates in a single operation
@@ -100,7 +134,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`✓ Downloaded ${updates.length} file(s) in ${duration}s`, updates.length > 0 ? "success" : "info");
 
-        return { manifest: updatedManifest, hasChanges: updates.length > 0 };
+        return { manifest: updatedManifest, hasChanges: updates.length > 0, cleanedRemoteManifest };
 
     } catch (err) {
         console.error("[Sync] Download failed:", err);

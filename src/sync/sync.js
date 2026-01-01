@@ -16,6 +16,7 @@ import { syncManifest } from "./steps/syncManifest";
 import { downloadUpdates } from "./steps/downloadUpdates";
 import { uploadUpdates } from "./steps/uploadUpdates";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
+import { removeDeletedFiles } from "./steps/removeDeletedFiles";
 import { uploadManifest } from "./steps/uploadManifest";
 
 const SYNC_INTERVAL = 60; // seconds
@@ -42,7 +43,13 @@ export async function performSync() {
         // Step 4
         const downloadResult = await downloadUpdates(localManifest, remoteManifest);
         localManifest = downloadResult.manifest;
+        remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
         hasChanges = hasChanges || downloadResult.hasChanges;
+
+        // Step 4.5: Remove files that were deleted on remote
+        const removeResult = await removeDeletedFiles(localManifest, remoteManifest);
+        localManifest = removeResult.manifest;
+        hasChanges = hasChanges || removeResult.hasChanges;
 
         // Step 5
         const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest);

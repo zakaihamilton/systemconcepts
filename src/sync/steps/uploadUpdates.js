@@ -21,10 +21,12 @@ async function uploadFile(localFile, createdFolders) {
         const data = JSON.parse(content);
         await writeCompressedFile(remoteFilePath, data, createdFolders);
 
+        addSyncLog(`Uploaded: ${fileBasename}`, "info");
         // Hash verification is already done locally, skip re-download
         return localFile;
     } catch (err) {
         console.error(`[Sync] Failed to upload ${fileBasename}:`, err);
+        addSyncLog(`Failed to upload: ${fileBasename}`, "error");
         return null;
     }
 }
