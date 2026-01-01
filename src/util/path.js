@@ -61,6 +61,13 @@ export function isTagsFile(path) {
     return hasTagsExt;
 }
 
+export function isDurationFile(path) {
+    path = makePath(path);
+    const durationExtensions = [".duration"];
+    const hasDurationExt = !!durationExtensions.find(ext => path.endsWith(ext));
+    return hasDurationExt;
+}
+
 export function fileExtension(path) {
     path = makePath(path);
     const components = path.split(".");
