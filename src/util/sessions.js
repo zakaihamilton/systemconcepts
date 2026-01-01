@@ -303,7 +303,9 @@ export function useSessions(depends = [], options = {}) {
             const currentHash = JSON.stringify({ metadata: groupMetadata, settings: groupsSettings });
             const groupsChanged = currentHash !== groupsHash;
             const noSessions = sessions === null;
-            const syncChanged = syncCounter !== savedSyncCounter;
+            // Only reload on sync if we had data before (savedSyncCounter > 0)
+            // Ignore the initial 0→1 transition which happens on first page load
+            const syncChanged = syncCounter !== savedSyncCounter && savedSyncCounter > 0;
 
             // Update sessions if:
             // 1. We have no sessions yet (initial load)
@@ -313,7 +315,7 @@ export function useSessions(depends = [], options = {}) {
                 updateSessions(groupMetadata, syncCounter);
             }
         }
-    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsHash, sessions, groupsSettings]);
+    }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
