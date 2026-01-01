@@ -132,13 +132,16 @@ export function useSyncFeature() {
         ? Math.round((progress.processed / progress.total) * 100)
         : 0;
 
+    // Cap at 99% while syncing to indicate work in progress
+    const displayPercentage = (busy && percentage >= 100) ? 99 : percentage;
+
     return {
         sync: requestSync,
         busy,
         lastSynced,
         duration,
         logs,
-        percentage,
+        percentage: displayPercentage,
         startTime
     };
 }

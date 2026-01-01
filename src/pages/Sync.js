@@ -35,7 +35,7 @@ export default function Sync() {
     const translations = useTranslations();
     const { updateSync } = useContext(SyncContext);
     const [groups] = useGroups([]);
-    const { busy: sessionsBusy, updateSessions, updateAllSessions } = useUpdateSessions(groups);
+    const { busy: sessionsBusy } = useUpdateSessions(groups);
     const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
