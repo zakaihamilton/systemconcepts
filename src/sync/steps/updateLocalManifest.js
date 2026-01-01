@@ -10,6 +10,9 @@ import { getFileInfo } from "../hash";
 async function computeFileInfo(file) {
     try {
         const content = await storage.readFile(file.fullPath);
+        if (content === undefined || content === null) {
+            return null;
+        }
         const info = await getFileInfo(content);
         return { file, info };
     } catch (err) {

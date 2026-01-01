@@ -77,11 +77,6 @@ export async function downloadUpdates(localManifest, remoteManifest) {
 
         addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
 
-        // Log the files that will be downloaded
-        toDownload.forEach(file => {
-            addSyncLog(`Queued for download: ${file.path}`, "info");
-        });
-
         // Download in parallel batches
         const updates = [];
         for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {

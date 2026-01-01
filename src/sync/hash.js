@@ -11,8 +11,10 @@ export async function calculateHash(content) {
         data = new TextEncoder().encode(content);
     } else if (Buffer.isBuffer(content)) {
         data = new Uint8Array(content);
-    } else {
+    } else if (content) {
         data = content;
+    } else {
+        return null;
     }
 
     let hash = 0x811c9dc5;

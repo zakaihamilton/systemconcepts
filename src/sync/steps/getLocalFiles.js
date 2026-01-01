@@ -14,7 +14,9 @@ export async function getLocalFiles() {
         const files = listing.filter(item =>
             item.type !== "dir" &&
             item.name !== FILES_MANIFEST &&
-            !item.name.endsWith(".DS_Store")
+            !item.name.endsWith(".DS_Store") &&
+            // Only allow year-based tag files e.g. "2021.tags", not individual session tags
+            (!item.name.endsWith(".tags") || /^\d{4}\.tags$/.test(item.name))
         ).map(item => {
             const relPath = item.path.substring(LOCAL_SYNC_PATH.length + 1);
             return {
