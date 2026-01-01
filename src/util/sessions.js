@@ -61,8 +61,22 @@ export function useSessions(depends = [], options = {}) {
 
         try {
             const [groupsSyncData, filesManifest] = await Promise.all([
-                readCompressedFile(makePath("local/sync/groups.json")),
-                readCompressedFile(makePath("local/sync", FILES_MANIFEST))
+                (async () => {
+                    const path = makePath("local/sync/groups.json");
+                    if (await storage.exists(path)) {
+                        const content = await storage.readFile(path);
+                        return JSON.parse(content);
+                    }
+                    return null;
+                })(),
+                (async () => {
+                    const path = makePath("local/sync", FILES_MANIFEST);
+                    if (await storage.exists(path)) {
+                        const content = await storage.readFile(path);
+                        return JSON.parse(content);
+                    }
+                    return null;
+                })()
             ]);
             const cdn = groupsSettings?.cdn || {};
 
@@ -77,18 +91,22 @@ export function useSessions(depends = [], options = {}) {
                 const chunk = groups.slice(i, i + CHUNK_SIZE);
                 const chunkResults = await Promise.all(chunk.map(async group => {
                     const groupName = group.name;
-                    // Check manifest for merged file first (Disabled Groups)
-                    const mergedPath = `local/sync/${groupName}.json`;
+                    // Check manifest for merged file first
+                    const mergedPath = `/${groupName}.json`;
                     // Check if file is in manifest (prefer manifest over fs check for perf) or fallback to fs if manifest missing
                     let isMerged = filesManifest && filesManifest.some(f => f.path === mergedPath);
                     if (!filesManifest) {
-                        isMerged = await storage.exists(makePath(mergedPath));
+                        isMerged = await storage.exists(makePath(`local/sync/${groupName}.json`));
                     }
 
                     if (isMerged) {
-                        const groupData = await readCompressedFile(makePath(mergedPath));
-                        if (groupData && groupData.sessions) {
-                            return { group, sessions: groupData.sessions };
+                        const path = makePath(`local/sync/${groupName}.json`);
+                        if (await storage.exists(path)) {
+                            const content = await storage.readFile(path);
+                            const groupData = JSON.parse(content);
+                            if (groupData && groupData.sessions) {
+                                return { group, sessions: groupData.sessions };
+                            }
                         }
                     }
 
@@ -96,7 +114,8 @@ export function useSessions(depends = [], options = {}) {
                     // If manifest exists, use it to find year files
                     let years = [];
                     if (filesManifest) {
-                        const yearRegex = new RegExp(`^local/sync/${groupName}/(\\d+)\\.json$`);
+                        // Paths in manifest have leading slash: /groupname/year.json
+                        const yearRegex = new RegExp(`^/${groupName}/(\\d+)\\.json$`);
                         years = filesManifest
                             .filter(f => yearRegex.test(f.path))
                             .map(f => ({ name: f.path.match(yearRegex)[1] }));
@@ -144,9 +163,12 @@ export function useSessions(depends = [], options = {}) {
                         // If we don't have pre-loaded sessions (from merged file), load year file
                         if (!dataSessions) {
                             path = makePath("local/sync", group.name, `${year.name}.json`);
-                            const data = await readCompressedFile(path);
-                            if (data && data.sessions) {
-                                dataSessions = data.sessions;
+                            if (await storage.exists(path)) {
+                                const content = await storage.readFile(path);
+                                const data = JSON.parse(content);
+                                if (data && data.sessions) {
+                                    dataSessions = data.sessions;
+                                }
                             }
                         }
 
