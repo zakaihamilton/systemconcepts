@@ -1200,6 +1200,10 @@ export default {
         {
             "id": "NEW_SESSIONS",
             "value": "שיעורים חדשים"
+        },
+        {
+            "id": "UPDATE_METADATA",
+            "value": "עדכון מידע"
         }
     ]
 };

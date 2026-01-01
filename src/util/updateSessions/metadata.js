@@ -2,21 +2,25 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { LOCAL_SYNC_PATH } from "@sync/constants";
 
-export async function loadTags(year, name, path, updateTags, isMerged, isBundled) {
-    const sessionTagsMap = {};
-    let updateLocalTags = updateTags;
+async function loadMetadata(property, extension, year, name, path, forceUpdate, isMerged, isBundled) {
+    const sessionMetadataMap = {};
+    let updateLocalMetadata = forceUpdate;
 
-    if (!updateTags) {
-        let tagsLoaded = false;
-        const tagLoader = (data) => {
+    if (!forceUpdate) {
+        let metadataLoaded = false;
+        const metadataLoader = (data) => {
             if (data && Array.isArray(data.sessions)) {
                 data.sessions.forEach(session => {
-                    if (session && session.tags && session.tags.length) {
-                        sessionTagsMap[session.id] = session.tags;
-                        if (session.name) {
-                            sessionTagsMap[session.name] = session.tags;
-                            if (session.name.startsWith(year.name)) {
-                                tagsLoaded = true;
+                    if (session && session[property]) {
+                        // Check if array has length for tags, or if value exists for others
+                        const hasValue = Array.isArray(session[property]) ? session[property].length > 0 : session[property];
+                        if (hasValue) {
+                            sessionMetadataMap[session.id] = session[property];
+                            if (session.name) {
+                                sessionMetadataMap[session.name] = session[property];
+                                if (session.name.startsWith(year.name)) {
+                                    metadataLoaded = true;
+                                }
                             }
                         }
                     }
@@ -30,137 +34,63 @@ export async function loadTags(year, name, path, updateTags, isMerged, isBundled
                 if (await storage.exists(bundlePath)) {
                     const content = await storage.readFile(bundlePath);
                     const data = JSON.parse(content);
-                    tagLoader(data);
+                    metadataLoader(data);
                 }
             }
 
-            // Check merged if not bundled or not found in bundle
-            if (!tagsLoaded && isMerged) {
+            if (!metadataLoaded && isMerged) {
                 const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
                 if (await storage.exists(mergedPath)) {
                     const content = await storage.readFile(mergedPath);
                     const data = JSON.parse(content);
-                    tagLoader(data);
+                    metadataLoader(data);
                 }
             }
 
-            if (!tagsLoaded) {
+            if (!metadataLoaded) {
                 const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
                 if (await storage.exists(localYearPath)) {
                     const content = await storage.readFile(localYearPath);
                     const data = JSON.parse(content);
-                    tagLoader(data);
+                    metadataLoader(data);
                 }
             }
 
-            if (!tagsLoaded) {
-                updateLocalTags = true;
+            if (!metadataLoaded) {
+                updateLocalMetadata = true;
             }
 
         } catch (err) {
-            console.warn(`[Sync] Failed to read cache for tags`, err);
+            console.warn(`[Sync] Failed to read cache for ${property}`, err);
         }
     }
 
-    if (updateLocalTags) {
-        const tagFileName = `${year.name}.tags`;
-        const tagRemotePath = makePath(path, tagFileName);
-        if (await storage.exists(tagRemotePath)) {
+    if (updateLocalMetadata) {
+        const metadataFileName = `${year.name}${extension}`;
+        const metadataRemotePath = makePath(path, metadataFileName);
+        if (await storage.exists(metadataRemotePath)) {
             try {
-                const content = await storage.readFile(tagRemotePath);
+                const content = await storage.readFile(metadataRemotePath);
                 const data = JSON.parse(content);
                 if (data && Array.isArray(data.sessions)) {
                     data.sessions.forEach(session => {
-                        if (session.sessionName && session.tags) {
-                            sessionTagsMap[session.sessionName] = session.tags;
+                        if (session.sessionName && session[property]) {
+                            sessionMetadataMap[session.sessionName] = session[property];
                         }
                     });
                 }
             } catch (err) {
-                console.error(`[Sync] Error reading tags file ${tagRemotePath}:`, err);
+                console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
             }
         }
     }
-    return sessionTagsMap;
+    return sessionMetadataMap;
 }
 
-export async function loadDurations(year, name, path, updateTags, isMerged, isBundled) {
-    const sessionDurationMap = {};
-    let updateLocalDurations = updateTags;
+export async function loadTags(year, name, path, forceUpdate, isMerged, isBundled) {
+    return loadMetadata("tags", ".tags", year, name, path, forceUpdate, isMerged, isBundled);
+}
 
-    if (!updateTags) {
-        let durationsLoaded = false;
-        const durationLoader = (data) => {
-            if (data && Array.isArray(data.sessions)) {
-                data.sessions.forEach(session => {
-                    if (session && session.duration) {
-                        sessionDurationMap[session.id] = session.duration;
-                        if (session.name) {
-                            sessionDurationMap[session.name] = session.duration;
-                            if (session.name.startsWith(year.name)) {
-                                durationsLoaded = true;
-                            }
-                        }
-                    }
-                });
-            }
-        };
-
-        try {
-            if (isBundled) {
-                const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
-                if (await storage.exists(bundlePath)) {
-                    const content = await storage.readFile(bundlePath);
-                    const data = JSON.parse(content);
-                    durationLoader(data);
-                }
-            }
-
-            if (!durationsLoaded && isMerged) {
-                const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-                if (await storage.exists(mergedPath)) {
-                    const content = await storage.readFile(mergedPath);
-                    const data = JSON.parse(content);
-                    durationLoader(data);
-                }
-            }
-
-            if (!durationsLoaded) {
-                const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
-                if (await storage.exists(localYearPath)) {
-                    const content = await storage.readFile(localYearPath);
-                    const data = JSON.parse(content);
-                    durationLoader(data);
-                }
-            }
-
-            if (!durationsLoaded) {
-                updateLocalDurations = true;
-            }
-
-        } catch (err) {
-            console.warn(`[Sync] Failed to read cache for durations`, err);
-        }
-    }
-
-    if (updateLocalDurations) {
-        const durationFileName = `${year.name}.duration`;
-        const durationRemotePath = makePath(path, durationFileName);
-        if (await storage.exists(durationRemotePath)) {
-            try {
-                const content = await storage.readFile(durationRemotePath);
-                const data = JSON.parse(content);
-                if (data && Array.isArray(data.sessions)) {
-                    data.sessions.forEach(session => {
-                        if (session.sessionName && session.duration) {
-                            sessionDurationMap[session.sessionName] = session.duration;
-                        }
-                    });
-                }
-            } catch (err) {
-                console.error(`[Sync] Error reading durations file ${durationRemotePath}:`, err);
-            }
-        }
-    }
-    return sessionDurationMap;
+export async function loadDurations(year, name, path, forceUpdate, isMerged, isBundled) {
+    return loadMetadata("duration", ".duration", year, name, path, forceUpdate, isMerged, isBundled);
 }

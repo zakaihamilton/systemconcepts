@@ -1208,6 +1208,10 @@ export default {
         {
             "id": "NEW_SESSIONS",
             "value": "Novas sessões"
+        },
+        {
+            "id": "UPDATE_METADATA",
+            "value": "Atualizar metadados"
         }
     ]
 };

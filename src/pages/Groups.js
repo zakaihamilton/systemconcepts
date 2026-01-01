@@ -131,8 +131,8 @@ export default function Groups() {
         sync && sync();
     };
 
-    const updateGroupWithSync = async (name, updateAll, updateTags) => {
-        await updateGroup(name, updateAll, updateTags);
+    const updateGroupWithSync = async (name, updateAll, forceUpdate) => {
+        await updateGroup(name, updateAll, forceUpdate);
 
         // Trigger sync - it will upload local changes
         if (sync) {

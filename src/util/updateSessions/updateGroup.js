@@ -12,7 +12,7 @@ import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 
 const prefix = makePath("aws/sessions") + "/";
 
-export async function updateGroupProcess(name, updateAll, updateTags = false, isMerged = false, isBundled = false) {
+export async function updateGroupProcess(name, updateAll, forceUpdate = false, isMerged = false, isBundled = false) {
     const path = prefix + name;
     let itemIndex = 0;
     UpdateSessionsStore.update(s => {
@@ -114,8 +114,8 @@ export async function updateGroupProcess(name, updateAll, updateTags = false, is
             yearItems.sort((a, b) => a.name.localeCompare(b.name));
 
             // Load Metadata
-            const sessionTagsMap = await loadTags(year, name, path, updateTags, isMerged, isBundled);
-            const sessionDurationMap = await loadDurations(year, name, path, updateTags, isMerged, isBundled);
+            const sessionTagsMap = await loadTags(year, name, path, forceUpdate, isMerged, isBundled);
+            const sessionDurationMap = await loadDurations(year, name, path, forceUpdate, isMerged, isBundled);
 
             // Group files by session ID
             const sessionFilesMap = {};

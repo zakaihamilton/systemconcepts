@@ -103,7 +103,7 @@ export function useUpdateSessions(groups) {
         }
     }, [groups, prefix]);
 
-    const updateSpecificGroup = useCallback(async (name, updateAll, updateTags) => {
+    const updateSpecificGroup = useCallback(async (name, updateAll, forceUpdate) => {
         const isSyncBusy = SyncActiveStore.getRawState().busy;
         if (isSyncBusy) {
             console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
@@ -117,7 +117,7 @@ export function useUpdateSessions(groups) {
             const groupInfo = groups.find(g => g.name === name);
             const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
             const isBundled = groupInfo?.bundled;
-            const result = await updateGroupProcess(name, updateAll, updateTags, isMerged, isBundled);
+            const result = await updateGroupProcess(name, updateAll, forceUpdate, isMerged, isBundled);
             if (isBundled && Array.isArray(result)) {
                 await updateBundleFile(result);
             }

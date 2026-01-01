@@ -1264,6 +1264,10 @@ export default {
         {
             "id": "NEW_SESSIONS",
             "value": "New Sessions"
+        },
+        {
+            "id": "UPDATE_METADATA",
+            "value": "Update Metadata"
         }
     ]
 };
