@@ -39,6 +39,28 @@ function NewSessionItem({ session }) {
     );
 }
 
+function NewSessionsList({ sessions }) {
+    const translations = useTranslations();
+    const [expanded, setExpanded] = useState(true);
+
+    return (
+        <div className={styles.newSessions}>
+            <div className={styles.newSessionsTitle} onClick={() => setExpanded(!expanded)} style={{ cursor: 'pointer' }}>
+                <SessionIcon className={styles.titleIcon} />
+                <span style={{ flex: 1 }}>{translations.NEW_SESSIONS}</span>
+                {expanded ? <ExpandLessIcon className={styles.expandIcon} /> : <ExpandMoreIcon className={styles.expandIcon} />}
+            </div>
+            {expanded && (
+                <div className={styles.sessionsList}>
+                    {sessions.map((session, idx) => (
+                        <NewSessionItem key={idx} session={session} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function ProgressDialog() {
     const translations = useTranslations();
     const { busy, status, start, showUpdateDialog } = UpdateSessionsStore.useState();
@@ -94,19 +116,7 @@ export default function ProgressDialog() {
                         {item.year && `${item.year} - `}{item.progress} / {item.count} {translations.YEARS}
                     </div>
                 </div>
-                {hasNewSessions && (
-                    <div className={styles.newSessions}>
-                        <div className={styles.newSessionsTitle}>
-                            <SessionIcon className={styles.titleIcon} />
-                            {translations.NEW_SESSIONS || "New Sessions"}
-                        </div>
-                        <div className={styles.sessionsList}>
-                            {item.newSessions.map((session, idx) => (
-                                <NewSessionItem key={idx} session={session} />
-                            ))}
-                        </div>
-                    </div>
-                )}
+                {hasNewSessions && <NewSessionsList sessions={item.newSessions} />}
                 {hasErrors && (
                     <div className={styles.errors}>
                         {item.errors.map((err, idx) => (

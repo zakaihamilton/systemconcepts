@@ -150,6 +150,14 @@ export default {
             "value": "Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor."
         },
         {
+            "id": "CLEAR_STORAGE",
+            "value": "Limpar Armazenamento"
+        },
+        {
+            "id": "CONFIRM_CLEAR_STORAGE",
+            "value": "Tem certeza de que deseja limpar todo o armazenamento? Isso excluirá todos os dados locais e recarregará a página."
+        },
+        {
             "id": "VERY_SMALL",
             "value": "Muito Pequena"
         },
@@ -1176,6 +1184,10 @@ export default {
         {
             "id": "SEEK",
             "value": "Buscar"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "Novas sessões"
         }
     ]
 };

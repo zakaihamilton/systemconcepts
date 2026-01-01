@@ -146,6 +146,18 @@ async function exists(path) {
     return exists;
 }
 
+export async function clear() {
+    if (typeof indexedDB === "undefined") {
+        return;
+    }
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.deleteDatabase("systemconcepts-fs");
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+        req.onblocked = () => resolve();
+    });
+}
+
 export default {
     getListing,
     createFolder,

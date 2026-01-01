@@ -150,6 +150,14 @@ export default {
             "value": "Do you want to perform a full synchronization? This will re-download all session data from the server."
         },
         {
+            "id": "CLEAR_STORAGE",
+            "value": "Clear Storage"
+        },
+        {
+            "id": "CONFIRM_CLEAR_STORAGE",
+            "value": "Are you sure you want to clear all storage? This will delete all local data and reload the page."
+        },
+        {
             "id": "VERY_SMALL",
             "value": "Very Small"
         },
@@ -1216,6 +1224,10 @@ export default {
         {
             "id": "LOG_COPIED",
             "value": "Log Copied to Clipboard"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "New Sessions"
         }
     ]
 };
