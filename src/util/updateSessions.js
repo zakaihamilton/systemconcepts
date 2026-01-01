@@ -124,6 +124,8 @@ export function useUpdateSessions(groups) {
                         id = id.replace(/\.tags$/, "");
                         // Only read tag file if forcing update or tag missing from cache
                         if (updateTags || !sessionTagsMap[id]) {
+                            continue;
+                            /*
                             try {
                                 const content = await storage.readFile(file.path);
                                 const data = JSON.parse(content);
@@ -133,6 +135,7 @@ export function useUpdateSessions(groups) {
                             } catch (err) {
                                 console.error(`Error reading tags file ${file.path}:`, err);
                             }
+                            */
                         }
                         continue;
                     }

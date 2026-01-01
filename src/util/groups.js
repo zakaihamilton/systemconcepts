@@ -68,23 +68,25 @@ export function useGroups(depends = []) {
         GroupsStore.update(s => { s.busy = true; });
 
         try {
-            GroupsStore.update(s => {
-                if (typeof data === "function") {
-                    updatedGroups = data(s.groups);
-                } else {
-                    updatedGroups = data;
-                }
-                updatedSettings = s.settings || {};
+            const rawState = GroupsStore.getRawState();
+            if (typeof data === "function") {
+                updatedGroups = data(rawState.groups);
+            } else {
+                updatedGroups = data;
+            }
+            updatedSettings = rawState.settings || {};
 
-                updatedGroups = updatedGroups.map(group => {
-                    const existing = s.groups.find(g => g.name === group.name);
-                    const hash1 = JSON.stringify(group);
-                    const hash2 = JSON.stringify(existing);
-                    if (existing && hash1 !== hash2) {
-                        return { ...group, counter: (existing.counter || 0) + 1 };
-                    }
+            updatedGroups = updatedGroups.map(group => {
+                const existing = rawState.groups.find(g => g.name === group.name);
+                if (!existing) {
                     return group;
-                });
+                }
+                const hash1 = JSON.stringify(group);
+                const hash2 = JSON.stringify(existing);
+                if (hash1 !== hash2) {
+                    return { ...group, counter: (existing.counter || 0) + 1 };
+                }
+                return group;
             });
 
             await writeGroups({
