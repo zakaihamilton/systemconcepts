@@ -55,6 +55,9 @@ export function useSessions(depends = [], options = {}) {
             return;
         }
 
+        const startTime = performance.now();
+        console.log('[Sessions] Loading sessions...');
+
         // Helper to yield to the event loop
         const yieldToEventLoop = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -83,14 +86,31 @@ export function useSessions(depends = [], options = {}) {
             const groups = Array.isArray(groupsSyncData?.groups) ? groupsSyncData.groups : [];
 
             // Cache bundle.json to avoid reading it multiple times for bundled groups
-            let bundleData = null;
+            let bundledSessions = [];
             const bundlePath = makePath("local/sync/bundle.json");
             if (await storage.exists(bundlePath)) {
                 try {
                     const content = await storage.readFile(bundlePath);
-                    bundleData = JSON.parse(content);
+                    const data = JSON.parse(content);
+                    if (data?.sessions) {
+                        bundledSessions = data.sessions;
+                    }
                 } catch (err) {
                     console.error("[Sessions] Error reading bundle.json:", err);
+                }
+            }
+
+            const timeAfterManifests = performance.now();
+            console.log(`[Sessions] Loaded manifests in ${(timeAfterManifests - startTime).toFixed(1)}ms`);
+
+            // Separate bundled groups from non-bundled
+            const bundledGroups = new Set();
+            const nonBundledGroups = [];
+            for (const group of groups) {
+                if (group.bundled) {
+                    bundledGroups.add(group.name);
+                } else {
+                    nonBundledGroups.push(group);
                 }
             }
 
@@ -98,15 +118,10 @@ export function useSessions(depends = [], options = {}) {
             const CHUNK_SIZE = 3;
             let groupsWithYears = [];
 
-            for (let i = 0; i < groups.length; i += CHUNK_SIZE) {
-                const chunk = groups.slice(i, i + CHUNK_SIZE);
+            for (let i = 0; i < nonBundledGroups.length; i += CHUNK_SIZE) {
+                const chunk = nonBundledGroups.slice(i, i + CHUNK_SIZE);
                 const chunkResults = await Promise.all(chunk.map(async group => {
                     const groupName = group.name;
-                    if (group.bundled && bundleData?.sessions) {
-                        // Use cached bundle data instead of reading file again
-                        const groupSessions = bundleData.sessions.filter(s => s.group === groupName);
-                        return { group, sessions: groupSessions };
-                    }
 
                     // Check manifest for merged file first
                     const mergedPath = `/${groupName}.json`;
@@ -154,10 +169,13 @@ export function useSessions(depends = [], options = {}) {
                 groupsWithYears.push(...chunkResults);
 
                 // Yield to UI after each chunk
-                if (i + CHUNK_SIZE < groups.length) {
+                if (i + CHUNK_SIZE < nonBundledGroups.length) {
                     await yieldToEventLoop();
                 }
             }
+
+            const timeAfterGroups = performance.now();
+            console.log(`[Sessions] Processed ${groups.length} groups (${bundledGroups.size} bundled) in ${(timeAfterGroups - timeAfterManifests).toFixed(1)}ms`);
 
             const tasks = groupsWithYears.flatMap(({ group, years, sessions }) => {
                 if (sessions) {
@@ -174,9 +192,29 @@ export function useSessions(depends = [], options = {}) {
                 }
             }
 
+            // Enrich bundled sessions once (instead of filtering per group)
+            if (bundledSessions.length > 0) {
+                for (let i = 0; i < bundledSessions.length; i++) {
+                    const session = bundledSessions[i];
+                    const groupInfo = groupInfoMap.get(session.group);
+
+                    // Skip if group is not actually bundled
+                    if (!bundledGroups.has(session.group)) continue;
+
+                    if (session.image && cdn.url) {
+                        session.thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                    }
+
+                    if (groupInfo?.color && !session.color) {
+                        session.color = groupInfo.color;
+                    }
+                }
+            }
+
             // Process year files in chunks
             const YEAR_CHUNK_SIZE = 5;
-            let allSessions = [];
+            // Start with enriched bundled sessions
+            let allSessions = bundledSessions.slice();
 
             for (let i = 0; i < tasks.length; i += YEAR_CHUNK_SIZE) {
                 const chunk = tasks.slice(i, i + YEAR_CHUNK_SIZE);
@@ -234,6 +272,10 @@ export function useSessions(depends = [], options = {}) {
                     await yieldToEventLoop();
                 }
             }
+
+            const timeAfterSessions = performance.now();
+            console.log(`[Sessions] Loaded ${allSessions.length} sessions in ${(timeAfterSessions - timeAfterGroups).toFixed(1)}ms`);
+            console.log(`[Sessions] Total load time: ${(timeAfterSessions - startTime).toFixed(1)}ms`);
 
             SessionsStore.update(s => {
                 s.sessions = allSessions;
