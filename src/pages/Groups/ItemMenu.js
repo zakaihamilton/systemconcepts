@@ -41,7 +41,7 @@ export default function ItemMenuWidget({ item, updateGroup, store, setGroups, se
             name: translations.UPDATE_TAGS || "Update Tags",
             icon: <UpdateIcon />,
             onClick: () => {
-                updateGroup && updateGroup(item.name, false, true);
+                updateGroup && updateGroup(item.name, true, true);
             }
         },
         {

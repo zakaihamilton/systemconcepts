@@ -126,32 +126,68 @@ export function useUpdateSessions(groups) {
                 // If not forcing update, try to load from cache
                 let updateLocalTags = updateTags;
                 if (!updateTags) {
-                    const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
-                    try {
-                        if (await storage.exists(localYearPath)) {
-                            const content = await storage.readFile(localYearPath);
-                            const data = JSON.parse(content);
-                            if (data && Array.isArray(data.sessions)) {
-                                data.sessions.forEach(session => {
-                                    if (session && session.tags && session.tags.length) {
-                                        sessionTagsMap[session.id] = session.tags;
+                    let tagsLoaded = false;
+                    const tagLoader = (data) => {
+                        if (data && Array.isArray(data.sessions)) {
+                            data.sessions.forEach(session => {
+                                if (session && session.tags && session.tags.length) {
+                                    sessionTagsMap[session.id] = session.tags;
+                                    if (session.name) {
+                                        sessionTagsMap[session.name] = session.tags;
+                                        if (session.name.startsWith(year.name)) {
+                                            tagsLoaded = true;
+                                        }
                                     }
-                                });
+                                }
+                            });
+                        }
+                    };
+
+                    try {
+
+                        if (isBundled) {
+                            const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+                            if (await storage.exists(bundlePath)) {
+                                const content = await storage.readFile(bundlePath);
+                                const data = JSON.parse(content);
+                                tagLoader(data);
                             }
                         }
-                        else {
+
+                        // Check merged if not bundled or not found in bundle
+                        if (!tagsLoaded && isMerged) {
+                            const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+                            if (await storage.exists(mergedPath)) {
+                                const content = await storage.readFile(mergedPath);
+                                const data = JSON.parse(content);
+                                tagLoader(data);
+                            }
+                        }
+
+                        if (!tagsLoaded) {
+                            const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
+                            if (await storage.exists(localYearPath)) {
+                                const content = await storage.readFile(localYearPath);
+                                const data = JSON.parse(content);
+                                tagLoader(data);
+                            }
+                        }
+
+                        if (!tagsLoaded) {
                             updateLocalTags = true;
                         }
+
                     } catch (err) {
-                        console.warn(`[Sync] Failed to read cache from ${localYearPath}`, err);
+                        console.warn(`[Sync] Failed to read cache for tags`, err);
                     }
                 }
 
                 if (updateLocalTags) {
-                    const tagFile = yearItems.find(f => f.name.endsWith(".tags"));
-                    if (tagFile) {
+                    const tagFileName = `${year.name}.tags`;
+                    const tagRemotePath = makePath(path, tagFileName);
+                    if (await storage.exists(tagRemotePath)) {
                         try {
-                            const content = await storage.readFile(tagFile.path);
+                            const content = await storage.readFile(tagRemotePath);
                             const data = JSON.parse(content);
                             if (data && Array.isArray(data.sessions)) {
                                 let count = 0;
@@ -163,7 +199,7 @@ export function useUpdateSessions(groups) {
                                 });
                             }
                         } catch (err) {
-                            console.error(`[Sync] Error reading tags file ${tagFile.path}:`, err);
+                            console.error(`[Sync] Error reading tags file ${tagRemotePath}:`, err);
                         }
                     }
                 }
@@ -223,8 +259,7 @@ export function useUpdateSessions(groups) {
                     const ai = sessionName.endsWith(" - AI") || sessionName.startsWith("Overview - ");
                     const key = name + "_" + id;
                     // Use tags from map
-                    const rawTags = sessionTagsMap[id] || [];
-                    const sessionTags = Array.isArray(rawTags) ? [...new Set(rawTags)] : Object.keys(rawTags);
+                    const sessionTags = sessionTagsMap[id] || [];
                     const item = {
                         key,
                         id,
@@ -653,7 +688,7 @@ export function useUpdateSessions(groups) {
                 s.busy = false;
             });
         }
-    }, [updateGroup]);
+    }, [updateGroup, groups]);
     return useMemo(() => ({
         status,
         busy,
@@ -665,6 +700,9 @@ export function useUpdateSessions(groups) {
 }
 
 async function updateYearSync(groupName, year, sessions) {
+    if (!sessions || sessions.length === 0) {
+        return 0;
+    }
     const localPath = makePath(LOCAL_SYNC_PATH, groupName, `${year}.json`);
     try {
         let version = 1;
@@ -716,49 +754,6 @@ async function updateYearSync(groupName, year, sessions) {
     }
 }
 
-async function finalizeGroupSync(groupName) {
-    const localGroupPath = makePath(LOCAL_SYNC_PATH, `${groupName}.json`);
-    const localYearsPath = makePath(LOCAL_SYNC_PATH, groupName);
-
-    try {
-        const yearsListing = await storage.getListing(localYearsPath);
-        const years = [];
-        if (yearsListing) {
-            for (const item of yearsListing) {
-                if (item.name.endsWith(".json")) {
-                    years.push({
-                        name: item.name.replace(".json", ""),
-                        counter: 0
-                    });
-                }
-            }
-        }
-
-        let version = 1;
-        if (await storage.exists(localGroupPath)) {
-            const existingContent = await storage.readFile(localGroupPath);
-            try {
-                const existingData = JSON.parse(existingContent);
-                if (existingData && existingData.version) {
-                    version = existingData.version + 1;
-                }
-            } catch (e) { }
-        }
-
-        const groupData = {
-            version,
-            group: groupName,
-            date: Date.now(),
-            years: years
-        };
-
-        await writeCompressedFile(localGroupPath, groupData);
-        return true;
-    } catch (err) {
-        console.error(`[Sync] Error finalizing group ${groupName}:`, err);
-        return false;
-    }
-}
 
 async function updateBundleFile(newSessions) {
     const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");

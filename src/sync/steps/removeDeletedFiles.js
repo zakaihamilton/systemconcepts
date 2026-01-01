@@ -13,7 +13,14 @@ export async function removeDeletedFiles(localManifest, remoteManifest) {
 
     try {
         const remotePathsSet = new Set(remoteManifest.map(f => f.path));
-        const toDelete = localManifest.filter(f => !remotePathsSet.has(f.path));
+
+        // Only delete files that were previously synced (version > 1)
+        // Don't delete new files (version = 1) that haven't been uploaded yet
+        const toDelete = localManifest.filter(f => {
+            if (remotePathsSet.has(f.path)) return false;
+            const version = parseInt(f.version || "1");
+            return version > 1;
+        });
 
         if (toDelete.length === 0) {
             addSyncLog("✓ No deleted files to remove", "info");
