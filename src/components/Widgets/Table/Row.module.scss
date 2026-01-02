@@ -29,6 +29,16 @@
     border-top: 2px solid var(--neutral-700) !important;
 }
 
+.cell.defaultAlign {
+    [dir=ltr] & {
+        text-align: left;
+    }
+
+    [dir=rtl] & {
+        text-align: right;
+    }
+}
+
 .cellContent.padding {
     padding-left: 0.5em !important;
     padding-right: 0.5em !important;
@@ -44,18 +54,18 @@
     box-sizing: border-box;
 }
 
-.cellContent.head {
-    background: var(--main-background) !important;
-}
-
 .cellContent.defaultAlign {
     [dir=ltr] & {
-        text-align: left;
+        justify-content: flex-start;
     }
 
     [dir=rtl] & {
-        text-align: right;
+        justify-content: flex-end;
     }
+}
+
+.cellContent.head {
+    background: var(--main-background) !important;
 }
 
 .cellContent.selected {

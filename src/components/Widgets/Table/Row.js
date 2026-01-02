@@ -16,7 +16,10 @@ export default function Row({ className = "", separator, viewMode, index, select
             onClick={onClick ? () => onClick(item) : undefined}
             padding="none"
             classes={{
-                root: clsx(styles.cell, separator && styles.separator)
+                root: clsx(styles.cell,
+                    separator && styles.separator,
+                    !align && styles.defaultAlign,
+                )
             }}
             style={{ height: rowHeight, ...viewModeStyle }}
             key={columnId}
