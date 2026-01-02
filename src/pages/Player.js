@@ -40,7 +40,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails } = PlayerStore.useState();
+    const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
@@ -92,10 +92,12 @@ export default function PlayerPage({ show = false, suffix, mode }) {
 
     const color = groups.find(item => item.name === group)?.color;
 
+    const playingSessionName = session && <div className={styles.playingSessionName}><b>{session.group[0].toUpperCase() + session.group.substring(1)}</b><div>{session.date + " " + session.name}</div></div>;
+
     const toolbarItems = [
         hash && !show && {
             id: "player",
-            name: translations.PLAYER,
+            name: playingSessionName,
             icon: <VideoLabelIcon />,
             menu: false,
             target: hash,
@@ -127,7 +129,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show, showDetails, isVideo] });
+    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show, showDetails, isVideo, playingSessionName] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
