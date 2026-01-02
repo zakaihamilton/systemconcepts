@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useWindowSize } from "@util/size";
+import { useEffect, useState } from "react";
 
 export function getProperty(name) {
     return getComputedStyle(document.documentElement, null).getPropertyValue(name);
@@ -31,17 +31,28 @@ export function useStyles(styles, data) {
 }
 
 export function useDeviceType() {
-    const size = useWindowSize();
-    const isPhone = size.width && size.width <= 768;
-    const isTablet = size.width && size.width >= 768 && size.width <= 1024;
-    if (!size.width) {
-        return "ssr";
-    }
-    if (isTablet) {
-        return "tablet";
-    }
-    if (isPhone) {
-        return "phone";
-    }
-    return "desktop";
+    // Start with "ssr" to avoid hydration mismatch
+    const [deviceType, setDeviceType] = useState("ssr");
+
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            let newType = "desktop";
+            if (width >= 768 && width <= 1024) {
+                newType = "tablet";
+            } else if (width < 768) {
+                newType = "phone";
+            }
+
+            setDeviceType(current => current !== newType ? newType : current);
+        };
+
+        // Initial check
+        handleResize();
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    return deviceType;
 }
