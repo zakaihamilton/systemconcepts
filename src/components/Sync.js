@@ -1,4 +1,5 @@
 import { createContext, useMemo } from "react";
+import { addPath } from "@util/pages";
 import styles from "./Sync.module.scss";
 import { useStyles } from "@util/styles";
 import { useSyncFeature } from "@sync/sync";
@@ -47,7 +48,10 @@ export default function Sync({ children }) {
             menu: false,
             icon: syncIcon,
             onClick: () => {
-                if (sessionsBusy) {
+                if (busy) {
+                    addPath("sync");
+                }
+                else if (sessionsBusy) {
                     UpdateSessionsStore.update(s => {
                         s.showUpdateDialog = true;
                     });
