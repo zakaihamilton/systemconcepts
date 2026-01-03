@@ -212,12 +212,23 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                         const cleanRelativePath = rawRelativePath.replace(/^[\/\\]+/, "");
                         const cleanManifestKey = `metadata/sessions/${cleanRelativePath}`;
 
-                        // Also check if it's bundled - bundled files won't have individual manifest keys!
-                        // But wait, if it's bundled, we might have migrated it to a bundle. 
-                        // If it's bundled, we should probably check if the BUNDLE file exists or just re-migrate to be safe/simple.
-                        // Bundling is fast/in-memory anyway.
-                        // For non-bundled files:
-                        if (!manifest[cleanManifestKey]) {
+                        const parts = cleanRelativePath.split("/");
+                        const groupName = parts[0];
+                        const isBundled = bundledGroups.has(groupName);
+
+                        let cleanEntryExists = false;
+                        if (isBundled) {
+                            const bundleKey = `metadata/sessions/${groupName}.json`;
+                            if (manifest[bundleKey]) {
+                                cleanEntryExists = true;
+                            }
+                        } else {
+                            if (manifest[cleanManifestKey]) {
+                                cleanEntryExists = true;
+                            }
+                        }
+
+                        if (!cleanEntryExists) {
                             // Force re-migration of this file only if we don't have a clean record of it
                             if (migrationState.migrated[file.path]) {
                                 migrationState.migrated[file.path] = false;
@@ -225,9 +236,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                                 repairCount++;
                             }
                         } else {
-                            // We have the clean key, just dropping the bad one. 
-                            // No need to increment repairCount (which triggers logging "Queued for repair")
-                            // unless we want to log "Cleaning ghost entries".
+                            // We have the clean key (or bundle), just dropping the bad one. 
+                            // No need to increment repairCount
                         }
                     }
                 }
@@ -325,6 +335,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     // Read from MongoDB
                     const content = await storage.readFile(file.path);
 
+                    if (!content || !content.trim()) {
+                        console.warn(`[Personal] Skipping empty file: ${file.path}`);
+                        migrationState.migrated[file.path] = true;
+                        return;
+                    }
+
                     if (isBundled) {
                         if (!bundleCache[groupName]) {
                             bundleCache[groupName] = { content: {}, dirty: false };
@@ -336,7 +352,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             bundleCache[groupName].content[bundleKey] = data;
                             bundleCache[groupName].dirty = true;
                         } catch (e) {
-                            console.error("Error parsing JSON for bundle", file.path);
+                            console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
+                            // Intentionally continue to mark as migrated so we don't loop forever
                         }
                     } else {
                         const awsPath = makePath(basePath, "metadata/sessions", relativePath);
