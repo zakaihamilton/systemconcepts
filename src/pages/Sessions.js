@@ -269,8 +269,8 @@ export default function SessionsPage() {
                         href={target(item)}
                         onClick={() => gotoItem(item)}
                         path={shouldShowImage ? item.thumbnail : null}
-                        width={isMobile && viewMode === "grid" ? "100%" : "12em"}
-                        height={isMobile && viewMode === "grid" ? "7em" : "10em"}
+                        width={viewMode === "grid" ? null : "12em"}
+                        height={viewMode === "grid" ? null : "9em"}
                         alt={altIcon}
                         loading="lazy"
                     />
@@ -438,7 +438,7 @@ export default function SessionsPage() {
         {!isMobile && <FilterBar />}
         <Table
             cellWidth={isMobile ? "11em" : "16em"}
-            cellHeight={isMobile ? "12em" : "20em"}
+            cellHeight={isMobile ? "12em" : "17em"}
             name="sessions"
             store={SessionsStore}
             columns={columns}

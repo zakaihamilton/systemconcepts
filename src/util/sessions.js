@@ -157,14 +157,6 @@ export function useSessions(depends = [], options = {}) {
 
                     if (Object.keys(personalMetadata).length > 0) {
                         console.log(`[Sessions] Loaded ${Object.keys(personalMetadata).length} personal metadata entries`);
-                        // Log first few keys for debugging
-                        const keys = Object.keys(personalMetadata).slice(0, 3);
-                        console.log(`[Sessions] Sample personal metadata keys:`, keys);
-                        // Check if a specific key has position
-                        const firstKey = keys[0];
-                        if (firstKey) {
-                            console.log(`[Sessions] First entry value:`, personalMetadata[firstKey]);
-                        }
                     }
                 } catch (err) {
                     console.error("[Sessions] Error loading personal metadata:", err);
