@@ -95,12 +95,43 @@ export async function performSync() {
             addSyncLog(`No changes detected`, "info");
         }
 
+        // Run personal sync after main sync completes
+        await runPersonalSync();
+
     } catch (err) {
         console.error("[Sync] Sync failed:", err);
         addSyncLog(`Sync failed: ${err.message}`, "error");
         throw err;
     } finally {
         unlock();
+    }
+}
+
+/**
+ * Run personal files sync
+ */
+async function runPersonalSync() {
+    try {
+        SyncActiveStore.update(s => {
+            s.personalSyncBusy = true;
+            s.personalSyncError = null;
+        });
+
+        const { performPersonalSync } = await import("@personal/personalSync");
+        const result = await performPersonalSync();
+
+        SyncActiveStore.update(s => {
+            s.personalSyncBusy = false;
+            if (!result.success) {
+                s.personalSyncError = result.error?.message || "Personal sync failed";
+            }
+        });
+    } catch (err) {
+        console.error("[Personal Sync] Failed:", err);
+        SyncActiveStore.update(s => {
+            s.personalSyncBusy = false;
+            s.personalSyncError = err.message;
+        });
     }
 }
 

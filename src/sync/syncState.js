@@ -11,7 +11,10 @@ export const SyncActiveStore = new Store({
     logs: [], // Store sync milestones
     lastDuration: 0, // Track duration of last successful sync
     startTime: 0, // Track when current sync started
-    needsSessionReload: false // Signal that sessions should be reloaded
+    needsSessionReload: false, // Signal that sessions should be reloaded
+    personalSyncBusy: false, // Track personal sync status
+    personalSyncProgress: { total: 0, processed: 0 },
+    personalSyncError: null
 });
 
 export const UpdateSessionsStore = new Store({

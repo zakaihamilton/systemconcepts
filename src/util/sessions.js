@@ -100,6 +100,77 @@ export function useSessions(depends = [], options = {}) {
                 }
             }
 
+            // Load personal metadata (position/duration) from local personal files
+            let personalMetadata = {};
+            const personalBasePath = "local/personal/metadata/sessions";
+            if (await storage.exists(personalBasePath)) {
+                try {
+                    const listing = await storage.getRecursiveList(personalBasePath);
+                    const metadataFiles = listing.filter(item =>
+                        item.type !== "dir" &&
+                        item.name?.endsWith(".json") &&
+                        !item.name.includes("undefined")
+                    );
+
+                    console.log(`[Sessions] Found ${metadataFiles.length} personal metadata files`);
+
+                    // Load each metadata file to get position/duration
+                    for (const file of metadataFiles) {
+                        try {
+                            const content = await storage.readFile(file.path);
+                            const data = JSON.parse(content);
+
+                            // Extract group and session name from path
+                            // Path formats:
+                            // - local/personal/metadata/sessions/<group>/<year>/<session>.json
+                            // - local/personal/metadata/sessions/<group>/<session>.json
+                            // - local/personal/metadata/sessions/<session>.json (flat, no group)
+                            let relativePath = file.path.replace(personalBasePath, "");
+                            // Remove leading slashes
+                            while (relativePath.startsWith("/")) {
+                                relativePath = relativePath.substring(1);
+                            }
+
+                            const parts = relativePath.split("/");
+                            const sessionName = parts[parts.length - 1].replace(".json", "");
+
+                            // Determine group based on path structure
+                            let group = "";
+                            if (parts.length >= 2) {
+                                // Has subfolders - first part is group
+                                group = parts[0];
+                            }
+                            // If no group subfolder, we can't match to sessions (need group)
+                            if (!group) {
+                                continue;
+                            }
+
+                            const key = `${group}/${sessionName}`;
+                            personalMetadata[key] = {
+                                position: data.position || 0,
+                                duration: data.duration || 0
+                            };
+                        } catch (err) {
+                            // Skip files that can't be read/parsed
+                        }
+                    }
+
+                    if (Object.keys(personalMetadata).length > 0) {
+                        console.log(`[Sessions] Loaded ${Object.keys(personalMetadata).length} personal metadata entries`);
+                        // Log first few keys for debugging
+                        const keys = Object.keys(personalMetadata).slice(0, 3);
+                        console.log(`[Sessions] Sample personal metadata keys:`, keys);
+                        // Check if a specific key has position
+                        const firstKey = keys[0];
+                        if (firstKey) {
+                            console.log(`[Sessions] First entry value:`, personalMetadata[firstKey]);
+                        }
+                    }
+                } catch (err) {
+                    console.error("[Sessions] Error loading personal metadata:", err);
+                }
+            }
+
             const timeAfterManifests = performance.now();
             console.log(`[Sessions] Loaded manifests in ${(timeAfterManifests - startTime).toFixed(1)}ms`);
 
@@ -208,6 +279,18 @@ export function useSessions(depends = [], options = {}) {
                     if (groupInfo?.color && !session.color) {
                         session.color = groupInfo.color;
                     }
+
+                    // Merge personal metadata (position/duration)
+                    const personalKey = `${session.group}/${session.date} ${session.name}`;
+                    const personal = personalMetadata[personalKey];
+                    if (personal) {
+                        session.position = personal.position;
+                        session.duration = personal.duration;
+                    }
+                    if (personal) {
+                        session.position = personal.position;
+                        session.duration = personal.duration;
+                    }
                 }
             }
 
@@ -254,6 +337,14 @@ export function useSessions(depends = [], options = {}) {
                             // Add color if available and not already set
                             if (groupColor && !session.color) {
                                 session.color = groupColor;
+                            }
+
+                            // Merge personal metadata (position/duration)
+                            const personalKey = `${session.group}/${session.date} ${session.name}`;
+                            const personal = personalMetadata[personalKey];
+                            if (personal) {
+                                session.position = personal.position;
+                                session.duration = personal.duration;
                             }
                         }
 
@@ -368,7 +459,7 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -376,6 +467,8 @@ export function useSessions(depends = [], options = {}) {
             const withoutSummary = typeFilter.includes("without_summary");
             const withTags = typeFilter.includes("with_tags");
             const withoutTags = typeFilter.includes("without_tags");
+            const withPosition = typeFilter.includes("with_position");
+            const withoutPosition = typeFilter.includes("without_position");
 
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
@@ -409,6 +502,18 @@ export function useSessions(depends = [], options = {}) {
                 } else if (withoutTags) {
                     matchTags = !hasTags;
                 }
+
+                const hasPosition = !!session.position;
+                let matchPosition = true;
+                if (withPosition && withoutPosition) {
+                    matchPosition = true;
+                } else if (withPosition) {
+                    matchPosition = hasPosition;
+                } else if (withoutPosition) {
+                    matchPosition = !hasPosition;
+                }
+
+                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition;
 
                 return matchType && matchThumbnail && matchSummary && matchTags;
             });

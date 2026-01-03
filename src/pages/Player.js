@@ -51,7 +51,8 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
-    const metadataPath = folder && sessionName && "local/personal/metadata" + folder + "/" + sessionName + ".json";
+    // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
+    const metadataPath = folder && sessionName && `local/personal/metadata/sessions${folder}/${sessionName}.json`;
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
 

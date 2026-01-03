@@ -37,6 +37,7 @@ export default function Sync() {
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
     const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
+    const { personalSyncBusy, personalSyncError } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
@@ -198,6 +199,23 @@ export default function Sync() {
                             </Box>
                             <LinearProgress variant="determinate" value={syncPercentage} sx={{ height: 8, borderRadius: 4 }} />
                         </Box>
+
+                        {/* Personal Sync Status */}
+                        <Box sx={{ width: '100%', mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    {translations.PERSONAL_SYNC || "Personal Files"}
+                                </Typography>
+                                <Typography variant="body2" color={personalSyncError ? "error" : "text.secondary"}>
+                                    {personalSyncBusy ? translations.SYNCING : (personalSyncError ? translations.ERROR : translations.IDLE)}
+                                </Typography>
+                            </Box>
+                            {personalSyncError && (
+                                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>
+                                    {personalSyncError}
+                                </Typography>
+                            )}
+                        </Box>
                     </Box>
                 </CardContent>
             </Card>
@@ -235,13 +253,15 @@ export default function Sync() {
                 </Box>
             </Box>
 
-            {confirmClearCache && (
-                <Dialog title={translations.CLEAR_CACHE} onClose={() => setConfirmClearCache(false)} actions={clearCacheActions}>
-                    <Typography variant="body1">
-                        {translations.CLEAR_CACHE_MESSAGE}
-                    </Typography>
-                </Dialog>
-            )}
-        </Box>
+            {
+                confirmClearCache && (
+                    <Dialog title={translations.CLEAR_CACHE} onClose={() => setConfirmClearCache(false)} actions={clearCacheActions}>
+                        <Typography variant="body1">
+                            {translations.CLEAR_CACHE_MESSAGE}
+                        </Typography>
+                    </Dialog>
+                )
+            }
+        </Box >
     );
 }

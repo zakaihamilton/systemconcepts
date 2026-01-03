@@ -1,5 +1,5 @@
 import { createContext, useMemo } from "react";
-import { addPath } from "@util/pages";
+import { setPath } from "@util/pages";
 import styles from "./Sync.module.scss";
 import { useStyles } from "@util/styles";
 import { useSyncFeature } from "@sync/sync";
@@ -14,13 +14,14 @@ registerToolbar("Sync", 1);
 
 export const SyncContext = createContext();
 
-import { UpdateSessionsStore } from "@sync/syncState";
+import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 
 export default function Sync({ children }) {
     const translations = useTranslations();
     const { sync, busy, error, duration, changed, percentage, currentBundle } = useSyncFeature();
     const { busy: sessionsBusy } = UpdateSessionsStore.useState();
-    const isBusy = busy || sessionsBusy;
+    const { personalSyncBusy, personalSyncError } = SyncActiveStore.useState();
+    const isBusy = busy || sessionsBusy || personalSyncBusy;
     const className = useStyles(styles, {
         animated: isBusy
     });
@@ -29,7 +30,9 @@ export default function Sync({ children }) {
 
     const name = <span>
         {!!error && translations.SYNC_FAILED}
-        {!error && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {!!personalSyncError && " (Personal)"}
+        {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {personalSyncBusy && " + Personal"}
         <br />
         {!!duration && formattedDuration}
     </span>;
@@ -49,7 +52,7 @@ export default function Sync({ children }) {
             icon: syncIcon,
             onClick: () => {
                 if (busy) {
-                    addPath("sync");
+                    setPath("sync");
                 }
                 else if (sessionsBusy) {
                     UpdateSessionsStore.update(s => {
@@ -63,7 +66,7 @@ export default function Sync({ children }) {
 
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle, sessionsBusy] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle, sessionsBusy, personalSyncBusy, personalSyncError] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, error };

@@ -301,10 +301,16 @@ export default function SessionsPage() {
     }, [viewMode, typeFilter, target, gotoItem, handleIconClick, isMobile]);
 
     const filter = useCallback(item => {
+        // Debug: trace first filter execution
+        if (!window._filterTrace) window._filterTrace = 0;
+        if (window._filterTrace < 1) {
+            console.log(`[Sessions] Trace: filter running. typeFilter:`, typeFilter);
+            window._filterTrace++;
+        }
         let { group, type, year, thumbnail } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -312,6 +318,8 @@ export default function SessionsPage() {
             const withoutSummary = typeFilter.includes("without_summary");
             const withTags = typeFilter.includes("with_tags");
             const withoutTags = typeFilter.includes("without_tags");
+            const withPosition = typeFilter.includes("with_position");
+            const withoutPosition = typeFilter.includes("without_position");
 
             const matchType = !types.length || types.includes(type);
 
@@ -344,7 +352,23 @@ export default function SessionsPage() {
                 matchTags = !hasTags;
             }
 
-            show = show && matchType && matchThumbnail && matchSummary && matchTags;
+            let matchPosition = true;
+            const hasPosition = item.position > 0;
+            if (withPosition && withoutPosition) {
+                matchPosition = true;
+            } else if (withPosition) {
+                matchPosition = hasPosition;
+                // Debug: log first few items checks
+                if (!window._posFilterCheck) window._posFilterCheck = 0;
+                if (window._posFilterCheck < 5) {
+                    console.log(`[Sessions debug] Checking ${item.name}: position=${item.position}, hasPosition=${hasPosition}, match=${matchPosition}`);
+                    window._posFilterCheck++;
+                }
+            } else if (withoutPosition) {
+                matchPosition = !hasPosition;
+            }
+
+            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);

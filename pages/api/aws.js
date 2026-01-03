@@ -24,15 +24,35 @@ export default async function AWS_API(req, res) {
         }
         console.log(`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${req.method}, Path: ${path}`);
 
-        // Determine access level
-        const isLocalHost = req.headers.host && req.headers.host.includes("localhost");
-        const isAdmin = roleAuth(user.role, "admin") || isLocalHost;
-        const readOnly = !isAdmin; // Admins can write, non-admins are read-only
+        // Determine access level based on role and path
+        const isAdmin = roleAuth(user.role, "admin");
 
-        if (isAdmin && isLocalHost) {
-            console.log(`[AWS API] Granted ADMIN access via localhost bypass for user: ${user.id}`);
+        let readOnly = true;
+
+        if (isAdmin) {
+            // Admins can read/write anywhere
+            readOnly = false;
+        } else {
+            // Non-admins: read from /sync, read/write to /personal/<userid>
+            const isPersonalPath = path.startsWith(`personal/${user.id}/`);
+            const isSyncPath = path.startsWith("sync/");
+
+            if (req.method === "GET") {
+                // Allow read from sync or own personal directory
+                if (isSyncPath || isPersonalPath) {
+                    readOnly = false; // Allow read
+                }
+            } else if ((req.method === "PUT" || req.method === "DELETE") && isPersonalPath) {
+                // Allow write/delete only to own personal directory
+                readOnly = false;
+            } else if (req.method !== "GET") {
+                // Block writes to other paths
+                console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
+                throw "ACCESS_DENIED: Cannot write to this path";
+            }
         }
 
+        console.log(`[AWS API] Access granted - ReadOnly: ${readOnly}`);
 
         const result = await handleRequest({ req, readOnly });
         if (Buffer.isBuffer(result)) {

@@ -47,6 +47,13 @@ export function useLocalStorage(id, store, fields) {
         const item = window.localStorage.getItem(id);
         if (item) {
             const obj = JSON.parse(item);
+            if (fields) {
+                Object.keys(obj).map(key => {
+                    if (!fields.includes(key)) {
+                        delete obj[key];
+                    }
+                });
+            }
             store.update(s => {
                 Object.assign(s, obj);
                 s._loaded = true;
