@@ -255,8 +255,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         // bundledGroups already loaded at top of function
 
-        // Bundle cache: { [groupName]: { content: { [relativePath]: data }, dirty: false } }
+        // Bundle cache: { [groupName or group/year]: { content: { [relativePath]: data }, dirty: false } }
         const bundleCache = {};
+
+        // Track individual file manifest keys to remove (they're now in bundles)
+        const individualFilesToRemove = new Set();
+
 
         // Helper to flush bundles
         const flushBundles = async () => {
@@ -351,6 +355,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
                             bundleCache[groupName].content[bundleKey] = data;
                             bundleCache[groupName].dirty = true;
+                            individualFilesToRemove.add(`metadata/sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
                             // Intentionally continue to mark as migrated so we don't loop forever
@@ -375,6 +380,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             const sessionKey = parts.slice(2).join("/");
                             bundleCache[yearBundleKey].content[sessionKey] = data;
                             bundleCache[yearBundleKey].dirty = true;
+                            individualFilesToRemove.add(`metadata/sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
                         }
@@ -405,6 +411,15 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         // Final save
         await flushBundles();
+
+        // Clean up individual file entries from manifest (they're now in bundles)
+        for (const fileKey of individualFilesToRemove) {
+            delete manifest[fileKey];
+        }
+        if (individualFilesToRemove.size > 0) {
+            console.log(`[Personal] Cleaned up ${individualFilesToRemove.size} individual file entries from manifest`);
+        }
+
         await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
         await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
 
