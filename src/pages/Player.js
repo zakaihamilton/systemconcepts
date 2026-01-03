@@ -52,7 +52,24 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
-    const metadataPath = folder && sessionName && `local/personal/metadata/sessions${folder}/${sessionName}.json`;
+    // Or in bundle: local/personal/metadata/sessions/<group>.json
+    const groupInfo = groups.find(g => g.name === group);
+    const isBundled = groupInfo?.bundled;
+
+    let metadataPath = null;
+    let metadataKey = null;
+
+    if (folder && sessionName && group) { // ensure we have group
+        if (isBundled) {
+            metadataPath = `local/personal/metadata/sessions/${group}.json`;
+            // Key format: {year}/{sessionName}.json (matches migrateFromMongoDB)
+            // folder usually includes year like "/2024"
+            const relativeFolder = folder.replace(/^\//, ""); // remove leading slash
+            metadataKey = `${relativeFolder ? relativeFolder + "/" : ""}${sessionName}.json`;
+        } else {
+            metadataPath = `local/personal/metadata/sessions${folder}/${sessionName}.json`;
+        }
+    }
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
 
@@ -163,6 +180,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     let mediaType = undefined;
     const mediaProps = {
         metadataPath,
+        metadataKey,
         path: mediaPath,
         date,
         year,

@@ -204,7 +204,7 @@ export default function Sync() {
                         <Box sx={{ width: '100%', mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                 <Typography variant="body2" color="text.secondary">
-                                    {translations.PERSONAL_SYNC || "Personal Files"}
+                                    {translations.PERSONAL_SYNC}
                                 </Typography>
                                 <Typography variant="body2" color={personalSyncError ? "error" : "text.secondary"}>
                                     {personalSyncBusy ? translations.SYNCING : (personalSyncError ? translations.ERROR : translations.IDLE)}

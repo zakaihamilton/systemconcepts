@@ -1272,6 +1272,10 @@ export default {
         {
             "id": "UPDATE_METADATA",
             "value": "Update Metadata"
+        },
+        {
+            "id": "PERSONAL_SYNC",
+            "value": "Personal Sync"
         }
     ]
 };

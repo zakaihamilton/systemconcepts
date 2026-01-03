@@ -27,6 +27,7 @@ export default function Video({ show, metadataPath, name, path, color, children,
                 playerRef={playerRef}
                 color={color}
                 metadataPath={metadataPath}
+                metadataKey={props.metadataKey}
                 path={path}
                 show={show}
             />}

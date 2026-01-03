@@ -1216,6 +1216,10 @@ export default {
         {
             "id": "UPDATE_METADATA",
             "value": "Atualizar metadados"
+        },
+        {
+            "id": "PERSONAL_SYNC",
+            "value": "Arquivos Pessoais"
         }
     ]
 };

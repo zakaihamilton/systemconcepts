@@ -2,6 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
+import { readGroups } from "@sync/groups";
 import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST } from "../constants";
 
 const MIGRATION_FILE = "migration.json";
@@ -105,11 +106,82 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         let migratedCount = 0;
         const mongoPath = "personal/metadata/sessions";
 
+        // Load groups to check for bundled status
+        let bundledGroups = new Set();
+        try {
+            const { groups } = await readGroups();
+            if (groups) {
+                groups.forEach(g => {
+                    if (g.bundled) {
+                        bundledGroups.add(g.name);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("[Personal] Error loading groups for bundling check:", err);
+        }
+
+        // Bundle cache: { [groupName]: { content: { [relativePath]: data }, dirty: false } }
+        const bundleCache = {};
+
+        // Helper to flush bundles
+        const flushBundles = async () => {
+            for (const [groupName, cache] of Object.entries(bundleCache)) {
+                if (cache.dirty) {
+                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", `${groupName}.json`);
+                    const awsBundlePath = makePath(basePath, "metadata/sessions", `${groupName}.json`);
+
+                    // Read existing if not fully loaded? 
+                    // We assume we are building it or appending. 
+                    // Ideally we read existing first if we want to support partial updates, but migration is usually filling gaps.
+                    // For safety, let's just write what we have. 
+                    // However, if we migrated some files in previous run, they might be in the file already?
+                    // Actually, if we write the WHOLE bundle every time, we need to know the whole state.
+                    // But we only fetch "filesToMigrate".
+                    // So we must read existing bundle first if it exists!
+
+                    let fullBundle = cache.content;
+                    if (await storage.exists(bundlePath)) {
+                        try {
+                            const existing = JSON.parse(await storage.readFile(bundlePath));
+                            fullBundle = { ...existing, ...cache.content };
+                        } catch (err) { }
+                    }
+
+                    const content = JSON.stringify(fullBundle, null, 2);
+                    await storage.createFolderPath(bundlePath);
+                    await storage.writeFile(bundlePath, content);
+                    await storage.writeFile(awsBundlePath, content);
+
+                    // Update manifest for the bundle file
+                    // The individual files inside are NOT in the manifest anymore?
+                    // Or do we keep them virtual?
+                    // The Plan said: "Update manifest with bundle file."
+                    // So we remove individual entries? 
+                    // Users current manifest might have individual entries.
+                    // We should add the bundle entry.
+                    // We should probably NOT add individual entries for bundled files.
+
+                    const hash = calculateHash(content);
+                    const manifestKey = `metadata/sessions/${groupName}.json`;
+                    manifest[manifestKey] = {
+                        hash,
+                        modified: Date.now()
+                    };
+
+                    cache.dirty = false;
+                    // Keep content in memory in case we add more to it in next batch
+                    cache.content = fullBundle;
+                }
+            }
+        };
+
         // Migrate files one by one, saving progress after each batch
         for (const file of filesToMigrate) {
             try {
-                // Calculate paths
-                const relativePath = file.path.substring(mongoPath.length + 1);
+                // Calculate paths and sanitize double slashes
+                let relativePath = file.path.substring(mongoPath.length + 1);
+                relativePath = relativePath.replace(/^[\/\\]+/, ""); // Remove leading slashes
 
                 // Skip invalid paths (undefined, empty, or just whitespace)
                 if (!relativePath || !relativePath.trim() || relativePath.includes("undefined")) {
@@ -118,28 +190,52 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     continue;
                 }
 
+                const parts = relativePath.split("/");
+                const groupName = parts[0];
+                const isBundled = bundledGroups.has(groupName);
+
                 // Read from MongoDB
                 const content = await storage.readFile(file.path);
 
-                const awsPath = makePath(basePath, "metadata/sessions", relativePath);
-                const localPath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", relativePath);
+                if (isBundled) {
+                    if (!bundleCache[groupName]) {
+                        bundleCache[groupName] = { content: {}, dirty: false };
+                    }
+                    // Parse content to store as object in bundle
+                    try {
+                        const data = JSON.parse(content);
+                        // Store using relativePath as key (e.g. "2024/session.json")
+                        // Or maybe just session name if structure allows? 
+                        // Plan said: "Key format... relative path suffix"
+                        // relativePath includes groupName! "group/year/session.json"
+                        // We want key inside bundle to be "year/session.json"
+                        const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
+                        bundleCache[groupName].content[bundleKey] = data;
+                        bundleCache[groupName].dirty = true;
+                    } catch (e) {
+                        console.error("Error parsing JSON for bundle", file.path);
+                    }
+                } else {
+                    const awsPath = makePath(basePath, "metadata/sessions", relativePath);
+                    const localPath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", relativePath);
 
-                // Create parent directories for local path
-                await storage.createFolderPath(localPath);
+                    // Create parent directories for local path
+                    await storage.createFolderPath(localPath);
 
-                // Write to AWS
-                await storage.writeFile(awsPath, content);
+                    // Write to AWS
+                    await storage.writeFile(awsPath, content);
 
-                // Write to local storage (so user sees progress immediately)
-                await storage.writeFile(localPath, content);
+                    // Write to local storage (so user sees progress immediately)
+                    await storage.writeFile(localPath, content);
 
-                // Add to manifest
-                const hash = calculateHash(content);
-                const manifestKey = `metadata/sessions/${relativePath}`;
-                manifest[manifestKey] = {
-                    hash,
-                    modified: file.mtimeMs
-                };
+                    // Add to manifest
+                    const hash = calculateHash(content);
+                    const manifestKey = `metadata/sessions/${relativePath}`;
+                    manifest[manifestKey] = {
+                        hash,
+                        modified: file.mtimeMs
+                    };
+                }
 
                 // Mark as migrated
                 migrationState.migrated[file.path] = true;
@@ -147,6 +243,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                 // Save progress every 5 files
                 if (migratedCount % 5 === 0) {
+                    await flushBundles();
                     await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
                     await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
                     addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
@@ -159,6 +256,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         }
 
         // Final save
+        await flushBundles();
         await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
         await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
 

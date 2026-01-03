@@ -96,6 +96,7 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
             color={color}
             noDuration={true}
             metadataPath={metadataPath}
+            metadataKey={props.metadataKey}
             path={path}
             show={show}
             zIndex={1}

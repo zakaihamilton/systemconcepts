@@ -119,18 +119,31 @@ export function useSessions(depends = [], options = {}) {
                         try {
                             const content = await storage.readFile(file.path);
                             const data = JSON.parse(content);
-
-                            // Extract group and session name from path
-                            // Path formats:
-                            // - local/personal/metadata/sessions/<group>/<year>/<session>.json
-                            // - local/personal/metadata/sessions/<group>/<session>.json
-                            // - local/personal/metadata/sessions/<session>.json (flat, no group)
                             let relativePath = file.path.replace(personalBasePath, "");
                             // Remove leading slashes
                             while (relativePath.startsWith("/")) {
                                 relativePath = relativePath.substring(1);
                             }
 
+                            // Check if this is a group bundle (no subdirectories in path)
+                            // e.g. "mygroup.json" vs "mygroup/2024/session.json"
+                            if (!relativePath.includes("/")) {
+                                const groupName = relativePath.replace(".json", "");
+                                // Parse bundle content: { "2024/session.json": { position... } }
+                                for (const [bundleKey, sessionData] of Object.entries(data)) {
+                                    // bundleKey is like "2024/session.json" or "session.json"
+                                    const parts = bundleKey.split("/");
+                                    const sessionName = parts[parts.length - 1].replace(".json", "");
+                                    const key = `${groupName}/${sessionName}`;
+                                    personalMetadata[key] = {
+                                        position: sessionData.position || 0,
+                                        duration: sessionData.duration || 0
+                                    };
+                                }
+                                continue;
+                            }
+
+                            // Existing logic for individual files
                             const parts = relativePath.split("/");
                             const sessionName = parts[parts.length - 1].replace(".json", "");
 

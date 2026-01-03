@@ -1208,6 +1208,10 @@ export default {
         {
             "id": "UPDATE_METADATA",
             "value": "עדכון מידע"
+        },
+        {
+            "id": "PERSONAL_SYNC",
+            "value": "הסנכרון האישי"
         }
     ]
 };

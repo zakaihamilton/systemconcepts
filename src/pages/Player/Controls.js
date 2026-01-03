@@ -18,7 +18,7 @@ import { PlayerStore } from "../Player";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadataPath, zIndex, color, noDuration }) {
+export default function Controls({ show, path, playerRef, metadataPath, metadataKey, zIndex, color, noDuration }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
 
@@ -28,7 +28,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
     const [currentTime, setCurrentTime] = useState(0);
     const [error, setError] = useState(null);
     const visible = usePageVisibility();
-    const [metadata, , , setMetadata] = useFile(metadataPath, [metadataPath], data => {
+    const [metadata, , , setMetadata] = useFile(metadataPath, [metadataPath, metadataKey], data => {
         return data ? JSON.parse(data) : {};
     });
 
@@ -42,9 +42,12 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
             else if (name === "loadstart") {
                 setError(null);
             }
-            else if (name === "loadedmetadata" && metadata && metadata.position) {
-                playerRef.currentTime = metadata.position; // eslint-disable-line react-hooks/immutability
-                setCurrentTime(playerRef.currentTime);
+            else if (name === "loadedmetadata") {
+                const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
+                if (currentMetadata.position) {
+                    playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
+                    setCurrentTime(playerRef.currentTime);
+                }
             }
             if (name === "timeupdate" && !dragging.current) {
                 const currentTime = parseInt(playerRef.currentTime);
@@ -75,7 +78,7 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
         return () => {
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, [visible, show, metadata, playerRef]);
+    }, [visible, show, metadata, playerRef, metadataKey]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;
@@ -170,12 +173,22 @@ export default function Controls({ show, path, playerRef, metadataPath, zIndex, 
                 if (!data) {
                     data = {};
                 }
-                data.duration = parseInt(playerRef && playerRef.duration);
-                data.position = parseInt(currentTime);
+                const duration = parseInt(playerRef && playerRef.duration);
+                const position = parseInt(currentTime);
+
+                if (metadataKey) {
+                    const subData = data[metadataKey] || {};
+                    subData.duration = duration;
+                    subData.position = position;
+                    return { ...data, [metadataKey]: subData };
+                }
+
+                data.duration = duration;
+                data.position = position;
                 return { ...data };
             });
         }
-    }, [currentTime, playerRef, setMetadata]);
+    }, [currentTime, playerRef, setMetadata, metadataKey]);
     const events = {
         onMouseDown(e) {
             dragging.current = true;
