@@ -30,6 +30,17 @@ export default async function USERS_API(req, res) {
                 if (record.id !== body.id || record.role !== body.role) {
                     throw "ACCESS_DENIED";
                 }
+                // SENTINEL: Restore sensitive fields from DB record to prevent Mass Assignment
+                // This ensures a user cannot overwrite their password, role, or other critical fields
+                // by simply including them in the PUT body.
+                body.hash = record.hash;
+                body.salt = record.salt;
+                body.role = record.role;
+                body.credentials = record.credentials;
+                body.resetToken = record.resetToken;
+                body.resetTokenExpiry = record.resetTokenExpiry;
+                body.date = record.date;
+                body.utc = record.utc;
             }
         }
         const result = await handleRequest({ collectionName, req });
