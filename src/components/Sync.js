@@ -32,7 +32,6 @@ export default function Sync({ children }) {
         {!!error && translations.SYNC_FAILED}
         {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
         {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
-        {personalSyncBusy && translations.PERSONAL_SYNC_BUSY}
         <br />
         {!!duration && formattedDuration}
     </span>;

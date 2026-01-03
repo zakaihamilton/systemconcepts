@@ -79,6 +79,16 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
     }, [visible, show, metadata, playerRef, metadataKey]);
+
+    useEffect(() => {
+        if (metadata && playerRef && playerRef.readyState >= 1) {
+            const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
+            if (currentMetadata.position && playerRef.currentTime < 1) {
+                playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
+                setCurrentTime(currentMetadata.position);
+            }
+        }
+    }, [metadata, metadataKey, playerRef]);
     const seekPosition = useCallback(position => {
         if (isNaN(position)) {
             return;

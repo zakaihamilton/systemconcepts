@@ -9,7 +9,7 @@ import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 
-export default function Audio({ show, metadataPath, year, name, path, date, group, color, children, elements, showDetails, ...props }) {
+export default function Audio({ show, metadataPath, metadataKey, year, name, path, date, group, color, children, elements, showDetails, ...props }) {
     const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
@@ -96,7 +96,7 @@ export default function Audio({ show, metadataPath, year, name, path, date, grou
             color={color}
             noDuration={true}
             metadataPath={metadataPath}
-            metadataKey={props.metadataKey}
+            metadataKey={metadataKey}
             path={path}
             show={show}
             zIndex={1}

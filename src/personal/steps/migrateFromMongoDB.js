@@ -20,6 +20,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
     try {
         // Load or create migration state
+        const mongoPath = "personal/metadata/sessions";
         let migrationState = { files: [], migrated: {}, complete: false };
 
         if (await storage.exists(migrationPath)) {
@@ -46,7 +47,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         if (migrationState.files.length === 0) {
             addSyncLog("[Personal] Scanning MongoDB for files to migrate...", "info");
 
-            const mongoPath = "personal/metadata/sessions";
+
 
             if (!(await storage.exists(mongoPath))) {
                 addSyncLog("[Personal] No MongoDB personal files found", "info");
@@ -80,7 +81,87 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             addSyncLog(`[Personal] Cached ${files.length} files for migration`, "info");
         }
 
-        // Find files that haven't been migrated yet
+        // Check usage of remoteManifest to skip already processed files
+        // This handles the "Fresh Sync / Reset" scenario
+        // We do this check before filtering filesToMigrate
+        let autoMigratedCount = 0;
+
+
+        // Helper to get expected manifest key
+        const getManifestKey = (filePath) => {
+            let relativePath = filePath.substring(mongoPath.length + 1);
+            relativePath = relativePath.replace(/^[\/\\]+/, "");
+            return `metadata/sessions/${relativePath}`;
+        };
+
+        // Helper to check bundling status
+        // We need to know if a group is bundled to check for the BUNDLE file in manifest instead of individual file
+        // We already loaded groups later, but we need them now.
+        // Let's hoist the group loading logic up.
+
+
+
+        // Load groups to check for bundled status
+        let bundledGroups = new Set();
+        try {
+            const { groups } = await readGroups();
+            if (groups) {
+                groups.forEach(g => {
+                    if (g.bundled) {
+                        bundledGroups.add(g.name);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("[Personal] Error loading groups for bundling check:", err);
+        }
+
+        // Find files that haven't been migrated yet, checking remoteManifest first
+        let hasNewSkippedFiles = false;
+
+        // First pass: mark already-uploaded files as migrated
+        for (const file of migrationState.files) {
+            if (migrationState.migrated[file.path]) continue;
+
+            let relativePath = file.path.substring("personal/metadata/sessions".length + 1);
+            relativePath = relativePath.replace(/^[\/\\]+/, "");
+
+            if (!relativePath || !relativePath.trim()) continue;
+
+            const parts = relativePath.split("/");
+            const groupName = parts[0];
+            const isBundled = bundledGroups.has(groupName);
+
+            let existsRemote = false;
+
+            if (isBundled) {
+                // Check if the group bundle exists in manifest
+                const bundleKey = `metadata/sessions/${groupName}.json`;
+                if (remoteManifest[bundleKey]) {
+                    // Assume if bundle exists, the file is in it. 
+                    // This is an optimization. Worst case if data missing, user can re-save.
+                    existsRemote = true;
+                }
+            } else {
+                const manifestKey = `metadata/sessions/${relativePath}`;
+                if (remoteManifest[manifestKey]) {
+                    existsRemote = true;
+                }
+            }
+
+            if (existsRemote) {
+                migrationState.migrated[file.path] = true;
+                hasNewSkippedFiles = true;
+                autoMigratedCount++;
+            }
+        }
+
+        if (hasNewSkippedFiles) {
+            addSyncLog(`[Personal] Linked ${autoMigratedCount} files to existing remote data`, "info");
+            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+        }
+
+        // NOW filter for work to do
         const filesToMigrate = migrationState.files.filter(f => !migrationState.migrated[f.path]);
 
         if (filesToMigrate.length === 0) {
@@ -110,7 +191,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         // This handles files that were previously migrated incorrectly
         if (migrationState.files && migrationState.files.length > 0) {
             let repairCount = 0;
-            const mongoPath = "personal/metadata/sessions";
+
 
             for (const file of migrationState.files) {
                 // Check if this file produced a double slash key
@@ -160,22 +241,9 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         }
 
         let migratedCount = 0;
-        const mongoPath = "personal/metadata/sessions";
 
-        // Load groups to check for bundled status
-        let bundledGroups = new Set();
-        try {
-            const { groups } = await readGroups();
-            if (groups) {
-                groups.forEach(g => {
-                    if (g.bundled) {
-                        bundledGroups.add(g.name);
-                    }
-                });
-            }
-        } catch (err) {
-            console.error("[Personal] Error loading groups for bundling check:", err);
-        }
+
+        // bundledGroups already loaded at top of function
 
         // Bundle cache: { [groupName]: { content: { [relativePath]: data }, dirty: false } }
         const bundleCache = {};
