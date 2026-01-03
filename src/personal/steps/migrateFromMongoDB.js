@@ -434,7 +434,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`[Personal] ✓ Migrated ${migratedCount} files in ${duration}s (${done + migratedCount}/${total} total)`, "success");
 
-        return { migrated: migratedCount > 0, fileCount: migratedCount, manifest, deletedKeys };
+        return { migrated: (individualFilesToRemove.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest, deletedKeys };
 
     } catch (err) {
         console.error("[Personal] Migration error:", err);
