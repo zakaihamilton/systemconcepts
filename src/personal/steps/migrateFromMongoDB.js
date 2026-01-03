@@ -107,7 +107,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             const { groups } = await readGroups();
             if (groups) {
                 groups.forEach(g => {
-                    if (g.bundled) {
+                    if (g.bundled || g.merged) {
                         bundledGroups.add(g.name);
                     }
                 });
@@ -260,10 +260,10 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         // Helper to flush bundles
         const flushBundles = async () => {
-            for (const [groupName, cache] of Object.entries(bundleCache)) {
+            for (const [cacheKey, cache] of Object.entries(bundleCache)) {
                 if (cache.dirty) {
-                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", `${groupName}.json`);
-                    const awsBundlePath = makePath(basePath, "metadata/sessions", `${groupName}.json`);
+                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", `${cacheKey}.json`);
+                    const awsBundlePath = makePath(basePath, "metadata/sessions", `${cacheKey}.json`);
 
                     // Read existing if not fully loaded? 
                     // We assume we are building it or appending. 
@@ -297,7 +297,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     // We should probably NOT add individual entries for bundled files.
 
                     const hash = calculateHash(content);
-                    const manifestKey = `metadata/sessions/${groupName}.json`;
+                    const manifestKey = `metadata/sessions/${cacheKey}.json`;
                     manifest[manifestKey] = {
                         hash,
                         modified: Date.now()
@@ -356,25 +356,28 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             // Intentionally continue to mark as migrated so we don't loop forever
                         }
                     } else {
-                        const awsPath = makePath(basePath, "metadata/sessions", relativePath);
-                        const localPath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", relativePath);
+                        // Split groups: organize by year into {group}/{year}.json
+                        const year = parts[1];
 
-                        // Create parent directories for local path
-                        await storage.createFolderPath(localPath);
+                        if (!year) {
+                            console.warn(`[Personal] Skipping file without year: ${file.path}`);
+                            migrationState.migrated[file.path] = true;
+                            return;
+                        }
 
-                        // Write to AWS
-                        await storage.writeFile(awsPath, content);
+                        const yearBundleKey = `${groupName}/${year}`;
+                        if (!bundleCache[yearBundleKey]) {
+                            bundleCache[yearBundleKey] = { content: {}, dirty: false };
+                        }
 
-                        // Write to local storage (so user sees progress immediately)
-                        await storage.writeFile(localPath, content);
-
-                        // Add to manifest
-                        const hash = calculateHash(content);
-                        const manifestKey = `metadata/sessions/${relativePath}`;
-                        manifest[manifestKey] = {
-                            hash,
-                            modified: file.mtimeMs
-                        };
+                        try {
+                            const data = JSON.parse(content);
+                            const sessionKey = parts.slice(2).join("/");
+                            bundleCache[yearBundleKey].content[sessionKey] = data;
+                            bundleCache[yearBundleKey].dirty = true;
+                        } catch (e) {
+                            console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
+                        }
                     }
 
                     // Mark as migrated

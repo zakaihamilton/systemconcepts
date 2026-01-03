@@ -55,7 +55,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
     // Or in bundle: local/personal/metadata/sessions/<group>.json
     const groupInfo = groups.find(g => g.name === group);
-    const isBundled = groupInfo?.bundled;
+    const isBundled = groupInfo?.bundled || groupInfo?.merged;
 
     console.log("[Player] Metadata setup:", {
         group,
@@ -76,8 +76,9 @@ export default function PlayerPage({ show = false, suffix, mode }) {
             // We use the year variable directly instead of deriving from folder to avoid including prefix/group
             metadataKey = `${year ? year + "/" : ""}${sessionName}.json`;
         } else {
-            // For non-bundled: local/personal/metadata/sessions/{group}/{year}/{sessionName}.json
-            metadataPath = `local/personal/metadata/sessions/${group}/${year ? year + "/" : ""}${sessionName}.json`;
+            // For split groups: year-based bundles with metadataKey
+            metadataPath = `local/personal/metadata/sessions/${group}/${year}.json`;
+            metadataKey = `${sessionName}.json`;
         }
     }
 
