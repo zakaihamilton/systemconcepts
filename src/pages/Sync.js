@@ -37,7 +37,7 @@ export default function Sync() {
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
     const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
-    const { personalSyncBusy, personalSyncError } = useSyncFeature();
+    const { personalSyncBusy, personalSyncError, personalSyncPercentage } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
@@ -206,10 +206,20 @@ export default function Sync() {
                                 <Typography variant="body2" color="text.secondary">
                                     {translations.PERSONAL_SYNC}
                                 </Typography>
-                                <Typography variant="body2" color={personalSyncError ? "error" : "text.secondary"}>
-                                    {personalSyncBusy ? translations.SYNCING : (personalSyncError ? translations.ERROR : translations.IDLE)}
-                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body2" color={personalSyncError ? "error" : "text.secondary"}>
+                                        {personalSyncBusy ? translations.SYNCING : (personalSyncError ? translations.ERROR : translations.IDLE)}
+                                    </Typography>
+                                    {personalSyncBusy && (
+                                        <Typography variant="body2" color="text.secondary" sx={{ minWidth: '3.5em', textAlign: 'right', fontWeight: 'bold' }}>
+                                            {personalSyncPercentage}%
+                                        </Typography>
+                                    )}
+                                </Box>
                             </Box>
+                            {personalSyncBusy && (
+                                <LinearProgress variant="determinate" value={personalSyncPercentage || 0} sx={{ height: 6, borderRadius: 3, mb: 1 }} />
+                            )}
                             {personalSyncError && (
                                 <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>
                                     {personalSyncError}

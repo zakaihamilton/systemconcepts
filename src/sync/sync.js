@@ -115,6 +115,7 @@ async function runPersonalSync() {
         SyncActiveStore.update(s => {
             s.personalSyncBusy = true;
             s.personalSyncError = null;
+            s.personalSyncProgress = { processed: 0, total: 0 };
         });
 
         const { performPersonalSync } = await import("@personal/personalSync");
@@ -172,17 +173,25 @@ export function useSyncFeature() {
         logs: s.logs,
         lastDuration: s.lastDuration,
         startTime: s.startTime,
-        progress: s.progress
+        progress: s.progress,
+        personalSyncBusy: s.personalSyncBusy,
+        personalSyncError: s.personalSyncError,
+        personalSyncProgress: s.personalSyncProgress
     }));
 
-    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress } = state;
+    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress, personalSyncBusy, personalSyncError, personalSyncProgress } = state;
 
     const percentage = progress && progress.total > 0
         ? Math.round((progress.processed / progress.total) * 100)
         : 0;
 
+    const personalPercentage = personalSyncProgress && personalSyncProgress.total > 0
+        ? Math.round((personalSyncProgress.processed / personalSyncProgress.total) * 100)
+        : 0;
+
     // Cap at 99% while syncing to indicate work in progress
     const displayPercentage = (busy && percentage >= 100) ? 99 : percentage;
+    const displayPersonalPercentage = (personalSyncBusy && personalPercentage >= 100) ? 99 : personalPercentage;
 
     return {
         sync: requestSync,
@@ -191,7 +200,11 @@ export function useSyncFeature() {
         duration,
         logs,
         percentage: displayPercentage,
-        startTime
+        startTime,
+        personalSyncBusy,
+        personalSyncError,
+        personalSyncProgress,
+        personalSyncPercentage: displayPersonalPercentage
     };
 }
 

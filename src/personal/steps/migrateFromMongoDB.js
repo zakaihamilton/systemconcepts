@@ -3,6 +3,7 @@ import { makePath } from "@util/path";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
 import { readGroups } from "@sync/groups";
+import { SyncActiveStore } from "@sync/syncState";
 import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST } from "../constants";
 
 const MIGRATION_FILE = "migration.json";
@@ -247,6 +248,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
                     await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
                     addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
+                    SyncActiveStore.update(s => {
+                        s.personalSyncProgress = {
+                            processed: done + migratedCount,
+                            total: total
+                        };
+                    });
                 }
 
             } catch (err) {
