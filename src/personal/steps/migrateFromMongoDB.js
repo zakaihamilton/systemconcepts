@@ -23,6 +23,9 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         if (await storage.exists(migrationPath)) {
             try {
                 const content = await storage.readFile(migrationPath);
+                if (!content || !content.trim()) {
+                    throw new Error("Empty migration file");
+                }
                 migrationState = JSON.parse(content);
 
                 // If migration is complete, skip
@@ -32,7 +35,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                 addSyncLog(`[Personal] Resuming migration: ${Object.keys(migrationState.migrated).length}/${migrationState.files.length} done`, "info");
             } catch (err) {
-                console.error("[Personal] Error reading migration state:", err);
+                addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "warning");
+                // State remains at default (initialized above)
             }
         }
 
