@@ -1,4 +1,4 @@
-@import "../scss/mixins";
+@use "../scss/mixins" as *;
 
 .gridThumbnail {
     grid-row: 3 / 7;
