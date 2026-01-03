@@ -122,15 +122,31 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     const badManifestKey = `metadata/sessions/${rawRelativePath}`;
 
                     if (manifest[badManifestKey]) {
-                        // Found a bad entry - blacklist and force re-migration
+                        // Found a bad entry - blacklist
                         delete manifest[badManifestKey];
                         deletedKeys.push(badManifestKey);
 
-                        // Force re-migration of this file
-                        if (migrationState.migrated[file.path]) {
-                            migrationState.migrated[file.path] = false;
-                            migrationState.complete = false; // Mark migration as incomplete
-                            repairCount++;
+                        // Check if we ALREADY have the clean entry (e.g. from previous partial run)
+                        // If so, we don't need to re-migrate, just clean the manifest
+                        const cleanRelativePath = rawRelativePath.replace(/^[\/\\]+/, "");
+                        const cleanManifestKey = `metadata/sessions/${cleanRelativePath}`;
+
+                        // Also check if it's bundled - bundled files won't have individual manifest keys!
+                        // But wait, if it's bundled, we might have migrated it to a bundle. 
+                        // If it's bundled, we should probably check if the BUNDLE file exists or just re-migrate to be safe/simple.
+                        // Bundling is fast/in-memory anyway.
+                        // For non-bundled files:
+                        if (!manifest[cleanManifestKey]) {
+                            // Force re-migration of this file only if we don't have a clean record of it
+                            if (migrationState.migrated[file.path]) {
+                                migrationState.migrated[file.path] = false;
+                                migrationState.complete = false; // Mark migration as incomplete
+                                repairCount++;
+                            }
+                        } else {
+                            // We have the clean key, just dropping the bad one. 
+                            // No need to increment repairCount (which triggers logging "Queued for repair")
+                            // unless we want to log "Cleaning ghost entries".
                         }
                     }
                 }
@@ -216,89 +232,87 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             }
         };
 
-        // Migrate files one by one, saving progress after each batch
-        for (const file of filesToMigrate) {
-            try {
-                // Calculate paths and sanitize double slashes
-                let relativePath = file.path.substring(mongoPath.length + 1);
-                relativePath = relativePath.replace(/^[\/\\]+/, ""); // Remove leading slashes
+        // Migrate files in batches
+        const BATCH_SIZE = 50;
+        for (let i = 0; i < filesToMigrate.length; i += BATCH_SIZE) {
+            const batch = filesToMigrate.slice(i, i + BATCH_SIZE);
 
-                // Skip invalid paths (undefined, empty, or just whitespace)
-                if (!relativePath || !relativePath.trim() || relativePath.includes("undefined")) {
-                    addSyncLog(`[Personal] Skipping invalid path: ${file.path}`, "info");
-                    migrationState.migrated[file.path] = true; // Mark as done so we don't retry
-                    continue;
-                }
+            await Promise.all(batch.map(async (file) => {
+                try {
+                    // Calculate paths and sanitize double slashes
+                    let relativePath = file.path.substring(mongoPath.length + 1);
+                    relativePath = relativePath.replace(/^[\/\\]+/, ""); // Remove leading slashes
 
-                const parts = relativePath.split("/");
-                const groupName = parts[0];
-                const isBundled = bundledGroups.has(groupName);
-
-                // Read from MongoDB
-                const content = await storage.readFile(file.path);
-
-                if (isBundled) {
-                    if (!bundleCache[groupName]) {
-                        bundleCache[groupName] = { content: {}, dirty: false };
+                    // Skip invalid paths (undefined, empty, or just whitespace)
+                    if (!relativePath || !relativePath.trim() || relativePath.includes("undefined")) {
+                        // Mark as done so we don't retry
+                        migrationState.migrated[file.path] = true;
+                        return;
                     }
-                    // Parse content to store as object in bundle
-                    try {
-                        const data = JSON.parse(content);
-                        // Store using relativePath as key (e.g. "2024/session.json")
-                        // Or maybe just session name if structure allows? 
-                        // Plan said: "Key format... relative path suffix"
-                        // relativePath includes groupName! "group/year/session.json"
-                        // We want key inside bundle to be "year/session.json"
-                        const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
-                        bundleCache[groupName].content[bundleKey] = data;
-                        bundleCache[groupName].dirty = true;
-                    } catch (e) {
-                        console.error("Error parsing JSON for bundle", file.path);
-                    }
-                } else {
-                    const awsPath = makePath(basePath, "metadata/sessions", relativePath);
-                    const localPath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", relativePath);
 
-                    // Create parent directories for local path
-                    await storage.createFolderPath(localPath);
+                    const parts = relativePath.split("/");
+                    const groupName = parts[0];
+                    const isBundled = bundledGroups.has(groupName);
 
-                    // Write to AWS
-                    await storage.writeFile(awsPath, content);
+                    // Read from MongoDB
+                    const content = await storage.readFile(file.path);
 
-                    // Write to local storage (so user sees progress immediately)
-                    await storage.writeFile(localPath, content);
+                    if (isBundled) {
+                        if (!bundleCache[groupName]) {
+                            bundleCache[groupName] = { content: {}, dirty: false };
+                        }
+                        // Parse content to store as object in bundle
+                        try {
+                            const data = JSON.parse(content);
+                            const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
+                            bundleCache[groupName].content[bundleKey] = data;
+                            bundleCache[groupName].dirty = true;
+                        } catch (e) {
+                            console.error("Error parsing JSON for bundle", file.path);
+                        }
+                    } else {
+                        const awsPath = makePath(basePath, "metadata/sessions", relativePath);
+                        const localPath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", relativePath);
 
-                    // Add to manifest
-                    const hash = calculateHash(content);
-                    const manifestKey = `metadata/sessions/${relativePath}`;
-                    manifest[manifestKey] = {
-                        hash,
-                        modified: file.mtimeMs
-                    };
-                }
+                        // Create parent directories for local path
+                        await storage.createFolderPath(localPath);
 
-                // Mark as migrated
-                migrationState.migrated[file.path] = true;
-                migratedCount++;
+                        // Write to AWS
+                        await storage.writeFile(awsPath, content);
 
-                // Save progress every 5 files
-                if (migratedCount % 5 === 0) {
-                    await flushBundles();
-                    await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
-                    await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
-                    addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
-                    SyncActiveStore.update(s => {
-                        s.personalSyncProgress = {
-                            processed: done + migratedCount,
-                            total: total
+                        // Write to local storage (so user sees progress immediately)
+                        await storage.writeFile(localPath, content);
+
+                        // Add to manifest
+                        const hash = calculateHash(content);
+                        const manifestKey = `metadata/sessions/${relativePath}`;
+                        manifest[manifestKey] = {
+                            hash,
+                            modified: file.mtimeMs
                         };
-                    });
-                }
+                    }
 
-            } catch (err) {
-                console.error(`[Personal] Error migrating ${file.path}:`, err);
-                addSyncLog(`[Personal] Failed: ${file.path}`, "error");
-            }
+                    // Mark as migrated
+                    migrationState.migrated[file.path] = true;
+                    migratedCount++;
+
+                } catch (err) {
+                    console.error(`[Personal] Error migrating ${file.path}:`, err);
+                    addSyncLog(`[Personal] Failed: ${file.path}`, "error");
+                }
+            }));
+
+            // Save progress after each batch
+            await flushBundles();
+            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
+            addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
+            SyncActiveStore.update(s => {
+                s.personalSyncProgress = {
+                    processed: done + migratedCount,
+                    total: total
+                };
+            });
         }
 
         // Final save
