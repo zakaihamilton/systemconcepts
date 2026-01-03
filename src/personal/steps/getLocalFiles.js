@@ -1,5 +1,5 @@
 import storage from "@util/storage";
-import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST } from "../constants";
+import { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } from "../constants";
 import { addSyncLog } from "@sync/logs";
 
 /**
@@ -13,7 +13,7 @@ export async function getLocalFiles() {
         const listing = await storage.getRecursiveList(LOCAL_PERSONAL_PATH);
         const files = listing.filter(item =>
             item.type !== "dir" &&
-            item.name !== PERSONAL_MANIFEST &&
+            item.name !== LOCAL_PERSONAL_MANIFEST &&
             !item.name.endsWith(".DS_Store")
         ).map(item => {
             const relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);

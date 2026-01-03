@@ -30,9 +30,9 @@ export default function Sync({ children }) {
 
     const name = <span>
         {!!error && translations.SYNC_FAILED}
-        {!!personalSyncError && " (Personal)"}
+        {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
         {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
-        {personalSyncBusy && " + Personal"}
+        {personalSyncBusy && translations.PERSONAL_SYNC_BUSY}
         <br />
         {!!duration && formattedDuration}
     </span>;

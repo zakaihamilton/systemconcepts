@@ -1212,6 +1212,14 @@ export default {
         {
             "id": "PERSONAL_SYNC",
             "value": "הסנכרון האישי"
+        },
+        {
+            "id": "PERSONAL_SYNC_ERROR",
+            "value": "שגיאה בהסנכרון האישי"
+        },
+        {
+            "id": "PERSONAL_SYNC_BUSY",
+            "value": "הסנכרון האישי בוצע"
         }
     ]
 };

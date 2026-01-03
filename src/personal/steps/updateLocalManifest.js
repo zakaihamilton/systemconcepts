@@ -1,5 +1,5 @@
 import storage from "@util/storage";
-import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST } from "../constants";
+import { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } from "../constants";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
 
@@ -11,7 +11,7 @@ export async function updateLocalManifest(localFiles) {
     addSyncLog("[Personal] Step 2: Updating local manifest...", "info");
 
     try {
-        const manifestPath = `${LOCAL_PERSONAL_PATH}/${PERSONAL_MANIFEST}`;
+        const manifestPath = `${LOCAL_PERSONAL_PATH}/${LOCAL_PERSONAL_MANIFEST}`;
         let manifest = {};
 
         // Try to read existing manifest

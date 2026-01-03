@@ -56,6 +56,13 @@ export async function performPersonalSync() {
                 remoteManifest = { ...remoteManifest, ...migrationResult.manifest };
             }
 
+            // Remove deleted keys (fixed double slashes)
+            if (migrationResult.deletedKeys) {
+                migrationResult.deletedKeys.forEach(key => {
+                    delete remoteManifest[key];
+                });
+            }
+
             // Upload the updated manifest
             const { uploadManifest } = await import("./steps/uploadManifest");
             await uploadManifest(remoteManifest, userid);
@@ -74,8 +81,8 @@ export async function performPersonalSync() {
 
         // Save local manifest after downloads
         if (downloadResult.hasChanges) {
-            const { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST } = await import("./constants");
-            const manifestPath = `${LOCAL_PERSONAL_PATH}/${PERSONAL_MANIFEST}`;
+            const { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } = await import("./constants");
+            const manifestPath = `${LOCAL_PERSONAL_PATH}/${LOCAL_PERSONAL_MANIFEST}`;
             await storage.writeFile(manifestPath, JSON.stringify(localManifest, null, 4));
             addSyncLog("[Personal] Saved updated local manifest after downloads", "info");
         }

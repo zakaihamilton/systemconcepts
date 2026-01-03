@@ -1276,6 +1276,14 @@ export default {
         {
             "id": "PERSONAL_SYNC",
             "value": "Personal Sync"
+        },
+        {
+            "id": "PERSONAL_SYNC_ERROR",
+            "value": "Personal Sync Error"
+        },
+        {
+            "id": "PERSONAL_SYNC_BUSY",
+            "value": "Personal Sync Busy"
         }
     ]
 };

@@ -1220,6 +1220,14 @@ export default {
         {
             "id": "PERSONAL_SYNC",
             "value": "Arquivos Pessoais"
+        },
+        {
+            "id": "PERSONAL_SYNC_ERROR",
+            "value": "Erro na sincronização pessoal"
+        },
+        {
+            "id": "PERSONAL_SYNC_BUSY",
+            "value": "Sincronização pessoal em andamento"
         }
     ]
 };

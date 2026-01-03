@@ -4,7 +4,7 @@ import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
 import { readGroups } from "@sync/groups";
 import { SyncActiveStore } from "@sync/syncState";
-import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST } from "../constants";
+import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST, LOCAL_PERSONAL_MANIFEST } from "../constants";
 
 const MIGRATION_FILE = "migration.json";
 
@@ -16,7 +16,7 @@ const MIGRATION_FILE = "migration.json";
 export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     const start = performance.now();
     const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
-    const localManifestPath = makePath(LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST);
+    const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
 
     try {
         // Load or create migration state
@@ -102,6 +102,45 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 const localManifest = JSON.parse(content);
                 manifest = { ...manifest, ...localManifest };
             } catch (err) { }
+        }
+
+        const deletedKeys = [];
+
+        // Repair Step: Check for and fix double slash paths in manifest/state
+        // This handles files that were previously migrated incorrectly
+        if (migrationState.files && migrationState.files.length > 0) {
+            let repairCount = 0;
+            const mongoPath = "personal/metadata/sessions";
+
+            for (const file of migrationState.files) {
+                // Check if this file produced a double slash key
+                // Old logic was substring without cleaning leading slash
+                const rawRelativePath = file.path.substring(mongoPath.length + 1);
+
+                // If the raw relative path starts with /, it caused a double slash //
+                if (rawRelativePath.startsWith("/")) {
+                    const badManifestKey = `metadata/sessions/${rawRelativePath}`;
+
+                    if (manifest[badManifestKey]) {
+                        // Found a bad entry - blacklist and force re-migration
+                        delete manifest[badManifestKey];
+                        deletedKeys.push(badManifestKey);
+
+                        // Force re-migration of this file
+                        if (migrationState.migrated[file.path]) {
+                            migrationState.migrated[file.path] = false;
+                            migrationState.complete = false; // Mark migration as incomplete
+                            repairCount++;
+                        }
+                    }
+                }
+            }
+
+            if (repairCount > 0) {
+                addSyncLog(`[Personal] Found ${repairCount} files with double-slash paths. Queued for repair.`, "warning");
+                // Save state immediately to ensure we don't lose the "unmigrated" status if crash
+                await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            }
         }
 
         let migratedCount = 0;
@@ -278,7 +317,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`[Personal] ✓ Migrated ${migratedCount} files in ${duration}s (${done + migratedCount}/${total} total)`, "success");
 
-        return { migrated: migratedCount > 0, fileCount: migratedCount, manifest };
+        return { migrated: migratedCount > 0, fileCount: migratedCount, manifest, deletedKeys };
 
     } catch (err) {
         console.error("[Personal] Migration error:", err);
