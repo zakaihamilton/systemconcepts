@@ -214,9 +214,7 @@ export default function SessionsPage() {
         switch (columnId) {
             case 'name':
             case 'nameWidget': {
-                const style = {
-                    background: `conic-gradient(var(--primary-color) ${item.percentage}%, transparent 0)`
-                };
+                const style = {};
 
                 const icon = (
                     <div
