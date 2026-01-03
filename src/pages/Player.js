@@ -18,6 +18,7 @@ import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import { useGroups } from "@util/groups";
+import { useSessions } from "@util/sessions";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 import InfoIcon from "@mui/icons-material/Info";
@@ -44,7 +45,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
-    const [groups] = useGroups([]);
+    const [, , groups] = useSessions([], { filterSessions: false, skipSync: true, active: false });
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
@@ -56,20 +57,31 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     const groupInfo = groups.find(g => g.name === group);
     const isBundled = groupInfo?.bundled;
 
+    console.log("[Player] Metadata setup:", {
+        group,
+        groupInfo: groupInfo?.name,
+        isBundled,
+        year,
+        sessionName,
+        groupsLoaded: groups.length
+    });
+
     let metadataPath = null;
     let metadataKey = null;
 
     if (folder && sessionName && group) { // ensure we have group
         if (isBundled) {
             metadataPath = `local/personal/metadata/sessions/${group}.json`;
-            // Key format: {year}/{sessionName}.json (matches migrateFromMongoDB)
-            // folder usually includes year like "/2024"
-            const relativeFolder = folder.replace(/^\//, ""); // remove leading slash
-            metadataKey = `${relativeFolder ? relativeFolder + "/" : ""}${sessionName}.json`;
+            // Key format: {year}/{sessionName}.json
+            // We use the year variable directly instead of deriving from folder to avoid including prefix/group
+            metadataKey = `${year ? year + "/" : ""}${sessionName}.json`;
         } else {
-            metadataPath = `local/personal/metadata/sessions${folder}/${sessionName}.json`;
+            // For non-bundled: local/personal/metadata/sessions/{group}/{year}/{sessionName}.json
+            metadataPath = `local/personal/metadata/sessions/${group}/${year ? year + "/" : ""}${sessionName}.json`;
         }
     }
+
+
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
 

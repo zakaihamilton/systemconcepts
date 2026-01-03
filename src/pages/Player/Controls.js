@@ -81,11 +81,32 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
     }, [visible, show, metadata, playerRef, metadataKey]);
 
     useEffect(() => {
+        console.log("[Controls] Metadata effect triggered", {
+            hasMetadata: !!metadata,
+            metadataKey,
+            readyState: playerRef?.readyState,
+            currentTime: playerRef?.currentTime
+        });
+
         if (metadata && playerRef && playerRef.readyState >= 1) {
             const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
+            console.log("[Controls] Current metadata:", {
+                metadataKey,
+                currentMetadata,
+                position: currentMetadata.position,
+                hasMetadataKey: !!metadataKey,
+                metadataKeys: Object.keys(metadata).slice(0, 5)
+            });
+
             if (currentMetadata.position && playerRef.currentTime < 1) {
+
                 playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
                 setCurrentTime(currentMetadata.position);
+            } else {
+                console.log("[Controls] Not setting position:", {
+                    hasPosition: !!currentMetadata.position,
+                    currentTime: playerRef.currentTime
+                });
             }
         }
     }, [metadata, metadataKey, playerRef]);
