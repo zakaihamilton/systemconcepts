@@ -173,9 +173,10 @@ export function useActivePages(depends = []) {
     let { hash = "" } = MainStore.useState();
     const translations = useTranslations();
     const pages = usePages();
+    const dependsString = JSON.stringify(depends);
     const activePages = useMemo(() => {
         return getPagesFromHash({ hash, translations, pages });
-    }, [hash, translations, pages, ...depends]);
+    }, [hash, translations, pages, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return activePages;
 }
 

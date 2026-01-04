@@ -81,90 +81,110 @@ export function fetchJSON(url, options) {
 
 export function useFetchJSON(url, options, depends = [], cond = true, delay = 0) {
     const isOnline = useOnline();
-    const [inProgress, setProgress] = useState(!!url && cond && isOnline);
-    const [result, setResult] = useState(null);
-    const timeoutRef = useRef(null);
-    const [error, setError] = useState("");
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
+
+    const [state, setState] = useState({
+        result: null,
+        error: "",
+        inProgress: !!url && cond && isOnline
+    });
+
+    const [prevArgs, setPrevArgs] = useState({ url, optionsString, dependsString, cond, isOnline });
+
+    if (
+        url !== prevArgs.url ||
+        optionsString !== prevArgs.optionsString ||
+        dependsString !== prevArgs.dependsString ||
+        cond !== prevArgs.cond ||
+        isOnline !== prevArgs.isOnline
+    ) {
+        setPrevArgs({ url, optionsString, dependsString, cond, isOnline });
+        setState({
+            result: null,
+            error: "",
+            inProgress: !!url && cond && isOnline
+        });
+    }
+
     useEffect(() => {
-        if (cond && isOnline) {
-            setResult(null);
-            setError("");
-            setProgress(true);
+        if (!cond || !isOnline) return;
 
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
+        let active = true;
+        const timeoutId = setTimeout(() => {
+            fetchJSON(url, options).then(data => {
+                if (active) {
+                    setState(prev => ({ ...prev, result: data, inProgress: false }));
+                }
+            }).catch(err => {
+                if (active) {
+                    setState(prev => ({ ...prev, error: err, inProgress: false }));
+                }
+            });
+        }, delay);
 
-            timeoutRef.current = setTimeout(() => {
-                timeoutRef.current = null;
-                fetchJSON(url, options).then(data => {
-                    setResult(data);
-                    setProgress(false);
-                }).catch(err => {
-                    setProgress(false);
-                    setError(err);
-                });
-            }, delay);
-        }
-        else {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-            }
-        }
         return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-            }
+            active = false;
+            clearTimeout(timeoutId);
         };
-    }, [url, cond, optionsString, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
-    return [result, setResult, inProgress, error];
+    }, [url, optionsString, dependsString, cond, isOnline, delay]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const setResult = (val) => setState(prev => ({ ...prev, result: val }));
+
+    return [state.result, setResult, state.inProgress, state.error];
 }
 
 export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const isOnline = useOnline();
-    const [inProgress, setProgress] = useState(!!url && cond && isOnline);
-    const [result, setResult] = useState(null);
-    const timeoutRef = useRef(null);
-    const [error, setError] = useState("");
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
+
+    const [state, setState] = useState({
+        result: null,
+        error: "",
+        inProgress: !!url && cond && isOnline
+    });
+
+    const [prevArgs, setPrevArgs] = useState({ url, optionsString, dependsString, cond, isOnline });
+
+    if (
+        url !== prevArgs.url ||
+        optionsString !== prevArgs.optionsString ||
+        dependsString !== prevArgs.dependsString ||
+        cond !== prevArgs.cond ||
+        isOnline !== prevArgs.isOnline
+    ) {
+        setPrevArgs({ url, optionsString, dependsString, cond, isOnline });
+        setState({
+            result: null,
+            error: "",
+            inProgress: !!url && cond && isOnline
+        });
+    }
+
     useEffect(() => {
         if (cond && isOnline && url) {
-            setResult(null);
-            setError("");
-            setProgress(true);
-
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-
-            timeoutRef.current = setTimeout(() => {
-                timeoutRef.current = null;
+            let active = true;
+            const timeoutId = setTimeout(() => {
                 fetchText(url, options).then(data => {
-                    setResult(data);
-                    setProgress(false);
+                    if (active) {
+                        setState(prev => ({ ...prev, result: data, inProgress: false }));
+                    }
                 }).catch(err => {
-                    setProgress(false);
-                    setError(err);
+                    if (active) {
+                        setState(prev => ({ ...prev, error: err, inProgress: false }));
+                    }
                 });
             }, delay);
+
+            return () => {
+                active = false;
+                clearTimeout(timeoutId);
+            };
         }
-        else {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-            }
-        }
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-            }
-        };
     }, [url, optionsString, cond, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
-    return [result, setResult, inProgress, error];
+
+    const setResult = (val) => setState(prev => ({ ...prev, result: val }));
+
+    return [state.result, setResult, state.inProgress, state.error];
 }

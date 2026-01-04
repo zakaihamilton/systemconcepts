@@ -371,7 +371,7 @@ export default function TableWidget(props) {
         }
     }
 
-    useToolbar({ id: "Table", items: toolbarItems, depends: [rawItems, name, translations, viewMode, sortItems, itemsPerPage] });
+    useToolbar({ id: "Table", items: toolbarItems, depends: [rawItems, name, translations, viewMode, sortItems, itemsPerPage, isMobile] });
 
     useEffect(() => {
         const hasColumn = visibleColumns.some(column => column.id === orderBy || column.sortable === orderBy);
