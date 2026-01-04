@@ -1168,6 +1168,50 @@ export default {
         {
             "id": "SEEK",
             "value": "חיפוש"
+        },
+        {
+            "id": 404,
+            "value": "לא ניתן לגשת לשרת!"
+        },
+        {
+            "id": "SYNC_STATUS",
+            "value": "מצב סנכרון"
+        },
+        {
+            "id": "LAST_SYNCED",
+            "value": "סונכרן לאחרונה"
+        },
+        {
+            "id": "GROUPS_SYNCED",
+            "value": "קבוצות סונכרנו"
+        },
+        {
+            "id": "ADDED_SESSIONS",
+            "value": "שיעורים נוספו"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "שיעורים הוסרו"
+        },
+        {
+            "id": "TAGS_SYNCED",
+            "value": "תגים סונכרנו"
+        },
+        {
+            "id": "IDLE",
+            "value": "בהמתנה"
+        },
+        {
+            "id": "NEVER",
+            "value": "אף פעם"
+        },
+        {
+            "id": "COPY_LOG",
+            "value": "העתק יומן"
+        },
+        {
+            "id": "LOG_COPIED",
+            "value": "יומן הועתק ללוח"
         }
     ]
 };

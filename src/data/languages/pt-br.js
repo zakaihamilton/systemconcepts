@@ -354,10 +354,6 @@ export default {
             "value": "Barra Lateral"
         },
         {
-            "id": "LOGIN",
-            "value": "Login"
-        },
-        {
             "id": "ACCOUNT",
             "value": "Conta"
         },
@@ -1138,10 +1134,6 @@ export default {
             "value": "Limpar Grupos"
         },
         {
-            "id": "APPLY_FILTERS",
-            "value": "Aplicar Filtros"
-        },
-        {
             "id": "SELECTED",
             "value": "Selecionado"
         },
@@ -1176,6 +1168,50 @@ export default {
         {
             "id": "SEEK",
             "value": "Buscar"
+        },
+        {
+            "id": 404,
+            "value": "Não é possível acessar o servidor!"
+        },
+        {
+            "id": "SYNC_STATUS",
+            "value": "Status de Sincronização"
+        },
+        {
+            "id": "LAST_SYNCED",
+            "value": "Última Sincronização"
+        },
+        {
+            "id": "GROUPS_SYNCED",
+            "value": "Grupos Sincronizados"
+        },
+        {
+            "id": "ADDED_SESSIONS",
+            "value": "Sessões Adicionadas"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "Sessões Removidas"
+        },
+        {
+            "id": "TAGS_SYNCED",
+            "value": "Tags Sincronizadas"
+        },
+        {
+            "id": "IDLE",
+            "value": "Ocioso"
+        },
+        {
+            "id": "NEVER",
+            "value": "Nunca"
+        },
+        {
+            "id": "COPY_LOG",
+            "value": "Copiar Log"
+        },
+        {
+            "id": "LOG_COPIED",
+            "value": "Log Copiado para a Área de Transferência"
         }
     ]
 };
