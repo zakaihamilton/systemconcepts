@@ -26,6 +26,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         if (await storage.exists(migrationPath)) {
             try {
                 const content = await storage.readFile(migrationPath);
+                console.log(`[Personal] Migration file exists, size: ${content?.length || 0} bytes`);
                 if (!content || !content.trim()) {
                     throw new Error("Empty migration file");
                 }
@@ -33,11 +34,13 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                 // If migration is complete, skip
                 if (migrationState.complete) {
-                    return { migrated: false, fileCount: 0 };
+                    console.log("[Personal] Migration already complete, skipping");
+                    return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
                 }
 
                 addSyncLog(`[Personal] Resuming migration: ${Object.keys(migrationState.migrated).length}/${migrationState.files.length} done`, "info");
             } catch (err) {
+                console.error("[Personal] Error loading migration state:", err);
                 addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "warning");
                 // State remains at default (initialized above)
             }
@@ -76,7 +79,20 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 path: f.path,
                 mtimeMs: f.mtimeMs || Date.now()
             }));
-            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            const stateContent = JSON.stringify(migrationState, null, 2);
+            console.log(`[Personal] Writing migration state after caching: ${migrationState.files.length} files, ${stateContent.length} bytes`);
+            await storage.writeFile(migrationPath, stateContent);
+
+            // Verify write succeeded
+            try {
+                const verifyContent = await storage.readFile(migrationPath);
+                console.log(`[Personal] Verification read: ${verifyContent?.length || 0} bytes`);
+                if (!verifyContent || verifyContent.length === 0) {
+                    console.error("[Personal] CRITICAL: Migration file write failed - file is empty after write!");
+                }
+            } catch (err) {
+                console.error("[Personal] CRITICAL: Cannot verify migration file write:", err);
+            }
 
             addSyncLog(`[Personal] Cached ${files.length} files for migration`, "info");
         }
