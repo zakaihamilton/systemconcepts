@@ -168,7 +168,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             addSyncLog("[Personal] All files migrated!", "success");
             migrationState.complete = true;
             await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
-            return { migrated: false, fileCount: 0 };
+            // Still return manifest in case we need to upload cleaned entries
+            return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
         }
 
         const total = migrationState.files.length;

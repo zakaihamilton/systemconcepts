@@ -38,6 +38,12 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
             const batch = filesToDownload.slice(i, i + PERSONAL_BATCH_SIZE);
 
             await Promise.all(batch.map(async (path) => {
+                // Skip invalid paths
+                if (!path || !path.trim() || path.trim() === '.json') {
+                    console.warn(`[Personal] Skipping invalid path: "${path}"`);
+                    return;
+                }
+
                 const remotePath = makePath(basePath, path);
                 const localPath = makePath(LOCAL_PERSONAL_PATH, path);
 
