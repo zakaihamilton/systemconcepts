@@ -242,6 +242,16 @@ export async function handleRequest({ readOnly, req }) {
         try {
             path = decodeURIComponent(path);
 
+            if (readOnly) {
+                const normalizedPath = normalizePath(path);
+                if (normalizedPath === "private" || normalizedPath.startsWith("private/")) {
+                    throw new Error("ACCESS_DENIED");
+                }
+                if (normalizedPath.includes("..")) {
+                    throw new Error("ACCESS_DENIED");
+                }
+            }
+
             if (type === "dir") {
                 const items = await list({ path, useCount: true });
                 return items;
