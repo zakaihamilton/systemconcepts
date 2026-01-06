@@ -18,6 +18,17 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
     const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
 
+    // Check if migration has already occurred by looking at remote manifest
+    // If the user has files in the personal folder, we assume migration is done.
+    const hasRemoteFiles = Object.keys(remoteManifest).some(key =>
+        key.startsWith("metadata/sessions/") || key.startsWith("files/")
+    );
+
+    if (hasRemoteFiles) {
+        console.log("[Personal] Remote personal files exist, skipping migration scan");
+        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+    }
+
     const safeWriteMigration = async (data, reason = "unknown") => {
         const tempPath = migrationPath + ".tmp";
         const content = JSON.stringify(data, null, 2);
