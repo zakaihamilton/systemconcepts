@@ -243,20 +243,15 @@ export async function handleRequest({ readOnly, req }) {
             path = decodeURIComponent(path);
             if (readOnly) {
                 const normalized = normalizePath(path);
-                if (normalized.split("/").includes("..")) {
-                    throw "ACCESS_DENIED";
-                }
-                if (normalized.startsWith("private/") || normalized === "private") {
-                    throw "ACCESS_DENIED";
-                }
-            }
+                // SENTINEL: Use robust check for path traversal and blocked folders.
+                // We use split("/").includes("..") which is safer than string.includes("..")
+                // because it allows valid filenames like "report..pdf" while blocking traversal segments.
+                // We also strictly block access to the "private" folder.
 
-            if (readOnly) {
-                const normalizedPath = normalizePath(path);
-                if (normalizedPath === "private" || normalizedPath.startsWith("private/")) {
+                if (normalized.split("/").includes("..")) {
                     throw new Error("ACCESS_DENIED");
                 }
-                if (normalizedPath.includes("..")) {
+                if (normalized.startsWith("private/") || normalized === "private") {
                     throw new Error("ACCESS_DENIED");
                 }
             }
