@@ -101,10 +101,6 @@ const storageMethods = Object.fromEntries([
         name: "deleteFile"
     },
     {
-        name: "rename",
-        types: ["path", "path"]
-    },
-    {
         name: "readFile"
     },
     {

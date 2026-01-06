@@ -20,26 +20,31 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
     const safeWriteMigration = async (data) => {
         const tempPath = migrationPath + ".tmp";
-        await storage.writeFile(tempPath, JSON.stringify(data, null, 2));
+        const content = JSON.stringify(data, null, 2);
 
-        // Verify temp file before renaming
+        // Write to temp first
+        await storage.writeFile(tempPath, content);
+
+        // Verify temp file
         const tempContent = await storage.readFile(tempPath);
         if (!tempContent || !tempContent.trim()) {
             throw new Error("Failed to write migration temp file (empty content)");
         }
 
-        // Delete target file first to ensure rename success (some adapters might fail to overwrite)
+        // Manual copy to target (safer than rename in some environments)
         if (await storage.exists(migrationPath)) {
             await storage.deleteFile(migrationPath);
         }
+        await storage.writeFile(migrationPath, tempContent);
 
-        await storage.rename(tempPath, migrationPath);
-
-        // Verify target file after rename
+        // Verify target file
         const targetContent = await storage.readFile(migrationPath);
         if (!targetContent || !targetContent.trim()) {
-            throw new Error("Failed to rename migration file (target empty after rename)");
+            throw new Error("Failed to write migration file (target empty after write)");
         }
+
+        // Cleanup temp
+        await storage.deleteFile(tempPath);
     };
 
     try {
@@ -66,6 +71,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             } catch (err) {
                 console.error("[Personal] Error loading migration state:", err);
                 addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "info");
+                // Explicitly delete the corrupted file to prevent loops
+                try { await storage.deleteFile(migrationPath); } catch (e) {}
                 // State remains at default (initialized above)
             }
         }
