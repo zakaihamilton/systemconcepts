@@ -2,7 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { PERSONAL_SYNC_BASE_PATH, LOCAL_PERSONAL_PATH, PERSONAL_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "@sync/logs";
-import { readCompressedFile } from "@sync/bundle";
+import { calculateHash } from "@sync/hash";
 
 /**
  * Step 4: Download files that are newer/different on remote
@@ -52,8 +52,14 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                     await storage.createFolderPath(localPath);
                     await storage.writeFile(localPath, content);
 
-                    // Update local manifest
-                    localManifest[path] = { ...remoteManifest[path] };
+                    // Update local manifest with the hash of the content we just wrote
+                    // This prevents infinite download loops if the local hash calculation
+                    // differs from the remote hash (e.g. due to line endings or formatting)
+                    const hash = await calculateHash(content);
+                    localManifest[path] = {
+                        ...remoteManifest[path],
+                        hash
+                    };
 
                     addSyncLog(`[Personal] Downloaded: ${path}`, "info");
                 } catch (err) {
