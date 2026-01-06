@@ -241,6 +241,15 @@ export async function handleRequest({ readOnly, req }) {
         }
         try {
             path = decodeURIComponent(path);
+            if (readOnly) {
+                const normalized = normalizePath(path);
+                if (normalized.split("/").includes("..")) {
+                    throw "ACCESS_DENIED";
+                }
+                if (normalized.startsWith("private/") || normalized === "private") {
+                    throw "ACCESS_DENIED";
+                }
+            }
 
             if (readOnly) {
                 const normalizedPath = normalizePath(path);
