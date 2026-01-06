@@ -1220,6 +1220,8 @@ export default {
         {
             "id": "PERSONAL_SYNC_BUSY",
             "value": "הסנכרון האישי בוצע"
+        },
+        {
             "id": 404,
             "value": "לא ניתן לגשת לשרת!"
         },
