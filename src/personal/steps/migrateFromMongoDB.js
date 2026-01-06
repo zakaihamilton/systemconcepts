@@ -41,7 +41,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 addSyncLog(`[Personal] Resuming migration: ${Object.keys(migrationState.migrated).length}/${migrationState.files.length} done`, "info");
             } catch (err) {
                 console.error("[Personal] Error loading migration state:", err);
-                addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "warning");
+                addSyncLog(`[Personal] Starting fresh migration state: ${err.message}`, "info");
                 // State remains at default (initialized above)
             }
         }

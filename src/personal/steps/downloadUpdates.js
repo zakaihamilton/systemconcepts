@@ -19,6 +19,18 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
 
         // Find files to download
         for (const [path, remoteInfo] of Object.entries(remoteManifest)) {
+            // Skip individual session files (depth >= 3 in metadata/sessions/)
+            // We only want to download bundled files (metadata/sessions/group.json or metadata/sessions/group/year.json)
+            // Individual files: metadata/sessions/group/year/session.json
+            if (path.startsWith("metadata/sessions/")) {
+                const relativePath = path.substring("metadata/sessions/".length);
+                // normalize path separators just in case, though manifest should use /
+                const parts = relativePath.split("/");
+                if (parts.length >= 3) {
+                    continue;
+                }
+            }
+
             const localInfo = localManifest[path];
 
             if (!localInfo || localInfo.hash !== remoteInfo.hash) {
