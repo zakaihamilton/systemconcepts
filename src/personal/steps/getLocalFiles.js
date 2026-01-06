@@ -14,6 +14,8 @@ export async function getLocalFiles() {
         const files = listing.filter(item =>
             item.type !== "dir" &&
             item.name !== LOCAL_PERSONAL_MANIFEST &&
+            item.name !== "migration.json" &&
+            item.name !== "migration.json.tmp" &&
             !item.name.endsWith(".DS_Store")
         ).map(item => {
             const relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
