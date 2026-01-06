@@ -222,48 +222,60 @@ export default function TableWidget(props) {
         });
     }, [itemsPerPage, store]);
 
-    const { items, rawItems } = useMemo(() => {
+    const searchKeys = useMemo(() => {
+        return columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
+            if (typeof item.searchable === "string") {
+                return item.searchable;
+            }
+            if (typeof item.sortable === "string") {
+                return item.sortable;
+            }
+            return item.id;
+        });
+    }, [columns]);
+
+    const mappedData = useMemo(() => {
         let raw = data || [];
         if (filter) {
             raw = raw.filter(filter);
         }
 
-        let processed = raw.map(item => ({
+        return raw.map(item => ({
             raw: item,
             mapped: mapper ? mapper(item) : item
         }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data, filter, mapper, ...depends]);
 
-        if (search) {
-            const lowerSearch = search.toLowerCase();
-            const keys = columns.filter(item => typeof item.searchable === "undefined" || item.searchable).map(item => {
-                if (typeof item.searchable === "string") {
-                    return item.searchable;
-                }
-                if (typeof item.sortable === "string") {
-                    return item.sortable;
-                }
-                return item.id;
-            });
-            processed = processed.filter(({ mapped }) => {
-                for (const key of keys) {
-                    if (typeof mapped[key] === "string") {
-                        const match = mapped[key].toLowerCase().includes(lowerSearch);
-                        if (match) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
+    const filteredData = useMemo(() => {
+        if (!search) {
+            return mappedData;
         }
 
-        processed = stableSort(processed || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
+        const lowerSearch = search.toLowerCase();
+        return mappedData.filter(({ mapped }) => {
+            for (const key of searchKeys) {
+                if (typeof mapped[key] === "string") {
+                    const match = mapped[key].toLowerCase().includes(lowerSearch);
+                    if (match) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }, [mappedData, search, searchKeys]);
 
+    const sortedData = useMemo(() => {
+        return stableSort(filteredData || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
+    }, [filteredData, order, orderBy]);
+
+    const { items, rawItems } = useMemo(() => {
         return {
-            items: processed.map(p => p.mapped),
-            rawItems: processed.map(p => p.raw)
+            items: sortedData.map(p => p.mapped),
+            rawItems: sortedData.map(p => p.raw)
         };
-    }, [search, data, order, orderBy, columns, filter, mapper, ...depends]);
+    }, [sortedData]);
 
     const toolbarItems = [
         data && name && onImport && {
