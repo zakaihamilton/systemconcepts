@@ -39,6 +39,7 @@ export async function updateLocalManifest(localFiles) {
         }
 
         // Write updated manifest
+        await storage.createFolderPath(manifestPath);
         await storage.writeFile(manifestPath, JSON.stringify(manifest, null, 4));
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);

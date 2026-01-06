@@ -83,6 +83,7 @@ export async function performPersonalSync() {
         if (downloadResult.hasChanges) {
             const { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } = await import("./constants");
             const manifestPath = `${LOCAL_PERSONAL_PATH}/${LOCAL_PERSONAL_MANIFEST}`;
+            await storage.createFolderPath(manifestPath);
             await storage.writeFile(manifestPath, JSON.stringify(localManifest, null, 4));
             addSyncLog("[Personal] Saved updated local manifest after downloads", "info");
         }
