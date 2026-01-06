@@ -3,17 +3,23 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import styles from "./Input.module.scss";
 import clsx from "clsx";
 import Tooltip from "@mui/material/Tooltip";
+import { useTranslations } from "@util/translations";
 
 export function arrayToMenuItems(list) {
     return list.map(({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>));
 }
 
-export default forwardRef(function InputWidget({ background, label, render, mapping, helperText = " ", validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, ...props }, ref) {
+export default forwardRef(function InputWidget({ background, label, render, mapping, helperText = " ", validate, onValidate, readOnly, items, fullWidth = true, icon, tooltip = "", className, select, multiple, autocomplete, state, onChange, renderValue, type, ...props }, ref) {
     let [value, setValue] = state || [];
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const translations = useTranslations();
 
     const onChangeText = useCallback(event => {
         const { value } = event.target;
@@ -45,6 +51,13 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
         renderValue = renderValue || (selected => selected.filter(Boolean).join(", "));
     }
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
+    const inputType = type === 'password' && showPassword ? 'text' : type;
+
     const textField = (params = {}) => {
         const { slotProps: paramsSlotProps = {}, ...otherParams } = params;
         return (
@@ -59,6 +72,7 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                 helperText={error || helperText}
                 variant="filled"
                 fullWidth={fullWidth}
+                type={inputType}
                 {...props}
                 {...otherParams}
                 slotProps={{
@@ -74,6 +88,20 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
                                     <Tooltip title={tooltip} arrow>
                                         <span>{icon}</span>
                                     </Tooltip>
+                                </InputAdornment>
+                            )
+                        }),
+                        ...(type === 'password' && {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label={showPassword ? translations.HIDE_PASSWORD : translations.SHOW_PASSWORD}
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
                                 </InputAdornment>
                             )
                         }),
@@ -133,4 +161,3 @@ export default forwardRef(function InputWidget({ background, label, render, mapp
         />
     );
 });
-

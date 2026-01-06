@@ -1216,6 +1216,14 @@ export default {
         {
             "id": "LOG_COPIED",
             "value": "Log Copied to Clipboard"
+        },
+        {
+            "id": "SHOW_PASSWORD",
+            "value": "Show Password"
+        },
+        {
+            "id": "HIDE_PASSWORD",
+            "value": "Hide Password"
         }
     ]
 };
