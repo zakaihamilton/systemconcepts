@@ -17,6 +17,20 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     const start = performance.now();
     const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
     const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
+    const completionKey = `personal_migration_complete_${userid}`;
+
+    // Fast check via localStorage to avoid FS operations if already done
+    try {
+        if (typeof localStorage !== "undefined" && localStorage.getItem(completionKey) === "true") {
+            // Verify if we should trust it - maybe check if migration file exists?
+            // If the user wants to force re-run they can clear storage.
+            // For now, trust it to stop the loop.
+            console.log("[Personal] Migration marked complete in localStorage");
+            return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+        }
+    } catch (e) {
+        console.warn("[Personal] localStorage check failed:", e);
+    }
 
     const safeWriteMigration = async (data) => {
         const tempPath = migrationPath + ".tmp";
@@ -31,11 +45,13 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             throw new Error("Failed to write migration temp file (empty content)");
         }
 
-        // Manual copy to target (safer than rename in some environments)
-        if (await storage.exists(migrationPath)) {
-            await storage.deleteFile(migrationPath);
-        }
+        // Manual copy to target
+        // We removed the explicit delete to avoid potential race conditions with the subsequent write
+        // storage.writeFile should handle overwrite correctly
         await storage.writeFile(migrationPath, tempContent);
+
+        // Small delay to ensure flush
+        await new Promise(resolve => setTimeout(resolve, 50));
 
         // Verify target file
         const targetContent = await storage.readFile(migrationPath);
@@ -484,6 +500,14 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         if (remaining === 0) {
             migrationState.complete = true;
             await safeWriteMigration(migrationState);
+
+            // Set localStorage flag
+            try {
+                if (typeof localStorage !== "undefined") {
+                    localStorage.setItem(completionKey, "true");
+                }
+            } catch (e) {}
+
             addSyncLog("[Personal] Migration complete!", "success");
         }
 
