@@ -1220,6 +1220,8 @@ export default {
         {
             "id": "PERSONAL_SYNC_BUSY",
             "value": "Sincronização pessoal em andamento"
+        },
+        {
             "id": 404,
             "value": "Não foi possível acessar o servidor!"
         },
