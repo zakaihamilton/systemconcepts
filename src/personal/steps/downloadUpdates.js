@@ -49,6 +49,7 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
 
                 try {
                     const content = await storage.readFile(remotePath);
+                    await storage.createFolderPath(localPath);
                     await storage.writeFile(localPath, content);
 
                     // Update local manifest
