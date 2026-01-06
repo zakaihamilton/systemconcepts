@@ -41,7 +41,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 addSyncLog(`[Personal] Resuming migration: ${Object.keys(migrationState.migrated).length}/${migrationState.files.length} done`, "info");
             } catch (err) {
                 console.error("[Personal] Error loading migration state:", err);
-                addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "warning");
+                addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "info");
                 // State remains at default (initialized above)
             }
         }
@@ -203,6 +203,16 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         }
 
         const deletedKeys = [];
+        // Track unique keys to add to deletedKeys array
+        const deletedKeysSet = new Set();
+
+        // Helper to mark key as deleted
+        const markAsDeleted = (key) => {
+            if (manifest[key]) {
+                delete manifest[key];
+                deletedKeysSet.add(key);
+            }
+        };
 
         // Repair Step: Check for and fix double slash paths in manifest/state
         // This handles files that were previously migrated incorrectly
@@ -221,8 +231,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                     if (manifest[badManifestKey]) {
                         // Found a bad entry - blacklist
-                        delete manifest[badManifestKey];
-                        deletedKeys.push(badManifestKey);
+                        markAsDeleted(badManifestKey);
 
                         // Check if we ALREADY have the clean entry (e.g. from previous partial run)
                         // If so, we don't need to re-migrate, just clean the manifest
@@ -267,6 +276,16 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             }
         }
 
+        // Cleanup Step: Remove individual manifest entries for files that were already migrated
+        // This handles the "Zombie Manifest Entry" issue where a previous run crashed before cleanup
+        for (const file of migrationState.files) {
+            if (migrationState.migrated[file.path]) {
+                const relativePath = file.path.substring(mongoPath.length + 1).replace(/^[\/\\]+/, "");
+                const manifestKey = `metadata/sessions/${relativePath}`;
+                markAsDeleted(manifestKey);
+            }
+        }
+
         let migratedCount = 0;
 
 
@@ -274,9 +293,6 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         // Bundle cache: { [groupName or group/year]: { content: { [relativePath]: data }, dirty: false } }
         const bundleCache = {};
-
-        // Track individual file manifest keys to remove (they're now in bundles)
-        const individualFilesToRemove = new Set();
 
 
         // Helper to flush bundles
@@ -372,7 +388,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
                             bundleCache[groupName].content[bundleKey] = data;
                             bundleCache[groupName].dirty = true;
-                            individualFilesToRemove.add(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(`metadata/sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
                             // Intentionally continue to mark as migrated so we don't loop forever
@@ -397,7 +413,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             const sessionKey = parts.slice(2).join("/");
                             bundleCache[yearBundleKey].content[sessionKey] = data;
                             bundleCache[yearBundleKey].dirty = true;
-                            individualFilesToRemove.add(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(`metadata/sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
                         }
@@ -429,14 +445,6 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         // Final save
         await flushBundles();
 
-        // Clean up individual file entries from manifest (they're now in bundles)
-        for (const fileKey of individualFilesToRemove) {
-            delete manifest[fileKey];
-        }
-        if (individualFilesToRemove.size > 0) {
-            console.log(`[Personal] Cleaned up ${individualFilesToRemove.size} individual file entries from manifest`);
-        }
-
         await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
         await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
 
@@ -451,7 +459,10 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`[Personal] ✓ Migrated ${migratedCount} files in ${duration}s (${done + migratedCount}/${total} total)`, "success");
 
-        return { migrated: (individualFilesToRemove.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest, deletedKeys };
+        // Convert set to array
+        deletedKeys.push(...deletedKeysSet);
+
+        return { migrated: (deletedKeysSet.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest, deletedKeys };
 
     } catch (err) {
         console.error("[Personal] Migration error:", err);
