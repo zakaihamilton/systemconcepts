@@ -19,13 +19,14 @@ const getOrdinal = (n, locale) => {
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
 };
 
-export function useDateFormatter(options, locale) {
+export function useDateFormatter(options, localeArg) {
     const appLocale = useLocale();
-    locale = locale || appLocale || 'en-US';
+    const locale = localeArg || appLocale || 'en-US';
     // 2. Memoize the formatter object itself for performance
+    const optionsString = JSON.stringify(options);
     const formatter = useMemo(() => {
         return new Intl.DateTimeFormat(locale, options);
-    }, [locale, JSON.stringify(options)]); // Only stringify if options are highly dynamic
+    }, [locale, optionsString, options]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // 3. Return a formatting function that includes ordinal logic
     return {

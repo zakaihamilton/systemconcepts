@@ -138,14 +138,26 @@ const storageMethods = Object.fromEntries([
 
 export function useListing(url, depends = [], options) {
     const [listing, setListing] = useState(null);
-    const [loading, setLoading] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const active = useRef(url);
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
-    useEffect(() => {
+
+    const [prevArgs, setPrevArgs] = useState({ url, optionsString, dependsString });
+
+    if (
+        url !== prevArgs.url ||
+        optionsString !== prevArgs.optionsString ||
+        dependsString !== prevArgs.dependsString
+    ) {
+        setPrevArgs({ url, optionsString, dependsString });
+        setListing(null);
         setLoading(true);
         setError(null);
+    }
+
+    useEffect(() => {
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
             if (active.current === url) {
@@ -170,12 +182,11 @@ export function useListing(url, depends = [], options) {
                 });
             }
         });
-    }, [url, optionsString, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
-    useEffect(() => {
         return () => {
             active.current = null;
         };
-    }, []);
+    }, [url, optionsString, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
+
     return [listing, loading, error];
 }
 
@@ -215,7 +226,14 @@ export function useFile(urlArgument, depends = [], mapping) {
     }, [url, setState]);
     const dependsString = JSON.stringify(depends);
     const mappingString = mapping?.toString();
+
+    // We can't easily do the "render-phase update" pattern here because useGlobalState is external.
+    // However, we can avoid setting state synchronously in useEffect if it's already correct.
+
     useEffect(() => {
+        // Clearing error on mount/update via timeout is weird but maybe intended to flash errors?
+        // The original code:
+        /*
         const timerHandle = setTimeout(() => {
             setState(state => {
                 state = state || {};
@@ -225,9 +243,17 @@ export function useFile(urlArgument, depends = [], mapping) {
                 return { ...state, error: null };
             });
         }, 0);
+        */
+        // This clears the error immediately after mount? Why?
+        // Maybe to reset error state from previous usage?
+
+        let active = true;
+
         if (!url) {
-            return () => clearTimeout(timerHandle);
+            return;
         }
+
+        // Trigger loading state if not already loading
         setState(state => {
             state = state || {};
             if (state.loading === true) {
@@ -235,7 +261,9 @@ export function useFile(urlArgument, depends = [], mapping) {
             }
             return { ...state, loading: true };
         });
+
         storageMethods.exists(url).then(exists => {
+            if (!active) return;
             if (!exists) {
                 let data = null;
                 if (mapping) {
@@ -250,6 +278,7 @@ export function useFile(urlArgument, depends = [], mapping) {
                 return;
             }
             storageMethods.readFile(url).then(data => {
+                if (!active) return;
                 if (mapping) {
                     data = mapping(data, url);
                 }
@@ -260,6 +289,7 @@ export function useFile(urlArgument, depends = [], mapping) {
                     return { ...state, data, loading: false };
                 });
             }).catch(err => {
+                if (!active) return;
                 setState(state => {
                     if (state.error === err && state.loading === false) {
                         return state;
@@ -268,6 +298,7 @@ export function useFile(urlArgument, depends = [], mapping) {
                 });
             });
         }).catch(err => {
+            if (!active) return;
             setState(state => {
                 if (state.error === err && state.loading === false) {
                     return state;
@@ -275,7 +306,10 @@ export function useFile(urlArgument, depends = [], mapping) {
                 return { ...state, error: err, loading: false };
             });
         });
-        return () => clearTimeout(timerHandle);
+
+        return () => {
+            active = false;
+        };
     }, [url, mappingString, setState, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     return [data, loading, error, write];
 }
