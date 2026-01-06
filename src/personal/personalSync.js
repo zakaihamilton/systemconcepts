@@ -28,7 +28,9 @@ export async function performPersonalSync() {
         // Get userid from cookies
         const userid = Cookies.get("id");
         if (!userid) {
-            throw new Error("User ID not found in cookies");
+            const error = new Error("User not logged in");
+            error.code = "NOT_LOGGED_IN";
+            throw error;
         }
         addSyncLog(`[Personal] Syncing for user: ${userid}`, "info");
 
