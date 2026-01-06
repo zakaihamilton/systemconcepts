@@ -1220,6 +1220,48 @@ export default {
         {
             "id": "PERSONAL_SYNC_BUSY",
             "value": "הסנכרון האישי בוצע"
+            "id": 404,
+            "value": "לא ניתן לגשת לשרת!"
+        },
+        {
+            "id": "SYNC_STATUS",
+            "value": "מצב סנכרון"
+        },
+        {
+            "id": "LAST_SYNCED",
+            "value": "סנכרון אחרון"
+        },
+        {
+            "id": "GROUPS_SYNCED",
+            "value": "קבוצות שסונכרנו"
+        },
+        {
+            "id": "ADDED_SESSIONS",
+            "value": "שיעורים שנוספו"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "שיעורים שהוסרו"
+        },
+        {
+            "id": "TAGS_SYNCED",
+            "value": "תגים שסונכרנו"
+        },
+        {
+            "id": "IDLE",
+            "value": "ממתין"
+        },
+        {
+            "id": "NEVER",
+            "value": "אף פעם"
+        },
+        {
+            "id": "COPY_LOG",
+            "value": "העתק יומן"
+        },
+        {
+            "id": "LOG_COPIED",
+            "value": "היומן הועתק ללוח"
         }
     ]
 };

@@ -39,6 +39,7 @@ export default function ToolbarItem({ item, idx, count }) {
                                     disabled={item.disabled}
                                     size="small"
                                     id={item.id}
+                                    aria-label={item.name}
                                 >
                                     <div className={styles.iconWrapper}>
                                         {item.icon}

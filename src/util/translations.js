@@ -7,9 +7,10 @@ export function useTranslations() {
     const items = useMemo(() => {
         const { translations } = languages.find(item => item.id === language) || {};
         const obj = {};
-        (translations || []).map(({ id, value }) => {
+        // Optimization: Use for...of instead of map to avoid creating unnecessary arrays
+        for (const { id, value } of (translations || [])) {
             obj[id] = value;
-        });
+        }
         return obj;
     }, [language]);
     return items;
