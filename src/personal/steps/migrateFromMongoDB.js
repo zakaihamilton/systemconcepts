@@ -18,6 +18,53 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
     const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
 
+    // Check if migration has already occurred by looking at remote manifest
+    // If the user has files in the personal folder, we assume migration is done.
+    const hasRemoteFiles = Object.keys(remoteManifest).some(key =>
+        key.startsWith("metadata/sessions/") || key.startsWith("files/")
+    );
+
+    if (hasRemoteFiles) {
+        console.log("[Personal] Remote personal files exist, skipping migration scan");
+        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+    }
+
+    const safeWriteMigration = async (data, reason = "unknown") => {
+        const tempPath = migrationPath + ".tmp";
+        const content = JSON.stringify(data, null, 2);
+        const size = content.length;
+
+        console.log(`[Personal] Writing migration state (${reason}): ${size} bytes`);
+
+        // Write to temp first
+        await storage.writeFile(tempPath, content);
+
+        // Verify temp file
+        const tempContent = await storage.readFile(tempPath);
+        if (!tempContent || !tempContent.trim()) {
+            console.error(`[Personal] Failed to write temp file (${reason})`);
+            throw new Error("Failed to write migration temp file (empty content)");
+        }
+
+        // Manual copy to target
+        await storage.writeFile(migrationPath, tempContent);
+
+        // Small delay to ensure flush
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // Verify target file
+        const targetContent = await storage.readFile(migrationPath);
+        if (!targetContent || !targetContent.trim()) {
+            console.error(`[Personal] Failed to write target file (${reason}) - target empty`);
+            throw new Error("Failed to write migration file (target empty after write)");
+        } else {
+            console.log(`[Personal] Verified migration file (${reason}): ${targetContent.length} bytes`);
+        }
+
+        // Cleanup temp
+        await storage.deleteFile(tempPath);
+    };
+
     try {
         // Load or create migration state
         const mongoPath = "personal/metadata/sessions";
@@ -42,6 +89,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             } catch (err) {
                 console.error("[Personal] Error loading migration state:", err);
                 addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "info");
+                // Explicitly delete the corrupted file to prevent loops
+                try { await storage.deleteFile(migrationPath); } catch (e) {}
                 // State remains at default (initialized above)
             }
         }
@@ -70,7 +119,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             if (files.length === 0) {
                 addSyncLog("[Personal] No files found in MongoDB", "info");
                 migrationState.complete = true;
-                await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+                await safeWriteMigration(migrationState, "empty_mongo");
                 return { migrated: false, fileCount: 0 };
             }
 
@@ -79,21 +128,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 path: f.path,
                 mtimeMs: f.mtimeMs || Date.now()
             }));
-            const stateContent = JSON.stringify(migrationState, null, 2);
-            console.log(`[Personal] Writing migration state after caching: ${migrationState.files.length} files, ${stateContent.length} bytes`);
-            await storage.writeFile(migrationPath, stateContent);
 
-            // Verify write succeeded
-            try {
-                const verifyContent = await storage.readFile(migrationPath);
-                console.log(`[Personal] Verification read: ${verifyContent?.length || 0} bytes`);
-                if (!verifyContent || verifyContent.length === 0) {
-                    console.error("[Personal] CRITICAL: Migration file write failed - file is empty after write!");
-                }
-            } catch (err) {
-                console.error("[Personal] CRITICAL: Cannot verify migration file write:", err);
-            }
-
+            await safeWriteMigration(migrationState, "cache_files");
             addSyncLog(`[Personal] Cached ${files.length} files for migration`, "info");
         }
 
@@ -174,7 +210,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         if (hasNewSkippedFiles) {
             addSyncLog(`[Personal] Linked ${autoMigratedCount} files to existing remote data`, "info");
-            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            await safeWriteMigration(migrationState, "linked_remote");
         }
 
         // NOW filter for work to do
@@ -183,7 +219,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         if (filesToMigrate.length === 0) {
             addSyncLog("[Personal] All files migrated!", "success");
             migrationState.complete = true;
-            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            await safeWriteMigration(migrationState, "complete_skipped");
             // Still return manifest in case we need to upload cleaned entries
             return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
         }
@@ -272,7 +308,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             if (repairCount > 0) {
                 addSyncLog(`[Personal] Found ${repairCount} files with double-slash paths. Queued for repair.`, "warning");
                 // Save state immediately to ensure we don't lose the "unmigrated" status if crash
-                await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+                await safeWriteMigration(migrationState, "repair_paths");
             }
         }
 
@@ -431,7 +467,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
             // Save progress after each batch
             await flushBundles();
-            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            await safeWriteMigration(migrationState, "batch_progress");
             await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
             addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
             SyncActiveStore.update(s => {
@@ -445,14 +481,14 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         // Final save
         await flushBundles();
 
-        await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+        await safeWriteMigration(migrationState, "final_save");
         await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
 
         // Check if complete
         const remaining = migrationState.files.filter(f => !migrationState.migrated[f.path]).length;
         if (remaining === 0) {
             migrationState.complete = true;
-            await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+            await safeWriteMigration(migrationState, "complete");
             addSyncLog("[Personal] Migration complete!", "success");
         }
 

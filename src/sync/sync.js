@@ -129,9 +129,15 @@ async function runPersonalSync() {
         });
     } catch (err) {
         console.error("[Personal Sync] Failed:", err);
+        let errorMessage = err.message || "Unknown error";
+
+        if (err.code === "NOT_LOGGED_IN" || errorMessage.includes("User not logged in") || errorMessage.includes("User ID not found")) {
+            errorMessage = "Please login to sync personal files";
+        }
+
         SyncActiveStore.update(s => {
             s.personalSyncBusy = false;
-            s.personalSyncError = err.message;
+            s.personalSyncError = errorMessage;
         });
     }
 }
