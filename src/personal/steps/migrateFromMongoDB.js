@@ -21,12 +21,25 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     const safeWriteMigration = async (data) => {
         const tempPath = migrationPath + ".tmp";
         await storage.writeFile(tempPath, JSON.stringify(data, null, 2));
+
         // Verify temp file before renaming
         const tempContent = await storage.readFile(tempPath);
         if (!tempContent || !tempContent.trim()) {
             throw new Error("Failed to write migration temp file (empty content)");
         }
+
+        // Delete target file first to ensure rename success (some adapters might fail to overwrite)
+        if (await storage.exists(migrationPath)) {
+            await storage.deleteFile(migrationPath);
+        }
+
         await storage.rename(tempPath, migrationPath);
+
+        // Verify target file after rename
+        const targetContent = await storage.readFile(migrationPath);
+        if (!targetContent || !targetContent.trim()) {
+            throw new Error("Failed to rename migration file (target empty after rename)");
+        }
     };
 
     try {
