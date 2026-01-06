@@ -3,7 +3,7 @@ import { makePath } from "@util/path";
 import { PERSONAL_SYNC_BASE_PATH, PERSONAL_MANIFEST } from "../constants";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
-import { readCompressedFile, writeCompressedFile } from "@sync/bundle";
+import { readCompressedFile, writeCompressedFile, decompressJSON } from "@sync/bundle";
 
 /**
  * Step 3: Download the remote manifest and compare with local
@@ -25,7 +25,7 @@ export async function syncManifest(localManifest, userid) {
         } else {
             // Bootstrap: Build manifest from existing remote files
             addSyncLog("[Personal] No manifest found, building from existing files...", "info");
-            remoteManifest = await buildManifestFromRemote();
+            remoteManifest = await buildManifestFromRemote(basePath);
 
             // Save the newly built manifest
             if (Object.keys(remoteManifest).length > 0) {
@@ -46,12 +46,12 @@ export async function syncManifest(localManifest, userid) {
 /**
  * Build manifest from existing remote files
  */
-async function buildManifestFromRemote() {
+async function buildManifestFromRemote(basePath) {
     const manifest = {};
 
     try {
         // Get recursive listing of all files in aws/personal
-        const listing = await storage.getRecursiveList(PERSONAL_SYNC_BASE_PATH);
+        const listing = await storage.getRecursiveList(basePath);
 
         const files = listing.filter(item =>
             item.type !== "dir" &&
@@ -63,11 +63,34 @@ async function buildManifestFromRemote() {
 
         // Build manifest entries for each file
         for (const item of files) {
-            const relPath = item.path.substring(basePath.length + 1);
+            let relPath = item.path.substring(basePath.length + 1);
+            let content;
 
             try {
-                // Read file to calculate hash
-                const content = await storage.readFile(item.path);
+                // Handle compressed metadata files
+                if (relPath.startsWith("metadata/sessions/") && relPath.endsWith(".gz")) {
+                    // Read file as buffer/base64
+                    const fileData = await storage.readFile(item.path);
+                    let buffer;
+                    if (typeof fileData === 'string') {
+                        buffer = Buffer.from(fileData, 'base64');
+                    } else if (Buffer.isBuffer(fileData)) {
+                        buffer = fileData;
+                    } else {
+                         buffer = Buffer.from(fileData);
+                    }
+
+                    // Decompress to get original content for hash
+                    const json = decompressJSON(buffer);
+                    content = JSON.stringify(json); // Get the string representation for hash
+
+                    // Use logical path (without .gz)
+                    relPath = relPath.slice(0, -3);
+                } else {
+                    // Read file normally
+                    content = await storage.readFile(item.path);
+                }
+
                 const hash = calculateHash(content);
 
                 manifest[relPath] = {

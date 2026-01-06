@@ -2,6 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { PERSONAL_SYNC_BASE_PATH, LOCAL_PERSONAL_PATH, PERSONAL_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "@sync/logs";
+import { compressJSON } from "@sync/bundle";
 
 /**
  * Step 5: Upload files that were modified locally
@@ -38,13 +39,25 @@ export async function uploadUpdates(localManifest, remoteManifest, userid) {
 
             await Promise.all(batch.map(async (path) => {
                 const localPath = makePath(LOCAL_PERSONAL_PATH, path);
-                const remotePath = makePath(basePath, path);
+                let remotePath = makePath(basePath, path);
 
                 try {
-                    const content = await storage.readFile(localPath);
+                    let content = await storage.readFile(localPath);
+
+                    // Check if file should be compressed (metadata/sessions)
+                    if (path.startsWith("metadata/sessions/") && path.endsWith(".json")) {
+                        // Content from storage.readFile is string for .json
+                        const json = JSON.parse(content);
+                        const compressed = compressJSON(json);
+                        const buffer = Buffer.from(compressed);
+                        // AWS/Storage needs base64 for binary
+                        content = buffer.toString('base64');
+                        remotePath += ".gz";
+                    }
+
                     await storage.writeFile(remotePath, content);
 
-                    // Update remote manifest
+                    // Update remote manifest (using logical path, not .gz)
                     remoteManifest[path] = { ...localManifest[path] };
 
                     addSyncLog(`[Personal] Uploaded: ${path}`, "info");
