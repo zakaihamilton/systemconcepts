@@ -38,10 +38,12 @@ export default async function AWS_API(req, res) {
             const isSyncPath = path.startsWith("sync/");
 
             if (req.method === "GET") {
-                // Allow read from sync or own personal directory
-                if (isSyncPath || isPersonalPath) {
-                    readOnly = false; // Allow read
+                // For GET requests, we must explicitly deny access to unauthorized paths.
+                if (!isSyncPath && !isPersonalPath) {
+                    console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot read from path: ${path}`);
+                    throw "ACCESS_DENIED: Cannot read from this path";
                 }
+                // readOnly remains true for GET, which is correct.
             } else if ((req.method === "PUT" || req.method === "DELETE") && isPersonalPath) {
                 // Allow write/delete only to own personal directory
                 readOnly = false;
