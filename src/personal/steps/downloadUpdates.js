@@ -44,11 +44,38 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                     return;
                 }
 
-                const remotePath = makePath(basePath, path);
+                let remotePath = makePath(basePath, path);
                 const localPath = makePath(LOCAL_PERSONAL_PATH, path);
 
                 try {
-                    const content = await storage.readFile(remotePath);
+                    let content;
+
+                    // Check if file should be compressed (metadata/sessions)
+                    // If so, we expect a .gz file remotely
+                    if (path.startsWith("metadata/sessions/") && path.endsWith(".json")) {
+                         // Try downloading .gz version
+                         const gzPath = remotePath + ".gz";
+                         // readCompressedFile handles decompression if needed
+                         const data = await readCompressedFile(gzPath);
+                         if (data) {
+                             content = JSON.stringify(data, null, 4);
+                         } else {
+                             // Fallback to normal file if .gz doesn't exist?
+                             // Or maybe the manifest was built from a non-gz file (legacy)?
+                             // But syncManifest handles .gz -> logical path mapping.
+                             // If manifest has entry, syncManifest found it.
+                             // If syncManifest found it as .gz, we should download .gz.
+                             // If syncManifest found it as .json, we download .json.
+                             // But we stripped .gz in syncManifest logic if it existed.
+                             // So we should try .gz first.
+
+                             // If readCompressedFile failed, maybe try without .gz?
+                             content = await storage.readFile(remotePath);
+                         }
+                    } else {
+                         content = await storage.readFile(remotePath);
+                    }
+
                     await storage.createFolderPath(localPath);
                     await storage.writeFile(localPath, content);
 
