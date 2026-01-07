@@ -135,6 +135,8 @@ export default function Storage({ path = "" }) {
             dateWidget: item.mtimeMs && dateFormatter.format(item.mtimeMs)
         };
 
+        const itemForMenu = { ...result };
+
         let nameWidget = null;
         if (mode === "create" && item.create) {
             nameWidget = <Edit key={id} />;
@@ -146,7 +148,7 @@ export default function Storage({ path = "" }) {
                 onClick={!editing && rowClick.bind(this, result)}
                 iconPadding={item.type ? 110 : 60}
                 icons={<>
-                    {item.type && <ItemMenu readOnly={readOnly} item={result} />}
+                    {item.type && <ItemMenu readOnly={readOnly} item={itemForMenu} />}
                     <Tooltip title={tooltip} arrow>
                         <span>{icon}</span>
                     </Tooltip>

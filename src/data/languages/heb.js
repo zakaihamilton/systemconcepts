@@ -1264,6 +1264,14 @@ export default {
         {
             "id": "LOG_COPIED",
             "value": "היומן הועתק ללוח"
+        },
+        {
+            "id": "SHOW_PASSWORD",
+            "value": "הצג סיסמה"
+        },
+        {
+            "id": "HIDE_PASSWORD",
+            "value": "הסתר סיסמה"
         }
     ]
 };

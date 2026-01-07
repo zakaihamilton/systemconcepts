@@ -1264,6 +1264,14 @@ export default {
         {
             "id": "LOG_COPIED",
             "value": "Log copiado para a área de transferência"
+        },
+        {
+            "id": "SHOW_PASSWORD",
+            "value": "Mostrar Senha"
+        },
+        {
+            "id": "HIDE_PASSWORD",
+            "value": "Ocultar Senha"
         }
     ]
 };

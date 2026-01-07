@@ -1,5 +1,6 @@
 import { login, register, changePassword, resetPassword, sendResetEmail } from "@util/login";
 import { getSafeError } from "@util/safeError";
+import { checkRateLimit } from "@util/rateLimit";
 
 export default async function LOGIN_API(req, res) {
     if (req.method === "GET") {
@@ -7,6 +8,10 @@ export default async function LOGIN_API(req, res) {
         let params = {};
         try {
             const { id, password, hash } = req.headers || {};
+            // Sentinel: Rate limit login attempts to prevent brute force
+            if (password) {
+                await checkRateLimit(req);
+            }
             params = await login({
                 id,
                 password: decodeURIComponent(password),
