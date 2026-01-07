@@ -3,6 +3,7 @@ import { makePath } from "@util/path";
 import { PERSONAL_SYNC_BASE_PATH, LOCAL_PERSONAL_PATH, PERSONAL_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
+import { readCompressedFile } from "@sync/bundle";
 
 /**
  * Step 4: Download files that are newer/different on remote
