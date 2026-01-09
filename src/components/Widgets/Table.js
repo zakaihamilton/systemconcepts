@@ -242,7 +242,8 @@ export default function TableWidget(props) {
 
         return raw.map(item => ({
             raw: item,
-            mapped: mapper ? mapper(item) : item
+            mapped: mapper ? mapper(item) : item,
+            __searchCache: {}
         }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, filter, mapper, ...depends]);
@@ -253,10 +254,16 @@ export default function TableWidget(props) {
         }
 
         const lowerSearch = search.toLowerCase();
-        return mappedData.filter(({ mapped }) => {
+        return mappedData.filter((item) => {
+            const { mapped, __searchCache } = item;
             for (const key of searchKeys) {
                 if (typeof mapped[key] === "string") {
-                    const match = mapped[key].toLowerCase().includes(lowerSearch);
+                    let val = __searchCache[key];
+                    if (val === undefined) {
+                        val = mapped[key].toLowerCase();
+                        __searchCache[key] = val;
+                    }
+                    const match = val.includes(lowerSearch);
                     if (match) {
                         return true;
                     }
