@@ -22,7 +22,9 @@ export default async function PERSONAL_API(req, res) {
                 try {
                     const query = JSON.parse(decodeURIComponent(req.headers.query));
                     path = query.folder || query.id || "";
-                } catch (e) { }
+                } catch (e) {
+                    console.error("[Personal API] Failed to parse query header:", e);
+                }
             }
         }
 
