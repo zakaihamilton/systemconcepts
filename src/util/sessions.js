@@ -533,6 +533,6 @@ export function useSessions(depends = [], options = {}) {
 
     // Only show loading if we don't have sessions yet
     // Don't show loading during sync if we already have data
-    const isLoading = (busy || loading) && sessions === null;
+    const isLoading = (busy || loading) && (!sessions || !sessions.length);
     return [items, isLoading, groupMetadata, setGroups];
 }
