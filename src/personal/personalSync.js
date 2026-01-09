@@ -13,6 +13,7 @@ import { uploadUpdates } from "./steps/uploadUpdates";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { removeDeletedFiles } from "./steps/removeDeletedFiles";
 import { uploadManifest } from "./steps/uploadManifest";
+import { PERSONAL_SYNC_BASE_PATH } from "./constants";
 
 /**
  * Main personal sync function
@@ -47,7 +48,7 @@ export async function performPersonalSync() {
 
         // Step 3.5: Migrate from MongoDB if needed
         const { migrateFromMongoDB } = await import("./steps/migrateFromMongoDB");
-        const basePath = `aws/personal/${userid}`;
+        const basePath = PERSONAL_SYNC_BASE_PATH.replace("{userid}", userid);
         const migrationResult = await migrateFromMongoDB(userid, remoteManifest, basePath);
 
         if (migrationResult.migrated) {
