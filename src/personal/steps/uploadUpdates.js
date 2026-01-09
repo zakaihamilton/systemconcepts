@@ -44,8 +44,8 @@ export async function uploadUpdates(localManifest, remoteManifest, userid) {
                 try {
                     let content = await storage.readFile(localPath);
 
-                    // Check if file should be compressed (metadata/sessions)
-                    if (path.startsWith("metadata/sessions/") && path.endsWith(".json")) {
+                    // Check if file should be compressed (all json files)
+                    if (path.endsWith(".json")) {
                         // Content from storage.readFile is string for .json
                         const json = JSON.parse(content);
                         const compressed = compressJSON(json);

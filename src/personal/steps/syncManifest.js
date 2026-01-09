@@ -68,7 +68,7 @@ async function buildManifestFromRemote(basePath) {
 
             try {
                 // Handle compressed metadata files
-                if (relPath.startsWith("metadata/sessions/") && relPath.endsWith(".gz")) {
+                if (relPath.endsWith(".json.gz")) {
                     // Read file as buffer/base64
                     const fileData = await storage.readFile(item.path);
                     let buffer;

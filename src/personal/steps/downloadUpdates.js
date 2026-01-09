@@ -51,9 +51,9 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                 try {
                     let content;
 
-                    // Check if file should be compressed (metadata/sessions)
+                    // Check if file should be compressed (all json files)
                     // If so, we expect a .gz file remotely
-                    if (path.startsWith("metadata/sessions/") && path.endsWith(".json")) {
+                    if (path.endsWith(".json")) {
                          // Try downloading .gz version
                          const gzPath = remotePath + ".gz";
                          // readCompressedFile handles decompression if needed
