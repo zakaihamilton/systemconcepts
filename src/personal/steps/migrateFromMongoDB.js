@@ -21,7 +21,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     // Check if migration has already occurred by looking at remote manifest
     // If the user has files in the personal folder, we assume migration is done.
     const hasRemoteFiles = Object.keys(remoteManifest).some(key =>
-        key.startsWith("metadata/sessions/") || key.startsWith("files/")
+        key.startsWith("sessions/") || key.startsWith("files/")
     );
 
     if (hasRemoteFiles) {
@@ -143,7 +143,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         const getManifestKey = (filePath) => {
             let relativePath = filePath.substring(mongoPath.length + 1);
             relativePath = relativePath.replace(/^[\/\\]+/, "");
-            return `metadata/sessions/${relativePath}`;
+            return `sessions/${relativePath}`;
         };
 
         // Helper to check bundling status
@@ -188,14 +188,14 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
             if (isBundled) {
                 // Check if the group bundle exists in manifest
-                const bundleKey = `metadata/sessions/${groupName}.json`;
+                const bundleKey = `sessions/${groupName}.json`;
                 if (remoteManifest[bundleKey]) {
                     // Assume if bundle exists, the file is in it. 
                     // This is an optimization. Worst case if data missing, user can re-save.
                     existsRemote = true;
                 }
             } else {
-                const manifestKey = `metadata/sessions/${relativePath}`;
+                const manifestKey = `sessions/${relativePath}`;
                 if (remoteManifest[manifestKey]) {
                     existsRemote = true;
                 }
@@ -263,7 +263,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                 // If the raw relative path starts with /, it caused a double slash //
                 if (rawRelativePath.startsWith("/")) {
-                    const badManifestKey = `metadata/sessions/${rawRelativePath}`;
+                    const badManifestKey = `sessions/${rawRelativePath}`;
 
                     if (manifest[badManifestKey]) {
                         // Found a bad entry - blacklist
@@ -272,7 +272,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                         // Check if we ALREADY have the clean entry (e.g. from previous partial run)
                         // If so, we don't need to re-migrate, just clean the manifest
                         const cleanRelativePath = rawRelativePath.replace(/^[\/\\]+/, "");
-                        const cleanManifestKey = `metadata/sessions/${cleanRelativePath}`;
+                        const cleanManifestKey = `sessions/${cleanRelativePath}`;
 
                         const parts = cleanRelativePath.split("/");
                         const groupName = parts[0];
@@ -280,7 +280,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                         let cleanEntryExists = false;
                         if (isBundled) {
-                            const bundleKey = `metadata/sessions/${groupName}.json`;
+                            const bundleKey = `sessions/${groupName}.json`;
                             if (manifest[bundleKey]) {
                                 cleanEntryExists = true;
                             }
@@ -317,7 +317,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         for (const file of migrationState.files) {
             if (migrationState.migrated[file.path]) {
                 const relativePath = file.path.substring(mongoPath.length + 1).replace(/^[\/\\]+/, "");
-                const manifestKey = `metadata/sessions/${relativePath}`;
+                const manifestKey = `sessions/${relativePath}`;
                 markAsDeleted(manifestKey);
             }
         }
@@ -336,7 +336,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             for (const [cacheKey, cache] of Object.entries(bundleCache)) {
                 if (cache.dirty) {
                     const bundlePath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", `${cacheKey}.json`);
-                    const awsBundlePath = makePath(basePath, "metadata/sessions", `${cacheKey}.json`);
+                    const awsBundlePath = makePath(basePath, "sessions", `${cacheKey}.json`);
 
                     // Read existing if not fully loaded? 
                     // We assume we are building it or appending. 
@@ -370,7 +370,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     // We should probably NOT add individual entries for bundled files.
 
                     const hash = calculateHash(content);
-                    const manifestKey = `metadata/sessions/${cacheKey}.json`;
+                    const manifestKey = `sessions/${cacheKey}.json`;
                     manifest[manifestKey] = {
                         hash,
                         modified: Date.now()
@@ -424,7 +424,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
                             bundleCache[groupName].content[bundleKey] = data;
                             bundleCache[groupName].dirty = true;
-                            markAsDeleted(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(`sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
                             // Intentionally continue to mark as migrated so we don't loop forever
@@ -449,7 +449,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                             const sessionKey = parts.slice(2).join("/");
                             bundleCache[yearBundleKey].content[sessionKey] = data;
                             bundleCache[yearBundleKey].dirty = true;
-                            markAsDeleted(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(`sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
                         }

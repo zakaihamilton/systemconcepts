@@ -38,14 +38,19 @@ export async function uploadUpdates(localManifest, remoteManifest, userid) {
             const batch = filesToUpload.slice(i, i + PERSONAL_BATCH_SIZE);
 
             await Promise.all(batch.map(async (path) => {
-                const localPath = makePath(LOCAL_PERSONAL_PATH, path);
+                // Map remote key (sessions/...) back to local path (metadata/sessions/...)
+                let localRelativePath = path;
+                if (path.startsWith("sessions/")) {
+                    localRelativePath = "metadata/" + path;
+                }
+                const localPath = makePath(LOCAL_PERSONAL_PATH, localRelativePath);
                 let remotePath = makePath(basePath, path);
 
                 try {
                     let content = await storage.readFile(localPath);
 
                     // Check if file should be compressed (metadata/sessions)
-                    if (path.startsWith("metadata/sessions/") && path.endsWith(".json")) {
+                    if (path.startsWith("sessions/") && path.endsWith(".json")) {
                         // Content from storage.readFile is string for .json
                         const json = JSON.parse(content);
                         const compressed = compressJSON(json);

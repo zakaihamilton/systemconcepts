@@ -46,14 +46,19 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                 }
 
                 let remotePath = makePath(basePath, path);
-                const localPath = makePath(LOCAL_PERSONAL_PATH, path);
+                // Map remote key (sessions/...) back to local path (metadata/sessions/...)
+                let localRelativePath = path;
+                if (path.startsWith("sessions/")) {
+                    localRelativePath = "metadata/" + path;
+                }
+                const localPath = makePath(LOCAL_PERSONAL_PATH, localRelativePath);
 
                 try {
                     let content;
 
                     // Check if file should be compressed (metadata/sessions)
                     // If so, we expect a .gz file remotely
-                    if (path.startsWith("metadata/sessions/") && path.endsWith(".json")) {
+                    if (path.startsWith("sessions/") && path.endsWith(".json")) {
                          // Try downloading .gz version
                          const gzPath = remotePath + ".gz";
                          // readCompressedFile handles decompression if needed

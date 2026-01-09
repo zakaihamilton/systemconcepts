@@ -44,7 +44,7 @@ export async function getLocalFiles() {
                 return false;
             }
 
-            const relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
+            let relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
 
             // Filter metadata/sessions files based on group config
             if (relPath.startsWith("metadata/sessions/")) {
@@ -77,7 +77,11 @@ export async function getLocalFiles() {
 
             return true;
         }).map(item => {
-            const relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
+            // Map local path (metadata/sessions/...) to remote key (sessions/...)
+            let relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
+            if (relPath.startsWith("metadata/sessions/")) {
+                relPath = relPath.substring("metadata/".length);
+            }
             return {
                 path: relPath,
                 fullPath: item.path
