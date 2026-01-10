@@ -14,6 +14,7 @@ export async function getLocalFiles() {
         // Load groups to check for bundled/merged status
         let bundledGroups = new Set();
         let mergedGroups = new Set();
+        let allGroups = new Set();
 
         const groupsPath = makePath("local/sync/groups.json");
         if (await storage.exists(groupsPath)) {
@@ -23,6 +24,7 @@ export async function getLocalFiles() {
                 const groups = data.groups || [];
 
                 for (const g of groups) {
+                    allGroups.add(g.name);
                     if (g.bundled) {
                         bundledGroups.add(g.name);
                     } else if (g.merged) {
@@ -58,8 +60,9 @@ export async function getLocalFiles() {
                     if (groupPart.endsWith(".json")) {
                         // This is a bundle/merged file: metadata/sessions/group.json
                         const groupName = groupPart.replace(".json", "");
-                        // Only include if group is bundled or merged
-                        if (bundledGroups.has(groupName) || mergedGroups.has(groupName)) {
+
+                        // Only include if group exists and is bundled or merged
+                        if (allGroups.has(groupName) && (bundledGroups.has(groupName) || mergedGroups.has(groupName))) {
                             return true;
                         }
                         return false;
@@ -67,8 +70,8 @@ export async function getLocalFiles() {
                         // This is inside a group folder
                         const groupName = groupPart;
 
-                        // Only include if group is NOT bundled AND NOT merged (i.e. split)
-                        if (!bundledGroups.has(groupName) && !mergedGroups.has(groupName)) {
+                        // Only include if group exists and is split (NOT bundled, NOT merged)
+                        if (allGroups.has(groupName) && !bundledGroups.has(groupName) && !mergedGroups.has(groupName)) {
                             // For split groups, we now organize by year
                             // Structure is: metadata/sessions/group/year.json
                             // or could be legacy: metadata/sessions/group/year/session.json

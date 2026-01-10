@@ -155,10 +155,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         // Load groups to check for bundled status
         let bundledGroups = new Set();
+        let allGroups = new Set();
         try {
             const { groups } = await readGroups();
             if (groups) {
                 groups.forEach(g => {
+                    allGroups.add(g.name);
                     if (g.bundled || g.merged) {
                         bundledGroups.add(g.name);
                     }
@@ -182,6 +184,13 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
             const parts = relativePath.split("/");
             const groupName = parts[0];
+
+            // Skip if group doesn't exist
+            if (!allGroups.has(groupName)) {
+                migrationState.migrated[file.path] = true;
+                continue;
+            }
+
             const isBundled = bundledGroups.has(groupName);
 
             let existsRemote = false;
@@ -276,6 +285,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                         const parts = cleanRelativePath.split("/");
                         const groupName = parts[0];
+
+                        // Skip if group doesn't exist
+                        if (!allGroups.has(groupName)) {
+                            continue;
+                        }
+
                         const isBundled = bundledGroups.has(groupName);
 
                         let cleanEntryExists = false;
@@ -406,6 +421,13 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                     const parts = relativePath.split("/");
                     const groupName = parts[0];
+
+                    // Skip if group doesn't exist
+                    if (!allGroups.has(groupName)) {
+                        migrationState.migrated[file.path] = true;
+                        return;
+                    }
+
                     const isBundled = bundledGroups.has(groupName);
 
                     // Read from MongoDB
