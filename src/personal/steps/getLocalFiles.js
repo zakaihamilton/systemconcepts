@@ -39,7 +39,9 @@ export async function getLocalFiles() {
         const splitCount = allGroups.size - bundledGroups.size - mergedGroups.size;
         addSyncLog(`[Personal] Loaded ${allGroups.size} group(s) for filtering (${bundledGroups.size} bundled, ${mergedGroups.size} merged, ${splitCount} split)`, "info");
 
+
         const listing = await storage.getRecursiveList(LOCAL_PERSONAL_PATH);
+
         const files = listing.filter(item => {
             if (item.type === "dir" ||
                 item.name === LOCAL_PERSONAL_MANIFEST ||
@@ -49,7 +51,11 @@ export async function getLocalFiles() {
                 return false;
             }
 
-            const relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
+            let relPath = item.path.substring(LOCAL_PERSONAL_PATH.length + 1);
+            // Storage paths have leading slash, LOCAL_PERSONAL_PATH doesn't, so strip leading slash
+            if (relPath.startsWith("/")) {
+                relPath = relPath.substring(1);
+            }
 
             // Filter metadata/sessions files based on group config
             if (relPath.startsWith("metadata/sessions/")) {
@@ -69,7 +75,12 @@ export async function getLocalFiles() {
                         if (allGroups.size === 0) {
                             return true; // Fallback: include if groups not loaded
                         }
-                        if (allGroups.has(groupName) && (bundledGroups.has(groupName) || mergedGroups.has(groupName))) {
+                        const isKnown = allGroups.has(groupName);
+                        const isBundled = bundledGroups.has(groupName);
+                        const isMerged = mergedGroups.has(groupName);
+                        const shouldInclude = isKnown && (isBundled || isMerged);
+
+                        if (shouldInclude) {
                             return true;
                         }
                         return false;

@@ -16,6 +16,14 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
     const basePath = PERSONAL_SYNC_BASE_PATH.replace("{userid}", userid);
 
     try {
+        // Clean local manifest of any entries with leading slashes (from old data)
+        const cleanedLocalManifest = {};
+        for (const [path, entry] of Object.entries(localManifest)) {
+            const normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+            cleanedLocalManifest[normalizedPath] = entry;
+        }
+        localManifest = cleanedLocalManifest;
+
         const filesToDownload = [];
 
         // Find files to download
@@ -54,36 +62,40 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                     // Check if file should be compressed (all json files)
                     // If so, we expect a .gz file remotely
                     if (path.endsWith(".json")) {
-                         // Try downloading .gz version
-                         const gzPath = remotePath + ".gz";
-                         // readCompressedFile handles decompression if needed
-                         const data = await readCompressedFile(gzPath);
-                         if (data) {
-                             content = JSON.stringify(data, null, 4);
-                         } else {
-                             // Fallback to normal file if .gz doesn't exist?
-                             // Or maybe the manifest was built from a non-gz file (legacy)?
-                             // But syncManifest handles .gz -> logical path mapping.
-                             // If manifest has entry, syncManifest found it.
-                             // If syncManifest found it as .gz, we should download .gz.
-                             // If syncManifest found it as .json, we download .json.
-                             // But we stripped .gz in syncManifest logic if it existed.
-                             // So we should try .gz first.
+                        // Try downloading .gz version
+                        const gzPath = remotePath + ".gz";
+                        // readCompressedFile handles decompression if needed
+                        const data = await readCompressedFile(gzPath);
+                        if (data) {
+                            content = JSON.stringify(data, null, 4);
+                        } else {
+                            // Fallback to normal file if .gz doesn't exist?
+                            // Or maybe the manifest was built from a non-gz file (legacy)?
+                            // But syncManifest handles .gz -> logical path mapping.
+                            // If manifest has entry, syncManifest found it.
+                            // If syncManifest found it as .gz, we should download .gz.
+                            // If syncManifest found it as .json, we download .json.
+                            // But we stripped .gz in syncManifest logic if it existed.
+                            // So we should try .gz first.
 
-                             // If readCompressedFile failed, maybe try without .gz?
-                             content = await storage.readFile(remotePath);
-                         }
+                            // If readCompressedFile failed, maybe try without .gz?
+                            content = await storage.readFile(remotePath);
+                        }
                     } else {
-                         content = await storage.readFile(remotePath);
+                        content = await storage.readFile(remotePath);
                     }
+
 
                     await storage.createFolderPath(localPath);
                     await storage.writeFile(localPath, content);
 
-                    // Update local manifest with the hash of the content we just wrote
-                    // This prevents infinite download loops if the local hash calculation
-                    // differs from the remote hash (e.g. due to line endings or formatting)
-                    const hash = await calculateHash(content);
+                    // Read back the file from storage to calculate the hash.
+                    // This ensures the hash we store in the manifest matches exactly what
+                    // we will read from disk in the next sync (Step 2), accounting for any
+                    // storage-layer transformations (e.g. line endings, encoding).
+                    const writtenContent = await storage.readFile(localPath);
+                    const hash = await calculateHash(writtenContent);
+
                     localManifest[path] = {
                         ...remoteManifest[path],
                         hash

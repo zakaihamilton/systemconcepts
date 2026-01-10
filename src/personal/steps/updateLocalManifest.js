@@ -12,31 +12,33 @@ export async function updateLocalManifest(localFiles) {
 
     try {
         const manifestPath = `${LOCAL_PERSONAL_PATH}/${LOCAL_PERSONAL_MANIFEST}`;
-        let manifest = {};
+        let existingManifest = {};
 
-        // Try to read existing manifest
+        // Read existing manifest to avoid recalculating hashes for unchanged files
         try {
             const content = await storage.readFile(manifestPath);
-            const existingManifest = JSON.parse(content);
-            if (existingManifest && typeof existingManifest === 'object') {
-                manifest = existingManifest;
+            const parsed = JSON.parse(content);
+            if (parsed && typeof parsed === 'object') {
+                // Normalize paths in existing manifest (strip leading slashes from old entries)
+                for (const [path, entry] of Object.entries(parsed)) {
+                    const normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+                    existingManifest[normalizedPath] = entry;
+                }
             }
         } catch (err) {
             addSyncLog("[Personal] No existing manifest found, creating new one", "info");
         }
 
-        // Update manifest with current files
+        // Build new manifest from current files only
+        const manifest = {};
         for (const file of localFiles) {
             const content = await storage.readFile(file.fullPath);
             const hash = await calculateHash(content);
 
-
-            if (!manifest[file.path] || manifest[file.path].hash !== hash) {
-                manifest[file.path] = {
-                    hash,
-                    modified: Date.now()
-                };
-            }
+            manifest[file.path] = {
+                hash,
+                modified: Date.now()
+            };
         }
 
         // Write updated manifest

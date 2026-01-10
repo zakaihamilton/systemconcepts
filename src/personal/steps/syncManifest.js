@@ -20,7 +20,27 @@ export async function syncManifest(localManifest, userid) {
     try {
         let remoteManifest = await readCompressedFile(remoteManifestPath) || {};
 
+        // Normalize paths in existing manifest (strip leading slashes from old entries)
         if (Object.keys(remoteManifest).length > 0) {
+            const normalizedManifest = {};
+            let hadLeadingSlashes = false;
+
+            for (const [path, entry] of Object.entries(remoteManifest)) {
+                const normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+                if (path !== normalizedPath) {
+                    hadLeadingSlashes = true;
+                }
+                normalizedManifest[normalizedPath] = entry;
+            }
+            remoteManifest = normalizedManifest;
+
+            // If we normalized any paths, save the cleaned manifest back to AWS
+            if (hadLeadingSlashes) {
+                addSyncLog(`[Personal] Cleaning manifest (removing leading slashes)`, "info");
+                await writeCompressedFile(remoteManifestPath, remoteManifest);
+                addSyncLog(`[Personal] ✓ Uploaded cleaned manifest`, "info");
+            }
+
             addSyncLog(`[Personal] Found existing manifest with ${Object.keys(remoteManifest).length} files`, "info");
         } else {
             // Bootstrap: Build manifest from existing remote files
@@ -64,6 +84,10 @@ async function buildManifestFromRemote(basePath) {
         // Build manifest entries for each file
         for (const item of files) {
             let relPath = item.path.substring(basePath.length + 1);
+            // Storage paths have leading slash, basePath doesn't, so strip it
+            if (relPath.startsWith("/")) {
+                relPath = relPath.substring(1);
+            }
             let content;
 
             try {
