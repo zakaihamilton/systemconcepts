@@ -36,7 +36,7 @@ export class GroupFilter {
 
     /**
      * Check if a file path should be included based on group active/bundled/merged state
-     * @param {string} relPath Relative path (e.g., metadata/sessions/group.json)
+     * @param {string} relPath Relative path (e.g., group.json or group/2024.json)
      */
     shouldIncludeFile(relPath) {
         // If groups failed to load or are empty, default to including everything (safe fallback)
@@ -44,21 +44,48 @@ export class GroupFilter {
             return true;
         }
 
-        // Only filter metadata/sessions files
-        if (!relPath.startsWith("metadata/sessions/")) {
-            return true;
+        const parts = relPath.split("/");
+
+        // Normalize legacy paths for filtering checks
+        // We want to apply the same bundled/merged logic even to legacy files
+        if (relPath.startsWith("metadata/sessions/")) {
+            const cleanPath = relPath.substring("metadata/sessions/".length);
+            // Re-split the clean path to check 1 or 2 parts logic below
+            // Recursive call or just reset 'parts' variable?
+            // Resetting parts variable is safer as the logic below uses 'parts'
+            const cleanParts = cleanPath.split("/");
+
+            // Handle 1 part (file) logic
+            if (cleanParts.length === 1) {
+                const fileName = cleanParts[0];
+                if (fileName.endsWith(".json")) {
+                    const groupName = fileName.replace(".json", "");
+                    const isKnown = this.allGroups.has(groupName);
+                    const isBundled = this.bundledGroups.has(groupName);
+                    const isMerged = this.mergedGroups.has(groupName);
+                    return isKnown && !isBundled && isMerged;
+                }
+            }
+            // Handle 2 parts (directory) logic
+            else if (cleanParts.length === 2) {
+                const groupName = cleanParts[0];
+                const fileName = cleanParts[1];
+                if (fileName.endsWith(".json")) {
+                    const isKnown = this.allGroups.has(groupName);
+                    const isBundled = this.bundledGroups.has(groupName);
+                    const isMerged = this.mergedGroups.has(groupName);
+                    return isKnown && !isBundled && !isMerged;
+                }
+            }
+            // If legacy path doesn't match standard structure, exclude it (strict)
+            return false;
         }
 
-        const parts = relPath.split("/");
-        // parts[0] is "metadata", parts[1] is "sessions"
-        // parts[2] is either group name (file) or group name (folder)
-
-        if (parts.length >= 3) {
-            const groupPart = parts[2];
-
-            if (groupPart.endsWith(".json")) {
-                // This is a single file: metadata/sessions/group.json
-                const groupName = groupPart.replace(".json", "");
+        // Single file: group.json
+        if (parts.length === 1) {
+            const fileName = parts[0];
+            if (fileName.endsWith(".json")) {
+                const groupName = fileName.replace(".json", "");
 
                 const isKnown = this.allGroups.has(groupName);
                 const isBundled = this.bundledGroups.has(groupName);
@@ -69,10 +96,14 @@ export class GroupFilter {
                 // 2. NOT bundled (bundled groups are in a separate common file)
                 // 3. AND Merged (merged groups are single files)
                 return isKnown && !isBundled && isMerged;
-            } else {
-                // This is inside a group folder: metadata/sessions/group/2024.json
-                const groupName = groupPart;
+            }
+        }
+        // Folder: group/2024.json
+        else if (parts.length === 2) {
+            const groupName = parts[0];
+            const fileName = parts[1];
 
+            if (fileName.endsWith(".json")) {
                 const isKnown = this.allGroups.has(groupName);
                 const isBundled = this.bundledGroups.has(groupName);
                 const isMerged = this.mergedGroups.has(groupName);
@@ -85,6 +116,6 @@ export class GroupFilter {
             }
         }
 
-        return true;
+        return false;
     }
 }

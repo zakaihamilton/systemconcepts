@@ -26,12 +26,7 @@ export async function updateLocalManifest(localFiles) {
                     existingManifest[normalizedPath] = entry;
                 }
                 const keys = Object.keys(existingManifest);
-                console.log(`[DEBUG] existingManifest keys (${keys.length}):`, keys.slice(0, 5));
-                if (keys.includes("metadata/sessions/yossi/2022.json")) {
-                    console.log("[DEBUG] metadata/sessions/yossi/2022.json FOUND in keys");
-                } else {
-                    console.log("[DEBUG] metadata/sessions/yossi/2022.json NOT FOUND in keys");
-                }
+
             }
         } catch (err) {
             addSyncLog("[Personal] No existing manifest found, creating new one", "info");
@@ -40,6 +35,24 @@ export async function updateLocalManifest(localFiles) {
         // Build new manifest from current files only
         const manifest = {};
         for (const file of localFiles) {
+            // Auto-migration: Move files from metadata/sessions/ to root
+            if (file.path.startsWith("metadata/sessions/")) {
+                const newRelativePath = file.path.substring("metadata/sessions/".length);
+                const newFullPath = `${LOCAL_PERSONAL_PATH}/${newRelativePath}`;
+
+                try {
+                    await storage.moveFile(file.fullPath, newFullPath);
+                    console.log(`[Personal] Migrated ${file.path} -> ${newRelativePath}`);
+
+                    // Update file object to point to new location
+                    file.path = newRelativePath;
+                    file.fullPath = newFullPath;
+                } catch (err) {
+                    console.error(`[Personal] Failed to migrate ${file.path}:`, err);
+                    // Continue with old path if move failed, so we don't crash
+                }
+            }
+
             const content = await storage.readFile(file.fullPath);
             let hash;
 
@@ -56,13 +69,13 @@ export async function updateLocalManifest(localFiles) {
             }
 
             // Preserve version from existing manifest, or default to 1
+            // Force version bump to ensure all files are uploaded to fix phantom remote state
+            // If version is already high, preserve it. Otherwise, jump to 2000000.
             const existingEntry = existingManifest[file.path];
-            const version = existingEntry ? (existingEntry.version || 1) : 1;
+            const currentVer = existingEntry ? (existingEntry.version || 1) : 1;
+            const version = currentVer >= 2000000 ? currentVer : 2000000;
 
-            if (file.path.includes("yossi/2022.json")) {
-                console.log(`[DEBUG] Processing file.path: "${file.path}"`);
-                console.log(`[DEBUG] Found in existing? ${!!existingEntry}. Version: ${version}`);
-            }
+
 
             manifest[file.path] = {
                 hash,

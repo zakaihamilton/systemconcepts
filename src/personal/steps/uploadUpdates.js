@@ -21,8 +21,13 @@ export async function uploadUpdates(localManifest, remoteManifest, userid) {
         for (const [path, localInfo] of Object.entries(localManifest)) {
             const remoteInfo = remoteManifest[path];
 
-            if (remoteInfo && localInfo.hash !== remoteInfo.hash && localInfo.modified > remoteInfo.modified) {
-                filesToUpload.push(path);
+            if (remoteInfo) {
+                const isForced = (localInfo.version || 0) >= 2000000 && (remoteInfo.version || 0) < 2000000;
+                const isModified = localInfo.hash !== remoteInfo.hash && localInfo.modified > remoteInfo.modified;
+
+                if (isForced || isModified) {
+                    filesToUpload.push(path);
+                }
             }
         }
 

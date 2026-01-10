@@ -21,7 +21,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     // Check if migration has already occurred by looking at remote manifest
     // If the user has files in the personal folder, we assume migration is done.
     const hasRemoteFiles = Object.keys(remoteManifest).some(key =>
-        key.startsWith("metadata/sessions/") || key.startsWith("files/")
+        key.endsWith(".json")
     );
 
     if (hasRemoteFiles) {
@@ -143,7 +143,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         const getManifestKey = (filePath) => {
             let relativePath = filePath.substring(mongoPath.length + 1);
             relativePath = relativePath.replace(/^[\/\\]+/, "");
-            return `metadata/sessions/${relativePath}`;
+            return `${relativePath}`;
         };
 
         // Helper to check bundling status
@@ -197,14 +197,14 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
             if (isBundled) {
                 // Check if the group bundle exists in manifest
-                const bundleKey = `metadata/sessions/${groupName}.json`;
+                const bundleKey = `${groupName}.json`;
                 if (remoteManifest[bundleKey]) {
                     // Assume if bundle exists, the file is in it. 
                     // This is an optimization. Worst case if data missing, user can re-save.
                     existsRemote = true;
                 }
             } else {
-                const manifestKey = `metadata/sessions/${relativePath}`;
+                const manifestKey = `${relativePath}`;
                 if (remoteManifest[manifestKey]) {
                     existsRemote = true;
                 }
@@ -281,7 +281,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                         // Check if we ALREADY have the clean entry (e.g. from previous partial run)
                         // If so, we don't need to re-migrate, just clean the manifest
                         const cleanRelativePath = rawRelativePath.replace(/^[\/\\]+/, "");
-                        const cleanManifestKey = `metadata/sessions/${cleanRelativePath}`;
+                        const cleanManifestKey = `${cleanRelativePath}`;
 
                         const parts = cleanRelativePath.split("/");
                         const groupName = parts[0];
@@ -295,7 +295,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                         let cleanEntryExists = false;
                         if (isBundled) {
-                            const bundleKey = `metadata/sessions/${groupName}.json`;
+                            const bundleKey = `${groupName}.json`;
                             if (manifest[bundleKey]) {
                                 cleanEntryExists = true;
                             }
@@ -332,7 +332,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         for (const file of migrationState.files) {
             if (migrationState.migrated[file.path]) {
                 const relativePath = file.path.substring(mongoPath.length + 1).replace(/^[\/\\]+/, "");
-                const manifestKey = `metadata/sessions/${relativePath}`;
+                const manifestKey = `${relativePath}`;
                 markAsDeleted(manifestKey);
             }
         }
@@ -350,7 +350,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         const flushBundles = async () => {
             for (const [cacheKey, cache] of Object.entries(bundleCache)) {
                 if (cache.dirty) {
-                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", `${cacheKey}.json`);
+                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, `${cacheKey}.json`);
 
 
                     // Read existing if not fully loaded? 
@@ -388,7 +388,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                     const hash = await calculateHash(content);
 
-                    const manifestKey = `metadata/sessions/${cacheKey}.json`;
+                    const manifestKey = `${cacheKey}.json`;
                     manifest[manifestKey] = {
                         hash,
                         modified: Date.now()

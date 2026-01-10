@@ -72,8 +72,14 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                     return;
                 }
 
+                // Auto-migration: Map legacy paths to new structure on download
+                let localRelativePath = path;
+                if (path.startsWith("metadata/sessions/")) {
+                    localRelativePath = path.substring("metadata/sessions/".length);
+                }
+
                 let remotePath = makePath(basePath, path);
-                const localPath = makePath(LOCAL_PERSONAL_PATH, path);
+                const localPath = makePath(LOCAL_PERSONAL_PATH, localRelativePath);
 
                 try {
                     let content;
@@ -100,18 +106,38 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
                         await storage.createFolderPath(localPath);
                         await storage.writeFile(localPath, content);
 
-                        localManifest[path] = {
+                        // Use the new path in the local manifest
+                        localManifest[localRelativePath] = {
                             ...remoteManifest[path],
                             hash,
                             version: remoteManifest[path].version || 1
                         };
 
-                        // Update remote manifest with the new canonical hash.
-                        // This ensures that the remote manifest (files.json) on S3 gets updated 
-                        // with the format-agnostic hash when uploadManifest runs (Step 7),
-                        // preventing infinite download loops due to hash mismatch.
-                        if (remoteManifest[path] && remoteManifest[path].hash !== hash) {
-                            remoteManifest[path].hash = hash;
+                        // If we mapped it, remove the old key if it existed (though it shouldn't if we started clean)
+                        if (localRelativePath !== path && localManifest[path]) {
+                            delete localManifest[path];
+                        }
+
+                        // CRITICAL FIX: Update remote manifest keys to match new structure
+                        // This prevents re-downloading the old key in the next sync
+                        if (localRelativePath !== path) {
+                            if (remoteManifest[path]) {
+                                // We add the new key but mark it as 'stale' so uploadUpdates (Step 5)
+                                // sees a mismatch and uploads the content to the new location.
+                                // This also prevents removeDeletedFiles (Step 4.5) from deleting the local file.
+                                remoteManifest[localRelativePath] = {
+                                    ...remoteManifest[path],
+                                    hash: "FORCE_UPLOAD",
+                                    modified: 0,
+                                    version: remoteManifest[path].version || 1
+                                };
+                                delete remoteManifest[path]; // Remove legacy key
+                            }
+                        }
+
+                        // Update remote manifest with the new canonical hash (if key wasn't just swapped above)
+                        if (remoteManifest[localRelativePath] && remoteManifest[localRelativePath].hash !== hash) {
+                            remoteManifest[localRelativePath].hash = hash;
                         }
                     } else {
                         content = await storage.readFile(remotePath);
