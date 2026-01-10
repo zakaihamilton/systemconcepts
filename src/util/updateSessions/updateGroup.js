@@ -39,10 +39,10 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
     });
     const allSessionNames = new Set();
     const allSessions = [];
+    let existingSessions = [];
 
     // If merged/bundled and incremental update, load existing sessions first to preserve history
     if ((isMerged || isBundled) && !updateAll) {
-        let existingSessions = [];
         if (isBundled) {
             const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
             try {
@@ -156,11 +156,11 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             if (isMerged || isBundled) {
                 allSessions.push(...yearSessions);
             } else {
-                const count = await updateYearSync(name, year.name, yearSessions);
-                if (count > 0) {
+                const { counter, newCount } = await updateYearSync(name, year.name, yearSessions);
+                if (counter > 0) {
                     yearSessions.forEach(session => allSessionNames.add(session.id));
                     UpdateSessionsStore.update(s => {
-                        s.status[itemIndex].addedCount += yearSessions.length;
+                        s.status[itemIndex].addedCount += newCount;
                         s.status = [...s.status];
                     });
                 }
@@ -192,7 +192,10 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         await cleanupBundledGroup(name);
 
         const totalSessions = uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
-        const addedCount = totalSessions.length;
+
+        const existingIds = new Set(existingSessions.map(s => s.id));
+        const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
+
         UpdateSessionsStore.update(s => {
             s.status[itemIndex].addedCount = addedCount;
             s.status = [...s.status];
@@ -223,7 +226,10 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         await cleanupMergedGroup(name);
 
         const totalSessions = uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
-        const addedCount = totalSessions.length;
+
+        const existingIds = new Set(existingSessions.map(s => s.id));
+        const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
+
         UpdateSessionsStore.update(s => {
             s.status[itemIndex].addedCount = addedCount;
             s.status = [...s.status];

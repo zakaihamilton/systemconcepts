@@ -40,29 +40,36 @@ export async function updateYearSync(groupName, year, sessions) {
             counter: Date.now()
         };
         // Check if content changed
+        let newCount = 0;
         if (await storage.exists(localPath)) {
             const existingContent = await storage.readFile(localPath);
-            // We need to compare w/o version and counter to see if actual data changed,
-            // but since we already incremented version, simple string compare won't work if we want to avoid bumps for no reason.
-            // Let's compare "sessions" and "group" and "year".
             try {
                 const existingObj = JSON.parse(existingContent);
                 const exSessions = JSON.stringify(existingObj.sessions);
+
+                // Calculate newCount even if specific content matches, just to be safe, 
+                // but usually we rely on "something changed". 
+                // However, diffing logic is needed for newCount.
+                const existingIds = new Set((existingObj.sessions || []).map(s => s.name || s.id));
+                newCount = data.sessions.filter(s => !existingIds.has(s.name || s.id)).length;
+
                 const newSessions = JSON.stringify(data.sessions);
                 if (exSessions === newSessions && existingObj.group === data.group) {
-                    return 0;
+                    return { counter: 0, newCount: 0 };
                 }
-                // If we are here, something changed.
-                // We typically use the version we calculated earlier.
             } catch (e) {
                 // if parse fails, overwrite
+                newCount = data.sessions.length; // Assume all are new if existing corrupt
             }
+        } else {
+            newCount = data.sessions.length; // All are new
         }
+
         await writeCompressedFile(localPath, data);
-        return data.counter;
+        return { counter: data.counter, newCount };
     } catch (err) {
         console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
-        return 0;
+        return { counter: 0, newCount: 0 };
     }
 }
 
