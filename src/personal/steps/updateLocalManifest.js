@@ -73,11 +73,15 @@ export async function updateLocalManifest(localFiles) {
             const existingEntry = existingManifest[file.path];
             const version = existingEntry ? (existingEntry.version || 1) : 1;
 
-
+            // Only update timestamp if content changed (hash mismatch)
+            // This prevents "modified" from changing on every sync
+            const modified = (existingEntry && existingEntry.hash === hash)
+                ? existingEntry.modified
+                : Date.now();
 
             manifest[file.path] = {
                 hash,
-                modified: Date.now(),
+                modified,
                 version
             };
         }
