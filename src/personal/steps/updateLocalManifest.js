@@ -69,11 +69,9 @@ export async function updateLocalManifest(localFiles) {
             }
 
             // Preserve version from existing manifest, or default to 1
-            // Force version bump to ensure all files are uploaded to fix phantom remote state
-            // If version is already high, preserve it. Otherwise, jump to 2000000.
+            // Preserve version from existing manifest, or default to 1
             const existingEntry = existingManifest[file.path];
-            const currentVer = existingEntry ? (existingEntry.version || 1) : 1;
-            const version = currentVer >= 2000000 ? currentVer : 2000000;
+            const version = existingEntry ? (existingEntry.version || 1) : 1;
 
 
 
