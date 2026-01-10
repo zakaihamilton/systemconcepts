@@ -28,7 +28,10 @@ export default async function AWS_API(req, res) {
             throw "ACCESS_DENIED";
         }
 
-        const result = await handleRequest({ req, readOnly });
+        // Sentinel: Pass the already-decoded path to handleRequest to ensure
+        // the path we validated/logged (in login) is the exact same path used for the operation.
+        // This prevents double-decoding vulnerabilities.
+        const result = await handleRequest({ req, readOnly, path });
         if (typeof result === "object") {
             res.status(200).json(result);
         }
