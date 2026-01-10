@@ -44,6 +44,10 @@ export class GroupFilter {
             return true;
         }
 
+        if (relPath === "bundle.json") {
+            return true;
+        }
+
         const parts = relPath.split("/");
 
         // Normalize legacy paths for filtering checks

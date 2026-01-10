@@ -102,14 +102,15 @@ export function useSessions(depends = [], options = {}) {
 
             // Load personal metadata (position/duration) from local personal files
             let personalMetadata = {};
-            const personalBasePath = "local/personal/metadata/sessions";
+            const personalBasePath = "local/personal";
             if (await storage.exists(personalBasePath)) {
                 try {
                     const listing = await storage.getRecursiveList(personalBasePath);
                     const metadataFiles = listing.filter(item =>
                         item.type !== "dir" &&
                         item.name?.endsWith(".json") &&
-                        !item.name.includes("undefined")
+                        !item.name.includes("undefined") &&
+                        !item.path.includes("metadata/sessions") // Exclude any legacy folder if it still exists
                     );
 
                     console.log(`[Sessions] Found ${metadataFiles.length} personal metadata files`);
@@ -125,46 +126,58 @@ export function useSessions(depends = [], options = {}) {
                                 relativePath = relativePath.substring(1);
                             }
 
-                            // Check if this is a group bundle (no subdirectories in path)
-                            // e.g. "mygroup.json" vs "mygroup/2024/session.json"
-                            if (!relativePath.includes("/")) {
-                                const groupName = relativePath.replace(".json", "");
-                                // Parse bundle content: { "2024/session.json": { position... } }
-                                for (const [bundleKey, sessionData] of Object.entries(data)) {
-                                    // bundleKey is like "2024/session.json" or "session.json"
-                                    const parts = bundleKey.split("/");
-                                    const sessionName = parts[parts.length - 1].replace(".json", "");
-                                    const key = `${groupName}/${sessionName}`;
+                            const parts = relativePath.split("/");
+                            let groupName = "";
+                            const isBundleFile = parts.length === 1 && parts[0] === "bundle.json";
+
+                            // Case 1: Merged Group (group.json) - excluding bundle.json
+                            if (parts.length === 1 && !isBundleFile) {
+                                groupName = parts[0].replace(".json", "");
+                            }
+                            // Case 2: Split Group (group/year.json)
+                            else if (parts.length === 2) {
+                                groupName = parts[0];
+                            } else if (!isBundleFile) {
+                                // Unknown structure, skip
+                                continue;
+                            }
+
+                            // Treat all files as bundles (merged or split)
+                            // Content is { "key": { position, duration } }
+                            for (const [bundleKey, sessionData] of Object.entries(data)) {
+                                // bundleKey is like "2024/session.json" (merged) or "session.json" (split)
+                                // OR "group/year/session.json" (bundle.json)
+                                let key = "";
+
+                                if (isBundleFile) {
+                                    // bundleKey: group/year/session.json or group/session.json
+                                    const bParts = bundleKey.split("/");
+                                    if (bParts.length >= 2) {
+                                        const bGroup = bParts[0];
+                                        const bSessionName = bParts[bParts.length - 1].replace(".json", "");
+
+                                        // We need to construct the key used for lookup: group + date + name
+                                        // But we only have group + sessionName. 
+                                        // The SessionsStore loading logic matches strictly on "group/sessionName" (derived from filename)?
+                                        // No, verify key format.
+                                        // Lines 137/161 used "group/sessionName". Matches below.
+                                        key = `${bGroup}/${bSessionName}`;
+                                    }
+                                } else {
+                                    const keyParts = bundleKey.split("/");
+                                    const sessionName = keyParts[keyParts.length - 1].replace(".json", "");
+                                    key = `${groupName}/${sessionName}`;
+                                }
+
+                                if (key) {
                                     personalMetadata[key] = {
                                         position: sessionData.position || 0,
                                         duration: sessionData.duration || 0
                                     };
                                 }
-                                continue;
                             }
-
-                            // Existing logic for individual files
-                            const parts = relativePath.split("/");
-                            const sessionName = parts[parts.length - 1].replace(".json", "");
-
-                            // Determine group based on path structure
-                            let group = "";
-                            if (parts.length >= 2) {
-                                // Has subfolders - first part is group
-                                group = parts[0];
-                            }
-                            // If no group subfolder, we can't match to sessions (need group)
-                            if (!group) {
-                                continue;
-                            }
-
-                            const key = `${group}/${sessionName}`;
-                            personalMetadata[key] = {
-                                position: data.position || 0,
-                                duration: data.duration || 0
-                            };
                         } catch (err) {
-                            // Skip files that can't be read/parsed
+                            console.error(`[Sessions] Error parsing personal file ${file.path}:`, err);
                         }
                     }
 
