@@ -253,11 +253,21 @@ export default function TableWidget(props) {
         }
 
         const lowerSearch = search.toLowerCase();
-        return mappedData.filter(({ mapped }) => {
+        return mappedData.filter((wrapper) => {
+            const { mapped } = wrapper;
             for (const key of searchKeys) {
-                if (typeof mapped[key] === "string") {
-                    const match = mapped[key].toLowerCase().includes(lowerSearch);
-                    if (match) {
+                const val = mapped[key];
+                if (typeof val === "string") {
+                    let cache = wrapper.__searchCache;
+                    if (!cache) {
+                        cache = wrapper.__searchCache = Object.create(null);
+                    }
+                    let lowerVal = cache[key];
+                    if (lowerVal === undefined) {
+                        lowerVal = val.toLowerCase();
+                        cache[key] = lowerVal;
+                    }
+                    if (lowerVal.includes(lowerSearch)) {
                         return true;
                     }
                 }

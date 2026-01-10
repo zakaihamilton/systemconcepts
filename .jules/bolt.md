@@ -1,0 +1,3 @@
+## 2024-05-23 - Transient Caching on Wrapper Objects
+**Learning:** When filtering or processing a derived dataset (`mappedData`) where expensive operations (like `toLowerCase()`) are repeated on the same items during user interaction (like typing), we can cache the results directly on the transient wrapper objects. This avoids re-calculation without polluting the original data or needing complex external cache invalidation logic, as the wrappers are discarded when the data source changes.
+**Action:** Use this pattern for high-frequency filtering operations on large lists where the derived data reference remains stable while the filter criteria changes.
