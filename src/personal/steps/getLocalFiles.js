@@ -36,6 +36,9 @@ export async function getLocalFiles() {
             }
         }
 
+        const splitCount = allGroups.size - bundledGroups.size - mergedGroups.size;
+        addSyncLog(`[Personal] Loaded ${allGroups.size} group(s) for filtering (${bundledGroups.size} bundled, ${mergedGroups.size} merged, ${splitCount} split)`, "info");
+
         const listing = await storage.getRecursiveList(LOCAL_PERSONAL_PATH);
         const files = listing.filter(item => {
             if (item.type === "dir" ||
@@ -61,7 +64,11 @@ export async function getLocalFiles() {
                         // This is a bundle/merged file: metadata/sessions/group.json
                         const groupName = groupPart.replace(".json", "");
 
-                        // Only include if group exists and is bundled or merged
+                        // If groups loaded, check if group exists and is bundled/merged
+                        // If groups not loaded, include file (fallback to safe behavior)
+                        if (allGroups.size === 0) {
+                            return true; // Fallback: include if groups not loaded
+                        }
                         if (allGroups.has(groupName) && (bundledGroups.has(groupName) || mergedGroups.has(groupName))) {
                             return true;
                         }
@@ -70,8 +77,13 @@ export async function getLocalFiles() {
                         // This is inside a group folder
                         const groupName = groupPart;
 
-                        // Only include if group exists and is split (NOT bundled, NOT merged)
-                        if (allGroups.has(groupName) && !bundledGroups.has(groupName) && !mergedGroups.has(groupName)) {
+                        // If groups loaded, check if group exists and is split
+                        // If groups not loaded, check file structure (fallback)
+                        const groupsLoaded = allGroups.size > 0;
+                        const isKnownGroup = groupsLoaded ? allGroups.has(groupName) : true;
+                        const isSplitGroup = groupsLoaded ? (!bundledGroups.has(groupName) && !mergedGroups.has(groupName)) : true;
+
+                        if (isKnownGroup && isSplitGroup) {
                             // For split groups, we now organize by year
                             // Structure is: metadata/sessions/group/year.json
                             // or could be legacy: metadata/sessions/group/year/session.json

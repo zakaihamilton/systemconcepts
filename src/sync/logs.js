@@ -7,6 +7,6 @@ export function addSyncLog(message, type = "info") {
             timestamp: Date.now(),
             message,
             type
-        }].slice(-100); // Keep last 100 logs
+        }].slice(-200); // Keep last 200 logs
     });
 }
