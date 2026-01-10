@@ -57,15 +57,18 @@ export class GroupFilter {
             const groupPart = parts[2];
 
             if (groupPart.endsWith(".json")) {
-                // This is a bundle/merged file: metadata/sessions/group.json
+                // This is a single file: metadata/sessions/group.json
                 const groupName = groupPart.replace(".json", "");
 
                 const isKnown = this.allGroups.has(groupName);
                 const isBundled = this.bundledGroups.has(groupName);
                 const isMerged = this.mergedGroups.has(groupName);
 
-                // Include ONLY if it is a known group AND it is bundled or merged
-                return isKnown && (isBundled || isMerged);
+                // Include ONLY if it is:
+                // 1. A known group
+                // 2. NOT bundled (bundled groups are in a separate common file)
+                // 3. AND Merged (merged groups are single files)
+                return isKnown && !isBundled && isMerged;
             } else {
                 // This is inside a group folder: metadata/sessions/group/2024.json
                 const groupName = groupPart;
@@ -74,7 +77,10 @@ export class GroupFilter {
                 const isBundled = this.bundledGroups.has(groupName);
                 const isMerged = this.mergedGroups.has(groupName);
 
-                // Include ONLY if it is a known group AND it is NOT bundled/merged (i.e. Split)
+                // Include ONLY if it is:
+                // 1. A known group
+                // 2. NOT bundled
+                // 3. AND NOT merged (merged groups are single files)
                 return isKnown && !isBundled && !isMerged;
             }
         }
