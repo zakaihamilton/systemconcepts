@@ -90,7 +90,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 console.error("[Personal] Error loading migration state:", err);
                 addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "info");
                 // Explicitly delete the corrupted file to prevent loops
-                try { await storage.deleteFile(migrationPath); } catch (e) {}
+                try { await storage.deleteFile(migrationPath); } catch (e) { }
                 // State remains at default (initialized above)
             }
         }
@@ -104,7 +104,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             if (!(await storage.exists(mongoPath))) {
                 addSyncLog("[Personal] No MongoDB personal files found", "info");
                 migrationState.complete = true;
-                await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 2));
+                await storage.writeFile(migrationPath, JSON.stringify(migrationState, null, 4));
                 return { migrated: false, fileCount: 0 };
             }
 
@@ -336,7 +336,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             for (const [cacheKey, cache] of Object.entries(bundleCache)) {
                 if (cache.dirty) {
                     const bundlePath = makePath(LOCAL_PERSONAL_PATH, "metadata/sessions", `${cacheKey}.json`);
-                    const awsBundlePath = makePath(basePath, "metadata/sessions", `${cacheKey}.json`);
+
 
                     // Read existing if not fully loaded? 
                     // We assume we are building it or appending. 
@@ -355,10 +355,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                         } catch (err) { }
                     }
 
-                    const content = JSON.stringify(fullBundle, null, 2);
+                    const content = JSON.stringify(fullBundle, null, 4);
+
                     await storage.createFolderPath(bundlePath);
                     await storage.writeFile(bundlePath, content);
-                    await storage.writeFile(awsBundlePath, content);
+                    // Don't write to AWS directly - let the sync process handle uploads
+
 
                     // Update manifest for the bundle file
                     // The individual files inside are NOT in the manifest anymore?
@@ -369,7 +371,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     // We should add the bundle entry.
                     // We should probably NOT add individual entries for bundled files.
 
-                    const hash = calculateHash(content);
+                    const hash = await calculateHash(content);
+
                     const manifestKey = `metadata/sessions/${cacheKey}.json`;
                     manifest[manifestKey] = {
                         hash,
@@ -468,7 +471,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             // Save progress after each batch
             await flushBundles();
             await safeWriteMigration(migrationState, "batch_progress");
-            await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
+            await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
             addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
             SyncActiveStore.update(s => {
                 s.personalSyncProgress = {
@@ -482,7 +485,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         await flushBundles();
 
         await safeWriteMigration(migrationState, "final_save");
-        await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 2));
+        await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
+
 
         // Check if complete
         const remaining = migrationState.files.filter(f => !migrationState.migrated[f.path]).length;

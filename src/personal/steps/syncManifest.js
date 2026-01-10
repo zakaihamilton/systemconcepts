@@ -77,12 +77,13 @@ async function buildManifestFromRemote(basePath) {
                     } else if (Buffer.isBuffer(fileData)) {
                         buffer = fileData;
                     } else {
-                         buffer = Buffer.from(fileData);
+                        buffer = Buffer.from(fileData);
                     }
 
                     // Decompress to get original content for hash
                     const json = decompressJSON(buffer);
-                    content = JSON.stringify(json); // Get the string representation for hash
+                    content = JSON.stringify(json, null, 4); // Use same formatting as when writing files
+
 
                     // Use logical path (without .gz)
                     relPath = relPath.slice(0, -3);
@@ -91,7 +92,8 @@ async function buildManifestFromRemote(basePath) {
                     content = await storage.readFile(item.path);
                 }
 
-                const hash = calculateHash(content);
+                const hash = await calculateHash(content);
+
 
                 manifest[relPath] = {
                     hash,

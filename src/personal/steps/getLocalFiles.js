@@ -64,11 +64,22 @@ export async function getLocalFiles() {
                         }
                         return false;
                     } else {
-                        // This is inside a group folder: metadata/sessions/group/session.json
+                        // This is inside a group folder
                         const groupName = groupPart;
+
                         // Only include if group is NOT bundled AND NOT merged (i.e. split)
                         if (!bundledGroups.has(groupName) && !mergedGroups.has(groupName)) {
-                            return true;
+                            // For split groups, we now organize by year
+                            // Structure is: metadata/sessions/group/year.json
+                            // or could be legacy: metadata/sessions/group/year/session.json
+                            if (parts.length === 4 && parts[3].endsWith(".json")) {
+                                // This is a year bundle file: metadata/sessions/group/year.json
+                                return true;
+                            } else if (parts.length > 4) {
+                                // This is a legacy individual session file (shouldn't exist after migration)
+                                // Skip these as they should have been migrated to year bundles
+                                return false;
+                            }
                         }
                         return false;
                     }

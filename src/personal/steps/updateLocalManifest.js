@@ -28,7 +28,8 @@ export async function updateLocalManifest(localFiles) {
         // Update manifest with current files
         for (const file of localFiles) {
             const content = await storage.readFile(file.fullPath);
-            const hash = calculateHash(content);
+            const hash = await calculateHash(content);
+
 
             if (!manifest[file.path] || manifest[file.path].hash !== hash) {
                 manifest[file.path] = {
