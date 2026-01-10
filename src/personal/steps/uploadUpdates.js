@@ -58,7 +58,20 @@ export async function uploadUpdates(localManifest, remoteManifest, userid) {
                     await storage.writeFile(remotePath, content);
 
                     // Update remote manifest (using logical path, not .gz)
-                    remoteManifest[path] = { ...localManifest[path] };
+                    // Increment version to signal change
+                    const currentVer = (remoteManifest[path] && remoteManifest[path].version) || 1;
+                    const newVer = currentVer + 1;
+
+                    remoteManifest[path] = {
+                        ...localManifest[path],
+                        version: newVer
+                    };
+
+                    // Also update local manifest to reflect the new version
+                    // so we don't redownload our own upload
+                    if (localManifest[path]) {
+                        localManifest[path].version = newVer;
+                    }
 
                     addSyncLog(`[Personal] Uploaded: ${path}`, "info");
                 } catch (err) {

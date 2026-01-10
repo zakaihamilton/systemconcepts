@@ -44,6 +44,10 @@ export default function Sync() {
     const [currentTime, setCurrentTime] = React.useState(Date.now());
 
     React.useEffect(() => {
+        console.log("Build Timestamp: 2026-01-10 21:49:00 - Checking for Fixes");
+    }, []);
+
+    React.useEffect(() => {
         let interval;
         if (syncBusy) {
             interval = setInterval(() => {

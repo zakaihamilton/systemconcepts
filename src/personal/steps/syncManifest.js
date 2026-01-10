@@ -3,6 +3,7 @@ import { makePath } from "@util/path";
 import { PERSONAL_SYNC_BASE_PATH, PERSONAL_MANIFEST } from "../constants";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
+import { calculateCanonicalHash } from "@sync/canonical";
 import { readCompressedFile, writeCompressedFile, decompressJSON } from "@sync/bundle";
 
 /**
@@ -19,6 +20,13 @@ export async function syncManifest(localManifest, userid) {
 
     try {
         let remoteManifest = await readCompressedFile(remoteManifestPath) || {};
+
+        // Ensure all entries have a version
+        for (const key of Object.keys(remoteManifest)) {
+            if (!remoteManifest[key].version) {
+                remoteManifest[key].version = 1;
+            }
+        }
 
         // Normalize paths in existing manifest (strip leading slashes from old entries)
         if (Object.keys(remoteManifest).length > 0) {
@@ -106,23 +114,28 @@ async function buildManifestFromRemote(basePath) {
 
                     // Decompress to get original content for hash
                     const json = decompressJSON(buffer);
-                    content = JSON.stringify(json, null, 4); // Use same formatting as when writing files
-
+                    // Calculate canonical hash from object
+                    const hash = await calculateCanonicalHash(json);
 
                     // Use logical path (without .gz)
                     relPath = relPath.slice(0, -3);
+
+                    manifest[relPath] = {
+                        hash,
+                        modified: item.mtimeMs || Date.now(),
+                        version: 1 // Default version for bootstrap
+                    };
                 } else {
                     // Read file normally
-                    content = await storage.readFile(item.path);
+                    const content = await storage.readFile(item.path);
+                    const hash = await calculateHash(content);
+
+                    manifest[relPath] = {
+                        hash,
+                        modified: item.mtimeMs || Date.now(),
+                        version: 1 // Default version for bootstrap
+                    };
                 }
-
-                const hash = await calculateHash(content);
-
-
-                manifest[relPath] = {
-                    hash,
-                    modified: item.mtimeMs || Date.now()
-                };
             } catch (err) {
                 console.error(`[Personal] Error processing ${relPath}:`, err);
             }

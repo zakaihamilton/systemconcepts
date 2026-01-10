@@ -56,7 +56,17 @@ export async function uploadNewFiles(localManifest, remoteManifest, userid) {
                     await storage.writeFile(remotePath, content);
 
                     // Add to remote manifest (using logical path)
-                    remoteManifest[path] = { ...localManifest[path] };
+                    // Add to remote manifest (using logical path)
+                    // Set initial version to 1
+                    remoteManifest[path] = {
+                        ...localManifest[path],
+                        version: 1
+                    };
+
+                    // Update local manifest as well to avoid mismatch
+                    if (localManifest[path]) {
+                        localManifest[path].version = 1;
+                    }
 
                     addSyncLog(`[Personal] Uploaded new: ${path}`, "info");
                 } catch (err) {
