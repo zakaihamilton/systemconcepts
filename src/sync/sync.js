@@ -199,13 +199,27 @@ export function useSyncFeature() {
     const displayPercentage = (busy && percentage >= 100) ? 99 : percentage;
     const displayPersonalPercentage = (personalSyncBusy && personalPercentage >= 100) ? 99 : personalPercentage;
 
+    let effectivePercentage = 0;
+
+    if (busy) {
+        effectivePercentage = displayPercentage;
+    } else if (personalSyncBusy) {
+        effectivePercentage = displayPersonalPercentage;
+    } else {
+        if (displayPersonalPercentage === 100) {
+            effectivePercentage = 100;
+        } else if (displayPercentage === 100) {
+            effectivePercentage = 100;
+        }
+    }
+
     return {
         sync: requestSync,
         busy,
         lastSynced,
         duration,
         logs,
-        percentage: displayPercentage,
+        percentage: effectivePercentage,
         startTime,
         personalSyncBusy,
         personalSyncError,

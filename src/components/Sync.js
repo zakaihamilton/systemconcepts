@@ -31,7 +31,7 @@ export default function Sync({ children }) {
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
-        {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {!error && !personalSyncError && (isBusy ? `${translations.SYNCING} (${percentage}%)` : (percentage === 100 ? `${translations.SYNC} (100%)` : translations.SYNC))}
         <br />
         {!!duration && formattedDuration}
     </span>;
