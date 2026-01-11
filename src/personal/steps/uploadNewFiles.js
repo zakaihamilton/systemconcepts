@@ -59,7 +59,9 @@ export async function uploadNewFiles(localManifest, remoteManifest, userid, onPr
                         const buffer = Buffer.from(compressed);
                         // AWS/Storage needs base64 for binary
                         content = buffer.toString('base64');
-                        remotePath += ".gz";
+                        // AWS/Storage needs base64 for binary
+                        content = buffer.toString('base64');
+                        remotePath = remotePath.replace(/\.json$/, ".gz");
                     }
 
                     await storage.writeFile(remotePath, content);

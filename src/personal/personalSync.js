@@ -4,6 +4,8 @@ import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { SyncActiveStore } from "@sync/syncState";
 import { SyncProgressTracker } from "@sync/progressTracker";
+import { makePath } from "@util/path";
+import { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } from "./constants";
 
 // Step Imports
 import { getLocalFiles } from "./steps/getLocalFiles";
@@ -62,11 +64,6 @@ export async function performPersonalSync() {
         if (migrationResult.migrated) {
             addSyncLog(`[Personal] Migration complete: ${migrationResult.fileCount} files`, "success");
 
-            // Merge migration manifest into remote manifest
-            if (migrationResult.manifest) {
-                remoteManifest = { ...remoteManifest, ...migrationResult.manifest };
-            }
-
             // Remove deleted keys (fixed double slashes)
             if (migrationResult.deletedKeys) {
                 migrationResult.deletedKeys.forEach(key => {
@@ -74,13 +71,35 @@ export async function performPersonalSync() {
                 });
             }
 
-            // Upload the updated manifest
-            const { uploadManifest } = await import("./steps/uploadManifest");
-            await uploadManifest(remoteManifest, userid);
+            // Reload local manifest from disk because migration updated it
+            const manifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
+            if (await storage.exists(manifestPath)) {
+                const content = await storage.readFile(manifestPath);
+                localManifest = JSON.parse(content);
+                addSyncLog(`[Personal] Reloaded local manifest: ${Object.keys(localManifest).length} files`, "info");
+            }
 
-            // Re-sync to get the updated manifest
-            remoteManifest = await syncManifest(localManifest, userid);
-            addSyncLog(`[Personal] Re-synced manifest after migration: ${Object.keys(remoteManifest).length} files`, "info");
+            // Fix for "Removal before Upload":
+            // Migration created new local files. removeDeletedFiles (Step 4.5) will delete them
+            // because they are not in remoteManifest yet.
+            // We must add them to remoteManifest in-memory so they survive Step 4.5.
+            // We set hash="FORCE_UPLOAD" and modified=0 to ensure uploadUpdates (Step 5) picks them up.
+            if (migrationResult.manifest) {
+                const migratedKeys = Object.keys(migrationResult.migrated || {});
+                // If migrationResult.migrated is map of paths, extracting keys might be tricky because paths are absolute/relative?
+                // Actually migrationResult.manifest contains the entries we care about.
+                for (const [key, entry] of Object.entries(migrationResult.manifest)) {
+                    // Only protect if it's not already in remote (or if we forced it)
+                    if (!remoteManifest[key]) {
+                        remoteManifest[key] = {
+                            ...entry,
+                            hash: "FORCE_UPLOAD",
+                            modified: 0,
+                            version: (entry.version || 1)
+                        };
+                    }
+                }
+            }
         }
         progress.completeStep('migrateFromMongoDB');
 
@@ -158,8 +177,8 @@ export async function performPersonalSync() {
 
         let error = err;
         if (err === 401 || err === 403) {
-             error = new Error(errorMessage);
-             error.code = "NOT_LOGGED_IN";
+            error = new Error(errorMessage);
+            error.code = "NOT_LOGGED_IN";
         }
 
         return { success: false, error: error };

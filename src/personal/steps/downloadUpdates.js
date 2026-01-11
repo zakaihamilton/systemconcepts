@@ -97,7 +97,7 @@ export async function downloadUpdates(localManifest, remoteManifest, userid, onP
                     // If so, we expect a .gz file remotely
                     if (path.endsWith(".json")) {
                         // Try downloading .gz version
-                        const gzPath = remotePath + ".gz";
+                        const gzPath = remotePath.replace(/\.json$/, ".gz");
                         // readCompressedFile handles decompression if needed
                         const data = await readCompressedFile(gzPath);
                         let hash;
@@ -108,8 +108,19 @@ export async function downloadUpdates(localManifest, remoteManifest, userid, onP
                         } else {
                             // Fallback to normal file if .gz doesn't exist?
                             // If syncManifest found it as .json (legacy), we download .json.
-                            content = await storage.readFile(remotePath);
-                            hash = await calculateHash(content);
+                            // BUT if it's not found, we shouldn't create an empty file.
+                            if (await storage.exists(remotePath)) {
+                                content = await storage.readFile(remotePath);
+                                hash = await calculateHash(content);
+                            } else {
+                                console.warn(`[Personal] Remote file missing (phantom manifest entry): ${remotePath}`);
+                                return;
+                            }
+                        }
+
+                        if (!content || (typeof content === 'string' && !content.trim())) {
+                            console.warn(`[Personal] Skipping empty content for: ${path}`);
+                            return;
                         }
 
                         await storage.createFolderPath(localPath);
@@ -149,7 +160,18 @@ export async function downloadUpdates(localManifest, remoteManifest, userid, onP
                             remoteManifest[localRelativePath].hash = hash;
                         }
                     } else {
-                        content = await storage.readFile(remotePath);
+                        if (await storage.exists(remotePath)) {
+                            content = await storage.readFile(remotePath);
+                        } else {
+                            console.warn(`[Personal] Remote file missing (phantom manifest entry): ${remotePath}`);
+                            return;
+                        }
+
+                        if (!content || (typeof content === 'string' && !content.trim())) {
+                            console.warn(`[Personal] Skipping empty content for: ${path}`);
+                            return;
+                        }
+
                         await storage.createFolderPath(localPath);
                         await storage.writeFile(localPath, content);
 

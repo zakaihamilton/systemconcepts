@@ -100,7 +100,7 @@ async function buildManifestFromRemote(basePath) {
 
             try {
                 // Handle compressed metadata files
-                if (relPath.endsWith(".json.gz")) {
+                if (relPath.endsWith(".gz")) {
                     // Read file as buffer/base64
                     const fileData = await storage.readFile(item.path);
                     let buffer;
@@ -117,8 +117,8 @@ async function buildManifestFromRemote(basePath) {
                     // Calculate canonical hash from object
                     const hash = await calculateCanonicalHash(json);
 
-                    // Use logical path (without .gz)
-                    relPath = relPath.slice(0, -3);
+                    // Use logical path (without .gz, restoration to .json)
+                    relPath = relPath.replace(/\.gz$/, ".json");
 
                     manifest[relPath] = {
                         hash,

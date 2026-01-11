@@ -25,8 +25,8 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     );
 
     if (hasRemoteFiles) {
-        console.log("[Personal] Remote personal files exist, skipping migration scan");
-        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+        console.log("[Personal] Remote personal files exist, but proceeding to scan in case of broken migration");
+        // return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
     }
 
     const safeWriteMigration = async (data, reason = "unknown") => {
@@ -51,8 +51,19 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
                 // If migration is complete, skip
                 if (migrationState.complete) {
-                    console.log("[Personal] Migration already complete, skipping");
-                    return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+                    // Check for zombie state: Migration thinks it's done, but remote is empty.
+                    // This implies the files were migrated locally, but then deleted before upload.
+                    const remoteHasJson = Object.keys(remoteManifest).some(k => k.endsWith(".json"));
+
+                    if (!remoteHasJson) {
+                        console.log("[Personal] Migration marked complete but remote is empty. Forcing re-migration.");
+                        migrationState.complete = false;
+                        migrationState.migrated = {};
+                        // Fall through to normal logic
+                    } else {
+                        console.log("[Personal] Migration already complete, skipping");
+                        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+                    }
                 }
 
                 addSyncLog(`[Personal] Resuming migration: ${Object.keys(migrationState.migrated).length}/${migrationState.files.length} done`, "info");
@@ -189,9 +200,10 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             }
 
             if (existsRemote) {
-                migrationState.migrated[file.path] = true;
-                hasNewSkippedFiles = true;
-                autoMigratedCount++;
+                // For repair: Don't skip even if remote exists, because remote might be a phantom manifest
+                // migrationState.migrated[file.path] = true;
+                // hasNewSkippedFiles = true;
+                // autoMigratedCount++;
             }
         }
 
@@ -348,9 +360,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     const hash = await calculateHash(content);
 
                     const manifestKey = `${cacheKey}.json`;
+                    const oldEntry = manifest[manifestKey];
+                    const version = oldEntry ? (oldEntry.version || 1) + 1 : 1;
                     manifest[manifestKey] = {
                         hash,
-                        modified: Date.now()
+                        modified: Date.now(),
+                        version
                     };
 
                     cache.dirty = false;
