@@ -100,7 +100,11 @@ export async function performSync() {
 
     } catch (err) {
         console.error("[Sync] Sync failed:", err);
-        addSyncLog(`Sync failed: ${err.message}`, "error");
+        let errorMessage = err.message || String(err);
+        if (err === 401 || err === 403) {
+            errorMessage = "Please login to sync";
+        }
+        addSyncLog(`Sync failed: ${errorMessage}`, "error");
         throw err;
     } finally {
         unlock();
