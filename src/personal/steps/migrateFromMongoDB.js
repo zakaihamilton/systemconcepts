@@ -367,6 +367,21 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
         for (let i = 0; i < filesToMigrate.length; i += BATCH_SIZE) {
             const batch = filesToMigrate.slice(i, i + BATCH_SIZE);
 
+            // Optimization: Read all files in the batch at once
+            // This prevents "Failed" errors caused by too many concurrent HTTP requests
+            let batchContents = null;
+            try {
+                const batchPaths = batch.map(f => {
+                    // Strip "personal/" prefix to get path relative to device
+                    // file.path is like /personal/metadata/sessions/...
+                    const parts = f.path.split("/").filter(Boolean);
+                    return parts.slice(1).join("/");
+                });
+                batchContents = await storage.readFiles("personal", batchPaths);
+            } catch (err) {
+                console.error("[Personal] Error batch reading files:", err);
+            }
+
             await Promise.all(batch.map(async (file) => {
                 try {
                     // Calculate paths and sanitize double slashes
@@ -392,8 +407,19 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     const isBundled = bundledGroups.has(groupName);
                     const isMerged = mergedGroups.has(groupName);
 
-                    // Read from MongoDB
-                    const content = await storage.readFile(file.path);
+                    if (!batchContents) {
+                        throw new Error("Batch read failed");
+                    }
+
+                    // Read from MongoDB using batch cache
+                    // Key returned by readFiles matches the key used in request (with device-relative path)
+                    // remote.js/readFiles maps input paths using makePath(prefix + name).
+                    // We passed prefix="personal" and name="metadata/sessions/..."
+                    // so it requested makePath("personal/metadata/sessions/...") -> "/metadata/sessions/..."
+                    // And results are keyed by that absolute path.
+                    const fileParts = file.path.split("/").filter(Boolean);
+                    const lookupKey = "/" + fileParts.slice(1).join("/");
+                    const content = batchContents[lookupKey];
 
                     if (!content || !content.trim()) {
                         console.warn(`[Personal] Skipping empty file: ${file.path}`);
