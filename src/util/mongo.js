@@ -120,6 +120,21 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
                 console.log("found an item for collection", collectionName, "id", parsedId);
                 return result;
             }
+            else if (headers.prefix) {
+                const prefix = decodeURIComponent(headers.prefix);
+                const parsedFields = headers.fields && JSON.parse(decodeURIComponent(headers.fields));
+                const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const safePrefix = escapeRegex(prefix);
+                const query = { id: { $regex: `^${safePrefix}` } };
+                const result = await listCollection({
+                    dbName,
+                    collectionName,
+                    query,
+                    fields: parsedFields
+                });
+                console.log("found", result.length, "items with prefix", prefix, "for collection", collectionName);
+                return result;
+            }
             else {
                 const parsedQuery = query && JSON.parse(decodeURIComponent(query));
                 sanitizeQuery(parsedQuery);
