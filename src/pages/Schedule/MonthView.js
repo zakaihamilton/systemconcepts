@@ -23,7 +23,7 @@ import { useTheme } from "@mui/material/styles";
 
 registerToolbar("MonthView");
 
-export default function MonthView({ sessions, date, store }) {
+export default function MonthView({ sessions, date, store, playingSession }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [popupDate, setPopupDate] = useState(null);
     const isPhone = useDeviceType() === "phone";
@@ -52,7 +52,7 @@ export default function MonthView({ sessions, date, store }) {
     const numWeeks = getNumberOfWeeksInMonth(month);
     const weeks = new Array(numWeeks).fill(0).map((_, index) => {
         const weekFirstDay = addDate(firstDay, index * 7);
-        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} onMenuVisible={setIsMenuOpen} onOpenDay={setPopupDate} />;
+        return <Week sessions={sessions} key={index} month={month} date={weekFirstDay} row={index + 2} rowCount={numWeeks + 1} dateFormatter={dayFormatter} store={store} onMenuVisible={setIsMenuOpen} onOpenDay={setPopupDate} playingSession={playingSession} />;
     });
 
     const numDaysInWeek = 7;
@@ -208,6 +208,7 @@ export default function MonthView({ sessions, date, store }) {
         return {
             id: item.name,
             name: item.name,
+            group: item.group,
             date: item.date,
             type: item.type,
             description: groupName,
@@ -231,6 +232,7 @@ export default function MonthView({ sessions, date, store }) {
             items={popupItems}
             onSwipeLeft={direction === "rtl" ? gotoPreviousDay : gotoNextDay}
             onSwipeRight={direction === "rtl" ? gotoNextDay : gotoPreviousDay}
-            direction={direction} />
+            direction={direction}
+            playingSession={playingSession} />
     </div>;
 }

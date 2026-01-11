@@ -150,6 +150,14 @@ export default {
             "value": "האם ברצונך לבצע סינכרון מלא? פעולה זו תוריד מחדש את כל נתוני השיעורים מהשרת."
         },
         {
+            "id": "CLEAR_STORAGE",
+            "value": "נקה אחסון"
+        },
+        {
+            "id": "CONFIRM_CLEAR_STORAGE",
+            "value": "האם אתה בטוח שברצונך לנקות את כל האחסון? זה ימחוק את כל הנתונים המקומיים וייטען מחדש את הדף."
+        },
+        {
             "id": "VERY_SMALL",
             "value": "קטן מאוד"
         },
@@ -790,6 +798,10 @@ export default {
             "value": "נגן"
         },
         {
+            "id": "PLAYING",
+            "value": "מנגן"
+        },
+        {
             "id": "SCHEDULE",
             "value": "יומן"
         },
@@ -1106,6 +1118,26 @@ export default {
             "value": "השבת"
         },
         {
+            "id": "MERGE",
+            "value": "מזג"
+        },
+        {
+            "id": "SPLIT",
+            "value": "פצל"
+        },
+        {
+            "id": "STORAGE",
+            "value": "אחסון"
+        },
+        {
+            "id": "MERGED",
+            "value": "ממוזג"
+        },
+        {
+            "id": "SIZE",
+            "value": "גודל"
+        },
+        {
             "id": "STATISTICS",
             "value": "סטטיסטיקות"
         },
@@ -1168,6 +1200,26 @@ export default {
         {
             "id": "SEEK",
             "value": "חיפוש"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "שיעורים חדשים"
+        },
+        {
+            "id": "UPDATE_METADATA",
+            "value": "עדכון מידע"
+        },
+        {
+            "id": "PERSONAL_SYNC",
+            "value": "הסנכרון האישי"
+        },
+        {
+            "id": "PERSONAL_SYNC_ERROR",
+            "value": "שגיאה בהסנכרון האישי"
+        },
+        {
+            "id": "PERSONAL_SYNC_BUSY",
+            "value": "הסנכרון האישי בוצע"
         },
         {
             "id": 404,

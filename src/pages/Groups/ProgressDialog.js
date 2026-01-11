@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { UpdateSessionsStore } from "@util/syncState";
+import { UpdateSessionsStore } from "@sync/syncState";
 import { useTranslations } from "@util/translations";
 import styles from "./ProgressDialog.module.scss";
 import { formatDuration } from "@util/string";
@@ -10,13 +10,60 @@ import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
 import Chip from "@mui/material/Chip";
 import clsx from "clsx";
+import SessionIcon from "@mui/icons-material/Assignment";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+
+function NewSessionItem({ session }) {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+        <div className={clsx(styles.sessionItem, expanded && styles.expanded)}>
+            <div className={styles.sessionName} onClick={() => setExpanded(!expanded)} style={{ cursor: 'pointer' }}>
+                <SessionIcon className={styles.sessionIcon} />
+                <span style={{ flex: 1 }}>{session.name}</span>
+                {expanded ? <ExpandLessIcon className={styles.expandIcon} /> : <ExpandMoreIcon className={styles.expandIcon} />}
+            </div>
+            {expanded && (
+                <div className={styles.sessionFiles}>
+                    {session.files.map((file, fileIdx) => (
+                        <div key={fileIdx} className={styles.fileName}>
+                            <DescriptionIcon className={styles.fileIcon} />
+                            {file}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function NewSessionsList({ sessions }) {
+    const translations = useTranslations();
+    const [expanded, setExpanded] = useState(true);
+
+    return (
+        <div className={styles.newSessions}>
+            <div className={styles.newSessionsTitle} onClick={() => setExpanded(!expanded)} style={{ cursor: 'pointer' }}>
+                <SessionIcon className={styles.titleIcon} />
+                <span style={{ flex: 1 }}>{translations.NEW_SESSIONS}</span>
+                {expanded ? <ExpandLessIcon className={styles.expandIcon} /> : <ExpandMoreIcon className={styles.expandIcon} />}
+            </div>
+            {expanded && (
+                <div className={styles.sessionsList}>
+                    {sessions.map((session, idx) => (
+                        <NewSessionItem key={idx} session={session} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function ProgressDialog() {
     const translations = useTranslations();
-    // We track 'busy' to know when to open, but we use 'open' to control visibility
-    // so the user can close it manually, or keep it open after sync finishes.
-    const { busy, status, start } = UpdateSessionsStore.useState();
-    const [open, setOpen] = useState(false);
+    const { busy, status, start, showUpdateDialog } = UpdateSessionsStore.useState();
     const wasBusyRef = useRef(false);
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
 
@@ -32,22 +79,18 @@ export default function ProgressDialog() {
 
     useEffect(() => {
         if (busy && !wasBusyRef.current) {
-            setOpen(true);
+            UpdateSessionsStore.update(s => {
+                s.showUpdateDialog = true;
+            });
         }
         wasBusyRef.current = busy;
     }, [busy]);
 
     const handleClose = () => {
-        setOpen(false);
+        UpdateSessionsStore.update(s => {
+            s.showUpdateDialog = false;
+        });
     };
-
-    // Filter status for items that have started (have processed years or errors)
-    // or we can just show all active content.
-    // The status array accumulates, so we might want to show everything in it
-    // but maybe clearer to show only what's happened in this session (handled by Store reset?)
-    // Actually UpdateSessionsStore doesn't seem to reset status array between runs based on lines 67-82
-    // It finds existing item or appends.
-    // So let's just display the status list.
 
     const renderItem = (item) => {
         const hasErrors = item.errors && item.errors.length > 0;
@@ -66,30 +109,13 @@ export default function ProgressDialog() {
                 <div className={styles.progressContainer}>
                     <LinearProgress variant="determinate" value={progress} className={styles.progressBar} color={hasErrors ? "error" : "primary"} />
                     <div className={styles.progressText}>
-                        {item.tagCount > 0 && <Chip label={`${item.tagCount}`} color="primary" size="small" className={styles.countChip} />}
                         {item.addedCount > 0 && <Chip label={`+${item.addedCount}`} color="success" size="small" className={styles.countChip} />}
                         {item.removedCount > 0 && <Chip label={`-${item.removedCount}`} color="error" size="small" className={styles.countChip} />}
                         <div style={{ flex: 1 }} />
                         {item.year && `${item.year} - `}{item.progress} / {item.count} {translations.YEARS}
                     </div>
                 </div>
-                {hasNewSessions && (
-                    <div className={styles.newSessions}>
-                        <div className={styles.newSessionsTitle}>{translations.NEW_SESSIONS || "New Sessions"}:</div>
-                        <div className={styles.sessionsList}>
-                            {item.newSessions.map((session, idx) => (
-                                <div key={idx} className={styles.sessionItem}>
-                                    <div className={styles.sessionName}>{session.name}</div>
-                                    <div className={styles.sessionFiles}>
-                                        {session.files.map((file, fileIdx) => (
-                                            <div key={fileIdx} className={styles.fileName}>{file}</div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                {hasNewSessions && <NewSessionsList sessions={item.newSessions} />}
                 {hasErrors && (
                     <div className={styles.errors}>
                         {item.errors.map((err, idx) => (
@@ -101,7 +127,7 @@ export default function ProgressDialog() {
         );
     };
 
-    if (!open) {
+    if (!showUpdateDialog) {
         return null;
     }
 

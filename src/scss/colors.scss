@@ -30,6 +30,8 @@
     --primary-color-rgb: 59, 130, 246;
     --border-color-rgb: 226, 232, 240;
     --secondary-color-rgb: 96, 165, 250;
+    --primary-color: var(--primary-500);
+    --secondary-color: var(--neutral-500);
 
     --text-color: var(--neutral-800);
     --inverse-text-color: #ffffff;
@@ -73,6 +75,9 @@
     --select-text-color: #ffffff;
 
     --cue-color: white;
+
+    --playing-color: #a855f7;
+    --playing-bg: #f5f3ff;
 }
 
 
@@ -144,4 +149,7 @@
     --select-text-color: #ffffff;
 
     --cue-color: white;
+
+    --playing-color: #c084fc;
+    --playing-bg: #2e1065;
 }

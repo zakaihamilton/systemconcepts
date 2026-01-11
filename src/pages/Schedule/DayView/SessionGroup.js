@@ -2,7 +2,7 @@ import styles from "./SessionGroup.module.scss";
 import Session from "./Session";
 import { useSessionTextColor } from "@util/colors";
 
-export default function SessionGroup({ group, sessions }) {
+export default function SessionGroup({ group, sessions, playingSession }) {
     const groupLabel = group[0].toUpperCase() + group.slice(1);
     const firstSession = sessions[0];
     const groupColor = firstSession.color;
@@ -19,7 +19,7 @@ export default function SessionGroup({ group, sessions }) {
                 .sort((a, b) => (a.typeOrder || 0) - (b.typeOrder || 0))
                 .map(session => {
                     const { name, key, ...props } = session;
-                    return <Session key={name} name={name} {...props} />;
+                    return <Session key={name} name={name} {...props} isPlaying={playingSession && playingSession.name === name && playingSession.group === session.group && playingSession.date === session.date} />;
                 })}
         </div>
     </div>;

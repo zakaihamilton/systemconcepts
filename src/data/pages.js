@@ -32,10 +32,14 @@ import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore
 const Reset = dynamic(() => import("@pages/Settings/Reset"), { loading: () => <PageLoad /> });
 const ClearCache = dynamic(() => import("@pages/Settings/ClearCache"), { loading: () => <PageLoad /> });
 
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+const ClearStorage = dynamic(() => import("@pages/Settings/ClearStorage"), { loading: () => <PageLoad /> });
+
 import EditIcon from "@mui/icons-material/Edit";
 const Editor = dynamic(() => import("@pages/Editor"), { loading: () => <PageLoad /> });
 
 import ImageIcon from "@mui/icons-material/Image";
+
 const Image = dynamic(() => import("@pages/Image"), { loading: () => <PageLoad /> });
 import { getImageSection } from "@pages/Image/Section";
 
@@ -152,6 +156,12 @@ export default [
         name: "CLEAR_CACHE",
         Icon: StorageIcon,
         Component: ClearCache
+    },
+    {
+        id: "clearStorage",
+        name: "CLEAR_STORAGE",
+        Icon: DeleteForeverIcon,
+        Component: ClearStorage
     },
     {
         id: "reset",

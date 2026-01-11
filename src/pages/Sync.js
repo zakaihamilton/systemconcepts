@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
 import { useGroups } from "@util/groups";
-import { useSyncFeature } from "@util/sync";
+import { useSyncFeature } from "@sync/sync";
 import styles from "./Sync.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
@@ -20,7 +20,7 @@ import Button from "@mui/material/Button";
 import CachedIcon from "@mui/icons-material/Cached";
 import { useContext } from "react";
 import { SyncContext } from "@components/Sync";
-import { clearBundleCache } from "@util/sync";
+import { clearBundleCache } from "@sync/sync";
 import Dialog from "@widgets/Dialog";
 
 import IconButton from "@mui/material/IconButton";
@@ -35,11 +35,31 @@ export default function Sync() {
     const translations = useTranslations();
     const { updateSync } = useContext(SyncContext);
     const [groups] = useGroups([]);
-    const { busy: sessionsBusy, updateSessions, updateAllSessions } = useUpdateSessions(groups);
-    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs } = useSyncFeature();
+    const { busy: sessionsBusy } = useUpdateSessions(groups);
+    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
+    const { personalSyncBusy, personalSyncError, personalSyncPercentage } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
+    const [currentTime, setCurrentTime] = React.useState(Date.now());
+
+    React.useEffect(() => {
+        console.log("Build Timestamp: 2026-01-10 21:49:00 - Checking for Fixes");
+    }, []);
+
+    React.useEffect(() => {
+        let interval;
+        if (syncBusy) {
+            interval = setInterval(() => {
+                setCurrentTime(Date.now());
+            }, 1000);
+        } else {
+            setCurrentTime(Date.now());
+        }
+        return () => clearInterval(interval);
+    }, [syncBusy]);
+
+    const liveDuration = syncBusy && startTime ? (currentTime - startTime) : (syncDuration || 0);
 
     React.useEffect(() => {
         if (logRef.current) {
@@ -73,8 +93,8 @@ export default function Sync() {
     const clearCache = async () => {
         try {
             await clearBundleCache();
-            await updateSync(false);
             setConfirmClearCache(false);
+            await updateSync(false);
         } catch (err) {
             console.error("Failed to clear cache", err);
         }
@@ -139,7 +159,7 @@ export default function Sync() {
                                     {translations.DURATION}
                                 </Typography>
                                 <Typography variant="h6" noWrap>
-                                    {(syncBusy || syncDuration) ? formatDuration(syncDuration) : "--:--"}
+                                    {(syncBusy || syncDuration) ? formatDuration(liveDuration) : "--:--"}
                                 </Typography>
                             </Box>
 
@@ -149,7 +169,7 @@ export default function Sync() {
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Typography variant="h6" noWrap>
-                                        {syncBusy ? translations.SYNCING : translations.IDLE}
+                                        {syncBusy ? translations.SYNCING : (lastSynced ? translations.COMPLETE : translations.IDLE)}
                                     </Typography>
                                     {syncBusy && <UpdateIcon className={animatedClassName} sx={{ fontSize: 20 }} />}
                                 </Box>
@@ -182,6 +202,33 @@ export default function Sync() {
                                 </Typography>
                             </Box>
                             <LinearProgress variant="determinate" value={syncPercentage} sx={{ height: 8, borderRadius: 4 }} />
+                        </Box>
+
+                        {/* Personal Sync Status */}
+                        <Box sx={{ width: '100%', mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    {translations.PERSONAL_SYNC}
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body2" color={personalSyncError ? "error" : "text.secondary"}>
+                                        {personalSyncBusy ? translations.SYNCING : (personalSyncError ? translations.ERROR : translations.IDLE)}
+                                    </Typography>
+                                    {personalSyncBusy && (
+                                        <Typography variant="body2" color="text.secondary" sx={{ minWidth: '3.5em', textAlign: 'right', fontWeight: 'bold' }}>
+                                            {personalSyncPercentage}%
+                                        </Typography>
+                                    )}
+                                </Box>
+                            </Box>
+                            {personalSyncBusy && (
+                                <LinearProgress variant="determinate" value={personalSyncPercentage || 0} sx={{ height: 6, borderRadius: 3, mb: 1 }} />
+                            )}
+                            {personalSyncError && (
+                                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>
+                                    {personalSyncError}
+                                </Typography>
+                            )}
                         </Box>
                     </Box>
                 </CardContent>
@@ -220,13 +267,15 @@ export default function Sync() {
                 </Box>
             </Box>
 
-            {confirmClearCache && (
-                <Dialog title={translations.CLEAR_CACHE} onClose={() => setConfirmClearCache(false)} actions={clearCacheActions}>
-                    <Typography variant="body1">
-                        {translations.CLEAR_CACHE_MESSAGE}
-                    </Typography>
-                </Dialog>
-            )}
-        </Box>
+            {
+                confirmClearCache && (
+                    <Dialog title={translations.CLEAR_CACHE} onClose={() => setConfirmClearCache(false)} actions={clearCacheActions}>
+                        <Typography variant="body1">
+                            {translations.CLEAR_CACHE_MESSAGE}
+                        </Typography>
+                    </Dialog>
+                )
+            }
+        </Box >
     );
 }

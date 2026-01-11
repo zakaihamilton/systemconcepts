@@ -21,19 +21,21 @@ import Cookies from "js-cookie";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SessionIcon from "@widgets/SessionIcon";
 import Chip from "@mui/material/Chip";
-import { SyncActiveStore } from "@util/syncState";
+import { SyncActiveStore } from "@sync/syncState";
+import { PlayerStore } from "@pages/Player";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isMobile = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
-    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order, showFilterDialog } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order } = SessionsStore.useState();
+    const { session } = PlayerStore.useState();
     useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset"]);
 
     // Memoize dependencies to prevent unnecessary resets
     const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode]);
-    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode], [groupFilter, typeFilter, yearFilter, translations, viewMode]);
+    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode, session], [groupFilter, typeFilter, yearFilter, translations, viewMode, session]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };
@@ -78,7 +80,7 @@ export default function SessionsPage() {
             },
             columnProps: {
                 style: {
-                    width: "7em"
+                    width: "9em"
                 }
             },
             viewModes: {
@@ -171,46 +173,12 @@ export default function SessionsPage() {
         if (!item) {
             return null;
         }
-        const { position, duration } = item;
-        const percentage = duration && (position / duration * 100);
-        const style = {
-            background: `conic-gradient(var(--primary-color) ${percentage}%, transparent 0)`
-        };
-        const title = translations[item.type.toUpperCase()];
-        const onClickIcon = () => handleIconClick(item.type);
 
-        const icon = <div style={style} className={styles.icon + " " + (typeFilter.length ? styles.active : "")} onClick={onClickIcon} id={item.type}>
-            <SessionIcon type={item.type} />
-        </div>;
+        const percentage = item.duration && (item.position / item.duration * 100);
+        const isPlaying = session && session.group === item.group && session.date === item.date && session.name === item.name;
 
-        const altIcon = <>
-            {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
-            {!!item.ai && <div className={styles.altIcon + " " + styles.ai + " " + (item.video ? styles.video : "")}>
-                <AutoAwesomeIcon />
-            </div>}
-        </>;
-
-        const nameContent = <Tooltip arrow title={item.name}>
-            <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
-                {item.name}
-                <div className={styles.percentageContainer + " " + (percentage && styles.visible)}>
-                    <div className={styles.percentage} style={{ width: percentage + "%" }} />
-                </div>
-            </span>
-        </Tooltip>;
-
-        const href = target(item);
-        let nameWidget = <Row href={href} onClick={gotoItem.bind(null, item)} icons={icon}>{nameContent}</Row>;
-        if (viewMode === "grid") {
-            nameWidget = <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />;
-        }
-
-        // Don't spread the entire item object - only add what's needed
-        const durationWidget = item.type === "image" ? "" : (item.duration > 1 ? formatDuration(item.duration * 1000, true) : translations.UNKNOWN);
-
-        // Return new object with only essential properties, not all file metadata
         return {
-            // Core properties needed for display
+            // Identity & core data
             key: item.key,
             id: item.id,
             name: item.name,
@@ -220,26 +188,127 @@ export default function SessionsPage() {
             color: item.color,
             type: item.type,
             typeOrder: item.typeOrder,
-            duration: item.duration,
-            position: item.position,
+
+            // Media properties
             thumbnail: item.thumbnail,
             video: item.video,
             ai: item.ai,
-            // Computed widgets
-            nameWidget,
-            groupWidget: <Group fill={viewMode === "grid"} name={item.group} color={item.color} />,
-            thumbnailWidget: <Image href={href} onClick={gotoItem.bind(null, item)} path={item.thumbnail} width={isMobile && viewMode === "grid" ? "100%" : "12em"} height={isMobile && viewMode === "grid" ? "7em" : "10em"} alt={altIcon} />,
-            durationWidget,
-            tagsWidget: (item.tags || []).length ? <div className={styles.tags}>{item.tags.map(tag => <Chip key={tag} label={tag} size="small" className={styles.tag} />)}</div> : null,
-            tags: (item.tags || []).join(" ")
+            duration: item.duration,
+            position: item.position,
+            percentage,
+
+            // Pre-computed display values
+            summary: item.summary,
+            tags: item.tags || [],
+            tagsString: (item.tags || []).join(" "),
+            formattedDuration: item.type === "image"
+                ? ""
+                : (item.duration > 1
+                    ? formatDuration(item.duration * 1000, true)
+                    : translations.UNKNOWN),
+            isPlaying
         };
-    }, [viewMode, typeFilter, translations, target, gotoItem, handleIconClick]);
+    }, [formatDuration, translations, session]);
+
+    const renderColumn = useCallback((columnId, item) => {
+        switch (columnId) {
+            case 'name':
+            case 'nameWidget': {
+                const style = {};
+
+                const icon = (
+                    <div
+                        style={style}
+                        className={clsx(styles.icon, typeFilter.length && styles.active)}
+                        onClick={() => handleIconClick(item.type)}
+                        id={item.type}
+                    >
+                        <SessionIcon type={item.type} />
+                    </div>
+                );
+
+                const nameContentInner = (
+                    <span className={clsx(styles.labelText, viewMode !== "table" && styles.singleLine)}>
+                        {item.name}
+                        <div className={clsx(styles.percentageContainer, item.percentage && styles.visible)}>
+                            <div className={styles.percentage} style={{ width: item.percentage + "%" }} />
+                        </div>
+                    </span>
+                );
+
+                const nameContent = <Tooltip enterDelay={500} enterNextDelay={500} arrow title={item.name}>
+                    <div className={styles.nameContainer}>
+                        {nameContentInner}
+                    </div>
+                </Tooltip>;
+
+                const href = target(item);
+                return viewMode === "grid"
+                    ? <Label className={clsx(styles.labelName, styles[viewMode])} icon={viewMode !== "grid" && icon} name={nameContent} />
+                    : <Row href={href} onClick={() => gotoItem(item)} icons={icon}>{nameContent}</Row>;
+            }
+
+            case 'thumbnail':
+            case 'thumbnailWidget': {
+                const shouldShowImage = viewMode === "grid";
+                const altIcon = (
+                    <>
+                        {item.video ? <MovieIcon fontSize="large" /> : <GraphicEqIcon fontSize="large" />}
+                        {item.ai && (
+                            <div className={clsx(styles.altIcon, styles.ai, item.video && styles.video)}>
+                                <AutoAwesomeIcon />
+                            </div>
+                        )}
+                    </>
+                );
+
+                return (
+                    <Image
+                        href={target(item)}
+                        onClick={() => gotoItem(item)}
+                        path={shouldShowImage ? item.thumbnail : null}
+                        width={viewMode === "grid" ? null : "12em"}
+                        height={viewMode === "grid" ? null : "9em"}
+                        alt={altIcon}
+                        loading="lazy"
+                    />
+                );
+            }
+
+            case 'group':
+            case 'groupWidget':
+                return <Group fill={viewMode === "grid"} name={item.group} color={item.color} />;
+
+            case 'duration':
+            case 'durationWidget':
+                return item.formattedDuration;
+
+            case 'tags':
+            case 'tagsWidget':
+                return item.tags.length ? (
+                    <div className={styles.tags}>
+                        {item.tags.map(tag => (
+                            <Chip key={tag} label={tag} size="small" className={styles.tag} />
+                        ))}
+                    </div>
+                ) : null;
+
+            default:
+                return item[columnId];
+        }
+    }, [viewMode, typeFilter, target, gotoItem, handleIconClick, isMobile]);
 
     const filter = useCallback(item => {
+        // Debug: trace first filter execution
+        if (!window._filterTrace) window._filterTrace = 0;
+        if (window._filterTrace < 1) {
+            console.log(`[Sessions] Trace: filter running. typeFilter:`, typeFilter);
+            window._filterTrace++;
+        }
         let { group, type, year, thumbnail } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -247,6 +316,8 @@ export default function SessionsPage() {
             const withoutSummary = typeFilter.includes("without_summary");
             const withTags = typeFilter.includes("with_tags");
             const withoutTags = typeFilter.includes("without_tags");
+            const withPosition = typeFilter.includes("with_position");
+            const withoutPosition = typeFilter.includes("without_position");
 
             const matchType = !types.length || types.includes(type);
 
@@ -279,7 +350,23 @@ export default function SessionsPage() {
                 matchTags = !hasTags;
             }
 
-            show = show && matchType && matchThumbnail && matchSummary && matchTags;
+            let matchPosition = true;
+            const hasPosition = item.position > 0;
+            if (withPosition && withoutPosition) {
+                matchPosition = true;
+            } else if (withPosition) {
+                matchPosition = hasPosition;
+                // Debug: log first few items checks
+                if (!window._posFilterCheck) window._posFilterCheck = 0;
+                if (window._posFilterCheck < 5) {
+                    console.log(`[Sessions debug] Checking ${item.name}: position=${item.position}, hasPosition=${hasPosition}, match=${matchPosition}`);
+                    window._posFilterCheck++;
+                }
+            } else if (withoutPosition) {
+                matchPosition = !hasPosition;
+            }
+
+            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);
@@ -349,7 +436,7 @@ export default function SessionsPage() {
         {!isMobile && <FilterBar />}
         <Table
             cellWidth={isMobile ? "11em" : "16em"}
-            cellHeight={isMobile ? "12em" : "20em"}
+            cellHeight={isMobile ? "12em" : "17em"}
             name="sessions"
             store={SessionsStore}
             columns={columns}
@@ -362,6 +449,8 @@ export default function SessionsPage() {
             depends={tableDeps}
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
+            renderColumn={renderColumn}
+            rowClassName={item => item.isPlaying ? styles.playing : null}
         />
 
         {!!isMobile && <FilterBar />}

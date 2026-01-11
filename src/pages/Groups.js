@@ -1,16 +1,15 @@
 import Table from "@widgets/Table";
+import storage from "@util/storage";
 import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
-import { Store } from "pullstate";
-import { useGroups } from "@util/groups";
-import { useSyncFeature } from "@util/sync";
-import { SyncActiveStore, UpdateSessionsStore } from "@util/syncState";
+import { GroupsStore } from "@util/groups";
+import { requestSync } from "@sync/sync";
 import ColorPicker from "./Groups/ColorPicker";
 import styles from "./Groups.module.scss";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
-import { formatDuration } from "@util/string";
+import { formatDuration, abbreviateSize } from "@util/string";
 import UpdateIcon from "@mui/icons-material/Update";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -18,28 +17,105 @@ import { useStyles } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
-import { useSessions, SessionsStore } from "@util/sessions";
+import { useSessions } from "@util/sessions";
 import { useEffect, useRef, useState } from "react";
 import ProgressDialog from "./Groups/ProgressDialog";
+import UploadIcon from "@mui/icons-material/Upload";
 
 registerToolbar("Groups");
-
-export const GroupsStore = new Store({
-    counter: 0,
-    showDisabled: false
-});
 
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
     const { counter, showDisabled } = GroupsStore.useState();
-    const [groups, loading, setGroups] = useGroups([counter]);
+    const [sessions, loading, groups, setGroups] = useSessions([counter], { filterSessions: false });
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
-    const [sessions, loadingSessions] = useSessions([], { filterSessions: false });
-    const { sync } = useSyncFeature();
+    const sync = requestSync;
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const syncTimerRef = useRef(null);
+    const fileInputRef = useRef(null);
+    const [groupSizes, setGroupSizes] = useState({});
+    const [sizeRefreshTrigger, setSizeRefreshTrigger] = useState(0);
+
+    // Calculate storage sizes for each group
+    useEffect(() => {
+        const calculateSizes = async () => {
+            const sizes = {};
+            let bundleData = null;
+
+            // Check if we need to load bundle
+            const hasBundled = groups.some(g => g.bundled);
+            if (hasBundled) {
+                const bundlePath = "local/sync/bundle.json";
+                try {
+                    if (await storage.exists(bundlePath)) {
+                        const content = await storage.readFile(bundlePath);
+                        bundleData = JSON.parse(content);
+                    }
+                } catch (err) {
+                    console.error("Error reading bundle for size check:", err);
+                }
+            }
+
+            for (const group of groups) {
+                try {
+                    const isMerged = group.merged ?? group.disabled;
+                    let totalSize = 0;
+
+                    if (group.bundled) {
+                        if (bundleData && Array.isArray(bundleData.sessions)) {
+                            const groupSessions = bundleData.sessions.filter(s => s.group === group.name);
+                            // We approximate the size by stringifying the sessions belonging to this group
+                            if (groupSessions.length > 0) {
+                                totalSize = JSON.stringify(groupSessions).length;
+                            }
+                        }
+                    } else if (isMerged) {
+                        // Check merged file
+                        const mergedPath = `local/sync/${group.name}.json`;
+                        if (await storage.exists(mergedPath)) {
+                            const content = await storage.readFile(mergedPath);
+                            totalSize = content ? content.length : 0;
+                        }
+                    } else {
+                        // Check split files
+                        const splitPath = `local/sync/${group.name}`;
+                        if (await storage.exists(splitPath)) {
+                            const yearFiles = await storage.getListing(splitPath);
+                            if (yearFiles) {
+                                for (const yearFile of yearFiles) {
+                                    if (yearFile.name.endsWith('.json')) {
+                                        const filePath = `${splitPath}/${yearFile.name}`;
+                                        const content = await storage.readFile(filePath);
+                                        totalSize += content ? content.length : 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    sizes[group.name] = totalSize;
+                } catch (err) {
+                    console.error(`Error calculating size for ${group.name}:`, err);
+                    sizes[group.name] = 0;
+                }
+            }
+            setGroupSizes(sizes);
+        };
+
+        if (groups.length > 0) {
+            calculateSizes();
+        }
+    }, [groups, counter, sizeRefreshTrigger]);
+
+    // Refresh sizes when update sessions completes
+    useEffect(() => {
+        if (!busy) {
+            // Trigger size recalculation when busy becomes false
+            setSizeRefreshTrigger(prev => prev + 1);
+        }
+    }, [busy]);
 
     const animatedClassName = useStyles(styles, {
         animated: busy
@@ -79,20 +155,13 @@ export default function Groups() {
         sync && sync();
     };
 
-    const updateGroupWithSync = async (name, updateAll) => {
-        await updateGroup(name, updateAll);
+    const updateGroupWithSync = async (name, updateAll, forceUpdate) => {
+        await updateGroup(name, updateAll, forceUpdate);
 
         // Trigger sync - it will upload local changes
         if (sync) {
             sync();
         }
-
-        // Wait for sync to upload, then force reload
-        setTimeout(() => {
-            SyncActiveStore.update(s => {
-                s.counter++;
-            });
-        }, 2000);
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
@@ -108,6 +177,59 @@ export default function Groups() {
 
     const duration = start && currentTime - start;
     const formattedDuration = formatDuration(duration);
+
+    const handleImportGroups = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const importedData = JSON.parse(text);
+
+            // Handle multiple formats: array, or object { groups: [...] }, or object { "groupName": { ... } }
+            let importedGroups = [];
+            if (Array.isArray(importedData)) {
+                importedGroups = importedData;
+            } else if (importedData.groups && Array.isArray(importedData.groups)) {
+                importedGroups = importedData.groups;
+            } else {
+                // Convert object map { "name": { ... } } to array
+                importedGroups = Object.entries(importedData).map(([name, info]) => ({
+                    name,
+                    ...info
+                }));
+            }
+
+            if (!importedGroups.length) {
+                throw new Error("Invalid format: no groups found in the imported file");
+            }
+
+            // Replace existing groups with imported data
+            setGroups(currentGroups => {
+                // Map imported groups to the standard format
+                const updated = importedGroups.map(imported => {
+                    const existing = currentGroups.find(g => g.name === imported.name) || {};
+                    return {
+                        ...existing, // Preserve existing internal fields if any
+                        name: imported.name,
+                        color: imported.color !== undefined ? imported.color : (existing.color || ""),
+                        disabled: imported.disabled !== undefined ? !!imported.disabled : (existing.disabled || false)
+                    };
+                });
+                return updated;
+            });
+        } catch (err) {
+            console.error("Error importing groups:", err);
+            alert("Failed to import groups.json: " + err.message);
+        }
+
+        // Reset file input
+        event.target.value = '';
+    };
 
     const toolbarItems = [
         !!busy && {
@@ -144,6 +266,14 @@ export default function Groups() {
             onClick: () => GroupsStore.update(s => { s.showDisabled = !s.showDisabled; }),
             location: "header",
             menu: true
+        },
+        !busy && {
+            id: "import_groups",
+            name: translations.IMPORT_GROUPS || "Import Groups",
+            icon: <UploadIcon />,
+            onClick: handleImportGroups,
+            location: "header",
+            menu: true
         }
     ];
 
@@ -160,6 +290,26 @@ export default function Groups() {
         withProgress && {
             id: "progress",
             title: translations.PROGRESS,
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
+        },
+        {
+            id: "storageMode",
+            title: translations.STORAGE,
+            sortable: "storageMode",
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
+        },
+        {
+            id: "storageSize",
+            title: translations.SIZE,
+            sortable: "storageSizeBytes",
             columnProps: {
                 style: {
                     width: "6em"
@@ -199,16 +349,29 @@ export default function Groups() {
 
         const iconWidget = <ItemMenu updateGroup={updateGroupWithSync} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
 
+        const sizeBytes = groupSizes[item.name] || 0;
+        const sizeDisplay = sizeBytes > 0 ? abbreviateSize(sizeBytes) : '-';
+
         return {
             ...item,
             iconWidget,
             nameWidget: <Label name={item.name[0].toUpperCase() + item.name.slice(1)} icon={iconWidget} className={item.disabled && styles.disabled} />,
             progress: !!hasStatusItem && <Progress variant={variant} tooltip={tooltip} size={48} style={{ flex: 0, justifyContent: "initial" }} value={variant === "determinate" ? percentage : undefined} />,
-            colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />
+            colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />,
+            storageMode: item.bundled ? translations.BUNDLED : ((item.merged ?? item.disabled) ? translations.MERGED : translations.SPLIT),
+            storageSize: sizeDisplay,
+            storageSizeBytes: sizeBytes
         };
     };
 
     return <>
+        <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+        />
         <Table
             name="groups"
             store={GroupsStore}
@@ -226,8 +389,8 @@ export default function Groups() {
                 table: null
             }}
             mapper={mapper}
-            loading={loading || loadingSessions}
-            depends={[translations, status, updateGroupWithSync, sessions, showDisabled]}
+            loading={loading}
+            depends={[translations, status, updateGroupWithSync, sessions, showDisabled, groupSizes]}
         />
         <ProgressDialog />
     </>;

@@ -18,7 +18,7 @@ import Typography from "@mui/material/Typography";
 import StatusBar from "@widgets/StatusBar";
 import Destination from "./Storage/Destination";
 import { useDateFormatter } from "@util/locale";
-import { useSync } from "@util/sync";
+import { useSync } from "@sync/sync";
 import { isBinaryFile, isImageFile } from "@util/path";
 import styles from "./Storage.module.scss";
 import { useLocalStorage } from "@util/store";
@@ -92,7 +92,7 @@ export default function Storage({ path = "" }) {
             sortable: "mtimeMs",
             columnProps: {
                 style: {
-                    width: "22em"
+                    width: "25em"
                 }
             }
         }
@@ -240,6 +240,7 @@ export default function Storage({ path = "" }) {
                 });
             }}
             depends={[mode, select, path, editing, dateFormatter]}
+            resetScrollDeps={[path]}
             onExport={onExport}
             onImport={!readOnly && onImport}
             statusBar={statusBar}

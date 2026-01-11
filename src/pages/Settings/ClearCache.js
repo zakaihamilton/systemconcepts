@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import Dialog from "@widgets/Dialog";
 import { goBackPage } from "@util/pages";
 import { SyncContext } from "@components/Sync";
-import { clearBundleCache } from "@util/sync";
+import { clearBundleCache } from "@sync/sync";
 
 export default function ClearCache() {
     const translations = useTranslations();

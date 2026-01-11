@@ -17,7 +17,7 @@ import { useSwipe } from "@util/touch";
 
 registerToolbar("DayView");
 
-export default function DayView({ sessions, date, store }) {
+export default function DayView({ sessions, date, store, playingSession }) {
     const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
     const translations = useTranslations();
@@ -53,7 +53,7 @@ export default function DayView({ sessions, date, store }) {
     const sortedGroups = Object.keys(groups).sort();
 
     const items = sortedGroups.map(group => {
-        return <SessionGroup key={group} group={group} sessions={groups[group]} />;
+        return <SessionGroup key={group} group={group} sessions={groups[group]} playingSession={playingSession} />;
     });
 
     const gotoPreviousDay = () => {

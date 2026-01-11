@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, ListObjectsCommand } from "@aws-sdk/client-s3";
-import { lockMutex } from "./mutex";
+import { lockMutex } from "@sync/mutex";
 import fs from "fs";
-import { makePath } from "@util/path";
+import { makePath, isBinaryFile } from "@util/path";
 import { getSafeError } from "./safeError";
 
 let s3Client = null;
@@ -274,11 +274,21 @@ export async function handleRequest({ readOnly, req }) {
             console.error("get error: ", err);
             return { err: getSafeError(err) };
         }
-    } else if (!readOnly && req.method === "PUT") {
-        for (const item of req.body) {
-            await uploadData({ path: item.path, data: item.body });
+    } else if (req.method === "PUT") {
+        if (readOnly) {
+            throw { message: "READ_ONLY_ACCESS", status: 403 };
         }
-    } else if (!readOnly && req.method === "DELETE") {
+        for (const item of req.body) {
+            let { body, path } = item;
+            if (typeof body === "string" && isBinaryFile(path)) {
+                body = Buffer.from(body, "base64");
+            }
+            await uploadData({ path, data: body });
+        }
+    } else if (req.method === "DELETE") {
+        if (readOnly) {
+            throw { message: "READ_ONLY_ACCESS", status: 403 };
+        }
         const { path } = headers;
         await deleteFile({ path: decodeURIComponent(path) });
     }

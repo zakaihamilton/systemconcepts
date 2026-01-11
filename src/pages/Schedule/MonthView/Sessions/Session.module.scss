@@ -1,3 +1,5 @@
+@use "../../../../scss/mixins" as *;
+
 .root {
     display: flex;
     flex-direction: column;
@@ -85,4 +87,10 @@
     margin-top: 4px;
     opacity: 0.8;
     margin: 0.5em;
+}
+
+
+
+.playing {
+    @include playing;
 }
