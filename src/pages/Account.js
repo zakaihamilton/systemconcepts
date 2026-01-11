@@ -161,7 +161,10 @@ export default function Account({ redirect }) {
         }
     };
 
-    const onSubmit = async () => {
+    const onSubmit = async (event) => {
+        if (event) {
+            event.preventDefault();
+        }
         if (isSignedIn) {
             // Clear cookies
             Cookies.set("id", "");
@@ -224,12 +227,6 @@ export default function Account({ redirect }) {
         }
     };
 
-    const onKeyDown = async event => {
-        if (event.keyCode == 13) {
-            onSubmit();
-        }
-    };
-
     const onValidateField = text => {
         let error = "";
         if (!text) {
@@ -263,7 +260,7 @@ export default function Account({ redirect }) {
                 {error && <Typography className={styles.error}>
                     {error}
                 </Typography>}
-                <div className={styles.form}>
+                <form className={styles.form} onSubmit={onSubmit} noValidate>
                     <Grid container spacing={2}>
                         <Grid size={12}>
                             <Input
@@ -272,6 +269,7 @@ export default function Account({ redirect }) {
                                 id="username"
                                 label={translations.ID}
                                 name="username"
+                                type="email"
                                 autoComplete="username"
                                 validate={validate}
                                 readOnly={isSignedIn}
@@ -293,7 +291,6 @@ export default function Account({ redirect }) {
                                 validate={validate}
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
-                                onKeyDown={onKeyDown}
                                 background={true}
                             />
                         </Grid>}
@@ -313,7 +310,7 @@ export default function Account({ redirect }) {
                         </Grid>}
                         <Grid size={12}>
                             <Button
-                                onClick={onSubmit}
+                                type="submit"
                                 disabled={isInvalid || inProgress}
                                 fullWidth
                                 variant="contained"
@@ -388,7 +385,7 @@ export default function Account({ redirect }) {
                             </div>
                         </Grid>
                     </Grid>
-                </div>
+                </form>
             </div>
         </div>
     );
