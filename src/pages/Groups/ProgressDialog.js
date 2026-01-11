@@ -146,8 +146,8 @@ export default function ProgressDialog() {
                 <div className={styles.timerGhost}>{formattedDuration.replace(/[0-9]/g, "8")}</div>
             </div>}
             <div className={styles.content}>
-                {status.map(renderItem)}
-                {status.length === 0 && <div className={styles.empty}>{translations.NO_UPDATES}</div>}
+                {status.filter(item => item.count > 0 || (item.errors && item.errors.length > 0)).map(renderItem)}
+                {status.filter(item => item.count > 0 || (item.errors && item.errors.length > 0)).length === 0 && <div className={styles.empty}>{translations.NO_UPDATES}</div>}
             </div>
         </Dialog>
     );
