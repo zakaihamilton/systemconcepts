@@ -142,6 +142,14 @@ export default {
             "value": "Reset"
         },
         {
+            "id": "ENGLISH",
+            "value": "English"
+        },
+        {
+            "id": "BOTH",
+            "value": "Both"
+        },
+        {
             "id": "RESET_SETTINGS",
             "value": "Reset Settings"
         },

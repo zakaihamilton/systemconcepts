@@ -126,6 +126,14 @@ export default {
             "value": "איפוס"
         },
         {
+            "id": "ENGLISH",
+            "value": "אנגלית"
+        },
+        {
+            "id": "BOTH",
+            "value": "שניהם"
+        },
+        {
             "id": "RESET_SETTINGS",
             "value": "איפוס הגדרות"
         },

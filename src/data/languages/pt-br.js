@@ -126,6 +126,14 @@ export default {
             "value": "Restaurar"
         },
         {
+            "id": "ENGLISH",
+            "value": "Inglês"
+        },
+        {
+            "id": "BOTH",
+            "value": "Ambos"
+        },
+        {
             "id": "RESET_SETTINGS",
             "value": "Restaurar Configurações"
         },

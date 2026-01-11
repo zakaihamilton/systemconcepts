@@ -477,7 +477,7 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -487,6 +487,8 @@ export function useSessions(depends = [], options = {}) {
             const withoutTags = typeFilter.includes("without_tags");
             const withPosition = typeFilter.includes("with_position");
             const withoutPosition = typeFilter.includes("without_position");
+            const withEnglish = typeFilter.includes("with_english");
+            const withHebrew = typeFilter.includes("with_hebrew");
 
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
@@ -531,7 +533,17 @@ export function useSessions(depends = [], options = {}) {
                     matchPosition = !hasPosition;
                 }
 
-                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition;
+                const isHebrew = /[\u0590-\u05FF]/.test(session.name);
+                let matchLanguage = true;
+                if (withEnglish && withHebrew) {
+                    matchLanguage = true;
+                } else if (withEnglish) {
+                    matchLanguage = !isHebrew;
+                } else if (withHebrew) {
+                    matchLanguage = isHebrew;
+                }
+
+                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage;
 
                 return matchType && matchThumbnail && matchSummary && matchTags;
             });

@@ -308,7 +308,7 @@ export default function SessionsPage() {
         let { group, type, year, thumbnail } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -318,6 +318,8 @@ export default function SessionsPage() {
             const withoutTags = typeFilter.includes("without_tags");
             const withPosition = typeFilter.includes("with_position");
             const withoutPosition = typeFilter.includes("without_position");
+            const withEnglish = typeFilter.includes("with_english");
+            const withHebrew = typeFilter.includes("with_hebrew");
 
             const matchType = !types.length || types.includes(type);
 
@@ -366,7 +368,17 @@ export default function SessionsPage() {
                 matchPosition = !hasPosition;
             }
 
-            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition;
+            const isHebrew = /[\u0590-\u05FF]/.test(item.name);
+            let matchLanguage = true;
+            if (withEnglish && withHebrew) {
+                matchLanguage = true;
+            } else if (withEnglish) {
+                matchLanguage = !isHebrew;
+            } else if (withHebrew) {
+                matchLanguage = isHebrew;
+            }
+
+            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);

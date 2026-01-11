@@ -75,6 +75,17 @@ export default function FilterBar({ hideYears = false }) {
                 { id: "with_position", name: translations.WITH_POSITION || "With Position", radio: true },
                 { id: "without_position", name: translations.WITHOUT_POSITION || "Without Position", radio: true }
             ]
+        },
+        {
+            id: "language_header",
+            name: translations.LANGUAGE,
+            header: true,
+            expanded: typeFilter.includes("with_english") || typeFilter.includes("with_hebrew"),
+            items: [
+                { id: "languages_all", name: translations.BOTH, radio: true },
+                { id: "with_english", name: translations.ENGLISH, radio: true },
+                { id: "with_hebrew", name: translations.HEBREW, radio: true }
+            ]
         }
     ], [translations, typeFilter]);
 
@@ -122,6 +133,7 @@ export default function FilterBar({ hideYears = false }) {
                     (type.id === "summaries_all" && !typeFilter.includes("with_summary") && !typeFilter.includes("without_summary")) ||
                     (type.id === "tags_all" && !typeFilter.includes("with_tags") && !typeFilter.includes("without_tags")) ||
                     (type.id === "position_all" && !typeFilter.includes("with_position") && !typeFilter.includes("without_position")) ||
+                    (type.id === "languages_all" && !typeFilter.includes("with_english") && !typeFilter.includes("with_hebrew")) ||
                     (type.radio && typeFilter.includes(type.id)),
                 checked: !type.radio && typeFilter.includes(type.id),
                 selected: typeFilter,
@@ -138,7 +150,8 @@ export default function FilterBar({ hideYears = false }) {
                             thumbnails_all: ["with_thumbnail", "without_thumbnail"],
                             summaries_all: ["with_summary", "without_summary"],
                             tags_all: ["with_tags", "without_tags"],
-                            position_all: ["with_position", "without_position"]
+                            position_all: ["with_position", "without_position"],
+                            languages_all: ["with_english", "with_hebrew"]
                         };
                         if (allRadios[type.id]) {
                             s.typeFilter = s.typeFilter.filter(t => !allRadios[type.id].includes(t));
@@ -153,7 +166,9 @@ export default function FilterBar({ hideYears = false }) {
                                 with_tags: "without_tags",
                                 without_tags: "with_tags",
                                 with_position: "without_position",
-                                without_position: "with_position"
+                                without_position: "with_position",
+                                with_english: "with_hebrew",
+                                with_hebrew: "with_english"
                             };
                             const otherRadio = otherRadios[type.id];
                             s.typeFilter = s.typeFilter.filter(t => t !== otherRadio);
