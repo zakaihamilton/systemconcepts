@@ -18,7 +18,7 @@ import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 
 export default function Sync({ children }) {
     const translations = useTranslations();
-    const { sync, busy, error, duration, changed, percentage, currentBundle } = useSyncFeature();
+    const { sync, busy, error, duration, changed, percentage, currentBundle, personalSyncPercentage } = useSyncFeature();
     const { busy: sessionsBusy } = UpdateSessionsStore.useState();
     const { personalSyncBusy, personalSyncError } = SyncActiveStore.useState();
     const isBusy = busy || sessionsBusy || personalSyncBusy;
@@ -27,14 +27,24 @@ export default function Sync({ children }) {
     });
 
     const formattedDuration = formatDuration(duration);
+    const activePercentage = (personalSyncBusy ? personalSyncPercentage : percentage) ?? 0;
+    const showPercentage = isBusy && (busy || personalSyncBusy);
 
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
         {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {showPercentage && ` (${activePercentage}%)`}
         <br />
         {!!duration && formattedDuration}
     </span>;
+
+    const ariaLabel = (() => {
+        if (error) return translations.SYNC_FAILED;
+        if (personalSyncError) return translations.PERSONAL_SYNC_ERROR;
+        if (isBusy) return `${translations.SYNCING}${showPercentage ? ` (${activePercentage}%)` : ''}`;
+        return translations.SYNC;
+    })();
 
     const syncIcon =
         <Badge overlap="rectangular" color="secondary" variant="dot" invisible={!changed}>
@@ -45,6 +55,7 @@ export default function Sync({ children }) {
         {
             id: "sync",
             name,
+            ariaLabel,
             location: "header",
             sortKey: 1,
             menu: false,
@@ -65,7 +76,7 @@ export default function Sync({ children }) {
 
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle, sessionsBusy, personalSyncBusy, personalSyncError] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle, sessionsBusy, personalSyncBusy, personalSyncError, activePercentage, showPercentage, ariaLabel] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, error };
