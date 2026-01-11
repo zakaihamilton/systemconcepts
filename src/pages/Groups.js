@@ -340,7 +340,7 @@ export default function Groups() {
         };
 
         const statusItem = (status || []).find(group => group.name === item.name) || {};
-        const hasStatusItem = statusItem.progress !== "undefined";
+        const hasStatusItem = typeof statusItem.progress !== "undefined" && statusItem.count > 0;
 
         const variant = statusItem.progress !== -1 ? "determinate" : undefined;
         const tooltip = statusItem.index + " / " + statusItem.count;
