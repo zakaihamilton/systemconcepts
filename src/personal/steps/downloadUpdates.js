@@ -10,7 +10,7 @@ import { GroupFilter } from "../groups";
 /**
  * Step 4: Download files that are newer/different on remote
  */
-export async function downloadUpdates(localManifest, remoteManifest, userid) {
+export async function downloadUpdates(localManifest, remoteManifest, userid, onProgress) {
     const start = performance.now();
     addSyncLog("[Personal] Step 4: Downloading updates...", "info");
 
@@ -61,9 +61,18 @@ export async function downloadUpdates(localManifest, remoteManifest, userid) {
 
         addSyncLog(`[Personal] Downloading ${filesToDownload.length} file(s)...`, "info");
 
+        if (onProgress) {
+            onProgress(0, filesToDownload.length);
+        }
+
         // Download in batches
         for (let i = 0; i < filesToDownload.length; i += PERSONAL_BATCH_SIZE) {
             const batch = filesToDownload.slice(i, i + PERSONAL_BATCH_SIZE);
+            const processedCount = i;
+
+            if (onProgress) {
+                onProgress(processedCount, filesToDownload.length);
+            }
 
             await Promise.all(batch.map(async (path) => {
                 // Skip invalid paths

@@ -12,37 +12,55 @@ const STEP_WEIGHTS = {
     uploadManifest: 5
 };
 
-const TOTAL_WEIGHT = Object.values(STEP_WEIGHTS).reduce((sum, w) => sum + w, 0);
+const PERSONAL_STEP_WEIGHTS = {
+    ...STEP_WEIGHTS,
+    migrateFromMongoDB: 10
+};
 
 export class SyncProgressTracker {
-    constructor() {
+    constructor(isPersonal = false) {
+        this.isPersonal = isPersonal;
         this.completedWeight = 0;
+        this.weights = isPersonal ? PERSONAL_STEP_WEIGHTS : STEP_WEIGHTS;
+        this.totalWeight = Object.values(this.weights).reduce((sum, w) => sum + w, 0);
     }
 
     updateProgress(stepName, stepProgress = { processed: 1, total: 1 }) {
-        const stepWeight = STEP_WEIGHTS[stepName] || 0;
+        const stepWeight = this.weights[stepName] || 0;
         const stepCompletion = stepProgress.total > 0 ? (stepProgress.processed / stepProgress.total) : 0;
         const currentStepWeight = stepWeight * stepCompletion;
 
+        const progressUpdate = {
+            total: this.totalWeight,
+            processed: this.completedWeight + currentStepWeight
+        };
+
         SyncActiveStore.update(s => {
-            s.progress = {
-                total: TOTAL_WEIGHT,
-                processed: this.completedWeight + currentStepWeight
-            };
+            if (this.isPersonal) {
+                s.personalSyncProgress = progressUpdate;
+            } else {
+                s.progress = progressUpdate;
+            }
         });
     }
 
     completeStep(stepName) {
-        this.completedWeight += STEP_WEIGHTS[stepName] || 0;
+        this.completedWeight += this.weights[stepName] || 0;
         this.updateProgress(stepName, { processed: 1, total: 1 });
     }
 
     setComplete() {
+        const progressUpdate = {
+            total: this.totalWeight,
+            processed: this.totalWeight
+        };
+
         SyncActiveStore.update(s => {
-            s.progress = {
-                total: TOTAL_WEIGHT,
-                processed: TOTAL_WEIGHT
-            };
+            if (this.isPersonal) {
+                s.personalSyncProgress = progressUpdate;
+            } else {
+                s.progress = progressUpdate;
+            }
         });
     }
 }
