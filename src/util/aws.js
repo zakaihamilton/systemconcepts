@@ -42,6 +42,26 @@ function normalizePath(path) {
     return path.startsWith('/') ? path.substring(1) : path;
 }
 
+/**
+ * Validate path access to prevent traversal and restricted folder access
+ * @param {string} path - Path to validate
+ * @throws {Error} ACCESS_DENIED if path is invalid
+ */
+export function validatePathAccess(path) {
+    const normalized = normalizePath(path);
+    // SENTINEL: Use robust check for path traversal and blocked folders.
+    // We use split("/").includes("..") which is safer than string.includes("..")
+    // because it allows valid filenames like "report..pdf" while blocking traversal segments.
+    // We also strictly block access to the "private" folder.
+
+    if (normalized.split("/").includes("..")) {
+        throw new Error("ACCESS_DENIED");
+    }
+    if (normalized.startsWith("private/") || normalized === "private") {
+        throw new Error("ACCESS_DENIED");
+    }
+}
+
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
     const s3 = await getS3({});
     const fileStream = fs.createReadStream(from);
@@ -242,18 +262,7 @@ export async function handleRequest({ readOnly, req }) {
         try {
             path = decodeURIComponent(path);
             if (readOnly) {
-                const normalized = normalizePath(path);
-                // SENTINEL: Use robust check for path traversal and blocked folders.
-                // We use split("/").includes("..") which is safer than string.includes("..")
-                // because it allows valid filenames like "report..pdf" while blocking traversal segments.
-                // We also strictly block access to the "private" folder.
-
-                if (normalized.split("/").includes("..")) {
-                    throw new Error("ACCESS_DENIED");
-                }
-                if (normalized.startsWith("private/") || normalized === "private") {
-                    throw new Error("ACCESS_DENIED");
-                }
+                validatePathAccess(path);
             }
 
             if (type === "dir") {
