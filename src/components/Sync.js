@@ -33,7 +33,7 @@ export default function Sync({ children }) {
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
-        {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {!error && !personalSyncError && (personalSyncBusy ? (translations.PERSONAL + " " + translations.SYNCING) : (isBusy ? translations.SYNCING : translations.SYNC))}
         {showPercentage && ` (${activePercentage}%)`}
         <br />
         {!!duration && formattedDuration}
@@ -42,7 +42,10 @@ export default function Sync({ children }) {
     const ariaLabel = (() => {
         if (error) return translations.SYNC_FAILED;
         if (personalSyncError) return translations.PERSONAL_SYNC_ERROR;
-        if (isBusy) return `${translations.SYNCING}${showPercentage ? ` (${activePercentage}%)` : ''}`;
+        if (isBusy) {
+            const label = personalSyncBusy ? (translations.PERSONAL + " " + translations.SYNCING) : translations.SYNCING;
+            return `${label}${showPercentage ? ` (${activePercentage}%)` : ''}`;
+        }
         return translations.SYNC;
     })();
 
