@@ -6,7 +6,7 @@
         background-color: rgba(var(--text-color-rgb), 0.05);
         border-radius: 12px;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid transparent;
+        border: 1px solid var(--border-color);
         padding-top: 18px;
 
         &:hover {
@@ -21,6 +21,7 @@
         &.Mui-focused {
             background-color: rgba(var(--primary-color-rgb), 0.05);
             box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
+            border-color: var(--primary-color);
         }
 
         &:active {
