@@ -150,8 +150,19 @@ export async function performPersonalSync() {
 
     } catch (err) {
         console.error("[Personal Sync] Sync failed:", err);
-        addSyncLog(`[Personal] Sync failed: ${err.message}`, "error");
-        return { success: false, error: err };
+        let errorMessage = err.message || String(err);
+        if (err === 401 || err === 403) {
+            errorMessage = "Please login to sync";
+        }
+        addSyncLog(`[Personal] Sync failed: ${errorMessage}`, "error");
+
+        let error = err;
+        if (err === 401 || err === 403) {
+             error = new Error(errorMessage);
+             error.code = "NOT_LOGGED_IN";
+        }
+
+        return { success: false, error: error };
     } finally {
         unlock();
     }
