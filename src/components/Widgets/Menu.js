@@ -139,7 +139,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                     {...props}
                 >
                     <div className={styles.background} style={style} />
-                    {hasAnyIcon && (
+                    {!header && hasAnyIcon && (
                         <ListItemIcon className={styles.itemIcon}>
                             {hasSelector && (
                                 <div className={styles.selector}>
