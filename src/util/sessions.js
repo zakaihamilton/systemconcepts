@@ -40,7 +40,7 @@ export function useSessions(depends = [], options = {}) {
     const { settings: groupsSettings } = GroupsStore.useState();
     const [groupMetadata, loading, setGroups] = useGroups([syncCounter, ...depends]);
     const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog } = SessionsStore.useState();
-    useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter"]);
+    useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter", "showFilterDialog"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
         SessionsStore.update(s => {
