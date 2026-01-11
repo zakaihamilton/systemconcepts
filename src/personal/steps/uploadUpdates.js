@@ -7,7 +7,7 @@ import { compressJSON } from "@sync/bundle";
 /**
  * Step 5: Upload files that were modified locally
  */
-export async function uploadUpdates(localManifest, remoteManifest, userid) {
+export async function uploadUpdates(localManifest, remoteManifest, userid, onProgress) {
     const start = performance.now();
     addSyncLog("[Personal] Step 5: Uploading updates...", "info");
 
@@ -33,9 +33,18 @@ export async function uploadUpdates(localManifest, remoteManifest, userid) {
 
         addSyncLog(`[Personal] Uploading ${filesToUpload.length} modified file(s)...`, "info");
 
+        if (onProgress) {
+            onProgress(0, filesToUpload.length);
+        }
+
         // Upload in batches
         for (let i = 0; i < filesToUpload.length; i += PERSONAL_BATCH_SIZE) {
             const batch = filesToUpload.slice(i, i + PERSONAL_BATCH_SIZE);
+            const processedCount = i;
+
+            if (onProgress) {
+                onProgress(processedCount, filesToUpload.length);
+            }
 
             await Promise.all(batch.map(async (path) => {
                 const localPath = makePath(LOCAL_PERSONAL_PATH, path);

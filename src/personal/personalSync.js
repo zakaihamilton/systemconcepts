@@ -3,6 +3,7 @@ import { addSyncLog } from "@sync/logs";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { SyncActiveStore } from "@sync/syncState";
+import { SyncProgressTracker } from "@sync/progressTracker";
 
 // Step Imports
 import { getLocalFiles } from "./steps/getLocalFiles";
@@ -23,6 +24,7 @@ export async function performPersonalSync() {
     addSyncLog("[Personal] Starting personal sync process...", "info");
     const startTime = performance.now();
     let hasChanges = false;
+    const progress = new SyncProgressTracker(true);
 
     try {
         // Get userid from cookies
@@ -35,17 +37,24 @@ export async function performPersonalSync() {
         addSyncLog(`[Personal] Syncing for user: ${userid}`, "info");
 
         // Step 1: Get local personal files
+        progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
         const localFiles = await getLocalFiles();
+        progress.completeStep('getLocalFiles');
 
         // Step 2: Update local manifest
+        progress.updateProgress('updateLocalManifest', { processed: 0, total: 1 });
         let localManifest = await updateLocalManifest(localFiles);
+        progress.completeStep('updateLocalManifest');
 
         // Step 3: Sync with remote manifest
+        progress.updateProgress('syncManifest', { processed: 0, total: 1 });
         let remoteManifest = await syncManifest(localManifest, userid);
         addSyncLog(`[Personal] Local manifest has ${Object.keys(localManifest).length} files`, "info");
         addSyncLog(`[Personal] Remote manifest has ${Object.keys(remoteManifest).length} files`, "info");
+        progress.completeStep('syncManifest');
 
         // Step 3.5: Migrate from MongoDB if needed
+        progress.updateProgress('migrateFromMongoDB', { processed: 0, total: 1 });
         const { migrateFromMongoDB } = await import("./steps/migrateFromMongoDB");
         const basePath = `aws/personal/${userid}`;
         const migrationResult = await migrateFromMongoDB(userid, remoteManifest, basePath);
@@ -73,13 +82,18 @@ export async function performPersonalSync() {
             remoteManifest = await syncManifest(localManifest, userid);
             addSyncLog(`[Personal] Re-synced manifest after migration: ${Object.keys(remoteManifest).length} files`, "info");
         }
+        progress.completeStep('migrateFromMongoDB');
 
         // Step 4: Download updates
-        const downloadResult = await downloadUpdates(localManifest, remoteManifest, userid);
+        progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
+        const downloadResult = await downloadUpdates(localManifest, remoteManifest, userid, (processed, total) => {
+            progress.updateProgress('downloadUpdates', { processed, total });
+        });
         localManifest = downloadResult.manifest;
         remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
         hasChanges = hasChanges || downloadResult.hasChanges;
         addSyncLog(`[Personal] After downloads, local manifest has ${Object.keys(localManifest).length} files`, "info");
+        progress.completeStep('downloadUpdates');
 
         // Save local manifest after downloads
         if (downloadResult.hasChanges) {
@@ -91,22 +105,34 @@ export async function performPersonalSync() {
         }
 
         // Step 4.5: Remove deleted files
+        progress.updateProgress('removeDeletedFiles', { processed: 0, total: 1 });
         const removeResult = await removeDeletedFiles(localManifest, remoteManifest);
         localManifest = removeResult.manifest;
         hasChanges = hasChanges || removeResult.hasChanges;
+        progress.completeStep('removeDeletedFiles');
 
         // Step 5: Upload updates
-        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, userid);
+        progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
+        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, userid, (processed, total) => {
+            progress.updateProgress('uploadUpdates', { processed, total });
+        });
         remoteManifest = uploadUpdatesResult.manifest;
         hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
+        progress.completeStep('uploadUpdates');
 
         // Step 6: Upload new files
-        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, userid);
+        progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
+        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, userid, (processed, total) => {
+            progress.updateProgress('uploadNewFiles', { processed, total });
+        });
         remoteManifest = uploadNewResult.manifest;
         hasChanges = hasChanges || uploadNewResult.hasChanges;
+        progress.completeStep('uploadNewFiles');
 
         // Step 7: Upload manifest
+        progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
         await uploadManifest(remoteManifest, userid);
+        progress.setComplete();
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
         addSyncLog(`[Personal] Sync complete in ${duration}s`, "success");
