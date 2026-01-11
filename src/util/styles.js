@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { useWindowSize } from "@util/size";
+import { nextTrimmedString } from "@util/array";
 
 export function getProperty(name) {
     return getComputedStyle(document.documentElement, null).getPropertyValue(name);
@@ -31,17 +32,44 @@ export function useStyles(styles, data) {
 }
 
 export function useDeviceType() {
-    const size = useWindowSize();
-    const isPhone = size.width && size.width <= 768;
-    const isTablet = size.width && size.width >= 768 && size.width <= 1024;
-    if (!size.width) {
-        return "ssr";
-    }
-    if (isTablet) {
-        return "tablet";
-    }
-    if (isPhone) {
-        return "phone";
-    }
-    return "desktop";
+    const [deviceType, setDeviceType] = useState(() => {
+        if (typeof window === "undefined") {
+            return "ssr";
+        }
+        const width = window.innerWidth;
+        if (width < 768) return "phone";
+        if (width <= 1024) return "tablet";
+        return "desktop";
+    });
+
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            let newType = "desktop";
+            if (width < 768) {
+                newType = "phone";
+            } else if (width <= 1024) {
+                newType = "tablet";
+            }
+
+            setDeviceType(prev => prev === newType ? prev : newType);
+        };
+
+        // Handle initial load
+        handleResize();
+
+        let timeoutId = null;
+        const onResize = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(handleResize, 100);
+        };
+
+        window.addEventListener("resize", onResize);
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            window.removeEventListener("resize", onResize);
+        };
+    }, []);
+
+    return deviceType;
 }
