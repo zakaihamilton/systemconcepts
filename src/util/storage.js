@@ -136,6 +136,10 @@ const storageMethods = Object.fromEntries([
     }];
 }));
 
+storageMethods.getRecursiveList = async (path) => {
+    return callMethod({ name: "getRecursiveList" }, path);
+};
+
 export function useListing(url, depends = [], options) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(null);
@@ -281,6 +285,18 @@ export function useFile(urlArgument, depends = [], mapping) {
 }
 
 async function getRecursiveList(path) {
+    // Try to use the storage method if available (optimized)
+    try {
+        const result = await storageMethods.getRecursiveList(path);
+        if (result) {
+            return result;
+        }
+    } catch (err) {
+        // Fallback to manual recursion if method not supported or fails
+        // But actually callMethod throws if method not found on device?
+        // callMethod returns null if method not found.
+    }
+
     // Return empty array if directory doesn't exist (e.g., after cache clear)
     if (!await storageMethods.exists(path)) {
         return [];
