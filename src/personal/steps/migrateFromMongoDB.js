@@ -200,10 +200,10 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             }
 
             if (existsRemote) {
-                // For repair: Don't skip even if remote exists, because remote might be a phantom manifest
-                // migrationState.migrated[file.path] = true;
-                // hasNewSkippedFiles = true;
-                // autoMigratedCount++;
+                // If remote exists, we assume it is the source of truth and skip local migration
+                migrationState.migrated[file.path] = true;
+                hasNewSkippedFiles = true;
+                autoMigratedCount++;
             }
         }
 
