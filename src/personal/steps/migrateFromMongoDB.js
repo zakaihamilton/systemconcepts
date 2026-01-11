@@ -30,39 +30,9 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
     }
 
     const safeWriteMigration = async (data, reason = "unknown") => {
-        const tempPath = migrationPath + ".tmp";
         const content = JSON.stringify(data, null, 2);
-        const size = content.length;
-
-        console.log(`[Personal] Writing migration state (${reason}): ${size} bytes`);
-
-        // Write to temp first
-        await storage.writeFile(tempPath, content);
-
-        // Verify temp file
-        const tempContent = await storage.readFile(tempPath);
-        if (!tempContent || !tempContent.trim()) {
-            console.error(`[Personal] Failed to write temp file (${reason})`);
-            throw new Error("Failed to write migration temp file (empty content)");
-        }
-
-        // Manual copy to target
-        await storage.writeFile(migrationPath, tempContent);
-
-        // Small delay to ensure flush
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        // Verify target file
-        const targetContent = await storage.readFile(migrationPath);
-        if (!targetContent || !targetContent.trim()) {
-            console.error(`[Personal] Failed to write target file (${reason}) - target empty`);
-            throw new Error("Failed to write migration file (target empty after write)");
-        } else {
-            console.log(`[Personal] Verified migration file (${reason}): ${targetContent.length} bytes`);
-        }
-
-        // Cleanup temp
-        await storage.deleteFile(tempPath);
+        // Direct write for performance, skipping double-verify overhead
+        await storage.writeFile(migrationPath, content);
     };
 
     try {
@@ -360,39 +330,20 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                 if (cache.dirty) {
                     const bundlePath = makePath(LOCAL_PERSONAL_PATH, `${cacheKey}.json`);
 
-
-                    // Read existing if not fully loaded? 
-                    // We assume we are building it or appending. 
-                    // Ideally we read existing first if we want to support partial updates, but migration is usually filling gaps.
-                    // For safety, let's just write what we have. 
-                    // However, if we migrated some files in previous run, they might be in the file already?
-                    // Actually, if we write the WHOLE bundle every time, we need to know the whole state.
-                    // But we only fetch "filesToMigrate".
-                    // So we must read existing bundle first if it exists!
-
-                    let fullBundle = cache.content;
-                    if (await storage.exists(bundlePath)) {
+                    // Optimization: Only read existing file if we haven't loaded it yet
+                    // This prevents reading the file repeatedly in subsequent batches
+                    if (!cache.loaded && await storage.exists(bundlePath)) {
                         try {
                             const existing = JSON.parse(await storage.readFile(bundlePath));
-                            fullBundle = { ...existing, ...cache.content };
+                            cache.content = { ...existing, ...cache.content };
                         } catch (err) { }
                     }
+                    cache.loaded = true;
 
-                    const content = JSON.stringify(fullBundle, null, 4);
+                    const content = JSON.stringify(cache.content, null, 4);
 
                     await storage.createFolderPath(bundlePath);
                     await storage.writeFile(bundlePath, content);
-                    // Don't write to AWS directly - let the sync process handle uploads
-
-
-                    // Update manifest for the bundle file
-                    // The individual files inside are NOT in the manifest anymore?
-                    // Or do we keep them virtual?
-                    // The Plan said: "Update manifest with bundle file."
-                    // So we remove individual entries? 
-                    // Users current manifest might have individual entries.
-                    // We should add the bundle entry.
-                    // We should probably NOT add individual entries for bundled files.
 
                     const hash = await calculateHash(content);
 
@@ -403,14 +354,16 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     };
 
                     cache.dirty = false;
-                    // Keep content in memory in case we add more to it in next batch
-                    cache.content = fullBundle;
                 }
             }
         };
 
+        // Sort files to migrate by path to ensure bundle locality
+        // This makes sure we process all files for a group/year together, minimizing bundle I/O
+        filesToMigrate.sort((a, b) => a.path.localeCompare(b.path));
+
         // Migrate files in batches
-        const BATCH_SIZE = 50;
+        const BATCH_SIZE = 500;
         for (let i = 0; i < filesToMigrate.length; i += BATCH_SIZE) {
             const batch = filesToMigrate.slice(i, i + BATCH_SIZE);
 
