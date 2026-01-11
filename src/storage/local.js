@@ -95,7 +95,8 @@ async function deleteFolder(root) {
     for (const name of names) {
         const path = [root, name].filter(Boolean).join("/");
         const stat = await fs.promises.stat(path);
-        if (stat.type === "dir") {
+        const isDir = stat.type === "dir" || (stat.isDirectory && stat.isDirectory());
+        if (isDir) {
             await deleteFolder(path);
         }
         else {
