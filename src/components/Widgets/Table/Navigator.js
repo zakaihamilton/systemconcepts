@@ -71,7 +71,11 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
                 <Tooltip title={translations.PAGE_INDEX} arrow>
                     <span>
                         <DelayInput onChange={handlePageChange} value={pageIndex + 1}>
-                            <TextField className={styles.pageIndex} variant="standard" />
+                            <TextField
+                                className={styles.pageIndex}
+                                variant="standard"
+                                inputProps={{ "aria-label": translations.PAGE_INDEX }}
+                            />
                         </DelayInput>
                     </span>
                 </Tooltip>
