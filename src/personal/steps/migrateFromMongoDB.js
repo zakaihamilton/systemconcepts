@@ -155,14 +155,17 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
 
         // Load groups to check for bundled status
         let bundledGroups = new Set();
+        let mergedGroups = new Set();
         let allGroups = new Set();
         try {
             const { groups } = await readGroups();
             if (groups) {
                 groups.forEach(g => {
                     allGroups.add(g.name);
-                    if (g.bundled || g.merged) {
+                    if (g.bundled) {
                         bundledGroups.add(g.name);
+                    } else if (g.merged) {
+                        mergedGroups.add(g.name);
                     }
                 });
             }
@@ -192,15 +195,20 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
             }
 
             const isBundled = bundledGroups.has(groupName);
+            const isMerged = mergedGroups.has(groupName);
 
             let existsRemote = false;
 
             if (isBundled) {
+                // Check if the common bundle exists in manifest
+                const bundleKey = "bundle.json";
+                if (remoteManifest[bundleKey]) {
+                    existsRemote = true;
+                }
+            } else if (isMerged) {
                 // Check if the group bundle exists in manifest
                 const bundleKey = `${groupName}.json`;
                 if (remoteManifest[bundleKey]) {
-                    // Assume if bundle exists, the file is in it. 
-                    // This is an optimization. Worst case if data missing, user can re-save.
                     existsRemote = true;
                 }
             } else {
@@ -429,6 +437,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                     }
 
                     const isBundled = bundledGroups.has(groupName);
+                    const isMerged = mergedGroups.has(groupName);
 
                     // Read from MongoDB
                     const content = await storage.readFile(file.path);
@@ -439,16 +448,28 @@ export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
                         return;
                     }
 
-                    if (isBundled) {
-                        if (!bundleCache[groupName]) {
-                            bundleCache[groupName] = { content: {}, dirty: false };
+                    if (isBundled || isMerged) {
+                        // Bundled goes to "bundle.json", Merged goes to "{group}.json"
+                        // Key for Bundled: "group/file.json" (relativePath is suitable)
+                        // Key for Merged: "file.json" (relativePath without group)
+
+                        const cacheKey = isBundled ? "bundle" : groupName;
+                        if (!bundleCache[cacheKey]) {
+                            bundleCache[cacheKey] = { content: {}, dirty: false };
                         }
-                        // Parse content to store as object in bundle
+
                         try {
                             const data = JSON.parse(content);
-                            const bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
-                            bundleCache[groupName].content[bundleKey] = data;
-                            bundleCache[groupName].dirty = true;
+                            let bundleKey = "";
+                            if (isBundled) {
+                                bundleKey = relativePath; // e.g. "independent/session.json"
+                            } else {
+                                // Merged: strip group name
+                                bundleKey = relativePath.substring(groupName.length + 1).replace(/^[\/\\]+/, "");
+                            }
+
+                            bundleCache[cacheKey].content[bundleKey] = data;
+                            bundleCache[cacheKey].dirty = true;
                             markAsDeleted(`metadata/sessions/${relativePath}`);
                         } catch (e) {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
