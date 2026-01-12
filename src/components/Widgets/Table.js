@@ -256,24 +256,43 @@ export default function TableWidget(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, filter, mapper, ...depends]);
 
+    // Optimization: Create a persistent cache for search strings that resets only when data changes.
+    // This avoids mutating data objects while still providing O(1) access to lowercased strings
+    // during filtering, which significantly improves performance for large datasets.
+    const searchCache = useMemo(() => new WeakMap(), [mappedData]);
+
     const filteredData = useMemo(() => {
         if (!search) {
             return mappedData;
         }
 
         const lowerSearch = search.toLowerCase();
-        return mappedData.filter(({ mapped }) => {
+
+        return mappedData.filter((wrapper) => {
+            const { mapped } = wrapper;
+
+            // Get or create cache entry for this wrapper
+            let itemCache = searchCache.get(wrapper);
+            if (!itemCache) {
+                itemCache = Object.create(null);
+                searchCache.set(wrapper, itemCache);
+            }
+
             for (const key of searchKeys) {
                 if (typeof mapped[key] === "string") {
-                    const match = mapped[key].toLowerCase().includes(lowerSearch);
-                    if (match) {
+                    let lowerValue = itemCache[key];
+                    if (lowerValue === undefined) {
+                        lowerValue = mapped[key].toLowerCase();
+                        itemCache[key] = lowerValue;
+                    }
+                    if (lowerValue.includes(lowerSearch)) {
                         return true;
                     }
                 }
             }
             return false;
         });
-    }, [mappedData, search, searchKeys]);
+    }, [mappedData, search, searchKeys, searchCache]);
 
     const sortedData = useMemo(() => {
         return stableSort(filteredData || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
