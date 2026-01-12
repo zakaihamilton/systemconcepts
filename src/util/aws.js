@@ -270,7 +270,7 @@ export async function handleRequest({ readOnly, req, path }) {
         }
         try {
             if (readOnly) {
-                validatePathAccess(path);
+                validatePathAccess(currentPath);
             }
 
             if (type === "dir") {
