@@ -818,6 +818,14 @@ export default {
             "value": "Collapse"
         },
         {
+            "id": "SHOW_GROUP_COUNTERS",
+            "value": "Show Group Counters"
+        },
+        {
+            "id": "HIDE_GROUP_COUNTERS",
+            "value": "Hide Group Counters"
+        },
+        {
             "id": "ID_DESCRIPTION",
             "value": "This is your unique identifier that should consist of only letters (A-Z) and numbers (0-9)"
         },

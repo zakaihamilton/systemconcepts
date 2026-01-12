@@ -798,6 +798,14 @@ export default {
             "value": "כווץ"
         },
         {
+            "id": "SHOW_GROUP_COUNTERS",
+            "value": "הצג מונים קבוצתיים"
+        },
+        {
+            "id": "HIDE_GROUP_COUNTERS",
+            "value": "הסתר מונים קבוצתיים"
+        },
+        {
             "id": "ID_DESCRIPTION",
             "value": "זה המזהה היחודי שלך שמורכב באותיות באנגלית (A-Z) ומספרים (0-9)"
         },

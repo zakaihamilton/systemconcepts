@@ -139,7 +139,7 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
                             </div>
                         </Tooltip>
                     ))}
-                    <Tooltip title={showBadges ? translations.COLLAPSE : translations.EXPAND} arrow>
+                    <Tooltip title={showBadges ? translations.HIDE_GROUP_COUNTERS : translations.SHOW_GROUP_COUNTERS} arrow>
                         <IconButton className={styles.toggleButton} onClick={toggleBadges} size="small">
                             {showBadges ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                         </IconButton>
