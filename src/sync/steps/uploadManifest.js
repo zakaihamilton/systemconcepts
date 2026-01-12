@@ -11,6 +11,13 @@ export async function uploadManifest(remoteManifest) {
     const start = performance.now();
     addSyncLog("Step 7: Uploading manifest...", "info");
 
+    const role = Cookies.get("role");
+    // Only Admin can upload the global manifest
+    if (role !== "admin") {
+        addSyncLog("Skipping global manifest upload (Student/ReadOnly)", "info");
+        return;
+    }
+
     try {
         const remoteManifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
         await writeCompressedFile(remoteManifestPath, remoteManifest);

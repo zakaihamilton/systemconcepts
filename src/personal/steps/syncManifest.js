@@ -53,12 +53,31 @@ export async function syncManifest(localManifest, userid) {
         } else {
             // Bootstrap: Build manifest from existing remote files
             addSyncLog("[Personal] No manifest found, building from existing files...", "info");
-            remoteManifest = await buildManifestFromRemote(basePath);
+            try {
+                // If we don't have permission (403), this will throw.
+                // We'll catch it and assume empty remote state for read-only users.
+                remoteManifest = await buildManifestFromRemote(basePath);
+            } catch (err) {
+                if (err.status === 403 || err === 403 || String(err).includes("403")) {
+                    addSyncLog("[Personal] Cannot list remote files (read-only/access denied). Starting with empty remote state.", "warning");
+                    remoteManifest = {};
+                } else {
+                    throw err;
+                }
+            }
 
             // Save the newly built manifest
             if (Object.keys(remoteManifest).length > 0) {
-                await writeCompressedFile(remoteManifestPath, remoteManifest);
-                addSyncLog(`[Personal] Created manifest with ${Object.keys(remoteManifest).length} existing files`, "info");
+                try {
+                    await writeCompressedFile(remoteManifestPath, remoteManifest);
+                    addSyncLog(`[Personal] Created manifest with ${Object.keys(remoteManifest).length} existing files`, "info");
+                } catch (writeErr) {
+                    if (writeErr.status === 403 || writeErr === 403 || String(writeErr).includes("403")) {
+                        addSyncLog(`[Personal] Unable to save bootstrap manifest (read-only).`, "warning");
+                    } else {
+                        throw writeErr; // Rethrow other errors
+                    }
+                }
             }
         }
 
