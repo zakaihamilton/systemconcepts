@@ -11,6 +11,7 @@ async function getListing(path, options = {}) {
     const listing = [];
     const items = await fetchJSON(fsEndPoint, {
         method: "GET",
+        cache: "no-store",
         headers: {
             type: "dir",
             path: encodeURIComponent(path.slice(1))
@@ -22,6 +23,7 @@ async function getListing(path, options = {}) {
         if (useCount && stat.type === "dir") {
             const children = await fetchJSON(fsEndPoint, {
                 method: "GET",
+                cache: "no-store",
                 headers: {
                     type: "dir",
                     path: encodeURIComponent(path.slice(1))
@@ -69,6 +71,7 @@ async function deleteFolder(root) {
     }
     await fetchJSON(fsEndPoint, {
         method: "DELETE",
+        cache: "no-store",
         headers: {
             path: encodeURIComponent(root.slice(1))
         }
@@ -79,6 +82,7 @@ async function deleteFile(path) {
     path = makePath(path);
     await fetchJSON(fsEndPoint, {
         method: "DELETE",
+        cache: "no-store",
         headers: {
             path: encodeURIComponent(path.slice(1))
         }
@@ -92,6 +96,7 @@ async function readFile(path) {
     if (binary) {
         body = await fetchBlob(fsEndPoint, {
             method: "GET",
+            cache: "no-store",
             headers: {
                 binary: true,
                 path: encodeURIComponent(path.slice(1))
@@ -103,6 +108,7 @@ async function readFile(path) {
     else {
         body = await fetchText(fsEndPoint, {
             method: "GET",
+            cache: "no-store",
             headers: {
                 type: "file",
                 path: encodeURIComponent(path.slice(1))
@@ -143,6 +149,7 @@ async function writeFile(path, body) {
     path = makePath(path);
     await fetchJSON(fsEndPoint, {
         method: "PUT",
+        cache: "no-store",
         body: JSON.stringify([{
             path,
             body
@@ -159,6 +166,7 @@ async function writeFiles(prefix, files) {
         if (JSON.stringify(batch).length + body.length > maxBytes) {
             await fetchJSON(fsEndPoint, {
                 method: "PUT",
+                cache: "no-store",
                 body: JSON.stringify(batch)
             });
             batch = [];
@@ -171,6 +179,7 @@ async function writeFiles(prefix, files) {
     if (batch.length) {
         await fetchJSON(fsEndPoint, {
             method: "PUT",
+            cache: "no-store",
             body: JSON.stringify(batch)
         });
     }
@@ -182,6 +191,7 @@ async function exists(path) {
     try {
         const item = await fetchJSON(fsEndPoint, {
             method: "GET",
+            cache: "no-store",
             headers: {
                 path: encodeURIComponent(path.slice(1)),
                 exists: true
