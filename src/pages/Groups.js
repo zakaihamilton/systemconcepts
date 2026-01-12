@@ -217,7 +217,9 @@ export default function Groups() {
                         ...existing, // Preserve existing internal fields if any
                         name: imported.name,
                         color: imported.color !== undefined ? imported.color : (existing.color || ""),
-                        disabled: imported.disabled !== undefined ? !!imported.disabled : (existing.disabled || false)
+                        disabled: imported.disabled !== undefined ? !!imported.disabled : (existing.disabled || false),
+                        merged: imported.merged !== undefined ? !!imported.merged : (existing.merged || false),
+                        bundled: imported.bundled !== undefined ? !!imported.bundled : (existing.bundled || false)
                     };
                 });
                 return updated;
