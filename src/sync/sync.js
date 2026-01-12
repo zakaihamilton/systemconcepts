@@ -2,8 +2,10 @@ import { useRef, useEffect, useState } from "react";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
+import { fetchJSON } from "@util/fetch";
 
 import { usePageVisibility } from "@util/hooks";
+import { roleAuth } from "@util/roles";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { lockMutex } from "@sync/mutex";
 import { LOCAL_SYNC_PATH } from "./constants";
@@ -27,12 +29,38 @@ const SYNC_INTERVAL = 60; // seconds
  */
 export async function performSync() {
     const unlock = await lockMutex({ id: "sync_process" });
-    addSyncLog("Starting sync process...", "info");
-    const startTime = performance.now();
-    let hasChanges = false;
-    const progress = new SyncProgressTracker();
-
     try {
+        let role = Cookies.get("role");
+        if (!roleAuth(role, "student")) {
+            // Role is restricted, check server for updates
+            try {
+                const id = Cookies.get("id");
+                const hash = Cookies.get("hash");
+                if (id && hash) {
+                    const user = await fetchJSON("/api/login", {
+                        headers: { id, hash }
+                    });
+                    if (user && user.role) {
+                        role = user.role;
+                        Cookies.set("role", role, { expires: 60 });
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to refresh role", err);
+            }
+
+            if (!roleAuth(role, "student")) {
+                addSyncLog("Visitor access restricted. Please contact Administrator for access.", "warning");
+                return;
+            }
+        }
+
+        addSyncLog("Starting sync process...", "info");
+        const startTime = performance.now();
+        let hasChanges = false;
+        const progress = new SyncProgressTracker();
+
+
         // Step 1
         progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
         const localFiles = await getLocalFiles();

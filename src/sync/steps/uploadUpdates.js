@@ -4,6 +4,7 @@ import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
+import Cookies from "js-cookie";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 
@@ -96,6 +97,15 @@ export async function uploadUpdates(localManifest, remoteManifest) {
         return { manifest: updatedManifest, hasChanges: updates.length > 0 };
 
     } catch (err) {
+        if (err.status === 403 || err === 403 || err.message?.includes("ACCESS_DENIED")) {
+            const role = Cookies.get("role");
+            if (role === "visitor") {
+                addSyncLog("Visitor access restricted. Please contact Administrator for write access.", "warning");
+            } else {
+                addSyncLog("Skipping updates upload (read-only access)", "warning");
+            }
+            return { manifest: remoteManifest, hasChanges: false };
+        }
         console.error("[Sync] Upload updates failed:", err);
         addSyncLog(`Upload updates failed: ${err.message}`, "error");
         throw err;

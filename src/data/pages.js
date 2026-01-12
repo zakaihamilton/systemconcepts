@@ -189,6 +189,7 @@ export default [
         name: "ACCOUNT",
         Icon: AccountCircleIcon,
         Component: Account,
+        divider: true,
         sidebar: true
     },
     {
@@ -257,8 +258,7 @@ export default [
         name: "SYNC",
         Icon: SyncIcon,
         Component: Sync,
-        sidebar: true,
-        category: "tools"
+        sidebar: true
     },
     {
         id: "manageBookmarks",

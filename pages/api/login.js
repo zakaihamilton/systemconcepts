@@ -86,7 +86,7 @@ export default async function LOGIN_API(req, res) {
                     lastName: decodeURIComponent(last_name),
                     password: decodeURIComponent(password)
                 });
-                res.status(200).json({ hash });
+                res.status(200).json({ hash, role: "visitor" });
             }
             catch (err) {
                 console.error("login error: ", err);

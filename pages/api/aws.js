@@ -26,16 +26,18 @@ export default async function AWS_API(req, res) {
 
         // Determine access level based on role and path
         const isAdmin = roleAuth(user.role, "admin");
+        const isStudent = roleAuth(user.role, "student");
 
         let readOnly = true;
 
         if (isAdmin) {
             // Admins can read/write anywhere
             readOnly = false;
-        } else {
-            // Non-admins: read from /sync, read/write to /personal/<userid>
-            const isPersonalPath = path.startsWith(`personal/${user.id}/`);
-            const isSyncPath = path.startsWith("sync/");
+        } else if (isStudent) {
+            // Students can read from /sync, read/write to /personal/<userid>
+            const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
+            const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`);
+            const isSyncPath = checkPath.startsWith("sync/");
 
             if (req.method === "GET") {
                 // For GET requests, we must explicitly deny access to unauthorized paths.
@@ -52,6 +54,9 @@ export default async function AWS_API(req, res) {
                 console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
                 throw "ACCESS_DENIED: Cannot write to this path";
             }
+        }
+        else {
+            throw "ACCESS_DENIED: Not authorized";
         }
 
         console.log(`[AWS API] Access granted - ReadOnly: ${readOnly}`);

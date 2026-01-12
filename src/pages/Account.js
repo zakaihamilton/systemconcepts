@@ -144,6 +144,9 @@ export default function Account({ redirect }) {
             if (verification.hash) {
                 Cookies.set("id", id, remember && { expires: 60 });
                 Cookies.set("hash", verification.hash, remember && { expires: 60 });
+                if (verification.role) {
+                    Cookies.set("role", verification.role, remember && { expires: 60 });
+                }
                 if (redirect) {
                     setHash(decodeURIComponent(redirect));
                 }
@@ -169,6 +172,7 @@ export default function Account({ redirect }) {
             // Clear cookies
             Cookies.set("id", "");
             Cookies.set("hash", "");
+            Cookies.set("role", "");
             idState[1]("");
 
             // Clear bundle cache on logout
@@ -193,13 +197,17 @@ export default function Account({ redirect }) {
                         id,
                         password: encodeURIComponent(password)
                     }
-                }).then(async ({ err, hash }) => {
+                }).then(async (data) => {
+                    const { err, hash } = data;
                     if (err) {
                         console.error(err);
                         throw err;
                     }
                     Cookies.set("id", id, remember && { expires: 60 });
                     Cookies.set("hash", hash, remember && { expires: 60 });
+                    if (data.role) {
+                        Cookies.set("role", data.role, remember && { expires: 60 });
+                    }
 
                     if (createPasskey) {
                         try {
@@ -220,6 +228,7 @@ export default function Account({ redirect }) {
                 }).catch(err => {
                     Cookies.set("id", "");
                     Cookies.set("hash", "");
+                    Cookies.set("role", "");
                     setError(translations[err] || String(err));
                     setProgress(false);
                 });
