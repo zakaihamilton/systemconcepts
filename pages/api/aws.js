@@ -57,6 +57,12 @@ export default async function AWS_API(req, res) {
         console.log(`[AWS API] Access granted - ReadOnly: ${readOnly}`);
 
         const result = await handleRequest({ req, readOnly });
+
+        // Prevent caching of any kind
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+
         if (Buffer.isBuffer(result)) {
             res.status(200).send(result);
         }

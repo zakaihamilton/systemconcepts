@@ -77,7 +77,8 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
     let years = [];
     try {
-        years = (await getListing(path)).filter(year => !year.name.endsWith(".tags") && !year.name.endsWith(".duration"));
+        const fullListing = await getListing(path);
+        years = fullListing.filter(year => !year.name.endsWith(".tags") && !year.name.endsWith(".duration"));
     }
     catch (err) {
         console.error(err);
@@ -93,6 +94,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             return yearName === currentYear;
         });
     }
+
     const limit = pLimit(4);
 
     UpdateSessionsStore.update(s => {
@@ -109,7 +111,6 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
         try {
             const yearItems = await getListing(year.path);
-
             yearItems.sort((a, b) => a.name.localeCompare(b.name));
 
             // Load Metadata
