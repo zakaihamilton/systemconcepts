@@ -243,13 +243,22 @@ export function cdnUrl(path) {
     return url;
 }
 
-export async function handleRequest({ readOnly, req }) {
+export async function handleRequest({ readOnly, req, path }) {
     const headers = req.headers || {};
+
+    // Helper to resolve path: prefer argument (decoded), fallback to headers (encoded)
+    const resolvePath = () => {
+        if (path !== undefined) return path;
+        const headerPath = headers.path;
+        return headerPath ? decodeURIComponent(headerPath) : headerPath;
+    };
+
     if (req.method === "GET") {
-        let { path, binary, type, exists } = headers;
+        let { binary, type, exists } = headers;
+        const currentPath = resolvePath();
+
         if (exists) {
-            path = decodeURIComponent(path);
-            const metadata = await metadataInfo({ path });
+            const metadata = await metadataInfo({ path: currentPath });
             if (metadata) {
                 const type = metadata.type === "application/x-directory" ? "dir" : "file";
                 return {
@@ -260,17 +269,16 @@ export async function handleRequest({ readOnly, req }) {
             return {};
         }
         try {
-            path = decodeURIComponent(path);
             if (readOnly) {
                 validatePathAccess(path);
             }
 
             if (type === "dir") {
-                const items = await list({ path, useCount: true });
+                const items = await list({ path: currentPath, useCount: true });
                 return items;
             }
             else {
-                return await downloadData({ path, binary });
+                return await downloadData({ path: currentPath, binary });
             }
         }
         catch (err) {
