@@ -14,7 +14,7 @@ export default async function LOGIN_API(req, res) {
             }
             params = await login({
                 id,
-                password: decodeURIComponent(password),
+                password: password ? decodeURIComponent(password) : undefined,
                 hash,
                 api: "login"
             });
