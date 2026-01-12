@@ -15,6 +15,13 @@ export async function uploadManifest(remoteManifest, userid) {
     const basePath = PERSONAL_SYNC_BASE_PATH.replace("{userid}", userid);
     const remoteManifestPath = makePath(basePath, PERSONAL_MANIFEST);
 
+    // Prevent uploading empty manifest to avoid corruption
+    const fileCount = Object.keys(remoteManifest || {}).length;
+    if (fileCount === 0) {
+        addSyncLog("[Personal] Skipping manifest upload (empty manifest)", "info");
+        return;
+    }
+
     try {
         await writeCompressedFile(remoteManifestPath, remoteManifest);
 

@@ -18,6 +18,13 @@ export async function uploadManifest(remoteManifest) {
         return;
     }
 
+    // Prevent uploading empty manifest to avoid corruption
+    const fileCount = Object.keys(remoteManifest || {}).length;
+    if (fileCount === 0) {
+        addSyncLog("Skipping manifest upload (empty manifest would corrupt sync)", "warning");
+        return;
+    }
+
     try {
         const remoteManifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
         await writeCompressedFile(remoteManifestPath, remoteManifest);

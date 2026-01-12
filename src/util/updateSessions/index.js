@@ -16,11 +16,6 @@ export function useUpdateSessions(groups) {
     // Our utils.getListing is exactly that.
 
     const updateSessions = useCallback(async (includeDisabled) => {
-        const isSyncBusy = SyncActiveStore.getRawState().busy;
-        if (isSyncBusy) {
-            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
-            return;
-        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
@@ -60,11 +55,6 @@ export function useUpdateSessions(groups) {
     }, [groups, prefix]);
 
     const updateAllSessions = useCallback(async (includeDisabled) => {
-        const isSyncBusy = SyncActiveStore.getRawState().busy;
-        if (isSyncBusy) {
-            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
-            return;
-        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
@@ -104,11 +94,6 @@ export function useUpdateSessions(groups) {
     }, [groups, prefix]);
 
     const updateSpecificGroup = useCallback(async (name, updateAll, forceUpdate) => {
-        const isSyncBusy = SyncActiveStore.getRawState().busy;
-        if (isSyncBusy) {
-            console.warn("[Update] Sync is currently busy, skipping manual update to avoid conflicts.");
-            return;
-        }
         UpdateSessionsStore.update(s => {
             s.busy = true;
             s.start = new Date().getTime();
