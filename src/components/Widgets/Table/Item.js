@@ -71,15 +71,34 @@ function ItemWidget({ className = "", separator, viewMode, selected: selectedIte
     const onClick = event => {
         rowClick(event, item);
     };
+
+    const onKeyDown = event => {
+        if (rowClick && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            rowClick(event, item);
+        }
+    };
+
+    const isInteractive = !!rowClick;
+
     const classes = useStyles(styles, {
         item: true,
         separator,
-        hover: !!rowClick,
+        hover: isInteractive,
         selected: selectedItem,
         even: index % 2 === 0
     });
     return <div className={styles.root} style={{ ...style, '--group-color': item.color }}>
-        <div className={classes + " " + className} {...rowClick && { onClick }} {...props}>
+        <div
+            className={classes + " " + className}
+            {...isInteractive && {
+                onClick,
+                onKeyDown,
+                role: "button",
+                tabIndex: 0
+            }}
+            {...props}
+        >
             {cells}
         </div>
     </div>;
