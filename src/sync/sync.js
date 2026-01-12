@@ -7,7 +7,7 @@ import { fetchJSON } from "@util/fetch";
 import { usePageVisibility } from "@util/hooks";
 import { roleAuth } from "@util/roles";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { lockMutex } from "@sync/mutex";
+import { lockMutex, isMutexLocked } from "@sync/mutex";
 import { LOCAL_SYNC_PATH } from "./constants";
 import { addSyncLog } from "./logs";
 
@@ -31,8 +31,30 @@ export async function performSync() {
     const unlock = await lockMutex({ id: "sync_process" });
     try {
         let role = Cookies.get("role");
+        const id = Cookies.get("id");
+        const hash = Cookies.get("hash");
+
+        if (!role && id && hash) {
+            console.log("[Sync] Role undefined but logged in, fetching...");
+            try {
+                const user = await fetchJSON("/api/login", {
+                    headers: { id, hash }
+                });
+                if (user && user.role) {
+                    role = user.role;
+                    Cookies.set("role", role, { expires: 60 });
+                    console.log("[Sync] Role fetched:", role);
+                }
+            } catch (err) {
+                console.error("[Sync] Failed to fetch role:", err);
+            }
+        }
+
+        console.log("[Sync] Initial role check:", role);
+
         if (!roleAuth(role, "student")) {
             // Role is restricted, check server for updates
+            console.log("[Sync] Role restricted, attempting refresh...");
             try {
                 const id = Cookies.get("id");
                 const hash = Cookies.get("hash");
@@ -40,20 +62,33 @@ export async function performSync() {
                     const user = await fetchJSON("/api/login", {
                         headers: { id, hash }
                     });
+                    console.log("[Sync] Refresh result:", user);
                     if (user && user.role) {
                         role = user.role;
                         Cookies.set("role", role, { expires: 60 });
+                        console.log("[Sync] Role updated to:", role);
                     }
                 }
             } catch (err) {
-                console.error("Failed to refresh role", err);
+                console.error("[Sync] Failed to refresh role", err);
+                addSyncLog(`Role refresh failed: ${err.message || String(err)}`, "error");
             }
 
-            if (!roleAuth(role, "student")) {
-                addSyncLog("Visitor access restricted. Please contact Administrator for access.", "warning");
+            if (roleAuth(role, "student")) {
+                console.log("[Sync] Role refreshed and authorized. Proceeding with sync.");
+            } else {
+                console.warn("[Sync] Access still restricted after refresh. Role:", role);
+                addSyncLog(`Visitor access restricted (role: ${role || "none"}). Please contact Administrator for access.`, "warning");
+                UpdateSessionsStore.update(s => {
+                    s.busy = false; // FIX: Reset busy state
+                });
+                SyncActiveStore.update(s => {
+                    s.busy = false; // FIX: Reset busy state
+                });
                 return;
             }
         }
+
 
         addSyncLog("Starting sync process...", "info");
         const startTime = performance.now();
@@ -121,6 +156,9 @@ export async function performSync() {
             addSyncLog(`Changes detected - reloading sessions`, "info");
         } else {
             addSyncLog(`No changes detected`, "info");
+            UpdateSessionsStore.update(s => {
+                s.busy = false;
+            });
         }
 
         // Run personal sync after main sync completes
@@ -133,9 +171,24 @@ export async function performSync() {
             errorMessage = "Please login to sync";
         }
         addSyncLog(`Sync failed: ${errorMessage}`, "error");
+        UpdateSessionsStore.update(s => {
+            s.busy = false;
+        });
         throw err;
     } finally {
         unlock();
+        // Force unlock if still reports locked (double-safety)
+        if (isMutexLocked({ id: "sync_process" })) {
+            const { getMutex } = await import("@sync/mutex");
+            const lock = getMutex({ id: "sync_process" });
+            if (lock) {
+                lock._locks = 0;
+                lock._locking = Promise.resolve();
+                SyncActiveStore.update(s => {
+                    s.busy = false; // FIX: Reset busy state
+                });
+            }
+        }
     }
 }
 
@@ -199,7 +252,7 @@ export async function requestSync() {
         });
     } catch (err) {
         SyncActiveStore.update(s => {
-            s.busy = false;
+            s.busy = false; // FIX: Reset busy state in outer catch
         });
     }
 }

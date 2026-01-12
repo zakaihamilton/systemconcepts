@@ -43,6 +43,19 @@ export default async function USERS_API(req, res) {
                 body.utc = record.utc;
             }
         }
+        else if (req.method === "PUT") {
+            const body = req.body;
+            const parsedId = decodeURIComponent(queryId);
+            const record = await findRecord({ query: { id: parsedId }, collectionName });
+            if (record) {
+                body.hash = record.hash;
+                body.salt = record.salt;
+                body.date = record.date;
+                body.utc = record.utc;
+                // Admins trigger this branch, so we DO NOT restore body.role from record.role,
+                // allowing the Admin's change to persist.
+            }
+        }
         const result = await handleRequest({ collectionName, req });
         res.status(200).json(result);
     }

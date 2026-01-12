@@ -24,12 +24,18 @@ export default async function LOGIN_API(req, res) {
         }
         if (error) {
             console.error("login error: ", error);
+            res.status(200).json({ err: getSafeError(error) });
         }
         else {
             // Log only ID to avoid leaking sensitive data (hash, PII)
-            console.log("login success", params && params.id);
+            if (params && !params.role) {
+                params.role = "visitor";
+            }
+            res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+            res.status(200).json({ ...(error && { err: getSafeError(error) }), ...params });
         }
-        res.status(200).json({ ...(error && { err: getSafeError(error) }), ...params });
     }
     else if (req.method === "PUT") {
         const headers = req.headers || {};

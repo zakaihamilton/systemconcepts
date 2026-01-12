@@ -205,9 +205,7 @@ export default function Account({ redirect }) {
                     }
                     Cookies.set("id", id, remember && { expires: 60 });
                     Cookies.set("hash", hash, remember && { expires: 60 });
-                    if (data.role) {
-                        Cookies.set("role", data.role, remember && { expires: 60 });
-                    }
+                    Cookies.set("role", data.role || "visitor", remember && { expires: 60 });
 
                     if (createPasskey) {
                         try {

@@ -50,10 +50,15 @@ export async function login({ id, password, hash, api, path }) {
         query: { id },
         record: {
             ...user,
+            role: user.role || "visitor",
             date,
             utc
         }
     });
+    // Ensure the returned user object also has the role
+    if (!user.role) {
+        user.role = "visitor";
+    }
     return user;
 }
 
