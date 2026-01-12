@@ -1292,6 +1292,10 @@ export default {
         {
             "id": "PERSONAL_SYNC_BUSY",
             "value": "Personal Sync Busy"
+        },
+        {
+            "id": "TOTAL_SESSIONS_ADDED",
+            "value": "Total Sessions Added"
         }
     ]
 };

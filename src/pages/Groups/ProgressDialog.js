@@ -66,6 +66,8 @@ export default function ProgressDialog() {
     const { busy, status, start, showUpdateDialog } = UpdateSessionsStore.useState();
     const wasBusyRef = useRef(false);
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
+    const [expandedItems, setExpandedItems] = useState(new Set());
+    const [isListExpanded, setListExpanded] = useState(false);
 
     useEffect(() => {
         if (busy) {
@@ -82,6 +84,7 @@ export default function ProgressDialog() {
             UpdateSessionsStore.update(s => {
                 s.showUpdateDialog = true;
             });
+            setExpandedItems(new Set());
         }
         wasBusyRef.current = busy;
     }, [busy]);
@@ -93,46 +96,33 @@ export default function ProgressDialog() {
     };
 
     const renderItem = (item) => {
-        const hasErrors = item.errors && item.errors.length > 0;
-        const progress = item.count > 0 ? (item.progress / item.count) * 100 : 0;
-        const isDone = item.count > 0 && item.progress === item.count;
-        const hasNewSessions = item.newSessions && item.newSessions.length > 0;
-
-        return (
-            <div key={item.name} className={styles.item}>
-                <div className={styles.header}>
-                    <div className={styles.name}>{item.name}</div>
-                    <div className={styles.statusIcon}>
-                        {hasErrors ? <ErrorIcon color="error" /> : (isDone ? <CheckIcon color="success" /> : null)}
-                    </div>
-                </div>
-                <div className={styles.progressContainer}>
-                    <LinearProgress variant="determinate" value={progress} className={styles.progressBar} color={hasErrors ? "error" : "primary"} />
-                    <div className={styles.progressText}>
-                        {item.addedCount > 0 && <Chip label={`+${item.addedCount}`} color="success" size="small" className={styles.countChip} />}
-                        {item.removedCount > 0 && <Chip label={`-${item.removedCount}`} color="error" size="small" className={styles.countChip} />}
-                        <div style={{ flex: 1 }} />
-                        {item.year && `${item.year} - `}{item.progress} / {item.count} {translations.YEARS}
-                    </div>
-                </div>
-                {hasNewSessions && <NewSessionsList sessions={item.newSessions} />}
-                {hasErrors && (
-                    <div className={styles.errors}>
-                        {item.errors.map((err, idx) => (
-                            <div key={idx} className={styles.error}>{err.toString()}</div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
+        return <ProgressItem key={item.name} item={item} translations={translations} />;
     };
 
     if (!showUpdateDialog) {
         return null;
     }
 
+    // Filter items based on logic used in render
     const duration = start && currentTime - start;
     const formattedDuration = formatDuration(duration);
+
+    const visibleItems = status.filter(item => item.count > 0 || (item.errors && item.errors.length > 0));
+    const totalAdded = status.reduce((acc, item) => acc + (item.addedCount || 0), 0);
+
+    const toggleList = () => {
+        setListExpanded(!isListExpanded);
+    };
+
+    const toggleItem = (name) => {
+        const newSet = new Set(expandedItems);
+        if (newSet.has(name)) {
+            newSet.delete(name);
+        } else {
+            newSet.add(name);
+        }
+        setExpandedItems(newSet);
+    };
 
     return (
         <Dialog
@@ -146,9 +136,64 @@ export default function ProgressDialog() {
                 <div className={styles.timerGhost}>{formattedDuration.replace(/[0-9]/g, "8")}</div>
             </div>}
             <div className={styles.content}>
-                {status.filter(item => item.count > 0 || (item.errors && item.errors.length > 0)).map(renderItem)}
-                {status.filter(item => item.count > 0 || (item.errors && item.errors.length > 0)).length === 0 && <div className={styles.empty}>{translations.NO_UPDATES}</div>}
+                <div className={styles.totalAdded} onClick={toggleList} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ flex: 1 }}>{translations.TOTAL_SESSIONS_ADDED}: {totalAdded}</span>
+                    {isListExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </div>
+                {isListExpanded && visibleItems.map(item => (
+                    <ProgressItem
+                        key={item.name}
+                        item={item}
+                        translations={translations}
+                        expanded={expandedItems.has(item.name)}
+                        onToggle={() => toggleItem(item.name)}
+                    />
+                ))}
+                {isListExpanded && visibleItems.length === 0 && <div className={styles.empty}>{translations.NO_UPDATES}</div>}
             </div>
         </Dialog>
+    );
+}
+
+function ProgressItem({ item, translations, expanded, onToggle }) {
+    const hasErrors = item.errors && item.errors.length > 0;
+    const progress = item.count > 0 ? (item.progress / item.count) * 100 : 0;
+    const isDone = item.count > 0 && item.progress === item.count;
+    const hasNewSessions = item.newSessions && item.newSessions.length > 0;
+
+    return (
+        <div key={item.name} className={styles.item}>
+            <div className={styles.header} onClick={onToggle} style={{ cursor: 'pointer' }}>
+                <div className={styles.statusIcon}>
+                    {hasErrors ? <ErrorIcon color="error" /> : (isDone ? <CheckIcon color="success" /> : null)}
+                </div>
+                <div className={styles.name}>{item.name}</div>
+                <div style={{ flex: 1 }} />
+                <div className={styles.headerSummary}>
+                    {item.addedCount > 0 && <Chip label={`+${item.addedCount}`} color="success" size="small" className={styles.countChip} />}
+                    {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </div>
+            </div>
+            {expanded && (
+                <>
+                    <div className={styles.progressContainer}>
+                        <LinearProgress variant="determinate" value={progress} className={styles.progressBar} color={hasErrors ? "error" : "primary"} />
+                        <div className={styles.progressText}>
+                            {item.removedCount > 0 && <Chip label={`-${item.removedCount}`} color="error" size="small" className={styles.countChip} />}
+                            <div style={{ flex: 1 }} />
+                            {item.year && `${item.year} - `}{item.progress} / {item.count} {translations.YEARS}
+                        </div>
+                    </div>
+                    {hasNewSessions && <NewSessionsList sessions={item.newSessions} />}
+                    {hasErrors && (
+                        <div className={styles.errors}>
+                            {item.errors.map((err, idx) => (
+                                <div key={idx} className={styles.error}>{err.toString()}</div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
     );
 }

@@ -1280,6 +1280,10 @@ export default {
         {
             "id": "HIDE_PASSWORD",
             "value": "הסתר סיסמה"
+        },
+        {
+            "id": "TOTAL_SESSIONS_ADDED",
+            "value": "סה״כ שיעורים שנוספו"
         }
     ]
 };
