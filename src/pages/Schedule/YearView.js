@@ -15,7 +15,7 @@ import { useSwipe } from "@util/touch";
 
 registerToolbar("YearView");
 
-export default function YearView({ sessions, date, store }) {
+export default function YearView({ sessions, date, store, playingSession }) {
     const { lastViewMode } = store.useState();
     const direction = useDirection();
     const translations = useTranslations();
@@ -25,7 +25,7 @@ export default function YearView({ sessions, date, store }) {
 
     const months = new Array(12).fill(0).map((_, index) => {
         const monthDate = new Date(currentYear, index, 1);
-        return <Month key={index} date={monthDate} sessions={sessions} store={store} />;
+        return <Month key={index} date={monthDate} sessions={sessions} store={store} playingSession={playingSession} />;
     });
 
     const yearState = [currentYear, year => {

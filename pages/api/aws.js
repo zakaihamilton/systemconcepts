@@ -13,26 +13,54 @@ export default async function AWS_API(req, res) {
         if (!id || !hash) {
             throw "ACCESS_DENIED";
         }
-        const path = decodeURIComponent((req.body && req.body.path) || (req.headers && req.headers.path));
+        const body = (req.body && Array.isArray(req.body)) ? (req.body[0] || {}) : (req.body || {});
+        let path = body.path || (req.headers && req.headers.path) || "";
+        if (path) {
+            path = decodeURIComponent(path);
+        }
         const user = await login({ id, hash, api: "aws", path });
         if (!user) {
             throw "ACCESS_DENIED";
         }
+        console.log(`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${req.method}, Path: ${path}`);
 
-        // Determine access level
+        // Determine access level based on role and path
         const isAdmin = roleAuth(user.role, "admin");
-        let readOnly = !isAdmin; // Admins can write, non-admins are read-only
 
-        // Additional check: non-admins cannot write to shared metadata
-        if (!readOnly && !isAdmin) {
-            throw "ACCESS_DENIED";
+        let readOnly = true;
+
+        if (isAdmin) {
+            // Admins can read/write anywhere
+            readOnly = false;
+        } else {
+            // Non-admins: read from /sync, read/write to /personal/<userid>
+            const isPersonalPath = path.startsWith(`personal/${user.id}/`);
+            const isSyncPath = path.startsWith("sync/");
+
+            if (req.method === "GET") {
+                // For GET requests, we must explicitly deny access to unauthorized paths.
+                if (!isSyncPath && !isPersonalPath) {
+                    console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot read from path: ${path}`);
+                    throw "ACCESS_DENIED: Cannot read from this path";
+                }
+                // readOnly remains true for GET, which is correct.
+            } else if ((req.method === "PUT" || req.method === "DELETE") && isPersonalPath) {
+                // Allow write/delete only to own personal directory
+                readOnly = false;
+            } else if (req.method !== "GET") {
+                // Block writes to other paths
+                console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
+                throw "ACCESS_DENIED: Cannot write to this path";
+            }
         }
 
-        // Sentinel: Pass the already-decoded path to handleRequest to ensure
-        // the path we validated/logged (in login) is the exact same path used for the operation.
-        // This prevents double-decoding vulnerabilities.
-        const result = await handleRequest({ req, readOnly, path });
-        if (typeof result === "object") {
+        console.log(`[AWS API] Access granted - ReadOnly: ${readOnly}`);
+
+        const result = await handleRequest({ req, readOnly });
+        if (Buffer.isBuffer(result)) {
+            res.status(200).send(result);
+        }
+        else if (typeof result === "object") {
             res.status(200).json(result);
         }
         else {
@@ -40,7 +68,7 @@ export default async function AWS_API(req, res) {
         }
     }
     catch (err) {
-        console.error("login error: ", err);
+        console.error("aws error: ", err);
         res.status(403).json({ err: getSafeError(err) });
     }
 }

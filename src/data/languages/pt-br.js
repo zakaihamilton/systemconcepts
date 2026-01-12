@@ -126,6 +126,14 @@ export default {
             "value": "Restaurar"
         },
         {
+            "id": "ENGLISH",
+            "value": "Inglês"
+        },
+        {
+            "id": "BOTH",
+            "value": "Ambos"
+        },
+        {
             "id": "RESET_SETTINGS",
             "value": "Restaurar Configurações"
         },
@@ -148,6 +156,14 @@ export default {
         {
             "id": "CLEAR_CACHE_MESSAGE",
             "value": "Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor."
+        },
+        {
+            "id": "CLEAR_STORAGE",
+            "value": "Limpar Armazenamento"
+        },
+        {
+            "id": "CONFIRM_CLEAR_STORAGE",
+            "value": "Tem certeza de que deseja limpar todo o armazenamento? Isso excluirá todos os dados locais e recarregará a página."
         },
         {
             "id": "VERY_SMALL",
@@ -790,6 +806,10 @@ export default {
             "value": "Tocador"
         },
         {
+            "id": "PLAYING",
+            "value": "Tocando"
+        },
+        {
             "id": "SCHEDULE",
             "value": "Cronograma"
         },
@@ -1106,6 +1126,26 @@ export default {
             "value": "Desabilitar"
         },
         {
+            "id": "MERGE",
+            "value": "Mesclar"
+        },
+        {
+            "id": "SPLIT",
+            "value": "Dividir"
+        },
+        {
+            "id": "STORAGE",
+            "value": "Armazenamento"
+        },
+        {
+            "id": "MERGED",
+            "value": "Mesclado"
+        },
+        {
+            "id": "SIZE",
+            "value": "Tamanho"
+        },
+        {
             "id": "STATISTICS",
             "value": "Estatísticas"
         },
@@ -1168,6 +1208,26 @@ export default {
         {
             "id": "SEEK",
             "value": "Buscar"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "Novas sessões"
+        },
+        {
+            "id": "UPDATE_METADATA",
+            "value": "Atualizar metadados"
+        },
+        {
+            "id": "PERSONAL_SYNC",
+            "value": "Arquivos Pessoais"
+        },
+        {
+            "id": "PERSONAL_SYNC_ERROR",
+            "value": "Erro na sincronização pessoal"
+        },
+        {
+            "id": "PERSONAL_SYNC_BUSY",
+            "value": "Sincronização pessoal em andamento"
         },
         {
             "id": 404,

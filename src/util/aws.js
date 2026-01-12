@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, ListObjectsCommand } from "@aws-sdk/client-s3";
-import { lockMutex } from "./mutex";
+import { lockMutex } from "@sync/mutex";
 import fs from "fs";
-import { makePath } from "@util/path";
+import { makePath, isBinaryFile } from "@util/path";
 import { getSafeError } from "./safeError";
 
 let s3Client = null;
@@ -40,6 +40,26 @@ function normalizePath(path) {
     if (!path) return path;
     // Remove leading slash
     return path.startsWith('/') ? path.substring(1) : path;
+}
+
+/**
+ * Validate path access to prevent traversal and restricted folder access
+ * @param {string} path - Path to validate
+ * @throws {Error} ACCESS_DENIED if path is invalid
+ */
+export function validatePathAccess(path) {
+    const normalized = normalizePath(path);
+    // SENTINEL: Use robust check for path traversal and blocked folders.
+    // We use split("/").includes("..") which is safer than string.includes("..")
+    // because it allows valid filenames like "report..pdf" while blocking traversal segments.
+    // We also strictly block access to the "private" folder.
+
+    if (normalized.split("/").includes("..")) {
+        throw new Error("ACCESS_DENIED");
+    }
+    if (normalized.startsWith("private/") || normalized === "private") {
+        throw new Error("ACCESS_DENIED");
+    }
 }
 
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
@@ -250,18 +270,7 @@ export async function handleRequest({ readOnly, req, path }) {
         }
         try {
             if (readOnly) {
-                const normalized = normalizePath(currentPath);
-                // SENTINEL: Use robust check for path traversal and blocked folders.
-                // We use split("/").includes("..") which is safer than string.includes("..")
-                // because it allows valid filenames like "report..pdf" while blocking traversal segments.
-                // We also strictly block access to the "private" folder.
-
-                if (normalized.split("/").includes("..")) {
-                    throw new Error("ACCESS_DENIED");
-                }
-                if (normalized.startsWith("private/") || normalized === "private") {
-                    throw new Error("ACCESS_DENIED");
-                }
+                validatePathAccess(path);
             }
 
             if (type === "dir") {
@@ -282,12 +291,22 @@ export async function handleRequest({ readOnly, req, path }) {
             console.error("get error: ", err);
             return { err: getSafeError(err) };
         }
-    } else if (!readOnly && req.method === "PUT") {
-        for (const item of req.body) {
-            await uploadData({ path: item.path, data: item.body });
+    } else if (req.method === "PUT") {
+        if (readOnly) {
+            throw { message: "READ_ONLY_ACCESS", status: 403 };
         }
-    } else if (!readOnly && req.method === "DELETE") {
-        const currentPath = resolvePath();
-        await deleteFile({ path: currentPath });
+        for (const item of req.body) {
+            let { body, path } = item;
+            if (typeof body === "string" && isBinaryFile(path)) {
+                body = Buffer.from(body, "base64");
+            }
+            await uploadData({ path, data: body });
+        }
+    } else if (req.method === "DELETE") {
+        if (readOnly) {
+            throw { message: "READ_ONLY_ACCESS", status: 403 };
+        }
+        const { path } = headers;
+        await deleteFile({ path: decodeURIComponent(path) });
     }
 }

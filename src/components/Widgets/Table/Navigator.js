@@ -25,11 +25,15 @@ export default function Navigator({ numItems, pageIndex, pageCount, setPageIndex
     };
 
     const gotoPreviousPage = () => {
-        setPageIndex && setPageIndex(pageIndex - 1);
+        if (pageIndex > 0) {
+            setPageIndex && setPageIndex(pageIndex - 1);
+        }
     };
 
     const gotoNextPage = () => {
-        setPageIndex && setPageIndex(pageIndex + 1);
+        if (pageIndex < pageCount - 1) {
+            setPageIndex && setPageIndex(pageIndex + 1);
+        }
     };
 
     const gotoLastPage = () => {

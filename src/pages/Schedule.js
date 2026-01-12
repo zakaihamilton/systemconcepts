@@ -36,6 +36,9 @@ export const ScheduleStore = new Store({
 
 registerToolbar("Schedule");
 
+import { PlayerStore } from "@pages/Player";
+import { fileTitle } from "@util/path";
+
 export default function SchedulePage() {
     const isMobile = useDeviceType() === "phone";
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -44,6 +47,9 @@ export default function SchedulePage() {
     const search = useSearch("schedule");
     let { date, viewMode } = ScheduleStore.useState();
     const { showFilterDialog } = SessionsStore.useState();
+    const { session } = PlayerStore.useState();
+    const playingSession = session;
+
     if (!date) {
         date = new Date();
     }
@@ -183,16 +189,17 @@ export default function SchedulePage() {
         {statusBar}
         {!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}
         <div className={clsx(styles.content, isMobile && styles.mobile, viewMode === "tracks" && styles.noScroll)}>
-            {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} />}
-            {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} />}
-            {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} />}
-            {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} />}
+            {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} playingSession={playingSession} />}
+            {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} playingSession={playingSession} />}
+            {!loading && viewMode === "week" && <WeekView sessions={items} date={date} store={ScheduleStore} playingSession={playingSession} />}
+            {!loading && viewMode === "day" && <DayView sessions={items} date={date} store={ScheduleStore} playingSession={playingSession} />}
             {!loading && viewMode === "tracks" && <TracksView
                 sessions={items}
                 loading={loading}
                 store={ScheduleStore}
                 translations={translations}
                 viewModes={{ tracks: {} }}
+                playingSession={playingSession}
             />}
             {!!loading && loadingElement}
         </div>

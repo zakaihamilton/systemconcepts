@@ -9,7 +9,7 @@ import SessionIcon from "@widgets/SessionIcon";
 import { getSessionTextColor } from "@util/colors";
 import { useTheme } from "@mui/material/styles";
 import { useTranslations } from "@util/translations";
-export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible, onOpenDay }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible, onOpenDay, playingSession }) {
     const translations = useTranslations();
     const theme = useTheme();
 
@@ -32,12 +32,12 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
         return {
             id: item.name,
             name: item.name,
+            group: item.group,
             date: item.date,
             description: groupName,
             backgroundColor: item.color,
             style: { color: getSessionTextColor(item.color, theme) },
             icon,
-            description: groupName,
             target: "#schedule/" + toPath(path),
             onClick: () => addPath(path)
         };
@@ -64,7 +64,7 @@ export default function Day({ sessions, month, column, row, date, columnCount, r
                         <div>{item.name}</div>
                     </div>} key={index}>
                         <span>
-                            <div className={styles.dot} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
+                            <div className={clsx(styles.dot, playingSession && playingSession.name === item.name && playingSession.group === item.group && playingSession.date === item.date && styles.playing)} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
                         </span>
                     </Tooltip>)}
                 </div>

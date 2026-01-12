@@ -1,13 +1,14 @@
 import storage from "@util/storage";
-import { makePath, fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleFile, isSummaryFile } from "@util/path";
+import { makePath } from "@util/path";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useTranslations } from "@util/translations";
 import { useLocalStorage } from "@util/store";
-import { useGroups } from "@util/groups";
-import { useSync } from "@util/sync";
+import { useGroups, GroupsStore } from "@util/groups";
+import { useSync } from "@sync/sync";
+import { FILES_MANIFEST } from "@sync/constants";
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import { useDeviceType } from "./styles";
 
@@ -23,6 +24,7 @@ export const SessionsStore = new Store({
     counter: 0,
     syncCounter: 0,
     groupsMetadata: "",
+    groupsHash: "",
     showFilterDialog: false,
     order: "asc",
     orderBy: "date",
@@ -33,10 +35,11 @@ export const SessionsStore = new Store({
 export function useSessions(depends = [], options = {}) {
     const isMobile = useDeviceType() !== "desktop";
     const { filterSessions = true, skipSync = false, showToolbar } = options;
-    const [syncCounter, syncing] = useSync({ ...options, active: !skipSync });
+    const [syncCounter] = useSync({ ...options, active: !skipSync });
     const translations = useTranslations();
-    const [groupMetadata, loading] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsMetadata, showFilterDialog } = SessionsStore.useState();
+    const { settings: groupsSettings } = GroupsStore.useState();
+    const [groupMetadata, loading, setGroups] = useGroups([syncCounter, ...depends]);
+    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter", "showFilterDialog"]);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
@@ -51,224 +54,344 @@ export function useSessions(depends = [], options = {}) {
         if (!continueUpdate) {
             return;
         }
-        const getJSON = async path => {
-            const exists = await storage.exists(path);
-            let data = [];
-            if (exists) {
-                data = await storage.readFile(path);
-                try {
-                    if (data) {
-                        data = JSON.parse(data);
+
+        const startTime = performance.now();
+        console.log('[Sessions] Loading sessions...');
+
+        // Helper to yield to the event loop
+        const yieldToEventLoop = () => new Promise(resolve => setTimeout(resolve, 0));
+
+        try {
+            const [groupsSyncData, filesManifest] = await Promise.all([
+                (async () => {
+                    const path = makePath("local/sync/groups.json");
+                    if (await storage.exists(path)) {
+                        const content = await storage.readFile(path);
+                        return JSON.parse(content);
                     }
-                }
-                catch (err) {
-                    console.error("failed to parse", path, err, "data", data);
-                }
-                if (!data) {
-                    data = [];
+                    return null;
+                })(),
+                (async () => {
+                    const path = makePath("local/sync", FILES_MANIFEST);
+                    if (await storage.exists(path)) {
+                        const content = await storage.readFile(path);
+                        return JSON.parse(content);
+                    }
+                    return null;
+                })()
+            ]);
+            const cdn = groupsSettings?.cdn || {};
+
+            // groupsSyncData.groups is now an array of { name, counter }
+            const groups = Array.isArray(groupsSyncData?.groups) ? groupsSyncData.groups : [];
+
+            // Cache bundle.json to avoid reading it multiple times for bundled groups
+            let bundledSessions = [];
+            const bundlePath = makePath("local/sync/bundle.json");
+            if (await storage.exists(bundlePath)) {
+                try {
+                    const content = await storage.readFile(bundlePath);
+                    const data = JSON.parse(content);
+                    if (data?.sessions) {
+                        bundledSessions = data.sessions;
+                    }
+                } catch (err) {
+                    console.error("[Sessions] Error reading bundle.json:", err);
                 }
             }
-            return data;
-        };
-        const getListing = async path => {
-            const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
-            const localUrl = "local/" + normalizedPath + "/listing.json";
-            return await getJSON(localUrl);
-        };
-        const getMetadata = async path => {
-            const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
-            const localUrl = "local/" + normalizedPath + "/metadata.json";
-            return await getJSON(localUrl);
-        };
-        const getTags = async path => {
-            // Remove leading slash from path to avoid double slashes (makePath returns /shared/sessions/...)
-            const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
-            const localUrl = "local/" + normalizedPath + "/tags.json";
-            const tags = await getJSON(localUrl);
-            return tags;
-        };
-        const basePath = "shared/sessions";
-        try {
-            const [cdnData, groups] = await Promise.all([
-                getJSON("local/" + basePath + "/cdn.json"),
-                getListing(basePath)
-            ]);
-            const cdn = cdnData || {};
-            const groupsWithYears = await Promise.all(groups.map(async group => {
-                const years = await getListing(makePath(basePath, group.name));
-                return { group, years };
-            }));
 
-            const tasks = groupsWithYears.flatMap(({ group, years }) =>
-                years.map(year => ({ group, year }))
-            );
+            // Load personal metadata (position/duration) from local personal files
+            let personalMetadata = {};
+            const personalBasePath = "local/personal";
+            if (await storage.exists(personalBasePath)) {
+                try {
+                    const listing = await storage.getRecursiveList(personalBasePath);
+                    const metadataFiles = listing.filter(item =>
+                        item.type !== "dir" &&
+                        item.name?.endsWith(".json") &&
+                        !item.name.includes("undefined") &&
+                        !item.path.includes("metadata/sessions") // Exclude any legacy folder if it still exists
+                    );
 
-            const processedYears = await Promise.all(tasks.map(async ({ group, year }) => {
-                const path = makePath(basePath, group.name, year.name);
-                const [files, sessionsMetadata, tagsMap] = await Promise.all([
-                    getListing(path),
-                    getMetadata(path),
-                    getTags(path)
-                ]);
+                    console.log(`[Sessions] Found ${metadataFiles.length} personal metadata files`);
 
+                    // Load each metadata file to get position/duration
+                    for (const file of metadataFiles) {
+                        try {
+                            const content = await storage.readFile(file.path);
+                            const data = JSON.parse(content);
+                            let relativePath = file.path.replace(personalBasePath, "");
+                            // Remove leading slashes
+                            while (relativePath.startsWith("/")) {
+                                relativePath = relativePath.substring(1);
+                            }
 
+                            const parts = relativePath.split("/");
+                            let groupName = "";
+                            const isBundleFile = parts.length === 1 && parts[0] === "bundle.json";
 
-                files.sort((a, b) => a.name.localeCompare(b.name));
+                            // Case 1: Merged Group (group.json) - excluding bundle.json
+                            if (parts.length === 1 && !isBundleFile) {
+                                groupName = parts[0].replace(".json", "");
+                            }
+                            // Case 2: Split Group (group/year.json)
+                            else if (parts.length === 2) {
+                                groupName = parts[0];
+                            } else if (!isBundleFile) {
+                                // Unknown structure, skip
+                                continue;
+                            }
 
-                // Group files by session ID
-                const sessionFilesMap = {};
-                for (const file of files) {
-                    let id = fileTitle(file.name);
-                    // Handle resolution suffix for video files
-                    if (isVideoFile(file.name)) {
-                        const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
-                        if (resolutionMatch) {
-                            id = resolutionMatch[1];
+                            // Treat all files as bundles (merged or split)
+                            // Content is { "key": { position, duration } }
+                            for (const [bundleKey, sessionData] of Object.entries(data)) {
+                                // bundleKey is like "2024/session.json" (merged) or "session.json" (split)
+                                // OR "group/year/session.json" (bundle.json)
+                                let key = "";
+
+                                if (isBundleFile) {
+                                    // bundleKey: group/year/session.json or group/session.json
+                                    const bParts = bundleKey.split("/");
+                                    if (bParts.length >= 2) {
+                                        const bGroup = bParts[0];
+                                        const bSessionName = bParts[bParts.length - 1].replace(".json", "");
+
+                                        // We need to construct the key used for lookup: group + date + name
+                                        // But we only have group + sessionName. 
+                                        // The SessionsStore loading logic matches strictly on "group/sessionName" (derived from filename)?
+                                        // No, verify key format.
+                                        // Lines 137/161 used "group/sessionName". Matches below.
+                                        key = `${bGroup}/${bSessionName}`;
+                                    }
+                                } else {
+                                    const keyParts = bundleKey.split("/");
+                                    const sessionName = keyParts[keyParts.length - 1].replace(".json", "");
+                                    key = `${groupName}/${sessionName}`;
+                                }
+
+                                if (key) {
+                                    personalMetadata[key] = {
+                                        position: sessionData.position || 0,
+                                        duration: sessionData.duration || 0
+                                    };
+                                }
+                            }
+                        } catch (err) {
+                            console.error(`[Sessions] Error parsing personal file ${file.path}:`, err);
                         }
                     }
-                    if (isSubtitleFile(file.name)) {
-                        id = id.replace(/\.[a-z]{2,3}$/, "");
+
+                    if (Object.keys(personalMetadata).length > 0) {
+                        console.log(`[Sessions] Loaded ${Object.keys(personalMetadata).length} personal metadata entries`);
                     }
-                    if (!sessionFilesMap[id]) {
-                        sessionFilesMap[id] = [];
-                    }
-                    sessionFilesMap[id].push(file);
+                } catch (err) {
+                    console.error("[Sessions] Error loading personal metadata:", err);
                 }
+            }
 
-                const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
+            const timeAfterManifests = performance.now();
+            console.log(`[Sessions] Loaded manifests in ${(timeAfterManifests - startTime).toFixed(1)}ms`);
 
-                const yearSessions = await Promise.all(sortedIds.map(async id => {
-                    const [, date, name] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
-                    if (!date || !name) {
-                        return null;
+            // Separate bundled groups from non-bundled
+            const bundledGroups = new Set();
+            const nonBundledGroups = [];
+            for (const group of groups) {
+                if (group.bundled) {
+                    bundledGroups.add(group.name);
+                } else {
+                    nonBundledGroups.push(group);
+                }
+            }
+
+            // Process groups in chunks to avoid blocking
+            const CHUNK_SIZE = 3;
+            let groupsWithYears = [];
+
+            for (let i = 0; i < nonBundledGroups.length; i += CHUNK_SIZE) {
+                const chunk = nonBundledGroups.slice(i, i + CHUNK_SIZE);
+                const chunkResults = await Promise.all(chunk.map(async group => {
+                    const groupName = group.name;
+
+                    // Check manifest for merged file first
+                    const mergedPath = `/${groupName}.json`;
+                    // Check if file is in manifest (prefer manifest over fs check for perf) or fallback to fs if manifest missing
+                    let isMerged = filesManifest && filesManifest.some(f => f.path === mergedPath);
+                    if (!filesManifest) {
+                        isMerged = await storage.exists(makePath(`local/sync/${groupName}.json`));
                     }
 
-                    const fileList = sessionFilesMap[id];
-
-                    const audioFiles = fileList.filter(f => isAudioFile(f.name));
-                    const audioFile = audioFiles.length ? audioFiles[audioFiles.length - 1] : null;
-
-                    const videoFiles = fileList.filter(f => isVideoFile(f.name));
-
-                    const imageFiles = fileList.filter(f => isImageFile(f.name));
-                    const imageFile = imageFiles.length ? imageFiles[imageFiles.length - 1] : null;
-
-                    const subtitleFiles = fileList.filter(f => isSubtitleFile(f.name));
-                    const subtitleFile = subtitleFiles.length ? subtitleFiles[subtitleFiles.length - 1] : null;
-
-                    const summaryFiles = fileList.filter(f => isSummaryFile(f.name));
-                    const summaryFile = summaryFiles.length ? summaryFiles[summaryFiles.length - 1] : null;
-
-                    if (!audioFile && !videoFiles.length && !imageFile) {
-                        return null;
-                    }
-
-                    const groupInfo = (groupMetadata || []).find(item => item.name === group.name) || {};
-                    let sessionInfo = (sessionsMetadata || []).find(item => item.name === id) || {};
-                    const metadataPath = "local/personal/metadata/sessions/" + group.name + "/" + year.name + "/" + date + " " + name + ".json";
-                    const sessionMetadata = await getJSON(metadataPath);
-
-                    sessionInfo = { ...sessionInfo, ...sessionMetadata };
-                    delete sessionInfo.name;
-
-                    const ai = name.endsWith(" - AI") || name.startsWith("Overview - ");
-                    const key = group.name + "_" + id;
-                    const rawTags = tagsMap[id] || [];
-                    const sessionTags = Array.isArray(rawTags) ? [...new Set(rawTags)] : Object.keys(rawTags);
-                    const item = {
-                        key,
-                        id,
-                        name,
-                        date,
-                        year: year.name,
-                        group: group.name,
-                        color: groupInfo.color,
-                        ai,
-                        tags: sessionTags,
-                        ...sessionInfo,
-                        ...sessionMetadata
-                    };
-
-                    if (audioFile) {
-                        item.audio = audioFile;
-                    }
-
-                    if (videoFiles.length) {
-                        for (const file of videoFiles) {
-                            const fileId = fileTitle(file.name);
-                            const resolutionMatch = fileId.match(/(.*)_(\d+x\d+)/);
-                            if (resolutionMatch) {
-                                const [, , resolution] = resolutionMatch;
-                                if (!item.resolutions) {
-                                    item.resolutions = {};
-                                }
-                                item.resolutions[resolution] = file;
-                            } else {
-                                item.video = file;
+                    if (isMerged) {
+                        const path = makePath(`local/sync/${groupName}.json`);
+                        if (await storage.exists(path)) {
+                            const content = await storage.readFile(path);
+                            const groupData = JSON.parse(content);
+                            if (groupData && groupData.sessions) {
+                                return { group, sessions: groupData.sessions };
                             }
                         }
                     }
 
-                    if (imageFile) {
-                        if (cdn.url) {
-                            item.thumbnail = cdn.url + encodeURI(imageFile.path.replace("/aws", ""));
-                        } else {
-                            item.thumbnail = true;
-                        }
-                    }
-
-                    if (subtitleFile) {
-                        item.subtitles = subtitleFile;
-                    }
-
-                    if (summaryFile) {
-                        item.summary = { ...summaryFile, path: summaryFile.path.replace(/^\/aws/, "").replace(/^\//, "") };
-                    }
-
-                    if (videoFiles.length) {
-                        item.type = "video";
-                        item.typeOrder = 10;
-                    } else if (audioFile) {
-                        item.type = "audio";
-                        item.typeOrder = 20;
-                    } else if (imageFile) {
-                        item.type = "image";
-                        item.duration = 0.1;
-                        item.typeOrder = 30;
+                    // Standard enabled groups: Find year files
+                    // If manifest exists, use it to find year files
+                    let years = [];
+                    if (filesManifest) {
+                        // Paths in manifest have leading slash: /groupname/year.json
+                        const yearRegex = new RegExp(`^/${groupName}/(\\d+)\\.json$`);
+                        years = filesManifest
+                            .filter(f => yearRegex.test(f.path))
+                            .map(f => ({ name: f.path.match(yearRegex)[1] }));
                     } else {
-                        item.type = "unknown";
-                        item.typeOrder = 40;
-                    }
-
-                    if (!item.duration) {
-                        item.duration = 0.5;
-                    }
-
-                    if (ai) {
-                        if (name.endsWith(" - AI")) {
-                            item.type = "ai";
+                        // Fallback to reading summary file (legacy/during transition) or directory listing
+                        try {
+                            // Try listing first as summary file is deprecated
+                            const listing = await storage.getListing(makePath("local/sync", groupName));
+                            if (listing) {
+                                years = listing.filter(f => f.name.endsWith(".json")).map(f => ({ name: f.name.replace(".json", "") }));
+                            }
+                        } catch (err) {
+                            // ignore missing dir
                         }
-                        else if (name.startsWith("Overview - ")) {
-                            item.type = "overview";
-                        }
-                        item.typeOrder -= 5;
                     }
 
-                    return item;
+                    return { group, years };
+                }));
+                groupsWithYears.push(...chunkResults);
+
+                // Yield to UI after each chunk
+                if (i + CHUNK_SIZE < nonBundledGroups.length) {
+                    await yieldToEventLoop();
+                }
+            }
+
+            const timeAfterGroups = performance.now();
+            console.log(`[Sessions] Processed ${groups.length} groups (${bundledGroups.size} bundled) in ${(timeAfterGroups - timeAfterManifests).toFixed(1)}ms`);
+
+            const tasks = groupsWithYears.flatMap(({ group, years, sessions }) => {
+                if (sessions) {
+                    return [{ group, sessions }];
+                }
+                return years.map(year => ({ group, year }));
+            });
+
+            // Pre-compute groupInfo map to avoid repeated lookups
+            const groupInfoMap = new Map();
+            if (groupMetadata) {
+                for (const info of groupMetadata) {
+                    groupInfoMap.set(info.name, info);
+                }
+            }
+
+            // Enrich bundled sessions once (instead of filtering per group)
+            if (bundledSessions.length > 0) {
+                for (let i = 0; i < bundledSessions.length; i++) {
+                    const session = bundledSessions[i];
+                    const groupInfo = groupInfoMap.get(session.group);
+
+                    // Skip if group is not actually bundled
+                    if (!bundledGroups.has(session.group)) continue;
+
+                    if (session.image && cdn.url) {
+                        session.thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                    }
+
+                    if (groupInfo?.color && !session.color) {
+                        session.color = groupInfo.color;
+                    }
+
+                    // Merge personal metadata (position/duration)
+                    const personalKey = `${session.group}/${session.date} ${session.name}`;
+                    const personal = personalMetadata[personalKey];
+                    if (personal) {
+                        session.position = personal.position;
+                        session.duration = personal.duration;
+                    }
+                    if (personal) {
+                        session.position = personal.position;
+                        session.duration = personal.duration;
+                    }
+                }
+            }
+
+            // Process year files in chunks
+            const YEAR_CHUNK_SIZE = 5;
+            // Start with enriched bundled sessions
+            let allSessions = bundledSessions.slice();
+
+            for (let i = 0; i < tasks.length; i += YEAR_CHUNK_SIZE) {
+                const chunk = tasks.slice(i, i + YEAR_CHUNK_SIZE);
+                const chunkResults = await Promise.all(chunk.map(async ({ group, year, sessions }) => {
+                    try {
+                        let dataSessions = sessions;
+                        let path = "";
+
+                        // If we don't have pre-loaded sessions (from merged file), load year file
+                        if (!dataSessions) {
+                            path = makePath("local/sync", group.name, `${year.name}.json`);
+                            if (await storage.exists(path)) {
+                                const content = await storage.readFile(path);
+                                const data = JSON.parse(content);
+                                if (data && data.sessions) {
+                                    dataSessions = data.sessions;
+                                }
+                            }
+                        }
+
+                        if (!dataSessions) {
+                            return [];
+                        }
+
+                        const groupInfo = groupInfoMap.get(group.name);
+                        const groupColor = groupInfo?.color;
+
+                        // Mutate sessions in-place instead of creating new objects
+                        for (let i = 0; i < dataSessions.length; i++) {
+                            const session = dataSessions[i];
+
+                            // Update thumbnail if CDN URL exists
+                            if (session.image && cdn.url) {
+                                session.thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                            }
+
+                            // Add color if available and not already set
+                            if (groupColor && !session.color) {
+                                session.color = groupColor;
+                            }
+
+                            // Merge personal metadata (position/duration)
+                            const personalKey = `${session.group}/${session.date} ${session.name}`;
+                            const personal = personalMetadata[personalKey];
+                            if (personal) {
+                                session.position = personal.position;
+                                session.duration = personal.duration;
+                            }
+                        }
+
+                        return dataSessions;
+                    } catch (err) {
+                        console.error("Error reading sessions file", path, err);
+                        return [];
+                    }
                 }));
 
-                const validSessions = yearSessions.filter(Boolean);
-                return validSessions;
-            }));
+                // Use concat to avoid spread operator overhead
+                allSessions = allSessions.concat(chunkResults.flat());
 
-            const allSessions = processedYears.flat();
+                // Yield to UI after each chunk
+                if (i + YEAR_CHUNK_SIZE < tasks.length) {
+                    await yieldToEventLoop();
+                }
+            }
+
+            const timeAfterSessions = performance.now();
+            console.log(`[Sessions] Loaded ${allSessions.length} sessions in ${(timeAfterSessions - timeAfterGroups).toFixed(1)}ms`);
+            console.log(`[Sessions] Total load time: ${(timeAfterSessions - startTime).toFixed(1)}ms`);
 
             SessionsStore.update(s => {
                 s.sessions = allSessions;
                 s.groups = groups;
                 s.busy = false;
                 s.syncCounter = syncCounter;
-                s.groupsMetadata = JSON.stringify(groupMetadata);
+                s.groupsHash = JSON.stringify({ metadata: groupMetadata, settings: groupsSettings });
             });
         }
         catch (err) {
@@ -282,23 +405,26 @@ export function useSessions(depends = [], options = {}) {
                 s.syncCounter = syncCounter;
             });
         }
-    }, []);
+    }, [groupsSettings]);
 
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
-            const groupsChanged = JSON.stringify(groupMetadata) !== groupsMetadata;
+            const currentHash = JSON.stringify({ metadata: groupMetadata, settings: groupsSettings });
+            const groupsChanged = currentHash !== groupsHash;
             const noSessions = sessions === null;
-            const syncChanged = syncCounter !== savedSyncCounter;
+            // Only reload on sync if we had data before (savedSyncCounter > 0)
+            // Ignore the initial 0→1 transition which happens on first page load
+            const syncChanged = syncCounter !== savedSyncCounter && savedSyncCounter > 0;
 
             // Update sessions if:
             // 1. We have no sessions yet (initial load)
-            // 2. Groups metadata changed (group colors, names, etc.)
+            // 2. Groups metadata/settings changed (group colors, names, CDN, etc.)
             // 3. Sync counter changed (new session data was synced)
             if (noSessions || groupsChanged || syncChanged) {
                 updateSessions(groupMetadata, syncCounter);
             }
         }
-    }, [groupMetadata, loading, updateSessions, syncCounter, savedSyncCounter, groupsMetadata, sessions]);
+    }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
@@ -351,7 +477,7 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -359,6 +485,10 @@ export function useSessions(depends = [], options = {}) {
             const withoutSummary = typeFilter.includes("without_summary");
             const withTags = typeFilter.includes("with_tags");
             const withoutTags = typeFilter.includes("without_tags");
+            const withPosition = typeFilter.includes("with_position");
+            const withoutPosition = typeFilter.includes("without_position");
+            const withEnglish = typeFilter.includes("with_english");
+            const withHebrew = typeFilter.includes("with_hebrew");
 
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
@@ -393,6 +523,28 @@ export function useSessions(depends = [], options = {}) {
                     matchTags = !hasTags;
                 }
 
+                const hasPosition = !!session.position;
+                let matchPosition = true;
+                if (withPosition && withoutPosition) {
+                    matchPosition = true;
+                } else if (withPosition) {
+                    matchPosition = hasPosition;
+                } else if (withoutPosition) {
+                    matchPosition = !hasPosition;
+                }
+
+                const isHebrew = /[\u0590-\u05FF]/.test(session.name);
+                let matchLanguage = true;
+                if (withEnglish && withHebrew) {
+                    matchLanguage = true;
+                } else if (withEnglish) {
+                    matchLanguage = !isHebrew;
+                } else if (withHebrew) {
+                    matchLanguage = isHebrew;
+                }
+
+                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage;
+
                 return matchType && matchThumbnail && matchSummary && matchTags;
             });
         }
@@ -407,5 +559,5 @@ export function useSessions(depends = [], options = {}) {
     // Only show loading if we don't have sessions yet
     // Don't show loading during sync if we already have data
     const isLoading = (busy || loading) && (!sessions || !sessions.length);
-    return [items, isLoading];
+    return [items, isLoading, groupMetadata, setGroups];
 }

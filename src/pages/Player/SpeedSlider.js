@@ -30,13 +30,17 @@ export default function SpeedSlider() {
         SPEED_NORMAL: 1.0,
         SPEED_FASTER: 1.1,
         SPEED_FAST: 1.25,
+        SPEED_1_30: 1.3,
+        SPEED_1_35: 1.35,
+        SPEED_1_40: 1.4,
+        SPEED_1_45: 1.45,
         SPEED_VERY_FAST: 1.5,
         SPEED_SUPER_FAST: 1.75,
-        SPEED_DOUBLE: 2.0
+        SPEED_2_0: 2.0
     };
 
     // Hide labels for intermediate speeds
-    const hiddenLabels = [1.1, 1.25];
+    const hiddenLabels = [1.1, 1.25, 1.3, 1.35, 1.4, 1.45];
 
     const speedMarks = Object.entries(rateItems).map(([, value]) => ({
         value,
@@ -47,9 +51,10 @@ export default function SpeedSlider() {
         const entry = Object.entries(rateItems).find(([, val]) => val === value);
         if (entry) {
             const [name] = entry;
-            return translations[name] || name.replace('SPEED_', '').split('_').map(word =>
-                word.charAt(0) + word.slice(1).toLowerCase()
-            ).join(' ');
+            const label = translations[name];
+            if (label) {
+                return `${label} (${value}x)`;
+            }
         }
         return value + "x";
     };

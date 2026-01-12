@@ -26,6 +26,12 @@
             "@diagrams/*": [
                 "src/diagrams/*"
             ],
+            "@sync/*": [
+                "src/sync/*"
+            ],
+            "@personal/*": [
+                "src/personal/*"
+            ]
         }
     }
 }

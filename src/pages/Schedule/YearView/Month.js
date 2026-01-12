@@ -6,7 +6,7 @@ import { useTranslations } from "@util/translations";
 import Tooltip from "@mui/material/Tooltip";
 
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
-export default function Month({ date, sessions, store }) {
+export default function Month({ date, sessions, store, playingSession }) {
     const translations = useTranslations();
     const monthFormatter = useDateFormatter({ month: "long" });
     const dayFormatter = useDateFormatter({ day: "numeric" });
@@ -37,6 +37,7 @@ export default function Month({ date, sessions, store }) {
             const dayLabel = dayFormatter.format(dayDate);
             const sessionDate = getDateString(dayDate);
             const hasSession = sessions && sessions.some(s => s.date === sessionDate);
+            const isPlaying = sessions && sessions.some(s => s.date === sessionDate && s.name === playingSession);
             const onClick = () => {
                 store.update(s => {
                     s.date = dayDate;
@@ -45,7 +46,7 @@ export default function Month({ date, sessions, store }) {
                 });
             };
 
-            return <div key={`day-${weekIndex}-${dayIndex}`} className={clsx(styles.day, !isMonth && styles.otherMonth, isToday && styles.today, hasSession && styles.hasSession)} onClick={onClick}>
+            return <div key={`day-${weekIndex}-${dayIndex}`} className={clsx(styles.day, !isMonth && styles.otherMonth, isToday && styles.today, hasSession && styles.hasSession, isPlaying && styles.playing)} onClick={onClick}>
                 {dayLabel}
             </div>;
         });

@@ -88,21 +88,69 @@ async function createFolderPath(path, isFolder = false) {
 
 async function deleteFolder(root) {
     root = makePath(root);
-    if (!(await exists(root))) {
-        return;
-    }
-    const names = await fs.promises.readdir(root);
-    for (const name of names) {
-        const path = [root, name].filter(Boolean).join("/");
-        const stat = await fs.promises.stat(path);
-        if (stat.type === "dir") {
-            await deleteFolder(path);
+    let lastError = null;
+
+    for (let i = 0; i < 10; i++) {
+        let names = [];
+        try {
+            names = await fs.promises.readdir(root);
         }
-        else {
-            await deleteFile(path);
+        catch (err) {
+            if (err.code === "ENOENT") {
+                return;
+            }
+            throw err;
+        }
+
+        if (names.length > 0) {
+            for (const name of names) {
+                const path = [root, name].filter(Boolean).join("/");
+                try {
+                    const stat = await fs.promises.stat(path);
+                    const isDir = stat.type === "dir" || (stat.isDirectory && stat.isDirectory());
+                    if (isDir) {
+                        await deleteFolder(path);
+                    }
+                    else {
+                        await deleteFile(path);
+                    }
+                }
+                catch (err) {
+                    if (err.code !== "ENOENT") {
+                        console.error(err);
+                    }
+                }
+            }
+        }
+
+        try {
+            await fs.promises.rmdir(root);
+            return;
+        }
+        catch (err) {
+            if (err.code === "ENOENT") {
+                return;
+            }
+            if (err.code === "ENOTEMPTY" || err.message.includes("ENOTEMPTY")) {
+                try {
+                    const names = await fs.promises.readdir(root);
+                    if (names.length === 0) {
+                        return;
+                    }
+                }
+                catch (e) {
+                    // ignore
+                }
+                lastError = err;
+                await new Promise(resolve => setTimeout(resolve, 100));
+                continue;
+            }
+            throw err;
         }
     }
-    await fs.promises.rmdir(root);
+    if (lastError) {
+        throw lastError;
+    }
 }
 
 async function deleteFile(path) {
@@ -144,6 +192,18 @@ async function exists(path) {
     catch (err) {
     }
     return exists;
+}
+
+export async function clear() {
+    if (typeof indexedDB === "undefined") {
+        return;
+    }
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.deleteDatabase("systemconcepts-fs");
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+        req.onblocked = () => resolve();
+    });
 }
 
 export default {

@@ -6,7 +6,7 @@ import { useSwipe } from "@util/touch";
 import clsx from "clsx";
 import { useDeviceType } from "@util/styles";
 
-export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSwipeRight, direction }) {
+export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSwipeRight, direction, playingSession }) {
     const isMobile = useDeviceType() === "phone";
     const dialogDateFormatter = useDateFormatter({ dateStyle: "full" });
     const { swipeDirection, ...swipeHandlers } = useSwipe({
@@ -38,6 +38,7 @@ export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSw
             date={item.date}
             showGroup={true}
             small={true}
+            isPlaying={playingSession && playingSession.name === item.name && playingSession.group === item.group && playingSession.date === item.date}
         />;
     });
 

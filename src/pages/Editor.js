@@ -5,7 +5,7 @@ import { Store } from "pullstate";
 import { useParentPath } from "@util/pages";
 import storage from "@util/storage";
 import Progress from "@widgets/Progress";
-import { useSync } from "@util/sync";
+import { useSync } from "@sync/sync";
 import Download from "@widgets/Download";
 import { exportData } from "@util/importExport";
 

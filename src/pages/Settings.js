@@ -19,6 +19,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import useDarkMode from "use-dark-mode";
 import Row from "@widgets/Row";
 import StorageIcon from "@mui/icons-material/Storage";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 export const SettingsStore = new Store({
     order: "desc",
     offset: 0,
@@ -140,6 +141,15 @@ export default function Settings() {
                 {translations.CLEAR_CACHE}
             </Button>
         },
+        {
+            id: "clearStorage",
+            icon: <DeleteForeverIcon />,
+            name: translations.CLEAR_STORAGE,
+            widget: <Button variant="contained" color="error" onClick={() => addPath("clearStorage")}>
+                {translations.CLEAR_STORAGE}
+            </Button>
+        },
+
         {
             id: "reset",
             icon: <SettingsBackupRestoreIcon />,

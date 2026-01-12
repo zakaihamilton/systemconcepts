@@ -58,6 +58,22 @@ export default {
             "value": "Setting"
         },
         {
+            "id": "COMPLETE",
+            "value": "Complete"
+        },
+        {
+            "id": "BUNDLE",
+            "value": "Bundle"
+        },
+        {
+            "id": "SEPARATE",
+            "value": "Separate"
+        },
+        {
+            "id": "BUNDLED",
+            "value": "Bundled"
+        },
+        {
             "id": "LANGUAGE",
             "value": "Language"
         },
@@ -126,6 +142,14 @@ export default {
             "value": "Reset"
         },
         {
+            "id": "ENGLISH",
+            "value": "English"
+        },
+        {
+            "id": "BOTH",
+            "value": "Both"
+        },
+        {
             "id": "RESET_SETTINGS",
             "value": "Reset Settings"
         },
@@ -148,6 +172,14 @@ export default {
         {
             "id": "CLEAR_CACHE_MESSAGE",
             "value": "Do you want to perform a full synchronization? This will re-download all session data from the server."
+        },
+        {
+            "id": "CLEAR_STORAGE",
+            "value": "Clear Storage"
+        },
+        {
+            "id": "CONFIRM_CLEAR_STORAGE",
+            "value": "Are you sure you want to clear all storage? This will delete all local data and reload the page."
         },
         {
             "id": "VERY_SMALL",
@@ -794,6 +826,10 @@ export default {
             "value": "Player"
         },
         {
+            "id": "PLAYING",
+            "value": "Playing"
+        },
+        {
             "id": "SCHEDULE",
             "value": "Schedule"
         },
@@ -1110,6 +1146,26 @@ export default {
             "value": "Disabled"
         },
         {
+            "id": "MERGE",
+            "value": "Merge"
+        },
+        {
+            "id": "SPLIT",
+            "value": "Split"
+        },
+        {
+            "id": "STORAGE",
+            "value": "Storage"
+        },
+        {
+            "id": "MERGED",
+            "value": "Merged"
+        },
+        {
+            "id": "SIZE",
+            "value": "Size"
+        },
+        {
             "id": "STATISTICS",
             "value": "Statistics"
         },
@@ -1218,12 +1274,24 @@ export default {
             "value": "Log Copied to Clipboard"
         },
         {
-            "id": "SHOW_PASSWORD",
-            "value": "Show Password"
+            "id": "NEW_SESSIONS",
+            "value": "New Sessions"
         },
         {
-            "id": "HIDE_PASSWORD",
-            "value": "Hide Password"
+            "id": "UPDATE_METADATA",
+            "value": "Update Metadata"
+        },
+        {
+            "id": "PERSONAL_SYNC",
+            "value": "Personal Sync"
+        },
+        {
+            "id": "PERSONAL_SYNC_ERROR",
+            "value": "Personal Sync Error"
+        },
+        {
+            "id": "PERSONAL_SYNC_BUSY",
+            "value": "Personal Sync Busy"
         }
     ]
 };

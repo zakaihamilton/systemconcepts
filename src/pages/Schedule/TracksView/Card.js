@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { getContrastColor } from "@util/color";
 import SessionIcon from "@widgets/SessionIcon";
 
-const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick }) {
+const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick, isPlaying }) {
     const rootRef = useRef(null);
     const [showThumbnail, setShowThumbnail] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -44,7 +44,7 @@ const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick })
     return (
         <div
             ref={rootRef}
-            className={clsx(styles.card, isActive && styles.active)}
+            className={clsx(styles.card, isActive && styles.active, isPlaying && styles.playing)}
             onClick={handleClick}
         >
             <div className={styles.cardInner} style={backgroundStyle}>

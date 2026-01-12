@@ -67,9 +67,11 @@
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
-    min-width: 160px;
+    width: 200px;
     margin-top: 0.3em;
     margin-bottom: 0.3em;
+    justify-content: space-between;
+    padding: 0 1em;
 
     &:hover {
         background: var(--hover-background);
@@ -77,8 +79,8 @@
     }
 
     @media (max-width: 768px) {
-        min-width: 110px;
-        padding: 0.5em 1em;
+        width: 120px;
+        padding: 0.5em 0.5em;
         font-size: 0.85em;
     }
 }
@@ -88,12 +90,19 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.1em;
+    overflow: hidden;
+    flex: 1;
 }
 
 .mainLabel {
     font-size: 1em;
     font-weight: 600;
     line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
 }
 
 .subLabel {
@@ -102,6 +111,11 @@
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
 }
 
 
@@ -114,7 +128,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
+    margin-left: 0.25em;
     transform: scale(1);
     transition: all 0.1s ease;
 

@@ -18,7 +18,7 @@
 }
 
 .background {
-    position: relative;
+    position: absolute;
 
     [dir=ltr] & {
         left: 0px;
@@ -32,8 +32,8 @@
 
     display: flex;
     align-items: center;
-    border-bottom: 2px solid transparent;
     height: 100%;
+    width: 100%;
     flex: 1;
     overflow: hidden;
 }
@@ -44,7 +44,6 @@
 
 .background.clickable:hover {
     background: var(--info-background) !important;
-    border-bottom: 2px solid var(--hover-color);
 }
 
 .icons {

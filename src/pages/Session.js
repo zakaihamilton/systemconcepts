@@ -117,7 +117,7 @@ export default function SessionPage({ group, year, date, name }) {
                 <div className={styles.metadata}>
                     <Group name={group} color={session.color} />
                     <span className={styles.date}>{dateWidget}</span>
-                    {duration > 1 && <span className={styles.duration}>{formatDuration(duration * 1000, true)}</span>}
+                    {duration > 1 && <span className={styles.duration}>{session.position && formatDuration(session.position * 1000, true) + " / "}{formatDuration(duration * 1000, true)}</span>}
                 </div>
                 {session.tags && session.tags.length > 0 && (
                     <div className={styles.tags}>

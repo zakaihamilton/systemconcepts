@@ -17,7 +17,7 @@ import clsx from "clsx";
 
 registerToolbar("WeekView");
 
-export default function WeekView({ sessions, date, store }) {
+export default function WeekView({ sessions, date, store, playingSession }) {
     const { lastViewMode } = store.useState();
     const isPhone = useDeviceType() === "phone";
     const direction = useDirection();
@@ -204,7 +204,7 @@ export default function WeekView({ sessions, date, store }) {
     return <div className={styles.root}>
         <div className={clsx(styles.grid, isPhone && styles.mobile)}>
             {dayTitles}
-            <Week sessions={sessions} month={month} date={firstDay} row={2} dateFormatter={dayFormatter} />
+            <Week sessions={sessions} month={month} date={firstDay} row={2} dateFormatter={dayFormatter} playingSession={playingSession} />
         </div>
     </div>;
 }

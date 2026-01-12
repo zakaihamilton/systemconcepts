@@ -1,3 +1,5 @@
+@use "../../../scss/mixins" as *;
+
 .root {
     display: flex;
     flex-direction: column;
@@ -103,4 +105,10 @@
 
 .today.hasSession::after {
     background-color: white;
+}
+
+
+
+.playing {
+    @include playing;
 }

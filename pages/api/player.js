@@ -1,4 +1,4 @@
-import { cdnUrl, metadataInfo } from "@util/aws";
+import { cdnUrl, metadataInfo, validatePathAccess } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
@@ -31,6 +31,7 @@ export default async function PLAYER_API(req, res) {
             throw "ACCESS_DENIED";
         }
         const decodedPath = decodeURIComponent(path);
+        validatePathAccess(decodedPath);
         const sessionUrl = cdnUrl(decodedPath);
         let subtitles = null;
         const dotIndex = decodedPath.lastIndexOf(".");
@@ -42,7 +43,7 @@ export default async function PLAYER_API(req, res) {
                 subtitles = "/api/subtitle?path=" + encodeURIComponent(s3Key);
             }
         }
-        log({ component, message: `User ${id} is playing session: ${sessionUrl}` });
+        log({ component, message: `User ${id} is playing session: ${decodeURIComponent(sessionUrl)}` });
         res.status(200).json({ path: sessionUrl, subtitles });
     }
     catch (err) {

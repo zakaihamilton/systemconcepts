@@ -18,6 +18,7 @@ import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import { useGroups } from "@util/groups";
+import { useSessions } from "@util/sessions";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 import InfoIcon from "@mui/icons-material/Info";
@@ -31,7 +32,8 @@ export const PlayerStore = new Store({
     showDetails: true,
     showSpeed: false,
     hash: "",
-    player: null
+    player: null,
+    session: null
 });
 
 registerToolbar("Player");
@@ -39,18 +41,55 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails } = PlayerStore.useState();
+    const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
-    const [groups] = useGroups([]);
+    const [, , groups] = useSessions([], { filterSessions: false, skipSync: true, active: false });
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
-    const metadataPath = "local/personal/metadata" + folder + "/" + sessionName + ".json";
+    // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
+    // Or in bundle: local/personal/metadata/sessions/<group>.json
+    const groupInfo = groups.find(g => g.name === group);
+    const isBundled = groupInfo?.bundled;
+    const isMerged = groupInfo?.merged;
+
+    console.log("[Player] Metadata setup:", {
+        group,
+        groupInfo: groupInfo?.name,
+        isBundled,
+        isMerged,
+        year,
+        sessionName,
+        groupsLoaded: groups.length
+    });
+
+    let metadataPath = null;
+    let metadataKey = null;
+
+    if (folder && sessionName && group) { // ensure we have group
+        if (isBundled) {
+            // Bundled groups share a common file
+            metadataPath = "local/personal/bundle.json";
+            // Key must include group to be unique
+            metadataKey = `${group}/${year ? year + "/" : ""}${sessionName}.json`;
+        } else if (isMerged) {
+            // Merged groups have their own single file
+            metadataPath = `local/personal/${group}.json`;
+            // Key format: {year}/{sessionName}.json
+            metadataKey = `${year ? year + "/" : ""}${sessionName}.json`;
+        } else {
+            // Split groups: year-based bundles
+            metadataPath = `local/personal/${group}/${year}.json`;
+            metadataKey = `${sessionName}.json`;
+        }
+    }
+
+
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
 
@@ -79,16 +118,29 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         }
     }, [data && data.path]);
 
+    useEffect(() => {
+        if (group && date && name) {
+            PlayerStore.update(s => {
+                const session = { group, date, name };
+                console.log("sesion playing", session);
+                s.session = session;
+            });
+        }
+    }, [group, date, name]);
+
     const color = groups.find(item => item.name === group)?.color;
+
+    const playingSessionName = session && <div className={styles.playingSessionName}><b>{session.group[0].toUpperCase() + session.group.substring(1)}</b><div>{session.date + " " + session.name}</div></div>;
 
     const toolbarItems = [
         hash && !show && {
             id: "player",
-            name: translations.PLAYER,
+            name: playingSessionName,
             icon: <VideoLabelIcon />,
             menu: false,
             target: hash,
-            onClick: gotoPlayer
+            onClick: gotoPlayer,
+            className: styles.playerIcon
         },
         subtitles && show && {
             id: "subtitles",
@@ -115,7 +167,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show, showDetails, isVideo] });
+    useToolbar({ id: "Player", items: toolbarItems, depends: [hash, subtitles, showSubtitles, translations, show, showDetails, isVideo, playingSessionName] });
 
     const style = {
         visibility: show ? "visible" : "hidden",
@@ -148,6 +200,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     let mediaType = undefined;
     const mediaProps = {
         metadataPath,
+        metadataKey,
         path: mediaPath,
         date,
         year,

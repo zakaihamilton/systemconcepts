@@ -1,5 +1,5 @@
 const MongoClient = require("mongodb").MongoClient;
-const { lockMutex } = require("./mutex");
+const { lockMutex } = require("@sync/mutex");
 import { getSafeError } from "./safeError";
 import { sanitizeQuery } from "./mongoSanitize";
 
@@ -118,6 +118,21 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
             else if (id) {
                 const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
                 console.log("found an item for collection", collectionName, "id", parsedId);
+                return result;
+            }
+            else if (headers.prefix) {
+                const prefix = decodeURIComponent(headers.prefix);
+                const parsedFields = headers.fields && JSON.parse(decodeURIComponent(headers.fields));
+                const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const safePrefix = escapeRegex(prefix);
+                const query = { id: { $regex: `^${safePrefix}` } };
+                const result = await listCollection({
+                    dbName,
+                    collectionName,
+                    query,
+                    fields: parsedFields
+                });
+                console.log("found", result.length, "items with prefix", prefix, "for collection", collectionName);
                 return result;
             }
             else {

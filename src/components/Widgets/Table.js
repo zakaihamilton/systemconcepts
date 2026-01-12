@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useContext, useEffect, useMemo } from "react";
+import React, { forwardRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
@@ -73,6 +73,8 @@ export default function TableWidget(props) {
         viewModes = { table: null },
         resetScrollDeps = EMPTY_ARRAY,
         getSeparator,
+        renderColumn,
+        rowClassName,
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -142,6 +144,13 @@ export default function TableWidget(props) {
             timeoutId = setTimeout(() => saveScrollPosition(offset), 300);
         };
     }, [saveScrollPosition]);
+
+    // Handle scroll state for performance optimization
+    const handleScrollState = React.useCallback((offset) => {
+        // Save scroll position
+        debouncedSaveScroll(offset);
+    }, [debouncedSaveScroll]);
+
     const pageSize = useContext(ContentSize);
     const search = useSearch(name, () => {
         store.update(s => {
@@ -397,7 +406,8 @@ export default function TableWidget(props) {
 
     const sizeToPixels = text => {
         const number = parseFloat(text);
-        const sizeInPixels = text.trim().endsWith("em") ? number * (size && size.emPixels) : number;
+        const emPixels = (size && size.emPixels) || 16;
+        const sizeInPixels = text.trim().endsWith("em") ? number * emPixels : number;
         return sizeInPixels;
     };
 
@@ -427,8 +437,10 @@ export default function TableWidget(props) {
         sidePadding,
         orderBy,
         order,
-        getSeparator
-    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator]);
+        getSeparator,
+        renderColumn,
+        rowClassName
+    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn, rowClassName]);
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
@@ -460,7 +472,29 @@ export default function TableWidget(props) {
 
     // Derived state for empty condition
     // Optimization: Derive isEmpty from data and items to avoid state synchronization and extra renders
-    const isEmpty = !loading && data && (!data.length || !items.length);
+    const isEmpty = !loading && data !== null && (!data.length || !items.length);
+
+    // Delay showing "Loading" to prevent flicker on quick loads
+    const [showLoading, setShowLoading] = useState(false);
+    useEffect(() => {
+        if (loading) {
+            const timer = setTimeout(() => setShowLoading(true), 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setShowLoading(false);
+        }
+    }, [loading]);
+
+    // Delay showing "No Items" to prevent flicker on initial load
+    const [showEmpty, setShowEmpty] = useState(false);
+    useEffect(() => {
+        if (isEmpty) {
+            const timer = setTimeout(() => setShowEmpty(true), 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setShowEmpty(false);
+        }
+    }, [isEmpty]);
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
@@ -469,8 +503,8 @@ export default function TableWidget(props) {
         const itemCount = hideColumns ? numItems : numItems + 1;
 
         return <>
-            {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
+            {!!showLoading && loadingElement}
+            {!!showEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeList
                 className={styles.tableList}
@@ -480,9 +514,10 @@ export default function TableWidget(props) {
                 itemCount={itemCount}
                 itemSize={itemHeightInPixels}
                 width={size.width}
+                overscanCount={1}
                 initialScrollOffset={scrollOffset}
                 onScroll={({ scrollOffset }) => {
-                    debouncedSaveScroll(scrollOffset);
+                    handleScrollState(scrollOffset);
                 }}
                 itemData={itemData}
             >
@@ -528,6 +563,7 @@ export default function TableWidget(props) {
                     separator = getSeparator(item, prevItem, orderBy, viewMode);
                 }
             }
+            const className = rowClassName ? rowClassName(item) : "";
             return <Row
                 key={key || id || idx}
                 index={idx}
@@ -539,13 +575,15 @@ export default function TableWidget(props) {
                 style={style}
                 selected={selected}
                 separator={separator}
+                renderColumn={renderColumn}
+                className={clsx(props.className, className)}
                 {...props}
             />;
         });
 
         return (<>
-            {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
+            {!!showLoading && loadingElement}
+            {!!showEmpty && !loading && emptyElement}
             {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
                 {!!statusBarVisible && statusBar}
                 {!error && <Table classes={{ root: styles.table }} stickyHeader style={style}>
@@ -569,8 +607,8 @@ export default function TableWidget(props) {
     }
     else if (viewMode === "grid") {
         return <>
-            {!!loading && loadingElement}
-            {!!isEmpty && !loading && emptyElement}
+            {!!showLoading && loadingElement}
+            {!!showEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
             {!loading && !!numItems && !error && <FixedSizeGrid
                 className={styles.grid}
@@ -581,9 +619,11 @@ export default function TableWidget(props) {
                 rowHeight={cellHeightInPixels}
                 height={height}
                 width={size.width}
+                overscanRowCount={1}
+                overscanColumnCount={0}
                 initialScrollTop={scrollOffset}
                 onScroll={({ scrollTop }) => {
-                    debouncedSaveScroll(scrollTop);
+                    handleScrollState(scrollTop);
                 }}
                 itemData={itemData}
             >
@@ -597,13 +637,17 @@ export default function TableWidget(props) {
     }
 }
 
-const TableListRow = ({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator } = data;
+const TableListRow = React.memo(({ index, style, data }) => {
+    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn, rowClassName } = data;
     const itemIndex = hideColumns ? index : index - 1;
-    const item = items[itemIndex];
-    const { id, key } = item || {};
+    const item = items?.[itemIndex];
+
+    if (!item) return null;
+
+    const { id, key } = item;
     const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
     const selected = index && selectedRow && selectedRow(item);
+    const className = rowClassName ? rowClassName(item) : "";
 
     if (!hideColumns && !index) {
         return null;
@@ -621,6 +665,7 @@ const TableListRow = ({ index, style, data }) => {
         key={key || id || itemIndex}
         style={{ ...style, ...itemStyles }}
         {...props}
+        className={clsx(props.className, className)}
         columns={visibleColumns}
         rowClick={rowClick}
         item={item}
@@ -628,19 +673,21 @@ const TableListRow = ({ index, style, data }) => {
         viewMode={viewMode}
         selected={selected}
         separator={separator}
+        renderColumn={renderColumn}
     />;
-};
+});
 
-const TableGridCell = ({ columnIndex, rowIndex, style, data }) => {
-    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick } = data;
+const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
+    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
     const index = (rowIndex * columnCount) + columnIndex;
-    const item = items[index];
+    const item = items?.[index];
     if (!item) {
         return null;
     }
     const { id, key } = item;
     const { style: itemStyles, ...props } = viewModes[viewMode] || {};
     const selected = selectedRow && selectedRow(item);
+    const className = rowClassName ? rowClassName(item) : "";
 
     const finalStyle = { ...style };
     finalStyle.left += sidePadding;
@@ -649,11 +696,13 @@ const TableGridCell = ({ columnIndex, rowIndex, style, data }) => {
         key={id || key || index}
         style={{ ...finalStyle, ...itemStyles }}
         {...props}
+        className={clsx(props.className, className)}
         columns={visibleColumns}
         rowClick={rowClick}
         item={item}
         index={index}
         viewMode={viewMode}
         selected={selected}
+        renderColumn={renderColumn}
     />;
-};
+});

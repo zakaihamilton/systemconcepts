@@ -44,6 +44,40 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         return listing;
     }
 
+    async function getRecursiveList(path) {
+        path = makePath(path);
+        const listing = [];
+
+        // Ensure trailing slash for directory prefix match to avoid partial matches
+        // e.g. "metadata/session" matching "metadata/sessions_old"
+        const prefix = path.endsWith("/") ? path : path + "/";
+
+        const items = await fetchJSON(fsEndPoint, {
+            method: "GET",
+            headers: {
+                prefix: encodeURIComponent(prefix),
+                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1, id: 1 }))
+            }
+        });
+
+        for (const item of items) {
+            const { name, stat = {}, deleted, id } = item;
+            if (deleted) {
+                continue;
+            }
+            // item.id is the full path in mongo.
+            // We need to reconstruct the return object consistent with getListing
+            Object.assign(item, stat);
+            // item.path should include deviceId for the consumer
+            item.path = makePath(deviceId, id);
+            // item.id also
+            item.id = item.path;
+
+            listing.push(item);
+        }
+        return listing;
+    }
+
     async function createFolder(path) {
         path = makePath(path);
         if (!(await exists(path))) {
@@ -255,6 +289,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 
     return {
         getListing,
+        getRecursiveList,
         createFolder,
         createFolders,
         createFolderPath,

@@ -22,7 +22,7 @@ const InnerList = forwardRef(({ style, ...rest }, ref) => (
     />
 ));
 
-export default function TrackRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store, translations = {} }) {
+export default function TrackRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store, translations = {}, playingSession }) {
     const listRef = useRef(null);
     const outerRef = useRef(null);
     const dateFormatter = useDateFormatter({ year: 'numeric', month: 'long' });
@@ -94,23 +94,26 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
     const itemData = useMemo(() => ({
         sessions,
         focusedSessionId,
-        onSessionClick
-    }), [sessions, focusedSessionId, onSessionClick]);
+        onSessionClick,
+        playingSession
+    }), [sessions, focusedSessionId, onSessionClick, playingSession]);
 
     // Memoize RowItem component
     const RowItem = useCallback(({ index, style, data }) => {
-        const { sessions, focusedSessionId, onSessionClick } = data;
+        const { sessions, focusedSessionId, onSessionClick, playingSession } = data;
         const session = sessions[index];
         const newStyle = {
             ...style,
             left: (parseFloat(style.left) || 0) + 24
         };
+        const isPlaying = playingSession && playingSession.name === session.name && playingSession.group === session.group && playingSession.date === session.date;
         return (
             <div style={newStyle} className={styles.cardContainer}>
                 <TrackCard
                     session={session}
                     isActive={session.id === focusedSessionId}
                     onSessionClick={onSessionClick}
+                    isPlaying={isPlaying}
                 />
             </div>
         );

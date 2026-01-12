@@ -1,17 +1,20 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { Store } from "pullstate";
-import storage from "@util/storage";
+import { readGroups, writeGroups } from "@sync/groups";
+import { SyncActiveStore } from "@sync/syncState";
 
 export const GroupsStore = new Store({
     groups: [],
+    settings: {},
     busy: false,
-    counter: 0
+    counter: 0,
+    showDisabled: false
 });
 
-export function useGroups(depends) {
+export function useGroups(depends = []) {
     const { busy, groups } = GroupsStore.useState();
+    const [syncCounter, setSyncCounter] = useState(0);
 
-    const localMetadataPath = "local/shared/groups.json";
     const loadGroups = useCallback(async () => {
         let isBusy = false;
         let hasGroups = false;
@@ -20,108 +23,90 @@ export function useGroups(depends) {
             hasGroups = s.groups && s.groups.length > 0;
         });
 
-        // If already loading and we have cached groups, just return
-        // This prevents waiting during sync when groups are already loaded
-        if (isBusy && hasGroups) {
-            return;
-        }
+        if (isBusy && hasGroups) return;
+        if (isBusy) return;
 
-        // If already loading and no groups yet, wait for it to complete
-        if (isBusy) {
-            return;
-        }
+        GroupsStore.update(s => { s.busy = true; });
+        console.log("[Groups] Loading groups...");
 
-        // Now we can set busy since we're actually going to load
-        GroupsStore.update(s => {
-            s.busy = true;
-        });
         try {
-            let listing = [];
-            if (await storage.exists("local/shared/sessions/listing.json")) {
-                const listingFile = await storage.readFile("local/shared/sessions/listing.json");
-                listing = JSON.parse(listingFile) || [];
-            }
+            const { groups: metadata, settings, version } = await readGroups();
 
-            if (!listing.length) {
-                console.warn("listing.json empty or missing, scanning local directory for groups...");
-                if (await storage.exists("local/shared/sessions")) {
-                    const items = await storage.getListing("local/shared/sessions") || [];
-                    listing = items
-                        .filter(item => item.type === "dir" || item.stat?.type === "dir")
-                        .map(item => ({ name: item.name }));
-                }
-
-                if (!listing.length) {
-                    console.log("Local directory empty, scanning S3 for groups...");
-                    const remoteItems = await storage.getListing("aws/metadata/sessions") || [];
-                    listing = remoteItems
-                        .filter(item => item.type === "dir" || item.stat?.type === "dir")
-                        .map(item => ({ name: item.name }))
-                        .filter(g => g.name !== "bundle.gz" && !g.name.startsWith("bundle.gz.part"));
-                }
-
-                if (listing.length > 0) {
-                    console.log("Restored listing from scan:", listing);
-                    await storage.createFolderPath("local/shared/sessions/listing.json");
-                    await storage.writeFile("local/shared/sessions/listing.json", JSON.stringify(listing, null, 4));
-                }
-            }
-
-            let metadataFile = "[]";
-            if (await storage.exists(localMetadataPath)) {
-                metadataFile = await storage.readFile(localMetadataPath);
-            } else if (await storage.exists("local/shared/sessions/groups.json")) {
-                console.log("Migrating groups.json to new location...");
-                metadataFile = await storage.readFile("local/shared/sessions/groups.json");
-                // Save to new location immediately
-                await storage.createFolderPath(localMetadataPath);
-                await storage.writeFile(localMetadataPath, metadataFile);
-            }
-            const metadata = JSON.parse(metadataFile);
-            listing.map(item => {
-                const metadataItem = metadata.find(el => el.name === item.name);
-                if (!metadataItem) {
-                    metadata.push({
-                        name: item.name,
-                        color: "",
-                        translations: [],
-                        user: "",
-                        disabled: false
-                    });
-                }
-            });
+            console.log(`[Groups] loadGroups complete. Found ${metadata.length} groups.`);
             GroupsStore.update(s => {
                 s.groups = metadata;
+                s.settings = settings;
+                s.version = version;
                 s.busy = false;
             });
         }
         catch (err) {
-            console.error(err);
+            console.error("[Groups] Error loading groups:", err);
             GroupsStore.update(s => {
-                s.groups = [];
                 s.busy = false;
             });
         }
     }, []);
 
+    // Subscribe to sync counter to trigger reloads
     useEffect(() => {
-        loadGroups();
-    }, [...depends]);
-
-    const updateGroups = useCallback(data => {
-        GroupsStore.update(s => {
-            if (typeof data === "function") {
-                data = data(s.groups);
-            }
-
-            storage.writeFile(localMetadataPath, JSON.stringify(data, null, 4));
-            s.groups = data;
-            s.counter++; // Increment counter to trigger sync
-        });
+        const unsubscribe = SyncActiveStore.subscribe(
+            s => s.counter,
+            newCounter => setSyncCounter(newCounter)
+        );
+        return unsubscribe;
     }, []);
 
-    // Only show busy if we're loading AND don't have groups yet
-    // This prevents showing loading during sync when groups are already cached
+    useEffect(() => {
+        loadGroups();
+    }, [syncCounter, ...depends]);
+
+    const updateGroups = useCallback(async data => {
+        let updatedGroups = null;
+        let updatedSettings = null;
+
+        GroupsStore.update(s => { s.busy = true; });
+
+        try {
+            const rawState = GroupsStore.getRawState();
+            if (typeof data === "function") {
+                updatedGroups = data(rawState.groups);
+            } else {
+                updatedGroups = data;
+            }
+            updatedSettings = rawState.settings || {};
+
+            updatedGroups = updatedGroups.map(group => {
+                const existing = rawState.groups.find(g => g.name === group.name);
+                if (!existing) {
+                    return group;
+                }
+                const hash1 = JSON.stringify(group);
+                const hash2 = JSON.stringify(existing);
+                if (hash1 !== hash2) {
+                    return { ...group, counter: (existing.counter || 0) + 1 };
+                }
+                return group;
+            });
+
+            await writeGroups({
+                groups: updatedGroups,
+                settings: updatedSettings
+            });
+
+            GroupsStore.update(s => {
+                s.groups = updatedGroups;
+                s.busy = false;
+                s.counter++; // Increment counter to trigger sync
+            });
+        } catch (err) {
+            console.error("[Groups] Error updating groups:", err);
+            GroupsStore.update(s => {
+                s.busy = false;
+            });
+        }
+    }, []);
+
     const isLoading = busy && (!groups || groups.length === 0);
     return [groups, isLoading, updateGroups];
 }
