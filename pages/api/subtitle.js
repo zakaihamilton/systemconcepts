@@ -1,4 +1,4 @@
-import { downloadData } from "@util/aws";
+import { downloadData, validatePathAccess } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
@@ -29,7 +29,9 @@ export default async function SUBTITLE_API(req, res) {
             throw "ACCESS_DENIED";
         }
 
-        const data = await downloadData({ path: decodeURIComponent(path) });
+        const decodedPath = decodeURIComponent(path);
+        validatePathAccess(decodedPath);
+        const data = await downloadData({ path: decodedPath });
         res.setHeader("Content-Type", "text/vtt");
         res.status(200).send(data);
     }
