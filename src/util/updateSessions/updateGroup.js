@@ -158,8 +158,10 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 allSessions.push(...yearSessions);
             } else {
                 const { counter, newCount } = await updateYearSync(name, year.name, yearSessions);
+                // Track sessions for total count regardless of whether file was updated
+                yearSessions.forEach(session => allSessionNames.add(session.id));
+
                 if (counter > 0) {
-                    yearSessions.forEach(session => allSessionNames.add(session.id));
                     UpdateSessionsStore.update(s => {
                         s.status[itemIndex].addedCount += newCount;
                         s.status = [...s.status];
