@@ -70,7 +70,7 @@ export default function SignUp() {
         if (!text) {
             error = translations.EMPTY_FIELD;
         }
-        else if (!text.match(/^[a-z0-9]+$/i)) {
+        else if (!text.match(/^[a-z0-9\-_]+$/i)) {
             error = translations.BAD_ID;
         }
         return error;
@@ -84,7 +84,10 @@ export default function SignUp() {
         onValidateId(idState[0]);
     const isInvalid = validate && invalidFields;
 
-    const onSubmit = () => {
+    const onSubmit = (event) => {
+        if (event) {
+            event.preventDefault();
+        }
         setValidate(true);
         if (!invalidFields && !inProgress) {
             const [id] = idState;
@@ -121,12 +124,6 @@ export default function SignUp() {
         }
     };
 
-    const onKeyDown = async event => {
-        if (event.keyCode == 13) {
-            onSubmit();
-        }
-    };
-
     return (
         <div className={styles.root}>
             <div className={styles.card}>
@@ -144,7 +141,7 @@ export default function SignUp() {
                 {error && <Typography className={styles.error}>
                     {error}
                 </Typography>}
-                <div className={styles.form}>
+                <form className={styles.form} onSubmit={onSubmit} noValidate>
                     <Grid container spacing={2}>
                         <Grid size={12}>
                             <Input
@@ -215,7 +212,6 @@ export default function SignUp() {
                                 validate={validate}
                                 onValidate={onValidatePassword}
                                 icon={<VpnKeyIcon />}
-                                onKeyDown={onKeyDown}
                                 background={true}
                             />
                         </Grid>
@@ -229,11 +225,11 @@ export default function SignUp() {
                         <Grid size={12}>
                             <Button
                                 fullWidth
+                                type="submit"
                                 variant="contained"
                                 color="primary"
                                 className={styles.submit}
                                 disabled={!!(isInvalid || inProgress)}
-                                onClick={onSubmit}
                             >
                                 {translations.SIGN_UP}
                             </Button>
@@ -244,7 +240,7 @@ export default function SignUp() {
                             </Link>
                         </div>
                     </Grid>
-                </div>
+                </form>
             </div>
         </div>
     );
