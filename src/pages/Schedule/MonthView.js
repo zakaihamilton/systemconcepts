@@ -186,7 +186,7 @@ export default function MonthView({ sessions, date, store, playingSession }) {
 
     useToolbar({ id: "MonthView", items: toolbarItems, depends: [translations, month, lastViewMode] });
 
-    const { swipeDirection, ...swipeHandlers } = useSwipe({
+    const swipeHandlers = useSwipe({
         onSwipeLeft: direction === "rtl" ? gotoPreviousMonth : gotoNextMonth,
         onSwipeRight: direction === "rtl" ? gotoNextMonth : gotoPreviousMonth
     });

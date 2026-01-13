@@ -250,7 +250,7 @@ export async function requestSync() {
             s.lastDuration = syncDuration;
             s.counter++;
         });
-    } catch (err) {
+    } catch {
         SyncActiveStore.update(s => {
             s.busy = false; // FIX: Reset busy state in outer catch
         });

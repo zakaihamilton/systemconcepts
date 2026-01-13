@@ -4,7 +4,7 @@ import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
 import { readGroups } from "@sync/groups";
 import { SyncActiveStore } from "@sync/syncState";
-import { LOCAL_PERSONAL_PATH, PERSONAL_MANIFEST, LOCAL_PERSONAL_MANIFEST } from "../constants";
+import { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } from "../constants";
 
 const MIGRATION_FILE = "migration.json";
 
@@ -13,7 +13,7 @@ const MIGRATION_FILE = "migration.json";
  * Uses local migration.json to track progress and allow resumable migration
  * Files are copied to local storage immediately so user sees progress
  */
-export async function migrateFromMongoDB(userid, remoteManifest, basePath) {
+export async function migrateFromMongoDB(userid, remoteManifest) {
     const start = performance.now();
     const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
     const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);

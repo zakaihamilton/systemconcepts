@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { addPath, toPath } from "@util/pages";

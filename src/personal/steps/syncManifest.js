@@ -115,7 +115,6 @@ async function buildManifestFromRemote(basePath) {
             if (relPath.startsWith("/")) {
                 relPath = relPath.substring(1);
             }
-            let content;
 
             try {
                 // Handle compressed metadata files

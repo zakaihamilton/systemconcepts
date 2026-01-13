@@ -1,9 +1,9 @@
 import styles from "./Button.module.scss";
 import clsx from "clsx";
 
-export default function Button({ id, name, icon, active, subHeading, onClick, label, ...props }) {
+export default function Button({ name, icon, active, subHeading, onClick, label, ...props }) {
     // Remove active from props to prevent it from being passed to DOM
-    const { active: _, ...buttonProps } = { active, ...props };
+    const { active: _unused, ...buttonProps } = { active, ...props }; // eslint-disable-line no-unused-vars
 
     return <button
         className={clsx(styles.root, active && styles.active)}

@@ -61,7 +61,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         });
 
         for (const item of items) {
-            const { name, stat = {}, deleted, id } = item;
+            const { stat = {}, deleted, id } = item;
             if (deleted) {
                 continue;
             }
@@ -281,7 +281,7 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             });
             exists = item && !item.deleted;
         }
-        catch (err) {
+        catch {
 
         }
         return exists;

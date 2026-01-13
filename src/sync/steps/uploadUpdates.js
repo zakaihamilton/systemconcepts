@@ -5,7 +5,6 @@ import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";
-import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 
 /**

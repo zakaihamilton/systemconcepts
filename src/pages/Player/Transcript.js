@@ -1,12 +1,12 @@
 import { useRef, useEffect, useState } from "react";
 import styles from "./Transcript.module.scss";
 import { PlayerStore } from "../Player";
-import Controls from "./Controls";
+
 import { useFetch } from "@util/fetch";
 import Progress from "@widgets/Progress";
 import Download from "@widgets/Download";
 
-export default function Transcript({ mode }) {
+export default function Transcript() {
     const { subtitles, player } = PlayerStore.useState();
     const [transcript, setTranscript] = useState([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(-1);

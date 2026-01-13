@@ -10,7 +10,7 @@ async function getListing(path, options = {}) {
     try {
         names = await fs.promises.readdir(path);
     }
-    catch (err) {
+    catch {
         return [];
     }
     for (const name of names) {
@@ -138,7 +138,7 @@ async function deleteFolder(root) {
                         return;
                     }
                 }
-                catch (e) {
+                catch {
                     // ignore
                 }
                 lastError = err;
@@ -189,7 +189,7 @@ async function exists(path) {
         const stat = await fs.promises.stat(path);
         exists = stat !== null;
     }
-    catch (err) {
+    catch {
     }
     return exists;
 }

@@ -1,4 +1,4 @@
-import storage from "@util/storage";
+
 import { makePath } from "@util/path";
 import { PERSONAL_SYNC_BASE_PATH, PERSONAL_MANIFEST } from "../constants";
 import { addSyncLog } from "@sync/logs";

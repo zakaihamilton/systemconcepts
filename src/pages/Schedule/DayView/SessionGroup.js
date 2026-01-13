@@ -19,7 +19,7 @@ export default function SessionGroup({ group, sessions, playingSession }) {
                 .sort((a, b) => (a.typeOrder || 0) - (b.typeOrder || 0))
                 .map(session => {
                     const { name, key, ...props } = session;
-                    return <Session key={name} name={name} {...props} isPlaying={playingSession && playingSession.name === name && playingSession.group === session.group && playingSession.date === session.date} />;
+                    return <Session key={key || name} name={name} {...props} isPlaying={playingSession && playingSession.name === name && playingSession.group === session.group && playingSession.date === session.date} />;
                 })}
         </div>
     </div>;

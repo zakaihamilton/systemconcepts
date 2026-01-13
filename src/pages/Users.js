@@ -38,7 +38,6 @@ export default function Users() {
     useLocalStorage("UsersStore", UsersStore, ["viewMode"]);
     const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
     const [inProgress, setProgress] = useState(false);
-    const [error, setError] = useState(false);
 
     useEffect(() => {
         UsersStore.update(s => {
@@ -153,7 +152,7 @@ export default function Users() {
                 s.counter++;
             });
         }).catch(err => {
-            setError(translations[err] || String(err));
+            console.error(err);
             setProgress(false);
         });
     };

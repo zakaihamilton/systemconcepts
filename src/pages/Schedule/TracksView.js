@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef, useContext } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, useContext } from "react";
 import styles from "./TracksView.module.scss";
 import TrackRow from "./TracksView/Row";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
@@ -12,7 +12,7 @@ import TodayIcon from '@mui/icons-material/Today';
 
 registerToolbar("TracksView");
 
-export default function TracksView({ sessions = [], loading, store, translations, viewModes, playingSession }) {
+export default function TracksView({ sessions = [], store, translations, playingSession }) {
     const isMobile = useDeviceType() !== "desktop";
     const [focusedSessionId, setFocusedSessionId] = useState(null);
     const listRef = useRef(null);

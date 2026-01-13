@@ -14,7 +14,7 @@ import Replay10Icon from "@mui/icons-material/Replay10";
 import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
 import Button from "@mui/material/Button";
-import { PlayerStore } from "../Player";
+
 import { useMediaSession } from "@util/useMediaSession";
 
 const skipPoints = 10;

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import { useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
 import styles from './Row.module.scss';
 import TrackCard from './Card';
 import Typography from '@mui/material/Typography';

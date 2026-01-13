@@ -26,6 +26,7 @@ import Tooltip from "@mui/material/Tooltip";
 import TracksView from "@pages/Schedule/TracksView";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import { PlayerStore } from "@pages/Player";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -36,8 +37,6 @@ export const ScheduleStore = new Store({
 
 registerToolbar("Schedule");
 
-import { PlayerStore } from "@pages/Player";
-import { fileTitle } from "@util/path";
 
 export default function SchedulePage() {
     const isMobile = useDeviceType() === "phone";

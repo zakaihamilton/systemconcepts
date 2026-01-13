@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useTranslations } from "@util/translations";
 import EmailIcon from "@mui/icons-material/Email";
 import Input from "@widgets/Input";

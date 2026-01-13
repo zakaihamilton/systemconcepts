@@ -9,7 +9,7 @@ import SessionIcon from "@widgets/SessionIcon";
 import { getSessionTextColor } from "@util/colors";
 import { useTheme } from "@mui/material/styles";
 import { useTranslations } from "@util/translations";
-export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, store, onMenuVisible, onOpenDay, playingSession }) {
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, onOpenDay, playingSession }) {
     const translations = useTranslations();
     const theme = useTheme();
 

@@ -14,7 +14,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
     const { showSpeed } = PlayerStore.useState();
     const [, setCounter] = useState(0);
     useEffect(() => {
-        const update = name => {
+        const update = () => {
             setCounter(counter => counter + 1);
         };
         const events = ["ratechange"];

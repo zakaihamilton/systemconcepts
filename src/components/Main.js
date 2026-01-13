@@ -1,11 +1,10 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
-import { useStyles, useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/styles";
 import Page from "./Page";
-import Theme from "./Theme";
 import { useLanguage } from "@util/language";
 import Sync from "./Sync";
 import Head from "./Head";
@@ -14,7 +13,6 @@ import Title from "./Title";
 import { useResize } from "@util/size";
 import clsx from "clsx";
 import CssBaseline from "@mui/material/CssBaseline";
-import NoSsr from "@mui/material/NoSsr";
 
 export const MainStoreDefaults = {
     fontSize: "16",

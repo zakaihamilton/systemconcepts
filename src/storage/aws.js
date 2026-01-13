@@ -45,15 +45,15 @@ async function getListing(path, options = {}) {
     return listing;
 }
 
-async function createFolder(path) {
+async function createFolder() {
     /* ignore on aws */
 }
 
-async function createFolders(prefix, folders) {
+async function createFolders() {
     /* ignore on aws */
 }
 
-async function createFolderPath(path) {
+async function createFolderPath() {
     /* ignore on aws */
 }
 
@@ -199,7 +199,7 @@ async function exists(path) {
         });
         exists = item && item.name;
     }
-    catch (err) {
+    catch {
 
     }
     return exists;

@@ -58,8 +58,7 @@ export async function performPersonalSync() {
         // Step 3.5: Migrate from MongoDB if needed
         progress.updateProgress('migrateFromMongoDB', { processed: 0, total: 1 });
         const { migrateFromMongoDB } = await import("./steps/migrateFromMongoDB");
-        const basePath = `aws/personal/${userid}`;
-        const migrationResult = await migrateFromMongoDB(userid, remoteManifest, basePath);
+        const migrationResult = await migrateFromMongoDB(userid, remoteManifest);
 
         if (migrationResult.migrated) {
             addSyncLog(`[Personal] Migration complete: ${migrationResult.fileCount} files`, "success");
@@ -85,7 +84,6 @@ export async function performPersonalSync() {
             // We must add them to remoteManifest in-memory so they survive Step 4.5.
             // We set hash="FORCE_UPLOAD" and modified=0 to ensure uploadUpdates (Step 5) picks them up.
             if (migrationResult.manifest) {
-                const migratedKeys = Object.keys(migrationResult.migrated || {});
                 // If migrationResult.migrated is map of paths, extracting keys might be tricky because paths are absolute/relative?
                 // Actually migrationResult.manifest contains the entries we care about.
                 for (const [key, entry] of Object.entries(migrationResult.manifest)) {

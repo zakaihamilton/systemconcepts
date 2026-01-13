@@ -196,7 +196,7 @@ export default function DayView({ sessions, date, store, playingSession }) {
 
     useToolbar({ id: "DayView", items: toolbarItems, depends: [translations, date, lastViewMode] });
 
-    const { swipeDirection, ...swipeHandlers } = useSwipe({
+    const swipeHandlers = useSwipe({
         onSwipeLeft: direction === "rtl" ? gotoPreviousDay : gotoNextDay,
         onSwipeRight: direction === "rtl" ? gotoNextDay : gotoPreviousDay
     });

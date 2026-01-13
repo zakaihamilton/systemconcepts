@@ -7,7 +7,7 @@ import { readCompressedFile } from "../bundle";
 /**
  * Step 3: Download the files.json and compare it with the local files.json
  */
-export async function syncManifest(localManifest) {
+export async function syncManifest() {
     const start = performance.now();
     addSyncLog("Step 3: Syncing manifest...", "info");
 

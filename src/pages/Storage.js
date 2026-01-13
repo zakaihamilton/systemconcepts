@@ -49,7 +49,7 @@ export default function Storage({ path = "" }) {
     const isPhone = useDeviceType() === "phone";
     const [syncCounter] = useSync();
     const translations = useTranslations();
-    const { item: editedItem, viewMode, mode, select, counter, editing } = StorageStore.useState();
+    const { item: editedItem, mode, select, counter, editing } = StorageStore.useState();
     useLocalStorage("StorageStore", StorageStore, ["viewMode"]);
     const [data, loading, error] = useListing(path, [counter, syncCounter]);
     const device = devices.find(item => item.id === path.split("/")[0]);

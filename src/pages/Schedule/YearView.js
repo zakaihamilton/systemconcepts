@@ -114,7 +114,7 @@ export default function YearView({ sessions, date, store, playingSession }) {
 
     useToolbar({ id: "YearView", items: toolbarItems, depends: [translations, currentYear, lastViewMode] });
 
-    const { swipeDirection, ...swipeHandlers } = useSwipe({
+    const swipeHandlers = useSwipe({
         onSwipeLeft: direction === "rtl" ? gotoPreviousYear : gotoNextYear,
         onSwipeRight: direction === "rtl" ? gotoNextYear : gotoPreviousYear
     });

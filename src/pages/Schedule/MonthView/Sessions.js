@@ -9,7 +9,7 @@ import { useDeviceType } from "@util/styles";
 export default function Sessions({ open, onClose, date, items, onSwipeLeft, onSwipeRight, direction, playingSession }) {
     const isMobile = useDeviceType() === "phone";
     const dialogDateFormatter = useDateFormatter({ dateStyle: "full" });
-    const { swipeDirection, ...swipeHandlers } = useSwipe({
+    const swipeHandlers = useSwipe({
         onSwipeLeft,
         onSwipeRight
     });

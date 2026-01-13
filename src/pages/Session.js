@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "@util/translations";
 import { useSessions, SessionsStore } from "@util/sessions";
 import { getComparator, stableSort } from "@util/sort";
@@ -75,7 +75,7 @@ export default function SessionPage({ group, year, date, name }) {
         day: "numeric"
     });
 
-    const { swipeDirection, ...swipeHandlers } = useSwipe({
+    const swipeHandlers = useSwipe({
         onSwipeLeft: () => nextSession && gotoSession(nextSession),
         onSwipeRight: () => prevSession && gotoSession(prevSession)
     });
@@ -94,7 +94,7 @@ export default function SessionPage({ group, year, date, name }) {
         return <div className={styles.root}>{translations.NOT_FOUND}</div>;
     }
 
-    const { duration, thumbnail, video } = session;
+    const { duration, thumbnail } = session;
 
     const viewImage = () => {
         addPath("image");
