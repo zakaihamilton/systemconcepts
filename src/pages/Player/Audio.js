@@ -100,6 +100,8 @@ export default function Audio({ show, metadataPath, metadataKey, year, name, pat
             path={path}
             show={show}
             zIndex={1}
+            sessionName={name}
+            groupName={group}
         />}
         {playerRef && <Toolbar show={show} name={name} playerRef={playerRef} isVideo={false} />}
     </div>;

@@ -4,7 +4,7 @@ import Toolbar from "./Toolbar";
 import { PlayerStore } from "../Player";
 import styles from "./Video.module.scss";
 
-export default function Video({ show, metadataPath, metadataKey, name, path, color, children, ...props }) {
+export default function Video({ show, metadataPath, metadataKey, name, path, color, group, children, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -30,6 +30,8 @@ export default function Video({ show, metadataPath, metadataKey, name, path, col
                 metadataKey={metadataKey}
                 path={path}
                 show={show}
+                sessionName={name}
+                groupName={group}
             />}
             {playerRef && <Toolbar show={show} name={name} playerRef={playerRef} isVideo={true} />}
         </div>

@@ -15,10 +15,11 @@ import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
 import Button from "@mui/material/Button";
 import { PlayerStore } from "../Player";
+import { useMediaSession } from "@util/useMediaSession";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadataPath, metadataKey, zIndex, color, noDuration }) {
+export default function Controls({ show, path, playerRef, metadataPath, metadataKey, zIndex, color, noDuration, sessionName, groupName }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
 
@@ -28,6 +29,14 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
     const [currentTime, setCurrentTime] = useState(0);
     const [error, setError] = useState(null);
     const visible = usePageVisibility();
+
+    // MediaSession API integration for iOS Bluetooth headset controls
+    useMediaSession({
+        playerRef,
+        title: sessionName || "Session",
+        artist: groupName || "",
+        enabled: show && !!playerRef
+    });
     const [metadata, , , setMetadata] = useFile(metadataPath, [metadataPath, metadataKey], data => {
         return data ? JSON.parse(data) : {};
     });
