@@ -7,7 +7,7 @@ import { addSyncLog } from "../logs";
  * Step: Remove local files that no longer exist on remote
  * This ensures local storage stays in sync with the server
  */
-export async function removeDeletedFiles(localManifest, remoteManifest) {
+export async function removeDeletedFiles(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH) {
     const start = performance.now();
     addSyncLog("Checking for deleted files...", "info");
 
@@ -32,7 +32,7 @@ export async function removeDeletedFiles(localManifest, remoteManifest) {
         // Delete files
         for (const file of toDelete) {
             try {
-                const filePath = makePath(LOCAL_SYNC_PATH, file.path);
+                const filePath = makePath(localPath, file.path);
                 if (await storage.exists(filePath)) {
                     await storage.deleteFile(filePath);
                     addSyncLog(`Removed: ${file.path}`, "info");
@@ -47,7 +47,7 @@ export async function removeDeletedFiles(localManifest, remoteManifest) {
         const updatedManifest = localManifest.filter(f => remotePathsSet.has(f.path));
 
         // Write updated manifest
-        const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+        const manifestPath = makePath(localPath, FILES_MANIFEST);
         await storage.writeFile(manifestPath, JSON.stringify(updatedManifest, null, 4));
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);

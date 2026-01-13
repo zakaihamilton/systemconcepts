@@ -8,8 +8,9 @@ import { usePageVisibility } from "@util/hooks";
 import { roleAuth } from "@util/roles";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { lockMutex, isMutexLocked } from "@sync/mutex";
-import { LOCAL_SYNC_PATH } from "./constants";
+import { LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, SYNC_BASE_PATH, LOCAL_SYNC_PATH } from "./constants";
 import { addSyncLog } from "./logs";
+import { makePath } from "@util/path";
 
 // Step Imports
 import { getLocalFiles } from "./steps/getLocalFiles";
@@ -23,6 +24,73 @@ import { uploadManifest } from "./steps/uploadManifest";
 import { SyncProgressTracker } from "./progressTracker";
 
 const SYNC_INTERVAL = 60; // seconds
+
+/**
+ * Execute a single sync pipeline for a given path pair
+ */
+async function executeSyncPipeline(localPath, remotePath, label) {
+    const start = performance.now();
+    addSyncLog(`Starting ${label} sync...`, "info");
+    const progress = new SyncProgressTracker();
+    let hasChanges = false;
+
+    // Ensure local folder exists
+    await storage.createFolderPath(makePath(localPath, "dummy"));
+
+    // Step 1
+    progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
+    const localFiles = await getLocalFiles(localPath);
+    progress.completeStep('getLocalFiles');
+
+    // Step 2
+    progress.updateProgress('updateLocalManifest', { processed: 0, total: 1 });
+    let localManifest = await updateLocalManifest(localFiles, localPath);
+    progress.completeStep('updateLocalManifest');
+
+    // Step 3
+    progress.updateProgress('syncManifest', { processed: 0, total: 1 });
+    let remoteManifest = await syncManifest(remotePath);
+    progress.completeStep('syncManifest');
+
+    // Step 4
+    progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
+    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, remotePath);
+    localManifest = downloadResult.manifest;
+    remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
+    hasChanges = hasChanges || downloadResult.hasChanges;
+    progress.completeStep('downloadUpdates');
+
+    // Step 4.5: Remove files that were deleted on remote
+    progress.updateProgress('removeDeletedFiles', { processed: 0, total: 1 });
+    const removeResult = await removeDeletedFiles(localManifest, remoteManifest, localPath);
+    localManifest = removeResult.manifest;
+    hasChanges = hasChanges || removeResult.hasChanges;
+    progress.completeStep('removeDeletedFiles');
+
+    // Step 5
+    progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
+    const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, remotePath);
+    remoteManifest = uploadUpdatesResult.manifest;
+    hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
+    progress.completeStep('uploadUpdates');
+
+    // Step 6
+    progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
+    const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, remotePath);
+    remoteManifest = uploadNewResult.manifest;
+    hasChanges = hasChanges || uploadNewResult.hasChanges;
+    progress.completeStep('uploadNewFiles');
+
+    // Step 7
+    progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
+    await uploadManifest(remoteManifest, remotePath);
+    progress.setComplete();
+
+    const duration = ((performance.now() - start) / 1000).toFixed(1);
+    addSyncLog(`✓ ${label} sync complete in ${duration}s`, "success");
+
+    return hasChanges;
+}
 
 /**
  * Main sync function
@@ -89,64 +157,19 @@ export async function performSync() {
             }
         }
 
-
         addSyncLog("Starting sync process...", "info");
         const startTime = performance.now();
-        let hasChanges = false;
-        const progress = new SyncProgressTracker();
 
+        // 1. Main Sync
+        const mainChanges = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main");
 
-        // Step 1
-        progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
-        const localFiles = await getLocalFiles();
-        progress.completeStep('getLocalFiles');
+        // 2. Library Sync
+        const libraryChanges = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library");
 
-        // Step 2
-        progress.updateProgress('updateLocalManifest', { processed: 0, total: 1 });
-        let localManifest = await updateLocalManifest(localFiles);
-        progress.completeStep('updateLocalManifest');
-
-        // Step 3
-        progress.updateProgress('syncManifest', { processed: 0, total: 1 });
-        let remoteManifest = await syncManifest(localManifest);
-        progress.completeStep('syncManifest');
-
-        // Step 4
-        progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
-        const downloadResult = await downloadUpdates(localManifest, remoteManifest);
-        localManifest = downloadResult.manifest;
-        remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
-        hasChanges = hasChanges || downloadResult.hasChanges;
-        progress.completeStep('downloadUpdates');
-
-        // Step 4.5: Remove files that were deleted on remote
-        progress.updateProgress('removeDeletedFiles', { processed: 0, total: 1 });
-        const removeResult = await removeDeletedFiles(localManifest, remoteManifest);
-        localManifest = removeResult.manifest;
-        hasChanges = hasChanges || removeResult.hasChanges;
-        progress.completeStep('removeDeletedFiles');
-
-        // Step 5
-        progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
-        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest);
-        remoteManifest = uploadUpdatesResult.manifest;
-        hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
-        progress.completeStep('uploadUpdates');
-
-        // Step 6
-        progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
-        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest);
-        remoteManifest = uploadNewResult.manifest;
-        hasChanges = hasChanges || uploadNewResult.hasChanges;
-        progress.completeStep('uploadNewFiles');
-
-        // Step 7
-        progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
-        await uploadManifest(remoteManifest);
-        progress.setComplete();
+        const hasChanges = mainChanges || libraryChanges;
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
-        addSyncLog(`Sync complete in ${duration}s`, "success");
+        addSyncLog(`Total sync time: ${duration}s`, "success");
 
         // Only trigger reload if sync actually changed something
         if (hasChanges) {

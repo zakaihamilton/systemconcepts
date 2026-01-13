@@ -297,20 +297,30 @@ async function getRecursiveList(path) {
         // callMethod returns null if method not found.
     }
 
-    // Return empty array if directory doesn't exist (e.g., after cache clear)
-    if (!await storageMethods.exists(path)) {
-        return [];
-    }
-
+    // Return empty array if directory listing fails
     let listing = [];
     const addListing = async (dirPath) => {
         const items = await limit(() => storageMethods.getListing(dirPath));
-        if (!items) return;
+        if (!items) {
+            console.log(`[Storage] No items found for: ${dirPath}`);
+            return;
+        }
+        console.log(`[Storage] Found ${items.length} items in ${dirPath}`);
 
-        listing.push(...items);
+        const files = items.filter(item => {
+            const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name.endsWith("/");
+            return !isDir;
+        });
+        listing.push(...files);
 
-        const subDirs = items.filter(item => item.type === "dir" || item.stat?.type === "dir");
-        await Promise.all(subDirs.map(dir => addListing(dir.path)));
+        const subDirs = items.filter(item => {
+            const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name.endsWith("/");
+            return isDir;
+        });
+
+        if (subDirs.length > 0) {
+            await Promise.all(subDirs.map(dir => addListing(dir.path)));
+        }
     };
     await addListing(path);
     return listing;

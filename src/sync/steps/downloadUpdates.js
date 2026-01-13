@@ -10,13 +10,20 @@ import { SyncActiveStore } from "../syncState";
 /**
  * Helper function to download a single file
  */
-async function downloadFile(remoteFile, createdFolders) {
+async function downloadFile(remoteFile, createdFolders, localPath, remotePath) {
     const fileBasename = remoteFile.path;
-    const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
-    const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
+    const localFilePath = makePath(localPath, fileBasename);
+    let remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
 
     try {
-        const data = await readCompressedFile(remoteFilePath);
+        let data = await readCompressedFile(remoteFilePath);
+
+        if (!data) {
+            // Try without .gz extension
+            remoteFilePath = makePath(remotePath, fileBasename);
+            data = await readCompressedFile(remoteFilePath);
+        }
+
         if (!data) return null;
 
         if (createdFolders) {
@@ -32,9 +39,11 @@ async function downloadFile(remoteFile, createdFolders) {
         await storage.writeFile(localFilePath, content);
 
         // Verify hash
-        const info = await getFileInfo(content);
-        if (info.hash !== remoteFile.hash) {
-            console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
+        if (remoteFile.hash) {
+            const info = await getFileInfo(content);
+            if (info.hash !== remoteFile.hash) {
+                console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
+            }
         }
 
         addSyncLog(`Downloaded: ${fileBasename}`, "info");
@@ -50,7 +59,7 @@ async function downloadFile(remoteFile, createdFolders) {
  * Step 4: Download files that have higher version on remote
  * Uses parallel batch processing for performance
  */
-export async function downloadUpdates(localManifest, remoteManifest) {
+export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH) {
     const start = performance.now();
     addSyncLog("Step 4: Downloading updates...", "info");
 
@@ -63,16 +72,18 @@ export async function downloadUpdates(localManifest, remoteManifest) {
         // Collect files that need downloading
         for (const remoteFile of remoteManifest) {
             const localFile = localMap.get(remoteFile.path);
-            const remoteVer = parseInt(remoteFile.version);
-            const localVer = localFile ? parseInt(localFile.version) : 0;
+            const remoteVer = parseInt(remoteFile.version) || 0;
+            const localVer = localFile ? (parseInt(localFile.version) || 0) : 0;
 
-            if (remoteVer > localVer) {
+            console.log(`[Sync] Check ${remoteFile.path}: remoteVer=${remoteVer}, localVer=${localVer}`);
+
+            if (remoteVer > localVer || !localFile) {
                 toDownload.push(remoteFile);
             }
         }
 
         if (toDownload.length === 0) {
-            addSyncLog("✓ No downloads needed", "info");
+            console.log("[Sync] Comparison complete, nothing to download. Remote Manifest:", JSON.stringify(remoteManifest));
             return { manifest: localManifest, hasChanges: false, cleanedRemoteManifest: remoteManifest };
         }
 
@@ -97,7 +108,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
 
             const results = await Promise.all(
                 batch.map(async remoteFile => {
-                    const result = await downloadFile(remoteFile, createdFolders);
+                    const result = await downloadFile(remoteFile, createdFolders, localPath, remotePath);
                     // If download returned null, the file doesn't exist on remote
                     if (result === null) {
                         missingOnRemote.push(remoteFile);
@@ -123,7 +134,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
             });
 
             // Upload the cleaned manifest immediately
-            const manifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
+            const manifestPath = makePath(remotePath, FILES_MANIFEST_GZ);
             await writeCompressedFile(manifestPath, cleanedRemoteManifest);
             addSyncLog(`✓ Cleaned remote manifest (removed ${missingOnRemote.length} missing files)`, "success");
         }
@@ -132,7 +143,7 @@ export async function downloadUpdates(localManifest, remoteManifest) {
         const updatedManifest = await applyManifestUpdates(localManifest, updates);
 
         // Write updated manifest to disk
-        const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+        const manifestPath = makePath(localPath, FILES_MANIFEST);
         await storage.writeFile(manifestPath, JSON.stringify(updatedManifest, null, 4));
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);

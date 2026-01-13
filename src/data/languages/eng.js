@@ -778,6 +778,10 @@ export default {
             "value": "Group"
         },
         {
+            "id": "LIBRARY",
+            "value": "Library"
+        },
+        {
             "id": "GROUPS",
             "value": "Groups"
         },
@@ -1304,6 +1308,58 @@ export default {
         {
             "id": "TOTAL_SESSIONS_ADDED",
             "value": "Total Sessions Added"
+        },
+        {
+            "id": "EXPAND_ALL",
+            "value": "Expand All"
+        },
+        {
+            "id": "COLLAPSE_ALL",
+            "value": "Collapse All"
+        },
+        {
+            "id": "AUTHOR",
+            "value": "Author"
+        },
+        {
+            "id": "BOOK",
+            "value": "Book"
+        },
+        {
+            "id": "VOLUME",
+            "value": "Volume"
+        },
+        {
+            "id": "PART",
+            "value": "Part"
+        },
+        {
+            "id": "SECTION",
+            "value": "Section"
+        },
+        {
+            "id": "YEAR",
+            "value": "Year"
+        },
+        {
+            "id": "PORTION",
+            "value": "Portion"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Article"
+        },
+        {
+            "id": "CHAPTER",
+            "value": "Chapter"
+        },
+        {
+            "id": "TITLE",
+            "value": "Title"
+        },
+        {
+            "id": "NUMBER",
+            "value": "No."
         }
     ]
 };

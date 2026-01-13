@@ -10,10 +10,10 @@ import { applyManifestUpdates } from "../manifest";
 /**
  * Helper function to upload a single file
  */
-async function uploadFile(localFile, createdFolders) {
+async function uploadFile(localFile, createdFolders, localPath, remotePath) {
     const fileBasename = localFile.path;
-    const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
-    const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
+    const localFilePath = makePath(localPath, fileBasename);
+    const remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
 
     try {
         const content = await storage.readFile(localFilePath);
@@ -36,7 +36,7 @@ async function uploadFile(localFile, createdFolders) {
  * Step 5: Upload files that have higher version locally
  * Uses parallel batch processing for performance
  */
-export async function uploadUpdates(localManifest, remoteManifest) {
+export async function uploadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH) {
     const start = performance.now();
     addSyncLog("Step 5: Uploading updates...", "info");
 
@@ -81,7 +81,7 @@ export async function uploadUpdates(localManifest, remoteManifest) {
             });
 
             const results = await Promise.all(
-                batch.map(localFile => uploadFile(localFile, createdFolders))
+                batch.map(localFile => uploadFile(localFile, createdFolders, localPath, remotePath))
             );
 
             updates.push(...results.filter(Boolean));

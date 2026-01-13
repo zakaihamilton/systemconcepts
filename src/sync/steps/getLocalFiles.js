@@ -1,16 +1,17 @@
 import storage from "@util/storage";
+import { makePath } from "@util/path";
 import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
 
 /**
  * Step 1: Read the listing of the sync folder (ignoring the files.json)
  */
-export async function getLocalFiles() {
+export async function getLocalFiles(localPath = LOCAL_SYNC_PATH) {
     const start = performance.now();
     addSyncLog("Step 1: Reading local files...", "info");
 
     try {
-        const listing = await storage.getRecursiveList(LOCAL_SYNC_PATH);
+        const listing = await storage.getRecursiveList(localPath);
         const files = listing.filter(item =>
             item.type !== "dir" &&
             item.name !== FILES_MANIFEST &&
@@ -18,7 +19,11 @@ export async function getLocalFiles() {
             // Only allow year-based tag files e.g. "2021.tags", not individual session tags
             (!item.name.endsWith(".tags") || /^\d{4}\.tags$/.test(item.name))
         ).map(item => {
-            const relPath = item.path.substring(LOCAL_SYNC_PATH.length + 1);
+            const prefix = makePath(localPath);
+            let relPath = item.path.substring(prefix.length);
+            if (!relPath.startsWith("/")) {
+                relPath = "/" + relPath;
+            }
             return {
                 path: relPath,
                 fullPath: item.path

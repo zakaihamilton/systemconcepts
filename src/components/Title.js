@@ -5,10 +5,13 @@ import { useDeviceType } from "@util/styles";
 import { ScheduleStore } from "@pages/Schedule";
 import { SessionsStore } from "@util/sessions";
 
+import { LibraryStore } from "@pages/Library/Store";
+
 export default function Title() {
     const { viewMode } = ScheduleStore.useState();
     const { viewMode: sessionsViewMode } = SessionsStore.useState();
-    const pages = useActivePages([viewMode, sessionsViewMode]);
+    const { tags } = LibraryStore.useState();
+    const pages = useActivePages([viewMode, sessionsViewMode, tags]);
     const isMobile = useDeviceType() !== "desktop";
     return <Breadcrumbs className={styles.bar} items={pages} bar={true} border={true} hideRoot={isMobile} />;
 }

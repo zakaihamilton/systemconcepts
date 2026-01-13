@@ -136,7 +136,7 @@ export function getPagesFromHash({ hash, translations, pages }) {
             if (page.root) {
                 subPath = subPath.substring(pageId.length);
             }
-            const url = page.path || path + encodeURIComponent(subPath);
+            const url = (page.section ? null : page.path) || path + encodeURIComponent(subPath);
             const name = page.name;
             page = Object.assign({}, page, params);
             if (typeof page.section === "function") {

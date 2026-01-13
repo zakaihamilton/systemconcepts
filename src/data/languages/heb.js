@@ -758,6 +758,10 @@ export default {
             "value": "קבוצה"
         },
         {
+            "id": "LIBRARY",
+            "value": "ספרייה"
+        },
+        {
             "id": "GROUPS",
             "value": "קבוצות"
         },
@@ -1292,6 +1296,58 @@ export default {
         {
             "id": "TOTAL_SESSIONS_ADDED",
             "value": "סה״כ שיעורים שנוספו"
+        },
+        {
+            "id": "EXPAND_ALL",
+            "value": "הרחב הכל"
+        },
+        {
+            "id": "COLLAPSE_ALL",
+            "value": "צמצם הכל"
+        },
+        {
+            "id": "AUTHOR",
+            "value": "מחבר"
+        },
+        {
+            "id": "BOOK",
+            "value": "ספר"
+        },
+        {
+            "id": "VOLUME",
+            "value": "כרך"
+        },
+        {
+            "id": "PART",
+            "value": "חלק"
+        },
+        {
+            "id": "SECTION",
+            "value": "סעיף"
+        },
+        {
+            "id": "YEAR",
+            "value": "שנה"
+        },
+        {
+            "id": "PORTION",
+            "value": "פרשה"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "מאמר"
+        },
+        {
+            "id": "CHAPTER",
+            "value": "פרק"
+        },
+        {
+            "id": "TITLE",
+            "value": "כותרת"
+        },
+        {
+            "id": "NUMBER",
+            "value": "מס׳"
         }
     ]
 };

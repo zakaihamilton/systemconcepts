@@ -9,10 +9,10 @@ import Cookies from "js-cookie";
 /**
  * Helper function to upload a new file
  */
-async function uploadNewFile(localFile, createdFolders) {
+async function uploadNewFile(localFile, createdFolders, localPath, remotePath) {
     const fileBasename = localFile.path;
-    const localFilePath = makePath(LOCAL_SYNC_PATH, fileBasename);
-    const remoteFilePath = makePath(SYNC_BASE_PATH, `${fileBasename}.gz`);
+    const localFilePath = makePath(localPath, fileBasename);
+    const remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
 
     try {
         const content = await storage.readFile(localFilePath);
@@ -35,7 +35,7 @@ async function uploadNewFile(localFile, createdFolders) {
  * Step 6: Upload new files not present in remote manifest
  * Uses parallel batch processing for performance
  */
-export async function uploadNewFiles(localManifest, remoteManifest) {
+export async function uploadNewFiles(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH) {
     const start = performance.now();
     addSyncLog("Step 6: Uploading new files...", "info");
 
@@ -76,7 +76,7 @@ export async function uploadNewFiles(localManifest, remoteManifest) {
             });
 
             const results = await Promise.all(
-                batch.map(localFile => uploadNewFile(localFile, createdFolders))
+                batch.map(localFile => uploadNewFile(localFile, createdFolders, localPath, remotePath))
             );
 
             updates.push(...results.filter(Boolean));

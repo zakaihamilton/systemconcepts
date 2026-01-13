@@ -5,7 +5,7 @@ import Link from "@mui/material/Link";
 export default function Apps() {
     const pages = usePages();
 
-    const items = pages.filter(page => page.apps && !page.category).sort((a, b) => a.name.localeCompare(b.name));
+    const items = pages.filter(page => page.apps && !page.category).sort((a, b) => b.name.localeCompare(a.name));
     const elements = items.map(page => {
         const { Icon } = page;
         return <Link href={"#" + page.id} underline="none" key={page.id} className={styles.item} onClick={() => setPath(page.id)}>

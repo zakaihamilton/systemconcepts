@@ -63,7 +63,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
     else {
         style.paddingLeft = (depth * 1.5) + "em";
     }
-    if (target && !target.startsWith("#")) {
+    if (typeof target === "string" && !target.startsWith("#")) {
         target = "#" + target;
     }
     else if (!target) {
