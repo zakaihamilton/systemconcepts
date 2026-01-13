@@ -1,8 +1,9 @@
+import React from "react";
 import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Store";
 import { LibraryIcons, LibraryTagKeys } from "./Icons";
 
-export function getLibrarySection({ id, path, translations, sectionIndex }) {
+export function getLibrarySection({ id, path, translations }) {
     const { tags } = LibraryStore.getRawState();
 
     const onClick = () => {
@@ -11,63 +12,69 @@ export function getLibrarySection({ id, path, translations, sectionIndex }) {
         });
     };
 
+    const segments = path.split("/").filter(Boolean).map(decodeURIComponent);
+    const name = decodeURIComponent(id || segments[segments.length - 1]);
+
     // Identify if this is the root "Library" breadcrumb
-    if (id && id.toLowerCase() === "library") {
+    const isRoot = name && name.toLowerCase() === "library";
+
+    if (isRoot) {
+        let label = translations.LIBRARY || "Library";
+        if (label && typeof label === "string" && label.length > 0) {
+            label = label.charAt(0).toUpperCase() + label.slice(1);
+        }
+        const RootIcon = LibraryIcons.library;
         return {
-            name: translations.LIBRARY,
-            label: translations.LIBRARY,
-            tooltip: translations.LIBRARY,
+            name: label,
+            label: label,
+            tooltip: label,
+            Icon: RootIcon,
+            icon: RootIcon && <RootIcon />,
             onClick
         };
     }
 
-    // For sub-segments, default to the segment name itself
-    const name = id;
     let description = "";
-    let Icon = null;
+    let SelectedIcon = null;
 
-    const getTagHierarchy = (tag) => {
-        return LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
-    };
+    if (tags && tags.length > 0) {
+        // Robust matching to find the relevant tag and its field type
+        const tag = tags.find(t =>
+            LibraryTagKeys.some(key => {
+                const val = t[key];
+                return val && String(val).trim().toLowerCase() === name.toLowerCase();
+            })
+        );
 
-    // Find the current hash items to determine if we are at the leaf node
-    const hash = (typeof window !== "undefined" ? window.location.hash : "").split("?")[0].replace("#", "");
-    const hashItems = hash.split("/").filter(Boolean).map(decodeURIComponent);
-    const libRootIndex = hashItems.findIndex(h => h.toLowerCase() === "library");
-    const subSegments = hashItems.slice(libRootIndex + 1);
-    const urlPath = subSegments.join("|");
+        if (tag) {
+            const currentField = LibraryTagKeys.find(key => {
+                const val = tag[key];
+                return val && String(val).trim().toLowerCase() === name.toLowerCase();
+            });
 
-    // Find a tag that matches the sequence of segments to identify metadata
-    const tag = (tags || []).find(t => {
-        const hierarchy = getTagHierarchy(t);
-        return subSegments.every((val, i) => hierarchy[i] === val);
-    });
+            if (currentField) {
+                SelectedIcon = LibraryIcons[currentField];
+            }
 
-    if (tag) {
-        const hierarchy = getTagHierarchy(tag);
-        const segmentIndex = typeof sectionIndex !== "undefined" ? sectionIndex - 1 : subSegments.indexOf(name);
-
-        // Map the segment name to its corresponding field key
-        const presentFields = LibraryTagKeys.filter(f => tag[f]);
-        const currentField = presentFields[segmentIndex];
-        if (currentField) {
-            Icon = LibraryIcons[currentField];
-        }
-
-        const isLeaf = hierarchy.join("|") === urlPath && name === hierarchy[hierarchy.length - 1];
-        if (isLeaf) {
-            description = [
-                tag.number ? `${translations.NUMBER || "No."} ${tag.number}` : null
-            ].filter(Boolean).join(" | ");
+            if (currentField === "article" || currentField === "chapter" || tag.number) {
+                description = [
+                    tag.number ? `${translations.NUMBER || "No."} ${tag.number}` : null
+                ].filter(Boolean).join(" | ");
+            }
         }
     }
 
-    return {
+    // Crucial: We must return BOTH Icon: null and icon: null to prevent 
+    // the breadcrumb from falling back to the page definition's generic icon.
+    const result = {
         name,
         label: name,
         tooltip: name,
         description,
-        Icon,
-        onClick
+        onClick,
+        Icon: SelectedIcon || null,
+        icon: SelectedIcon ? <SelectedIcon /> : null
     };
+
+    return result;
 }

@@ -1348,6 +1348,10 @@ export default {
         {
             "id": "NUMBER",
             "value": "מס׳"
+        },
+        {
+            "id": "SELECT_ITEM",
+            "value": "בחר מאמר לצפייה בתוכן"
         }
     ]
 };

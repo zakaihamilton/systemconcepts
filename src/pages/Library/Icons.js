@@ -1,6 +1,7 @@
 import PersonIcon from "@mui/icons-material/Person";
 import BookIcon from "@mui/icons-material/Book";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SegmentIcon from "@mui/icons-material/Segment";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import EventIcon from "@mui/icons-material/Event";
@@ -10,9 +11,10 @@ import SubjectIcon from "@mui/icons-material/Subject";
 import TitleIcon from "@mui/icons-material/Title";
 
 export const LibraryIcons = {
+    library: LibraryBooksIcon,
     author: PersonIcon,
     book: BookIcon,
-    volume: LibraryBooksIcon,
+    volume: MenuBookIcon,
     part: SegmentIcon,
     section: ViewStreamIcon,
     year: EventIcon,

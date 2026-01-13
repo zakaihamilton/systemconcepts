@@ -1340,6 +1340,10 @@ export default {
         {
             "id": "NUMBER",
             "value": "Número"
+        },
+        {
+            "id": "SELECT_ITEM",
+            "value": "Selecione um artigo para visualizar o conteúdo"
         }
     ]
 };

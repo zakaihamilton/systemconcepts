@@ -18,7 +18,7 @@ import { setHash } from "@util/pages";
 import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 
-export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, href, hideRoot, navigateLast, description, menuItems, onClick }) {
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, icon, href, hideRoot, navigateLast, description, menuItems, onClick }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
@@ -35,7 +35,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
         deviceType === "tablet" && count >= 7 ||
         deviceType === "desktop" && count >= 10;
 
-    const title = !showLabel ? (label || name) : tooltip || label || name;
+    const title = (!showLabel ? (label || name) : tooltip || label || name) || "";
 
     const gotoItem = (event) => {
         if (onClick) {
@@ -71,13 +71,15 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
             const path = items.slice(2, -2).map(item => item.label || item.name).join("/");
             return (
                 <>
-                    <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
-                        <Tooltip arrow title={path}>
-                            <IconButton className={styles.iconButton} size="small">
-                                <MoreHorizIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </Link>
+                    <Tooltip arrow title={path || ""}>
+                        <span>
+                            <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
+                                <IconButton className={styles.iconButton} size="small">
+                                    <MoreHorizIcon />
+                                </IconButton>
+                            </Link>
+                        </span>
+                    </Tooltip>
                     <div className={styles.separator}>
                         <SeparatorIcon fontSize="small" />
                     </div>
@@ -93,9 +95,9 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
 
     const content = (
         <>
-            {Icon && (
+            {(Icon || icon) && (
                 <div className={styles.icon}>
-                    <Icon />
+                    {icon || <Icon />}
                 </div>
             )}
             {(showLabel || isLast) && (
@@ -114,17 +116,19 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
     return (
         <>
             <Tooltip arrow title={title}>
-                <Link
-                    className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
-                    color="inherit"
-                    href={href}
-                    onClick={gotoItem}
-                    underline="none"
-                >
-                    <span className={styles.itemContent}>
-                        {content}
-                    </span>
-                </Link>
+                <span>
+                    <Link
+                        className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
+                        color="inherit"
+                        href={href}
+                        onClick={gotoItem}
+                        underline="none"
+                    >
+                        <span className={styles.itemContent}>
+                            {content}
+                        </span>
+                    </Link>
+                </span>
             </Tooltip>
             {!!menuItems && <Menu
                 anchorEl={anchorEl}
@@ -172,7 +176,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
         <div className={clsx(styles.root, bar && styles.bar, border && styles.border, className)}>
             <div className={styles.row}>
                 <NoSsr>
-                    {!!bar && <SidebarIcon />}
+                    {!!bar && <span><SidebarIcon /></span>}
                     {<Divider orientation="vertical" flexItem style={{ margin: "0 0.5rem" }} />}
                     <div className={styles.breadcrumbs}>
                         {breadcrumbItems}
