@@ -17,6 +17,7 @@ import Tooltip from "@mui/material/Tooltip";
 import TreeItem from "./Library/TreeItem";
 import { setPath, usePathItems } from "@util/pages";
 import { MainStore } from "@components/Main";
+import { LibraryStore } from "./Library/Store";
 
 
 export default function Library() {
@@ -69,6 +70,9 @@ export default function Library() {
                     const data = JSON.parse(content);
                     console.log("Loaded tags:", data.length);
                     setTags(data);
+                    LibraryStore.update(s => {
+                        s.tags = data;
+                    });
                 } else {
                     console.warn("Library tags not found at", tagsPath);
                 }
@@ -194,9 +198,6 @@ export default function Library() {
                     <Typography variant="h6">
                         {translations.LIBRARY || "Library"}
                     </Typography>
-                    <IconButton onClick={() => setShowSidebar(false)} size="small">
-                        <ChevronLeftIcon />
-                    </IconButton>
                 </Box>
                 <Divider />
                 <List component="nav" sx={{ overflow: "auto", flex: 1, minWidth: 250 }}>
@@ -213,18 +214,6 @@ export default function Library() {
             </Paper>
 
             <Box sx={{ flex: 1, height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                {!showLibrarySideBar && (
-                    <Box sx={{ p: 1, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center" }}>
-                        <Tooltip title={translations.SHOW_SIDEBAR || "Show Sidebar"}>
-                            <IconButton onClick={() => setShowSidebar(true)} size="small">
-                                <MenuOpenIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Typography variant="body2" sx={{ ml: 1, fontWeight: "bold", color: "text.secondary" }}>
-                            {translations.LIBRARY || "Library"}
-                        </Typography>
-                    </Box>
-                )}
                 <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
                     {content ? (
                         <Box>

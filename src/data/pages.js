@@ -78,6 +78,7 @@ const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> 
 
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 const Library = dynamic(() => import("@pages/Library"), { loading: () => <PageLoad /> });
+import { getLibrarySection } from "@pages/Library/Section";
 
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { getSessionsSection } from "@pages/Sessions/Section";
@@ -244,10 +245,12 @@ export default [
     {
         apps: true,
         sidebar: true,
-        id: "library",
+        id: /^library/,
+        path: "library",
         name: "LIBRARY",
         Icon: LibraryBooksIcon,
-        Component: Library
+        Component: Library,
+        section: getLibrarySection
     },
     {
         id: "session",

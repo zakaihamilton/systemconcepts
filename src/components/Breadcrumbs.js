@@ -18,7 +18,7 @@ import { setHash } from "@util/pages";
 import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 
-export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, href, hideRoot, navigateLast, description, menuItems }) {
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, href, hideRoot, navigateLast, description, menuItems, onClick }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
     const deviceType = useDeviceType();
@@ -38,6 +38,11 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
     const title = !showLabel ? (label || name) : tooltip || label || name;
 
     const gotoItem = (event) => {
+        if (onClick) {
+            event.preventDefault();
+            onClick();
+            return;
+        }
         if (isLast && menuItems) {
             event.preventDefault();
             setAnchorEl(event.currentTarget);

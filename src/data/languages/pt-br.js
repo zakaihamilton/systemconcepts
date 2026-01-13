@@ -1296,6 +1296,50 @@ export default {
         {
             "id": "COLLAPSE_ALL",
             "value": "Recolher Tudo"
+        },
+        {
+            "id": "AUTHOR",
+            "value": "Autor"
+        },
+        {
+            "id": "BOOK",
+            "value": "Livro"
+        },
+        {
+            "id": "VOLUME",
+            "value": "Volume"
+        },
+        {
+            "id": "PART",
+            "value": "Parte"
+        },
+        {
+            "id": "SECTION",
+            "value": "Seção"
+        },
+        {
+            "id": "YEAR",
+            "value": "Ano"
+        },
+        {
+            "id": "PORTION",
+            "value": "Porção"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Artigo"
+        },
+        {
+            "id": "CHAPTER",
+            "value": "Capítulo"
+        },
+        {
+            "id": "TITLE",
+            "value": "Título"
+        },
+        {
+            "id": "NUMBER",
+            "value": "Número"
         }
     ]
 };

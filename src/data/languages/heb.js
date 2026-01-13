@@ -1304,6 +1304,50 @@ export default {
         {
             "id": "COLLAPSE_ALL",
             "value": "צמצם הכל"
+        },
+        {
+            "id": "AUTHOR",
+            "value": "מחבר"
+        },
+        {
+            "id": "BOOK",
+            "value": "ספר"
+        },
+        {
+            "id": "VOLUME",
+            "value": "כרך"
+        },
+        {
+            "id": "PART",
+            "value": "חלק"
+        },
+        {
+            "id": "SECTION",
+            "value": "סעיף"
+        },
+        {
+            "id": "YEAR",
+            "value": "שנה"
+        },
+        {
+            "id": "PORTION",
+            "value": "פרשה"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "מאמר"
+        },
+        {
+            "id": "CHAPTER",
+            "value": "פרק"
+        },
+        {
+            "id": "TITLE",
+            "value": "כותרת"
+        },
+        {
+            "id": "NUMBER",
+            "value": "מס׳"
         }
     ]
 };

@@ -1316,6 +1316,50 @@ export default {
         {
             "id": "COLLAPSE_ALL",
             "value": "Collapse All"
+        },
+        {
+            "id": "AUTHOR",
+            "value": "Author"
+        },
+        {
+            "id": "BOOK",
+            "value": "Book"
+        },
+        {
+            "id": "VOLUME",
+            "value": "Volume"
+        },
+        {
+            "id": "PART",
+            "value": "Part"
+        },
+        {
+            "id": "SECTION",
+            "value": "Section"
+        },
+        {
+            "id": "YEAR",
+            "value": "Year"
+        },
+        {
+            "id": "PORTION",
+            "value": "Portion"
+        },
+        {
+            "id": "ARTICLE",
+            "value": "Article"
+        },
+        {
+            "id": "CHAPTER",
+            "value": "Chapter"
+        },
+        {
+            "id": "TITLE",
+            "value": "Title"
+        },
+        {
+            "id": "NUMBER",
+            "value": "No."
         }
     ]
 };

@@ -50,6 +50,8 @@
     white-space: nowrap;
     cursor: pointer;
     opacity: 0.75;
+    min-width: 0;
+    max-width: 250px;
 
     &:hover {
         background-color: var(--hover-background);
@@ -65,6 +67,8 @@
     display: flex;
     align-items: center;
     height: 100%;
+    min-width: 0;
+    width: 100%;
 }
 
 .item:last-child {
@@ -84,18 +88,24 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    width: 100%;
 }
 
 .column {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0;
+    flex: 1;
 }
 
 .description {
     font-size: 0.75rem;
     opacity: 0.7;
     line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .icon {
