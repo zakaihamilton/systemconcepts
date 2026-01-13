@@ -66,9 +66,9 @@ export function useSearch(name, updateCallback) {
         }
     }, []);
 
-    // Memoize the search element - only recreate for device/translation changes
-    // Using defaultValue makes it uncontrolled, so cursor position is preserved
-    const searchElement = useMemo(() => (
+    // Wrap the search UI in a component so that we don't pass refs directly through the ToolbarStore.
+    // This prevents Pullstate/Immer from freezing the ref objects.
+    const SearchComponent = useCallback(() => (
         <div ref={containerRef} className={clsx(styles.search, isDesktop && styles.searchExpanded)} onClick={handleClick}>
             <div className={styles.searchIcon}>
                 <SearchIcon />
@@ -87,7 +87,6 @@ export function useSearch(name, updateCallback) {
                 inputProps={{ "aria-label": "search" }}
             />
         </div>
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [isDesktop, translations.SEARCH, handleClick, onChangeText, handleFocus, handleBlur]);
 
     const toolbarItems = useMemo(() => [
@@ -96,9 +95,9 @@ export function useSearch(name, updateCallback) {
             menu: false,
             sortKey: -1,
             location: isPhone && "header",
-            element: searchElement
+            element: <SearchComponent />
         }
-    ], [isPhone, searchElement]);
+    ], [isPhone, SearchComponent]);
 
     useToolbar({ id: "Search", items: toolbarItems, depends: [isPhone, deviceType] });
 
