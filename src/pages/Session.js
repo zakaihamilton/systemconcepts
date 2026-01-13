@@ -113,7 +113,14 @@ export default function SessionPage({ group, year, date, name }) {
     return <div className={styles.root} {...swipeHandlers}>
         <div className={styles.card} style={{ "--group-color": session.color }}>
             <div className={styles.header}>
-                <div className={styles.title}>{name}</div>
+                <div className={styles.title} onClick={() => {
+                    const fullName = `${date} ${name}`;
+                    const success = copyToClipboard(fullName);
+                    if (success) {
+                        setCopiedTag(fullName);
+                        setShowClipboard(true);
+                    }
+                }}>{name}</div>
                 <div className={styles.metadata}>
                     <Group name={group} color={session.color} />
                     <span className={styles.date}>{dateWidget}</span>
