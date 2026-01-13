@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearch } from "@components/Search";
 import storage from "@util/storage";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
@@ -38,17 +38,17 @@ export default function Library() {
     const role = Cookies.get("role");
     const isAdmin = roleAuth(role, "admin");
 
-    const getTagHierarchy = (tag) => {
+    const getTagHierarchy = useCallback((tag) => {
         return LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
-    };
+    }, []);
 
-    const onSelect = (tag) => {
+    const onSelect = useCallback((tag) => {
         setSelectedTag(tag);
-        const hierarchy = getTagHierarchy(tag);
+        const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {

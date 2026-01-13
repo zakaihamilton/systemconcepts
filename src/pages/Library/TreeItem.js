@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
-export default function TreeItem({ node, onSelect, selectedId, selectedPath, level = 0 }) {
+const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, level = 0 }) {
     const [open, setOpen] = useState(false);
     const hasChildren = node.children && node.children.length > 0;
     const isSelected = !!selectedId && node._id === selectedId;
@@ -19,18 +19,20 @@ export default function TreeItem({ node, onSelect, selectedId, selectedPath, lev
         }
     }, [selectedPath, node.id]);
 
-    const handleToggle = (e) => {
+    const handleToggle = useCallback((e) => {
         e.stopPropagation();
-        setOpen(!open);
-    };
+        setOpen(prev => !prev);
+    }, []);
 
-    const handleSelect = () => {
+    const handleSelect = useCallback(() => {
         if (!hasChildren) {
             onSelect(node);
         } else {
-            setOpen(!open);
+            setOpen(prev => !prev);
         }
-    };
+    }, [hasChildren, onSelect, node]);
+
+    const Icon = node.Icon;
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -71,8 +73,8 @@ export default function TreeItem({ node, onSelect, selectedId, selectedPath, lev
                         )}
                     </Box>
 
-                    {node.Icon && (
-                        <node.Icon sx={{ fontSize: 18, mr: 1, color: "text.secondary", flexShrink: 0 }} />
+                    {Icon && (
+                        <Icon sx={{ fontSize: 18, mr: 1, color: "text.secondary", flexShrink: 0 }} />
                     )}
 
                     {node.number && (
@@ -112,31 +114,31 @@ export default function TreeItem({ node, onSelect, selectedId, selectedPath, lev
                     />
                 </Box>
             </ListItemButton>
-            {hasChildren && (
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                    <List
-                        component="div"
-                        disablePadding
-                        sx={{
-                            ml: (level === 0 ? 1 : 2) + 1.5,
-                            borderLeft: "1px solid",
-                            borderColor: "divider",
-                            pl: 0.5
-                        }}
-                    >
-                        {node.children.map((child) => (
-                            <TreeItem
-                                key={child.id}
-                                node={child}
-                                onSelect={onSelect}
-                                selectedId={selectedId}
-                                selectedPath={selectedPath}
-                                level={level + 1}
-                            />
-                        ))}
-                    </List>
-                </Collapse>
+            {hasChildren && open && (
+                <List
+                    component="div"
+                    disablePadding
+                    sx={{
+                        ml: (level === 0 ? 1 : 2) + 1.5,
+                        borderLeft: "1px solid",
+                        borderColor: "divider",
+                        pl: 0.5
+                    }}
+                >
+                    {node.children.map((child) => (
+                        <TreeItem
+                            key={child.id}
+                            node={child}
+                            onSelect={onSelect}
+                            selectedId={selectedId}
+                            selectedPath={selectedPath}
+                            level={level + 1}
+                        />
+                    ))}
+                </List>
             )}
         </Box>
     );
-}
+});
+
+export default TreeItem;
