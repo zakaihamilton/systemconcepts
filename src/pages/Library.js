@@ -38,9 +38,37 @@ function TreeItem({ node, onSelect, selectedId, level = 0 }) {
             <ListItemButton
                 onClick={handleClick}
                 selected={isSelected}
-                sx={{ pl: level * 2 + 2 }}
+                sx={{ pl: level * 2 + 2, py: 0.5 }}
             >
-                <ListItemText primary={node.name} />
+                <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+                    {node.number && (
+                        <Box
+                            sx={{
+                                mr: 1,
+                                px: 0.6,
+                                py: 0.2,
+                                bgcolor: "primary.main",
+                                color: "primary.contrastText",
+                                borderRadius: 1.5,
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                                minWidth: 20,
+                                textAlign: "center",
+                                opacity: 0.9,
+                                boxShadow: 1
+                            }}
+                        >
+                            {node.number}
+                        </Box>
+                    )}
+                    <ListItemText
+                        primary={node.name}
+                        primaryTypographyProps={{
+                            variant: "body2",
+                            sx: { fontWeight: node.number ? "bold" : "regular" }
+                        }}
+                    />
+                </Box>
                 {hasChildren ? (open ? <ExpandLess /> : <ExpandMore />) : null}
             </ListItemButton>
             {hasChildren && (
@@ -133,17 +161,29 @@ export default function Library() {
         let filteredTags = tags;
         if (search) {
             const lowerSearch = search.toLowerCase();
+            const keysToSearch = ["author", "book", "volume", "part", "section", "year", "portion", "chapter", "article", "number", "title"];
             filteredTags = tags.filter(tag =>
-                (tag.author && tag.author.toLowerCase().includes(lowerSearch)) ||
-                (tag.book && tag.book.toLowerCase().includes(lowerSearch)) ||
-                (tag.part && tag.part.toLowerCase().includes(lowerSearch)) ||
-                (tag.chapter && tag.chapter.toLowerCase().includes(lowerSearch))
+                keysToSearch.some(key => {
+                    const value = tag[key];
+                    return value && String(value).toLowerCase().includes(lowerSearch);
+                })
             );
         }
 
         for (const tag of filteredTags) {
             let currentLevel = root.children;
-            const levels = [tag.author, tag.book, tag.part, tag.chapter].filter(Boolean);
+            const levels = [
+                tag.author,
+                tag.book,
+                tag.volume,
+                tag.part,
+                tag.section,
+                tag.year,
+                tag.portion,
+                tag.chapter,
+                tag.article,
+                tag.title
+            ].map(v => v ? String(v).trim() : null).filter(Boolean);
             if (levels.length === 0) continue;
 
             const pathIds = [];
@@ -152,12 +192,13 @@ export default function Library() {
                 pathIds.push(name);
                 const id = pathIds.join("|");
 
-                let node = currentLevel.find(n => n.name === name);
+                let node = currentLevel.find(n => n.id === id);
                 if (!node) {
                     node = {
                         id,
                         name,
                         children: [],
+                        number: (name === tag.article) ? tag.number : null,
                         ...(!isHead ? { ...tag, _id: tag._id } : {})
                     };
                     currentLevel.push(node);
@@ -217,11 +258,45 @@ export default function Library() {
                 )}
                 {content ? (
                     <Box>
-                        <Typography variant="h5" gutterBottom>
-                            {selectedTag?.chapter}
-                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1, flexWrap: "wrap" }}>
+                            {selectedTag?.chapter && (
+                                <Typography variant="h5" color="textSecondary">
+                                    {selectedTag.chapter}
+                                </Typography>
+                            )}
+                            {selectedTag?.chapter && (selectedTag?.article || selectedTag?.title) && (
+                                <Typography variant="h5" color="textSecondary">-</Typography>
+                            )}
+                            {selectedTag?.number && (
+                                <Box
+                                    sx={{
+                                        px: 1,
+                                        py: 0.5,
+                                        bgcolor: "primary.main",
+                                        color: "primary.contrastText",
+                                        borderRadius: 1.5,
+                                        fontSize: "1rem",
+                                        fontWeight: "bold",
+                                        boxShadow: 2
+                                    }}
+                                >
+                                    {selectedTag.number}
+                                </Box>
+                            )}
+                            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                                {[selectedTag?.article, selectedTag?.title].filter(Boolean).join(" - ")}
+                            </Typography>
+                        </Box>
                         <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-                            {selectedTag?.author} - {selectedTag?.book}
+                            {[
+                                selectedTag?.author,
+                                selectedTag?.book,
+                                selectedTag?.volume,
+                                selectedTag?.part,
+                                selectedTag?.section,
+                                selectedTag?.year,
+                                selectedTag?.portion
+                            ].filter(Boolean).join(" | ")}
                         </Typography>
                         <Divider sx={{ my: 2 }} />
                         <div style={{ lineHeight: 1.6 }}>
