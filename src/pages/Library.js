@@ -8,6 +8,7 @@ import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
 import ReactMarkdown from 'react-markdown';
 import { useTranslations } from "@util/translations";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
@@ -16,6 +17,7 @@ import { setPath, usePathItems } from "@util/pages";
 import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Library/Store";
 import { LibraryIcons, LibraryTagKeys } from "./Library/Icons";
+import { useDeviceType } from "@util/styles";
 
 
 export default function Library() {
@@ -105,11 +107,16 @@ export default function Library() {
     }, [selectedTag]);
 
     const { showLibrarySideBar } = MainStore.useState();
+    const isMobile = useDeviceType() !== "desktop";
 
     const setShowSidebar = (show) => {
         MainStore.update(s => {
             s.showLibrarySideBar = show;
         });
+    };
+
+    const closeDrawer = () => {
+        setShowSidebar(false);
     };
 
     const tree = useMemo(() => {
@@ -162,39 +169,72 @@ export default function Library() {
 
     return (
         <Box sx={{ display: "flex", height: "100%", bgcolor: "background.default", position: "relative", gap: 2, p: 2 }}>
-            <Paper
-                elevation={3}
-                sx={{
-                    width: showLibrarySideBar ? 400 : 0,
-                    minWidth: showLibrarySideBar ? 400 : 0,
-                    overflow: "hidden",
-                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                    display: "flex",
-                    flexDirection: "column",
-                    borderRadius: 4,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    bgcolor: "background.paper",
-                    position: "relative",
-                    boxShadow: showLibrarySideBar ? "0 8px 32px rgba(0,0,0,0.08)" : "none",
-                    height: "100%",
-                    opacity: showLibrarySideBar ? 1 : 0,
-                    transform: showLibrarySideBar ? "translateX(0)" : "translateX(-20px)",
-                    zIndex: 2
-                }}
-            >
-                <List component="nav" sx={{ overflow: "auto", flex: 1, minWidth: 400, py: 1 }}>
-                    {tree.map(node => (
-                        <TreeItem
-                            key={node.id}
-                            node={node}
-                            onSelect={onSelect}
-                            selectedId={selectedTag?._id}
-                            selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
-                        />
-                    ))}
-                </List>
-            </Paper>
+            {isMobile ? (
+                <Drawer
+                    anchor="left"
+                    open={showLibrarySideBar}
+                    onClose={closeDrawer}
+                    ModalProps={{
+                        keepMounted: true
+                    }}
+                    PaperProps={{
+                        sx: {
+                            width: "85vw",
+                            maxWidth: 400,
+                            bgcolor: "background.paper"
+                        }
+                    }}
+                >
+                    <List component="nav" sx={{ overflow: "auto", flex: 1, py: 1 }}>
+                        {tree.map(node => (
+                            <TreeItem
+                                key={node.id}
+                                node={node}
+                                onSelect={(tag) => {
+                                    onSelect(tag);
+                                    closeDrawer();
+                                }}
+                                selectedId={selectedTag?._id}
+                                selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
+                            />
+                        ))}
+                    </List>
+                </Drawer>
+            ) : (
+                <Paper
+                    elevation={3}
+                    sx={{
+                        width: showLibrarySideBar ? 400 : 0,
+                        minWidth: showLibrarySideBar ? 400 : 0,
+                        overflow: "hidden",
+                        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                        display: "flex",
+                        flexDirection: "column",
+                        borderRadius: 4,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        bgcolor: "background.paper",
+                        position: "relative",
+                        boxShadow: showLibrarySideBar ? "0 8px 32px rgba(0,0,0,0.08)" : "none",
+                        height: "100%",
+                        opacity: showLibrarySideBar ? 1 : 0,
+                        transform: showLibrarySideBar ? "translateX(0)" : "translateX(-20px)",
+                        zIndex: 2
+                    }}
+                >
+                    <List component="nav" sx={{ overflow: "auto", flex: 1, minWidth: 400, py: 1 }}>
+                        {tree.map(node => (
+                            <TreeItem
+                                key={node.id}
+                                node={node}
+                                onSelect={onSelect}
+                                selectedId={selectedTag?._id}
+                                selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
+                            />
+                        ))}
+                    </List>
+                </Paper>
+            )}
 
             <Paper
                 elevation={2}

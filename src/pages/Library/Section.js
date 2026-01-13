@@ -55,12 +55,6 @@ export function getLibrarySection({ id, path, translations }) {
             if (currentField) {
                 SelectedIcon = LibraryIcons[currentField];
             }
-
-            if (currentField === "article" || currentField === "chapter" || tag.number) {
-                description = [
-                    tag.number ? `${translations.NUMBER || "No."} ${tag.number}` : null
-                ].filter(Boolean).join(" | ");
-            }
         }
     }
 

@@ -1358,10 +1358,6 @@ export default {
             "value": "Title"
         },
         {
-            "id": "NUMBER",
-            "value": "No."
-        },
-        {
             "id": "SELECT_ITEM",
             "value": "Select an article to view content"
         }
