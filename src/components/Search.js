@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import InputBase from "@mui/material/InputBase";
 import styles from "./Search.module.scss";
 import SearchIcon from "@mui/icons-material/Search";
@@ -32,6 +32,10 @@ export function useSearch(name, updateCallback) {
     const [focused, setFocused] = useState(false);
     const translations = useTranslations();
     const inputRef = useRef(null);
+    const containerRef = useRef(null);
+    // Track initial value for uncontrolled input
+    const initialValueRef = useRef(searchTerm);
+
     useTimeout(() => {
         SearchStore.update(s => {
             s.search[effectiveName] = value;
@@ -39,45 +43,64 @@ export function useSearch(name, updateCallback) {
         effectiveUpdateCallback && effectiveUpdateCallback(value);
     }, 500, [value]);
 
-    const onChangeText = event => {
-        const { value } = event.target;
-        setValue(value);
-    };
+    // Update expanded class via DOM to avoid recreating the element
+    useEffect(() => {
+        if (containerRef.current) {
+            if (isDesktop || focused) {
+                containerRef.current.classList.add(styles.searchExpanded);
+            } else {
+                containerRef.current.classList.remove(styles.searchExpanded);
+            }
+        }
+    }, [isDesktop, focused]);
 
-    const toolbarItems = [
+    const onChangeText = useCallback(event => {
+        setValue(event.target.value);
+    }, []);
+
+    const handleFocus = useCallback(() => setFocused(true), []);
+    const handleBlur = useCallback(() => setFocused(false), []);
+    const handleClick = useCallback(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, []);
+
+    // Memoize the search element - only recreate for device/translation changes
+    // Using defaultValue makes it uncontrolled, so cursor position is preserved
+    const searchElement = useMemo(() => (
+        <div ref={containerRef} className={clsx(styles.search, isDesktop && styles.searchExpanded)} onClick={handleClick}>
+            <div className={styles.searchIcon}>
+                <SearchIcon />
+            </div>
+            <InputBase
+                inputRef={inputRef}
+                placeholder={translations.SEARCH + "…"}
+                defaultValue={initialValueRef.current}
+                onChange={onChangeText}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                type="search"
+                classes={{
+                    root: styles.inputRoot
+                }}
+                inputProps={{ "aria-label": "search" }}
+            />
+        </div>
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), [isDesktop, translations.SEARCH, handleClick, onChangeText, handleFocus, handleBlur]);
+
+    const toolbarItems = useMemo(() => [
         {
             id: "search",
             menu: false,
             sortKey: -1,
             location: isPhone && "header",
-            element: <div className={clsx(styles.search, (isDesktop || focused) && styles.searchExpanded)} onClick={() => {
-                if (!focused && inputRef.current) {
-                    inputRef.current.focus();
-                }
-            }}>
-                <div className={styles.searchIcon}>
-                    <SearchIcon />
-                </div>
-                <InputBase
-                    inputRef={node => {
-                        inputRef.current = node;
-                    }}
-                    placeholder={translations.SEARCH + "…"}
-                    value={value}
-                    onChange={onChangeText}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    type="search"
-                    classes={{
-                        root: styles.inputRoot
-                    }}
-                    inputProps={{ "aria-label": "search" }}
-                />
-            </div>
+            element: searchElement
         }
-    ].filter(Boolean);
+    ], [isPhone, searchElement]);
 
-    useToolbar({ id: "Search", items: toolbarItems, depends: [search, value, isPhone, translations, focused, deviceType] });
+    useToolbar({ id: "Search", items: toolbarItems, depends: [isPhone, deviceType] });
 
     return searchTerm;
 }
