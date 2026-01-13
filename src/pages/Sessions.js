@@ -151,7 +151,7 @@ export default function SessionsPage() {
         {
             id: "tagsWidget",
             title: translations.TAGS,
-            searchable: "tags",
+            searchable: "tagsString",
             sortable: false,
             visible: false
         }
