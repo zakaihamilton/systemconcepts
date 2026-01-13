@@ -179,6 +179,74 @@ export default function Library() {
                 currentLevel = node.children;
             });
         }
+
+        // Recursively sort all levels of the tree
+        const numberWords = {
+            'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+            'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+            'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+            'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+            'first': 1, 'second': 2, 'third': 3, 'fourth': 4, 'fifth': 5,
+            'sixth': 6, 'seventh': 7, 'eighth': 8, 'ninth': 9, 'tenth': 10
+        };
+
+        const getNumericPrefix = (name) => {
+            if (!name) return null;
+            const lowerName = name.toLowerCase();
+            // Check if name starts with a number word
+            for (const [word, num] of Object.entries(numberWords)) {
+                if (lowerName.startsWith(word)) {
+                    return num;
+                }
+            }
+            return null;
+        };
+
+        // Priority items that should appear first (lower number = higher priority)
+        const getPriority = (name) => {
+            if (!name) return 999;
+            // Normalize: lowercase and replace curly/smart quotes with straight quotes
+            const lowerName = name.toLowerCase().replace(/['']/g, "'");
+            if (lowerName.includes("editor") && lowerName.includes("note")) return 0;
+            if (lowerName.startsWith("introduction")) return 1;
+            return 999;
+        };
+
+        const sortTree = (nodes) => {
+            nodes.sort((a, b) => {
+                const nameA = a.name || "";
+                const nameB = b.name || "";
+
+                // Check for priority items first
+                const priorityA = getPriority(nameA);
+                const priorityB = getPriority(nameB);
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB;
+                }
+
+                // Check for number word prefixes
+                const numA = getNumericPrefix(nameA);
+                const numB = getNumericPrefix(nameB);
+
+                // If both have number word prefixes, sort by number
+                if (numA !== null && numB !== null) {
+                    return numA - numB;
+                }
+                // If only one has a number word prefix, it comes first
+                if (numA !== null) return -1;
+                if (numB !== null) return 1;
+
+                // Natural sort (handles numbers correctly: 1,2,3,10 instead of 1,10,2,3)
+                return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+            });
+            nodes.forEach(node => {
+                if (node.children && node.children.length > 0) {
+                    sortTree(node.children);
+                }
+            });
+        };
+
+        sortTree(root.children);
         return root.children;
     }, [tags, search]);
 
