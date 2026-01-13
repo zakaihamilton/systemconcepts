@@ -54,6 +54,7 @@ export function getLibrarySection({ id, path, translations }) {
 
             if (currentField) {
                 SelectedIcon = LibraryIcons[currentField];
+                description = currentField.charAt(0).toUpperCase() + currentField.slice(1);
             }
         }
     }
