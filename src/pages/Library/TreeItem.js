@@ -71,6 +71,10 @@ export default function TreeItem({ node, onSelect, selectedId, selectedPath, lev
                         )}
                     </Box>
 
+                    {node.Icon && (
+                        <node.Icon sx={{ fontSize: 18, mr: 1, color: "text.secondary", flexShrink: 0 }} />
+                    )}
+
                     {node.number && (
                         <Box
                             sx={{

@@ -1,5 +1,6 @@
 import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Store";
+import { LibraryIcons, LibraryTagKeys } from "./Icons";
 
 export function getLibrarySection({ id, path, translations }) {
     const { tags } = LibraryStore.getRawState();
@@ -23,20 +24,10 @@ export function getLibrarySection({ id, path, translations }) {
     // For sub-segments, default to the segment name itself
     const name = id;
     let description = "";
+    let Icon = null;
 
     const getTagHierarchy = (tag) => {
-        return [
-            tag.author,
-            tag.book,
-            tag.volume,
-            tag.part,
-            tag.section,
-            tag.year,
-            tag.portion,
-            tag.article,
-            tag.chapter,
-            tag.title
-        ].map(v => v ? String(v).trim() : null).filter(Boolean);
+        return LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
     };
 
     // Find the current hash items to determine if we are at the leaf node
@@ -54,6 +45,14 @@ export function getLibrarySection({ id, path, translations }) {
 
     if (tag) {
         const hierarchy = getTagHierarchy(tag);
+        const segmentIndex = subSegments.indexOf(name);
+        // Map the segment name to its corresponding field key
+        const presentFields = LibraryTagKeys.filter(f => tag[f]);
+        const currentField = presentFields[segmentIndex];
+        if (currentField) {
+            Icon = LibraryIcons[currentField];
+        }
+
         const isLeaf = hierarchy.join("|") === urlPath && name === hierarchy[hierarchy.length - 1];
         if (isLeaf) {
             description = [
@@ -67,6 +66,7 @@ export function getLibrarySection({ id, path, translations }) {
         label: name,
         tooltip: name,
         description,
+        Icon,
         onClick
     };
 }

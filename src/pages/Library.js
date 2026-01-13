@@ -18,6 +18,7 @@ import TreeItem from "./Library/TreeItem";
 import { setPath, usePathItems } from "@util/pages";
 import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Library/Store";
+import { LibraryIcons, LibraryTagKeys } from "./Library/Icons";
 
 
 export default function Library() {
@@ -29,18 +30,7 @@ export default function Library() {
     const pathItems = usePathItems();
 
     const getTagHierarchy = (tag) => {
-        return [
-            tag.author,
-            tag.book,
-            tag.volume,
-            tag.part,
-            tag.section,
-            tag.year,
-            tag.portion,
-            tag.article,
-            tag.chapter,
-            tag.title
-        ].map(v => v ? String(v).trim() : null).filter(Boolean);
+        return LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
     };
 
     const onSelect = (tag) => {
@@ -131,7 +121,7 @@ export default function Library() {
         let filteredTags = tags;
         if (search) {
             const lowerSearch = search.toLowerCase();
-            const keysToSearch = ["author", "book", "volume", "part", "section", "year", "portion", "chapter", "article", "number", "title"];
+            const keysToSearch = [...LibraryTagKeys, "number"];
             filteredTags = tags.filter(tag =>
                 keysToSearch.some(key => {
                     const value = tag[key];
@@ -142,18 +132,7 @@ export default function Library() {
 
         for (const tag of filteredTags) {
             let currentLevel = root.children;
-            const levels = [
-                tag.author,
-                tag.book,
-                tag.volume,
-                tag.part,
-                tag.section,
-                tag.year,
-                tag.portion,
-                tag.article,
-                tag.chapter,
-                tag.title
-            ].map(v => v ? String(v).trim() : null).filter(Boolean);
+            const levels = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
             if (levels.length === 0) continue;
 
             const pathIds = [];
@@ -164,11 +143,15 @@ export default function Library() {
 
                 let node = currentLevel.find(n => n.id === id);
                 if (!node) {
+                    const type = LibraryTagKeys.find(key => tag[key] && String(tag[key]).trim() === name);
+                    const Icon = LibraryIcons[type];
                     node = {
                         id,
                         name,
+                        type,
+                        Icon,
                         children: [],
-                        number: (name === tag.article) ? tag.number : null,
+                        number: (type === "article") ? tag.number : null,
                         ...(!isHead ? { ...tag, _id: tag._id } : {})
                     };
                     currentLevel.push(node);
