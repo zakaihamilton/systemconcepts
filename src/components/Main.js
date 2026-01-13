@@ -20,7 +20,8 @@ export const MainStoreDefaults = {
     language: "auto",
     showSideBar: true,
     showDrawer: false,
-    speedToolbar: "top"
+    speedToolbar: "top",
+    showLibrarySideBar: true
 };
 
 export const MainStore = new Store(MainStoreDefaults);
