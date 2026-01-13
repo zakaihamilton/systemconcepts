@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import pageList from "@data/pages";
 import { useTranslations } from "@util/translations";
-import { isRegEx } from "@util/string";
 import { useLanguage } from "@util/language";
 import { MainStore } from "@components/Main";
 
@@ -117,7 +116,7 @@ export function getPagesFromHash({ hash, translations, pages }) {
             subPath += section;
             let page = pages.find(page => {
                 const matchId = path + subPath;
-                if (!isRegEx(page.id)) {
+                if (!page.custom) {
                     return page.id === matchId;
                 }
                 const match = matchId.match(page.id);

@@ -245,7 +245,8 @@ export default [
     {
         apps: true,
         sidebar: true,
-        id: /^library/,
+        id: "library",
+        custom: true,
         path: "library",
         name: "LIBRARY",
         Icon: LibraryBooksIcon,
