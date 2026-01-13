@@ -273,18 +273,72 @@ export default function TableWidget(props) {
             });
         }
 
-        const lowerSearch = search.toLowerCase();
-        return mappedData.filter(({ mapped }) => {
+        // Parse search query with AND/OR support
+        // Split by OR first (case insensitive), then by AND within each group
+        // Spaces between terms without explicit operators are treated as AND
+        // Quoted strings are treated as a single term
+        const parseSearchQuery = (query) => {
+            // Helper to extract terms from a string, respecting quotes
+            const extractTerms = (str) => {
+                const terms = [];
+                const regex = /"([^"]+)"|'([^']+)'|(\S+)/g;
+                let match;
+                while ((match = regex.exec(str)) !== null) {
+                    // match[1] is double-quoted, match[2] is single-quoted, match[3] is unquoted
+                    const term = match[1] || match[2] || match[3];
+                    if (term && term.toLowerCase() !== 'and') {
+                        terms.push(term);
+                    }
+                }
+                return terms;
+            };
+
+            // Split by " OR " (case insensitive), but not within quotes
+            // First, temporarily replace quoted strings with placeholders
+            const quotedStrings = [];
+            let processedQuery = query.replace(/"[^"]+"|'[^']+'/g, (match) => {
+                quotedStrings.push(match);
+                return `__QUOTED_${quotedStrings.length - 1}__`;
+            });
+
+            // Split by OR
+            const orParts = processedQuery.split(/\s+or\s+/i);
+
+            return orParts.map(part => {
+                // Restore quoted strings
+                let restored = part;
+                quotedStrings.forEach((qs, idx) => {
+                    restored = restored.replace(`__QUOTED_${idx}__`, qs);
+                });
+                return extractTerms(restored);
+            }).filter(group => group.length > 0);
+        };
+
+        // Check if an item matches a single search term
+        const matchesTerm = (mapped, term) => {
+            const lowerTerm = term.toLowerCase();
             for (const key of searchKeys) {
                 if (typeof mapped[key] === "string") {
-                    const match = mapped[key].toLowerCase().includes(lowerSearch);
-                    if (match) {
+                    if (mapped[key].toLowerCase().includes(lowerTerm)) {
                         return true;
                     }
                 }
             }
             return false;
-        });
+        };
+
+        // Check if an item matches the parsed query
+        // orGroups is an array of AND-groups, where each AND-group is an array of terms
+        // An item matches if ANY OR-group matches, and an OR-group matches if ALL its terms match
+        const matchesQuery = (mapped, orGroups) => {
+            return orGroups.some(andTerms =>
+                andTerms.every(term => matchesTerm(mapped, term))
+            );
+        };
+
+        const orGroups = parseSearchQuery(search);
+
+        return mappedData.filter(({ mapped }) => matchesQuery(mapped, orGroups));
     }, [mappedData, search, searchKeys]);
 
     const sortedData = useMemo(() => {
