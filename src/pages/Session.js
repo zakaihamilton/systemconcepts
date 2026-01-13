@@ -14,7 +14,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useDeviceType } from "@util/styles";
 import { useSwipe } from "@util/touch";
-import SwipeIndicator from "@widgets/SwipeIndicator";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -158,7 +157,6 @@ export default function SessionPage({ group, year, date, name }) {
                 </div>
             </div>
         </div>
-        <SwipeIndicator direction={swipeDirection} />
         <Snackbar
             open={showClipboard}
             autoHideDuration={3000}
