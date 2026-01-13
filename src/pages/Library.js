@@ -10,10 +10,7 @@ import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import ReactMarkdown from 'react-markdown';
 import { useTranslations } from "@util/translations";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import TreeItem from "./Library/TreeItem";
 import { setPath, usePathItems } from "@util/pages";
 import { MainStore } from "@components/Main";
@@ -164,26 +161,29 @@ export default function Library() {
 
 
     return (
-        <Box sx={{ display: "flex", height: "100%", overflow: "hidden", position: "relative" }}>
+        <Box sx={{ display: "flex", height: "100%", bgcolor: "background.default", position: "relative", gap: 2, p: 2 }}>
             <Paper
                 elevation={3}
                 sx={{
-                    width: showLibrarySideBar ? "30%" : 0,
-                    minWidth: showLibrarySideBar ? 250 : 0,
+                    width: showLibrarySideBar ? 400 : 0,
+                    minWidth: showLibrarySideBar ? 400 : 0,
                     overflow: "hidden",
-                    borderRight: showLibrarySideBar ? "1px solid #ccc" : "none",
-                    transition: "width 0.3s ease, min-width 0.3s ease",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                     display: "flex",
-                    flexDirection: "column"
+                    flexDirection: "column",
+                    borderRadius: 4,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    position: "relative",
+                    boxShadow: showLibrarySideBar ? "0 8px 32px rgba(0,0,0,0.08)" : "none",
+                    height: "100%",
+                    opacity: showLibrarySideBar ? 1 : 0,
+                    transform: showLibrarySideBar ? "translateX(0)" : "translateX(-20px)",
+                    zIndex: 2
                 }}
             >
-                <Box sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between", minWidth: 250 }}>
-                    <Typography variant="h6">
-                        {translations.LIBRARY || "Library"}
-                    </Typography>
-                </Box>
-                <Divider />
-                <List component="nav" sx={{ overflow: "auto", flex: 1, minWidth: 250 }}>
+                <List component="nav" sx={{ overflow: "auto", flex: 1, minWidth: 400, py: 1 }}>
                     {tree.map(node => (
                         <TreeItem
                             key={node.id}
@@ -196,64 +196,86 @@ export default function Library() {
                 </List>
             </Paper>
 
-            <Box sx={{ flex: 1, height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
+            <Paper
+                elevation={2}
+                sx={{
+                    flex: 1,
+                    height: "100%",
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    borderRadius: 4,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.04)"
+                }}
+            >
+                <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, overflow: "auto" }}>
                     {content ? (
-                        <Box>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1, flexWrap: "wrap" }}>
-                                {selectedTag?.chapter && (
-                                    <Typography variant="h5" color="textSecondary">
-                                        {selectedTag.chapter}
-                                    </Typography>
-                                )}
-                                {selectedTag?.chapter && (selectedTag?.article || selectedTag?.title) && (
-                                    <Typography variant="h5" color="textSecondary">-</Typography>
-                                )}
+                        <Box sx={{ maxWidth: 800, mx: "auto" }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}>
                                 {selectedTag?.number && (
                                     <Box
                                         sx={{
-                                            px: 1,
+                                            px: 1.5,
                                             py: 0.5,
                                             bgcolor: "primary.main",
                                             color: "primary.contrastText",
-                                            borderRadius: 1.5,
-                                            fontSize: "1rem",
-                                            fontWeight: "bold",
-                                            boxShadow: 2
+                                            borderRadius: 2,
+                                            fontSize: "0.9rem",
+                                            fontWeight: 800,
+                                            boxShadow: "0 4px 12px rgba(var(--primary-rgb), 0.3)"
                                         }}
                                     >
                                         {selectedTag.number}
                                     </Box>
                                 )}
-                                <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                                <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -1, color: "text.primary" }}>
                                     {[selectedTag?.article, selectedTag?.title].filter(Boolean).join(" - ")}
                                 </Typography>
                             </Box>
-                            <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-                                {[
-                                    selectedTag?.author,
-                                    selectedTag?.book,
-                                    selectedTag?.volume,
-                                    selectedTag?.part,
-                                    selectedTag?.section,
-                                    selectedTag?.year,
-                                    selectedTag?.portion
-                                ].filter(Boolean).join(" | ")}
-                            </Typography>
-                            <Divider sx={{ my: 2 }} />
-                            <div style={{ lineHeight: 1.6 }}>
+
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary", mb: 3, flexWrap: "wrap" }}>
+                                {selectedTag?.chapter && (
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        {selectedTag.chapter}
+                                    </Typography>
+                                )}
+                                {selectedTag?.chapter && <Typography variant="subtitle1">•</Typography>}
+                                <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
+                                    {[
+                                        selectedTag?.author,
+                                        selectedTag?.book,
+                                        selectedTag?.volume,
+                                        selectedTag?.part,
+                                        selectedTag?.section,
+                                        selectedTag?.year,
+                                        selectedTag?.portion
+                                    ].filter(Boolean).join(" • ")}
+                                </Typography>
+                            </Box>
+
+                            <Divider sx={{ mb: 4, opacity: 0.6 }} />
+
+                            <Box sx={{
+                                "& p": { lineHeight: 1.8, mb: 2.5, fontSize: "1.05rem", color: "text.primary" },
+                                "& h1, & h2, & h3": { mb: 2, mt: 4, fontWeight: 700 },
+                                color: "text.primary"
+                            }}>
                                 <ReactMarkdown>{content}</ReactMarkdown>
-                            </div>
+                            </Box>
                         </Box>
                     ) : (
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-                            <Typography variant="body1" color="textSecondary">
-                                Select a chapter to view content
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.5 }}>
+                            <LibraryBooksIcon sx={{ fontSize: 64, mb: 2, color: "divider" }} />
+                            <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>
+                                {translations.SELECT_ITEM || "Select a chapter to view content"}
                             </Typography>
                         </Box>
                     )}
                 </Box>
-            </Box>
+            </Paper>
         </Box>
     );
 }
