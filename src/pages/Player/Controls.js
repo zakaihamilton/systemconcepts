@@ -19,7 +19,7 @@ import { useMediaSession } from "@util/useMediaSession";
 
 const skipPoints = 10;
 
-export default function Controls({ show, path, playerRef, metadataPath, metadataKey, zIndex, color, noDuration, sessionName, groupName }) {
+export default function Controls({ show, path, playerRef, metadataPath, metadataKey, zIndex, color, noDuration, sessionName, groupName, sessionDate }) {
     const progressRef = useRef(null);
     const { direction } = MainStore.useState();
 
@@ -31,10 +31,15 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
     const visible = usePageVisibility();
 
     // MediaSession API integration for iOS Bluetooth headset controls
+    // Capitalize first letter of artist name
+    const capitalizedArtist = groupName ? groupName.charAt(0).toUpperCase() + groupName.slice(1) : "";
+    // Include date in title if available (YYYY-MM-DD format, before session name)
+    const formattedDate = sessionDate ? new Date(sessionDate).toISOString().split('T')[0] : null;
+    const sessionTitle = formattedDate ? `${formattedDate} ${sessionName || "Session"}` : (sessionName || "Session");
     useMediaSession({
         playerRef,
-        title: sessionName || "Session",
-        artist: groupName || "",
+        title: sessionTitle,
+        artist: capitalizedArtist,
         enabled: show && !!playerRef
     });
     const [metadata, , , setMetadata] = useFile(metadataPath, [metadataPath, metadataKey], data => {
