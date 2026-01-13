@@ -60,6 +60,8 @@ export default function Library() {
         }
     }, [tags, pathItems]);
 
+    const [customOrder, setCustomOrder] = useState({});
+
     useEffect(() => {
         async function loadTags() {
             try {
@@ -79,7 +81,23 @@ export default function Library() {
                 console.error("Failed to load library tags:", err);
             }
         }
+
+        async function loadCustomOrder() {
+            try {
+                const orderPath = makePath(LIBRARY_LOCAL_PATH, "library-order.json");
+                if (await storage.exists(orderPath)) {
+                    const content = await storage.readFile(orderPath);
+                    const data = JSON.parse(content);
+                    console.log("Loaded custom order:", Object.keys(data).length, "items");
+                    setCustomOrder(data);
+                }
+            } catch (err) {
+                console.error("Failed to load library order:", err);
+            }
+        }
+
         loadTags();
+        loadCustomOrder();
     }, []);
 
     useEffect(() => {
@@ -152,18 +170,21 @@ export default function Library() {
 
         for (const tag of filteredTags) {
             let currentLevel = root.children;
-            const levels = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
+            // Build levels with their corresponding keys to track the correct type
+            const levels = LibraryTagKeys.map(key => ({ key, value: tag[key] }))
+                .filter(item => item.value && String(item.value).trim())
+                .map(item => ({ key: item.key, value: String(item.value).trim() }));
             if (levels.length === 0) continue;
 
             const pathIds = [];
-            levels.forEach((name, index) => {
+            levels.forEach((levelItem, index) => {
+                const { key: type, value: name } = levelItem;
                 const isHead = index < levels.length - 1;
                 pathIds.push(name);
                 const id = pathIds.join("|");
 
                 let node = currentLevel.find(n => n.id === id);
                 if (!node) {
-                    const type = LibraryTagKeys.find(key => tag[key] && String(tag[key]).trim() === name);
                     const Icon = LibraryIcons[type];
                     node = {
                         id,
@@ -212,6 +233,18 @@ export default function Library() {
             return 999;
         };
 
+        // Get custom order from library-order.json (case-insensitive lookup)
+        const getCustomOrder = (name) => {
+            if (!name || !customOrder) return null;
+            // Try exact match first, then lowercase
+            if (customOrder[name] !== undefined) return customOrder[name];
+            const lowerName = name.toLowerCase();
+            for (const [key, value] of Object.entries(customOrder)) {
+                if (key.toLowerCase() === lowerName) return value;
+            }
+            return null;
+        };
+
         const sortTree = (nodes) => {
             nodes.sort((a, b) => {
                 const nameA = a.name || "";
@@ -223,6 +256,16 @@ export default function Library() {
                 if (priorityA !== priorityB) {
                     return priorityA - priorityB;
                 }
+
+                // Check for custom order from library-order.json
+                const customA = getCustomOrder(nameA);
+                const customB = getCustomOrder(nameB);
+                if (customA !== null && customB !== null) {
+                    return customA - customB;
+                }
+                // If only one has custom order, it comes first
+                if (customA !== null) return -1;
+                if (customB !== null) return 1;
 
                 // Check for number word prefixes
                 const numA = getNumericPrefix(nameA);
@@ -248,7 +291,7 @@ export default function Library() {
 
         sortTree(root.children);
         return root.children;
-    }, [tags, search]);
+    }, [tags, search, customOrder]);
 
 
     return (
