@@ -254,6 +254,18 @@ export default {
             "value": "Delete File"
         },
         {
+            "id": "DELETE_ARTICLE",
+            "value": "Delete Article"
+        },
+        {
+            "id": "DELETE_ARTICLE_CONFIRM",
+            "value": "Are you sure you want to delete this article? This action cannot be undone."
+        },
+        {
+            "id": "DELETING",
+            "value": "Deleting..."
+        },
+        {
             "id": "ITEMS_NONE_SELECTED",
             "value": "No Selected Items"
         },
@@ -556,6 +568,10 @@ export default {
         {
             "id": "SAVE",
             "value": "Save"
+        },
+        {
+            "id": "SAVING",
+            "value": "Saving..."
         },
         {
             "id": "CANCEL",
@@ -1286,6 +1302,10 @@ export default {
             "value": "Log Copied to Clipboard"
         },
         {
+            "id": "COPIED",
+            "value": "Copied!"
+        },
+        {
             "id": "NEW_SESSIONS",
             "value": "New Sessions"
         },
@@ -1360,6 +1380,10 @@ export default {
         {
             "id": "SELECT_ITEM",
             "value": "Select an article to view content"
+        },
+        {
+            "id": "EDIT_TAGS",
+            "value": "Edit Article Tags"
         }
     ]
 };

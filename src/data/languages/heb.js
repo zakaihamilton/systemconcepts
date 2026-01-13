@@ -238,6 +238,18 @@ export default {
             "value": "מחיקת קובץ"
         },
         {
+            "id": "DELETE_ARTICLE",
+            "value": "מחיקת מאמר"
+        },
+        {
+            "id": "DELETE_ARTICLE_CONFIRM",
+            "value": "האם אתה בטוח שברצונך למחוק את המאמר הזה? לא ניתן לבטל פעולה זו."
+        },
+        {
+            "id": "DELETING",
+            "value": "מוחק..."
+        },
+        {
             "id": "ITEMS_NONE_SELECTED",
             "value": "לא נבחר פריטים"
         },
@@ -536,6 +548,10 @@ export default {
         {
             "id": "SAVE",
             "value": "שמור"
+        },
+        {
+            "id": "SAVING",
+            "value": "שומר..."
         },
         {
             "id": "CANCEL",
@@ -1286,6 +1302,10 @@ export default {
             "value": "היומן הועתק ללוח"
         },
         {
+            "id": "COPIED",
+            "value": "הועתק!"
+        },
+        {
             "id": "SHOW_PASSWORD",
             "value": "הצג סיסמה"
         },
@@ -1348,6 +1368,10 @@ export default {
         {
             "id": "SELECT_ITEM",
             "value": "בחר מאמר לצפייה בתוכן"
+        },
+        {
+            "id": "EDIT_TAGS",
+            "value": "עריכת תגיות מאמר"
         }
     ]
 };

@@ -238,6 +238,18 @@ export default {
             "value": "Excluir Arquivo"
         },
         {
+            "id": "DELETE_ARTICLE",
+            "value": "Excluir Artigo"
+        },
+        {
+            "id": "DELETE_ARTICLE_CONFIRM",
+            "value": "Tem certeza de que deseja excluir este artigo? Esta ação não pode ser desfeita."
+        },
+        {
+            "id": "DELETING",
+            "value": "Excluindo..."
+        },
+        {
             "id": "ITEMS_NONE_SELECTED",
             "value": "Nenhum Item Selecionado"
         },
@@ -536,6 +548,10 @@ export default {
         {
             "id": "SAVE",
             "value": "Salvar"
+        },
+        {
+            "id": "SAVING",
+            "value": "Salvando..."
         },
         {
             "id": "CANCEL",
@@ -1278,6 +1294,10 @@ export default {
             "value": "Log copiado para a área de transferência"
         },
         {
+            "id": "COPIED",
+            "value": "Copiado!"
+        },
+        {
             "id": "SHOW_PASSWORD",
             "value": "Mostrar Senha"
         },
@@ -1340,6 +1360,10 @@ export default {
         {
             "id": "SELECT_ITEM",
             "value": "Selecione um artigo para visualizar o conteúdo"
+        },
+        {
+            "id": "EDIT_TAGS",
+            "value": "Editar Tags do Artigo"
         }
     ]
 };

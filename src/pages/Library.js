@@ -18,6 +18,12 @@ import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Library/Store";
 import { LibraryIcons, LibraryTagKeys } from "./Library/Icons";
 import { useDeviceType } from "@util/styles";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
+import Tooltip from "@mui/material/Tooltip";
+import Cookies from "js-cookie";
+import { roleAuth } from "@util/roles";
+import EditTagsDialog from "./Library/EditTagsDialog";
 
 
 export default function Library() {
@@ -27,6 +33,10 @@ export default function Library() {
     const [selectedTag, setSelectedTag] = useState(null);
     const translations = useTranslations();
     const pathItems = usePathItems();
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+    const role = Cookies.get("role");
+    const isAdmin = roleAuth(role, "admin");
 
     const getTagHierarchy = (tag) => {
         return LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
@@ -117,6 +127,12 @@ export default function Library() {
 
     const closeDrawer = () => {
         setShowSidebar(false);
+    };
+
+    const openEditDialog = () => {
+        if (selectedTag) {
+            setEditDialogOpen(true);
+        }
     };
 
     const tree = useMemo(() => {
@@ -253,8 +269,27 @@ export default function Library() {
             >
                 <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, overflow: "auto" }}>
                     {content ? (
-                        <Box sx={{ maxWidth: 800, mx: "auto" }}>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}>
+                        <Box sx={{ maxWidth: 800, mx: "auto", position: "relative" }}>
+                            {isAdmin && (
+                                <Tooltip title={translations.EDIT || "Edit"}>
+                                    <IconButton
+                                        onClick={openEditDialog}
+                                        sx={{
+                                            position: "absolute",
+                                            top: 0,
+                                            right: 0,
+                                            bgcolor: "action.hover",
+                                            "&:hover": {
+                                                bgcolor: "primary.main",
+                                                color: "primary.contrastText"
+                                            }
+                                        }}
+                                    >
+                                        <EditIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap", pr: isAdmin ? 6 : 0 }}>
                                 {selectedTag?.number && (
                                     <Box
                                         sx={{
@@ -310,12 +345,23 @@ export default function Library() {
                         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.5 }}>
                             <LibraryBooksIcon sx={{ fontSize: 64, mb: 2, color: "divider" }} />
                             <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>
-                                {translations.SELECT_ITEM || "Select a chapter to view content"}
+                                {translations.SELECT_ITEM}
                             </Typography>
                         </Box>
                     )}
                 </Box>
             </Paper>
+
+            {/* Edit Tags Dialog */}
+            <EditTagsDialog
+                open={editDialogOpen}
+                onClose={() => setEditDialogOpen(false)}
+                selectedTag={selectedTag}
+                tags={tags}
+                setTags={setTags}
+                setSelectedTag={setSelectedTag}
+                setContent={setContent}
+            />
         </Box>
     );
 }
