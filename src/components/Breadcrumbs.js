@@ -113,19 +113,19 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
 
     return (
         <>
-            <Link
-                className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
-                color="inherit"
-                href={href}
-                onClick={gotoItem}
-                underline="none"
-            >
-                <Tooltip arrow title={title}>
+            <Tooltip arrow title={title}>
+                <Link
+                    className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
+                    color="inherit"
+                    href={href}
+                    onClick={gotoItem}
+                    underline="none"
+                >
                     <span className={styles.itemContent}>
                         {content}
                     </span>
-                </Tooltip>
-            </Link>
+                </Link>
+            </Tooltip>
             {!!menuItems && <Menu
                 anchorEl={anchorEl}
                 open={open}

@@ -2,7 +2,7 @@ import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Store";
 import { LibraryIcons, LibraryTagKeys } from "./Icons";
 
-export function getLibrarySection({ id, path, translations }) {
+export function getLibrarySection({ id, path, translations, sectionIndex }) {
     const { tags } = LibraryStore.getRawState();
 
     const onClick = () => {
@@ -45,7 +45,8 @@ export function getLibrarySection({ id, path, translations }) {
 
     if (tag) {
         const hierarchy = getTagHierarchy(tag);
-        const segmentIndex = subSegments.indexOf(name);
+        const segmentIndex = typeof sectionIndex !== "undefined" ? sectionIndex - 1 : subSegments.indexOf(name);
+
         // Map the segment name to its corresponding field key
         const presentFields = LibraryTagKeys.filter(f => tag[f]);
         const currentField = presentFields[segmentIndex];
