@@ -6,6 +6,13 @@ import { getSafeError } from "@util/safeError";
 
 const collectionName = "users";
 
+// SENTINEL: Sanitize user object to remove sensitive fields
+function sanitizeUser(user) {
+    if (!user) return user;
+    const { hash, salt, resetToken, resetTokenExpiry, credentials, ...safeUser } = user;
+    return safeUser;
+}
+
 export default async function USERS_API(req, res) {
     try {
         const { headers } = req || {};
@@ -57,7 +64,13 @@ export default async function USERS_API(req, res) {
             }
         }
         const result = await handleRequest({ collectionName, req });
-        res.status(200).json(result);
+
+        // SENTINEL: Strip sensitive fields from response
+        if (Array.isArray(result)) {
+            res.status(200).json(result.map(sanitizeUser));
+        } else {
+            res.status(200).json(sanitizeUser(result));
+        }
     }
     catch (err) {
         console.error("users error: ", err);
