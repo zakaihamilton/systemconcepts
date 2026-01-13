@@ -12,14 +12,10 @@ export function getLibrarySection({ id, path, translations }) {
 
     // Identify if this is the root "Library" breadcrumb
     if (id && id.toLowerCase() === "library") {
-        let label = translations.LIBRARY || "Library";
-        if (label && typeof label === "string" && label.length > 0) {
-            label = label.charAt(0).toUpperCase() + label.slice(1);
-        }
         return {
-            name: label,
-            label: label,
-            tooltip: label,
+            name: translations.LIBRARY,
+            label: translations.LIBRARY,
+            tooltip: translations.LIBRARY,
             onClick
         };
     }
