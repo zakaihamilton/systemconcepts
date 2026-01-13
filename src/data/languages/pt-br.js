@@ -758,6 +758,10 @@ export default {
             "value": "Grupo"
         },
         {
+            "id": "LIBRARY",
+            "value": "Biblioteca"
+        },
+        {
             "id": "GROUPS",
             "value": "Grupos"
         },
@@ -1280,6 +1284,18 @@ export default {
         {
             "id": "HIDE_PASSWORD",
             "value": "Ocultar Senha"
+        },
+        {
+            "id": "TOTAL_SESSIONS_ADDED",
+            "value": "Total de sessões adicionadas"
+        },
+        {
+            "id": "EXPAND_ALL",
+            "value": "Expandir Tudo"
+        },
+        {
+            "id": "COLLAPSE_ALL",
+            "value": "Recolher Tudo"
         }
     ]
 };

@@ -76,6 +76,9 @@ const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad
 import LabelIcon from "@mui/icons-material/Label";
 const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
 
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+const Library = dynamic(() => import("@pages/Library"), { loading: () => <PageLoad /> });
+
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { getSessionsSection } from "@pages/Sessions/Section";
 const Bookmarks = dynamic(() => import("@pages/Bookmarks"), { loading: () => <PageLoad /> });
@@ -90,6 +93,7 @@ export default [
         Icon: LabelIcon,
         Component: Tags,
         sidebar: true,
+        categoryId: "tools",
         category: "tools"
     },
     {
@@ -236,6 +240,14 @@ export default [
         Icon: EventIcon,
         Component: Schedule,
         section: getScheduleSection
+    },
+    {
+        apps: true,
+        sidebar: true,
+        id: "library",
+        name: "LIBRARY",
+        Icon: LibraryBooksIcon,
+        Component: Library
     },
     {
         id: "session",

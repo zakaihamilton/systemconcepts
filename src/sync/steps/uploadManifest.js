@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 /**
  * Step 7: Upload the final manifest file
  */
-export async function uploadManifest(remoteManifest) {
+export async function uploadManifest(remoteManifest, remotePath = SYNC_BASE_PATH) {
     const start = performance.now();
     addSyncLog("Step 7: Uploading manifest...", "info");
 
@@ -26,7 +26,7 @@ export async function uploadManifest(remoteManifest) {
     }
 
     try {
-        const remoteManifestPath = makePath(SYNC_BASE_PATH, FILES_MANIFEST_GZ);
+        const remoteManifestPath = makePath(remotePath, FILES_MANIFEST_GZ);
         await writeCompressedFile(remoteManifestPath, remoteManifest);
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);

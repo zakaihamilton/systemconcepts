@@ -778,6 +778,10 @@ export default {
             "value": "Group"
         },
         {
+            "id": "LIBRARY",
+            "value": "Library"
+        },
+        {
             "id": "GROUPS",
             "value": "Groups"
         },
@@ -1304,6 +1308,14 @@ export default {
         {
             "id": "TOTAL_SESSIONS_ADDED",
             "value": "Total Sessions Added"
+        },
+        {
+            "id": "EXPAND_ALL",
+            "value": "Expand All"
+        },
+        {
+            "id": "COLLAPSE_ALL",
+            "value": "Collapse All"
         }
     ]
 };

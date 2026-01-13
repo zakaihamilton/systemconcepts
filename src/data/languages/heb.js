@@ -758,6 +758,10 @@ export default {
             "value": "קבוצה"
         },
         {
+            "id": "LIBRARY",
+            "value": "ספרייה"
+        },
+        {
             "id": "GROUPS",
             "value": "קבוצות"
         },
@@ -1292,6 +1296,14 @@ export default {
         {
             "id": "TOTAL_SESSIONS_ADDED",
             "value": "סה״כ שיעורים שנוספו"
+        },
+        {
+            "id": "EXPAND_ALL",
+            "value": "הרחב הכל"
+        },
+        {
+            "id": "COLLAPSE_ALL",
+            "value": "צמצם הכל"
         }
     ]
 };

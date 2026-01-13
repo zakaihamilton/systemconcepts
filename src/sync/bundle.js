@@ -35,15 +35,32 @@ export async function readCompressedFile(path) {
             return null;
         }
         const data = await storage.readFile(path);
+        if (data === undefined || data === null || data === "") {
+            return null;
+        }
 
         if (path.endsWith(".json")) {
             return typeof data === "string" ? JSON.parse(data) : data;
         }
 
+        if (typeof data === "string") {
+            try {
+                // Try parsing as raw JSON first
+                return JSON.parse(data);
+            } catch (e) {
+                // Not raw JSON, continue with base64/gzip
+            }
+        }
+
         // All storage returns base64 string (both local and AWS)
         let buffer;
         if (typeof data === 'string') {
-            buffer = Buffer.from(data, 'base64');
+            try {
+                buffer = Buffer.from(data, 'base64');
+            } catch (e) {
+                console.error(`[Bundle] Failed to decode base64 for ${path}`);
+                return null;
+            }
         } else if (Buffer.isBuffer(data)) {
             buffer = data;
         } else if (data instanceof Uint8Array) {
@@ -53,7 +70,12 @@ export async function readCompressedFile(path) {
             return null;
         }
 
-        return decompressJSON(buffer);
+        try {
+            return decompressJSON(buffer);
+        } catch (e) {
+            console.error(`[Bundle] Failed to decompress ${path}:`, e.message);
+            return null;
+        }
     } catch (err) {
         console.error(`[Bundle] Error reading file ${path}:`, err);
         return null;

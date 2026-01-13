@@ -26,17 +26,23 @@ async function computeFileInfo(file) {
  * Step 2: Update local manifest with file hashes
  * Uses parallel batch processing for performance
  */
-export async function updateLocalManifest(localFiles) {
+export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PATH) {
     const start = performance.now();
     addSyncLog("Step 2: Updating local manifest...", "info");
 
-    const localManifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+    const localManifestPath = makePath(localPath, FILES_MANIFEST);
 
     try {
         let manifest = [];
         if (await storage.exists(localManifestPath)) {
             const content = await storage.readFile(localManifestPath);
-            manifest = JSON.parse(content);
+            if (content) {
+                try {
+                    manifest = JSON.parse(content);
+                } catch (err) {
+                    console.error("[Sync] Failed to parse manifest, starting fresh", err);
+                }
+            }
         }
 
         // Create a map for faster lookup
@@ -108,7 +114,7 @@ export async function updateLocalManifest(localFiles) {
             return true;
         });
 
-        if (changed) {
+        if (changed || !(await storage.exists(localManifestPath))) {
             await storage.writeFile(localManifestPath, JSON.stringify(filteredManifest, null, 4));
         }
 
