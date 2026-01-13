@@ -38,11 +38,13 @@ export default function Content() {
     const showPage = activePage.id !== "player" && Component;
     const Player = pages.find(page => page.id === "player").Component;
     return <ContentSize.Provider value={size}>
-        <div ref={ref} className={styles.pageContainer}>
-            <main className={styles.page}>
-                {playerPage && <Player key={playerPage.url} show={showPlayer} {...playerPage} />}
-                {showPage && <Component {...activePage} />}
-            </main>
+        <div className={styles.root}>
+            <div ref={ref} className={styles.pageContainer}>
+                <main className={styles.page}>
+                    {playerPage && <Player key={playerPage.url} show={showPlayer} {...playerPage} />}
+                    {showPage && <Component {...activePage} />}
+                </main>
+            </div>
         </div>
     </ContentSize.Provider>;
 }

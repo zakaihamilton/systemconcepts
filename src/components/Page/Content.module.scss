@@ -1,3 +1,11 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+}
+
 .pageContainer {
     display: flex;
     overflow: auto;
@@ -9,4 +17,12 @@
     flex: 1;
     flex-direction: column;
     transform: translateZ(0);
+}
+
+// Only constrain width on large screens (4K, ultra-wide, etc.)
+@media (min-width: 1700px) {
+    .root {
+        max-width: 1700px;
+        margin: 0 auto;
+    }
 }
