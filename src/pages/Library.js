@@ -10,6 +10,7 @@ import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import { useTranslations } from "@util/translations";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import TreeItem from "./Library/TreeItem";
@@ -24,7 +25,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Cookies from "js-cookie";
 import { roleAuth } from "@util/roles";
 import EditTagsDialog from "./Library/EditTagsDialog";
-
+import styles from "./Library.module.scss";
 
 export default function Library() {
     const search = useSearch();
@@ -448,8 +449,16 @@ export default function Library() {
                                 "& p": { lineHeight: 1.8, mb: 2.5, fontSize: "1.05rem", color: "text.primary" },
                                 "& h1, & h2, & h3": { mb: 2, mt: 4, fontWeight: 700 },
                                 color: "text.primary"
-                            }}>
-                                <ReactMarkdown>{content}</ReactMarkdown>
+                            }} className={styles.markdown}>
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkBreaks]}
+                                    components={{
+                                        // This replaces the <br> tag with a styled <span>
+                                        br: () => <span style={{ display: 'block', marginBottom: '1.2rem', content: '""' }} />
+                                    }}
+                                >
+                                    {content}
+                                </ReactMarkdown>
                             </Box>
                         </Box>
                     ) : (

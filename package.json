@@ -44,6 +44,7 @@
     "react-dom": "^19.2.1",
     "react-markdown": "^10.1.0",
     "react-window": "^1.8.10",
+    "remark-breaks": "^4.0.0",
     "sass": "^1.83.4",
     "stylis": "^4.3.5",
     "stylis-plugin-rtl": "^2.1.1",

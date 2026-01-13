@@ -1,0 +1,21 @@
+/* Use :global to target the tags inside your hashed class */
+.markdown :global(p) {
+    line-height: 1.8;
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+}
+
+.markdown :global(br) {
+    display: block;
+    content: "";
+    margin-top: 1.5rem;
+    /* This is your line spacing */
+}
+
+.markdown :global(h1),
+.markdown :global(h2),
+.markdown :global(h3) {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
