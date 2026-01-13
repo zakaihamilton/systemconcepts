@@ -261,6 +261,18 @@ export default function TableWidget(props) {
             return mappedData;
         }
 
+        // Handle special search prefixes
+        if (search.toLowerCase() === "@doublespace") {
+            return mappedData.filter(({ mapped }) => {
+                // Check if name has double (or more) consecutive spaces
+                const nameHasDoubleSpace = mapped.name && /  /.test(mapped.name);
+                // Check if there's a double space between date and name
+                const fullName = `${mapped.date || ""} ${mapped.name || ""}`;
+                const fullNameHasDoubleSpace = /  /.test(fullName);
+                return nameHasDoubleSpace || fullNameHasDoubleSpace;
+            });
+        }
+
         const lowerSearch = search.toLowerCase();
         return mappedData.filter(({ mapped }) => {
             for (const key of searchKeys) {
