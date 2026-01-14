@@ -27,11 +27,16 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import ClearIcon from "@mui/icons-material/Clear";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DownloadIcon from "@mui/icons-material/Download";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Tooltip from "@mui/material/Tooltip";
 import Cookies from "js-cookie";
 import { roleAuth } from "@util/roles";
 import EditTagsDialog from "./Library/EditTagsDialog";
 import AutoFillTagsDialog from "./Library/AutoFillTagsDialog";
+import { exportData } from "@util/importExport";
 import styles from "./Library.module.scss";
 
 export default function Library() {
@@ -45,6 +50,8 @@ export default function Library() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [autoFillDialogOpen, setAutoFillDialogOpen] = useState(false);
     const [isHeaderShrunk, setIsHeaderShrunk] = useState(false);
+    const [matchIndex, setMatchIndex] = useState(0);
+    const [totalMatches, setTotalMatches] = useState(0);
 
     const contentRef = React.useRef(null);
     const handleScroll = useCallback((e) => {
@@ -156,6 +163,70 @@ export default function Library() {
             setContent("Error loading content.");
         }
     }, [selectedTag]);
+
+    const formatArticleWithTags = useCallback((tag, text) => {
+        if (!tag) return text;
+        const tagsStr = LibraryTagKeys
+            .map(key => {
+                const val = tag[key];
+                if (!val) return null;
+                const label = key.charAt(0).toUpperCase() + key.slice(1);
+                return `${label}: ${val}`;
+            })
+            .filter(Boolean)
+            .join("\n");
+        return `${tagsStr}\n\n${"=".repeat(20)}\n\n${text || ""}`;
+    }, []);
+
+    const handleCopy = useCallback(() => {
+        if (!selectedTag || !content) return;
+        const formatted = formatArticleWithTags(selectedTag, content);
+        navigator.clipboard.writeText(formatted);
+    }, [selectedTag, content, formatArticleWithTags]);
+
+    const handleExport = useCallback(() => {
+        if (!selectedTag || !content) return;
+        const formatted = formatArticleWithTags(selectedTag, content);
+        const filename = `${selectedTag.article || "Article"}_${selectedTag.number || ""}.txt`;
+        exportData(formatted, filename, "text/plain");
+    }, [selectedTag, content, formatArticleWithTags]);
+
+    const scrollToMatch = useCallback((index) => {
+        const highlights = document.querySelectorAll('.search-highlight');
+        if (highlights[index]) {
+            highlights[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Add a temporary "active" style
+            highlights[index].style.outline = "2px solid #ff9800";
+            highlights[index].style.borderRadius = "2px";
+            setTimeout(() => {
+                if (highlights[index]) {
+                    highlights[index].style.outline = "none";
+                }
+            }, 2000);
+        }
+    }, []);
+
+    const handleNextMatch = useCallback(() => {
+        if (totalMatches === 0) return;
+        const next = (matchIndex + 1) % totalMatches;
+        setMatchIndex(next);
+        scrollToMatch(next);
+    }, [matchIndex, totalMatches, scrollToMatch]);
+
+    const handlePrevMatch = useCallback(() => {
+        if (totalMatches === 0) return;
+        const prev = (matchIndex - 1 + totalMatches) % totalMatches;
+        setMatchIndex(prev);
+        scrollToMatch(prev);
+    }, [matchIndex, totalMatches, scrollToMatch]);
+
+    useEffect(() => {
+        const highlights = document.querySelectorAll('.search-highlight');
+        setTotalMatches(highlights.length);
+        if (highlights.length > 0 && matchIndex >= highlights.length) {
+            setMatchIndex(0);
+        }
+    }, [content, search]);
 
     useEffect(() => {
         loadContent();
@@ -440,7 +511,7 @@ export default function Library() {
                 parts.push(children.slice(currentIndex, matchIndex));
             }
             parts.push(
-                <span key={matchIndex} style={{ backgroundColor: "#ffeb3b", color: "#000" }}>
+                <span key={matchIndex} className="search-highlight" style={{ backgroundColor: "#ffeb3b", color: "#000" }}>
                     {children.slice(matchIndex, matchIndex + search.length)}
                 </span>
             );
@@ -529,6 +600,32 @@ export default function Library() {
                     />
                 ))}
             </List>
+
+            {isAdmin && (
+                <Box sx={{ p: 2, borderTop: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+                    <Tooltip title={translations.AUTO_FILL_TAGS || "Auto-Fill Tags"}>
+                        <IconButton
+                            onClick={() => setAutoFillDialogOpen(true)}
+                            fullWidth
+                            sx={{
+                                borderRadius: 2,
+                                bgcolor: "action.hover",
+                                justifyContent: "center",
+                                py: 1,
+                                "&:hover": {
+                                    bgcolor: "secondary.main",
+                                    color: "secondary.contrastText"
+                                }
+                            }}
+                        >
+                            <AutoFixHighIcon sx={{ mr: 1 }} />
+                            <Typography variant="button">
+                                {translations.AUTO_FILL_TAGS || "Auto-Fill Tags"}
+                            </Typography>
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            )}
         </Box>
     );
 
@@ -656,23 +753,33 @@ export default function Library() {
                                     overflow: "hidden",
                                     transition: "all 0.3s ease"
                                 }}>
-                                    {selectedTag.chapter && (
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                            {selectedTag.chapter}
-                                        </Typography>
-                                    )}
-                                    {selectedTag.chapter && <span>•</span>}
-                                    <span>
-                                        {[
-                                            selectedTag.author,
-                                            selectedTag.book,
-                                            selectedTag.volume,
-                                            selectedTag.part,
-                                            selectedTag.section,
-                                            selectedTag.year,
-                                            selectedTag.portion
-                                        ].filter(Boolean).join(" • ")}
-                                    </span>
+                                    {[
+                                        { key: "chapter", label: "Chapter" },
+                                        { key: "author", label: "Author" },
+                                        { key: "book", label: "Book" },
+                                        { key: "volume", label: "Volume" },
+                                        { key: "part", label: "Part" },
+                                        { key: "section", label: "Section" },
+                                        { key: "year", label: "Year" },
+                                        { key: "portion", label: "Portion" }
+                                    ].map((field, idx, arr) => {
+                                        const value = selectedTag[field.key];
+                                        if (!value) return null;
+                                        const isLast = idx === arr.length - 1 || !arr.slice(idx + 1).some(f => selectedTag[f.key]);
+                                        return (
+                                            <React.Fragment key={field.key}>
+                                                <Tooltip title={field.label}>
+                                                    <Typography
+                                                        variant={field.key === "chapter" ? "subtitle2" : "body2"}
+                                                        sx={{ fontWeight: field.key === "chapter" ? 600 : 400, fontSize: "inherit" }}
+                                                    >
+                                                        {value}
+                                                    </Typography>
+                                                </Tooltip>
+                                                {!isLast && <span>•</span>}
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </Box>
                             </>
                         ) : (
@@ -682,46 +789,70 @@ export default function Library() {
                         )}
                     </Box>
 
-                    {isAdmin && (
-                        <Box sx={{
-                            display: "flex",
-                            gap: 1,
-                            opacity: isHeaderShrunk ? 0 : 1,
-                            pointerEvents: isHeaderShrunk ? "none" : "auto",
-                            transition: "opacity 0.3s ease"
-                        }}>
-                            <Tooltip title={translations.AUTO_FILL_TAGS || "Auto-Fill Tags"}>
-                                <IconButton
-                                    onClick={() => setAutoFillDialogOpen(true)}
-                                    sx={{
-                                        bgcolor: "action.hover",
-                                        "&:hover": {
-                                            bgcolor: "secondary.main",
-                                            color: "secondary.contrastText"
-                                        }
-                                    }}
-                                >
-                                    <AutoFixHighIcon />
+                    <Box sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        opacity: isHeaderShrunk ? 0 : 1,
+                        pointerEvents: isHeaderShrunk ? "none" : "auto",
+                        transition: "opacity 0.3s ease"
+                    }}>
+                        {search && totalMatches > 0 && (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mr: 1, bgcolor: "action.selected", px: 1, py: 0.5, borderRadius: 2 }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 40, textAlign: "center" }}>
+                                    {totalMatches > 0 ? `${matchIndex + 1} / ${totalMatches}` : "0 / 0"}
+                                </Typography>
+                                <IconButton size="small" onClick={handlePrevMatch}>
+                                    <KeyboardArrowUpIcon fontSize="small" />
                                 </IconButton>
-                            </Tooltip>
-                            {selectedTag && (
-                                <Tooltip title={translations.EDIT || "Edit"}>
+                                <IconButton size="small" onClick={handleNextMatch}>
+                                    <KeyboardArrowDownIcon fontSize="small" />
+                                </IconButton>
+                            </Box>
+                        )}
+                        {selectedTag && (
+                            <>
+                                <Tooltip title={translations.COPY || "Copy to Clipboard"}>
                                     <IconButton
-                                        onClick={openEditDialog}
+                                        onClick={handleCopy}
                                         sx={{
                                             bgcolor: "action.hover",
-                                            "&:hover": {
-                                                bgcolor: "primary.main",
-                                                color: "primary.contrastText"
-                                            }
+                                            "&:hover": { bgcolor: "primary.light", color: "primary.contrastText" }
                                         }}
                                     >
-                                        <EditIcon />
+                                        <ContentCopyIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
-                            )}
-                        </Box>
-                    )}
+                                <Tooltip title={translations.EXPORT || "Export"}>
+                                    <IconButton
+                                        onClick={handleExport}
+                                        sx={{
+                                            bgcolor: "action.hover",
+                                            "&:hover": { bgcolor: "primary.light", color: "primary.contrastText" }
+                                        }}
+                                    >
+                                        <DownloadIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                                {isAdmin && (
+                                    <Tooltip title={translations.EDIT || "Edit"}>
+                                        <IconButton
+                                            onClick={openEditDialog}
+                                            sx={{
+                                                bgcolor: "action.hover",
+                                                "&:hover": {
+                                                    bgcolor: "primary.main",
+                                                    color: "primary.contrastText"
+                                                }
+                                            }}
+                                        >
+                                            <EditIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                            </>
+                        )}
+                    </Box>
                 </Box>
 
                 <Box
