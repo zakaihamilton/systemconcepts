@@ -21,14 +21,7 @@ registerToolbar("Article");
 
 const rehypeArticleEnrichment = () => {
     return (tree) => {
-        // Helper to get text content from a node
-        const getText = (node) => {
-            if (node.type === "text") return node.value;
-            if (node.children) return node.children.map(getText).join("");
-            return "";
-        };
-
-        // 1. Split <p> nodes that contain <br> into multiple <p> nodes
+        // Split <p> nodes that contain <br> into multiple <p> nodes
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
@@ -73,44 +66,6 @@ const rehypeArticleEnrichment = () => {
 
         if (tree.children) {
             tree.children = visitAndSplit(tree.children);
-        }
-
-        // 2. Assign unique numbers to valid content paragraphs
-        let index = 0;
-        const visitAndNumber = (nodes) => {
-            nodes.forEach(node => {
-                if (node.type === "element" && node.tagName === "p") {
-                    const textContent = getText(node).trim();
-                    const metadataPatterns = [
-                        /^author:/i,
-                        /^book:/i,
-                        /^article:/i,
-                        /^year:/i,
-                        /^volume:/i,
-                        /^part:/i,
-                        /^section:/i,
-                        /^portion:/i,
-                        /^chapter:/i,
-                        /^title:/i,
-                        /^====/
-                    ];
-                    const isMetadata = metadataPatterns.some(pattern => pattern.test(textContent)) ||
-                        (textContent.length > 3 && textContent.replace(/=/g, "").length === 0);
-
-                    if (!isMetadata && textContent.length > 0) {
-                        index++;
-                        node.properties = node.properties || {};
-                        node.properties["data-p-index"] = index;
-                    }
-                }
-                if (node.children) {
-                    visitAndNumber(node.children);
-                }
-            });
-        };
-
-        if (tree.children) {
-            visitAndNumber(tree.children);
         }
     };
 };
@@ -194,10 +149,6 @@ export default function Article({
         }
     }, [content, search]);
 
-    const handleCopyText = useCallback((text) => {
-        navigator.clipboard.writeText(String(text));
-    }, []);
-
     const Highlight = useCallback(({ children }) => {
         if (!search || !children || typeof children !== 'string') return children;
         const lowerSearch = search.toLowerCase();
@@ -242,22 +193,8 @@ export default function Article({
     }, [Highlight]);
 
     const markdownComponents = useMemo(() => {
-        const ParagraphNumber = ({ number }) => (
-            <Typography
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopyText(number);
-                }}
-                className={styles.paragraphNumber}
-                sx={{ right: 0 }}
-            >
-                {number}
-            </Typography>
-        );
-
         return {
             p: ({ children, ...props }) => {
-                const number = props["data-p-index"];
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
                 const childrenArray = React.Children.toArray(children);
                 const hasContent = childrenArray.some(child => {
@@ -267,11 +204,8 @@ export default function Article({
                 if (!hasContent) return null;
 
                 return (
-                    <Box className={styles.paragraphWrapper}>
-                        <Box sx={{ flex: 1 }}>
-                            <TextRenderer>{children}</TextRenderer>
-                        </Box>
-                        {number && <ParagraphNumber number={number} />}
+                    <Box sx={{ marginBottom: '12px' }}>
+                        <TextRenderer>{children}</TextRenderer>
                     </Box>
                 );
             },
@@ -288,7 +222,7 @@ export default function Article({
             h6: ({ children }) => <h6><TextRenderer>{children}</TextRenderer></h6>,
             br: () => <span style={{ display: "block", marginBottom: "1.2rem", content: '""' }} />
         };
-    }, [handleCopyText, TextRenderer]);
+    }, [TextRenderer]);
 
     const toolbarItems = useMemo(() => {
         const items = [
