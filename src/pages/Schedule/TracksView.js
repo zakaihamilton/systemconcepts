@@ -31,7 +31,14 @@ export default function TracksView({ sessions = [], store, translations, playing
     const groupedSessions = useMemo(() => {
         const groups = {};
         sessions.forEach(session => {
-            const [year, month] = session.date.split('-');
+            if (!session.date) {
+                return;
+            }
+            const parts = session.date.split('-');
+            if (parts.length < 2) {
+                return;
+            }
+            const [year, month] = parts;
             const yearMonth = `${year}-${month}`;
             if (!groups[yearMonth]) {
                 groups[yearMonth] = [];
