@@ -6,7 +6,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Drawer from "@mui/material/Drawer";
 import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import ClearIcon from "@mui/icons-material/Clear";
 import TreeItem from "./TreeItem";
@@ -21,7 +20,6 @@ export default function Tags({
     onSelect,
     selectedTag,
     translations,
-    isAdmin,
     isMobile,
     showLibrarySideBar,
     closeDrawer,
@@ -96,6 +94,18 @@ export default function Tags({
             'sixth': 6, 'seventh': 7, 'eighth': 8, 'ninth': 9, 'tenth': 10
         };
 
+        const getPriority = (name) => {
+            if (!name) return 999;
+            const lowerName = name.toLowerCase().replace(/['']/g, "'");
+            if (lowerName.includes("editor") && lowerName.includes("note")) return 0;
+            if (lowerName.startsWith("intro")) return 1;
+            if (lowerName.startsWith("preface")) return 2;
+            if (lowerName.startsWith("foreword")) return 3;
+            if (lowerName.startsWith("prologue")) return 4;
+            if (lowerName.startsWith("contents") || lowerName.includes("table of contents")) return 5;
+            return 999;
+        };
+
         const extractNumber = (name) => {
             if (!name) return null;
             const lowerName = name.toLowerCase();
@@ -115,7 +125,7 @@ export default function Tags({
             }
             if (candidates.length === 0) return null;
             candidates.sort((a, b) => a.position - b.position);
-            return candidates[0].value;
+            return candidates[0];
         };
 
         const getBaseName = (name) => {
@@ -130,13 +140,6 @@ export default function Tags({
             return base.replace(/\s+/g, ' ').trim();
         };
 
-        const getPriority = (name) => {
-            if (!name) return 999;
-            const lowerName = name.toLowerCase().replace(/['']/g, "'");
-            if (lowerName.includes("editor") && lowerName.includes("note")) return 0;
-            if (lowerName.startsWith("introduction")) return 1;
-            return 999;
-        };
 
         const getCustomOrderVal = (name) => {
             if (!name || !customOrder) return null;
@@ -162,42 +165,50 @@ export default function Tags({
                 if (customA !== null) return -1;
                 if (customB !== null) return 1;
 
-                const orderA = a.order !== undefined ? parseInt(a.order, 10) : null;
-                const orderB = b.order !== undefined ? parseInt(b.order, 10) : null;
-                if (orderA !== null && orderB !== null) {
+                const orderA = (a.order !== undefined && a.order !== null && a.order !== "") ? parseInt(a.order, 10) : null;
+                const orderB = (b.order !== undefined && b.order !== null && b.order !== "") ? parseInt(b.order, 10) : null;
+                if (orderA !== null && orderB !== null && !isNaN(orderA) && !isNaN(orderB)) {
                     if (orderA !== orderB) return orderA - orderB;
                 }
-                if (orderA !== null) return -1;
-                if (orderB !== null) return 1;
+                if (orderA !== null && !isNaN(orderA)) return -1;
+                if (orderB !== null && !isNaN(orderB)) return 1;
 
-                const tagNumA = a.number !== undefined ? parseInt(a.number, 10) : null;
-                const tagNumB = b.number !== undefined ? parseInt(b.number, 10) : null;
-                if (tagNumA !== null && tagNumB !== null) {
+                const tagNumA = (a.number !== undefined && a.number !== null && a.number !== "") ? parseInt(a.number, 10) : null;
+                const tagNumB = (b.number !== undefined && b.number !== null && b.number !== "") ? parseInt(b.number, 10) : null;
+                if (tagNumA !== null && tagNumB !== null && !isNaN(tagNumA) && !isNaN(tagNumB)) {
                     if (tagNumA !== tagNumB) return tagNumA - tagNumB;
-                    const subNumA = a.subNumber !== undefined ? parseInt(a.subNumber, 10) : null;
-                    const subNumB = b.subNumber !== undefined ? parseInt(b.subNumber, 10) : null;
-                    if (subNumA !== null && subNumB !== null) {
+                    const subNumA = (a.subNumber !== undefined && a.subNumber !== null && a.subNumber !== "") ? parseInt(a.subNumber, 10) : null;
+                    const subNumB = (b.subNumber !== undefined && b.subNumber !== null && b.subNumber !== "") ? parseInt(b.subNumber, 10) : null;
+                    if (subNumA !== null && subNumB !== null && !isNaN(subNumA) && !isNaN(subNumB)) {
                         if (subNumA !== subNumB) return subNumA - subNumB;
                     }
-                    if (subNumA !== null) return -1;
-                    if (subNumB !== null) return 1;
+                    if (subNumA !== null && !isNaN(subNumA)) return -1;
+                    if (subNumB !== null && !isNaN(subNumB)) return 1;
                 }
-                if (tagNumA !== null) return -1;
-                if (tagNumB !== null) return 1;
+                if (tagNumA !== null && !isNaN(tagNumA)) return -1;
+                if (tagNumB !== null && !isNaN(tagNumB)) return 1;
 
-                const numA = extractNumber(nameA);
-                const numB = extractNumber(nameB);
+                const candA = extractNumber(nameA);
+                const candB = extractNumber(nameB);
 
-                if (numA !== null && numB !== null) {
+                if (candA && candB) {
+                    const numA = candA.value;
+                    const numB = candB.value;
                     const baseA = getBaseName(nameA);
                     const baseB = getBaseName(nameB);
                     if (baseA === baseB) return numA - numB;
+
+                    // If both items are "numbered" (number at the start), prioritize number sort
+                    if (candA.position <= 2 && candB.position <= 2) {
+                        return numA - numB;
+                    }
+
                     const baseCompare = baseA.localeCompare(baseB, undefined, { numeric: true, sensitivity: 'base' });
                     if (baseCompare !== 0) return baseCompare;
                     return numA - numB;
                 }
-                if (numA !== null) return -1;
-                if (numB !== null) return 1;
+                if (candA) return -1;
+                if (candB) return 1;
 
                 return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
             });
