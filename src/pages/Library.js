@@ -214,6 +214,10 @@ export default function Library() {
 
         const extractNumber = (name) => {
             if (!name) return null;
+            const match = name.match(/^(\d+)/);
+            if (match) {
+                return parseInt(match[1], 10);
+            }
             const lowerName = name.toLowerCase();
             const words = lowerName.split(/[^a-z]+/);
             for (const word of words) {
@@ -274,11 +278,15 @@ export default function Library() {
 
                 // If both have number word prefixes, sort by number
                 if (numA !== null && numB !== null) {
-                    return numA - numB;
+                    if (numA !== numB) {
+                        return numA - numB;
+                    }
                 }
                 // If only one has a number word prefix, it comes first
-                if (numA !== null) return -1;
-                if (numB !== null) return 1;
+                else {
+                    if (numA !== null) return -1;
+                    if (numB !== null) return 1;
+                }
 
                 // Natural sort (handles numbers correctly: 1,2,3,10 instead of 1,10,2,3)
                 return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
