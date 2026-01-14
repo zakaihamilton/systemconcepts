@@ -3,8 +3,8 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
@@ -74,7 +74,11 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                     </Box>
 
                     {Icon && (
-                        <Icon sx={{ fontSize: 18, mr: 1, color: "text.secondary", flexShrink: 0 }} />
+                        <Tooltip title={(node.type || "").charAt(0).toUpperCase() + (node.type || "").slice(1)} enterDelay={500}>
+                            <Box sx={{ display: "flex", flexShrink: 0 }}>
+                                <Icon sx={{ fontSize: 18, mr: 1, color: "text.secondary" }} />
+                            </Box>
+                        </Tooltip>
                     )}
 
                     {node.number && (
@@ -96,22 +100,50 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                             {node.number}
                         </Box>
                     )}
-                    <ListItemText
-                        primary={
-                            <Typography
-                                variant="body2"
-                                sx={{
+                    <Tooltip
+                        title={node.name}
+                        enterDelay={0}
+                        placement="bottom-start"
+                        slotProps={{
+                            popper: {
+                                sx: {
+                                    pointerEvents: "none"
+                                },
+                                modifiers: [
+                                    {
+                                        name: 'offset',
+                                        options: {
+                                            offset: [-9, -38],
+                                        },
+                                    },
+                                ],
+                            },
+                            tooltip: {
+                                sx: {
+                                    maxWidth: 500,
                                     fontSize: "0.85rem",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap"
-                                }}
-                            >
-                                {node.name}
-                            </Typography>
-                        }
-                        sx={{ minWidth: 0 }}
-                    />
+                                    pointerEvents: "none"
+                                }
+                            }
+                        }}
+                    >
+                        <ListItemText
+                            primary={
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontSize: "0.85rem",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap"
+                                    }}
+                                >
+                                    {node.name}
+                                </Typography>
+                            }
+                            sx={{ minWidth: 0 }}
+                        />
+                    </Tooltip>
                 </Box>
             </ListItemButton>
             {hasChildren && open && (

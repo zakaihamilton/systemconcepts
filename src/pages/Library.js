@@ -44,6 +44,16 @@ export default function Library() {
     const pathItems = usePathItems();
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [autoFillDialogOpen, setAutoFillDialogOpen] = useState(false);
+    const [isHeaderShrunk, setIsHeaderShrunk] = useState(false);
+
+    const contentRef = React.useRef(null);
+    const handleScroll = useCallback((e) => {
+        const scrollTop = e.target.scrollTop;
+        const shouldShrink = scrollTop > 50;
+        if (shouldShrink !== isHeaderShrunk) {
+            setIsHeaderShrunk(shouldShrink);
+        }
+    }, [isHeaderShrunk]);
 
     const role = Cookies.get("role");
     const isAdmin = roleAuth(role, "admin");
@@ -585,38 +595,67 @@ export default function Library() {
             >
                 {/* Fixed Header with Edit Button */}
                 <Box sx={{
-                    p: { xs: 2, md: 3 },
+                    p: { xs: 2, md: isHeaderShrunk ? 1.5 : 3 },
                     borderBottom: "1px solid",
                     borderColor: "divider",
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    bgcolor: "background.default"
+                    alignItems: "center",
+                    bgcolor: "background.default",
+                    transition: "all 0.3s ease",
+                    minHeight: isHeaderShrunk ? 60 : 80
                 }}>
                     <Box sx={{ flex: 1, pr: 2 }}>
                         {selectedTag ? (
                             <>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, flexWrap: "wrap" }}>
+                                <Box sx={{ mb: isHeaderShrunk ? 0 : 1, transition: "margin 0.3s ease" }}>
                                     {selectedTag.number && (
                                         <Box
+                                            component="span"
                                             sx={{
-                                                px: 1.5,
-                                                py: 0.5,
+                                                px: 1,
+                                                py: 0.25,
+                                                mr: 1,
                                                 bgcolor: "primary.main",
                                                 color: "primary.contrastText",
-                                                borderRadius: 2,
-                                                fontSize: "0.9rem",
-                                                fontWeight: 800
+                                                borderRadius: 1.5,
+                                                fontSize: isHeaderShrunk ? "0.75rem" : "0.85rem",
+                                                fontWeight: 800,
+                                                display: "inline-block",
+                                                verticalAlign: "middle",
+                                                transition: "all 0.3s ease"
                                             }}
                                         >
                                             {selectedTag.number}
                                         </Box>
                                     )}
-                                    <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5, color: "text.primary" }}>
+                                    <Typography
+                                        component="span"
+                                        variant={isHeaderShrunk ? "body1" : "h6"}
+                                        sx={{
+                                            fontWeight: 700,
+                                            letterSpacing: -0.3,
+                                            color: "text.primary",
+                                            verticalAlign: "middle",
+                                            transition: "all 0.3s ease",
+                                            fontSize: isHeaderShrunk ? "0.95rem" : "1.1rem"
+                                        }}
+                                    >
                                         {[selectedTag.article, selectedTag.title].filter(Boolean).join(" - ")}
                                     </Typography>
                                 </Box>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary", flexWrap: "wrap", fontSize: "0.9rem" }}>
+                                <Box sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    color: "text.secondary",
+                                    flexWrap: "wrap",
+                                    fontSize: "0.9rem",
+                                    opacity: isHeaderShrunk ? 0 : 1,
+                                    height: isHeaderShrunk ? 0 : "auto",
+                                    overflow: "hidden",
+                                    transition: "all 0.3s ease"
+                                }}>
                                     {selectedTag.chapter && (
                                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                                             {selectedTag.chapter}
@@ -644,7 +683,13 @@ export default function Library() {
                     </Box>
 
                     {isAdmin && (
-                        <Box sx={{ display: "flex", gap: 1 }}>
+                        <Box sx={{
+                            display: "flex",
+                            gap: 1,
+                            opacity: isHeaderShrunk ? 0 : 1,
+                            pointerEvents: isHeaderShrunk ? "none" : "auto",
+                            transition: "opacity 0.3s ease"
+                        }}>
                             <Tooltip title={translations.AUTO_FILL_TAGS || "Auto-Fill Tags"}>
                                 <IconButton
                                     onClick={() => setAutoFillDialogOpen(true)}
@@ -679,7 +724,11 @@ export default function Library() {
                     )}
                 </Box>
 
-                <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, overflow: "auto" }}>
+                <Box
+                    ref={contentRef}
+                    onScroll={handleScroll}
+                    sx={{ flex: 1, p: { xs: 2, md: 4 }, overflow: "auto" }}
+                >
                     {content ? (
                         <Box sx={{ maxWidth: 800, mx: "auto", position: "relative" }}>
                             <Box sx={{
