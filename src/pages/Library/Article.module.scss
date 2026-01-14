@@ -2,6 +2,9 @@
     flex-grow: 1;
     height: 100%;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--background-paper);
@@ -44,12 +47,14 @@
 .headerTitleWrapper {
     min-width: 0;
     flex: 1;
+    overflow: hidden;
 }
 
 .titleRow {
     display: flex;
     align-items: center;
     gap: 12px;
+    overflow: hidden;
 }
 
 .title {
@@ -63,6 +68,7 @@
     margin: 0;
     font-size: 2.125rem;
     min-width: 0;
+    flex: 1;
 
     &.shrunk {
         font-size: 1.25rem;
@@ -118,48 +124,6 @@
 
     svg {
         color: var(--primary-main);
-    }
-}
-
-.actions {
-    display: flex;
-    gap: 12px;
-    padding: 1rem;
-    transition: all 0.3s ease;
-
-    &.hide {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateX(20px);
-    }
-}
-
-.actionButton {
-    background-color: var(--background-paper);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--divider);
-    border-radius: 10px;
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-    &:hover {
-        background-color: var(--primary-main);
-        color: var(--primary-contrast-text);
-        border-color: var(--primary-main);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.25);
-    }
-
-    &.editButton:hover {
-        background-color: #ff9800;
-        border-color: #ff9800;
-        color: white;
-        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
     }
 }
 
@@ -225,7 +189,7 @@
     font-family: monospace;
     cursor: pointer;
     position: absolute;
-    right: -42px;
+    right: 0;
     top: 4px;
     transition: all 0.2s ease;
     z-index: 5;

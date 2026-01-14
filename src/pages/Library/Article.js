@@ -13,8 +13,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { LibraryTagKeys, LibraryIcons } from "./Icons";
 import { exportData } from "@util/importExport";
+import { useToolbar, registerToolbar } from "@components/Toolbar";
 import styles from "./Article.module.scss";
 import clsx from "clsx";
+
+registerToolbar("Article");
 
 const rehypeArticleEnrichment = () => {
     return (tree) => {
@@ -233,6 +236,7 @@ export default function Article({
                     handleCopyText(number);
                 }}
                 className={styles.paragraphNumber}
+                sx={{ right: 0 }}
             >
                 {number}
             </Typography>
@@ -273,6 +277,39 @@ export default function Article({
         };
     }, [handleCopyText]);
 
+    const toolbarItems = useMemo(() => {
+        const items = [
+            {
+                id: "copy",
+                name: translations.COPY_TO_CLIPBOARD || "Copy to Clipboard",
+                icon: <ContentCopyIcon />,
+                onClick: handleCopy
+            },
+            {
+                id: "export",
+                name: translations.EXPORT_TO_TXT || "Export to .txt",
+                icon: <DownloadIcon />,
+                onClick: handleExport
+            }
+        ];
+        if (isAdmin) {
+            items.push({
+                id: "edit",
+                name: translations.EDIT_TAGS || "Edit Tags",
+                icon: <EditIcon />,
+                onClick: openEditDialog
+            });
+        }
+        return items;
+    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog]);
+
+    useToolbar({
+        id: "Article",
+        items: toolbarItems,
+        visible: !!content,
+        depends: [toolbarItems, content]
+    });
+
     if (!content) {
         return (
             <Box className={styles.placeholder}>
@@ -290,6 +327,7 @@ export default function Article({
             ref={contentRef}
             onScroll={handleScroll}
             className={styles.root}
+            minWidth={0}
             sx={{
                 ml: { sm: showLibrarySideBar ? 2 : 0 }
             }}
@@ -305,11 +343,12 @@ export default function Article({
                     >
                         <LibraryBooksIcon />
                     </IconButton>
-                    <Box className={styles.headerTitleWrapper}>
-                        <Box className={styles.titleRow}>
+                    <Box className={styles.headerTitleWrapper} sx={{ overflow: "hidden" }}>
+                        <Box className={styles.titleRow} sx={{ overflow: "hidden" }}>
                             <Typography
                                 variant={isHeaderShrunk ? "h6" : "h4"}
                                 className={clsx(styles.title, isHeaderShrunk && styles.shrunk)}
+                                sx={{ flex: 1 }}
                             >
                                 {title}
                             </Typography>
@@ -344,37 +383,6 @@ export default function Article({
                             </Box>
                         )}
                     </Box>
-                </Box>
-                <Box className={clsx(styles.actions, isHeaderShrunk && styles.hide)}>
-                    <Tooltip title={translations.COPY_TO_CLIPBOARD || "Copy to Clipboard"}>
-                        <IconButton
-                            onClick={handleCopy}
-                            size={isHeaderShrunk ? "small" : "medium"}
-                            className={styles.actionButton}
-                        >
-                            <ContentCopyIcon fontSize={isHeaderShrunk ? "small" : "medium"} />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={translations.EXPORT_TO_TXT || "Export to .txt"}>
-                        <IconButton
-                            onClick={handleExport}
-                            size={isHeaderShrunk ? "small" : "medium"}
-                            className={styles.actionButton}
-                        >
-                            <DownloadIcon fontSize={isHeaderShrunk ? "small" : "medium"} />
-                        </IconButton>
-                    </Tooltip>
-                    {isAdmin && (
-                        <Tooltip title={translations.EDIT_TAGS || "Edit Tags"}>
-                            <IconButton
-                                onClick={openEditDialog}
-                                size={isHeaderShrunk ? "small" : "medium"}
-                                className={clsx(styles.actionButton, styles.editButton)}
-                            >
-                                <EditIcon fontSize={isHeaderShrunk ? "small" : "medium"} />
-                            </IconButton>
-                        </Tooltip>
-                    )}
                 </Box>
             </Box>
 
