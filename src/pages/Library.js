@@ -26,10 +26,12 @@ import { useDeviceType } from "@util/styles";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import ClearIcon from "@mui/icons-material/Clear";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import Tooltip from "@mui/material/Tooltip";
 import Cookies from "js-cookie";
 import { roleAuth } from "@util/roles";
 import EditTagsDialog from "./Library/EditTagsDialog";
+import AutoFillTagsDialog from "./Library/AutoFillTagsDialog";
 import styles from "./Library.module.scss";
 
 export default function Library() {
@@ -41,21 +43,27 @@ export default function Library() {
     const translations = useTranslations();
     const pathItems = usePathItems();
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [autoFillDialogOpen, setAutoFillDialogOpen] = useState(false);
 
     const role = Cookies.get("role");
     const isAdmin = roleAuth(role, "admin");
 
     const getTagHierarchy = useCallback((tag) => {
-        return LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
+        const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
+        // Append article number to last item if it exists (for unique identification)
+        if (tag.number && hierarchy.length > 0) {
+            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}#${tag.number}`;
+        }
+        return hierarchy;
     }, []);
 
     const onSelect = useCallback((tag) => {
         setSelectedTag(tag);
-        const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
+        const hierarchy = getTagHierarchy(tag);
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
         }
-    }, []);
+    }, [getTagHierarchy]);
 
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
@@ -212,7 +220,12 @@ export default function Library() {
             levels.forEach((levelItem, index) => {
                 const { key: type, value: name } = levelItem;
                 const isHead = index < levels.length - 1;
-                pathIds.push(name);
+
+                // For leaf nodes (articles), include number in ID to differentiate duplicates
+                const nodeNumber = (!isHead && tag.number) ? tag.number : null;
+                const idSuffix = nodeNumber ? `#${nodeNumber}` : '';
+
+                pathIds.push(name + idSuffix);
                 const id = pathIds.join("|");
 
                 let node = currentLevel.find(n => n.id === id);
@@ -225,6 +238,8 @@ export default function Library() {
                         Icon,
                         children: [],
                         number: (type === "article") ? tag.number : null,
+                        subNumber: (!isHead && tag.subNumber) ? tag.subNumber : null,
+                        order: (!isHead && tag.order) ? tag.order : null,
                         ...(!isHead ? { ...tag, _id: tag._id } : {})
                     };
                     currentLevel.push(node);
@@ -323,30 +338,68 @@ export default function Library() {
                 if (customA !== null) return -1;
                 if (customB !== null) return 1;
 
+                // Check for explicit order field (manual ordering)
+                const orderA = a.order ? parseInt(a.order, 10) : null;
+                const orderB = b.order ? parseInt(b.order, 10) : null;
+                if (orderA !== null && orderB !== null) {
+                    if (orderA !== orderB) return orderA - orderB;
+                }
+                if (orderA !== null) return -1;
+                if (orderB !== null) return 1;
+
                 // Check for tag.number (explicit article numbers)
                 const tagNumA = a.number ? parseInt(a.number, 10) : null;
                 const tagNumB = b.number ? parseInt(b.number, 10) : null;
                 if (tagNumA !== null && tagNumB !== null) {
                     if (tagNumA !== tagNumB) return tagNumA - tagNumB;
+                    // If same number, check subNumber
+                    const subNumA = a.subNumber ? parseInt(a.subNumber, 10) : null;
+                    const subNumB = b.subNumber ? parseInt(b.subNumber, 10) : null;
+                    if (subNumA !== null && subNumB !== null) {
+                        if (subNumA !== subNumB) return subNumA - subNumB;
+                    }
+                    if (subNumA !== null) return -1;
+                    if (subNumB !== null) return 1;
                 }
                 if (tagNumA !== null) return -1;
                 if (tagNumB !== null) return 1;
 
-                // Check for number word prefixes
+                // Check for number word prefixes or numbers in names
                 const numA = extractNumber(nameA);
                 const numB = extractNumber(nameB);
 
-                // If both have number word prefixes, sort by number
-                if (numA !== null && numB !== null) {
-                    if (numA !== numB) {
-                        return numA - numB;
+                // Extract trailing number in parentheses like (1), (2) for final sorting
+                const trailingNumA = nameA.match(/\((\d+)\)\s*$/)?.[1];
+                const trailingNumB = nameB.match(/\((\d+)\)\s*$/)?.[1];
+
+                // If both have trailing numbers, extract base and compare
+                if (trailingNumA && trailingNumB) {
+                    const baseA = nameA.replace(/\s*\(\d+\)\s*$/, '').trim();
+                    const baseB = nameB.replace(/\s*\(\d+\)\s*$/, '').trim();
+
+                    if (baseA.toLowerCase() === baseB.toLowerCase()) {
+                        return parseInt(trailingNumA, 10) - parseInt(trailingNumB, 10);
                     }
                 }
-                // If only one has a number word prefix, it comes first
-                else {
-                    if (numA !== null) return -1;
-                    if (numB !== null) return 1;
+
+                // If both have numbers, compare base names first, then numbers
+                if (numA !== null && numB !== null) {
+                    // Extract base name by removing the number portion for comparison
+                    const baseA = nameA.replace(/\s*[\(\[]?\d+[\)\]]?\s*$/, '').trim();
+                    const baseB = nameB.replace(/\s*[\(\[]?\d+[\)\]]?\s*$/, '').trim();
+
+                    // If base names are the same (or very similar), sort by number
+                    if (baseA.toLowerCase() === baseB.toLowerCase()) {
+                        return numA - numB;
+                    }
+                    // Otherwise, compare by base name first, then number
+                    const baseCompare = baseA.localeCompare(baseB, undefined, { numeric: true, sensitivity: 'base' });
+                    if (baseCompare !== 0) return baseCompare;
+                    return numA - numB;
                 }
+                // If only one has a number, it comes first
+                if (numA !== null) return -1;
+                if (numB !== null) return 1;
 
                 // Natural sort (handles numbers correctly: 1,2,3,10 instead of 1,10,2,3)
                 return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
@@ -590,21 +643,39 @@ export default function Library() {
                         )}
                     </Box>
 
-                    {isAdmin && selectedTag && (
-                        <Tooltip title={translations.EDIT || "Edit"}>
-                            <IconButton
-                                onClick={openEditDialog}
-                                sx={{
-                                    bgcolor: "action.hover",
-                                    "&:hover": {
-                                        bgcolor: "primary.main",
-                                        color: "primary.contrastText"
-                                    }
-                                }}
-                            >
-                                <EditIcon />
-                            </IconButton>
-                        </Tooltip>
+                    {isAdmin && (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                            <Tooltip title={translations.AUTO_FILL_TAGS || "Auto-Fill Tags"}>
+                                <IconButton
+                                    onClick={() => setAutoFillDialogOpen(true)}
+                                    sx={{
+                                        bgcolor: "action.hover",
+                                        "&:hover": {
+                                            bgcolor: "secondary.main",
+                                            color: "secondary.contrastText"
+                                        }
+                                    }}
+                                >
+                                    <AutoFixHighIcon />
+                                </IconButton>
+                            </Tooltip>
+                            {selectedTag && (
+                                <Tooltip title={translations.EDIT || "Edit"}>
+                                    <IconButton
+                                        onClick={openEditDialog}
+                                        sx={{
+                                            bgcolor: "action.hover",
+                                            "&:hover": {
+                                                bgcolor: "primary.main",
+                                                color: "primary.contrastText"
+                                            }
+                                        }}
+                                    >
+                                        <EditIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                        </Box>
                     )}
                 </Box>
 
@@ -644,6 +715,14 @@ export default function Library() {
                 setTags={setTags}
                 setSelectedTag={setSelectedTag}
                 setContent={setContent}
+            />
+
+            {/* Auto-Fill Tags Dialog */}
+            <AutoFillTagsDialog
+                open={autoFillDialogOpen}
+                onClose={() => setAutoFillDialogOpen(false)}
+                tags={tags}
+                setTags={setTags}
             />
         </Box>
     );

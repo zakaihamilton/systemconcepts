@@ -41,6 +41,8 @@ export default function EditTagsDialog({
                 formValues[key] = selectedTag[key] || "";
             });
             formValues.number = selectedTag.number || "";
+            formValues.subNumber = selectedTag.subNumber || "";
+            formValues.order = selectedTag.order || "";
             setEditFormValues(formValues);
             setIdCopied(false);
             setShowDeleteConfirm(false);
@@ -80,6 +82,12 @@ export default function EditTagsDialog({
             if (editFormValues.number !== undefined) {
                 updatedTag.number = editFormValues.number || null;
             }
+            if (editFormValues.subNumber !== undefined) {
+                updatedTag.subNumber = editFormValues.subNumber || null;
+            }
+            if (editFormValues.order !== undefined) {
+                updatedTag.order = editFormValues.order || null;
+            }
 
             // Update tags.json
             const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
@@ -102,6 +110,12 @@ export default function EditTagsDialog({
                             if (editFormValues.number !== undefined) {
                                 item.number = editFormValues.number || null;
                             }
+                            if (editFormValues.subNumber !== undefined) {
+                                item.subNumber = editFormValues.subNumber || null;
+                            }
+                            if (editFormValues.order !== undefined) {
+                                item.order = editFormValues.order || null;
+                            }
                         }
                         return item;
                     });
@@ -114,6 +128,12 @@ export default function EditTagsDialog({
                     });
                     if (editFormValues.number !== undefined) {
                         data.number = editFormValues.number || null;
+                    }
+                    if (editFormValues.subNumber !== undefined) {
+                        data.subNumber = editFormValues.subNumber || null;
+                    }
+                    if (editFormValues.order !== undefined) {
+                        data.order = editFormValues.order || null;
                     }
                     await storage.writeFile(filePath, JSON.stringify(data, null, 2));
                 }
@@ -252,6 +272,24 @@ export default function EditTagsDialog({
                             onChange={handleEditChange("number")}
                             fullWidth
                             size="small"
+                        />
+                        <TextField
+                            label={translations.SUB_NUMBER || "Sub-Number"}
+                            value={editFormValues.subNumber || ""}
+                            onChange={handleEditChange("subNumber")}
+                            fullWidth
+                            size="small"
+                            type="number"
+                            helperText={translations.SUB_NUMBER_HELPER || "For articles with same number"}
+                        />
+                        <TextField
+                            label={translations.ORDER || "Order"}
+                            value={editFormValues.order || ""}
+                            onChange={handleEditChange("order")}
+                            fullWidth
+                            size="small"
+                            type="number"
+                            helperText={translations.ORDER_HELPER || "Lower numbers appear first"}
                         />
                         {LibraryTagKeys.map(key => (
                             <TextField
