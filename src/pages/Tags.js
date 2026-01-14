@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Tabs from "@widgets/Tabs";
 import Tab from "@mui/material/Tab";
 import Sessions from "./Tags/Sessions";

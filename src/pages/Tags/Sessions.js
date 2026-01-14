@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "@util/translations";
 import { useSessions } from "@util/sessions";
 import Table from "@widgets/Table";

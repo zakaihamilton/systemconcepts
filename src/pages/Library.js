@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearch } from "@components/Search";
 import storage from "@util/storage";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
