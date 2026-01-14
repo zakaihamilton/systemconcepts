@@ -12,7 +12,7 @@ export default function Tags() {
 
     return (
         <div className={styles.container}>
-             <Tabs state={[tab, setTab]}>
+             <Tabs state={[tab, setTab]} className={styles.tabs}>
                 <Tab label={translations.SESSIONS || "Sessions"} value="sessions" />
                 <Tab label={translations.LIBRARY || "Library"} value="library" />
             </Tabs>
