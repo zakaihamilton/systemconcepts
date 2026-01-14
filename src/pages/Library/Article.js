@@ -185,7 +185,7 @@ export default function Article({
         navigator.clipboard.writeText(String(text));
     }, []);
 
-    const Highlight = ({ children }) => {
+    const Highlight = useCallback(({ children }) => {
         if (!search || !children || typeof children !== 'string') return children;
         const lowerSearch = search.toLowerCase();
         const lowerChildren = children.toLowerCase();
@@ -211,9 +211,9 @@ export default function Article({
             parts.push(children.slice(currentIndex));
         }
         return parts;
-    };
+    }, [search]);
 
-    const TextRenderer = ({ children }) => {
+    const TextRenderer = useCallback(({ children }) => {
         if (Array.isArray(children)) {
             return children.map((child, idx) => <TextRenderer key={idx}>{child}</TextRenderer>);
         }
@@ -226,7 +226,7 @@ export default function Article({
             });
         }
         return children;
-    };
+    }, [Highlight]);
 
     const markdownComponents = useMemo(() => {
         const ParagraphNumber = ({ number }) => (
@@ -275,7 +275,7 @@ export default function Article({
             h6: ({ children }) => <h6><TextRenderer>{children}</TextRenderer></h6>,
             br: () => <span style={{ display: "block", marginBottom: "1.2rem", content: '""' }} />
         };
-    }, [handleCopyText]);
+    }, [handleCopyText, TextRenderer]);
 
     const toolbarItems = useMemo(() => {
         const items = [

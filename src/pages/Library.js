@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useSearch } from "@components/Search";
 import storage from "@util/storage";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
@@ -79,6 +79,8 @@ export default function Library() {
 
     const [customOrder, setCustomOrder] = useState({});
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
+    const contentCacheRef = useRef(new Map());
+    const fileCacheRef = useRef(new Map());
 
     const loadTags = useCallback(async () => {
         try {
@@ -119,21 +121,40 @@ export default function Library() {
             setContent(null);
             return;
         }
+
+        // Check content cache first
+        const cacheKey = selectedTag._id;
+        if (contentCacheRef.current.has(cacheKey)) {
+            setContent(contentCacheRef.current.get(cacheKey));
+            return;
+        }
+
         try {
             const filePath = makePath(LIBRARY_LOCAL_PATH, selectedTag.path);
-            if (await storage.exists(filePath)) {
+            let data;
+
+            // Check file cache
+            if (fileCacheRef.current.has(filePath)) {
+                data = fileCacheRef.current.get(filePath);
+            } else if (await storage.exists(filePath)) {
                 const fileContent = await storage.readFile(filePath);
-                const data = JSON.parse(fileContent);
-                let item = null;
-                if (Array.isArray(data)) {
-                    item = data.find(i => i._id === selectedTag._id);
-                } else if (data._id === selectedTag._id) {
-                    item = data;
-                }
-                setContent(item ? item.text : "Content not found in file.");
+                data = JSON.parse(fileContent);
+                fileCacheRef.current.set(filePath, data);
             } else {
                 setContent("File not found.");
+                return;
             }
+
+            let item = null;
+            if (Array.isArray(data)) {
+                item = data.find(i => i._id === selectedTag._id);
+            } else if (data._id === selectedTag._id) {
+                item = data;
+            }
+
+            const contentText = item ? item.text : "Content not found in file.";
+            contentCacheRef.current.set(cacheKey, contentText);
+            setContent(contentText);
         } catch (err) {
             console.error("Failed to load content:", err);
             setContent("Error loading content.");
@@ -154,6 +175,9 @@ export default function Library() {
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
+            // Clear caches when library is updated
+            contentCacheRef.current.clear();
+            fileCacheRef.current.clear();
             loadTags();
             loadCustomOrder();
             loadContent();

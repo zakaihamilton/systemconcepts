@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import TextField from "@mui/material/TextField";
@@ -221,6 +221,19 @@ export default function Tags({
         return root.children;
     }, [tags, debouncedFilterText, customOrder]);
 
+    const selectedPath = useMemo(() => {
+        return selectedTag ? getTagHierarchy(selectedTag).join("|") : null;
+    }, [selectedTag, getTagHierarchy]);
+
+    const handleTreeSelect = useCallback((tag) => {
+        if (!isMobile) {
+            onSelect(tag);
+        } else {
+            onSelect(tag);
+            closeDrawer();
+        }
+    }, [isMobile, onSelect, closeDrawer]);
+
     const sideBarContent = (
         <Box className={styles.sidebarInner}>
             <Box className={styles.searchContainer}>
@@ -258,15 +271,9 @@ export default function Tags({
                         <TreeItem
                             key={node.id}
                             node={node}
-                            onSelect={(tag) => {
-                                if (!isMobile) onSelect(tag);
-                                else {
-                                    onSelect(tag);
-                                    closeDrawer();
-                                }
-                            }}
+                            onSelect={handleTreeSelect}
                             selectedId={selectedTag?._id}
-                            selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
+                            selectedPath={selectedPath}
                         />
                     ))}
                 </List>
@@ -275,6 +282,7 @@ export default function Tags({
             {/* Auto-fill Tags button removed as per Phase 13 */}
         </Box>
     );
+
 
     if (isMobile) {
         return (
