@@ -345,13 +345,6 @@ export default function Article({
                     </IconButton>
                     <Box className={styles.headerTitleWrapper} sx={{ overflow: "hidden" }}>
                         <Box className={styles.titleRow} sx={{ overflow: "hidden" }}>
-                            <Typography
-                                variant={isHeaderShrunk ? "h6" : "h4"}
-                                className={clsx(styles.title, isHeaderShrunk && styles.shrunk)}
-                                sx={{ flex: 1 }}
-                            >
-                                {title}
-                            </Typography>
                             {selectedTag?.number && (
                                 <Paper
                                     elevation={0}
@@ -360,6 +353,13 @@ export default function Article({
                                     #{selectedTag.number}
                                 </Paper>
                             )}
+                            <Typography
+                                variant={isHeaderShrunk ? "h6" : "h4"}
+                                className={clsx(styles.title, isHeaderShrunk && styles.shrunk)}
+                                sx={{ flex: 1 }}
+                            >
+                                {title}
+                            </Typography>
                         </Box>
                         {!isHeaderShrunk && (
                             <Box className={styles.metadataRow}>
