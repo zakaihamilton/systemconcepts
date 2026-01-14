@@ -200,7 +200,9 @@ export default function Tags({
 
                     // If both items are "numbered" (number at the start), prioritize number sort
                     if (candA.position <= 2 && candB.position <= 2) {
-                        return numA - numB;
+                        if (numA !== numB) return numA - numB;
+                        // Same starting number - shorter name comes first (e.g., "1984" before "1984-85")
+                        if (nameA.length !== nameB.length) return nameA.length - nameB.length;
                     }
 
                     const baseCompare = baseA.localeCompare(baseB, undefined, { numeric: true, sensitivity: 'base' });
