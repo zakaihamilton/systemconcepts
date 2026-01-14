@@ -166,6 +166,13 @@ export async function performSync() {
         // 2. Library Sync
         const libraryChanges = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library");
 
+        if (libraryChanges) {
+            SyncActiveStore.update(s => {
+                s.libraryUpdateCounter = (s.libraryUpdateCounter || 0) + 1;
+            });
+            addSyncLog(`Library changes detected`, "info");
+        }
+
         const hasChanges = mainChanges || libraryChanges;
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
