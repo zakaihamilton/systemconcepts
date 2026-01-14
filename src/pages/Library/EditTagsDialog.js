@@ -303,7 +303,7 @@ export default function EditTagsDialog({
                         ))}
                     </Box>
                 </DialogContent>
-                <DialogActions sx={{ p: 2, pt: 0, justifyContent: "space-between" }}>
+                <DialogActions sx={{ p: 2, pt: 2, justifyContent: "space-between" }}>
                     <Button
                         onClick={() => setShowDeleteConfirm(true)}
                         color="error"

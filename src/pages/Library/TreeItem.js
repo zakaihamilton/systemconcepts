@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo, useRef } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -7,11 +7,27 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import styles from "./TreeItem.module.scss";
+import clsx from "clsx";
 
 const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, level = 0 }) {
     const [open, setOpen] = useState(false);
     const hasChildren = node.children && node.children.length > 0;
     const isSelected = !!selectedId && node._id === selectedId;
+    const [isTruncated, setIsTruncated] = useState(false);
+    const textRef = useRef(null);
+
+    const checkTruncation = useCallback(() => {
+        if (textRef.current) {
+            setIsTruncated(textRef.current.scrollWidth > textRef.current.clientWidth);
+        }
+    }, []);
+
+    useEffect(() => {
+        checkTruncation();
+        window.addEventListener('resize', checkTruncation);
+        return () => window.removeEventListener('resize', checkTruncation);
+    }, [node.name, checkTruncation]);
 
     useEffect(() => {
         if (selectedPath && node.id !== "root" && (selectedPath === node.id || selectedPath.startsWith(node.id + "|"))) {
@@ -39,70 +55,43 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
             <ListItemButton
                 onClick={handleSelect}
                 selected={isSelected}
+                className={clsx(styles.itemButton, isSelected && styles.selected)}
                 sx={{
-                    pl: level === 0 ? 1 : 2,
-                    py: 0.25,
-                    minHeight: 32,
-                    "&.Mui-selected": {
-                        bgcolor: "action.selected"
-                    }
+                    pl: level === 0 ? 1 : 1.5
                 }}
             >
-                <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                <Box className={styles.contentWrapper}>
                     <Box
                         onClick={hasChildren ? handleToggle : undefined}
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 24,
-                            height: 24,
-                            mr: 0.5,
-                            cursor: hasChildren ? "pointer" : "default",
-                            color: "text.secondary",
-                            flexShrink: 0,
-                            "&:hover": hasChildren ? { color: "primary.main" } : {}
-                        }}
+                        className={clsx(styles.toggleIcon, open ? styles.open : styles.closed)}
                     >
                         {hasChildren ? (
-                            open ?
-                                <RemoveIcon sx={{ fontSize: 16, border: "1px solid", borderRadius: 0.5 }} /> :
-                                <AddIcon sx={{ fontSize: 16, border: "1px solid", borderRadius: 0.5 }} />
+                            <Box
+                                component="span"
+                                className={styles.chevron}
+                            />
                         ) : (
-                            <Box sx={{ width: 16 }} />
+                            <Box className={styles.dot} />
                         )}
                     </Box>
 
                     {Icon && (
                         <Tooltip title={(node.type || "").charAt(0).toUpperCase() + (node.type || "").slice(1)} enterDelay={500}>
-                            <Box sx={{ display: "flex", flexShrink: 0 }}>
-                                <Icon sx={{ fontSize: 18, mr: 1, color: "text.secondary" }} />
+                            <Box className={styles.iconWrapper}>
+                                <Icon sx={{ fontSize: "inherit" }} />
                             </Box>
                         </Tooltip>
                     )}
 
                     {node.number && (
-                        <Box
-                            sx={{
-                                mr: 1,
-                                px: 0.6,
-                                py: 0.1,
-                                bgcolor: "primary.main",
-                                color: "primary.contrastText",
-                                borderRadius: 1.5,
-                                fontSize: "0.7rem",
-                                fontWeight: "bold",
-                                minWidth: 18,
-                                textAlign: "center",
-                                flexShrink: 0
-                            }}
-                        >
+                        <Box className={styles.tagNumber}>
                             {node.number}
                         </Box>
                     )}
                     <Tooltip
-                        title={node.name}
+                        title={isTruncated ? node.name : ""}
                         enterDelay={0}
+                        disableHoverListener={!isTruncated}
                         placement="bottom-start"
                         slotProps={{
                             popper: {
@@ -130,13 +119,10 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                         <ListItemText
                             primary={
                                 <Typography
+                                    ref={textRef}
                                     variant="body2"
-                                    sx={{
-                                        fontSize: "0.85rem",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        whiteSpace: "nowrap"
-                                    }}
+                                    onMouseEnter={checkTruncation}
+                                    className={clsx(styles.name, hasChildren ? styles.parentName : styles.childName)}
                                 >
                                     {node.name}
                                 </Typography>
@@ -150,11 +136,9 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                 <List
                     component="div"
                     disablePadding
+                    className={styles.childList}
                     sx={{
-                        ml: (level === 0 ? 1 : 2) + 1.5,
-                        borderLeft: "1px solid",
-                        borderColor: "divider",
-                        pl: 0.5
+                        ml: (level === 0 ? 1 : 1.5) + 1
                     }}
                 >
                     {node.children.map((child) => (

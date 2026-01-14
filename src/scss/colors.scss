@@ -78,6 +78,18 @@
 
     --playing-color: #a855f7;
     --playing-bg: #f5f3ff;
+
+    /* Aliases for compatibility */
+    --background-paper: var(--main-background-alternative);
+    --background-default: var(--main-background);
+    --primary-main: var(--primary-color);
+    --secondary-main: var(--secondary-color);
+    --primary-contrast-text: var(--inverse-text-color);
+    --text-primary: var(--text-color);
+    --text-secondary: var(--secondary-color);
+    --divider: var(--border-color);
+    --action-hover: var(--hover-color);
+    --action-selected: var(--selected-color);
 }
 
 
@@ -152,4 +164,16 @@
 
     --playing-color: #c084fc;
     --playing-bg: #2e1065;
+
+    /* Aliases for compatibility */
+    --background-paper: var(--main-background-alternative);
+    --background-default: var(--main-background);
+    --primary-main: var(--primary-color);
+    --secondary-main: var(--secondary-color);
+    --primary-contrast-text: var(--inverse-text-color);
+    --text-primary: var(--text-color);
+    --text-secondary: var(--secondary-color);
+    --divider: var(--border-color);
+    --action-hover: var(--hover-color);
+    --action-selected: var(--selected-color);
 }
