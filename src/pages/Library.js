@@ -25,6 +25,7 @@ import { LibraryIcons, LibraryTagKeys } from "./Library/Icons";
 import { useDeviceType } from "@util/styles";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
+import ClearIcon from "@mui/icons-material/Clear";
 import Tooltip from "@mui/material/Tooltip";
 import Cookies from "js-cookie";
 import { roleAuth } from "@util/roles";
@@ -244,18 +245,38 @@ export default function Library() {
 
         const extractNumber = (name) => {
             if (!name) return null;
-            const match = name.match(/^(\d+)/);
-            if (match) {
-                return parseInt(match[1], 10);
-            }
             const lowerName = name.toLowerCase();
-            const words = lowerName.split(/[^a-z]+/);
-            for (const word of words) {
+
+            // Find all potential numbers (both digits and words) with their positions
+            const candidates = [];
+
+            // Find all digit sequences with their positions
+            const digitRegex = /(\d+)/g;
+            let digitMatch;
+            while ((digitMatch = digitRegex.exec(name)) !== null) {
+                candidates.push({
+                    position: digitMatch.index,
+                    value: parseInt(digitMatch[1], 10)
+                });
+            }
+
+            // Find all number words with their positions
+            const wordRegex = /[a-z]+/gi;
+            let wordMatch;
+            while ((wordMatch = wordRegex.exec(lowerName)) !== null) {
+                const word = wordMatch[0];
                 if (numberWords[word] !== undefined) {
-                    return numberWords[word];
+                    candidates.push({
+                        position: wordMatch.index,
+                        value: numberWords[word]
+                    });
                 }
             }
-            return null;
+
+            // Return the first number found (by position in the string)
+            if (candidates.length === 0) return null;
+            candidates.sort((a, b) => a.position - b.position);
+            return candidates[0].value;
         };
 
         // Priority items that should appear first (lower number = higher priority)
@@ -301,6 +322,15 @@ export default function Library() {
                 // If only one has custom order, it comes first
                 if (customA !== null) return -1;
                 if (customB !== null) return 1;
+
+                // Check for tag.number (explicit article numbers)
+                const tagNumA = a.number ? parseInt(a.number, 10) : null;
+                const tagNumB = b.number ? parseInt(b.number, 10) : null;
+                if (tagNumA !== null && tagNumB !== null) {
+                    if (tagNumA !== tagNumB) return tagNumA - tagNumB;
+                }
+                if (tagNumA !== null) return -1;
+                if (tagNumB !== null) return 1;
 
                 // Check for number word prefixes
                 const numA = extractNumber(nameA);
@@ -382,9 +412,9 @@ export default function Library() {
         h1: ({ children }) => <h1><TextRenderer>{children}</TextRenderer></h1>,
         h2: ({ children }) => <h2><TextRenderer>{children}</TextRenderer></h2>,
         h3: ({ children }) => <h3><TextRenderer>{children}</TextRenderer></h3>,
-        h4: ({ children }) => 4><h4><TextRenderer>{children}</TextRenderer></h4>,
-        h5: ({ children }) => 5><h5><TextRenderer>{children}</TextRenderer></h5>,
-        h6: ({ children }) => 6><h6><TextRenderer>{children}</TextRenderer></h6>,
+        h4: ({ children }) => 4 > <h4><TextRenderer>{children}</TextRenderer></h4>,
+        h5: ({ children }) => 5 > <h5><TextRenderer>{children}</TextRenderer></h5>,
+        h6: ({ children }) => 6 > <h6><TextRenderer>{children}</TextRenderer></h6>,
         // This replaces the <br> tag with a styled <span>
         br: () => <span style={{ display: 'block', marginBottom: '1.2rem', content: '""' }} />
     };
@@ -403,7 +433,19 @@ export default function Library() {
                             <InputAdornment position="start">
                                 <FilterAltIcon color="action" />
                             </InputAdornment>
-                        )
+                        ),
+                        endAdornment: filterText ? (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    size="small"
+                                    onClick={() => setFilterText("")}
+                                    edge="end"
+                                    sx={{ mr: -0.5 }}
+                                >
+                                    <ClearIcon fontSize="small" />
+                                </IconButton>
+                            </InputAdornment>
+                        ) : null
                     }}
                 />
             </Box>
