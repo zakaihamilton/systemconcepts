@@ -9,10 +9,13 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { useTranslations } from "@util/translations";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import TreeItem from "./Library/TreeItem";
 import { setPath, usePathItems } from "@util/pages";
 import { MainStore } from "@components/Main";
@@ -29,6 +32,7 @@ import styles from "./Library.module.scss";
 
 export default function Library() {
     const search = useSearch();
+    const [filterText, setFilterText] = useState("");
     const [tags, setTags] = useState([]);
     const [content, setContent] = useState(null);
     const [selectedTag, setSelectedTag] = useState(null);
@@ -158,15 +162,29 @@ export default function Library() {
         const root = { id: "root", name: "Library", children: [] };
 
         let filteredTags = tags;
-        if (search) {
-            const lowerSearch = search.toLowerCase();
+        if (filterText) {
+            const lowerFilter = filterText.toLowerCase();
             const keysToSearch = [...LibraryTagKeys, "number"];
-            filteredTags = tags.filter(tag =>
-                keysToSearch.some(key => {
-                    const value = tag[key];
-                    return value && String(value).toLowerCase().includes(lowerSearch);
-                })
-            );
+
+            // AND/OR Logic
+            const terms = lowerFilter.split(/\s+/).filter(Boolean);
+
+            filteredTags = tags.filter(tag => {
+                const values = keysToSearch.map(key => tag[key]).filter(v => v && String(v).trim()).map(v => String(v).toLowerCase());
+                const allValues = values.join(" "); // Concatenate all values for easier searching
+
+                // Check for OR logic (e.g., "term1 OR term2")
+                if (terms.includes("or")) {
+                    const groups = lowerFilter.split(/\s+or\s+/).filter(Boolean);
+                    return groups.some(group => {
+                        const groupTerms = group.split(/\s+/).filter(Boolean);
+                        return groupTerms.every(term => allValues.includes(term));
+                    });
+                }
+
+                // Default AND logic
+                return terms.every(term => allValues.includes(term));
+            });
         }
 
         for (const tag of filteredTags) {
@@ -300,8 +318,102 @@ export default function Library() {
 
         sortTree(root.children);
         return root.children;
-    }, [tags, search, customOrder]);
+    }, [tags, filterText, customOrder]);
 
+    const Highlight = ({ children }) => {
+        if (!search || !children || typeof children !== 'string') return children;
+        const lowerSearch = search.toLowerCase();
+        const lowerChildren = children.toLowerCase();
+        if (!lowerChildren.includes(lowerSearch)) return children;
+
+        const parts = [];
+        let currentIndex = 0;
+        let matchIndex = lowerChildren.indexOf(lowerSearch);
+
+        while (matchIndex !== -1) {
+            if (matchIndex > currentIndex) {
+                parts.push(children.slice(currentIndex, matchIndex));
+            }
+            parts.push(
+                <span key={matchIndex} style={{ backgroundColor: "#ffeb3b", color: "#000" }}>
+                    {children.slice(matchIndex, matchIndex + search.length)}
+                </span>
+            );
+            currentIndex = matchIndex + search.length;
+            matchIndex = lowerChildren.indexOf(lowerSearch, currentIndex);
+        }
+        if (currentIndex < children.length) {
+            parts.push(children.slice(currentIndex));
+        }
+        return parts;
+    };
+
+    const TextRenderer = ({ children }) => {
+        if (Array.isArray(children)) {
+            return children.map((child, index) => <TextRenderer key={index}>{child}</TextRenderer>);
+        }
+        if (typeof children === 'string') {
+            return <Highlight>{children}</Highlight>;
+        }
+        if (React.isValidElement(children)) {
+            return React.cloneElement(children, {
+                children: <TextRenderer>{children.props.children}</TextRenderer>
+            });
+        }
+        return children;
+    };
+
+    // Components to wrap with highlighting
+    const markdownComponents = {
+        p: ({ children }) => <p><TextRenderer>{children}</TextRenderer></p>,
+        li: ({ children }) => <li><TextRenderer>{children}</TextRenderer></li>,
+        h1: ({ children }) => <h1><TextRenderer>{children}</TextRenderer></h1>,
+        h2: ({ children }) => <h2><TextRenderer>{children}</TextRenderer></h2>,
+        h3: ({ children }) => <h3><TextRenderer>{children}</TextRenderer></h3>,
+        h4: ({ children }) => 4><h4><TextRenderer>{children}</TextRenderer></h4>,
+        h5: ({ children }) => 5><h5><TextRenderer>{children}</TextRenderer></h5>,
+        h6: ({ children }) => 6><h6><TextRenderer>{children}</TextRenderer></h6>,
+        // This replaces the <br> tag with a styled <span>
+        br: () => <span style={{ display: 'block', marginBottom: '1.2rem', content: '""' }} />
+    };
+
+    const sideBarContent = (
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <Box sx={{ p: 2, pb: 0 }}>
+                <TextField
+                    placeholder={translations.FILTER_TAGS || "Filter tags..."}
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                    fullWidth
+                    size="small"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <FilterAltIcon color="action" />
+                            </InputAdornment>
+                        )
+                    }}
+                />
+            </Box>
+            <List component="nav" sx={{ overflow: "auto", flex: 1, py: 1 }}>
+                {tree.map(node => (
+                    <TreeItem
+                        key={node.id}
+                        node={node}
+                        onSelect={(tag) => {
+                            if (!isMobile) onSelect(tag);
+                            else {
+                                onSelect(tag);
+                                closeDrawer();
+                            }
+                        }}
+                        selectedId={selectedTag?._id}
+                        selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
+                    />
+                ))}
+            </List>
+        </Box>
+    );
 
     return (
         <Box sx={{ display: "flex", height: "100%", bgcolor: "background.default", position: "relative", gap: 2, p: 2 }}>
@@ -321,20 +433,7 @@ export default function Library() {
                         }
                     }}
                 >
-                    <List component="nav" sx={{ overflow: "auto", flex: 1, py: 1 }}>
-                        {tree.map(node => (
-                            <TreeItem
-                                key={node.id}
-                                node={node}
-                                onSelect={(tag) => {
-                                    onSelect(tag);
-                                    closeDrawer();
-                                }}
-                                selectedId={selectedTag?._id}
-                                selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
-                            />
-                        ))}
-                    </List>
+                    {sideBarContent}
                 </Drawer>
             ) : (
                 <Paper
@@ -358,17 +457,7 @@ export default function Library() {
                         zIndex: 2
                     }}
                 >
-                    <List component="nav" sx={{ overflow: "auto", flex: 1, minWidth: 400, py: 1 }}>
-                        {tree.map(node => (
-                            <TreeItem
-                                key={node.id}
-                                node={node}
-                                onSelect={onSelect}
-                                selectedId={selectedTag?._id}
-                                selectedPath={selectedTag ? getTagHierarchy(selectedTag).join("|") : null}
-                            />
-                        ))}
-                    </List>
+                    {sideBarContent}
                 </Paper>
             )}
 
@@ -387,72 +476,87 @@ export default function Library() {
                     boxShadow: "0 4px 20px rgba(0,0,0,0.04)"
                 }}
             >
+                {/* Fixed Header with Edit Button */}
+                <Box sx={{
+                    p: { xs: 2, md: 3 },
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    bgcolor: "background.default"
+                }}>
+                    <Box sx={{ flex: 1, pr: 2 }}>
+                        {selectedTag ? (
+                            <>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, flexWrap: "wrap" }}>
+                                    {selectedTag.number && (
+                                        <Box
+                                            sx={{
+                                                px: 1.5,
+                                                py: 0.5,
+                                                bgcolor: "primary.main",
+                                                color: "primary.contrastText",
+                                                borderRadius: 2,
+                                                fontSize: "0.9rem",
+                                                fontWeight: 800
+                                            }}
+                                        >
+                                            {selectedTag.number}
+                                        </Box>
+                                    )}
+                                    <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5, color: "text.primary" }}>
+                                        {[selectedTag.article, selectedTag.title].filter(Boolean).join(" - ")}
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary", flexWrap: "wrap", fontSize: "0.9rem" }}>
+                                    {selectedTag.chapter && (
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                            {selectedTag.chapter}
+                                        </Typography>
+                                    )}
+                                    {selectedTag.chapter && <span>•</span>}
+                                    <span>
+                                        {[
+                                            selectedTag.author,
+                                            selectedTag.book,
+                                            selectedTag.volume,
+                                            selectedTag.part,
+                                            selectedTag.section,
+                                            selectedTag.year,
+                                            selectedTag.portion
+                                        ].filter(Boolean).join(" • ")}
+                                    </span>
+                                </Box>
+                            </>
+                        ) : (
+                            <Typography variant="h6" color="text.secondary">
+                                {translations.SELECT_ITEM || "Select an item"}
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {isAdmin && selectedTag && (
+                        <Tooltip title={translations.EDIT || "Edit"}>
+                            <IconButton
+                                onClick={openEditDialog}
+                                sx={{
+                                    bgcolor: "action.hover",
+                                    "&:hover": {
+                                        bgcolor: "primary.main",
+                                        color: "primary.contrastText"
+                                    }
+                                }}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                </Box>
+
                 <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, overflow: "auto" }}>
                     {content ? (
                         <Box sx={{ maxWidth: 800, mx: "auto", position: "relative" }}>
-                            {isAdmin && (
-                                <Tooltip title={translations.EDIT || "Edit"}>
-                                    <IconButton
-                                        onClick={openEditDialog}
-                                        sx={{
-                                            position: "absolute",
-                                            top: 0,
-                                            right: 0,
-                                            bgcolor: "action.hover",
-                                            "&:hover": {
-                                                bgcolor: "primary.main",
-                                                color: "primary.contrastText"
-                                            }
-                                        }}
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            )}
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap", pr: isAdmin ? 6 : 0 }}>
-                                {selectedTag?.number && (
-                                    <Box
-                                        sx={{
-                                            px: 1.5,
-                                            py: 0.5,
-                                            bgcolor: "primary.main",
-                                            color: "primary.contrastText",
-                                            borderRadius: 2,
-                                            fontSize: "0.9rem",
-                                            fontWeight: 800,
-                                            boxShadow: "0 4px 12px rgba(var(--primary-rgb), 0.3)"
-                                        }}
-                                    >
-                                        {selectedTag.number}
-                                    </Box>
-                                )}
-                                <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -1, color: "text.primary" }}>
-                                    {[selectedTag?.article, selectedTag?.title].filter(Boolean).join(" - ")}
-                                </Typography>
-                            </Box>
-
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary", mb: 3, flexWrap: "wrap" }}>
-                                {selectedTag?.chapter && (
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                        {selectedTag.chapter}
-                                    </Typography>
-                                )}
-                                {selectedTag?.chapter && <Typography variant="subtitle1">•</Typography>}
-                                <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
-                                    {[
-                                        selectedTag?.author,
-                                        selectedTag?.book,
-                                        selectedTag?.volume,
-                                        selectedTag?.part,
-                                        selectedTag?.section,
-                                        selectedTag?.year,
-                                        selectedTag?.portion
-                                    ].filter(Boolean).join(" • ")}
-                                </Typography>
-                            </Box>
-
-                            <Divider sx={{ mb: 4, opacity: 0.6 }} />
-
                             <Box sx={{
                                 "& p": { lineHeight: 1.8, mb: 2.5, fontSize: "1.05rem", color: "text.primary" },
                                 "& h1, & h2, & h3": { mb: 2, mt: 4, fontWeight: 700 },
@@ -460,10 +564,7 @@ export default function Library() {
                             }} className={styles.markdown}>
                                 <ReactMarkdown
                                     remarkPlugins={[remarkBreaks]}
-                                    components={{
-                                        // This replaces the <br> tag with a styled <span>
-                                        br: () => <span style={{ display: 'block', marginBottom: '1.2rem', content: '""' }} />
-                                    }}
+                                    components={markdownComponents}
                                 >
                                     {content}
                                 </ReactMarkdown>

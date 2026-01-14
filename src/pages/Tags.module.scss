@@ -1,8 +1,25 @@
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--background);
+}
+
+.content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
 .root {
     height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    flex: 1;
 }
 
 .list {
