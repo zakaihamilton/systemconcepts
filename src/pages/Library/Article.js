@@ -81,7 +81,6 @@ export default function Article({
     handleScroll,
     contentRef,
     handleDrawerToggle,
-    showLibrarySideBar
 }) {
     const [matchIndex, setMatchIndex] = useState(0);
     const [totalMatches, setTotalMatches] = useState(0);
@@ -280,7 +279,7 @@ export default function Article({
             className={styles.root}
             minWidth={0}
             sx={{
-                ml: { sm: showLibrarySideBar ? 2 : 0 }
+                ml: { sm: 2 }
             }}
         >
             <Box className={clsx(styles.stickyHeader, isHeaderShrunk && styles.shrunk)}>
