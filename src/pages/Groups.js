@@ -13,7 +13,7 @@ import { formatDuration, abbreviateSize } from "@util/string";
 import UpdateIcon from "@mui/icons-material/Update";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { useStyles } from "@util/styles";
+import { useStyles, useDeviceType } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
@@ -27,6 +27,7 @@ registerToolbar("Groups");
 export default function Groups() {
     const online = useOnline();
     const translations = useTranslations();
+    const isMobile = useDeviceType() !== "desktop";
     const { counter, showDisabled } = GroupsStore.useState();
     const [sessions, loading, groups, setGroups] = useSessions([counter], { filterSessions: false });
     const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
@@ -298,7 +299,7 @@ export default function Groups() {
                 }
             }
         },
-        {
+        !isMobile && {
             id: "storageMode",
             title: translations.STORAGE,
             sortable: "storageMode",
@@ -308,7 +309,7 @@ export default function Groups() {
                 }
             }
         },
-        {
+        !isMobile && {
             id: "storageSize",
             title: translations.SIZE,
             sortable: "storageSizeBytes",

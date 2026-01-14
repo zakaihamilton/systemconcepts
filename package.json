@@ -61,5 +61,8 @@
     "globals": "^16.5.0",
     "typescript": "^5.9.3",
     "yarn-upgrade-all": "^0.7.4"
+  },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "^16.1.1"
   }
 }
