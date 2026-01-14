@@ -5,6 +5,7 @@ import { addSyncLog } from "../logs";
 
 /**
  * Step 1: Read the listing of the sync folder (ignoring the files.json)
+ * @param {string} localPath - The local path to sync
  */
 export async function getLocalFiles(localPath = LOCAL_SYNC_PATH) {
     const start = performance.now();

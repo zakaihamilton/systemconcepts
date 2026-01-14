@@ -1,8 +1,16 @@
+.root {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    background-color: var(--background-paper);
+    position: relative;
+    padding: 0.5rem;
+}
+
 /* Use :global to target the tags inside your hashed class */
 .markdown :global(p) {
-    line-height: 1.8;
     font-size: 1.05rem;
-    margin-bottom: 2.5rem;
+    line-height: 1;
 }
 
 .markdown :global(br) {

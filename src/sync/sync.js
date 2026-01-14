@@ -27,6 +27,9 @@ const SYNC_INTERVAL = 60; // seconds
 
 /**
  * Execute a single sync pipeline for a given path pair
+ * @param {string} localPath - Local path to sync
+ * @param {string} remotePath - Remote path to sync to
+ * @param {string} label - Label for logging
  */
 async function executeSyncPipeline(localPath, remotePath, label) {
     const start = performance.now();

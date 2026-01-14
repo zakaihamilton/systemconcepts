@@ -41,7 +41,7 @@ export function useSearch(name, updateCallback) {
             s.search[effectiveName] = value;
         });
         effectiveUpdateCallback && effectiveUpdateCallback(value);
-    }, 500, [value]);
+    }, 1000, [value]);
 
     // Update expanded class via DOM to avoid recreating the element
     useEffect(() => {
