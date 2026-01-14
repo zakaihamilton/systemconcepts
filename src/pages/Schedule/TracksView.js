@@ -39,6 +39,9 @@ export default function TracksView({ sessions = [], store, translations, playing
                 return;
             }
             const [year, month] = parts;
+            if (isNaN(parseInt(year)) || isNaN(parseInt(month))) {
+                return;
+            }
             const yearMonth = `${year}-${month}`;
             if (!groups[yearMonth]) {
                 groups[yearMonth] = [];
