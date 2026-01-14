@@ -19,6 +19,7 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import TreeItem from "./Library/TreeItem";
 import { setPath, usePathItems } from "@util/pages";
 import { MainStore } from "@components/Main";
+import { SyncActiveStore } from "@sync/syncState";
 import { LibraryStore } from "./Library/Store";
 import { LibraryIcons, LibraryTagKeys } from "./Library/Icons";
 import { useDeviceType } from "@util/styles";
@@ -66,78 +67,89 @@ export default function Library() {
     }, [tags, pathItems]);
 
     const [customOrder, setCustomOrder] = useState({});
+    const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
 
-    useEffect(() => {
-        async function loadTags() {
-            try {
-                const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
-                if (await storage.exists(tagsPath)) {
-                    const content = await storage.readFile(tagsPath);
-                    const data = JSON.parse(content);
-                    console.log("Loaded tags:", data.length);
-                    setTags(data);
-                    LibraryStore.update(s => {
-                        s.tags = data;
-                    });
-                } else {
-                    console.warn("Library tags not found at", tagsPath);
-                }
-            } catch (err) {
-                console.error("Failed to load library tags:", err);
+    const loadTags = useCallback(async () => {
+        try {
+            const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
+            if (await storage.exists(tagsPath)) {
+                const content = await storage.readFile(tagsPath);
+                const data = JSON.parse(content);
+                console.log("Loaded tags:", data.length);
+                setTags(data);
+                LibraryStore.update(s => {
+                    s.tags = data;
+                });
+            } else {
+                console.warn("Library tags not found at", tagsPath);
             }
+        } catch (err) {
+            console.error("Failed to load library tags:", err);
         }
+    }, []);
 
-        async function loadCustomOrder() {
-            try {
-                const orderPath = makePath(LIBRARY_LOCAL_PATH, "library-order.json");
-                if (await storage.exists(orderPath)) {
-                    const content = await storage.readFile(orderPath);
-                    const data = JSON.parse(content);
-                    console.log("Loaded custom order:", Object.keys(data).length, "items");
-                    setCustomOrder(data);
-                }
-            } catch (err) {
-                console.error("Failed to load library order:", err);
+    const loadCustomOrder = useCallback(async () => {
+        try {
+            const orderPath = makePath(LIBRARY_LOCAL_PATH, "library-order.json");
+            if (await storage.exists(orderPath)) {
+                const content = await storage.readFile(orderPath);
+                const data = JSON.parse(content);
+                console.log("Loaded custom order:", Object.keys(data).length, "items");
+                setCustomOrder(data);
             }
+        } catch (err) {
+            console.error("Failed to load library order:", err);
         }
-
-        loadTags();
-        loadCustomOrder();
     }, []);
 
     useEffect(() => {
-        async function loadContent() {
-            if (!selectedTag) {
-                setContent(null);
-                return;
-            }
-            try {
-                const filePath = makePath(LIBRARY_LOCAL_PATH, selectedTag.path);
-                if (await storage.exists(filePath)) {
-                    const fileContent = await storage.readFile(filePath);
-                    const data = JSON.parse(fileContent);
-                    let item = null;
-                    if (Array.isArray(data)) {
-                        item = data.find(i => i._id === selectedTag._id);
-                    } else if (data._id === selectedTag._id) {
-                        item = data;
-                    }
+        loadTags();
+        loadCustomOrder();
+    }, [loadTags, loadCustomOrder]);
 
-                    if (item) {
-                        setContent(item.text);
-                    } else {
-                        setContent("Content not found in file.");
-                    }
-                } else {
-                    setContent("File not found.");
-                }
-            } catch (err) {
-                console.error("Failed to load content:", err);
-                setContent("Error loading content.");
-            }
+    const loadContent = useCallback(async () => {
+        if (!selectedTag) {
+            setContent(null);
+            return;
         }
-        loadContent();
+        try {
+            const filePath = makePath(LIBRARY_LOCAL_PATH, selectedTag.path);
+            if (await storage.exists(filePath)) {
+                const fileContent = await storage.readFile(filePath);
+                const data = JSON.parse(fileContent);
+                let item = null;
+                if (Array.isArray(data)) {
+                    item = data.find(i => i._id === selectedTag._id);
+                } else if (data._id === selectedTag._id) {
+                    item = data;
+                }
+
+                if (item) {
+                    setContent(item.text);
+                } else {
+                    setContent("Content not found in file.");
+                }
+            } else {
+                setContent("File not found.");
+            }
+        } catch (err) {
+            console.error("Failed to load content:", err);
+            setContent("Error loading content.");
+        }
     }, [selectedTag]);
+
+    useEffect(() => {
+        loadContent();
+    }, [loadContent]);
+
+    useEffect(() => {
+        if (libraryUpdateCounter > 0) {
+            console.log("Library update detected, reloading...");
+            loadTags();
+            loadCustomOrder();
+            loadContent();
+        }
+    }, [libraryUpdateCounter, loadTags, loadCustomOrder, loadContent]);
 
     const { showLibrarySideBar } = MainStore.useState();
     const isMobile = useDeviceType() !== "desktop";
