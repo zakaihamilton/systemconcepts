@@ -48,7 +48,8 @@ export default function Library() {
     const contentRef = React.useRef(null);
     const handleScroll = useCallback((e) => {
         const scrollTop = e.target.scrollTop;
-        const shouldShrink = scrollTop > 100;
+        // Use hysteresis: shrink at 150px, but don't expand until below 100px
+        const shouldShrink = isHeaderShrunk ? scrollTop > 100 : scrollTop > 150;
         if (shouldShrink !== isHeaderShrunk) {
             setIsHeaderShrunk(shouldShrink);
         }

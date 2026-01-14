@@ -130,6 +130,19 @@ export default function Article({
 }) {
     const [matchIndex, setMatchIndex] = useState(0);
     const [totalMatches, setTotalMatches] = useState(0);
+    const [showPlaceholder, setShowPlaceholder] = useState(false);
+
+    // Delay showing the placeholder to avoid flash during loading
+    useEffect(() => {
+        if (!content && !selectedTag) {
+            const timer = setTimeout(() => {
+                setShowPlaceholder(true);
+            }, 300);
+            return () => clearTimeout(timer);
+        } else {
+            setShowPlaceholder(false);
+        }
+    }, [content, selectedTag]);
 
     const formatArticleWithTags = useCallback((tag, text) => {
         if (!tag) return text;
@@ -310,13 +323,17 @@ export default function Article({
         depends: [toolbarItems, content]
     });
 
-    if (!content) {
+    if (!content && showPlaceholder) {
         return (
             <Box className={styles.placeholder}>
                 <LibraryBooksIcon sx={{ fontSize: 64, opacity: 0.5 }} />
                 <Typography>{translations.SELECT_ITEM}</Typography>
             </Box>
         );
+    }
+
+    if (!content) {
+        return null;
     }
 
     const title = selectedTag?.article || selectedTag?.chapter || selectedTag?.section;
@@ -361,27 +378,35 @@ export default function Article({
                                 {title}
                             </Typography>
                         </Box>
-                        {!isHeaderShrunk && (
-                            <Box className={styles.metadataRow}>
-                                {LibraryTagKeys.map(key => {
-                                    if (!selectedTag?.[key] || key === "article" || key === "number") return null;
-                                    const value = selectedTag[key];
-                                    if (title === value) return null;
-                                    const Icon = LibraryIcons[key];
-                                    return (
-                                        <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
-                                            <Paper
-                                                elevation={0}
-                                                className={styles.metadataTag}
-                                            >
-                                                {Icon && <Icon sx={{ fontSize: "1rem" }} />}
-                                                <Typography variant="caption">{value}</Typography>
-                                            </Paper>
-                                        </Tooltip>
-                                    );
-                                })}
-                            </Box>
-                        )}
+                        <Box
+                            className={clsx(styles.metadataRow, isHeaderShrunk && styles.shrunk)}
+                            sx={{
+                                opacity: isHeaderShrunk ? 0 : 1,
+                                maxHeight: isHeaderShrunk ? 0 : '500px',
+                                marginTop: isHeaderShrunk ? 0 : '8px',
+                                visibility: isHeaderShrunk ? 'hidden' : 'visible',
+                                pointerEvents: isHeaderShrunk ? 'none' : 'auto',
+                                transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
+                        >
+                            {LibraryTagKeys.map(key => {
+                                if (!selectedTag?.[key] || key === "article" || key === "number") return null;
+                                const value = selectedTag[key];
+                                if (title === value) return null;
+                                const Icon = LibraryIcons[key];
+                                return (
+                                    <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
+                                        <Paper
+                                            elevation={0}
+                                            className={styles.metadataTag}
+                                        >
+                                            {Icon && <Icon sx={{ fontSize: "1rem" }} />}
+                                            <Typography variant="caption">{value}</Typography>
+                                        </Paper>
+                                    </Tooltip>
+                                );
+                            })}
+                        </Box>
                     </Box>
                 </Box>
             </Box>

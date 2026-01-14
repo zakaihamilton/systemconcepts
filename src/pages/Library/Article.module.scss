@@ -22,18 +22,18 @@
     z-index: 10;
     background-color: var(--background-paper);
     border-bottom: 1px solid var(--divider);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
+    will-change: padding, box-shadow;
+}
 
-    &.shrunk {
-        padding: 1rem;
-        background-color: var(--background-paper);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border-bottom: 1px solid var(--divider);
-    }
+.stickyHeader.shrunk {
+    padding: 0.25rem 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .headerInfo {
@@ -62,13 +62,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: all 0.3s ease;
+    transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--text-primary);
     letter-spacing: -0.02em;
     margin: 0;
     font-size: 2.125rem;
     min-width: 0;
     flex: 1;
+    will-change: font-size;
 
     &.shrunk {
         font-size: 1.25rem;
@@ -81,9 +82,10 @@
     color: var(--primary-contrast-text);
     border-radius: 6px;
     font-weight: 800;
-    transition: all 0.3s ease;
+    transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 0.875rem;
+    will-change: font-size;
 
     &.shrunk {
         font-size: 0.75rem;
@@ -95,7 +97,11 @@
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 8px;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    overflow: hidden;
 }
 
 .metadataTag {

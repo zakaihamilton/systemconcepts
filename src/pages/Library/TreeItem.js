@@ -16,6 +16,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
     const isSelected = !!selectedId && node._id === selectedId;
     const [isTruncated, setIsTruncated] = useState(false);
     const textRef = useRef(null);
+    const itemRef = useRef(null);
 
     const checkTruncation = useCallback(() => {
         if (textRef.current) {
@@ -35,6 +36,12 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
         }
     }, [selectedPath, node.id]);
 
+    useEffect(() => {
+        if (isSelected && itemRef.current) {
+            itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [isSelected]);
+
     const handleToggle = useCallback((e) => {
         e.stopPropagation();
         setOpen(prev => !prev);
@@ -53,6 +60,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
     return (
         <Box sx={{ display: "flex", flexDirection: "column" }}>
             <ListItemButton
+                ref={itemRef}
                 onClick={handleSelect}
                 selected={isSelected}
                 className={clsx(styles.itemButton, isSelected && styles.selected)}
