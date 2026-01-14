@@ -212,13 +212,13 @@ export default function Library() {
             'sixth': 6, 'seventh': 7, 'eighth': 8, 'ninth': 9, 'tenth': 10
         };
 
-        const getNumericPrefix = (name) => {
+        const extractNumber = (name) => {
             if (!name) return null;
             const lowerName = name.toLowerCase();
-            // Check if name starts with a number word
-            for (const [word, num] of Object.entries(numberWords)) {
-                if (lowerName.startsWith(word)) {
-                    return num;
+            const words = lowerName.split(/[^a-z]+/);
+            for (const word of words) {
+                if (numberWords[word] !== undefined) {
+                    return numberWords[word];
                 }
             }
             return null;
@@ -269,8 +269,8 @@ export default function Library() {
                 if (customB !== null) return 1;
 
                 // Check for number word prefixes
-                const numA = getNumericPrefix(nameA);
-                const numB = getNumericPrefix(nameB);
+                const numA = extractNumber(nameA);
+                const numB = extractNumber(nameB);
 
                 // If both have number word prefixes, sort by number
                 if (numA !== null && numB !== null) {
