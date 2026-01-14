@@ -17,6 +17,7 @@
     flex: 1;
     flex-direction: column;
     transform: translateZ(0);
+    min-width: 0;
 }
 
 // Only constrain width on large screens (4K, ultra-wide, etc.)
