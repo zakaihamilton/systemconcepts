@@ -27,8 +27,12 @@ const SYNC_INTERVAL = 60; // seconds
 
 /**
  * Execute a single sync pipeline for a given path pair
+ * @param {string} localPath - Local path to sync
+ * @param {string} remotePath - Remote path to sync to
+ * @param {string} label - Label for logging
+ * @param {string[]} excludePaths - Paths to exclude from sync
  */
-async function executeSyncPipeline(localPath, remotePath, label) {
+async function executeSyncPipeline(localPath, remotePath, label, excludePaths = []) {
     const start = performance.now();
     addSyncLog(`Starting ${label} sync...`, "info");
     const progress = new SyncProgressTracker();
@@ -39,7 +43,7 @@ async function executeSyncPipeline(localPath, remotePath, label) {
 
     // Step 1
     progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
-    const localFiles = await getLocalFiles(localPath);
+    const localFiles = await getLocalFiles(localPath, excludePaths);
     progress.completeStep('getLocalFiles');
 
     // Step 2
@@ -50,6 +54,22 @@ async function executeSyncPipeline(localPath, remotePath, label) {
     // Step 3
     progress.updateProgress('syncManifest', { processed: 0, total: 1 });
     let remoteManifest = await syncManifest(remotePath);
+
+    // Filter remote manifest to exclude paths
+    if (excludePaths.length > 0) {
+        const originalCount = remoteManifest.length;
+        remoteManifest = remoteManifest.filter(file => {
+            for (const excludePath of excludePaths) {
+                if (file.path.startsWith(excludePath)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        if (originalCount !== remoteManifest.length) {
+            addSyncLog(`Filtered ${originalCount - remoteManifest.length} excluded file(s) from remote manifest`, "info");
+        }
+    }
     progress.completeStep('syncManifest');
 
     // Step 4
@@ -160,8 +180,8 @@ export async function performSync() {
         addSyncLog("Starting sync process...", "info");
         const startTime = performance.now();
 
-        // 1. Main Sync
-        const mainChanges = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main");
+        // 1. Main Sync (exclude library folder since it has its own sync)
+        const mainChanges = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main", ["/library"]);
 
         // 2. Library Sync
         const libraryChanges = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library");
