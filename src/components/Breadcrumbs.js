@@ -116,7 +116,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
     return (
         <>
             <Tooltip arrow title={title}>
-                <span>
+                <span className={styles.itemWrapper}>
                     <Link
                         className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
                         color="inherit"

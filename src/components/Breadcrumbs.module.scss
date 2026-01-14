@@ -36,6 +36,12 @@
     padding: 0 0.5rem;
 }
 
+.itemWrapper {
+    min-width: 0;
+    overflow: hidden;
+    display: inline-flex;
+}
+
 .item {
     display: flex;
     align-items: center;
@@ -51,7 +57,7 @@
     cursor: pointer;
     opacity: 0.75;
     min-width: 0;
-    max-width: 250px;
+    max-width: 600px;
 
     &:hover {
         background-color: var(--hover-background);
@@ -88,7 +94,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 100%;
+    max-width: 100%;
 }
 
 .column {
