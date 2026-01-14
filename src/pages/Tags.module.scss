@@ -30,6 +30,10 @@
     grid-template-columns: 10% 10% 20% 60%;
 }
 
+.libraryList {
+    grid-template-columns: 10em 1fr 6em 8em;
+}
+
 .tags {
     display: flex;
     flex-wrap: wrap;

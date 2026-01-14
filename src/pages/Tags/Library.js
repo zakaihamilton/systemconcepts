@@ -25,7 +25,7 @@ export const LibraryTagsStore = new Store({
     order: "asc",
     offset: 0,
     orderBy: "count",
-    viewMode: "table",
+    viewMode: "list",
     search: ""
 });
 
@@ -310,6 +310,9 @@ export default function LibraryTags() {
                 columns={columns}
                 data={tableData}
                 viewModes={{
+                    list: {
+                        className: styles.libraryList
+                    },
                     table: null
                 }}
             />
