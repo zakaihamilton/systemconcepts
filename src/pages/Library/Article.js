@@ -370,6 +370,28 @@ function Article({
                 ml: { sm: 2 }
             }}
         >
+            <Fade in={scrollInfo.visible} timeout={1000}>
+                <Paper
+                    elevation={4}
+                    sx={{
+                        position: 'fixed',
+                        top: 24,
+                        right: 24,
+                        zIndex: 1400,
+                        px: 2,
+                        py: 1,
+                        borderRadius: 4,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        color: 'white',
+                        backdropFilter: 'blur(4px)',
+                        pointerEvents: 'none'
+                    }}
+                >
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                        Page {scrollInfo.page} / {scrollInfo.total}
+                    </Typography>
+                </Paper>
+            </Fade>
             <Box className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}>
                 <Box className={styles.headerInfo}>
                     <IconButton
@@ -469,29 +491,6 @@ function Article({
                     }}
                 />
             ))}
-            <Fade in={scrollInfo.visible}>
-                <Paper
-                    elevation={4}
-                    sx={{
-                        position: 'fixed',
-                        bottom: 24,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 1400,
-                        px: 2,
-                        py: 1,
-                        borderRadius: 4,
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        color: 'white',
-                        backdropFilter: 'blur(4px)',
-                        pointerEvents: 'none'
-                    }}
-                >
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                        Page {scrollInfo.page} / {scrollInfo.total}
-                    </Typography>
-                </Paper>
-            </Fade>
         </Box>
     );
 }
