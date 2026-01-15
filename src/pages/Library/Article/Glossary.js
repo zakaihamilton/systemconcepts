@@ -14,10 +14,10 @@ export const glossary = {
         "en": "Skull Face",
         "trans": "Partzuf Galgalta"
     },
-    "salik bere ’ uta": {
+    "salik bere’uta": {
         "he": "סליק ברעותא",
         "en": "Ascended in desire",
-        "trans": "Salik BeRe ’ uta"
+        "trans": "Salik BeRe’uta"
     },
     "petillah": {
         "he": "פתילה",
@@ -249,10 +249,10 @@ export const glossary = {
         "en": "The Light of Life",
         "trans": "Ohr HaChaim"
     },
-    " mala ' achim": {
+    " mala'achim": {
         "he": "מלאכים",
         "en": "Angels",
-        "trans": " Mala ' achim"
+        "trans": " Mala'achim"
     },
     "hevels": {
         "he": "הבלים",
@@ -284,10 +284,10 @@ export const glossary = {
         "en": "Emanator",
         "trans": "Maatzil"
     },
-    "ne ’ etzal": {
+    "ne’etzal": {
         "he": "נאצל",
         "en": "Emanated",
-        "trans": "Ne ’ etzal"
+        "trans": "Ne’etzal"
     },
     "rosh": {
         "he": "ראש",
@@ -354,10 +354,10 @@ export const glossary = {
         "en": "Face to Face",
         "trans": "Panim - beh - Panim"
     },
-    "malkhut d ’ kedushah": {
+    "malkhut d’kedushah": {
         "he": "מלכות דקדושה",
         "en": "Kingdom of Holiness",
-        "trans": "Malkhut d ’ Kedushah"
+        "trans": "Malkhut d’Kedushah"
     },
     "ohr elyon": {
         "he": "אור עליון",
@@ -1399,10 +1399,10 @@ export const glossary = {
         "en": "End",
         "trans": "Sium"
     },
-    "revi ’ it dam": {
+    "revi’it dam": {
         "he": "רביעית דם",
         "en": "Quarter of Blood",
-        "trans": "Revi ’ it Dam"
+        "trans": "Revi’it Dam"
     },
     "dam": {
         "he": "דם",
@@ -1414,30 +1414,30 @@ export const glossary = {
         "en": "Nails",
         "trans": "Tzipornaim"
     },
-    "se ’ arot": {
+    "se’arot": {
         "he": "שערות",
         "en": "Hairs",
-        "trans": "Se ’ arot"
+        "trans": "Se’arot"
     },
-    "se ’ arot rosh": {
+    "se’arot rosh": {
         "he": "שערות ראש",
         "en": "Hairs of the Head",
-        "trans": "Se ’ arot Rosh"
+        "trans": "Se’arot Rosh"
     },
-    "se ’ arot dikna": {
+    "se’arot dikna": {
         "he": "שערות דיקנא",
         "en": "Hairs of the Head",
-        "trans": "Se ’ arot Dikna"
+        "trans": "Se’arot Dikna"
     },
     "ohalim": {
         "he": "אוהלים",
         "en": "Tents",
         "trans": "Ohalim"
     },
-    "ne ’ etzalim": {
+    "ne’etzalim": {
         "he": "נאצלים",
         "en": "Emanated",
-        "trans": "Ne ’ etzalim"
+        "trans": "Ne’etzalim"
     },
     "atik": {
         "he": "עתיק",
@@ -1559,10 +1559,10 @@ export const glossary = {
         "en": "Coarsening",
         "trans": "Hitabut"
     },
-    "hit ’ abbut": {
+    "hit’abbut": {
         "he": "התעבות",
         "en": "Coarsening",
-        "trans": "Hit ’ abbut"
+        "trans": "Hit’abbut"
     },
     "harchaka": {
         "he": "הרחקה",
@@ -1574,10 +1574,10 @@ export const glossary = {
         "en": "Puncture",
         "trans": "Nekev"
     },
-    "he ’ elem": {
+    "he’elem": {
         "he": "העלם",
         "en": "Concealment",
-        "trans": "He ’ elem"
+        "trans": "He’elem"
     },
     "ha": {
         "he": "ה-",
@@ -1654,20 +1654,20 @@ export const glossary = {
         "en": "Judgements",
         "trans": "Dinim"
     },
-    "he ’ ara": {
+    "he’ara": {
         "he": "הארה",
         "en": "Illumination",
-        "trans": "He ’ ara"
+        "trans": "He’ara"
     },
-    "he ' arah": {
+    "he'arah": {
         "he": "הארה",
         "en": "Illumination",
-        "trans": "He ' arah"
+        "trans": "He'arah"
     },
-    "he ’ arat": {
+    "he’arat": {
         "he": "הארת",
         "en": "Illumination of",
-        "trans": "He ’ arat"
+        "trans": "He’arat"
     },
     "hitkalelut": {
         "he": "התכללות",
@@ -1689,10 +1689,10 @@ export const glossary = {
         "en": "Judgement",
         "trans": "Din"
     },
-    "he ’ arah": {
+    "he’arah": {
         "he": "הארה",
         "en": "Illumination",
-        "trans": "He ’ arah"
+        "trans": "He’arah"
     },
     "shoreshim": {
         "he": "שורשים",
@@ -1814,10 +1814,10 @@ export const glossary = {
         "en": "Illuminations",
         "trans": "He'arot"
     },
-    "he ’ arot": {
+    "he’arot": {
         "he": "הארות",
         "en": "Illuminations",
-        "trans": "He ’ arot"
+        "trans": "He’arot"
     },
     "dechura": {
         "he": "דכורא",
@@ -2769,10 +2769,10 @@ export const glossary = {
         "en": "",
         "trans": "HS"
     },
-    "hochma stima ' a": {
+    "hochma stima'a": {
         "he": "חכמה סתימאה",
         "en": "Blocked Wisdom",
-        "trans": "Hochma Stima ' a"
+        "trans": "Hochma Stima'a"
     },
     "hochma stimaa": {
         "he": "חכמה סתימאה",
@@ -2999,10 +2999,10 @@ export const glossary = {
         "en": "Speech",
         "trans": "Dibur"
     },
-    "beki ’ a": {
+    "beki’a": {
         "he": "בקיעה",
         "en": "Breaching",
-        "trans": "Beki ’ a"
+        "trans": "Beki’a"
     },
     "hevel": {
         "he": "הבל",
@@ -3374,10 +3374,10 @@ export const glossary = {
         "en": "Ledges of the Field",
         "trans": "Adnei ha Sadeh"
     },
-    "revi ’ it": {
+    "revi’it": {
         "he": "רביעית",
         "en": "Quarter",
-        "trans": "Revi ’ it"
+        "trans": "Revi’it"
     },
     "beresheet": {
         "he": "בראשית",
@@ -3394,10 +3394,10 @@ export const glossary = {
         "en": "Genesis Rabba",
         "trans": "Beresheet Rabba"
     },
-    "tuma ’ a": {
+    "tuma’a": {
         "he": "טומאה",
         "en": "Impurity",
-        "trans": "Tuma ’ a"
+        "trans": "Tuma’a"
     },
     "ms": {
         "he": "",
@@ -3504,15 +3504,15 @@ export const glossary = {
         "en": "Key",
         "trans": "Miftacha"
     },
-    "man  ’  ula": {
+    "man’ula": {
         "he": "מנעולא",
         "en": "Lock",
-        "trans": "Man  ’  ula"
+        "trans": "Man’ula"
     },
-    "man ’ ula": {
+    "man’ula": {
         "he": "מנעולא",
         "en": "Lock",
-        "trans": "Man ’ ula"
+        "trans": "Man’ula"
     },
     "manula": {
         "he": "מנעולא",
@@ -3579,10 +3579,10 @@ export const glossary = {
         "en": "",
         "trans": "have"
     },
-    " ’ s": {
+    "’s": {
         "he": "",
         "en": "",
-        "trans": " ’ s"
+        "trans": "’s"
     },
     "lo": {
         "he": "לא",
@@ -4416,10 +4416,10 @@ export const glossary = {
         "en": "Act of Creation",
         "trans": "Maase Beresheet"
     },
-    "haka ’ ot": {
+    "haka’ot": {
         "he": "הכאות",
         "en": "Strikings",
-        "trans": "Haka ’ ot"
+        "trans": "Haka’ot"
     },
     "dinim de nukva": {
         "he": "דינים דנוקבא",
@@ -4596,15 +4596,15 @@ export const glossary = {
         "en": "Missing",
         "trans": "Nifkad"
     },
-    "ne ’ esham": {
+    "ne’esham": {
         "he": "נאשם",
         "en": "Accused",
-        "trans": "Ne ’ esham"
+        "trans": "Ne’esham"
     },
-    "ne ’ eshama": {
+    "ne’eshama": {
         "he": "נאשמה",
         "en": "Accused",
-        "trans": "Ne ’ eshama"
+        "trans": "Ne’eshama"
     },
     "samin": {
         "he": "סמין",
@@ -4961,10 +4961,10 @@ export const glossary = {
         "en": "Side",
         "trans": "Ayver"
     },
-    "ashrei t ’ mimei darekh": {
+    "ashrei t’mimei darekh": {
         "he": "אשרי תמימי דרך",
         "en": "Happy are those whose way is perfect",
-        "trans": "Ashrei T ’ mimei Darekh"
+        "trans": "Ashrei T’mimei Darekh"
     },
     "chein": {
         "he": "חן",
@@ -5016,10 +5016,10 @@ export const glossary = {
         "en": "honorable",
         "trans": "SePhIN"
     },
-    "b ’ nachat": {
+    "b’nachat": {
         "he": "בנחת",
         "en": "gently",
-        "trans": "b ’ nachat"
+        "trans": "b’nachat"
     },
     "yaalat chein": {
         "he": "יעלת חן",
@@ -5606,10 +5606,10 @@ export const glossary = {
         "en": "Exile",
         "trans": "Galut"
     },
-    "ge ’ ula": {
+    "ge’ula": {
         "he": "גאולה",
         "en": "Redemption",
-        "trans": "Ge ’ ula"
+        "trans": "Ge’ula"
     },
     "geula": {
         "he": "גאולה",
@@ -5666,10 +5666,10 @@ export const glossary = {
         "en": "Pit",
         "trans": "Bor"
     },
-    "be ’ er": {
+    "be’er": {
         "he": "באר",
         "en": "Well",
-        "trans": "Be ’ er"
+        "trans": "Be’er"
     },
     "yovel": {
         "he": "יובל",
@@ -5811,10 +5811,10 @@ export const glossary = {
         "en": "Mating of AB SAG",
         "trans": "Zivug AB SAG"
     },
-    "he ’ arat ab sag": {
+    "he’arat ab sag": {
         "he": "הארת ע״ב ס״ג",
         "en": "illumination of AB SAG",
-        "trans": "He ’ arat AB SAG"
+        "trans": "He’arat AB SAG"
     },
     "bat": {
         "he": "בת",
@@ -5836,10 +5836,10 @@ export const glossary = {
         "en": "Mercy",
         "trans": "Hassidim"
     },
-    "man ’ ul": {
+    "man’ul": {
         "he": "מנעול",
         "en": "Lock",
-        "trans": "Man ’ ul"
+        "trans": "Man’ul"
     },
     "naalayim": {
         "he": "נעלים",
@@ -5926,10 +5926,10 @@ export const glossary = {
         "en": "Return",
         "trans": "Teshuv"
     },
-    "d ’ varim": {
+    "d’varim": {
         "he": "דברים",
         "en": "Words",
-        "trans": "D ’ varim"
+        "trans": "D’varim"
     },
     "dabor": {
         "he": "דבור",
@@ -6001,10 +6001,10 @@ export const glossary = {
         "en": "Goats",
         "trans": "Izim"
     },
-    "me ’ ah": {
+    "me’ah": {
         "he": "מאה",
         "en": "one hundred",
-        "trans": "Me ’ ah"
+        "trans": "Me’ah"
     },
     "klot": {
         "he": "כלות",

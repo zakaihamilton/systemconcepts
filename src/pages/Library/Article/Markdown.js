@@ -137,7 +137,7 @@ export default function Markdown({ children, search }) {
                 parts.push(children.slice(currentIndex, matchIndexPos));
             }
             parts.push(
-                <span key={matchIndexPos} className={styles['search-highlight']}>
+                <span key={matchIndexPos} className={`${styles['search-highlight']} search-highlight`}>
                     {children.slice(matchIndexPos, matchIndexPos + search.length)}
                 </span>
             );
@@ -183,6 +183,17 @@ export default function Markdown({ children, search }) {
                 }
 
                 const glossaryEntry = glossary[term.toLowerCase()];
+                // Skip lowercase 'or'
+                if (term === 'or') {
+                    continue;
+                }
+                // Skip 'Or' at the start of a sentence (sentence terminator + whitespace before it, or start of block)
+                if (term === 'Or') {
+                    const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(children.slice(0, start));
+                    if (isStartOfSentence) {
+                        continue;
+                    }
+                }
                 parts.push(
                     <Term
                         key={`gloss-${start}`}
