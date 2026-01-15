@@ -1,7 +1,70 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState, useRef } from "react";
 import Box from "@mui/material/Box";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import { glossary } from './Glossary';
+import styles from './Markdown.module.scss'; // Import as Module
+
+const Term = ({ term, entry }) => {
+    const [hover, setHover] = useState(false);
+    const [placement, setPlacement] = useState('top');
+    const containerRef = useRef(null);
+
+    const handleMouseEnter = () => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            // If the element is within 250px of the top of the viewport, flip to bottom
+            const spaceTop = rect.top;
+            if (spaceTop < 250) {
+                setPlacement('bottom');
+            } else {
+                setPlacement('top');
+            }
+        }
+        setHover(true);
+    };
+
+    return (
+        <span
+            className={styles['glossary-term-container']}
+            ref={containerRef}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={() => setHover(false)}
+        >
+            {/* The Transliteration (Top Annotation) */}
+            <span className={styles['glossary-annotation']}>{entry.trans}</span>
+
+            {/* The Main Text (English Translation) */}
+            <span className={styles['glossary-main-text']}>{entry.en}</span>
+
+            {/* The Tooltip */}
+            {hover && (
+                <>
+                    {/* Bridge ensures connection between word and tooltip */}
+                    <div className={`${styles['glossary-bridge']} ${styles[placement]}`} />
+
+                    <div className={`${styles['glossary-tooltip']} ${styles[placement]}`}>
+                        {/* English Section */}
+                        <div className={styles['tt-label']}>Translation</div>
+                        <div className={styles['tt-value']}>{entry.en}</div>
+
+                        <hr />
+
+                        {/* Transliteration Section */}
+                        <div className={styles['tt-label']}>Transliteration</div>
+                        <div className={styles['tt-value']}>{entry.trans}</div>
+
+                        <hr />
+
+                        {/* Hebrew Section */}
+                        <div className={styles['tt-label']}>Hebrew</div>
+                        <div className={styles['tt-hebrew']}>{entry.he}</div>
+                    </div>
+                </>
+            )}
+        </span>
+    );
+};
 
 const rehypeArticleEnrichment = () => {
     return (tree) => {
@@ -54,18 +117,9 @@ const rehypeArticleEnrichment = () => {
 export default function Markdown({ children, search }) {
     const processedChildren = useMemo(() => {
         if (typeof children !== 'string') return children;
-
-        return children
-            // REGEX EXPLANATION:
-            // ^\s* : Start of line + optional spaces
-            // (\d+)      : Capture the number (Group 1)
-            // ([\.\)])   : Capture either a dot OR a parenthesis (Group 2)
-            // \s* : Optional trailing spaces
-            .replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
-                // If it was "17)", it becomes "**17\)** "
-                // If it was "1.", it becomes "**1\.** "
-                return `**${number}\\${symbol}** `;
-            });
+        return children.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
+            return `**${number}\\${symbol}** `;
+        });
     }, [children]);
 
     const Highlight = useCallback(({ children }) => {
@@ -83,7 +137,7 @@ export default function Markdown({ children, search }) {
                 parts.push(children.slice(currentIndex, matchIndexPos));
             }
             parts.push(
-                <span key={matchIndexPos} className="search-highlight" style={{ backgroundColor: "#ffeb3b", color: "#000" }}>
+                <span key={matchIndexPos} className={styles['search-highlight']}>
                     {children.slice(matchIndexPos, matchIndexPos + search.length)}
                 </span>
             );
@@ -100,27 +154,71 @@ export default function Markdown({ children, search }) {
         if (Array.isArray(children)) {
             return children.map((child, idx) => <TextRenderer key={idx}>{child}</TextRenderer>);
         }
-        if (typeof children === 'string') return <Highlight>{children}</Highlight>;
+
         if (React.isValidElement(children)) {
             return React.cloneElement(children, {
                 children: <TextRenderer>{children.props.children}</TextRenderer>
             });
         }
+
+        if (typeof children === 'string') {
+            const glossaryKeys = Object.keys(glossary);
+            const pattern = new RegExp(`\\b(${glossaryKeys.join('|')})\\b`, 'gi');
+
+            const parts = [];
+            let lastIndex = 0;
+            let match;
+
+            while ((match = pattern.exec(children)) !== null) {
+                const term = match[0];
+                const start = match.index;
+                const end = start + term.length;
+
+                if (start > lastIndex) {
+                    parts.push(
+                        <Highlight key={`text-${start}`}>
+                            {children.slice(lastIndex, start)}
+                        </Highlight>
+                    );
+                }
+
+                const glossaryEntry = glossary[term.toLowerCase()];
+                parts.push(
+                    <Term
+                        key={`gloss-${start}`}
+                        term={term}
+                        entry={glossaryEntry}
+                    />
+                );
+
+                lastIndex = end;
+            }
+
+            if (lastIndex < children.length) {
+                parts.push(
+                    <Highlight key={`text-end`}>
+                        {children.slice(lastIndex)}
+                    </Highlight>
+                );
+            }
+
+            return parts.length > 0 ? parts : <Highlight>{children}</Highlight>;
+        }
+
         return children;
     }, [Highlight]);
 
     const markdownComponents = useMemo(() => {
         return {
-            p: ({ children, ...props }) => {
+            p: ({ children }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
                 return (
-                    <Box sx={{ marginBottom: '16px', lineHeight: 1.7 }}>
+                    <Box sx={{ marginBottom: '24px', lineHeight: 2.2 }}>
                         <TextRenderer>{children}</TextRenderer>
                     </Box>
                 );
             },
-            // We disable standard list rendering for these numbered items to prevent double-indenting
-            li: ({ children }) => <Box sx={{ mb: 1 }}><TextRenderer>{children}</TextRenderer></Box>,
+            li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2 }}><TextRenderer>{children}</TextRenderer></Box>,
             h1: ({ children }) => <Box component="h1" sx={{ mt: 3, mb: 2 }}><TextRenderer>{children}</TextRenderer></Box>,
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
