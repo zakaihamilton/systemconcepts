@@ -8,6 +8,9 @@ import Tooltip from "@mui/material/Tooltip";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
+import CodeIcon from "@mui/icons-material/Code";
+import CodeOffIcon from "@mui/icons-material/CodeOff";
+import ArticleIcon from "@mui/icons-material/Article";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
@@ -83,10 +86,12 @@ export default function Article({
     handleScroll,
     contentRef,
     handleDrawerToggle,
+    openEditContentDialog,
 }) {
     const [matchIndex, setMatchIndex] = useState(0);
     const [totalMatches, setTotalMatches] = useState(0);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
+    const [showMarkdown, setShowMarkdown] = useState(true);
 
     // Delay showing the placeholder to avoid flash during loading
     useEffect(() => {
@@ -259,15 +264,31 @@ export default function Article({
                 id: "export",
                 name: translations.EXPORT_TO_TXT || "Export to .txt",
                 icon: <DownloadIcon />,
-                onClick: handleExport
+                onClick: handleExport,
+                menu: true
+            },
+            {
+                id: "toggleMarkdown",
+                name: showMarkdown ? (translations.VIEW_PLAIN_TEXT || "View Plain Text") : (translations.VIEW_MARKDOWN || "View Markdown"),
+                icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
+                onClick: () => setShowMarkdown(prev => !prev),
+                menu: true
             }
         ];
         if (isAdmin) {
             items.push({
-                id: "edit",
+                id: "editTags",
                 name: translations.EDIT_TAGS || "Edit Tags",
                 icon: <EditIcon />,
-                onClick: openEditDialog
+                onClick: openEditDialog,
+                menu: true
+            });
+            items.push({
+                id: "editArticle",
+                name: translations.EDIT_ARTICLE || "Edit Article",
+                icon: <ArticleIcon />,
+                onClick: openEditContentDialog,
+                menu: true
             });
         }
         if (search && totalMatches > 0) {
@@ -293,7 +314,7 @@ export default function Article({
             });
         }
         return items;
-    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch]);
+    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown]);
 
     useToolbar({
         id: "Article",
@@ -407,13 +428,29 @@ export default function Article({
 
             <Box className={styles.contentScrollArea}>
                 <Box className={styles.contentWrapper}>
-                    <ReactMarkdown
-                        remarkPlugins={[remarkBreaks]}
-                        rehypePlugins={[rehypeArticleEnrichment]}
-                        components={markdownComponents}
-                    >
-                        {content}
-                    </ReactMarkdown>
+                    {showMarkdown ? (
+                        <ReactMarkdown
+                            remarkPlugins={[remarkBreaks]}
+                            rehypePlugins={[rehypeArticleEnrichment]}
+                            components={markdownComponents}
+                        >
+                            {content}
+                        </ReactMarkdown>
+                    ) : (
+                        <Box
+                            component="pre"
+                            sx={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                fontFamily: 'inherit',
+                                fontSize: 'inherit',
+                                lineHeight: 1.6,
+                                margin: 0
+                            }}
+                        >
+                            {content}
+                        </Box>
+                    )}
                 </Box>
             </Box>
         </Box>

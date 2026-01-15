@@ -117,13 +117,17 @@ export default function Toolbar({ className, location, dividerBefore, dividerAft
             {toolbarItems.map((item, idx) => (<Item key={item.id} item={item} idx={idx} count={toolbarItems.length} />))}
             {!!menuItems.length && <>
                 {!!toolbarItems.length && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}
-                <Menu items={menuItems}>
-                    <Tooltip arrow title={translations.MENU}>
-                        <IconButton className={styles.menuButton} size="small" aria-label={translations.MENU}>
-                            <MoreVertIcon />
-                        </IconButton>
-                    </Tooltip>
-                </Menu>
+                {menuItems.length === 1 ? (
+                    <Item key={menuItems[0].id} item={menuItems[0]} idx={0} count={1} />
+                ) : (
+                    <Menu items={menuItems}>
+                        <Tooltip arrow title={translations.MENU}>
+                            <IconButton className={styles.menuButton} size="small" aria-label={translations.MENU}>
+                                <MoreVertIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </Menu>
+                )}
             </>
             }
             {!!dividerAfter && !!(toolbarVisible || menuItems.length) && <Divider classes={{ root: styles.divider }} orientation="vertical" flexItem />}

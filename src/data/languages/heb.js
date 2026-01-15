@@ -1372,6 +1372,18 @@ export default {
         {
             "id": "EDIT_TAGS",
             "value": "עריכת תגיות מאמר"
+        },
+        {
+            "id": "VIEW_PLAIN_TEXT",
+            "value": "הצג טקסט רגיל"
+        },
+        {
+            "id": "VIEW_MARKDOWN",
+            "value": "הצג Markdown"
+        },
+        {
+            "id": "EDIT_ARTICLE",
+            "value": "עריכת מאמר"
         }
     ]
 };

@@ -1384,6 +1384,18 @@ export default {
         {
             "id": "EDIT_TAGS",
             "value": "Edit Article Tags"
+        },
+        {
+            "id": "VIEW_PLAIN_TEXT",
+            "value": "View Plain Text"
+        },
+        {
+            "id": "VIEW_MARKDOWN",
+            "value": "View Markdown"
+        },
+        {
+            "id": "EDIT_ARTICLE",
+            "value": "Edit Article"
         }
     ]
 };

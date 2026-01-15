@@ -14,6 +14,7 @@ import { useDeviceType } from "@util/styles";
 import Cookies from "js-cookie";
 import { roleAuth } from "@util/roles";
 import EditTagsDialog from "./Library/EditTagsDialog";
+import EditContentDialog from "./Library/EditContentDialog";
 import Tags from "./Library/Tags";
 import Article from "./Library/Article";
 import styles from "./Library.module.scss";
@@ -36,6 +37,7 @@ export default function Library() {
     const translations = useTranslations();
     const pathItems = usePathItems();
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editContentDialogOpen, setEditContentDialogOpen] = useState(false);
     const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
     useEffect(() => {
@@ -476,6 +478,7 @@ export default function Library() {
                 contentRef={contentRef}
                 handleDrawerToggle={handleDrawerToggle}
                 showLibrarySideBar={showLibrarySideBar}
+                openEditContentDialog={() => setEditContentDialogOpen(true)}
             />
 
             {isAdmin && selectedTag && (
@@ -487,6 +490,20 @@ export default function Library() {
                     setTags={setTags}
                     setSelectedTag={setSelectedTag}
                     setContent={setContent}
+                />
+            )}
+
+            {isAdmin && selectedTag && (
+                <EditContentDialog
+                    open={editContentDialogOpen}
+                    onClose={() => setEditContentDialogOpen(false)}
+                    selectedTag={selectedTag}
+                    content={content}
+                    setContent={(newContent) => {
+                        setContent(newContent);
+                        // Clear content cache so next load gets fresh data
+                        contentCacheRef.current.delete(selectedTag._id);
+                    }}
                 />
             )}
         </Box>
