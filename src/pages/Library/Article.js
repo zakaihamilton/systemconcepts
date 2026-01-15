@@ -3,9 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
-import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import CodeIcon from "@mui/icons-material/Code";
@@ -70,12 +68,6 @@ function Article({
 
         return `${metadata}\n\n${"=".repeat(20)}\n\n${text || ""}`;
     }, []);
-
-    const handleCopy = useCallback(() => {
-        if (!selectedTag || !content) return;
-        const formatted = formatArticleWithTags(selectedTag, content);
-        navigator.clipboard.writeText(formatted);
-    }, [selectedTag, content, formatArticleWithTags]);
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
@@ -214,13 +206,6 @@ function Article({
         }
         const items = [
             {
-                id: "copy",
-                name: translations.COPY_TO_CLIPBOARD,
-                icon: <ContentCopyIcon />,
-                onClick: handleCopy,
-                menu: true
-            },
-            {
                 id: "export",
                 name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
                 icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
@@ -274,7 +259,7 @@ function Article({
             });
         }
         return items;
-    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag]);
+    }, [translations, handleExport, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag]);
 
     useToolbar({
         id: "Article",
