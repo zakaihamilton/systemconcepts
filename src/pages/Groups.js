@@ -17,7 +17,7 @@ import { useStyles, useDeviceType } from "@util/styles";
 import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
-import { useSessions } from "@util/sessions";
+import { useSessions, SessionsStore } from "@util/sessions";
 import { useEffect, useRef, useState } from "react";
 import ProgressDialog from "./Groups/ProgressDialog";
 import UploadIcon from "@mui/icons-material/Upload";
@@ -148,16 +148,19 @@ export default function Groups() {
     // Wrap update functions to trigger sync after completion
     const updateSessionsWithSync = async () => {
         await updateSessions(showDisabled);
+        SessionsStore.update(s => { s.counter++; });
         sync && sync();
     };
 
     const updateAllSessionsWithSync = async () => {
         await updateAllSessions(showDisabled);
+        SessionsStore.update(s => { s.counter++; });
         sync && sync();
     };
 
     const updateGroupWithSync = async (name, updateAll, forceUpdate) => {
         await updateGroup(name, updateAll, forceUpdate);
+        SessionsStore.update(s => { s.counter++; });
 
         // Trigger sync - it will upload local changes
         if (sync) {

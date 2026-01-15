@@ -1,7 +1,7 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { Store } from "pullstate";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useTranslations } from "@util/translations";
@@ -39,8 +39,9 @@ export function useSessions(depends = [], options = {}) {
     const translations = useTranslations();
     const { settings: groupsSettings } = GroupsStore.useState();
     const [groupMetadata, loading, setGroups] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog } = SessionsStore.useState();
+    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog, counter } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter", "showFilterDialog"]);
+    const lastCounterRef = useRef(counter);
     const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
         let continueUpdate = true;
         SessionsStore.update(s => {
@@ -415,16 +416,22 @@ export function useSessions(depends = [], options = {}) {
             // Only reload on sync if we had data before (savedSyncCounter > 0)
             // Ignore the initial 0→1 transition which happens on first page load
             const syncChanged = syncCounter !== savedSyncCounter && savedSyncCounter > 0;
+            const counterChanged = counter !== lastCounterRef.current;
+
+            if (counterChanged) {
+                lastCounterRef.current = counter;
+            }
 
             // Update sessions if:
             // 1. We have no sessions yet (initial load)
             // 2. Groups metadata/settings changed (group colors, names, CDN, etc.)
             // 3. Sync counter changed (new session data was synced)
-            if (noSessions || groupsChanged || syncChanged) {
+            // 4. Counter manually changed (forced reload)
+            if (noSessions || groupsChanged || syncChanged || counterChanged) {
                 updateSessions(groupMetadata, syncCounter);
             }
         }
-    }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions]);
+    }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions, counter]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {
