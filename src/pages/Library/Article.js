@@ -415,6 +415,7 @@ function Article({
                                             <Paper
                                                 elevation={0}
                                                 className={styles.metadataTag}
+                                                data-key={key}
                                                 onClick={() => navigator.clipboard.writeText(value)}
                                                 sx={{ cursor: "pointer" }}
                                             >

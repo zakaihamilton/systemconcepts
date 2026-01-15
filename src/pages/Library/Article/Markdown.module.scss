@@ -124,9 +124,9 @@
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: var(--primary-500);
+        border-color: var(--primary-main);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        background-color: var(--primary-100);
+        background-color: var(--action-hover);
     }
 }
 
