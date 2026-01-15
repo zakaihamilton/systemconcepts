@@ -147,7 +147,8 @@ export default [
         Component: Storage,
         section: getStorageSection,
         sidebar: true,
-        category: "tools"
+        category: "tools",
+        contained: ["editor", "image"]
     },
     {
         sidebar: true,

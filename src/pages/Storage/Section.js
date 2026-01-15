@@ -2,23 +2,23 @@ import devices from "@data/storage";
 import StorageIcon from "@mui/icons-material/Storage";
 import FolderIcon from "@mui/icons-material/Folder";
 
-export function getStorageSection({ sectionIndex, id, translations }) {
+export function getStorageSection({ id, translations, path }) {
     let icon = <FolderIcon />;
     let tooltip = translations.FOLDER;
-    if (sectionIndex <= 1) {
+    let name = id;
+    if (!path) {
+        name = translations.STORAGE;
         tooltip = translations.STORAGE;
         icon = <StorageIcon />;
     }
-    let name = id;
-    if (sectionIndex) {
+    else if (!path.includes("/")) {
         const item = devices.find(item => item.id === id);
         if (item) {
             name = translations[item.name] || item.name;
             id = name;
         }
-    }
-    else {
-        name = translations.STORAGE;
+        tooltip = translations.STORAGE;
+        icon = <StorageIcon />;
     }
     return { icon, name, id, tooltip };
 }

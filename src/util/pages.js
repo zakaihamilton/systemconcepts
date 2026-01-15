@@ -114,16 +114,35 @@ export function getPagesFromHash({ hash, translations, pages }) {
                 subPath += "/";
             }
             subPath += section;
-            let page = pages.find(page => {
-                const matchId = path + subPath;
-                if (!page.custom) {
-                    return page.id === matchId;
+            const previousPage = results[results.length - 1];
+            let page = null;
+            const isContained = previousPage && previousPage.contained;
+            let isAllowed = false;
+            const baseSectionId = sectionId.split("?")[0];
+            if (Array.isArray(isContained)) {
+                isAllowed = isContained.includes(baseSectionId);
+            }
+
+            if (isContained && !isAllowed) {
+                page = { ...previousPage };
+                const prefix = previousPage.path ? previousPage.path + "/" : "";
+                sectionPath = prefix + sectionId;
+            }
+            else if (isContained && isAllowed) {
+                page = pages.find(page => page.id === baseSectionId);
+            }
+            else {
+                page = pages.find(page => {
+                    const matchId = path + subPath;
+                    if (!page.custom) {
+                        return page.id === matchId;
+                    }
+                    const match = matchId.match(page.id);
+                    return match;
+                });
+                if (!page) {
+                    page = pages.find(page => page.id === pageId);
                 }
-                const match = matchId.match(page.id);
-                return match;
-            });
-            if (!page) {
-                page = pages.find(page => page.id === pageId);
             }
             if (!page) {
                 return null;
@@ -134,6 +153,11 @@ export function getPagesFromHash({ hash, translations, pages }) {
             }
             if (page.root) {
                 subPath = subPath.substring(pageId.length);
+            }
+            if (isAllowed && params.name) {
+                const prefix = previousPage.path ? previousPage.path + "/" : "";
+                sectionPath = prefix + params.name;
+                page.useParentName = 1;
             }
             const url = (page.section ? null : page.path) || path + encodeURIComponent(subPath);
             const name = page.name;
@@ -150,9 +174,6 @@ export function getPagesFromHash({ hash, translations, pages }) {
                     return null;
                 }
                 page = Object.assign({}, page, result);
-            }
-            else if (sections.length > 1 && sectionIndex !== sections.length - 1) {
-                return;
             }
             const parentPath = urlToParentPath(url);
             const result = { ...page, url, path: sectionPath, sectionIndex, subPath, parentPath };
