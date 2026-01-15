@@ -5,7 +5,6 @@ import remarkBreaks from 'remark-breaks';
 
 const rehypeArticleEnrichment = () => {
     return (tree) => {
-        // Split <p> nodes that contain <br> into multiple <p> nodes
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
@@ -22,9 +21,7 @@ const rehypeArticleEnrichment = () => {
                             currentSegment.push(child);
                         }
                     });
-                    if (currentSegment.length > 0) {
-                        segments.push(currentSegment);
-                    }
+                    if (currentSegment.length > 0) segments.push(currentSegment);
 
                     if (segments.length === 0) {
                         newNodes.push(node);
@@ -55,6 +52,16 @@ const rehypeArticleEnrichment = () => {
 };
 
 export default function Markdown({ children, search }) {
+    // PRE-PROCESSOR: Fixes the auto-numbering and adds bolding
+    const processedChildren = useMemo(() => {
+        if (typeof children !== 'string') return children;
+
+        // 1. Finds a number at the start of a line (^(\d+)\.)
+        // 2. Replaces it with bold and an escaped period (**$1\.**) 
+        // 3. This prevents Markdown from turning it into a list and jumping numbers
+        return children.replace(/^(\d+)\./gm, '**$1\.**');
+    }, [children]);
+
     const Highlight = useCallback(({ children }) => {
         if (!search || !children || typeof children !== 'string') return children;
         const lowerSearch = search.toLowerCase();
@@ -115,6 +122,8 @@ export default function Markdown({ children, search }) {
                     </Box>
                 );
             },
+            // Note: ol/ul/li remain for standard lists, but the 1. 2. 3. sections 
+            // will now bypass these and use the 'p' component above instead.
             ol: ({ start, children, ...props }) => {
                 const startIndex = parseInt(start, 10) || 1;
                 return (
@@ -174,7 +183,7 @@ export default function Markdown({ children, search }) {
             rehypePlugins={[rehypeArticleEnrichment]}
             components={markdownComponents}
         >
-            {children}
+            {processedChildren}
         </ReactMarkdown>
     );
 }
