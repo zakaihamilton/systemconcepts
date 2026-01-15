@@ -509,39 +509,43 @@ export default function Article({
                                 <Paper
                                     elevation={0}
                                     className={styles.tagNumber}
+                                    component="span"
                                 >
                                     #{selectedTag.number}
                                 </Paper>
                             )}
+                            {" "}
                             <Typography
                                 variant="h4"
                                 className={styles.title}
-                                sx={{ flex: 1 }}
+                                component="span"
                             >
                                 {title.name}
                             </Typography>
                         </Box>
                         <Box className={styles.metadataRow}>
-                            {LibraryTagKeys.map(key => {
-                                if (!selectedTag?.[key] || key === "number") return null;
-                                if (title.key === key) return null;
-                                const value = selectedTag[key];
-                                if (title.name === value) return null;
-                                const Icon = LibraryIcons[key];
-                                return (
-                                    <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
-                                        <Paper
-                                            elevation={0}
-                                            className={styles.metadataTag}
-                                            onClick={() => navigator.clipboard.writeText(value)}
-                                            sx={{ cursor: "pointer" }}
-                                        >
-                                            {Icon && <Icon sx={{ fontSize: "1rem" }} />}
-                                            <Typography variant="caption">{value}</Typography>
-                                        </Paper>
-                                    </Tooltip>
-                                );
-                            })}
+                            {LibraryTagKeys.filter(key => key !== "book" && key !== "author")
+                                .concat(["book", "author"])
+                                .map(key => {
+                                    if (!selectedTag?.[key] || key === "number") return null;
+                                    if (title.key === key) return null;
+                                    const value = selectedTag[key];
+                                    if (title.name === value) return null;
+                                    const Icon = LibraryIcons[key];
+                                    return (
+                                        <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
+                                            <Paper
+                                                elevation={0}
+                                                className={styles.metadataTag}
+                                                onClick={() => navigator.clipboard.writeText(value)}
+                                                sx={{ cursor: "pointer" }}
+                                            >
+                                                {Icon && <Icon sx={{ fontSize: "1rem" }} />}
+                                                <Typography variant="caption">{value}</Typography>
+                                            </Paper>
+                                        </Tooltip>
+                                    );
+                                })}
                         </Box>
                     </Box>
                 </Box>

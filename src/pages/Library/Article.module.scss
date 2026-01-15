@@ -64,38 +64,25 @@
 }
 
 .titleRow {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    @media (max-width: 600px) {
-        align-items: flex-start;
-    }
+    display: block;
 
     @media (min-width: 601px) {
-        width: 100%;
-        max-width: 100%;
-        justify-content: center;
+        text-align: center;
     }
 }
 
 .title {
     font-weight: 900;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     color: var(--text-primary);
     letter-spacing: -0.02em;
     margin: 0;
     font-size: 2.125rem;
-    min-width: 0;
-    flex: 1;
+    display: inline;
+    vertical-align: middle;
+    word-break: break-word;
 
     @media (max-width: 600px) {
         font-size: 1.5rem;
-        white-space: normal;
-        overflow: visible;
-        text-overflow: clip;
     }
 }
 
@@ -107,6 +94,9 @@
     font-weight: 800;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 0.875rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 12px;
 }
 
 .metadataRow {
