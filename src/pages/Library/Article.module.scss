@@ -47,14 +47,16 @@
 .headerTitleWrapper {
     min-width: 0;
     flex: 1;
-    overflow: hidden;
 }
 
 .titleRow {
     display: flex;
     align-items: center;
     gap: 12px;
-    overflow: hidden;
+
+    @media (max-width: 600px) {
+        align-items: flex-start;
+    }
 }
 
 .title {
@@ -71,8 +73,25 @@
     flex: 1;
     will-change: font-size;
 
+    @media (max-width: 600px) {
+        font-size: 1.5rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
     &.shrunk {
         font-size: 1.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        @media (max-width: 600px) {
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     }
 }
 
@@ -96,12 +115,21 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 4px;
+    padding: 4px 0;
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 1;
-    overflow: hidden;
+    overflow: visible;
+
+    &.shrunk {
+        margin-top: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        overflow: hidden;
+    }
 }
 
 .metadataTag {
@@ -218,4 +246,20 @@
     color: var(--text-secondary);
     flex-direction: column;
     gap: 16px;
+    transition: all 0.3s ease;
+    user-select: none;
+
+    &:hover {
+        background-color: var(--action-hover);
+        color: var(--text-primary);
+
+        svg {
+            opacity: 0.8 !important;
+            transform: scale(1.1);
+        }
+    }
+
+    svg {
+        transition: all 0.3s ease;
+    }
 }

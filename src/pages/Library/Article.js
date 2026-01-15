@@ -11,6 +11,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { LibraryTagKeys, LibraryIcons } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
@@ -140,13 +142,35 @@ export default function Article({
         }
     }, []);
 
+    const handleNextMatch = useCallback(() => {
+        if (totalMatches === 0) return;
+        setMatchIndex(prev => {
+            const next = (prev + 1) % totalMatches;
+            scrollToMatch(next);
+            return next;
+        });
+    }, [totalMatches, scrollToMatch]);
+
+    const handlePrevMatch = useCallback(() => {
+        if (totalMatches === 0) return;
+        setMatchIndex(prev => {
+            const next = (prev - 1 + totalMatches) % totalMatches;
+            scrollToMatch(next);
+            return next;
+        });
+    }, [totalMatches, scrollToMatch]);
+
     useEffect(() => {
         const highlights = document.querySelectorAll('.search-highlight');
         setTotalMatches(highlights.length);
-        if (highlights.length > 0 && matchIndex >= highlights.length) {
-            setMatchIndex(0);
+        if (highlights.length > 0) {
+            setMatchIndex(prev => {
+                const index = prev >= highlights.length ? 0 : prev;
+                scrollToMatch(index);
+                return index;
+            });
         }
-    }, [content, search]);
+    }, [content, search, scrollToMatch]);
 
     const Highlight = useCallback(({ children }) => {
         if (!search || !children || typeof children !== 'string') return children;
@@ -246,8 +270,30 @@ export default function Article({
                 onClick: openEditDialog
             });
         }
+        if (search && totalMatches > 0) {
+            items.push({
+                id: "prevMatch",
+                name: translations.PREVIOUS_MATCH || "Previous Match",
+                icon: <KeyboardArrowUpIcon />,
+                onClick: handlePrevMatch,
+                location: "header"
+            });
+            items.push({
+                id: "matchCount",
+                name: `${matchIndex + 1} / ${totalMatches}`,
+                element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
+                location: "header"
+            });
+            items.push({
+                id: "nextMatch",
+                name: translations.NEXT_MATCH || "Next Match",
+                icon: <KeyboardArrowDownIcon />,
+                onClick: handleNextMatch,
+                location: "header"
+            });
+        }
         return items;
-    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog]);
+    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch]);
 
     useToolbar({
         id: "Article",
@@ -258,7 +304,7 @@ export default function Article({
 
     if (!content && showPlaceholder) {
         return (
-            <Box className={styles.placeholder}>
+            <Box className={styles.placeholder} onClick={handleDrawerToggle} sx={{ cursor: "pointer" }}>
                 <LibraryBooksIcon sx={{ fontSize: 64, opacity: 0.5 }} />
                 <Typography>{translations.SELECT_ITEM}</Typography>
             </Box>
@@ -293,8 +339,8 @@ export default function Article({
                     >
                         <LibraryBooksIcon />
                     </IconButton>
-                    <Box className={styles.headerTitleWrapper} sx={{ overflow: "hidden" }}>
-                        <Box className={styles.titleRow} sx={{ overflow: "hidden" }}>
+                    <Box className={styles.headerTitleWrapper}>
+                        <Box className={styles.titleRow}>
                             {selectedTag?.number && (
                                 <Paper
                                     elevation={0}
@@ -316,9 +362,9 @@ export default function Article({
                             sx={{
                                 opacity: isHeaderShrunk ? 0 : 1,
                                 maxHeight: isHeaderShrunk ? 0 : '500px',
-                                marginTop: isHeaderShrunk ? 0 : '8px',
                                 visibility: isHeaderShrunk ? 'hidden' : 'visible',
                                 pointerEvents: isHeaderShrunk ? 'none' : 'auto',
+                                overflow: isHeaderShrunk ? "hidden" : "visible",
                                 transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
                         >

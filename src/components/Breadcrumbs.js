@@ -157,7 +157,15 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     const isDesktop = deviceType === "desktop";
     const isTablet = deviceType === "tablet";
 
-    let breadcrumbItems = (items || []).filter(({ breadcrumbs }) => typeof breadcrumbs === "undefined" || breadcrumbs);
+    let breadcrumbItems = (items || []).filter((item, index) => {
+        const { breadcrumbs, id } = item;
+        if (typeof breadcrumbs !== "undefined" && !breadcrumbs) return false;
+        if (isPhone && id === "library") {
+            const firstLibraryIndex = items.findIndex(i => i.id === "library");
+            if (index > firstLibraryIndex) return false;
+        }
+        return true;
+    });
     breadcrumbItems = breadcrumbItems.map((item, index, list) => {
         const { id, url, ...props } = item;
         const href = "#" + url;
