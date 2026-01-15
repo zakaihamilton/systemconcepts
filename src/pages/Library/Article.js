@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useDeviceType } from "@util/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -37,6 +38,8 @@ function Article({
     handleDrawerToggle,
     openEditContentDialog,
 }) {
+    const deviceType = useDeviceType();
+    const isPhone = deviceType === "phone";
     const [matchIndex, setMatchIndex] = useState(0);
     const [totalMatches, setTotalMatches] = useState(0);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
@@ -69,90 +72,92 @@ function Article({
         return `${metadata}\n\n${"=".repeat(20)}\n\n${text || ""}`;
     }, []);
 
+    const handlePrint = useCallback(() => {
+        const rootElement = contentRef.current;
+        if (!rootElement) return;
+
+        const iframe = document.createElement("iframe");
+        Object.assign(iframe.style, {
+            position: "absolute",
+            top: "-9999px",
+            left: "-9999px",
+            width: "100%",
+            height: "auto"
+        });
+        document.body.appendChild(iframe);
+
+        const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
+            .map(node => node.outerHTML)
+            .join("");
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                ${styles}
+                <style>
+                    :global(body), html, body {
+                        background: white !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        width: 100% !important;
+                    }
+                    /* Ensure the cloned root is visible and resets layout */
+                    [class*="Article_root"] {
+                        position: static !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        margin: 0 !important;
+                        padding: 20px !important;
+                        width: 100% !important;
+                    }
+                    @media print {
+                        body { -webkit-print-color-adjust: exact; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${rootElement.outerHTML}
+                <script>
+                    window.onload = () => {
+                        setTimeout(() => {
+                            window.print();
+                            // Clean up after print dialog closes (approximate)
+                            setTimeout(() => {
+                                window.top.postMessage("print-complete", "*");
+                            }, 1000);
+                        }, 500);
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        const cleanup = (e) => {
+            if (e.data === "print-complete") {
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 5000); // Wait longer to ensure print is done
+                window.removeEventListener("message", cleanup);
+            }
+        };
+        window.addEventListener("message", cleanup);
+    }, []);
+
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
+        const formatted = formatArticleWithTags(selectedTag, content);
+        const filename = `${selectedTag.article || "Article"}${selectedTag.number ? `_${selectedTag.number}` : ""}.md`;
+        exportData(formatted, filename, "text/plain");
+    }, [selectedTag, content, formatArticleWithTags]);
 
-        if (showMarkdown) {
-            const rootElement = contentRef.current;
-            if (!rootElement) return;
-
-            const iframe = document.createElement("iframe");
-            Object.assign(iframe.style, {
-                position: "absolute",
-                top: "-9999px",
-                left: "-9999px",
-                width: "100%",
-                height: "auto"
-            });
-            document.body.appendChild(iframe);
-
-            const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
-                .map(node => node.outerHTML)
-                .join("");
-
-            const doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    ${styles}
-                    <style>
-                        :global(body), html, body {
-                            background: white !important;
-                            height: auto !important;
-                            overflow: visible !important;
-                        }
-                        /* Ensure the cloned root is visible and resets layout */
-                        [class*="Article_root"] {
-                            position: static !important;
-                            height: auto !important;
-                            overflow: visible !important;
-                            display: block !important;
-                            visibility: visible !important;
-                            margin: 0 !important;
-                            padding: 20px !important;
-                        }
-                        @media print {
-                            body { -webkit-print-color-adjust: exact; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${rootElement.outerHTML}
-                    <script>
-                        window.onload = () => {
-                            setTimeout(() => {
-                                window.print();
-                                // Clean up after print dialog closes (approximate)
-                                setTimeout(() => {
-                                    window.top.postMessage("print-complete", "*");
-                                }, 1000);
-                            }, 500);
-                        };
-                    </script>
-                </body>
-                </html>
-            `);
-            doc.close();
-
-            const cleanup = (e) => {
-                if (e.data === "print-complete") {
-                    setTimeout(() => {
-                        if (document.body.contains(iframe)) {
-                            document.body.removeChild(iframe);
-                        }
-                    }, 5000); // Wait longer to ensure print is done
-                    window.removeEventListener("message", cleanup);
-                }
-            };
-            window.addEventListener("message", cleanup);
-        } else {
-            const formatted = formatArticleWithTags(selectedTag, content);
-            const filename = `${selectedTag.article || "Article"}${selectedTag.number ? `_${selectedTag.number}` : ""}.md`;
-            exportData(formatted, filename, "text/plain");
-        }
-    }, [selectedTag, content, formatArticleWithTags, showMarkdown]);
 
     const scrollToMatch = useCallback((index) => {
         const highlights = document.querySelectorAll('.search-highlight');
@@ -209,7 +214,7 @@ function Article({
                 id: "export",
                 name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
                 icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
-                onClick: handleExport,
+                onClick: showMarkdown ? handlePrint : handleExport,
                 menu: true
             },
             {
@@ -242,24 +247,24 @@ function Article({
                 name: translations.PREVIOUS_MATCH,
                 icon: <KeyboardArrowUpIcon />,
                 onClick: handlePrevMatch,
-                location: "header"
+                location: isPhone ? "header" : undefined
             });
             items.push({
                 id: "matchCount",
                 name: `${matchIndex + 1} / ${totalMatches}`,
                 element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
-                location: "header"
+                location: isPhone ? "header" : undefined
             });
             items.push({
                 id: "nextMatch",
                 name: translations.NEXT_MATCH,
                 icon: <KeyboardArrowDownIcon />,
                 onClick: handleNextMatch,
-                location: "header"
+                location: isPhone ? "header" : undefined
             });
         }
         return items;
-    }, [translations, handleExport, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag]);
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone]);
 
     useToolbar({
         id: "Article",

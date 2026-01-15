@@ -1,31 +1,102 @@
-import React, { useMemo, useCallback, useState, useRef } from "react";
+import React, { useMemo, useCallback, useState, useRef, useEffect } from "react";
+import ReactDOM from 'react-dom';
 import Box from "@mui/material/Box";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from './Glossary';
 import styles from './Markdown.module.scss'; // Import as Module
 
-const Term = ({ term, entry }) => {
+const Term = ({ term, entry, search }) => {
     const [hover, setHover] = useState(false);
-    const [placement, setPlacement] = useState('top');
+    const [tooltipStyle, setTooltipStyle] = useState({});
+    const [bridgeStyle, setBridgeStyle] = useState({});
     const containerRef = useRef(null);
 
     const handleMouseEnter = () => {
         if (containerRef.current) {
             const rect = containerRef.current.getBoundingClientRect();
-            // If the element is within 250px of the top of the viewport, flip to bottom
             const spaceTop = rect.top;
+
+            const scrollX = window.scrollX;
+            const scrollY = window.scrollY;
+
+            // Base style for Portal (absolute relative to document)
+            const baseStyle = {
+                position: 'absolute',
+                left: `${rect.left + scrollX + rect.width / 2}px`,
+                zIndex: 1300,
+                margin: 0
+            };
+
+            const bridgeBase = {
+                position: 'absolute',
+                left: `${rect.left + scrollX}px`,
+                width: `${rect.width}px`,
+                transform: 'none',
+                zIndex: 1299
+            };
+
             if (spaceTop < 250) {
-                setPlacement('bottom');
+                // Place BOTTOM
+                const topVal = rect.bottom + scrollY + 10;
+                setTooltipStyle({
+                    ...baseStyle,
+                    top: `${topVal}px`,
+                    bottom: 'auto',
+                    transform: 'translateX(-50%)'
+                });
+                setBridgeStyle({
+                    ...bridgeBase,
+                    top: `${rect.bottom + scrollY}px`,
+                    height: '10px'
+                });
             } else {
-                setPlacement('top');
+                // Place TOP
+                const topVal = rect.top + scrollY - 10;
+                setTooltipStyle({
+                    ...baseStyle,
+                    top: `${topVal}px`,
+                    bottom: 'auto',
+                    // Use translate to shift it UP from the anchor point
+                    transform: 'translate(-50%, -100%)'
+                });
+                setBridgeStyle({
+                    ...bridgeBase,
+                    top: `${rect.top + scrollY - 10}px`,
+                    height: '10px'
+                });
             }
         }
         setHover(true);
     };
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (hover) {
+                setHover(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [hover]);
+
     const mainText = entry.en || entry.trans || term;
     const showAnnotation = entry.trans && entry.trans.toLowerCase() !== mainText.toLowerCase();
+
+    // Check for search match
+    let isMatch = false;
+    if (search) {
+        const lowerSearch = search.toLowerCase();
+        isMatch = (
+            term.toLowerCase().includes(lowerSearch) ||
+            (entry.en && entry.en.toLowerCase().includes(lowerSearch)) ||
+            (entry.trans && entry.trans.toLowerCase().includes(lowerSearch)) ||
+            (entry.he && entry.he.includes(search))
+        );
+    }
+
+    // Combine classes: locally scoped style + global 'search-highlight' for Article.js to find
+    const mainTextClass = `${styles['glossary-main-text']} ${isMatch ? 'search-highlight' : ''}`;
 
     return (
         <span
@@ -38,15 +109,15 @@ const Term = ({ term, entry }) => {
             {showAnnotation && <span className={styles['glossary-annotation']}>{entry.trans}</span>}
 
             {/* The Main Text (English Translation) */}
-            <span className={styles['glossary-main-text']}>{mainText}</span>
+            <span className={mainTextClass}>{mainText}</span>
 
-            {/* The Tooltip */}
-            {hover && (
+            {/* The Tooltip (Portalled) */}
+            {hover && ReactDOM.createPortal(
                 <>
                     {/* Bridge ensures connection between word and tooltip */}
-                    <div className={`${styles['glossary-bridge']} ${styles[placement]}`} />
+                    <div className={styles['glossary-bridge']} style={bridgeStyle} />
 
-                    <div className={`${styles['glossary-tooltip']} ${styles[placement]}`}>
+                    <div className={styles['glossary-tooltip']} style={tooltipStyle}>
                         {/* English Section */}
                         <div className={styles['tt-label']}>Translation</div>
                         <div className={styles['tt-value']}>{entry.en || mainText}</div>
@@ -63,7 +134,8 @@ const Term = ({ term, entry }) => {
                         <div className={styles['tt-label']}>Hebrew</div>
                         <div className={styles['tt-hebrew']}>{entry.he}</div>
                     </div>
-                </>
+                </>,
+                document.body
             )}
         </span>
     );
@@ -202,6 +274,7 @@ export default function Markdown({ children, search }) {
                         key={`gloss-${start}`}
                         term={term}
                         entry={glossaryEntry}
+                        search={search}
                     />
                 );
 
@@ -227,7 +300,7 @@ export default function Markdown({ children, search }) {
             p: ({ children }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
                 return (
-                    <Box sx={{ marginBottom: '24px', lineHeight: 2.8 }}>
+                    <Box className={styles.paragraph} sx={{ marginBottom: '24px', lineHeight: 2.8 }}>
                         <TextRenderer>{children}</TextRenderer>
                     </Box>
                 );

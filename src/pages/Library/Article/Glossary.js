@@ -2804,11 +2804,6 @@ export const glossary = {
         "en": "Portion of",
         "trans": "Parashat"
     },
-    "chap": {
-        "he": "",
-        "en": "",
-        "trans": "Chap"
-    },
     "lo nahara": {
         "he": "לא נהרא",
         "en": "That Does Not Shine",
