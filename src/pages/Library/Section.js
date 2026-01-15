@@ -38,24 +38,38 @@ export function getLibrarySection({ id, path, translations }) {
     let SelectedIcon = null;
 
     if (tags && tags.length > 0) {
-        // Robust matching to find the relevant tag and its field type
-        const tag = tags.find(t =>
+        // Find all tags that contain this name in any field
+        const matchingTags = tags.filter(t =>
             LibraryTagKeys.some(key => {
                 const val = t[key];
                 return val && String(val).trim().toLowerCase() === name.toLowerCase();
             })
         );
 
-        if (tag) {
-            const currentField = LibraryTagKeys.find(key => {
-                const val = tag[key];
-                return val && String(val).trim().toLowerCase() === name.toLowerCase();
-            });
+        // For each matching tag, find which field matches and get its index
+        let bestTag = null;
+        let bestFieldKey = null;
+        let bestFieldIndex = Infinity;
 
-            if (currentField) {
-                SelectedIcon = LibraryIcons[currentField];
-                description = currentField.charAt(0).toUpperCase() + currentField.slice(1);
+        for (const t of matchingTags) {
+            for (let i = 0; i < LibraryTagKeys.length; i++) {
+                const key = LibraryTagKeys[i];
+                const val = t[key];
+                if (val && String(val).trim().toLowerCase() === name.toLowerCase()) {
+                    // Prefer earlier fields (chapter before title)
+                    if (i < bestFieldIndex) {
+                        bestFieldIndex = i;
+                        bestFieldKey = key;
+                        bestTag = t;
+                    }
+                    break; // Only check first matching field per tag
+                }
             }
+        }
+
+        if (bestTag && bestFieldKey) {
+            SelectedIcon = LibraryIcons[bestFieldKey];
+            description = bestFieldKey.charAt(0).toUpperCase() + bestFieldKey.slice(1);
         }
     }
 

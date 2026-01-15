@@ -56,12 +56,6 @@
     overflow: hidden;
     flex: 0 1 auto;
     max-width: fit-content;
-
-    &.hasLabel {
-        @media (min-width: 601px) {
-            min-width: 8rem;
-        }
-    }
 }
 
 .item {

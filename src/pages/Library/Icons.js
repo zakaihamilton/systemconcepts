@@ -24,4 +24,4 @@ export const LibraryIcons = {
     title: TitleIcon
 };
 
-export const LibraryTagKeys = ["author", "book", "volume", "part", "section", "year", "portion", "article", "chapter", "title"];
+export const LibraryTagKeys = ["author", "book", "volume", "part", "section", "year", "portion", "chapter", "article", "title"];
