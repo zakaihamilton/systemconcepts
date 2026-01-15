@@ -750,8 +750,8 @@ export const glossary = {
         "trans": "AA"
     },
     "za": {
-        "he": "",
-        "en": "",
+        "he": "ז״א",
+        "en": "Small Face",
         "trans": "ZA"
     },
     "nhy": {

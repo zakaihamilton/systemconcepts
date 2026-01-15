@@ -24,6 +24,9 @@ const Term = ({ term, entry }) => {
         setHover(true);
     };
 
+    const mainText = entry.en || entry.trans || term;
+    const showAnnotation = entry.trans && entry.trans.toLowerCase() !== mainText.toLowerCase();
+
     return (
         <span
             className={styles['glossary-term-container']}
@@ -32,10 +35,10 @@ const Term = ({ term, entry }) => {
             onMouseLeave={() => setHover(false)}
         >
             {/* The Transliteration (Top Annotation) */}
-            <span className={styles['glossary-annotation']}>{entry.trans}</span>
+            {showAnnotation && <span className={styles['glossary-annotation']}>{entry.trans}</span>}
 
             {/* The Main Text (English Translation) */}
-            <span className={styles['glossary-main-text']}>{entry.en}</span>
+            <span className={styles['glossary-main-text']}>{mainText}</span>
 
             {/* The Tooltip */}
             {hover && (
@@ -46,7 +49,7 @@ const Term = ({ term, entry }) => {
                     <div className={`${styles['glossary-tooltip']} ${styles[placement]}`}>
                         {/* English Section */}
                         <div className={styles['tt-label']}>Translation</div>
-                        <div className={styles['tt-value']}>{entry.en}</div>
+                        <div className={styles['tt-value']}>{entry.en || mainText}</div>
 
                         <hr />
 
@@ -224,7 +227,7 @@ export default function Markdown({ children, search }) {
             p: ({ children }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
                 return (
-                    <Box sx={{ marginBottom: '24px', lineHeight: 2.2 }}>
+                    <Box sx={{ marginBottom: '24px', lineHeight: 2.8 }}>
                         <TextRenderer>{children}</TextRenderer>
                     </Box>
                 );
