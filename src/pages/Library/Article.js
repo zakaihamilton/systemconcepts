@@ -55,7 +55,7 @@ function Article({
         if (clientHeight === 0) return;
 
         const total = Math.ceil(scrollHeight / clientHeight);
-        let page = Math.ceil((scrollTop + clientHeight / 2) / clientHeight) || 1;
+        let page = Math.ceil((scrollTop + clientHeight / 4) / clientHeight) || 1;
         if (scrollTop + clientHeight >= scrollHeight - 1) {
             page = total;
         }
@@ -461,7 +461,21 @@ function Article({
                     </Box>
                 </Box>
             </Box>
-
+            {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
+                <Box
+                    key={i}
+                    sx={{
+                        position: 'absolute',
+                        top: (i + 1) * scrollInfo.clientHeight,
+                        left: 0,
+                        right: 0,
+                        height: '1px',
+                        borderTop: '2px dashed var(--divider)',
+                        opacity: 1.0,
+                        pointerEvents: 'none'
+                    }}
+                />
+            ))}
             <Box className={styles.contentScrollArea}>
                 <Box className={styles.contentWrapper}>
                     {showMarkdown ? (
@@ -485,22 +499,7 @@ function Article({
                     )}
                 </Box>
             </Box>
-            {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
-                <Box
-                    key={i}
-                    sx={{
-                        position: 'absolute',
-                        top: (i + 1) * scrollInfo.clientHeight,
-                        left: 0,
-                        right: 0,
-                        height: '1px',
-                        borderTop: '2px dashed var(--divider)',
-                        opacity: 1.0,
-                        zIndex: 5,
-                        pointerEvents: 'none'
-                    }}
-                />
-            ))}
+
             {content && showMarkdown && (
                 <Player
                     contentRef={contentRef}

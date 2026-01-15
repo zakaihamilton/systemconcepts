@@ -129,6 +129,7 @@
     transition: all 0.2s ease;
     position: relative;
     counter-increment: paragraph;
+    background-color: var(--background-paper);
 
     &:hover {
         border-color: var(--primary-main);
