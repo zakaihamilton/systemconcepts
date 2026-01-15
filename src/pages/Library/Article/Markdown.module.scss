@@ -1,0 +1,137 @@
+// Utility classes for positioning (defined at root so they Same exported keys)
+.top {
+
+    // Used for Bridge
+    &.glossary-bridge {
+        bottom: 100%;
+    }
+
+    // Used for Tooltip
+    &.glossary-tooltip {
+        bottom: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+.bottom {
+
+    // Used for Bridge
+    &.glossary-bridge {
+        top: 100%;
+    }
+
+    // Used for Tooltip
+    &.glossary-tooltip {
+        top: 100%;
+        margin-top: 10px;
+    }
+}
+
+.glossary-term-container {
+    display: inline-block;
+    position: relative;
+    line-height: 1.8;
+    cursor: pointer;
+    margin: 0 2px;
+
+    // The transliteration sitting above the word
+    .glossary-annotation {
+        display: block;
+        position: absolute;
+        top: -1.2em;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.65em;
+        color: var(--text-secondary);
+        font-weight: normal;
+        pointer-events: none;
+        white-space: nowrap;
+        font-style: italic;
+    }
+
+    // The main text (English Translation)
+    .glossary-main-text {
+        border-bottom: 1px dotted var(--text-secondary);
+        font-weight: 500;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+    // Hover state
+    &:hover .glossary-main-text {
+        background-color: #fff9c4;
+        color: #000;
+    }
+}
+
+// Invisible bridge
+.glossary-bridge {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    z-index: 99;
+}
+
+// The Tooltip Popup
+.glossary-tooltip {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--background-paper);
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    z-index: 100;
+    min-width: 150px;
+    text-align: center;
+    pointer-events: auto;
+
+    .tt-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tt-value {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .tt-hebrew {
+        font-size: 1.4rem;
+        font-family: 'Frank Ruhl Libre', 'David', serif;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }
+
+    hr {
+        margin: 8px 0;
+        border: 0;
+        border-top: 1px solid var(--divider);
+    }
+}
+
+.paragraph {
+    border: 1px solid transparent;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: var(--primary-500);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        background-color: var(--primary-100);
+    }
+}
+
+// Search Highlight
+.search-highlight {
+    background-color: #ffeb3b;
+    color: #000 !important;
+}
