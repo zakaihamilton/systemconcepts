@@ -316,11 +316,49 @@ export default function Article({
                     </Box>
                 );
             },
-            li: ({ children }) => (
-                <Box component="li" sx={{ mb: 1, listStyle: "inherit" }}>
-                    <TextRenderer>{children}</TextRenderer>
+            ol: ({ start, children, ...props }) => {
+                const startIndex = parseInt(start, 10) || 1;
+                return (
+                    <Box component="ol" sx={{ listStyle: "none", m: 0, p: 0, pl: 3 }} {...props}>
+                        {React.Children.map(children, (child, i) => {
+                            if (React.isValidElement(child)) {
+                                return React.cloneElement(child, { index: startIndex + i, ordered: true });
+                            }
+                            return child;
+                        })}
+                    </Box>
+                );
+            },
+            ul: ({ children, ...props }) => (
+                <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, pl: 3 }} {...props}>
+                    {React.Children.map(children, (child) => {
+                        if (React.isValidElement(child)) {
+                            return React.cloneElement(child, { ordered: false });
+                        }
+                        return child;
+                    })}
                 </Box>
             ),
+            li: ({ children, index, ordered, ...props }) => {
+                const marker = ordered ? (
+                    <Box component="span" sx={{ minWidth: "1.5em", mr: 1, textAlign: "right", userSelect: "text" }}>
+                        {index}.
+                    </Box>
+                ) : (
+                    <Box component="span" sx={{ minWidth: "1em", mr: 1, textAlign: "center", userSelect: "text" }}>
+                        •
+                    </Box>
+                );
+
+                return (
+                    <Box component="li" sx={{ mb: 1, display: "flex", alignItems: "baseline" }} {...props}>
+                        {marker}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <TextRenderer>{children}</TextRenderer>
+                        </Box>
+                    </Box>
+                );
+            },
             h1: ({ children }) => <h1><TextRenderer>{children}</TextRenderer></h1>,
             h2: ({ children }) => <h2><TextRenderer>{children}</TextRenderer></h2>,
             h3: ({ children }) => <h3><TextRenderer>{children}</TextRenderer></h3>,
