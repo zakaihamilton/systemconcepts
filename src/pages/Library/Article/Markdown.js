@@ -52,14 +52,20 @@ const rehypeArticleEnrichment = () => {
 };
 
 export default function Markdown({ children, search }) {
-    // PRE-PROCESSOR: Fixes the auto-numbering and adds bolding
     const processedChildren = useMemo(() => {
         if (typeof children !== 'string') return children;
 
-        // 1. Finds a number at the start of a line (^(\d+)\.)
-        // 2. Replaces it with bold and an escaped period (**$1\.**) 
-        // 3. This prevents Markdown from turning it into a list and jumping numbers
-        return children.replace(/^(\d+)\./gm, '**$1\.**');
+        return children
+            // REGEX EXPLANATION:
+            // ^\s* : Start of line + optional spaces
+            // (\d+)      : Capture the number (Group 1)
+            // ([\.\)])   : Capture either a dot OR a parenthesis (Group 2)
+            // \s* : Optional trailing spaces
+            .replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
+                // If it was "17)", it becomes "**17\)** "
+                // If it was "1.", it becomes "**1\.** "
+                return `**${number}\\${symbol}** `;
+            });
     }, [children]);
 
     const Highlight = useCallback(({ children }) => {
@@ -94,9 +100,7 @@ export default function Markdown({ children, search }) {
         if (Array.isArray(children)) {
             return children.map((child, idx) => <TextRenderer key={idx}>{child}</TextRenderer>);
         }
-        if (typeof children === 'string') {
-            return <Highlight>{children}</Highlight>;
-        }
+        if (typeof children === 'string') return <Highlight>{children}</Highlight>;
         if (React.isValidElement(children)) {
             return React.cloneElement(children, {
                 children: <TextRenderer>{children.props.children}</TextRenderer>
@@ -109,71 +113,16 @@ export default function Markdown({ children, search }) {
         return {
             p: ({ children, ...props }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
-                const childrenArray = React.Children.toArray(children);
-                const hasContent = childrenArray.some(child => {
-                    if (typeof child === "string") return child.trim().length > 0;
-                    return true;
-                });
-                if (!hasContent) return null;
-
                 return (
-                    <Box sx={{ marginBottom: '12px' }}>
+                    <Box sx={{ marginBottom: '16px', lineHeight: 1.7 }}>
                         <TextRenderer>{children}</TextRenderer>
                     </Box>
                 );
             },
-            // Note: ol/ul/li remain for standard lists, but the 1. 2. 3. sections 
-            // will now bypass these and use the 'p' component above instead.
-            ol: ({ start, children, ...props }) => {
-                const startIndex = parseInt(start, 10) || 1;
-                return (
-                    <Box component="ol" sx={{ listStyle: "none", m: 0, p: 0, pl: 3 }} {...props}>
-                        {React.Children.map(children, (child, i) => {
-                            if (React.isValidElement(child)) {
-                                return React.cloneElement(child, { index: startIndex + i, ordered: true });
-                            }
-                            return child;
-                        })}
-                    </Box>
-                );
-            },
-            ul: ({ children, ...props }) => (
-                <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, pl: 3 }} {...props}>
-                    {React.Children.map(children, (child) => {
-                        if (React.isValidElement(child)) {
-                            return React.cloneElement(child, { ordered: false });
-                        }
-                        return child;
-                    })}
-                </Box>
-            ),
-            li: ({ children, index, ordered, ...props }) => {
-                const marker = ordered ? (
-                    <Box component="span" sx={{ minWidth: "1.5em", mr: 1, textAlign: "right", userSelect: "text" }}>
-                        {index}.
-                    </Box>
-                ) : (
-                    <Box component="span" sx={{ minWidth: "1em", mr: 1, textAlign: "center", userSelect: "text" }}>
-                        •
-                    </Box>
-                );
-
-                return (
-                    <Box component="li" sx={{ mb: 1, display: "flex", alignItems: "baseline" }} {...props}>
-                        {marker}
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <TextRenderer>{children}</TextRenderer>
-                        </Box>
-                    </Box>
-                );
-            },
-            h1: ({ children }) => <h1><TextRenderer>{children}</TextRenderer></h1>,
-            h2: ({ children }) => <h2><TextRenderer>{children}</TextRenderer></h2>,
-            h3: ({ children }) => <h3><TextRenderer>{children}</TextRenderer></h3>,
-            h4: ({ children }) => <h4><TextRenderer>{children}</TextRenderer></h4>,
-            h5: ({ children }) => <h5><TextRenderer>{children}</TextRenderer></h5>,
-            h6: ({ children }) => <h6><TextRenderer>{children}</TextRenderer></h6>,
-            br: () => <span style={{ display: "block", marginBottom: "1.2rem", content: '""' }} />
+            // We disable standard list rendering for these numbered items to prevent double-indenting
+            li: ({ children }) => <Box sx={{ mb: 1 }}><TextRenderer>{children}</TextRenderer></Box>,
+            h1: ({ children }) => <Box component="h1" sx={{ mt: 3, mb: 2 }}><TextRenderer>{children}</TextRenderer></Box>,
+            br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
     }, [TextRenderer]);
 
