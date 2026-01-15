@@ -1396,6 +1396,22 @@ export default {
         {
             "id": "EDIT_ARTICLE",
             "value": "Edit Article"
+        },
+        {
+            "id": "EXPORT_TO_TXT",
+            "value": "Export to .txt"
+        },
+        {
+            "id": "EXPORT_TO_MD",
+            "value": "Export to .md"
+        },
+        {
+            "id": "EXPORT_TO_PDF",
+            "value": "Export to PDF"
+        },
+        {
+            "id": "PRINT",
+            "value": "Print"
         }
     ]
 };

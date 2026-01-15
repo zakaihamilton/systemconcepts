@@ -11,6 +11,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CodeIcon from "@mui/icons-material/Code";
 import CodeOffIcon from "@mui/icons-material/CodeOff";
 import ArticleIcon from "@mui/icons-material/Article";
+import PrintIcon from "@mui/icons-material/Print";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
@@ -128,10 +129,88 @@ export default function Article({
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
-        const formatted = formatArticleWithTags(selectedTag, content);
-        const filename = `${selectedTag.article || "Article"}_${selectedTag.number || ""}.txt`;
-        exportData(formatted, filename, "text/plain");
-    }, [selectedTag, content, formatArticleWithTags]);
+
+        if (showMarkdown) {
+            const rootElement = contentRef.current;
+            if (!rootElement) return;
+
+            const iframe = document.createElement("iframe");
+            Object.assign(iframe.style, {
+                position: "absolute",
+                top: "-9999px",
+                left: "-9999px",
+                width: "100%",
+                height: "auto"
+            });
+            document.body.appendChild(iframe);
+
+            const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
+                .map(node => node.outerHTML)
+                .join("");
+
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    ${styles}
+                    <style>
+                        :global(body), html, body {
+                            background: white !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                        }
+                        /* Ensure the cloned root is visible and resets layout */
+                        [class*="Article_root"] {
+                            position: static !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                            display: block !important;
+                            visibility: visible !important;
+                            margin: 0 !important;
+                            padding: 20px !important;
+                        }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${rootElement.outerHTML}
+                    <script>
+                        window.onload = () => {
+                            setTimeout(() => {
+                                window.print();
+                                // Clean up after print dialog closes (approximate)
+                                setTimeout(() => {
+                                    window.top.postMessage("print-complete", "*");
+                                }, 1000);
+                            }, 500);
+                        };
+                    </script>
+                </body>
+                </html>
+            `);
+            doc.close();
+
+            const cleanup = (e) => {
+                if (e.data === "print-complete") {
+                    setTimeout(() => {
+                        if (document.body.contains(iframe)) {
+                            document.body.removeChild(iframe);
+                        }
+                    }, 5000); // Wait longer to ensure print is done
+                    window.removeEventListener("message", cleanup);
+                }
+            };
+            window.addEventListener("message", cleanup);
+        } else {
+            const formatted = formatArticleWithTags(selectedTag, content);
+            const filename = `${selectedTag.article || "Article"}${selectedTag.number ? `_${selectedTag.number}` : ""}.md`;
+            exportData(formatted, filename, "text/plain");
+        }
+    }, [selectedTag, content, formatArticleWithTags, showMarkdown]);
 
     const scrollToMatch = useCallback((index) => {
         const highlights = document.querySelectorAll('.search-highlight');
@@ -262,8 +341,8 @@ export default function Article({
             },
             {
                 id: "export",
-                name: translations.EXPORT_TO_TXT || "Export to .txt",
-                icon: <DownloadIcon />,
+                name: showMarkdown ? (translations.PRINT || "Print") : (translations.EXPORT_TO_MD || "Export to .md"),
+                icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
                 onClick: handleExport,
                 menu: true
             },

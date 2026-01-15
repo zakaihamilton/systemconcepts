@@ -272,3 +272,95 @@
         margin: 0;
     }
 }
+
+@media print {
+
+    :global(html),
+    :global(body) {
+        visibility: hidden;
+        background-color: white;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .root {
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        height: auto;
+        overflow: visible;
+        background-color: white;
+        box-shadow: none;
+        display: block;
+        color: black;
+    }
+
+    .root * {
+        visibility: visible;
+    }
+
+    .stickyHeader {
+        position: static;
+        border-bottom: 2px solid #333;
+        padding: 0 0 20px 0;
+        margin-bottom: 30px;
+        display: block;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+
+    .stickyHeader>*:not(.headerInfo) {
+        display: none !important;
+    }
+
+    .headerInfo {
+        display: block;
+    }
+
+    .headerInfo>*:not(.headerTitleWrapper) {
+        display: none !important;
+    }
+
+    .title {
+        font-size: 24pt;
+        color: black;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .metadataTag {
+        border: 1px solid #ccc;
+        color: #333;
+    }
+
+    .contentScrollArea {
+        padding: 0;
+        overflow: visible;
+        height: auto !important;
+        display: block !important;
+        flex: none !important;
+    }
+
+    .contentWrapper {
+        max-width: 100%;
+        height: auto !important;
+        overflow: visible !important;
+
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        * {
+            color: black !important;
+        }
+    }
+
+    .placeholder {
+        display: none;
+    }
+}

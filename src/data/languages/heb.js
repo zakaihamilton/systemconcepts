@@ -1384,6 +1384,22 @@ export default {
         {
             "id": "EDIT_ARTICLE",
             "value": "עריכת מאמר"
+        },
+        {
+            "id": "EXPORT_TO_TXT",
+            "value": "ייצוא ל-.txt"
+        },
+        {
+            "id": "EXPORT_TO_MD",
+            "value": "ייצוא ל-.md"
+        },
+        {
+            "id": "EXPORT_TO_PDF",
+            "value": "ייצוא ל-PDF"
+        },
+        {
+            "id": "PRINT",
+            "value": "הדפסה"
         }
     ]
 };
