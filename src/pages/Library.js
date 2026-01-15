@@ -188,12 +188,12 @@ export default function Library() {
     }, [selectedTag]);
 
     useEffect(() => {
-        if (!selectedTag && !isMobile) {
+        if (!selectedTag && !isMobile && pathItems.length <= 1) {
             MainStore.update(s => {
                 s.showLibrarySideBar = true;
             });
         }
-    }, [selectedTag, isMobile]);
+    }, [selectedTag, isMobile, pathItems]);
 
     useEffect(() => {
         loadContent();

@@ -55,7 +55,10 @@ function Article({
         if (clientHeight === 0) return;
 
         const total = Math.ceil(scrollHeight / clientHeight);
-        const page = Math.ceil((scrollTop + clientHeight / 2) / clientHeight) || 1;
+        let page = Math.ceil((scrollTop + clientHeight / 2) / clientHeight) || 1;
+        if (scrollTop + clientHeight >= scrollHeight - 1) {
+            page = total;
+        }
 
         setScrollInfo(prev => {
             if (prev.page !== page || prev.total !== total || prev.clientHeight !== clientHeight || prev.scrollHeight !== scrollHeight) {
@@ -492,7 +495,7 @@ function Article({
                         right: 0,
                         height: '1px',
                         borderTop: '2px dashed var(--divider)',
-                        opacity: 0.5,
+                        opacity: 1.0,
                         zIndex: 5,
                         pointerEvents: 'none'
                     }}
