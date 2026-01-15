@@ -914,6 +914,18 @@ export default {
             "value": "Reduzir o zoom"
         },
         {
+            "id": "PREVIOUS_PARAGRAPH",
+            "value": "Parágrafo Anterior"
+        },
+        {
+            "id": "NEXT_PARAGRAPH",
+            "value": "Próximo Parágrafo"
+        },
+        {
+            "id": "SELECT_VOICE",
+            "value": "Selecionar Voz"
+        },
+        {
             "id": "EDIT_ACCOUNT",
             "value": "Editar Conta"
         },

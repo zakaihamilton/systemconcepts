@@ -218,7 +218,7 @@ const rehypeArticleEnrichment = () => {
 // Create the regex once since glossary is constant
 const termPattern = new RegExp(`\\b(${Object.keys(glossary).join('|')})\\b`, 'gi');
 
-export default React.memo(function Markdown({ children, search }) {
+export default React.memo(function Markdown({ children, search, currentTTSParagraph }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -335,10 +335,44 @@ export default React.memo(function Markdown({ children, search }) {
         return {
             p: ({ node, children }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
+
+                // Extract plain text from children for TTS
+                const extractText = (child) => {
+                    if (typeof child === 'string') return child;
+                    if (Array.isArray(child)) return child.map(extractText).join('');
+                    if (React.isValidElement(child)) {
+                        // Check if this is a glossary term by looking for the Term component structure
+                        // The Term component renders: <span with glossary-main-text class>
+                        // We want to extract the main text (translation) not the original term
+                        const props = child.props;
+
+                        // If it's a span with className containing 'glossary-main-text', get its text content
+                        if (props?.className && typeof props.className === 'string' &&
+                            props.className.includes('glossary-main-text')) {
+                            return props.children || '';
+                        }
+
+                        // Skip glossary annotations (transliteration above the word)
+                        if (props?.className && typeof props.className === 'string' &&
+                            props.className.includes('glossary-annotation')) {
+                            return '';
+                        }
+
+                        return extractText(props.children);
+                    }
+                    return '';
+                };
+
+                const paragraphText = extractText(children);
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                const isTTSActive = currentTTSParagraph === paragraphIndex;
+
                 return (
                     <Box
-                        className={styles.paragraph}
+                        className={`${styles.paragraph} ${isTTSActive ? styles.ttsActive : ''}`}
                         sx={{ marginBottom: '24px', lineHeight: 2.8 }}
+                        data-paragraph-index={paragraphIndex}
+                        data-paragraph-text={paragraphText}
                     >
                         <TextRenderer>{children}</TextRenderer>
                         <Tooltip title={translations?.ZOOM} placement="top" arrow>
@@ -358,7 +392,7 @@ export default React.memo(function Markdown({ children, search }) {
             h1: ({ children }) => <Box component="h1" sx={{ mt: 3, mb: 2 }}><TextRenderer>{children}</TextRenderer></Box>,
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer, handleParagraphZoom]);
+    }, [TextRenderer, handleParagraphZoom, currentTTSParagraph, translations]);
 
     return (
         <>

@@ -21,6 +21,7 @@ import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import styles from "./Article.module.scss";
 import clsx from "clsx";
+import Player from "./Article/Player";
 
 registerToolbar("Article");
 
@@ -47,6 +48,7 @@ function Article({
     const [showMarkdown, setShowMarkdown] = useState(true);
     const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
     const scrollTimeoutRef = useRef(null);
+    const [currentTTSParagraph, setCurrentTTSParagraph] = useState(-1);
 
     const updateScrollInfo = useCallback((target) => {
         const { scrollTop, scrollHeight, clientHeight } = target;
@@ -248,6 +250,11 @@ function Article({
             });
         }
     }, [content, search, scrollToMatch]);
+
+
+    const handleTTSParagraphChange = useCallback((index, element) => {
+        setCurrentTTSParagraph(index);
+    }, []);
 
 
 
@@ -455,7 +462,7 @@ function Article({
             <Box className={styles.contentScrollArea}>
                 <Box className={styles.contentWrapper}>
                     {showMarkdown ? (
-                        <Markdown search={search}>
+                        <Markdown search={search} currentTTSParagraph={currentTTSParagraph}>
                             {content}
                         </Markdown>
                     ) : (
@@ -491,6 +498,12 @@ function Article({
                     }}
                 />
             ))}
+            {content && showMarkdown && (
+                <Player
+                    contentRef={contentRef}
+                    onParagraphChange={handleTTSParagraphChange}
+                />
+            )}
         </Box>
     );
 }

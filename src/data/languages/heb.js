@@ -930,6 +930,26 @@ export default {
             "value": "הקטן תצוגה"
         },
         {
+            "id": "PLAYER",
+            "value": "נגן"
+        },
+        {
+            "id": "PREVIOUS_PARAGRAPH",
+            "value": "פסקה קודמת"
+        },
+        {
+            "id": "NEXT_PARAGRAPH",
+            "value": "פסקה הבאה"
+        },
+        {
+            "id": "SELECT_VOICE",
+            "value": "בחר קול"
+        },
+        {
+            "id": "COLLAPSE",
+            "value": "צמצם"
+        },
+        {
             "id": "EDIT_ACCOUNT",
             "value": "שינוי חשבון"
         },
