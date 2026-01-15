@@ -76,8 +76,9 @@ const Term = ({ term, entry, search }) => {
                 setHover(false);
             }
         };
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
+        // Use capture: true to detect scroll events on parent containers
+        window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+        return () => window.removeEventListener('scroll', handleScroll, { capture: true });
     }, [hover]);
 
     const mainText = entry.en || entry.trans || term;
@@ -189,7 +190,10 @@ const rehypeArticleEnrichment = () => {
     };
 };
 
-export default function Markdown({ children, search }) {
+// Create the regex once since glossary is constant
+const termPattern = new RegExp(`\\b(${Object.keys(glossary).join('|')})\\b`, 'gi');
+
+export default React.memo(function Markdown({ children, search }) {
     const processedChildren = useMemo(() => {
         if (typeof children !== 'string') return children;
         return children.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
@@ -237,14 +241,14 @@ export default function Markdown({ children, search }) {
         }
 
         if (typeof children === 'string') {
-            const glossaryKeys = Object.keys(glossary);
-            const pattern = new RegExp(`\\b(${glossaryKeys.join('|')})\\b`, 'gi');
-
             const parts = [];
             let lastIndex = 0;
             let match;
 
-            while ((match = pattern.exec(children)) !== null) {
+            // Reset lastIndex for the global regex because we are reusing it
+            termPattern.lastIndex = 0;
+
+            while ((match = termPattern.exec(children)) !== null) {
                 const term = match[0];
                 const start = match.index;
                 const end = start + term.length;
@@ -320,4 +324,4 @@ export default function Markdown({ children, search }) {
             {processedChildren}
         </ReactMarkdown>
     );
-}
+});

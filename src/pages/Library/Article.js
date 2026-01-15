@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useDeviceType } from "@util/styles";
+import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -44,6 +45,51 @@ function Article({
     const [totalMatches, setTotalMatches] = useState(0);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(true);
+    const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
+    const scrollTimeoutRef = useRef(null);
+
+    const updateScrollInfo = useCallback((target) => {
+        const { scrollTop, scrollHeight, clientHeight } = target;
+        if (clientHeight === 0) return;
+
+        const total = Math.ceil(scrollHeight / clientHeight);
+        const page = Math.ceil((scrollTop + clientHeight / 2) / clientHeight) || 1;
+
+        setScrollInfo(prev => {
+            if (prev.page !== page || prev.total !== total || prev.clientHeight !== clientHeight || prev.scrollHeight !== scrollHeight) {
+                return { ...prev, page, total, clientHeight, scrollHeight };
+            }
+            return prev;
+        });
+    }, []);
+
+    const handleScrollUpdate = useCallback((e) => {
+        updateScrollInfo(e.target);
+
+        setScrollInfo(prev => {
+            if (!prev.visible) return { ...prev, visible: true };
+            return prev;
+        });
+
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+
+        scrollTimeoutRef.current = setTimeout(() => {
+            setScrollInfo(prev => ({ ...prev, visible: false }));
+        }, 1500);
+    }, [updateScrollInfo]);
+
+    useEffect(() => {
+        const element = contentRef.current;
+        if (!element) return;
+
+        const observer = new ResizeObserver(() => {
+            updateScrollInfo(element);
+        });
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, [content, updateScrollInfo, contentRef]);
 
     // Delay showing the placeholder to avoid flash during loading
     useEffect(() => {
@@ -314,7 +360,10 @@ function Article({
         <Box
             component="main"
             ref={contentRef}
-            onScroll={handleScroll}
+            onScroll={(e) => {
+                if (handleScroll) handleScroll(e);
+                handleScrollUpdate(e);
+            }}
             className={styles.root}
             minWidth={0}
             sx={{
@@ -403,6 +452,45 @@ function Article({
                     )}
                 </Box>
             </Box>
+            {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
+                <Box
+                    key={i}
+                    sx={{
+                        position: 'absolute',
+                        top: (i + 1) * scrollInfo.clientHeight,
+                        left: 0,
+                        right: 0,
+                        height: '1px',
+                        borderTop: '2px dashed var(--divider)',
+                        opacity: 0.5,
+                        zIndex: 5,
+                        pointerEvents: 'none'
+                    }}
+                />
+            ))}
+            <Fade in={scrollInfo.visible}>
+                <Paper
+                    elevation={4}
+                    sx={{
+                        position: 'fixed',
+                        bottom: 24,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 1400,
+                        px: 2,
+                        py: 1,
+                        borderRadius: 4,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        color: 'white',
+                        backdropFilter: 'blur(4px)',
+                        pointerEvents: 'none'
+                    }}
+                >
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                        Page {scrollInfo.page} / {scrollInfo.total}
+                    </Typography>
+                </Paper>
+            </Fade>
         </Box>
     );
 }
