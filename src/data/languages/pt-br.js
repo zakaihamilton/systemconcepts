@@ -1392,6 +1392,18 @@ export default {
         {
             "id": "PRINT",
             "value": "Imprimir"
+        },
+        {
+            "id": "COPY_TO_CLIPBOARD",
+            "value": "Copiar para Área de Transferência"
+        },
+        {
+            "id": "PREVIOUS_MATCH",
+            "value": "Correspondência Anterior"
+        },
+        {
+            "id": "NEXT_MATCH",
+            "value": "Próxima Correspondência"
         }
     ]
 };

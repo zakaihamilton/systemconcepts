@@ -332,23 +332,27 @@ export default function Article({
     }, [TextRenderer]);
 
     const toolbarItems = useMemo(() => {
+        if (!content || !selectedTag) {
+            return [];
+        }
         const items = [
             {
                 id: "copy",
-                name: translations.COPY_TO_CLIPBOARD || "Copy to Clipboard",
+                name: translations.COPY_TO_CLIPBOARD,
                 icon: <ContentCopyIcon />,
-                onClick: handleCopy
+                onClick: handleCopy,
+                menu: true
             },
             {
                 id: "export",
-                name: showMarkdown ? (translations.PRINT || "Print") : (translations.EXPORT_TO_MD || "Export to .md"),
+                name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
                 icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
                 onClick: handleExport,
                 menu: true
             },
             {
                 id: "toggleMarkdown",
-                name: showMarkdown ? (translations.VIEW_PLAIN_TEXT || "View Plain Text") : (translations.VIEW_MARKDOWN || "View Markdown"),
+                name: showMarkdown ? translations.VIEW_PLAIN_TEXT : translations.VIEW_MARKDOWN,
                 icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
                 onClick: () => setShowMarkdown(prev => !prev),
                 menu: true
@@ -357,14 +361,14 @@ export default function Article({
         if (isAdmin) {
             items.push({
                 id: "editTags",
-                name: translations.EDIT_TAGS || "Edit Tags",
+                name: translations.EDIT_TAGS,
                 icon: <EditIcon />,
                 onClick: openEditDialog,
                 menu: true
             });
             items.push({
                 id: "editArticle",
-                name: translations.EDIT_ARTICLE || "Edit Article",
+                name: translations.EDIT_ARTICLE,
                 icon: <ArticleIcon />,
                 onClick: openEditContentDialog,
                 menu: true
@@ -373,7 +377,7 @@ export default function Article({
         if (search && totalMatches > 0) {
             items.push({
                 id: "prevMatch",
-                name: translations.PREVIOUS_MATCH || "Previous Match",
+                name: translations.PREVIOUS_MATCH,
                 icon: <KeyboardArrowUpIcon />,
                 onClick: handlePrevMatch,
                 location: "header"
@@ -386,14 +390,14 @@ export default function Article({
             });
             items.push({
                 id: "nextMatch",
-                name: translations.NEXT_MATCH || "Next Match",
+                name: translations.NEXT_MATCH,
                 icon: <KeyboardArrowDownIcon />,
                 onClick: handleNextMatch,
                 location: "header"
             });
         }
         return items;
-    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown]);
+    }, [translations, handleCopy, handleExport, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag]);
 
     useToolbar({
         id: "Article",

@@ -1400,6 +1400,18 @@ export default {
         {
             "id": "PRINT",
             "value": "הדפסה"
+        },
+        {
+            "id": "COPY_TO_CLIPBOARD",
+            "value": "העתק ללוח"
+        },
+        {
+            "id": "PREVIOUS_MATCH",
+            "value": "התאמה קודמת"
+        },
+        {
+            "id": "NEXT_MATCH",
+            "value": "התאמה הבאה"
         }
     ]
 };

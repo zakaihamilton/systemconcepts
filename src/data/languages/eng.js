@@ -1412,6 +1412,18 @@ export default {
         {
             "id": "PRINT",
             "value": "Print"
+        },
+        {
+            "id": "COPY_TO_CLIPBOARD",
+            "value": "Copy to Clipboard"
+        },
+        {
+            "id": "PREVIOUS_MATCH",
+            "value": "Previous Match"
+        },
+        {
+            "id": "NEXT_MATCH",
+            "value": "Next Match"
         }
     ]
 };
