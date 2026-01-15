@@ -1140,9 +1140,9 @@ export const glossary = {
         "trans": "Halon"
     },
     "zon": {
-        "he": "",
-        "en": "",
-        "trans": "ZON"
+        "he": "זעיר אנפין ונוקבא",
+        "en": "Small Face and Female",
+        "trans": "Zeir Anpin ve Nukva"
     },
     "hitlabshut": {
         "he": "התלבשות",
@@ -1175,9 +1175,9 @@ export const glossary = {
         "trans": "Sitra Achra"
     },
     "ak": {
-        "he": "",
-        "en": "",
-        "trans": "AK"
+        "he": "אדם קדמון",
+        "en": "Primordial Man",
+        "trans": "Adam Kadmon"
     },
     "zivug de hakaa": {
         "he": "זיווג דהכאה",
@@ -2448,6 +2448,16 @@ export const glossary = {
         "he": "י",
         "en": "Yod [י]",
         "trans": "Yod"
+    },
+    "hey": {
+        "he": "ה",
+        "en": "Hey [ה]",
+        "trans": "Hey"
+    },
+    "vav": {
+        "he": "ו",
+        "en": "Vav [ו]",
+        "trans": "Vav"
     },
     "hey [ה]": {
         "he": "ה",

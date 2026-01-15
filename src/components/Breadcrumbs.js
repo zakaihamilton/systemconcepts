@@ -21,6 +21,7 @@ import { useState } from "react";
 export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, icon, href, hideRoot, navigateLast, description, menuItems, onClick }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
+    const isStatic = isLast && !navigateLast && !menuItems && !onClick;
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
     const [anchorEl, setAnchorEl] = useState(null);
@@ -118,7 +119,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
             <Tooltip arrow title={title}>
                 <span className={clsx(styles.itemWrapper, (showLabel || isLast) && styles.hasLabel)}>
                     <Link
-                        className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
+                        className={clsx(styles.item, isStatic && styles.static, menuItems && styles.menuItems)}
                         color="inherit"
                         href={href}
                         onClick={gotoItem}

@@ -618,6 +618,10 @@ export default {
             "value": "Terms"
         },
         {
+            "id": "TRANSLATION",
+            "value": "Translation"
+        },
+        {
             "id": "TRANSLITERATION",
             "value": "Transliteration"
         },

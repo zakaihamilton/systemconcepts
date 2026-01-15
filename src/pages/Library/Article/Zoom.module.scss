@@ -1,0 +1,15 @@
+.root {
+    padding: 1rem;
+    border: 3px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.itemWrapper {
+    position: relative;
+    padding-right: 48px;
+}
+
+.item {
+    line-height: 3;
+    font-size: 1.4rem;
+}

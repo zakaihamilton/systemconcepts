@@ -141,6 +141,7 @@
     position: absolute;
     right: 8px;
     top: 8px;
+    height: 28px;
     z-index: 5;
     cursor: pointer;
     font-weight: 800;
@@ -155,6 +156,9 @@
     user-select: none;
     font-family: monospace;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         opacity: 1;

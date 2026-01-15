@@ -598,6 +598,10 @@ export default {
             "value": "מושגים"
         },
         {
+            "id": "TRANSLATION",
+            "value": "תרגום"
+        },
+        {
             "id": "TRANSLITERATION",
             "value": "תַעתִיק"
         },

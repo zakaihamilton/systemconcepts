@@ -5,12 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from './Glossary';
 import styles from './Markdown.module.scss'; // Import as Module
-import ZoomDialog from "./ZoomDialog";
+import Zoom from "./Zoom";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
 
 const Term = ({ term, entry, search }) => {
+    const translations = useTranslations();
     const [hover, setHover] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({});
     const [bridgeStyle, setBridgeStyle] = useState({});
@@ -138,20 +139,22 @@ const Term = ({ term, entry, search }) => {
 
                     <div className={styles['glossary-tooltip']} style={tooltipStyle}>
                         {/* English Section */}
-                        <div className={styles['tt-label']}>Translation</div>
+                        <div className={styles['tt-label']}>{translations.TRANSLATION}</div>
                         <div className={styles['tt-value']}>{entry.en || mainText}</div>
 
                         <hr />
 
                         {/* Transliteration Section */}
-                        <div className={styles['tt-label']}>Transliteration</div>
+                        <div className={styles['tt-label']}>{translations.TRANSLITERATION}</div>
                         <div className={styles['tt-value']}>{entry.trans}</div>
 
-                        <hr />
-
-                        {/* Hebrew Section */}
-                        <div className={styles['tt-label']}>Hebrew</div>
-                        <div className={styles['tt-hebrew']}>{entry.he}</div>
+                        {!!entry.he && (
+                            <>
+                                <hr />
+                                <div className={styles['tt-label']}>{translations.HEBREW}</div>
+                                <div className={styles['tt-hebrew']}>{entry.he}</div>
+                            </>
+                        )}
                     </div>
                 </>,
                 document.body
@@ -369,7 +372,7 @@ export default React.memo(function Markdown({ children, search }) {
                 </ReactMarkdown>
             </div>
 
-            <ZoomDialog
+            <Zoom
                 open={!!zoomedData}
                 onClose={() => setZoomedData(null)}
                 content={zoomedData?.content}
