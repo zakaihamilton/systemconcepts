@@ -7,6 +7,9 @@ import { glossary } from './Glossary';
 import styles from './Markdown.module.scss'; // Import as Module
 import ZoomDialog from "./ZoomDialog";
 
+import Tooltip from "@mui/material/Tooltip";
+import { useTranslations } from "@util/translations";
+
 const Term = ({ term, entry, search }) => {
     const [hover, setHover] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({});
@@ -159,6 +162,7 @@ const Term = ({ term, entry, search }) => {
 
 const rehypeArticleEnrichment = () => {
     return (tree) => {
+        let paragraphIndex = 0;
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
@@ -178,13 +182,16 @@ const rehypeArticleEnrichment = () => {
                     if (currentSegment.length > 0) segments.push(currentSegment);
 
                     if (segments.length === 0) {
+                        paragraphIndex++;
+                        node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
                         newNodes.push(node);
                     } else {
                         segments.forEach(seg => {
+                            paragraphIndex++;
                             newNodes.push({
                                 type: "element",
                                 tagName: "p",
-                                properties: { ...node.properties },
+                                properties: { ...node.properties, dataParagraphIndex: paragraphIndex },
                                 children: seg
                             });
                         });
@@ -209,7 +216,8 @@ const rehypeArticleEnrichment = () => {
 const termPattern = new RegExp(`\\b(${Object.keys(glossary).join('|')})\\b`, 'gi');
 
 export default React.memo(function Markdown({ children, search }) {
-    const [zoomedContent, setZoomedContent] = useState(null);
+    const translations = useTranslations();
+    const [zoomedData, setZoomedData] = useState(null);
 
     const processedChildren = useMemo(() => {
         if (typeof children !== 'string') return children;
@@ -316,33 +324,30 @@ export default React.memo(function Markdown({ children, search }) {
         return children;
     }, [Highlight]);
 
-    const handleParagraphDoubleClick = useCallback((children) => {
-        setZoomedContent(children);
+    const handleParagraphZoom = useCallback((children, number) => {
+        setZoomedData({ content: children, number });
     }, []);
 
     const markdownComponents = useMemo(() => {
         return {
-            p: ({ children }) => {
-                const lastTap = useRef(0);
-                const handleTouchEnd = (e) => {
-                    const now = Date.now();
-                    if (now - lastTap.current < 300) {
-                        e.preventDefault();
-                        handleParagraphDoubleClick(children);
-                    }
-                    lastTap.current = now;
-                };
-
+            p: ({ node, children }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
                 return (
                     <Box
                         className={styles.paragraph}
                         sx={{ marginBottom: '24px', lineHeight: 2.8 }}
-                        onDoubleClick={() => handleParagraphDoubleClick(children)}
-                        onTouchEnd={handleTouchEnd}
-                        style={{ touchAction: 'manipulation' }}
                     >
                         <TextRenderer>{children}</TextRenderer>
+                        <Tooltip title={translations?.ZOOM} placement="top" arrow>
+                            <span
+                                className={styles.paragraphNumber}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const number = node?.properties?.dataParagraphIndex;
+                                    handleParagraphZoom(children, number);
+                                }}
+                            />
+                        </Tooltip>
                     </Box>
                 );
             },
@@ -350,22 +355,26 @@ export default React.memo(function Markdown({ children, search }) {
             h1: ({ children }) => <Box component="h1" sx={{ mt: 3, mb: 2 }}><TextRenderer>{children}</TextRenderer></Box>,
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer, handleParagraphDoubleClick]);
+    }, [TextRenderer, handleParagraphZoom]);
 
     return (
         <>
-            <ReactMarkdown
-                remarkPlugins={[remarkBreaks]}
-                rehypePlugins={[rehypeArticleEnrichment]}
-                components={markdownComponents}
-            >
-                {processedChildren}
-            </ReactMarkdown>
+            <div className={styles.container}>
+                <ReactMarkdown
+                    remarkPlugins={[remarkBreaks]}
+                    rehypePlugins={[rehypeArticleEnrichment]}
+                    components={markdownComponents}
+                >
+                    {processedChildren}
+                </ReactMarkdown>
+            </div>
 
             <ZoomDialog
-                open={!!zoomedContent}
-                onClose={() => setZoomedContent(null)}
-                content={zoomedContent}
+                open={!!zoomedData}
+                onClose={() => setZoomedData(null)}
+                content={zoomedData?.content}
+                number={zoomedData?.number}
+                badgeClass={styles.paragraphBadge}
                 Renderer={TextRenderer}
             />
         </>

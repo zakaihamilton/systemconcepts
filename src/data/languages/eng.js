@@ -934,6 +934,10 @@ export default {
             "value": "Refresh"
         },
         {
+            "id": "ZOOM",
+            "value": "Zoom"
+        },
+        {
             "id": "ZOOM_IN",
             "value": "Zoom In"
         },

@@ -914,6 +914,10 @@ export default {
             "value": "רענן"
         },
         {
+            "id": "ZOOM",
+            "value": "תקריב"
+        },
+        {
             "id": "ZOOM_IN",
             "value": "מיקוד תצוגה"
         },
