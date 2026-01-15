@@ -5,75 +5,90 @@ import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from './Glossary';
 import styles from './Markdown.module.scss'; // Import as Module
+import ZoomDialog from "./ZoomDialog";
 
 const Term = ({ term, entry, search }) => {
     const [hover, setHover] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({});
     const [bridgeStyle, setBridgeStyle] = useState({});
     const containerRef = useRef(null);
+    const hoverTimeoutRef = useRef(null);
 
     const handleMouseEnter = () => {
-        if (containerRef.current) {
-            const rect = containerRef.current.getBoundingClientRect();
-            const spaceTop = rect.top;
+        hoverTimeoutRef.current = setTimeout(() => {
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                const spaceTop = rect.top;
 
-            const scrollX = window.scrollX;
-            const scrollY = window.scrollY;
+                const scrollX = window.scrollX;
+                const scrollY = window.scrollY;
 
-            // Base style for Portal (absolute relative to document)
-            const baseStyle = {
-                position: 'absolute',
-                left: `${rect.left + scrollX + rect.width / 2}px`,
-                zIndex: 1300,
-                margin: 0
-            };
+                // Base style for Portal (absolute relative to document)
+                const baseStyle = {
+                    position: 'absolute',
+                    left: `${rect.left + scrollX + rect.width / 2}px`,
+                    zIndex: 1300,
+                    margin: 0
+                };
 
-            const bridgeBase = {
-                position: 'absolute',
-                left: `${rect.left + scrollX}px`,
-                width: `${rect.width}px`,
-                transform: 'none',
-                zIndex: 1299
-            };
+                const bridgeBase = {
+                    position: 'absolute',
+                    left: `${rect.left + scrollX}px`,
+                    width: `${rect.width}px`,
+                    transform: 'none',
+                    zIndex: 1299
+                };
 
-            if (spaceTop < 250) {
-                // Place BOTTOM
-                const topVal = rect.bottom + scrollY + 10;
-                setTooltipStyle({
-                    ...baseStyle,
-                    top: `${topVal}px`,
-                    bottom: 'auto',
-                    transform: 'translateX(-50%)'
-                });
-                setBridgeStyle({
-                    ...bridgeBase,
-                    top: `${rect.bottom + scrollY}px`,
-                    height: '10px'
-                });
-            } else {
-                // Place TOP
-                const topVal = rect.top + scrollY - 10;
-                setTooltipStyle({
-                    ...baseStyle,
-                    top: `${topVal}px`,
-                    bottom: 'auto',
-                    // Use translate to shift it UP from the anchor point
-                    transform: 'translate(-50%, -100%)'
-                });
-                setBridgeStyle({
-                    ...bridgeBase,
-                    top: `${rect.top + scrollY - 10}px`,
-                    height: '10px'
-                });
+                if (spaceTop < 250) {
+                    // Place BOTTOM
+                    const topVal = rect.bottom + scrollY + 10;
+                    setTooltipStyle({
+                        ...baseStyle,
+                        top: `${topVal}px`,
+                        bottom: 'auto',
+                        transform: 'translateX(-50%)'
+                    });
+                    setBridgeStyle({
+                        ...bridgeBase,
+                        top: `${rect.bottom + scrollY}px`,
+                        height: '10px'
+                    });
+                } else {
+                    // Place TOP
+                    const topVal = rect.top + scrollY - 10;
+                    setTooltipStyle({
+                        ...baseStyle,
+                        top: `${topVal}px`,
+                        bottom: 'auto',
+                        // Use translate to shift it UP from the anchor point
+                        transform: 'translate(-50%, -100%)'
+                    });
+                    setBridgeStyle({
+                        ...bridgeBase,
+                        top: `${rect.top + scrollY - 10}px`,
+                        height: '10px'
+                    });
+                }
             }
+            setHover(true);
+        }, 300); // 300ms delay
+    };
+
+    const handleMouseLeave = () => {
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = null;
         }
-        setHover(true);
+        setHover(false);
     };
 
     useEffect(() => {
         const handleScroll = () => {
             if (hover) {
                 setHover(false);
+                if (hoverTimeoutRef.current) {
+                    clearTimeout(hoverTimeoutRef.current);
+                }
             }
         };
         // Use capture: true to detect scroll events on parent containers
@@ -104,7 +119,7 @@ const Term = ({ term, entry, search }) => {
             className={styles['glossary-term-container']}
             ref={containerRef}
             onMouseEnter={handleMouseEnter}
-            onMouseLeave={() => setHover(false)}
+            onMouseLeave={handleMouseLeave}
         >
             {/* The Transliteration (Top Annotation) */}
             {showAnnotation && <span className={styles['glossary-annotation']}>{entry.trans}</span>}
@@ -194,6 +209,8 @@ const rehypeArticleEnrichment = () => {
 const termPattern = new RegExp(`\\b(${Object.keys(glossary).join('|')})\\b`, 'gi');
 
 export default React.memo(function Markdown({ children, search }) {
+    const [zoomedContent, setZoomedContent] = useState(null);
+
     const processedChildren = useMemo(() => {
         if (typeof children !== 'string') return children;
         return children.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
@@ -299,12 +316,32 @@ export default React.memo(function Markdown({ children, search }) {
         return children;
     }, [Highlight]);
 
+    const handleParagraphDoubleClick = useCallback((children) => {
+        setZoomedContent(children);
+    }, []);
+
     const markdownComponents = useMemo(() => {
         return {
             p: ({ children }) => {
+                const lastTap = useRef(0);
+                const handleTouchEnd = (e) => {
+                    const now = Date.now();
+                    if (now - lastTap.current < 300) {
+                        e.preventDefault();
+                        handleParagraphDoubleClick(children);
+                    }
+                    lastTap.current = now;
+                };
+
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
                 return (
-                    <Box className={styles.paragraph} sx={{ marginBottom: '24px', lineHeight: 2.8 }}>
+                    <Box
+                        className={styles.paragraph}
+                        sx={{ marginBottom: '24px', lineHeight: 2.8 }}
+                        onDoubleClick={() => handleParagraphDoubleClick(children)}
+                        onTouchEnd={handleTouchEnd}
+                        style={{ touchAction: 'manipulation' }}
+                    >
                         <TextRenderer>{children}</TextRenderer>
                     </Box>
                 );
@@ -313,15 +350,24 @@ export default React.memo(function Markdown({ children, search }) {
             h1: ({ children }) => <Box component="h1" sx={{ mt: 3, mb: 2 }}><TextRenderer>{children}</TextRenderer></Box>,
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer]);
+    }, [TextRenderer, handleParagraphDoubleClick]);
 
     return (
-        <ReactMarkdown
-            remarkPlugins={[remarkBreaks]}
-            rehypePlugins={[rehypeArticleEnrichment]}
-            components={markdownComponents}
-        >
-            {processedChildren}
-        </ReactMarkdown>
+        <>
+            <ReactMarkdown
+                remarkPlugins={[remarkBreaks]}
+                rehypePlugins={[rehypeArticleEnrichment]}
+                components={markdownComponents}
+            >
+                {processedChildren}
+            </ReactMarkdown>
+
+            <ZoomDialog
+                open={!!zoomedContent}
+                onClose={() => setZoomedContent(null)}
+                content={zoomedContent}
+                Renderer={TextRenderer}
+            />
+        </>
     );
 });
