@@ -79,7 +79,7 @@ export default function Article({
     translations,
     isAdmin,
     openEditDialog,
-    isHeaderShrunk,
+    isHeaderHidden,
     handleScroll,
     contentRef,
     handleDrawerToggle,
@@ -350,7 +350,7 @@ export default function Article({
                 ml: { sm: 2 }
             }}
         >
-            <Box className={clsx(styles.stickyHeader, isHeaderShrunk && styles.shrunk)}>
+            <Box className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}>
                 <Box className={styles.headerInfo}>
                     <IconButton
                         color="inherit"
@@ -366,30 +366,20 @@ export default function Article({
                             {selectedTag?.number && (
                                 <Paper
                                     elevation={0}
-                                    className={clsx(styles.tagNumber, isHeaderShrunk && styles.shrunk)}
+                                    className={styles.tagNumber}
                                 >
                                     #{selectedTag.number}
                                 </Paper>
                             )}
                             <Typography
-                                variant={isHeaderShrunk ? "h6" : "h4"}
-                                className={clsx(styles.title, isHeaderShrunk && styles.shrunk)}
+                                variant="h4"
+                                className={styles.title}
                                 sx={{ flex: 1 }}
                             >
                                 {title.name}
                             </Typography>
                         </Box>
-                        <Box
-                            className={clsx(styles.metadataRow, isHeaderShrunk && styles.shrunk)}
-                            sx={{
-                                opacity: isHeaderShrunk ? 0 : 1,
-                                maxHeight: isHeaderShrunk ? 0 : '500px',
-                                visibility: isHeaderShrunk ? 'hidden' : 'visible',
-                                pointerEvents: isHeaderShrunk ? 'none' : 'auto',
-                                overflow: isHeaderShrunk ? "hidden" : "visible",
-                                transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }}
-                        >
+                        <Box className={styles.metadataRow}>
                             {LibraryTagKeys.map(key => {
                                 if (!selectedTag?.[key] || key === "number") return null;
                                 if (title.key === key) return null;
@@ -401,6 +391,8 @@ export default function Article({
                                         <Paper
                                             elevation={0}
                                             className={styles.metadataTag}
+                                            onClick={() => navigator.clipboard.writeText(value)}
+                                            sx={{ cursor: "pointer" }}
                                         >
                                             {Icon && <Icon sx={{ fontSize: "1rem" }} />}
                                             <Typography variant="caption">{value}</Typography>
