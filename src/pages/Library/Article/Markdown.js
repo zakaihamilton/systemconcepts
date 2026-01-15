@@ -4,11 +4,12 @@ import Box from "@mui/material/Box";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from './Glossary';
-import styles from './Markdown.module.scss'; // Import as Module
+import styles from './Markdown.module.scss';
 import Zoom from "./Zoom";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
+import clsx from "clsx";
 
 const Term = ({ term, entry, search }) => {
     const translations = useTranslations();
@@ -365,11 +366,11 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
                 const paragraphText = extractText(children);
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
-                const isTTSActive = currentTTSParagraph === paragraphIndex;
+                const paragraphSelected = currentTTSParagraph === paragraphIndex;
 
                 return (
                     <Box
-                        className={`${styles.paragraph} ${isTTSActive ? styles.ttsActive : ''}`}
+                        className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''}`}
                         sx={{ marginBottom: '24px', lineHeight: 2.8 }}
                         data-paragraph-index={paragraphIndex}
                         data-paragraph-text={paragraphText}
@@ -377,7 +378,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                         <TextRenderer>{children}</TextRenderer>
                         <Tooltip title={translations?.ZOOM} placement="top" arrow>
                             <span
-                                className={styles.paragraphNumber}
+                                className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     const number = node?.properties?.dataParagraphIndex;

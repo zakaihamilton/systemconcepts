@@ -131,6 +131,10 @@
     counter-increment: paragraph;
     background-color: var(--background-paper);
 
+    &:not(.selected) {
+        cursor: pointer;
+    }
+
     &:hover {
         border-color: var(--primary-main);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -138,7 +142,7 @@
     }
 }
 
-.ttsActive {
+.selected {
     background: linear-gradient(90deg,
             rgba(25, 118, 210, 0.12) 0%,
             rgba(25, 118, 210, 0.08) 100%);
@@ -178,7 +182,11 @@
     align-items: center;
     justify-content: center;
 
-    &:hover {
+    &:not(.selected) {
+        pointer-events: none;
+    }
+
+    &.selected:hover {
         opacity: 1;
         background-color: var(--primary-main);
         color: var(--primary-contrast-text);

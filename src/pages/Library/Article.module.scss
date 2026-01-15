@@ -186,40 +186,6 @@
     }
 }
 
-.paragraphWrapper {
-    position: relative;
-    margin-bottom: 12px;
-    padding-right: 48px;
-}
-
-.paragraphNumber {
-    font-weight: 800;
-    color: var(--primary-main);
-    font-size: 0.65rem;
-    padding: 4px 6px;
-    background-color: var(--action-hover);
-    border: 1px solid var(--divider);
-    border-radius: 6px;
-    text-align: center;
-    opacity: 0.4;
-    user-select: none;
-    font-family: monospace;
-    cursor: pointer;
-    position: absolute;
-    right: 0;
-    top: 4px;
-    transition: all 0.2s ease;
-    z-index: 5;
-
-    &:hover {
-        opacity: 1;
-        background-color: var(--primary-main);
-        color: var(--primary-contrast-text);
-        border-color: var(--primary-main);
-        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
-    }
-}
-
 .placeholder {
     display: flex;
     align-items: center;
