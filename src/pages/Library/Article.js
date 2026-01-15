@@ -76,7 +76,7 @@ const rehypeArticleEnrichment = () => {
     };
 };
 
-export default function Article({
+function Article({
     selectedTag,
     content,
     search,
@@ -581,3 +581,5 @@ export default function Article({
         </Box>
     );
 }
+
+export default React.memo(Article);

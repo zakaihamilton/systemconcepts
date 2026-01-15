@@ -214,9 +214,12 @@ export default function Library() {
         MainStore.update(s => { s.showLibrarySideBar = false; });
     };
 
-    const handleDrawerToggle = () => {
+    const handleDrawerToggle = useCallback(() => {
         MainStore.update(s => { s.showLibrarySideBar = !s.showLibrarySideBar; });
-    };
+    }, []);
+
+    const openEditDialog = useCallback(() => setEditDialogOpen(true), []);
+    const openEditContentDialog = useCallback(() => setEditContentDialogOpen(true), []);
 
     // Navigation between articles - flatten the tree in display order
     const sortedTags = useMemo(() => {
@@ -472,13 +475,13 @@ export default function Library() {
                 search={search}
                 translations={translations}
                 isAdmin={isAdmin}
-                openEditDialog={() => setEditDialogOpen(true)}
+                openEditDialog={openEditDialog}
                 isHeaderHidden={isHeaderHidden}
                 handleScroll={handleScroll}
                 contentRef={contentRef}
                 handleDrawerToggle={handleDrawerToggle}
                 showLibrarySideBar={showLibrarySideBar}
-                openEditContentDialog={() => setEditContentDialogOpen(true)}
+                openEditContentDialog={openEditContentDialog}
             />
 
             {isAdmin && selectedTag && (
