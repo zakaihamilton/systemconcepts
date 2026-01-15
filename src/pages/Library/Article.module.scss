@@ -34,6 +34,7 @@
 .stickyHeader.shrunk {
     padding: 0.25rem 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 3.5rem;
 }
 
 .headerInfo {
@@ -42,11 +43,24 @@
     align-items: center;
     flex: 1;
     min-width: 0;
+
+    @media (min-width: 601px) {
+        justify-content: center;
+    }
 }
+
+
 
 .headerTitleWrapper {
     min-width: 0;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    @media (min-width: 601px) {
+        align-items: center;
+        text-align: center;
+    }
 }
 
 .titleRow {
@@ -56,6 +70,12 @@
 
     @media (max-width: 600px) {
         align-items: flex-start;
+    }
+
+    @media (min-width: 601px) {
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
     }
 }
 
@@ -124,6 +144,10 @@
     opacity: 1;
     overflow: visible;
 
+    @media (min-width: 601px) {
+        justify-content: center;
+    }
+
     &.shrunk {
         margin-top: 0;
         padding-top: 0;
@@ -164,6 +188,9 @@
 .contentScrollArea {
     padding: 1rem;
     padding-top: 0.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .contentWrapper {
@@ -241,25 +268,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-grow: 1;
-    height: 100%;
-    color: var(--text-secondary);
     flex-direction: column;
+    padding: 2rem;
+    background-color: var(--action-hover);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    color: var(--text-secondary);
     gap: 16px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
+    cursor: pointer;
+    width: fit-content;
+    margin: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     &:hover {
-        background-color: var(--action-hover);
+        background-color: var(--action-selected);
         color: var(--text-primary);
+        border-color: var(--primary-main);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
         svg {
-            opacity: 0.8 !important;
+            opacity: 1 !important;
             transform: scale(1.1);
+            color: var(--primary-main);
         }
     }
 
     svg {
         transition: all 0.3s ease;
+        font-size: 3rem;
+    }
+
+    p {
+        font-weight: 500;
+        margin: 0;
     }
 }

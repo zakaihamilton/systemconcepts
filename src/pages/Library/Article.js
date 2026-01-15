@@ -302,11 +302,35 @@ export default function Article({
         depends: [toolbarItems, content]
     });
 
+    const title = useMemo(() => {
+        if (!selectedTag) return { name: "", key: "" };
+        for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+            const key = LibraryTagKeys[i];
+            const value = selectedTag[key];
+            if (value && String(value).trim()) {
+                return { name: value, key };
+            }
+        }
+        return { name: "", key: "" };
+    }, [selectedTag]);
+
     if (!content && showPlaceholder) {
         return (
-            <Box className={styles.placeholder} onClick={handleDrawerToggle} sx={{ cursor: "pointer" }}>
-                <LibraryBooksIcon sx={{ fontSize: 64, opacity: 0.5 }} />
-                <Typography>{translations.SELECT_ITEM}</Typography>
+            <Box
+                component="main"
+                className={styles.root}
+                sx={{
+                    ml: { sm: 2 },
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}
+            >
+                <Box className={styles.placeholder} onClick={handleDrawerToggle}>
+                    <LibraryBooksIcon />
+                    <Typography component="p">{translations.SELECT_ITEM}</Typography>
+                </Box>
             </Box>
         );
     }
@@ -314,8 +338,6 @@ export default function Article({
     if (!content) {
         return null;
     }
-
-    const title = selectedTag?.article || selectedTag?.chapter || selectedTag?.section;
 
     return (
         <Box
@@ -354,7 +376,7 @@ export default function Article({
                                 className={clsx(styles.title, isHeaderShrunk && styles.shrunk)}
                                 sx={{ flex: 1 }}
                             >
-                                {title}
+                                {title.name}
                             </Typography>
                         </Box>
                         <Box
@@ -369,9 +391,10 @@ export default function Article({
                             }}
                         >
                             {LibraryTagKeys.map(key => {
-                                if (!selectedTag?.[key] || key === "article" || key === "number") return null;
+                                if (!selectedTag?.[key] || key === "number") return null;
+                                if (title.key === key) return null;
                                 const value = selectedTag[key];
-                                if (title === value) return null;
+                                if (title.name === value) return null;
                                 const Icon = LibraryIcons[key];
                                 return (
                                     <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>

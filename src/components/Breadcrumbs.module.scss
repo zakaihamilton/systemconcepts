@@ -26,6 +26,19 @@
     height: 3.5rem;
 }
 
+.headerInfo {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+
+    @media (min-width: 601px) {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
 .breadcrumbs {
     display: flex;
     align-items: center;
@@ -34,12 +47,22 @@
     overflow: hidden;
     gap: 0.25rem;
     padding: 0 0.5rem;
+    min-width: 0;
 }
 
 .itemWrapper {
     min-width: 0;
+    display: flex;
     overflow: hidden;
-    display: inline-flex;
+    flex: 0 1 auto;
+    max-width: fit-content;
+
+    &.hasLabel {
+        @media (min-width: 601px) {
+            min-width: 8rem;
+            max-width: 400px;
+        }
+    }
 }
 
 .item {
@@ -57,7 +80,10 @@
     cursor: pointer;
     opacity: 0.75;
     min-width: 0;
-    max-width: 600px;
+
+    @media (min-width: 601px) {
+        justify-content: flex-start;
+    }
 
     &:hover {
         background-color: var(--hover-background);
@@ -72,9 +98,11 @@
 .itemContent {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     height: 100%;
     min-width: 0;
     width: 100%;
+    flex: 1;
 }
 
 .item:last-child {
@@ -103,6 +131,11 @@
     justify-content: center;
     min-width: 0;
     flex: 1;
+    overflow: hidden;
+
+    @media (min-width: 601px) {
+        align-items: flex-start;
+    }
 }
 
 .description {

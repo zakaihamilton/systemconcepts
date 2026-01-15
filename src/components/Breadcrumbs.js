@@ -116,7 +116,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
     return (
         <>
             <Tooltip arrow title={title}>
-                <span className={styles.itemWrapper}>
+                <span className={clsx(styles.itemWrapper, (showLabel || isLast) && styles.hasLabel)}>
                     <Link
                         className={clsx(styles.item, isLast && !navigateLast && !menuItems && styles.last, menuItems && styles.menuItems)}
                         color="inherit"
@@ -157,12 +157,22 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     const isDesktop = deviceType === "desktop";
     const isTablet = deviceType === "tablet";
 
+    const firstLibraryIndex = (items || []).findIndex(i => i.id === "library");
     let breadcrumbItems = (items || []).filter((item, index) => {
-        const { breadcrumbs, id } = item;
+        const { breadcrumbs } = item;
         if (typeof breadcrumbs !== "undefined" && !breadcrumbs) return false;
-        if (isPhone && id === "library") {
-            const firstLibraryIndex = items.findIndex(i => i.id === "library");
-            if (index > firstLibraryIndex) return false;
+
+        if (firstLibraryIndex !== -1 && index >= firstLibraryIndex) {
+            const isRoot = index === firstLibraryIndex;
+            const hasChildren = items.length > firstLibraryIndex + 1;
+
+            if (isPhone) {
+                // On mobile, keep the Library root but hide all sub-segments (tags/articles)
+                if (!isRoot && hasChildren) return false;
+            } else {
+                // On desktop/tablet, hide the Library root to focus on the selection hierarchy
+                if (isRoot && hasChildren) return false;
+            }
         }
         return true;
     });
