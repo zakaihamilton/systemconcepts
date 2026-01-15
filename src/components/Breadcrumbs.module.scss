@@ -56,6 +56,12 @@
     overflow: hidden;
     flex: 0 1 auto;
     max-width: fit-content;
+
+    &.hasLabel {
+        @media (min-width: 601px) {
+            min-width: 5rem;
+        }
+    }
 }
 
 .item {
@@ -128,6 +134,7 @@
 
     @media (min-width: 601px) {
         align-items: flex-start;
+        min-width: 4rem;
     }
 }
 

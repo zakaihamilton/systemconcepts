@@ -73,11 +73,21 @@ export function getLibrarySection({ id, path, translations }) {
         }
     }
 
+    // If the name starts with the description, remove it from the label
+    let label = name;
+    if (description && name.toLowerCase().startsWith(description.toLowerCase())) {
+        label = name.slice(description.length).trim();
+        // If nothing remains after stripping, keep the original name
+        if (!label) {
+            label = name;
+        }
+    }
+
     // Crucial: We must return BOTH Icon: null and icon: null to prevent 
     // the breadcrumb from falling back to the page definition's generic icon.
     const result = {
         name,
-        label: name,
+        label,
         tooltip: name,
         description,
         onClick,
