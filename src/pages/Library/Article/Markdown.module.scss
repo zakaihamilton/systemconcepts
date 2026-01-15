@@ -137,6 +137,23 @@
     }
 }
 
+.ttsActive {
+    background: linear-gradient(90deg,
+            rgba(25, 118, 210, 0.12) 0%,
+            rgba(25, 118, 210, 0.08) 100%);
+    border-color: var(--primary-main) !important;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2),
+        0 4px 12px rgba(25, 118, 210, 0.15) !important;
+
+    @media (prefers-color-scheme: dark) {
+        background: linear-gradient(90deg,
+                rgba(144, 202, 249, 0.15) 0%,
+                rgba(144, 202, 249, 0.08) 100%);
+        box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.25),
+            0 4px 12px rgba(144, 202, 249, 0.2) !important;
+    }
+}
+
 %paragraph-label-shared {
     position: absolute;
     right: 8px;

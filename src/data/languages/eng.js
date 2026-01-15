@@ -950,6 +950,26 @@ export default {
             "value": "Zoom Out"
         },
         {
+            "id": "PLAYER",
+            "value": "Player"
+        },
+        {
+            "id": "PREVIOUS_PARAGRAPH",
+            "value": "Previous Paragraph"
+        },
+        {
+            "id": "NEXT_PARAGRAPH",
+            "value": "Next Paragraph"
+        },
+        {
+            "id": "SELECT_VOICE",
+            "value": "Select Voice"
+        },
+        {
+            "id": "COLLAPSE",
+            "value": "Collapse"
+        },
+        {
             "id": "EDIT_ACCOUNT",
             "value": "Edit Account"
         },
