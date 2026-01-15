@@ -11,8 +11,14 @@ export default function Player({ contentRef, onParagraphChange }) {
     const [selectedVoice, setSelectedVoice] = useState(null);
     const [voiceMenuAnchor, setVoiceMenuAnchor] = useState(null);
     const [isCollapsed, setIsCollapsed] = useState(false);
+
     const utteranceRef = useRef(null);
     const synthRef = useRef(null);
+    const isInitialMount = useRef(true);
+
+    // NEW REFS FOR FIXING BUGS
+    const prevVoiceRef = useRef(null);
+    const isStoppingRef = useRef(false);
 
     // Initialize speech synthesis and load voices
     useEffect(() => {
@@ -69,18 +75,13 @@ export default function Player({ contentRef, onParagraphChange }) {
         const extractParagraphs = () => {
             const pElements = contentRef.current.querySelectorAll('[data-paragraph-index]');
             const extracted = Array.from(pElements).map((el, index) => {
-                // Extract text from the rendered DOM to get translated glossary terms
-                // Clone the element to manipulate it without affecting the display
                 const clone = el.cloneNode(true);
 
-                // Remove the paragraph number element
                 const paragraphNumber = clone.querySelector('[class*="paragraphNumber"]');
                 if (paragraphNumber) {
                     paragraphNumber.remove();
                 }
 
-                // Get text from glossary-main-text spans (the translated terms)
-                // and regular text, excluding annotations
                 const annotations = clone.querySelectorAll('[class*="glossary-annotation"]');
                 annotations.forEach(ann => ann.remove());
 
@@ -97,7 +98,6 @@ export default function Player({ contentRef, onParagraphChange }) {
 
         extractParagraphs();
 
-        // Re-extract if content changes
         const observer = new MutationObserver(extractParagraphs);
         observer.observe(contentRef.current, { childList: true, subtree: true });
 
@@ -106,85 +106,88 @@ export default function Player({ contentRef, onParagraphChange }) {
 
     // Speak a specific paragraph
     const speakParagraph = useCallback((index, autoPlay = true) => {
-        console.log('speakParagraph called:', index, autoPlay);
+        // 1. Guard against interactions while stopping
+        if (isStoppingRef.current) return;
         if (!synthRef.current || !paragraphs[index]) return;
 
-        // Invalidate current utterance to prevent onend from firing for the cancelled utterance
+        // 2. Clear the specific reference to block old 'onend' events
         utteranceRef.current = null;
 
-        // Cancel any ongoing speech
+        // 3. CANCEL IMMEDIATELY (Crucial step)
         synthRef.current.cancel();
 
         const paragraph = paragraphs[index];
 
-        // Update selection and scroll
+        // 4. Update UI State immediately
         setCurrentParagraphIndex(index);
         if (onParagraphChange) {
-            // Pass the actual data-paragraph-index value, not the array index
             onParagraphChange(paragraph.index, paragraph.element);
         }
         paragraph.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        // Only play if autoPlay is true
+        // 5. Handle "Pause" mode (just stop and exit)
         if (!autoPlay) {
             setIsPlaying(false);
             return;
         }
 
+        // 6. Setup the new utterance
         const utterance = new SpeechSynthesisUtterance(paragraph.text);
-
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
 
-        // Apply selected voice
         if (selectedVoice) {
             utterance.voice = selectedVoice;
         }
 
         utterance.onstart = () => {
-            // Only update state if this is still the active utterance
-            if (utteranceRef.current === utterance) {
+            if (utteranceRef.current === utterance && !isStoppingRef.current) {
                 setIsPlaying(true);
             }
         };
 
         utterance.onend = () => {
-            console.log('onend fired for utterance');
-            // Only proceed if this is the active utterance
-            if (utteranceRef.current === utterance) {
-                console.log('onend: proceeding to next paragraph');
-                // Auto-advance to next paragraph
+            if (utteranceRef.current === utterance && !isStoppingRef.current) {
                 if (index < paragraphs.length - 1) {
                     speakParagraph(index + 1, true);
                 } else {
                     setIsPlaying(false);
                 }
-            } else {
-                console.log('onend: ignoring cancelled utterance');
             }
         };
 
         utterance.onerror = (event) => {
-            // Ignore interrupted errors as they happen when we manually cancel/stop
-            if (event.error === 'interrupted' || event.error === 'canceled') {
-                return;
-            }
+            if (event.error === 'interrupted' || event.error === 'canceled') return;
             console.error('Speech synthesis error:', event);
             if (utteranceRef.current === utterance) {
                 setIsPlaying(false);
             }
         };
 
+        // 7. ASSIGN REF NOW (Before the timeout)
+        // This claims "ownership" of the player. 
+        // If another click happens during the 50ms wait, this ref will change, 
+        // and the timeout below will know to abort.
         utteranceRef.current = utterance;
-        synthRef.current.speak(utterance);
+
+        // 8. INTRODUCE DELAY
+        // This 50ms gap ensures the browser processes the .cancel() command 
+        // completely before receiving the new .speak() command.
+        setTimeout(() => {
+            // Only speak if this utterance is STILL the chosen one
+            if (utteranceRef.current === utterance && !isStoppingRef.current) {
+                synthRef.current.speak(utterance);
+            }
+        }, 50);
+
     }, [paragraphs, onParagraphChange, selectedVoice]);
 
     // Play/Resume
     const handlePlay = useCallback(() => {
         if (!synthRef.current) return;
+        isStoppingRef.current = false; // Reset stop flag on explicit play
 
-        // precise check: if we are paused OR (speaking but not reported as paused which can happen)
         if (synthRef.current.paused || synthRef.current.speaking) {
             synthRef.current.resume();
             setIsPlaying(true);
@@ -202,24 +205,26 @@ export default function Player({ contentRef, onParagraphChange }) {
         }
     }, []);
 
-    // Stop
+    // Stop (FIXED)
     const handleStop = useCallback(() => {
-        console.log('handleStop called');
+        isStoppingRef.current = true; // Block any pending restarts
+
         if (synthRef.current) {
-            // Clear reference before cancelling to prevent onend logic
+            // Clear reference immediately
             utteranceRef.current = null;
 
-            // Aggressive stop: resume -> cancel -> double check
+            // Aggressive stop
             synthRef.current.resume();
             synthRef.current.cancel();
 
-            // Double tap cancel for stubborn browsers
+            // Double check cleanup
             setTimeout(() => {
                 if (synthRef.current) {
-                    synthRef.current.resume();
+                    utteranceRef.current = null;
                     synthRef.current.cancel();
                 }
-            }, 10);
+                isStoppingRef.current = false; // Release lock after cleanup
+            }, 50);
 
             setIsPlaying(false);
             setCurrentParagraphIndex(-1);
@@ -244,19 +249,21 @@ export default function Player({ contentRef, onParagraphChange }) {
         handleVoiceMenuClose();
     };
 
-    // Previous paragraph
+    // Inside Player component
+
     const handlePrevious = useCallback(() => {
         const prevIndex = Math.max(0, currentParagraphIndex - 1);
-        speakParagraph(prevIndex, false);
-    }, [currentParagraphIndex, speakParagraph]);
+        // Pass 'isPlaying' instead of 'false' to maintain playback state
+        speakParagraph(prevIndex, isPlaying);
+    }, [currentParagraphIndex, speakParagraph, isPlaying]);
 
-    // Next paragraph
     const handleNext = useCallback(() => {
         const nextIndex = Math.min(paragraphs.length - 1, currentParagraphIndex + 1);
-        speakParagraph(nextIndex, false);
-    }, [currentParagraphIndex, paragraphs.length, speakParagraph]);
+        // Pass 'isPlaying' instead of 'false'
+        speakParagraph(nextIndex, isPlaying);
+    }, [currentParagraphIndex, paragraphs.length, speakParagraph, isPlaying]);
 
-    // Expose method to start from specific paragraph (called from paragraph clicks)
+    // Expose method to start from specific paragraph
     useEffect(() => {
         const handleParagraphClick = (event) => {
             const target = event.target.closest('[data-paragraph-index]');
@@ -266,8 +273,6 @@ export default function Player({ contentRef, onParagraphChange }) {
             const paragraphIndex = paragraphs.findIndex(p => p.index === index);
 
             if (paragraphIndex >= 0) {
-                // If currently playing, jump to the paragraph and play
-                // Otherwise, just select it
                 speakParagraph(paragraphIndex, isPlaying);
             }
         };
@@ -279,31 +284,33 @@ export default function Player({ contentRef, onParagraphChange }) {
         }
     }, [contentRef, paragraphs, speakParagraph, isPlaying]);
 
-    // Restart playback with new voice when voice changes during playback
-    const isInitialMount = useRef(true);
-
+    // Restart playback when voice changes (FIXED)
     useEffect(() => {
-        // Skip on initial mount
         if (isInitialMount.current) {
             isInitialMount.current = false;
+            prevVoiceRef.current = selectedVoice;
             return;
         }
 
-        if (isPlaying && currentParagraphIndex >= 0 && selectedVoice) {
-            // Cancel current speech and restart with new voice
-            if (synthRef.current) {
-                console.log('Voice changed, restarting playback...');
-                // No need for setTimeout here, speakParagraph handles cancellation
-                speakParagraph(currentParagraphIndex, true);
-            }
+        const hasVoiceChanged = prevVoiceRef.current !== selectedVoice;
+
+        // Only restart if:
+        // 1. We are playing
+        // 2. The voice ACTUALLY changed (not just paragraphs updating)
+        // 3. We are not currently stopping
+        if (isPlaying && currentParagraphIndex >= 0 && selectedVoice && hasVoiceChanged && !isStoppingRef.current) {
+            console.log('Voice changed, restarting playback...');
+            speakParagraph(currentParagraphIndex, true);
         }
+
+        prevVoiceRef.current = selectedVoice;
     }, [selectedVoice, isPlaying, currentParagraphIndex, speakParagraph]);
 
     // Cleanup on unmount
     useEffect(() => {
         return () => {
             if (synthRef.current) {
-                utteranceRef.current = null; // Clear ref before cancelling
+                utteranceRef.current = null;
                 synthRef.current.cancel();
             }
         };
