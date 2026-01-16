@@ -221,15 +221,22 @@ const rehypeArticleEnrichment = () => {
 };
 
 // Create the regex once since glossary is constant
-const termPattern = new RegExp(`\\b(${Object.keys(glossary).join('|')})\\b`, 'gi');
+// Sort keys by length descending to ensure multi-word terms (e.g. "hitpashtut aleph") are matched before single words
+const sortedKeys = Object.keys(glossary).sort((a, b) => b.length - a.length);
+// Escape special characters in keys to prevent regex errors
+const escapedKeys = sortedKeys.map(key => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+const termPattern = new RegExp(`\\b(${escapedKeys.join('|')})\\b`, 'gi');
 
 export default React.memo(function Markdown({ children, search, currentTTSParagraph }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
     const processedChildren = useMemo(() => {
-        if (typeof children !== 'string') return children;
         let content = children;
+        if (Array.isArray(content)) {
+            content = content.join('');
+        }
+        if (typeof content !== 'string') return content;
 
         // Bold numbered lists (existing)
         content = content.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
@@ -250,8 +257,17 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             return `### ${trimmed}\n`;
         });
 
-        // Cleanup double commas
-        content = content.replace(/, ,/g, ',');
+        // Cleanup double commas (handles ", ," and ",," and ",   ," and " ,")
+        // Aggressive: Replace any sequence starting and ending with comma, containing only commas/spaces, with single comma
+        content = content.replace(/\u00A0/g, ' '); // Replace NBSP with space
+        content = content.replace(/\u200B/g, ''); // Remove Zero Width Space
+        content = content.replace(/ ,/g, ',');
+        content = content.replace(/,[\s,]+,/g, ',');
+
+        // Fallback for tricky overlaps
+        if (content.match(/,[\s,]+,/)) {
+            content = content.replace(/,[\s,]+,/g, ',');
+        }
 
         return content;
     }, [children]);
@@ -296,6 +312,16 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         }
 
         if (typeof children === 'string') {
+            // Unconditional cleanup in renderer as final safety net
+            let cleanChildren = children;
+            cleanChildren = cleanChildren.replace(/\u00A0/g, ' ');
+            cleanChildren = cleanChildren.replace(/\u200B/g, '');
+            // Recursive comma collapse
+            cleanChildren = cleanChildren.replace(/,[\s,]+,/g, ',');
+            if (cleanChildren.match(/,[\s,]+,/)) {
+                cleanChildren = cleanChildren.replace(/,[\s,]+,/g, ',');
+            }
+
             const parts = [];
             let lastIndex = 0;
             let match;
@@ -303,7 +329,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             // Reset lastIndex for the global regex because we are reusing it
             termPattern.lastIndex = 0;
 
-            while ((match = termPattern.exec(children)) !== null) {
+            while ((match = termPattern.exec(cleanChildren)) !== null) {
                 const term = match[0];
                 const start = match.index;
                 const end = start + term.length;
@@ -311,7 +337,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                 if (start > lastIndex) {
                     parts.push(
                         <Highlight key={`text-${start}`}>
-                            {children.slice(lastIndex, start)}
+                            {cleanChildren.slice(lastIndex, start)}
                         </Highlight>
                     );
                 }
@@ -323,7 +349,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                 }
                 // Skip 'Or' at the start of a sentence (sentence terminator + whitespace before it, or start of block)
                 if (term === 'Or') {
-                    const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(children.slice(0, start));
+                    const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(cleanChildren.slice(0, start));
                     if (isStartOfSentence) {
                         continue;
                     }
@@ -340,15 +366,15 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                 lastIndex = end;
             }
 
-            if (lastIndex < children.length) {
+            if (lastIndex < cleanChildren.length) {
                 parts.push(
                     <Highlight key={`text-end`}>
-                        {children.slice(lastIndex)}
+                        {cleanChildren.slice(lastIndex)}
                     </Highlight>
                 );
             }
 
-            return parts.length > 0 ? parts : <Highlight>{children}</Highlight>;
+            return parts.length > 0 ? parts : <Highlight>{cleanChildren}</Highlight>;
         }
 
         return children;
