@@ -14,6 +14,10 @@ export default {
             "value": "אפליקציות"
         },
         {
+            "id": "ALL",
+            "value": "הכל"
+        },
+        {
             "id": "USERS",
             "value": "משתמשים"
         },
@@ -1452,6 +1456,74 @@ export default {
         {
             "id": "NEXT_MATCH",
             "value": "התאמה הבאה"
+        },
+        {
+            "id": "BATCH_UPDATE_TAGS",
+            "value": "Batch Update Tags"
+        },
+        {
+            "id": "FILTER_CONDITION",
+            "value": "Filter Condition"
+        },
+        {
+            "id": "KEY",
+            "value": "תג"
+        },
+        {
+            "id": "VALUE",
+            "value": "ערך"
+        },
+        {
+            "id": "CHANGE_FROM",
+            "value": "שנה מ"
+        },
+        {
+            "id": "CHANGE_TO",
+            "value": "שנה ל"
+        },
+        {
+            "id": "SOURCE_KEY",
+            "value": "תג מקור"
+        },
+        {
+            "id": "SOURCE_VALUE",
+            "value": "ערך מקור"
+        },
+        {
+            "id": "DESTINATION_KEY",
+            "value": "תג יעד"
+        },
+        {
+            "id": "DESTINATION_VALUE",
+            "value": "ערך יעד"
+        },
+        {
+            "id": "PREVIEW",
+            "value": "Preview"
+        },
+        {
+            "id": "NO_MATCHING_ITEMS",
+            "value": "No matching items found."
+        },
+        {
+            "id": "MATCHING_ITEMS",
+            "value": "Matching items"
+        },
+        {
+            "id": "TOTAL_FILES",
+            "value": "Total Files"
+        },
+        {
+            "id": "TOTAL_ITEMS",
+            "value": "Total Items"
+        },
+        {
+            "id": "UPDATING",
+            "value": "Updating..."
+        },
+        {
+            "id": "UPDATE",
+            "value": "Update"
         }
     ]
 };

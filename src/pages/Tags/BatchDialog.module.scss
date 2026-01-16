@@ -1,0 +1,16 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em; /* Space between sections */
+    padding-top: 1em;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 1em; /* Space between fields in a section */
+}
+
+.field {
+    width: 100%;
+}

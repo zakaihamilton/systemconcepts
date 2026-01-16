@@ -13,6 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloudSyncIcon from "@mui/icons-material/CloudSync";
+import EditAttributesIcon from "@mui/icons-material/EditAttributes";
 import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -24,6 +25,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { LibraryStore } from "@pages/Library/Store";
 import SyncDialog from "./SyncDialog";
+import BatchDialog from "./BatchDialog";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 
 registerToolbar("LibraryTags", 110);
@@ -46,6 +48,7 @@ export default function LibraryTags() {
     const [renameDialog, setRenameDialog] = useState(null); // { category, value }
     const [deleteDialog, setDeleteDialog] = useState(null); // { category, value, count }
     const [syncDialog, setSyncDialog] = useState(false);
+    const [batchDialog, setBatchDialog] = useState(false);
     const [newValue, setNewValue] = useState("");
     const [processing, setProcessing] = useState(false);
 
@@ -62,6 +65,13 @@ export default function LibraryTags() {
             name: translations.SYNC_ARTICLE_TAGS,
             icon: <CloudSyncIcon />,
             onClick: () => setSyncDialog(true),
+            location: "header"
+        },
+        isAdmin && {
+            id: "batch",
+            name: translations.BATCH_UPDATE_TAGS,
+            icon: <EditAttributesIcon />,
+            onClick: () => setBatchDialog(true),
             location: "header"
         }
     ].filter(Boolean);
@@ -404,6 +414,14 @@ export default function LibraryTags() {
                 open={syncDialog}
                 onClose={() => setSyncDialog(false)}
                 tags={tags}
+            />
+
+            {/* Batch Update Dialog */}
+            <BatchDialog
+                open={batchDialog}
+                onClose={() => setBatchDialog(false)}
+                tags={tags}
+                loadTags={loadTags}
             />
         </div>
     );

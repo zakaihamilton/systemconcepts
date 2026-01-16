@@ -14,6 +14,10 @@ export default {
             "value": "Apps"
         },
         {
+            "id": "ALL",
+            "value": "Todos"
+        },
+        {
             "id": "USERS",
             "value": "Usuários"
         },
@@ -1428,6 +1432,74 @@ export default {
         {
             "id": "NEXT_MATCH",
             "value": "Próxima Correspondência"
+        },
+        {
+            "id": "BATCH_UPDATE_TAGS",
+            "value": "Atualização em Lote de Tags"
+        },
+        {
+            "id": "FILTER_CONDITION",
+            "value": "Condição de Filtro"
+        },
+        {
+            "id": "KEY",
+            "value": "Tag"
+        },
+        {
+            "id": "VALUE",
+            "value": "Valor"
+        },
+        {
+            "id": "CHANGE_FROM",
+            "value": "Alterar De"
+        },
+        {
+            "id": "CHANGE_TO",
+            "value": "Alterar Para"
+        },
+        {
+            "id": "SOURCE_KEY",
+            "value": "Tag de Origem"
+        },
+        {
+            "id": "SOURCE_VALUE",
+            "value": "Valor de Origem"
+        },
+        {
+            "id": "DESTINATION_KEY",
+            "value": "Tag de Destino"
+        },
+        {
+            "id": "DESTINATION_VALUE",
+            "value": "Valor de Destino"
+        },
+        {
+            "id": "PREVIEW",
+            "value": "Pré-visualizar"
+        },
+        {
+            "id": "NO_MATCHING_ITEMS",
+            "value": "Nenhum item correspondente encontrado."
+        },
+        {
+            "id": "MATCHING_ITEMS",
+            "value": "Itens correspondentes"
+        },
+        {
+            "id": "TOTAL_FILES",
+            "value": "Total de Arquivos"
+        },
+        {
+            "id": "TOTAL_ITEMS",
+            "value": "Total de Itens"
+        },
+        {
+            "id": "UPDATING",
+            "value": "Atualizando..."
+        },
+        {
+            "id": "UPDATE",
+            "value": "Atualizar"
         }
     ]
 };

@@ -14,6 +14,10 @@ export default {
             "value": "Apps"
         },
         {
+            "id": "ALL",
+            "value": "All"
+        },
+        {
             "id": "USERS",
             "value": "Users"
         },
@@ -1464,6 +1468,74 @@ export default {
         {
             "id": "NEXT_MATCH",
             "value": "Next Match"
+        },
+        {
+            "id": "BATCH_UPDATE_TAGS",
+            "value": "Batch Update Tags"
+        },
+        {
+            "id": "FILTER_CONDITION",
+            "value": "Filter Condition"
+        },
+        {
+            "id": "KEY",
+            "value": "Tag"
+        },
+        {
+            "id": "VALUE",
+            "value": "Value"
+        },
+        {
+            "id": "CHANGE_FROM",
+            "value": "Change From"
+        },
+        {
+            "id": "CHANGE_TO",
+            "value": "Change To"
+        },
+        {
+            "id": "SOURCE_KEY",
+            "value": "Source Tag"
+        },
+        {
+            "id": "SOURCE_VALUE",
+            "value": "Source Value"
+        },
+        {
+            "id": "DESTINATION_KEY",
+            "value": "Destination Tag"
+        },
+        {
+            "id": "DESTINATION_VALUE",
+            "value": "Destination Value"
+        },
+        {
+            "id": "PREVIEW",
+            "value": "Preview"
+        },
+        {
+            "id": "NO_MATCHING_ITEMS",
+            "value": "No matching items found."
+        },
+        {
+            "id": "MATCHING_ITEMS",
+            "value": "Matching items"
+        },
+        {
+            "id": "TOTAL_FILES",
+            "value": "Total Files"
+        },
+        {
+            "id": "TOTAL_ITEMS",
+            "value": "Total Items"
+        },
+        {
+            "id": "UPDATING",
+            "value": "Updating..."
+        },
+        {
+            "id": "UPDATE",
+            "value": "Update"
         }
     ]
 };
