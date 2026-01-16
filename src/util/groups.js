@@ -59,7 +59,7 @@ export function useGroups(depends = []) {
 
     useEffect(() => {
         loadGroups();
-    }, [syncCounter, ...depends]);
+    }, [syncCounter, loadGroups, ...depends]);
 
     const updateGroups = useCallback(async data => {
         let updatedGroups = null;

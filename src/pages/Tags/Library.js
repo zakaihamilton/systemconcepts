@@ -333,7 +333,7 @@ export default function LibraryTags() {
                 </Box>
             )
         }));
-    }, [sortedData, translations]);
+    }, [sortedData, translations, isAdmin]);
 
     return (
         <div className={styles.root}>

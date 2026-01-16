@@ -41,7 +41,7 @@ export default function Sync() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
-    const [currentTime, setCurrentTime] = React.useState(Date.now());
+    const [currentTime, setCurrentTime] = React.useState(() => Date.now());
 
     React.useEffect(() => {
         console.log("Build Timestamp: 2026-01-10 21:49:00 - Checking for Fixes");

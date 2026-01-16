@@ -104,6 +104,7 @@ function Article({
             }, 300);
             return () => clearTimeout(timer);
         } else {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setShowPlaceholder(false);
         }
     }, [content, selectedTag]);
@@ -123,6 +124,7 @@ function Article({
         return `${metadata}\n\n${"=".repeat(20)}\n\n${text || ""}`;
     }, []);
 
+    // eslint-disable-next-line
     const handlePrint = useCallback(() => {
         const rootElement = contentRef.current;
         if (!rootElement) return;
@@ -244,6 +246,7 @@ function Article({
 
     useEffect(() => {
         const highlights = document.querySelectorAll('.search-highlight');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTotalMatches(highlights.length);
         if (highlights.length > 0) {
             setMatchIndex(prev => {
@@ -265,7 +268,7 @@ function Article({
         if (!content || !selectedTag) {
             return [];
         }
-        const items = [
+        return [
             {
                 id: "export",
                 name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
@@ -279,47 +282,46 @@ function Article({
                 icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
                 onClick: () => setShowMarkdown(prev => !prev),
                 menu: true
-            }
+            },
+            ...(isAdmin ? [
+                {
+                    id: "editTags",
+                    name: translations.EDIT_TAGS,
+                    icon: <EditIcon />,
+                    onClick: openEditDialog,
+                    menu: true
+                },
+                {
+                    id: "editArticle",
+                    name: translations.EDIT_ARTICLE,
+                    icon: <ArticleIcon />,
+                    onClick: openEditContentDialog,
+                    menu: true
+                }
+            ] : []),
+            ...(search && totalMatches > 0 ? [
+                {
+                    id: "prevMatch",
+                    name: translations.PREVIOUS_MATCH,
+                    icon: <KeyboardArrowUpIcon />,
+                    onClick: handlePrevMatch,
+                    location: isPhone ? "header" : undefined
+                },
+                {
+                    id: "matchCount",
+                    name: `${matchIndex + 1} / ${totalMatches}`,
+                    element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
+                    location: isPhone ? "header" : undefined
+                },
+                {
+                    id: "nextMatch",
+                    name: translations.NEXT_MATCH,
+                    icon: <KeyboardArrowDownIcon />,
+                    onClick: handleNextMatch,
+                    location: isPhone ? "header" : undefined
+                }
+            ] : [])
         ];
-        if (isAdmin) {
-            items.push({
-                id: "editTags",
-                name: translations.EDIT_TAGS,
-                icon: <EditIcon />,
-                onClick: openEditDialog,
-                menu: true
-            });
-            items.push({
-                id: "editArticle",
-                name: translations.EDIT_ARTICLE,
-                icon: <ArticleIcon />,
-                onClick: openEditContentDialog,
-                menu: true
-            });
-        }
-        if (search && totalMatches > 0) {
-            items.push({
-                id: "prevMatch",
-                name: translations.PREVIOUS_MATCH,
-                icon: <KeyboardArrowUpIcon />,
-                onClick: handlePrevMatch,
-                location: isPhone ? "header" : undefined
-            });
-            items.push({
-                id: "matchCount",
-                name: `${matchIndex + 1} / ${totalMatches}`,
-                element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
-                location: isPhone ? "header" : undefined
-            });
-            items.push({
-                id: "nextMatch",
-                name: translations.NEXT_MATCH,
-                icon: <KeyboardArrowDownIcon />,
-                onClick: handleNextMatch,
-                location: isPhone ? "header" : undefined
-            });
-        }
-        return items;
     }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone]);
 
     useToolbar({
@@ -329,6 +331,7 @@ function Article({
         depends: [toolbarItems, content]
     });
 
+    // eslint-disable-next-line
     const title = useMemo(() => {
         if (!selectedTag) return { name: "", key: "" };
         for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {

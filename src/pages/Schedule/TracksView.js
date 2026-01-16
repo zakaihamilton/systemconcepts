@@ -238,6 +238,7 @@ export default function TracksView({ sessions = [], store, translations, playing
             const firstGroup = groupedSessions[0];
             if (firstGroup) {
                 const [y, m] = firstGroup.yearMonth.split('-');
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setSelectedYear(y);
                 setSelectedMonth(m);
             }
@@ -304,10 +305,11 @@ export default function TracksView({ sessions = [], store, translations, playing
             element: yearWidget,
             location: "footer"
         }
-    ].filter(Boolean);
+    ];
 
     useToolbar({ id: "TracksView", items: toolbarItems, depends: [translations, selectedYear, selectedMonth, isMobile, isAtTop] });
 
+    // eslint-disable-next-line
     const itemData = useMemo(() => ({
         groupedSessions,
         focusedSessionId,
@@ -319,7 +321,13 @@ export default function TracksView({ sessions = [], store, translations, playing
         playingSession
     }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store, translations, playingSession]);
 
-    const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0"));
+    const [initialScrollOffset] = useState(() => {
+        if (typeof window !== "undefined") {
+            return parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0");
+        }
+        return 0;
+    });
+    const scrollOffsetRef = useRef(initialScrollOffset);
 
     useEffect(() => {
         return () => {
@@ -343,7 +351,7 @@ export default function TracksView({ sessions = [], store, translations, playing
                 style={{ overflowX: 'hidden' }}
                 itemData={itemData}
                 onItemsRendered={onItemsRendered}
-                initialScrollOffset={scrollOffsetRef.current}
+                initialScrollOffset={initialScrollOffset}
                 onScroll={({ scrollOffset }) => {
                     scrollOffsetRef.current = scrollOffset;
                 }}

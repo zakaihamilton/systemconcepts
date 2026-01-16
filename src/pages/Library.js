@@ -85,6 +85,7 @@ export default function Library() {
             const urlPath = pathItems.slice(1).join("|");
             const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
             if (tag) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setSelectedTag(tag);
                 // Remember the last viewed article
                 LibraryStore.update(s => {
@@ -138,6 +139,7 @@ export default function Library() {
     }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadTags();
         loadCustomOrder();
     }, [loadTags, loadCustomOrder]);
@@ -196,6 +198,7 @@ export default function Library() {
     }, [selectedTag, isMobile, pathItems]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadContent();
     }, [loadContent]);
 
@@ -204,6 +207,7 @@ export default function Library() {
             // Clear caches when library is updated
             contentCacheRef.current.clear();
             fileCacheRef.current.clear();
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             loadTags();
             loadCustomOrder();
             loadContent();

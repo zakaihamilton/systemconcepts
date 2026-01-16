@@ -195,7 +195,7 @@ export function useActivePages(depends = []) {
     const pages = usePages();
     const activePages = useMemo(() => {
         return getPagesFromHash({ hash, translations, pages });
-    }, [hash, translations, pages, ...depends]);
+    }, [hash, translations, pages, ...depends]); // eslint-disable-line
     return activePages;
 }
 

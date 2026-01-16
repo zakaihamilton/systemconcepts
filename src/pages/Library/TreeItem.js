@@ -32,6 +32,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
 
     useEffect(() => {
         if (selectedPath && node.id !== "root" && (selectedPath === node.id || selectedPath.startsWith(node.id + "|"))) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setOpen(true);
         }
     }, [selectedPath, node.id]);

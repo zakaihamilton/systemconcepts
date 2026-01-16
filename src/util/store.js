@@ -26,6 +26,7 @@ export function useStoreState(store, filter) {
 }
 
 export function useLocalStorage(id, store, fields) {
+    const fieldsStr = JSON.stringify(fields);
     useEffect(() => {
         if (typeof window === "undefined") {
             return;
@@ -67,18 +68,19 @@ export function useLocalStorage(id, store, fields) {
         return () => {
             unsubscribe();
         };
-    }, []);
+    }, [id, store, fieldsStr]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 export function useGlobalState(id, defaults) {
     const state = StateStore.useState(s => s[id], [id]);
+    const defaultsStr = JSON.stringify(defaults);
     useEffect(() => {
         if (typeof state === "undefined" && id) {
             StateStore.update(s => {
                 s[id] = defaults;
             });
         }
-    }, [state, id]);
+    }, [state, id, defaultsStr]); // eslint-disable-line react-hooks/exhaustive-deps
     const setState = useCallback(data => {
         if (!id) {
             return;

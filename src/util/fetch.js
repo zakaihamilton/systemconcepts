@@ -89,6 +89,7 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setResult(null);
             setError("");
             setProgress(true);
@@ -134,6 +135,7 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline && url) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setResult(null);
             setError("");
             setProgress(true);

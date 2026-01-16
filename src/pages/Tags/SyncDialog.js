@@ -24,15 +24,7 @@ export default function SyncDialog({ open, onClose, tags }) {
     const [calculating, setCalculating] = useState(false);
     const [changes, setChanges] = useState([]);
 
-    useEffect(() => {
-        if (open) {
-            calculateChanges();
-        } else {
-            setChanges([]);
-        }
-    }, [open]);
-
-    const calculateChanges = async () => {
+    const calculateChanges = React.useCallback(async () => {
         setCalculating(true);
         try {
             const filesToUpdate = {};
@@ -104,7 +96,15 @@ export default function SyncDialog({ open, onClose, tags }) {
         } finally {
             setCalculating(false);
         }
-    };
+    }, [tags]);
+
+    useEffect(() => {
+        if (open) {
+            calculateChanges();
+        } else {
+            setChanges([]);
+        }
+    }, [open, calculateChanges]);
 
     const handleApplySync = async () => {
         setProcessing(true);

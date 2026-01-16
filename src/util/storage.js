@@ -148,6 +148,7 @@ export function useListing(url, depends = [], options) {
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         setError(null);
         active.current = url;

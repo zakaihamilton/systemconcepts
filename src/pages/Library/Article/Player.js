@@ -19,6 +19,7 @@ export default function Player({ contentRef, onParagraphChange }) {
     // NEW REFS FOR FIXING BUGS
     const prevVoiceRef = useRef(null);
     const isStoppingRef = useRef(false);
+    const speakParagraphRef = useRef(null);
 
     // Initialize speech synthesis and load voices
     useEffect(() => {
@@ -150,7 +151,9 @@ export default function Player({ contentRef, onParagraphChange }) {
         utterance.onend = () => {
             if (utteranceRef.current === utterance && !isStoppingRef.current) {
                 if (index < paragraphs.length - 1) {
-                    speakParagraph(index + 1, true);
+                    if (speakParagraphRef.current) {
+                        speakParagraphRef.current(index + 1, true);
+                    }
                 } else {
                     setIsPlaying(false);
                 }
@@ -182,6 +185,10 @@ export default function Player({ contentRef, onParagraphChange }) {
         }, 50);
 
     }, [paragraphs, onParagraphChange, selectedVoice]);
+
+    useEffect(() => {
+        speakParagraphRef.current = speakParagraph;
+    }, [speakParagraph]);
 
     // Play/Resume
     const handlePlay = useCallback(() => {
@@ -300,6 +307,7 @@ export default function Player({ contentRef, onParagraphChange }) {
         // 3. We are not currently stopping
         if (isPlaying && currentParagraphIndex >= 0 && selectedVoice && hasVoiceChanged && !isStoppingRef.current) {
             console.log('Voice changed, restarting playback...');
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             speakParagraph(currentParagraphIndex, true);
         }
 

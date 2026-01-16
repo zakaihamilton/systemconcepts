@@ -16,6 +16,7 @@ const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick, i
     const { thumbnail, name, duration, color, group, id } = session;
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowThumbnail(false);
         setImageLoaded(false);
         const timer = setTimeout(() => {

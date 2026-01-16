@@ -223,7 +223,7 @@ const rehypeArticleEnrichment = () => {
 // Create the regex once since glossary is constant
 const termPattern = new RegExp(`\\b(${Object.keys(glossary).join('|')})\\b`, 'gi');
 
-export default React.memo(function Markdown({ children, search, currentTTSParagraph }) {
+const Markdown = React.memo(function Markdown({ children, search, currentTTSParagraph }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -253,7 +253,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         return content;
     }, [children]);
 
-    const Highlight = useCallback(({ children }) => {
+    const Highlight = useCallback(function Highlight({ children }) {
         if (!search || !children || typeof children !== 'string') return children;
         const lowerSearch = search.toLowerCase();
         const lowerChildren = children.toLowerCase();
@@ -281,7 +281,8 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         return parts;
     }, [search]);
 
-    const TextRenderer = useCallback(({ children }) => {
+    // eslint-disable-next-line react/display-name
+    const TextRenderer = useCallback(function TextRenderer({ children }) {
         if (Array.isArray(children)) {
             return children.map((child, idx) => <TextRenderer key={idx}>{child}</TextRenderer>);
         }
@@ -349,7 +350,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         }
 
         return children;
-    }, [Highlight]);
+    }, [Highlight, search]);
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });
@@ -469,3 +470,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         </>
     );
 });
+
+Markdown.displayName = "Markdown";
+
+export default Markdown;

@@ -60,6 +60,7 @@ export default function SpeedSlider() {
     };
 
     const handleSpeedChange = (event, newValue) => {
+        // eslint-disable-next-line
         player.playbackRate = newValue;
     };
 

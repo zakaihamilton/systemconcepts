@@ -289,6 +289,6 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
     return {
         // Expose for manual recovery if needed
         attemptResume: safePlay,
-        wasPlaying: wasPlayingRef.current
+        wasPlaying: wasPlayingRef
     };
 }

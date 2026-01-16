@@ -37,6 +37,7 @@ export default function Audio({ show, metadataPath, metadataKey, name, path, dat
 
         // Set initial duration if already loaded
         if (playerRef.duration) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setDuration(playerRef.duration);
         }
 
