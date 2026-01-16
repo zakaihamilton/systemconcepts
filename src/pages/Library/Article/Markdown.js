@@ -200,6 +200,10 @@ const rehypeArticleEnrichment = () => {
                             });
                         });
                     }
+                } else if (node.type === "element" && /^h[1-6]$/.test(node.tagName)) {
+                    paragraphIndex++;
+                    node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
+                    newNodes.push(node);
                 } else {
                     if (node.children) {
                         node.children = visitAndSplit(node.children);
@@ -225,9 +229,28 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
     const processedChildren = useMemo(() => {
         if (typeof children !== 'string') return children;
-        return children.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
+        let content = children;
+
+        // Bold numbered lists (existing)
+        content = content.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
             return `**${number}\\${symbol}** `;
         });
+
+        // Detect headings
+        // Heuristic: Start of line, Uppercase, No period at end, < 80 chars
+        // Negative lookahead to ensure not already a header or list item, or number
+        content = content.replace(/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(?:\r?\n|$)/gm, (match, line) => {
+            // Check if it really looks like a header
+            const trimmed = line.trim();
+            if (!trimmed) return match;
+            if (trimmed.endsWith('.')) return match; // Sentence
+            if (trimmed.length > 80) return match; // Too long
+
+            // It passes heuristic, make it a header
+            return `### ${trimmed}\n`;
+        });
+
+        return content;
     }, [children]);
 
     const Highlight = useCallback(({ children }) => {
@@ -333,6 +356,29 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
     }, []);
 
     const markdownComponents = useMemo(() => {
+        const HeaderRenderer = (tag) => ({ node, children }) => {
+            const paragraphIndex = node?.properties?.dataParagraphIndex;
+            const paragraphSelected = currentTTSParagraph === paragraphIndex;
+            return (
+                <Box
+                    component={tag}
+                    className={paragraphSelected ? styles.selected : ''}
+                    sx={{
+                        mt: 3,
+                        mb: 2,
+                        fontWeight: 'bold',
+                        position: 'relative',
+                        backgroundColor: 'var(--background-paper)',
+                        padding: '8px 16px',
+                        borderRadius: '8px'
+                    }}
+                    data-paragraph-index={paragraphIndex}
+                >
+                    <TextRenderer>{children}</TextRenderer>
+                </Box>
+            );
+        };
+
         return {
             p: ({ node, children }) => {
                 if (!children || (Array.isArray(children) && children.length === 0)) return null;
@@ -389,8 +435,13 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                     </Box>
                 );
             },
-            li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2 }}><TextRenderer>{children}</TextRenderer></Box>,
-            h1: ({ children }) => <Box component="h1" sx={{ mt: 3, mb: 2 }}><TextRenderer>{children}</TextRenderer></Box>,
+            li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>,
+            h1: HeaderRenderer('h1'),
+            h2: HeaderRenderer('h2'),
+            h3: HeaderRenderer('h3'),
+            h4: HeaderRenderer('h4'),
+            h5: HeaderRenderer('h5'),
+            h6: HeaderRenderer('h6'),
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
     }, [TextRenderer, handleParagraphZoom, currentTTSParagraph, translations]);
