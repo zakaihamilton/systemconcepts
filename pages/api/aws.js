@@ -29,13 +29,13 @@ export default async function AWS_API(req, res) {
         const isStudent = roleAuth(user.role, "student");
 
         let readOnly = true;
+        const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
 
         if (isAdmin) {
             // Admins can read/write anywhere
             readOnly = false;
         } else if (isStudent) {
             // Students can read from /sync, read/write to /personal/<userid>
-            const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
             const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`) || checkPath === `personal/${user.id}`;
             const isSyncPath = checkPath.startsWith("sync/");
 
@@ -43,7 +43,7 @@ export default async function AWS_API(req, res) {
                 // For GET requests, we must explicitly deny access to unauthorized paths.
                 if (!isSyncPath && !isPersonalPath) {
                     console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot read from path: ${path}`);
-                    throw "ACCESS_DENIED: Cannot read from this path: " + path;
+                    throw "ACCESS_DENIED: " + user.id + " cannot read from this path: " + path;
                 }
                 // readOnly remains true for GET, which is correct.
             } else if ((req.method === "PUT" || req.method === "DELETE") && isPersonalPath) {
@@ -52,21 +52,25 @@ export default async function AWS_API(req, res) {
             } else if (req.method !== "GET") {
                 // Block writes to other paths
                 console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
-                throw "ACCESS_DENIED: Cannot write to this path: " + path;
+                throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
             }
         }
         else {
-            throw "ACCESS_DENIED: Not authorized";
+            throw "ACCESS_DENIED: " + user.id + " is not authorized";
         }
 
-        console.log(`[AWS API] Access granted - ReadOnly: ${readOnly}`);
+        console.log(`[AWS API] Access granted for user ${user.id} - ReadOnly: ${readOnly}, Path: ${path} Role: ${user.role} Method: ${req.method}`);
 
         const result = await handleRequest({ req, readOnly });
 
-        // Prevent caching of any kind
-        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-        res.setHeader("Pragma", "no-cache");
-        res.setHeader("Expires", "0");
+        if (checkPath.startsWith("sessions/")) {
+            res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        }
+        else {
+            res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+        }
 
         if (Buffer.isBuffer(result)) {
             res.status(200).send(result);
