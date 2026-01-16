@@ -13,17 +13,17 @@ import Message from "@widgets/Message";
 import { useTranslations } from "@util/translations";
 import ErrorIcon from "@mui/icons-material/Error";
 
-function useImagePath(imageName = "") {
+function useImagePath(imageName = "", extension) {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
     const parentPath = useParentPath();
     let path = "";
     let url = null;
     if (group) {
-        let components = [prefix, group, year, date + " " + name + ".png"].filter(Boolean).join("/");
+        let components = [prefix, group, year, date + " " + name + "." + extension].filter(Boolean).join("/");
         path = makePath(components).split("/").join("/");
     }
     else {
-        path = (parentPath + "/" + imageName).split("/").slice(1).join("/");
+        path = (parentPath + "/" + imageName + "." + extension).split("/").slice(1).join("/");
     }
     const [data] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     if (path && group) {
@@ -33,11 +33,11 @@ function useImagePath(imageName = "") {
     return path;
 }
 
-export default function ImagePage({ name }) {
+export default function ImagePage({ name, ext = "png" }) {
     const translations = useTranslations();
     const size = useContext(ContentSize);
     const [syncCounter] = useSync();
-    const path = useImagePath(name);
+    const path = useImagePath(name, ext);
     const busyRef = useRef(false);
     const [loading, setLoading] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
@@ -47,7 +47,8 @@ export default function ImagePage({ name }) {
     const onLoad = () => {
         setImageLoading(false);
     };
-    const onError = () => {
+    const onError = (event) => {
+        console.warn("Failed to load image", event);
         setError(true);
         setImageLoading(false);
     };
@@ -69,7 +70,7 @@ export default function ImagePage({ name }) {
             setLoading(false);
         }
         catch (err) {
-            console.error(err);
+            console.warn("Failed to read image", err);
             setError(err);
             setContent(null);
             setLoading(false);
