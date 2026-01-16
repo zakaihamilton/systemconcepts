@@ -642,6 +642,18 @@ export default {
             "value": "Sincronizar Sessões"
         },
         {
+            "id": "SYNC_ARTICLE_TAGS",
+            "value": "Sincronizar Tags de Artigos"
+        },
+        {
+            "id": "SYNC_ARTICLE_TAGS_CONFIRM",
+            "value": "Tem certeza de que deseja sincronizar as tags da biblioteca para todos os arquivos de artigo? Esta ação substituirá tags individuais de arquivos."
+        },
+        {
+            "id": "SYNCING_ARTICLE_TAGS",
+            "value": "Sincronizando Tags de Artigos..."
+        },
+        {
             "id": "SYNC_ALL_SESSIONS",
             "value": "Sincronizar Todas as Sessões"
         },

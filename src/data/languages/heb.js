@@ -646,6 +646,18 @@ export default {
             "value": "סנכרון שיעורים"
         },
         {
+            "id": "SYNC_ARTICLE_TAGS",
+            "value": "סנכרון תגיות מאמרים"
+        },
+        {
+            "id": "SYNC_ARTICLE_TAGS_CONFIRM",
+            "value": "האם אתה בטוח שברצונך לסנכרן תגיות מהספרייה לכל קובצי המאמרים? פעולה זו תדרוס תגיות בודדות של קבצים."
+        },
+        {
+            "id": "SYNCING_ARTICLE_TAGS",
+            "value": "מסנכרן תגיות מאמרים..."
+        },
+        {
             "id": "SYNC_ALL_SESSIONS",
             "value": "סנכרון כל השיעורים"
         },

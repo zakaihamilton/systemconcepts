@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import Cookies from "js-cookie";
+import { roleAuth } from "@util/roles";
 import { Store } from "pullstate";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
@@ -10,6 +12,7 @@ import styles from "../Tags.module.scss";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CloudSyncIcon from "@mui/icons-material/CloudSync";
 import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -20,6 +23,10 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { LibraryStore } from "@pages/Library/Store";
+import SyncDialog from "./SyncDialog";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+
+registerToolbar("LibraryTags", 110);
 
 export const LibraryTagsStore = new Store({
     order: "asc",
@@ -38,12 +45,28 @@ export default function LibraryTags() {
     // Dialog States
     const [renameDialog, setRenameDialog] = useState(null); // { category, value }
     const [deleteDialog, setDeleteDialog] = useState(null); // { category, value, count }
+    const [syncDialog, setSyncDialog] = useState(false);
     const [newValue, setNewValue] = useState("");
     const [processing, setProcessing] = useState(false);
+
+    const role = Cookies.get("role");
+    const isAdmin = roleAuth(role, "admin");
 
     useEffect(() => {
         loadTags();
     }, []);
+
+    const toolbarItems = [
+        isAdmin && {
+            id: "sync",
+            name: translations.SYNC_ARTICLE_TAGS,
+            icon: <CloudSyncIcon />,
+            onClick: () => setSyncDialog(true),
+            location: "header"
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "LibraryTags", items: toolbarItems, depends: [isAdmin, translations] });
 
     const loadTags = async () => {
         try {
@@ -276,7 +299,7 @@ export default function LibraryTags() {
         return sortedData.map(item => ({
             ...item,
             actions: (
-                <Box>
+                isAdmin && <Box>
                     <Tooltip title={translations.RENAME || "Rename"}>
                         <IconButton
                             size="small"
@@ -375,6 +398,13 @@ export default function LibraryTags() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Sync Confirmation Dialog */}
+            <SyncDialog
+                open={syncDialog}
+                onClose={() => setSyncDialog(false)}
+                tags={tags}
+            />
         </div>
     );
 }
