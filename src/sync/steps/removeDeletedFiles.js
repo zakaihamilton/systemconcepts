@@ -7,7 +7,7 @@ import { addSyncLog } from "../logs";
  * Step: Remove local files that no longer exist on remote
  * This ensures local storage stays in sync with the server
  */
-export async function removeDeletedFiles(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH) {
+export async function removeDeletedFiles(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, readOnly = false) {
     const start = performance.now();
     addSyncLog("Checking for deleted files...", "info");
 
@@ -16,8 +16,13 @@ export async function removeDeletedFiles(localManifest, remoteManifest, localPat
 
         // Only delete files that were previously synced (version > 1)
         // Don't delete new files (version = 1) that haven't been uploaded yet
+        // UNLESS we are in read-only mode, in which case we enforce a strict mirror
         const toDelete = localManifest.filter(f => {
             if (remotePathsSet.has(f.path)) return false;
+
+            // If read-only, everything local but not remote is "garbage" to be removed
+            if (readOnly) return true;
+
             const version = parseInt(f.version || "1");
             return version > 1;
         });

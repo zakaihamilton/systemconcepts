@@ -70,7 +70,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role) {
 
     // Step 4.5: Remove files that were deleted on remote
     progress.updateProgress('removeDeletedFiles', { processed: 0, total: 1 });
-    const removeResult = await removeDeletedFiles(localManifest, remoteManifest, localPath);
+    const removeResult = await removeDeletedFiles(localManifest, remoteManifest, localPath, !canUpload);
     localManifest = removeResult.manifest;
     hasChanges = hasChanges || removeResult.hasChanges;
     progress.completeStep('removeDeletedFiles');
@@ -104,7 +104,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role) {
     progress.setComplete();
 
     const duration = ((performance.now() - start) / 1000).toFixed(1);
-    addSyncLog(`✓ ${label} sync complete in ${duration}s`, "success");
+    addSyncLog(`✓ ${label} sync complete (${remoteManifest.length} files) in ${duration}s`, "success");
 
     return hasChanges;
 }

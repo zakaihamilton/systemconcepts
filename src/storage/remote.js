@@ -46,6 +46,9 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 
     async function getRecursiveList(path) {
         path = makePath(path);
+        if (!(await exists(path))) {
+            return [];
+        }
         const listing = [];
 
         // Ensure trailing slash for directory prefix match to avoid partial matches
@@ -60,9 +63,20 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             }
         });
 
+        const validFolders = new Set([path]);
         for (const item of items) {
             const { stat = {}, deleted, id } = item;
+            if (!deleted && stat.type === "dir") {
+                validFolders.add(id);
+            }
+        }
+
+        for (const item of items) {
+            const { stat = {}, deleted, id, folder } = item;
             if (deleted) {
+                continue;
+            }
+            if (!validFolders.has(folder)) {
                 continue;
             }
             // item.id is the full path in mongo.
