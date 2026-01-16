@@ -58,15 +58,23 @@ export default function Editor({ name, path }) {
         readFile();
     }, [syncCounter]);
 
+    const setContent = useCallback((value) => {
+        EditorStore.update(s => {
+            s.content = value;
+        });
+    }, []);
+
+    const state = [content, setContent];
+
     const downloadFile = () => {
         if (content) {
-            exportData(content[0], name, "text/plain");
+            exportData(content, name, "text/plain");
         }
     };
 
     return <>
         <Download visible={!loading} onClick={downloadFile} />
-        {!loading && <EditorWidget state={content} />}
+        {!loading && <EditorWidget state={state} />}
         {loading && <Progress />}
     </>;
 }

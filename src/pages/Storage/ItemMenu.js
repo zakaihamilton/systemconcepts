@@ -2,10 +2,10 @@ import { StorageStore } from "../Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import { exportData } from "@util/importExport";
-import ImportExportIcon from "@mui/icons-material/ImportExport";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
+import GetAppIcon from "@mui/icons-material/GetApp";
 import { isBinaryFile, makePath, fileFolder } from "@util/path";
 import ItemMenu from "@components/ItemMenu";
 
@@ -131,7 +131,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
         !isBinaryFile(item.name) && {
             id: "export",
             name: translations.EXPORT,
-            icon: <ImportExportIcon />,
+            icon: <GetAppIcon />,
             onClick: async () => {
                 let data = null;
                 if (item.type === "dir") {
