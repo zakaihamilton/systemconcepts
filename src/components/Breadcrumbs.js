@@ -158,7 +158,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
     const isDesktop = deviceType === "desktop";
     const isTablet = deviceType === "tablet";
 
-    const firstLibraryIndex = (items || []).findIndex(i => i.id === "library");
+    const firstLibraryIndex = (items || []).findIndex(i => i.id === "library" && i.custom);
     let breadcrumbItems = (items || []).filter((item, index) => {
         const { breadcrumbs } = item;
         if (typeof breadcrumbs !== "undefined" && !breadcrumbs) return false;
