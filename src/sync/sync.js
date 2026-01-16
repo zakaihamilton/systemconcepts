@@ -31,11 +31,16 @@ const SYNC_INTERVAL = 60; // seconds
  * @param {string} remotePath - Remote path to sync to
  * @param {string} label - Label for logging
  */
-async function executeSyncPipeline(localPath, remotePath, label) {
+async function executeSyncPipeline(localPath, remotePath, label, role) {
     const start = performance.now();
     addSyncLog(`Starting ${label} sync...`, "info");
     const progress = new SyncProgressTracker();
     let hasChanges = false;
+    const canUpload = roleAuth(role, "admin");
+
+    if (!canUpload) {
+        addSyncLog(`Read-only mode: Uploads disabled for ${role}`, "info");
+    }
 
     // Ensure local folder exists
     await storage.createFolderPath(makePath(localPath, "dummy"));
@@ -70,23 +75,32 @@ async function executeSyncPipeline(localPath, remotePath, label) {
     hasChanges = hasChanges || removeResult.hasChanges;
     progress.completeStep('removeDeletedFiles');
 
-    // Step 5
-    progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
-    const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, remotePath);
-    remoteManifest = uploadUpdatesResult.manifest;
-    hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
-    progress.completeStep('uploadUpdates');
+    if (canUpload) {
+        // Step 5
+        progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
+        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, remotePath);
+        remoteManifest = uploadUpdatesResult.manifest;
+        hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
+        progress.completeStep('uploadUpdates');
 
-    // Step 6
-    progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
-    const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, remotePath);
-    remoteManifest = uploadNewResult.manifest;
-    hasChanges = hasChanges || uploadNewResult.hasChanges;
-    progress.completeStep('uploadNewFiles');
+        // Step 6
+        progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
+        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, remotePath);
+        remoteManifest = uploadNewResult.manifest;
+        hasChanges = hasChanges || uploadNewResult.hasChanges;
+        progress.completeStep('uploadNewFiles');
 
-    // Step 7
-    progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
-    await uploadManifest(remoteManifest, remotePath);
+        // Step 7
+        progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
+        await uploadManifest(remoteManifest, remotePath);
+        progress.completeStep('uploadManifest'); // Fix: actually complete step 7
+    } else {
+        // Skip upload steps UI progress
+        progress.completeStep('uploadUpdates');
+        progress.completeStep('uploadNewFiles');
+        progress.completeStep('uploadManifest');
+    }
+
     progress.setComplete();
 
     const duration = ((performance.now() - start) / 1000).toFixed(1);
@@ -164,10 +178,10 @@ export async function performSync() {
         const startTime = performance.now();
 
         // 1. Main Sync
-        const mainChanges = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main");
+        const mainChanges = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main", role);
 
         // 2. Library Sync
-        const libraryChanges = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library");
+        const libraryChanges = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library", role);
 
         if (libraryChanges) {
             SyncActiveStore.update(s => {
