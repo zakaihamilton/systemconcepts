@@ -250,6 +250,9 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             return `### ${trimmed}\n`;
         });
 
+        // Cleanup double commas
+        content = content.replace(/, ,/g, ',');
+
         return content;
     }, [children]);
 
@@ -369,7 +372,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                         fontWeight: 'bold',
                         position: 'relative',
                         backgroundColor: 'var(--background-paper)',
-                        padding: '8px 16px',
+                        padding: '16px 16px',
                         borderRadius: '8px'
                     }}
                     data-paragraph-index={paragraphIndex}
