@@ -599,180 +599,10 @@ export const glossary = {
         "en": "Singularity",
         "trans": "Yechida"
     },
-    "yhvh": {
-        "he": "",
-        "en": "",
-        "trans": "YHVH"
-    },
-    "erma": {
-        "he": "",
-        "en": "",
-        "trans": "ERMA"
-    },
-    "nrnhy": {
-        "he": "",
-        "en": "",
-        "trans": "NRNHY"
-    },
-    "yhnrn": {
-        "he": "",
-        "en": "",
-        "trans": "YHNRN"
-    },
-    "hnrn": {
-        "he": "",
-        "en": "",
-        "trans": "HNRN"
-    },
-    "nrnh": {
-        "he": "",
-        "en": "",
-        "trans": "NRNH"
-    },
-    "nrn": {
-        "he": "",
-        "en": "",
-        "trans": "NRN"
-    },
-    "nr": {
-        "he": "",
-        "en": "",
-        "trans": "NR"
-    },
-    "khbtm": {
-        "he": "",
-        "en": "",
-        "trans": "KHBTM"
-    },
-    "khbt": {
-        "he": "",
-        "en": "",
-        "trans": "KHBT"
-    },
-    "hbtm": {
-        "he": "",
-        "en": "",
-        "trans": "HBTM"
-    },
-    "hb tm": {
-        "he": "",
-        "en": "",
-        "trans": "HB TM"
-    },
-    "khb": {
-        "he": "",
-        "en": "",
-        "trans": "KHB"
-    },
-    "kh": {
-        "he": "",
-        "en": "",
-        "trans": "KH"
-    },
-    "hb": {
-        "he": "",
-        "en": "",
-        "trans": "HB"
-    },
-    "tm": {
-        "he": "",
-        "en": "",
-        "trans": "TM"
-    },
-    "asmb": {
-        "he": "",
-        "en": "",
-        "trans": "ASMB"
-    },
-    "abya": {
-        "he": "",
-        "en": "",
-        "trans": "ABYA"
-    },
-    "bya": {
-        "he": "",
-        "en": "",
-        "trans": "BYA"
-    },
-    "dhgt": {
-        "he": "",
-        "en": "",
-        "trans": "DHGT"
-    },
-    "hg tm": {
-        "he": "",
-        "en": "",
-        "trans": "HG TM"
-    },
-    "hgt": {
-        "he": "",
-        "en": "",
-        "trans": "HGT"
-    },
-    "hg": {
-        "he": "",
-        "en": "",
-        "trans": "HG"
-    },
-    "hgtnh": {
-        "he": "",
-        "en": "",
-        "trans": "HGTNH"
-    },
-    "hgtnhy": {
-        "he": "",
-        "en": "",
-        "trans": "HGTNHY"
-    },
-    "hgt nhy": {
-        "he": "",
-        "en": "",
-        "trans": "HGT NHY"
-    },
-    "bina and tm": {
-        "he": "",
-        "en": "",
-        "trans": "Bina and TM"
-    },
-    "tnhy": {
-        "he": "",
-        "en": "",
-        "trans": "TNHY"
-    },
-    "tnhym": {
-        "he": "",
-        "en": "",
-        "trans": "TNHYM"
-    },
-    "aa": {
-        "he": "",
-        "en": "",
-        "trans": "AA"
-    },
     "za": {
         "he": "ז״א",
         "en": "Small Face",
         "trans": "ZA"
-    },
-    "nhy": {
-        "he": "",
-        "en": "",
-        "trans": "NHY"
-    },
-    "nhym": {
-        "he": "",
-        "en": "",
-        "trans": "NHYM"
-    },
-    "ge": {
-        "he": "",
-        "en": "",
-        "trans": "GE"
-    },
-    "ahp": {
-        "he": "",
-        "en": "",
-        "trans": "AHP"
     },
     "gadlut bet": {
         "he": "גדלות ב",
@@ -818,11 +648,6 @@ export const glossary = {
         "he": "קו ימין",
         "en": "Right Line",
         "trans": "Kav Yamin"
-    },
-    "fwwd": {
-        "he": "",
-        "en": "",
-        "trans": "FWWD"
     },
     "akevim": {
         "he": "עקבים",
@@ -1208,11 +1033,6 @@ export const glossary = {
         "he": "ב״ן",
         "en": "",
         "trans": "BON"
-    },
-    "avi": {
-        "he": "",
-        "en": "",
-        "trans": "AVI"
     },
     "abba": {
         "he": "אבא",
@@ -1824,21 +1644,6 @@ export const glossary = {
         "en": "Male",
         "trans": "Dechura"
     },
-    "gar": {
-        "he": "",
-        "en": "",
-        "trans": "GAR"
-    },
-    "zat": {
-        "he": "",
-        "en": "",
-        "trans": "ZAT"
-    },
-    "vak": {
-        "he": "",
-        "en": "",
-        "trans": "VAK"
-    },
     "gimel rishonot": {
         "he": "ג׳ ראשונות",
         "en": "First Three",
@@ -2034,11 +1839,6 @@ export const glossary = {
         "en": "Females",
         "trans": "Nukvaot"
     },
-    "tanta": {
-        "he": "",
-        "en": "",
-        "trans": "TANTA"
-    },
     "etzem": {
         "he": "עצם",
         "en": "Bone",
@@ -2089,21 +1889,6 @@ export const glossary = {
         "en": "Face to Back",
         "trans": "Panim be Achor"
     },
-    "pbp": {
-        "he": "",
-        "en": "",
-        "trans": "PBP"
-    },
-    "pba": {
-        "he": "",
-        "en": "",
-        "trans": "PBA"
-    },
-    "abp": {
-        "he": "",
-        "en": "",
-        "trans": "ABP"
-    },
     "achoraim": {
         "he": "אחוריים",
         "en": "Posterior",
@@ -2139,20 +1924,10 @@ export const glossary = {
         "en": "Sparks",
         "trans": "Zikin"
     },
-    "man": {
-        "he": "",
-        "en": "",
-        "trans": "MAN"
-    },
     "mayin nukvin": {
         "he": "מיין נוקבין",
         "en": "Female Waters",
         "trans": "Mayin Nukvin"
-    },
-    "mad": {
-        "he": "",
-        "en": "",
-        "trans": "MAD"
     },
     "mayin duchrin": {
         "he": "מיין דוכרין",
@@ -2163,16 +1938,6 @@ export const glossary = {
         "he": "רשימות",
         "en": "Memories",
         "trans": "Reshimot"
-    },
-    "hbzon": {
-        "he": "",
-        "en": "",
-        "trans": "HBZON"
-    },
-    "yeshsut": {
-        "he": "",
-        "en": "",
-        "trans": "YESHSUT"
     },
     "tevuna": {
         "he": "תבונה",
@@ -2218,11 +1983,6 @@ export const glossary = {
         "he": "תבונה",
         "en": "Comprehension",
         "trans": "Tvuna"
-    },
-    "yesh": {
-        "he": "",
-        "en": "",
-        "trans": "YESH"
     },
     "rabbi aba": {
         "he": "רבי אבא",
@@ -2649,16 +2409,6 @@ export const glossary = {
         "en": "Circle of Father",
         "trans": "Igul Abba"
     },
-    "khbd": {
-        "he": "",
-        "en": "",
-        "trans": "KHBD"
-    },
-    "hbd": {
-        "he": "",
-        "en": "",
-        "trans": "HBD"
-    },
     "awzen": {
         "he": "אוזן",
         "en": "Ear",
@@ -2773,11 +2523,6 @@ export const glossary = {
         "he": "חוכמות",
         "en": "Wisdoms",
         "trans": "Hochmot"
-    },
-    "hs": {
-        "he": "",
-        "en": "",
-        "trans": "HS"
     },
     "hochma stima'a": {
         "he": "חכמה סתימאה",
@@ -3104,11 +2849,6 @@ export const glossary = {
         "en": "Impression of a Seal",
         "trans": "Roshem Hotam"
     },
-    "nh": {
-        "he": "",
-        "en": "",
-        "trans": "NH"
-    },
     "betisha": {
         "he": "בטישה",
         "en": "Beating",
@@ -3164,11 +2904,6 @@ export const glossary = {
         "en": "Hardness",
         "trans": "Kardinuta"
     },
-    "yhv": {
-        "he": "",
-        "en": "",
-        "trans": "YHV"
-    },
     "holam": {
         "he": "חולם",
         "en": "Above the Letters",
@@ -3193,16 +2928,6 @@ export const glossary = {
         "he": "נקבי עיינים",
         "en": "Eye Sockets",
         "trans": "Nikvey Eynaim"
-    },
-    "yod - hey - vav": {
-        "he": "",
-        "en": "",
-        "trans": "Yod - Hey - Vav"
-    },
-    "ne": {
-        "he": "",
-        "en": "",
-        "trans": "NE"
     },
     "mazla": {
         "he": "מזלא",
@@ -3324,11 +3049,6 @@ export const glossary = {
         "en": "Understandings",
         "trans": "Binot"
     },
-    "rts": {
-        "he": "",
-        "en": "",
-        "trans": "RTS"
-    },
     "sigim": {
         "he": "סיגים",
         "en": "Admixtures",
@@ -3403,11 +3123,6 @@ export const glossary = {
         "he": "טומאה",
         "en": "Impurity",
         "trans": "Tuma’a"
-    },
-    "ms": {
-        "he": "",
-        "en": "",
-        "trans": "MS"
     },
     "mocha": {
         "he": "מוחא",
@@ -3489,11 +3204,6 @@ export const glossary = {
         "en": "Houses",
         "trans": "Batim"
     },
-    "nglh": {
-        "he": "",
-        "en": "",
-        "trans": "NGLH"
-    },
     "nechtam": {
         "he": "נחתם",
         "en": "Stamped",
@@ -3508,11 +3218,6 @@ export const glossary = {
         "he": "מפתחא",
         "en": "Key",
         "trans": "Miftacha"
-    },
-    "man’ula": {
-        "he": "מנעולא",
-        "en": "Lock",
-        "trans": "Man’ula"
     },
     "man’ula": {
         "he": "מנעולא",
@@ -3534,20 +3239,10 @@ export const glossary = {
         "en": "Forehead",
         "trans": "Metzach"
     },
-    "svas": {
-        "he": "",
-        "en": "",
-        "trans": "SVAS"
-    },
     "tov ohr": {
         "he": "טוב אור",
         "en": "Good Light",
         "trans": "Tov Ohr"
-    },
-    "mltz": {
-        "he": "",
-        "en": "",
-        "trans": "MLTz"
     },
     "temarim": {
         "he": "תמרים",
@@ -3578,16 +3273,6 @@ export const glossary = {
         "he": "פרצופים עליונים",
         "en": "Upper Faces",
         "trans": "Partzufim Elyonim"
-    },
-    "have": {
-        "he": "",
-        "en": "",
-        "trans": "have"
-    },
-    "’s": {
-        "he": "",
-        "en": "",
-        "trans": "’s"
     },
     "lo": {
         "he": "לא",
@@ -3669,16 +3354,6 @@ export const glossary = {
         "en": "Upper Mating",
         "trans": "Zivug Elyon"
     },
-    "the,elyon,shoresh,keter": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "the",
-            "Elyon",
-            "Shoresh",
-            "Keter"
-        ]
-    },
     "klalut": {
         "he": "כללות",
         "en": "Generality",
@@ -3723,24 +3398,6 @@ export const glossary = {
         "he": "עצמותו",
         "en": "His Essence",
         "trans": "Atzmuto"
-    },
-    "elyon,keter": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Elyon",
-            "Keter"
-        ]
-    },
-    "the,elyon,ohr,keter": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "the",
-            "Elyon",
-            "Ohr",
-            "Keter"
-        ]
     },
     "eruv": {
         "he": "ערוב",
@@ -3852,11 +3509,6 @@ export const glossary = {
         "en": "Upper Seas",
         "trans": "Yamim Elyonim"
     },
-    "tnto": {
-        "he": "",
-        "en": "",
-        "trans": "TNTO"
-    },
     "zivug de lo pasik": {
         "he": "זיווג דלא פסיק",
         "en": "Never Ending Mating",
@@ -3956,11 +3608,6 @@ export const glossary = {
         "he": "אמת",
         "en": "Truth",
         "trans": "Emet"
-    },
-    "radla": {
-        "he": "",
-        "en": "",
-        "trans": "RADLA"
     },
     "tzadikim": {
         "he": "צדיקים",
@@ -4107,75 +3754,6 @@ export const glossary = {
         "en": "",
         "trans": "Shin [ש]"
     },
-    "aleph,and,bet": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Aleph",
-            "and",
-            "Bet"
-        ]
-    },
-    "aleph,, ,bet,and,gimel": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Aleph",
-            ", ",
-            "Bet",
-            "and",
-            "Gimel"
-        ]
-    },
-    "kof,, ,reish,, ,shin,and,tav": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Kof",
-            ", ",
-            "Reish",
-            ", ",
-            "Shin",
-            "and",
-            "Tav"
-        ]
-    },
-    "kof,and,reish": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Kof",
-            "and",
-            "Reish"
-        ]
-    },
-    "reish,and,kof": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Reish",
-            "and",
-            "Kof"
-        ]
-    },
-    "shin,and,tav": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Shin",
-            "and",
-            "Tav"
-        ]
-    },
-    "tav,and,shin": {
-        "he": "",
-        "en": "",
-        "trans": [
-            "Tav",
-            "and",
-            "Shin"
-        ]
-    },
     "mavet": {
         "he": "מות",
         "en": "Death",
@@ -4251,30 +3829,10 @@ export const glossary = {
         "en": "Feces",
         "trans": "Tzoah"
     },
-    "snglh": {
-        "he": "",
-        "en": "",
-        "trans": "SNGLH"
-    },
     "dalet behinot": {
         "he": "ד׳ בחינות",
         "en": "Four Phases",
         "trans": "Dalet Behinot"
-    },
-    "aya": {
-        "he": "",
-        "en": "",
-        "trans": "AYA"
-    },
-    "aba": {
-        "he": "",
-        "en": "",
-        "trans": "ABA"
-    },
-    "aby": {
-        "he": "",
-        "en": "",
-        "trans": "ABY"
     },
     "ketarim": {
         "he": "כתרים",
@@ -4290,11 +3848,6 @@ export const glossary = {
         "he": "ריח",
         "en": "Scent",
         "trans": "Reiach"
-    },
-    "rsrd": {
-        "he": "",
-        "en": "",
-        "trans": "RSRD"
     },
     "emtzai": {
         "he": "אמצעי",
@@ -4326,35 +3879,10 @@ export const glossary = {
         "en": "The",
         "trans": "Et"
     },
-    "gasmb": {
-        "he": "",
-        "en": "",
-        "trans": "GASMB"
-    },
     "dalet partzufim": {
         "he": "ד׳ פרצופים",
         "en": "Four Faces",
         "trans": "Dalet Partzufim"
-    },
-    "white": {
-        "he": "",
-        "en": "",
-        "trans": "white"
-    },
-    "red": {
-        "he": "",
-        "en": "",
-        "trans": "red"
-    },
-    "green": {
-        "he": "",
-        "en": "",
-        "trans": "green"
-    },
-    "black": {
-        "he": "",
-        "en": "",
-        "trans": "black"
     },
     "blita": {
         "he": "בליטה",
@@ -4436,20 +3964,10 @@ export const glossary = {
         "en": "Male Judgements",
         "trans": "Dinim de Dechura"
     },
-    "gas": {
-        "he": "",
-        "en": "",
-        "trans": "GAS"
-    },
     "mazal": {
         "he": "מזל",
         "en": "Constellation",
         "trans": "Mazal"
-    },
-    "israel and st": {
-        "he": "",
-        "en": "",
-        "trans": "Israel and ST"
     },
     "notzer": {
         "he": "נוצר",
@@ -4460,11 +3978,6 @@ export const glossary = {
         "he": "נקה",
         "en": "Cleanses",
         "trans": "Nakeh"
-    },
-    "de facto": {
-        "he": "",
-        "en": "",
-        "trans": "de facto"
     },
     "prakin": {
         "he": "פרקין",
@@ -4681,16 +4194,6 @@ export const glossary = {
         "en": "",
         "trans": "Baal Shem Tov"
     },
-    "god forbid": {
-        "he": "",
-        "en": "",
-        "trans": "God forbid"
-    },
-    "thank god": {
-        "he": "",
-        "en": "",
-        "trans": "thank God"
-    },
     "resheet": {
         "he": "ראשית",
         "en": "First",
@@ -4801,46 +4304,6 @@ export const glossary = {
         "en": "Human Emotion",
         "trans": "Regesh Enoshi"
     },
-    "“ and … went": {
-        "he": "",
-        "en": "",
-        "trans": "“ And … Went"
-    },
-    "“ and the angel of god who went": {
-        "he": "",
-        "en": "",
-        "trans": "“ And the angel of God who went"
-    },
-    "“ and the angel of god went": {
-        "he": "",
-        "en": "",
-        "trans": "“ And the angel of God went"
-    },
-    "“ and it came between the camp of egypt and the camp of israel": {
-        "he": "",
-        "en": "",
-        "trans": "“ And it came between the camp of Egypt and the camp of Israel"
-    },
-    "“ and moses stretched out his hand over the sea": {
-        "he": "",
-        "en": "",
-        "trans": "“ And Moses stretched out his hand over the sea"
-    },
-    "“ and it came to pass": {
-        "he": "",
-        "en": "",
-        "trans": "“ And It Came to pass"
-    },
-    "“ and it came": {
-        "he": "",
-        "en": "",
-        "trans": "“ And It Came"
-    },
-    "“ and … stretched": {
-        "he": "",
-        "en": "",
-        "trans": "“ And … Stretched"
-    },
     "michael": {
         "he": "מיכאל",
         "en": "",
@@ -4911,20 +4374,10 @@ export const glossary = {
         "en": "",
         "trans": "Edom"
     },
-    "bozrah": {
-        "he": "",
-        "en": "",
-        "trans": "Bozrah"
-    },
     "mikneh": {
         "he": "מקנה",
         "en": "Cattle",
         "trans": "Mikneh"
-    },
-    "vaetchanan": {
-        "he": "",
-        "en": "",
-        "trans": "Vaetchanan"
     },
     "kinyan": {
         "he": "קניין",
@@ -5061,16 +4514,6 @@ export const glossary = {
         "en": "",
         "trans": "David"
     },
-    "judgement": {
-        "he": "",
-        "en": "",
-        "trans": "judgement"
-    },
-    "mercy": {
-        "he": "",
-        "en": "",
-        "trans": "mercy"
-    },
     "aza": {
         "he": "עזא",
         "en": "",
@@ -5091,65 +4534,10 @@ export const glossary = {
         "en": "There is None Else Beside Him",
         "trans": "Ein Od Milvado"
     },
-    "lishna kama": {
-        "he": "",
-        "en": "",
-        "trans": "Lishna Kama"
-    },
-    "rashbam": {
-        "he": "",
-        "en": "",
-        "trans": "RASHBAM"
-    },
-    "rabbi ishmael": {
-        "he": "",
-        "en": "",
-        "trans": "Rabbi Ishmael"
-    },
-    "rabbi hai gaon": {
-        "he": "",
-        "en": "",
-        "trans": "Rabbi Hai Gaon"
-    },
-    "rabbi hamai gaon": {
-        "he": "",
-        "en": "",
-        "trans": "Rabbi Hamai Gaon"
-    },
-    "rabbi elazar of garmiza": {
-        "he": "",
-        "en": "",
-        "trans": "Rabbi Elazar of Garmiza"
-    },
     "rishonim": {
         "he": "ראשונים",
         "en": "The First Sages",
         "trans": "Rishonim"
-    },
-    "ramban": {
-        "he": "",
-        "en": "",
-        "trans": "RAMBAN"
-    },
-    "baal haturim": {
-        "he": "",
-        "en": "",
-        "trans": "Baal HaTurim"
-    },
-    "baal shulchan aruch": {
-        "he": "",
-        "en": "",
-        "trans": "Baal Shulchan Aruch"
-    },
-    "vilna gaon": {
-        "he": "",
-        "en": "",
-        "trans": "Vilna Gaon"
-    },
-    "ladi gaon": {
-        "he": "",
-        "en": "",
-        "trans": "Ladi Gaon"
     },
     "secrets of torah": {
         "he": "סתרי תורה",
@@ -5251,11 +4639,6 @@ export const glossary = {
         "en": "Female Light",
         "trans": "Ohr Nekeva"
     },
-    "wys": {
-        "he": "",
-        "en": "",
-        "trans": "WYS"
-    },
     "shanah": {
         "he": "שנה",
         "en": "Year",
@@ -5285,31 +4668,6 @@ export const glossary = {
         "he": "מצח",
         "en": "Forehead",
         "trans": "Metzah"
-    },
-    "malchut to bina": {
-        "he": "",
-        "en": "",
-        "trans": "Malchut to Bina"
-    },
-    "bina and zon": {
-        "he": "",
-        "en": "",
-        "trans": "Bina and ZON"
-    },
-    "bina tifferet and malchut": {
-        "he": "",
-        "en": "",
-        "trans": "Bina Tifferet and Malchut"
-    },
-    "neshama haya yechida": {
-        "he": "",
-        "en": "",
-        "trans": "Neshama Haya Yechida"
-    },
-    "malchut ak": {
-        "he": "",
-        "en": "",
-        "trans": "Malchut AK"
     },
     "malchut de ak": {
         "he": "מלכות דא״ק",
@@ -5366,11 +4724,6 @@ export const glossary = {
         "en": "Phylacteries",
         "trans": "Tefillin"
     },
-    "elijah": {
-        "he": "",
-        "en": "",
-        "trans": "Elijah"
-    },
     "yam suf": {
         "he": "ים סוף",
         "en": "Read Sea",
@@ -5400,11 +4753,6 @@ export const glossary = {
         "he": "ציצית",
         "en": "Fringes",
         "trans": "Tzitzit"
-    },
-    "shema": {
-        "he": "",
-        "en": "",
-        "trans": "Shema"
     },
     "rosh hashanah": {
         "he": "ראש השנה",
@@ -5511,11 +4859,6 @@ export const glossary = {
         "en": "",
         "trans": "Kaddish"
     },
-    "ashan": {
-        "he": "",
-        "en": "",
-        "trans": "ASHAN"
-    },
     "shearim": {
         "he": "שערים",
         "en": "Gates",
@@ -5525,16 +4868,6 @@ export const glossary = {
         "he": "אוצר",
         "en": "Treasure",
         "trans": "Otzar"
-    },
-    "rashi": {
-        "he": "",
-        "en": "",
-        "trans": "RASHI"
-    },
-    "holy zohar": {
-        "he": "",
-        "en": "",
-        "trans": "Holy Zohar"
     },
     "musaf": {
         "he": "מוסף",
@@ -5680,11 +5013,6 @@ export const glossary = {
         "he": "יובל",
         "en": "Jubilee",
         "trans": "Yovel"
-    },
-    "hasten": {
-        "he": "",
-        "en": "",
-        "trans": "hasten"
     },
     "avoda zarah": {
         "he": "עבודה זרה",
@@ -5950,21 +5278,6 @@ export const glossary = {
         "he": "שמים",
         "en": "Heavens",
         "trans": "Shamaim"
-    },
-    "shina": {
-        "he": "",
-        "en": "",
-        "trans": "Shina"
-    },
-    "shinan": {
-        "he": "",
-        "en": "",
-        "trans": "Shinan"
-    },
-    "shanan": {
-        "he": "",
-        "en": "",
-        "trans": "Shanan"
     },
     "nesher": {
         "he": "נשר",
