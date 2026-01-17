@@ -316,7 +316,7 @@ export default function Player({ contentRef, onParagraphChange }) {
         };
     }, []);
 
-    if (paragraphs.length === 0) return null;
+    if (paragraphs.length === 0 || voices.length === 0) return null;
 
     return (
         <Controls
