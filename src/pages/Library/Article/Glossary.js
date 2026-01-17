@@ -12,7 +12,8 @@ export const glossary = {
     "partzuf galgalta": {
         "he": "פרצוף גלגלתא",
         "en": "Skull Face",
-        "trans": "Partzuf Galgalta"
+        "trans": "Partzuf Galgalta",
+        "style": "skull"
     },
     "salik bere’uta": {
         "he": "סליק ברעותא",
@@ -67,12 +68,18 @@ export const glossary = {
     "yaarot hadvash": {
         "he": "יערות הדבש",
         "en": "The Honeycombs",
-        "trans": "Yaarot Hadvash"
+        "trans": "Yaarot Hadvash",
+        "style": {
+            "category": "Book"
+        }
     },
     "rashar hirsh": {
         "he": "רש״ר הירש",
         "en": "Samson Raphael Hirsch",
-        "trans": "RASHAR Hirsh"
+        "trans": "RASHAR Hirsh",
+        "style": {
+            "category": "Author"
+        }
     },
     "histaklut dak": {
         "he": "הסתכלות דק",
@@ -87,42 +94,65 @@ export const glossary = {
     "galgalta": {
         "he": "גלגלתא",
         "en": "Skull",
-        "trans": "Galgalta"
+        "trans": "Galgalta",
+        "style": "skull"
     },
     "ohr ein sof": {
         "he": "אור אין סוף",
         "en": "Light of Infinity",
-        "trans": "Ohr Ein Sof"
+        "trans": "Ohr Ein Sof",
+        "style": {
+            "category": "World",
+            "phase": "root"
+        }
     },
     "ohr nefesh": {
         "he": "אור נפש",
         "en": "Light of Relaxation",
-        "trans": "Ohr Nefesh"
+        "trans": "Ohr Nefesh",
+        "style": {
+            "phase": "four"
+        }
     },
     "ohr ruach": {
         "he": "אור רוח",
         "en": "Light of Modulation",
-        "trans": "Ohr Ruach"
+        "trans": "Ohr Ruach",
+        "style": {
+            "phase": "three"
+        }
     },
     "ohr neshama": {
         "he": "אור נשמה",
         "en": "Light of Protection",
-        "trans": "Ohr Neshama"
+        "trans": "Ohr Neshama",
+        "style": {
+            "phase": "two"
+        }
     },
     "ohr haya": {
         "he": "אור חיה",
         "en": "Light of Expression",
-        "trans": "Ohr Haya"
+        "trans": "Ohr Haya",
+        "style": {
+            "phase": "one"
+        }
     },
     "ohr yechida": {
         "he": "אור יחידה",
         "en": "Light of Singularity",
-        "trans": "Ohr Yechida"
+        "trans": "Ohr Yechida",
+        "style": {
+            "phase": "root"
+        }
     },
     "ohr keter": {
         "he": "אור כתר",
         "en": "Light of Crown",
-        "trans": "Ohr Keter"
+        "trans": "Ohr Keter",
+        "style": {
+            "phase": "root"
+        }
     },
     "ohr hochma": {
         "he": "אור חכמה",
@@ -132,27 +162,43 @@ export const glossary = {
     "ohr bina": {
         "he": "אור בינה",
         "en": "Light of Understanding",
-        "trans": "Ohr Bina"
+        "trans": "Ohr Bina",
+        "style": {
+            "phase": "two"
+        }
     },
     "ohr tifferet": {
         "he": "אור תפארת",
         "en": "Light of Beauty",
-        "trans": "Ohr Tifferet"
+        "trans": "Ohr Tifferet",
+        "style": {
+            "phase": "three"
+        }
     },
     "ohr malchut": {
         "he": "אור מלכות",
         "en": "Light of Kingdom",
-        "trans": "Ohr Malchut"
+        "trans": "Ohr Malchut",
+        "style": {
+            "phase": "four"
+        }
     },
     "kli keter": {
         "he": "כלי כתר",
         "en": "Vessel of Crown",
-        "trans": "Kli Keter"
+        "trans": "Kli Keter",
+        "style": {
+            "category": "Vessel",
+            "phase": "root"
+        }
     },
     "patach": {
         "he": "פתח",
         "en": "",
-        "trans": "Patach"
+        "trans": "Patach",
+        "style": {
+            "category": "Vowels"
+        }
     },
     "mat": {
         "he": "מת",
@@ -172,42 +218,74 @@ export const glossary = {
     "hirik": {
         "he": "חיריק",
         "en": "Below the Letters",
-        "trans": "Hirik"
+        "trans": "Hirik",
+        "style": {
+            "category": "State",
+            "phase": "two"
+        }
     },
     "kli hochma": {
         "he": "כלי חכמה",
         "en": "Vessel of Wisdom",
-        "trans": "Kli Hochma"
+        "trans": "Kli Hochma",
+        "style": {
+            "category": "Vessel",
+            "phase": "one"
+        }
     },
     "kli bina": {
         "he": "כלי בינה",
         "en": "Vessel of Understanding",
-        "trans": "Kli Bina"
+        "trans": "Kli Bina",
+        "style": {
+            "category": "Vessel",
+            "phase": "two"
+        }
     },
     "kli tifferet": {
         "he": "כלי תפארת",
         "en": "Vessel of Beauty",
-        "trans": "Kli Tifferet"
+        "trans": "Kli Tifferet",
+        "style": {
+            "category": "Vessel",
+            "phase": "three"
+        }
     },
     "kli malchut": {
         "he": "כלי מלכות",
         "en": "Vessel of Kingdom",
-        "trans": "Kli Malchut"
+        "trans": "Kli Malchut",
+        "style": {
+            "category": "Vessel",
+            "phase": "four"
+        }
     },
     "kli zier anpin": {
         "he": "כלי זעיר אנפין",
         "en": "Vessel of Small Face",
-        "trans": "Kli Zier Anpin"
+        "trans": "Kli Zier Anpin",
+        "style": {
+            "category": "Vessel",
+            "phase": "three"
+        }
     },
     "ohr zeir anpin": {
         "he": "אור זעיר אנפין",
         "en": "Light of Small Face",
-        "trans": "Ohr Zeir Anpin"
+        "trans": "Ohr Zeir Anpin",
+        "style": {
+            "category": "Light",
+            "phase": "three"
+        }
     },
     "behinat shoresh": {
         "he": "בחינת שורש",
         "en": "Root Phase",
-        "trans": "Behinat Shoresh"
+        "trans": "Behinat Shoresh",
+        "style": {
+            "phase": "root",
+            "category": "Phase"
+        }
     },
     "yashar el": {
         "he": "ישר-אל",
@@ -217,32 +295,56 @@ export const glossary = {
     "behina aleph": {
         "he": "בחינה א׳",
         "en": "Phase One",
-        "trans": "Behina Aleph"
+        "trans": "Behina Aleph",
+        "style": {
+            "phase": "one",
+            "category": "Phase"
+        }
     },
     "behina bet": {
         "he": "בחינה ב׳",
         "en": "Phase Two",
-        "trans": "Behina Bet"
+        "trans": "Behina Bet",
+        "style": {
+            "phase": "two",
+            "category": "Phase"
+        }
     },
     "behina gimel": {
         "he": "בחינה ג׳",
         "en": "Phase Three",
-        "trans": "Behina Gimel"
+        "trans": "Behina Gimel",
+        "style": {
+            "phase": "three",
+            "category": "Phase"
+        }
     },
     "behina dalet": {
         "he": "בחינה ד׳",
         "en": "Phase Four",
-        "trans": "Behina Dalet"
+        "trans": "Behina Dalet",
+        "style": {
+            "phase": "four",
+            "category": "Phase"
+        }
     },
     "aviut shoresh": {
         "he": "עביות שורש",
         "en": "Root Phase Coarseness",
-        "trans": "Aviut Shoresh"
+        "trans": "Aviut Shoresh",
+        "style": {
+            "phase": "root",
+            "category": "Coarseness"
+        }
     },
     "aviut aleph": {
         "he": "עביות א׳",
         "en": "Phase One Coarseness",
-        "trans": "Aviut Aleph"
+        "trans": "Aviut Aleph",
+        "style": {
+            "phase": "one",
+            "category": "Coarseness"
+        }
     },
     "ohr hachaim": {
         "he": "אור החיים",
@@ -267,17 +369,29 @@ export const glossary = {
     "aviut bet": {
         "he": "עביות ב׳",
         "en": "Phase Two Coarseness",
-        "trans": "Aviut Bet"
+        "trans": "Aviut Bet",
+        "style": {
+            "phase": "two",
+            "category": "Coarseness"
+        }
     },
     "aviut gimel": {
         "he": "עביות ג׳",
         "en": "Phase Three Coarseness",
-        "trans": "Aviut Gimel"
+        "trans": "Aviut Gimel",
+        "style": {
+            "phase": "three",
+            "category": "Coarseness"
+        }
     },
     "aviut dalet": {
         "he": "עביות ד׳",
         "en": "Phase Four Coarseness",
-        "trans": "Aviut Dalet"
+        "trans": "Aviut Dalet",
+        "style": {
+            "phase": "four",
+            "category": "Coarseness"
+        }
     },
     "maatzil": {
         "he": "מאציל",
@@ -292,7 +406,11 @@ export const glossary = {
     "rosh": {
         "he": "ראש",
         "en": "Head",
-        "trans": "Rosh"
+        "trans": "Rosh",
+        "style": {
+            "category": "Location",
+            "phase": "root"
+        }
     },
     "krevut": {
         "he": "קרבות",
@@ -302,7 +420,10 @@ export const glossary = {
     "toch": {
         "he": "תוך",
         "en": "Interior",
-        "trans": "Toch"
+        "trans": "Toch",
+        "style": {
+            "category": "location"
+        }
     },
     "guf": {
         "he": "גוף",
@@ -337,7 +458,11 @@ export const glossary = {
     "tabur": {
         "he": "טבור",
         "en": "Navel",
-        "trans": "Tabur"
+        "trans": "Tabur",
+        "style": {
+            "phase": "three",
+            "category": "Location"
+        }
     },
     "kli": {
         "he": "כלי",
@@ -452,7 +577,10 @@ export const glossary = {
     "radak": {
         "he": "הרד״ק",
         "en": "",
-        "trans": "RADAK"
+        "trans": "RADAK",
+        "style": {
+            "category": "Author"
+        }
     },
     "ohr": {
         "he": "אור",
@@ -502,77 +630,152 @@ export const glossary = {
     "keter": {
         "he": "כתר",
         "en": "Crown",
-        "trans": "Keter"
+        "trans": "Keter",
+        "style": {
+            "category": "Vessel",
+            "phase": "root"
+        }
     },
     "keters": {
         "he": "כתרים",
         "en": "Crowns",
-        "trans": "Keters"
+        "trans": "Keters",
+        "style": {
+            "category": "Vessel",
+            "phase": "root"
+        }
     },
     "hochma": {
         "he": "חכמה",
         "en": "Wisdom",
-        "trans": "Hochma"
+        "trans": "Hochma",
+        "style": {
+            "category": "Vessel",
+            "phase": "one"
+        }
     },
     "bina": {
         "he": "בינה",
         "en": "Understanding",
-        "trans": "Bina"
+        "trans": "Bina",
+        "style": {
+            "category": "Vessel",
+            "phase": "two"
+        }
     },
     "tifferet": {
         "he": "תפארת",
         "en": "Beauty",
-        "trans": "Tifferet"
+        "trans": "Tifferet",
+        "style": {
+            "category": "Vessel",
+            "phase": "three"
+        }
     },
     "malchut": {
         "he": "מלכות",
         "en": "Kingdom",
-        "trans": "Malchut"
+        "trans": "Malchut",
+        "style": {
+            "category": "Vessel",
+            "phase": "four"
+        }
     },
     "hesed": {
         "he": "חסד",
         "en": "Mercy",
-        "trans": "Hesed"
+        "trans": "Hesed",
+        "style": {
+            "category": "Six Sides",
+            "phase": {
+                "major": "three",
+                "minor": "root"
+            }
+        }
     },
     "gevura": {
         "he": "גבורה",
         "en": "Judgement",
-        "trans": "Gevura"
+        "trans": "Gevura",
+        "style": {
+            "category": "Six Sides",
+            "phase": {
+                "major": "three",
+                "minor": "one"
+            }
+        }
     },
     "netzah": {
         "he": "נצח",
         "en": "Eternity",
-        "trans": "Netzah"
+        "trans": "Netzah",
+        "style": {
+            "category": "Six Sides",
+            "phase": {
+                "major": "three",
+                "minor": "three"
+            }
+        }
     },
     "hod": {
         "he": "הוד",
         "en": "Majesty",
-        "trans": "Hod"
+        "trans": "Hod",
+        "style": {
+            "category": "Six Sides",
+            "phase": {
+                "major": "three",
+                "minor": "four"
+            }
+        }
     },
     "yesod": {
         "he": "יסוד",
         "en": "Foundation",
-        "trans": "Yesod"
+        "trans": "Yesod",
+        "style": {
+            "category": "Six Sides",
+            "phase": {
+                "major": "three",
+                "minor": "collective"
+            }
+        }
     },
     "nefesh": {
         "he": "נפש",
         "en": "Soul",
-        "trans": "Nefesh"
+        "trans": "Nefesh",
+        "style": {
+            "category": "Light",
+            "phase": "four"
+        }
     },
     "ruach": {
         "he": "רוח",
         "en": "Spirit",
-        "trans": "Ruach"
+        "trans": "Ruach",
+        "style": {
+            "category": "Light",
+            "phase": "three"
+        }
     },
     "ruachs": {
         "he": "רוחות",
         "en": "Modulations",
-        "trans": "Ruachs"
+        "trans": "Ruachs",
+        "style": {
+            "category": "Light",
+            "phase": "three"
+        }
     },
     "neshama": {
         "he": "נשמה",
         "en": "Soul",
-        "trans": "Neshama"
+        "trans": "Neshama",
+        "style": {
+            "category": "Light",
+            "phase": "two"
+        }
     },
     "behinat hamshacha": {
         "he": "בחינת המשכה",
@@ -592,12 +795,20 @@ export const glossary = {
     "haya": {
         "he": "חיה",
         "en": "Expression",
-        "trans": "Haya"
+        "trans": "Haya",
+        "style": {
+            "category": "Light",
+            "phase": "one"
+        }
     },
     "yechida": {
         "he": "יחידה",
         "en": "Singularity",
-        "trans": "Yechida"
+        "trans": "Yechida",
+        "style": {
+            "category": "Light",
+            "phase": "root"
+        }
     },
     "za": {
         "he": "ז״א",
@@ -607,37 +818,65 @@ export const glossary = {
     "gadlut bet": {
         "he": "גדלות ב",
         "en": "Expression",
-        "trans": "Gadlut Bet"
+        "trans": "Gadlut Bet",
+        "style": {
+            "category": "State",
+            "phase": "two"
+        }
     },
     "gadlut": {
         "he": "גדלות",
         "en": "Greatness",
-        "trans": "Gadlut"
+        "trans": "Gadlut",
+        "style": {
+            "category": "State",
+            "phase": "one"
+        }
     },
     "biceps": {
         "he": "קבורת",
         "en": "",
-        "trans": "biceps"
+        "trans": "biceps",
+        "style": {
+            "category": "Joints",
+            "phase": "root"
+        }
     },
     "forearm": {
         "he": "זרוע",
         "en": "",
-        "trans": "forearm"
+        "trans": "forearm",
+        "style": {
+            "category": "Joints",
+            "phase": "one"
+        }
     },
     "palm": {
         "he": "כף היד",
         "en": "",
-        "trans": "palm"
+        "trans": "palm",
+        "style": {
+            "category": "Joints",
+            "phase": "two"
+        }
     },
     "katnut": {
         "he": "קטנות",
         "en": "Smallness",
-        "trans": "Katnut"
+        "trans": "Katnut",
+        "style": {
+            "category": "State",
+            "phase": "root"
+        }
     },
     "bituy": {
         "he": "ביטוי",
         "en": "Expression",
-        "trans": "Bituy"
+        "trans": "Bituy",
+        "style": {
+            "category": "State",
+            "phase": "two"
+        }
     },
     "kav small": {
         "he": "קו שמאל",
@@ -687,27 +926,44 @@ export const glossary = {
     "rigshi": {
         "he": "רגשי",
         "en": "Emotional",
-        "trans": "Rigshi"
+        "trans": "Rigshi",
+        "style": {
+            "category": "State",
+            "phase": "one"
+        }
     },
     "arich anpin": {
         "he": "אריך אנפין",
         "en": "Long Face",
-        "trans": "Arich Anpin"
+        "trans": "Arich Anpin",
+        "style": {
+            "category": "Face",
+            "phase": "root"
+        }
     },
     "arich": {
         "he": "אריך",
         "en": "Long",
-        "trans": "Arich"
+        "trans": "Arich",
+        "style": {
+            "category": "Face",
+            "phase": "root"
+        }
     },
     "zeir anpin": {
         "he": "זעיר אנפין",
         "en": "Small Face",
-        "trans": "Zeir Anpin"
+        "trans": "Zeir Anpin",
+        "style": {
+            "category": "Face/Vessel",
+            "phase": "three"
+        }
     },
     "adam kadmon": {
         "he": "אדם קדמון",
         "en": "Primordial Man",
-        "trans": "Adam Kadmon"
+        "trans": "Adam Kadmon",
+        "style": "primordial man"
     },
     "perud": {
         "he": "פרוד",
@@ -737,67 +993,118 @@ export const glossary = {
     "atzilut": {
         "he": "אצילות",
         "en": "Emanation",
-        "trans": "Atzilut"
+        "trans": "Atzilut",
+        "style": {
+            "category": "World",
+            "phase": "one"
+        }
     },
     "beria": {
         "he": "בריאה",
         "en": "Creation",
-        "trans": "Beria"
+        "trans": "Beria",
+        "style": {
+            "category": "World",
+            "phase": "two"
+        }
     },
     "yetzira": {
         "he": "יצירה",
         "en": "Formation",
-        "trans": "Yetzira"
+        "trans": "Yetzira",
+        "style": {
+            "category": "World",
+            "phase": "three"
+        }
     },
     "assiya": {
         "he": "עשייה",
         "en": "Action",
-        "trans": "Assiya"
+        "trans": "Assiya",
+        "style": {
+            "category": "World",
+            "phase": "four"
+        }
     },
     "olam ha zeh": {
         "he": "עולם הזה",
         "en": "This World",
-        "trans": "Olam ha Zeh"
+        "trans": "Olam ha Zeh",
+        "style": {
+            "category": "World",
+            "phase": "four"
+        }
     },
     "olam ha ba": {
         "he": "עולם הבא",
         "en": "Next World",
-        "trans": "Olam ha Ba"
+        "trans": "Olam ha Ba",
+        "style": {
+            "category": "World",
+            "phase": "one"
+        }
     },
     "olam ha nekudim": {
         "he": "עולם הנקודים",
         "en": "World of Deficiencies",
-        "trans": "Olam ha Nekudim"
+        "trans": "Olam ha Nekudim",
+        "style": {
+            "category": "World"
+        }
     },
     "olam adam kadmon": {
         "he": "עולם אדם קדמון",
         "en": "World of Primordial Man",
-        "trans": "Olam Adam Kadmon"
+        "trans": "Olam Adam Kadmon",
+        "style": {
+            "category": "World",
+            "phase": "root"
+        }
     },
     "olam akudim": {
         "he": "עולם העקודים",
         "en": "World of Binding",
-        "trans": "Olam Akudim"
+        "trans": "Olam Akudim",
+        "style": {
+            "category": "World",
+            "phase": "root"
+        }
     },
     "olam atzilut": {
         "he": "עולם אצילות",
         "en": "World of Emanation",
-        "trans": "Olam Atzilut"
+        "trans": "Olam Atzilut",
+        "style": {
+            "category": "World",
+            "phase": "one"
+        }
     },
     "olam beria": {
         "he": "עולם בריאה",
         "en": "World of Creation",
-        "trans": "Olam Beria"
+        "trans": "Olam Beria",
+        "style": {
+            "category": "World",
+            "phase": "two"
+        }
     },
     "olam yetzira": {
         "he": "עולם יצירה",
         "en": "World of Formation",
-        "trans": "Olam Yetzira"
+        "trans": "Olam Yetzira",
+        "style": {
+            "category": "World",
+            "phase": "three"
+        }
     },
     "olam assiya": {
         "he": "עולם עשייה",
         "en": "World of Action",
-        "trans": "Olam Assiya"
+        "trans": "Olam Assiya",
+        "style": {
+            "category": "World",
+            "phase": "four"
+        }
     },
     "olam nekudim": {
         "he": "עולם נקודים",
@@ -817,47 +1124,73 @@ export const glossary = {
     "chazeh": {
         "he": "חזה",
         "en": "Chest",
-        "trans": "Chazeh"
+        "trans": "Chazeh",
+        "style": "chest"
     },
     "ayin": {
         "he": "עין",
         "en": "Eye",
-        "trans": "Ayin"
+        "trans": "Ayin",
+        "style": {
+            "phase": "one"
+        }
     },
     "eynayim": {
         "he": "עיינים",
         "en": "Eyes",
-        "trans": "Eynayim"
+        "trans": "Eynayim",
+        "style": {
+            "phase": "one"
+        }
     },
     "awyzen": {
         "he": "אוזן",
         "en": "Ear",
-        "trans": "Awyzen"
+        "trans": "Awyzen",
+        "style": {
+            "phase": "two"
+        }
     },
     "awznayim": {
         "he": "אוזנים",
         "en": "Ears",
-        "trans": "Awznayim"
+        "trans": "Awznayim",
+        "style": {
+            "phase": "two"
+        }
     },
     "oznayim": {
         "he": "אוזניים",
         "en": "Ears",
-        "trans": "Oznayim"
+        "trans": "Oznayim",
+        "style": {
+            "phase": "two"
+        }
     },
     "hotem": {
         "he": "חוטם",
         "en": "Nose",
-        "trans": "Hotem"
+        "trans": "Hotem",
+        "style": {
+            "phase": "three"
+        }
     },
     "peh": {
         "he": "פה",
         "en": "Mouth",
-        "trans": "Peh"
+        "trans": "Peh",
+        "style": {
+            "phase": "four"
+        }
     },
     "taburit": {
         "he": "טבורית",
         "en": "Navel",
-        "trans": "Taburit"
+        "trans": "Taburit",
+        "style": {
+            "phase": "three",
+            "category": "Location"
+        }
     },
     "partzufim": {
         "he": "פרצופים",
@@ -932,7 +1265,11 @@ export const glossary = {
     "ein sof": {
         "he": "אין סוף",
         "en": "Infinity",
-        "trans": "Ein Sof"
+        "trans": "Ein Sof",
+        "style": {
+            "category": "World",
+            "phase": "root"
+        }
     },
     "igulim": {
         "he": "עיגולים",
@@ -957,7 +1294,11 @@ export const glossary = {
     "nukva": {
         "he": "נוקבא",
         "en": "Female",
-        "trans": "Nukva"
+        "trans": "Nukva",
+        "style": {
+            "category": "Face/Vessel",
+            "phase": "four"
+        }
     },
     "halon": {
         "he": "חלון",
@@ -1017,32 +1358,64 @@ export const glossary = {
     "ab": {
         "he": "ע״ב",
         "en": "",
-        "trans": "AB"
+        "trans": "AB",
+        "style": {
+            "category": "Face",
+            "phase": "one",
+            "tooltip": "72\nע״ב",
+            "short": "Second Face in the World of Primordial Man"
+        }
     },
     "sag": {
         "he": "ס״ג",
         "en": "",
-        "trans": "SAG"
+        "trans": "SAG",
+        "style": {
+            "category": "Face",
+            "phase": "two",
+            "tooltip": "63ֿ\nס״ג",
+            "short": "Third Face in the World of Primordial Man"
+        }
     },
     "ma": {
         "he": "מ״ה",
         "en": "",
-        "trans": "MA"
+        "trans": "MA",
+        "style": {
+            "category": "Face",
+            "phase": "three",
+            "tooltip": "45\nמ״ה",
+            "short": "Fourth Face in the World of Primordial Man"
+        }
     },
     "bon": {
         "he": "ב״ן",
         "en": "",
-        "trans": "BON"
+        "trans": "BON",
+        "style": {
+            "category": "Face",
+            "phase": "four",
+            "tooltip": "52\nב״ן",
+            "short": "Fifth Face in the World of Primordial Man"
+        }
     },
     "abba": {
         "he": "אבא",
         "en": "Father",
-        "trans": "Abba"
+        "trans": "Abba",
+        "style": {
+            "category": "Face",
+            "phase": "one"
+        }
     },
     "ima": {
         "he": "אמא",
         "en": "Mother",
-        "trans": "Ima"
+        "trans": "Ima",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "tzimtzum aleph": {
         "he": "צמצום א׳",
@@ -1062,27 +1435,47 @@ export const glossary = {
     "moach": {
         "he": "מוח",
         "en": "Mind",
-        "trans": "Moach"
+        "trans": "Moach",
+        "style": {
+            "category": "Body",
+            "phase": "root"
+        }
     },
     "atzamot": {
         "he": "עצמות",
         "en": "Bones",
-        "trans": "Atzamot"
+        "trans": "Atzamot",
+        "style": {
+            "category": "Body",
+            "phase": "one"
+        }
     },
     "gidin": {
         "he": "גידין",
         "en": "Tendons",
-        "trans": "Gidin"
+        "trans": "Gidin",
+        "style": {
+            "category": "Body",
+            "phase": "two"
+        }
     },
     "basar": {
         "he": "בשר",
         "en": "Flesh",
-        "trans": "Basar"
+        "trans": "Basar",
+        "style": {
+            "category": "Body",
+            "phase": "three"
+        }
     },
     "or": {
         "he": "עור",
         "en": "Skin",
-        "trans": "Or"
+        "trans": "Or",
+        "style": {
+            "category": "Body",
+            "phase": "four"
+        }
     },
     "malbushim": {
         "he": "",
@@ -1092,72 +1485,128 @@ export const glossary = {
     "ktonet": {
         "he": "כותנת",
         "en": "Shirt",
-        "trans": "Ktonet"
+        "trans": "Ktonet",
+        "style": {
+            "category": "Clothing",
+            "phase": "one"
+        }
     },
     "michnasayim": {
         "he": "מכנסיים",
         "en": "Trousers",
-        "trans": "Michnasayim"
+        "trans": "Michnasayim",
+        "style": {
+            "category": "Clothing",
+            "phase": "two"
+        }
     },
     "mitznefet": {
         "he": "מצנפת",
         "en": "Miter",
-        "trans": "Mitznefet"
+        "trans": "Mitznefet",
+        "style": {
+            "category": "Clothing",
+            "phase": "three"
+        }
     },
     "avnet": {
         "he": "אבנת",
         "en": "Belt",
-        "trans": "Avnet"
+        "trans": "Avnet",
+        "style": {
+            "category": "Clothing",
+            "phase": "four"
+        }
     },
     "bayit": {
         "he": "בית",
         "en": "House",
-        "trans": "Bayit"
+        "trans": "Bayit",
+        "style": {
+            "category": "House",
+            "phase": "one"
+        }
     },
     "hatzer": {
         "he": "חצר",
         "en": "Yard",
-        "trans": "Hatzer"
+        "trans": "Hatzer",
+        "style": {
+            "category": "House",
+            "phase": "two"
+        }
     },
     "sadeh": {
         "he": "שדה",
         "en": "Field",
-        "trans": "Sadeh"
+        "trans": "Sadeh",
+        "style": {
+            "category": "House",
+            "phase": "three"
+        }
     },
     "midbar": {
         "he": "מדבר",
         "en": "Desert",
-        "trans": "Midbar"
+        "trans": "Midbar",
+        "style": {
+            "category": "House",
+            "phase": "four"
+        }
     },
     "bamidbar": {
         "he": "במדבר",
         "en": "Numbers",
-        "trans": "BaMidbar"
+        "trans": "BaMidbar",
+        "style": {
+            "category": "Volume",
+            "phase": "four"
+        }
     },
     "mayim": {
         "he": "מים",
         "en": "Water",
-        "trans": "Mayim"
+        "trans": "Mayim",
+        "style": {
+            "category": "Element",
+            "phase": "one"
+        }
     },
     "afar": {
         "he": "עפר",
         "en": "Dust",
-        "trans": "Afar"
+        "trans": "Afar",
+        "style": {
+            "category": "Element",
+            "phase": "four"
+        }
     },
     "esh": {
         "he": "אש",
         "en": "Fire",
-        "trans": "Esh"
+        "trans": "Esh",
+        "style": {
+            "category": "Element",
+            "phase": "two"
+        }
     },
     "ruchot": {
         "he": "רוחות",
         "en": "Spirits",
-        "trans": "Ruchot"
+        "trans": "Ruchot",
+        "style": {
+            "category": "Angels",
+            "phase": "two"
+        }
     },
     "affar": {
         "he": "עפר",
         "en": "Dust",
-        "trans": "Affar"
+        "trans": "Affar",
+        "style": {
+            "category": "Element",
+            "phase": "four"
+        }
     },
     "nitzotz": {
         "he": "ניצוץ",
@@ -1172,17 +1621,29 @@ export const glossary = {
     "taamim": {
         "he": "טעמים",
         "en": "Tastes",
-        "trans": "Taamim"
+        "trans": "Taamim",
+        "style": {
+            "phase": "one",
+            "category": "Flow"
+        }
     },
     "nekudot": {
         "he": "נקודות",
         "en": "Points",
-        "trans": "Nekudot"
+        "trans": "Nekudot",
+        "style": {
+            "phase": "two",
+            "category": "Flow"
+        }
     },
     "tagin": {
         "he": "טגין",
         "en": "Crowns",
-        "trans": "Tagin"
+        "trans": "Tagin",
+        "style": {
+            "phase": "three",
+            "category": "Flow"
+        }
     },
     "ot": {
         "he": "אות",
@@ -1192,12 +1653,20 @@ export const glossary = {
     "otiot": {
         "he": "אותיות",
         "en": "Letters",
-        "trans": "Otiot"
+        "trans": "Otiot",
+        "style": {
+            "phase": "four",
+            "category": "Flow"
+        }
     },
     "parsa": {
         "he": "פרסא",
         "en": "Diaphragm",
-        "trans": "Parsa"
+        "trans": "Parsa",
+        "style": {
+            "phase": "two",
+            "category": "Location"
+        }
     },
     "raglin": {
         "he": "רגלין",
@@ -1207,7 +1676,11 @@ export const glossary = {
     "sium raglin": {
         "he": "סיום רגלין",
         "en": "End of Legs",
-        "trans": "Sium Raglin"
+        "trans": "Sium Raglin",
+        "style": {
+            "phase": "four",
+            "category": "Location"
+        }
     },
     "sium parsa": {
         "he": "סיום פרסא",
@@ -1217,7 +1690,11 @@ export const glossary = {
     "sium": {
         "he": "סיום",
         "en": "End",
-        "trans": "Sium"
+        "trans": "Sium",
+        "style": {
+            "category": "Location",
+            "phase": "four"
+        }
     },
     "revi’it dam": {
         "he": "רביעית דם",
@@ -1262,42 +1739,72 @@ export const glossary = {
     "atik": {
         "he": "עתיק",
         "en": "Ancient",
-        "trans": "Atik"
+        "trans": "Atik",
+        "style": {
+            "category": "Face",
+            "phase": "root"
+        }
     },
     "atik yomin": {
         "he": "עתיק יומין",
         "en": "Ancient of Days",
-        "trans": "Atik Yomin"
+        "trans": "Atik Yomin",
+        "style": {
+            "category": "Face",
+            "phase": "root"
+        }
     },
     "tohu": {
         "he": "תוהו",
         "en": "Unformed",
-        "trans": "Tohu"
+        "trans": "Tohu",
+        "style": {
+            "category": "Phase",
+            "phase": "one"
+        }
     },
     "bohu": {
         "he": "בוהו",
         "en": "Chaos",
-        "trans": "Bohu"
+        "trans": "Bohu",
+        "style": {
+            "category": "Phase",
+            "phase": "two"
+        }
     },
     "choshech": {
         "he": "חשך",
         "en": "Darkness",
-        "trans": "Choshech"
+        "trans": "Choshech",
+        "style": {
+            "category": "Phase",
+            "phase": "three"
+        }
     },
     "daat": {
         "he": "דעת",
         "en": "Knowledge",
-        "trans": "Daat"
+        "trans": "Daat",
+        "style": {
+            "category": "Vessel",
+            "phase": "three"
+        }
     },
     "sefer habahir": {
         "he": "ספר הבהיר",
         "en": "Book of the Bright",
-        "trans": "Sefer HaBahir"
+        "trans": "Sefer HaBahir",
+        "style": {
+            "category": "Book"
+        }
     },
     "ohr habahir": {
         "he": "אור הבהיר",
         "en": "The Bright Light",
-        "trans": "Ohr HaBahir"
+        "trans": "Ohr HaBahir",
+        "style": {
+            "category": "Book"
+        }
     },
     "sefer": {
         "he": "ספר",
@@ -1337,12 +1844,18 @@ export const glossary = {
     "havayah": {
         "he": "הויה",
         "en": "Tetragrammaton",
-        "trans": "HaVaYaH"
+        "trans": "HaVaYaH",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "havayot": {
         "he": "הוויות",
         "en": "Tetragrammatons",
-        "trans": "HaVaYot"
+        "trans": "HaVaYot",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "haita": {
         "he": "הייתה",
@@ -1367,7 +1880,10 @@ export const glossary = {
     "shlomo": {
         "he": "שלמה",
         "en": "Solomon",
-        "trans": "Shlomo"
+        "trans": "Shlomo",
+        "style": {
+            "category": "Author"
+        }
     },
     "orot": {
         "he": "אורות",
@@ -1467,12 +1983,20 @@ export const glossary = {
     "hassadim": {
         "he": "חסדים",
         "en": "Mercies",
-        "trans": "Hassadim"
+        "trans": "Hassadim",
+        "style": {
+            "category": "Aspect",
+            "phase": "root"
+        }
     },
     "dinim": {
         "he": "דינים",
         "en": "Judgements",
-        "trans": "Dinim"
+        "trans": "Dinim",
+        "style": {
+            "category": "Aspect",
+            "phase": "one"
+        }
     },
     "he’ara": {
         "he": "הארה",
@@ -1507,7 +2031,11 @@ export const glossary = {
     "din": {
         "he": "דין",
         "en": "Judgement",
-        "trans": "Din"
+        "trans": "Din",
+        "style": {
+            "category": "Aspect",
+            "phase": "one"
+        }
     },
     "he’arah": {
         "he": "הארה",
@@ -1647,12 +2175,18 @@ export const glossary = {
     "gimel rishonot": {
         "he": "ג׳ ראשונות",
         "en": "First Three",
-        "trans": "Gimel Rishonot"
+        "trans": "Gimel Rishonot",
+        "style": {
+            "category": "Intensity"
+        }
     },
     "zayin tachtonot": {
         "he": "ז׳ תחתונות",
         "en": "Lower Seven",
-        "trans": "Zayin Tachtonot"
+        "trans": "Zayin Tachtonot",
+        "style": {
+            "category": "Intensity"
+        }
     },
     "tachtonot": {
         "he": "תחתונות",
@@ -1727,22 +2261,38 @@ export const glossary = {
     "midat ha din": {
         "he": "מדת הדין",
         "en": "Measure of Judgement",
-        "trans": "Midat ha Din"
+        "trans": "Midat ha Din",
+        "style": {
+            "category": "Aspect",
+            "phase": "one"
+        }
     },
     "midat ha rachamim": {
         "he": "מדת הרחמים",
         "en": "Measure of Mercy",
-        "trans": "Midat ha Rachamim"
+        "trans": "Midat ha Rachamim",
+        "style": {
+            "category": "Aspect",
+            "phase": "root"
+        }
     },
     "midot ha din": {
         "he": "מידות הדין",
         "en": "Measures of Judgement",
-        "trans": "Midot ha Din"
+        "trans": "Midot ha Din",
+        "style": {
+            "category": "Aspect",
+            "phase": "one"
+        }
     },
     "midot ha rachamim": {
         "he": "מידות הרחמים",
         "en": "Measures of Mercy",
-        "trans": "Midot ha Rachamim"
+        "trans": "Midot ha Rachamim",
+        "style": {
+            "category": "Aspect",
+            "phase": "root"
+        }
     },
     "mida": {
         "he": "מידה",
@@ -1757,7 +2307,11 @@ export const glossary = {
     "rachamim": {
         "he": "רחמים",
         "en": "Mercy",
-        "trans": "Rachamim"
+        "trans": "Rachamim",
+        "style": {
+            "category": "Aspect",
+            "phase": "root"
+        }
     },
     "galgal": {
         "he": "גלגל",
@@ -1787,17 +2341,26 @@ export const glossary = {
     "sefer yetzira": {
         "he": "ספר יצירה",
         "en": "Book of Formation",
-        "trans": "Sefer Yetzira"
+        "trans": "Sefer Yetzira",
+        "style": {
+            "category": "Book"
+        }
     },
     "panim masbirot": {
         "he": "פנים מסבירות",
         "en": "A Welcoming Face",
-        "trans": "Panim Masbirot"
+        "trans": "Panim Masbirot",
+        "style": {
+            "category": "Book"
+        }
     },
     "panim meirot umasbirot": {
         "he": "פנים מאירות ומסבירות",
         "en": "A Bright and Welcoming Face",
-        "trans": "Panim Meirot uMasbirot"
+        "trans": "Panim Meirot uMasbirot",
+        "style": {
+            "category": "Book"
+        }
     },
     "tikkuney zohar": {
         "he": "תיקוני זוהר",
@@ -1822,12 +2385,18 @@ export const glossary = {
     "eynaim": {
         "he": "עיינים",
         "en": "Eyes",
-        "trans": "Eynaim"
+        "trans": "Eynaim",
+        "style": {
+            "phase": "one"
+        }
     },
     "awznaim": {
         "he": "אוזניים",
         "en": "Ears",
-        "trans": "Awznaim"
+        "trans": "Awznaim",
+        "style": {
+            "phase": "two"
+        }
     },
     "ve": {
         "he": "ו-",
@@ -1942,7 +2511,11 @@ export const glossary = {
     "tevuna": {
         "he": "תבונה",
         "en": "Comprehension",
-        "trans": "Tevuna"
+        "trans": "Tevuna",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "ain": {
         "he": "אין",
@@ -1957,17 +2530,29 @@ export const glossary = {
     "yod - hey vav - hey": {
         "he": "י-ה-ו-ה",
         "en": "God",
-        "trans": "Yod - Hey Vav - Hey"
+        "trans": "Yod - Hey Vav - Hey",
+        "style": {
+            "category": "Holy Name",
+            "phase": "three"
+        }
     },
     "yisrael saba tvuna": {
         "he": "ישראל סבא ותבונה",
         "en": "Grandfather of Israel and Comprehension",
-        "trans": "Yisrael Saba Tvuna"
+        "trans": "Yisrael Saba Tvuna",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "yisrael saba ve tvuna": {
         "he": "ישראל סבא ותבונה",
         "en": "Grandfather of Israel and Comprehension",
-        "trans": "Yisrael Saba ve Tvuna"
+        "trans": "Yisrael Saba ve Tvuna",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "yisrael": {
         "he": "ישראל",
@@ -1977,12 +2562,20 @@ export const glossary = {
     "yisrael saba": {
         "he": "ישראל סבא",
         "en": "Grandfather of Israel",
-        "trans": "Yisrael Saba"
+        "trans": "Yisrael Saba",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "tvuna": {
         "he": "תבונה",
         "en": "Comprehension",
-        "trans": "Tvuna"
+        "trans": "Tvuna",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "rabbi aba": {
         "he": "רבי אבא",
@@ -2022,12 +2615,20 @@ export const glossary = {
     "hey tata'a": {
         "he": "ה׳ תתאה",
         "en": "Bottom Hey",
-        "trans": "Hey Tata'a"
+        "trans": "Hey Tata'a",
+        "style": {
+            "category": "Holy Name",
+            "phase": "four"
+        }
     },
     "gevurot": {
         "he": "גבורות",
         "en": "Judgements",
-        "trans": "Gevurot"
+        "trans": "Gevurot",
+        "style": {
+            "category": "Six Sides",
+            "phase": "one"
+        }
     },
     "tikkun": {
         "he": "תיקון",
@@ -2092,7 +2693,10 @@ export const glossary = {
     "talmud eser sefirot": {
         "he": "תלמוד עשר ספירות",
         "en": "Study of the Ten Emanations",
-        "trans": "Talmud Eser Sefirot"
+        "trans": "Talmud Eser Sefirot",
+        "style": {
+            "category": "Book"
+        }
     },
     "etz chayim": {
         "he": "עץ חיים",
@@ -2262,32 +2866,52 @@ export const glossary = {
     "yud havayah": {
         "he": "י׳ הויה",
         "en": "Yud of Tetragrammaton",
-        "trans": "Yud HaVaYaH"
+        "trans": "Yud HaVaYaH",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "yod havayah": {
         "he": "י׳ הויה",
         "en": "Yod of Tetragrammaton",
-        "trans": "Yod HaVaYaH"
+        "trans": "Yod HaVaYaH",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "hey havayah": {
         "he": "ה׳ הויה",
         "en": "Hey of Tetragrammaton",
-        "trans": "Hey HaVaYaH"
+        "trans": "Hey HaVaYaH",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "vav havayah": {
         "he": "ו׳ הויה",
         "en": "Vav of Tetragrammaton",
-        "trans": "Vav HaVaYaH"
+        "trans": "Vav HaVaYaH",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "ruchin": {
         "he": "רוחין",
         "en": "Spirits",
-        "trans": "Ruchin"
+        "trans": "Ruchin",
+        "style": {
+            "category": "Angels",
+            "phase": "two"
+        }
     },
     "ofanim": {
         "he": "אופנים",
         "en": "Wheels",
-        "trans": "Ofanim"
+        "trans": "Ofanim",
+        "style": {
+            "category": "Angels",
+            "phase": "four"
+        }
     },
     "maavir": {
         "he": "מעביר",
@@ -2302,12 +2926,20 @@ export const glossary = {
     "ofan": {
         "he": "אופן",
         "en": "Wheel",
-        "trans": "Ofan"
+        "trans": "Ofan",
+        "style": {
+            "category": "Angels",
+            "phase": "four"
+        }
     },
     "mala'achim": {
         "he": "מלאכים",
         "en": "Angels",
-        "trans": "Mala'achim"
+        "trans": "Mala'achim",
+        "style": {
+            "category": "Angels",
+            "phase": "three"
+        }
     },
     "kashiut": {
         "he": "קשיות",
@@ -2402,17 +3034,28 @@ export const glossary = {
     "igul ima": {
         "he": "עיגול אמא",
         "en": "Circle of Mother",
-        "trans": "Igul Ima"
+        "trans": "Igul Ima",
+        "style": {
+            "category": "Face",
+            "phase": "two"
+        }
     },
     "igul abba": {
         "he": "עיגול אבא",
         "en": "Circle of Father",
-        "trans": "Igul Abba"
+        "trans": "Igul Abba",
+        "style": {
+            "category": "Face",
+            "phase": "one"
+        }
     },
     "awzen": {
         "he": "אוזן",
         "en": "Ear",
-        "trans": "Awzen"
+        "trans": "Awzen",
+        "style": {
+            "phase": "two"
+        }
     },
     "zakan": {
         "he": "זקן",
@@ -2427,7 +3070,10 @@ export const glossary = {
     "shechina": {
         "he": "שכינה",
         "en": "Divinity",
-        "trans": "Shechina"
+        "trans": "Shechina",
+        "style": {
+            "phase": "four"
+        }
     },
     "matronita": {
         "he": "מטרוניתא",
@@ -2437,12 +3083,18 @@ export const glossary = {
     "yehuda leib halevi ashlag": {
         "he": "יהודה ליב הלוי אשלג",
         "en": "Baal HaSulam",
-        "trans": "Yehuda Leib HaLevi Ashlag"
+        "trans": "Yehuda Leib HaLevi Ashlag",
+        "style": {
+            "category": "Author"
+        }
     },
     "baal hasulam": {
         "he": "בעל הסולם",
         "en": "",
-        "trans": "Baal HaSulam"
+        "trans": "Baal HaSulam",
+        "style": {
+            "category": "Author"
+        }
     },
     "sium raglaim": {
         "he": "סיום רגלין",
@@ -2512,12 +3164,19 @@ export const glossary = {
     "yahdonhy": {
         "he": "יאהדונהי",
         "en": "Combined Tetragrammaton",
-        "trans": "YAHDONHY"
+        "trans": "YAHDONHY",
+        "style": {
+            "category": "Y-A-H-D-O-N-H-Y י-א-ה-ד-ו-נ-ה-י"
+        }
     },
     "sof": {
         "he": "סוף",
         "en": "End",
-        "trans": "Sof"
+        "trans": "Sof",
+        "style": {
+            "category": "Location",
+            "phase": "four"
+        }
     },
     "hochmot": {
         "he": "חוכמות",
@@ -2532,12 +3191,19 @@ export const glossary = {
     "hochma stimaa": {
         "he": "חכמה סתימאה",
         "en": "Blocked Wisdom",
-        "trans": "Hochma Stimaa"
+        "trans": "Hochma Stimaa",
+        "style": {
+            "category": "Vessel"
+        }
     },
     "yetzirot": {
         "he": "יצירות",
         "en": "Formations",
-        "trans": "Yetzirot"
+        "trans": "Yetzirot",
+        "style": {
+            "category": "World",
+            "phase": "three"
+        }
     },
     "harut": {
         "he": "חרות",
@@ -2887,7 +3553,10 @@ export const glossary = {
     "enayim": {
         "he": "עיינים",
         "en": "Eyes",
-        "trans": "Enayim"
+        "trans": "Enayim",
+        "style": {
+            "phase": "one"
+        }
     },
     "tikkunim": {
         "he": "תיקונים",
@@ -2907,27 +3576,46 @@ export const glossary = {
     "holam": {
         "he": "חולם",
         "en": "Above the Letters",
-        "trans": "Holam"
+        "trans": "Holam",
+        "style": {
+            "category": "State",
+            "phase": "root"
+        }
     },
     "melafom": {
         "he": "מלאפום",
         "en": "In the Letters",
-        "trans": "Melafom"
+        "trans": "Melafom",
+        "style": {
+            "category": "State",
+            "phase": "one"
+        }
     },
     "shuruk": {
         "he": "שורוק",
         "en": "In the Letters",
-        "trans": "Shuruk"
+        "trans": "Shuruk",
+        "style": {
+            "category": "State",
+            "phase": "one"
+        }
     },
     "kamatz": {
         "he": "קמץ",
         "en": "Punctuation of Crown",
-        "trans": "Kamatz"
+        "trans": "Kamatz",
+        "style": {
+            "category": "אָ",
+            "phase": "root"
+        }
     },
     "nikvey eynaim": {
         "he": "נקבי עיינים",
         "en": "Eye Sockets",
-        "trans": "Nikvey Eynaim"
+        "trans": "Nikvey Eynaim",
+        "style": {
+            "phase": "one"
+        }
     },
     "mazla": {
         "he": "מזלא",
@@ -2942,7 +3630,10 @@ export const glossary = {
     "nikvey awzen": {
         "he": "נקבי עיינים",
         "en": "Ear Sockets",
-        "trans": "Nikvey Awzen"
+        "trans": "Nikvey Awzen",
+        "style": {
+            "phase": "two"
+        }
     },
     "heys": {
         "he": "הי׳ים",
@@ -3047,7 +3738,11 @@ export const glossary = {
     "binot": {
         "he": "בינות",
         "en": "Understandings",
-        "trans": "Binot"
+        "trans": "Binot",
+        "style": {
+            "category": "Vessel",
+            "phase": "two"
+        }
     },
     "sigim": {
         "he": "סיגים",
@@ -3092,7 +3787,10 @@ export const glossary = {
     "adni": {
         "he": "אדני",
         "en": "Lord",
-        "trans": "ADNI"
+        "trans": "ADNI",
+        "style": {
+            "category": "Holy Name"
+        }
     },
     "adnei ha sadeh": {
         "he": "אדני השדה",
@@ -3112,12 +3810,18 @@ export const glossary = {
     "hulin": {
         "he": "חולין",
         "en": "",
-        "trans": "Hulin"
+        "trans": "Hulin",
+        "style": {
+            "category": "Tractate"
+        }
     },
     "beresheet rabba": {
         "he": "בראשית רבה",
         "en": "Genesis Rabba",
-        "trans": "Beresheet Rabba"
+        "trans": "Beresheet Rabba",
+        "style": {
+            "category": "Book"
+        }
     },
     "tuma’a": {
         "he": "טומאה",
@@ -3142,17 +3846,28 @@ export const glossary = {
     "abba ima": {
         "he": "אבא אמא",
         "en": "Father and Mother",
-        "trans": "Abba Ima"
+        "trans": "Abba Ima",
+        "style": {
+            "category": "Face",
+            "phase": "one"
+        }
     },
     "abba ve ima": {
         "he": "אבא ואמא",
         "en": "Father and Mother",
-        "trans": "Abba ve Ima"
+        "trans": "Abba ve Ima",
+        "style": {
+            "category": "Face",
+            "phase": "one"
+        }
     },
     "vav kzavot": {
         "he": "ו׳ קצוות",
         "en": "Six Edges",
-        "trans": "Vav Kzavot"
+        "trans": "Vav Kzavot",
+        "style": {
+            "category": "Intensity"
+        }
     },
     "vav  ( six )": {
         "he": "",
@@ -3212,7 +3927,10 @@ export const glossary = {
     "zahariel": {
         "he": "זכריאל",
         "en": "",
-        "trans": "Zahariel"
+        "trans": "Zahariel",
+        "style": {
+            "category": "Angel"
+        }
     },
     "miftacha": {
         "he": "מפתחא",
@@ -3232,12 +3950,19 @@ export const glossary = {
     "kitra": {
         "he": "כתרא",
         "en": "Crown",
-        "trans": "Kitra"
+        "trans": "Kitra",
+        "style": {
+            "category": "Vessel",
+            "phase": "root"
+        }
     },
     "metzach": {
         "he": "מצח",
         "en": "Forehead",
-        "trans": "Metzach"
+        "trans": "Metzach",
+        "style": {
+            "phase": "root"
+        }
     },
     "tov ohr": {
         "he": "טוב אור",
@@ -3307,12 +4032,18 @@ export const glossary = {
     "idra zuta": {
         "he": "אדרא זוטא",
         "en": "",
-        "trans": "Idra Zuta"
+        "trans": "Idra Zuta",
+        "style": {
+            "category": "Zohar Portion"
+        }
     },
     "idra raba": {
         "he": "אדרא רבא",
         "en": "",
-        "trans": "Idra Raba"
+        "trans": "Idra Raba",
+        "style": {
+            "category": "Zohar Portion"
+        }
     },
     "mitpaer": {
         "he": "מתפאר",
@@ -3327,7 +4058,10 @@ export const glossary = {
     "bershit raba": {
         "he": "בראשית רבא",
         "en": "Genesis Rabba",
-        "trans": "Bershit Raba"
+        "trans": "Bershit Raba",
+        "style": {
+            "category": "Book"
+        }
     },
     "avot": {
         "he": "אבות",
@@ -3342,12 +4076,19 @@ export const glossary = {
     "olam ha brudim": {
         "he": "עולם הברודים",
         "en": "World of Correction",
-        "trans": "Olam ha Brudim"
+        "trans": "Olam ha Brudim",
+        "style": {
+            "category": "World",
+            "phase": "one"
+        }
     },
     "olam ha tikun": {
         "he": "עולם התיקון",
         "en": "World of Correction",
-        "trans": "Olam ha Tikun"
+        "trans": "Olam ha Tikun",
+        "style": {
+            "category": "World"
+        }
     },
     "zivug elyon": {
         "he": "זיווג עליון",
@@ -3372,7 +4113,10 @@ export const glossary = {
     "ahavah": {
         "he": "אהבה",
         "en": "Love",
-        "trans": "AhaVaH"
+        "trans": "AhaVaH",
+        "style": {
+            "category": "A-Ha-Va-H א-ה-ב-ה"
+        }
     },
     "neshikin": {
         "he": "נשיקין",
@@ -3417,7 +4161,10 @@ export const glossary = {
     "etzem hochma": {
         "he": "עצם חכמה",
         "en": "Core of Wisdom",
-        "trans": "Etzem Hochma"
+        "trans": "Etzem Hochma",
+        "style": {
+            "phase": "one"
+        }
     },
     "hayim": {
         "he": "חיים",
@@ -3427,7 +4174,11 @@ export const glossary = {
     "malchuts": {
         "he": "מלכיות",
         "en": "Kingdoms",
-        "trans": "Malchuts"
+        "trans": "Malchuts",
+        "style": {
+            "category": "Vessel",
+            "phase": "four"
+        }
     },
     "tsdadim": {
         "he": "צדדים",
@@ -3532,7 +4283,11 @@ export const glossary = {
     "olam ha akudim": {
         "he": "עולם העקודים",
         "en": "The World of Binding",
-        "trans": "Olam ha Akudim"
+        "trans": "Olam ha Akudim",
+        "style": {
+            "category": "World",
+            "phase": "root"
+        }
     },
     "nivraim": {
         "he": "נבראים",
@@ -3622,7 +4377,11 @@ export const glossary = {
     "ateret yesod": {
         "he": "עטרת יסוד",
         "en": "Encirclement of Foundation",
-        "trans": "Ateret Yesod"
+        "trans": "Ateret Yesod",
+        "style": {
+            "category": "Vessel",
+            "phase": "four"
+        }
     },
     "beresheet barah elokim et": {
         "he": "בראשית ברא אלקים את",
@@ -3774,7 +4533,6 @@ export const glossary = {
         "en": "Chariots",
         "trans": "Merkavot"
     },
-
     "avid": {
         "he": "עביד",
         "en": "Do",
@@ -3785,7 +4543,6 @@ export const glossary = {
         "en": "Lost",
         "trans": "Avud"
     },
-
     "tzoah": {
         "he": "צואה",
         "en": "Feces",
@@ -3829,7 +4586,11 @@ export const glossary = {
     "drush": {
         "he": "דרוש",
         "en": "Homily",
-        "trans": "Drush"
+        "trans": "Drush",
+        "style": {
+            "phase": "two",
+            "category": "Orchard"
+        }
     },
     "shmia": {
         "he": "שמיעה",
@@ -3959,27 +4720,42 @@ export const glossary = {
     "teva": {
         "he": "טבע",
         "en": "Nature",
-        "trans": "Teva"
+        "trans": "Teva",
+        "style": {
+            "phase": "root"
+        }
     },
     "enoshut": {
         "he": "אנושות",
         "en": "Humanity",
-        "trans": "Enoshut"
+        "trans": "Enoshut",
+        "style": {
+            "phase": "one"
+        }
     },
     "hevra": {
         "he": "חברה",
         "en": "Society",
-        "trans": "Hevra"
+        "trans": "Hevra",
+        "style": {
+            "phase": "two"
+        }
     },
     "kevutsa": {
         "he": "קבוצה",
         "en": "Group",
-        "trans": "Kevutsa"
+        "trans": "Kevutsa",
+        "style": {
+            "phase": "three"
+        }
     },
     "yahid segula": {
         "he": "יחיד סגולה",
         "en": "Individual",
-        "trans": "Yahid Segula"
+        "trans": "Yahid Segula",
+        "style": {
+            "phase": "four"
+        }
     },
     "gar de bina": {
         "he": "ג״ר דבינה",
@@ -4039,32 +4815,56 @@ export const glossary = {
     "noga shell": {
         "he": "קליפת נוגה",
         "en": "Brightness Shell",
-        "trans": "Noga shell"
+        "trans": "Noga shell",
+        "style": {
+            "category": "Shells",
+            "phase": "one"
+        }
     },
     "noga": {
         "he": "נוגה",
         "en": "Brightness",
-        "trans": "Noga"
+        "trans": "Noga",
+        "style": {
+            "category": "Shells",
+            "phase": "one"
+        }
     },
     "hashmal": {
         "he": "חשמל",
         "en": "Electricity",
-        "trans": "HASHMAL"
+        "trans": "HASHMAL",
+        "style": {
+            "category": "Shells",
+            "phase": "root"
+        }
     },
     "stormy wind": {
         "he": "רוח סערה",
         "en": "Stormy Wind",
-        "trans": "Stormy Wind"
+        "trans": "Stormy Wind",
+        "style": {
+            "category": "Shells",
+            "phase": "four"
+        }
     },
     "great cloud": {
         "he": "ענן גדול",
         "en": "Great Cloud",
-        "trans": "Great Cloud"
+        "trans": "Great Cloud",
+        "style": {
+            "category": "Shells",
+            "phase": "three"
+        }
     },
     "blazing fire": {
         "he": "אש מתלקחת",
         "en": "Blazing Fire",
-        "trans": "Blazing Fire"
+        "trans": "Blazing Fire",
+        "style": {
+            "category": "Shells",
+            "phase": "two"
+        }
     },
     "arvut": {
         "he": "ערבות",
@@ -4104,7 +4904,10 @@ export const glossary = {
     "malbim": {
         "he": "מלבים",
         "en": "",
-        "trans": "MALBIM"
+        "trans": "MALBIM",
+        "style": {
+            "category": "Author"
+        }
     },
     "lo lishma": {
         "he": "לא לשמה",
@@ -4154,7 +4957,10 @@ export const glossary = {
     "baal shem tov": {
         "he": "בעל שם טוב",
         "en": "",
-        "trans": "Baal Shem Tov"
+        "trans": "Baal Shem Tov",
+        "style": {
+            "category": "Author"
+        }
     },
     "resheet": {
         "he": "ראשית",
@@ -4164,7 +4970,10 @@ export const glossary = {
     "eden": {
         "he": "עדן",
         "en": "",
-        "trans": "Eden"
+        "trans": "Eden",
+        "style": {
+            "category": "Location"
+        }
     },
     "big zeir anpin ve nukva": {
         "he": "זעיר אנפין ונוקבא גדולים",
@@ -4199,17 +5008,26 @@ export const glossary = {
     "regesh": {
         "he": "רגש",
         "en": "Emotion",
-        "trans": "Regesh"
+        "trans": "Regesh",
+        "style": {
+            "phase": "three"
+        }
     },
     "yegiah": {
         "he": "יגיעה",
         "en": "Effort",
-        "trans": "Yegiah"
+        "trans": "Yegiah",
+        "style": {
+            "phase": "four"
+        }
     },
     "machshava": {
         "he": "מחשבה",
         "en": "Thought",
-        "trans": "Machshava"
+        "trans": "Machshava",
+        "style": {
+            "phase": "two"
+        }
     },
     "sechel": {
         "he": "שכל",
@@ -4219,12 +5037,18 @@ export const glossary = {
     "boreh": {
         "he": "בורא",
         "en": "Creator",
-        "trans": "Boreh"
+        "trans": "Boreh",
+        "style": {
+            "phase": "two"
+        }
     },
     "nivrah": {
         "he": "נברא",
         "en": "Creature",
-        "trans": "Nivrah"
+        "trans": "Nivrah",
+        "style": {
+            "phase": "two"
+        }
     },
     "ruchani": {
         "he": "רוחני",
@@ -4239,7 +5063,10 @@ export const glossary = {
     "sechel ruchani": {
         "he": "שכל רוחני",
         "en": "Spiritual Thought",
-        "trans": "Sechel Ruchani"
+        "trans": "Sechel Ruchani",
+        "style": {
+            "phase": "one"
+        }
     },
     "belaila de kala": {
         "he": "ליל הכלה",
@@ -4254,47 +5081,80 @@ export const glossary = {
     "regesh ruchani": {
         "he": "רגש רוחני",
         "en": "Spiritual Emotion",
-        "trans": "Regesh Ruchani"
+        "trans": "Regesh Ruchani",
+        "style": {
+            "phase": "two"
+        }
     },
     "sechel enoshi": {
         "he": "שכל אנושי",
         "en": "Human Thought",
-        "trans": "Sechel Enoshi"
+        "trans": "Sechel Enoshi",
+        "style": {
+            "phase": "three"
+        }
     },
     "regesh enoshi": {
         "he": "רגש אנושי",
         "en": "Human Emotion",
-        "trans": "Regesh Enoshi"
+        "trans": "Regesh Enoshi",
+        "style": {
+            "phase": "four"
+        }
     },
     "michael": {
         "he": "מיכאל",
         "en": "",
-        "trans": "Michael"
+        "trans": "Michael",
+        "style": {
+            "category": "Angel",
+            "phase": "one"
+        }
     },
     "gabriel": {
         "he": "גבריאל",
         "en": "",
-        "trans": "Gabriel"
+        "trans": "Gabriel",
+        "style": {
+            "category": "Angel",
+            "phase": "two"
+        }
     },
     "uriel": {
         "he": "אוריאל",
         "en": "",
-        "trans": "Uriel"
+        "trans": "Uriel",
+        "style": {
+            "category": "Angel",
+            "phase": "four"
+        }
     },
     "rafael": {
         "he": "רפאל",
         "en": "",
-        "trans": "Rafael"
+        "trans": "Rafael",
+        "style": {
+            "category": "Angel",
+            "phase": "three"
+        }
     },
     "raphael": {
         "he": "רפאל",
         "en": "",
-        "trans": "Raphael"
+        "trans": "Raphael",
+        "style": {
+            "category": "Angel",
+            "phase": "three"
+        }
     },
     "nuriel": {
         "he": "נוריאל",
         "en": "",
-        "trans": "Nuriel"
+        "trans": "Nuriel",
+        "style": {
+            "category": "Angel",
+            "phase": "four"
+        }
     },
     "tsaphon": {
         "he": "צפון",
@@ -4329,12 +5189,19 @@ export const glossary = {
     "mitzrayim": {
         "he": "",
         "en": "Egypt",
-        "trans": "Mitzrayim"
+        "trans": "Mitzrayim",
+        "style": {
+            "category": "Location",
+            "hebrew": "מצרים"
+        }
     },
     "edom": {
         "he": "אדום",
         "en": "",
-        "trans": "Edom"
+        "trans": "Edom",
+        "style": {
+            "category": "Location"
+        }
     },
     "mikneh": {
         "he": "מקנה",
@@ -4349,27 +5216,47 @@ export const glossary = {
     "abram": {
         "he": "אברם",
         "en": "",
-        "trans": "Abram"
+        "trans": "Abram",
+        "style": {
+            "category": "Class/Patriarch",
+            "phase": "root"
+        }
     },
     "abraham": {
         "he": "אברהם",
         "en": "",
-        "trans": "Abraham"
+        "trans": "Abraham",
+        "style": {
+            "category": "Class/Patriarch",
+            "phase": "root"
+        }
     },
     "isaac": {
         "he": "יצחק",
         "en": "",
-        "trans": "Isaac"
+        "trans": "Isaac",
+        "style": {
+            "category": "Class/Patriarch",
+            "phase": "one"
+        }
     },
     "jacob": {
         "he": "יעקב",
         "en": "",
-        "trans": "Jacob"
+        "trans": "Jacob",
+        "style": {
+            "category": "Class/Patriarch",
+            "phase": "two"
+        }
     },
     "joseph": {
         "he": "יוסף",
         "en": "",
-        "trans": "Joseph"
+        "trans": "Joseph",
+        "style": {
+            "category": "Class",
+            "phase": "collective"
+        }
     },
     "aveyrah": {
         "he": "עברה",
@@ -4419,7 +5306,11 @@ export const glossary = {
     "shor": {
         "he": "שור",
         "en": "Ox",
-        "trans": "Shor"
+        "trans": "Shor",
+        "style": {
+            "phase": "one",
+            "category": "Chariot"
+        }
     },
     "nachat": {
         "he": "נחת",
@@ -4474,17 +5365,27 @@ export const glossary = {
     "david": {
         "he": "דוד",
         "en": "",
-        "trans": "David"
+        "trans": "David",
+        "style": {
+            "category": "King",
+            "phase": "four"
+        }
     },
     "aza": {
         "he": "עזא",
         "en": "",
-        "trans": "Aza"
+        "trans": "Aza",
+        "style": {
+            "category": "Angel"
+        }
     },
     "azael": {
         "he": "עזאל",
         "en": "",
-        "trans": "Azael"
+        "trans": "Azael",
+        "style": {
+            "category": "Angel"
+        }
     },
     "tsror": {
         "he": "צרור",
@@ -4499,32 +5400,50 @@ export const glossary = {
     "rishonim": {
         "he": "ראשונים",
         "en": "The First Sages",
-        "trans": "Rishonim"
+        "trans": "Rishonim",
+        "style": {
+            "category": "Author"
+        }
     },
     "secrets of torah": {
         "he": "סתרי תורה",
         "en": "",
-        "trans": "Secrets of Torah"
+        "trans": "Secrets of Torah",
+        "style": {
+            "category": "Knowledge"
+        }
     },
     "flavors of torah": {
         "he": "טעמי תורה",
         "en": "",
-        "trans": "Flavors of Torah"
+        "trans": "Flavors of Torah",
+        "style": {
+            "category": "Knowledge"
+        }
     },
     "secrets of the torah": {
         "he": "סתרי תורה",
         "en": "",
-        "trans": "Secrets of the Torah"
+        "trans": "Secrets of the Torah",
+        "style": {
+            "category": "Knowledge"
+        }
     },
     "taamim of torah": {
         "he": "טעמי תורה",
         "en": "Tastes of the Torah",
-        "trans": "Taamim of Torah"
+        "trans": "Taamim of Torah",
+        "style": {
+            "category": "Knowledge"
+        }
     },
     "taamim of the torah": {
         "he": "טעמי תורה",
         "en": "Tastes of the Torah",
-        "trans": "Taamim of the Torah"
+        "trans": "Taamim of the Torah",
+        "style": {
+            "category": "Knowledge"
+        }
     },
     "hech": {
         "he": "חך",
@@ -4534,17 +5453,29 @@ export const glossary = {
     "ophanim": {
         "he": "אופנים",
         "en": "Cycles",
-        "trans": "Ophanim"
+        "trans": "Ophanim",
+        "style": {
+            "category": "Angels",
+            "phase": "four"
+        }
     },
     "hayot": {
         "he": "חיות",
         "en": "Animals",
-        "trans": "Hayot"
+        "trans": "Hayot",
+        "style": {
+            "category": "Angels",
+            "phase": "three"
+        }
     },
     "seraphim": {
         "he": "שרפים",
         "en": "",
-        "trans": "Seraphim"
+        "trans": "Seraphim",
+        "style": {
+            "category": "Angels",
+            "phase": "two"
+        }
     },
     "atah": {
         "he": "אתה",
@@ -4554,7 +5485,11 @@ export const glossary = {
     "melech ha daat": {
         "he": "מלך הדעת",
         "en": "King of Knowledge",
-        "trans": "Melech ha Daat"
+        "trans": "Melech ha Daat",
+        "style": {
+            "category": "King",
+            "phase": "three"
+        }
     },
     "derech": {
         "he": "דרך",
@@ -4609,7 +5544,10 @@ export const glossary = {
     "hakdamat sefer hazohar": {
         "he": "הקדמת ספר הזוהר",
         "en": "Introduction of The Book of Zohar",
-        "trans": "Hakdamat Sefer HaZohar"
+        "trans": "Hakdamat Sefer HaZohar",
+        "style": {
+            "category": "Book"
+        }
     },
     "ish": {
         "he": "איש",
@@ -4639,7 +5577,10 @@ export const glossary = {
     "ah av": {
         "he": "אח אב",
         "en": "",
-        "trans": "Ah Av"
+        "trans": "Ah Av",
+        "style": {
+            "category": "King of Israel"
+        }
     },
     "mi": {
         "he": "מי",
@@ -4659,17 +5600,29 @@ export const glossary = {
     "elokim": {
         "he": "אלהים",
         "en": "Lord",
-        "trans": "Elokim"
+        "trans": "Elokim",
+        "style": {
+            "category": "Holy Name",
+            "phase": "one"
+        }
     },
     "ekyeh": {
         "he": "אהיה",
         "en": "I will be",
-        "trans": "EKYEH"
+        "trans": "EKYEH",
+        "style": {
+            "category": "Holy Name",
+            "phase": "root"
+        }
     },
     "shadai": {
         "he": "ש-ד-י",
         "en": "Almighty",
-        "trans": "Shadai"
+        "trans": "Shadai",
+        "style": {
+            "phase": "collective",
+            "category": "Holy Name"
+        }
     },
     "shed": {
         "he": "שד",
@@ -4699,17 +5652,28 @@ export const glossary = {
     "israel": {
         "he": "ישראל",
         "en": "",
-        "trans": "Israel"
+        "trans": "Israel",
+        "style": {
+            "phase": "three"
+        }
     },
     "aaron": {
         "he": "אהרון",
         "en": "",
-        "trans": "Aaron"
+        "trans": "Aaron",
+        "style": {
+            "category": "Six Sides",
+            "phase": "four"
+        }
     },
     "mem - bet": {
         "he": "מ״ב",
         "en": "42",
-        "trans": "Mem - Bet"
+        "trans": "Mem - Bet",
+        "style": {
+            "category": "Holy Name",
+            "phase": "one"
+        }
     },
     "tzitzit": {
         "he": "ציצית",
@@ -4719,7 +5683,10 @@ export const glossary = {
     "rosh hashanah": {
         "he": "ראש השנה",
         "en": "New Year",
-        "trans": "Rosh HaShanah"
+        "trans": "Rosh HaShanah",
+        "style": {
+            "category": "Festival"
+        }
     },
     "over": {
         "he": "עובר",
@@ -4729,17 +5696,26 @@ export const glossary = {
     "passover": {
         "he": "פסח",
         "en": "",
-        "trans": "Passover"
+        "trans": "Passover",
+        "style": {
+            "category": "Festival"
+        }
     },
     "shavuot": {
         "he": "שבועות",
         "en": "",
-        "trans": "Shavuot"
+        "trans": "Shavuot",
+        "style": {
+            "category": "Festival"
+        }
     },
     "sukkot": {
         "he": "סוכות",
         "en": "",
-        "trans": "Sukkot"
+        "trans": "Sukkot",
+        "style": {
+            "category": "Festival"
+        }
     },
     "rimon": {
         "he": "רימון",
@@ -4794,22 +5770,34 @@ export const glossary = {
     "ish - boshet": {
         "he": "איש בושת",
         "en": "",
-        "trans": "Ish - boshet"
+        "trans": "Ish - boshet",
+        "style": {
+            "category": "Person"
+        }
     },
     "mavo shearim": {
         "he": "מבוא שערים",
         "en": "Entrance of the Gates",
-        "trans": "Mavo Shearim"
+        "trans": "Mavo Shearim",
+        "style": {
+            "category": "Book"
+        }
     },
     "shlavey hasulam": {
         "he": "שלבי הסולם",
         "en": "Rungs of the Ladder",
-        "trans": "Shlavey HaSulam"
+        "trans": "Shlavey HaSulam",
+        "style": {
+            "category": "Book"
+        }
     },
     "baruch shalom halevi ashlag": {
         "he": "ברוך שלום הלוי אשלג",
         "en": "",
-        "trans": "Baruch Shalom HaLevi Ashlag"
+        "trans": "Baruch Shalom HaLevi Ashlag",
+        "style": {
+            "category": "Author"
+        }
     },
     "eretz": {
         "he": "ארץ",
@@ -4819,7 +5807,10 @@ export const glossary = {
     "kaddish": {
         "he": "קדיש",
         "en": "",
-        "trans": "Kaddish"
+        "trans": "Kaddish",
+        "style": {
+            "category": "Prayer"
+        }
     },
     "shearim": {
         "he": "שערים",
@@ -4989,17 +5980,29 @@ export const glossary = {
     "peshat": {
         "he": "פשט",
         "en": "Literal",
-        "trans": "Peshat"
+        "trans": "Peshat",
+        "style": {
+            "phase": "four",
+            "category": "Orchard"
+        }
     },
     "remez": {
         "he": "רמז",
         "en": "Intimation",
-        "trans": "Remez"
+        "trans": "Remez",
+        "style": {
+            "phase": "three",
+            "category": "Orchard"
+        }
     },
     "sod": {
         "he": "סוד",
         "en": "Secret",
-        "trans": "Sod"
+        "trans": "Sod",
+        "style": {
+            "phase": "one",
+            "category": "Orchard"
+        }
     },
     "gavar": {
         "he": "גבר",
@@ -5009,22 +6012,38 @@ export const glossary = {
     "pishon": {
         "he": "פישון",
         "en": "",
-        "trans": "Pishon"
+        "trans": "Pishon",
+        "style": {
+            "category": "River",
+            "phase": "four"
+        }
     },
     "gichon": {
         "he": "גיחון",
         "en": "",
-        "trans": "Gichon"
+        "trans": "Gichon",
+        "style": {
+            "category": "River",
+            "phase": "three"
+        }
     },
     "hidekel": {
         "he": "חדקל",
         "en": "",
-        "trans": "Hidekel"
+        "trans": "Hidekel",
+        "style": {
+            "category": "River",
+            "phase": "two"
+        }
     },
     "euphrates": {
         "he": "פרת",
         "en": "",
-        "trans": "Euphrates"
+        "trans": "Euphrates",
+        "style": {
+            "category": "River",
+            "phase": "one"
+        }
     },
     "had kal": {
         "he": "חד קל",
@@ -5044,22 +6063,38 @@ export const glossary = {
     "ben azai": {
         "he": "בן עזאי",
         "en": "",
-        "trans": "Ben Azai"
+        "trans": "Ben Azai",
+        "style": {
+            "category": "Sage",
+            "phase": "four"
+        }
     },
     "ben zoma": {
         "he": "בן זומא",
         "en": "",
-        "trans": "Ben Zoma"
+        "trans": "Ben Zoma",
+        "style": {
+            "category": "Sage",
+            "phase": "three"
+        }
     },
     "acher": {
         "he": "אחר",
         "en": "Other",
-        "trans": "Acher"
+        "trans": "Acher",
+        "style": {
+            "category": "Sage",
+            "phase": "two"
+        }
     },
     "rabbi akiva": {
         "he": "רבי עקיבא",
         "en": "",
-        "trans": "Rabbi Akiva"
+        "trans": "Rabbi Akiva",
+        "style": {
+            "category": "Sage",
+            "phase": "one"
+        }
     },
     "segula": {
         "he": "סגולה",
@@ -5189,7 +6224,11 @@ export const glossary = {
     "cherubim": {
         "he": "כרובים",
         "en": "",
-        "trans": "Cherubim"
+        "trans": "Cherubim",
+        "style": {
+            "phase": "two",
+            "category": "Angels"
+        }
     },
     "chayot": {
         "he": "חיות",
@@ -5244,12 +6283,20 @@ export const glossary = {
     "nesher": {
         "he": "נשר",
         "en": "Eagle",
-        "trans": "Nesher"
+        "trans": "Nesher",
+        "style": {
+            "phase": "two",
+            "category": "Chariot"
+        }
     },
     "aryeh": {
         "he": "אריה",
         "en": "Lion",
-        "trans": "Aryeh"
+        "trans": "Aryeh",
+        "style": {
+            "phase": "root",
+            "category": "Chariot"
+        }
     },
     "matzpatz": {
         "he": "מצפץ",

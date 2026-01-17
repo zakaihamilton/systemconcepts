@@ -1524,6 +1524,46 @@ export default {
         {
             "id": "UPDATE",
             "value": "Update"
+        },
+        {
+            "id": "JUMP_TO",
+            "value": "קפוץ ל"
+        },
+        {
+            "id": "PAGE",
+            "value": "עמוד"
+        },
+        {
+            "id": "PARAGRAPH",
+            "value": "פסקה"
+        },
+        {
+            "id": "PAGE_NUMBER",
+            "value": "מספר עמוד"
+        },
+        {
+            "id": "PARAGRAPH_NUMBER",
+            "value": "מספר פסקה"
+        },
+        {
+            "id": "GO",
+            "value": "עבור"
+        },
+        {
+            "id": "SCROLL_TO_TOP",
+            "value": "גלילה למעלה"
+        },
+        {
+            "id": "ZOOM",
+            "value": "הגדל פסקה"
+        },
+        {
+            "id": "ARTICLE_TERMS",
+            "value": "מונחי המאמר"
+        },
+        {
+            "id": "NO_TERMS_FOUND",
+            "value": "לא נמצאו מונחים"
         }
     ]
 };

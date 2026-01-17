@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from './Glossary';
-import { termPattern } from './GlossaryUtils';
+import { termPattern, PHASE_COLORS, getStyleInfo } from "./GlossaryUtils";
 import styles from './Markdown.module.scss';
 import Zoom from "./Zoom";
 
@@ -13,6 +13,8 @@ import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
 import clsx from "clsx";
 
+
+
 const Term = ({ term, entry, search }) => {
     const translations = useTranslations();
     const [hover, setHover] = useState(false);
@@ -20,6 +22,12 @@ const Term = ({ term, entry, search }) => {
     const [bridgeStyle, setBridgeStyle] = useState({});
     const containerRef = useRef(null);
     const hoverTimeoutRef = useRef(null);
+
+    const styleInfo = getStyleInfo(entry.style);
+    const phaseRaw = styleInfo?.phase;
+    const phaseKey = typeof phaseRaw === 'string' ? phaseRaw.toLowerCase() : null;
+    const phaseColor = phaseKey ? PHASE_COLORS[phaseKey] : null;
+    const phaseLabel = phaseKey ? phaseKey.charAt(0).toUpperCase() + phaseKey.slice(1) : null;
 
     const handleMouseEnter = () => {
         hoverTimeoutRef.current = setTimeout(() => {
@@ -30,12 +38,17 @@ const Term = ({ term, entry, search }) => {
                 const scrollX = window.scrollX;
                 const scrollY = window.scrollY;
 
+                const borderStyle = phaseColor ? {
+                    borderBottom: `4px solid ${phaseColor}`
+                } : {};
+
                 // Base style for Portal (absolute relative to document)
                 const baseStyle = {
                     position: 'absolute',
                     left: `${rect.left + scrollX + rect.width / 2}px`,
                     zIndex: 1300,
-                    margin: 0
+                    margin: 0,
+                    ...borderStyle
                 };
 
                 const bridgeBase = {
@@ -53,7 +66,8 @@ const Term = ({ term, entry, search }) => {
                         ...baseStyle,
                         top: `${topVal}px`,
                         bottom: 'auto',
-                        transform: 'translateX(-50%)'
+                        transform: 'translateX(-50%)',
+                        ...borderStyle
                     });
                     setBridgeStyle({
                         ...bridgeBase,
@@ -68,7 +82,8 @@ const Term = ({ term, entry, search }) => {
                         top: `${topVal}px`,
                         bottom: 'auto',
                         // Use translate to shift it UP from the anchor point
-                        transform: 'translate(-50%, -100%)'
+                        transform: 'translate(-50%, -100%)',
+                        ...borderStyle
                     });
                     setBridgeStyle({
                         ...bridgeBase,
@@ -132,7 +147,12 @@ const Term = ({ term, entry, search }) => {
             {showAnnotation && <span className={styles['glossary-annotation']}>{entry.trans}</span>}
 
             {/* The Main Text (English Translation) */}
-            <span className={mainTextClass}>{mainText}</span>
+            <span
+                className={mainTextClass}
+                style={phaseColor ? { borderBottom: `2px solid ${phaseColor}` } : {}}
+            >
+                {mainText}
+            </span>
 
             {/* The Tooltip (Portalled) */}
             {hover && ReactDOM.createPortal(
@@ -141,6 +161,34 @@ const Term = ({ term, entry, search }) => {
                     <div className={styles['glossary-bridge']} style={bridgeStyle} />
 
                     <div className={styles['glossary-tooltip']} style={tooltipStyle}>
+                        {styleInfo?.category && (
+                            <div className={styles['tt-category']} style={{
+                                display: 'inline-block',
+                                background: '#eee',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                                marginBottom: '8px',
+                                color: '#333'
+                            }}>
+                                {styleInfo.category}
+                            </div>
+                        )}
+                        {phaseLabel && (
+                            <div className={styles['tt-phase']} style={{
+                                display: 'inline-block',
+                                background: phaseColor,
+                                color: '#000',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                                marginBottom: '8px',
+                                marginLeft: '6px',
+                                border: '1px solid rgba(0,0,0,0.1)'
+                            }}>
+                                {phaseLabel}
+                            </div>
+                        )}
                         {/* English Section */}
                         <div className={styles['tt-label']}>{translations.TRANSLATION}</div>
                         <div className={styles['tt-value']}>{entry.en || mainText}</div>

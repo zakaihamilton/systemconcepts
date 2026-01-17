@@ -22,7 +22,7 @@ import { useToolbar, registerToolbar } from "@components/Toolbar";
 import styles from "./Article.module.scss";
 import clsx from "clsx";
 import Player from "./Article/Player";
-import JumpToParagraphDialog from "./Article/JumpToParagraphDialog";
+import JumpDialog from "./Article/JumpDialog";
 import ArticleTermsDialog from "./Article/ArticleTermsDialog";
 import { scanForTerms } from "./Article/GlossaryUtils";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
@@ -62,17 +62,24 @@ function Article({
     const [articleTerms, setArticleTerms] = useState([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
-    const handleJump = useCallback((number) => {
+    const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
-        const element = contentRef.current.querySelector(`[data-paragraph-index="${number}"]`);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            element.classList.add(styles.highlightedParagraph);
-            setTimeout(() => {
-                element.classList.remove(styles.highlightedParagraph);
-            }, 2000);
+        if (type === 'paragraph') {
+            const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add(styles.highlightedParagraph);
+                setTimeout(() => {
+                    element.classList.remove(styles.highlightedParagraph);
+                }, 2000);
+            }
+        } else if (type === 'page') {
+            if (contentRef.current && scrollInfo.clientHeight > 0) {
+                const scrollTop = (value - 1) * scrollInfo.clientHeight;
+                contentRef.current.scrollTo({ top: scrollTop, behavior: 'smooth' });
+            }
         }
-    }, [contentRef]);
+    }, [contentRef, scrollInfo]);
 
     const handleShowTerms = useCallback(() => {
         const terms = scanForTerms(content);
@@ -338,14 +345,14 @@ function Article({
             });
             items.push({
                 id: "jumpToParagraph",
-                name: translations.JUMP_TO_PARAGRAPH || "Jump to Paragraph",
+                name: translations.JUMP_TO,
                 icon: <FormatListNumberedIcon />,
                 onClick: () => setJumpDialogOpen(true),
                 menu: true
             });
             items.push({
                 id: "articleTerms",
-                name: translations.ARTICLE_TERMS || "Article Terms",
+                name: translations.ARTICLE_TERMS,
                 icon: <MenuBookIcon />,
                 onClick: handleShowTerms,
                 menu: true
@@ -421,174 +428,192 @@ function Article({
     }
 
     return (
+
         <Box
             component="main"
-            ref={contentRef}
-            onScroll={(e) => {
-                if (handleScroll) handleScroll(e);
-                handleScrollUpdate(e);
-                setShowScrollTop(e.target.scrollTop > 300);
-            }}
             className={styles.root}
             minWidth={0}
             sx={{
-                ml: { sm: 2 }
+                ml: { sm: 2 },
+                overflow: 'hidden !important',
+                position: 'relative'
             }}
         >
-            <Fade in={scrollInfo.visible} timeout={1000}>
-                <Paper
-                    elevation={4}
-                    sx={{
-                        position: 'fixed',
-                        top: 24,
-                        right: 24,
-                        zIndex: 1400,
-                        px: 2,
-                        py: 1,
-                        borderRadius: 4,
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        color: 'white',
-                        backdropFilter: 'blur(4px)',
-                        pointerEvents: 'none'
-                    }}
-                >
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                        Page {scrollInfo.page} / {scrollInfo.total}
-                    </Typography>
-                </Paper>
-            </Fade>
-            <Box className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}>
-                <Box className={styles.headerInfo}>
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        edge="start"
-                        onClick={handleDrawerToggle}
-                        sx={{ display: { sm: "none" } }}
-                    >
-                        <LibraryBooksIcon />
-                    </IconButton>
-                    <Box className={styles.headerTitleWrapper}>
-                        <Box className={styles.titleRow}>
-                            {selectedTag?.number && (
-                                <Paper
-                                    elevation={0}
-                                    className={styles.tagNumber}
-                                    component="span"
-                                >
-                                    #{selectedTag.number}
-                                </Paper>
-                            )}
-                            {" "}
-                            <Typography
-                                variant="h4"
-                                className={styles.title}
-                                component="span"
-                            >
-                                {title.name}
-                            </Typography>
-                        </Box>
-                        <Box className={styles.metadataRow}>
-                            {LibraryTagKeys.filter(key => key !== "book" && key !== "author")
-                                .concat(["book", "author"])
-                                .map(key => {
-                                    if (!selectedTag?.[key] || key === "number") return null;
-                                    if (title.key === key) return null;
-                                    const value = selectedTag[key];
-                                    if (title.name === value) return null;
-                                    const Icon = LibraryIcons[key];
-                                    return (
-                                        <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
-                                            <Paper
-                                                elevation={0}
-                                                className={styles.metadataTag}
-                                                data-key={key}
-                                                onClick={() => navigator.clipboard.writeText(value)}
-                                                sx={{ cursor: "pointer" }}
-                                            >
-                                                {Icon && <Icon sx={{ fontSize: "1rem" }} />}
-                                                <Typography variant="caption">{value}</Typography>
-                                            </Paper>
-                                        </Tooltip>
-                                    );
-                                })}
-                        </Box>
-                    </Box>
-                </Box>
-            </Box>
-            {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
+            <Zoom in={showScrollTop}>
                 <Box
-                    key={i}
                     sx={{
                         position: 'absolute',
-                        top: (i + 1) * scrollInfo.clientHeight,
-                        left: 0,
-                        right: 0,
-                        height: '1px',
-                        borderTop: '2px dashed var(--divider)',
-                        opacity: 1.0,
-                        pointerEvents: 'none'
-                    }}
-                />
-            ))}
-            <Box className={styles.contentScrollArea}>
-                <Box className={styles.contentWrapper}>
-                    {showMarkdown ? (
-                        <Markdown search={search} currentTTSParagraph={currentTTSParagraph}>
-                            {content}
-                        </Markdown>
-                    ) : (
-                        <Box
-                            component="pre"
-                            sx={{
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                fontFamily: 'inherit',
-                                fontSize: 'inherit',
-                                lineHeight: 1.6,
-                                margin: 0
-                            }}
-                        >
-                            {content}
-                        </Box>
-                    )}
-                </Box>
-            </Box>
-
-            {content && showMarkdown && (
-                <Player
-                    contentRef={contentRef}
-                    onParagraphChange={handleTTSParagraphChange}
-                />
-            )}
-            <JumpToParagraphDialog
-                open={jumpDialogOpen}
-                onClose={() => setJumpDialogOpen(false)}
-                onSubmit={handleJump}
-            />
-            <ArticleTermsDialog
-                open={termsDialogOpen}
-                onClose={() => setTermsDialogOpen(false)}
-                terms={articleTerms}
-            />
-            <Zoom in={showScrollTop}>
-                <Fab
-                    color="primary"
-                    size="small"
-                    aria-label="scroll back to top"
-                    onClick={scrollToTop}
-                    sx={{
-                        position: 'fixed',
-                        bottom: 16,
-                        right: 16,
+                        top: 16,
+                        left: 16,
                         zIndex: 1300
                     }}
                 >
-                    <ArrowUpwardIcon />
-                </Fab>
+                    <Tooltip title={translations.SCROLL_TO_TOP || "Scroll to Top"} placement="right">
+                        <Fab
+                            color="primary"
+                            size="small"
+                            aria-label="scroll back to top"
+                            onClick={scrollToTop}
+                        >
+                            <ArrowUpwardIcon />
+                        </Fab>
+                    </Tooltip>
+                </Box>
             </Zoom>
+            <Box
+                ref={contentRef}
+                onScroll={(e) => {
+                    if (handleScroll) handleScroll(e);
+                    handleScrollUpdate(e);
+                    setShowScrollTop(e.target.scrollTop > 300);
+                }}
+                sx={{
+                    height: '100%',
+                    overflowY: 'auto',
+                    overflowX: 'hidden'
+                }}
+            >
+                <Fade in={scrollInfo.visible} timeout={1000}>
+                    <Paper
+                        elevation={4}
+                        sx={{
+                            position: 'fixed',
+                            top: 24,
+                            right: 24,
+                            zIndex: 1400,
+                            px: 2,
+                            py: 1,
+                            borderRadius: 4,
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            color: 'white',
+                            backdropFilter: 'blur(4px)',
+                            pointerEvents: 'none'
+                        }}
+                    >
+                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            Page {scrollInfo.page} / {scrollInfo.total}
+                        </Typography>
+                    </Paper>
+                </Fade>
+                <Box className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}>
+                    <Box className={styles.headerInfo}>
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            edge="start"
+                            onClick={handleDrawerToggle}
+                            sx={{ display: { sm: "none" } }}
+                        >
+                            <LibraryBooksIcon />
+                        </IconButton>
+                        <Box className={styles.headerTitleWrapper}>
+                            <Box className={styles.titleRow}>
+                                {selectedTag?.number && (
+                                    <Paper
+                                        elevation={0}
+                                        className={styles.tagNumber}
+                                        component="span"
+                                    >
+                                        #{selectedTag.number}
+                                    </Paper>
+                                )}
+                                {" "}
+                                <Typography
+                                    variant="h4"
+                                    className={styles.title}
+                                    component="span"
+                                >
+                                    {title.name}
+                                </Typography>
+                            </Box>
+                            <Box className={styles.metadataRow}>
+                                {LibraryTagKeys.filter(key => key !== "book" && key !== "author")
+                                    .concat(["book", "author"])
+                                    .map(key => {
+                                        if (!selectedTag?.[key] || key === "number") return null;
+                                        if (title.key === key) return null;
+                                        const value = selectedTag[key];
+                                        if (title.name === value) return null;
+                                        const Icon = LibraryIcons[key];
+                                        return (
+                                            <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
+                                                <Paper
+                                                    elevation={0}
+                                                    className={styles.metadataTag}
+                                                    data-key={key}
+                                                    onClick={() => navigator.clipboard.writeText(value)}
+                                                    sx={{ cursor: "pointer" }}
+                                                >
+                                                    {Icon && <Icon sx={{ fontSize: "1rem" }} />}
+                                                    <Typography variant="caption">{value}</Typography>
+                                                </Paper>
+                                            </Tooltip>
+                                        );
+                                    })}
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
+                {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
+                    <Box
+                        key={i}
+                        sx={{
+                            position: 'absolute',
+                            top: (i + 1) * scrollInfo.clientHeight,
+                            left: 0,
+                            right: 0,
+                            height: '1px',
+                            borderTop: '2px dashed var(--divider)',
+                            opacity: 1.0,
+                            pointerEvents: 'none'
+                        }}
+                    />
+                ))}
+                <Box className={styles.contentScrollArea}>
+                    <Box className={styles.contentWrapper}>
+                        {showMarkdown ? (
+                            <Markdown search={search} currentTTSParagraph={currentTTSParagraph}>
+                                {content}
+                            </Markdown>
+                        ) : (
+                            <Box
+                                component="pre"
+                                sx={{
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    fontFamily: 'inherit',
+                                    fontSize: 'inherit',
+                                    lineHeight: 1.6,
+                                    margin: 0
+                                }}
+                            >
+                                {content}
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+
+                {content && showMarkdown && (
+                    <Player
+                        contentRef={contentRef}
+                        onParagraphChange={handleTTSParagraphChange}
+                    />
+                )}
+                <JumpDialog
+                    open={jumpDialogOpen}
+                    onClose={() => setJumpDialogOpen(false)}
+                    onSubmit={handleJump}
+                    maxPage={scrollInfo.total}
+                />
+                <ArticleTermsDialog
+                    open={termsDialogOpen}
+                    onClose={() => setTermsDialogOpen(false)}
+                    terms={articleTerms}
+                />
+            </Box>
         </Box>
     );
+
 }
 
 export default React.memo(Article);

@@ -49,3 +49,22 @@ export function scanForTerms(text) {
         .map(([key, entry]) => ({ term: key, ...entry }))
         .sort((a, b) => a.term.localeCompare(b.term));
 }
+
+export const PHASE_COLORS = {
+    root: '#ffffff',
+    one: '#fff59d',
+    two: '#90caf9',
+    three: '#ef9a9a',
+    four: '#a5d6a7'
+};
+
+export const getStyleInfo = (style) => {
+    if (!style) return null;
+    if (typeof style === 'string') {
+        return { category: style };
+    }
+    return {
+        category: style.category,
+        phase: style.phase
+    };
+};

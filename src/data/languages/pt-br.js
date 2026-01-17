@@ -1500,6 +1500,46 @@ export default {
         {
             "id": "UPDATE",
             "value": "Atualizar"
+        },
+        {
+            "id": "JUMP_TO",
+            "value": "Ir Para"
+        },
+        {
+            "id": "PAGE",
+            "value": "Página"
+        },
+        {
+            "id": "PARAGRAPH",
+            "value": "Parágrafo"
+        },
+        {
+            "id": "PAGE_NUMBER",
+            "value": "Número da Página"
+        },
+        {
+            "id": "PARAGRAPH_NUMBER",
+            "value": "Número do Parágrafo"
+        },
+        {
+            "id": "GO",
+            "value": "Ir"
+        },
+        {
+            "id": "SCROLL_TO_TOP",
+            "value": "Rolar para o Topo"
+        },
+        {
+            "id": "ZOOM",
+            "value": "Zoom no Parágrafo"
+        },
+        {
+            "id": "ARTICLE_TERMS",
+            "value": "Termos do Artigo"
+        },
+        {
+            "id": "NO_TERMS_FOUND",
+            "value": "Nenhum termo encontrado"
         }
     ]
 };

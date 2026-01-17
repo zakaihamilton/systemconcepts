@@ -1536,6 +1536,46 @@ export default {
         {
             "id": "UPDATE",
             "value": "Update"
+        },
+        {
+            "id": "JUMP_TO",
+            "value": "Jump To"
+        },
+        {
+            "id": "PAGE",
+            "value": "Page"
+        },
+        {
+            "id": "PARAGRAPH",
+            "value": "Paragraph"
+        },
+        {
+            "id": "PAGE_NUMBER",
+            "value": "Page Number"
+        },
+        {
+            "id": "PARAGRAPH_NUMBER",
+            "value": "Paragraph Number"
+        },
+        {
+            "id": "GO",
+            "value": "Go"
+        },
+        {
+            "id": "SCROLL_TO_TOP",
+            "value": "Scroll to Top"
+        },
+        {
+            "id": "ZOOM",
+            "value": "Zoom to Paragraph"
+        },
+        {
+            "id": "ARTICLE_TERMS",
+            "value": "Article Terms"
+        },
+        {
+            "id": "NO_TERMS_FOUND",
+            "value": "No terms found"
         }
     ]
 };
