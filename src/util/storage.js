@@ -291,17 +291,24 @@ async function getRecursiveList(path) {
         if (result) {
             return result;
         }
+        console.log(`[Storage] Device method returned null/undefined for: ${path}, using fallback`);
     } catch (err) {
         // Fallback to manual recursion if method not supported or fails
-        // But actually callMethod throws if method not found on device?
-        // callMethod returns null if method not found.
+        console.warn(`[Storage] Device method failed for ${path}:`, err.message || err);
     }
 
     // Return empty array if directory listing fails
     let listing = [];
     const visitedPaths = new Set();
+    const MAX_DEPTH = 10; // Prevent runaway recursion
 
-    const addListing = async (dirPath) => {
+    const addListing = async (dirPath, depth = 0) => {
+        // Prevent runaway recursion
+        if (depth > MAX_DEPTH) {
+            console.warn(`[Storage] Max depth exceeded for: ${dirPath}`);
+            return;
+        }
+
         // Prevent infinite loops and duplicate visits
         const normalizedPath = makePath(dirPath);
         if (visitedPaths.has(normalizedPath)) {
@@ -324,7 +331,7 @@ async function getRecursiveList(path) {
         });
 
         if (validItems.length === 0 && items.length > 0) {
-            console.warn(`[Storage] Skipping ${dirPath} - items don't match expected path prefix`);
+            console.warn(`[Storage] Skipping ${dirPath} - ${items.length} items don't match expected path prefix`);
             return;
         }
 
@@ -340,10 +347,10 @@ async function getRecursiveList(path) {
         });
 
         if (subDirs.length > 0) {
-            await Promise.all(subDirs.map(dir => addListing(dir.path)));
+            await Promise.all(subDirs.map(dir => addListing(dir.path, depth + 1)));
         }
     };
-    await addListing(path);
+    await addListing(path, 0);
     return listing;
 }
 
