@@ -21,7 +21,7 @@ import { uploadUpdates } from "./steps/uploadUpdates";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { removeDeletedFiles } from "./steps/removeDeletedFiles";
 import { uploadManifest } from "./steps/uploadManifest";
-import { SyncProgressTracker } from "./progressTracker";
+import { SyncProgressTracker, MAIN_SYNC_WEIGHT, LIBRARY_SYNC_WEIGHT, PERSONAL_SYNC_WEIGHT, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 
 const SYNC_INTERVAL = 60; // seconds
 
@@ -31,10 +31,10 @@ const SYNC_INTERVAL = 60; // seconds
  * @param {string} remotePath - Remote path to sync to
  * @param {string} label - Label for logging
  */
-async function executeSyncPipeline(localPath, remotePath, label, role) {
+async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffset = 0, combinedTotalWeight = null) {
     const start = performance.now();
     addSyncLog(`Starting ${label} sync...`, "info");
-    const progress = new SyncProgressTracker();
+    const progress = new SyncProgressTracker(phaseOffset, combinedTotalWeight);
     let hasChanges = false;
     const canUpload = roleAuth(role, "admin");
 
@@ -106,7 +106,8 @@ async function executeSyncPipeline(localPath, remotePath, label, role) {
     const duration = ((performance.now() - start) / 1000).toFixed(1);
     addSyncLog(`✓ ${label} sync complete (${remoteManifest.length} files) in ${duration}s`, "success");
 
-    return hasChanges;
+    // Return the new offset for the next phase
+    return { hasChanges, newOffset: progress.getCurrentOffset() };
 }
 
 /**
@@ -177,11 +178,14 @@ export async function performSync() {
         addSyncLog("Starting sync process...", "info");
         const startTime = performance.now();
 
-        // 1. Main Sync
-        const mainChanges = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main", role);
+        // 1. Main Sync (starts at offset 0)
+        const mainResult = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main", role, 0, TOTAL_COMBINED_WEIGHT);
 
-        // 2. Library Sync
-        const libraryChanges = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library", role);
+        // 2. Library Sync (starts where main left off)
+        const libraryResult = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library", role, mainResult.newOffset, TOTAL_COMBINED_WEIGHT);
+
+        const mainChanges = mainResult.hasChanges;
+        const libraryChanges = libraryResult.hasChanges;
 
         if (libraryChanges) {
             SyncActiveStore.update(s => {
@@ -208,8 +212,8 @@ export async function performSync() {
             });
         }
 
-        // Run personal sync after main sync completes
-        await runPersonalSync();
+        // Run personal sync after main sync completes (starts where library left off)
+        await runPersonalSync(libraryResult.newOffset);
 
     } catch (err) {
         console.error("[Sync] Sync failed:", err);
@@ -242,16 +246,15 @@ export async function performSync() {
 /**
  * Run personal files sync
  */
-async function runPersonalSync() {
+async function runPersonalSync(phaseOffset = 0) {
     try {
         SyncActiveStore.update(s => {
             s.personalSyncBusy = true;
             s.personalSyncError = null;
-            s.personalSyncProgress = { processed: 0, total: 0 };
         });
 
         const { performPersonalSync } = await import("@personal/personalSync");
-        const result = await performPersonalSync();
+        const result = await performPersonalSync(phaseOffset, TOTAL_COMBINED_WEIGHT);
 
         SyncActiveStore.update(s => {
             s.personalSyncBusy = false;
@@ -313,23 +316,18 @@ export function useSyncFeature() {
         startTime: s.startTime,
         progress: s.progress,
         personalSyncBusy: s.personalSyncBusy,
-        personalSyncError: s.personalSyncError,
-        personalSyncProgress: s.personalSyncProgress
+        personalSyncError: s.personalSyncError
     }));
 
-    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress, personalSyncBusy, personalSyncError, personalSyncProgress } = state;
+    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress, personalSyncBusy, personalSyncError } = state;
 
     const percentage = progress && progress.total > 0
         ? Math.round((progress.processed / progress.total) * 100)
         : 0;
 
-    const personalPercentage = personalSyncProgress && personalSyncProgress.total > 0
-        ? Math.round((personalSyncProgress.processed / personalSyncProgress.total) * 100)
-        : 0;
-
     // Cap at 99% while syncing to indicate work in progress
-    const displayPercentage = (busy && percentage >= 100) ? 99 : percentage;
-    const displayPersonalPercentage = (personalSyncBusy && personalPercentage >= 100) ? 99 : personalPercentage;
+    const isSyncing = busy || personalSyncBusy;
+    const displayPercentage = (isSyncing && percentage >= 100) ? 99 : percentage;
 
     return {
         sync: requestSync,
@@ -340,9 +338,7 @@ export function useSyncFeature() {
         percentage: displayPercentage,
         startTime,
         personalSyncBusy,
-        personalSyncError,
-        personalSyncProgress,
-        personalSyncPercentage: displayPersonalPercentage
+        personalSyncError
     };
 }
 

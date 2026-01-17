@@ -17,12 +17,25 @@ const PERSONAL_STEP_WEIGHTS = {
     migrateFromMongoDB: 10
 };
 
+// Calculate total weights for each phase
+export const MAIN_SYNC_WEIGHT = Object.values(STEP_WEIGHTS).reduce((sum, w) => sum + w, 0);
+export const LIBRARY_SYNC_WEIGHT = Object.values(STEP_WEIGHTS).reduce((sum, w) => sum + w, 0);
+export const PERSONAL_SYNC_WEIGHT = Object.values(PERSONAL_STEP_WEIGHTS).reduce((sum, w) => sum + w, 0);
+export const TOTAL_COMBINED_WEIGHT = MAIN_SYNC_WEIGHT + LIBRARY_SYNC_WEIGHT + PERSONAL_SYNC_WEIGHT;
+
 export class SyncProgressTracker {
-    constructor(isPersonal = false) {
-        this.isPersonal = isPersonal;
+    constructor(phaseOffset = 0, combinedTotalWeight = null) {
+        this.phaseOffset = phaseOffset;
         this.completedWeight = 0;
-        this.weights = isPersonal ? PERSONAL_STEP_WEIGHTS : STEP_WEIGHTS;
-        this.totalWeight = Object.values(this.weights).reduce((sum, w) => sum + w, 0);
+        this.weights = STEP_WEIGHTS;
+        this.localTotalWeight = Object.values(this.weights).reduce((sum, w) => sum + w, 0);
+        this.combinedTotalWeight = combinedTotalWeight || this.localTotalWeight;
+    }
+
+    // Set weights for personal sync (which includes migrateFromMongoDB)
+    usePersonalWeights() {
+        this.weights = PERSONAL_STEP_WEIGHTS;
+        this.localTotalWeight = Object.values(this.weights).reduce((sum, w) => sum + w, 0);
     }
 
     updateProgress(stepName, stepProgress = { processed: 1, total: 1 }) {
@@ -31,16 +44,12 @@ export class SyncProgressTracker {
         const currentStepWeight = stepWeight * stepCompletion;
 
         const progressUpdate = {
-            total: this.totalWeight,
-            processed: this.completedWeight + currentStepWeight
+            total: this.combinedTotalWeight,
+            processed: this.phaseOffset + this.completedWeight + currentStepWeight
         };
 
         SyncActiveStore.update(s => {
-            if (this.isPersonal) {
-                s.personalSyncProgress = progressUpdate;
-            } else {
-                s.progress = progressUpdate;
-            }
+            s.progress = progressUpdate;
         });
     }
 
@@ -51,16 +60,17 @@ export class SyncProgressTracker {
 
     setComplete() {
         const progressUpdate = {
-            total: this.totalWeight,
-            processed: this.totalWeight
+            total: this.combinedTotalWeight,
+            processed: this.phaseOffset + this.localTotalWeight
         };
 
         SyncActiveStore.update(s => {
-            if (this.isPersonal) {
-                s.personalSyncProgress = progressUpdate;
-            } else {
-                s.progress = progressUpdate;
-            }
+            s.progress = progressUpdate;
         });
+    }
+
+    // Get the current completed weight including phase offset
+    getCurrentOffset() {
+        return this.phaseOffset + this.completedWeight;
     }
 }

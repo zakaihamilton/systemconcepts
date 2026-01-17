@@ -18,7 +18,7 @@ import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 
 export default function Sync({ children }) {
     const translations = useTranslations();
-    const { sync, busy, error, duration, changed, percentage, currentBundle, personalSyncPercentage } = useSyncFeature();
+    const { sync, busy, error, duration, changed, percentage } = useSyncFeature();
     const { busy: sessionsBusy } = UpdateSessionsStore.useState();
     const { personalSyncBusy, personalSyncError } = SyncActiveStore.useState();
     const isBusy = busy || sessionsBusy || personalSyncBusy;
@@ -27,14 +27,13 @@ export default function Sync({ children }) {
     });
 
     const formattedDuration = formatDuration(duration);
-    const activePercentage = (personalSyncBusy ? personalSyncPercentage : percentage) ?? 0;
     const showPercentage = isBusy && (busy || personalSyncBusy);
 
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
-        {!error && !personalSyncError && (personalSyncBusy ? (translations.PERSONAL + " " + translations.SYNCING) : (isBusy ? translations.SYNCING : translations.SYNC))}
-        {showPercentage && ` (${activePercentage}%)`}
+        {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {showPercentage && ` (${percentage}%)`}
         <br />
         {!!duration && formattedDuration}
     </span>;
@@ -43,8 +42,7 @@ export default function Sync({ children }) {
         if (error) return translations.SYNC_FAILED;
         if (personalSyncError) return translations.PERSONAL_SYNC_ERROR;
         if (isBusy) {
-            const label = personalSyncBusy ? (translations.PERSONAL + " " + translations.SYNCING) : translations.SYNCING;
-            return `${label}${showPercentage ? ` (${activePercentage}%)` : ''}`;
+            return `${translations.SYNCING}${showPercentage ? ` (${percentage}%)` : ''}`;
         }
         return translations.SYNC;
     })();
@@ -79,7 +77,7 @@ export default function Sync({ children }) {
 
     ].filter(Boolean);
 
-    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, currentBundle, sessionsBusy, personalSyncBusy, personalSyncError, activePercentage, showPercentage, ariaLabel] });
+    useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, sessionsBusy, personalSyncBusy, personalSyncError, showPercentage, ariaLabel] });
 
     const syncContext = useMemo(() => {
         return { updateSync: sync, error };

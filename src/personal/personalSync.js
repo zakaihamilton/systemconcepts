@@ -21,12 +21,13 @@ import { uploadManifest } from "./steps/uploadManifest";
  * Main personal sync function
  * Runs independently from main sync but follows same pattern
  */
-export async function performPersonalSync() {
+export async function performPersonalSync(phaseOffset = 0, combinedTotalWeight = null) {
     const unlock = await lockMutex({ id: "personal_sync_process" });
     addSyncLog("[Personal] Starting personal sync process...", "info");
     const startTime = performance.now();
     let hasChanges = false;
-    const progress = new SyncProgressTracker(true);
+    const progress = new SyncProgressTracker(phaseOffset, combinedTotalWeight);
+    progress.usePersonalWeights();
 
     try {
         // Get userid from cookies

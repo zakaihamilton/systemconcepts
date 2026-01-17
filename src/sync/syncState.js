@@ -14,7 +14,6 @@ export const SyncActiveStore = new Store({
     needsSessionReload: false, // Signal that sessions should be reloaded
     libraryUpdateCounter: 0, // Signal that library content changed
     personalSyncBusy: false, // Track personal sync status
-    personalSyncProgress: { total: 0, processed: 0 },
     personalSyncError: null
 });
 
