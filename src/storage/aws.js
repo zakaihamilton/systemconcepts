@@ -190,6 +190,7 @@ async function getRecursiveList(path) {
 
     // First check if the base path exists
     if (!(await exists(path))) {
+        console.log(`[AWS Storage] Path does not exist: ${path}`);
         return [];
     }
 
@@ -197,11 +198,14 @@ async function getRecursiveList(path) {
     const visitedPaths = new Set();
 
     const addListing = async (dirPath) => {
+        // Normalize the path for consistent comparison
+        const normalizedDirPath = makePath(dirPath);
+
         // Prevent infinite loops and duplicate visits
-        if (visitedPaths.has(dirPath)) {
+        if (visitedPaths.has(normalizedDirPath)) {
             return;
         }
-        visitedPaths.add(dirPath);
+        visitedPaths.add(normalizedDirPath);
 
         try {
             const items = await getListing(dirPath);
@@ -209,7 +213,16 @@ async function getRecursiveList(path) {
                 return;
             }
 
+            // Expected path prefix for items (with aws device prefix)
+            const expectedPrefix = makePath("aws", normalizedDirPath);
+
             for (const item of items) {
+                // Validate item path belongs to this directory
+                if (!item.path || !item.path.startsWith(expectedPrefix)) {
+                    console.warn(`[AWS Storage] Skipping invalid item: ${item.path} (expected prefix: ${expectedPrefix})`);
+                    continue;
+                }
+
                 const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name?.endsWith("/");
                 if (isDir) {
                     // item.path has "aws/" prefix from getListing, strip it for recursive call

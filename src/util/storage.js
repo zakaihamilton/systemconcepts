@@ -299,22 +299,43 @@ async function getRecursiveList(path) {
 
     // Return empty array if directory listing fails
     let listing = [];
+    const visitedPaths = new Set();
+
     const addListing = async (dirPath) => {
-        const items = await limit(() => storageMethods.getListing(dirPath));
-        if (!items) {
-            console.log(`[Storage] No items found for: ${dirPath}`);
+        // Prevent infinite loops and duplicate visits
+        const normalizedPath = makePath(dirPath);
+        if (visitedPaths.has(normalizedPath)) {
             return;
         }
-        console.log(`[Storage] Found ${items.length} items in ${dirPath}`);
+        visitedPaths.add(normalizedPath);
 
-        const files = items.filter(item => {
-            const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name.endsWith("/");
+        const items = await limit(() => storageMethods.getListing(dirPath));
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return;
+        }
+
+        // Validate items actually belong to this directory path
+        const validItems = items.filter(item => {
+            if (!item.path) return false;
+            const itemPath = makePath(item.path);
+            // Item path should start with the directory path (be a child)
+            return itemPath.startsWith(normalizedPath + "/") ||
+                itemPath === normalizedPath + "/" + item.name;
+        });
+
+        if (validItems.length === 0 && items.length > 0) {
+            console.warn(`[Storage] Skipping ${dirPath} - items don't match expected path prefix`);
+            return;
+        }
+
+        const files = validItems.filter(item => {
+            const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name?.endsWith("/");
             return !isDir;
         });
         listing.push(...files);
 
-        const subDirs = items.filter(item => {
-            const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name.endsWith("/");
+        const subDirs = validItems.filter(item => {
+            const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name?.endsWith("/");
             return isDir;
         });
 
