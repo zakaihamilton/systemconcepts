@@ -38,7 +38,7 @@ export default function Editor({ name, path }) {
         setLoading(true);
         readFile();
         const unsubscribe = EditorStore.subscribe(s => s.content, (data, s) => {
-            if (s.autoSave && content !== data) {
+            if (s.autoSave && content[0] !== data) {
                 if (timerRef.current) {
                     clearTimeout(timerRef.current);
                     timerRef.current = null;
@@ -58,23 +58,15 @@ export default function Editor({ name, path }) {
         readFile();
     }, [syncCounter]);
 
-    const setContent = useCallback((value) => {
-        EditorStore.update(s => {
-            s.content = value;
-        });
-    }, []);
-
-    const state = [content, setContent];
-
     const downloadFile = () => {
-        if (content) {
-            exportData(content, name, "text/plain");
+        if (content[0]) {
+            exportData(content[0], name, "text/plain");
         }
     };
 
     return <>
         <Download visible={!loading} onClick={downloadFile} />
-        {!loading && <EditorWidget state={state} />}
+        {!loading && <EditorWidget state={content} />}
         {loading && <Progress />}
     </>;
 }

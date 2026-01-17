@@ -17,12 +17,12 @@ export default function EditWidget({ store }) {
             s.editing = false;
         });
         return result;
-    }, [name[0]]);
+    }, [value[0]]);
     const keyDown = async event => {
         if (event.keyCode == 13) {
             let valid = true;
             if (onValidate) {
-                valid = onValidate(name[0]);
+                valid = onValidate(value[0]);
             }
             if (valid) {
                 store.update(s => {
@@ -35,7 +35,7 @@ export default function EditWidget({ store }) {
     const onClickAway = async () => {
         let valid = true;
         if (onValidate) {
-            valid = await onValidate(name[0]);
+            valid = await onValidate(value[0]);
         }
         if (valid) {
             await complete();
