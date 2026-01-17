@@ -11,6 +11,7 @@ export default async function AWS_API(req, res) {
         const cookies = parseCookie(cookie);
         const { id, hash } = cookies || {};
         if (!id || !hash) {
+            console.log(`[AWS API] ACCESS DENIED: No cookie found`);
             throw "ACCESS_DENIED";
         }
         const body = (req.body && Array.isArray(req.body)) ? (req.body[0] || {}) : (req.body || {});
@@ -20,6 +21,7 @@ export default async function AWS_API(req, res) {
         }
         const user = await login({ id, hash, api: "aws", path });
         if (!user) {
+            console.log(`[AWS API] ACCESS DENIED: User ${id} is not authorized`);
             throw "ACCESS_DENIED";
         }
         console.log(`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${req.method}, Path: ${path}`);
