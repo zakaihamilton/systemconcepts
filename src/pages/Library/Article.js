@@ -108,6 +108,10 @@ function Article({
         }
     }, [content, selectedTag]);
 
+    useEffect(() => {
+        setScrollInfo({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
+    }, [selectedTag]);
+
     const formatArticleWithTags = useCallback((tag, text) => {
         if (!tag) return text;
         const metadata = LibraryTagKeys
