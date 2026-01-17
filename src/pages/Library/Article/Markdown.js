@@ -38,17 +38,12 @@ const Term = ({ term, entry, search }) => {
                 const scrollX = window.scrollX;
                 const scrollY = window.scrollY;
 
-                const borderStyle = phaseColor ? {
-                    borderBottom: `4px solid ${phaseColor}`
-                } : {};
-
                 // Base style for Portal (absolute relative to document)
                 const baseStyle = {
                     position: 'absolute',
                     left: `${rect.left + scrollX + rect.width / 2}px`,
                     zIndex: 1300,
-                    margin: 0,
-                    ...borderStyle
+                    margin: 0
                 };
 
                 const bridgeBase = {
@@ -66,8 +61,7 @@ const Term = ({ term, entry, search }) => {
                         ...baseStyle,
                         top: `${topVal}px`,
                         bottom: 'auto',
-                        transform: 'translateX(-50%)',
-                        ...borderStyle
+                        transform: 'translateX(-50%)'
                     });
                     setBridgeStyle({
                         ...bridgeBase,
@@ -82,8 +76,7 @@ const Term = ({ term, entry, search }) => {
                         top: `${topVal}px`,
                         bottom: 'auto',
                         // Use translate to shift it UP from the anchor point
-                        transform: 'translate(-50%, -100%)',
-                        ...borderStyle
+                        transform: 'translate(-50%, -100%)'
                     });
                     setBridgeStyle({
                         ...bridgeBase,
