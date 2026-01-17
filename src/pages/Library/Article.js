@@ -61,24 +61,30 @@ function Article({
     const [termsDialogOpen, setTermsDialogOpen] = useState(false);
     const [articleTerms, setArticleTerms] = useState([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [totalParagraphs, setTotalParagraphs] = useState(0);
 
     const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
-        if (type === 'paragraph') {
-            const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.classList.add(styles.highlightedParagraph);
-                setTimeout(() => {
-                    element.classList.remove(styles.highlightedParagraph);
-                }, 2000);
+        setTimeout(() => {
+            if (contentRef.current) {
+                contentRef.current.focus();
             }
-        } else if (type === 'page') {
-            if (contentRef.current && scrollInfo.clientHeight > 0) {
-                const scrollTop = (value - 1) * scrollInfo.clientHeight;
-                contentRef.current.scrollTo({ top: scrollTop, behavior: 'smooth' });
+            if (type === 'paragraph') {
+                const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add(styles.highlightedParagraph);
+                    setTimeout(() => {
+                        element.classList.remove(styles.highlightedParagraph);
+                    }, 2000);
+                }
+            } else if (type === 'page') {
+                if (contentRef.current && scrollInfo.clientHeight > 0) {
+                    const scrollTop = (value - 1) * scrollInfo.clientHeight;
+                    contentRef.current.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                }
             }
-        }
+        }, 100);
     }, [contentRef, scrollInfo]);
 
     const handleShowTerms = useCallback(() => {
@@ -90,6 +96,7 @@ function Article({
     const scrollToTop = useCallback(() => {
         if (contentRef.current) {
             contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+            contentRef.current.focus();
         }
     }, [contentRef]);
 
@@ -136,6 +143,11 @@ function Article({
             updateScrollInfo(element);
         });
         observer.observe(element);
+
+        // Count paragraphs
+        const paragraphs = element.querySelectorAll('[data-paragraph-index]');
+        setTotalParagraphs(paragraphs.length);
+
         return () => observer.disconnect();
     }, [content, updateScrollInfo, contentRef]);
 
@@ -464,6 +476,7 @@ function Article({
             </Zoom>
             <Box
                 ref={contentRef}
+                tabIndex={-1}
                 onScroll={(e) => {
                     if (handleScroll) handleScroll(e);
                     handleScrollUpdate(e);
@@ -472,9 +485,11 @@ function Article({
                 sx={{
                     height: '100%',
                     overflowY: 'auto',
-                    overflowX: 'hidden'
+                    overflowX: 'hidden',
+                    outline: 'none'
                 }}
             >
+
                 <Fade in={scrollInfo.visible} timeout={1000}>
                     <Paper
                         elevation={4}
@@ -606,6 +621,7 @@ function Article({
                     onClose={() => setJumpDialogOpen(false)}
                     onSubmit={handleJump}
                     maxPage={scrollInfo.total}
+                    maxParagraphs={totalParagraphs}
                 />
                 <ArticleTermsDialog
                     open={termsDialogOpen}

@@ -37,7 +37,7 @@ export default function ArticleTermsDialog({ open, onClose, terms }) {
                                         primary={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <Typography variant="subtitle1" component="span" style={{ fontWeight: 'bold' }}>
-                                                    {label}
+                                                    {index + 1}. {label}
                                                 </Typography>
                                                 {styleInfo?.category && (
                                                     <span style={{

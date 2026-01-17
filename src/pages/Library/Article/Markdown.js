@@ -250,10 +250,7 @@ const rehypeArticleEnrichment = () => {
                             });
                         });
                     }
-                } else if (node.type === "element" && /^h[1-6]$/.test(node.tagName)) {
-                    paragraphIndex++;
-                    node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
-                    newNodes.push(node);
+
                 } else {
                     if (node.children) {
                         node.children = visitAndSplit(node.children);

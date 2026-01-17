@@ -11,23 +11,28 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { useTranslations } from "@util/translations";
 
-export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1 }) {
+export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxParagraphs = 0 }) {
     const translations = useTranslations();
     const [tab, setTab] = useState(0); // 0: Paragraph, 1: Page
     const [paragraphNumber, setParagraphNumber] = useState('');
     const [pageNumber, setPageNumber] = useState('');
 
+    const inputRef = React.useRef(null);
+
     useEffect(() => {
         if (open) {
-            // Reset fields or focus?
-            // Keep previous values?
+            setTimeout(() => {
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
+            }, 100);
         }
-    }, [open]);
+    }, [open, tab]);
 
     const handleSubmit = () => {
         if (tab === 0) {
             const val = parseInt(paragraphNumber, 10);
-            if (!isNaN(val) && val > 0) {
+            if (!isNaN(val) && val > 0 && val <= maxParagraphs) {
                 onSubmit('paragraph', val);
                 setParagraphNumber('');
             }
@@ -42,6 +47,8 @@ export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1 }) {
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
             handleSubmit();
         }
     };
@@ -69,13 +76,15 @@ export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1 }) {
                         autoFocus
                         margin="dense"
                         id="paragraph-number"
-                        label={translations.PARAGRAPH_NUMBER}
+                        label={`${translations.PARAGRAPH_NUMBER} (1-${maxParagraphs})`}
                         type="number"
                         fullWidth
                         variant="outlined"
                         value={paragraphNumber}
                         onChange={(e) => setParagraphNumber(e.target.value)}
                         onKeyDown={handleKeyDown}
+                        inputRef={inputRef}
+                        InputProps={{ inputProps: { min: 1, max: maxParagraphs } }}
                     />
                 )}
 
