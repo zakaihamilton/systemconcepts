@@ -11,7 +11,7 @@ import { lockMutex } from "../mutex";
 /**
  * Helper function to download a single file
  */
-async function downloadFile(remoteFile, createdFolders, localPath, remotePath) {
+async function downloadFile(remoteFile, localEntry, createdFolders, localPath, remotePath) {
     const fileBasename = remoteFile.path;
     const localFilePath = makePath(localPath, fileBasename);
     let remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
@@ -40,6 +40,22 @@ async function downloadFile(remoteFile, createdFolders, localPath, remotePath) {
 
         const unlock = await lockMutex({ id: localFilePath });
         try {
+            // Check if file has changed locally since sync started
+            // This prevents overwriting newer local changes with older remote files
+            if (await storage.exists(localFilePath)) {
+                const currentContent = await storage.readFile(localFilePath);
+                if (currentContent) {
+                    const info = await getFileInfo(currentContent);
+                    // If file exists but wasn't in manifest, OR hash is different than manifest
+                    // Then it was modified locally during the download
+                    if (!localEntry || info.hash !== localEntry.hash) {
+                        console.warn(`[Sync] Aborting overwrite of ${fileBasename} - file changed locally during download`);
+                        addSyncLog(`Skipped overwrite: ${fileBasename} (changed locally)`, "warning");
+                        return false;
+                    }
+                }
+            }
+
             await storage.writeFile(localFilePath, content);
         } finally {
             unlock();
@@ -115,8 +131,9 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
             const results = await Promise.all(
                 batch.map(async remoteFile => {
-                    const result = await downloadFile(remoteFile, createdFolders, localPath, remotePath);
-                    // If download returned null, the file doesn't exist on remote
+                    const localEntry = localMap.get(remoteFile.path);
+                    const result = await downloadFile(remoteFile, localEntry, createdFolders, localPath, remotePath);
+                    // If download returned null, the file doesn't exist on remote (or read failed)
                     if (result === null) {
                         missingOnRemote.push(remoteFile);
                     }
