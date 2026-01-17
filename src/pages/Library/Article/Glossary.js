@@ -3774,41 +3774,7 @@ export const glossary = {
         "en": "Chariots",
         "trans": "Merkavot"
     },
-    "another god": {
-        "he": "",
-        "en": "another god",
-        "trans": "another god"
-    },
-    "spiritual fruits": {
-        "he": "",
-        "en": "Spiritual Fruits",
-        "trans": "spiritual fruits"
-    },
-    "creator": {
-        "he": "",
-        "en": "Creator",
-        "trans": "Creator"
-    },
-    "end of correction": {
-        "he": "",
-        "en": "End of Correction",
-        "trans": "End of Correction"
-    },
-    "good": {
-        "he": "",
-        "en": "Good",
-        "trans": "good"
-    },
-    "bad": {
-        "he": "",
-        "en": "Bad",
-        "trans": "bad"
-    },
-    "evils": {
-        "he": "",
-        "en": "Evils",
-        "trans": "evils"
-    },
+
     "avid": {
         "he": "עביד",
         "en": "Do",
@@ -3819,11 +3785,7 @@ export const glossary = {
         "en": "Lost",
         "trans": "Avud"
     },
-    "evil": {
-        "he": "",
-        "en": "Evil",
-        "trans": "evil"
-    },
+
     "tzoah": {
         "he": "צואה",
         "en": "Feces",
