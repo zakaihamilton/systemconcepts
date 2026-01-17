@@ -22,6 +22,14 @@ import { useToolbar, registerToolbar } from "@components/Toolbar";
 import styles from "./Article.module.scss";
 import clsx from "clsx";
 import Player from "./Article/Player";
+import JumpToParagraphDialog from "./Article/JumpToParagraphDialog";
+import ArticleTermsDialog from "./Article/ArticleTermsDialog";
+import { scanForTerms } from "./Article/GlossaryUtils";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import Fab from "@mui/material/Fab";
+import Zoom from "@mui/material/Zoom";
 
 registerToolbar("Article");
 
@@ -49,6 +57,34 @@ function Article({
     const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
     const scrollTimeoutRef = useRef(null);
     const [currentTTSParagraph, setCurrentTTSParagraph] = useState(-1);
+    const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
+    const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+    const [articleTerms, setArticleTerms] = useState([]);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    const handleJump = useCallback((number) => {
+        setJumpDialogOpen(false);
+        const element = contentRef.current.querySelector(`[data-paragraph-index="${number}"]`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.classList.add(styles.highlightedParagraph);
+            setTimeout(() => {
+                element.classList.remove(styles.highlightedParagraph);
+            }, 2000);
+        }
+    }, [contentRef]);
+
+    const handleShowTerms = useCallback(() => {
+        const terms = scanForTerms(content);
+        setArticleTerms(terms);
+        setTermsDialogOpen(true);
+    }, [content]);
+
+    const scrollToTop = useCallback(() => {
+        if (contentRef.current) {
+            contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [contentRef]);
 
     const updateScrollInfo = useCallback((target) => {
         const { scrollTop, scrollHeight, clientHeight } = target;
@@ -300,6 +336,20 @@ function Article({
                 onClick: openEditContentDialog,
                 menu: true
             });
+            items.push({
+                id: "jumpToParagraph",
+                name: translations.JUMP_TO_PARAGRAPH || "Jump to Paragraph",
+                icon: <FormatListNumberedIcon />,
+                onClick: () => setJumpDialogOpen(true),
+                menu: true
+            });
+            items.push({
+                id: "articleTerms",
+                name: translations.ARTICLE_TERMS || "Article Terms",
+                icon: <MenuBookIcon />,
+                onClick: handleShowTerms,
+                menu: true
+            });
         }
         if (search && totalMatches > 0) {
             items.push({
@@ -377,6 +427,7 @@ function Article({
             onScroll={(e) => {
                 if (handleScroll) handleScroll(e);
                 handleScrollUpdate(e);
+                setShowScrollTop(e.target.scrollTop > 300);
             }}
             className={styles.root}
             minWidth={0}
@@ -510,6 +561,32 @@ function Article({
                     onParagraphChange={handleTTSParagraphChange}
                 />
             )}
+            <JumpToParagraphDialog
+                open={jumpDialogOpen}
+                onClose={() => setJumpDialogOpen(false)}
+                onSubmit={handleJump}
+            />
+            <ArticleTermsDialog
+                open={termsDialogOpen}
+                onClose={() => setTermsDialogOpen(false)}
+                terms={articleTerms}
+            />
+            <Zoom in={showScrollTop}>
+                <Fab
+                    color="primary"
+                    size="small"
+                    aria-label="scroll back to top"
+                    onClick={scrollToTop}
+                    sx={{
+                        position: 'fixed',
+                        bottom: 16,
+                        right: 16,
+                        zIndex: 1300
+                    }}
+                >
+                    <ArrowUpwardIcon />
+                </Fab>
+            </Zoom>
         </Box>
     );
 }

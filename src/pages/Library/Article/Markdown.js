@@ -4,8 +4,10 @@ import Box from "@mui/material/Box";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from './Glossary';
+import { termPattern } from './GlossaryUtils';
 import styles from './Markdown.module.scss';
 import Zoom from "./Zoom";
+
 
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
@@ -220,12 +222,6 @@ const rehypeArticleEnrichment = () => {
     };
 };
 
-// Create the regex once since glossary is constant
-// Sort keys by length descending to ensure multi-word terms (e.g. "hitpashtut aleph") are matched before single words
-const sortedKeys = Object.keys(glossary).sort((a, b) => b.length - a.length);
-// Escape special characters in keys to prevent regex errors
-const escapedKeys = sortedKeys.map(key => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-const termPattern = new RegExp(`\\b(${escapedKeys.join('|')})\\b`, 'gi');
 
 export default React.memo(function Markdown({ children, search, currentTTSParagraph }) {
     const translations = useTranslations();
