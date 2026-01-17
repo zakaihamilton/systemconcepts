@@ -185,6 +185,49 @@ async function writeFiles(prefix, files) {
     }
 }
 
+async function getRecursiveList(path) {
+    path = makePath(path);
+
+    // First check if the base path exists
+    if (!(await exists(path))) {
+        return [];
+    }
+
+    const listing = [];
+    const visitedPaths = new Set();
+
+    const addListing = async (dirPath) => {
+        // Prevent infinite loops and duplicate visits
+        if (visitedPaths.has(dirPath)) {
+            return;
+        }
+        visitedPaths.add(dirPath);
+
+        try {
+            const items = await getListing(dirPath);
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return;
+            }
+
+            for (const item of items) {
+                const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name?.endsWith("/");
+                if (isDir) {
+                    // item.path has "aws/" prefix from getListing, strip it for recursive call
+                    const itemPathWithoutDevice = item.path.replace(/^\/aws\//, "/").replace(/^aws\//, "");
+                    await addListing(itemPathWithoutDevice);
+                } else {
+                    listing.push(item);
+                }
+            }
+        } catch (err) {
+            console.warn(`[AWS Storage] Failed to list ${dirPath}:`, err.message || err);
+        }
+    };
+
+    await addListing(path);
+    return listing;
+}
+
 async function exists(path) {
     path = makePath(path);
     let exists = false;
@@ -207,6 +250,7 @@ async function exists(path) {
 
 export default {
     getListing,
+    getRecursiveList,
     createFolder,
     createFolders,
     createFolderPath,
