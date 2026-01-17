@@ -6,6 +6,7 @@ import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";
 import { applyManifestUpdates } from "../manifest";
+import { lockMutex } from "../mutex";
 
 /**
  * Helper function to upload a single file
@@ -16,7 +17,13 @@ async function uploadFile(localFile, createdFolders, localPath, remotePath) {
     const remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
 
     try {
-        const content = await storage.readFile(localFilePath);
+        const unlock = await lockMutex({ id: localFilePath });
+        let content;
+        try {
+            content = await storage.readFile(localFilePath);
+        } finally {
+            unlock();
+        }
         if (!content) return null;
 
         const data = JSON.parse(content);

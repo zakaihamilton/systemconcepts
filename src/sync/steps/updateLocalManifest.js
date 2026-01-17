@@ -4,13 +4,21 @@ import { LOCAL_SYNC_PATH, FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { getFileInfo } from "../hash";
+import { lockMutex } from "../mutex";
 
 /**
  * Helper function to compute file info for a single file
  */
 async function computeFileInfo(file) {
     try {
-        const content = await storage.readFile(file.fullPath);
+        const unlock = await lockMutex({ id: file.fullPath });
+        let content;
+        try {
+            content = await storage.readFile(file.fullPath);
+        } finally {
+            unlock();
+        }
+
         if (content === undefined || content === null) {
             return null;
         }
@@ -115,7 +123,12 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
         });
 
         if (changed || !(await storage.exists(localManifestPath))) {
-            await storage.writeFile(localManifestPath, JSON.stringify(filteredManifest, null, 4));
+            const unlock = await lockMutex({ id: localManifestPath });
+            try {
+                await storage.writeFile(localManifestPath, JSON.stringify(filteredManifest, null, 4));
+            } finally {
+                unlock();
+            }
         }
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);

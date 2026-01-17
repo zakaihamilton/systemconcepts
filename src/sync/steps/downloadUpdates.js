@@ -6,6 +6,7 @@ import { readCompressedFile, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 import { SyncActiveStore } from "../syncState";
+import { lockMutex } from "../mutex";
 
 /**
  * Helper function to download a single file
@@ -36,7 +37,13 @@ async function downloadFile(remoteFile, createdFolders, localPath, remotePath) {
             await storage.createFolderPath(localFilePath);
         }
         const content = JSON.stringify(data, null, 4);
-        await storage.writeFile(localFilePath, content);
+
+        const unlock = await lockMutex({ id: localFilePath });
+        try {
+            await storage.writeFile(localFilePath, content);
+        } finally {
+            unlock();
+        }
 
         // Verify hash
         if (remoteFile.hash) {
@@ -144,7 +151,12 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
         // Write updated manifest to disk
         const manifestPath = makePath(localPath, FILES_MANIFEST);
-        await storage.writeFile(manifestPath, JSON.stringify(updatedManifest, null, 4));
+        const unlock = await lockMutex({ id: manifestPath });
+        try {
+            await storage.writeFile(manifestPath, JSON.stringify(updatedManifest, null, 4));
+        } finally {
+            unlock();
+        }
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`✓ Downloaded ${updates.length} file(s) in ${duration}s`, updates.length > 0 ? "success" : "info");
