@@ -17,6 +17,8 @@ export const BookmarksStore = new Store({
 
 const BOOKMARKS_PATH = makePath(LOCAL_PERSONAL_PATH, "bookmarks.json");
 
+let storageSubscription = null;
+
 function useBookmarksStorage() {
     useEffect(() => {
         const init = async () => {
@@ -45,6 +47,7 @@ function useBookmarksStorage() {
                         const data = JSON.parse(localData);
                         await storage.createFolderPath(BOOKMARKS_PATH);
                         await storage.writeFile(BOOKMARKS_PATH, JSON.stringify(data, null, 4));
+                        window.localStorage.removeItem("bookmarks");
                         BookmarksStore.update(s => {
                             Object.assign(s, data);
                             s._loaded = true;
@@ -66,7 +69,10 @@ function useBookmarksStorage() {
     }, []);
 
     useEffect(() => {
-        const unsubscribe = BookmarksStore.subscribe(s => s, async s => {
+        if (storageSubscription) {
+            return;
+        }
+        storageSubscription = BookmarksStore.subscribe(s => s, async s => {
             if (s._loaded) {
                 const content = JSON.stringify(s, (key, value) => {
                     if (key === "_loaded") {
@@ -82,11 +88,18 @@ function useBookmarksStorage() {
                 }
             }
         });
-        return unsubscribe;
+        return () => {
+            // We do not unsubscribe to ensure persistence continues even if component unmounts
+            // assuming useBookmarksStorage is called from a persistent component or logic.
+            // However, if we want to be clean, we should refactor this to be outside react lifecycle entirely
+            // or count references.
+            // For now, keeping the subscription active is safer for data integrity as long as the app is running.
+        };
     }, []);
 }
 
 export function useBookmarks() {
+    useBookmarksStorage();
     const translations = useTranslations();
     const { bookmarks = [] } = BookmarksStore.useState();
     const pages = usePages();
