@@ -62,7 +62,7 @@ export default async function AWS_API(req, res) {
 
         console.log(`[AWS API] Access granted for user ${user.id} - ReadOnly: ${readOnly}, Path: ${path} Role: ${user.role} Method: ${req.method}`);
 
-        const result = await handleRequest({ req, readOnly });
+        const result = await handleRequest({ req, readOnly, path });
 
         if (checkPath.startsWith("sessions/")) {
             res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
