@@ -642,6 +642,18 @@ export default {
             "value": "Sincronizando"
         },
         {
+            "id": "SYNCING_MAIN",
+            "value": "Sincronizando Principal"
+        },
+        {
+            "id": "SYNCING_LIBRARY",
+            "value": "Sincronizando Biblioteca"
+        },
+        {
+            "id": "SYNCING_PERSONAL",
+            "value": "Sincronizando Pessoal"
+        },
+        {
             "id": "SYNC_SESSIONS",
             "value": "Sincronizar Sessões"
         },

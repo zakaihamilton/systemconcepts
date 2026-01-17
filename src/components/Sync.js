@@ -18,7 +18,7 @@ import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 
 export default function Sync({ children }) {
     const translations = useTranslations();
-    const { sync, busy, error, duration, changed, percentage } = useSyncFeature();
+    const { sync, busy, error, duration, changed, percentage, phase } = useSyncFeature();
     const { busy: sessionsBusy } = UpdateSessionsStore.useState();
     const { personalSyncBusy, personalSyncError } = SyncActiveStore.useState();
     const isBusy = busy || sessionsBusy || personalSyncBusy;
@@ -29,10 +29,17 @@ export default function Sync({ children }) {
     const formattedDuration = formatDuration(duration);
     const showPercentage = isBusy && (busy || personalSyncBusy);
 
+    const getSyncLabel = () => {
+        if (phase === "main") return translations.SYNCING_MAIN;
+        if (phase === "library") return translations.SYNCING_LIBRARY;
+        if (phase === "personal" || personalSyncBusy) return translations.SYNCING_PERSONAL;
+        return translations.SYNCING;
+    };
+
     const name = <span>
         {!!error && translations.SYNC_FAILED}
         {!!personalSyncError && translations.PERSONAL_SYNC_ERROR}
-        {!error && !personalSyncError && (isBusy ? translations.SYNCING : translations.SYNC)}
+        {!error && !personalSyncError && (isBusy ? getSyncLabel() : translations.SYNC)}
         {showPercentage && ` (${percentage}%)`}
         <br />
         {!!duration && formattedDuration}
@@ -42,7 +49,7 @@ export default function Sync({ children }) {
         if (error) return translations.SYNC_FAILED;
         if (personalSyncError) return translations.PERSONAL_SYNC_ERROR;
         if (isBusy) {
-            return `${translations.SYNCING}${showPercentage ? ` (${percentage}%)` : ''}`;
+            return `${getSyncLabel()}${showPercentage ? ` (${percentage}%)` : ''}`;
         }
         return translations.SYNC;
     })();

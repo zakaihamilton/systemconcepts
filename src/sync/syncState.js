@@ -12,6 +12,7 @@ export const SyncActiveStore = new Store({
     lastDuration: 0, // Track duration of last successful sync
     startTime: 0, // Track when current sync started
     needsSessionReload: false, // Signal that sessions should be reloaded
+    phase: null, // Track current sync phase (main, library, personal)
     libraryUpdateCounter: 0, // Signal that library content changed
     personalSyncBusy: false, // Track personal sync status
     personalSyncError: null

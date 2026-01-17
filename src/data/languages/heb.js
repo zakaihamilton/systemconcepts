@@ -646,6 +646,18 @@ export default {
             "value": "מסנכרן"
         },
         {
+            "id": "SYNCING_MAIN",
+            "value": "מסנכרן ראשי"
+        },
+        {
+            "id": "SYNCING_LIBRARY",
+            "value": "מסנכרן ספריה"
+        },
+        {
+            "id": "SYNCING_PERSONAL",
+            "value": "מסנכרן אישי"
+        },
+        {
             "id": "SYNC_SESSIONS",
             "value": "סנכרון שיעורים"
         },

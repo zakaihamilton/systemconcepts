@@ -179,9 +179,11 @@ export async function performSync() {
         const startTime = performance.now();
 
         // 1. Main Sync (starts at offset 0)
+        SyncActiveStore.update(s => { s.phase = "main"; });
         const mainResult = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main", role, 0, TOTAL_COMBINED_WEIGHT);
 
         // 2. Library Sync (starts where main left off)
+        SyncActiveStore.update(s => { s.phase = "library"; });
         const libraryResult = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library", role, mainResult.newOffset, TOTAL_COMBINED_WEIGHT);
 
         const mainChanges = mainResult.hasChanges;
@@ -237,9 +239,13 @@ export async function performSync() {
                 lock._locking = Promise.resolve();
                 SyncActiveStore.update(s => {
                     s.busy = false; // FIX: Reset busy state
+                    s.phase = null;
                 });
             }
         }
+        SyncActiveStore.update(s => {
+            s.phase = null;
+        });
     }
 }
 
@@ -251,6 +257,7 @@ async function runPersonalSync(phaseOffset = 0) {
         SyncActiveStore.update(s => {
             s.personalSyncBusy = true;
             s.personalSyncError = null;
+            s.phase = "personal";
         });
 
         const { performPersonalSync } = await import("@personal/personalSync");
@@ -316,10 +323,11 @@ export function useSyncFeature() {
         startTime: s.startTime,
         progress: s.progress,
         personalSyncBusy: s.personalSyncBusy,
-        personalSyncError: s.personalSyncError
+        personalSyncError: s.personalSyncError,
+        phase: s.phase
     }));
 
-    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress, personalSyncBusy, personalSyncError } = state;
+    const { busy, lastSynced, logs, lastDuration: duration, startTime, progress, personalSyncBusy, personalSyncError, phase } = state;
 
     const percentage = progress && progress.total > 0
         ? Math.round((progress.processed / progress.total) * 100)
@@ -338,7 +346,8 @@ export function useSyncFeature() {
         percentage: displayPercentage,
         startTime,
         personalSyncBusy,
-        personalSyncError
+        personalSyncError,
+        phase
     };
 }
 

@@ -666,6 +666,18 @@ export default {
             "value": "Syncing"
         },
         {
+            "id": "SYNCING_MAIN",
+            "value": "Syncing Main"
+        },
+        {
+            "id": "SYNCING_LIBRARY",
+            "value": "Syncing Library"
+        },
+        {
+            "id": "SYNCING_PERSONAL",
+            "value": "Syncing Personal"
+        },
+        {
             "id": "SYNC_SESSIONS",
             "value": "Sync Sessions"
         },
