@@ -184,7 +184,7 @@ function Article({
         });
         document.body.appendChild(iframe);
 
-        const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
+        const cssStyles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
             .map(node => node.outerHTML)
             .join("");
 
@@ -194,7 +194,7 @@ function Article({
             <!DOCTYPE html>
             <html>
             <head>
-                ${styles}
+                ${cssStyles}
                 <style>
                     :global(body), html, body {
                         background: white !important;
@@ -219,7 +219,9 @@ function Article({
                 </style>
             </head>
             <body>
-                ${rootElement.outerHTML}
+                <div class="${styles.root}">
+                    ${rootElement.outerHTML}
+                </div>
                 <script>
                     window.onload = () => {
                         setTimeout(() => {
