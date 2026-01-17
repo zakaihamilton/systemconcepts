@@ -199,6 +199,13 @@ export default function Library() {
         loadContent();
     }, [loadContent]);
 
+    // Reset scroll position when article changes
+    useEffect(() => {
+        if (selectedTag && contentRef.current) {
+            contentRef.current.scrollTop = 0;
+        }
+    }, [selectedTag]);
+
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
             // Clear caches when library is updated
