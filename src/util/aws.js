@@ -165,7 +165,9 @@ export async function downloadData({ path, binary, bucketName = process.env.AWS_
 
     // 5. Memory Optimization: Use SDK built-in transform methods
     if (binary) {
-        return await response.Body.transformToByteArray();
+        const uint8Array = await response.Body.transformToByteArray();
+        // Convert Uint8Array to Buffer for compatibility with existing code
+        return Buffer.from(uint8Array);
     }
     return await response.Body.transformToString();
 }
