@@ -39,8 +39,8 @@ export default async function AWS_API(req, res) {
         } else if (isStudent) {
             // Students can read from /sync, read/write to /personal/<userid>
             const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`) || checkPath === `personal/${user.id}`;
-            const isSyncPath = checkPath.startsWith("sync/");
-            const isLibraryPath = checkPath.startsWith("library/");
+            const isSyncPath = checkPath.startsWith("sync/") || checkPath === "sync";
+            const isLibraryPath = checkPath.startsWith("library/") || checkPath === "library";
 
             if (req.method === "GET") {
                 // For GET requests, we must explicitly deny access to unauthorized paths.
