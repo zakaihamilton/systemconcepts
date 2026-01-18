@@ -179,6 +179,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 s.status[itemIndex].errors.push(err.message || String(err));
                 s.status = [...s.status];
             });
+            throw err; // Abort this year's processing and fail the group update
         } finally {
             UpdateSessionsStore.update(s => {
                 s.status[itemIndex].progress++;
@@ -186,7 +187,12 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             });
         }
     }));
-    await Promise.all(promises);
+    try {
+        await Promise.all(promises);
+    } catch (err) {
+        console.error(`[Sync] Group ${name} failed to process all years. Aborting write to prevent corruption.`);
+        return;
+    }
 
     if (isBundled) {
         // For bundled groups:
