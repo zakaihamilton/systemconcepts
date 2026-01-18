@@ -131,6 +131,9 @@ export default function SideBar() {
         ...otherItems
     ];
 
+    // Must declare all hooks before any conditional returns
+    const rootRef = useRef(null);
+
     if (isMobile) {
         return <Drawer
             anchor="left"
@@ -145,8 +148,6 @@ export default function SideBar() {
             <QuickAccess closeDrawer={closeDrawer} state={state} />
         </Drawer>;
     }
-
-    const rootRef = useRef(null);
 
     const scrollToBottom = () => {
         if (rootRef.current) {
