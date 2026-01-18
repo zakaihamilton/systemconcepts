@@ -16,7 +16,8 @@ export const SyncActiveStore = new Store({
     libraryUpdateCounter: 0, // Signal that library content changed
     personalSyncBusy: false, // Track personal sync status
     personalSyncError: null,
-    locked: false // Track if sync upload is locked
+    locked: false, // Track if sync upload is locked
+    autoSync: true // Track if automatic sync is enabled (default: true)
 });
 
 export const UpdateSessionsStore = new Store({
@@ -34,7 +35,18 @@ if (typeof window !== "undefined") {
         });
     }
 
+    const autoSync = localStorage.getItem("sync_autoSync");
+    if (autoSync !== null) {
+        SyncActiveStore.update(s => {
+            s.autoSync = autoSync === "true";
+        });
+    }
+
     SyncActiveStore.subscribe(s => s.locked, locked => {
         localStorage.setItem("sync_locked", locked);
+    });
+
+    SyncActiveStore.subscribe(s => s.autoSync, autoSync => {
+        localStorage.setItem("sync_autoSync", autoSync);
     });
 }

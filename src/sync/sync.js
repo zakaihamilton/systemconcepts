@@ -21,7 +21,7 @@ import { uploadUpdates } from "./steps/uploadUpdates";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { removeDeletedFiles } from "./steps/removeDeletedFiles";
 import { uploadManifest } from "./steps/uploadManifest";
-import { SyncProgressTracker, MAIN_SYNC_WEIGHT, LIBRARY_SYNC_WEIGHT, PERSONAL_SYNC_WEIGHT, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
+import { SyncProgressTracker, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 
 const SYNC_INTERVAL = 60; // seconds
 
@@ -369,12 +369,12 @@ export function useSync(options = {}) {
     const online = useOnline();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isVisible = usePageVisibility();
-    const { busy } = SyncActiveStore.useState(s => ({ busy: s.busy }));
+    const { busy, autoSync } = SyncActiveStore.useState(s => ({ busy: s.busy, autoSync: s.autoSync }));
     const [counter, setCounter] = useState(0);
     const timerRef = useRef(null);
 
     useEffect(() => {
-        if (!active || !online || !isSignedIn || !isVisible) {
+        if (!active || !online || !isSignedIn || !isVisible || !autoSync) {
             return;
         }
 
@@ -398,14 +398,14 @@ export function useSync(options = {}) {
             }
         }
 
-        timerRef.current = setInterval(checkSync, 10000);
+        timerRef.current = setInterval(checkSync, SYNC_INTERVAL * 1000 / 2);
 
         return () => {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
         };
-    }, [active, online, isSignedIn, isVisible, busy]);
+    }, [active, online, isSignedIn, isVisible, busy, autoSync]);
 
     useEffect(() => {
         const unsubscribe = SyncActiveStore.subscribe(

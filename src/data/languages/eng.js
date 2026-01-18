@@ -1668,6 +1668,14 @@ export default {
         {
             "id": "UPLOAD",
             "value": "Upload"
+        },
+        {
+            "id": "AUTO_SYNC",
+            "value": "Auto Sync"
+        },
+        {
+            "id": "AUTO_SYNC_DESCRIPTION",
+            "value": "Enable automatic background synchronization"
         }
     ]
 };

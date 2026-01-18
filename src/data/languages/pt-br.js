@@ -1636,6 +1636,14 @@ export default {
         {
             "id": "UPLOAD",
             "value": "Envio"
+        },
+        {
+            "id": "AUTO_SYNC",
+            "value": "Sincronização Automática"
+        },
+        {
+            "id": "AUTO_SYNC_DESCRIPTION",
+            "value": "Ativar sincronização automática em segundo plano"
         }
     ]
 };

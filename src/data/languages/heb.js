@@ -1660,6 +1660,14 @@ export default {
         {
             "id": "UPLOAD",
             "value": "העלאה"
+        },
+        {
+            "id": "AUTO_SYNC",
+            "value": "סנכרון אוטומטי"
+        },
+        {
+            "id": "AUTO_SYNC_DESCRIPTION",
+            "value": "הפעל סנכרון רקע אוטומטי"
         }
     ]
 };

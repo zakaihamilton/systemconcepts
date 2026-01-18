@@ -23,6 +23,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import Cookies from "js-cookie";
 import { SyncActiveStore } from "@sync/syncState";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -131,6 +132,27 @@ export default function Settings() {
         }
     ];
 
+    const { autoSync } = SyncActiveStore.useState();
+
+    const setAutoSync = useCallback(value => {
+        SyncActiveStore.update(s => {
+            s.autoSync = value === "on";
+        });
+    }, []);
+
+    const autoSyncState = [autoSync ? "on" : "off", setAutoSync];
+
+    const autoSyncItems = [
+        {
+            id: "on",
+            name: translations.ON
+        },
+        {
+            id: "off",
+            name: translations.OFF
+        }
+    ];
+
     const data = [
         {
             id: "language",
@@ -156,6 +178,14 @@ export default function Settings() {
             description: translations.UPLOAD_DESCRIPTION,
             value: uploadState[0],
             widget: <Dynamic items={uploadItems} state={uploadState} />
+        },
+        {
+            id: "autoSync",
+            icon: <AutorenewIcon />,
+            name: translations.AUTO_SYNC || "Auto Sync",
+            description: translations.AUTO_SYNC_DESCRIPTION,
+            value: autoSyncState[0],
+            widget: <Dynamic items={autoSyncItems} state={autoSyncState} />
         },
         {
             id: "speedToolbar",

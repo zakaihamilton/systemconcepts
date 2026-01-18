@@ -172,10 +172,6 @@ export default function Groups() {
         sync && sync();
     };
 
-    const updateGroupWithSync = async (name, updateAll, forceUpdate) => {
-        await updateGroup(name, updateAll, forceUpdate);
-    };
-
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
 
     useEffect(() => {
@@ -361,7 +357,7 @@ export default function Groups() {
 
         const percentage = statusItem.count > 0 ? (statusItem.progress / statusItem.count) * 100 : 0;
 
-        const iconWidget = <ItemMenu updateGroup={updateGroupWithSync} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
+        const iconWidget = <ItemMenu updateGroup={updateGroup} item={item} store={GroupsStore} setGroups={setGroups} sessions={sessions} />;
 
         const sizeBytes = groupSizes[item.name] || 0;
         const sizeDisplay = sizeBytes > 0 ? abbreviateSize(sizeBytes) : '-';
@@ -404,7 +400,7 @@ export default function Groups() {
             }}
             mapper={mapper}
             loading={loading}
-            depends={[translations, status, updateGroupWithSync, sessions, showDisabled, groupSizes]}
+            depends={[translations, status, updateGroup, sessions, showDisabled, groupSizes]}
         />
         <ProgressDialog />
     </>;
