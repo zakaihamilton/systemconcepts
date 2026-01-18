@@ -25,3 +25,16 @@ export const UpdateSessionsStore = new Store({
     start: 0,
     showUpdateDialog: false
 });
+
+if (typeof window !== "undefined") {
+    const locked = localStorage.getItem("sync_locked");
+    if (locked) {
+        SyncActiveStore.update(s => {
+            s.locked = locked === "true";
+        });
+    }
+
+    SyncActiveStore.subscribe(s => s.locked, locked => {
+        localStorage.setItem("sync_locked", locked);
+    });
+}

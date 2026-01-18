@@ -4,7 +4,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { Store } from "pullstate";
 import { useActivePages, getPagesFromHash, usePages } from "@util/pages";
 import { MainStore } from "@components/Main";
-import storage from "@storage/local";
+import storage from "@util/storage";
 import { LOCAL_PERSONAL_PATH } from "@personal/constants";
 import { makePath } from "@util/path";
 import { useEffect } from "react";
