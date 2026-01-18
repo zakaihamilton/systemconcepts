@@ -5,18 +5,21 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import styles from "./TreeItem.module.scss";
 import clsx from "clsx";
+import { LibraryStore } from "./Store";
 
-const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, level = 0 }) {
-    const [open, setOpen] = useState(false);
+const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, onToggle, level = 0 }) {
     const hasChildren = node.children && node.children.length > 0;
     const isSelected = !!selectedId && node._id === selectedId;
     const [isTruncated, setIsTruncated] = useState(false);
     const textRef = useRef(null);
     const itemRef = useRef(null);
+    const expandedNodes = LibraryStore.useState(s => s.expandedNodes);
+    const open = expandedNodes.includes(node.id);
 
     const checkTruncation = useCallback(() => {
         if (textRef.current) {
@@ -31,29 +34,75 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
     }, [node.name, checkTruncation]);
 
     useEffect(() => {
-        if (selectedPath && node.id !== "root" && (selectedPath === node.id || selectedPath.startsWith(node.id + "|"))) {
-            setOpen(true);
+        if (selectedPath && node.id && node.id !== "root" && (selectedPath === node.id || selectedPath.startsWith(node.id + "|"))) {
+            if (!open) {
+                LibraryStore.update(s => {
+                    if (!s.expandedNodes.includes(node.id)) {
+                        s.expandedNodes = [...s.expandedNodes, node.id];
+                    }
+                });
+            }
         }
     }, [selectedPath, node.id]);
 
     useEffect(() => {
-        if (isSelected && itemRef.current) {
-            itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if ((isSelected || selectedPath === node.id) && itemRef.current) {
+            const timer = setTimeout(() => {
+                itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+            return () => clearTimeout(timer);
         }
-    }, [isSelected]);
+    }, [isSelected, selectedPath, node.id]);
 
     const handleToggle = useCallback((e) => {
-        e.stopPropagation();
-        setOpen(prev => !prev);
-    }, []);
+        if (e) {
+            e.stopPropagation();
+        }
+        if (onToggle) {
+            onToggle(node.id, !open);
+        } else {
+            LibraryStore.update(s => {
+                if (s.expandedNodes.includes(node.id)) {
+                    s.expandedNodes = s.expandedNodes.filter(id => id !== node.id);
+                } else {
+                    s.expandedNodes = [...s.expandedNodes, node.id];
+                }
+            });
+        }
+    }, [node.id, open, onToggle]);
+
+    useEffect(() => {
+        if (open && itemRef.current) {
+            const timer = setTimeout(() => {
+                itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [open]);
+
+    const handleChildToggle = useCallback((childId, isExpanding) => {
+        if (isExpanding) {
+            const siblingIds = node.children.map(c => c.id).filter(id => id !== childId);
+            LibraryStore.update(s => {
+                s.expandedNodes = s.expandedNodes.filter(id => !siblingIds.includes(id));
+                if (!s.expandedNodes.includes(childId)) {
+                    s.expandedNodes = [...s.expandedNodes, childId];
+                }
+            });
+        } else {
+            LibraryStore.update(s => {
+                s.expandedNodes = s.expandedNodes.filter(id => id !== childId);
+            });
+        }
+    }, [node.children]);
 
     const handleSelect = useCallback(() => {
         if (!hasChildren) {
             onSelect(node);
         } else {
-            setOpen(prev => !prev);
+            handleToggle();
         }
-    }, [hasChildren, onSelect, node]);
+    }, [hasChildren, onSelect, node, handleToggle]);
 
     const Icon = node.Icon;
 
@@ -70,17 +119,11 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
             >
                 <Box className={styles.contentWrapper}>
                     <Box
-                        onClick={hasChildren ? handleToggle : undefined}
-                        className={clsx(styles.toggleIcon, open ? styles.open : styles.closed)}
+                        onClick={hasChildren ? (e) => handleToggle(e) : undefined}
+                        className={styles.toggleIcon}
+                        sx={{ visibility: hasChildren ? "visible" : "hidden" }}
                     >
-                        {hasChildren ? (
-                            <Box
-                                component="span"
-                                className={styles.chevron}
-                            />
-                        ) : (
-                            <Box className={styles.dot} />
-                        )}
+                        {open ? <ExpandLessIcon className={styles.expandIcon} /> : <ExpandMoreIcon className={styles.expandIcon} />}
                     </Box>
 
                     {Icon && (
@@ -156,6 +199,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                             onSelect={onSelect}
                             selectedId={selectedId}
                             selectedPath={selectedPath}
+                            onToggle={handleChildToggle}
                             level={level + 1}
                         />
                     ))}

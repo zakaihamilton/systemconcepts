@@ -45,7 +45,6 @@ function Article({
     isHeaderHidden,
     handleScroll,
     contentRef,
-    handleDrawerToggle,
     openEditContentDialog,
 }) {
     const deviceType = useDeviceType();
@@ -429,7 +428,7 @@ function Article({
                     justifyContent: "center"
                 }}
             >
-                <Box className={styles.placeholder} onClick={handleDrawerToggle}>
+                <Box className={styles.placeholder}>
                     <LibraryBooksIcon />
                     <Typography component="p">{translations.SELECT_ITEM}</Typography>
                 </Box>
@@ -514,15 +513,6 @@ function Article({
                 </Fade>
                 <Box className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}>
                     <Box className={styles.headerInfo}>
-                        <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
-                            edge="start"
-                            onClick={handleDrawerToggle}
-                            sx={{ display: { sm: "none" } }}
-                        >
-                            <LibraryBooksIcon />
-                        </IconButton>
                         <Box className={styles.headerTitleWrapper}>
                             <Box className={styles.titleRow}>
                                 {selectedTag?.number && (
@@ -629,7 +619,7 @@ function Article({
                     terms={articleTerms}
                 />
             </Box>
-        </Box>
+        </Box >
     );
 
 }

@@ -1,0 +1,19 @@
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.searchContainer {
+    padding: 0.5rem 0.75rem;
+    flex-shrink: 0;
+}
+
+.filterInput {
+    :global(.MuiInputBase-root) {
+        font-size: 0.85rem;
+    }
+}
+
+.treeContainer {
+    flex: 1;
+}

@@ -17,7 +17,7 @@ import Link from "@mui/material/Link";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import IconButton from "@mui/material/IconButton";
 
-export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action }) {
+export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action, onToggle, content, isOpen }) {
     const { direction } = MainStore.useState();
     const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
     const isSelected = typeof selected === "function" ? selected(id) : (Array.isArray(selected) ? selected.includes(id) : selected === id);
@@ -28,7 +28,10 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
     const iconContainerClassName = useStyles(styles, {
         iconContainer: true
     });
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = typeof isOpen !== "undefined";
+    const open = isControlled ? isOpen : internalOpen;
+
     let expandIcon = null;
     let rootItemClick = () => {
         if (onClick) {
@@ -39,11 +42,22 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
         }
         clickHandler && clickHandler(id);
     };
-    if (items && items.length) {
+
+    const handleToggle = () => {
+        const newOpen = !open;
+        if (!isControlled) {
+            setInternalOpen(newOpen);
+        }
+        if (onToggle) {
+            onToggle(newOpen);
+        }
+    };
+
+    if ((items && items.length) || content) {
         expandIcon = open ? <ExpandLess className={styles.expandIcon} /> : <ExpandMore className={styles.expandIcon} />;
-        rootItemClick = () => {
-            setOpen(!open);
-        };
+        rootItemClick = handleToggle;
+    } else {
+        expandIcon = <span className={styles.expandPlaceholder} />;
     }
     const elements = (items || []).map(item => {
         const { id, ...props } = item;
@@ -72,6 +86,7 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
     return <>
         <ListItem disablePadding className={itemClassName} divider={!!reverse && !!divider}>
             <ListItemButton style={style} component={target ? Link : undefined} underline="none" href={target} selected={isSelected} onClick={rootItemClick}>
+                {expandIcon}
                 {!!avatar && icon && <ListItemAvatar>
                     <Avatar className={iconContainerClassName}>
                         {actionIcon}
@@ -81,7 +96,6 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
                     {icon}
                 </ListItemIcon>}
                 <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
-                {expandIcon}
             </ListItemButton>
             {!!actionIcon && <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback} size="large">
@@ -90,9 +104,9 @@ export function ListItemWidget({ id, divider, reverse, depth, target, clickHandl
             </ListItemSecondaryAction>}
         </ListItem>
         {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
+            {content ? content : <List component="div" disablePadding>
                 {elements}
-            </List>
+            </List>}
         </Collapse>}
         {!reverse && !!divider && <Divider />}
     </>;

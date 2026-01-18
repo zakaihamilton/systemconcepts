@@ -1,13 +1,22 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import styles from "./SideBar.module.scss";
 import List from "@widgets/List";
 import Drawer from "@mui/material/Drawer";
+import Collapse from "@mui/material/Collapse";
+import Box from "@mui/material/Box";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useDeviceType } from "@util/styles";
 import { MainStore } from "./Main";
 import { useActivePages, usePages, setHash } from "@util/pages";
 import QuickAccess from "./SideBar/QuickAccess";
+import LibraryTree from "./SideBar/LibraryTree";
 import { useBookmarks } from "@components/Bookmarks";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import { useTranslations } from "@util/translations";
 
 import clsx from "clsx";
@@ -15,10 +24,21 @@ import clsx from "clsx";
 export default function SideBar() {
     const translations = useTranslations();
     const isMobile = useDeviceType() !== "desktop";
-    const { direction, showSlider, hash } = MainStore.useState();
+    const { direction, showSlider, hash, libraryExpanded } = MainStore.useState();
     const bookmarks = useBookmarks();
     const activePages = useActivePages();
     const pages = usePages("sidebar");
+    const isLibraryActive = !!activePages.find(page => page.id === "library");
+
+    // Auto-expand library when navigating to a library page
+    useEffect(() => {
+        if (isLibraryActive && !libraryExpanded) {
+            MainStore.update(s => {
+                s.libraryExpanded = true;
+            });
+        }
+    }, [isLibraryActive]);
+
     const selected = id => {
         return !!activePages.find(page => page.id === id && !page.sectionIndex);
     };
@@ -49,15 +69,16 @@ export default function SideBar() {
 
     const sidebarPages = pages.filter(page => page.sidebar && !page.category);
 
-    const apps = sidebarPages.filter(page => page.apps);
+    // Separate Library from other apps
+    const apps = sidebarPages.filter(page => page.apps && page.id !== "library");
+    const library = sidebarPages.find(page => page.id === "library");
     const other = sidebarPages.filter(page => !page.apps);
 
     const items = [
         ...apps.map((item, index) => ({
             ...item,
-            divider: index === apps.length - 1 && other.length > 0
+            divider: false
         })),
-        ...other
     ].map(item => {
         let target = item.path || item.id;
         if (item.id === "account") {
@@ -69,9 +90,19 @@ export default function SideBar() {
         return { ...item, target };
     });
 
+    const otherItems = other.map(item => {
+        let target = item.path || item.id;
+        if (item.id === "account") {
+            const currentPath = hash && (hash.startsWith("#") ? hash.substring(1) : hash);
+            if (currentPath && !currentPath.startsWith("account") && !currentPath.startsWith("signup") && !currentPath.startsWith("signin")) {
+                target += "?redirect=" + encodeURIComponent(currentPath);
+            }
+        }
+        return { ...item, target };
+    });
 
     if (bookmarks && bookmarks.length) {
-        items.push({
+        otherItems.push({
             id: "bookmarks",
             name: translations.BOOKMARKS,
             icon: <BookmarkIcon />,
@@ -83,24 +114,63 @@ export default function SideBar() {
             divider: true
         });
     }
+
+    const handleLibraryClick = (isOpen) => {
+        MainStore.update(s => {
+            s.libraryExpanded = isOpen;
+        });
+    };
+
+    const libraryItem = {
+        id: "library",
+        name: library?.name ? translations[library.name] || library.name : translations.LIBRARY || "Library",
+        icon: <LibraryBooksIcon />,
+        isOpen: libraryExpanded,
+        onToggle: handleLibraryClick,
+        content: <LibraryTree closeDrawer={closeDrawer} isMobile={isMobile} />,
+        selected: isLibraryActive && !libraryExpanded, // Maintain selection logic
+        divider: true
+    };
+
+    const mergedItems = [
+        ...items,
+        libraryItem,
+        ...otherItems
+    ];
+
     if (isMobile) {
         return <Drawer
             anchor="left"
             open={showSlider}
+            className={styles.mobileDrawer}
             ModalProps={{
-                keepMounted: true
+                // keepMounted: true // Removed to fix aria-hidden focus issue
             }}
             onClose={closeDrawer}
         >
-            <List onClick={closeDrawer} items={items} state={state} />
+            <List onClick={closeDrawer} items={mergedItems} state={state} />
             <QuickAccess closeDrawer={closeDrawer} state={state} />
         </Drawer>;
     }
 
-    return <div className={clsx(styles.root, direction === "rtl" && styles.rtl)}>
+    const rootRef = useRef(null);
+
+    const scrollToBottom = () => {
+        if (rootRef.current) {
+            setTimeout(() => {
+                rootRef.current.scrollTo({
+                    top: rootRef.current.scrollHeight,
+                    behavior: "smooth"
+                });
+            }, 300);
+        }
+    };
+
+    return <div ref={rootRef} className={clsx(styles.root, direction === "rtl" && styles.rtl)}>
         <div className={styles.container}>
-            <List items={items} state={state} />
-            <QuickAccess closeDrawer={closeDrawer} state={state} />
+            <List items={mergedItems} state={state} />
+            <QuickAccess closeDrawer={closeDrawer} state={state} onScrollToBottom={scrollToBottom} />
         </div>
     </div>;
 }
+

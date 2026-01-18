@@ -5,11 +5,11 @@ import { useLanguage } from "@util/language";
 import { MainStore } from "@components/Main";
 
 export function usePathItems() {
-    let { hash } = MainStore.useState();
-    if (hash.startsWith("#")) {
+    let { hash = "" } = MainStore.useState();
+    if (hash && hash.startsWith("#")) {
         hash = hash.substring(1);
     }
-    const items = hash.split("/").filter(Boolean).map(item => decodeURIComponent(item));
+    const items = (hash || "").split("/").filter(Boolean).map(item => decodeURIComponent(item));
     return items;
 }
 
@@ -66,8 +66,8 @@ export function urlToParentPath(url) {
 }
 
 export function useParentPath(index = 0) {
-    const { hash } = MainStore.useState();
-    const items = hash.split("/").filter(Boolean);
+    const { hash = "" } = MainStore.useState();
+    const items = (hash || "").split("/").filter(Boolean);
     const previousItem = items[items.length - 2 - index] || "";
     return decodeURIComponent(previousItem);
 }

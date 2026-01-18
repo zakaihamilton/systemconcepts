@@ -1,99 +1,58 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { useSearch } from "@components/Search";
-import storage from "@util/storage";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import ClearIcon from "@mui/icons-material/Clear";
+import TreeItem from "@pages/Library/TreeItem";
+import { LibraryIcons, LibraryTagKeys } from "@pages/Library/Icons";
+import { LibraryStore } from "@pages/Library/Store";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { makePath } from "@util/path";
-import Box from "@mui/material/Box";
-import { useTranslations } from "@util/translations";
+import storage from "@util/storage";
 import { setPath, usePathItems } from "@util/pages";
 import { SyncActiveStore } from "@sync/syncState";
-import { LibraryStore } from "./Library/Store";
-import { LibraryTagKeys } from "./Library/Icons";
-import { useDeviceType } from "@util/styles";
-import Cookies from "js-cookie";
-import { roleAuth } from "@util/roles";
-import EditTagsDialog from "./Library/EditTagsDialog";
-import EditContentDialog from "./Library/EditContentDialog";
-import Article from "./Library/Article";
-import styles from "./Library.module.scss";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useSwipe } from "@util/touch";
+import { useTranslations } from "@util/translations";
+import styles from "./LibraryTree.module.scss";
 
-registerToolbar("Library");
-
-export default function Library() {
-    const isMobile = useDeviceType() !== "desktop";
-    const search = useSearch();
-    const [tags, setTags] = useState([]);
-    const [content, setContent] = useState(null);
-    const [selectedTag, setSelectedTag] = useState(null);
+export default function LibraryTree({ closeDrawer, isMobile }) {
     const translations = useTranslations();
-    const pathItems = usePathItems();
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [editContentDialogOpen, setEditContentDialogOpen] = useState(false);
-    const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+    const [filterText, setFilterText] = useState("");
+    const [debouncedFilterText, setDebouncedFilterText] = useState("");
+    const [tags, setTags] = useState([]);
     const [customOrder, setCustomOrder] = useState({});
+    const [selectedTag, setSelectedTag] = useState(null);
+    const [highlightPath, setHighlightPath] = useState(null);
+    const pathItems = usePathItems();
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
-    const contentCacheRef = useRef(new Map());
-    const fileCacheRef = useRef(new Map());
-
-    const contentRef = React.useRef(null);
-    const handleScroll = useCallback((e) => {
-        const scrollTop = e.target.scrollTop;
-        // Use hysteresis: hide at 150px, but don't show until below 100px
-        const shouldHide = isHeaderHidden ? scrollTop > 100 : scrollTop > 150;
-        if (shouldHide !== isHeaderHidden) {
-            setIsHeaderHidden(shouldHide);
-        }
-    }, [isHeaderHidden]);
-
-    const role = Cookies.get("role");
-    const isAdmin = roleAuth(role, "admin");
-
-    const getTagHierarchy = useCallback((tag) => {
-        const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
-        if (tag.number && hierarchy.length > 0) {
-            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}#${tag.number}`;
-        }
-        return hierarchy;
-    }, []);
-
-    const onSelect = useCallback((tag) => {
-        setSelectedTag(tag);
-        const hierarchy = getTagHierarchy(tag);
-        if (hierarchy.length > 0) {
-            setPath("library", ...hierarchy);
-        }
-        // Remember the last viewed article
-        LibraryStore.update(s => {
-            s.lastViewedArticle = tag;
-        });
-    }, [getTagHierarchy]);
+    const scrollToPath = LibraryStore.useState(s => s.scrollToPath);
+    const treeContainerRef = useRef(null);
 
     useEffect(() => {
-        if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
-            const urlPath = pathItems.slice(1).join("|");
-            const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
-            if (tag) {
-                setSelectedTag(tag);
-                // Remember the last viewed article
+        const handler = setTimeout(() => {
+            setDebouncedFilterText(filterText);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [filterText]);
+
+    // Handle scroll-to-path from breadcrumb clicks
+    useEffect(() => {
+        if (scrollToPath) {
+            setHighlightPath(scrollToPath);
+            // Clear the scrollToPath after a delay
+            setTimeout(() => {
                 LibraryStore.update(s => {
-                    s.lastViewedArticle = tag;
+                    s.scrollToPath = null;
                 });
-            }
-        } else if (tags.length > 0 && pathItems.length === 1 && pathItems[0] === "library") {
-            // If we're on the root library page, restore the last viewed article
-            const { lastViewedArticle } = LibraryStore.getRawState();
-            if (lastViewedArticle) {
-                const tag = tags.find(t => t._id === lastViewedArticle._id);
-                if (tag) {
-                    onSelect(tag);
-                }
-            }
+                // Clear highlight after scroll animation completes
+                setTimeout(() => {
+                    setHighlightPath(null);
+                }, 1000);
+            }, 100);
         }
-    }, [tags, pathItems, getTagHierarchy, onSelect]);
+    }, [scrollToPath]);
 
     const loadTags = useCallback(async () => {
         try {
@@ -129,85 +88,59 @@ export default function Library() {
         loadCustomOrder();
     }, [loadTags, loadCustomOrder]);
 
-    const loadContent = useCallback(async () => {
-        if (!selectedTag) {
-            setContent(null);
-            return;
-        }
-
-        // Check content cache first
-        const cacheKey = selectedTag._id;
-        if (contentCacheRef.current.has(cacheKey)) {
-            setContent(contentCacheRef.current.get(cacheKey));
-            return;
-        }
-
-        try {
-            const filePath = makePath(LIBRARY_LOCAL_PATH, selectedTag.path);
-            let data;
-
-            // Check file cache
-            if (fileCacheRef.current.has(filePath)) {
-                data = fileCacheRef.current.get(filePath);
-            } else if (await storage.exists(filePath)) {
-                const fileContent = await storage.readFile(filePath);
-                data = JSON.parse(fileContent);
-                fileCacheRef.current.set(filePath, data);
-            } else {
-                setContent("File not found.");
-                return;
-            }
-
-            let item = null;
-            if (Array.isArray(data)) {
-                item = data.find(i => i._id === selectedTag._id);
-            } else if (data._id === selectedTag._id) {
-                item = data;
-            }
-
-            const contentText = item ? item.text : "Content not found in file.";
-            contentCacheRef.current.set(cacheKey, contentText);
-            setContent(contentText);
-        } catch (err) {
-            console.error("Failed to load content:", err);
-            setContent("Error loading content.");
-        }
-    }, [selectedTag]);
-
-    useEffect(() => {
-        loadContent();
-    }, [loadContent]);
-
-    // Reset scroll position when article changes
-    useEffect(() => {
-        if (selectedTag && contentRef.current) {
-            contentRef.current.scrollTop = 0;
-        }
-    }, [selectedTag]);
-
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
-            // Clear caches when library is updated
-            contentCacheRef.current.clear();
-            fileCacheRef.current.clear();
             loadTags();
             loadCustomOrder();
-            loadContent();
         }
-    }, [libraryUpdateCounter, loadTags, loadCustomOrder, loadContent]);
+    }, [libraryUpdateCounter, loadTags, loadCustomOrder]);
 
-    const openEditDialog = useCallback(() => setEditDialogOpen(true), []);
-    const openEditContentDialog = useCallback(() => setEditContentDialogOpen(true), []);
+    const getTagHierarchy = useCallback((tag) => {
+        const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
+        if (tag.number && hierarchy.length > 0) {
+            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}#${tag.number}`;
+        }
+        return hierarchy;
+    }, []);
 
-    // Navigation between articles - flatten the tree in display order
-    const sortedTags = useMemo(() => {
-        if (!tags || tags.length === 0) return [];
+    // Sync selectedTag with URL
+    useEffect(() => {
+        if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
+            const urlPath = pathItems.slice(1).join("|");
+            const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
+            if (tag) {
+                setSelectedTag(tag);
+            }
+        }
+    }, [tags, pathItems, getTagHierarchy]);
 
-        // We need to build the same tree structure as Tags.js and flatten it
-        // Import the same sorting logic
+
+    const tree = useMemo(() => {
         const root = { id: "root", name: "Library", children: [] };
 
-        for (const tag of tags) {
+        let filteredTags = tags;
+        if (debouncedFilterText) {
+            const lowerFilter = debouncedFilterText.toLowerCase();
+            const keysToSearch = [...LibraryTagKeys, "number"];
+            const terms = lowerFilter.split(/\s+/).filter(Boolean);
+
+            filteredTags = tags.filter(tag => {
+                const values = keysToSearch.map(key => tag[key]).filter(v => v && String(v).trim()).map(v => String(v).toLowerCase());
+                const allValues = values.join(" ");
+
+                if (terms.includes("or")) {
+                    const groups = lowerFilter.split(/\s+or\s+/).filter(Boolean);
+                    return groups.some(group => {
+                        const groupTerms = group.split(/\s+/).filter(Boolean);
+                        return groupTerms.every(term => allValues.includes(term));
+                    });
+                }
+
+                return terms.every(term => allValues.includes(term));
+            });
+        }
+
+        for (const tag of filteredTags) {
             let currentLevel = root.children;
             const levels = LibraryTagKeys.map(key => ({ key, value: tag[key] }))
                 .filter(item => item.value && String(item.value).trim())
@@ -226,10 +159,12 @@ export default function Library() {
 
                 let node = currentLevel.find(n => n.id === id);
                 if (!node) {
+                    const Icon = LibraryIcons[type];
                     node = {
                         id,
                         name,
                         type,
+                        Icon,
                         children: [],
                         ...(!isHead ? { ...tag, _id: tag._id, number: tag.number } : {})
                     };
@@ -239,7 +174,6 @@ export default function Library() {
             });
         }
 
-        // Use the same sorting logic as Tags.js
         const numberWords = {
             'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
             'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
@@ -372,103 +306,93 @@ export default function Library() {
         };
 
         sortTree(root.children);
+        return root.children;
+    }, [tags, debouncedFilterText, customOrder]);
 
-        // Flatten the tree in depth-first order
-        const flattened = [];
-        const flatten = (nodes) => {
-            nodes.forEach(node => {
-                if (node._id) {
-                    flattened.push(node);
-                }
-                if (node.children && node.children.length > 0) {
-                    flatten(node.children);
+    const selectedPath = useMemo(() => {
+        return selectedTag ? getTagHierarchy(selectedTag).join("|") : null;
+    }, [selectedTag, getTagHierarchy]);
+
+    const onSelect = useCallback((tag) => {
+        setSelectedTag(tag);
+        const hierarchy = getTagHierarchy(tag);
+        if (hierarchy.length > 0) {
+            setPath("library", ...hierarchy);
+        }
+        LibraryStore.update(s => {
+            s.lastViewedArticle = tag;
+        });
+        if (isMobile && closeDrawer) {
+            closeDrawer();
+        }
+    }, [getTagHierarchy, isMobile, closeDrawer]);
+
+    const handleToggle = useCallback((nodeId, isExpanding) => {
+        if (isExpanding) {
+            const siblingIds = tree.map(node => node.id).filter(id => id !== nodeId);
+            LibraryStore.update(s => {
+                s.expandedNodes = s.expandedNodes.filter(id => !siblingIds.includes(id));
+                if (!s.expandedNodes.includes(nodeId)) {
+                    s.expandedNodes = [...s.expandedNodes, nodeId];
                 }
             });
-        };
-        flatten(root.children);
-
-        return flattened;
-    }, [tags, customOrder]);
-
-    const currentIndex = useMemo(() => {
-        if (!selectedTag || sortedTags.length === 0) return -1;
-        return sortedTags.findIndex(tag => tag._id === selectedTag._id);
-    }, [selectedTag, sortedTags]);
-
-    const prevArticle = currentIndex > 0 && sortedTags[currentIndex - 1];
-    const nextArticle = currentIndex !== -1 && currentIndex < sortedTags.length - 1 && sortedTags[currentIndex + 1];
-
-    const gotoArticle = useCallback((tag) => {
-        if (!tag) return;
-        onSelect(tag);
-    }, [onSelect]);
-
-    const toolbarItems = [
-        !isMobile && {
-            id: "prevArticle",
-            name: translations.PREVIOUS,
-            icon: <ArrowBackIcon />,
-            onClick: () => prevArticle && gotoArticle(prevArticle),
-            location: "header",
-            disabled: !prevArticle
-        },
-        !isMobile && {
-            id: "nextArticle",
-            name: translations.NEXT,
-            icon: <ArrowForwardIcon />,
-            onClick: () => nextArticle && gotoArticle(nextArticle),
-            location: "header",
-            disabled: !nextArticle
+        } else {
+            LibraryStore.update(s => {
+                s.expandedNodes = s.expandedNodes.filter(id => id !== nodeId);
+            });
         }
-    ];
+    }, [tree]);
 
-    useToolbar({ id: "Library", items: toolbarItems, depends: [prevArticle, nextArticle, translations, isMobile] });
-
-    const swipeHandlers = useSwipe({
-        onSwipeLeft: () => nextArticle && gotoArticle(nextArticle),
-        onSwipeRight: () => prevArticle && gotoArticle(prevArticle)
-    });
+    if (!tags || tags.length === 0) {
+        return null;
+    }
 
     return (
-        <Box className={styles.root} {...swipeHandlers}>
-            <Article
-                selectedTag={selectedTag}
-                content={content}
-                search={search}
-                translations={translations}
-                isAdmin={isAdmin}
-                openEditDialog={openEditDialog}
-                isHeaderHidden={isHeaderHidden}
-                handleScroll={handleScroll}
-                contentRef={contentRef}
-                openEditContentDialog={openEditContentDialog}
-            />
-
-            {isAdmin && selectedTag && (
-                <EditTagsDialog
-                    open={editDialogOpen}
-                    onClose={() => setEditDialogOpen(false)}
-                    selectedTag={selectedTag}
-                    tags={tags}
-                    setTags={setTags}
-                    setSelectedTag={setSelectedTag}
-                    setContent={setContent}
-                />
-            )}
-
-            {isAdmin && selectedTag && (
-                <EditContentDialog
-                    open={editContentDialogOpen}
-                    onClose={() => setEditContentDialogOpen(false)}
-                    selectedTag={selectedTag}
-                    content={content}
-                    setContent={(newContent) => {
-                        setContent(newContent);
-                        // Clear content cache so next load gets fresh data
-                        contentCacheRef.current.delete(selectedTag._id);
+        <Box className={styles.root}>
+            <Box className={styles.searchContainer}>
+                <TextField
+                    placeholder={translations.FILTER_TAGS || "Filter tags..."}
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                    fullWidth
+                    size="small"
+                    className={styles.filterInput}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <FilterAltIcon color="action" fontSize="small" />
+                            </InputAdornment>
+                        ),
+                        endAdornment: filterText ? (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    size="small"
+                                    onClick={() => setFilterText("")}
+                                    edge="end"
+                                    sx={{ mr: -0.5 }}
+                                >
+                                    <ClearIcon fontSize="small" />
+                                </IconButton>
+                            </InputAdornment>
+                        ) : null
                     }}
                 />
-            )}
+            </Box>
+            <Box className={styles.treeContainer} ref={treeContainerRef}>
+                <List component="nav" sx={{ py: 0.5, pl: 3 }}>
+                    {tree.map(node => (
+                        <TreeItem
+                            key={node.id}
+                            node={node}
+                            onSelect={onSelect}
+                            selectedId={selectedTag?._id}
+                            selectedPath={highlightPath || selectedPath}
+                            onToggle={handleToggle}
+                            level={0}
+                        />
+                    ))}
+                </List>
+            </Box>
         </Box>
     );
 }

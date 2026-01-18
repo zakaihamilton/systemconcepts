@@ -12,7 +12,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import { useLanguage } from "@util/language";
 import useDarkMode from "use-dark-mode";
 
-export default function QuickAccess({ closeDrawer, state }) {
+export default function QuickAccess({ closeDrawer, state, onScrollToBottom }) {
     const language = useLanguage();
     const translations = useTranslations();
     const pages = usePages();
@@ -35,6 +35,12 @@ export default function QuickAccess({ closeDrawer, state }) {
     const toolsItems = pages.filter(page => page.sidebar && page.category === "tools").map(item => {
         return { ...item, target: item.path || item.id };
     });
+
+    const handleToggle = (isOpen) => {
+        if (isOpen && onScrollToBottom) {
+            onScrollToBottom();
+        }
+    };
 
     const quickAccessItems = [
         {
@@ -60,13 +66,15 @@ export default function QuickAccess({ closeDrawer, state }) {
                 };
             }),
             selected: language,
-            divider: true
+            divider: true,
+            onToggle: handleToggle
         },
         {
             id: "tools",
             name: translations.TOOLS,
             icon: <BuildIcon />,
-            items: toolsItems
+            items: toolsItems,
+            onToggle: handleToggle
         },
         ...pages.filter(page => page.sidebar && page.category === "quickaccess")
     ].filter(Boolean);
