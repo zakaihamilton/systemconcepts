@@ -3,7 +3,7 @@ import { useTranslations } from "@util/translations";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Dialog from "@widgets/Dialog";
-import { goBackPage, toPath } from "@util/pages";
+import { goBackPage, setPath } from "@util/pages";
 import { SyncContext } from "@components/Sync";
 import { clearBundleCache } from "@sync/sync";
 
@@ -19,7 +19,7 @@ export default function FullSync() {
                 // Still try to sync even if clear had issues
             }
 
-            toPath("sync");
+            setPath("sync");
             // Force a fresh sync after clearing
             await updateSync(false); // Force full sync (not poll)
         } catch (err) {
