@@ -2,13 +2,6 @@ import { useCallback, useEffect, useRef } from "react";
 import styles from "./SideBar.module.scss";
 import List from "@widgets/List";
 import Drawer from "@mui/material/Drawer";
-import Collapse from "@mui/material/Collapse";
-import Box from "@mui/material/Box";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useDeviceType } from "@util/styles";
 import { MainStore } from "./Main";
 import { useActivePages, usePages, setHash } from "@util/pages";
@@ -28,7 +21,7 @@ export default function SideBar() {
     const bookmarks = useBookmarks();
     const activePages = useActivePages();
     const pages = usePages("sidebar");
-    const isLibraryActive = !!activePages.find(page => page.id === "library");
+    const isLibraryActive = !!activePages.find(page => page.id === "library" && page.custom);
 
     // Auto-expand library when navigating to a library page
     useEffect(() => {
