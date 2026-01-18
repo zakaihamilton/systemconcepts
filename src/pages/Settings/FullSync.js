@@ -3,15 +3,13 @@ import { useTranslations } from "@util/translations";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Dialog from "@widgets/Dialog";
-import { goBackPage } from "@util/pages";
+import { goBackPage, toPath } from "@util/pages";
 import { SyncContext } from "@components/Sync";
 import { clearBundleCache } from "@sync/sync";
-import { useNavigate } from "react-router-dom";
 
 export default function FullSync() {
     const translations = useTranslations();
     const { updateSync } = useContext(SyncContext);
-    const navigate = useNavigate();
 
     const reset = async () => {
         try {
@@ -23,7 +21,7 @@ export default function FullSync() {
 
             // Force a fresh sync after clearing
             await updateSync(false); // Force full sync (not poll)
-            navigate("/sync");
+            toPath("sync");
         } catch (err) {
             console.error("Failed to reset cache and sync", err);
             // Still go back even on error so user isn't stuck

@@ -2,7 +2,6 @@ import styles from "./Image.module.scss";
 import { useState, useEffect, useRef } from "react";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
-import { addPath } from "@util/pages";
 import Link from "@mui/material/Link";
 
 export default function ImageWidget({ className, onClick, href, loading, path, width, height, alt, showProgress = true, onLoad: onLoadCallback }) {
