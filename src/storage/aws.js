@@ -245,7 +245,7 @@ async function exists(path) {
     path = makePath(path);
     let exists = false;
     try {
-        const item = await fetchJSON(fsEndPoint, {
+        const item = await fetchJSON(fsEndPoint + "?path=" + encodeURIComponent(path.slice(1)), {
             method: "GET",
             cache: "no-store",
             headers: {
@@ -253,7 +253,11 @@ async function exists(path) {
                 exists: true
             },
         });
-        exists = item && item.name;
+        if (Array.isArray(item)) {
+            exists = true;
+        } else {
+            exists = item && item.name;
+        }
         if (!exists) {
             console.log(`[AWS Storage] Path check returned false for ${path}`, item);
         }

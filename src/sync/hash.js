@@ -22,7 +22,7 @@ export async function calculateHash(content) {
         hash ^= data[i];
         hash = Math.imul(hash, 0x01000193);
     }
-    return (hash >>> 0).toString(16);
+    return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
 /**

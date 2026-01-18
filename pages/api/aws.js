@@ -15,7 +15,7 @@ export default async function AWS_API(req, res) {
             throw "ACCESS_DENIED";
         }
         const body = (req.body && Array.isArray(req.body)) ? (req.body[0] || {}) : (req.body || {});
-        let path = body.path || (req.headers && req.headers.path) || "";
+        let path = body.path || (req.headers && req.headers.path) || req.query?.path || "";
         if (path) {
             path = decodeURIComponent(path);
         }
