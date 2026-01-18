@@ -19,9 +19,9 @@ export default function FullSync() {
                 // Still try to sync even if clear had issues
             }
 
+            toPath("sync");
             // Force a fresh sync after clearing
             await updateSync(false); // Force full sync (not poll)
-            toPath("sync");
         } catch (err) {
             console.error("Failed to reset cache and sync", err);
             // Still go back even on error so user isn't stuck
