@@ -21,7 +21,7 @@ import { useSessions, SessionsStore } from "@util/sessions";
 import { useEffect, useRef, useState } from "react";
 import ProgressDialog from "./Groups/ProgressDialog";
 import UploadIcon from "@mui/icons-material/Upload";
-import GroupUpdateReview from "./Groups/GroupUpdateReview";
+
 
 registerToolbar("Groups");
 
@@ -147,10 +147,6 @@ export default function Groups() {
     }, [counter, syncEnabled, sync]);
 
     // Wrap update functions to trigger sync after completion
-    // Wrap update functions to trigger sync after completion
-    const [reviewData, setReviewData] = useState(null);
-    const [pendingAction, setPendingAction] = useState(null);
-
     const runUpdate = async (action, args) => {
         if (action === "updateSessions") {
             const [showDisabled] = args;
@@ -166,30 +162,19 @@ export default function Groups() {
         sync && sync();
     };
 
-    const handleReviewApprove = async () => {
-        setReviewData(null);
-        if (pendingAction) {
-            await runUpdate(pendingAction.type, pendingAction.args);
-            setPendingAction(null);
-        }
-    };
-
     const updateSessionsWithSync = async () => {
-        const results = await updateSessions(showDisabled, true);
-        setReviewData(results);
-        setPendingAction({ type: "updateSessions", args: [showDisabled] });
+        await updateSessions(showDisabled);
+        sync && sync();
     };
 
     const updateAllSessionsWithSync = async () => {
-        const results = await updateAllSessions(showDisabled, true);
-        setReviewData(results);
-        setPendingAction({ type: "updateAllSessions", args: [showDisabled] });
+        await updateAllSessions(showDisabled);
+        sync && sync();
     };
 
     const updateGroupWithSync = async (name, updateAll, forceUpdate) => {
-        const result = await updateGroup(name, updateAll, forceUpdate, true);
-        setReviewData(result);
-        setPendingAction({ type: "updateGroup", args: [name, updateAll, forceUpdate] });
+        await updateGroup(name, updateAll, forceUpdate);
+        sync && sync();
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
@@ -423,13 +408,5 @@ export default function Groups() {
             depends={[translations, status, updateGroupWithSync, sessions, showDisabled, groupSizes]}
         />
         <ProgressDialog />
-        {reviewData && (
-            <GroupUpdateReview
-                open={true}
-                groups={Array.isArray(reviewData) ? reviewData : [reviewData]}
-                onClose={() => setReviewData(null)}
-                onApprove={handleReviewApprove}
-            />
-        )}
     </>;
 }

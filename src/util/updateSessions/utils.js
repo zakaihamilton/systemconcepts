@@ -11,7 +11,7 @@ export async function getListing(path) {
     return listing;
 }
 
-export async function updateYearSync(groupName, year, sessions, dryRun = false) {
+export async function updateYearSync(groupName, year, sessions) {
     if (!sessions || sessions.length === 0) {
         return 0;
     }
@@ -57,30 +57,12 @@ export async function updateYearSync(groupName, year, sessions, dryRun = false) 
                 if (exSessions === newSessions && existingObj.group === data.group) {
                     return { counter: 0, newCount: 0 };
                 }
-
-                if (dryRun) {
-                    // Identify updated sessions (exists in old but changed content)
-                    // limit to metadata changes if needed, but here any change to stringify is an update
-                    // Optimization: We can just return the count of "updated" which is (total - new - unchanged)?
-                    // But accurately:
-                    const updatedSessions = data.sessions.filter(s => {
-                        const id = s.name || s.id;
-                        if (!existingIds.has(id)) return false; // It's new, not updated
-                        const oldSession = existingObj.sessions.find(os => (os.name || os.id) === id);
-                        return JSON.stringify(s) !== JSON.stringify(oldSession);
-                    });
-                    return { counter: 0, newCount, updatedSessions };
-                }
             } catch (e) {
                 // if parse fails, overwrite
                 newCount = data.sessions.length; // Assume all are new if existing corrupt
             }
         } else {
             newCount = data.sessions.length; // All are new
-        }
-
-        if (dryRun) {
-            return { counter: 0, newCount, updatedSessions: [] }; // In dry run we only care about new count for now or detailed diff if needed
         }
 
         await writeCompressedFile(localPath, data);

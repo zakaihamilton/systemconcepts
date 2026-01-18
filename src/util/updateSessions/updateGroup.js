@@ -12,12 +12,10 @@ import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 
 const prefix = makePath("aws/sessions") + "/";
 
-export async function updateGroupProcess(name, updateAll, forceUpdate = false, isMerged = false, isBundled = false, dryRun = false) {
+export async function updateGroupProcess(name, updateAll, forceUpdate = false, isMerged = false, isBundled = false) {
     const path = prefix + name;
     let itemIndex = 0;
 
-    // In dryRun, we might not want to mess with the store status too much, 
-    // but for progress indication it's useful.
     UpdateSessionsStore.update(s => {
         itemIndex = s.status.findIndex(item => item.name === name);
         const statusItem = {
@@ -106,15 +104,11 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         s.status = [...s.status];
     });
 
-    const results = []; // Collect results for split groups
-
     const promises = years.map((year) => limit(async () => {
         UpdateSessionsStore.update(s => {
-            if (!dryRun) { // Only update status in real run
-                s.status[itemIndex].years.push(year.name);
-                s.status[itemIndex].year = year.name;
-                s.status = [...s.status];
-            }
+            s.status[itemIndex].years.push(year.name);
+            s.status[itemIndex].year = year.name;
+            s.status = [...s.status];
         });
 
         try {
@@ -165,20 +159,11 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             if (isMerged || isBundled) {
                 allSessions.push(...yearSessions);
             } else {
-                const { counter, newCount, updatedSessions } = await updateYearSync(name, year.name, yearSessions, dryRun);
+                const { counter, newCount } = await updateYearSync(name, year.name, yearSessions);
                 // Track sessions for total count regardless of whether file was updated
                 yearSessions.forEach(session => allSessionNames.add(session.id));
 
-                if (dryRun) {
-                    results.push({
-                        year: year.name,
-                        yearSessions,
-                        newCount,
-                        updatedSessions: updatedSessions || []
-                    });
-                }
-
-                if (counter > 0 && !dryRun) {
+                if (counter > 0) {
                     UpdateSessionsStore.update(s => {
                         s.status[itemIndex].addedCount += newCount;
                         s.status = [...s.status];
@@ -209,39 +194,16 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         const uniqueSessions = Array.from(sessionMap.values());
 
         // 2. Cleanup
-        if (!dryRun) {
-            await cleanupBundledGroup(name);
-        }
-
-        const totalSessions = uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
+        await cleanupBundledGroup(name);
 
         const existingIds = new Set(existingSessions.map(s => s.id));
         const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
-        const newSessions_ = uniqueSessions.filter(s => !existingIds.has(s.id));
-        const removedSessions = existingSessions.filter(s => !sessionMap.has(s.id));
-        const updatedSessions = uniqueSessions.filter(s => {
-            if (!existingIds.has(s.id)) return false;
-            const old = existingSessions.find(os => os.id === s.id);
-            return JSON.stringify(s) !== JSON.stringify(old);
+
+        UpdateSessionsStore.update(s => {
+            s.status[itemIndex].addedCount = addedCount;
+            s.status = [...s.status];
         });
-
-        if (!dryRun) {
-            UpdateSessionsStore.update(s => {
-                s.status[itemIndex].addedCount = addedCount;
-                s.status = [...s.status];
-            });
-        }
         uniqueSessions.forEach(session => allSessionNames.add(session.id));
-
-        if (dryRun) {
-            return {
-                name,
-                newSessions: newSessions_,
-                updatedSessions,
-                removedSessions,
-                totalSessions: uniqueSessions.length
-            };
-        }
 
         return uniqueSessions;
     }
@@ -254,136 +216,68 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         const uniqueSessions = Array.from(sessionMap.values());
 
         // 2. Write ONE merged file
-        if (!dryRun) {
-            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-            const groupData = {
-                version: 1,
-                group: name,
-                date: Date.now(),
-                sessions: uniqueSessions
-            };
-            await writeCompressedFile(localGroupPath, groupData);
-        }
+        const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+        const groupData = {
+            version: 1,
+            group: name,
+            date: Date.now(),
+            sessions: uniqueSessions
+        };
+        await writeCompressedFile(localGroupPath, groupData);
 
         // 3. Cleanup
-        if (!dryRun) {
-            await cleanupMergedGroup(name);
-        }
-
-        const totalSessions = uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
+        await cleanupMergedGroup(name);
 
         const existingIds = new Set(existingSessions.map(s => s.id));
         const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
-        const newSessions_ = uniqueSessions.filter(s => !existingIds.has(s.id));
-        const removedSessions = existingSessions.filter(s => !sessionMap.has(s.id));
-        const updatedSessions = uniqueSessions.filter(s => {
-            if (!existingIds.has(s.id)) return false;
-            const old = existingSessions.find(os => os.id === s.id);
-            return JSON.stringify(s) !== JSON.stringify(old);
+
+        UpdateSessionsStore.update(s => {
+            s.status[itemIndex].addedCount = addedCount;
+            s.status = [...s.status];
         });
-
-        if (!dryRun) {
-            UpdateSessionsStore.update(s => {
-                s.status[itemIndex].addedCount = addedCount;
-                s.status = [...s.status];
-            });
-        }
         uniqueSessions.forEach(session => allSessionNames.add(session.id));
-
-        if (dryRun) {
-            return {
-                name,
-                newSessions: newSessions_,
-                updatedSessions,
-                removedSessions,
-                totalSessions: uniqueSessions.length
-            };
-        }
     } else {
         // For split (enabled) groups:
         // 1. Check if we need to migrate from a merged file (e.g. settings changed or first sync after migration)
-        if (!dryRun) {
-            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-            if (await storage.exists(localGroupPath)) {
-                try {
-                    const content = await storage.readFile(localGroupPath);
-                    const data = JSON.parse(content);
-                    if (data && data.sessions) {
-                        // Group by year
-                        const byYear = {};
-                        data.sessions.forEach(s => {
-                            if (!byYear[s.year]) byYear[s.year] = [];
-                            byYear[s.year].push(s);
-                        });
+        const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+        if (await storage.exists(localGroupPath)) {
+            try {
+                const content = await storage.readFile(localGroupPath);
+                const data = JSON.parse(content);
+                if (data && data.sessions) {
+                    // Group by year
+                    const byYear = {};
+                    data.sessions.forEach(s => {
+                        if (!byYear[s.year]) byYear[s.year] = [];
+                        byYear[s.year].push(s);
+                    });
 
-                        // Write year files for years NOT processed in this sync
-                        // (Processed years are already written by updateYearSync above)
-                        const processedYears = new Set(years.map(y => y.name));
-                        for (const [year, sessions] of Object.entries(byYear)) {
-                            if (!processedYears.has(year)) {
-                                await updateYearSync(name, year, sessions);
-                            }
+                    // Write year files for years NOT processed in this sync
+                    // (Processed years are already written by updateYearSync above)
+                    const processedYears = new Set(years.map(y => y.name));
+                    for (const [year, sessions] of Object.entries(byYear)) {
+                        if (!processedYears.has(year)) {
+                            await updateYearSync(name, year, sessions);
                         }
                     }
-                } catch (err) {
-                    console.error("Error migrating from merged file", err);
                 }
-                // 2. Delete local merged file
-                await storage.deleteFile(localGroupPath);
-
-                // 3. Delete remote merged file from AWS
-                const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
-                try {
-                    if (await storage.exists(remoteGroupPath)) {
-                        console.log(`[Sync] Deleting remote merged file: ${remoteGroupPath}`);
-                        await storage.deleteFile(remoteGroupPath);
-                        console.log(`[Sync] Successfully deleted remote merged file`);
-                    }
-                } catch (err) {
-                    console.error(`[Sync] Error deleting remote merged file for ${name}:`, err);
-                }
+            } catch (err) {
+                console.error("Error migrating from merged file", err);
             }
-        }
+            // 2. Delete local merged file
+            await storage.deleteFile(localGroupPath);
 
-        if (dryRun) {
-            // For split groups, we collected new valid sessions in `allSessionNames`.
-            // But we don't know "removed" easily because we only processed filtered years if !updateAll.
-            // If updateAll=false, we only know about current year changes.
-            // So for split groups, removed detection is partial or impossible without full scan.
-
-            // However, `results` contains everything we touched.
-            // Let's aggregate new and updated from `results`.
-
-            let newSessions_ = [];
-            let updatedSessions_ = [];
-
-            // We can't really list "new sessions object" for split groups unless we assume they are in `results`.
-            // updateYearSync returned { newCount }.
-            // We need to fetch the actual new objects if we want to list them.
-            // But wait, `updateYearSync` returns `updatedSessions`.
-            // It does NOT return `newSessions` list currently, only counter.
-            // Let's assume for now we list updated sessions correctly.
-            // For new sessions, we can just show the count. Or try to find them.
-
-            // To properly list new sessions, we need `updateYearSync` to return them or we calculate them here.
-            // In `updateYearSync` we filtered `newCount`. We can filter `newSessions` list there too.
-            // I pushed `results` which has `yearSessions`.
-            // But I don't have `existingIds` for split groups in this scope easily (each year load has it inside).
-
-            // Since I can't easily change `updateYearSync` AGAIN without more risk, 
-            // and split groups are less common or user didn't complain about them specifically (corruption usually implies merged/bundled json issues),
-            // I will return what I have.
-
-            // Aggregating updated sessions:
-            updatedSessions_ = results.flatMap(r => r.updatedSessions);
-
-            return {
-                name,
-                newSessions: [], // We don't have the list, only count in `addedCount`. UI can show "X new sessions" without list if empty.
-                updatedSessions: updatedSessions_,
-                removedSessions: [], // Impossible to know without full scan
-                totalSessions: allSessionNames.size
-            };
+            // 3. Delete remote merged file from AWS
+            const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
+            try {
+                if (await storage.exists(remoteGroupPath)) {
+                    console.log(`[Sync] Deleting remote merged file: ${remoteGroupPath}`);
+                    await storage.deleteFile(remoteGroupPath);
+                    console.log(`[Sync] Successfully deleted remote merged file`);
+                }
+            } catch (err) {
+                console.error(`[Sync] Error deleting remote merged file for ${name}:`, err);
+            }
         }
     }
 
