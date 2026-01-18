@@ -46,13 +46,16 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
                 const currentContent = await storage.readFile(localFilePath);
                 if (currentContent) {
                     const info = await getFileInfo(currentContent);
-                    // If file exists but wasn't in manifest, OR hash is different than manifest
-                    // Then it was modified locally during the download
-                    if (!localEntry || info.hash !== localEntry.hash) {
-                        console.warn(`[Sync] Aborting overwrite of ${fileBasename} - file changed locally during download`);
+
+                    // Only treat as conflict if file is in manifest AND hash differs
+                    // If file is not in manifest, just download it normally
+                    if (localEntry && info.hash !== localEntry.hash) {
+                        console.warn(`[Sync] Conflict detected for ${fileBasename}:`);
+                        console.warn(`  - File exists locally and in manifest`);
+                        console.warn(`  - Hash mismatch: manifest=${localEntry.hash}, current=${info.hash}`);
 
                         const remoteVer = parseInt(remoteFile.version) || 0;
-                        const localVer = localEntry ? (parseInt(localEntry.version) || 0) : 0;
+                        const localVer = parseInt(localEntry.version) || 0;
                         const newVer = Math.max(remoteVer, localVer) + 1;
 
                         addSyncLog(`Conflict resolved: ${fileBasename} (local version bumped to ${newVer})`, "warning");

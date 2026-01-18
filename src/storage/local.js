@@ -218,7 +218,10 @@ async function getRecursiveList(path) {
     const items = await getListing(path);
     for (const item of items) {
         if (item.type === "dir") {
-            const children = await getRecursiveList(item.path.split("/").slice(1).join("/"));
+            // item.path is in format "/local/sync/subfolder"
+            // We need to pass just the filesystem path: "/sync/subfolder" (keep leading /)
+            const pathWithoutDevice = item.path.replace(/^\/local/, "");
+            const children = await getRecursiveList(pathWithoutDevice);
             listing.push(...children);
         } else {
             listing.push(item);
