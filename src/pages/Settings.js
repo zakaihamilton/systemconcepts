@@ -20,6 +20,10 @@ import useDarkMode from "use-dark-mode";
 import Row from "@widgets/Row";
 import StorageIcon from "@mui/icons-material/Storage";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import Cookies from "js-cookie";
+import { SyncActiveStore } from "@sync/syncState";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+
 export const SettingsStore = new Store({
     order: "desc",
     offset: 0,
@@ -102,6 +106,31 @@ export default function Settings() {
         name: translations[item.name]
     }));
 
+    const role = Cookies.get("role");
+    const isAdmin = role === "admin";
+    const { locked } = SyncActiveStore.useState();
+
+    const setUpload = useCallback(value => {
+        SyncActiveStore.update(s => {
+            s.locked = value === "off";
+        });
+    }, []);
+
+    const uploadState = [locked ? "off" : "on", setUpload];
+
+    const showUpload = isAdmin;
+
+    const uploadItems = [
+        {
+            id: "on",
+            name: translations.ON
+        },
+        {
+            id: "off",
+            name: translations.OFF
+        }
+    ];
+
     const data = [
         {
             id: "language",
@@ -117,6 +146,13 @@ export default function Settings() {
             name: translations.DARK_MODE,
             value: darkModeSelected,
             widget: <Dynamic items={darkModeItems} state={darkModeState} />
+        },
+        showUpload && {
+            id: "upload",
+            icon: <ImportExportIcon />,
+            name: translations.UPLOAD || "Upload",
+            value: uploadState[0],
+            widget: <Dynamic items={uploadItems} state={uploadState} />
         },
         {
             id: "speedToolbar",
@@ -149,7 +185,6 @@ export default function Settings() {
                 {translations.CLEAR_STORAGE}
             </Button>
         },
-
         {
             id: "reset",
             icon: <SettingsBackupRestoreIcon />,
@@ -164,7 +199,7 @@ export default function Settings() {
             name: translations.VERSION,
             widget: process.env.NEXT_PUBLIC_VERSION
         }
-    ];
+    ].filter(Boolean);
 
     const mapper = item => {
         const { icon, name, ...props } = item;

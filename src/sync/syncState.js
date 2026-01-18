@@ -15,7 +15,8 @@ export const SyncActiveStore = new Store({
     phase: null, // Track current sync phase (main, library, personal)
     libraryUpdateCounter: 0, // Signal that library content changed
     personalSyncBusy: false, // Track personal sync status
-    personalSyncError: null
+    personalSyncError: null,
+    locked: false // Track if sync upload is locked
 });
 
 export const UpdateSessionsStore = new Store({

@@ -285,8 +285,16 @@ async function runPersonalSync(phaseOffset = 0) {
 }
 
 export async function requestSync() {
-    const isBusy = SyncActiveStore.getRawState().busy;
+    const state = SyncActiveStore.getRawState();
+    const isBusy = state.busy;
+    const isLocked = state.locked;
     const isSessionsBusy = UpdateSessionsStore.getRawState().busy;
+
+    if (isLocked) {
+        addSyncLog("Sync is locked (skipping upload)", "warning");
+        return;
+    }
+
     if (isBusy || isSessionsBusy) return;
 
     SyncActiveStore.update(s => {
