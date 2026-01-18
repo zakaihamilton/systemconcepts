@@ -87,7 +87,8 @@ export async function updateBundleFile(newSessions) {
             }
         }
     } catch (err) {
-        console.warn("[Sync] Failed to read existing bundle for update", err);
+        console.error("[Sync] Failed to read existing bundle for update", err);
+        throw err;
     }
 
     // 2. Remove old sessions for groups that we are updating

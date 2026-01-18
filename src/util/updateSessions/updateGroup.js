@@ -209,7 +209,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
             if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
                 addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
-                return null;
+                return uniqueSessions;
             }
         }
 
