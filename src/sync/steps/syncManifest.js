@@ -22,6 +22,10 @@ function normalizeManifest(manifest) {
     const pathMap = new Map();
 
     for (const entry of manifest) {
+        if (!entry.path) {
+            console.warn("[Sync] Skipping invalid manifest entry (missing path):", entry);
+            continue;
+        }
         const normalizedPath = normalizePath(entry.path);
         const normalizedEntry = { ...entry, path: normalizedPath };
         const version = parseInt(entry.version) || 0;

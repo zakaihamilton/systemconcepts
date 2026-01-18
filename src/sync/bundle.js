@@ -110,6 +110,11 @@ export async function writeCompressedFile(path, data, folderCache = null) {
             }
         }
 
+        if (data === undefined || data === null) {
+            console.error(`[Bundle] Attempted to write ${data} to ${path}`);
+            throw new Error(`Attempted to write ${data} to ${path}`);
+        }
+
         if (path.endsWith(".json")) {
             const jsonString = JSON.stringify(data, null, 4);
             await storage.writeFile(tmpPath, jsonString);

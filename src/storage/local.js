@@ -213,6 +213,20 @@ export async function clear() {
     });
 }
 
+async function getRecursiveList(path) {
+    let listing = [];
+    const items = await getListing(path);
+    for (const item of items) {
+        if (item.type === "dir") {
+            const children = await getRecursiveList(item.path.split("/").slice(1).join("/"));
+            listing.push(...children);
+        } else {
+            listing.push(item);
+        }
+    }
+    return listing;
+}
+
 export default {
     getListing,
     createFolder,
@@ -224,5 +238,6 @@ export default {
     readFiles,
     writeFile,
     writeFiles,
-    exists
+    exists,
+    getRecursiveList
 };
