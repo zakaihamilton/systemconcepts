@@ -200,6 +200,18 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         const sessionMap = new Map();
         allSessions.forEach(s => sessionMap.set(s.id, s));
         const uniqueSessions = Array.from(sessionMap.values());
+        uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
+
+        if (existingSessions) {
+            existingSessions.sort((a, b) => a.id.localeCompare(b.id));
+            const uniqueSessionsStr = JSON.stringify(uniqueSessions);
+            const existingSessionsStr = JSON.stringify(existingSessions);
+
+            if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
+                addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
+                return null;
+            }
+        }
 
         // 2. Cleanup
         await cleanupBundledGroup(name);
@@ -222,19 +234,35 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         const sessionMap = new Map();
         allSessions.forEach(s => sessionMap.set(s.id, s));
         const uniqueSessions = Array.from(sessionMap.values());
+        uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
 
-        // 2. Write ONE merged file
-        const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-        const groupData = {
-            version: 1,
-            group: name,
-            date: Date.now(),
-            sessions: uniqueSessions
-        };
-        await writeCompressedFile(localGroupPath, groupData);
+        let hasChanges = true;
+        if (existingSessions) {
+            existingSessions.sort((a, b) => a.id.localeCompare(b.id));
+            const uniqueSessionsStr = JSON.stringify(uniqueSessions);
+            const existingSessionsStr = JSON.stringify(existingSessions);
 
-        // 3. Cleanup
-        await cleanupMergedGroup(name);
+            if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
+                hasChanges = false;
+                addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
+                return;
+            }
+        }
+
+        if (hasChanges) {
+            // 2. Write ONE merged file
+            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+            const groupData = {
+                version: 1,
+                group: name,
+                date: Date.now(),
+                sessions: uniqueSessions
+            };
+            await writeCompressedFile(localGroupPath, groupData);
+
+            // 3. Cleanup
+            await cleanupMergedGroup(name);
+        }
 
         const existingIds = new Set(existingSessions.map(s => s.id));
         const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
