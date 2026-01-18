@@ -34,9 +34,12 @@ export function useUpdateSessions(groups) {
             const limit = pLimit(4);
             const promises = items.map(item => {
                 const groupInfo = groups.find(group => group.name === item.name);
-                const isDisabled = groupInfo?.disabled;
-                const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
-                const isBundled = groupInfo?.bundled;
+                if (!groupInfo) {
+                    return null;
+                }
+                const isDisabled = groupInfo.disabled;
+                const isMerged = groupInfo.merged ?? groupInfo.disabled;
+                const isBundled = groupInfo.bundled;
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
@@ -73,9 +76,12 @@ export function useUpdateSessions(groups) {
             const limit = pLimit(4);
             const promises = items.map(item => {
                 const groupInfo = groups.find(group => group.name === item.name);
-                const isDisabled = groupInfo?.disabled;
-                const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
-                const isBundled = groupInfo?.bundled;
+                if (!groupInfo) {
+                    return null;
+                }
+                const isDisabled = groupInfo.disabled;
+                const isMerged = groupInfo.merged ?? groupInfo?.disabled;
+                const isBundled = groupInfo.bundled;
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
