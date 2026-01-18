@@ -94,7 +94,8 @@ export default async function AWS_API(req, res) {
 export const config = {
     api: {
         bodyParser: {
-            sizeLimit: "5mb",
-        }
+            sizeLimit: "50mb",
+        },
+        responseLimit: false,
     }
 };
