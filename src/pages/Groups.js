@@ -174,7 +174,6 @@ export default function Groups() {
 
     const updateGroupWithSync = async (name, updateAll, forceUpdate) => {
         await updateGroup(name, updateAll, forceUpdate);
-        sync && sync();
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
