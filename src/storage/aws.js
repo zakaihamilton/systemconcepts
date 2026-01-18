@@ -254,9 +254,12 @@ async function exists(path) {
             },
         });
         exists = item && item.name;
+        if (!exists) {
+            console.log(`[AWS Storage] Path check returned false for ${path}`, item);
+        }
     }
-    catch {
-
+    catch (err) {
+        console.error(`[AWS Storage] Path check error for ${path}:`, err);
     }
     return exists;
 }
