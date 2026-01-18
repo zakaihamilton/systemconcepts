@@ -31,7 +31,7 @@ export default function Main() {
     const counter = useResize();
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
-    const { direction, showSideBar } = MainStore.useState();
+    const { direction, showSideBar, libraryExpanded } = MainStore.useState();
     useLocalStorage("MainStore", MainStore);
 
     useEffect(() => {
@@ -61,7 +61,8 @@ export default function Main() {
         styles.root,
         showSideBar && !isMobile && styles.sidebar,
         isMobile && styles.mobile,
-        direction === "rtl" && styles.rtl
+        direction === "rtl" && styles.rtl,
+        libraryExpanded && styles.libraryExpanded
     );
 
     return <>

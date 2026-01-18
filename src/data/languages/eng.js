@@ -1588,6 +1588,46 @@ export default {
         {
             "id": "NO_TERMS_FOUND",
             "value": "No terms found"
+        },
+        {
+            "id": "REVIEW_UPDATE",
+            "value": "Review Update"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "New Sessions"
+        },
+        {
+            "id": "UPDATED_SESSIONS",
+            "value": "Updated Sessions"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "Removed Sessions"
+        },
+        {
+            "id": "TOTAL_SESSIONS",
+            "value": "Total Sessions"
+        },
+        {
+            "id": "NO_UPDATES",
+            "value": "No Updates"
+        },
+        {
+            "id": "NEW",
+            "value": "New"
+        },
+        {
+            "id": "UPDATED",
+            "value": "Updated"
+        },
+        {
+            "id": "REMOVED",
+            "value": "Removed"
+        },
+        {
+            "id": "APPROVE_UPDATE",
+            "value": "Update"
         }
     ]
 };

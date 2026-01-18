@@ -1552,6 +1552,46 @@ export default {
         {
             "id": "NO_TERMS_FOUND",
             "value": "Nenhum termo encontrado"
+        },
+        {
+            "id": "REVIEW_UPDATE",
+            "value": "Revisar Atualização"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "Novas Sessões"
+        },
+        {
+            "id": "UPDATED_SESSIONS",
+            "value": "Sessões Atualizadas"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "Sessões Removidas"
+        },
+        {
+            "id": "TOTAL_SESSIONS",
+            "value": "Total de Sessões"
+        },
+        {
+            "id": "NO_UPDATES",
+            "value": "Sem Atualizações"
+        },
+        {
+            "id": "NEW",
+            "value": "Novo"
+        },
+        {
+            "id": "UPDATED",
+            "value": "Atualizado"
+        },
+        {
+            "id": "REMOVED",
+            "value": "Removido"
+        },
+        {
+            "id": "APPROVE_UPDATE",
+            "value": "Atualizar"
         }
     ]
 };

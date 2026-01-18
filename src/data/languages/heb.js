@@ -1576,6 +1576,46 @@ export default {
         {
             "id": "NO_TERMS_FOUND",
             "value": "לא נמצאו מונחים"
+        },
+        {
+            "id": "REVIEW_UPDATE",
+            "value": "סקירת עדכון"
+        },
+        {
+            "id": "NEW_SESSIONS",
+            "value": "שיעורים חדשים"
+        },
+        {
+            "id": "UPDATED_SESSIONS",
+            "value": "שיעורים מעודכנים"
+        },
+        {
+            "id": "REMOVED_SESSIONS",
+            "value": "שיעורים שהוסרו"
+        },
+        {
+            "id": "TOTAL_SESSIONS",
+            "value": 'סה"כ שיעורים'
+        },
+        {
+            "id": "NO_UPDATES",
+            "value": "אין עדכונים"
+        },
+        {
+            "id": "NEW",
+            "value": "חדש"
+        },
+        {
+            "id": "UPDATED",
+            "value": "מעודכן"
+        },
+        {
+            "id": "REMOVED",
+            "value": "הוסר"
+        },
+        {
+            "id": "APPROVE_UPDATE",
+            "value": "עדכן"
         }
     ]
 };
