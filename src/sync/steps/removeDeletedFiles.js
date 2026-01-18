@@ -12,6 +12,17 @@ export async function removeDeletedFiles(localManifest, remoteManifest, localPat
     addSyncLog("Checking for deleted files...", "info");
 
     try {
+        // Safety check: If we didn't load from a manifest file, do not delete local files.
+        // This prevents mass deletion when the remote folder is missing or inaccessible (e.g., failed listing).
+        if (!remoteManifest.loadedFromManifest) {
+            if (remoteManifest.length === 0) {
+                addSyncLog("Remote manifest missing/empty - skipping deletion for safety", "warning");
+            } else {
+                addSyncLog("Remote manifest generated from listing - skipping deletion for safety", "warning");
+            }
+            return { manifest: localManifest, hasChanges: false };
+        }
+
         const remotePathsSet = new Set(remoteManifest.map(f => f.path));
 
         // Only delete files that were previously synced (version > 1)

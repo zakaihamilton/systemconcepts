@@ -53,6 +53,7 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
 
     try {
         let remoteManifest = [];
+        let loadedFromManifest = false;
 
         // 1. Try files.gz
         if (await storage.exists(remoteManifestPathGz)) {
@@ -60,6 +61,7 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
             remoteManifest = normalizeManifest(rawManifest);
             const deduped = rawManifest.length - remoteManifest.length;
             console.log(`[Sync] Found ${remoteManifestPathGz}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ''}`);
+            loadedFromManifest = true;
         }
         // 2. Try files.json
         if (remoteManifest.length === 0 && await storage.exists(remoteManifestPathJson)) {
@@ -70,6 +72,7 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
                     remoteManifest = normalizeManifest(rawManifest);
                     const deduped = rawManifest.length - remoteManifest.length;
                     console.log(`[Sync] Found ${remoteManifestPathJson}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ''}`);
+                    loadedFromManifest = true;
                 } catch (e) {
                     console.error("[Sync] Error parsing remote manifest", e);
                 }
@@ -119,6 +122,11 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`✓ Synced manifest (${remoteManifest.length} files) in ${duration}s`, "info");
+
+        // Attach flag to indicate if manifest was loaded from file vs generated/empty
+        // This is crucial for preventing mass deletion when remote is missing/corrupted
+        remoteManifest.loadedFromManifest = loadedFromManifest;
+
         return remoteManifest;
     } catch (err) {
         console.error("[Sync] Step 3 error:", err);
