@@ -82,8 +82,14 @@ export async function uploadNewFiles(localManifest, remoteManifest, localPath = 
             updates.push(...results.filter(Boolean));
         }
 
-        // Add all new files to remote manifest
-        const updatedManifest = [...remoteManifest, ...updates];
+        // Add all new files to remote manifest with version timestamp
+        const timestamp = Date.now().toString();
+        const updatesWithVersion = updates.map(f => ({
+            ...f,
+            version: timestamp
+        }));
+
+        const updatedManifest = [...remoteManifest, ...updatesWithVersion];
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`✓ Uploaded ${updates.length} new file(s) in ${duration}s`, updates.length > 0 ? "success" : "info");

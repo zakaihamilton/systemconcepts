@@ -111,7 +111,7 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
                     path: relPath,
                     size: item.size || 0,
                     hash: null, // Hash unknown
-                    version: Math.max(1, item.mtimeMs || 1).toString()
+                    version: Math.max(2, item.mtimeMs || 1).toString()
                 };
             });
             console.log(`[Sync] After filtering, remoteManifest has ${remoteManifest.length} files`);
