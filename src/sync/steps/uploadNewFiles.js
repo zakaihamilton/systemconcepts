@@ -84,7 +84,7 @@ export async function uploadNewFiles(localManifest, remoteManifest, localPath = 
 
         // Add all new files to remote manifest with version timestamp
         const timestamp = Date.now().toString();
-        const updatesWithVersion = updates.map(f => ({
+        const updatesWithVersion = updates.filter(f => f && f.path).map(f => ({
             ...f,
             version: timestamp
         }));

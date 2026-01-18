@@ -30,7 +30,7 @@ import { getStorageSection } from "@pages/Storage/Section";
 
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 const Reset = dynamic(() => import("@pages/Settings/Reset"), { loading: () => <PageLoad /> });
-const ClearCache = dynamic(() => import("@pages/Settings/ClearCache"), { loading: () => <PageLoad /> });
+const FullSync = dynamic(() => import("@pages/Settings/FullSync"), { loading: () => <PageLoad /> });
 
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 const ClearStorage = dynamic(() => import("@pages/Settings/ClearStorage"), { loading: () => <PageLoad /> });
@@ -158,10 +158,10 @@ export default [
         Component: Settings
     },
     {
-        id: "clearCache",
-        name: "CLEAR_CACHE",
+        id: "fullSync",
+        name: "FULL_SYNC",
         Icon: StorageIcon,
-        Component: ClearCache
+        Component: FullSync
     },
     {
         id: "clearStorage",

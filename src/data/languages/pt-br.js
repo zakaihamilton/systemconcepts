@@ -170,15 +170,15 @@ export default {
             "value": "Você deseja voltar as configurações para os valores originais?"
         },
         {
-            "id": "CLEAR_CACHE",
+            "id": "FULL_SYNC",
             "value": "Sincronização Completa"
         },
         {
-            "id": "CLEAR_CACHE_DESCRIPTION",
+            "id": "FULL_SYNC_DESCRIPTION",
             "value": "Limpa o cache do aplicativo e recarrega."
         },
         {
-            "id": "CLEAR_CACHE_MESSAGE",
+            "id": "FULL_SYNC_MESSAGE",
             "value": "Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor."
         },
         {

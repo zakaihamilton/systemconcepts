@@ -170,15 +170,15 @@ export default {
             "value": "האם לאפס את ההגדרות לנתונים הראשוניים?"
         },
         {
-            "id": "CLEAR_CACHE",
+            "id": "FULL_SYNC",
             "value": "סנכרון מלא"
         },
         {
-            "id": "CLEAR_CACHE_DESCRIPTION",
+            "id": "FULL_SYNC_DESCRIPTION",
             "value": "מנקה את מטמון האפליקציה וטוען מחדש."
         },
         {
-            "id": "CLEAR_CACHE_MESSAGE",
+            "id": "FULL_SYNC_MESSAGE",
             "value": "האם ברצונך לבצע סינכרון מלא? פעולה זו תוריד מחדש את כל נתוני השיעורים מהשרת."
         },
         {

@@ -197,7 +197,14 @@ async function getRecursiveList(path) {
     const listing = [];
     const visitedPaths = new Set();
 
-    const addListing = async (dirPath) => {
+    const MAX_DEPTH = 10;
+
+    const addListing = async (dirPath, depth = 0) => {
+        if (depth > MAX_DEPTH) {
+            console.warn(`[AWS Storage] Max depth exceeded for: ${dirPath}`);
+            return;
+        }
+
         // Normalize the path for consistent comparison
         const normalizedDirPath = makePath(dirPath);
 
@@ -227,7 +234,7 @@ async function getRecursiveList(path) {
                 if (isDir) {
                     // item.path has "aws/" prefix from getListing, strip it for recursive call
                     const itemPathWithoutDevice = item.path.replace(/^\/aws\//, "/").replace(/^aws\//, "");
-                    await addListing(itemPathWithoutDevice);
+                    await addListing(itemPathWithoutDevice, depth + 1);
                 } else {
                     listing.push(item);
                 }

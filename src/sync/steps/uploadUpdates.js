@@ -95,7 +95,8 @@ export async function uploadUpdates(localManifest, remoteManifest, localPath = L
         }
 
         // Apply all updates to remote manifest
-        const updatedManifest = await applyManifestUpdates(remoteManifest, updates);
+        const validUpdates = updates.filter(f => f && f.path);
+        const updatedManifest = await applyManifestUpdates(remoteManifest, validUpdates);
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);
         addSyncLog(`✓ Uploaded ${updates.length} update(s) in ${duration}s`, updates.length > 0 ? "success" : "info");

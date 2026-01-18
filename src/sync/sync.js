@@ -36,10 +36,15 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
     addSyncLog(`Starting ${label} sync...`, "info");
     const progress = new SyncProgressTracker(phaseOffset, combinedTotalWeight);
     let hasChanges = false;
-    const canUpload = roleAuth(role, "admin") && !SyncActiveStore.getRawState().locked;
+    const isLocked = SyncActiveStore.getRawState().locked;
+    const canUpload = roleAuth(role, "admin") && !isLocked;
 
     if (!canUpload) {
-        addSyncLog(`Read-only mode: Uploads disabled for ${role}`, "info");
+        if (isLocked) {
+            addSyncLog(`Uploads skipped (Sync is Locked)`, "warning");
+        } else {
+            addSyncLog(`Read-only mode: Uploads disabled for ${role}`, "info");
+        }
     }
 
     // Ensure local folder exists

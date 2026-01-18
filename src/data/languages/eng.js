@@ -186,15 +186,15 @@ export default {
             "value": "Do you want to reset the settings to their original values?"
         },
         {
-            "id": "CLEAR_CACHE",
+            "id": "FULL_SYNC",
             "value": "Full Sync"
         },
         {
-            "id": "CLEAR_CACHE_DESCRIPTION",
+            "id": "FULL_SYNC_DESCRIPTION",
             "value": "Clears the application cache and reloads."
         },
         {
-            "id": "CLEAR_CACHE_MESSAGE",
+            "id": "FULL_SYNC_MESSAGE",
             "value": "Do you want to perform a full synchronization? This will re-download all session data from the server."
         },
         {
