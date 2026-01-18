@@ -88,6 +88,8 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             s.status[itemIndex].errors.push(err.message || String(err));
             s.status = [...s.status];
         });
+        // Abort the process to prevent data corruption (writing empty files)
+        return;
     }
     if (!updateAll) {
         const currentYear = new Date().getFullYear();
