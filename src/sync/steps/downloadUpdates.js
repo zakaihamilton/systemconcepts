@@ -50,8 +50,19 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
                     // Then it was modified locally during the download
                     if (!localEntry || info.hash !== localEntry.hash) {
                         console.warn(`[Sync] Aborting overwrite of ${fileBasename} - file changed locally during download`);
-                        addSyncLog(`Skipped overwrite: ${fileBasename} (changed locally)`, "warning");
-                        return false;
+
+                        const remoteVer = parseInt(remoteFile.version) || 0;
+                        const localVer = localEntry ? (parseInt(localEntry.version) || 0) : 0;
+                        const newVer = Math.max(remoteVer, localVer) + 1;
+
+                        addSyncLog(`Conflict resolved: ${fileBasename} (local version bumped to ${newVer})`, "warning");
+
+                        return {
+                            path: remoteFile.path,
+                            hash: info.hash,
+                            size: info.size,
+                            version: newVer.toString()
+                        };
                     }
                 }
             }
