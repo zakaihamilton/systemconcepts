@@ -66,8 +66,16 @@ export default {
             "value": "Idioma"
         },
         {
+            "id": "LANGUAGE_DESCRIPTION",
+            "value": "Alterar o idioma do aplicativo."
+        },
+        {
             "id": "DARK_MODE",
             "value": "Modo Escuro"
+        },
+        {
+            "id": "DARK_MODE_DESCRIPTION",
+            "value": "Alternar entre temas claros e escuros."
         },
         {
             "id": "LIGHT_MODE",
@@ -106,6 +114,10 @@ export default {
             "value": "Tamanho Fonte"
         },
         {
+            "id": "FONT_SIZE_DESCRIPTION",
+            "value": "Ajustar o tamanho do texto."
+        },
+        {
             "id": "DEVICES",
             "value": "Dispositivos"
         },
@@ -142,6 +154,10 @@ export default {
             "value": "Restaurar Configurações"
         },
         {
+            "id": "RESET_SETTINGS_DESCRIPTION",
+            "value": "Restaura as configurações padrão."
+        },
+        {
             "id": "CANCEL",
             "value": "Cancelar"
         },
@@ -158,12 +174,20 @@ export default {
             "value": "Sincronização Completa"
         },
         {
+            "id": "CLEAR_CACHE_DESCRIPTION",
+            "value": "Limpa o cache do aplicativo e recarrega."
+        },
+        {
             "id": "CLEAR_CACHE_MESSAGE",
             "value": "Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor."
         },
         {
             "id": "CLEAR_STORAGE",
             "value": "Limpar Armazenamento"
+        },
+        {
+            "id": "CLEAR_STORAGE_DESCRIPTION",
+            "value": "Exclui todos os dados locais."
         },
         {
             "id": "CONFIRM_CLEAR_STORAGE",
@@ -752,6 +776,10 @@ export default {
         {
             "id": "SPEED_TOOLBAR",
             "value": "Barra de Velocidade"
+        },
+        {
+            "id": "SPEED_TOOLBAR_DESCRIPTION",
+            "value": "Posição da barra de ferramentas de velocidade."
         },
         {
             "id": "TOP",
@@ -1592,6 +1620,22 @@ export default {
         {
             "id": "APPROVE_UPDATE",
             "value": "Atualizar"
+        },
+        {
+            "id": "VERSION",
+            "value": "Versão"
+        },
+        {
+            "id": "VERSION_DESCRIPTION",
+            "value": "Versão atual do aplicativo."
+        },
+        {
+            "id": "UPLOAD_DESCRIPTION",
+            "value": "Ativar ou desativar o upload de arquivos."
+        },
+        {
+            "id": "UPLOAD",
+            "value": "Envio"
         }
     ]
 };

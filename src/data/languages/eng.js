@@ -82,8 +82,16 @@ export default {
             "value": "Language"
         },
         {
+            "id": "LANGUAGE_DESCRIPTION",
+            "value": "Change the application language."
+        },
+        {
             "id": "DARK_MODE",
             "value": "Dark Mode"
+        },
+        {
+            "id": "DARK_MODE_DESCRIPTION",
+            "value": "Toggle between light and dark themes."
         },
         {
             "id": "LIGHT_MODE",
@@ -122,6 +130,10 @@ export default {
             "value": "Font Size"
         },
         {
+            "id": "FONT_SIZE_DESCRIPTION",
+            "value": "Adjust the text size."
+        },
+        {
             "id": "DEVICES",
             "value": "Devices"
         },
@@ -158,6 +170,10 @@ export default {
             "value": "Reset Settings"
         },
         {
+            "id": "RESET_SETTINGS_DESCRIPTION",
+            "value": "Restores default settings."
+        },
+        {
             "id": "CANCEL",
             "value": "Cancel"
         },
@@ -174,12 +190,20 @@ export default {
             "value": "Full Sync"
         },
         {
+            "id": "CLEAR_CACHE_DESCRIPTION",
+            "value": "Clears the application cache and reloads."
+        },
+        {
             "id": "CLEAR_CACHE_MESSAGE",
             "value": "Do you want to perform a full synchronization? This will re-download all session data from the server."
         },
         {
             "id": "CLEAR_STORAGE",
             "value": "Clear Storage"
+        },
+        {
+            "id": "CLEAR_STORAGE_DESCRIPTION",
+            "value": "Deletes all local data."
         },
         {
             "id": "CONFIRM_CLEAR_STORAGE",
@@ -776,6 +800,10 @@ export default {
         {
             "id": "SPEED_TOOLBAR",
             "value": "Speed Toolbar"
+        },
+        {
+            "id": "SPEED_TOOLBAR_DESCRIPTION",
+            "value": "Position of the speed control toolbar."
         },
         {
             "id": "TOP",
@@ -1628,6 +1656,22 @@ export default {
         {
             "id": "APPROVE_UPDATE",
             "value": "Update"
+        },
+        {
+            "id": "VERSION",
+            "value": "Version"
+        },
+        {
+            "id": "VERSION_DESCRIPTION",
+            "value": "Current application version."
+        },
+        {
+            "id": "UPLOAD_DESCRIPTION",
+            "value": "Enable or disable file uploads."
+        },
+        {
+            "id": "UPLOAD",
+            "value": "Upload"
         }
     ]
 };

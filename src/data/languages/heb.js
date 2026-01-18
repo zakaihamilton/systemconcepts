@@ -66,8 +66,16 @@ export default {
             "value": "שפה"
         },
         {
+            "id": "LANGUAGE_DESCRIPTION",
+            "value": "שנה את שפת האפליקציה."
+        },
+        {
             "id": "DARK_MODE",
             "value": "מצב חשוך"
+        },
+        {
+            "id": "DARK_MODE_DESCRIPTION",
+            "value": "עבור בין מצב מואר וחשוך."
         },
         {
             "id": "LIGHT_MODE",
@@ -106,6 +114,10 @@ export default {
             "value": "גודל גופן"
         },
         {
+            "id": "FONT_SIZE_DESCRIPTION",
+            "value": "התאם את גודל הטקסט."
+        },
+        {
             "id": "DEVICES",
             "value": "מכשירים"
         },
@@ -142,6 +154,10 @@ export default {
             "value": "איפוס הגדרות"
         },
         {
+            "id": "RESET_SETTINGS_DESCRIPTION",
+            "value": "משחזר את הגדרות ברירת המחדל."
+        },
+        {
             "id": "CANCEL",
             "value": "ביטול"
         },
@@ -158,12 +174,20 @@ export default {
             "value": "סנכרון מלא"
         },
         {
+            "id": "CLEAR_CACHE_DESCRIPTION",
+            "value": "מנקה את מטמון האפליקציה וטוען מחדש."
+        },
+        {
             "id": "CLEAR_CACHE_MESSAGE",
             "value": "האם ברצונך לבצע סינכרון מלא? פעולה זו תוריד מחדש את כל נתוני השיעורים מהשרת."
         },
         {
             "id": "CLEAR_STORAGE",
             "value": "נקה אחסון"
+        },
+        {
+            "id": "CLEAR_STORAGE_DESCRIPTION",
+            "value": "מוחק את כל הנתונים המקומיים."
         },
         {
             "id": "CONFIRM_CLEAR_STORAGE",
@@ -756,6 +780,10 @@ export default {
         {
             "id": "SPEED_TOOLBAR",
             "value": "סרגל מהירות"
+        },
+        {
+            "id": "SPEED_TOOLBAR_DESCRIPTION",
+            "value": "מיקום סרגל כלי המהירות."
         },
         {
             "id": "TOP",
@@ -1616,6 +1644,22 @@ export default {
         {
             "id": "APPROVE_UPDATE",
             "value": "עדכן"
+        },
+        {
+            "id": "VERSION",
+            "value": "גרסה"
+        },
+        {
+            "id": "VERSION_DESCRIPTION",
+            "value": "גרסת האפליקציה הנוכחית."
+        },
+        {
+            "id": "UPLOAD_DESCRIPTION",
+            "value": "הפעל או השבת העלאת קבצים."
+        },
+        {
+            "id": "UPLOAD",
+            "value": "העלאה"
         }
     ]
 };

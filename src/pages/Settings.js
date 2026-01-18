@@ -136,6 +136,7 @@ export default function Settings() {
             id: "language",
             icon: <LanguageIcon />,
             name: translations.LANGUAGE,
+            description: translations.LANGUAGE_DESCRIPTION,
             value: states.language[0],
             widget: <Dynamic items={languageItems} state={states.language} />,
             target: "languages"
@@ -144,6 +145,7 @@ export default function Settings() {
             id: "darkMode",
             icon: <InvertColorsIcon />,
             name: translations.DARK_MODE,
+            description: translations.DARK_MODE_DESCRIPTION,
             value: darkModeSelected,
             widget: <Dynamic items={darkModeItems} state={darkModeState} />
         },
@@ -151,6 +153,7 @@ export default function Settings() {
             id: "upload",
             icon: <ImportExportIcon />,
             name: translations.UPLOAD || "Upload",
+            description: translations.UPLOAD_DESCRIPTION,
             value: uploadState[0],
             widget: <Dynamic items={uploadItems} state={uploadState} />
         },
@@ -158,6 +161,7 @@ export default function Settings() {
             id: "speedToolbar",
             icon: <SlowMotionVideoIcon />,
             name: translations.SPEED_TOOLBAR,
+            description: translations.SPEED_TOOLBAR_DESCRIPTION,
             value: states.speedToolbar[0],
             widget: <Dynamic items={speedToolbarItems} state={states.speedToolbar} />
         },
@@ -165,6 +169,7 @@ export default function Settings() {
             id: "fontSize",
             icon: <FormatSizeIcon />,
             name: translations.FONT_SIZE,
+            description: translations.FONT_SIZE_DESCRIPTION,
             value: states.fontSize[0],
             widget: <Dynamic items={fontSizeItems} state={states.fontSize} />,
             target: "fontSizes"
@@ -173,6 +178,7 @@ export default function Settings() {
             id: "clearCache",
             icon: <StorageIcon />,
             name: translations.CLEAR_CACHE,
+            description: translations.CLEAR_CACHE_DESCRIPTION,
             widget: <Button variant="contained" onClick={() => addPath("clearCache")}>
                 {translations.CLEAR_CACHE}
             </Button>
@@ -181,6 +187,7 @@ export default function Settings() {
             id: "clearStorage",
             icon: <DeleteForeverIcon />,
             name: translations.CLEAR_STORAGE,
+            description: translations.CLEAR_STORAGE_DESCRIPTION,
             widget: <Button variant="contained" color="error" onClick={() => addPath("clearStorage")}>
                 {translations.CLEAR_STORAGE}
             </Button>
@@ -189,6 +196,7 @@ export default function Settings() {
             id: "reset",
             icon: <SettingsBackupRestoreIcon />,
             name: translations.RESET_SETTINGS,
+            description: translations.RESET_SETTINGS_DESCRIPTION,
             widget: <Button variant="contained" onClick={() => addPath("reset")}>
                 {translations.RESET}
             </Button>
@@ -197,16 +205,20 @@ export default function Settings() {
             id: "version",
             icon: <BuildIcon />,
             name: translations.VERSION,
+            description: translations.VERSION_DESCRIPTION,
             widget: process.env.NEXT_PUBLIC_VERSION
         }
     ].filter(Boolean);
 
     const mapper = item => {
-        const { icon, name, ...props } = item;
+        const { icon, name, description, ...props } = item;
         const href = item.target && target(item);
         const onClick = () => navigate(item.target);
         props.title = <Row onClick={item.target ? onClick : undefined} href={href} key={item.id} icons={icon}>
-            {name}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+                <div>{name}</div>
+                <div style={{ fontSize: "0.85em", opacity: 0.7 }}>{description}</div>
+            </div>
         </Row>;
         return props;
     };
