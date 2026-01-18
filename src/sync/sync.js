@@ -36,7 +36,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
     addSyncLog(`Starting ${label} sync...`, "info");
     const progress = new SyncProgressTracker(phaseOffset, combinedTotalWeight);
     let hasChanges = false;
-    const canUpload = roleAuth(role, "admin");
+    const canUpload = roleAuth(role, "admin") && !SyncActiveStore.getRawState().locked;
 
     if (!canUpload) {
         addSyncLog(`Read-only mode: Uploads disabled for ${role}`, "info");
@@ -261,7 +261,7 @@ async function runPersonalSync(phaseOffset = 0) {
         });
 
         const { performPersonalSync } = await import("@personal/personalSync");
-        const result = await performPersonalSync(phaseOffset, TOTAL_COMBINED_WEIGHT);
+        const result = await performPersonalSync(phaseOffset, TOTAL_COMBINED_WEIGHT, SyncActiveStore.getRawState().locked);
 
         SyncActiveStore.update(s => {
             s.personalSyncBusy = false;
@@ -292,7 +292,6 @@ export async function requestSync() {
 
     if (isLocked) {
         addSyncLog("Sync is locked (skipping upload)", "warning");
-        return;
     }
 
     if (isBusy || isSessionsBusy) return;

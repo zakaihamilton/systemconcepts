@@ -21,7 +21,7 @@ import { uploadManifest } from "./steps/uploadManifest";
  * Main personal sync function
  * Runs independently from main sync but follows same pattern
  */
-export async function performPersonalSync(phaseOffset = 0, combinedTotalWeight = null) {
+export async function performPersonalSync(phaseOffset = 0, combinedTotalWeight = null, locked = false) {
     const unlock = await lockMutex({ id: "personal_sync_process" });
     addSyncLog("[Personal] Starting personal sync process...", "info");
     const startTime = performance.now();
@@ -129,27 +129,34 @@ export async function performPersonalSync(phaseOffset = 0, combinedTotalWeight =
         hasChanges = hasChanges || removeResult.hasChanges;
         progress.completeStep('removeDeletedFiles');
 
-        // Step 5: Upload updates
-        progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
-        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, userid, (processed, total) => {
-            progress.updateProgress('uploadUpdates', { processed, total });
-        });
-        remoteManifest = uploadUpdatesResult.manifest;
-        hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
-        progress.completeStep('uploadUpdates');
+        if (!locked) {
+            // Step 5: Upload updates
+            progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
+            const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, userid, (processed, total) => {
+                progress.updateProgress('uploadUpdates', { processed, total });
+            });
+            remoteManifest = uploadUpdatesResult.manifest;
+            hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
+            progress.completeStep('uploadUpdates');
 
-        // Step 6: Upload new files
-        progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
-        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, userid, (processed, total) => {
-            progress.updateProgress('uploadNewFiles', { processed, total });
-        });
-        remoteManifest = uploadNewResult.manifest;
-        hasChanges = hasChanges || uploadNewResult.hasChanges;
-        progress.completeStep('uploadNewFiles');
+            // Step 6: Upload new files
+            progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
+            const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, userid, (processed, total) => {
+                progress.updateProgress('uploadNewFiles', { processed, total });
+            });
+            remoteManifest = uploadNewResult.manifest;
+            hasChanges = hasChanges || uploadNewResult.hasChanges;
+            progress.completeStep('uploadNewFiles');
 
-        // Step 7: Upload manifest
-        progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
-        await uploadManifest(remoteManifest, userid);
+            // Step 7: Upload manifest
+            progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
+            await uploadManifest(remoteManifest, userid);
+        } else {
+            addSyncLog(`[Personal] Uploads skipped because sync is locked`, "warning");
+            progress.completeStep('uploadUpdates');
+            progress.completeStep('uploadNewFiles');
+            progress.completeStep('uploadManifest');
+        }
         progress.setComplete();
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
