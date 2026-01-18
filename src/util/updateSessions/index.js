@@ -111,7 +111,7 @@ export function useUpdateSessions(groups) {
             const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
             const isBundled = groupInfo?.bundled;
             const result = await updateGroupProcess(name, updateAll, forceUpdate, isMerged, isBundled);
-            if (isBundled && Array.isArray(result)) {
+            if (isBundled && Array.isArray(result) && result.length > 0) {
                 await updateBundleFile(result);
             }
             return result;
