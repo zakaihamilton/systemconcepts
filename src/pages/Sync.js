@@ -43,10 +43,6 @@ export default function Sync() {
     const [currentTime, setCurrentTime] = React.useState(Date.now());
 
     React.useEffect(() => {
-        console.log("Build Timestamp: 2026-01-10 21:49:00 - Checking for Fixes");
-    }, []);
-
-    React.useEffect(() => {
         let interval;
         if (syncBusy) {
             interval = setInterval(() => {
@@ -83,19 +79,19 @@ export default function Sync() {
 
     const isBusy = syncBusy || sessionsBusy;
 
-    const [confirmClearCache, setConfirmClearCache] = React.useState(false);
+    const [confirmFullSync, setConfirmFullSync] = React.useState(false);
 
     const animatedClassName = useStyles(styles, {
         animated: isBusy
     });
 
-    const clearCache = async () => {
+    const fullSync = async () => {
         try {
             await clearBundleCache();
-            setConfirmClearCache(false);
+            setConfirmFullSync(false);
             await updateSync(false);
         } catch (err) {
-            console.error("Failed to clear cache", err);
+            console.error("Failed to full sync", err);
         }
     };
 
@@ -112,11 +108,11 @@ export default function Sync() {
 
     useToolbar({ id: "Sync", items: toolbarItems, depends: [syncEnabled, isBusy, translations, online] });
 
-    const clearCacheActions = (<>
-        <Button variant="contained" color="warning" onClick={clearCache}>
-            {translations.CLEAR_CACHE}
+    const fullSyncActions = (<>
+        <Button variant="contained" color="warning" onClick={fullSync}>
+            {translations.FULL_SYNC}
         </Button>
-        <Button variant="contained" onClick={() => setConfirmClearCache(false)}>
+        <Button variant="contained" onClick={() => setConfirmFullSync(false)}>
             {translations.CANCEL}
         </Button>
     </>);
@@ -179,14 +175,14 @@ export default function Sync() {
                                     variant="outlined"
                                     color="warning"
                                     startIcon={<CachedIcon />}
-                                    onClick={() => setConfirmClearCache(true)}
+                                    onClick={() => setConfirmFullSync(true)}
                                     disabled={isBusy}
                                     sx={{
                                         opacity: isBusy ? 0.5 : 1,
                                         whiteSpace: 'nowrap'
                                     }}
                                 >
-                                    {translations.CLEAR_CACHE}
+                                    {translations.FULL_SYNC}
                                 </Button>
                             </Box>
                         </Box>
@@ -240,10 +236,10 @@ export default function Sync() {
             </Box>
 
             {
-                confirmClearCache && (
-                    <Dialog title={translations.CLEAR_CACHE} onClose={() => setConfirmClearCache(false)} actions={clearCacheActions}>
+                confirmFullSync && (
+                    <Dialog title={translations.FULL_SYNC} onClose={() => setConfirmFullSync(false)} actions={fullSyncActions}>
                         <Typography variant="body1">
-                            {translations.CLEAR_CACHE_MESSAGE}
+                            {translations.FULL_SYNC_MESSAGE}
                         </Typography>
                     </Dialog>
                 )

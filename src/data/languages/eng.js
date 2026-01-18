@@ -678,10 +678,6 @@ export default {
             "value": "Sync"
         },
         {
-            "id": "FULL_SYNC",
-            "value": "Sync All Sessions",
-        },
-        {
             "id": "SYNC_FAILED",
             "value": "Sync Failed"
         },

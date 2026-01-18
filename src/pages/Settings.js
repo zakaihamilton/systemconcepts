@@ -175,12 +175,12 @@ export default function Settings() {
             target: "fontSizes"
         },
         {
-            id: "clearCache",
+            id: "fullSync",
             icon: <StorageIcon />,
-            name: translations.CLEAR_CACHE,
-            description: translations.CLEAR_CACHE_DESCRIPTION,
-            widget: <Button variant="contained" onClick={() => addPath("clearCache")}>
-                {translations.CLEAR_CACHE}
+            name: translations.FULL_SYNC,
+            description: translations.FULL_SYNC_DESCRIPTION,
+            widget: <Button variant="contained" onClick={() => addPath("fullSync")}>
+                {translations.FULL_SYNC}
             </Button>
         },
         {
