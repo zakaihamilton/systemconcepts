@@ -40,6 +40,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
     const canUpload = roleAuth(role, "admin") && !isLocked;
 
     if (!canUpload) {
+        console.log(`[Sync] Upload blocked. Role: ${role}, Admin Auth: ${roleAuth(role, "admin")}, Locked: ${isLocked}`);
         if (isLocked) {
             addSyncLog(`Uploads skipped (Sync is Locked)`, "warning");
         } else {

@@ -23,7 +23,7 @@ function normalizeManifest(manifest) {
 
     for (const entry of manifest) {
         if (!entry.path) {
-            console.warn("[Sync] Skipping invalid manifest entry (missing path):", entry);
+            console.warn("[Sync] Skipping invalid manifest entry (missing path):", JSON.stringify(entry));
             continue;
         }
         const normalizedPath = normalizePath(entry.path);
@@ -62,9 +62,13 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
         // 1. Try files.gz
         if (await storage.exists(remoteManifestPathGz)) {
             const rawManifest = await readCompressedFile(remoteManifestPathGz) || [];
+            console.log(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
             remoteManifest = normalizeManifest(rawManifest);
             const deduped = rawManifest.length - remoteManifest.length;
             console.log(`[Sync] Found ${remoteManifestPathGz}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ''}`);
+            if (deduped === rawManifest.length && rawManifest.length > 0) {
+                console.error("[Sync] CRITICAL: All items removed during normalization!");
+            }
             loadedFromManifest = true;
         }
         // 2. Try files.json
