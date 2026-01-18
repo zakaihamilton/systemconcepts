@@ -160,7 +160,14 @@ async function deleteFile(path) {
 
 async function readFile(path) {
     path = makePath(path);
-    return await fs.promises.readFile(path, "utf8");
+    try {
+        return await fs.promises.readFile(path, "utf8");
+    } catch (err) {
+        if (err.code !== "ENOENT" && !err.message.includes("ENOENT")) {
+            throw err;
+        }
+        return null;
+    }
 }
 
 async function readFiles(prefix, files) {
