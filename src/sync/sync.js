@@ -122,6 +122,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
 export async function performSync() {
     const unlock = await lockMutex({ id: "sync_process" });
     try {
+        console.log(`[Sync] Version: ${process.env.NEXT_PUBLIC_VERSION}`);
         let role = Cookies.get("role");
         const id = Cookies.get("id");
         const hash = Cookies.get("hash");
