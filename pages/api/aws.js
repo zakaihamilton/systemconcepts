@@ -16,9 +16,6 @@ export default async function AWS_API(req, res) {
         }
         const body = (req.body && Array.isArray(req.body)) ? (req.body[0] || {}) : (req.body || {});
         let path = body.path || (req.headers && req.headers.path) || req.query?.path || "";
-        if (path) {
-            path = decodeURIComponent(path);
-        }
         const user = await login({ id, hash, api: "aws", path });
         if (!user) {
             console.log(`[AWS API] ACCESS DENIED: User ${id} is not authorized`);
