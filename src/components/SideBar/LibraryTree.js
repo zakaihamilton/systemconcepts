@@ -40,7 +40,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     // Handle scroll-to-path from breadcrumb clicks
     useEffect(() => {
         if (scrollToPath) {
-            setHighlightPath(scrollToPath);
+            setTimeout(() => setHighlightPath(scrollToPath), 0);
             // Clear the scrollToPath after a delay
             setTimeout(() => {
                 LibraryStore.update(s => {
@@ -84,14 +84,18 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     }, []);
 
     useEffect(() => {
-        loadTags();
-        loadCustomOrder();
+        setTimeout(() => {
+            loadTags();
+            loadCustomOrder();
+        }, 0);
     }, [loadTags, loadCustomOrder]);
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
-            loadTags();
-            loadCustomOrder();
+            setTimeout(() => {
+                loadTags();
+                loadCustomOrder();
+            }, 0);
         }
     }, [libraryUpdateCounter, loadTags, loadCustomOrder]);
 
@@ -109,7 +113,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
             const urlPath = pathItems.slice(1).join("|");
             const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
             if (tag) {
-                setSelectedTag(tag);
+                setTimeout(() => setSelectedTag(tag), 0);
             }
         }
     }, [tags, pathItems, getTagHierarchy]);

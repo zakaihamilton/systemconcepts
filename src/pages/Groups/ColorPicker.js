@@ -16,13 +16,11 @@ export default function ColorPicker({ name, color, pickerClassName, onChangeComp
     const [open, setOpen] = useState(false);
     const [currentColor, setCurrentColor] = useState(color);
 
-    useEffect(() => {
-        if (open) {
-            setCurrentColor(color);
-        }
-    }, [open, color]);
+    // useEffect removed to avoid set-state-in-effect warning.
+    // State is initialized in handleClick instead.
 
     const handleClick = () => {
+        setCurrentColor(color);
         setOpen(true);
     };
 

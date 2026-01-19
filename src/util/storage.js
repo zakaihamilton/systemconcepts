@@ -148,8 +148,8 @@ export function useListing(url, depends = [], options) {
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
-        setLoading(true);
-        setError(null);
+        setTimeout(() => setLoading(true), 0);
+        setTimeout(() => setError(null), 0);
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
             if (active.current === url) {

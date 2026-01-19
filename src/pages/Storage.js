@@ -69,7 +69,7 @@ export default function Storage({ path = "" }) {
         });
     }, [path]);
 
-    const columns = [
+    const columns = useMemo(() => [
         {
             id: "nameWidget",
             title: translations.NAME,
@@ -96,9 +96,9 @@ export default function Storage({ path = "" }) {
                 }
             }
         }
-    ].filter(Boolean);
+    ].filter(Boolean), [isPhone, translations]);
 
-    const mapper = item => {
+    const mapper = useCallback(item => {
         const id = item.id || item.name;
         let name = item.name;
         let tooltip = translations.STORAGE;
@@ -159,7 +159,7 @@ export default function Storage({ path = "" }) {
 
         result.nameWidget = nameWidget;
         return result;
-    };
+    }, [path, translations, mode, editedItem, editing, rowClick, readOnly, dateFormatter]);
 
     let dataEx = useActions(data);
 
@@ -191,11 +191,11 @@ export default function Storage({ path = "" }) {
         else {
             setPath("storage/" + id.split("/").filter(Boolean).join("/"));
         }
-    }, [select, path]);
+    }, [select]);
 
     const statusBar = <StatusBar data={dataEx} mapper={mapper} store={StorageStore} />;
 
-    const onImport = async (data) => {
+    const onImport = useCallback(async (data) => {
         try {
             await storage.importFolder(path, data);
             StorageStore.update(s => {
@@ -209,15 +209,15 @@ export default function Storage({ path = "" }) {
                 s.severity = "error";
             });
         }
-    };
+    }, [path]);
 
     const name = path.split("/").pop();
 
-    const onExport = async () => {
+    const onExport = useCallback(async () => {
         const object = await storage.exportFolder(path);
         const data = JSON.stringify(object, null, 4);
         return data;
-    };
+    }, [path]);
 
     return <>
         <Table

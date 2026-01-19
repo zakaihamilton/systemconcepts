@@ -71,7 +71,7 @@ export default function ProgressDialog() {
 
     useEffect(() => {
         if (busy) {
-            setCurrentTime(new Date().getTime());
+            setTimeout(() => setCurrentTime(new Date().getTime()), 0);
             const interval = setInterval(() => {
                 setCurrentTime(new Date().getTime());
             }, 1000);
@@ -84,7 +84,7 @@ export default function ProgressDialog() {
             UpdateSessionsStore.update(s => {
                 s.showUpdateDialog = true;
             });
-            setExpandedItems(new Set());
+            setTimeout(() => setExpandedItems(new Set()), 0);
         }
         wasBusyRef.current = busy;
     }, [busy]);

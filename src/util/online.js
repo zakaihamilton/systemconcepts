@@ -12,6 +12,6 @@ export function useOnline() {
             window.removeEventListener("online", onOnline);
             window.removeEventListener("offline", onOffline);
         };
-    }, []);
+    }, [onOffline, onOnline]);
     return onlineStatus;
 }

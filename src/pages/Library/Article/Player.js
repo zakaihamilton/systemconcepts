@@ -105,6 +105,7 @@ export default function Player({ contentRef, onParagraphChange }) {
     }, [contentRef]);
 
     // Speak a specific paragraph
+    const speakParagraphRef = useRef(null);
     const speakParagraph = useCallback((index, autoPlay = true) => {
         // 1. Guard against interactions while stopping
         if (isStoppingRef.current) return;
@@ -150,7 +151,9 @@ export default function Player({ contentRef, onParagraphChange }) {
         utterance.onend = () => {
             if (utteranceRef.current === utterance && !isStoppingRef.current) {
                 if (index < paragraphs.length - 1) {
-                    speakParagraph(index + 1, true);
+                    if (speakParagraphRef.current) {
+                        speakParagraphRef.current(index + 1, true);
+                    }
                 } else {
                     setIsPlaying(false);
                 }
@@ -182,6 +185,10 @@ export default function Player({ contentRef, onParagraphChange }) {
         }, 50);
 
     }, [paragraphs, onParagraphChange, selectedVoice]);
+
+    useEffect(() => {
+        speakParagraphRef.current = speakParagraph;
+    }, [speakParagraph]);
 
     // Play/Resume
     const handlePlay = useCallback(() => {
@@ -300,7 +307,7 @@ export default function Player({ contentRef, onParagraphChange }) {
         // 3. We are not currently stopping
         if (isPlaying && currentParagraphIndex >= 0 && selectedVoice && hasVoiceChanged && !isStoppingRef.current) {
             console.log('Voice changed, restarting playback...');
-            speakParagraph(currentParagraphIndex, true);
+            setTimeout(() => speakParagraph(currentParagraphIndex, true), 0);
         }
 
         prevVoiceRef.current = selectedVoice;

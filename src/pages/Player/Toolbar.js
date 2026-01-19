@@ -26,7 +26,7 @@ export default function Toolbar({ show, playerRef, isVideo }) {
         return () => {
             listeners.forEach(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, []);
+    }, [playerRef]);
 
     const speed = playerRef.playbackRate || 1.0;
 

@@ -37,19 +37,25 @@ export default function ImageWidget({ className, onClick, href, loading, path, w
                 const img = imgRef.current;
                 // Check if image is already loaded (cached)
                 if (img && img.complete && img.naturalHeight !== 0) {
-                    setImageLoading(false);
-                    setLoaded(true);
-                    setError(false);
-                    if (onLoadCallback) onLoadCallback();
+                    setTimeout(() => {
+                        setImageLoading(false);
+                        setLoaded(true);
+                        setError(false);
+                        if (onLoadCallback) onLoadCallback();
+                    }, 0);
                 } else {
-                    setImageLoading(true);
-                    setLoaded(false);
-                    setError(false);
+                    setTimeout(() => {
+                        setImageLoading(true);
+                        setLoaded(false);
+                        setError(false);
+                    }, 0);
                 }
             } else {
-                setImageLoading(false);
-                setLoaded(false);
-                setError(false);
+                setTimeout(() => {
+                    setImageLoading(false);
+                    setLoaded(false);
+                    setError(false);
+                }, 0);
             }
         }
     }, [path, hasPath, onLoadCallback]);

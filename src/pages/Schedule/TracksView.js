@@ -201,7 +201,7 @@ export default function TracksView({ sessions = [], store, translations, playing
         addPath(itemPath);
     }, []);
 
-    const scrollToDate = (year, month) => {
+    const scrollToDate = useCallback((year, month) => {
         let prefix = `${year}`;
         if (month) prefix += `-${month}`;
 
@@ -209,7 +209,7 @@ export default function TracksView({ sessions = [], store, translations, playing
         if (index !== -1 && listRef.current) {
             listRef.current.scrollToItem(index, "start");
         }
-    };
+    }, [groupedSessions]);
 
     const gotoToday = useCallback(() => {
         if (listRef.current) {
@@ -218,18 +218,18 @@ export default function TracksView({ sessions = [], store, translations, playing
     }, []);
 
     // State handlers for Input widget
-    const yearState = [selectedYear, (year) => {
+    const yearState = useMemo(() => [selectedYear, (year) => {
         setSelectedYear(year);
         setSelectedMonth("");
         scrollToDate(year, "");
-    }];
+    }], [selectedYear, scrollToDate]);
 
-    const monthState = [selectedMonth, (month) => {
+    const monthState = useMemo(() => [selectedMonth, (month) => {
         setSelectedMonth(month);
         if (selectedYear) {
             scrollToDate(selectedYear, month);
         }
-    }];
+    }], [selectedMonth, selectedYear, scrollToDate]);
 
     // Automatically select the newest year available on init if not set
     useEffect(() => {
@@ -238,13 +238,15 @@ export default function TracksView({ sessions = [], store, translations, playing
             const firstGroup = groupedSessions[0];
             if (firstGroup) {
                 const [y, m] = firstGroup.yearMonth.split('-');
-                setSelectedYear(y);
-                setSelectedMonth(m);
+                setTimeout(() => {
+                    setSelectedYear(y);
+                    setSelectedMonth(m);
+                }, 0);
             }
         }
     }, [dateOptions.years, selectedYear, groupedSessions]);
 
-    const yearItems = dateOptions.years.map(y => ({ id: y, name: y }));
+    const yearItems = useMemo(() => dateOptions.years.map(y => ({ id: y, name: y })), [dateOptions.years]);
 
     const availableMonths = useMemo(() => {
         if (!selectedYear || !dateOptions.monthsByYear[selectedYear]) return [];
@@ -256,12 +258,12 @@ export default function TracksView({ sessions = [], store, translations, playing
             });
     }, [selectedYear, dateOptions, dateFormatter]);
 
-    const monthItems = [
+    const monthItems = useMemo(() => [
         ...availableMonths
-    ];
+    ], [availableMonths]);
 
-    const yearWidget = <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "6em" }} items={yearItems} state={yearState} />;
-    const monthWidget = <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: "8em" }} items={monthItems} state={monthState} disabled={!selectedYear} />;
+    const yearWidget = useMemo(() => <Input select={true} label={translations.YEAR} helperText="" fullWidth={false} style={{ minWidth: "6em" }} items={yearItems} state={yearState} />, [translations, yearItems, yearState]);
+    const monthWidget = useMemo(() => <Input select={true} label={translations.MONTH} helperText="" fullWidth={false} style={{ minWidth: "8em" }} items={monthItems} state={monthState} disabled={!selectedYear} />, [translations, monthItems, monthState, selectedYear]);
 
     // Disable Today button when already at the top of the list
     const [isAtTop, setIsAtTop] = useState(true);
@@ -284,27 +286,29 @@ export default function TracksView({ sessions = [], store, translations, playing
         }
     }, []);
 
-    const toolbarItems = [
-        {
-            id: "today",
-            name: translations.TODAY,
-            icon: <TodayIcon />,
-            onClick: gotoToday,
-            disabled: isAtTop,
-            location: "header",
-            menu: false
-        },
-        {
-            id: "monthWidget",
-            element: monthWidget,
-            location: "footer"
-        },
-        {
-            id: "yearWidget",
-            element: yearWidget,
-            location: "footer"
-        }
-    ].filter(Boolean);
+    const toolbarItems = useMemo(() => {
+        return [
+            {
+                id: "today",
+                name: translations.TODAY,
+                icon: <TodayIcon />,
+                onClick: gotoToday,
+                disabled: isAtTop,
+                location: "header",
+                menu: false
+            },
+            {
+                id: "monthWidget",
+                element: monthWidget,
+                location: "footer"
+            },
+            {
+                id: "yearWidget",
+                element: yearWidget,
+                location: "footer"
+            }
+        ];
+    }, [translations, gotoToday, isAtTop, monthWidget, yearWidget]);
 
     useToolbar({ id: "TracksView", items: toolbarItems, depends: [translations, selectedYear, selectedMonth, isMobile, isAtTop] });
 
@@ -317,9 +321,10 @@ export default function TracksView({ sessions = [], store, translations, playing
         store,
         translations,
         playingSession
-    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize?.width, CARD_WIDTH, store, translations, playingSession]);
+    }), [groupedSessions, focusedSessionId, handleSessionClick, pageSize, CARD_WIDTH, store, translations, playingSession]);
 
-    const scrollOffsetRef = useRef(parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0"));
+    const [initialScrollOffset] = useState(() => parseInt(sessionStorage.getItem("tracks_vertical_offset") || "0"));
+    const scrollOffsetRef = useRef(initialScrollOffset);
 
     useEffect(() => {
         return () => {
@@ -343,7 +348,7 @@ export default function TracksView({ sessions = [], store, translations, playing
                 style={{ overflowX: 'hidden' }}
                 itemData={itemData}
                 onItemsRendered={onItemsRendered}
-                initialScrollOffset={scrollOffsetRef.current}
+                initialScrollOffset={initialScrollOffset}
                 onScroll={({ scrollOffset }) => {
                     scrollOffsetRef.current = scrollOffset;
                 }}

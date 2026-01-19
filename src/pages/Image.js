@@ -81,13 +81,13 @@ export default function ImagePage({ name, ext = "png" }) {
         if (path) {
             readFile();
         }
-    }, [path]);
+    }, [path, readFile]);
 
     useEffect(() => {
         if (path) {
             readFile();
         }
-    }, [syncCounter]);
+    }, [syncCounter, path, readFile]);
 
     useEffect(() => {
         if (content) {
@@ -112,7 +112,8 @@ export default function ImagePage({ name, ext = "png" }) {
 
     return <div className={styles.root}>
         <Download visible={!loading && !imageLoading && !error} onClick={downloadImage} />
-        {!loading && !error && <img className={styles.img} onError={onError} onLoad={onLoad} style={style} src={src} />}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {!loading && !error && <img alt={name} className={styles.img} onError={onError} onLoad={onLoad} style={style} src={src} />}
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
         {!!error && <Message Icon={ErrorIcon} label={translations.CANNOT_LOAD_IMAGE} />}
     </div>;

@@ -286,10 +286,10 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             console.error(err);
         });
     };
-    const stop = () => {
+    const stop = useCallback(() => {
         playerRef.pause();
         playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
-    };
+    }, [playerRef]);
 
     const prevPath = useRef(path);
     useEffect(() => {

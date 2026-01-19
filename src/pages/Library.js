@@ -77,7 +77,7 @@ export default function Library() {
             const urlPath = pathItems.slice(1).join("|");
             const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
             if (tag) {
-                setSelectedTag(tag);
+                setTimeout(() => setSelectedTag(tag), 0);
                 // Remember the last viewed article
                 LibraryStore.update(s => {
                     s.lastViewedArticle = tag;
@@ -89,7 +89,7 @@ export default function Library() {
             if (lastViewedArticle) {
                 const tag = tags.find(t => t._id === lastViewedArticle._id);
                 if (tag) {
-                    onSelect(tag);
+                    setTimeout(() => onSelect(tag), 0);
                 }
             }
         }
@@ -125,8 +125,10 @@ export default function Library() {
     }, []);
 
     useEffect(() => {
-        loadTags();
-        loadCustomOrder();
+        setTimeout(() => {
+            loadTags();
+            loadCustomOrder();
+        }, 0);
     }, [loadTags, loadCustomOrder]);
 
     const loadContent = useCallback(async () => {
@@ -175,7 +177,7 @@ export default function Library() {
     }, [selectedTag]);
 
     useEffect(() => {
-        loadContent();
+        setTimeout(() => loadContent(), 0);
     }, [loadContent]);
 
     // Reset scroll position when article changes
@@ -183,16 +185,18 @@ export default function Library() {
         if (selectedTag && contentRef.current) {
             contentRef.current.scrollTop = 0;
         }
-    }, [selectedTag]);
+    }, [selectedTag?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
             // Clear caches when library is updated
             contentCacheRef.current.clear();
             fileCacheRef.current.clear();
-            loadTags();
-            loadCustomOrder();
-            loadContent();
+            setTimeout(() => {
+                loadTags();
+                loadCustomOrder();
+                loadContent();
+            }, 0);
         }
     }, [libraryUpdateCounter, loadTags, loadCustomOrder, loadContent]);
 

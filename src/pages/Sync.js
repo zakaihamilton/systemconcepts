@@ -40,7 +40,7 @@ export default function Sync() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
-    const [currentTime, setCurrentTime] = React.useState(Date.now());
+    const [currentTime, setCurrentTime] = React.useState(() => Date.now());
 
     React.useEffect(() => {
         let interval;

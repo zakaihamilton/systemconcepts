@@ -45,19 +45,19 @@ export default function Settings() {
         else {
             darkMode.disable();
         }
-    });
+    }, [darkMode]);
 
     const darkModeState = [darkModeSelected, setDarkMode];
 
-    const navigate = id => {
+    const navigate = useCallback(id => {
         addPath(id);
-    };
+    }, []);
 
-    const target = item => {
+    const target = useCallback(item => {
         return "#" + toPath("settings", item.target);
-    };
+    }, []);
 
-    const columns = [
+    const columns = useMemo(() => [
         {
             id: "title",
             title: translations.NAME,
@@ -69,7 +69,7 @@ export default function Settings() {
             title: translations.SETTING,
             sortable: "value"
         }
-    ];
+    ], [translations]);
 
     const languageItems = [
         {
@@ -240,7 +240,7 @@ export default function Settings() {
         }
     ].filter(Boolean);
 
-    const mapper = item => {
+    const mapper = useCallback(item => {
         const { icon, name, description, ...props } = item;
         const href = item.target && target(item);
         const onClick = () => navigate(item.target);
@@ -251,7 +251,7 @@ export default function Settings() {
             </div>
         </Row>;
         return props;
-    };
+    }, [navigate, target]);
 
     return <>
         <Table

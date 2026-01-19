@@ -89,9 +89,11 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
     const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline) {
-            setResult(null);
-            setError("");
-            setProgress(true);
+            setTimeout(() => {
+                setResult(null);
+                setError("");
+                setProgress(true);
+            }, 0);
 
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
@@ -134,9 +136,11 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const optionsString = JSON.stringify(options);
     useEffect(() => {
         if (cond && isOnline && url) {
-            setResult(null);
-            setError("");
-            setProgress(true);
+            setTimeout(() => {
+                setResult(null);
+                setError("");
+                setProgress(true);
+            }, 0);
 
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);

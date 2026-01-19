@@ -207,6 +207,8 @@ const Term = ({ term, entry, search }) => {
     );
 };
 
+Term.displayName = "Term";
+
 const rehypeArticleEnrichment = () => {
     return (tree) => {
         let paragraphIndex = 0;
@@ -412,34 +414,38 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         }
 
         return children;
-    }, [Highlight]);
+    }, [Highlight, search]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });
     }, []);
 
     const markdownComponents = useMemo(() => {
-        const HeaderRenderer = (tag) => ({ node, children }) => {
-            const paragraphIndex = node?.properties?.dataParagraphIndex;
-            const paragraphSelected = currentTTSParagraph === paragraphIndex;
-            return (
-                <Box
-                    component={tag}
-                    className={paragraphSelected ? styles.selected : ''}
-                    sx={{
-                        mt: 3,
-                        mb: 2,
-                        fontWeight: 'bold',
-                        position: 'relative',
-                        backgroundColor: 'var(--background-paper)',
-                        padding: '16px 16px',
-                        borderRadius: '8px'
-                    }}
-                    data-paragraph-index={paragraphIndex}
-                >
-                    <TextRenderer>{children}</TextRenderer>
-                </Box>
-            );
+        const HeaderRenderer = (tag) => {
+            const Header = ({ node, children }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                const paragraphSelected = currentTTSParagraph === paragraphIndex;
+                return (
+                    <Box
+                        component={tag}
+                        className={paragraphSelected ? styles.selected : ''}
+                        sx={{
+                            mt: 3,
+                            mb: 2,
+                            fontWeight: 'bold',
+                            position: 'relative',
+                            backgroundColor: 'var(--background-paper)',
+                            padding: '16px 16px',
+                            borderRadius: '8px'
+                        }}
+                        data-paragraph-index={paragraphIndex}
+                    >
+                        <TextRenderer>{children}</TextRenderer>
+                    </Box>
+                );
+            };
+            Header.displayName = `Header${tag}`;
+            return Header;
         };
 
         return {
@@ -507,7 +513,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             h6: HeaderRenderer('h6'),
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer, handleParagraphZoom, currentTTSParagraph, translations]);
+    }, [TextRenderer, handleParagraphZoom, currentTTSParagraph, translations]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>

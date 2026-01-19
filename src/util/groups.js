@@ -57,9 +57,10 @@ export function useGroups(depends = []) {
         return unsubscribe;
     }, []);
 
+    const dependsHash = (depends || []).join(",");
     useEffect(() => {
         loadGroups();
-    }, [syncCounter, ...depends]);
+    }, [syncCounter, loadGroups, dependsHash]);
 
     const updateGroups = useCallback(async data => {
         let updatedGroups = null;
