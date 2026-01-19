@@ -1676,6 +1676,46 @@ export default {
         {
             "id": "AUTO_SYNC_DESCRIPTION",
             "value": "Enable automatic background synchronization"
+        },
+        {
+            "id": "CATEGORY",
+            "value": "Category"
+        },
+        {
+            "id": "COUNT",
+            "value": "Count"
+        },
+        {
+            "id": "DELETE_TAG",
+            "value": "Delete Tag"
+        },
+        {
+            "id": "DELETE_ARTICLES",
+            "value": "Delete Articles"
+        },
+        {
+            "id": "RENAME_TAG",
+            "value": "Rename Tag"
+        },
+        {
+            "id": "DELETE_TAG_CONFIRM",
+            "value": "Are you sure you want to remove this tag from all articles?"
+        },
+        {
+            "id": "AFFECTED_ITEMS",
+            "value": "Affected items"
+        },
+        {
+            "id": "DELETE_ARTICLES_CONFIRM",
+            "value": "Are you sure you want to PERMANENTLY DELETE all articles with this tag? This action cannot be undone."
+        },
+        {
+            "id": "ARTICLES_TO_DELETE",
+            "value": "Articles to delete"
+        },
+        {
+            "id": "DELETE_FOREVER",
+            "value": "Delete Forever"
         }
     ]
 };

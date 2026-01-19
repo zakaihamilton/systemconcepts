@@ -1668,6 +1668,46 @@ export default {
         {
             "id": "AUTO_SYNC_DESCRIPTION",
             "value": "הפעל סנכרון רקע אוטומטי"
+        },
+        {
+            "id": "CATEGORY",
+            "value": "קטגוריה"
+        },
+        {
+            "id": "COUNT",
+            "value": "מספר"
+        },
+        {
+            "id": "DELETE_TAG",
+            "value": "מחק תג"
+        },
+        {
+            "id": "DELETE_ARTICLES",
+            "value": "מחיקת מאמרים"
+        },
+        {
+            "id": "RENAME_TAG",
+            "value": "שנה שם תג"
+        },
+        {
+            "id": "DELETE_TAG_CONFIRM",
+            "value": "האם אתה בטוח שברצונך להסיר תג זה מכל המאמרים?"
+        },
+        {
+            "id": "AFFECTED_ITEMS",
+            "value": "פריטים מושפעים"
+        },
+        {
+            "id": "DELETE_ARTICLES_CONFIRM",
+            "value": "האם אתה בטוח שברצונך למחוק לצמיתות את כל המאמרים עם תג זה? לא ניתן לבטל פעולה זו."
+        },
+        {
+            "id": "ARTICLES_TO_DELETE",
+            "value": "מאמרים למחיקה"
+        },
+        {
+            "id": "DELETE_FOREVER",
+            "value": "מחק לצמיתות"
         }
     ]
 };

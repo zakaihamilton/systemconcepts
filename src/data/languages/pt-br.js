@@ -1644,6 +1644,46 @@ export default {
         {
             "id": "AUTO_SYNC_DESCRIPTION",
             "value": "Ativar sincronização automática em segundo plano"
+        },
+        {
+            "id": "CATEGORY",
+            "value": "Categoria"
+        },
+        {
+            "id": "COUNT",
+            "value": "Contagem"
+        },
+        {
+            "id": "DELETE_TAG",
+            "value": "Excluir tag"
+        },
+        {
+            "id": "DELETE_ARTICLES",
+            "value": "Excluir artigos"
+        },
+        {
+            "id": "RENAME_TAG",
+            "value": "Renomear tag"
+        },
+        {
+            "id": "DELETE_TAG_CONFIRM",
+            "value": "Tem certeza de que deseja remover esta tag de todos os artigos?"
+        },
+        {
+            "id": "AFFECTED_ITEMS",
+            "value": "Itens afetados"
+        },
+        {
+            "id": "DELETE_ARTICLES_CONFIRM",
+            "value": "Tem certeza de que deseja EXCLUIR PERMANENTEMENTE todos os artigos com esta tag? Esta ação não pode ser desfeita."
+        },
+        {
+            "id": "ARTICLES_TO_DELETE",
+            "value": "Artigos para excluir"
+        },
+        {
+            "id": "DELETE_FOREVER",
+            "value": "Excluir para sempre"
         }
     ]
 };
