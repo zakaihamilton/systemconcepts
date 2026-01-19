@@ -24,14 +24,6 @@ export default function SyncDialog({ open, onClose, tags }) {
     const [calculating, setCalculating] = useState(false);
     const [changes, setChanges] = useState([]);
 
-    useEffect(() => {
-        if (open) {
-            calculateChanges();
-        } else {
-            setChanges([]);
-        }
-    }, [open, calculateChanges]);
-
     const calculateChanges = useCallback(async () => {
         setCalculating(true);
         try {
@@ -105,6 +97,14 @@ export default function SyncDialog({ open, onClose, tags }) {
             setCalculating(false);
         }
     }, [tags]);
+
+    useEffect(() => {
+        if (open) {
+            calculateChanges();
+        } else {
+            setChanges([]);
+        }
+    }, [open, calculateChanges]);
 
     const handleApplySync = async () => {
         setProcessing(true);

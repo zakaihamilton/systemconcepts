@@ -98,6 +98,36 @@ export default function Storage({ path = "" }) {
         }
     ].filter(Boolean), [isPhone, translations]);
 
+    const rowClick = useCallback(item => {
+        const { id } = item;
+        if (select) {
+            const exists = select.find(item => item.id === id);
+            StorageStore.update(s => {
+                if (exists) {
+                    s.select = select.filter(item => item.id !== id);
+                }
+                else {
+                    s.select = [...select, item];
+                }
+            });
+            return;
+        }
+        if (item.type === "file") {
+            if (isImageFile(item.name)) {
+                addPath(`image?name=${item.name}`);
+            }
+            else if (isBinaryFile(item.name)) {
+                /* add media player here */
+            }
+            else {
+                addPath(`editor?name=${item.name}`);
+            }
+        }
+        else {
+            setPath("storage/" + id.split("/").filter(Boolean).join("/"));
+        }
+    }, [select]);
+
     const mapper = useCallback(item => {
         const id = item.id || item.name;
         let name = item.name;
@@ -162,36 +192,6 @@ export default function Storage({ path = "" }) {
     }, [path, translations, mode, editedItem, editing, rowClick, readOnly, dateFormatter]);
 
     let dataEx = useActions(data);
-
-    const rowClick = useCallback(item => {
-        const { id } = item;
-        if (select) {
-            const exists = select.find(item => item.id === id);
-            StorageStore.update(s => {
-                if (exists) {
-                    s.select = select.filter(item => item.id !== id);
-                }
-                else {
-                    s.select = [...select, item];
-                }
-            });
-            return;
-        }
-        if (item.type === "file") {
-            if (isImageFile(item.name)) {
-                addPath(`image?name=${item.name}`);
-            }
-            else if (isBinaryFile(item.name)) {
-                /* add media player here */
-            }
-            else {
-                addPath(`editor?name=${item.name}`);
-            }
-        }
-        else {
-            setPath("storage/" + id.split("/").filter(Boolean).join("/"));
-        }
-    }, [select]);
 
     const statusBar = <StatusBar data={dataEx} mapper={mapper} store={StorageStore} />;
 
