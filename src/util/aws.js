@@ -253,6 +253,7 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
 
 export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
     path = normalizePath(path);
+    console.log(`[S3 list] Listing path: ${path}, bucket: ${bucketName}`);
     const s3 = await getS3({});
     const items = [];
     let continuationToken = undefined;
@@ -264,7 +265,9 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
             Prefix: path ? path + "/" : "",
             ContinuationToken: continuationToken
         };
+        console.log(`[S3 list] ListParams:`, listParams);
         const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+        console.log(`[S3 list] Response - CommonPrefixes: ${listResponse.CommonPrefixes?.length || 0}, Contents: ${listResponse.Contents?.length || 0}`);
 
         listResponse.CommonPrefixes?.forEach(prefix => {
             const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1).split("/").pop();
@@ -315,6 +318,7 @@ export async function handleRequest({ readOnly, req, path }) {
     };
 
     const currentPath = resolvePath();
+    console.log(`[handleRequest] Method: ${req.method}, CurrentPath: ${currentPath}, ReadOnly: ${readOnly}`);
 
     // 7. Security: Always validate path traversal regardless of method
     // (Previously only validated in GET readOnly, allowing PUT/DELETE exploits)
@@ -336,7 +340,10 @@ export async function handleRequest({ readOnly, req, path }) {
 
         try {
             if (type === "dir") {
-                return await list({ path: currentPath });
+                console.log(`[handleRequest] Listing directory: ${currentPath}`);
+                const result = await list({ path: currentPath });
+                console.log(`[handleRequest] Directory listing returned ${result?.length || 0} items`);
+                return result;
             } else {
                 return await downloadData({ path: currentPath, binary });
             }

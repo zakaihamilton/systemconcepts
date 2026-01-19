@@ -4,8 +4,11 @@ import { writeCompressedFile } from "@sync/bundle";
 import { LOCAL_SYNC_PATH } from "@sync/constants";
 
 export async function getListing(path) {
+    console.log(`[getListing] Requesting listing for: ${path}`);
     let listing = await storage.getListing(path);
+    console.log(`[getListing] Received listing with ${listing?.length || 0} items for: ${path}`);
     if (!listing) {
+        console.warn(`[getListing] No listing returned for: ${path}`);
         return [];
     }
     return listing;

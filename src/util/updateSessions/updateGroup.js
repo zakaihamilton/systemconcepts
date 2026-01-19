@@ -79,8 +79,14 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
     let years = [];
     try {
+        console.log(`[UpdateGroup] Fetching listing for path: ${path}`);
         const fullListing = await getListing(path);
+        console.log(`[UpdateGroup] Received ${fullListing?.length || 0} items from listing`);
+        if (fullListing && fullListing.length > 0) {
+            console.log(`[UpdateGroup] First item:`, JSON.stringify(fullListing[0]));
+        }
         years = fullListing.filter(year => !year.name.endsWith(".tags") && !year.name.endsWith(".duration"));
+        console.log(`[UpdateGroup] Filtered to ${years.length} year folders:`, years.map(y => y.name));
     }
     catch (err) {
         console.error(err);
@@ -114,7 +120,9 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         });
 
         try {
+            console.log(`[UpdateGroup] Fetching items for year: ${year.name}, path: ${year.path}`);
             const yearItems = await getListing(year.path);
+            console.log(`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`);
             yearItems.sort((a, b) => a.name.localeCompare(b.name));
 
             // Load Metadata
