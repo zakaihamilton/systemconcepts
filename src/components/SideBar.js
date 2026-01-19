@@ -30,7 +30,8 @@ export default function SideBar() {
                 s.libraryExpanded = true;
             });
         }
-    }, [isLibraryActive, libraryExpanded]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLibraryActive]);
 
     const selected = id => {
         return !!activePages.find(page => page.id === id && !page.sectionIndex);
