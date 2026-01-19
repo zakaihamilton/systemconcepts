@@ -95,7 +95,6 @@ function Article({
     const scrollToTop = useCallback(() => {
         if (contentRef.current) {
             contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-            contentRef.current.focus();
         }
     }, [contentRef]);
 
@@ -164,7 +163,7 @@ function Article({
 
     useEffect(() => {
         setTimeout(() => setScrollInfo({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 }), 0);
-    }, [selectedTag]);
+    }, [selectedTag?._id]);
 
     const formatArticleWithTags = useCallback((tag, text) => {
         if (!tag) return text;

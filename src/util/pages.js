@@ -6,10 +6,13 @@ import { MainStore } from "@components/Main";
 
 export function usePathItems() {
     let { hash = "" } = MainStore.useState();
-    if (hash && hash.startsWith("#")) {
-        hash = hash.substring(1);
-    }
-    const items = (hash || "").split("/").filter(Boolean).map(item => decodeURIComponent(item));
+    const items = useMemo(() => {
+        let h = hash;
+        if (h && h.startsWith("#")) {
+            h = h.substring(1);
+        }
+        return (h || "").split("/").filter(Boolean).map(item => decodeURIComponent(item));
+    }, [hash]);
     return items;
 }
 

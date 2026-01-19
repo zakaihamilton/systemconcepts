@@ -185,7 +185,7 @@ export default function Library() {
         if (selectedTag && contentRef.current) {
             contentRef.current.scrollTop = 0;
         }
-    }, [selectedTag]);
+    }, [selectedTag?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
