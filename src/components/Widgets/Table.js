@@ -536,6 +536,7 @@ export default function TableWidget(props) {
     }, [loading]);
 
     // Delay showing "No Items" to prevent flicker on initial load
+    const isEmpty = !items || !items.length;
     const [showEmpty, setShowEmpty] = useState(false);
     useEffect(() => {
         if (isEmpty) {
@@ -544,7 +545,7 @@ export default function TableWidget(props) {
         } else {
             setShowEmpty(false);
         }
-    }, []);
+    }, [isEmpty]);
 
     if (!size.height) {
         return null;
