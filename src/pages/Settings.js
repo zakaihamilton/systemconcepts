@@ -9,7 +9,7 @@ import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
 import languages from "@data/languages";
 import fontSizes from "@data/fontSizes";
 import { useTranslations } from "@util/translations";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import Dynamic from "@widgets/Dynamic";
 import { useDeviceType } from "@util/styles";
 import Button from "@mui/material/Button";
