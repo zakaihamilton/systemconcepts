@@ -249,12 +249,20 @@ export default function TableWidget(props) {
             raw = raw.filter(filter);
         }
 
-        return raw.map(item => ({
-            raw: item,
-            mapped: mapper ? mapper(item) : item
-        }));
+        return raw.map(item => {
+            const mapped = mapper ? mapper(item) : item;
+            const searchableText = searchKeys.map(key => {
+                const val = mapped[key];
+                return (typeof val === "string") ? val.toLowerCase() : "";
+            }).join("\0");
+            return {
+                raw: item,
+                mapped,
+                searchableText
+            };
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data, filter, mapper, ...depends]);
+    }, [data, filter, mapper, searchKeys, ...depends]);
 
     const filteredData = useMemo(() => {
         if (!search) {
@@ -315,31 +323,23 @@ export default function TableWidget(props) {
         };
 
         // Check if an item matches a single search term
-        const matchesTerm = (mapped, term) => {
-            const lowerTerm = term.toLowerCase();
-            for (const key of searchKeys) {
-                if (typeof mapped[key] === "string") {
-                    if (mapped[key].toLowerCase().includes(lowerTerm)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+        const matchesTerm = (item, term) => {
+            return item.searchableText.includes(term);
         };
 
         // Check if an item matches the parsed query
         // orGroups is an array of AND-groups, where each AND-group is an array of terms
         // An item matches if ANY OR-group matches, and an OR-group matches if ALL its terms match
-        const matchesQuery = (mapped, orGroups) => {
+        const matchesQuery = (item, orGroups) => {
             return orGroups.some(andTerms =>
-                andTerms.every(term => matchesTerm(mapped, term))
+                andTerms.every(term => matchesTerm(item, term))
             );
         };
 
-        const orGroups = parseSearchQuery(search);
+        const orGroups = parseSearchQuery(search).map(group => group.map(term => term.toLowerCase()));
 
-        return mappedData.filter(({ mapped }) => matchesQuery(mapped, orGroups));
-    }, [mappedData, search, searchKeys]);
+        return mappedData.filter(item => matchesQuery(item, orGroups));
+    }, [mappedData, search]);
 
     const sortedData = useMemo(() => {
         return stableSort(filteredData || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
