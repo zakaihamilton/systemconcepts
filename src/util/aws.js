@@ -225,19 +225,21 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
             type: headResponse.ContentType,
             name,
             size: headResponse.ContentLength,
-            date: headResponse.LastModified.valueOf()
+            date: headResponse.LastModified?.valueOf()
         };
     } catch (err) {
         // If file not found, check if it is a folder (CommonPrefixes)
         const listParams = {
             Bucket: bucketName,
             Delimiter: "/",
-            Prefix: path ? path + "/" : ""
+            Prefix: path ? path + "/" : "",
+            MaxKeys: 1
         };
 
         try {
-            const listResponse = await s3.send(new ListObjectsCommand(listParams));
-            if (listResponse?.Contents?.length > 0 || listResponse?.CommonPrefixes?.length > 0) {
+            const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+            if ((listResponse.Contents && listResponse.Contents.length > 0) ||
+                (listResponse.CommonPrefixes && listResponse.CommonPrefixes.length > 0)) {
                 const name = path.split("/").pop();
                 return {
                     type: "application/x-directory",

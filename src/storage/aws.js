@@ -16,8 +16,7 @@ async function getListing(path, options = {}) {
         method: "GET",
         cache: "no-store",
         headers: {
-            type: "dir",
-            path: encodedPath
+            type: "dir"
         }
     });
     console.log(`[AWS Storage] getListing - Received ${items?.length || 0} items for path: ${path}`);
@@ -30,8 +29,7 @@ async function getListing(path, options = {}) {
                 method: "GET",
                 cache: "no-store",
                 headers: {
-                    type: "dir",
-                    path: encodeURIComponent(path.slice(1))
+                    type: "dir"
                 }
             });
             let count = 0;
@@ -80,7 +78,6 @@ async function deleteFolder(root) {
         method: "DELETE",
         cache: "no-store",
         headers: {
-            path: encodedPath
         }
     });
 }
@@ -92,7 +89,6 @@ async function deleteFile(path) {
         method: "DELETE",
         cache: "no-store",
         headers: {
-            path: encodedPath
         }
     });
 }
@@ -107,8 +103,7 @@ async function readFile(path) {
             method: "GET",
             cache: "no-store",
             headers: {
-                binary: true,
-                path: encodedPath
+                binary: true
             }
         });
         // Check if we accidentally received a directory listing
@@ -124,8 +119,7 @@ async function readFile(path) {
             method: "GET",
             cache: "no-store",
             headers: {
-                type: "file",
-                path: encodedPath
+                type: "file"
             }
         });
         // Check if we accidentally received a directory listing (JSON array)
