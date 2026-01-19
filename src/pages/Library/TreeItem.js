@@ -43,7 +43,8 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                 });
             }
         }
-    }, [selectedPath, node.id, open]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedPath, node.id]);
 
     useEffect(() => {
         if ((isSelected || selectedPath === node.id) && itemRef.current) {
