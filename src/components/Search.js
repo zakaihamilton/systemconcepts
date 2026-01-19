@@ -15,7 +15,7 @@ export const SearchStore = new Store({
     search: {}
 });
 
-export function SearchWidget({ isDesktop, translations, placeholder, defaultValue, onChange }) {
+export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef(null);
     const containerRef = useRef(null);
@@ -95,12 +95,11 @@ export function useSearch(name, updateCallback) {
     const searchElement = useMemo(() => (
         <SearchWidget
             isDesktop={isDesktop}
-            translations={translations}
             placeholder={translations.SEARCH + "…"}
             defaultValue={initialValue}
             onChange={onChangeText}
         />
-    ), [isDesktop, translations, initialValue, onChangeText]);
+    ), [isDesktop, initialValue, onChangeText]);
 
     const toolbarItems = useMemo(() => [
         {
