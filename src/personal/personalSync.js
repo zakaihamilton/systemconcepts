@@ -51,7 +51,7 @@ export async function performPersonalSync(phaseOffset = 0, combinedTotalWeight =
 
         // Step 3: Sync with remote manifest
         progress.updateProgress('syncManifest', { processed: 0, total: 1 });
-        let remoteManifest = await syncManifest(localManifest, userid);
+        let remoteManifest = await syncManifest(localManifest, userid, locked);
         addSyncLog(`[Personal] Local manifest has ${Object.keys(localManifest).length} files`, "info");
         addSyncLog(`[Personal] Remote manifest has ${Object.keys(remoteManifest).length} files`, "info");
         progress.completeStep('syncManifest');

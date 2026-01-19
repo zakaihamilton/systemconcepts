@@ -10,7 +10,7 @@ import { readCompressedFile, writeCompressedFile, decompressJSON } from "@sync/b
  * Step 3: Download the remote manifest and compare with local
  * If manifest doesn't exist or is empty, build it from existing remote files
  */
-export async function syncManifest(localManifest, userid) {
+export async function syncManifest(localManifest, userid, locked = false) {
     const start = performance.now();
     addSyncLog("[Personal] Step 3: Syncing manifest...", "info");
 
@@ -45,8 +45,12 @@ export async function syncManifest(localManifest, userid) {
             // If we normalized any paths, save the cleaned manifest back to AWS
             if (hadLeadingSlashes) {
                 addSyncLog(`[Personal] Cleaning manifest (removing leading slashes)`, "info");
-                await writeCompressedFile(remoteManifestPath, remoteManifest);
-                addSyncLog(`[Personal] ✓ Uploaded cleaned manifest`, "info");
+                if (!locked) {
+                    await writeCompressedFile(remoteManifestPath, remoteManifest);
+                    addSyncLog(`[Personal] ✓ Uploaded cleaned manifest`, "info");
+                } else {
+                    addSyncLog(`[Personal] Skipping cleaned manifest upload (locked)`, "warning");
+                }
             }
 
             addSyncLog(`[Personal] Found existing manifest with ${Object.keys(remoteManifest).length} files`, "info");
@@ -69,8 +73,12 @@ export async function syncManifest(localManifest, userid) {
             // Save the newly built manifest
             if (Object.keys(remoteManifest).length > 0) {
                 try {
-                    await writeCompressedFile(remoteManifestPath, remoteManifest);
-                    addSyncLog(`[Personal] Created manifest with ${Object.keys(remoteManifest).length} existing files`, "info");
+                    if (!locked) {
+                        await writeCompressedFile(remoteManifestPath, remoteManifest);
+                        addSyncLog(`[Personal] Created manifest with ${Object.keys(remoteManifest).length} existing files`, "info");
+                    } else {
+                        addSyncLog(`[Personal] Skipping bootstrap manifest upload (locked)`, "warning");
+                    }
                 } catch (writeErr) {
                     if (writeErr.status === 403 || writeErr === 403 || String(writeErr).includes("403")) {
                         addSyncLog(`[Personal] Unable to save bootstrap manifest (read-only).`, "warning");

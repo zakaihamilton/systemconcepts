@@ -25,7 +25,7 @@ export async function updateLocalManifest(localFiles) {
                     const normalizedPath = path.startsWith("/") ? path.substring(1) : path;
                     existingManifest[normalizedPath] = entry;
                 }
-                const keys = Object.keys(existingManifest); // eslint-disable-line no-unused-vars
+                const keys = Object.keys(existingManifest);  
 
             }
         } catch {

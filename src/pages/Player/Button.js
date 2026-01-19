@@ -3,7 +3,7 @@ import clsx from "clsx";
 
 export default function Button({ name, icon, active, subHeading, onClick, label, ...props }) {
     // Remove active from props to prevent it from being passed to DOM
-    const { active: _unused, ...buttonProps } = { active, ...props }; // eslint-disable-line no-unused-vars
+    const { active: _unused, ...buttonProps } = { active, ...props };  
 
     return <button
         className={clsx(styles.root, active && styles.active)}
