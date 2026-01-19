@@ -12,9 +12,10 @@ import styles from "./TreeItem.module.scss";
 import clsx from "clsx";
 import { LibraryStore } from "./Store";
 
-const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, onToggle, level = 0, scrollTrigger }) {
+const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 }) {
     const hasChildren = node.children && node.children.length > 0;
-    const isSelected = !!selectedId && node._id === selectedId;
+    const isSelected = LibraryStore.useState(s => s.selectedId === node._id);
+    const selectPath = LibraryStore.useState(s => s.selectPath);
     const [isTruncated, setIsTruncated] = useState(false);
     const textRef = useRef(null);
     const itemRef = useRef(null);
@@ -34,7 +35,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
     }, [node.name, checkTruncation]);
 
     useEffect(() => {
-        if (selectedPath && node.id && node.id !== "root" && (selectedPath === node.id || selectedPath.startsWith(node.id + "|"))) {
+        if (selectPath && node.id && node.id !== "root" && (selectPath === node.id || selectPath.startsWith(node.id + "|"))) {
             if (!open) {
                 LibraryStore.update(s => {
                     if (!s.expandedNodes.includes(node.id)) {
@@ -44,16 +45,16 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedPath, node.id, scrollTrigger]);
+    }, [selectPath, node.id]);
 
     useEffect(() => {
-        if ((isSelected || selectedPath === node.id) && itemRef.current) {
+        if ((isSelected || selectPath === node.id) && itemRef.current) {
             const timer = setTimeout(() => {
                 itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [isSelected, selectedPath, node.id, scrollTrigger]);
+    }, [isSelected, selectPath, node.id]);
 
     const handleToggle = useCallback((e) => {
         if (e) {
@@ -198,11 +199,8 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                             key={child.id}
                             node={child}
                             onSelect={onSelect}
-                            selectedId={selectedId}
-                            selectedPath={selectedPath}
                             onToggle={handleChildToggle}
                             level={level + 1}
-                            scrollTrigger={scrollTrigger}
                         />
                     ))}
                 </List>

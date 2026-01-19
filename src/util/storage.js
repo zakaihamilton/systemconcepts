@@ -148,8 +148,10 @@ export function useListing(url, depends = [], options) {
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
-        const loadingTimer = setTimeout(() => setLoading(true), 0);
-        setError(null);
+        const loadingTimer = setTimeout(() => {
+            setLoading(true);
+            setError(null);
+        }, 0);
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
             clearTimeout(loadingTimer);

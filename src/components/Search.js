@@ -99,7 +99,7 @@ export function useSearch(name, updateCallback) {
             defaultValue={initialValue}
             onChange={onChangeText}
         />
-    ), [isDesktop, initialValue, onChangeText]);
+    ), [isDesktop, initialValue, onChangeText, translations.SEARCH]);
 
     const toolbarItems = useMemo(() => [
         {

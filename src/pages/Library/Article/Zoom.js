@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import Dialog from "@mui/material/Dialog";
+import Tooltip from "@mui/material/Tooltip";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -29,9 +30,11 @@ export default function Zoom({ open, onClose, content, number, badgeClass, Rende
             <DialogContent className={styles.root}>
                 <Box className={styles.itemWrapper}>
                     {number && <span className={badgeClass}>{number}</span>}
-                    <IconButton className={styles.copyButton} onClick={handleCopy} size="small">
-                        <ContentCopyIcon fontSize="small" />
-                    </IconButton>
+                    <Tooltip title={translations.COPY} arrow>
+                        <IconButton className={styles.copyButton} onClick={handleCopy} size="small">
+                            <ContentCopyIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
                     <Typography
                         ref={contentRef}
                         variant="h5"

@@ -23,13 +23,10 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     const [debouncedFilterText, setDebouncedFilterText] = useState("");
     const [tags, setTags] = useState([]);
     const [customOrder, setCustomOrder] = useState({});
-    const [selectedTag, setSelectedTag] = useState(null);
-    const [highlightPath, setHighlightPath] = useState(null);
     const pathItems = usePathItems();
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
     const scrollToPath = LibraryStore.useState(s => s.scrollToPath);
     const treeContainerRef = useRef(null);
-    const [scrollTrigger, setScrollTrigger] = useState(0);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -41,8 +38,9 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     // Handle scroll-to-path from breadcrumb clicks
     useEffect(() => {
         if (scrollToPath) {
-            setScrollTrigger(prev => prev + 1);
-            setTimeout(() => setHighlightPath(scrollToPath), 0);
+            LibraryStore.update(s => {
+                s.selectPath = scrollToPath;
+            });
             // Clear the scrollToPath after a delay
             setTimeout(() => {
                 LibraryStore.update(s => {
@@ -50,7 +48,9 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                 });
                 // Clear highlight after scroll animation completes
                 setTimeout(() => {
-                    setHighlightPath(null);
+                    LibraryStore.update(s => {
+                        s.selectPath = null;
+                    });
                 }, 1000);
             }, 100);
         }
@@ -115,7 +115,28 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
             const urlPath = pathItems.slice(1).join("|");
             const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
             if (tag) {
-                setTimeout(() => setSelectedTag(tag), 0);
+                // Calculate parent IDs for expansion
+                const hierarchy = getTagHierarchy(tag);
+                const parentIds = [];
+                let currentPath = "";
+                hierarchy.forEach((segment, index) => {
+                    if (index < hierarchy.length - 1) { // Don't expand leaf
+                        currentPath = currentPath ? currentPath + "|" + segment : segment;
+                        const matchingNode = tags.find(t => getTagHierarchy(t).join("|") === currentPath);
+                        // This logic is simplified; strictly mapping path segments to IDs might require tree traversal
+                        // For now, let's just trigger the selectPath update which TreeItem will react to
+                    }
+                });
+
+                LibraryStore.update(s => {
+                    s.selectedId = tag._id;
+                    s.selectPath = urlPath;
+                });
+            } else {
+                LibraryStore.update(s => {
+                    s.selectedId = null;
+                    s.selectPath = null;
+                });
             }
         }
     }, [tags, pathItems, getTagHierarchy]);
@@ -315,12 +336,11 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
         return root.children;
     }, [tags, debouncedFilterText, customOrder]);
 
-    const selectedPath = useMemo(() => {
-        return selectedTag ? getTagHierarchy(selectedTag).join("|") : null;
-    }, [selectedTag, getTagHierarchy]);
 
     const onSelect = useCallback((tag) => {
-        setSelectedTag(tag);
+        LibraryStore.update(s => {
+            s.selectedId = tag._id;
+        });
         const hierarchy = getTagHierarchy(tag);
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
@@ -391,11 +411,8 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                             key={node.id}
                             node={node}
                             onSelect={onSelect}
-                            selectedId={selectedTag?._id}
-                            selectedPath={highlightPath || selectedPath}
                             onToggle={handleToggle}
                             level={0}
-                            scrollTrigger={scrollTrigger}
                         />
                     ))}
                 </List>
