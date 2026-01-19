@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
@@ -13,7 +13,6 @@ import DialogActions from "@mui/material/DialogActions";
 import CloudSyncIcon from "@mui/icons-material/CloudSync";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";

@@ -12,7 +12,7 @@ import styles from "./TreeItem.module.scss";
 import clsx from "clsx";
 import { LibraryStore } from "./Store";
 
-const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, onToggle, level = 0 }) {
+const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPath, onToggle, level = 0, scrollTrigger }) {
     const hasChildren = node.children && node.children.length > 0;
     const isSelected = !!selectedId && node._id === selectedId;
     const [isTruncated, setIsTruncated] = useState(false);
@@ -44,7 +44,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedPath, node.id]);
+    }, [selectedPath, node.id, scrollTrigger]);
 
     useEffect(() => {
         if ((isSelected || selectedPath === node.id) && itemRef.current) {
@@ -53,7 +53,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [isSelected, selectedPath, node.id]);
+    }, [isSelected, selectedPath, node.id, scrollTrigger]);
 
     const handleToggle = useCallback((e) => {
         if (e) {
@@ -202,6 +202,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                             selectedPath={selectedPath}
                             onToggle={handleChildToggle}
                             level={level + 1}
+                            scrollTrigger={scrollTrigger}
                         />
                     ))}
                 </List>

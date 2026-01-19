@@ -61,7 +61,7 @@ export default function LibraryTags() {
 
     const toolbarItems = [
         isAdmin && {
-            id: "sync",
+            id: "sync_article_tags",
             name: translations.SYNC_ARTICLE_TAGS,
             icon: <CloudSyncIcon />,
             onClick: () => setSyncDialog(true),

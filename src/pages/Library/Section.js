@@ -1,5 +1,4 @@
 import React from "react";
-import { MainStore } from "@components/Main";
 import { LibraryStore } from "./Store";
 import { LibraryIcons, LibraryTagKeys } from "./Icons";
 
@@ -8,23 +7,6 @@ export function getLibrarySection({ id, path, translations }) {
 
     const segments = (path || "").split("/").filter(Boolean).map(decodeURIComponent);
     const name = decodeURIComponent(id || segments[segments.length - 1] || "");
-
-    // Build the path ID from segments (excluding 'library')
-    const pathSegments = segments.slice(1); // remove 'library' prefix
-    const scrollTargetPath = pathSegments.join("|");
-
-    const onClick = () => {
-        // Expand the library sidebar section
-        MainStore.update(s => {
-            s.libraryExpanded = true;
-        });
-        // Set a scroll target so the tree scrolls to this item
-        if (scrollTargetPath) {
-            LibraryStore.update(s => {
-                s.scrollToPath = scrollTargetPath;
-            });
-        }
-    };
 
     // Identify if this is the root "Library" breadcrumb
     const isRoot = name && name.toLowerCase() === "library";
@@ -40,8 +22,7 @@ export function getLibrarySection({ id, path, translations }) {
             label: label,
             tooltip: label,
             Icon: RootIcon,
-            icon: RootIcon && <RootIcon />,
-            onClick
+            icon: RootIcon && <RootIcon />
         };
     }
 
@@ -101,7 +82,7 @@ export function getLibrarySection({ id, path, translations }) {
         label,
         tooltip: name,
         description,
-        onClick,
+        static: true,
         Icon: SelectedIcon || null,
         icon: SelectedIcon ? <SelectedIcon /> : null
     };

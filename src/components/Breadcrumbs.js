@@ -18,10 +18,10 @@ import { setHash } from "@util/pages";
 import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 
-export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, icon, href, hideRoot, navigateLast, description, menuItems, onClick }) {
+export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon, icon, href, hideRoot, navigateLast, description, menuItems, onClick, static: isStaticProp }) {
     const { direction } = MainStore.useState();
     const isLast = index === count - 1;
-    const isStatic = isLast && !navigateLast && !menuItems && !onClick;
+    const isStatic = isStaticProp || (isLast && !navigateLast && !menuItems && !onClick);
     const deviceType = useDeviceType();
     const SeparatorIcon = direction === "rtl" ? NavigateBeforeIcon : NavigateNextIcon;
     const [anchorEl, setAnchorEl] = useState(null);
@@ -39,6 +39,10 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
     const title = (!showLabel ? (label || name) : tooltip || label || name) || "";
 
     const gotoItem = (event) => {
+        if (isStaticProp) {
+            event.preventDefault();
+            return;
+        }
         if (onClick) {
             event.preventDefault();
             onClick();

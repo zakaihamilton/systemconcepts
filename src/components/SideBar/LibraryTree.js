@@ -29,6 +29,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
     const scrollToPath = LibraryStore.useState(s => s.scrollToPath);
     const treeContainerRef = useRef(null);
+    const [scrollTrigger, setScrollTrigger] = useState(0);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -40,6 +41,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     // Handle scroll-to-path from breadcrumb clicks
     useEffect(() => {
         if (scrollToPath) {
+            setScrollTrigger(prev => prev + 1);
             setTimeout(() => setHighlightPath(scrollToPath), 0);
             // Clear the scrollToPath after a delay
             setTimeout(() => {
@@ -393,6 +395,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                             selectedPath={highlightPath || selectedPath}
                             onToggle={handleToggle}
                             level={0}
+                            scrollTrigger={scrollTrigger}
                         />
                     ))}
                 </List>
