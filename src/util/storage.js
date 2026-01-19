@@ -148,10 +148,11 @@ export function useListing(url, depends = [], options) {
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
-        setTimeout(() => setLoading(true), 0);
-        setTimeout(() => setError(null), 0);
+        const loadingTimer = setTimeout(() => setLoading(true), 0);
+        setError(null);
         active.current = url;
         storageMethods.getListing(url, options).then(listing => {
+            clearTimeout(loadingTimer);
             if (active.current === url) {
                 setListing(prev => {
                     if (prev === listing) return prev;
@@ -163,6 +164,7 @@ export function useListing(url, depends = [], options) {
                 });
             }
         }).catch(err => {
+            clearTimeout(loadingTimer);
             if (active.current === url) {
                 setError(prev => {
                     if (prev === err) return prev;
@@ -174,6 +176,9 @@ export function useListing(url, depends = [], options) {
                 });
             }
         });
+        return () => {
+            clearTimeout(loadingTimer);
+        };
     }, [url, optionsString, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
     useEffect(() => {
         return () => {
