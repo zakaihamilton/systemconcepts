@@ -125,14 +125,10 @@ async function readFile(path) {
         // Check if we accidentally received a directory listing (JSON array)
         try {
             const parsed = JSON.parse(body);
-            if (Array.isArray(parsed)) {
-                throw new Error(`Cannot read directory as file: ${path}`);
-            }
+            // Relaxed check: valid text files can be arrays (e.g. .tags), so we don't throw here.
+            // rely on exists() to filter directories.
         } catch (e) {
             // Not JSON or not an array, which is expected for normal files
-            if (e.message && e.message.includes('Cannot read directory')) {
-                throw e;
-            }
         }
     }
     return body;
@@ -286,7 +282,12 @@ async function exists(path) {
             console.log(`[AWS Storage] Path check returned directory listing for ${path}, treating as non-existent file`);
             exists = false;
         } else {
-            exists = item && item.name;
+            // If it's explicitly identified as a directory, say it doesn't exist (as a file)
+            if (item && (item.type === "dir" || item.type === "application/x-directory")) {
+                exists = false;
+            } else {
+                exists = item && item.name;
+            }
         }
         if (!exists) {
             console.log(`[AWS Storage] Path check returned false for ${path}`, item);
