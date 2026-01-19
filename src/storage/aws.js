@@ -11,7 +11,8 @@ async function getListing(path, options = {}) {
     const listing = [];
     const encodedPath = encodeURIComponent(path.slice(1));
     console.log(`[AWS Storage] getListing - Original path: ${path}, Encoded: ${encodedPath}`);
-    const items = await fetchJSON(fsEndPoint, {
+    const url = `${fsEndPoint}?path=${encodedPath}`;
+    const items = await fetchJSON(url, {
         method: "GET",
         cache: "no-store",
         headers: {
@@ -24,7 +25,8 @@ async function getListing(path, options = {}) {
         const { name, stat = {} } = item;
         const itemPath = makePath(path, name);
         if (useCount && stat.type === "dir") {
-            const children = await fetchJSON(fsEndPoint, {
+            const url = `${fsEndPoint}?path=${encodeURIComponent(path.slice(1))}`;
+            const children = await fetchJSON(url, {
                 method: "GET",
                 cache: "no-store",
                 headers: {
@@ -73,22 +75,24 @@ async function deleteFolder(root) {
             await deleteFile(path);
         }
     }
-    await fetchJSON(fsEndPoint, {
+    const encodedPath = encodeURIComponent(root.slice(1));
+    await fetchJSON(`${fsEndPoint}?path=${encodedPath}`, {
         method: "DELETE",
         cache: "no-store",
         headers: {
-            path: encodeURIComponent(root.slice(1))
+            path: encodedPath
         }
     });
 }
 
 async function deleteFile(path) {
     path = makePath(path);
-    await fetchJSON(fsEndPoint, {
+    const encodedPath = encodeURIComponent(path.slice(1));
+    await fetchJSON(`${fsEndPoint}?path=${encodedPath}`, {
         method: "DELETE",
         cache: "no-store",
         headers: {
-            path: encodeURIComponent(path.slice(1))
+            path: encodedPath
         }
     });
 }
@@ -98,12 +102,13 @@ async function readFile(path) {
     const binary = isBinaryFile(path);
     let body = null;
     if (binary) {
-        body = await fetchBlob(fsEndPoint, {
+        const encodedPath = encodeURIComponent(path.slice(1));
+        body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}`, {
             method: "GET",
             cache: "no-store",
             headers: {
                 binary: true,
-                path: encodeURIComponent(path.slice(1))
+                path: encodedPath
             }
         });
         // Check if we accidentally received a directory listing
@@ -114,12 +119,13 @@ async function readFile(path) {
         return body;
     }
     else {
-        body = await fetchText(fsEndPoint, {
+        const encodedPath = encodeURIComponent(path.slice(1));
+        body = await fetchText(`${fsEndPoint}?path=${encodedPath}`, {
             method: "GET",
             cache: "no-store",
             headers: {
                 type: "file",
-                path: encodeURIComponent(path.slice(1))
+                path: encodedPath
             }
         });
         // Check if we accidentally received a directory listing (JSON array)

@@ -34,6 +34,7 @@ export async function readCompressedFile(path) {
         if (!await storage.exists(path)) {
             return null;
         }
+        console.log("Reading file", path);
         const data = await storage.readFile(path);
         if (data === undefined || data === null || data === "") {
             return null;
