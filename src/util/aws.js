@@ -329,7 +329,10 @@ export async function handleRequest({ readOnly, req, path }) {
     }
 
     if (req.method === "GET") {
-        let { binary, type, exists } = headers;
+        const query = req.query || {};
+        let binary = query.binary || headers.binary;
+        let type = query.type || headers.type;
+        let exists = query.exists || headers.exists;
 
         if (exists) {
             const metadata = await metadataInfo({ path: currentPath });

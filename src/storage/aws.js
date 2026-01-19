@@ -11,26 +11,20 @@ async function getListing(path, options = {}) {
     const listing = [];
     const encodedPath = encodeURIComponent(path.slice(1));
     console.log(`[AWS Storage] getListing - Original path: ${path}, Encoded: ${encodedPath}`);
-    const url = `${fsEndPoint}?path=${encodedPath}`;
+    const url = `${fsEndPoint}?path=${encodedPath}&type=dir`;
     const items = await fetchJSON(url, {
         method: "GET",
-        cache: "no-store",
-        headers: {
-            type: "dir"
-        }
+        cache: "no-store"
     });
     console.log(`[AWS Storage] getListing - Received ${items?.length || 0} items for path: ${path}`);
     for (const item of items) {
         const { name, stat = {} } = item;
         const itemPath = makePath(path, name);
         if (useCount && stat.type === "dir") {
-            const url = `${fsEndPoint}?path=${encodeURIComponent(path.slice(1))}`;
+            const url = `${fsEndPoint}?path=${encodeURIComponent(path.slice(1))}&type=dir`;
             const children = await fetchJSON(url, {
                 method: "GET",
-                cache: "no-store",
-                headers: {
-                    type: "dir"
-                }
+                cache: "no-store"
             });
             let count = 0;
             for (const item of children) {
@@ -76,9 +70,7 @@ async function deleteFolder(root) {
     const encodedPath = encodeURIComponent(root.slice(1));
     await fetchJSON(`${fsEndPoint}?path=${encodedPath}`, {
         method: "DELETE",
-        cache: "no-store",
-        headers: {
-        }
+        cache: "no-store"
     });
 }
 
@@ -87,9 +79,7 @@ async function deleteFile(path) {
     const encodedPath = encodeURIComponent(path.slice(1));
     await fetchJSON(`${fsEndPoint}?path=${encodedPath}`, {
         method: "DELETE",
-        cache: "no-store",
-        headers: {
-        }
+        cache: "no-store"
     });
 }
 
@@ -99,12 +89,9 @@ async function readFile(path) {
     let body = null;
     if (binary) {
         const encodedPath = encodeURIComponent(path.slice(1));
-        body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}`, {
+        body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true`, {
             method: "GET",
-            cache: "no-store",
-            headers: {
-                binary: true
-            }
+            cache: "no-store"
         });
         // Check if we accidentally received a directory listing
         if (Array.isArray(body)) {
@@ -115,12 +102,9 @@ async function readFile(path) {
     }
     else {
         const encodedPath = encodeURIComponent(path.slice(1));
-        body = await fetchText(`${fsEndPoint}?path=${encodedPath}`, {
+        body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file`, {
             method: "GET",
-            cache: "no-store",
-            headers: {
-                type: "file"
-            }
+            cache: "no-store"
         });
         // Check if we accidentally received a directory listing (JSON array)
         try {
@@ -262,13 +246,9 @@ async function exists(path) {
     path = makePath(path);
     let exists = false;
     try {
-        const item = await fetchJSON(fsEndPoint + "?path=" + encodeURIComponent(path.slice(1)), {
+        const item = await fetchJSON(fsEndPoint + "?path=" + encodeURIComponent(path.slice(1)) + "&exists=true", {
             method: "GET",
-            cache: "no-store",
-            headers: {
-                path: encodeURIComponent(path.slice(1)),
-                exists: true
-            },
+            cache: "no-store"
         });
         // If we receive an array, it means we got a directory listing instead of file metadata
         // This happens when the file doesn't exist but a similarly-named directory does
