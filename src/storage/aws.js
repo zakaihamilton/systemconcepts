@@ -204,12 +204,6 @@ async function writeFiles(prefix, files) {
 async function getRecursiveList(path) {
     path = makePath(path);
 
-    // First check if the base path exists
-    if (!(await exists(path))) {
-        console.log(`[AWS Storage] Path does not exist: ${path}`);
-        return [];
-    }
-
     const listing = [];
     const visitedPaths = new Set();
 
