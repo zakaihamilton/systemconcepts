@@ -100,7 +100,6 @@ export async function readCompressedFile(path) {
  */
 export async function writeCompressedFile(path, data, folderCache = null) {
     path = makePath(path);
-    const tmpPath = path + ".tmp";
     try {
         const folder = path.substring(0, path.lastIndexOf("/"));
         if (!folderCache || !folderCache.has(folder)) {
@@ -117,26 +116,17 @@ export async function writeCompressedFile(path, data, folderCache = null) {
 
         if (path.endsWith(".json")) {
             const jsonString = JSON.stringify(data, null, 4);
-            await storage.writeFile(tmpPath, jsonString);
+            await storage.writeFile(path, jsonString);
         } else {
             const compressed = compressJSON(data);
             const buffer = Buffer.from(compressed);
 
             // Both local and AWS need base64 encoding for .gz files
             const base64 = buffer.toString('base64');
-            await storage.writeFile(tmpPath, base64);
+            await storage.writeFile(path, base64);
         }
-
-        // Atomic move (or safe copy+delete)
-        await storage.moveFile(tmpPath, path);
     } catch (err) {
         console.error(`[Bundle] Error writing file ${path}:`, err);
-        // Try to cleanup tmp file if it exists
-        try {
-            if (await storage.exists(tmpPath)) {
-                await storage.deleteFile(tmpPath);
-            }
-        } catch (e) { /* ignore */ }
         throw err;
     }
 }
