@@ -106,6 +106,10 @@ async function readFile(path) {
                 path: encodeURIComponent(path.slice(1))
             }
         });
+        // Check if we accidentally received a directory listing
+        if (Array.isArray(body)) {
+            throw new Error(`Cannot read directory as file: ${path}`);
+        }
         body = binaryToString(body);
         return body;
     }
@@ -118,6 +122,18 @@ async function readFile(path) {
                 path: encodeURIComponent(path.slice(1))
             }
         });
+        // Check if we accidentally received a directory listing (JSON array)
+        try {
+            const parsed = JSON.parse(body);
+            if (Array.isArray(parsed)) {
+                throw new Error(`Cannot read directory as file: ${path}`);
+            }
+        } catch (e) {
+            // Not JSON or not an array, which is expected for normal files
+            if (e.message && e.message.includes('Cannot read directory')) {
+                throw e;
+            }
+        }
     }
     return body;
 }
@@ -264,8 +280,11 @@ async function exists(path) {
                 exists: true
             },
         });
+        // If we receive an array, it means we got a directory listing instead of file metadata
+        // This happens when the file doesn't exist but a similarly-named directory does
         if (Array.isArray(item)) {
-            exists = true;
+            console.log(`[AWS Storage] Path check returned directory listing for ${path}, treating as non-existent file`);
+            exists = false;
         } else {
             exists = item && item.name;
         }

@@ -61,15 +61,20 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
 
         // 1. Try files.gz
         if (await storage.exists(remoteManifestPathGz)) {
-            const rawManifest = await readCompressedFile(remoteManifestPathGz) || [];
-            console.log(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
-            remoteManifest = normalizeManifest(rawManifest);
-            const deduped = rawManifest.length - remoteManifest.length;
-            console.log(`[Sync] Found ${remoteManifestPathGz}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ''}`);
-            if (deduped === rawManifest.length && rawManifest.length > 0) {
-                console.error("[Sync] CRITICAL: All items removed during normalization!");
+            try {
+                const rawManifest = await readCompressedFile(remoteManifestPathGz) || [];
+                console.log(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
+                remoteManifest = normalizeManifest(rawManifest);
+                const deduped = rawManifest.length - remoteManifest.length;
+                console.log(`[Sync] Found ${remoteManifestPathGz}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ''}`);
+                if (deduped === rawManifest.length && rawManifest.length > 0) {
+                    console.error("[Sync] CRITICAL: All items removed during normalization!");
+                }
+                loadedFromManifest = true;
+            } catch (err) {
+                console.warn(`[Sync] Failed to read compressed manifest ${remoteManifestPathGz}:`, err.message || err);
+                // Fall through to try JSON or directory listing
             }
-            loadedFromManifest = true;
         }
         // 2. Try files.json
         if (remoteManifest.length === 0 && await storage.exists(remoteManifestPathJson)) {
