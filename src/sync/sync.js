@@ -68,7 +68,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
 
     // Step 4
     progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
-    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, remotePath);
+    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, remotePath, canUpload);
     localManifest = downloadResult.manifest;
     remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
     hasChanges = hasChanges || downloadResult.hasChanges;

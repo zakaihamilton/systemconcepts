@@ -96,7 +96,7 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
  * Step 4: Download files that have higher version on remote
  * Uses parallel batch processing for performance
  */
-export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH) {
+export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true) {
     const start = performance.now();
     addSyncLog("Step 4: Downloading updates...", "info");
 
@@ -171,10 +171,14 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
                 addSyncLog(`Removed from remote manifest: ${file.path} (file not found)`, "info");
             });
 
-            // Upload the cleaned manifest immediately
-            const manifestPath = makePath(remotePath, FILES_MANIFEST_GZ);
-            await writeCompressedFile(manifestPath, cleanedRemoteManifest);
-            addSyncLog(`✓ Cleaned remote manifest (removed ${missingOnRemote.length} missing files)`, "success");
+            // Upload the cleaned manifest only if uploads are allowed
+            if (canUpload) {
+                const manifestPath = makePath(remotePath, FILES_MANIFEST_GZ);
+                await writeCompressedFile(manifestPath, cleanedRemoteManifest);
+                addSyncLog(`✓ Cleaned remote manifest (removed ${missingOnRemote.length} missing files)`, "success");
+            } else {
+                addSyncLog(`Manifest cleaning skipped (${missingOnRemote.length} missing files) - Sync is Locked`, "warning");
+            }
         }
 
         // Apply all updates in a single operation
