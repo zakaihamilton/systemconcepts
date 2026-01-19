@@ -25,7 +25,8 @@ export default async function AWS_API(req, res) {
             console.log(`[AWS API] ACCESS DENIED: User ${id} is not authorized`);
             throw "ACCESS_DENIED";
         }
-        console.log(`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${req.method}, Path: ${path}`); \n        console.log(`[AWS API] Request headers:`, { type: headers.type, binary: headers.binary, exists: headers.exists });
+        console.log(`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${req.method}, Path: ${path}`);
+        console.log(`[AWS API] Request headers:`, { type: headers.type, binary: headers.binary, exists: headers.exists });
 
         // Determine access level based on role and path
         const isAdmin = roleAuth(user.role, "admin");
