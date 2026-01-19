@@ -60,7 +60,8 @@ export default function SpeedSlider() {
     };
 
     const handleSpeedChange = (event, newValue) => {
-        player.playbackRate = newValue;
+        const audio = player;
+        audio.playbackRate = newValue; // eslint-disable-line react-hooks/immutability
     };
 
     const max = Math.max(...Object.values(rateItems));

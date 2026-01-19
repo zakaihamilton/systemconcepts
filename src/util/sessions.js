@@ -431,7 +431,7 @@ export function useSessions(depends = [], options = {}) {
                 updateSessions(groupMetadata, syncCounter);
             }
         }
-    }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions, counter]);
+    }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions, counter, groupsSettings, updateSessions]);
 
     const groupsItems = useMemo(() => {
         return groups.map(group => {

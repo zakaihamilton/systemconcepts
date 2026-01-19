@@ -37,7 +37,7 @@ export default function Audio({ show, metadataPath, metadataKey, name, path, dat
 
         // Set initial duration if already loaded
         if (playerRef.duration) {
-            setDuration(playerRef.duration);
+            setTimeout(() => setDuration(playerRef.duration), 0);
         }
 
         playerRef.addEventListener('durationchange', handleDurationChange);

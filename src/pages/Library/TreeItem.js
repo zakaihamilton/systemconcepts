@@ -43,7 +43,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, selectedId, selectedPa
                 });
             }
         }
-    }, [selectedPath, node.id]);
+    }, [selectedPath, node.id, open]);
 
     useEffect(() => {
         if ((isSelected || selectedPath === node.id) && itemRef.current) {

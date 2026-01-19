@@ -21,11 +21,12 @@ const getOrdinal = (n, locale) => {
 
 export function useDateFormatter(options, locale) {
     const appLocale = useLocale();
-    locale = locale || appLocale || 'en-US';
+    const effectiveLocale = locale || appLocale || 'en-US';
+    const optionsString = JSON.stringify(options);
     // 2. Memoize the formatter object itself for performance
     const formatter = useMemo(() => {
-        return new Intl.DateTimeFormat(locale, options);
-    }, [locale, JSON.stringify(options)]); // Only stringify if options are highly dynamic
+        return new Intl.DateTimeFormat(effectiveLocale, JSON.parse(optionsString));
+    }, [effectiveLocale, optionsString]);
 
     // 3. Return a formatting function that includes ordinal logic
     return {
@@ -33,7 +34,7 @@ export function useDateFormatter(options, locale) {
         formatWithOrdinal: (date) => {
             const parts = formatter.formatToParts(date);
             return parts.map(part =>
-                part.type === 'day' ? getOrdinal(parseInt(part.value), locale) : part.value
+                part.type === 'day' ? getOrdinal(parseInt(part.value), effectiveLocale) : part.value
             ).join('');
         }
     };

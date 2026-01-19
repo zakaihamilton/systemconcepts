@@ -67,7 +67,7 @@ export function useLocalStorage(id, store, fields) {
         return () => {
             unsubscribe();
         };
-    }, []);
+    }, [fields, id, store]);
 }
 
 export function useGlobalState(id, defaults) {
@@ -78,7 +78,7 @@ export function useGlobalState(id, defaults) {
                 s[id] = defaults;
             });
         }
-    }, [state, id]);
+    }, [state, id, defaults]);
     const setState = useCallback(data => {
         if (!id) {
             return;

@@ -22,6 +22,8 @@ const InnerList = forwardRef(({ style, ...rest }, ref) => (
     />
 ));
 
+InnerList.displayName = "InnerList";
+
 export default function TrackRow({ date, sessions, focusedSessionId, onSessionClick, width = 0, itemSize = 350, store, translations = {}, playingSession }) {
     const listRef = useRef(null);
     const outerRef = useRef(null);

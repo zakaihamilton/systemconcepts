@@ -158,12 +158,12 @@ function Article({
             }, 300);
             return () => clearTimeout(timer);
         } else {
-            setShowPlaceholder(false);
+            setTimeout(() => setShowPlaceholder(false), 0);
         }
     }, [content, selectedTag]);
 
     useEffect(() => {
-        setScrollInfo({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
+        setTimeout(() => setScrollInfo({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 }), 0);
     }, [selectedTag]);
 
     const formatArticleWithTags = useCallback((tag, text) => {
@@ -260,7 +260,7 @@ function Article({
             }
         };
         window.addEventListener("message", cleanup);
-    }, []);
+    }, [contentRef]);
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
@@ -304,13 +304,15 @@ function Article({
 
     useEffect(() => {
         const highlights = document.querySelectorAll('.search-highlight');
-        setTotalMatches(highlights.length);
+        setTimeout(() => setTotalMatches(highlights.length), 0);
         if (highlights.length > 0) {
-            setMatchIndex(prev => {
-                const index = prev >= highlights.length ? 0 : prev;
-                scrollToMatch(index);
-                return index;
-            });
+            setTimeout(() => {
+                setMatchIndex(prev => {
+                    const index = prev >= highlights.length ? 0 : prev;
+                    scrollToMatch(index);
+                    return index;
+                });
+            }, 0);
         }
     }, [content, search, scrollToMatch]);
 
@@ -325,7 +327,7 @@ function Article({
         if (!content || !selectedTag) {
             return [];
         }
-        const items = [
+        let items = [
             {
                 id: "export",
                 name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
@@ -342,59 +344,65 @@ function Article({
             }
         ];
         if (isAdmin) {
-            items.push({
-                id: "editTags",
-                name: translations.EDIT_TAGS,
-                icon: <EditIcon />,
-                onClick: openEditDialog,
-                menu: true
-            });
-            items.push({
-                id: "editArticle",
-                name: translations.EDIT_ARTICLE,
-                icon: <ArticleIcon />,
-                onClick: openEditContentDialog,
-                menu: true
-            });
-            items.push({
-                id: "jumpToParagraph",
-                name: translations.JUMP_TO,
-                icon: <FormatListNumberedIcon />,
-                onClick: () => setJumpDialogOpen(true),
-                menu: true
-            });
-            items.push({
-                id: "articleTerms",
-                name: translations.ARTICLE_TERMS,
-                icon: <MenuBookIcon />,
-                onClick: handleShowTerms,
-                menu: true
-            });
+            items = [
+                ...items,
+                {
+                    id: "editTags",
+                    name: translations.EDIT_TAGS,
+                    icon: <EditIcon />,
+                    onClick: openEditDialog,
+                    menu: true
+                },
+                {
+                    id: "editArticle",
+                    name: translations.EDIT_ARTICLE,
+                    icon: <ArticleIcon />,
+                    onClick: openEditContentDialog,
+                    menu: true
+                },
+                {
+                    id: "jumpToParagraph",
+                    name: translations.JUMP_TO,
+                    icon: <FormatListNumberedIcon />,
+                    onClick: () => setJumpDialogOpen(true),
+                    menu: true
+                },
+                {
+                    id: "articleTerms",
+                    name: translations.ARTICLE_TERMS,
+                    icon: <MenuBookIcon />,
+                    onClick: handleShowTerms,
+                    menu: true
+                }
+            ];
         }
         if (search && totalMatches > 0) {
-            items.push({
-                id: "prevMatch",
-                name: translations.PREVIOUS_MATCH,
-                icon: <KeyboardArrowUpIcon />,
-                onClick: handlePrevMatch,
-                location: isPhone ? "header" : undefined
-            });
-            items.push({
-                id: "matchCount",
-                name: `${matchIndex + 1} / ${totalMatches}`,
-                element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
-                location: isPhone ? "header" : undefined
-            });
-            items.push({
-                id: "nextMatch",
-                name: translations.NEXT_MATCH,
-                icon: <KeyboardArrowDownIcon />,
-                onClick: handleNextMatch,
-                location: isPhone ? "header" : undefined
-            });
+            items = [
+                ...items,
+                {
+                    id: "prevMatch",
+                    name: translations.PREVIOUS_MATCH,
+                    icon: <KeyboardArrowUpIcon />,
+                    onClick: handlePrevMatch,
+                    location: isPhone ? "header" : undefined
+                },
+                {
+                    id: "matchCount",
+                    name: `${matchIndex + 1} / ${totalMatches}`,
+                    element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
+                    location: isPhone ? "header" : undefined
+                },
+                {
+                    id: "nextMatch",
+                    name: translations.NEXT_MATCH,
+                    icon: <KeyboardArrowDownIcon />,
+                    onClick: handleNextMatch,
+                    location: isPhone ? "header" : undefined
+                }
+            ];
         }
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone]);
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms]);
 
     useToolbar({
         id: "Article",
@@ -403,7 +411,7 @@ function Article({
         depends: [toolbarItems, content]
     });
 
-    const title = useMemo(() => {
+    const getTitle = () => {
         if (!selectedTag) return { name: "", key: "" };
         for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
             const key = LibraryTagKeys[i];
@@ -413,7 +421,9 @@ function Article({
             }
         }
         return { name: "", key: "" };
-    }, [selectedTag]);
+    };
+
+    const title = getTitle();
 
     if (!content && showPlaceholder) {
         return (

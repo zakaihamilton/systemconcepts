@@ -34,7 +34,7 @@ export function useSearch(name, updateCallback) {
     const inputRef = useRef(null);
     const containerRef = useRef(null);
     // Track initial value for uncontrolled input
-    const initialValueRef = useRef(searchTerm);
+    const [initialValue] = useState(searchTerm);
 
     useTimeout(() => {
         SearchStore.update(s => {
@@ -68,7 +68,7 @@ export function useSearch(name, updateCallback) {
 
     // Wrap the search UI in a component so that we don't pass refs directly through the ToolbarStore.
     // This prevents Pullstate/Immer from freezing the ref objects.
-    const SearchComponent = useCallback(() => (
+    const searchElement = useMemo(() => (
         <div ref={containerRef} className={clsx(styles.search, isDesktop && styles.searchExpanded)} onClick={handleClick}>
             <div className={styles.searchIcon}>
                 <SearchIcon />
@@ -76,7 +76,7 @@ export function useSearch(name, updateCallback) {
             <InputBase
                 inputRef={inputRef}
                 placeholder={translations.SEARCH + "…"}
-                defaultValue={initialValueRef.current}
+                defaultValue={initialValue}
                 onChange={onChangeText}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
@@ -87,7 +87,7 @@ export function useSearch(name, updateCallback) {
                 inputProps={{ "aria-label": "search" }}
             />
         </div>
-    ), [isDesktop, translations.SEARCH, handleClick, onChangeText, handleFocus, handleBlur]);
+    ), [isDesktop, translations.SEARCH, handleClick, onChangeText, handleFocus, handleBlur, initialValue]);
 
     const toolbarItems = useMemo(() => [
         {
@@ -95,9 +95,9 @@ export function useSearch(name, updateCallback) {
             menu: false,
             sortKey: -1,
             location: isPhone && "header",
-            element: <SearchComponent />
+            element: searchElement
         }
-    ], [isPhone, SearchComponent]);
+    ], [isPhone, searchElement]);
 
     useToolbar({ id: "Search", items: toolbarItems, depends: [isPhone, deviceType] });
 

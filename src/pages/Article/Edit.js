@@ -17,7 +17,7 @@ export default function EditWidget({ store }) {
             s.editing = false;
         });
         return result;
-    }, [value[0]]);
+    }, [onDone, store, value]);
     const keyDown = async event => {
         if (event.keyCode == 13) {
             let valid = true;

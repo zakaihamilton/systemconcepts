@@ -30,9 +30,9 @@ export default function SyncDialog({ open, onClose, tags }) {
         } else {
             setChanges([]);
         }
-    }, [open]);
+    }, [open, calculateChanges]);
 
-    const calculateChanges = async () => {
+    const calculateChanges = useCallback(async () => {
         setCalculating(true);
         try {
             const filesToUpdate = {};
@@ -104,7 +104,7 @@ export default function SyncDialog({ open, onClose, tags }) {
         } finally {
             setCalculating(false);
         }
-    };
+    }, [tags]);
 
     const handleApplySync = async () => {
         setProcessing(true);

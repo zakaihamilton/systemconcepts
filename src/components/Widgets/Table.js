@@ -466,7 +466,7 @@ export default function TableWidget(props) {
         if (!hasColumn) {
             store.update(s => { s.orderBy = defaultSort; });
         }
-    }, []);
+    }, [visibleColumns, orderBy, defaultSort, store]);
 
 
 
@@ -487,7 +487,8 @@ export default function TableWidget(props) {
         const rowCount = columnCount ? Math.ceil((items && items.length || 0) / columnCount) : 0;
         const sidePadding = size && size.width ? ((size.width - (columnCount * cellWidthInPixels)) / 2) : 0;
         return { columnCount, rowCount, sidePadding };
-    }, [size?.width, cellWidthInPixels, items?.length]);
+        return { columnCount, rowCount, sidePadding };
+    }, [size, cellWidthInPixels, items]);
 
     const { columnCount, rowCount, sidePadding } = gridLayout;
 
@@ -523,23 +524,6 @@ export default function TableWidget(props) {
         return Inner;
     }, [viewMode, viewModes, itemHeightInPixels, hideColumns, visibleColumns]);
 
-    if (!size.height) {
-        return null;
-    }
-
-    const statusBarVisible = !loading && !error && !!statusBar;
-    const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
-    const style = {
-        maxHeight: size.height + "px",
-        maxWidth: size.width + "px"
-    };
-
-    const numItems = items && items.length;
-
-    // Derived state for empty condition
-    // Optimization: Derive isEmpty from data and items to avoid state synchronization and extra renders
-    const isEmpty = !loading && data !== null && (!data.length || !items.length);
-
     // Delay showing "Loading" to prevent flicker on quick loads
     const [showLoading, setShowLoading] = useState(false);
     useEffect(() => {
@@ -560,7 +544,20 @@ export default function TableWidget(props) {
         } else {
             setShowEmpty(false);
         }
-    }, [isEmpty]);
+    }, []);
+
+    if (!size.height) {
+        return null;
+    }
+
+    const statusBarVisible = !loading && !error && !!statusBar;
+    const height = size.height - (!!statusBarIsActive && sizeToPixels(statusBarHeight));
+    const style = {
+        maxHeight: size.height + "px",
+        maxWidth: size.width + "px"
+    };
+
+    const numItems = items && items.length;
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
@@ -743,6 +740,8 @@ const TableListRow = React.memo(({ index, style, data }) => {
     />;
 });
 
+TableListRow.displayName = "TableListRow";
+
 const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
     const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
     const index = (rowIndex * columnCount) + columnIndex;
@@ -772,3 +771,5 @@ const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
         renderColumn={renderColumn}
     />;
 });
+
+TableGridCell.displayName = "TableGridCell";

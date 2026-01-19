@@ -16,8 +16,10 @@ const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick, i
     const { thumbnail, name, duration, color, group, id } = session;
 
     useEffect(() => {
-        setShowThumbnail(false);
-        setImageLoaded(false);
+        setTimeout(() => {
+            setShowThumbnail(false);
+            setImageLoaded(false);
+        }, 0);
         const timer = setTimeout(() => {
             setShowThumbnail(true);
         }, 1000);

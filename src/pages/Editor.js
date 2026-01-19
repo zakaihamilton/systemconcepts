@@ -33,7 +33,7 @@ export default function Editor({ name, path }) {
             });
             setLoading(false);
         });
-    }, []);
+    }, [path]);
     useEffect(() => {
         setLoading(true);
         readFile();
@@ -52,11 +52,11 @@ export default function Editor({ name, path }) {
         return () => {
             unsubscribe();
         };
-    }, []);
+    }, [content, path, readFile]);
 
     useEffect(() => {
         readFile();
-    }, [syncCounter]);
+    }, [syncCounter, readFile]);
 
     const downloadFile = () => {
         if (content[0]) {

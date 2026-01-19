@@ -116,7 +116,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
                 s.subtitles = data && data.subtitles;
             });
         }
-    }, [data && data.path]);
+    }, [data]);
 
     useEffect(() => {
         if (group && date && name) {

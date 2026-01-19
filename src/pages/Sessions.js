@@ -208,7 +208,7 @@ export default function SessionsPage() {
                     : translations.UNKNOWN),
             isPlaying
         };
-    }, [formatDuration, translations, session]);
+    }, [translations, session]);
 
     const renderColumn = useCallback((columnId, item) => {
         switch (columnId) {
@@ -296,7 +296,7 @@ export default function SessionsPage() {
             default:
                 return item[columnId];
         }
-    }, [viewMode, typeFilter, target, gotoItem, handleIconClick, isMobile]);
+    }, [viewMode, typeFilter, target, gotoItem, handleIconClick]);
 
     const filter = useCallback(item => {
         // Debug: trace first filter execution

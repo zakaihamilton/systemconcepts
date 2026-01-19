@@ -30,7 +30,7 @@ export default function SideBar() {
                 s.libraryExpanded = true;
             });
         }
-    }, [isLibraryActive]);
+    }, [isLibraryActive, libraryExpanded]);
 
     const selected = id => {
         return !!activePages.find(page => page.id === id && !page.sectionIndex);
