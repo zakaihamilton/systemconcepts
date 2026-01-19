@@ -11,7 +11,7 @@ async function getListing(path, options = {}) {
     const listing = [];
     const encodedPath = encodeURIComponent(path.slice(1));
     console.log(`[AWS Storage] getListing - Original path: ${path}, Encoded: ${encodedPath}`);
-    const url = `${fsEndPoint}?path=${encodedPath}&type=dir`;
+    const url = `${fsEndPoint}?path=${encodedPath}&type=dir&t=${Date.now()}`;
     const items = await fetchJSON(url, {
         method: "GET",
         cache: "no-store"
@@ -21,7 +21,7 @@ async function getListing(path, options = {}) {
         const { name, stat = {} } = item;
         const itemPath = makePath(path, name);
         if (useCount && stat.type === "dir") {
-            const url = `${fsEndPoint}?path=${encodeURIComponent(path.slice(1))}&type=dir`;
+            const url = `${fsEndPoint}?path=${encodeURIComponent(path.slice(1))}&type=dir&t=${Date.now()}`;
             const children = await fetchJSON(url, {
                 method: "GET",
                 cache: "no-store"
@@ -246,7 +246,7 @@ async function exists(path) {
     path = makePath(path);
     let exists = false;
     try {
-        const item = await fetchJSON(fsEndPoint + "?path=" + encodeURIComponent(path.slice(1)) + "&exists=true", {
+        const item = await fetchJSON(fsEndPoint + "?path=" + encodeURIComponent(path.slice(1)) + "&exists=true&t=" + Date.now(), {
             method: "GET",
             cache: "no-store"
         });

@@ -68,7 +68,10 @@ export default async function AWS_API(req, res) {
 
         const result = await handleRequest({ req, readOnly, path });
 
-        if (checkPath.startsWith("sessions/")) {
+        const isDir = (req.query && req.query.type === "dir") || (headers && headers.type === "dir");
+        const isExists = (req.query && req.query.exists) || (headers && headers.exists);
+
+        if (checkPath.startsWith("sessions/") && !isDir && !isExists) {
             res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
         }
         else {
