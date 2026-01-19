@@ -15,6 +15,52 @@ export const SearchStore = new Store({
     search: {}
 });
 
+export function SearchWidget({ isDesktop, translations, placeholder, defaultValue, onChange }) {
+    const [focused, setFocused] = useState(false);
+    const inputRef = useRef(null);
+    const containerRef = useRef(null);
+
+    // Update expanded class via DOM to avoid recreating the element
+    useEffect(() => {
+        if (containerRef.current) {
+            if (isDesktop || focused) {
+                containerRef.current.classList.add(styles.searchExpanded);
+            } else {
+                containerRef.current.classList.remove(styles.searchExpanded);
+            }
+        }
+    }, [isDesktop, focused]);
+
+    const handleFocus = useCallback(() => setFocused(true), []);
+    const handleBlur = useCallback(() => setFocused(false), []);
+    const handleClick = useCallback(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, []);
+
+    return (
+        <div ref={containerRef} className={clsx(styles.search, isDesktop && styles.searchExpanded)} onClick={handleClick}>
+            <div className={styles.searchIcon}>
+                <SearchIcon />
+            </div>
+            <InputBase
+                inputRef={inputRef}
+                placeholder={placeholder}
+                defaultValue={defaultValue}
+                onChange={onChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                type="search"
+                classes={{
+                    root: styles.inputRoot
+                }}
+                inputProps={{ "aria-label": "search" }}
+            />
+        </div>
+    );
+}
+
 export function useSearch(name, updateCallback) {
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
@@ -29,10 +75,7 @@ export function useSearch(name, updateCallback) {
     const { search } = SearchStore.useState();
     const searchTerm = search[effectiveName] || "";
     const [value, setValue] = useState(searchTerm);
-    const [focused, setFocused] = useState(false);
     const translations = useTranslations();
-    const inputRef = useRef(null);
-    const containerRef = useRef(null);
     // Track initial value for uncontrolled input
     const [initialValue] = useState(searchTerm);
 
@@ -43,51 +86,21 @@ export function useSearch(name, updateCallback) {
         effectiveUpdateCallback && effectiveUpdateCallback(value);
     }, 1000, [value]);
 
-    // Update expanded class via DOM to avoid recreating the element
-    useEffect(() => {
-        if (containerRef.current) {
-            if (isDesktop || focused) {
-                containerRef.current.classList.add(styles.searchExpanded);
-            } else {
-                containerRef.current.classList.remove(styles.searchExpanded);
-            }
-        }
-    }, [isDesktop, focused]);
-
     const onChangeText = useCallback(event => {
         setValue(event.target.value);
-    }, []);
-
-    const handleFocus = useCallback(() => setFocused(true), []);
-    const handleBlur = useCallback(() => setFocused(false), []);
-    const handleClick = useCallback(() => {
-        if (inputRef.current) {
-            inputRef.current.focus();
-        }
     }, []);
 
     // Wrap the search UI in a component so that we don't pass refs directly through the ToolbarStore.
     // This prevents Pullstate/Immer from freezing the ref objects.
     const searchElement = useMemo(() => (
-        <div ref={containerRef} className={clsx(styles.search, isDesktop && styles.searchExpanded)} onClick={handleClick}>
-            <div className={styles.searchIcon}>
-                <SearchIcon />
-            </div>
-            <InputBase
-                inputRef={inputRef}
-                placeholder={translations.SEARCH + "…"}
-                defaultValue={initialValue}
-                onChange={onChangeText}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                type="search"
-                classes={{
-                    root: styles.inputRoot
-                }}
-                inputProps={{ "aria-label": "search" }}
-            />
-        </div>
-    ), [isDesktop, translations.SEARCH, handleClick, onChangeText, handleFocus, handleBlur, initialValue]);
+        <SearchWidget
+            isDesktop={isDesktop}
+            translations={translations}
+            placeholder={translations.SEARCH + "…"}
+            defaultValue={initialValue}
+            onChange={onChangeText}
+        />
+    ), [isDesktop, translations, initialValue, onChangeText]);
 
     const toolbarItems = useMemo(() => [
         {
