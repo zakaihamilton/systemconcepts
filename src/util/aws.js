@@ -5,8 +5,7 @@ import {
     CopyObjectCommand,
     DeleteObjectCommand,
     HeadObjectCommand,
-    ListObjectsV2Command,
-    ListObjectsCommand
+    ListObjectsV2Command
 } from "@aws-sdk/client-s3";
 import { lockMutex } from "@sync/mutex";
 import fs from "fs";

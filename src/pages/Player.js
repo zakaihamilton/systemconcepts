@@ -17,7 +17,6 @@ import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import { useParentParams } from "@util/pages";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
-import { useGroups } from "@util/groups";
 import { useSessions } from "@util/sessions";
 import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
