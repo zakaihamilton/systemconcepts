@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 
 export function useCounter(defaultValue = 0) {
     const [counter, setCounter] = useState(defaultValue);

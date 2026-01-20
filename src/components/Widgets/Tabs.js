@@ -1,4 +1,4 @@
-import React from "react";
+
 import Tabs from "@mui/material/Tabs";
 import styles from "./Tabs.module.scss";
 

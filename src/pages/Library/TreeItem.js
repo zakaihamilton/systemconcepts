@@ -7,7 +7,6 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import styles from "./TreeItem.module.scss";
 import clsx from "clsx";
 import { LibraryStore } from "./Store";

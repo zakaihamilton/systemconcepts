@@ -1,4 +1,4 @@
-import React from "react";
+
 import Typography from "@mui/material/Typography";
 import styles from "./AppTitle.module.scss";
 import { useTranslations } from "@util/translations";

@@ -1,8 +1,7 @@
 import { useMemo, useCallback } from "react";
-import storage from "@util/storage";
 import { makePath } from "@util/path";
 import pLimit from "../p-limit";
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { UpdateSessionsStore } from "@sync/syncState";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateBundleFile } from "./utils";
 
