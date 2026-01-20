@@ -57,7 +57,13 @@ export default async function USERS_API(req, res) {
             }
         }
         const result = await handleRequest({ collectionName, req });
-        res.status(200).json(result);
+        const sanitizeUser = (user) => {
+            if (!user) return user;
+            const { hash, salt, resetToken, resetTokenExpiry, credentials, ...rest } = user;
+            return rest;
+        };
+        const sanitizedResult = Array.isArray(result) ? result.map(sanitizeUser) : sanitizeUser(result);
+        res.status(200).json(sanitizedResult);
     }
     catch (err) {
         console.error("users error: ", err);
