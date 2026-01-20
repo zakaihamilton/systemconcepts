@@ -4,13 +4,16 @@ import { LOCAL_SYNC_PATH } from "@sync/constants";
 
 async function loadMetadata(property, extension, year, name, path, forceUpdate, isMerged, isBundled) {
     const sessionMetadataMap = {};
-    let updateLocalMetadata = forceUpdate;
+    let updateLocalMetadata = true;
 
     if (!forceUpdate) {
         let metadataLoaded = false;
         const metadataLoader = (data) => {
             if (data && Array.isArray(data.sessions)) {
                 data.sessions.forEach(session => {
+                    if (session.name && session.name.startsWith(year.name)) {
+                        return;
+                    }
                     if (session && session[property]) {
                         // Check if array has length for tags, or if value exists for others
                         const hasValue = Array.isArray(session[property]) ? session[property].length > 0 : session[property];
@@ -81,6 +84,7 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                 }
             } catch (err) {
                 console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
+                throw err;
             }
         }
     }
