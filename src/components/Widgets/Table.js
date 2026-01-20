@@ -378,7 +378,7 @@ export default function TableWidget(props) {
             location: "header",
             menu: "true"
         },
-        data && name && {
+        !isMobile && data && name && {
             id: "export",
             name: translations.EXPORT,
             icon: <GetAppIcon />,
