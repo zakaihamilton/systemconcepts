@@ -1708,6 +1708,14 @@ export default {
         {
             "id": "DELETE_FOREVER",
             "value": "מחק לצמיתות"
+        },
+        {
+            "id": "SHOW_ABBREVIATIONS",
+            "value": "הצג ראשי תיבות"
+        },
+        {
+            "id": "SHOW_FULL_TERMS",
+            "value": "הצג מונחים מלאים"
         }
     ]
 };

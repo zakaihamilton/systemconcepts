@@ -19,7 +19,11 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { LibraryTagKeys, LibraryIcons } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
+import { abbreviations } from "../../data/abbreviations";
+import { useLanguage } from "@util/language";
 import styles from "./Article.module.scss";
+
+
 import clsx from "clsx";
 import Player from "./Article/Player";
 import JumpDialog from "./Article/JumpDialog";
@@ -54,6 +58,8 @@ function Article({
     const [totalMatches, setTotalMatches] = useState(0);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(true);
+    const [showAbbreviations, setShowAbbreviations] = useState(true);
+    const language = useLanguage();
     const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
     const scrollTimeoutRef = useRef(null);
     const [currentTTSParagraph, setCurrentTTSParagraph] = useState(-1);
@@ -341,6 +347,13 @@ function Article({
                 icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
                 onClick: () => setShowMarkdown(prev => !prev),
                 menu: true
+            },
+            {
+                id: "toggleAbbreviations",
+                name: showAbbreviations ? translations.SHOW_FULL_TERMS : translations.SHOW_ABBREVIATIONS,
+                icon: <LibraryBooksIcon />,
+                onClick: () => setShowAbbreviations(prev => !prev),
+                menu: true
             }
         ];
         if (isAdmin) {
@@ -402,7 +415,7 @@ function Article({
             ];
         }
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms]);
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations]);
 
     useToolbar({
         id: "Article",
@@ -424,6 +437,21 @@ function Article({
     };
 
     const title = getTitle();
+
+    const processedContent = useMemo(() => {
+        if (!content || showAbbreviations) return content;
+        let text = content;
+        // Sort keys by length descending to handle overlapping abbreviations
+        const keys = Object.keys(abbreviations).sort((a, b) => b.length - a.length);
+        for (const key of keys) {
+            const expansion = abbreviations[key];
+            if (!expansion) continue;
+            // Replace standalone abbreviations, avoiding partial matches
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            text = text.replace(regex, expansion.eng);
+        }
+        return text;
+    }, [content, showAbbreviations]);
 
     if (loading) {
         return (
@@ -558,7 +586,10 @@ function Article({
                                     className={styles.title}
                                     component="span"
                                 >
-                                    {title.name}
+                                    {(() => {
+                                        const expansion = abbreviations[title.name];
+                                        return (!showAbbreviations && expansion) ? expansion.eng : title.name;
+                                    })()}
                                 </Typography>
                             </Box>
                             <Box className={styles.metadataRow}>
@@ -570,17 +601,19 @@ function Article({
                                         const value = selectedTag[key];
                                         if (title.name === value) return null;
                                         const Icon = LibraryIcons[key];
+                                        const expansion = abbreviations[value];
+                                        const displayValue = (!showAbbreviations && expansion) ? expansion.eng : value;
                                         return (
                                             <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
                                                 <Paper
                                                     elevation={0}
                                                     className={styles.metadataTag}
                                                     data-key={key}
-                                                    onClick={() => navigator.clipboard.writeText(value)}
+                                                    onClick={() => navigator.clipboard.writeText(displayValue)}
                                                     sx={{ cursor: "pointer" }}
                                                 >
                                                     {Icon && <Icon sx={{ fontSize: "1rem" }} />}
-                                                    <Typography variant="caption">{value}</Typography>
+                                                    <Typography variant="caption">{displayValue}</Typography>
                                                 </Paper>
                                             </Tooltip>
                                         );
@@ -608,7 +641,7 @@ function Article({
                     <Box className={styles.contentWrapper}>
                         {showMarkdown ? (
                             <Markdown search={search} currentTTSParagraph={currentTTSParagraph}>
-                                {content}
+                                {processedContent}
                             </Markdown>
                         ) : (
                             <Box
@@ -622,7 +655,7 @@ function Article({
                                     margin: 0
                                 }}
                             >
-                                {content}
+                                {processedContent}
                             </Box>
                         )}
                     </Box>

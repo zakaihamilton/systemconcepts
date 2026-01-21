@@ -1716,6 +1716,14 @@ export default {
         {
             "id": "DELETE_FOREVER",
             "value": "Delete Forever"
+        },
+        {
+            "id": "SHOW_ABBREVIATIONS",
+            "value": "Show Abbreviations"
+        },
+        {
+            "id": "SHOW_FULL_TERMS",
+            "value": "Show Full Terms"
         }
     ]
 };

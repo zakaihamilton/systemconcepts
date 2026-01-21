@@ -10,6 +10,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import styles from "./TreeItem.module.scss";
 import clsx from "clsx";
 import { LibraryStore } from "./Store";
+import { abbreviations } from "@data/abbreviations";
+import { useLanguage } from "@util/language";
 
 const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 }) {
     const hasChildren = node.children && node.children.length > 0;
@@ -20,6 +22,8 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
     const itemRef = useRef(null);
     const expandedNodes = LibraryStore.useState(s => s.expandedNodes);
     const open = expandedNodes.includes(node.id);
+    const expansion = abbreviations[node.name];
+    const name = expansion ? expansion.eng : node.name;
 
     const checkTruncation = useCallback(() => {
         if (textRef.current) {
@@ -31,7 +35,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
         checkTruncation();
         window.addEventListener('resize', checkTruncation);
         return () => window.removeEventListener('resize', checkTruncation);
-    }, [node.name, checkTruncation]);
+    }, [name, checkTruncation]);
 
     useEffect(() => {
         if (selectPath && node.id && node.id !== "root" && (selectPath === node.id || selectPath.startsWith(node.id + "|"))) {
@@ -141,7 +145,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
                         </Box>
                     )}
                     <Tooltip
-                        title={isTruncated ? node.name : ""}
+                        title={isTruncated ? name : ""}
                         enterDelay={0}
                         disableHoverListener={!isTruncated}
                         placement="bottom-start"
@@ -176,7 +180,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
                                     onMouseEnter={checkTruncation}
                                     className={clsx(styles.name, hasChildren ? styles.parentName : styles.childName)}
                                 >
-                                    {node.name}
+                                    {name}
                                 </Typography>
                             }
                             sx={{ minWidth: 0 }}
