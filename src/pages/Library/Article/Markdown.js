@@ -534,6 +534,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                 number={zoomedData?.number}
                 badgeClass={styles.paragraphBadge}
                 Renderer={TextRenderer}
+                copyExcludeSelectors={[`.${styles['glossary-annotation']}`]}
             />
         </>
     );

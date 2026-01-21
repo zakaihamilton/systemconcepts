@@ -9,14 +9,26 @@ import IconButton from "@mui/material/IconButton";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useTranslations } from "@util/translations";
 
-export default function Zoom({ open, onClose, content, number, badgeClass, Renderer }) {
+export default function Zoom({ open, onClose, content, number, badgeClass, Renderer, copyExcludeSelectors }) {
     const contentRef = useRef(null);
     const translations = useTranslations();
 
     const handleCopy = () => {
-        const text = contentRef.current?.innerText;
+        let text = "";
+        if (contentRef.current) {
+            if (copyExcludeSelectors && copyExcludeSelectors.length) {
+                const clone = contentRef.current.cloneNode(true);
+                copyExcludeSelectors.forEach(selector => {
+                    const elements = clone.querySelectorAll(selector);
+                    elements.forEach(element => element.remove());
+                });
+                text = clone.innerText;
+            } else {
+                text = contentRef.current.innerText;
+            }
+        }
         if (text) {
-            navigator.clipboard.writeText(text);
+            navigator.clipboard.writeText(text.replace(/\r?\n|\r/g, " "));
         }
     };
 
