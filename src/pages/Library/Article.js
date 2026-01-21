@@ -232,6 +232,7 @@ function Article({
                     }
                     @media print {
                         body { -webkit-print-color-adjust: exact; }
+                        .print-hidden { display: none !important; }
                     }
                 </style>
             </head>
@@ -550,6 +551,7 @@ function Article({
                 <Fade in={scrollInfo.visible} timeout={1000}>
                     <Paper
                         elevation={4}
+                        className="print-hidden"
                         sx={{
                             position: 'fixed',
                             top: 24,
