@@ -7,11 +7,19 @@ export const abbreviations = {
         eng: "Hesed, Gevura, Tifferet",
         heb: "חסד, גבורה, תפארת"
     },
+    "NHY": {
+        eng: "Netzah, Hod, Yesod",
+        heb: "נצח, הוד, יסוד"
+    },
     "NHYM": {
         eng: "Netzah, Hod, Yesod, Malchut",
         heb: "נצח, הוד, יסוד, מלכות"
     },
     "KHBTM": {
+        eng: "Keter, Hochma, Bina, Tifferet, Malchut",
+        heb: "כתר, חכמה, בינה, תפארת, מלכות"
+    },
+    "KHB TM": {
         eng: "Keter, Hochma, Bina, Tifferet, Malchut",
         heb: "כתר, חכמה, בינה, תפארת, מלכות"
     },
@@ -23,9 +31,17 @@ export const abbreviations = {
         eng: "Daat, Hesed, Gevura, Tifferet",
         heb: "דעת, חסד, גבורה, תפארת"
     },
+    "HGT NH": {
+        eng: "Hesed, Gevura, Tifferet, Netzah, Hod",
+        heb: "חסד, גבורה, תפארת, נצח, הוד"
+    },
     "HGTNH": {
         eng: "Hesed, Gevura, Tifferet, Netzah, Hod",
         heb: "חסד, גבורה, תפארת, נצח, הוד"
+    },
+    "HGT NHY": {
+        eng: "Hesed, Gevura, Tifferet, Netzah, Hod, Yesod",
+        heb: "חסד, גבורה, תפארת, נצח, הוד, יסוד"
     },
     "HGTNHY": {
         eng: "Hesed, Gevura, Tifferet, Netzah, Hod, Yesod",

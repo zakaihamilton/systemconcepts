@@ -447,7 +447,9 @@ function Article({
             const expansion = abbreviations[key];
             if (!expansion) continue;
             // Replace standalone abbreviations, avoiding partial matches
-            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            // Also consume following parenthetical if it matches the expansion (e.g. "KHB (Crown...)" -> "Crown...")
+            const escapedExpansion = expansion.eng.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b${key}\\b(?:\\s*\\(${escapedExpansion}\\))?`, 'gi');
             text = text.replace(regex, expansion.eng);
         }
         return text;

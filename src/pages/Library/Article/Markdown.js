@@ -367,8 +367,26 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
             while ((match = termPattern.exec(cleanChildren)) !== null) {
                 const term = match[0];
-                const start = match.index;
-                const end = start + term.length;
+                let start = match.index;
+                let end = start + term.length;
+
+                const glossaryEntry = glossary[term.toLowerCase()];
+
+                // Check for following parenthetical that matches the term translation
+                // This handles cases like "Head (head)" or "Term (Translated Term)"
+                const textAfter = cleanChildren.slice(end);
+                // Look for (content)
+                const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(textAfter);
+                if (parentheticalMatch) {
+                    const content = parentheticalMatch[1].trim().toLowerCase();
+                    const mainText = (glossaryEntry?.en || glossaryEntry?.trans || term).toLowerCase();
+
+                    // If the parenthetical content roughly matches the translation/term
+                    if (content === mainText || content === term.toLowerCase()) {
+                        // Consume the parenthetical
+                        end += parentheticalMatch[0].length;
+                    }
+                }
 
                 if (start > lastIndex) {
                     parts.push(
@@ -378,7 +396,6 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                     );
                 }
 
-                const glossaryEntry = glossary[term.toLowerCase()];
                 // Skip lowercase 'or'
                 if (term === 'or') {
                     continue;
