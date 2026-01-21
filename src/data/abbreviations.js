@@ -54,5 +54,13 @@ export const abbreviations = {
     "KHBD": {
         eng: "Keter, Hochma, Bina, Daat",
         heb: "כתר, חכמה, בינה, דעת"
-    }
+    },
+    "TM": {
+        eng: "Tifferet, Malchut",
+        heb: "תפארת, מלכות"
+    },
+    "YESHSUT": {
+        eng: "Yisrael Saba, Tevuna",
+        heb: "ישראל סבא, תבונה"
+    },
 };

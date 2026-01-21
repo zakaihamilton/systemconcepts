@@ -1,5 +1,5 @@
 
-import { glossary } from './Glossary';
+import { glossary } from '@data/glossary';
 
 // Create the regex once since glossary is constant
 // Sort keys by length descending to ensure multi-word terms (e.g. "hitpashtut aleph") are matched before single words

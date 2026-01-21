@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import Box from "@mui/material/Box";
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
-import { glossary } from './Glossary';
+import { glossary } from '@data/glossary';
 import { termPattern, PHASE_COLORS, getStyleInfo } from "./GlossaryUtils";
 import styles from './Markdown.module.scss';
 import Zoom from "./Zoom";

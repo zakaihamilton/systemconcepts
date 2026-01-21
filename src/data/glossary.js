@@ -2805,63 +2805,63 @@ export const glossary = {
     },
     "yud": {
         "he": "י",
-        "en": "Yud [י]",
+        "en": "Yud",
         "trans": "Yud"
     },
     "yod": {
         "he": "י",
-        "en": "Yod [י]",
+        "en": "Yod",
         "trans": "Yod"
     },
     "hey": {
         "he": "ה",
-        "en": "Hey [ה]",
+        "en": "Hey",
         "trans": "Hey"
     },
     "vav": {
         "he": "ו",
-        "en": "Vav [ו]",
+        "en": "Vav",
         "trans": "Vav"
     },
     "hey [ה]": {
         "he": "ה",
-        "en": "",
-        "trans": "Hey [ה]"
+        "en": "Hey",
+        "trans": "Hey"
     },
     "vav [ו]": {
         "he": "ו",
-        "en": "",
-        "trans": "Vav [ו]"
+        "en": "Vav",
+        "trans": "Vav"
     },
     "aleph [א]": {
         "he": "א",
-        "en": "",
-        "trans": "Aleph [א]"
+        "en": "Aleph",
+        "trans": "Aleph"
     },
     "tav [ת]": {
         "he": "ת",
-        "en": "",
-        "trans": "Tav [ת]"
+        "en": "Tav",
+        "trans": "Tav"
     },
     "yodin [י]": {
         "he": "יודין",
-        "en": "",
-        "trans": "Yodin [י]"
+        "en": "Yodin",
+        "trans": "Yodin"
     },
     "yudin [י]": {
         "he": "יודין",
-        "en": "",
-        "trans": "Yudin [י]"
+        "en": "Yodin",
+        "trans": "Yudin"
     },
     "alephin [א]": {
         "he": "אלפין",
-        "en": "",
-        "trans": "Alephin [א]"
+        "en": "Alephin",
+        "trans": "Alephin"
     },
     "heyin [ה]": {
         "he": "היין",
-        "en": "",
-        "trans": "Heyin [ה]"
+        "en": "Heyin",
+        "trans": "Heyin"
     },
     "yud havayah": {
         "he": "י׳ הויה",
