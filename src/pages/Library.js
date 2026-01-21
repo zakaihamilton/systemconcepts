@@ -29,6 +29,7 @@ export default function Library() {
     const [tags, setTags] = useState([]);
     const [content, setContent] = useState(null);
     const [selectedTag, setSelectedTag] = useState(null);
+    const [loading, setLoading] = useState(false);
     const translations = useTranslations();
     const pathItems = usePathItems();
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -36,8 +37,8 @@ export default function Library() {
     const [isHeaderHidden, setIsHeaderHidden] = useState(false);
     const [customOrder, setCustomOrder] = useState({});
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
-    const contentCacheRef = useRef(new Map());
-    const fileCacheRef = useRef(new Map());
+
+
 
     const contentRef = React.useRef(null);
     const handleScroll = useCallback((e) => {
@@ -61,6 +62,10 @@ export default function Library() {
     }, []);
 
     const onSelect = useCallback((tag) => {
+        if (!selectedTag || tag._id !== selectedTag._id) {
+            setLoading(true);
+            setContent(null);
+        }
         setSelectedTag(tag);
         const hierarchy = getTagHierarchy(tag);
         if (hierarchy.length > 0) {
@@ -70,14 +75,16 @@ export default function Library() {
         LibraryStore.update(s => {
             s.lastViewedArticle = tag;
         });
-    }, [getTagHierarchy]);
+    }, [getTagHierarchy, selectedTag]);
 
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
             const urlPath = pathItems.slice(1).join("|");
             const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
-            if (tag) {
-                setTimeout(() => setSelectedTag(tag), 0);
+            if (tag && (!selectedTag || tag._id !== selectedTag._id)) {
+                setLoading(true);
+                setContent(null);
+                setSelectedTag(tag);
                 // Remember the last viewed article
                 LibraryStore.update(s => {
                     s.lastViewedArticle = tag;
@@ -93,7 +100,7 @@ export default function Library() {
                 }
             }
         }
-    }, [tags, pathItems, getTagHierarchy, onSelect]);
+    }, [tags, pathItems, getTagHierarchy, onSelect, selectedTag]);
 
     const loadTags = useCallback(async () => {
         try {
@@ -137,24 +144,19 @@ export default function Library() {
             return;
         }
 
-        // Check content cache first
-        const cacheKey = selectedTag._id;
-        if (contentCacheRef.current.has(cacheKey)) {
-            setContent(contentCacheRef.current.get(cacheKey));
-            return;
-        }
+
+
+        setLoading(true);
+        setContent(null);
+        await new Promise(r => setTimeout(r, 0));
 
         try {
             const filePath = makePath(LIBRARY_LOCAL_PATH, selectedTag.path);
             let data;
 
-            // Check file cache
-            if (fileCacheRef.current.has(filePath)) {
-                data = fileCacheRef.current.get(filePath);
-            } else if (await storage.exists(filePath)) {
+            if (await storage.exists(filePath)) {
                 const fileContent = await storage.readFile(filePath);
                 data = JSON.parse(fileContent);
-                fileCacheRef.current.set(filePath, data);
             } else {
                 setContent("File not found.");
                 return;
@@ -168,11 +170,12 @@ export default function Library() {
             }
 
             const contentText = item ? item.text : "Content not found in file.";
-            contentCacheRef.current.set(cacheKey, contentText);
             setContent(contentText);
         } catch (err) {
             console.error("Failed to load content:", err);
             setContent("Error loading content.");
+        } finally {
+            setLoading(false);
         }
     }, [selectedTag]);
 
@@ -190,8 +193,8 @@ export default function Library() {
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
             // Clear caches when library is updated
-            contentCacheRef.current.clear();
-            fileCacheRef.current.clear();
+
+
             setTimeout(() => {
                 loadTags();
                 loadCustomOrder();
@@ -446,6 +449,7 @@ export default function Library() {
                 handleScroll={handleScroll}
                 contentRef={contentRef}
                 openEditContentDialog={openEditContentDialog}
+                loading={loading}
             />
 
             {isAdmin && selectedTag && (
@@ -468,8 +472,6 @@ export default function Library() {
                     content={content}
                     setContent={(newContent) => {
                         setContent(newContent);
-                        // Clear content cache so next load gets fresh data
-                        contentCacheRef.current.delete(selectedTag._id);
                     }}
                 />
             )}

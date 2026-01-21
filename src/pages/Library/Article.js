@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Tooltip from "@mui/material/Tooltip";
+import CircularProgress from "@mui/material/CircularProgress";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import CodeIcon from "@mui/icons-material/Code";
@@ -45,6 +46,7 @@ function Article({
     handleScroll,
     contentRef,
     openEditContentDialog,
+    loading
 }) {
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
@@ -422,6 +424,24 @@ function Article({
     };
 
     const title = getTitle();
+
+    if (loading) {
+        return (
+            <Box
+                component="main"
+                className={styles.root}
+                sx={{
+                    ml: { sm: 2 },
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     if (!content && showPlaceholder) {
         return (
