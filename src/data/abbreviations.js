@@ -63,4 +63,20 @@ export const abbreviations = {
         eng: "Yisrael Saba, Tevuna",
         heb: "ישראל סבא, תבונה"
     },
+    "NRNHY": {
+        eng: "Nefesh, Ruach, Neshamah, Chayah, Yechidah",
+        heb: "נפש, רוח, נשמה, חיה, יחידה"
+    },
+    "NRNH": {
+        eng: "Nefesh, Ruach, Neshamah, Chayah",
+        heb: "נפש, רוח, נשמה, חיה"
+    },
+    "NRN": {
+        eng: "Nefesh, Ruach, Neshamah",
+        heb: "נפש, רוח, נשמה"
+    },
+    "NR": {
+        eng: "Nefesh, Ruach",
+        heb: "נפש, רוח"
+    }
 };
