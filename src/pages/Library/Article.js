@@ -337,10 +337,10 @@ function Article({
         }
         let items = [
             {
-                id: "export",
-                name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
-                icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
-                onClick: showMarkdown ? handlePrint : handleExport,
+                id: "toggleAbbreviations",
+                name: showAbbreviations ? translations.SHOW_FULL_TERMS : translations.SHOW_ABBREVIATIONS,
+                icon: <LibraryBooksIcon />,
+                onClick: () => setShowAbbreviations(prev => !prev),
                 menu: true
             },
             {
@@ -348,33 +348,13 @@ function Article({
                 name: showMarkdown ? translations.VIEW_PLAIN_TEXT : translations.VIEW_MARKDOWN,
                 icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
                 onClick: () => setShowMarkdown(prev => !prev),
-                menu: true
-            },
-            {
-                id: "toggleAbbreviations",
-                name: showAbbreviations ? translations.SHOW_FULL_TERMS : translations.SHOW_ABBREVIATIONS,
-                icon: <LibraryBooksIcon />,
-                onClick: () => setShowAbbreviations(prev => !prev),
-                menu: true
+                menu: true,
+                divider: true
             }
         ];
         if (isAdmin) {
             items = [
                 ...items,
-                {
-                    id: "editTags",
-                    name: translations.EDIT_TAGS,
-                    icon: <EditIcon />,
-                    onClick: openEditDialog,
-                    menu: true
-                },
-                {
-                    id: "editArticle",
-                    name: translations.EDIT_ARTICLE,
-                    icon: <ArticleIcon />,
-                    onClick: openEditContentDialog,
-                    menu: true
-                },
                 {
                     id: "jumpToParagraph",
                     name: translations.JUMP_TO,
@@ -387,10 +367,33 @@ function Article({
                     name: translations.ARTICLE_TERMS,
                     icon: <MenuBookIcon />,
                     onClick: handleShowTerms,
+                    menu: true,
+                    divider: true
+                },
+                {
+                    id: "editTags",
+                    name: translations.EDIT_TAGS,
+                    icon: <EditIcon />,
+                    onClick: openEditDialog,
                     menu: true
+                },
+                {
+                    id: "editArticle",
+                    name: translations.EDIT_ARTICLE,
+                    icon: <ArticleIcon />,
+                    onClick: openEditContentDialog,
+                    menu: true,
+                    divider: true
                 }
             ];
         }
+        items.push({
+            id: "export",
+            name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
+            icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
+            onClick: showMarkdown ? handlePrint : handleExport,
+            menu: true
+        });
         if (search && totalMatches > 0) {
             items = [
                 ...items,
