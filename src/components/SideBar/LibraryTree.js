@@ -396,6 +396,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                                     onClick={() => setFilterText("")}
                                     edge="end"
                                     sx={{ mr: -0.5 }}
+                                    aria-label={translations.CLEAR_FILTER}
                                 >
                                     <ClearIcon fontSize="small" />
                                 </IconButton>
