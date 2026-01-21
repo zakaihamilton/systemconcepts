@@ -1,0 +1,204 @@
+.dialogBody {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    /* Important for nested flex scroll */
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    background-color: var(--background-default);
+    border-right: 1px solid var(--divider);
+    overflow-y: auto;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+
+    &::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+    }
+}
+
+.letterLink {
+    cursor: pointer;
+    padding: 2px 0;
+    color: var(--text-secondary);
+    font-weight: bold;
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+    transition: color 0.2s;
+
+    &:hover,
+    &.active {
+        color: var(--primary-main);
+        background-color: var(--action-hover);
+    }
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 !important;
+    /* Override MUI default padding to control it internally or allows list to touch edges */
+
+    /* We want the scrollbar to be on the content */
+}
+
+.list {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.titleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 16px;
+    /* Adjust for close button if present or general spacing */
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    background-color: var(--main-background);
+    border-radius: 0.5em;
+    padding: 0;
+    margin-left: 16px;
+    flex: 1;
+    max-width: 250px;
+    height: 3em;
+    position: relative;
+    overflow: hidden;
+
+    .searchIcon {
+        padding: 0.5em;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--input-icon-color);
+        width: 3em;
+        flex-shrink: 0;
+    }
+
+    .searchInput {
+        border: none;
+        background: transparent;
+        outline: none;
+        color: inherit;
+        font-size: 1rem;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding-right: 0.5em;
+
+        &::placeholder {
+            color: var(--text-secondary);
+        }
+    }
+
+    .clearButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-right: 8px;
+        transition: opacity 0.2s ease;
+        opacity: 1;
+
+        &.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+}
+
+.termPrimary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.termLabel {
+    font-weight: bold !important;
+    margin-right: 4px;
+}
+
+.categoryBadge {
+    display: inline-block;
+    background: #eee;
+    color: #333;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.phaseBadge {
+    display: inline-block;
+    color: #000;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.termSecondary {
+    margin-top: 4px;
+}
+
+.translationBlock {
+    margin-bottom: 4px;
+}
+
+.hebrewTranslation {
+    margin-left: 8px;
+    direction: rtl;
+}
+
+.paragraphContainer {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    /* Allows wrapping */
+    gap: 4px;
+    align-items: center;
+}
+
+.paragraphBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding: 0 6px;
+    min-width: 24px;
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--primary-main);
+    font-size: 0.75rem;
+    background-color: var(--action-hover);
+    border: 1px solid var(--divider);
+    border-radius: 6px;
+    font-family: monospace;
+    text-align: center;
+    opacity: 0.7;
+    user-select: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+        opacity: 1;
+        background-color: var(--primary-main);
+        color: var(--primary-contrast-text);
+        border-color: var(--primary-main);
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
+}

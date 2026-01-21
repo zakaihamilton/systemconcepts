@@ -12,41 +12,97 @@ export function scanForTerms(text) {
     if (!text || typeof text !== 'string') return [];
 
     const foundTerms = new Map();
-    let match;
 
     // Reset lastIndex because we are using a global regex
     termPattern.lastIndex = 0;
 
-    // Clean text similar to Markdown.js (optional but recommended for accuracy)
-    let cleanText = text;
-    cleanText = cleanText.replace(/\u00A0/g, ' ');
-    cleanText = cleanText.replace(/\u200B/g, '');
+    // Split text into lines (potential paragraphs)
+    // We split by any newline sequence to catch all lines
+    const lines = text.split(/\r?\n/);
 
-    while ((match = termPattern.exec(cleanText)) !== null) {
-        const term = match[0];
-        const start = match.index;
+    let paragraphIndex = 0;
 
-        // Skip lowercase 'or'
-        if (term === 'or') {
-            continue;
+    lines.forEach((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        // Determine if this line is a "Paragraph" that gets an index in the UI
+        // Logic must match Markdown.js rendering behavior
+
+        let isParagraph = true;
+
+        // 1. Check for Explicit Headers (#)
+        if (/^#+\s/.test(trimmed)) {
+            isParagraph = false;
         }
-        // Skip 'Or' at the start of a sentence
-        if (term === 'Or') {
-            const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(cleanText.slice(0, start));
-            if (isStartOfSentence) {
-                continue;
+
+        // 2. Check for Bullet Lists (*, -, +). Note: Numbered lists are converted to paragraphs in Markdown.js, so they COUNT.
+        // We ensure it's a list marker followed by space
+        else if (/^[\*\-\+]\s/.test(trimmed)) {
+            isParagraph = false;
+        }
+
+        // 3. Check for Heuristic Headers (matches Markdown.js logic)
+        // Start of line, Uppercase, No period at end, < 80 chars
+        // Negative lookahead for #, -, *, digit to ensure not already a header or list
+        else if (/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(?:\r?\n|$)/.test(line)) {
+            // Strictly check the same conditions as Markdown.js
+            if (!trimmed.endsWith('.') && trimmed.length <= 80) {
+                isParagraph = false;
             }
         }
 
-        const lowerTerm = term.toLowerCase();
-        if (glossary[lowerTerm]) {
-            foundTerms.set(lowerTerm, glossary[lowerTerm]);
+        if (!isParagraph) {
+            // If it's not a paragraph (e.g. Header), we skip associating it with a number
+            // because the UI doesn't assign indices to headers, so we can't jump to them.
+            return;
         }
-    }
+
+        paragraphIndex++;
+        const currentParagraphNumber = paragraphIndex;
+
+        // Clean text similar to Markdown.js
+        let cleanText = line;
+        cleanText = cleanText.replace(/\u00A0/g, ' ');
+        cleanText = cleanText.replace(/\u200B/g, '');
+
+        // Reset regex for each line
+        const localTermPattern = new RegExp(termPattern);
+        let match;
+
+        while ((match = localTermPattern.exec(cleanText)) !== null) {
+            const term = match[0];
+            const start = match.index;
+
+            // Skip lowercase 'or'
+            if (term === 'or') {
+                continue;
+            }
+            // Skip 'Or' at the start of a sentence
+            if (term === 'Or') {
+                const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(cleanText.slice(0, start));
+                if (isStartOfSentence) {
+                    continue;
+                }
+            }
+
+            const lowerTerm = term.toLowerCase();
+            if (glossary[lowerTerm]) {
+                if (!foundTerms.has(lowerTerm)) {
+                    foundTerms.set(lowerTerm, { ...glossary[lowerTerm], paragraphs: new Set() });
+                }
+                foundTerms.get(lowerTerm).paragraphs.add(currentParagraphNumber);
+            }
+        }
+    });
 
     // Convert Map to Array and sort by term name
     return Array.from(foundTerms.entries())
-        .map(([key, entry]) => ({ term: key, ...entry }))
+        .map(([key, entry]) => ({
+            term: key,
+            ...entry,
+            paragraphs: Array.from(entry.paragraphs).sort((a, b) => a - b)
+        }))
         .sort((a, b) => a.term.localeCompare(b.term));
 }
 

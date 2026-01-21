@@ -686,6 +686,7 @@ function Article({
                     open={termsDialogOpen}
                     onClose={() => setTermsDialogOpen(false)}
                     terms={articleTerms}
+                    onJump={(paragraph) => handleJump('paragraph', paragraph)}
                 />
             </Box>
         </Box >
