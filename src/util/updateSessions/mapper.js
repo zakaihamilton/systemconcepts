@@ -24,7 +24,9 @@ export function createSessionItem(id, fileList, yearName, groupName, sessionTags
         return null;
     }
 
-    const ai = !imageFile && (sessionName.endsWith(" - AI") || sessionName.startsWith("Overview - "));
+    const isOverview = sessionName.startsWith("Overview - ");
+    const isAi = !imageFile && sessionName.endsWith(" - AI");
+    const ai = isOverview || isAi;
     const key = groupName + "_" + id;
 
     const item = {
