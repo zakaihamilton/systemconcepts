@@ -21,6 +21,7 @@ import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { abbreviations } from "../../data/abbreviations";
 import { useLanguage } from "@util/language";
+import { useLocalStorage } from "@util/hooks";
 import styles from "./Article.module.scss";
 
 
@@ -58,7 +59,7 @@ function Article({
     const [totalMatches, setTotalMatches] = useState(0);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(true);
-    const [showAbbreviations, setShowAbbreviations] = useState(true);
+    const [showAbbreviations, setShowAbbreviations] = useLocalStorage("showAbbreviations", true);
     const language = useLanguage();
     const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
     const scrollTimeoutRef = useRef(null);
