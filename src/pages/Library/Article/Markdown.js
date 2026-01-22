@@ -545,6 +545,11 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                 >
                     {processedChildren}
                 </ReactMarkdown>
+                <Box className={styles.endOfArticle}>
+                    <Box className={styles.endOfArticleLine} />
+                    <Box className={styles.endOfArticleOrnament}>✦</Box>
+                    <Box className={styles.endOfArticleLine} />
+                </Box>
             </div>
 
             <Zoom

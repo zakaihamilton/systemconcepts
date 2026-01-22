@@ -634,6 +634,7 @@ function Article({
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
                     <Box
                         key={i}
+                        className={styles.pageSeparator}
                         sx={{
                             position: 'absolute',
                             top: (i + 1) * scrollInfo.clientHeight,

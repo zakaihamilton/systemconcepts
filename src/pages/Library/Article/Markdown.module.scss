@@ -233,6 +233,30 @@
     color: #000 !important;
 }
 
+// End of Article Separator
+.endOfArticle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 48px 0 24px;
+    gap: 16px;
+    pointer-events: none;
+    user-select: none;
+}
+
+.endOfArticleLine {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--text-secondary), transparent);
+}
+
+.endOfArticleOrnament {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    opacity: 0.6;
+}
+
 @media print {
     .glossary-term-container {
         line-height: 2.2;
@@ -247,5 +271,10 @@
     .paragraph {
         line-height: 2.0;
         padding: 12px 16px;
+    }
+
+    .paragraphNumber,
+    .paragraphBadge {
+        display: none !important;
     }
 }
