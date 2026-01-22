@@ -7,11 +7,14 @@ import { glossary } from '@data/glossary';
 import { termPattern, PHASE_COLORS, getStyleInfo } from "./GlossaryUtils";
 import styles from './Markdown.module.scss';
 import Zoom from "./Zoom";
-
+import { LibraryStore } from "../Store";
+import { setPath } from "@util/pages";
+import { LibraryTagKeys } from "../Icons";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
 import clsx from "clsx";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 
 
@@ -209,6 +212,245 @@ const Term = ({ term, entry, search }) => {
 
 Term.displayName = "Term";
 
+// Word-to-number mapping for chapter references
+const wordToNumber = {
+    'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+    'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+    'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+    'first': 1, 'second': 2, 'third': 3, 'fourth': 4, 'fifth': 5,
+    'sixth': 6, 'seventh': 7, 'eighth': 8, 'ninth': 9, 'tenth': 10
+};
+
+// Reference pattern to detect cross-references like "Inner Reflection Chapter Nine, item 33"
+// Matches: [section name] Chapter [number/word], item [number]
+// Reference pattern to detect cross-references like "Inner Reflection Chapter Nine, item 33"
+// Matches: [Optional Section Name] Chapter [number/word], item [number]
+const referencePattern = /(?:([A-Z][A-Za-z]+(?:\s+(?:[A-Z][A-Za-z]+|of|the|in|and))*)\s+)?Chapter\s+(\w+)(?:,?\s*item\s+(\d+))?/g;
+
+// Find an article by partial tag matching
+const findArticleByReference = (tags, sectionName, chapterName, currentTag) => {
+    if (!tags || !Array.isArray(tags)) return null;
+
+    // Clean up the section name (remove trailing " in" which might be captured)
+    let cleanSection = sectionName.trim();
+    if (cleanSection.toLowerCase().endsWith(' in')) {
+        cleanSection = cleanSection.slice(0, -3).trim();
+    }
+
+    const normalizedSection = cleanSection.toLowerCase();
+    const normalizedChapter = chapterName.toLowerCase().trim();
+
+    // Convert word to number if applicable
+    const chapterAsNumber = wordToNumber[normalizedChapter] || parseInt(normalizedChapter, 10);
+
+    // Resolve section aliases from glossary
+    const sectionAliases = [normalizedSection];
+    const glossaryEntry = glossary[normalizedSection];
+    if (glossaryEntry) {
+        if (glossaryEntry.en) sectionAliases.push(glossaryEntry.en.toLowerCase());
+        if (glossaryEntry.trans) sectionAliases.push(glossaryEntry.trans.toLowerCase());
+    }
+
+    // Look for matching article
+    return tags.find(tag => {
+        // Book Constraint: Must be in the same book
+        if (currentTag?.book && tag.book && tag.book !== currentTag.book) {
+            return false;
+        }
+
+        // Check if section matches (partial match)
+        const tagSection = (tag.section || '').toLowerCase();
+
+        // Must have a section tag to match against
+        if (!tagSection) return false;
+        // Check match against any known alias of the section name
+        const sectionMatch = sectionAliases.some(alias =>
+            tagSection.includes(alias) || alias.includes(tagSection)
+        );
+
+        if (!sectionMatch) {
+            return false;
+        }
+
+        // Check if chapter matches (word or number)
+        const tagChapter = (tag.chapter || '').toLowerCase();
+
+        // If the tag has no chapter, it cannot match a specific chapter request
+        if (!tagChapter && normalizedChapter) {
+            return false;
+        }
+
+        const tagChapterNumber = wordToNumber[tagChapter.replace(/chapter\s+/i, '').trim()] ||
+            parseInt(tagChapter.replace(/\D/g, ''), 10);
+
+        if (tagChapter.includes(normalizedChapter) ||
+            (tagChapter && normalizedChapter.includes(tagChapter.replace(/chapter\s+/i, '').trim()))) {
+            // Match same part if current tag has a part
+            if (currentTag?.part && tag.part && tag.part !== currentTag.part) {
+                return false;
+            }
+            return true;
+        }
+
+        if (!isNaN(chapterAsNumber) && !isNaN(tagChapterNumber) && chapterAsNumber === tagChapterNumber) {
+            // Match same part if current tag has a part
+            if (currentTag?.part && tag.part && tag.part !== currentTag.part) {
+                return false;
+            }
+            return true;
+        }
+
+        return false;
+    });
+};
+
+// Generate the navigation path for a tag
+const getTagHierarchy = (tag) => {
+    const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
+    if (tag.number && hierarchy.length > 0) {
+        hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}:${tag.number}`;
+    }
+    return hierarchy;
+};
+
+// Component to render text with glossary terms (fully interactive)
+const TextWithTerms = ({ text }) => {
+    const parts = [];
+    let lastIndex = 0;
+    termPattern.lastIndex = 0;
+    let match;
+
+    while ((match = termPattern.exec(text)) !== null) {
+        const term = match[0];
+        let start = match.index;
+        let end = start + term.length;
+
+        const glossaryEntry = glossary[term.toLowerCase()];
+
+        // Check for following parenthetical
+        const textAfter = text.slice(end);
+        const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(textAfter);
+        if (parentheticalMatch) {
+            const content = parentheticalMatch[1].trim().toLowerCase();
+            const mainText = (glossaryEntry?.en || glossaryEntry?.trans || term).toLowerCase();
+            if (content === mainText || content === term.toLowerCase()) {
+                end += parentheticalMatch[0].length;
+            }
+        }
+
+        if (start > lastIndex) {
+            parts.push(text.slice(lastIndex, start));
+        }
+
+        // Render fully interactive Term component
+        parts.push(
+            <Term
+                key={start}
+                term={term}
+                entry={glossaryEntry}
+            />
+        );
+
+        lastIndex = end;
+    }
+
+    if (lastIndex < text.length) {
+        parts.push(text.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+};
+
+// ReferenceLink component for clickable cross-references
+const ReferenceLink = ({ text, sectionName, chapterName, itemNumber, currentTag }) => {
+    const translations = useTranslations();
+    const tags = LibraryStore.useState(s => s.tags);
+
+    const handleClick = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const targetArticle = findArticleByReference(tags, sectionName, chapterName, currentTag);
+        if (targetArticle) {
+            const hierarchy = getTagHierarchy(targetArticle);
+            if (hierarchy.length > 0) {
+                if (itemNumber) {
+                    // Update URL hash for deep linking
+                    const lastIndex = hierarchy.length - 1;
+                    const lastPart = hierarchy[lastIndex];
+                    // Remove existing : suffix (or #/! if handling legacy)
+                    const baseUrl = lastPart.split(/[:#!]/)[0];
+                    hierarchy[lastIndex] = `${baseUrl}:${itemNumber}`;
+
+                    // Also store in state for component-level handling
+                    LibraryStore.update(s => {
+                        s.scrollToParagraph = parseInt(itemNumber, 10);
+                    });
+                }
+                setPath("library", ...hierarchy);
+            }
+        }
+    }, [tags, sectionName, chapterName, itemNumber, currentTag]);
+
+    const targetArticle = findArticleByReference(tags, sectionName, chapterName, currentTag);
+
+    if (!targetArticle) {
+        // No matching article found, render as plain text (with terms)
+        return <TextWithTerms text={text} />;
+    }
+
+    // Build tooltip content from target article tags
+    const tooltipContent = (
+        <React.Fragment>
+            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{translations?.NAVIGATE_TO || "Jump to:"}</div>
+            {LibraryTagKeys.map(key => {
+                if (!targetArticle[key] || key === "number" || key === "title") return null;
+                return (
+                    <div key={key}>
+                        <span style={{ color: '#aaa' }}>{key.charAt(0).toUpperCase() + key.slice(1)}:</span> {targetArticle[key]}
+                    </div>
+                );
+            })}
+            {itemNumber && (
+                <div>
+                    <span style={{ color: '#aaa' }}>Item:</span> {itemNumber}
+                </div>
+            )}
+        </React.Fragment>
+    );
+
+    return (
+        <span className={styles['reference-container']}>
+            <TextWithTerms text={text} />
+            <Tooltip title={tooltipContent} arrow>
+                <span
+                    onClick={handleClick}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        verticalAlign: 'middle',
+                        marginLeft: '6px',
+                        marginTop: '-3px', // Make the arrow higher
+                        cursor: 'pointer',
+                        color: 'var(--primary-main)',
+                        border: '1px solid var(--primary-main)',
+                        borderRadius: '50%',
+                        width: '18px',
+                        height: '18px',
+                        padding: '1px'
+                    }}
+                >
+                    <ArrowForwardIcon style={{ fontSize: '0.9rem' }} />
+                </span>
+            </Tooltip>
+        </span>
+    );
+};
+
+ReferenceLink.displayName = "ReferenceLink";
+
 const rehypeArticleEnrichment = () => {
     return (tree) => {
         let paragraphIndex = 0;
@@ -263,7 +505,7 @@ const rehypeArticleEnrichment = () => {
 };
 
 
-export default React.memo(function Markdown({ children, search, currentTTSParagraph }) {
+export default React.memo(function Markdown({ children, search, currentTTSParagraph, selectedTag }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -374,82 +616,142 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                 cleanChildren = cleanChildren.replace(/,[\s,]+,/g, ',');
             }
 
-            const parts = [];
-            let lastIndex = 0;
-            let match;
+            // First pass: find all cross-references
+            const references = [];
+            referencePattern.lastIndex = 0;
+            let refMatch;
+            while ((refMatch = referencePattern.exec(cleanChildren)) !== null) {
+                references.push({
+                    text: refMatch[0],
+                    sectionName: refMatch[1].trim(),
+                    chapterName: refMatch[2],
+                    itemNumber: refMatch[3] || null,
+                    start: refMatch.index,
+                    end: refMatch.index + refMatch[0].length
+                });
+            }
 
-            // Reset lastIndex for the global regex because we are reusing it
-            termPattern.lastIndex = 0;
+            // Process text: split by references, then apply glossary to non-reference parts
+            const processGlossary = (text, keyPrefix) => {
+                const parts = [];
+                let lastIndex = 0;
+                termPattern.lastIndex = 0;
+                let match;
 
-            while ((match = termPattern.exec(cleanChildren)) !== null) {
-                const term = match[0];
-                let start = match.index;
-                let end = start + term.length;
+                while ((match = termPattern.exec(text)) !== null) {
+                    const term = match[0];
+                    let start = match.index;
+                    let end = start + term.length;
 
-                const glossaryEntry = glossary[term.toLowerCase()];
+                    const glossaryEntry = glossary[term.toLowerCase()];
 
-                // Check for following parenthetical that matches the term translation
-                // This handles cases like "Head (head)" or "Term (Translated Term)"
-                const textAfter = cleanChildren.slice(end);
-                // Look for (content)
-                const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(textAfter);
-                if (parentheticalMatch) {
-                    const content = parentheticalMatch[1].trim().toLowerCase();
-                    const mainText = (glossaryEntry?.en || glossaryEntry?.trans || term).toLowerCase();
-
-                    // If the parenthetical content roughly matches the translation/term
-                    if (content === mainText || content === term.toLowerCase()) {
-                        // Consume the parenthetical
-                        end += parentheticalMatch[0].length;
+                    // Check for following parenthetical
+                    const textAfter = text.slice(end);
+                    const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(textAfter);
+                    if (parentheticalMatch) {
+                        const content = parentheticalMatch[1].trim().toLowerCase();
+                        const mainText = (glossaryEntry?.en || glossaryEntry?.trans || term).toLowerCase();
+                        if (content === mainText || content === term.toLowerCase()) {
+                            end += parentheticalMatch[0].length;
+                        }
                     }
+
+                    if (start > lastIndex) {
+                        parts.push(
+                            <Highlight key={`${keyPrefix}-text-${start}`}>
+                                {text.slice(lastIndex, start)}
+                            </Highlight>
+                        );
+                    }
+
+                    // Skip lowercase 'or'
+                    if (term === 'or') {
+                        lastIndex = start;
+                        continue;
+                    }
+                    // Skip 'Or' at the start of a sentence
+                    if (term === 'Or') {
+                        const isStartOfSentence = (start === 0) || /[\.!\?]\s+$/.test(text.slice(0, start));
+                        if (isStartOfSentence) {
+                            lastIndex = start;
+                            continue;
+                        }
+                    }
+                    parts.push(
+                        <Term
+                            key={`${keyPrefix}-gloss-${start}`}
+                            term={term}
+                            entry={glossaryEntry}
+                            search={search}
+                        />
+                    );
+
+                    lastIndex = end;
                 }
 
-                if (start > lastIndex) {
+                if (lastIndex < text.length) {
                     parts.push(
-                        <Highlight key={`text-${start}`}>
-                            {cleanChildren.slice(lastIndex, start)}
+                        <Highlight key={`${keyPrefix}-text-end`}>
+                            {text.slice(lastIndex)}
                         </Highlight>
                     );
                 }
 
-                // Skip lowercase 'or'
-                if (term === 'or') {
-                    lastIndex = start;
-                    continue;
-                }
-                // Skip 'Or' at the start of a sentence (sentence terminator + whitespace before it, or start of block)
-                if (term === 'Or') {
-                    const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(cleanChildren.slice(0, start));
-                    if (isStartOfSentence) {
-                        lastIndex = start;
-                        continue;
+                return parts.length > 0 ? parts : <Highlight>{text}</Highlight>;
+            };
+
+            // If no references, just process glossary
+            if (references.length === 0) {
+                return processGlossary(cleanChildren, 'main');
+            }
+
+            // Build parts array with references and glossary-processed text
+            const parts = [];
+            let lastRefEnd = 0;
+
+            references.forEach((ref, idx) => {
+                // Add text before this reference (processed for glossary)
+                if (ref.start > lastRefEnd) {
+                    const beforeText = cleanChildren.slice(lastRefEnd, ref.start);
+                    const glossaryParts = processGlossary(beforeText, `before-ref-${idx}`);
+                    if (Array.isArray(glossaryParts)) {
+                        parts.push(...glossaryParts);
+                    } else {
+                        parts.push(glossaryParts);
                     }
                 }
+
+                // Add the reference link
                 parts.push(
-                    <Term
-                        key={`gloss-${start}`}
-                        term={term}
-                        entry={glossaryEntry}
-                        search={search}
+                    <ReferenceLink
+                        key={`ref-${idx}`}
+                        text={ref.text}
+                        sectionName={ref.sectionName}
+                        chapterName={ref.chapterName}
+                        itemNumber={ref.itemNumber}
+                        currentTag={selectedTag}
                     />
                 );
 
-                lastIndex = end;
+                lastRefEnd = ref.end;
+            });
+
+            // Add remaining text after last reference
+            if (lastRefEnd < cleanChildren.length) {
+                const afterText = cleanChildren.slice(lastRefEnd);
+                const glossaryParts = processGlossary(afterText, 'after-ref');
+                if (Array.isArray(glossaryParts)) {
+                    parts.push(...glossaryParts);
+                } else {
+                    parts.push(glossaryParts);
+                }
             }
 
-            if (lastIndex < cleanChildren.length) {
-                parts.push(
-                    <Highlight key={`text-end`}>
-                        {cleanChildren.slice(lastIndex)}
-                    </Highlight>
-                );
-            }
-
-            return parts.length > 0 ? parts : <Highlight>{cleanChildren}</Highlight>;
+            return parts;
         }
 
         return children;
-    }, [Highlight, search]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [Highlight, search, selectedTag]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });

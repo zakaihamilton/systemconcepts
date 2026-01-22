@@ -35,6 +35,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import Fab from "@mui/material/Fab";
 import Zoom from "@mui/material/Zoom";
+import { LibraryStore } from "./Store";
 
 registerToolbar("Article");
 
@@ -143,6 +144,18 @@ function Article({
         }, 1500);
     }, [updateScrollInfo]);
 
+    // Handle scroll to paragraph from cross-link navigation
+    const scrollToParagraph = LibraryStore.useState(s => s.scrollToParagraph);
+    useEffect(() => {
+        if (scrollToParagraph !== null && content) {
+            // Wait for content to render
+            setTimeout(() => {
+                handleJump('paragraph', scrollToParagraph);
+                LibraryStore.update(s => { s.scrollToParagraph = null; });
+            }, 500);
+        }
+    }, [scrollToParagraph, content, handleJump]);
+
     useEffect(() => {
         const element = contentRef.current;
         if (!element) return;
@@ -158,6 +171,50 @@ function Article({
 
         return () => observer.disconnect();
     }, [content, updateScrollInfo, contentRef]);
+
+    // Update URL hash when clicking a paragraph
+    useEffect(() => {
+        const element = contentRef.current;
+        if (!element) return;
+
+        const handleClick = (e) => {
+            // Find closest paragraph with index
+            const paragraph = e.target.closest('[data-paragraph-index]');
+            if (paragraph) {
+                const index = paragraph.getAttribute('data-paragraph-index');
+                if (index) {
+                    // Replace history state to just update hash without scrolling or adding history
+                    const currentHash = window.location.hash;
+                    // Check if hash already ends with :number
+                    const separatorIndex = currentHash.lastIndexOf(':');
+                    let newHash = currentHash;
+
+                    // Check if we found a colon after the last slash
+                    const lastSlashIndex = currentHash.lastIndexOf('/');
+
+                    if (separatorIndex !== -1 && separatorIndex > lastSlashIndex) {
+                        const suffix = currentHash.substring(separatorIndex + 1);
+                        // Only replace if the suffix is numeric (indicating a paragraph ID)
+                        // If it's text (e.g. part of a title with a colon), we append instead
+                        if (/^\d+$/.test(suffix)) {
+                            newHash = currentHash.substring(0, separatorIndex) + ':' + index;
+                        } else {
+                            newHash = currentHash + ':' + index;
+                        }
+                    } else {
+                        newHash = currentHash + ':' + index;
+                    }
+
+                    if (currentHash !== newHash) {
+                        window.history.replaceState(null, null, newHash);
+                    }
+                }
+            }
+        };
+
+        element.addEventListener('click', handleClick);
+        return () => element.removeEventListener('click', handleClick);
+    }, [content, contentRef]);
 
     // Delay showing the placeholder to avoid flash during loading
     useEffect(() => {
@@ -661,7 +718,7 @@ function Article({
                 <Box className={styles.contentScrollArea}>
                     <Box className={styles.contentWrapper}>
                         {showMarkdown ? (
-                            <Markdown search={search} currentTTSParagraph={currentTTSParagraph}>
+                            <Markdown search={search} currentTTSParagraph={currentTTSParagraph} selectedTag={selectedTag}>
                                 {processedContent}
                             </Markdown>
                         ) : (

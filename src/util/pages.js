@@ -17,12 +17,12 @@ export function usePathItems() {
 }
 
 export function toPath(...path) {
-    const hash = path.map(item => encodeURIComponent(item)).join("/");
+    const hash = path.map(item => encodeURIComponent(item).replace(/%3A/g, ":")).join("/");
     return hash;
 }
 
 export function addPath(...path) {
-    const hash = window.location.hash + "/" + path.map(item => encodeURIComponent(item)).join("/");
+    const hash = window.location.hash + "/" + path.map(item => encodeURIComponent(item).replace(/%3A/g, ":")).join("/");
     setHash(hash);
 }
 
@@ -38,7 +38,7 @@ export function setPath(...path) {
         if (item.startsWith("#")) {
             item = item.substring(1);
         }
-        return encodeURIComponent(item);
+        return encodeURIComponent(item).replace(/%3A/g, ":");
     }).join("/");
     setHash(hash);
 }
@@ -49,7 +49,7 @@ export function replacePath(...path) {
         hash = hash.substring(1);
     }
     hash = hash.split("/").filter(Boolean).slice(0, -1).join("/");
-    hash += "/" + path.map(item => encodeURIComponent(item)).join("/");
+    hash += "/" + path.map(item => encodeURIComponent(item).replace(/%3A/g, ":")).join("/");
     setHash(hash);
 }
 

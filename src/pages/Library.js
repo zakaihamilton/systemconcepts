@@ -56,7 +56,7 @@ export default function Library() {
     const getTagHierarchy = useCallback((tag) => {
         const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
         if (tag.number && hierarchy.length > 0) {
-            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}#${tag.number}`;
+            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}:${tag.number}`;
         }
         return hierarchy;
     }, []);
@@ -80,7 +80,58 @@ export default function Library() {
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
             const urlPath = pathItems.slice(1).join("|");
-            const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
+            // Try explicit match first
+            let tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
+
+            // If no match, check for paragraph suffix (e.g. :8)
+            let paragraphId = null;
+            if (!tag) {
+                const parts = urlPath.split('|');
+                const lastPart = parts[parts.length - 1];
+                const lastSepIndex = lastPart.lastIndexOf(':');
+                if (lastSepIndex !== -1) {
+                    const possibleParagraph = lastPart.slice(lastSepIndex + 1);
+                    if (!isNaN(parseInt(possibleParagraph, 10))) {
+                        paragraphId = parseInt(possibleParagraph, 10);
+                        // Try matching removing the suffix, or treating suffix as just tag number if it was replaced
+                        // Scenario 1: Suffix REPLACED tag number. Base matches?
+                        // Scenario 2: Suffix APPENDED?
+
+                        // We will iterate tags and see if any hierarchy matches the URL base
+                        // But finding "base" is tricky if we don't know if original had number suffix.
+
+                        // Let's assume URL replaces tag number with paragraph number (as per Markdown.js logic)
+                        // So we look for tag where hierarchy WITHOUT number suffix matches URL base part.
+
+                        // Simpler strategy: Iterate all tags. For each, generate hierarchy.
+                        // Check if URL matches hierarchy but replacing last suffix with paragraph ID.
+
+                        tag = tags.find(t => {
+                            const h = getTagHierarchy(t);
+                            const hStr = h.join("|");
+
+                            // Check if current URL matches this tag's hierarchy EXCEPT for the last number
+                            // urlPath: ...|Chapter One:33
+                            // tagPath: ...|Chapter One:9
+
+                            const urlLastSep = urlPath.lastIndexOf(':');
+                            const urlBase = urlLastSep !== -1 ? urlPath.substring(0, urlLastSep) : urlPath;
+
+                            if (hStr === urlPath) return true;
+                            // Check if the tag matches the URL base (i.e. URL has extra paragraph suffix that tag doesn't have)
+                            if (hStr === urlBase) return true;
+
+                            const tagLastSep = hStr.lastIndexOf(':');
+                            if (tagLastSep !== -1) {
+                                const tagBase = hStr.substring(0, tagLastSep);
+                                if (tagBase === urlBase) return true;
+                            }
+                            return false;
+                        });
+                    }
+                }
+            }
+
             if (tag && (!selectedTag || tag._id !== selectedTag._id)) {
                 setLoading(true);
                 setContent(null);
@@ -88,6 +139,15 @@ export default function Library() {
                 // Remember the last viewed article
                 LibraryStore.update(s => {
                     s.lastViewedArticle = tag;
+                    if (paragraphId) {
+                        s.scrollToParagraph = paragraphId;
+                    }
+                });
+            } else if (tag && paragraphId) {
+                // Tag already selected, but ensure we scroll if needed (e.g. navigating between paragraphs? No, that's hash)
+                // But on Refresh, we might need to set it.
+                LibraryStore.update(s => {
+                    s.scrollToParagraph = paragraphId;
                 });
             }
         } else if (tags.length > 0 && pathItems.length === 1 && pathItems[0] === "library") {
