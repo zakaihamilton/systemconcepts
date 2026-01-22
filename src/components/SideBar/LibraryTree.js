@@ -4,6 +4,7 @@ import List from "@mui/material/List";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import ClearIcon from "@mui/icons-material/Clear";
 import TreeItem from "@pages/Library/TreeItem";
@@ -148,7 +149,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
         let filteredTags = tags;
         if (debouncedFilterText) {
             const lowerFilter = debouncedFilterText.toLowerCase();
-            const keysToSearch = [...LibraryTagKeys, "number"];
+            const keysToSearch = [...LibraryTagKeys.filter(k => k !== "author"), "number"];
             const terms = lowerFilter.split(/\s+/).filter(Boolean);
 
             filteredTags = tags.filter(tag => {
@@ -391,15 +392,17 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                         ),
                         endAdornment: filterText ? (
                             <InputAdornment position="end">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => setFilterText("")}
-                                    edge="end"
-                                    sx={{ mr: -0.5 }}
-                                    aria-label={translations.CLEAR_FILTER}
-                                >
-                                    <ClearIcon fontSize="small" />
-                                </IconButton>
+                                <Tooltip title={translations.CLEAR_FILTER || "Clear filter"}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => setFilterText("")}
+                                        edge="end"
+                                        sx={{ mr: -0.5 }}
+                                        aria-label={translations.CLEAR_FILTER}
+                                    >
+                                        <ClearIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
                             </InputAdornment>
                         ) : null
                     }}
