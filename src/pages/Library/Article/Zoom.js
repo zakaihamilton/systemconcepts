@@ -41,7 +41,7 @@ export default function Zoom({ open, onClose, content, number, badgeClass, Rende
         >
             <DialogContent className={styles.root}>
                 <Box className={styles.itemWrapper}>
-                    {number && <span className={badgeClass}>{number}</span>}
+                    {number && <span className={`${badgeClass} ${styles.badge}`}>{number}</span>}
                     <Tooltip title={translations.COPY} arrow>
                         <IconButton className={styles.copyButton} onClick={handleCopy} size="small">
                             <ContentCopyIcon fontSize="small" />

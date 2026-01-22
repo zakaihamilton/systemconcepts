@@ -159,6 +159,12 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         background-color: var(--action-hover);
     }
+
+    &.suppressHover:hover {
+        border-color: transparent;
+        box-shadow: none;
+        background-color: var(--background-paper);
+    }
 }
 
 .selected {
@@ -201,11 +207,7 @@
     align-items: center;
     justify-content: center;
 
-    &:not(.selected) {
-        pointer-events: none;
-    }
-
-    &.selected:hover {
+    &:hover {
         opacity: 1;
         background-color: var(--primary-main);
         color: var(--primary-contrast-text);

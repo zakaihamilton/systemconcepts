@@ -245,8 +245,11 @@ export default function Library() {
 
     // Reset scroll position when article changes
     useEffect(() => {
-        if (selectedTag && contentRef.current) {
-            contentRef.current.scrollTop = 0;
+        if (selectedTag) {
+            setIsHeaderHidden(false);
+            if (contentRef.current) {
+                contentRef.current.scrollTop = 0;
+            }
         }
     }, [selectedTag?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 

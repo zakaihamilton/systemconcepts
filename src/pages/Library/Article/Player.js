@@ -3,7 +3,7 @@ import { useTranslations } from '@util/translations';
 import Controls from './Player/Controls';
 import { LibraryTagKeys } from '../Icons';
 
-export default function Player({ contentRef, onParagraphChange, selectedTag }) {
+export default function Player({ contentRef, onParagraphChange, selectedTag, currentParagraphIndex: externalParagraphIndex }) {
     const translations = useTranslations();
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
@@ -20,6 +20,13 @@ export default function Player({ contentRef, onParagraphChange, selectedTag }) {
     // NEW REFS FOR FIXING BUGS
     const prevVoiceRef = useRef(null);
     const isStoppingRef = useRef(false);
+
+    // Sync with external paragraph selection (from Article click)
+    useEffect(() => {
+        if (typeof externalParagraphIndex === 'number') {
+            setCurrentParagraphIndex(externalParagraphIndex);
+        }
+    }, [externalParagraphIndex]);
 
     // Initialize speech synthesis and load voices
     useEffect(() => {
@@ -328,25 +335,7 @@ export default function Player({ contentRef, onParagraphChange, selectedTag }) {
     }, [currentParagraphIndex, paragraphs.length, speakParagraph, isPlaying]);
 
     // Expose method to start from specific paragraph
-    useEffect(() => {
-        const handleParagraphClick = (event) => {
-            const target = event.target.closest('[data-paragraph-index]');
-            if (!target) return;
 
-            const index = parseInt(target.getAttribute('data-paragraph-index'), 10);
-            const paragraphIndex = paragraphs.findIndex(p => p.index === index);
-
-            if (paragraphIndex >= 0) {
-                speakParagraph(paragraphIndex, isPlaying);
-            }
-        };
-
-        const content = contentRef?.current;
-        if (content) {
-            content.addEventListener('click', handleParagraphClick);
-            return () => content.removeEventListener('click', handleParagraphClick);
-        }
-    }, [contentRef, paragraphs, speakParagraph, isPlaying]);
 
     // Restart playback when voice changes (FIXED)
     useEffect(() => {

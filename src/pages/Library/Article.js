@@ -80,6 +80,7 @@ function Article({
             if (type === 'paragraph') {
                 const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
                 if (element) {
+                    setCurrentTTSParagraph(value);
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     element.classList.add(styles.highlightedParagraph);
                     setTimeout(() => {
@@ -178,11 +179,17 @@ function Article({
         if (!element) return;
 
         const handleClick = (e) => {
+            // Check for excluded elements (links, buttons, interactive tools)
+            if (e.target.closest('a') || e.target.closest('[data-prevent-select]')) {
+                return;
+            }
+
             // Find closest paragraph with index
             const paragraph = e.target.closest('[data-paragraph-index]');
             if (paragraph) {
                 const index = paragraph.getAttribute('data-paragraph-index');
                 if (index) {
+                    setCurrentTTSParagraph(parseInt(index, 10));
                     // Replace history state to just update hash without scrolling or adding history
                     const currentHash = window.location.hash;
                     // Check if hash already ends with :number
@@ -215,6 +222,8 @@ function Article({
         element.addEventListener('click', handleClick);
         return () => element.removeEventListener('click', handleClick);
     }, [content, contentRef]);
+
+
 
     // Delay showing the placeholder to avoid flash during loading
     useEffect(() => {
@@ -744,6 +753,7 @@ function Article({
                         contentRef={contentRef}
                         onParagraphChange={handleTTSParagraphChange}
                         selectedTag={selectedTag}
+                        currentParagraphIndex={currentTTSParagraph}
                     />
                 )}
                 <JumpDialog

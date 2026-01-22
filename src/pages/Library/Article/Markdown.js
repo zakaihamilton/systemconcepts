@@ -233,23 +233,29 @@ const findArticleByReference = (tags, sectionName, chapterName, currentTag) => {
     if (!tags || !Array.isArray(tags)) return null;
 
     // Clean up the section name (remove trailing " in" which might be captured)
-    let cleanSection = sectionName.trim();
-    if (cleanSection.toLowerCase().endsWith(' in')) {
+    let cleanSection = sectionName ? sectionName.trim() : null;
+    if (cleanSection && cleanSection.toLowerCase().endsWith(' in')) {
         cleanSection = cleanSection.slice(0, -3).trim();
     }
 
-    const normalizedSection = cleanSection.toLowerCase();
-    const normalizedChapter = chapterName.toLowerCase().trim();
+    const normalizedSection = cleanSection ? cleanSection.toLowerCase() : null;
+    const normalizedChapter = chapterName ? chapterName.toLowerCase().trim() : '';
 
     // Convert word to number if applicable
     const chapterAsNumber = wordToNumber[normalizedChapter] || parseInt(normalizedChapter, 10);
 
     // Resolve section aliases from glossary
-    const sectionAliases = [normalizedSection];
-    const glossaryEntry = glossary[normalizedSection];
-    if (glossaryEntry) {
-        if (glossaryEntry.en) sectionAliases.push(glossaryEntry.en.toLowerCase());
-        if (glossaryEntry.trans) sectionAliases.push(glossaryEntry.trans.toLowerCase());
+    const sectionAliases = [];
+    if (normalizedSection) {
+        sectionAliases.push(normalizedSection);
+        const glossaryEntry = glossary[normalizedSection];
+        if (glossaryEntry) {
+            if (glossaryEntry.en) sectionAliases.push(glossaryEntry.en.toLowerCase());
+            if (glossaryEntry.trans) sectionAliases.push(glossaryEntry.trans.toLowerCase());
+        }
+    } else if (currentTag?.section) {
+        // Default to current section if not specified
+        sectionAliases.push(currentTag.section.toLowerCase());
     }
 
     // Look for matching article
@@ -345,11 +351,12 @@ const TextWithTerms = ({ text }) => {
 
         // Render fully interactive Term component
         parts.push(
-            <Term
-                key={start}
-                term={term}
-                entry={glossaryEntry}
-            />
+            <span key={start} data-prevent-select="true">
+                <Term
+                    term={term}
+                    entry={glossaryEntry}
+                />
+            </span>
         );
 
         lastIndex = end;
@@ -425,6 +432,7 @@ const ReferenceLink = ({ text, sectionName, chapterName, itemNumber, currentTag 
             <TextWithTerms text={text} />
             <Tooltip title={tooltipContent} arrow>
                 <span
+                    data-prevent-select="true"
                     onClick={handleClick}
                     style={{
                         display: 'inline-flex',
@@ -623,7 +631,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             while ((refMatch = referencePattern.exec(cleanChildren)) !== null) {
                 references.push({
                     text: refMatch[0],
-                    sectionName: refMatch[1].trim(),
+                    sectionName: refMatch[1] ? refMatch[1].trim() : null,
                     chapterName: refMatch[2],
                     itemNumber: refMatch[3] || null,
                     start: refMatch.index,
@@ -751,7 +759,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         }
 
         return children;
-    }, [Highlight, search, selectedTag]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [Highlight, search, selectedTag, currentTTSParagraph]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });
@@ -818,11 +826,12 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
                 const paragraphText = extractText(children);
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
+                const [hoveringNumber, setHoveringNumber] = useState(false);
                 const paragraphSelected = currentTTSParagraph === paragraphIndex;
 
                 return (
                     <Box
-                        className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''}`}
+                        className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
                         sx={{ marginBottom: '24px', lineHeight: 2.8 }}
                         data-paragraph-index={paragraphIndex}
                         data-paragraph-text={paragraphText}
@@ -830,7 +839,10 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
                         <TextRenderer>{children}</TextRenderer>
                         <Tooltip title={translations?.ZOOM} placement="top" arrow>
                             <span
+                                data-prevent-select="true"
                                 className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
+                                onMouseEnter={() => setHoveringNumber(true)}
+                                onMouseLeave={() => setHoveringNumber(false)}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     const number = node?.properties?.dataParagraphIndex;
