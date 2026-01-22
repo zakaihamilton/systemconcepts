@@ -526,7 +526,7 @@ function Article({
                         zIndex: 1300
                     }}
                 >
-                    <Tooltip title={translations.SCROLL_TO_TOP || "Scroll to Top"} placement="right">
+                    <Tooltip title={translations.SCROLL_TO_TOP} placement="right">
                         <Fab
                             size="small"
                             aria-label="scroll back to top"
