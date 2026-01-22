@@ -280,13 +280,14 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         });
 
         // Detect headings
-        // Heuristic: Start of line, Uppercase, No period at end, < 80 chars
+        // Heuristic: Start of line, Uppercase, No period/semicolon at end, < 80 chars
         // Negative lookahead to ensure not already a header or list item, or number
         content = content.replace(/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(?:\r?\n|$)/gm, (match, line) => {
             // Check if it really looks like a header
             const trimmed = line.trim();
             if (!trimmed) return match;
             if (trimmed.endsWith('.')) return match; // Sentence
+            if (trimmed.endsWith(';')) return match; // Sentence ending with semicolon
             if (trimmed.length > 80) return match; // Too long
 
             // It passes heuristic, make it a header
