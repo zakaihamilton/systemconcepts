@@ -120,9 +120,9 @@
 
 .scrollIndicator {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
     width: 30px;
     background: linear-gradient(to left, var(--background-default, #000), transparent);
     pointer-events: none;

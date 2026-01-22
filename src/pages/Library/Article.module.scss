@@ -18,7 +18,7 @@
 
 .stickyHeader {
     position: sticky;
-    top: 0;
+    top: 0px;
     z-index: 10;
     background-color: var(--background-paper);
     border-bottom: 1px solid var(--divider);
@@ -244,8 +244,8 @@
     .root {
         visibility: visible;
         position: absolute;
-        left: 0;
-        top: 0;
+        left: 0px;
+        top: 0px;
         width: 100%;
         margin: 0;
         padding: 20px;

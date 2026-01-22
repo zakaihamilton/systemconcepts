@@ -13,7 +13,7 @@
 
     // Desktop: Top Stickiness
     position: sticky;
-    top: 0;
+    top: 0px;
     bottom: auto;
     transform: translateY(0);
     border-bottom: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
@@ -31,7 +31,7 @@
 
 @media (max-width: 768px) {
     .root {
-        bottom: 0;
+        bottom: 0px;
         top: auto;
         transform: translateY(0);
         border-top: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
