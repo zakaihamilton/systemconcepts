@@ -528,12 +528,21 @@ function Article({
                 >
                     <Tooltip title={translations.SCROLL_TO_TOP || "Scroll to Top"} placement="right">
                         <Fab
-                            color="primary"
                             size="small"
                             aria-label="scroll back to top"
                             onClick={scrollToTop}
+                            sx={{
+                                opacity: 0.6,
+                                backgroundColor: 'var(--action-hover)',
+                                color: 'var(--text-secondary)',
+                                boxShadow: 1,
+                                '&:hover': {
+                                    opacity: 1,
+                                    backgroundColor: 'var(--action-selected)'
+                                }
+                            }}
                         >
-                            <ArrowUpwardIcon />
+                            <ArrowUpwardIcon fontSize="small" />
                         </Fab>
                     </Tooltip>
                 </Box>
