@@ -232,3 +232,20 @@
     background-color: #ffeb3b;
     color: #000 !important;
 }
+
+@media print {
+    .glossary-term-container {
+        line-height: 2.2;
+        margin-top: 0.8em;
+
+        .glossary-annotation {
+            top: -1.4em;
+            font-size: 0.6em;
+        }
+    }
+
+    .paragraph {
+        line-height: 2.0;
+        padding: 12px 16px;
+    }
+}
