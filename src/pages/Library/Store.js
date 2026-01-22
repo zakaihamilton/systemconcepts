@@ -7,5 +7,6 @@ export const LibraryStore = new Store({
     scrollToParagraph: null,
     expandedNodes: [],
     selectPath: null,
-    selectedId: null
+    selectedId: null,
+    clickedId: null
 });

@@ -25,6 +25,9 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
     const expansion = abbreviations[node.name];
     const name = expansion ? expansion.eng : node.name;
 
+    // Use Store to track clicks across possible remounts
+    const clickedId = LibraryStore.useState(s => s.clickedId);
+
     const checkTruncation = useCallback(() => {
         if (textRef.current) {
             setIsTruncated(textRef.current.scrollWidth > textRef.current.clientWidth);
@@ -50,19 +53,29 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectPath, node.id]);
 
+    // Center the selected item only if it wasn't manually clicked in the tree
     useEffect(() => {
-        if ((isSelected || selectPath === node.id) && itemRef.current) {
+        if (selectPath === node.id && itemRef.current) {
+            if (clickedId === node.id) {
+                // Already visible via click or toggle, do not scroll
+                return;
+            }
             const timer = setTimeout(() => {
-                itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
+                if (itemRef.current) {
+                    itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
             return () => clearTimeout(timer);
         }
-    }, [isSelected, selectPath, node.id]);
+    }, [selectPath, node.id, clickedId]);
 
     const handleToggle = useCallback((e) => {
         if (e) {
             e.stopPropagation();
         }
+        LibraryStore.update(s => {
+            s.clickedId = node.id;
+        });
         if (onToggle) {
             onToggle(node.id, !open);
         } else {
@@ -75,15 +88,6 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
             });
         }
     }, [node.id, open, onToggle]);
-
-    useEffect(() => {
-        if (open && itemRef.current) {
-            const timer = setTimeout(() => {
-                itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 300);
-            return () => clearTimeout(timer);
-        }
-    }, [open]);
 
     const handleChildToggle = useCallback((childId, isExpanding) => {
         if (isExpanding) {
@@ -101,7 +105,22 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
         }
     }, [node.children]);
 
-    const handleSelect = useCallback(() => {
+    const handleSelect = useCallback((e) => {
+        if (e) {
+            e.preventDefault();
+        }
+        LibraryStore.update(s => {
+            s.clickedId = node.id;
+        });
+        // Clear clickedId after a delay to allow future programmatic scrolling to this node
+        setTimeout(() => {
+            LibraryStore.update(s => {
+                if (s.clickedId === node.id) {
+                    s.clickedId = null;
+                }
+            });
+        }, 2000);
+
         if (!hasChildren) {
             onSelect(node);
         } else {

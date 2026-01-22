@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
-import styles from '../Player.module.scss';
+import styles from './Controls.module.scss';
 
 export default function Controls({
     translations,
@@ -35,7 +35,7 @@ export default function Controls({
     handleVoiceMenuClose,
     handleVoiceSelect
 }) {
-
+    const voiceTooltip = <span className={styles.voiceTooltip}><b> Voice</b>{selectedVoice?.name || ''}</span>;
     return (
         <>
             <Paper
@@ -101,7 +101,7 @@ export default function Controls({
                                 </span>
                             </Tooltip>
 
-                            <Tooltip title={`Voice: ${selectedVoice?.name || ''}`} arrow>
+                            <Tooltip title={voiceTooltip} arrow>
                                 <IconButton
                                     onClick={handleVoiceMenuOpen}
                                     className={styles.controlButton}

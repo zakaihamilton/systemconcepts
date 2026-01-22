@@ -63,7 +63,7 @@ export default function Tags({
                 const { key: type, value: name } = levelItem;
                 const isHead = index < levels.length - 1;
                 const nodeNumber = (!isHead && tag.number) ? tag.number : null;
-                const idSuffix = nodeNumber ? `#${nodeNumber}` : '';
+                const idSuffix = nodeNumber ? `:${nodeNumber}` : '';
 
                 pathIds.push(name + idSuffix);
                 const id = pathIds.join("|");

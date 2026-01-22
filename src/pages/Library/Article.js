@@ -64,7 +64,7 @@ function Article({
     const language = useLanguage();
     const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
     const scrollTimeoutRef = useRef(null);
-    const [currentTTSParagraph, setCurrentTTSParagraph] = useState(-1);
+    const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
     const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
     const [termsDialogOpen, setTermsDialogOpen] = useState(false);
     const [articleTerms, setArticleTerms] = useState([]);
@@ -80,7 +80,7 @@ function Article({
             if (type === 'paragraph') {
                 const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
                 if (element) {
-                    setCurrentTTSParagraph(value);
+                    setCurrentParagraphIndex(value);
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     element.classList.add(styles.highlightedParagraph);
                     setTimeout(() => {
@@ -189,7 +189,7 @@ function Article({
             if (paragraph) {
                 const index = paragraph.getAttribute('data-paragraph-index');
                 if (index) {
-                    setCurrentTTSParagraph(parseInt(index, 10));
+                    setCurrentParagraphIndex(parseInt(index, 10));
                     // Replace history state to just update hash without scrolling or adding history
                     const currentHash = window.location.hash;
                     // Check if hash already ends with :number
@@ -393,11 +393,9 @@ function Article({
     }, [content, search, scrollToMatch]);
 
 
-    const handleTTSParagraphChange = useCallback((index, element) => {
-        setCurrentTTSParagraph(index);
+    const handleTTSParagraphChange = useCallback((index) => {
+        setCurrentParagraphIndex(index);
     }, []);
-
-
 
     const toolbarItems = useMemo(() => {
         if (!content || !selectedTag) {
@@ -727,7 +725,7 @@ function Article({
                 <Box className={styles.contentScrollArea}>
                     <Box className={styles.contentWrapper}>
                         {showMarkdown ? (
-                            <Markdown search={search} currentTTSParagraph={currentTTSParagraph} selectedTag={selectedTag}>
+                            <Markdown search={search} currentTTSParagraph={currentParagraphIndex} selectedTag={selectedTag}>
                                 {processedContent}
                             </Markdown>
                         ) : (
@@ -753,7 +751,7 @@ function Article({
                         contentRef={contentRef}
                         onParagraphChange={handleTTSParagraphChange}
                         selectedTag={selectedTag}
-                        currentParagraphIndex={currentTTSParagraph}
+                        currentParagraphIndex={currentParagraphIndex}
                     />
                 )}
                 <JumpDialog

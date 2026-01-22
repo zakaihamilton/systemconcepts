@@ -105,7 +105,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     const getTagHierarchy = useCallback((tag) => {
         const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
         if (tag.number && hierarchy.length > 0) {
-            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}#${tag.number}`;
+            hierarchy[hierarchy.length - 1] = `${hierarchy[hierarchy.length - 1]}:${tag.number}`;
         }
         return hierarchy;
     }, []);
@@ -114,24 +114,56 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
             const urlPath = pathItems.slice(1).join("|");
-            const tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
+            let tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
+            let paragraphId = null;
+
+            if (!tag) {
+                const parts = urlPath.split('|');
+                const lastPart = parts[parts.length - 1];
+                const lastSepIndex = lastPart.lastIndexOf(':');
+                if (lastSepIndex !== -1) {
+                    const possibleParagraph = lastPart.slice(lastSepIndex + 1);
+                    if (!isNaN(parseInt(possibleParagraph, 10))) {
+                        paragraphId = parseInt(possibleParagraph, 10);
+                        tag = tags.find(t => {
+                            const h = getTagHierarchy(t);
+                            const hStr = h.join("|");
+                            const urlLastSep = urlPath.lastIndexOf(':');
+                            const urlBase = urlLastSep !== -1 ? urlPath.substring(0, urlLastSep) : urlPath;
+
+                            if (hStr === urlPath) return true;
+                            if (hStr === urlBase) return true;
+
+                            const tagLastSep = hStr.lastIndexOf(':');
+                            if (tagLastSep !== -1) {
+                                const tagBase = hStr.substring(0, tagLastSep);
+                                if (tagBase === urlBase) return true;
+                            }
+                            return false;
+                        });
+                    }
+                }
+            }
+
             if (tag) {
                 // Calculate parent IDs for expansion
                 const hierarchy = getTagHierarchy(tag);
                 const parentIds = [];
                 let currentPath = "";
                 hierarchy.forEach((segment, index) => {
+                    currentPath = currentPath ? currentPath + "|" + segment : segment;
                     if (index < hierarchy.length - 1) { // Don't expand leaf
-                        currentPath = currentPath ? currentPath + "|" + segment : segment;
-                        const matchingNode = tags.find(t => getTagHierarchy(t).join("|") === currentPath);
-                        // This logic is simplified; strictly mapping path segments to IDs might require tree traversal
-                        // For now, let's just trigger the selectPath update which TreeItem will react to
+                        parentIds.push(currentPath);
                     }
                 });
 
                 LibraryStore.update(s => {
                     s.selectedId = tag._id;
                     s.selectPath = urlPath;
+                    s.expandedNodes = [...new Set([...s.expandedNodes, ...parentIds])];
+                    if (paragraphId) {
+                        s.scrollToParagraph = paragraphId;
+                    }
                 });
             } else {
                 LibraryStore.update(s => {
@@ -180,7 +212,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                 const { key: type, value: name } = levelItem;
                 const isHead = index < levels.length - 1;
                 const nodeNumber = (!isHead && tag.number) ? tag.number : null;
-                const idSuffix = nodeNumber ? `#${nodeNumber}` : '';
+                const idSuffix = nodeNumber ? `:${nodeNumber}` : '';
 
                 pathIds.push(name + idSuffix);
                 const id = pathIds.join("|");
@@ -392,7 +424,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                         ),
                         endAdornment: filterText ? (
                             <InputAdornment position="end">
-                                <Tooltip title={translations.CLEAR_FILTER || "Clear filter"}>
+                                <Tooltip title={translations.CLEAR_FILTER}>
                                     <IconButton
                                         size="small"
                                         onClick={() => setFilterText("")}
