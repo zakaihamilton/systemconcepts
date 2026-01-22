@@ -280,18 +280,22 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         });
 
         // Detect headings
-        // Heuristic: Start of line, Uppercase, No period/semicolon at end, < 80 chars
+        // Heuristic: Start of line, Uppercase, No period/semicolon/comma at end, < 80 chars
+        // Also check: if next line starts with lowercase, this line is a continuation, not a header
         // Negative lookahead to ensure not already a header or list item, or number
-        content = content.replace(/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(?:\r?\n|$)/gm, (match, line) => {
+        content = content.replace(/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(\r?\n)(.?)/gm, (match, line, newline, nextChar) => {
             // Check if it really looks like a header
             const trimmed = line.trim();
             if (!trimmed) return match;
-            if (trimmed.endsWith('.')) return match; // Sentence
+            if (trimmed.endsWith('.')) return match; // Sentence ending with period
             if (trimmed.endsWith(';')) return match; // Sentence ending with semicolon
+            if (trimmed.endsWith(',')) return match; // Sentence ending with comma
             if (trimmed.length > 80) return match; // Too long
+            // If next line starts with lowercase letter, this is a continuation, not a header
+            if (nextChar && /[a-z]/.test(nextChar)) return match;
 
             // It passes heuristic, make it a header
-            return `### ${trimmed}\n`;
+            return `### ${trimmed}${newline}${nextChar}`;
         });
 
         // Cleanup double commas (handles ", ," and ",," and ",   ," and " ,")
