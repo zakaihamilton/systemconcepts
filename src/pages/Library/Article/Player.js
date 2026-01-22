@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from '@util/translations';
 import Controls from './Player/Controls';
+import { LibraryTagKeys } from '../Icons';
 
-export default function Player({ contentRef, onParagraphChange }) {
+export default function Player({ contentRef, onParagraphChange, selectedTag }) {
     const translations = useTranslations();
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
@@ -73,6 +74,55 @@ export default function Player({ contentRef, onParagraphChange }) {
         if (!contentRef?.current) return;
 
         const extractParagraphs = () => {
+            const result = [];
+
+            // Prepend title and tags as virtual paragraphs
+            if (selectedTag) {
+                // Build title text (find the most specific tag value)
+                let titleText = '';
+                for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+                    const key = LibraryTagKeys[i];
+                    const value = selectedTag[key];
+                    if (value && String(value).trim()) {
+                        titleText = value;
+                        break;
+                    }
+                }
+
+                // Add title as first virtual paragraph
+                if (titleText) {
+                    const numberPrefix = selectedTag.number ? `Number ${selectedTag.number}. ` : '';
+                    result.push({
+                        element: null, // Virtual paragraph has no element
+                        text: `${numberPrefix}${titleText}`,
+                        index: -2, // Special index for title
+                        isVirtual: true,
+                        type: 'title'
+                    });
+                }
+
+                // Build tags text (collect all tag values except the title)
+                const tagTexts = [];
+                for (const key of LibraryTagKeys) {
+                    const value = selectedTag[key];
+                    if (value && String(value).trim() && value !== titleText) {
+                        const label = key.charAt(0).toUpperCase() + key.slice(1);
+                        tagTexts.push(`${label}: ${value}`);
+                    }
+                }
+
+                // Add tags as second virtual paragraph
+                if (tagTexts.length > 0) {
+                    result.push({
+                        element: null,
+                        text: tagTexts.join('. '),
+                        index: -1, // Special index for tags
+                        isVirtual: true,
+                        type: 'tags'
+                    });
+                }
+            }
+
             const pElements = contentRef.current.querySelectorAll('[data-paragraph-index]');
             const extracted = Array.from(pElements).map((el, index) => {
                 const clone = el.cloneNode(true);
@@ -90,10 +140,13 @@ export default function Player({ contentRef, onParagraphChange }) {
                 return {
                     element: el,
                     text: text,
-                    index: parseInt(el.getAttribute('data-paragraph-index'), 10) || index
+                    index: parseInt(el.getAttribute('data-paragraph-index'), 10) || index,
+                    isVirtual: false
                 };
             });
-            setParagraphs(extracted);
+
+            result.push(...extracted);
+            setParagraphs(result);
         };
 
         extractParagraphs();
@@ -102,7 +155,7 @@ export default function Player({ contentRef, onParagraphChange }) {
         observer.observe(contentRef.current, { childList: true, subtree: true });
 
         return () => observer.disconnect();
-    }, [contentRef]);
+    }, [contentRef, selectedTag]);
 
     // Speak a specific paragraph
     const speakParagraphRef = useRef(null);
@@ -124,7 +177,10 @@ export default function Player({ contentRef, onParagraphChange }) {
         if (onParagraphChange) {
             onParagraphChange(paragraph.index, paragraph.element);
         }
-        paragraph.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Only scroll into view for non-virtual paragraphs
+        if (paragraph.element) {
+            paragraph.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
         // 5. Handle "Pause" mode (just stop and exit)
         if (!autoPlay) {

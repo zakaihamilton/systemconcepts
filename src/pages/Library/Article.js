@@ -674,6 +674,7 @@ function Article({
                     <Player
                         contentRef={contentRef}
                         onParagraphChange={handleTTSParagraphChange}
+                        selectedTag={selectedTag}
                     />
                 )}
                 <JumpDialog
