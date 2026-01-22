@@ -545,6 +545,7 @@ function Article({
                     setShowScrollTop(e.target.scrollTop > 300);
                 }}
                 sx={{
+                    position: 'relative',
                     height: '100%',
                     overflowY: 'auto',
                     overflowX: 'hidden',
