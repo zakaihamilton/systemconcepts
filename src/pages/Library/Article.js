@@ -110,7 +110,9 @@ function Article({
         const { scrollTop, scrollHeight, clientHeight } = target;
         if (clientHeight === 0) return;
 
-        const total = Math.ceil(scrollHeight / clientHeight);
+        // Use a threshold to prevent small overflows (like margins/padding) from creating extra pages
+        const effectiveScrollHeight = scrollHeight - (clientHeight * 0.1); // Allow 10% tolerance
+        const total = Math.max(1, Math.ceil(effectiveScrollHeight / clientHeight));
         let page = Math.ceil((scrollTop + clientHeight / 4) / clientHeight) || 1;
         if (scrollTop + clientHeight >= scrollHeight - 1) {
             page = total;
