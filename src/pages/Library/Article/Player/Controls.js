@@ -101,7 +101,7 @@ export default function Controls({
                                 </span>
                             </Tooltip>
 
-                            <Tooltip title={translations.SELECT_VOICE} arrow>
+                            <Tooltip title={`Voice: ${selectedVoice?.name || ''}`} arrow>
                                 <IconButton
                                     onClick={handleVoiceMenuOpen}
                                     className={styles.controlButton}
