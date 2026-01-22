@@ -398,12 +398,14 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
                 // Skip lowercase 'or'
                 if (term === 'or') {
+                    lastIndex = start;
                     continue;
                 }
                 // Skip 'Or' at the start of a sentence (sentence terminator + whitespace before it, or start of block)
                 if (term === 'Or') {
                     const isStartOfSentence = (start === 0) || /[\.\!\?]\s+$/.test(cleanChildren.slice(0, start));
                     if (isStartOfSentence) {
+                        lastIndex = start;
                         continue;
                     }
                 }
