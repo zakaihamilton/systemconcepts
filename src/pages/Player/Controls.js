@@ -57,6 +57,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
                 setError(null);
             }
             else if (name === "loadedmetadata") {
+                if (!metadataKey) return; // Skip if metadataKey not ready
                 const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
                 if (currentMetadata.position) {
                     playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
@@ -102,6 +103,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             currentTime: playerRef?.currentTime
         });
 
+        if (!metadataKey) return; // Skip if metadataKey not ready
         if (metadata && playerRef && playerRef.readyState >= 1) {
             const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
             console.log("[Controls] Current metadata:", {
@@ -213,7 +215,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
         };
     }, [handlePosEvent]);
     useEffect(() => {
-        if (currentTime && !isNaN(currentTime) && playerRef.duration) {
+        if (currentTime && !isNaN(currentTime) && playerRef.duration && metadataKey) {
             setMetadata(data => {
                 if (!data) {
                     data = {};
