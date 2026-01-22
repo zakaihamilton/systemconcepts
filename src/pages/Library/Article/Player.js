@@ -103,7 +103,8 @@ export default function Player({ contentRef, onParagraphChange, selectedTag }) {
 
                 // Build tags text (collect all tag values except the title)
                 const tagTexts = [];
-                for (const key of LibraryTagKeys) {
+                for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+                    const key = LibraryTagKeys[i];
                     const value = selectedTag[key];
                     if (value && String(value).trim() && value !== titleText) {
                         const label = key.charAt(0).toUpperCase() + key.slice(1);
