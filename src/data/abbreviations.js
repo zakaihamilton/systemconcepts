@@ -78,5 +78,13 @@ export const abbreviations = {
     "NR": {
         eng: "Nefesh, Ruach",
         heb: "נפש, רוח"
+    },
+    "BYA": {
+        eng: "Beria, Yetzira, Assiya",
+        heb: "בריאה, יצירה, עשיה"
+    },
+    "HB": {
+        eng: "Hochma, Bina",
+        heb: "חכמה, בינה"
     }
 };

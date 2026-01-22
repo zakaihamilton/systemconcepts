@@ -6347,5 +6347,40 @@ export const glossary = {
         "he": "אמה",
         "en": "Cubit",
         "trans": "Amah"
+    },
+    "el": {
+        "he": "אל",
+        "en": "El",
+        "trans": "El"
+    },
+    "elohim": {
+        "he": "אלוהים",
+        "en": "Gods",
+        "trans": "Elohim"
+    },
+    "tzvaot": {
+        "he": "צבאות",
+        "en": "Hosts",
+        "trans": "Tzvaot"
+    },
+    "ekie": {
+        "he": "אהיה",
+        "en": "I will be",
+        "trans": "Ekie"
+    },
+    "koh": {
+        "he": "יה",
+        "en": "God",
+        "trans": "Koh"
+    },
+    "kel": {
+        "he": "אל",
+        "en": "God",
+        "trans": "Kel"
+    },
+    "el hay": {
+        "he": "אל חי",
+        "en": "God of Life",
+        "trans": "El Hay"
     }
 };
