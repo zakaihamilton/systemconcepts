@@ -279,23 +279,34 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             return `**${number}\\${symbol}** `;
         });
 
+        // Remove duplicate newlines (normalize to a single newline for paragraph breaks)
+        content = content.replace(/\n{2,}/g, '\n');
+
         // Detect headings
         // Heuristic: Start of line, Uppercase, No period/semicolon/comma at end, < 80 chars
         // Also check: if next line starts with lowercase, this line is a continuation, not a header
         // Negative lookahead to ensure not already a header or list item, or number
-        content = content.replace(/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(\r?\n)(.?)/gm, (match, line, newline, nextChar) => {
+        content = content.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
             // Check if it really looks like a header
             const trimmed = line.trim();
             if (!trimmed) return match;
             if (trimmed.endsWith('.')) return match; // Sentence ending with period
             if (trimmed.endsWith(';')) return match; // Sentence ending with semicolon
             if (trimmed.endsWith(',')) return match; // Sentence ending with comma
-            if (trimmed.length > 80) return match; // Too long
-            // If next line starts with lowercase letter, this is a continuation, not a header
-            if (nextChar && /[a-z]/.test(nextChar)) return match;
+            if (trimmed.length > 120) return match; // Too long
+
+            // Check what follows this line - look ahead in original content
+            const matchEnd = match.length;
+            const afterMatch = content.slice(content.indexOf(match) + matchEnd);
+            const nextLineMatch = afterMatch.match(/^[ \t]*(\S)/);
+            if (nextLineMatch) {
+                const firstChar = nextLineMatch[1];
+                // If next non-empty line starts with lowercase, this is a continuation
+                if (/[a-z]/.test(firstChar)) return match;
+            }
 
             // It passes heuristic, make it a header
-            return `### ${trimmed}${newline}${nextChar}`;
+            return `### ${trimmed}${newline}`;
         });
 
         // Cleanup double commas (handles ", ," and ",," and ",   ," and " ,")
