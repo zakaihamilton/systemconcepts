@@ -350,26 +350,26 @@ function Article({
                 onClick: () => setShowMarkdown(prev => !prev),
                 menu: true,
                 divider: true
+            },
+            {
+                id: "jumpToParagraph",
+                name: translations.JUMP_TO,
+                icon: <FormatListNumberedIcon />,
+                onClick: () => setJumpDialogOpen(true),
+                menu: true
+            },
+            {
+                id: "articleTerms",
+                name: translations.ARTICLE_TERMS,
+                icon: <MenuBookIcon />,
+                onClick: handleShowTerms,
+                menu: true,
+                divider: true
             }
         ];
         if (isAdmin) {
             items = [
                 ...items,
-                {
-                    id: "jumpToParagraph",
-                    name: translations.JUMP_TO,
-                    icon: <FormatListNumberedIcon />,
-                    onClick: () => setJumpDialogOpen(true),
-                    menu: true
-                },
-                {
-                    id: "articleTerms",
-                    name: translations.ARTICLE_TERMS,
-                    icon: <MenuBookIcon />,
-                    onClick: handleShowTerms,
-                    menu: true,
-                    divider: true
-                },
                 {
                     id: "editTags",
                     name: translations.EDIT_TAGS,
