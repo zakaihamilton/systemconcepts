@@ -291,6 +291,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
     const stop = useCallback(() => {
         playerRef.pause();
         playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
+        setCurrentTime(0);
     }, [playerRef]);
 
     const prevPath = useRef(path);
