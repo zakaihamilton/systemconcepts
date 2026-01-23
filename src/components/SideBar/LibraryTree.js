@@ -7,6 +7,10 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import ClearIcon from "@mui/icons-material/Clear";
+import SearchIcon from "@mui/icons-material/Search";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import TreeItem from "@pages/Library/TreeItem";
 import { LibraryIcons, LibraryTagKeys } from "@pages/Library/Icons";
 import { LibraryStore } from "@pages/Library/Store";
@@ -442,6 +446,23 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
             </Box>
             <Box className={styles.treeContainer} ref={treeContainerRef}>
                 <List component="nav" sx={{ py: 0.5, pl: 3 }}>
+                    <ListItemButton
+                        onClick={() => {
+                            setPath("library", "research");
+                            if (isMobile && closeDrawer) {
+                                closeDrawer();
+                            }
+                        }}
+                        sx={{ pl: 1 }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                            <SearchIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={translations.RESEARCH || "Research"}
+                            primaryTypographyProps={{ variant: "body2", style: { fontSize: "0.85rem" } }}
+                        />
+                    </ListItemButton>
                     {tree.map(node => (
                         <TreeItem
                             key={node.id}
