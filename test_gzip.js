@@ -1,5 +1,4 @@
 const pako = require("pako");
-const fs = require("fs");
 
 function testGzipStability() {
     // 1. Create a large base object

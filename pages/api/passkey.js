@@ -20,7 +20,7 @@ export default async function PASSKEY_API(req, res) {
                     try {
                         await login({ id, hash, api: "passkey-register-options" });
                         authenticated = true;
-                    } catch (e) {
+                    } catch {
                         // ignore error, treat as unauthenticated
                     }
                 }
@@ -30,13 +30,12 @@ export default async function PASSKEY_API(req, res) {
                     email,
                     firstName: first_name,
                     lastName: last_name,
-                    origin,
                     rpID,
                     authenticated
                 });
                 res.status(200).json(options);
             } else if (action === "auth-options") {
-                const options = await getPasskeyAuthOptions({ id, origin, rpID });
+                const options = await getPasskeyAuthOptions({ id, rpID });
                 res.status(200).json(options);
             } else if (action === "list") {
                 // Require authentication
@@ -68,7 +67,7 @@ export default async function PASSKEY_API(req, res) {
             await deletePasskey({ id, credentialId });
             res.status(200).json({ success: true });
         } catch (err) {
-             console.error("passkey error: ", err);
+            console.error("passkey error: ", err);
             res.status(500).json({ err: getSafeError(err) });
         }
     } else if (req.method === "POST") {
@@ -84,8 +83,8 @@ export default async function PASSKEY_API(req, res) {
                     try {
                         await login({ id, hash, api: "passkey-register-verify" });
                         authenticated = true;
-                    } catch (e) {
-                         // ignore
+                    } catch {
+                        // ignore
                     }
                 }
 

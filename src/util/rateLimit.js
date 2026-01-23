@@ -36,11 +36,6 @@ export async function checkRateLimit(req, { limit = 5, windowMs = 60 * 1000 } = 
     // If no document matched (either new IP or expired), we need to reset/insert.
     if (!record) {
         // Upsert a new window
-        const newRecord = {
-            ip,
-            count: 1,
-            resetTime: now + windowMs
-        };
         // Use updateOne with upsert to handle race where another request just created it.
         // If it exists now (race condition), we just want to reset it?
         // No, if it exists now, it means someone else beat us.

@@ -42,7 +42,7 @@ export function useSessions(depends = [], options = {}) {
     const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog, counter } = SessionsStore.useState();
     useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter", "showFilterDialog"]);
     const lastCounterRef = useRef(counter);
-    const updateSessions = useCallback(async (groupMetadata, syncCounter) => {
+    const updateSessions = useCallback(async (syncCounter) => {
         let continueUpdate = true;
         SessionsStore.update(s => {
             if (s.busy) {
@@ -177,8 +177,8 @@ export function useSessions(depends = [], options = {}) {
                                     };
                                 }
                             }
-                        } catch (err) {
-                            console.error(`[Sessions] Error parsing personal file ${file.path}:`, err);
+                        } catch {
+                            console.error(`[Sessions] Error parsing personal file ${file.path}:`);
                         }
                     }
 
@@ -249,7 +249,7 @@ export function useSessions(depends = [], options = {}) {
                             if (listing) {
                                 years = listing.filter(f => f.name.endsWith(".json")).map(f => ({ name: f.name.replace(".json", "") }));
                             }
-                        } catch (err) {
+                        } catch {
                             // ignore missing dir
                         }
                     }
@@ -323,13 +323,13 @@ export function useSessions(depends = [], options = {}) {
                 const chunkResults = await Promise.all(chunk.map(async ({ group, year, sessions }) => {
                     try {
                         let dataSessions = sessions;
-                        let path = "";
+                        let _path = "";
 
                         // If we don't have pre-loaded sessions (from merged file), load year file
                         if (!dataSessions) {
-                            path = makePath("local/sync", group.name, `${year.name}.json`);
-                            if (await storage.exists(path)) {
-                                const content = await storage.readFile(path);
+                            _path = makePath("local/sync", group.name, `${year.name}.json`);
+                            if (await storage.exists(_path)) {
+                                const content = await storage.readFile(_path);
                                 const data = JSON.parse(content);
                                 if (data && data.sessions) {
                                     dataSessions = data.sessions;
@@ -369,7 +369,7 @@ export function useSessions(depends = [], options = {}) {
 
                         return dataSessions;
                     } catch (err) {
-                        console.error("Error reading sessions file", path, err);
+                        console.error("Error reading sessions file", _path, err);
                         return [];
                     }
                 }));
@@ -406,7 +406,7 @@ export function useSessions(depends = [], options = {}) {
                 s.syncCounter = syncCounter;
             });
         }
-    }, [groupsSettings]);
+    }, [groupsSettings, groupMetadata]);
 
     useEffect(() => {
         if (groupMetadata && groupMetadata.length && !loading) {
@@ -428,7 +428,7 @@ export function useSessions(depends = [], options = {}) {
             // 3. Sync counter changed (new session data was synced)
             // 4. Counter manually changed (forced reload)
             if (noSessions || groupsChanged || syncChanged || counterChanged) {
-                updateSessions(groupMetadata, syncCounter);
+                updateSessions(syncCounter);
             }
         }
     }, [groupMetadata, loading, syncCounter, savedSyncCounter, groupsHash, sessions, counter, groupsSettings, updateSessions]);

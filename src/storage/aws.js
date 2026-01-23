@@ -108,10 +108,10 @@ async function readFile(path) {
         });
         // Check if we accidentally received a directory listing (JSON array)
         try {
-            const parsed = JSON.parse(body);
+            const _parsed = JSON.parse(body);
             // Relaxed check: valid text files can be arrays (e.g. .tags), so we don't throw here.
             // rely on exists() to filter directories.
-        } catch (e) {
+        } catch (_e) {
             // Not JSON or not an array, which is expected for normal files
         }
     }

@@ -36,7 +36,7 @@ export default function Sync() {
     const { updateSync } = useContext(SyncContext);
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
-    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime, personalSyncBusy, personalSyncError } = useSyncFeature();
+    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);

@@ -29,7 +29,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
         // return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
     }
 
-    const safeWriteMigration = async (data, reason = "unknown") => {
+    const safeWriteMigration = async (data) => {
         const content = JSON.stringify(data, null, 2);
         // Direct write for performance, skipping double-verify overhead
         await storage.writeFile(migrationPath, content);
@@ -71,7 +71,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                 console.error("[Personal] Error loading migration state:", err);
                 addSyncLog(`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`, "info");
                 // Explicitly delete the corrupted file to prevent loops
-                try { await storage.deleteFile(migrationPath); } catch (e) { }
+                try { await storage.deleteFile(migrationPath); } catch { }
                 // State remains at default (initialized above)
             }
         }
@@ -121,7 +121,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
 
 
         // Helper to get expected manifest key
-        const getManifestKey = (filePath) => {
+        const _getManifestKey = (filePath) => {
             let relativePath = filePath.substring(mongoPath.length + 1);
             relativePath = relativePath.replace(/^[\/\\]+/, "");
             return `${relativePath}`;
@@ -234,7 +234,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                 const content = await storage.readFile(localManifestPath);
                 const localManifest = JSON.parse(content);
                 manifest = { ...manifest, ...localManifest };
-            } catch (err) { }
+            } catch { }
         }
 
         const deletedKeys = [];
@@ -348,7 +348,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                         try {
                             const existing = JSON.parse(await storage.readFile(bundlePath));
                             cache.content = { ...existing, ...cache.content };
-                        } catch (err) { }
+                        } catch { }
                     }
                     cache.loaded = true;
 
@@ -465,7 +465,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                             bundleCache[cacheKey].content[bundleKey] = data;
                             bundleCache[cacheKey].dirty = true;
                             markAsDeleted(`metadata/sessions/${relativePath}`);
-                        } catch (e) {
+                        } catch {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
                             // Intentionally continue to mark as migrated so we don't loop forever
                         }
@@ -490,7 +490,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                             bundleCache[yearBundleKey].content[sessionKey] = data;
                             bundleCache[yearBundleKey].dirty = true;
                             markAsDeleted(`metadata/sessions/${relativePath}`);
-                        } catch (e) {
+                        } catch {
                             console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
                         }
                     }

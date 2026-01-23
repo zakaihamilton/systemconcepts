@@ -89,11 +89,10 @@ export function scanForTerms(text) {
         cleanText = cleanText.replace(/\u00A0/g, ' ');
         cleanText = cleanText.replace(/\u200B/g, '');
 
-        // Reset regex for each line
-        termPattern.lastIndex = 0;
-        let match;
+        // Use matchAll to avoid modifying termPattern.lastIndex
+        const matches = [...cleanText.matchAll(termPattern)];
 
-        while ((match = termPattern.exec(cleanText)) !== null) {
+        for (const match of matches) {
             const term = match[0];
             const start = match.index;
 

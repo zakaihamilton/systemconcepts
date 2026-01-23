@@ -118,7 +118,7 @@ export async function changePassword({ api, id, oldPassword, newPassword, salt =
     return result;
 }
 
-export async function resetPassword({ api, id, code, newPassword, salt = 10 }) {
+export async function resetPassword({ id, code, newPassword, salt = 10 }) {
     id = id.toLowerCase();
     let user = null;
     try {

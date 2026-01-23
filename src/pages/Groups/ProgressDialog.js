@@ -95,9 +95,6 @@ export default function ProgressDialog() {
         });
     };
 
-    const renderItem = (item) => {
-        return <ProgressItem key={item.name} item={item} translations={translations} />;
-    };
 
     if (!showUpdateDialog) {
         return null;

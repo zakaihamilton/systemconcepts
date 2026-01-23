@@ -21,7 +21,7 @@ const classes = {
     paper: `${PREFIX}-paper`
 };
 
-const StyledMenuRoot = styled(Menu)(({ theme }) => ({
+const StyledMenuRoot = styled(Menu)(({ theme: _theme }) => ({
     [`& .${classes.paper}`]: {
         borderRadius: 12,
         marginTop: 8,
@@ -98,7 +98,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         const hasAnyIcon = hasSelector || hasIcon;
         return (itemsList || []).flatMap((item, index, list) => {
             const isLast = list.length - 1 === index;
-            const { checked, radio, header, divider, name, target, icon, items: subItems, onClick: itemOnClick, id, menu, backgroundColor, description, selected, expanded: itemExpanded, ...props } = item;
+            const { checked, radio, header, divider, name, target, icon, items: subItems, onClick: itemOnClick, id, menu: _menu, backgroundColor, description, selected, expanded: itemExpanded, ...props } = item;
             const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
             const selectedArray = Array.isArray(selectedItem);
             const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;

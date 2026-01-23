@@ -15,7 +15,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { LibraryTagKeys } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
-import { abbreviations } from "../../data/abbreviations";
 import { useLocalStorage } from "@util/hooks";
 import styles from "./Article.module.scss";
 

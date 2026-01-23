@@ -30,7 +30,7 @@ export async function updateYearSync(groupName, year, sessions) {
                 if (existingData && existingData.version) {
                     version = existingData.version + 1;
                 }
-            } catch (e) {
+            } catch {
                 // Ignore parse errors, start fresh
             }
         }
@@ -60,7 +60,7 @@ export async function updateYearSync(groupName, year, sessions) {
                 if (exSessions === newSessions && existingObj.group === data.group) {
                     return { counter: 0, newCount: 0 };
                 }
-            } catch (e) {
+            } catch {
                 // if parse fails, overwrite
                 newCount = data.sessions.length; // Assume all are new if existing corrupt
             }

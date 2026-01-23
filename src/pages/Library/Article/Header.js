@@ -13,7 +13,6 @@ export default function Header({
     isHeaderHidden,
     showAbbreviations,
     title,
-    translations,
     currentParagraphIndex
 }) {
     const handleTagKeyPress = (e, value) => {

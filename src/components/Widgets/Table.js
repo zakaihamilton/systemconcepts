@@ -511,7 +511,7 @@ export default function TableWidget(props) {
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
-            const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+            const { style: itemStyles, columnStyles: _columnStyles, ...props } = viewModes[viewMode] || {};
             const style = {
                 top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
             };
@@ -709,7 +709,7 @@ const TableListRow = React.memo(({ index, style, data }) => {
     if (!item) return null;
 
     const { id, key } = item;
-    const { style: itemStyles, columnStyles, ...props } = viewModes[viewMode] || {};
+    const { style: itemStyles, columnStyles: _columnStyles, ...props } = viewModes[viewMode] || {};
     const selected = index && selectedRow && selectedRow(item);
     const className = rowClassName ? rowClassName(item) : "";
 

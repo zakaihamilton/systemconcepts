@@ -226,7 +226,7 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
             size: headResponse.ContentLength,
             date: headResponse.LastModified?.valueOf()
         };
-    } catch (err) {
+    } catch {
         // If file not found, check if it is a folder (CommonPrefixes)
         const listParams = {
             Bucket: bucketName,
@@ -245,7 +245,7 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
                     name
                 };
             }
-        } catch (listErr) {
+        } catch {
             // Ignore list errors, return null
         }
     }

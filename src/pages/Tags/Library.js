@@ -380,7 +380,6 @@ export default function LibraryTags() {
         }
     ];
 
-    const [anchorEl, setAnchorEl] = useState(null);
     const [actionItem, setActionItem] = useState(null);
     const [menuPosition, setMenuPosition] = useState(null);
 

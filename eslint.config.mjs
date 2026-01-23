@@ -4,6 +4,9 @@ import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
 
 export default [
+    {
+        ignores: ["public/workbox-*.js", "public/sw.js", "**/test_gzip.js"],
+    },
     ...nextConfig,
     ...coreWebVitalsConfig,
     {
@@ -48,6 +51,7 @@ export default [
             "react/react-in-jsx-scope": "off",
             "react/jsx-uses-react": "off",
             "react/jsx-uses-vars": "error",
+            "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false, "varsIgnorePattern": "^(React|_)", "argsIgnorePattern": "^(React|_)", "caughtErrorsIgnorePattern": "^(React|_)" }]
         }
     },
     prettierConfig,

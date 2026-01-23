@@ -5,17 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 
 const rpName = "App"; // Should be configurable
 
-export async function storeChallenge(userId) {
-    // We store the challenge in a separate collection or within the user if we want to ensure only one challenge per user.
-    // However, challenges are tied to specific operations.
-    // Let's use a "challenges" collection with a TTL index if possible, or just a simple collection.
-    // The `mongo.js` might not support creating indexes easily.
-    // We'll just insert and delete.
-    const challenge = "challenge-" + Date.now() + "-" + Math.random(); // Placeholder for actual challenge if generated here?
-    // Actually @simplewebauthn generates the challenge.
-}
 
-export async function getPasskeyRegistrationOptions({ id, email, firstName, lastName, origin, rpID, authenticated }) {
+export async function getPasskeyRegistrationOptions({ id, email, firstName, lastName, rpID, authenticated }) {
     if (!id) {
         throw "MISSING_ID";
     }
@@ -215,7 +206,7 @@ export async function deletePasskey({ id, credentialId }) {
     return { success: true };
 }
 
-export async function getPasskeyAuthOptions({ id, origin, rpID }) {
+export async function getPasskeyAuthOptions({ id, rpID }) {
     let user = null;
     if (id) {
         id = id.toLowerCase();
@@ -227,9 +218,9 @@ export async function getPasskeyAuthOptions({ id, origin, rpID }) {
     // If id is provided:
 
     if (!user && id) {
-         // User might not exist yet if they typed a wrong ID, but we shouldn't reveal that?
-         // But for auth options we need to know if we are targeting a specific user.
-         throw "USER_NOT_FOUND";
+        // User might not exist yet if they typed a wrong ID, but we shouldn't reveal that?
+        // But for auth options we need to know if we are targeting a specific user.
+        throw "USER_NOT_FOUND";
     }
 
     // Cleanup existing challenges for this user and action

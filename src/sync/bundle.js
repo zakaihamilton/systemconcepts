@@ -48,7 +48,7 @@ export async function readCompressedFile(path) {
             try {
                 // Try parsing as raw JSON first
                 return JSON.parse(data);
-            } catch (e) {
+            } catch {
                 // Not raw JSON, continue with base64/gzip
             }
         }
@@ -83,7 +83,7 @@ export async function readCompressedFile(path) {
                 const text = new TextDecoder("utf-8").decode(buffer);
                 const json = JSON.parse(text);
                 return json;
-            } catch (jsonErr) {
+            } catch {
                 console.error(`[Bundle] Failed to decompress ${path}: ${e.message || e}`);
                 return null;
             }

@@ -109,7 +109,7 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
             for (const action of Object.keys(handlers)) {
                 try {
                     navigator.mediaSession.setActionHandler(action, null);
-                } catch (err) {
+                } catch {
                     // Ignore cleanup errors
                 }
             }
@@ -157,7 +157,7 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
                     playbackRate: playerRef.playbackRate || 1,
                     position: playerRef.currentTime || 0
                 });
-            } catch (err) {
+            } catch {
                 // setPositionState may throw if duration is 0 or invalid
             }
         };

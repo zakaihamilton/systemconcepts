@@ -182,7 +182,7 @@ export default function BreadcrumbsWidget({ className, items, border, bar, hideR
         return true;
     });
     breadcrumbItems = breadcrumbItems.map((item, index, list) => {
-        const { id, url, ...props } = item;
+        const { id: _id, url, ...props } = item;
         const href = "#" + url;
         return <BreadcrumbItem
             key={href}

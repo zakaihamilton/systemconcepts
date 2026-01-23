@@ -30,13 +30,13 @@ export function useGroups(depends = []) {
         console.log("[Groups] Loading groups...");
 
         try {
-            const { groups: metadata, settings, version } = await readGroups();
+            const { groups: metadata, settings, version: _version } = await readGroups();
 
             console.log(`[Groups] loadGroups complete. Found ${metadata.length} groups.`);
             GroupsStore.update(s => {
                 s.groups = metadata;
                 s.settings = settings;
-                s.version = version;
+                s.version = _version;
                 s.busy = false;
             });
         }

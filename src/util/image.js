@@ -34,9 +34,14 @@ export function shrinkImage(buffer, by) {
     return new Promise((resolve, reject) => {
         var reader = new FileReader();
         reader.addEventListener("load", async () => {
-            const content = await thumbnailify(reader.result, by);
-            resolve(content);
+            try {
+                const content = await thumbnailify(reader.result, by);
+                resolve(content);
+            } catch (err) {
+                reject(err);
+            }
         }, false);
+        reader.addEventListener("error", reject);
         reader.readAsDataURL(buffer);
     });
 }

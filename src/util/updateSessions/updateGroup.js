@@ -197,7 +197,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
     }));
     try {
         await Promise.all(promises);
-    } catch (err) {
+    } catch {
         console.error(`[Sync] Group ${name} failed to process all years. Aborting write to prevent corruption.`);
         return;
     }

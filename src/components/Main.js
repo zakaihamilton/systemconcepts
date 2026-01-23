@@ -28,7 +28,7 @@ export const MainStoreDefaults = {
 export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
-    const counter = useResize();
+    const _counter = useResize();
     const language = useLanguage();
     const isMobile = useDeviceType() !== "desktop";
     const { direction, showSideBar, libraryExpanded } = MainStore.useState();

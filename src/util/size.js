@@ -126,7 +126,7 @@ export function useSize(ref, depends = []) {
             });
         };
 
-        const resizeObserver = new ResizeObserver(entries => {
+        const resizeObserver = new ResizeObserver(() => {
             debouncedUpdate();
         });
 

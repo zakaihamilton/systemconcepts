@@ -17,7 +17,6 @@ function useImagePath(imageName = "", extension) {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
     const parentPath = useParentPath();
     let path = "";
-    let url = null;
     if (group) {
         let components = [prefix, group, year, date + " " + name + "." + extension].filter(Boolean).join("/");
         path = makePath(components).split("/").join("/");

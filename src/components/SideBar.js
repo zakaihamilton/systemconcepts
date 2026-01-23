@@ -69,7 +69,7 @@ export default function SideBar() {
     const other = sidebarPages.filter(page => !page.apps);
 
     const items = [
-        ...apps.map((item, index) => ({
+        ...apps.map((item, _index) => ({
             ...item,
             divider: false
         })),

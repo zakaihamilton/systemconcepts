@@ -324,10 +324,9 @@ const getTagHierarchy = (tag) => {
 const TextWithTerms = ({ text }) => {
     const parts = [];
     let lastIndex = 0;
-    termPattern.lastIndex = 0;
-    let match;
+    const matches = [...text.matchAll(termPattern)];
 
-    while ((match = termPattern.exec(text)) !== null) {
+    for (const match of matches) {
         const term = match[0];
         let start = match.index;
         let end = start + term.length;
@@ -626,9 +625,8 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
             // First pass: find all cross-references
             const references = [];
-            referencePattern.lastIndex = 0;
-            let refMatch;
-            while ((refMatch = referencePattern.exec(cleanChildren)) !== null) {
+            const refMatches = [...cleanChildren.matchAll(referencePattern)];
+            for (const refMatch of refMatches) {
                 references.push({
                     text: refMatch[0],
                     sectionName: refMatch[1] ? refMatch[1].trim() : null,
@@ -643,10 +641,9 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             const processGlossary = (text, keyPrefix) => {
                 const parts = [];
                 let lastIndex = 0;
-                termPattern.lastIndex = 0;
-                let match;
+                const matches = [...text.matchAll(termPattern)];
 
-                while ((match = termPattern.exec(text)) !== null) {
+                for (const match of matches) {
                     const term = match[0];
                     let start = match.index;
                     let end = start + term.length;

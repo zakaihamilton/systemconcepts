@@ -11,7 +11,6 @@ import styles from "./TreeItem.module.scss";
 import clsx from "clsx";
 import { LibraryStore } from "./Store";
 import { abbreviations } from "@data/abbreviations";
-import { useLanguage } from "@util/language";
 
 const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 }) {
     const hasChildren = node.children && node.children.length > 0;

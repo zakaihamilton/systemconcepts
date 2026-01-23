@@ -104,7 +104,7 @@ export function useBookmarks() {
     const { bookmarks = [] } = BookmarksStore.useState();
     const pages = usePages();
     const items = bookmarks.map(bookmark => {
-        const { pageId, ...props } = bookmark;
+        const { pageId: _pageId, ...props } = bookmark;
         const pagesFromHash = getPagesFromHash({ hash: bookmark.id, translations, pages });
         const page = pagesFromHash[pagesFromHash.length - 1];
         return {

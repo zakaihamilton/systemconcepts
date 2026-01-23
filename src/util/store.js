@@ -8,7 +8,7 @@ export function useStoreState(store, filter) {
     const storeState = store.useState(filter);
     const ref = useRef({});
     const states = ref.current;
-    const [counter, incCounter] = useCounter();
+    const [, incCounter] = useCounter();
     Object.keys(storeState || {}).forEach(key => {
         const value = storeState[key];
         let state = states[key];

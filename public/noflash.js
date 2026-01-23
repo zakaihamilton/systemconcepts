@@ -19,7 +19,7 @@
     var localStorageTheme = null;
     try {
         localStorageTheme = localStorage.getItem(storageKey);
-    } catch (err) { }
+    } catch (_err) { }
     var localStorageExists = localStorageTheme !== null;
     if (localStorageExists) {
         localStorageTheme = JSON.parse(localStorageTheme);
