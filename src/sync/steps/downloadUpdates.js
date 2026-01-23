@@ -117,6 +117,16 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
             if (remoteVer > localVer || !localFile) {
                 toDownload.push(remoteFile);
             }
+            else if (localFile.deleted) {
+                if (canUpload) {
+                    // Admin: Keep it deleted locally, skip download
+                    console.log(`[Sync] Skipping download for locally deleted file: ${remoteFile.path}`);
+                } else {
+                    // Student/Visitor: Re-download to restore from remote
+                    console.log(`[Sync] Restoring locally deleted file from remote: ${remoteFile.path}`);
+                    toDownload.push(remoteFile);
+                }
+            }
         }
 
         if (toDownload.length === 0) {

@@ -111,29 +111,34 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
             }
         }
 
-        // Remove files from manifest that no longer exist locally
+        // Mark files as deleted in manifest if they no longer exist locally
         const localFilePaths = new Set(localFiles.map(f => f.path));
-        const filteredManifest = manifest.filter(f => {
+        manifest.forEach(f => {
             if (!localFilePaths.has(f.path)) {
-                console.log(`[Sync] Removing missing file from manifest: ${f.path}`);
+                if (!f.deleted) {
+                    console.log(`[Sync] Marking missing file as deleted in manifest: ${f.path}`);
+                    f.deleted = true;
+                    changed = true;
+                }
+            } else if (f.deleted) {
+                console.log(`[Sync] File restored locally, unmarking deleted: ${f.path}`);
+                delete f.deleted;
                 changed = true;
-                return false;
             }
-            return true;
         });
 
         if (changed || !(await storage.exists(localManifestPath))) {
             const unlock = await lockMutex({ id: localManifestPath });
             try {
-                await storage.writeFile(localManifestPath, JSON.stringify(filteredManifest, null, 4));
+                await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
             } finally {
                 unlock();
             }
         }
 
         const duration = ((performance.now() - start) / 1000).toFixed(1);
-        addSyncLog(`✓ Updated manifest in ${duration}s (${filteredManifest.length} files)`, "info");
-        return filteredManifest;
+        addSyncLog(`✓ Updated manifest in ${duration}s (${manifest.length} files)`, "info");
+        return manifest;
 
     } catch (err) {
         console.error("[Sync] Step 2 error:", err);

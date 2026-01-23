@@ -8,7 +8,7 @@ import { usePageVisibility } from "@util/hooks";
 import { roleAuth } from "@util/roles";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { lockMutex, isMutexLocked } from "@sync/mutex";
-import { LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, SYNC_BASE_PATH, LOCAL_SYNC_PATH } from "./constants";
+import { LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST } from "./constants";
 import { addSyncLog } from "./logs";
 import { makePath } from "@util/path";
 
@@ -20,6 +20,7 @@ import { downloadUpdates } from "./steps/downloadUpdates";
 import { uploadUpdates } from "./steps/uploadUpdates";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { removeDeletedFiles } from "./steps/removeDeletedFiles";
+import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
 import { uploadManifest } from "./steps/uploadManifest";
 import { SyncProgressTracker, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 
@@ -96,6 +97,24 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
         hasChanges = hasChanges || uploadNewResult.hasChanges;
         progress.completeStep('uploadNewFiles');
 
+        // Step 6.5: Delete files from remote that were marked as deleted locally
+        progress.updateProgress('deleteRemoteFiles', { processed: 0, total: 1 });
+        const deletedPaths = await deleteRemoteFiles(localManifest, remotePath);
+        if (deletedPaths.length > 0) {
+            hasChanges = true;
+            // Clean up local manifest: remove the tombstoned entries
+            const deletedPathsSet = new Set(deletedPaths);
+            localManifest = localManifest.filter(f => !f.deleted || !deletedPathsSet.has(f.path));
+
+            // Update remote manifest: remove the deleted files
+            remoteManifest = remoteManifest.filter(f => !deletedPathsSet.has(f.path));
+
+            // Save the cleaned local manifest
+            const localManifestPath = makePath(localPath, FILES_MANIFEST);
+            await storage.writeFile(localManifestPath, JSON.stringify(localManifest, null, 4));
+        }
+        progress.completeStep('deleteRemoteFiles');
+
         // Step 7
         progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
         await uploadManifest(remoteManifest, remotePath);
@@ -104,6 +123,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
         // Skip upload steps UI progress
         progress.completeStep('uploadUpdates');
         progress.completeStep('uploadNewFiles');
+        progress.completeStep('deleteRemoteFiles');
         progress.completeStep('uploadManifest');
     }
 

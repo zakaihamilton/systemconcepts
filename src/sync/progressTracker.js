@@ -9,6 +9,7 @@ const STEP_WEIGHTS = {
     removeDeletedFiles: 5,
     uploadUpdates: 30,
     uploadNewFiles: 5,
+    deleteRemoteFiles: 5,
     uploadManifest: 5
 };
 
