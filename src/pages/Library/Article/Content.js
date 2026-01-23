@@ -4,11 +4,11 @@ import Markdown from "./Markdown";
 import articleStyles from "../Article.module.scss";
 import styles from "./Content.module.scss";
 
-export default function Content({ showMarkdown, search, currentTTSParagraph, selectedTag, processedContent }) {
+export default function Content({ showMarkdown, search, currentParagraphIndex, selectedTag, processedContent }) {
     return (
         <Box className={articleStyles.centeredContent}>
             {showMarkdown ? (
-                <Markdown search={search} currentTTSParagraph={currentTTSParagraph} selectedTag={selectedTag}>
+                <Markdown search={search} currentParagraphIndex={currentParagraphIndex} selectedTag={selectedTag}>
                     {processedContent}
                 </Markdown>
             ) : (

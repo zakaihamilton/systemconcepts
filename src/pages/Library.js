@@ -468,15 +468,33 @@ export default function Library() {
     const prevArticle = currentIndex > 0 && sortedTags[currentIndex - 1];
     const nextArticle = currentIndex !== -1 && currentIndex < sortedTags.length - 1 && sortedTags[currentIndex + 1];
 
+    const getArticleTitle = useCallback((tag) => {
+        if (!tag) return "";
+        for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+            const key = LibraryTagKeys[i];
+            const value = tag[key];
+            if (value && String(value).trim()) {
+                return value;
+            }
+        }
+        return "";
+    }, []);
+
+    const prevArticleName = useMemo(() => getArticleTitle(prevArticle), [prevArticle, getArticleTitle]);
+    const nextArticleName = useMemo(() => getArticleTitle(nextArticle), [nextArticle, getArticleTitle]);
+
     const gotoArticle = useCallback((tag) => {
         if (!tag) return;
         onSelect(tag);
     }, [onSelect]);
 
+    const previousTooltip = useMemo(() => prevArticleName ? <span className={styles.tooltip}><b>{translations.PREVIOUS}</b> {prevArticleName}</span> : <b>{translations.PREVIOUS}</b>, [prevArticleName, translations]);
+    const nextTooltip = useMemo(() => nextArticleName ? <span className={styles.tooltip}><b>{translations.NEXT}</b> {nextArticleName}</span> : <b>{translations.NEXT}</b>, [nextArticleName, translations]);
+
     const toolbarItems = [
         !isMobile && {
             id: "prevArticle",
-            name: translations.PREVIOUS,
+            name: previousTooltip,
             icon: <ArrowBackIcon />,
             onClick: () => prevArticle && gotoArticle(prevArticle),
             location: "header",
@@ -484,7 +502,7 @@ export default function Library() {
         },
         !isMobile && {
             id: "nextArticle",
-            name: translations.NEXT,
+            name: nextTooltip,
             icon: <ArrowForwardIcon />,
             onClick: () => nextArticle && gotoArticle(nextArticle),
             location: "header",
@@ -492,7 +510,7 @@ export default function Library() {
         }
     ];
 
-    useToolbar({ id: "Library", items: toolbarItems, depends: [prevArticle, nextArticle, translations, isMobile] });
+    useToolbar({ id: "Library", items: toolbarItems, depends: [prevArticle, nextArticle, prevArticleName, nextArticleName, translations, isMobile, previousTooltip, nextTooltip] });
 
     const swipeHandlers = useSwipe({
         onSwipeLeft: () => nextArticle && gotoArticle(nextArticle),
@@ -513,6 +531,10 @@ export default function Library() {
                 contentRef={contentRef}
                 openEditContentDialog={openEditContentDialog}
                 loading={loading}
+                prevArticle={{ name: prevArticleName, tag: prevArticle }}
+                nextArticle={{ name: nextArticleName, tag: nextArticle }}
+                onPrev={() => prevArticle && gotoArticle(prevArticle)}
+                onNext={() => nextArticle && gotoArticle(nextArticle)}
             />
 
             {isAdmin && selectedTag && (

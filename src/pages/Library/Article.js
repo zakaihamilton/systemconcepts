@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useDeviceType } from "@util/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -16,7 +16,6 @@ import { LibraryTagKeys } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { abbreviations } from "../../data/abbreviations";
-import { useLanguage } from "@util/language";
 import { useLocalStorage } from "@util/hooks";
 import styles from "./Article.module.scss";
 
@@ -67,7 +66,6 @@ function Article({
         showScrollTop,
         handleScrollUpdate,
         scrollToTop,
-        updateScrollInfo
     } = useArticleScroll(contentRef, handleScroll);
 
     const {
@@ -102,11 +100,37 @@ function Article({
         }, 100);
     }, [contentRef, scrollInfo.clientHeight]);
 
+    const title = useMemo(() => {
+        if (!selectedTag) return { name: "", key: "" };
+        for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+            const key = LibraryTagKeys[i];
+            const value = selectedTag[key];
+            if (value && String(value).trim()) {
+                return { name: value, key };
+            }
+        }
+        return { name: "", key: "" };
+    }, [selectedTag]);
+
+    const processedContent = useMemo(() => {
+        if (!content || showAbbreviations) return content;
+        let text = content;
+        const keys = Object.keys(abbreviations).sort((a, b) => b.length - a.length);
+        for (const key of keys) {
+            const expansion = abbreviations[key];
+            if (!expansion) continue;
+            const escapedExpansion = expansion.eng.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b${key}\\b(?:\\s*\\(${escapedExpansion}\\))?`, 'gi');
+            text = text.replace(regex, expansion.eng);
+        }
+        return text;
+    }, [content, showAbbreviations]);
+
     const handleShowTerms = useCallback(() => {
-        const terms = scanForTerms(content);
+        const terms = scanForTerms(processedContent);
         setArticleTerms(terms);
         setTermsDialogOpen(true);
-    }, [content]);
+    }, [processedContent]);
 
     // Handle scroll to paragraph from cross-link navigation
     const scrollToParagraph = LibraryStore.useState(s => s.scrollToParagraph);
@@ -357,8 +381,8 @@ function Article({
                 },
                 {
                     id: "matchCount",
-                    name: `${matchIndex + 1} / ${totalMatches}`,
-                    element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{matchIndex + 1} / {totalMatches}</Typography>,
+                    name: totalMatches > 0 ? `${matchIndex + 1} / ${totalMatches}` : "0 / 0",
+                    element: <Typography key="matchCount" variant="caption" sx={{ alignSelf: "center", mx: 1, color: "var(--text-secondary)", fontWeight: "bold" }}>{totalMatches > 0 ? `${matchIndex + 1} / ${totalMatches}` : "0 / 0"}</Typography>,
                     location: isPhone ? "header" : undefined
                 },
                 {
@@ -380,31 +404,7 @@ function Article({
         depends: [toolbarItems, content]
     });
 
-    const title = useMemo(() => {
-        if (!selectedTag) return { name: "", key: "" };
-        for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
-            const key = LibraryTagKeys[i];
-            const value = selectedTag[key];
-            if (value && String(value).trim()) {
-                return { name: value, key };
-            }
-        }
-        return { name: "", key: "" };
-    }, [selectedTag]);
 
-    const processedContent = useMemo(() => {
-        if (!content || showAbbreviations) return content;
-        let text = content;
-        const keys = Object.keys(abbreviations).sort((a, b) => b.length - a.length);
-        for (const key of keys) {
-            const expansion = abbreviations[key];
-            if (!expansion) continue;
-            const escapedExpansion = expansion.eng.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`\\b${key}\\b(?:\\s*\\(${escapedExpansion}\\))?`, 'gi');
-            text = text.replace(regex, expansion.eng);
-        }
-        return text;
-    }, [content, showAbbreviations]);
 
     if (loading) {
         return (
@@ -438,7 +438,14 @@ function Article({
                 sx={{ position: 'relative', height: '100%', overflowY: 'auto', overflowX: 'hidden', outline: 'none' }}
             >
                 <PageIndicator scrollInfo={scrollInfo} />
-                <Header selectedTag={selectedTag} isHeaderHidden={isHeaderHidden} showAbbreviations={showAbbreviations} title={title} translations={translations} />
+                <Header
+                    selectedTag={selectedTag}
+                    isHeaderHidden={isHeaderHidden}
+                    showAbbreviations={showAbbreviations}
+                    title={title}
+                    translations={translations}
+                    currentParagraphIndex={currentParagraphIndex}
+                />
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
                     <Box
                         key={i}
@@ -458,7 +465,7 @@ function Article({
                 <Content
                     showMarkdown={showMarkdown}
                     search={search}
-                    currentTTSParagraph={currentParagraphIndex}
+                    currentParagraphIndex={currentParagraphIndex}
                     selectedTag={selectedTag}
                     processedContent={processedContent}
                 />

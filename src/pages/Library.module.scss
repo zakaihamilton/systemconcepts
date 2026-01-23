@@ -31,3 +31,10 @@
 .markdown :global(li) {
     margin-bottom: 2rem;
 }
+
+.tooltip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

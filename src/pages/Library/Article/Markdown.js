@@ -513,7 +513,7 @@ const rehypeArticleEnrichment = () => {
 };
 
 
-export default React.memo(function Markdown({ children, search, currentTTSParagraph, selectedTag }) {
+export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -759,7 +759,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         }
 
         return children;
-    }, [Highlight, search, selectedTag, currentTTSParagraph]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [Highlight, search, selectedTag, currentParagraphIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });
@@ -769,7 +769,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
         const HeaderRenderer = (tag) => {
             const Header = ({ node, children }) => {
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
-                const paragraphSelected = currentTTSParagraph === paragraphIndex;
+                const paragraphSelected = currentParagraphIndex === paragraphIndex;
                 return (
                     <Box
                         component={tag}
@@ -826,7 +826,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
             const paragraphText = extractText(children);
             const paragraphIndex = node?.properties?.dataParagraphIndex;
-            const paragraphSelected = currentTTSParagraph === paragraphIndex;
+            const paragraphSelected = currentParagraphIndex === paragraphIndex;
 
             return (
                 <Box
@@ -864,7 +864,7 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             h6: HeaderRenderer('h6'),
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer, handleParagraphZoom, currentTTSParagraph, translations]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [TextRenderer, handleParagraphZoom, currentParagraphIndex, translations]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>

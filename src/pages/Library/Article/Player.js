@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from '@util/translations';
+import { useLocalStorage } from '@util/hooks';
 import Controls from './Player/Controls';
 import { LibraryTagKeys } from '../Icons';
 
@@ -18,7 +19,7 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
     const [voices, setVoices] = useState([]);
     const [selectedVoice, setSelectedVoice] = useState(null);
     const [voiceMenuAnchor, setVoiceMenuAnchor] = useState(null);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useLocalStorage("playerCollapsed", false);
 
     const utteranceRef = useRef(null);
     const synthRef = useRef(null);
@@ -132,18 +133,7 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
 
             const pElements = contentRef.current.querySelectorAll('[data-paragraph-index]');
             const extracted = Array.from(pElements).map((el, index) => {
-                const clone = el.cloneNode(true);
-
-                const paragraphNumber = clone.querySelector('[class*="paragraphNumber"]');
-                if (paragraphNumber) {
-                    paragraphNumber.remove();
-                }
-
-                const annotations = clone.querySelectorAll('[class*="glossary-annotation"]');
-                annotations.forEach(ann => ann.remove());
-
-                const text = clone.textContent.trim();
-
+                const text = el.getAttribute('data-paragraph-text') || el.textContent.trim();
                 return {
                     element: el,
                     text: text,

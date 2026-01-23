@@ -38,16 +38,18 @@ export function useArticleSearch(content, search) {
 
     useEffect(() => {
         const highlights = document.querySelectorAll('.search-highlight');
-        setTimeout(() => setTotalMatches(highlights.length), 0);
-        if (highlights.length > 0) {
-            setTimeout(() => {
-                setMatchIndex(prev => {
-                    const index = prev >= highlights.length ? 0 : prev;
-                    scrollToMatch(index);
-                    return index;
-                });
-            }, 0);
-        }
+        const count = highlights.length;
+
+        setTimeout(() => {
+            setTotalMatches(count);
+            setMatchIndex(prev => {
+                const newIndex = (count === 0 || !search) ? 0 : (prev >= count ? 0 : prev);
+                if (count > 0 && search) {
+                    scrollToMatch(newIndex);
+                }
+                return newIndex;
+            });
+        }, 0);
     }, [content, search, scrollToMatch]);
 
     return {

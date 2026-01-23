@@ -8,7 +8,14 @@ import { abbreviations } from "../../../data/abbreviations";
 import clsx from "clsx";
 import styles from "../Article.module.scss";
 
-export default function Header({ selectedTag, isHeaderHidden, showAbbreviations, title, translations }) {
+export default function Header({
+    selectedTag,
+    isHeaderHidden,
+    showAbbreviations,
+    title,
+    translations,
+    currentParagraphIndex
+}) {
     const handleTagKeyPress = (e, value) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -16,11 +23,18 @@ export default function Header({ selectedTag, isHeaderHidden, showAbbreviations,
         }
     };
 
+    const isTitleSelected = currentParagraphIndex === -2;
+    const isTagsSelected = currentParagraphIndex === -1;
+
     return (
         <Box
             component="header"
             role="banner"
-            className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}
+            className={clsx(
+                styles.stickyHeader,
+                isHeaderHidden && !isTitleSelected && !isTagsSelected && styles.hidden,
+                (isTitleSelected || isTagsSelected) && styles.headerSelected
+            )}
             aria-label={selectedTag?.article || "Article Header"}
         >
             <Box className={styles.headerContent}>
