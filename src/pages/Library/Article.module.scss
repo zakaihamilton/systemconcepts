@@ -8,8 +8,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--background-paper);
-    border-radius: 8px;
-    box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -26,9 +26,23 @@
         opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 1rem;
     will-change: transform, opacity;
+
+    .headerContent {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 auto;
+        padding: 0 24px;
+
+        @media (max-width: 600px) {
+            padding: 0 16px;
+        }
+    }
 }
 
 .stickyHeader.hidden {
@@ -90,9 +104,9 @@
     padding: 2px 8px;
     background-color: var(--primary-main);
     color: var(--primary-contrast-text);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
     font-weight: 800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 0.875rem;
     display: inline-block;
     vertical-align: middle;
@@ -118,16 +132,21 @@
     padding: 4px 12px;
     background-color: var(--action-hover);
     border: 1px solid var(--divider);
-    border-radius: 20px;
+    border-radius: var(--radius-full);
     color: var(--text-primary);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
 
     &:hover {
         background-color: var(--action-selected);
         border-color: var(--primary-main);
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.96);
+        box-shadow: var(--shadow-sm);
     }
 
     span {
@@ -143,49 +162,22 @@
 .contentScrollArea {
     padding: 1rem;
     padding-top: 0.5rem;
-    flex: 1;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
 }
 
-.contentWrapper {
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
+.centeredContent {
     width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        margin-top: 24px;
-        margin-bottom: 16px;
-        color: var(--text-primary);
-        font-weight: 700;
-        line-height: 1.4;
-    }
-
-    a {
-        color: var(--primary-main);
-        text-decoration: none;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    blockquote {
-        border-left: 4px solid var(--primary-main);
-        padding-left: 16px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        margin: 16px 0;
-        background-color: var(--action-hover);
-        border-radius: 4px;
+    @media (max-width: 600px) {
+        padding: 0 16px;
     }
 }
+
+
 
 .placeholder {
     display: flex;
@@ -219,11 +211,15 @@
 }
 
 @keyframes highlightFade {
+    0% {
+        background-color: transparent;
+        box-shadow: none;
+    }
 
-    0%,
-    20% {
-        background-color: rgba(255, 152, 0, 0.2);
-        box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.2);
+    15%,
+    35% {
+        background-color: rgba(255, 152, 0, 0.15);
+        box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
     }
 
     100% {
@@ -272,7 +268,7 @@
         opacity: 1 !important;
     }
 
-    .stickyHeader>*:not(.headerInfo) {
+    .stickyHeader>*:not(.headerInfo):not(.headerContent) {
         display: none !important;
     }
 

@@ -39,10 +39,10 @@ export default function Controls({
     return (
         <>
             <Paper
-                className={`${styles.root} ${!isCollapsed ? styles.expanded : ''} ${isCollapsed ? styles.collapsed : ''} ${isPlaying ? styles.playing : ''}`}
+                className={`${styles.root} ${!isCollapsed ? styles.expanded : ''} ${isCollapsed ? styles.collapsed : ''} ${isPlaying ? styles.playing : ''} print-hidden`}
                 elevation={0}
             >
-                <Box className={styles.controls}>
+                <Box className={styles.controls} role="group" aria-label="Player controls">
                     {!isCollapsed && (
                         <>
                             <Tooltip title={translations.PREVIOUS_PARAGRAPH} arrow>
@@ -51,6 +51,7 @@ export default function Controls({
                                         onClick={handlePrevious}
                                         disabled={currentParagraphIndex <= 0}
                                         className={styles.controlButton}
+                                        aria-label={translations.PREVIOUS_PARAGRAPH}
                                     >
                                         <SkipPreviousIcon />
                                     </IconButton>
@@ -62,6 +63,7 @@ export default function Controls({
                                     <IconButton
                                         onClick={handlePlay}
                                         className={`${styles.controlButton} ${styles.playButton}`}
+                                        aria-label={translations.PLAY}
                                     >
                                         <PlayArrowIcon />
                                     </IconButton>
@@ -71,6 +73,7 @@ export default function Controls({
                                     <IconButton
                                         onClick={handlePause}
                                         className={`${styles.controlButton} ${styles.playButton}`}
+                                        aria-label={translations.PAUSE}
                                     >
                                         <PauseIcon />
                                     </IconButton>
@@ -83,6 +86,7 @@ export default function Controls({
                                         onClick={handleStop}
                                         disabled={!isPlaying && currentParagraphIndex < 0}
                                         className={styles.controlButton}
+                                        aria-label={translations.STOP}
                                     >
                                         <StopIcon />
                                     </IconButton>
@@ -95,6 +99,7 @@ export default function Controls({
                                         onClick={handleNext}
                                         disabled={currentParagraphIndex >= paragraphs.length - 1}
                                         className={styles.controlButton}
+                                        aria-label={translations.NEXT_PARAGRAPH}
                                     >
                                         <SkipNextIcon />
                                     </IconButton>
@@ -105,6 +110,7 @@ export default function Controls({
                                 <IconButton
                                     onClick={handleVoiceMenuOpen}
                                     className={styles.controlButton}
+                                    aria-label="Select voice"
                                 >
                                     <RecordVoiceOverIcon />
                                 </IconButton>
@@ -132,6 +138,7 @@ export default function Controls({
                                         }
                                     }
                                 }}
+                                aria-label="Available voices"
                             >
                                 {voices
                                     .filter(voice => voice.lang.startsWith('en-'))
@@ -140,6 +147,7 @@ export default function Controls({
                                             key={index}
                                             onClick={() => handleVoiceSelect(voice)}
                                             selected={selectedVoice?.name === voice.name}
+                                            aria-label={`Select ${voice.name}`}
                                             sx={{
                                                 py: 1.5,
                                                 '&.Mui-selected': {
@@ -174,6 +182,7 @@ export default function Controls({
                                     onClick={() => setIsCollapsed(true)}
                                     className={styles.controlButton}
                                     size="small"
+                                    aria-label={translations.COLLAPSE}
                                 >
                                     <ExpandMoreIcon />
                                 </IconButton>
@@ -188,7 +197,7 @@ export default function Controls({
                 <Button
                     variant="text"
                     onClick={() => setIsCollapsed(false)}
-                    className={styles.expandButton}
+                    className={`${styles.expandButton} print-hidden`}
                     size="small"
                 >
                     {translations.PLAYER}

@@ -6,7 +6,14 @@ import { LibraryTagKeys } from '../Icons';
 export default function Player({ contentRef, onParagraphChange, selectedTag, currentParagraphIndex: externalParagraphIndex }) {
     const translations = useTranslations();
     const [isPlaying, setIsPlaying] = useState(false);
-    const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
+    const [currentParagraphIndex, setCurrentParagraphIndex] = useState(externalParagraphIndex ?? -1);
+    const [prevExternalIndex, setPrevExternalIndex] = useState(externalParagraphIndex);
+
+    if (externalParagraphIndex !== prevExternalIndex) {
+        setPrevExternalIndex(externalParagraphIndex);
+        setCurrentParagraphIndex(externalParagraphIndex);
+    }
+
     const [paragraphs, setParagraphs] = useState([]);
     const [voices, setVoices] = useState([]);
     const [selectedVoice, setSelectedVoice] = useState(null);
@@ -17,16 +24,8 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
     const synthRef = useRef(null);
     const isInitialMount = useRef(true);
 
-    // NEW REFS FOR FIXING BUGS
     const prevVoiceRef = useRef(null);
     const isStoppingRef = useRef(false);
-
-    // Sync with external paragraph selection (from Article click)
-    useEffect(() => {
-        if (typeof externalParagraphIndex === 'number') {
-            setCurrentParagraphIndex(externalParagraphIndex);
-        }
-    }, [externalParagraphIndex]);
 
     // Initialize speech synthesis and load voices
     useEffect(() => {

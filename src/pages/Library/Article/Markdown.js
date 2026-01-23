@@ -324,10 +324,10 @@ const getTagHierarchy = (tag) => {
 const TextWithTerms = ({ text }) => {
     const parts = [];
     let lastIndex = 0;
-    termPattern.lastIndex = 0;
+    const localPattern = new RegExp(termPattern);
     let match;
 
-    while ((match = termPattern.exec(text)) !== null) {
+    while ((match = localPattern.exec(text)) !== null) {
         const term = match[0];
         let start = match.index;
         let end = start + term.length;
@@ -351,7 +351,7 @@ const TextWithTerms = ({ text }) => {
 
         // Render fully interactive Term component
         parts.push(
-            <span key={start} data-prevent-select="true">
+            <span key={start}>
                 <Term
                     term={term}
                     entry={glossaryEntry}
@@ -626,9 +626,9 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
 
             // First pass: find all cross-references
             const references = [];
-            referencePattern.lastIndex = 0;
+            const localRefPattern = new RegExp(referencePattern);
             let refMatch;
-            while ((refMatch = referencePattern.exec(cleanChildren)) !== null) {
+            while ((refMatch = localRefPattern.exec(cleanChildren)) !== null) {
                 references.push({
                     text: refMatch[0],
                     sectionName: refMatch[1] ? refMatch[1].trim() : null,
@@ -643,10 +643,10 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             const processGlossary = (text, keyPrefix) => {
                 const parts = [];
                 let lastIndex = 0;
-                termPattern.lastIndex = 0;
+                const localPattern = new RegExp(termPattern);
                 let match;
 
-                while ((match = termPattern.exec(text)) !== null) {
+                while ((match = localPattern.exec(text)) !== null) {
                     const term = match[0];
                     let start = match.index;
                     let end = start + term.length;
@@ -793,66 +793,68 @@ export default React.memo(function Markdown({ children, search, currentTTSParagr
             return Header;
         };
 
-        return {
-            p: ({ node, children }) => {
-                if (!children || (Array.isArray(children) && children.length === 0)) return null;
+        const ParagraphRenderer = ({ node, children }) => {
+            const [hoveringNumber, setHoveringNumber] = useState(false);
+            if (!children || (Array.isArray(children) && children.length === 0)) return null;
 
-                // Extract plain text from children for TTS
-                const extractText = (child) => {
-                    if (typeof child === 'string') return child;
-                    if (Array.isArray(child)) return child.map(extractText).join('');
-                    if (React.isValidElement(child)) {
-                        // Check if this is a glossary term by looking for the Term component structure
-                        // The Term component renders: <span with glossary-main-text class>
-                        // We want to extract the main text (translation) not the original term
-                        const props = child.props;
+            // Extract plain text from children for TTS
+            const extractText = (child) => {
+                if (typeof child === 'string') return child;
+                if (Array.isArray(child)) return child.map(extractText).join('');
+                if (React.isValidElement(child)) {
+                    // Check if this is a glossary term by looking for the Term component structure
+                    // The Term component renders: <span with glossary-main-text class>
+                    // We want to extract the main text (translation) not the original term
+                    const props = child.props;
 
-                        // If it's a span with className containing 'glossary-main-text', get its text content
-                        if (props?.className && typeof props.className === 'string' &&
-                            props.className.includes('glossary-main-text')) {
-                            return props.children || '';
-                        }
-
-                        // Skip glossary annotations (transliteration above the word)
-                        if (props?.className && typeof props.className === 'string' &&
-                            props.className.includes('glossary-annotation')) {
-                            return '';
-                        }
-
-                        return extractText(props.children);
+                    // If it's a span with className containing 'glossary-main-text', get its text content
+                    if (props?.className && typeof props.className === 'string' &&
+                        props.className.includes('glossary-main-text')) {
+                        return props.children || '';
                     }
-                    return '';
-                };
 
-                const paragraphText = extractText(children);
-                const paragraphIndex = node?.properties?.dataParagraphIndex;
-                const [hoveringNumber, setHoveringNumber] = useState(false);
-                const paragraphSelected = currentTTSParagraph === paragraphIndex;
+                    // Skip glossary annotations (transliteration above the word)
+                    if (props?.className && typeof props.className === 'string' &&
+                        props.className.includes('glossary-annotation')) {
+                        return '';
+                    }
 
-                return (
-                    <Box
-                        className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
-                        sx={{ marginBottom: '24px', lineHeight: 2.8 }}
-                        data-paragraph-index={paragraphIndex}
-                        data-paragraph-text={paragraphText}
-                    >
-                        <TextRenderer>{children}</TextRenderer>
-                        <Tooltip title={translations?.ZOOM} placement="top" arrow>
-                            <span
-                                data-prevent-select="true"
-                                className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
-                                onMouseEnter={() => setHoveringNumber(true)}
-                                onMouseLeave={() => setHoveringNumber(false)}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const number = node?.properties?.dataParagraphIndex;
-                                    handleParagraphZoom(children, number);
-                                }}
-                            />
-                        </Tooltip>
-                    </Box>
-                );
-            },
+                    return extractText(props.children);
+                }
+                return '';
+            };
+
+            const paragraphText = extractText(children);
+            const paragraphIndex = node?.properties?.dataParagraphIndex;
+            const paragraphSelected = currentTTSParagraph === paragraphIndex;
+
+            return (
+                <Box
+                    className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
+                    sx={{ marginBottom: '24px', lineHeight: 2.8 }}
+                    data-paragraph-index={paragraphIndex}
+                    data-paragraph-text={paragraphText}
+                >
+                    <TextRenderer>{children}</TextRenderer>
+                    <Tooltip title={translations?.ZOOM} placement="top" arrow>
+                        <span
+                            data-prevent-select="true"
+                            className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
+                            onMouseEnter={() => setHoveringNumber(true)}
+                            onMouseLeave={() => setHoveringNumber(false)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const number = node?.properties?.dataParagraphIndex;
+                                handleParagraphZoom(children, number);
+                            }}
+                        />
+                    </Tooltip>
+                </Box>
+            );
+        };
+
+        return {
+            p: ParagraphRenderer,
             li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>,
             h1: HeaderRenderer('h1'),
             h2: HeaderRenderer('h2'),

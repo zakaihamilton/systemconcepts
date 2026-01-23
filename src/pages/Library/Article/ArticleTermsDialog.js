@@ -20,12 +20,14 @@ import styles from "./ArticleTermsDialog.module.scss";
 export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
     const translations = useTranslations();
     const [search, setSearch] = useState("");
+    const [prevOpen, setPrevOpen] = useState(open);
 
-    useEffect(() => {
-        if (open) {
-            setSearch("");
-        }
-    }, [open]);
+    if (open && !prevOpen) {
+        setPrevOpen(true);
+        setSearch("");
+    } else if (!open && prevOpen) {
+        setPrevOpen(false);
+    }
 
     const filteredTerms = useMemo(() => {
         if (!search) return terms;
@@ -54,6 +56,10 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 
     const [activeLetter, setActiveLetter] = useState(null);
 
+    if (uniqueLetters.length > 0 && !activeLetter) {
+        setActiveLetter(uniqueLetters[0]);
+    }
+
     const handleScroll = (e) => {
         const container = e.target;
         const containerTop = container.getBoundingClientRect().top;
@@ -80,13 +86,6 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
             setActiveLetter(currentLetter);
         }
     };
-
-    // Set initial active letter
-    useEffect(() => {
-        if (uniqueLetters.length > 0 && !activeLetter) {
-            setActiveLetter(uniqueLetters[0]);
-        }
-    }, [uniqueLetters, activeLetter]);
 
     const handleLetterClick = (letter) => {
         const element = document.getElementById(`term-letter-${letter}`);

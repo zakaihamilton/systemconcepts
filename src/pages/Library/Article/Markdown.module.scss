@@ -106,6 +106,16 @@
     min-width: 150px;
     text-align: center;
     pointer-events: auto;
+    animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: top center;
+
+    &.bottom {
+        transform-origin: top center;
+    }
+
+    &.top {
+        transform-origin: bottom center;
+    }
 
     .tt-label {
         font-size: 0.75rem;
@@ -136,6 +146,18 @@
     }
 }
 
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
 .container {
     counter-reset: paragraph;
 }
@@ -144,8 +166,11 @@
     border: 1px solid transparent;
     padding: 8px 16px;
     padding-right: 48px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    border-radius: var(--radius-md);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     counter-increment: paragraph;
     background-color: var(--background-paper);

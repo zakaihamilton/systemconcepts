@@ -70,7 +70,7 @@ export default function Theme({ children }) {
                 MuiButton: {
                     styleOverrides: {
                         root: {
-                            borderRadius: '8px', // Rounded corners
+                            borderRadius: 'var(--radius-md)',
                             boxShadow: 'none',
                             '&:hover': {
                                 boxShadow: 'none',
@@ -87,37 +87,31 @@ export default function Theme({ children }) {
                 MuiPaper: {
                     styleOverrides: {
                         rounded: {
-                            borderRadius: '12px',
+                            borderRadius: 'var(--radius-lg)',
                         },
                         elevation1: {
-                            boxShadow: darkMode.value
-                                ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.16)'
-                                : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)', // Tailwind shadow-sm
+                            boxShadow: 'var(--shadow-sm)',
                         },
                         elevation2: {
-                             boxShadow: darkMode.value
-                                ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)'
-                                : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', // Tailwind shadow-md
+                            boxShadow: 'var(--shadow-md)',
                         }
                     },
                 },
                 MuiAppBar: {
                     styleOverrides: {
                         root: {
-                            backgroundColor: darkMode.value ? '#1e293b' : '#ffffff',
-                            color: darkMode.value ? '#f1f5f9' : '#1e293b',
-                            boxShadow: darkMode.value
-                                ? '0 1px 2px 0 rgba(0, 0, 0, 0.3)'
-                                : '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                            backgroundImage: 'none', // Remove default MUI gradient in dark mode
+                            backgroundColor: 'var(--app-bar-background)',
+                            color: 'var(--text-primary)',
+                            boxShadow: 'var(--shadow-sm)',
+                            backgroundImage: 'none',
                         }
                     }
                 },
                 MuiDrawer: {
                     styleOverrides: {
                         paper: {
-                            backgroundColor: darkMode.value ? '#0f172a' : '#f8fafc',
-                            borderRight: `1px solid ${darkMode.value ? '#334155' : '#e2e8f0'}`,
+                            backgroundColor: 'var(--side-bar-background)',
+                            borderRight: '1px solid var(--divider)',
                         }
                     }
                 }

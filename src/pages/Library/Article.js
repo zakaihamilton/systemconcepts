@@ -1,10 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useDeviceType } from "@util/styles";
-import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
@@ -13,10 +10,9 @@ import CodeOffIcon from "@mui/icons-material/CodeOff";
 import ArticleIcon from "@mui/icons-material/Article";
 import PrintIcon from "@mui/icons-material/Print";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import Markdown from "./Article/Markdown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { LibraryTagKeys, LibraryIcons } from "./Icons";
+import { LibraryTagKeys } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { abbreviations } from "../../data/abbreviations";
@@ -24,22 +20,22 @@ import { useLanguage } from "@util/language";
 import { useLocalStorage } from "@util/hooks";
 import styles from "./Article.module.scss";
 
-
-import clsx from "clsx";
 import Player from "./Article/Player";
 import JumpDialog from "./Article/JumpDialog";
 import ArticleTermsDialog from "./Article/ArticleTermsDialog";
 import { scanForTerms } from "./Article/GlossaryUtils";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import Fab from "@mui/material/Fab";
-import Zoom from "@mui/material/Zoom";
 import { LibraryStore } from "./Store";
 
+import { useArticleScroll } from "./Article/useArticleScroll";
+import { useArticleSearch } from "./Article/useArticleSearch";
+import Header from "./Article/Header";
+import PageIndicator from "./Article/PageIndicator";
+import ScrollToTop from "./Article/ScrollToTop";
+import Content from "./Article/Content";
+
 registerToolbar("Article");
-
-
 
 function Article({
     selectedTag,
@@ -56,20 +52,30 @@ function Article({
 }) {
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
-    const [matchIndex, setMatchIndex] = useState(0);
-    const [totalMatches, setTotalMatches] = useState(0);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(true);
     const [showAbbreviations, setShowAbbreviations] = useLocalStorage("showAbbreviations", true);
-    const language = useLanguage();
-    const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
-    const scrollTimeoutRef = useRef(null);
     const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
     const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
     const [termsDialogOpen, setTermsDialogOpen] = useState(false);
     const [articleTerms, setArticleTerms] = useState([]);
-    const [showScrollTop, setShowScrollTop] = useState(false);
     const [totalParagraphs, setTotalParagraphs] = useState(0);
+
+    const {
+        scrollInfo,
+        setScrollInfo,
+        showScrollTop,
+        handleScrollUpdate,
+        scrollToTop,
+        updateScrollInfo
+    } = useArticleScroll(contentRef, handleScroll);
+
+    const {
+        matchIndex,
+        totalMatches,
+        handleNextMatch,
+        handlePrevMatch
+    } = useArticleSearch(content, search);
 
     const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
@@ -94,7 +100,7 @@ function Article({
                 }
             }
         }, 100);
-    }, [contentRef, scrollInfo]);
+    }, [contentRef, scrollInfo.clientHeight]);
 
     const handleShowTerms = useCallback(() => {
         const terms = scanForTerms(content);
@@ -102,54 +108,10 @@ function Article({
         setTermsDialogOpen(true);
     }, [content]);
 
-    const scrollToTop = useCallback(() => {
-        if (contentRef.current) {
-            contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }, [contentRef]);
-
-    const updateScrollInfo = useCallback((target) => {
-        const { scrollTop, scrollHeight, clientHeight } = target;
-        if (clientHeight === 0) return;
-
-        // Use a threshold to prevent small overflows (like margins/padding) from creating extra pages
-        const effectiveScrollHeight = scrollHeight - (clientHeight * 0.1); // Allow 10% tolerance
-        const total = Math.max(1, Math.ceil(effectiveScrollHeight / clientHeight));
-        let page = Math.ceil((scrollTop + clientHeight / 4) / clientHeight) || 1;
-        if (scrollTop + clientHeight >= scrollHeight - 1) {
-            page = total;
-        }
-
-        setScrollInfo(prev => {
-            if (prev.page !== page || prev.total !== total || prev.clientHeight !== clientHeight || prev.scrollHeight !== scrollHeight) {
-                return { ...prev, page, total, clientHeight, scrollHeight };
-            }
-            return prev;
-        });
-    }, []);
-
-    const handleScrollUpdate = useCallback((e) => {
-        updateScrollInfo(e.target);
-
-        setScrollInfo(prev => {
-            if (!prev.visible) return { ...prev, visible: true };
-            return prev;
-        });
-
-        if (scrollTimeoutRef.current) {
-            clearTimeout(scrollTimeoutRef.current);
-        }
-
-        scrollTimeoutRef.current = setTimeout(() => {
-            setScrollInfo(prev => ({ ...prev, visible: false }));
-        }, 1500);
-    }, [updateScrollInfo]);
-
     // Handle scroll to paragraph from cross-link navigation
     const scrollToParagraph = LibraryStore.useState(s => s.scrollToParagraph);
     useEffect(() => {
         if (scrollToParagraph !== null && content) {
-            // Wait for content to render
             setTimeout(() => {
                 handleJump('paragraph', scrollToParagraph);
                 LibraryStore.update(s => { s.scrollToParagraph = null; });
@@ -161,71 +123,44 @@ function Article({
         const element = contentRef.current;
         if (!element) return;
 
-        const observer = new ResizeObserver(() => {
-            updateScrollInfo(element);
-        });
-        observer.observe(element);
-
-        // Count paragraphs
         const paragraphs = element.querySelectorAll('[data-paragraph-index]');
-        setTotalParagraphs(paragraphs.length);
+        const count = paragraphs.length;
+        setTotalParagraphs(prev => prev !== count ? count : prev);
+    }, [content, contentRef]);
 
-        return () => observer.disconnect();
-    }, [content, updateScrollInfo, contentRef]);
+    const handleClick = useCallback((e) => {
+        if (e.target.closest('a') || e.target.closest('[data-prevent-select]')) {
+            return;
+        }
 
-    // Update URL hash when clicking a paragraph
-    useEffect(() => {
-        const element = contentRef.current;
-        if (!element) return;
+        const paragraph = e.target.closest('[data-paragraph-index]');
+        if (paragraph) {
+            const index = paragraph.getAttribute('data-paragraph-index');
+            if (index) {
+                setCurrentParagraphIndex(parseInt(index, 10));
+                const currentHash = window.location.hash;
+                const separatorIndex = currentHash.lastIndexOf(':');
+                const lastSlashIndex = currentHash.lastIndexOf('/');
+                let newHash = currentHash;
 
-        const handleClick = (e) => {
-            // Check for excluded elements (links, buttons, interactive tools)
-            if (e.target.closest('a') || e.target.closest('[data-prevent-select]')) {
-                return;
-            }
-
-            // Find closest paragraph with index
-            const paragraph = e.target.closest('[data-paragraph-index]');
-            if (paragraph) {
-                const index = paragraph.getAttribute('data-paragraph-index');
-                if (index) {
-                    setCurrentParagraphIndex(parseInt(index, 10));
-                    // Replace history state to just update hash without scrolling or adding history
-                    const currentHash = window.location.hash;
-                    // Check if hash already ends with :number
-                    const separatorIndex = currentHash.lastIndexOf(':');
-                    let newHash = currentHash;
-
-                    // Check if we found a colon after the last slash
-                    const lastSlashIndex = currentHash.lastIndexOf('/');
-
-                    if (separatorIndex !== -1 && separatorIndex > lastSlashIndex) {
-                        const suffix = currentHash.substring(separatorIndex + 1);
-                        // Only replace if the suffix is numeric (indicating a paragraph ID)
-                        // If it's text (e.g. part of a title with a colon), we append instead
-                        if (/^\d+$/.test(suffix)) {
-                            newHash = currentHash.substring(0, separatorIndex) + ':' + index;
-                        } else {
-                            newHash = currentHash + ':' + index;
-                        }
+                if (separatorIndex !== -1 && separatorIndex > lastSlashIndex) {
+                    const suffix = currentHash.substring(separatorIndex + 1);
+                    if (/^\d+$/.test(suffix)) {
+                        newHash = currentHash.substring(0, separatorIndex) + ':' + index;
                     } else {
                         newHash = currentHash + ':' + index;
                     }
+                } else {
+                    newHash = currentHash + ':' + index;
+                }
 
-                    if (currentHash !== newHash) {
-                        window.history.replaceState(null, null, newHash);
-                    }
+                if (currentHash !== newHash) {
+                    window.history.replaceState(null, null, newHash);
                 }
             }
-        };
+        }
+    }, []);
 
-        element.addEventListener('click', handleClick);
-        return () => element.removeEventListener('click', handleClick);
-    }, [content, contentRef]);
-
-
-
-    // Delay showing the placeholder to avoid flash during loading
     useEffect(() => {
         if (!content && !selectedTag) {
             const timer = setTimeout(() => {
@@ -239,7 +174,7 @@ function Article({
 
     useEffect(() => {
         setTimeout(() => setScrollInfo({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 }), 0);
-    }, [selectedTag?._id]);
+    }, [selectedTag?._id, setScrollInfo]);
 
     const formatArticleWithTags = useCallback((tag, text) => {
         if (!tag) return text;
@@ -288,7 +223,6 @@ function Article({
                         overflow: visible !important;
                         width: 100% !important;
                     }
-                    /* Ensure the cloned root is visible and resets layout */
                     [class*="Article_root"] {
                         position: static !important;
                         height: auto !important;
@@ -313,7 +247,6 @@ function Article({
                     window.onload = () => {
                         setTimeout(() => {
                             window.print();
-                            // Clean up after print dialog closes (approximate)
                             setTimeout(() => {
                                 window.top.postMessage("print-complete", "*");
                             }, 1000);
@@ -331,12 +264,12 @@ function Article({
                     if (document.body.contains(iframe)) {
                         document.body.removeChild(iframe);
                     }
-                }, 5000); // Wait longer to ensure print is done
+                }, 5000);
                 window.removeEventListener("message", cleanup);
             }
         };
         window.addEventListener("message", cleanup);
-    }, [contentRef]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
@@ -344,58 +277,6 @@ function Article({
         const filename = `${selectedTag.article || "Article"}${selectedTag.number ? `_${selectedTag.number}` : ""}.md`;
         exportData(formatted, filename, "text/plain");
     }, [selectedTag, content, formatArticleWithTags]);
-
-
-    const scrollToMatch = useCallback((index) => {
-        const highlights = document.querySelectorAll('.search-highlight');
-        if (highlights[index]) {
-            highlights[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            highlights[index].style.outline = "2px solid #ff9800";
-            highlights[index].style.borderRadius = "2px";
-            setTimeout(() => {
-                if (highlights[index]) {
-                    highlights[index].style.outline = "none";
-                }
-            }, 2000);
-        }
-    }, []);
-
-    const handleNextMatch = useCallback(() => {
-        if (totalMatches === 0) return;
-        setMatchIndex(prev => {
-            const next = (prev + 1) % totalMatches;
-            scrollToMatch(next);
-            return next;
-        });
-    }, [totalMatches, scrollToMatch]);
-
-    const handlePrevMatch = useCallback(() => {
-        if (totalMatches === 0) return;
-        setMatchIndex(prev => {
-            const next = (prev - 1 + totalMatches) % totalMatches;
-            scrollToMatch(next);
-            return next;
-        });
-    }, [totalMatches, scrollToMatch]);
-
-    useEffect(() => {
-        const highlights = document.querySelectorAll('.search-highlight');
-        setTimeout(() => setTotalMatches(highlights.length), 0);
-        if (highlights.length > 0) {
-            setTimeout(() => {
-                setMatchIndex(prev => {
-                    const index = prev >= highlights.length ? 0 : prev;
-                    scrollToMatch(index);
-                    return index;
-                });
-            }, 0);
-        }
-    }, [content, search, scrollToMatch]);
-
-
-    const handleTTSParagraphChange = useCallback((index) => {
-        setCurrentParagraphIndex(index);
-    }, []);
 
     const toolbarItems = useMemo(() => {
         if (!content || !selectedTag) {
@@ -453,11 +334,15 @@ function Article({
                 }
             ];
         }
+        // eslint-disable-next-line react-hooks/refs
         items.push({
             id: "export",
             name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
             icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
-            onClick: showMarkdown ? handlePrint : handleExport,
+            onClick: () => {
+                if (showMarkdown) handlePrint();
+                else handleExport();
+            },
             menu: true
         });
         if (search && totalMatches > 0) {
@@ -486,7 +371,7 @@ function Article({
             ];
         }
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations]);
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations]);
 
     useToolbar({
         id: "Article",
@@ -495,7 +380,7 @@ function Article({
         depends: [toolbarItems, content]
     });
 
-    const getTitle = () => {
+    const title = useMemo(() => {
         if (!selectedTag) return { name: "", key: "" };
         for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
             const key = LibraryTagKeys[i];
@@ -505,20 +390,15 @@ function Article({
             }
         }
         return { name: "", key: "" };
-    };
-
-    const title = getTitle();
+    }, [selectedTag]);
 
     const processedContent = useMemo(() => {
         if (!content || showAbbreviations) return content;
         let text = content;
-        // Sort keys by length descending to handle overlapping abbreviations
         const keys = Object.keys(abbreviations).sort((a, b) => b.length - a.length);
         for (const key of keys) {
             const expansion = abbreviations[key];
             if (!expansion) continue;
-            // Replace standalone abbreviations, avoiding partial matches
-            // Also consume following parenthetical if it matches the expansion (e.g. "KHB (Crown...)" -> "Crown...")
             const escapedExpansion = expansion.eng.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const regex = new RegExp(`\\b${key}\\b(?:\\s*\\(${escapedExpansion}\\))?`, 'gi');
             text = text.replace(regex, expansion.eng);
@@ -528,17 +408,7 @@ function Article({
 
     if (loading) {
         return (
-            <Box
-                component="main"
-                className={styles.root}
-                sx={{
-                    ml: { sm: 2 },
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                }}
-            >
+            <Box component="main" className={styles.root} sx={{ ml: { sm: 2 }, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <CircularProgress />
             </Box>
         );
@@ -546,17 +416,7 @@ function Article({
 
     if (!content && showPlaceholder) {
         return (
-            <Box
-                component="main"
-                className={styles.root}
-                sx={{
-                    ml: { sm: 2 },
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                }}
-            >
+            <Box component="main" className={styles.root} sx={{ ml: { sm: 2 }, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Box className={styles.placeholder}>
                     <LibraryBooksIcon />
                     <Typography component="p">{translations.SELECT_ITEM}</Typography>
@@ -565,147 +425,20 @@ function Article({
         );
     }
 
-    if (!content) {
-        return null;
-    }
+    if (!content) return null;
 
     return (
-
-        <Box
-            component="main"
-            className={styles.root}
-            minWidth={0}
-            sx={{
-                ml: { sm: 2 },
-                overflow: 'hidden !important',
-                position: 'relative'
-            }}
-        >
-            <Zoom in={showScrollTop}>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 16,
-                        left: 16,
-                        zIndex: 1300
-                    }}
-                >
-                    <Tooltip title={translations.SCROLL_TO_TOP} placement="right">
-                        <Fab
-                            size="small"
-                            aria-label="scroll back to top"
-                            onClick={scrollToTop}
-                            sx={{
-                                opacity: 0.6,
-                                backgroundColor: 'var(--action-hover)',
-                                color: 'var(--text-secondary)',
-                                boxShadow: 1,
-                                '&:hover': {
-                                    opacity: 1,
-                                    backgroundColor: 'var(--action-selected)'
-                                }
-                            }}
-                        >
-                            <ArrowUpwardIcon fontSize="small" />
-                        </Fab>
-                    </Tooltip>
-                </Box>
-            </Zoom>
+        <Box component="main" className={styles.root} minWidth={0} sx={{ ml: { sm: 2 }, overflow: 'hidden !important', position: 'relative' }}>
+            <ScrollToTop show={showScrollTop} onClick={scrollToTop} translations={translations} />
             <Box
                 ref={contentRef}
                 tabIndex={-1}
-                onScroll={(e) => {
-                    if (handleScroll) handleScroll(e);
-                    handleScrollUpdate(e);
-                    setShowScrollTop(e.target.scrollTop > 300);
-                }}
-                sx={{
-                    position: 'relative',
-                    height: '100%',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    outline: 'none'
-                }}
+                onScroll={handleScrollUpdate}
+                onClick={handleClick}
+                sx={{ position: 'relative', height: '100%', overflowY: 'auto', overflowX: 'hidden', outline: 'none' }}
             >
-
-                <Fade in={scrollInfo.visible} timeout={1000}>
-                    <Paper
-                        elevation={4}
-                        className="print-hidden"
-                        sx={{
-                            position: 'fixed',
-                            top: 24,
-                            right: 24,
-                            zIndex: 1400,
-                            px: 2,
-                            py: 1,
-                            borderRadius: 4,
-                            backgroundColor: 'rgba(0,0,0,0.7)',
-                            color: 'white',
-                            backdropFilter: 'blur(4px)',
-                            pointerEvents: 'none'
-                        }}
-                    >
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            Page {scrollInfo.page} / {scrollInfo.total}
-                        </Typography>
-                    </Paper>
-                </Fade>
-                <Box className={clsx(styles.stickyHeader, isHeaderHidden && styles.hidden)}>
-                    <Box className={styles.headerInfo}>
-                        <Box className={styles.headerTitleWrapper}>
-                            <Box className={styles.titleRow}>
-                                {selectedTag?.number && (
-                                    <Paper
-                                        elevation={0}
-                                        className={styles.tagNumber}
-                                        component="span"
-                                    >
-                                        #{selectedTag.number}
-                                    </Paper>
-                                )}
-                                {" "}
-                                <Typography
-                                    variant="h4"
-                                    className={styles.title}
-                                    component="span"
-                                >
-                                    {(() => {
-                                        const expansion = abbreviations[title.name];
-                                        return (!showAbbreviations && expansion) ? expansion.eng : title.name;
-                                    })()}
-                                </Typography>
-                            </Box>
-                            <Box className={styles.metadataRow}>
-                                {LibraryTagKeys.filter(key => key !== "book" && key !== "author")
-                                    .concat(["book", "author"])
-                                    .map(key => {
-                                        if (!selectedTag?.[key] || key === "number") return null;
-                                        if (title.key === key) return null;
-                                        const value = selectedTag[key];
-                                        if (title.name === value) return null;
-                                        const Icon = LibraryIcons[key];
-                                        const expansion = abbreviations[value];
-                                        const displayValue = (!showAbbreviations && expansion) ? expansion.eng : value;
-                                        return (
-                                            <Tooltip key={key} title={key.charAt(0).toUpperCase() + key.slice(1)} arrow>
-                                                <Paper
-                                                    elevation={0}
-                                                    className={styles.metadataTag}
-                                                    data-key={key}
-                                                    onClick={() => navigator.clipboard.writeText(displayValue)}
-                                                    sx={{ cursor: "pointer" }}
-                                                >
-                                                    {Icon && <Icon sx={{ fontSize: "1rem" }} />}
-                                                    <Typography variant="caption">{displayValue}</Typography>
-                                                </Paper>
-                                            </Tooltip>
-                                        );
-                                    })}
-                            </Box>
-                        </Box>
-                    </Box>
-                </Box>
+                <PageIndicator scrollInfo={scrollInfo} />
+                <Header selectedTag={selectedTag} isHeaderHidden={isHeaderHidden} showAbbreviations={showAbbreviations} title={title} translations={translations} />
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
                     <Box
                         key={i}
@@ -722,34 +455,17 @@ function Article({
                         }}
                     />
                 ))}
-                <Box className={styles.contentScrollArea}>
-                    <Box className={styles.contentWrapper}>
-                        {showMarkdown ? (
-                            <Markdown search={search} currentTTSParagraph={currentParagraphIndex} selectedTag={selectedTag}>
-                                {processedContent}
-                            </Markdown>
-                        ) : (
-                            <Box
-                                component="pre"
-                                sx={{
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                    fontFamily: 'inherit',
-                                    fontSize: 'inherit',
-                                    lineHeight: 1.6,
-                                    margin: 0
-                                }}
-                            >
-                                {processedContent}
-                            </Box>
-                        )}
-                    </Box>
-                </Box>
-
+                <Content
+                    showMarkdown={showMarkdown}
+                    search={search}
+                    currentTTSParagraph={currentParagraphIndex}
+                    selectedTag={selectedTag}
+                    processedContent={processedContent}
+                />
                 {content && showMarkdown && (
                     <Player
                         contentRef={contentRef}
-                        onParagraphChange={handleTTSParagraphChange}
+                        onParagraphChange={setCurrentParagraphIndex}
                         selectedTag={selectedTag}
                         currentParagraphIndex={currentParagraphIndex}
                     />
@@ -770,7 +486,6 @@ function Article({
             </Box>
         </Box >
     );
-
 }
 
 export default React.memo(Article);

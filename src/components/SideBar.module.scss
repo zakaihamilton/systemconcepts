@@ -22,8 +22,8 @@
     :global(.MuiPaper-root) {
         width: 35rem;
         background-color: var(--side-bar-background);
-        border-radius: 0 16px 16px 0;
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+        border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+        box-shadow: var(--shadow-lg);
     }
 }
 
