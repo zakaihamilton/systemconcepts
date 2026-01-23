@@ -22,7 +22,7 @@ import styles from "./Article.module.scss";
 import Player from "./Article/Player";
 import JumpDialog from "./Article/JumpDialog";
 import ArticleTermsDialog from "./Article/ArticleTermsDialog";
-import { scanForTerms } from "./Article/GlossaryUtils";
+import { scanForTerms, replaceAbbreviations } from "./Article/GlossaryUtils";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { LibraryStore } from "./Store";
@@ -114,16 +114,7 @@ function Article({
 
     const processedContent = useMemo(() => {
         if (!content || showAbbreviations) return content;
-        let text = content;
-        const keys = Object.keys(abbreviations).sort((a, b) => b.length - a.length);
-        for (const key of keys) {
-            const expansion = abbreviations[key];
-            if (!expansion) continue;
-            const escapedExpansion = expansion.eng.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`\\b${key}\\b(?:\\s*\\(${escapedExpansion}\\))?`, 'gi');
-            text = text.replace(regex, expansion.eng);
-        }
-        return text;
+        return replaceAbbreviations(content);
     }, [content, showAbbreviations]);
 
     const handleShowTerms = useCallback(() => {

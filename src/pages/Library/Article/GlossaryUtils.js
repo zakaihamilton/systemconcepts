@@ -1,5 +1,6 @@
 
 import { glossary } from '@data/glossary';
+import { abbreviations } from '@data/abbreviations';
 
 // Create the regex once since glossary is constant
 // Sort keys by length descending to ensure multi-word terms (e.g. "hitpashtut aleph") are matched before single words
@@ -7,6 +8,28 @@ const sortedKeys = Object.keys(glossary).sort((a, b) => b.length - a.length);
 // Escape special characters in keys to prevent regex errors
 const escapedKeys = sortedKeys.map(key => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
 export const termPattern = new RegExp(`\\b(${escapedKeys.join('|')})\\b`, 'gi');
+
+// Create abbreviation regex
+const abbreviationKeys = Object.keys(abbreviations).sort((a, b) => b.length - a.length);
+const abbreviationPatterns = abbreviationKeys.map(key => {
+    const expansion = abbreviations[key];
+    const escapedExpansion = expansion.eng.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return `\\b${key}\\b(?:\\s*\\(${escapedExpansion}\\))?`;
+});
+export const abbreviationPattern = new RegExp(`(${abbreviationPatterns.join('|')})`, 'gi');
+
+export function replaceAbbreviations(text) {
+    if (!text || typeof text !== 'string') return text;
+    return text.replace(abbreviationPattern, (match) => {
+        const lowerMatch = match.toLowerCase();
+        for (const key of abbreviationKeys) {
+            if (lowerMatch.startsWith(key.toLowerCase())) {
+                return abbreviations[key].eng;
+            }
+        }
+        return match;
+    });
+}
 
 export function scanForTerms(text) {
     if (!text || typeof text !== 'string') return [];
@@ -67,10 +90,10 @@ export function scanForTerms(text) {
         cleanText = cleanText.replace(/\u200B/g, '');
 
         // Reset regex for each line
-        const localTermPattern = new RegExp(termPattern);
+        termPattern.lastIndex = 0;
         let match;
 
-        while ((match = localTermPattern.exec(cleanText)) !== null) {
+        while ((match = termPattern.exec(cleanText)) !== null) {
             const term = match[0];
             const start = match.index;
 

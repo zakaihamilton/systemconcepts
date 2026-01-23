@@ -324,10 +324,10 @@ const getTagHierarchy = (tag) => {
 const TextWithTerms = ({ text }) => {
     const parts = [];
     let lastIndex = 0;
-    const localPattern = new RegExp(termPattern);
+    termPattern.lastIndex = 0;
     let match;
 
-    while ((match = localPattern.exec(text)) !== null) {
+    while ((match = termPattern.exec(text)) !== null) {
         const term = match[0];
         let start = match.index;
         let end = start + term.length;
@@ -626,9 +626,9 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
             // First pass: find all cross-references
             const references = [];
-            const localRefPattern = new RegExp(referencePattern);
+            referencePattern.lastIndex = 0;
             let refMatch;
-            while ((refMatch = localRefPattern.exec(cleanChildren)) !== null) {
+            while ((refMatch = referencePattern.exec(cleanChildren)) !== null) {
                 references.push({
                     text: refMatch[0],
                     sectionName: refMatch[1] ? refMatch[1].trim() : null,
@@ -643,10 +643,10 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             const processGlossary = (text, keyPrefix) => {
                 const parts = [];
                 let lastIndex = 0;
-                const localPattern = new RegExp(termPattern);
+                termPattern.lastIndex = 0;
                 let match;
 
-                while ((match = localPattern.exec(text)) !== null) {
+                while ((match = termPattern.exec(text)) !== null) {
                     const term = match[0];
                     let start = match.index;
                     let end = start + term.length;
@@ -759,7 +759,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         }
 
         return children;
-    }, [Highlight, search, selectedTag, currentParagraphIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [Highlight, search, selectedTag]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });

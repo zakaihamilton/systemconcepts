@@ -20,6 +20,7 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useSwipe } from "@util/touch";
+const fileCache = new Map();
 
 registerToolbar("Library");
 
@@ -214,9 +215,12 @@ export default function Library() {
             const filePath = makePath(LIBRARY_LOCAL_PATH, selectedTag.path);
             let data;
 
-            if (await storage.exists(filePath)) {
+            if (fileCache.has(filePath)) {
+                data = fileCache.get(filePath);
+            } else if (await storage.exists(filePath)) {
                 const fileContent = await storage.readFile(filePath);
                 data = JSON.parse(fileContent);
+                fileCache.set(filePath, data);
             } else {
                 setContent("File not found.");
                 return;
@@ -259,6 +263,7 @@ export default function Library() {
 
 
             setTimeout(() => {
+                fileCache.clear();
                 loadTags();
                 loadCustomOrder();
                 loadContent();
