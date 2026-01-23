@@ -4,10 +4,9 @@ import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -21,6 +20,9 @@ import { useTranslations } from "@util/translations";
 import { setPath } from "@util/pages";
 import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "./Icons";
+import { useToolbar } from "@components/Toolbar";
+import ReactMarkdown from "react-markdown";
+import { LibraryStore } from "./Store";
 
 const INDEX_FILE = "search_index.json";
 
@@ -71,36 +73,6 @@ export default function Research() {
         }
     }, []);
 
-    useEffect(() => {
-        loadTags();
-    }, [loadTags]);
-
-    const loadIndex = useCallback(async () => {
-        try {
-            const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
-            if (await storage.exists(indexPath)) {
-                const content = await storage.readFile(indexPath);
-                const data = JSON.parse(content);
-                if (isMounted.current) {
-                    setIndexData(data);
-                }
-            }
-        } catch (err) {
-            console.error("Failed to load search index:", err);
-        }
-    }, []);
-
-    useEffect(() => {
-        loadIndex();
-    }, [loadIndex]);
-
-    useEffect(() => {
-        if (libraryUpdateCounter > 0) {
-            loadIndex();
-            loadTags();
-        }
-    }, [libraryUpdateCounter, loadIndex, loadTags]);
-
     const buildIndex = useCallback(async () => {
         if (indexing) return;
         setIndexing(true);
@@ -149,21 +121,35 @@ export default function Research() {
 
                          if (item && item.text) {
                              const text = item.text;
-                             const tokens = text.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-                             const uniqueTokens = [...new Set(tokens)];
-
-                             const docId = tag._id;
-                             newIndex.files[docId] = {
+                             // Store metadata
+                             newIndex.files[tag._id] = {
                                  title: tag.title || tag.chapter || "Untitled",
                                  tag: tag,
-                                 snippetSource: text.substring(0, 200)
+                                 paragraphs: []
                              };
 
-                             uniqueTokens.forEach(token => {
-                                 if (!newIndex.tokens[token]) {
-                                     newIndex.tokens[token] = [];
-                                 }
-                                 newIndex.tokens[token].push(docId);
+                             // Split into paragraphs (approximate by double newline)
+                             const paragraphs = text.split(/\n\s*\n/);
+
+                             paragraphs.forEach((para, paraIndex) => {
+                                 if (!para.trim()) return;
+
+                                 const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+                                 const uniqueTokens = [...new Set(paraTokens)];
+
+                                 if (uniqueTokens.length === 0) return;
+
+                                 // Add to file data
+                                 newIndex.files[tag._id].paragraphs.push(para);
+
+                                 // Add to token index
+                                 uniqueTokens.forEach(token => {
+                                     if (!newIndex.tokens[token]) {
+                                         newIndex.tokens[token] = []; // Stores "docId:paraIndex"
+                                     }
+                                     // Store reference as "docId:paraIndex"
+                                     newIndex.tokens[token].push(`${tag._id}:${paraIndex}`);
+                                 });
                              });
                          }
                     }
@@ -194,6 +180,36 @@ export default function Research() {
 
     }, [indexing, translations]);
 
+    const loadIndex = useCallback(async () => {
+        try {
+            const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
+            if (await storage.exists(indexPath)) {
+                const content = await storage.readFile(indexPath);
+                const data = JSON.parse(content);
+                if (isMounted.current) {
+                    setIndexData(data);
+                }
+            } else {
+                // Auto-build if not exists
+                buildIndex();
+            }
+        } catch (err) {
+            console.error("Failed to load search index:", err);
+        }
+    }, [buildIndex]);
+
+    useEffect(() => {
+        loadTags();
+        loadIndex();
+    }, [loadTags, loadIndex]);
+
+    useEffect(() => {
+        if (libraryUpdateCounter > 0) {
+            loadIndex();
+            loadTags();
+        }
+    }, [libraryUpdateCounter, loadIndex, loadTags]);
+
     const handleSearch = useCallback(() => {
         if (!indexData || !query.trim()) {
             setResults([]);
@@ -202,35 +218,61 @@ export default function Research() {
 
         const terms = query.trim().split(/\s+/);
         const groups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
-        let finalIds = new Set();
+        let finalRefs = new Set(); // Stores "docId:paraIndex"
 
         groups.forEach(group => {
             const groupTerms = group.split(/\s+/).filter(t => t !== "AND" && t !== "OR").map(t => t.toLowerCase());
             if (groupTerms.length === 0) return;
 
-            let groupIds = null;
+            let groupRefs = null;
 
             groupTerms.forEach(term => {
                 const matchingTokens = Object.keys(indexData.tokens).filter(k => k.includes(term));
-                let termIds = new Set();
+                let termRefs = new Set();
                 matchingTokens.forEach(k => {
-                    indexData.tokens[k].forEach(id => termIds.add(id));
+                    indexData.tokens[k].forEach(ref => termRefs.add(ref));
                 });
 
-                if (groupIds === null) {
-                    groupIds = termIds;
+                if (groupRefs === null) {
+                    groupRefs = termRefs;
                 } else {
-                    groupIds = new Set([...groupIds].filter(x => termIds.has(x)));
+                    groupRefs = new Set([...groupRefs].filter(x => termRefs.has(x)));
                 }
             });
 
-            if (groupIds) {
-                groupIds.forEach(id => finalIds.add(id));
+            if (groupRefs) {
+                groupRefs.forEach(ref => finalRefs.add(ref));
             }
         });
 
-        const resultDocs = [...finalIds].map(id => indexData.files[id]).filter(Boolean);
-        setResults(resultDocs);
+        // Group by doc
+        const groupedResults = {};
+        [...finalRefs].forEach(ref => {
+            const [docId, paraIndex] = ref.split(':');
+            if (!groupedResults[docId]) {
+                const doc = indexData.files[docId];
+                if (doc) {
+                    groupedResults[docId] = {
+                        ...doc,
+                        docId,
+                        matches: []
+                    };
+                }
+            }
+            if (groupedResults[docId]) {
+                groupedResults[docId].matches.push({
+                    index: parseInt(paraIndex, 10),
+                    text: indexData.files[docId].paragraphs[parseInt(paraIndex, 10)]
+                });
+            }
+        });
+
+        // Sort paragraphs within docs
+        Object.values(groupedResults).forEach(doc => {
+            doc.matches.sort((a, b) => a.index - b.index);
+        });
+
+        setResults(Object.values(groupedResults));
 
     }, [indexData, query]);
 
@@ -240,10 +282,20 @@ export default function Research() {
         }
     };
 
-    const gotoArticle = (tag) => {
+    const gotoArticle = (tag, paragraphId) => {
         const hierarchy = getTagHierarchy(tag);
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
+            if (paragraphId !== undefined) {
+                // We need to coordinate with the Article component to scroll
+                // Using LibraryStore to pass this intent might be cleaner if direct URL hash isn't sufficient
+                // Hash pattern: #library/Book/Chapter:paragraphId ?
+                // Current system seems to use URL for hierarchy.
+                // Article.js uses `scrollToParagraph` in store.
+                LibraryStore.update(s => {
+                    s.scrollToParagraph = paragraphId;
+                });
+            }
         }
     };
 
@@ -255,6 +307,19 @@ export default function Research() {
             });
         });
     }, [results, filterTags]);
+
+    const toolbarItems = [
+        {
+            id: "rebuildIndex",
+            name: translations.REBUILD_INDEX || "Rebuild Index",
+            icon: <RefreshIcon />,
+            onClick: buildIndex,
+            disabled: indexing,
+            location: "header"
+        }
+    ];
+
+    useToolbar({ id: "Research", items: toolbarItems, depends: [indexing, translations, buildIndex] });
 
     return (
         <Box className={styles.root}>
@@ -304,48 +369,50 @@ export default function Research() {
                 />
             </Box>
 
-            <Box className={styles.controls}>
-                <Button
-                    startIcon={<RefreshIcon />}
-                    onClick={buildIndex}
-                    disabled={indexing}
-                    variant="outlined"
-                    size="small"
-                >
-                    {indexData ? (translations.REBUILD_INDEX || "Rebuild Index") : (translations.BUILD_INDEX || "Build Index")}
-                </Button>
-                {status && <Typography variant="caption">{status}</Typography>}
-                {indexData && <Typography variant="caption">
-                    {Object.keys(indexData.files).length} {translations.ARTICLES || "articles indexed"}
-                </Typography>}
-            </Box>
-
             {indexing && (
                 <Box className={styles.progressContainer}>
+                    <Typography variant="caption">{status}</Typography>
                     <LinearProgress variant="determinate" value={progress} />
                 </Box>
             )}
 
             <Box className={styles.results}>
-                <List>
-                    {filteredResults.length === 0 && query && !indexing && (
-                        <ListItem>
-                            <ListItemText primary={translations.NO_RESULTS || "No results found."} />
-                        </ListItem>
-                    )}
-                    {filteredResults.map((doc, index) => (
-                        <ListItemButton key={index} className={styles.resultItem} onClick={() => gotoArticle(doc.tag)}>
-                            <ListItemText
-                                primary={doc.title}
-                                secondary={
-                                    <span className={styles.snippet}>
-                                        {getTagHierarchy(doc.tag).join(" > ")}
-                                    </span>
-                                }
-                            />
-                        </ListItemButton>
-                    ))}
-                </List>
+                {results.length === 0 && query && !indexing && (
+                    <Typography variant="body1" sx={{ p: 2 }}>
+                        {translations.NO_RESULTS || "No results found."}
+                    </Typography>
+                )}
+                {filteredResults.map((doc) => (
+                    <Card key={doc.docId} sx={{ mb: 2 }} variant="outlined">
+                        <CardContent>
+                            <Typography variant="h6" component="div" gutterBottom>
+                                {doc.title}
+                            </Typography>
+                            <Typography color="text.secondary" gutterBottom sx={{ fontSize: '0.875rem' }}>
+                                {getTagHierarchy(doc.tag).join(" > ")}
+                            </Typography>
+
+                            {doc.matches.map((match, idx) => (
+                                <Box key={idx} sx={{ mt: 1, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
+                                    <ReactMarkdown
+                                        components={{
+                                            p: ({node, ...props}) => <Typography variant="body2" {...props} />
+                                        }}
+                                    >
+                                        {match.text}
+                                    </ReactMarkdown>
+                                    <Button
+                                        size="small"
+                                        onClick={() => gotoArticle(doc.tag, match.index)}
+                                        sx={{ mt: 0.5, textTransform: 'none' }}
+                                    >
+                                        Jump to paragraph
+                                    </Button>
+                                </Box>
+                            ))}
+                        </CardContent>
+                    </Card>
+                ))}
             </Box>
         </Box>
     );
