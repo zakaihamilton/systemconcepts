@@ -72,8 +72,10 @@ export default function Research() {
     const rowHeights = useRef({});
     const deviceType = useDeviceType();
     const isMobile = deviceType !== "desktop";
-    const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
+    const outerRef = useRef(null);
+    const [scrollPages, setScrollPages] = useState({ current: 1 });
     const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
+    const [appliedFilterTags, setAppliedFilterTags] = useState([]);
 
     useLocalStorage("ResearchStore", ResearchStore, ["query", "filterTags"]);
 
@@ -86,9 +88,12 @@ export default function Research() {
         }
     }, []);
 
-    const getItemSize = useCallback((index) => {
-        return rowHeights.current[index] || 200;
-    }, []);
+
+    useEffect(() => {
+        if (_loaded) {
+            setAppliedFilterTags(filterTags);
+        }
+    }, [_loaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         isMounted.current = true;
@@ -295,6 +300,7 @@ export default function Research() {
     }, [libraryUpdateCounter, loadIndex, loadTags]);
 
     const handleSearch = useCallback(async () => {
+        setAppliedFilterTags(filterTags);
         if (!indexData || !query.trim()) {
             setResults([]);
             ResearchStore.update(s => { s.hasSearched = true; });
@@ -392,7 +398,7 @@ export default function Research() {
             }
         }
 
-    }, [indexData, query, setResults]);
+    }, [indexData, query, setResults, filterTags]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
@@ -410,6 +416,7 @@ export default function Research() {
             s.highlight = [];
             s.hasSearched = false;
         });
+        setAppliedFilterTags([]);
     }, [setQuery]);
 
     const onKeyDown = (e) => {
@@ -432,17 +439,43 @@ export default function Research() {
 
     const filteredResults = useMemo(() => {
         let res;
-        if (!filterTags.length) {
+        if (!appliedFilterTags.length) {
             res = results;
         } else {
             res = results.filter(doc => {
-                return filterTags.every(filter => {
+                return appliedFilterTags.every(filter => {
                     return LibraryTagKeys.some(key => doc.tag[key] === filter);
                 });
             });
         }
         return res;
-    }, [results, filterTags]);
+    }, [results, appliedFilterTags]);
+
+    const matchCounts = useMemo(() => {
+        let sum = 0;
+        return filteredResults.map(doc => {
+            const count = doc.matches?.length || 0;
+            const start = sum + 1;
+            sum += count;
+            return { start, count, total: sum };
+        });
+    }, [filteredResults]);
+
+    const totalMatches = matchCounts.length > 0 ? matchCounts[matchCounts.length - 1].total : 0;
+
+    const getItemSize = useCallback((index) => {
+        if (rowHeights.current[index]) return rowHeights.current[index];
+        const doc = filteredResults[index];
+        const matchCount = doc?.matches?.length || 1;
+        return 100 + (matchCount * 150);
+    }, [filteredResults]);
+
+    useEffect(() => {
+        rowHeights.current = {};
+        if (listRef.current) {
+            listRef.current.resetAfterIndex(0);
+        }
+    }, [filteredResults]);
 
     const handlePrint = useCallback(() => {
         const rootElement = document.createElement("div");
@@ -521,15 +554,13 @@ export default function Research() {
 
     const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
-        if (type === 'paragraph') { // Using 'paragraph' type as 'result index' for reusing JumpDialog logic if possible, or mapping custom
-            const index = value - 1;
-            if (index >= 0 && index < filteredResults.length) {
-                if (listRef.current) {
-                    listRef.current.scrollToItem(index, "center");
-                }
+        if (type === 'page' && matchCounts.length) {
+            const artIndex = matchCounts.findIndex(m => value >= m.start && value <= m.total);
+            if (artIndex !== -1 && listRef.current) {
+                listRef.current.scrollToItem(artIndex, "start");
             }
         }
-    }, [filteredResults]);
+    }, [matchCounts, listRef]);
 
     const toolbarItems = useMemo(() => [
         {
@@ -654,10 +685,21 @@ export default function Research() {
                         height={size.height - (isMobile ? 150 : 250)} // Adjust for header/search bar
                         itemCount={filteredResults.length}
                         itemSize={getItemSize}
+                        estimatedItemSize={500}
                         width={size.width - 32} // Account for root padding
                         ref={listRef}
-                        onItemsRendered={({ visibleStartIndex, visibleStopIndex }) => {
-                            setVisibleRange({ start: visibleStartIndex + 1, end: visibleStopIndex + 1 });
+                        outerRef={outerRef}
+                        onScroll={({ scrollOffset }) => {
+                            if (!outerRef.current || totalMatches <= 1) return;
+                            const viewHeight = size.height - (isMobile ? 150 : 250);
+                            const scrollHeight = outerRef.current.scrollHeight;
+                            const maxScroll = scrollHeight - viewHeight;
+                            if (maxScroll <= 0) return;
+
+                            const ratio = Math.max(0, Math.min(1, scrollOffset / maxScroll));
+                            const current = Math.floor(ratio * (totalMatches - 1)) + 1;
+
+                            setScrollPages(prev => (prev.current !== current ? { current } : prev));
                         }}
                         itemData={{
                             results: filteredResults,
@@ -669,41 +711,52 @@ export default function Research() {
                     >
                         {SearchResultItem}
                     </VariableSizeList>
-                    <Fade in={true} timeout={1000}>
-                        <Paper
-                            elevation={4}
-                            className="print-hidden"
-                            sx={{
-                                position: 'absolute',
-                                top: 16,
-                                right: 16,
-                                zIndex: 1400,
-                                px: 2,
-                                py: 1,
-                                borderRadius: 4,
-                                backgroundColor: 'rgba(0,0,0,0.7)',
-                                color: 'white',
-                                backdropFilter: 'blur(4px)',
-                                pointerEvents: 'none'
-                            }}
-                        >
-                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                {visibleRange.start} / {filteredResults.length}
-                            </Typography>
-                        </Paper>
-                    </Fade>
+                    <PageIndicator
+                        current={scrollPages.current}
+                        total={totalMatches}
+                        translations={translations}
+                    />
                     <JumpDialog
                         open={jumpDialogOpen}
                         onClose={() => setJumpDialogOpen(false)}
                         onSubmit={handleJump}
-                        maxPage={1}
-                        maxParagraphs={filteredResults.length}
+                        maxPage={totalMatches}
+                        maxParagraphs={0}
                     />
                 </Box>
             )}
         </Box>
     );
 }
+
+const PageIndicator = React.memo(({ current, total, translations }) => {
+    return (
+        <Fade in={true} timeout={1000}>
+            <Paper
+                elevation={4}
+                className="print-hidden"
+                sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    zIndex: 1400,
+                    px: 2,
+                    py: 1,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    backdropFilter: 'blur(4px)',
+                    pointerEvents: 'none'
+                }}
+            >
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                    {translations.PAGE || "Page"} {current} / {total}
+                </Typography>
+            </Paper>
+        </Fade>
+    );
+});
+PageIndicator.displayName = "PageIndicator";
 
 const SearchResultItem = ({ index, style, data }) => {
     const { results, gotoArticle, setRowHeight, highlight } = data || {};
@@ -723,15 +776,15 @@ const SearchResultItem = ({ index, style, data }) => {
         return doc.text
             .replace(/\r\n/g, "\n")
             .replace(/\n(?!\n)/g, "\n\n");
-    }, [doc?.text]);
+    }, [doc]);
     // filteredParagraphs contains 1-based indices of paragraphs to display
-    const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc?.matches]);
+    const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc]);
 
     if (!doc) return null;
 
     return (
         <div style={style}>
-            <div ref={rowRef}>
+            <div ref={rowRef} className={styles.articleSeparator}>
                 <Article
                     selectedTag={doc.tag}
                     content={content}
