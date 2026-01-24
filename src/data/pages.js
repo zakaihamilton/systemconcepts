@@ -77,7 +77,7 @@ import LabelIcon from "@mui/icons-material/Label";
 const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
 
 import SearchIcon from "@mui/icons-material/Search";
-const Research = dynamic(() => import("@pages/Library/Research"), { loading: () => <PageLoad /> });
+const Research = dynamic(() => import("@pages/Research"), { loading: () => <PageLoad /> });
 
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 const Library = dynamic(() => import("@pages/Library"), { loading: () => <PageLoad /> });
@@ -221,14 +221,6 @@ export default [
         section: getResetSection
     },
     {
-        id: "library/research",
-        path: "library/research",
-        name: "RESEARCH",
-        Icon: SearchIcon,
-        Component: Research,
-        useParentName: 1
-    },
-    {
         apps: true,
         sidebar: true,
         id: "sessions",
@@ -253,6 +245,15 @@ export default [
         Icon: EventIcon,
         Component: Schedule,
         section: getScheduleSection
+    },
+    {
+        id: "research",
+        path: "research",
+        name: "RESEARCH",
+        sidebar: true,
+        apps: true,
+        Icon: SearchIcon,
+        Component: Research
     },
     {
         apps: true,

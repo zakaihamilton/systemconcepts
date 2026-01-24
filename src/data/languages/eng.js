@@ -1724,6 +1724,10 @@ export default {
         {
             "id": "SHOW_FULL_TERMS",
             "value": "Show Full Terms"
+        },
+        {
+            "id": "RESEARCH",
+            "value": "Research"
         }
     ]
 };

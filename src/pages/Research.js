@@ -4,14 +4,14 @@ import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import ClearIcon from "@mui/icons-material/Clear";
+import IconButton from "@mui/material/IconButton";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
+
 import { makePath } from "@util/path";
 import storage from "@util/storage";
 import { SyncActiveStore } from "@sync/syncState";
@@ -19,12 +19,20 @@ import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
 import { setPath } from "@util/pages";
 import styles from "./Research.module.scss";
-import { LibraryTagKeys } from "./Icons";
+import { LibraryTagKeys } from "@pages/Library/Icons";
 import { useToolbar } from "@components/Toolbar";
 import ReactMarkdown from "react-markdown";
-import { LibraryStore } from "./Store";
+import { LibraryStore } from "@pages/Library/Store";
+import { Store } from "pullstate";
 
 const INDEX_FILE = "search_index.json";
+
+export const ResearchStore = new Store({
+    query: "",
+    filterTags: [],
+    results: [],
+    hasSearched: false
+});
 
 function getTagHierarchy(tag) {
     const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
@@ -36,13 +44,11 @@ function getTagHierarchy(tag) {
 
 export default function Research() {
     const translations = useTranslations();
-    const [query, setQuery] = useState("");
-    const [results, setResults] = useState([]);
+    const { query, filterTags, results, hasSearched } = ResearchStore.useState();
     const [indexing, setIndexing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState("");
     const [indexData, setIndexData] = useState(null);
-    const [filterTags, setFilterTags] = useState([]);
     const [availableFilters, setAvailableFilters] = useState([]);
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
     const isMounted = useRef(true);
@@ -50,6 +56,18 @@ export default function Research() {
     useEffect(() => {
         isMounted.current = true;
         return () => { isMounted.current = false; };
+    }, []);
+
+    const setQuery = useCallback((val) => {
+        ResearchStore.update(s => { s.query = val; });
+    }, []);
+
+    const setFilterTags = useCallback((val) => {
+        ResearchStore.update(s => { s.filterTags = val; });
+    }, []);
+
+    const setResults = useCallback((val) => {
+        ResearchStore.update(s => { s.results = val; });
     }, []);
 
     const loadTags = useCallback(async () => {
@@ -109,49 +127,49 @@ export default function Research() {
 
                 try {
                     if (await storage.exists(filePath)) {
-                         const fileContent = await storage.readFile(filePath);
-                         let data = JSON.parse(fileContent);
+                        const fileContent = await storage.readFile(filePath);
+                        let data = JSON.parse(fileContent);
 
-                         let item = null;
-                         if (Array.isArray(data)) {
-                             item = data.find(i => i._id === tag._id);
-                         } else if (data._id === tag._id) {
-                             item = data;
-                         }
+                        let item = null;
+                        if (Array.isArray(data)) {
+                            item = data.find(i => i._id === tag._id);
+                        } else if (data._id === tag._id) {
+                            item = data;
+                        }
 
-                         if (item && item.text) {
-                             const text = item.text;
-                             // Store metadata
-                             newIndex.files[tag._id] = {
-                                 title: tag.title || tag.chapter || "Untitled",
-                                 tag: tag,
-                                 paragraphs: []
-                             };
+                        if (item && item.text) {
+                            const text = item.text;
+                            // Store metadata
+                            newIndex.files[tag._id] = {
+                                title: tag.title || tag.chapter || "Untitled",
+                                tag: tag,
+                                paragraphs: []
+                            };
 
-                             // Split into paragraphs (approximate by double newline)
-                             const paragraphs = text.split(/\n\s*\n/);
+                            // Split into paragraphs (approximate by double newline)
+                            const paragraphs = text.split(/\n\s*\n/);
 
-                             paragraphs.forEach((para, paraIndex) => {
-                                 if (!para.trim()) return;
+                            paragraphs.forEach((para, paraIndex) => {
+                                if (!para.trim()) return;
 
-                                 const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-                                 const uniqueTokens = [...new Set(paraTokens)];
+                                const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+                                const uniqueTokens = [...new Set(paraTokens)];
 
-                                 if (uniqueTokens.length === 0) return;
+                                if (uniqueTokens.length === 0) return;
 
-                                 // Add to file data
-                                 newIndex.files[tag._id].paragraphs.push(para);
+                                // Add to file data
+                                newIndex.files[tag._id].paragraphs.push(para);
 
-                                 // Add to token index
-                                 uniqueTokens.forEach(token => {
-                                     if (!newIndex.tokens[token]) {
-                                         newIndex.tokens[token] = []; // Stores "docId:paraIndex"
-                                     }
-                                     // Store reference as "docId:paraIndex"
-                                     newIndex.tokens[token].push(`${tag._id}:${paraIndex}`);
-                                 });
-                             });
-                         }
+                                // Add to token index
+                                uniqueTokens.forEach(token => {
+                                    if (!newIndex.tokens[token]) {
+                                        newIndex.tokens[token] = []; // Stores "docId:paraIndex"
+                                    }
+                                    // Store reference as "docId:paraIndex"
+                                    newIndex.tokens[token].push(`${tag._id}:${paraIndex}`);
+                                });
+                            });
+                        }
                     }
                 } catch (err) {
                     console.warn(`Failed to index file for tag ${tag._id}:`, err);
@@ -213,10 +231,11 @@ export default function Research() {
     const handleSearch = useCallback(() => {
         if (!indexData || !query.trim()) {
             setResults([]);
+            ResearchStore.update(s => { s.hasSearched = true; });
             return;
         }
 
-        const terms = query.trim().split(/\s+/);
+
         const groups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
         let finalRefs = new Set(); // Stores "docId:paraIndex"
 
@@ -273,8 +292,15 @@ export default function Research() {
         });
 
         setResults(Object.values(groupedResults));
+        ResearchStore.update(s => { s.hasSearched = true; });
 
-    }, [indexData, query]);
+    }, [indexData, query, setResults]);
+
+    const handleClear = useCallback(() => {
+        setQuery("");
+        setResults([]);
+        ResearchStore.update(s => { s.hasSearched = false; });
+    }, [setQuery, setResults]);
 
     const onKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -287,11 +313,6 @@ export default function Research() {
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
             if (paragraphId !== undefined) {
-                // We need to coordinate with the Article component to scroll
-                // Using LibraryStore to pass this intent might be cleaner if direct URL hash isn't sufficient
-                // Hash pattern: #library/Book/Chapter:paragraphId ?
-                // Current system seems to use URL for hierarchy.
-                // Article.js uses `scrollToParagraph` in store.
                 LibraryStore.update(s => {
                     s.scrollToParagraph = paragraphId;
                 });
@@ -335,10 +356,23 @@ export default function Research() {
                             <InputAdornment position="start">
                                 <SearchIcon />
                             </InputAdornment>
+                        ),
+                        endAdornment: query && (
+                            <InputAdornment position="end">
+                                <IconButton onClick={handleClear} size="small">
+                                    <ClearIcon fontSize="small" />
+                                </IconButton>
+                            </InputAdornment>
                         )
                     }}
+                    sx={{ flex: 1 }}
                 />
-                <Button variant="contained" onClick={handleSearch} disabled={indexing || !indexData}>
+                <Button
+                    variant="contained"
+                    onClick={handleSearch}
+                    disabled={indexing || !indexData}
+                    sx={{ height: 56, minWidth: 100 }}
+                >
                     {translations.SEARCH || "Search"}
                 </Button>
             </Box>
@@ -353,9 +387,10 @@ export default function Research() {
                         setFilterTags(newValue);
                     }}
                     renderTags={(value, getTagProps) =>
-                        value.map((option, index) => (
-                            <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-                        ))
+                        value.map((option, index) => {
+                            const { key, ...tagProps } = getTagProps({ index });
+                            return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
+                        })
                     }
                     renderInput={(params) => (
                         <TextField
@@ -376,42 +411,50 @@ export default function Research() {
                 </Box>
             )}
 
-            <Box className={styles.results}>
-                {results.length === 0 && query && !indexing && (
-                    <Typography variant="body1" sx={{ p: 2 }}>
-                        {translations.NO_RESULTS || "No results found."}
+            {hasSearched && !indexing && (
+                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        {filteredResults.length} {filteredResults.length === 1 ? (translations.RESULT || "result") : (translations.RESULTS || "results")}
                     </Typography>
+                </Box>
+            )}
+
+            <Box className={styles.results}>
+                {hasSearched && filteredResults.length === 0 && !indexing && (
+                    <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
+                        <Typography>
+                            {translations.NO_RESULTS || "No results found."}
+                        </Typography>
+                    </Box>
                 )}
+
                 {filteredResults.map((doc) => (
-                    <Card key={doc.docId} sx={{ mb: 2 }} variant="outlined">
-                        <CardContent>
-                            <Typography variant="h6" component="div" gutterBottom>
+                    <Box key={doc.docId} className={styles.resultItem}>
+                        <Box sx={{ mb: 1 }}>
+                            <Typography variant="h6" component="div">
                                 {doc.title}
                             </Typography>
-                            <Typography color="text.secondary" gutterBottom sx={{ fontSize: '0.875rem' }}>
+                            <Typography variant="caption" className={styles.metadata}>
                                 {getTagHierarchy(doc.tag).join(" > ")}
                             </Typography>
+                        </Box>
 
-                            {doc.matches.map((match, idx) => (
-                                <Box key={idx} sx={{ mt: 1, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
-                                    <ReactMarkdown
-                                        components={{
-                                            p: ({node, ...props}) => <Typography variant="body2" {...props} />
-                                        }}
-                                    >
-                                        {match.text}
-                                    </ReactMarkdown>
-                                    <Button
-                                        size="small"
-                                        onClick={() => gotoArticle(doc.tag, match.index)}
-                                        sx={{ mt: 0.5, textTransform: 'none' }}
-                                    >
-                                        Jump to paragraph
-                                    </Button>
-                                </Box>
-                            ))}
-                        </CardContent>
-                    </Card>
+                        {doc.matches.map((match, idx) => (
+                            <Box
+                                key={idx}
+                                className={styles.snippet}
+                                onClick={() => gotoArticle(doc.tag, match.index)}
+                            >
+                                <ReactMarkdown
+                                    components={{
+                                        p: ({ node: _node, ...props }) => <Typography variant="body2" component="span" {...props} />
+                                    }}
+                                >
+                                    {match.text}
+                                </ReactMarkdown>
+                            </Box>
+                        ))}
+                    </Box>
                 ))}
             </Box>
         </Box>

@@ -1716,6 +1716,10 @@ export default {
         {
             "id": "SHOW_FULL_TERMS",
             "value": "הצג מונחים מלאים"
+        },
+        {
+            "id": "RESEARCH",
+            "value": "מחקר"
         }
     ]
 };

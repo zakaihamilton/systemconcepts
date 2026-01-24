@@ -1684,6 +1684,10 @@ export default {
         {
             "id": "DELETE_FOREVER",
             "value": "Excluir para sempre"
+        },
+        {
+            "id": "RESEARCH",
+            "value": "Pesquisa"
         }
     ]
 };
