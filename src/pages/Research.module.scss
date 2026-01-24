@@ -60,3 +60,17 @@
         color: var(--text-primary);
     }
 }
+
+.filterContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.autocomplete {
+    :global(.MuiInputBase-root) {
+        height: 3em;
+        overflow-y: auto !important;
+        align-content: center;
+    }
+}

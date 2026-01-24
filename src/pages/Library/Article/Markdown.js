@@ -120,13 +120,17 @@ const Term = ({ term, entry, search }) => {
     // Check for search match
     let isMatch = false;
     if (search) {
-        const lowerSearch = search.toLowerCase();
-        isMatch = (
-            term.toLowerCase().includes(lowerSearch) ||
-            (entry.en && entry.en.toLowerCase().includes(lowerSearch)) ||
-            (entry.trans && entry.trans.toLowerCase().includes(lowerSearch)) ||
-            (entry.he && entry.he.includes(search))
-        );
+        const terms = Array.isArray(search) ? search : [search];
+        isMatch = terms.some(termStr => {
+            if (!termStr) return false;
+            const lowerSearch = termStr.toLowerCase();
+            return (
+                term.toLowerCase().includes(lowerSearch) ||
+                (entry.en && entry.en.toLowerCase().includes(lowerSearch)) ||
+                (entry.trans && entry.trans.toLowerCase().includes(lowerSearch)) ||
+                (entry.he && entry.he.includes(termStr))
+            );
+        });
     }
 
     // Combine classes: locally scoped style + global 'search-highlight' for Article.js to find
@@ -461,40 +465,15 @@ ReferenceLink.displayName = "ReferenceLink";
 const rehypeArticleEnrichment = () => {
     return (tree) => {
         let paragraphIndex = 0;
+        const paragraphs = [];
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
-                if (node.type === "element" && node.tagName === "p") {
-                    const segments = [];
-                    let currentSegment = [];
-                    node.children.forEach(child => {
-                        if (child.type === "element" && child.tagName === "br") {
-                            if (currentSegment.length > 0) {
-                                segments.push(currentSegment);
-                                currentSegment = [];
-                            }
-                        } else {
-                            currentSegment.push(child);
-                        }
-                    });
-                    if (currentSegment.length > 0) segments.push(currentSegment);
-
-                    if (segments.length === 0) {
-                        paragraphIndex++;
-                        node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
-                        newNodes.push(node);
-                    } else {
-                        segments.forEach(seg => {
-                            paragraphIndex++;
-                            newNodes.push({
-                                type: "element",
-                                tagName: "p",
-                                properties: { ...node.properties, dataParagraphIndex: paragraphIndex },
-                                children: seg
-                            });
-                        });
-                    }
-
+                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "ul" || node.tagName === "ol" || node.tagName === "blockquote")) {
+                    paragraphIndex++;
+                    node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
+                    newNodes.push(node);
+                    paragraphs.push(node);
                 } else {
                     if (node.children) {
                         node.children = visitAndSplit(node.children);
@@ -508,11 +487,16 @@ const rehypeArticleEnrichment = () => {
         if (tree.children) {
             tree.children = visitAndSplit(tree.children);
         }
+
+        const totalParagraphs = paragraphIndex;
+        paragraphs.forEach(node => {
+            node.properties = { ...node.properties, dataTotalParagraphs: totalParagraphs };
+        });
     };
 };
 
 
-export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag }) {
+export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag, filteredParagraphs }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -528,8 +512,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             return `**${number}\\${symbol}** `;
         });
 
-        // Remove duplicate newlines (normalize to a single newline for paragraph breaks)
-        content = content.replace(/\n{2,}/g, '\n');
+
 
         // Detect headings
         // Heuristic: Start of line, Uppercase, No period/semicolon/comma at end, < 80 chars
@@ -575,29 +558,61 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
     const Highlight = useCallback(({ children }) => {
         if (!search || !children || typeof children !== 'string') return children;
-        const lowerSearch = search.toLowerCase();
+
+        const terms = Array.isArray(search) ? search : [search];
+        if (terms.length === 0) return children;
+
         const lowerChildren = children.toLowerCase();
-        if (!lowerChildren.includes(lowerSearch)) return children;
+        // Find all matches for all terms
+        const matches = [];
+        terms.forEach(term => {
+            if (!term) return;
+            const lowerTerm = term.toLowerCase();
+            let index = lowerChildren.indexOf(lowerTerm);
+            while (index !== -1) {
+                matches.push({ start: index, end: index + term.length });
+                index = lowerChildren.indexOf(lowerTerm, index + 1);
+            }
+        });
+
+        if (matches.length === 0) return children;
+
+        // Sort and merge overlapping matches
+        matches.sort((a, b) => a.start - b.start);
+        const merged = [];
+        if (matches.length > 0) {
+            let current = matches[0];
+            for (let i = 1; i < matches.length; i++) {
+                const next = matches[i];
+                if (next.start < current.end) {
+                    current.end = Math.max(current.end, next.end);
+                } else {
+                    merged.push(current);
+                    current = next;
+                }
+            }
+            merged.push(current);
+        }
 
         const parts = [];
         let currentIndex = 0;
-        let matchIndexPos = lowerChildren.indexOf(lowerSearch);
 
-        while (matchIndexPos !== -1) {
-            if (matchIndexPos > currentIndex) {
-                parts.push(children.slice(currentIndex, matchIndexPos));
+        merged.forEach(match => {
+            if (match.start > currentIndex) {
+                parts.push(children.slice(currentIndex, match.start));
             }
             parts.push(
-                <span key={matchIndexPos} className={`${styles['search-highlight']} search-highlight`}>
-                    {children.slice(matchIndexPos, matchIndexPos + search.length)}
+                <span key={match.start} className={`${styles['search-highlight']} search-highlight`}>
+                    {children.slice(match.start, match.end)}
                 </span>
             );
-            currentIndex = matchIndexPos + search.length;
-            matchIndexPos = lowerChildren.indexOf(lowerSearch, currentIndex);
-        }
+            currentIndex = match.end;
+        });
+
         if (currentIndex < children.length) {
             parts.push(children.slice(currentIndex));
         }
+
         return parts;
     }, [search]);
 
@@ -766,6 +781,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         const HeaderRenderer = (tag) => {
             const Header = ({ node, children }) => {
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
+                if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
                 const paragraphSelected = currentParagraphIndex === paragraphIndex;
                 return (
                     <Box
@@ -792,6 +808,11 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
         const ParagraphRenderer = ({ node, children }) => {
             const [hoveringNumber, setHoveringNumber] = useState(false);
+            const paragraphIndex = node?.properties?.dataParagraphIndex;
+            const totalParagraphs = node?.properties?.dataTotalParagraphs;
+            const isLastParagraph = paragraphIndex === totalParagraphs;
+
+            if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
             if (!children || (Array.isArray(children) && children.length === 0)) return null;
 
             // Extract plain text from children for TTS
@@ -822,37 +843,62 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             };
 
             const paragraphText = extractText(children);
-            const paragraphIndex = node?.properties?.dataParagraphIndex;
+            // paragraphIndex is already retrieved above
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
 
             return (
-                <Box
-                    className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
-                    sx={{ marginBottom: '24px', lineHeight: 2.8 }}
-                    data-paragraph-index={paragraphIndex}
-                    data-paragraph-text={paragraphText}
-                >
-                    <TextRenderer>{children}</TextRenderer>
-                    <Tooltip title={translations?.ZOOM} placement="top" arrow>
-                        <span
-                            data-prevent-select="true"
-                            className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
-                            onMouseEnter={() => setHoveringNumber(true)}
-                            onMouseLeave={() => setHoveringNumber(false)}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                const number = node?.properties?.dataParagraphIndex;
-                                handleParagraphZoom(children, number);
-                            }}
-                        />
-                    </Tooltip>
-                </Box>
+                <React.Fragment>
+                    <Box
+                        className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
+                        sx={{ marginBottom: '24px', lineHeight: 2.8 }}
+                        data-paragraph-index={paragraphIndex}
+                        data-paragraph-text={paragraphText}
+                    >
+                        <TextRenderer>{children}</TextRenderer>
+                        <Tooltip title={translations?.ZOOM} placement="top" arrow>
+                            <span
+                                data-prevent-select="true"
+                                className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
+                                onMouseEnter={() => setHoveringNumber(true)}
+                                onMouseLeave={() => setHoveringNumber(false)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const number = node?.properties?.dataParagraphIndex;
+                                    handleParagraphZoom(children, number);
+                                }}
+                            >
+                                {paragraphIndex !== undefined ? paragraphIndex : ''}
+                            </span>
+                        </Tooltip>
+                    </Box>
+                    {isLastParagraph && (
+                        <Box className={styles.endOfArticle}>
+                            <Box className={styles.endOfArticleLine} />
+                            <Box className={styles.endOfArticleOrnament}>✦</Box>
+                            <Box className={styles.endOfArticleLine} />
+                        </Box>
+                    )}
+                </React.Fragment>
             );
+        };
+
+        // Helper to wrap other block elements with filtering
+        const BlockRenderer = (Tag) => {
+            const Renderer = ({ node, children }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
+                return <Tag>{children}</Tag>;
+            };
+            Renderer.displayName = `BlockRenderer${Tag}`;
+            return Renderer;
         };
 
         return {
             p: ParagraphRenderer,
             li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>,
+            ul: BlockRenderer('ul'),
+            ol: BlockRenderer('ol'),
+            blockquote: BlockRenderer('blockquote'),
             h1: HeaderRenderer('h1'),
             h2: HeaderRenderer('h2'),
             h3: HeaderRenderer('h3'),
@@ -861,7 +907,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             h6: HeaderRenderer('h6'),
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer, handleParagraphZoom, currentParagraphIndex, translations]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [currentParagraphIndex, filteredParagraphs, translations, TextRenderer, handleParagraphZoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>
@@ -873,11 +919,6 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 >
                     {processedChildren}
                 </ReactMarkdown>
-                <Box className={styles.endOfArticle}>
-                    <Box className={styles.endOfArticleLine} />
-                    <Box className={styles.endOfArticleOrnament}>✦</Box>
-                    <Box className={styles.endOfArticleLine} />
-                </Box>
             </div>
 
             <Zoom

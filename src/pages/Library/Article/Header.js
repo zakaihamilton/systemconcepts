@@ -13,7 +13,8 @@ export default function Header({
     isHeaderHidden,
     showAbbreviations,
     title,
-    currentParagraphIndex
+    currentParagraphIndex,
+    onTitleClick
 }) {
     const handleTagKeyPress = (e, value) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -55,6 +56,8 @@ export default function Header({
                                 variant="h4"
                                 className={styles.title}
                                 component="h1"
+                                onClick={onTitleClick}
+                                sx={onTitleClick ? { cursor: "pointer", "&:hover": { textDecoration: "underline" } } : undefined}
                             >
                                 {(() => {
                                     const expansion = abbreviations[title.name];

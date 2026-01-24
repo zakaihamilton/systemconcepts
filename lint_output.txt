@@ -1,0 +1,37 @@
+
+/Users/zakaihamilton/git/systemconcepts/src/pages/Library/Article.js
+  334:23   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  401:20   error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  399 |         }
+  400 |
+> 401 |         items.push({
+      |                    ^
+> 402 |             id: "export",
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 403 |             name: showMarkdown ? translations.PRINT : translations.EXPORT_TO_MD,
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 404 |             icon: showMarkdown ? <PrintIcon /> : <DownloadIcon />,
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 405 |             onClick: () => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 406 |                 if (showMarkdown) handlePrint();
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 407 |                 else handleExport();
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 408 |             },
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 409 |             menu: true
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 410 |         });
+      | ^^^^^^^^^^ Passing a ref to a function may read its value during render
+  411 |
+  412 |         if (search && totalMatches > 0) {
+  413 |             items = [  react-hooks/refs
+  461:333  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+✖ 3 problems (1 error, 2 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

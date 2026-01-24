@@ -42,16 +42,32 @@ import { roleAuth } from "@util/roles";
 
 registerToolbar("Article");
 
+/**
+ * ArticleToolbar Component
+ * Handles global toolbar registration for the Article page.
+ * Rendered only when the article is NOT embedded.
+ */
+function ArticleToolbar({ id, items, visible, depends }) {
+    useToolbar({ id, items, visible, depends });
+    return null;
+}
+
 function Article({
     selectedTag,
     content,
     openEditDialog,
     openEditContentDialog,
     loading,
+
     prevArticle,
     nextArticle,
     onPrev,
-    onNext
+    onNext,
+    filteredParagraphs = null,
+    onTitleClick,
+    embedded,
+    hidePlayer,
+    highlight
 }) {
     const translations = useTranslations();
     const search = useSearch();
@@ -97,7 +113,7 @@ function Article({
                 contentRef.current.scrollTop = 0;
             }
         }
-    }, [selectedTag?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [selectedTag?._id, contentRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const {
         matchIndex,
@@ -315,7 +331,7 @@ function Article({
             }
         };
         window.addEventListener("message", cleanup);
-    }, []);
+    }, [contentRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
@@ -325,7 +341,7 @@ function Article({
     }, [selectedTag, content, formatArticleWithTags]);
 
     const toolbarItems = useMemo(() => {
-        if (!content || !selectedTag) {
+        if (!content || !selectedTag || embedded) {
             return [];
         }
         let items = [
@@ -381,6 +397,7 @@ function Article({
                 });
             }
         }
+
         // eslint-disable-next-line react-hooks/refs
         items.push({
             id: "export",
@@ -392,6 +409,7 @@ function Article({
             },
             menu: true
         });
+
         if (search && totalMatches > 0) {
             items = [
                 ...items,
@@ -441,23 +459,12 @@ function Article({
         }
 
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, prevArticle, nextArticle, onPrev, onNext, isMobile]);
-
-    useToolbar({
-        id: "Article",
-        items: toolbarItems,
-        visible: !!content,
-        depends: [toolbarItems, content]
-    });
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, prevArticle, nextArticle, onPrev, onNext, isMobile, embedded]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const swipeHandlers = useSwipe({
         onSwipeLeft: onNext,
         onSwipeRight: onPrev
     });
-
-
-
-
 
     if (loading) {
         return (
@@ -481,14 +488,22 @@ function Article({
     if (!content) return null;
 
     return (
-        <Box component="main" className={styles.root} minWidth={0} sx={{ ml: { sm: 2 }, overflow: 'hidden !important', position: 'relative' }} {...swipeHandlers}>
+        <Box component="main" className={styles.root} minWidth={0} sx={{ ml: { sm: 2 }, overflow: embedded ? 'visible' : 'hidden !important', position: 'relative', height: embedded ? 'auto' : '100%' }} {...swipeHandlers}>
+            {!embedded && (
+                <ArticleToolbar
+                    id="Article"
+                    items={toolbarItems}
+                    visible={!!content}
+                    depends={[toolbarItems, content]}
+                />
+            )}
             <ScrollToTop show={showScrollTop} onClick={scrollToTop} translations={translations} />
             <Box
                 ref={contentRef}
                 tabIndex={-1}
                 onScroll={handleScrollUpdate}
                 onClick={handleClick}
-                sx={{ position: 'relative', height: '100%', overflowY: 'auto', overflowX: 'hidden', outline: 'none' }}
+                sx={{ position: 'relative', height: embedded ? 'auto' : '100%', overflowY: embedded ? 'visible' : 'auto', overflowX: 'hidden', outline: 'none' }}
             >
                 <PageIndicator scrollInfo={scrollInfo} />
                 <Header
@@ -498,6 +513,7 @@ function Article({
                     title={title}
                     translations={translations}
                     currentParagraphIndex={currentParagraphIndex}
+                    onTitleClick={onTitleClick}
                 />
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
                     <Box
@@ -521,8 +537,10 @@ function Article({
                     currentParagraphIndex={currentParagraphIndex}
                     selectedTag={selectedTag}
                     processedContent={processedContent}
+                    filteredParagraphs={filteredParagraphs}
+                    highlight={highlight}
                 />
-                {content && showMarkdown && (
+                {content && showMarkdown && !hidePlayer && (
                     <Player
                         contentRef={contentRef}
                         onParagraphChange={setCurrentParagraphIndex}

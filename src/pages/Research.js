@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -11,6 +11,11 @@ import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
+import Fade from "@mui/material/Fade";
+import PrintIcon from "@mui/icons-material/Print";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import JumpDialog from "@pages/Library/Article/JumpDialog";
 
 import { makePath } from "@util/path";
 import storage from "@util/storage";
@@ -20,10 +25,16 @@ import { useTranslations } from "@util/translations";
 import { setPath } from "@util/pages";
 import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
-import { useToolbar } from "@components/Toolbar";
-import ReactMarkdown from "react-markdown";
+import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
 import { Store } from "pullstate";
+import Article from "@pages/Library/Article";
+import { ContentSize } from "@components/Page/Content";
+import { VariableSizeList } from "react-window";
+import { useDeviceType } from "@util/styles";
+import { useLocalStorage } from "@util/store";
+
+registerToolbar("Research");
 
 const INDEX_FILE = "search_index.json";
 
@@ -31,7 +42,9 @@ export const ResearchStore = new Store({
     query: "",
     filterTags: [],
     results: [],
-    hasSearched: false
+    highlight: [],
+    hasSearched: false,
+    _loaded: false
 });
 
 function getTagHierarchy(tag) {
@@ -44,14 +57,38 @@ function getTagHierarchy(tag) {
 
 export default function Research() {
     const translations = useTranslations();
-    const { query, filterTags, results, hasSearched } = ResearchStore.useState();
+    const { query, filterTags, results, hasSearched, _loaded, highlight } = ResearchStore.useState();
     const [indexing, setIndexing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState("");
     const [indexData, setIndexData] = useState(null);
     const [availableFilters, setAvailableFilters] = useState([]);
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
+    const [searching, setSearching] = useState(false);
+    const [searchProgress, setSearchProgress] = useState(0);
     const isMounted = useRef(true);
+    const size = useContext(ContentSize);
+    const listRef = useRef();
+    const rowHeights = useRef({});
+    const deviceType = useDeviceType();
+    const isMobile = deviceType !== "desktop";
+    const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
+    const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
+
+    useLocalStorage("ResearchStore", ResearchStore, ["query", "filterTags"]);
+
+    const setRowHeight = useCallback((index, height) => {
+        if (rowHeights.current[index] !== height) {
+            rowHeights.current[index] = height;
+            if (listRef.current) {
+                listRef.current.resetAfterIndex(index);
+            }
+        }
+    }, []);
+
+    const getItemSize = useCallback((index) => {
+        return rowHeights.current[index] || 200;
+    }, []);
 
     useEffect(() => {
         isMounted.current = true;
@@ -95,7 +132,7 @@ export default function Research() {
         if (indexing) return;
         setIndexing(true);
         setProgress(0);
-        setStatus(translations.LOADING_TAGS || "Loading tags...");
+        setStatus(translations.LOADING_TAGS);
 
         try {
             const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
@@ -139,18 +176,45 @@ export default function Research() {
 
                         if (item && item.text) {
                             const text = item.text;
-                            // Store metadata
+                            // Store metadata and original text
                             newIndex.files[tag._id] = {
                                 title: tag.title || tag.chapter || "Untitled",
                                 tag: tag,
+                                text: text, // Store original text for display
                                 paragraphs: []
                             };
 
-                            // Split into paragraphs (approximate by double newline)
-                            const paragraphs = text.split(/\n\s*\n/);
+                            // Apply the same preprocessing as Markdown.js to split paragraphs
+                            // This must match how rehypeArticleEnrichment counts paragraphs
+                            let processed = text;
+
+                            // Convert Windows line endings
+                            processed = processed.replace(/\r\n/g, "\n");
+
+                            // Convert single newlines to double newlines (paragraph breaks)
+                            // This is critical because source content uses single newlines between paragraphs
+                            processed = processed.replace(/\n(?!\n)/g, "\n\n");
+
+                            // Bold numbered lists (same as Markdown.js)
+                            processed = processed.replace(/^\s*(\d+)([\.\\)])\s*/gm, (match, number, symbol) => {
+                                return `**${number}\\${symbol}** `;
+                            });
+
+                            // Detect headings (same heuristic as Markdown.js)
+                            processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
+                                const trimmed = line.trim();
+                                if (!trimmed) return match;
+                                if (trimmed.endsWith('.')) return match;
+                                if (trimmed.endsWith(';')) return match;
+                                if (trimmed.endsWith(',')) return match;
+                                if (trimmed.length > 120) return match;
+                                return `### ${trimmed}${newline}`;
+                            });
+
+                            // Split on double newlines (markdown paragraph breaks)
+                            const paragraphs = processed.split(/\n\n+/).filter(p => p.trim());
 
                             paragraphs.forEach((para, paraIndex) => {
-                                if (!para.trim()) return;
 
                                 const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
                                 const uniqueTokens = [...new Set(paraTokens)];
@@ -163,12 +227,14 @@ export default function Research() {
                                 // Add to token index
                                 uniqueTokens.forEach(token => {
                                     if (!newIndex.tokens[token]) {
-                                        newIndex.tokens[token] = []; // Stores "docId:paraIndex"
+                                        newIndex.tokens[token] = [];
                                     }
                                     // Store reference as "docId:paraIndex"
                                     newIndex.tokens[token].push(`${tag._id}:${paraIndex}`);
                                 });
                             });
+                            // Store lengths for end indicator check
+                            newIndex.files[tag._id].totalParagraphs = paragraphs.length;
                         }
                     }
                 } catch (err) {
@@ -183,7 +249,7 @@ export default function Research() {
                 await storage.createFolderPath(indexPath);
                 await storage.writeFile(indexPath, JSON.stringify(newIndex));
                 setIndexData(newIndex);
-                setStatus(translations.DONE || "Done");
+                setStatus(translations.DONE);
             }
 
         } catch (err) {
@@ -228,79 +294,123 @@ export default function Research() {
         }
     }, [libraryUpdateCounter, loadIndex, loadTags]);
 
-    const handleSearch = useCallback(() => {
+    const handleSearch = useCallback(async () => {
         if (!indexData || !query.trim()) {
             setResults([]);
             ResearchStore.update(s => { s.hasSearched = true; });
             return;
         }
 
+        setSearching(true);
+        setSearchProgress(0);
 
-        const groups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
-        let finalRefs = new Set(); // Stores "docId:paraIndex"
+        // Allow UI to update
+        await new Promise(resolve => setTimeout(resolve, 0));
 
-        groups.forEach(group => {
-            const groupTerms = group.split(/\s+/).filter(t => t !== "AND" && t !== "OR").map(t => t.toLowerCase());
-            if (groupTerms.length === 0) return;
+        try {
+            const groups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
+            const searchTerms = [];
+            let finalRefs = new Set(); // Stores "docId:paraIndex"
 
-            let groupRefs = null;
+            const totalSteps = groups.reduce((acc, g) => acc + g.split(/\s+/).filter(t => t !== "AND" && t !== "OR").length, 0) + 1;
+            let currentStep = 0;
 
-            groupTerms.forEach(term => {
-                const matchingTokens = Object.keys(indexData.tokens).filter(k => k.includes(term));
-                let termRefs = new Set();
-                matchingTokens.forEach(k => {
-                    indexData.tokens[k].forEach(ref => termRefs.add(ref));
-                });
+            for (const group of groups) {
+                const groupTerms = group.split(/\s+/).filter(t => t !== "AND" && t !== "OR").map(t => t.toLowerCase());
+                if (groupTerms.length === 0) continue;
+                searchTerms.push(...groupTerms);
 
-                if (groupRefs === null) {
-                    groupRefs = termRefs;
-                } else {
-                    groupRefs = new Set([...groupRefs].filter(x => termRefs.has(x)));
+                let groupRefs = null;
+
+                for (const term of groupTerms) {
+                    if (!isMounted.current) return;
+
+                    const matchingTokens = Object.keys(indexData.tokens).filter(k => k.includes(term));
+                    let termRefs = new Set();
+                    matchingTokens.forEach(k => {
+                        indexData.tokens[k].forEach(ref => termRefs.add(ref));
+                    });
+
+                    if (groupRefs === null) {
+                        groupRefs = termRefs;
+                    } else {
+                        groupRefs = new Set([...groupRefs].filter(x => termRefs.has(x)));
+                    }
+
+                    currentStep++;
+                    setSearchProgress((currentStep / totalSteps) * 100);
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+
+                if (groupRefs) {
+                    groupRefs.forEach(ref => finalRefs.add(ref));
+                }
+            }
+
+            // Group by doc
+            const groupedResults = {};
+            [...finalRefs].forEach(ref => {
+                const [docId, paraIndex] = ref.split(':');
+                if (!groupedResults[docId]) {
+                    const doc = indexData.files[docId];
+                    if (doc) {
+                        groupedResults[docId] = {
+                            ...doc,
+                            docId,
+                            matches: []
+                        };
+                    }
+                }
+                if (groupedResults[docId]) {
+                    groupedResults[docId].matches.push({
+                        index: parseInt(paraIndex, 10),
+                        text: indexData.files[docId].paragraphs[parseInt(paraIndex, 10)]
+                    });
                 }
             });
 
-            if (groupRefs) {
-                groupRefs.forEach(ref => finalRefs.add(ref));
-            }
-        });
+            // Sort paragraphs within docs
+            Object.values(groupedResults).forEach(doc => {
+                doc.matches.sort((a, b) => a.index - b.index);
+            });
 
-        // Group by doc
-        const groupedResults = {};
-        [...finalRefs].forEach(ref => {
-            const [docId, paraIndex] = ref.split(':');
-            if (!groupedResults[docId]) {
-                const doc = indexData.files[docId];
-                if (doc) {
-                    groupedResults[docId] = {
-                        ...doc,
-                        docId,
-                        matches: []
-                    };
-                }
-            }
-            if (groupedResults[docId]) {
-                groupedResults[docId].matches.push({
-                    index: parseInt(paraIndex, 10),
-                    text: indexData.files[docId].paragraphs[parseInt(paraIndex, 10)]
+            if (isMounted.current) {
+                const uniqueTerms = [...new Set(searchTerms)];
+                const resultsWithTerms = Object.values(groupedResults);
+                ResearchStore.update(s => {
+                    s.results = resultsWithTerms;
+                    s.highlight = uniqueTerms;
+                    s.hasSearched = true;
                 });
             }
-        });
-
-        // Sort paragraphs within docs
-        Object.values(groupedResults).forEach(doc => {
-            doc.matches.sort((a, b) => a.index - b.index);
-        });
-
-        setResults(Object.values(groupedResults));
-        ResearchStore.update(s => { s.hasSearched = true; });
+        } catch (err) {
+            console.error("Search failed:", err);
+        } finally {
+            if (isMounted.current) {
+                setSearching(false);
+                setSearchProgress(100);
+            }
+        }
 
     }, [indexData, query, setResults]);
 
+    // Only auto-search on initial page load if there's a saved query from localStorage
+    const initialSearchDone = useRef(false);
+    useEffect(() => {
+        if (_loaded && query && indexData && !hasSearched && !searching && !initialSearchDone.current) {
+            initialSearchDone.current = true;
+            handleSearch();
+        }
+    }, [_loaded, indexData, hasSearched, searching, handleSearch, query]);
+
     const handleClear = useCallback(() => {
         setQuery("");
-        setResults([]);
-        ResearchStore.update(s => { s.hasSearched = false; });
-    }, [setQuery, setResults]);
+        ResearchStore.update(s => {
+            s.results = [];
+            s.highlight = [];
+            s.hasSearched = false;
+        });
+    }, [setQuery]);
 
     const onKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -321,88 +431,200 @@ export default function Research() {
     };
 
     const filteredResults = useMemo(() => {
-        if (!filterTags.length) return results;
-        return results.filter(doc => {
-            return filterTags.every(filter => {
-                return LibraryTagKeys.some(key => doc.tag[key] === filter);
+        let res;
+        if (!filterTags.length) {
+            res = results;
+        } else {
+            res = results.filter(doc => {
+                return filterTags.every(filter => {
+                    return LibraryTagKeys.some(key => doc.tag[key] === filter);
+                });
             });
-        });
+        }
+        return res;
     }, [results, filterTags]);
 
-    const toolbarItems = [
+    const handlePrint = useCallback(() => {
+        const rootElement = document.createElement("div");
+        filteredResults.forEach((doc) => {
+            const docElement = document.createElement("div");
+            docElement.className = styles.printItem;
+            docElement.innerHTML = `
+                <div class="${styles.printHeader}">
+                    <h3>${doc.title || "Untitled"}</h3>
+                    <span class="${styles.printTag}">
+                        ${doc.tag && LibraryTagKeys.map(key => doc.tag[key]).filter(Boolean).join(" / ")}
+                    </span>
+                </div>
+                <div class="${styles.printContent}">
+                    ${doc.paragraphs.map(p => `<p>${p}</p>`).join("")}
+                </div>
+            `;
+            rootElement.appendChild(docElement);
+        });
+
+        const iframe = document.createElement("iframe");
+        Object.assign(iframe.style, {
+            position: "absolute",
+            top: "-9999px",
+            left: "-9999px",
+            width: "100%",
+            height: "auto"
+        });
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: sans-serif; padding: 20px; }
+                    .printItem { margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 20px; }
+                    .printHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+                    .printTag { font-size: 0.8em; color: #666; }
+                    h3 { margin: 0; }
+                    p { margin: 0 0 10px 0; }
+                    @media print {
+                        body { -webkit-print-color-adjust: exact; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${rootElement.innerHTML}
+                <script>
+                    window.onload = () => {
+                        window.print();
+                        setTimeout(() => {
+                            window.top.postMessage("print-complete", "*");
+                        }, 500);
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        const cleanup = (e) => {
+            if (e.data === "print-complete") {
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 5000);
+                window.removeEventListener("message", cleanup);
+            }
+        };
+        window.addEventListener("message", cleanup);
+    }, [filteredResults]);
+
+    const handleJump = useCallback((type, value) => {
+        setJumpDialogOpen(false);
+        if (type === 'paragraph') { // Using 'paragraph' type as 'result index' for reusing JumpDialog logic if possible, or mapping custom
+            const index = value - 1;
+            if (index >= 0 && index < filteredResults.length) {
+                if (listRef.current) {
+                    listRef.current.scrollToItem(index, "center");
+                }
+            }
+        }
+    }, [filteredResults]);
+
+    const toolbarItems = useMemo(() => [
         {
             id: "rebuildIndex",
-            name: translations.REBUILD_INDEX || "Rebuild Index",
+            name: translations.REBUILD_INDEX,
             icon: <RefreshIcon />,
             onClick: buildIndex,
             disabled: indexing,
             location: "header"
+        },
+        {
+            id: "jumpTo",
+            name: translations.JUMP_TO,
+            icon: <FormatListNumberedIcon />,
+            onClick: () => setJumpDialogOpen(true),
+            disabled: !hasSearched || filteredResults.length === 0,
+            location: "header"
+        },
+        {
+            id: "print",
+            name: translations.PRINT || "Print",
+            icon: <PrintIcon />,
+            onClick: handlePrint,
+            disabled: !hasSearched || filteredResults.length === 0,
+            location: "header"
         }
-    ];
+    ], [translations, buildIndex, indexing, hasSearched, filteredResults.length, handlePrint]);
 
-    useToolbar({ id: "Research", items: toolbarItems, depends: [indexing, translations, buildIndex] });
+    useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
     return (
         <Box className={styles.root}>
-            <Box className={styles.searchHeader}>
-                <TextField
-                    fullWidth
-                    placeholder={translations.SEARCH_ARTICLES || "Search articles (e.g. 'faith AND works', 'truth OR love')..."}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
-                        endAdornment: query && (
-                            <InputAdornment position="end">
-                                <IconButton onClick={handleClear} size="small">
-                                    <ClearIcon fontSize="small" />
-                                </IconButton>
-                            </InputAdornment>
-                        )
-                    }}
-                    sx={{ flex: 1 }}
-                />
-                <Button
-                    variant="contained"
-                    onClick={handleSearch}
-                    disabled={indexing || !indexData}
-                    sx={{ height: 56, minWidth: 100 }}
-                >
-                    {translations.SEARCH || "Search"}
-                </Button>
-            </Box>
+            <Paper sx={{ p: 2, mb: 2 }}>
+                <Box className={styles.searchHeader}>
+                    <TextField
+                        fullWidth
+                        placeholder={translations.SEARCH_ARTICLES}
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={onKeyDown}
+                        variant="outlined"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                            endAdornment: query && (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={handleClear} size="small">
+                                        <ClearIcon fontSize="small" />
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                        sx={{ flex: 1 }}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={handleSearch}
+                        disabled={indexing || searching || !indexData}
+                        sx={{ height: 56, minWidth: 100 }}
+                    >
+                        {translations.SEARCH}
+                    </Button>
+                </Box>
 
-            <Box sx={{ mb: 2 }}>
-                <Autocomplete
-                    multiple
-                    options={availableFilters}
-                    freeSolo
-                    value={filterTags}
-                    onChange={(event, newValue) => {
-                        setFilterTags(newValue);
-                    }}
-                    renderTags={(value, getTagProps) =>
-                        value.map((option, index) => {
-                            const { key, ...tagProps } = getTagProps({ index });
-                            return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
-                        })
-                    }
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="outlined"
-                            label={translations.FILTER_BY_TAGS || "Limit by tags (Book, Author...)"}
-                            placeholder="Add tag..."
-                            size="small"
-                        />
-                    )}
-                />
-            </Box>
+                <Box className={styles.filterContainer}>
+                    <Autocomplete
+                        multiple
+                        className={styles.autocomplete}
+                        options={availableFilters}
+                        freeSolo
+                        value={filterTags}
+                        onChange={(event, newValue) => {
+                            setFilterTags(newValue);
+                        }}
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => {
+                                const { key, ...tagProps } = getTagProps({ index });
+                                return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
+                            })
+                        }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label={translations.FILTER_BY_TAGS}
+                                placeholder={translations.TAG}
+                                size="small"
+                            />
+                        )}
+                    />
+                </Box>
+            </Paper>
 
             {indexing && (
                 <Box className={styles.progressContainer}>
@@ -411,52 +633,116 @@ export default function Research() {
                 </Box>
             )}
 
-            {hasSearched && !indexing && (
-                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                        {filteredResults.length} {filteredResults.length === 1 ? (translations.RESULT || "result") : (translations.RESULTS || "results")}
+            {searching && (
+                <Box className={styles.progressContainer}>
+                    <Typography variant="caption">{translations.SEARCHING}</Typography>
+                    <LinearProgress variant="determinate" value={searchProgress} />
+                </Box>
+            )}
+
+            {hasSearched && filteredResults.length === 0 && !indexing && (
+                <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
+                    <Typography>
+                        {translations.NO_RESULTS}
                     </Typography>
                 </Box>
             )}
 
-            <Box className={styles.results}>
-                {hasSearched && filteredResults.length === 0 && !indexing && (
-                    <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
-                        <Typography>
-                            {translations.NO_RESULTS || "No results found."}
-                        </Typography>
-                    </Box>
-                )}
-
-                {filteredResults.map((doc) => (
-                    <Box key={doc.docId} className={styles.resultItem}>
-                        <Box sx={{ mb: 1 }}>
-                            <Typography variant="h6" component="div">
-                                {doc.title}
+            {hasSearched && filteredResults.length > 0 && (
+                <Box sx={{ position: 'relative', flex: 1 }}>
+                    <VariableSizeList
+                        height={size.height - (isMobile ? 150 : 250)} // Adjust for header/search bar
+                        itemCount={filteredResults.length}
+                        itemSize={getItemSize}
+                        width={size.width - 32} // Account for root padding
+                        ref={listRef}
+                        onItemsRendered={({ visibleStartIndex, visibleStopIndex }) => {
+                            setVisibleRange({ start: visibleStartIndex + 1, end: visibleStopIndex + 1 });
+                        }}
+                        itemData={{
+                            results: filteredResults,
+                            gotoArticle,
+                            setRowHeight,
+                            listRef,
+                            highlight
+                        }}
+                    >
+                        {SearchResultItem}
+                    </VariableSizeList>
+                    <Fade in={true} timeout={1000}>
+                        <Paper
+                            elevation={4}
+                            className="print-hidden"
+                            sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                zIndex: 1400,
+                                px: 2,
+                                py: 1,
+                                borderRadius: 4,
+                                backgroundColor: 'rgba(0,0,0,0.7)',
+                                color: 'white',
+                                backdropFilter: 'blur(4px)',
+                                pointerEvents: 'none'
+                            }}
+                        >
+                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                {visibleRange.start} / {filteredResults.length}
                             </Typography>
-                            <Typography variant="caption" className={styles.metadata}>
-                                {getTagHierarchy(doc.tag).join(" > ")}
-                            </Typography>
-                        </Box>
-
-                        {doc.matches.map((match, idx) => (
-                            <Box
-                                key={idx}
-                                className={styles.snippet}
-                                onClick={() => gotoArticle(doc.tag, match.index)}
-                            >
-                                <ReactMarkdown
-                                    components={{
-                                        p: ({ node: _node, ...props }) => <Typography variant="body2" component="span" {...props} />
-                                    }}
-                                >
-                                    {match.text}
-                                </ReactMarkdown>
-                            </Box>
-                        ))}
-                    </Box>
-                ))}
-            </Box>
+                        </Paper>
+                    </Fade>
+                    <JumpDialog
+                        open={jumpDialogOpen}
+                        onClose={() => setJumpDialogOpen(false)}
+                        onSubmit={handleJump}
+                        maxPage={1}
+                        maxParagraphs={filteredResults.length}
+                    />
+                </Box>
+            )}
         </Box>
     );
 }
+
+const SearchResultItem = ({ index, style, data }) => {
+    const { results, gotoArticle, setRowHeight, highlight } = data || {};
+    const doc = results ? results[index] : null;
+    const rowRef = useRef(null);
+
+    useEffect(() => {
+        if (rowRef.current && setRowHeight) {
+            setRowHeight(index, rowRef.current.clientHeight);
+        }
+    }, [index, setRowHeight, doc?.docId]);
+
+    // Transform text: convert single newlines to double newlines for proper paragraph separation
+    // This must match the transformation done during indexing
+    const content = useMemo(() => {
+        if (!doc?.text) return "";
+        return doc.text
+            .replace(/\r\n/g, "\n")
+            .replace(/\n(?!\n)/g, "\n\n");
+    }, [doc?.text]);
+    // filteredParagraphs contains 1-based indices of paragraphs to display
+    const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc?.matches]);
+
+    if (!doc) return null;
+
+    return (
+        <div style={style}>
+            <div ref={rowRef}>
+                <Article
+                    selectedTag={doc.tag}
+                    content={content}
+                    filteredParagraphs={filteredParagraphs}
+                    onTitleClick={() => gotoArticle(doc.tag)}
+                    embedded={true}
+                    hidePlayer={true}
+                    highlight={highlight}
+                />
+            </div>
+        </div>
+    );
+};
+

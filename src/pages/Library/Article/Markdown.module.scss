@@ -158,10 +158,6 @@
     }
 }
 
-.container {
-    counter-reset: paragraph;
-}
-
 .paragraph {
     border: 1px solid transparent;
     padding: 8px 16px;
@@ -172,7 +168,6 @@
         background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
         border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    counter-increment: paragraph;
     background-color: var(--background-paper);
 
     &:not(.selected) {
@@ -243,10 +238,10 @@
 
 .paragraphNumber {
     @extend %paragraph-label-shared;
+}
 
-    &::after {
-        content: counter(paragraph);
-    }
+.paragraphBadge {
+    @extend %paragraph-label-shared;
 }
 
 .paragraphBadge {

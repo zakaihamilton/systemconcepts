@@ -1728,6 +1728,46 @@ export default {
         {
             "id": "RESEARCH",
             "value": "Research"
+        },
+        {
+            "id": "SEARCH_ARTICLES",
+            "value": "Search..."
+        },
+        {
+            "id": "REBUILD_INDEX",
+            "value": "Rebuild Index"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "Loading tags..."
+        },
+        {
+            "id": "DONE",
+            "value": "Done"
+        },
+        {
+            "id": "FILTER_BY_TAGS",
+            "value": "Tags"
+        },
+        {
+            "id": "SEARCHING",
+            "value": "Searching..."
+        },
+        {
+            "id": "NO_RESULTS",
+            "value": "No results found."
+        },
+        {
+            "id": "RESULT",
+            "value": "result"
+        },
+        {
+            "id": "RESULTS",
+            "value": "results"
+        },
+        {
+            "id": "TAG",
+            "value": "Tag"
         }
     ]
 };
