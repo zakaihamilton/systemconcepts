@@ -480,7 +480,8 @@ export default function Research() {
         if (rowHeights.current[index]) return rowHeights.current[index];
         const doc = filteredResults[index];
         const matchCount = doc?.matches?.length || 1;
-        return 100 + (matchCount * 150);
+        // More generous initial estimate to avoid initial clipping
+        return 400 + (matchCount * 200);
     }, [filteredResults]);
 
     useEffect(() => {
@@ -759,7 +760,16 @@ const SearchResultItem = ({ index, style, data }) => {
 
     useEffect(() => {
         if (rowRef.current && setRowHeight) {
-            setRowHeight(index, rowRef.current.clientHeight);
+            const observer = new ResizeObserver((entries) => {
+                for (let entry of entries) {
+                    const height = entry.contentRect.height;
+                    if (height > 0) {
+                        setRowHeight(index, height);
+                    }
+                }
+            });
+            observer.observe(rowRef.current);
+            return () => observer.disconnect();
         }
     }, [index, setRowHeight, doc?.docId]);
 
