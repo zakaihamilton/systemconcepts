@@ -66,6 +66,8 @@ export default function Research() {
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
     const [searching, setSearching] = useState(false);
     const [searchProgress, setSearchProgress] = useState(0);
+    const [showProgress, setShowProgress] = useState(false);
+    const searchTimer = useRef(null);
     const isMounted = useRef(true);
     const size = useContext(ContentSize);
     const listRef = useRef();
@@ -309,6 +311,12 @@ export default function Research() {
 
         setSearching(true);
         setSearchProgress(0);
+        setShowProgress(false);
+
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+        searchTimer.current = setTimeout(() => {
+            if (isMounted.current) setShowProgress(true);
+        }, 1000);
 
         // Allow UI to update
         await new Promise(resolve => setTimeout(resolve, 0));
@@ -395,6 +403,11 @@ export default function Research() {
             if (isMounted.current) {
                 setSearching(false);
                 setSearchProgress(100);
+                setShowProgress(false);
+                if (searchTimer.current) {
+                    clearTimeout(searchTimer.current);
+                    searchTimer.current = null;
+                }
             }
         }
 
@@ -593,7 +606,7 @@ export default function Research() {
 
     return (
         <Box className={styles.root}>
-            <Paper sx={{ p: 2, mb: 2 }}>
+            <Paper className={styles.searchPaper}>
                 <Box className={styles.searchHeader}>
                     <TextField
                         fullWidth
@@ -616,13 +629,13 @@ export default function Research() {
                                 </InputAdornment>
                             )
                         }}
-                        sx={{ flex: 1 }}
+                        className={styles.queryField}
                     />
                     <Button
                         variant="contained"
                         onClick={handleSearch}
                         disabled={indexing || searching || !indexData}
-                        sx={{ height: 56, minWidth: 100 }}
+                        className={styles.searchButton}
                     >
                         {translations.SEARCH}
                     </Button>
@@ -664,7 +677,7 @@ export default function Research() {
                 </Box>
             )}
 
-            {searching && (
+            {showProgress && (
                 <Box className={styles.progressContainer}>
                     <Typography variant="caption">{translations.SEARCHING}</Typography>
                     <LinearProgress variant="determinate" value={searchProgress} />
@@ -672,7 +685,7 @@ export default function Research() {
             )}
 
             {hasSearched && filteredResults.length === 0 && !indexing && (
-                <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
+                <Box className={styles.noResults}>
                     <Typography>
                         {translations.NO_RESULTS}
                     </Typography>
@@ -680,7 +693,7 @@ export default function Research() {
             )}
 
             {hasSearched && filteredResults.length > 0 && (
-                <Box sx={{ position: 'relative', flex: 1 }}>
+                <Box className={styles.resultsWrapper}>
                     <VariableSizeList
                         height={size.height - (isMobile ? 150 : 250)} // Adjust for header/search bar
                         itemCount={filteredResults.length}
@@ -734,22 +747,9 @@ const PageIndicator = React.memo(({ current, total, translations }) => {
         <Fade in={true} timeout={1000}>
             <Paper
                 elevation={4}
-                className="print-hidden"
-                sx={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    zIndex: 1400,
-                    px: 2,
-                    py: 1,
-                    borderRadius: 4,
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    color: 'white',
-                    backdropFilter: 'blur(4px)',
-                    pointerEvents: 'none'
-                }}
+                className={["print-hidden", styles.pageIndicator].join(" ")}
             >
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="body2" className={styles.pageIndicatorText}>
                     {translations.PAGE || "Page"} {current} / {total}
                 </Typography>
             </Paper>

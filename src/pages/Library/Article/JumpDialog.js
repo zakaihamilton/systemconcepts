@@ -13,7 +13,7 @@ import { useTranslations } from "@util/translations";
 
 export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxParagraphs = 0 }) {
     const translations = useTranslations();
-    const [tab, setTab] = useState(0); // 0: Paragraph, 1: Page
+    const [tab, setTab] = useState(maxParagraphs > 0 ? 0 : 1); // 0: Paragraph, 1: Page
     const [paragraphNumber, setParagraphNumber] = useState('');
     const [pageNumber, setPageNumber] = useState('');
 
@@ -59,17 +59,19 @@ export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxPa
                 {translations.JUMP_TO}
             </DialogTitle>
             <DialogContent>
-                <Tabs
-                    value={tab}
-                    onChange={(e, val) => setTab(val)}
-                    variant="fullWidth"
-                    textColor="primary"
-                    indicatorColor="primary"
-                    sx={{ marginBottom: 2 }}
-                >
-                    <Tab label={translations.PARAGRAPH} />
-                    <Tab label={translations.PAGE} />
-                </Tabs>
+                {maxParagraphs > 0 && maxPage > 0 && (
+                    <Tabs
+                        value={tab}
+                        onChange={(e, val) => setTab(val)}
+                        variant="fullWidth"
+                        textColor="primary"
+                        indicatorColor="primary"
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <Tab label={translations.PARAGRAPH} />
+                        <Tab label={translations.PAGE} />
+                    </Tabs>
+                )}
 
                 {tab === 0 && (
                     <TextField
