@@ -1546,6 +1546,10 @@ export default {
             "value": "Ir Para"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Ir Para o Artigo"
+        },
+        {
             "id": "PAGE",
             "value": "Página"
         },
@@ -1556,6 +1560,10 @@ export default {
         {
             "id": "PAGE_NUMBER",
             "value": "Número da Página"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Número do Artigo"
         },
         {
             "id": "PARAGRAPH_NUMBER",

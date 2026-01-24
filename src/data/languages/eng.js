@@ -1578,6 +1578,10 @@ export default {
             "value": "Jump To"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Jump To Article"
+        },
+        {
             "id": "PAGE",
             "value": "Page"
         },
@@ -1588,6 +1592,10 @@ export default {
         {
             "id": "PAGE_NUMBER",
             "value": "Page Number"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Article Number"
         },
         {
             "id": "PARAGRAPH_NUMBER",

@@ -1570,6 +1570,10 @@ export default {
             "value": "קפוץ ל"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "קפוץ למאמר"
+        },
+        {
             "id": "PAGE",
             "value": "עמוד"
         },
@@ -1580,6 +1584,10 @@ export default {
         {
             "id": "PAGE_NUMBER",
             "value": "מספר עמוד"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "מספר מאמר"
         },
         {
             "id": "PARAGRAPH_NUMBER",

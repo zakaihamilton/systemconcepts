@@ -75,7 +75,7 @@ export default function Research() {
     const deviceType = useDeviceType();
     const isMobile = deviceType !== "desktop";
     const outerRef = useRef(null);
-    const [scrollPages, setScrollPages] = useState({ current: 1 });
+    const [scrollPages, setScrollPages] = useState({ current: 1, total: 1 });
     const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
 
@@ -567,13 +567,10 @@ export default function Research() {
 
     const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
-        if (type === 'page' && matchCounts.length) {
-            const artIndex = matchCounts.findIndex(m => value >= m.start && value <= m.total);
-            if (artIndex !== -1 && listRef.current) {
-                listRef.current.scrollToItem(artIndex, "start");
-            }
+        if (type === 'page' && listRef.current) {
+            listRef.current.scrollToItem(value - 1, "start");
         }
-    }, [matchCounts, listRef]);
+    }, [listRef]);
 
     const toolbarItems = useMemo(() => [
         {
@@ -702,17 +699,10 @@ export default function Research() {
                         width={size.width - 32} // Account for root padding
                         ref={listRef}
                         outerRef={outerRef}
-                        onScroll={({ scrollOffset }) => {
-                            if (!outerRef.current || totalMatches <= 1) return;
-                            const viewHeight = size.height - (isMobile ? 150 : 250);
-                            const scrollHeight = outerRef.current.scrollHeight;
-                            const maxScroll = scrollHeight - viewHeight;
-                            if (maxScroll <= 0) return;
-
-                            const ratio = Math.max(0, Math.min(1, scrollOffset / maxScroll));
-                            const current = Math.floor(ratio * (totalMatches - 1)) + 1;
-
-                            setScrollPages(prev => (prev.current !== current ? { current } : prev));
+                        onItemsRendered={({ visibleStartIndex }) => {
+                            const current = visibleStartIndex + 1;
+                            const total = filteredResults.length;
+                            setScrollPages(prev => (prev.current !== current || prev.total !== total ? { current, total } : prev));
                         }}
                         itemData={{
                             results: filteredResults,
@@ -726,15 +716,19 @@ export default function Research() {
                     </VariableSizeList>
                     <PageIndicator
                         current={scrollPages.current}
-                        total={totalMatches}
+                        total={scrollPages.total}
                         translations={translations}
+                        label={translations.ARTICLE}
                     />
                     <JumpDialog
                         open={jumpDialogOpen}
                         onClose={() => setJumpDialogOpen(false)}
                         onSubmit={handleJump}
-                        maxPage={totalMatches}
+                        maxPage={scrollPages.total}
                         maxParagraphs={0}
+                        title={translations.JUMP_TO_ARTICLE || "Jump to Article"}
+                        pageLabel={translations.ARTICLE}
+                        pageNumberLabel={translations.ARTICLE_NUMBER}
                     />
                 </Box>
             )}
@@ -742,7 +736,7 @@ export default function Research() {
     );
 }
 
-const PageIndicator = React.memo(({ current, total, translations }) => {
+const PageIndicator = React.memo(({ current, total, translations, label }) => {
     return (
         <Fade in={true} timeout={1000}>
             <Paper
@@ -750,7 +744,7 @@ const PageIndicator = React.memo(({ current, total, translations }) => {
                 className={["print-hidden", styles.pageIndicator].join(" ")}
             >
                 <Typography variant="body2" className={styles.pageIndicatorText}>
-                    {translations.PAGE || "Page"} {current} / {total}
+                    {label || translations.PAGE || "Page"} {current} / {total}
                 </Typography>
             </Paper>
         </Fade>

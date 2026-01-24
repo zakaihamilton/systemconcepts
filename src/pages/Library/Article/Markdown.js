@@ -507,6 +507,12 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         }
         if (typeof content !== 'string') return content;
 
+        // Convert Windows line endings
+        content = content.replace(/\r\n/g, "\n");
+
+        // Convert single newlines to double newlines (paragraph breaks)
+        content = content.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
+
         // Bold numbered lists (existing)
         content = content.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
             return `**${number}\\${symbol}** `;
