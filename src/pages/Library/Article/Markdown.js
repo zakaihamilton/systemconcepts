@@ -788,24 +788,35 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             const Header = ({ node, children }) => {
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
                 if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
+
+                const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
+                const needsGap = currentIndex > 0 && (paragraphIndex - filteredParagraphs[currentIndex - 1] > 1);
+
                 const paragraphSelected = currentParagraphIndex === paragraphIndex;
                 return (
-                    <Box
-                        component={tag}
-                        className={paragraphSelected ? styles.selected : ''}
-                        sx={{
-                            mt: 3,
-                            mb: 2,
-                            fontWeight: 'bold',
-                            position: 'relative',
-                            backgroundColor: 'var(--background-paper)',
-                            padding: '16px 16px',
-                            borderRadius: '8px'
-                        }}
-                        data-paragraph-index={paragraphIndex}
-                    >
-                        <TextRenderer>{children}</TextRenderer>
-                    </Box>
+                    <React.Fragment>
+                        {needsGap && (
+                            <Box className={styles.gapSeparator}>
+                                •••
+                            </Box>
+                        )}
+                        <Box
+                            component={tag}
+                            className={paragraphSelected ? styles.selected : ''}
+                            sx={{
+                                mt: 3,
+                                mb: 2,
+                                fontWeight: 'bold',
+                                position: 'relative',
+                                backgroundColor: 'var(--background-paper)',
+                                padding: '16px 16px',
+                                borderRadius: '8px'
+                            }}
+                            data-paragraph-index={paragraphIndex}
+                        >
+                            <TextRenderer>{children}</TextRenderer>
+                        </Box>
+                    </React.Fragment>
                 );
             };
             Header.displayName = `Header${tag}`;
@@ -826,34 +837,33 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 if (typeof child === 'string') return child;
                 if (Array.isArray(child)) return child.map(extractText).join('');
                 if (React.isValidElement(child)) {
-                    // Check if this is a glossary term by looking for the Term component structure
-                    // The Term component renders: <span with glossary-main-text class>
-                    // We want to extract the main text (translation) not the original term
                     const props = child.props;
-
-                    // If it's a span with className containing 'glossary-main-text', get its text content
                     if (props?.className && typeof props.className === 'string' &&
                         props.className.includes('glossary-main-text')) {
                         return props.children || '';
                     }
-
-                    // Skip glossary annotations (transliteration above the word)
                     if (props?.className && typeof props.className === 'string' &&
                         props.className.includes('glossary-annotation')) {
                         return '';
                     }
-
                     return extractText(props.children);
                 }
                 return '';
             };
 
             const paragraphText = extractText(children);
-            // paragraphIndex is already retrieved above
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
+
+            const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
+            const needsGap = currentIndex > 0 && (paragraphIndex - filteredParagraphs[currentIndex - 1] > 1);
 
             return (
                 <React.Fragment>
+                    {needsGap && (
+                        <Box className={styles.gapSeparator}>
+                            •••
+                        </Box>
+                    )}
                     <Box
                         className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
                         sx={{ marginBottom: '24px', lineHeight: 2.8 }}

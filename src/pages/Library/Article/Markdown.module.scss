@@ -279,6 +279,19 @@
     opacity: 0.6;
 }
 
+.gapSeparator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 32px 0 16px;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+    opacity: 0.4;
+    pointer-events: none;
+    user-select: none;
+}
+
 @media print {
     .glossary-term-container {
         line-height: 2.2;

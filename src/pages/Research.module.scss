@@ -77,9 +77,14 @@
 
 
 .articleSeparator {
-    border-bottom: 2px solid var(--border);
-    padding-bottom: 2em;
-    margin-bottom: 2em;
+    border-bottom: 3px solid var(--divider);
+    padding-bottom: 4em;
+    margin-bottom: 0;
+    position: relative;
+
+    @media (prefers-color-scheme: dark) {
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+    }
 }
 
 .searchPaper {

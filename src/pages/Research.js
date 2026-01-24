@@ -762,7 +762,8 @@ const SearchResultItem = ({ index, style, data }) => {
         if (rowRef.current && setRowHeight) {
             const observer = new ResizeObserver((entries) => {
                 for (let entry of entries) {
-                    const height = entry.contentRect.height;
+                    const rect = entry.target.getBoundingClientRect();
+                    const height = rect.height;
                     if (height > 0) {
                         setRowHeight(index, height);
                     }
@@ -786,9 +787,11 @@ const SearchResultItem = ({ index, style, data }) => {
 
     if (!doc) return null;
 
+    const isLast = index === results.length - 1;
+
     return (
         <div style={style}>
-            <div ref={rowRef} className={styles.articleSeparator}>
+            <div ref={rowRef} className={!isLast ? styles.articleSeparator : ''}>
                 <Article
                     selectedTag={doc.tag}
                     content={content}
