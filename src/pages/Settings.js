@@ -24,6 +24,7 @@ import Cookies from "js-cookie";
 import { SyncActiveStore } from "@sync/syncState";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
+import TimelineIcon from "@mui/icons-material/Timeline";
 
 export const SettingsStore = new Store({
     order: "desc",
@@ -87,6 +88,17 @@ export default function Settings() {
         },
         {
             id: "on",
+            name: translations.ON
+        }
+    ];
+
+    const tronModeItems = [
+        {
+            id: false,
+            name: translations.OFF
+        },
+        {
+            id: true,
             name: translations.ON
         }
     ];
@@ -170,6 +182,14 @@ export default function Settings() {
             description: translations.DARK_MODE_DESCRIPTION,
             value: darkModeSelected,
             widget: <Dynamic items={darkModeItems} state={darkModeState} />
+        },
+        {
+            id: "tronMode",
+            icon: <TimelineIcon />,
+            name: translations.TRON_MODE,
+            description: translations.TRON_MODE_DESCRIPTION,
+            value: states.tronMode[0] ? translations.ON : translations.OFF,
+            widget: <Dynamic items={tronModeItems} state={states.tronMode} />
         },
         showUpload && {
             id: "upload",

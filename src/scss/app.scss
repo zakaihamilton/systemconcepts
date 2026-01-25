@@ -30,3 +30,43 @@ body {
   font-family: system-ui, sans-serif;
   overflow: hidden;
 }
+
+/* TRON Theme Effects */
+[data-theme="tron"] body {
+  /* Glowing Grid Background */
+  background-color: var(--main-background);
+  background-image:
+    linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center top;
+}
+
+[data-theme="tron"] * {
+    scrollbar-color: var(--primary-color) var(--neutral-100);
+}
+
+[data-theme="tron"] ::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    box-shadow: 0 0 5px var(--primary-color);
+}
+
+[data-theme="tron"] ::-webkit-scrollbar-track {
+    background: var(--neutral-100);
+}
+
+/* Scanline Effect */
+[data-theme="tron"] body::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 9999;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}

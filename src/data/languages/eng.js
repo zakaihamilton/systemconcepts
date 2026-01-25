@@ -1804,6 +1804,14 @@ export default {
         {
             "id": "RESULTS",
             "value": "results"
+        },
+        {
+            "id": "TRON_MODE",
+            "value": "Futuristic Mode"
+        },
+        {
+            "id": "TRON_MODE_DESCRIPTION",
+            "value": "Enable a TRON-inspired visual theme with animations."
         }
     ]
 };

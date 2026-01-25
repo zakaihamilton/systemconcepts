@@ -22,7 +22,8 @@ export const MainStoreDefaults = {
     showDrawer: false,
     speedToolbar: "top",
     showLibrarySideBar: true,
-    libraryExpanded: false
+    libraryExpanded: false,
+    tronMode: false
 };
 
 export const MainStore = new Store(MainStoreDefaults);
