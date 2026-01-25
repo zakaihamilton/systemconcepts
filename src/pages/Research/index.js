@@ -34,6 +34,8 @@ import { VariableSizeList } from "react-window";
 import { useDeviceType } from "@util/styles";
 import ScrollToTop from "@pages/Library/Article/ScrollToTop";
 import JumpDialog from "@pages/Library/Article/JumpDialog";
+import PageIndicator from "./PageIndicator";
+import SearchResultItem from "./SearchResultItem";
 
 const INDEX_FILE = "search_index.json";
 
@@ -715,69 +717,4 @@ export default function Research() {
     );
 }
 
-const PageIndicator = React.memo(({ current, total, visible, translations, label }) => {
-    return (
-        <Fade in={visible} timeout={1000}>
-            <Paper
-                elevation={4}
-                className={["print-hidden", styles.pageIndicator].join(" ")}
-            >
-                <div className={styles.pageIndicatorText}>
-                    {label || translations.PAGE || "Page"} {current} / {total}
-                </div>
-            </Paper>
-        </Fade>
-    );
-});
-PageIndicator.displayName = "PageIndicator";
-
-const SearchResultItem = ({ index, style, data }) => {
-    const { results, gotoArticle, setRowHeight, highlight } = data || {};
-    const doc = results ? results[index] : null;
-    const rowRef = useRef(null);
-
-    useEffect(() => {
-        if (rowRef.current && setRowHeight) {
-            const observer = new ResizeObserver((entries) => {
-                for (let entry of entries) {
-                    const rect = entry.target.getBoundingClientRect();
-                    const height = rect.height;
-                    if (height > 0) {
-                        setRowHeight(index, height);
-                    }
-                }
-            });
-            observer.observe(rowRef.current);
-            return () => observer.disconnect();
-        }
-    }, [index, setRowHeight, doc?.docId]);
-
-    // Transform text: use shared normalization to match indexing
-    const content = useMemo(() => {
-        if (!doc?.text) return "";
-        return normalizeContent(doc.text);
-    }, [doc]);
-    // filteredParagraphs contains 1-based indices of paragraphs to display
-    const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc]);
-
-    if (!doc) return null;
-
-    const isLast = index === results.length - 1;
-
-    return (
-        <div style={style}>
-            <div ref={rowRef} className={!isLast ? styles.articleSeparator : ''}>
-                <Article
-                    selectedTag={doc.tag}
-                    content={content}
-                    filteredParagraphs={filteredParagraphs}
-                    onTitleClick={() => gotoArticle(doc.tag)}
-                    embedded={true}
-                    hidePlayer={true}
-                    highlight={highlight}
-                />
-            </div>
-        </div>
-    );
-};
 
