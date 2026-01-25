@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
-import ReactDOM from "react-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -14,41 +13,27 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Fade from "@mui/material/Fade";
-import PrintIcon from "@mui/icons-material/Print";
-import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import JumpDialog from "@pages/Library/Article/JumpDialog";
-
 import { makePath } from "@util/path";
 import storage from "@util/storage";
 import { SyncActiveStore } from "@sync/syncState";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
 import { setPath } from "@util/pages";
+import { normalizeContent } from "@util/string";
 import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
-import { Store } from "pullstate";
+import { ResearchStore } from "@pages/ResearchStore";
 import Article from "@pages/Library/Article";
-import Header from "@pages/Library/Article/Header";
 import { ContentSize } from "@components/Page/Content";
 import { VariableSizeList } from "react-window";
 import { useDeviceType } from "@util/styles";
-import { useLocalStorage } from "@util/store";
 import ScrollToTop from "@pages/Library/Article/ScrollToTop";
-
-registerToolbar("Research");
 
 const INDEX_FILE = "search_index.json";
 
-export const ResearchStore = new Store({
-    query: "",
-    filterTags: [],
-    results: [],
-    highlight: [],
-    hasSearched: false,
-    _loaded: false
-});
+
 
 function getTagHierarchy(tag) {
     const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
@@ -58,53 +43,13 @@ function getTagHierarchy(tag) {
     return hierarchy;
 }
 
-function getArticleTitle(tag) {
-    if (!tag) return { name: "Untitled", key: "" };
-    for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
-        const key = LibraryTagKeys[i];
-        const value = tag[key];
-        if (value && String(value).trim()) {
-            return { name: value, key };
-        }
-    }
-    return { name: "Untitled", key: "" };
-}
 
-registerToolbar("Research");
-
-const normalizeContent = (text) => {
-    // Split by code blocks to protect them from normalization
-    const parts = text.split(/(```[\s\S]*?```)/g);
-    console.log(`[Research] NormalizeContent running on text length ${text.length}`);
-
-    return parts.map(part => {
-        if (part.startsWith('```')) return part;
-
-        let processed = part.replace(/\r\n/g, "\n");
-        // Convert single newlines to double to ensure granular paragraphs
-        processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
-
-        // Ensure headers are followed by double newlines to match indexing split
-        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
-            const trimmed = line.trim();
-            if (!trimmed) return match;
-            if (trimmed.endsWith('.')) return match;
-            if (trimmed.endsWith(';')) return match;
-            if (trimmed.endsWith(',')) return match;
-            if (trimmed.length > 120) return match;
-            return `### ${trimmed}\n\n`;
-        });
-        return processed;
-    }).join("");
-};
 
 
 export default function Research() {
+    registerToolbar("Research");
     const translations = useTranslations();
-    const { query, filterTags, results, hasSearched, _loaded, highlight } = ResearchStore.useState();
-    const [indexing, setIndexing] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [status, setStatus] = useState("");
+    const { query, filterTags, results, hasSearched, _loaded, highlight, indexing, progress, status, indexTimestamp } = ResearchStore.useState();
     const [indexData, setIndexData] = useState(null);
     const [availableFilters, setAvailableFilters] = useState([]);
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
@@ -122,13 +67,11 @@ export default function Research() {
     const [scrollPages, setScrollPages] = useState({ current: 1, total: 1, visible: false });
     const scrollTimeoutRef = useRef(null);
     const [lastSearch, setLastSearch] = useState({ query: "", filterTags: [] });
-    const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
-    const [printing, setPrinting] = useState(false);
 
-    useLocalStorage("ResearchStore", ResearchStore, ["query", "filterTags"]);
+
 
     const setRowHeight = useCallback((index, height) => {
         if (rowHeights.current[index] !== height) {
@@ -185,210 +128,8 @@ export default function Research() {
     }, []);
 
     const buildIndex = useCallback(async () => {
-        if (indexing) return;
-        setIndexing(true);
-        setProgress(0);
-        setStatus(translations.LOADING_TAGS);
-
-        try {
-            const tagsPath = makePath(LIBRARY_LOCAL_PATH, "tags.json");
-            if (!await storage.exists(tagsPath)) {
-                setStatus("No tags found.");
-                setIndexing(false);
-                return;
-            }
-
-            const tagsContent = await storage.readFile(tagsPath);
-            const tags = JSON.parse(tagsContent);
-
-            const newIndex = {
-                timestamp: Date.now(),
-                files: {},
-                tokens: {}
-            };
-
-            const total = tags.length;
-            let current = 0;
-
-            for (const tag of tags) {
-                if (!isMounted.current) break;
-
-                const progressVal = (current / total) * 100;
-                setProgress(progressVal);
-
-                const filePath = makePath(LIBRARY_LOCAL_PATH, tag.path);
-
-                try {
-                    if (await storage.exists(filePath)) {
-                        const fileContent = await storage.readFile(filePath);
-                        let data = JSON.parse(fileContent);
-
-                        let item = null;
-                        if (Array.isArray(data)) {
-                            item = data.find(i => i._id === tag._id);
-                        } else if (data._id === tag._id) {
-                            item = data;
-                        }
-
-                        if (item && item.text) {
-                            const text = item.text;
-                            // Store metadata and original text
-                            newIndex.files[tag._id] = {
-                                title: tag.title || tag.chapter || "Untitled",
-                                tag: tag,
-                                text: text, // Store original text for display
-                                paragraphs: []
-                            };
-
-                            // Store original text for display
-                            // Pre-normalize here to query paragraphs correctly
-                            // We do normalizing TWICE (once here, once in SearchResultItem) 
-                            // but splitting must happen on valid markdown
-                            // To avoid double processing and ensure consistency, we use the helper
-                            const processed = normalizeContent(text);
-
-                            // Split by double newlines, but preserve code blocks
-                            const splitSmart = (txt) => {
-                                const chunks = [];
-                                // Regex to match code blocks: ``` ... ``` (lazy)
-                                // or just text chunks separated by \n\n+
-                                // We iterate.
-                                let remaining = txt;
-                                while (remaining) {
-                                    // Find next code fence
-                                    const fenceIdx = remaining.indexOf("```");
-                                    if (fenceIdx === -1) {
-                                        // No more fences, split remainder by \n\n
-                                        const parts = remaining.split(/\n\n+/).filter(p => p.trim());
-                                        chunks.push(...parts);
-                                        break;
-                                    }
-
-                                    // Content before fence
-                                    const before = remaining.substring(0, fenceIdx);
-                                    if (before.trim()) {
-                                        const parts = before.split(/\n\n+/).filter(p => p.trim());
-                                        chunks.push(...parts);
-                                    }
-
-                                    // Find end of fence
-                                    // We need to skip the opening backticks
-                                    const openFenceEnd = remaining.indexOf("\n", fenceIdx);
-                                    if (openFenceEnd === -1) {
-                                        // Edge case: fence at end of string?
-                                        chunks.push(remaining.substring(fenceIdx));
-                                        break;
-                                    }
-
-                                    const closeFenceIdx = remaining.indexOf("```", openFenceEnd);
-                                    if (closeFenceIdx === -1) {
-                                        // Unclosed block? Treat as text
-                                        const rest = remaining.substring(fenceIdx);
-                                        // But wait, if we treat as text, subsequent \n\n will split it.
-                                        // Better to treat as one block if it looks like a code block.
-                                        chunks.push(rest);
-                                        break;
-                                    }
-
-                                    // Include closing fence lines
-                                    let closeFenceEnd = remaining.indexOf("\n", closeFenceIdx);
-                                    if (closeFenceEnd === -1) closeFenceEnd = remaining.length;
-
-                                    const codeBlock = remaining.substring(fenceIdx, closeFenceEnd);
-                                    chunks.push(codeBlock);
-
-                                    remaining = remaining.substring(closeFenceEnd).trimStart();
-                                }
-                                return chunks;
-                            };
-
-                            const mergeChunks = (chunks) => {
-                                if (chunks.length === 0) return chunks;
-
-                                const merged = [chunks[0]];
-
-                                // Helper to identify type
-                                const getType = (text) => {
-                                    const firstLine = text.split('\n')[0].trim();
-                                    if (/^```/.test(firstLine)) return 'code';
-                                    if (/^[-*]\s/.test(firstLine)) return 'ul';
-                                    if (/^\d+\.\s/.test(firstLine)) return 'ol';
-                                    if (/^>\s/.test(firstLine)) return 'quote';
-                                    return 'text';
-                                };
-
-                                for (let i = 1; i < chunks.length; i++) {
-                                    const prev = merged[merged.length - 1];
-                                    const curr = chunks[i];
-
-                                    const prevLastLine = prev.split('\n').pop().trim();
-                                    const currFirstLine = curr.split('\n')[0].trim();
-
-                                    const prevType = getType(prevLastLine);
-                                    const currType = getType(currFirstLine);
-
-                                    // Check strictly if types match and are list/quote
-                                    if (prevType === currType && ['ul', 'ol', 'quote'].includes(currType)) {
-                                        merged[merged.length - 1] += "\n\n" + curr;
-                                    } else {
-                                        merged.push(curr);
-                                    }
-                                }
-                                return merged;
-                            };
-
-                            const rawChunks = splitSmart(processed);
-                            const paragraphs = mergeChunks(rawChunks);
-
-                            paragraphs.forEach((para, paraIndex) => {
-
-                                const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-                                const uniqueTokens = [...new Set(paraTokens)];
-
-                                if (uniqueTokens.length === 0) return;
-
-                                // Add to file data
-                                newIndex.files[tag._id].paragraphs.push(para);
-
-                                // Add to token index
-                                uniqueTokens.forEach(token => {
-                                    if (!newIndex.tokens[token]) {
-                                        newIndex.tokens[token] = [];
-                                    }
-                                    // Store reference as "docId:paraIndex"
-                                    newIndex.tokens[token].push(`${tag._id}:${paraIndex}`);
-                                });
-                            });
-                            // Store lengths for end indicator check
-                            newIndex.files[tag._id].totalParagraphs = paragraphs.length;
-                        }
-                    }
-                } catch (err) {
-                    console.warn(`Failed to index file for tag ${tag._id}:`, err);
-                }
-
-                current++;
-            }
-
-            if (isMounted.current) {
-                const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
-                await storage.createFolderPath(indexPath);
-                await storage.writeFile(indexPath, JSON.stringify(newIndex));
-                setIndexData(newIndex);
-                setStatus(translations.DONE);
-            }
-
-        } catch (err) {
-            console.error("Indexing failed:", err);
-            if (isMounted.current) setStatus("Indexing failed");
-        } finally {
-            if (isMounted.current) {
-                setIndexing(false);
-                setTimeout(() => setStatus(""), 2000);
-            }
-        }
-
-    }, [indexing, translations]);
+        ResearchStore.update(s => { s.indexing = true; });
+    }, []);
 
     const loadIndex = useCallback(async () => {
         try {
@@ -411,7 +152,7 @@ export default function Research() {
     useEffect(() => {
         loadTags();
         loadIndex();
-    }, [loadTags, loadIndex]);
+    }, [loadTags, loadIndex, indexTimestamp]);
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
@@ -639,41 +380,6 @@ export default function Research() {
         }
     }, [filteredResults]);
 
-    useEffect(() => {
-        if (printing) {
-            const timer = setTimeout(() => {
-                // Ensure we listen for cleanup BEFORE printing
-                // This ensures we catch the event even if print() blocks synchronously
-                const cleanup = () => {
-                    setPrinting(false);
-                    window.removeEventListener("afterprint", cleanup);
-                };
-                window.addEventListener("afterprint", cleanup);
-
-                // Fallback: if afterprint doesn't fire (e.g. some browsers), reset anyway after a delay
-                // preventing the app from getting stuck in "print mode"
-                setTimeout(() => {
-                    setPrinting(false);
-                    window.removeEventListener("afterprint", cleanup);
-                }, 5000);
-
-                window.print();
-            }, 500); // Short delay to allow render
-            return () => clearTimeout(timer);
-        }
-    }, [printing]);
-
-    const handlePrint = useCallback(() => {
-        setPrinting(true);
-    }, []);
-
-    const handleJump = useCallback((type, value) => {
-        setJumpDialogOpen(false);
-        if (type === 'page' && listRef.current) {
-            listRef.current.scrollToItem(value - 1, "start");
-        }
-    }, [listRef]);
-
     const scrollToTop = useCallback(() => {
         if (listRef.current) {
             listRef.current.scrollToItem(0, "start");
@@ -688,24 +394,8 @@ export default function Research() {
             onClick: buildIndex,
             disabled: indexing,
             location: "header"
-        },
-        {
-            id: "jumpTo",
-            name: translations.JUMP_TO,
-            icon: <FormatListNumberedIcon />,
-            onClick: () => setJumpDialogOpen(true),
-            disabled: !hasSearched || filteredResults.length === 0,
-            location: "header"
-        },
-        {
-            id: "print",
-            name: translations.PRINT || "Print",
-            icon: <PrintIcon />,
-            onClick: handlePrint,
-            disabled: !hasSearched || filteredResults.length === 0,
-            location: "header"
         }
-    ], [translations, buildIndex, indexing, hasSearched, filteredResults.length, handlePrint]);
+    ], [translations, buildIndex, indexing]);
 
     useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
@@ -779,17 +469,28 @@ export default function Research() {
                 </Paper>
             )}
 
-            {indexing && (
-                <Box className={styles.progressContainer}>
-                    <Typography variant="caption">{status}</Typography>
-                    <LinearProgress variant="determinate" value={progress} />
-                </Box>
-            )}
+
 
             {showProgress && (
                 <Box className={styles.progressContainer}>
                     <Typography variant="caption">{translations.SEARCHING}</Typography>
                     <LinearProgress variant="determinate" value={searchProgress} />
+                </Box>
+            )}
+
+            {indexing && (
+                <Box className={styles.overlay}>
+                    <Paper className={styles.overlayContent}>
+                        <Typography variant="h6" gutterBottom>{status || translations.INDEXING}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                            <Box sx={{ width: '100%', mr: 1 }}>
+                                <LinearProgress variant="determinate" value={progress} />
+                            </Box>
+                            <Box sx={{ minWidth: 35 }}>
+                                <Typography variant="body2" color="text.secondary">{`${Math.round(progress)}%`}</Typography>
+                            </Box>
+                        </Box>
+                    </Paper>
                 </Box>
             )}
 
@@ -846,50 +547,6 @@ export default function Research() {
                         translations={translations}
                         label={translations.ARTICLE}
                     />
-                    <JumpDialog
-                        open={jumpDialogOpen}
-                        onClose={() => setJumpDialogOpen(false)}
-                        onSubmit={handleJump}
-                        maxPage={scrollPages.total}
-                        maxParagraphs={0}
-                        title={translations.JUMP_TO_ARTICLE || "Jump to Article"}
-                        pageLabel={translations.ARTICLE}
-                        pageNumberLabel={translations.ARTICLE_NUMBER}
-                    />
-                    {printing && ReactDOM.createPortal(
-                        <div id="print-root" className={styles.printContainer}>
-                            {filteredResults.map((doc, index) => {
-                                const content = normalizeContent(doc.text);
-                                const filteredParagraphs = doc.matches.map(m => m.index + 1);
-                                const title = getArticleTitle(doc.tag);
-                                return (
-                                    <div key={doc.tag._id || index} className={styles.printItem}>
-                                        <div className={styles.printHeaderWrapper}>
-                                            <Header
-                                                selectedTag={doc.tag}
-                                                isHeaderHidden={false}
-                                                showAbbreviations={false}
-                                                title={title}
-                                                currentParagraphIndex={-2}
-                                            />
-                                        </div>
-                                        <div className={styles.printContent}>
-                                            <Article
-                                                selectedTag={doc.tag}
-                                                content={content}
-                                                filteredParagraphs={filteredParagraphs}
-                                                embedded={true}
-                                                hidePlayer={true}
-                                                hideHeader={true}
-                                                highlight={highlight}
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>,
-                        document.body
-                    )}
                 </Box>
             )}
         </Box>

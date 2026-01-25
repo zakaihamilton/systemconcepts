@@ -24,7 +24,9 @@ const Term = ({ term, entry, search }) => {
     const [tooltipStyle, setTooltipStyle] = useState({});
     const [bridgeStyle, setBridgeStyle] = useState({});
     const containerRef = useRef(null);
+    const tooltipRef = useRef(null);
     const hoverTimeoutRef = useRef(null);
+    const [isMeasured, setIsMeasured] = useState(false);
 
     const styleInfo = getStyleInfo(entry.style);
     const phaseRaw = styleInfo?.phase;
@@ -34,61 +36,8 @@ const Term = ({ term, entry, search }) => {
 
     const handleMouseEnter = () => {
         hoverTimeoutRef.current = setTimeout(() => {
-            if (containerRef.current) {
-                const rect = containerRef.current.getBoundingClientRect();
-                const spaceTop = rect.top;
-
-                const scrollX = window.scrollX;
-                const scrollY = window.scrollY;
-
-                // Base style for Portal (absolute relative to document)
-                const baseStyle = {
-                    position: 'absolute',
-                    left: `${rect.left + scrollX + rect.width / 2}px`,
-                    zIndex: 1300,
-                    margin: 0
-                };
-
-                const bridgeBase = {
-                    position: 'absolute',
-                    left: `${rect.left + scrollX}px`,
-                    width: `${rect.width}px`,
-                    transform: 'none',
-                    zIndex: 1299
-                };
-
-                if (spaceTop < 250) {
-                    // Place BOTTOM
-                    const topVal = rect.bottom + scrollY + 10;
-                    setTooltipStyle({
-                        ...baseStyle,
-                        top: `${topVal}px`,
-                        bottom: 'auto',
-                        transform: 'translateX(-50%)'
-                    });
-                    setBridgeStyle({
-                        ...bridgeBase,
-                        top: `${rect.bottom + scrollY}px`,
-                        height: '10px'
-                    });
-                } else {
-                    // Place TOP
-                    const topVal = rect.top + scrollY - 10;
-                    setTooltipStyle({
-                        ...baseStyle,
-                        top: `${topVal}px`,
-                        bottom: 'auto',
-                        // Use translate to shift it UP from the anchor point
-                        transform: 'translate(-50%, -100%)'
-                    });
-                    setBridgeStyle({
-                        ...bridgeBase,
-                        top: `${rect.top + scrollY - 10}px`,
-                        height: '10px'
-                    });
-                }
-            }
             setHover(true);
+            setIsMeasured(false); // Reset measurement state
         }, 300); // 300ms delay
     };
 
@@ -98,12 +47,14 @@ const Term = ({ term, entry, search }) => {
             hoverTimeoutRef.current = null;
         }
         setHover(false);
+        setIsMeasured(false);
     };
 
     useEffect(() => {
         const handleScroll = () => {
             if (hover) {
                 setHover(false);
+                setIsMeasured(false);
                 if (hoverTimeoutRef.current) {
                     clearTimeout(hoverTimeoutRef.current);
                 }
@@ -113,6 +64,86 @@ const Term = ({ term, entry, search }) => {
         window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
         return () => window.removeEventListener('scroll', handleScroll, { capture: true });
     }, [hover]);
+
+    // Layout effect to measure and position tooltip once it renders
+    React.useLayoutEffect(() => {
+        if (hover && tooltipRef.current && containerRef.current && !isMeasured) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+            const tooltipHeight = tooltipRect.height;
+            const spaceTop = rect.top;
+            const spaceBottom = window.innerHeight - rect.bottom;
+
+            const scrollX = window.scrollX;
+            const scrollY = window.scrollY;
+
+            // Base style for Portal (absolute relative to document)
+            const baseStyle = {
+                position: 'absolute',
+                left: `${rect.left + scrollX + rect.width / 2}px`,
+                zIndex: 1300,
+                margin: 0,
+                opacity: 0 // Keep invisible until positioned
+            };
+
+            const bridgeBase = {
+                position: 'absolute',
+                left: `${rect.left + scrollX}px`,
+                width: `${rect.width}px`,
+                transform: 'none',
+                zIndex: 1299
+            };
+
+            let newTooltipStyle = {};
+            let newBridgeStyle = {};
+
+            // Logic: Prefer TOP if space permits, otherwise check BOTTOM
+            // Or stick to original logic: if (spaceTop < 250) -> BOTTOM
+            // New Logic: Check actual height against available space
+
+            // Padding/Margin buffer
+            const buffer = 20;
+
+            // If there is not enough space on top for actual height, go bottom
+            if (spaceTop < (tooltipHeight + buffer)) {
+                // Place BOTTOM
+                const topVal = rect.bottom + scrollY + 10;
+                newTooltipStyle = {
+                    ...baseStyle,
+                    top: `${topVal}px`,
+                    bottom: 'auto',
+                    transform: 'translateX(-50%)',
+                    opacity: 1 // Make visible
+                };
+                newBridgeStyle = {
+                    ...bridgeBase,
+                    top: `${rect.bottom + scrollY}px`,
+                    height: '10px'
+                };
+            } else {
+                // Place TOP (Default preference)
+                const topVal = rect.top + scrollY - 10;
+                newTooltipStyle = {
+                    ...baseStyle,
+                    top: `${topVal}px`,
+                    bottom: 'auto',
+                    // Use translate to shift it UP from the anchor point
+                    transform: 'translate(-50%, -100%)',
+                    opacity: 1 // Make visible
+                };
+                newBridgeStyle = {
+                    ...bridgeBase,
+                    top: `${rect.top + scrollY - 10}px`,
+                    height: '10px'
+                };
+            }
+
+            setTooltipStyle(newTooltipStyle);
+            setBridgeStyle(newBridgeStyle);
+            setIsMeasured(true);
+        }
+    }, [hover, isMeasured]);
 
     const mainText = entry.en || entry.trans || term;
     const showAnnotation = entry.trans && entry.trans.toLowerCase() !== mainText.toLowerCase();
@@ -158,9 +189,13 @@ const Term = ({ term, entry, search }) => {
             {hover && ReactDOM.createPortal(
                 <>
                     {/* Bridge ensures connection between word and tooltip */}
-                    <div className={styles['glossary-bridge']} style={bridgeStyle} />
+                    {isMeasured && <div className={styles['glossary-bridge']} style={bridgeStyle} />}
 
-                    <div className={styles['glossary-tooltip']} style={tooltipStyle}>
+                    <div
+                        className={styles['glossary-tooltip']}
+                        style={isMeasured ? tooltipStyle : { opacity: 0, position: 'fixed', top: -9999, left: -9999 }}
+                        ref={tooltipRef}
+                    >
                         {styleInfo?.category && (
                             <div className={styles['tt-category']} style={{
                                 display: 'inline-block',

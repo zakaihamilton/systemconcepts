@@ -6,6 +6,18 @@ export default {
     "locale": "en-US",
     "translations": [
         {
+            "id": "NO_TAGS_FOUND",
+            "value": "No tags found."
+        },
+        {
+            "id": "INDEXING_FAILED",
+            "value": "Indexing failed"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "Loading tags..."
+        },
+        {
             "id": "APP_NAME",
             "value": "System Concepts"
         },

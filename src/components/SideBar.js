@@ -11,6 +11,9 @@ import { useBookmarks } from "@components/Bookmarks";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import { useTranslations } from "@util/translations";
+import ResearchIndexer from "@pages/ResearchIndexer";
+import { ResearchStore } from "@pages/ResearchStore";
+import LinearProgress from "@mui/material/LinearProgress";
 
 import clsx from "clsx";
 
@@ -22,6 +25,7 @@ export default function SideBar() {
     const activePages = useActivePages();
     const pages = usePages("sidebar");
     const isLibraryActive = !!activePages.find(page => page.id === "library" && page.custom);
+    const { indexing, progress } = ResearchStore.useState();
 
     // Auto-expand library when navigating to a library page
     useEffect(() => {
@@ -82,6 +86,14 @@ export default function SideBar() {
             }
         }
         return { ...item, target };
+    }).map(item => {
+        if (item.id === "research" && indexing) {
+            return {
+                ...item,
+                description: <LinearProgress variant="determinate" value={progress} />
+            };
+        }
+        return item;
     });
 
     const otherItems = other.map(item => {
@@ -165,6 +177,7 @@ export default function SideBar() {
         <div className={styles.container}>
             <List items={mergedItems} state={state} />
             <QuickAccess closeDrawer={closeDrawer} state={state} onScrollToBottom={scrollToBottom} />
+            <ResearchIndexer />
         </div>
     </div>;
 }

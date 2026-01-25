@@ -6,6 +6,18 @@ export default {
     "locale": "he-IL",
     "translations": [
         {
+            "id": "NO_TAGS_FOUND",
+            "value": "לא נמצאו תגיות."
+        },
+        {
+            "id": "INDEXING_FAILED",
+            "value": "יצירת אינדקס נכשל"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "טוען תגיות..."
+        },
+        {
             "id": "APP_NAME",
             "value": "עקרונות המערכת"
         },
