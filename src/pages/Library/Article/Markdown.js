@@ -514,11 +514,11 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         content = content.replace(/\r\n/g, "\n");
 
         // Convert single newlines to double newlines (paragraph breaks)
-        content = content.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
+        content = content.replace(/\n+/g, "\n\n");
 
         // Bold numbered lists (existing)
-        content = content.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
-            return `**${number}\\${symbol}** `;
+        content = content.replace(/^\s*(\d+)([\.\)])[ \t]*/gm, (match, number, symbol) => {
+            return `\n\n**${number}\\${symbol}** `;
         });
 
 
