@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
+import { createPortal } from "react-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -71,6 +72,22 @@ export default function Research() {
     const [jumpOpen, setJumpOpen] = useState(false);
     const [printing, setPrinting] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [printRoot, setPrintRoot] = useState(null);
+
+    useEffect(() => {
+        let element = document.getElementById("print-root");
+        if (!element) {
+            element = document.createElement("div");
+            element.id = "print-root";
+            document.body.appendChild(element);
+        }
+        setPrintRoot(element);
+        return () => {
+            if (element && document.body.contains(element)) {
+                document.body.removeChild(element);
+            }
+        };
+    }, []);
 
     const handlePrint = useCallback(() => {
         setPrinting(true);
@@ -627,20 +644,23 @@ export default function Research() {
                 title={translations.JUMP_TO_ARTICLE}
             />
 
-            <div className={styles.printContainer}>
-                {printing && filteredResults.map((doc, index) => (
-                    <div key={doc.docId || index} className={styles.printItem}>
-                        <Article
-                            selectedTag={doc.tag}
-                            content={doc.content || normalizeContent(doc.text)} // handle potential missing content prop
-                            filteredParagraphs={doc.matches?.map(m => m.index + 1) || []}
-                            embedded={true}
-                            hidePlayer={true}
-                            highlight={highlight}
-                        />
-                    </div>
-                ))}
-            </div>
+            {printRoot && createPortal(
+                <div className={styles.printContainer}>
+                    {printing && filteredResults.map((doc, index) => (
+                        <div key={doc.docId || index} className={styles.printItem}>
+                            <Article
+                                selectedTag={doc.tag}
+                                content={doc.content || normalizeContent(doc.text)} // handle potential missing content prop
+                                filteredParagraphs={doc.matches?.map(m => m.index + 1) || []}
+                                embedded={true}
+                                hidePlayer={true}
+                                highlight={highlight}
+                            />
+                        </div>
+                    ))}
+                </div>,
+                printRoot
+            )}
         </Box>
     );
 }
