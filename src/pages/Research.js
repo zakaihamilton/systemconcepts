@@ -33,6 +33,7 @@ import { ContentSize } from "@components/Page/Content";
 import { VariableSizeList } from "react-window";
 import { useDeviceType } from "@util/styles";
 import { useLocalStorage } from "@util/store";
+import ScrollToTop from "@pages/Library/Article/ScrollToTop";
 
 registerToolbar("Research");
 
@@ -75,9 +76,13 @@ export default function Research() {
     const deviceType = useDeviceType();
     const isMobile = deviceType !== "desktop";
     const outerRef = useRef(null);
-    const [scrollPages, setScrollPages] = useState({ current: 1, total: 1 });
+    const [scrollPages, setScrollPages] = useState({ current: 1, total: 1, visible: false });
+    const scrollTimeoutRef = useRef(null);
+    const [lastSearch, setLastSearch] = useState({ query: "", filterTags: [] });
     const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
+    const [searchCollapsed, setSearchCollapsed] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
 
     useLocalStorage("ResearchStore", ResearchStore, ["query", "filterTags"]);
 
@@ -302,6 +307,8 @@ export default function Research() {
     }, [libraryUpdateCounter, loadIndex, loadTags]);
 
     const handleSearch = useCallback(async () => {
+        const currentSearch = { query, filterTags };
+        setLastSearch(currentSearch);
         setAppliedFilterTags(filterTags);
         if (!indexData || !query.trim()) {
             setResults([]);
@@ -573,6 +580,12 @@ export default function Research() {
         }
     }, [listRef]);
 
+    const scrollToTop = useCallback(() => {
+        if (listRef.current) {
+            listRef.current.scrollToItem(0, "start");
+        }
+    }, [listRef]);
+
     const toolbarItems = useMemo(() => [
         {
             id: "rebuildIndex",
@@ -604,69 +617,73 @@ export default function Research() {
 
     return (
         <Box className={styles.root}>
-            <Paper className={styles.searchPaper}>
-                <Box className={styles.searchHeader}>
-                    <TextField
-                        fullWidth
-                        placeholder={translations.SEARCH_ARTICLES}
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={onKeyDown}
-                        variant="outlined"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
-                            endAdornment: query && (
-                                <InputAdornment position="end">
-                                    <IconButton onClick={handleClear} size="small">
-                                        <ClearIcon fontSize="small" />
-                                    </IconButton>
-                                </InputAdornment>
-                            )
-                        }}
-                        className={styles.queryField}
-                    />
-                    <Button
-                        variant="contained"
-                        onClick={handleSearch}
-                        disabled={indexing || searching || !indexData}
-                        className={styles.searchButton}
-                    >
-                        {translations.SEARCH}
-                    </Button>
-                </Box>
+            {(!isMobile || !searchCollapsed) && (
+                <Paper className={[styles.searchPaper, isMobile && searchCollapsed && styles.searchPaperCollapsed].join(" ")}>
+                    <Box className={styles.searchHeader}>
+                        <TextField
+                            fullWidth
+                            placeholder={translations.SEARCH_ARTICLES}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onKeyDown={onKeyDown}
+                            variant="outlined"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: query && (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={handleClear} size="small">
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
+                            className={styles.queryField}
+                        />
+                        <Button
+                            variant="contained"
+                            onClick={handleSearch}
+                            disabled={indexing || searching || !indexData || (query === lastSearch.query && JSON.stringify(filterTags) === JSON.stringify(lastSearch.filterTags))}
+                            className={styles.searchButton}
+                        >
+                            {translations.SEARCH}
+                        </Button>
+                    </Box>
 
-                <Box className={styles.filterContainer}>
-                    <Autocomplete
-                        multiple
-                        className={styles.autocomplete}
-                        options={availableFilters}
-                        freeSolo
-                        value={filterTags}
-                        onChange={(event, newValue) => {
-                            setFilterTags(newValue);
-                        }}
-                        renderTags={(value, getTagProps) =>
-                            value.map((option, index) => {
-                                const { key, ...tagProps } = getTagProps({ index });
-                                return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
-                            })
-                        }
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="outlined"
-                                label={translations.FILTER_BY_TAGS}
-                                placeholder={translations.TAG}
-                                size="small"
+                    {!searchCollapsed && (
+                        <Box className={styles.filterContainer}>
+                            <Autocomplete
+                                multiple
+                                className={styles.autocomplete}
+                                options={availableFilters}
+                                freeSolo
+                                value={filterTags}
+                                onChange={(event, newValue) => {
+                                    setFilterTags(newValue);
+                                }}
+                                renderTags={(value, getTagProps) =>
+                                    value.map((option, index) => {
+                                        const { key, ...tagProps } = getTagProps({ index });
+                                        return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
+                                    })
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        label={translations.FILTER_BY_TAGS}
+                                        placeholder={translations.TAG}
+                                        size="small"
+                                    />
+                                )}
                             />
-                        )}
-                    />
-                </Box>
-            </Paper>
+                        </Box>
+                    )}
+                </Paper>
+            )}
 
             {indexing && (
                 <Box className={styles.progressContainer}>
@@ -693,7 +710,7 @@ export default function Research() {
             {hasSearched && filteredResults.length > 0 && (
                 <Box className={styles.resultsWrapper}>
                     <VariableSizeList
-                        height={size.height - (isMobile ? 150 : 250)} // Adjust for header/search bar
+                        height={size.height - (isMobile ? (searchCollapsed ? 40 : 180) : 250)} // Adjust for header/search bar
                         itemCount={filteredResults.length}
                         itemSize={getItemSize}
                         estimatedItemSize={500}
@@ -703,7 +720,19 @@ export default function Research() {
                         onItemsRendered={({ visibleStartIndex }) => {
                             const current = visibleStartIndex + 1;
                             const total = filteredResults.length;
-                            setScrollPages(prev => (prev.current !== current || prev.total !== total ? { current, total } : prev));
+                            setScrollPages(prev => ({ ...prev, current, total, visible: true }));
+
+                            if (scrollTimeoutRef.current) {
+                                clearTimeout(scrollTimeoutRef.current);
+                            }
+                            scrollTimeoutRef.current = setTimeout(() => {
+                                setScrollPages(prev => ({ ...prev, visible: false }));
+                            }, 1500);
+
+                            if (isMobile) {
+                                setSearchCollapsed(visibleStartIndex > 0);
+                            }
+                            setShowScrollTop(visibleStartIndex > 0);
                         }}
                         itemData={{
                             results: filteredResults,
@@ -715,9 +744,11 @@ export default function Research() {
                     >
                         {SearchResultItem}
                     </VariableSizeList>
+                    <ScrollToTop show={showScrollTop} onClick={scrollToTop} translations={translations} />
                     <PageIndicator
                         current={scrollPages.current}
                         total={scrollPages.total}
+                        visible={scrollPages.visible}
                         translations={translations}
                         label={translations.ARTICLE}
                     />
@@ -737,9 +768,9 @@ export default function Research() {
     );
 }
 
-const PageIndicator = React.memo(({ current, total, translations, label }) => {
+const PageIndicator = React.memo(({ current, total, visible, translations, label }) => {
     return (
-        <Fade in={true} timeout={1000}>
+        <Fade in={visible} timeout={1000}>
             <Paper
                 elevation={4}
                 className={["print-hidden", styles.pageIndicator].join(" ")}
