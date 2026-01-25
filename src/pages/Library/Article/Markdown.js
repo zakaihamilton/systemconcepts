@@ -466,10 +466,11 @@ const rehypeArticleEnrichment = () => {
     return (tree) => {
         let paragraphIndex = 0;
         const paragraphs = [];
+
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
-                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "ul" || node.tagName === "ol" || node.tagName === "blockquote")) {
+                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "ul" || node.tagName === "ol" || node.tagName === "blockquote" || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
                     paragraphIndex++;
                     node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
                     newNodes.push(node);
@@ -492,6 +493,8 @@ const rehypeArticleEnrichment = () => {
         paragraphs.forEach(node => {
             node.properties = { ...node.properties, dataTotalParagraphs: totalParagraphs };
         });
+        // Optimization: We could attach totalParagraphs to root or context, 
+        // but here we just loop again or assume component updates
     };
 };
 
@@ -898,14 +901,35 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             );
         };
 
-        // Helper to wrap other block elements with filtering
         const BlockRenderer = (Tag) => {
             const Renderer = ({ node, children }) => {
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
-                if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
+                const span = node?.properties?.dataParagraphSpan || 1;
+
+                if (Array.isArray(filteredParagraphs)) {
+                    const isVisible = filteredParagraphs.some(p => p >= paragraphIndex && p < paragraphIndex + span);
+                    if (!isVisible) return null;
+                }
+
                 return <Tag>{children}</Tag>;
             };
             Renderer.displayName = `BlockRenderer${Tag}`;
+            return Renderer;
+        };
+
+        const VoidRenderer = (Tag) => {
+            const Renderer = ({ node }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                const span = node?.properties?.dataParagraphSpan || 1;
+
+                if (Array.isArray(filteredParagraphs)) {
+                    const isVisible = filteredParagraphs.some(p => p >= paragraphIndex && p < paragraphIndex + span);
+                    if (!isVisible) return null;
+                }
+
+                return <Tag />;
+            };
+            Renderer.displayName = `VoidRenderer${Tag}`;
             return Renderer;
         };
 
@@ -915,6 +939,9 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             ul: BlockRenderer('ul'),
             ol: BlockRenderer('ol'),
             blockquote: BlockRenderer('blockquote'),
+            pre: BlockRenderer('pre'),
+            table: BlockRenderer('table'),
+            hr: VoidRenderer('hr'),
             h1: HeaderRenderer('h1'),
             h2: HeaderRenderer('h2'),
             h3: HeaderRenderer('h3'),

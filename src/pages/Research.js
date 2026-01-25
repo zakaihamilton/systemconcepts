@@ -73,20 +73,29 @@ function getArticleTitle(tag) {
 registerToolbar("Research");
 
 const normalizeContent = (text) => {
-    let processed = text.replace(/\r\n/g, "\n");
-    // Convert single newlines to double
-    processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
-    // Ensure headers are followed by double newlines to match indexing split
-    processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
-        const trimmed = line.trim();
-        if (!trimmed) return match;
-        if (trimmed.endsWith('.')) return match;
-        if (trimmed.endsWith(';')) return match;
-        if (trimmed.endsWith(',')) return match;
-        if (trimmed.length > 120) return match;
-        return `### ${trimmed}\n\n`;
-    });
-    return processed;
+    // Split by code blocks to protect them from normalization
+    const parts = text.split(/(```[\s\S]*?```)/g);
+    console.log(`[Research] NormalizeContent running on text length ${text.length}`);
+
+    return parts.map(part => {
+        if (part.startsWith('```')) return part;
+
+        let processed = part.replace(/\r\n/g, "\n");
+        // Convert single newlines to double to ensure granular paragraphs
+        processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
+
+        // Ensure headers are followed by double newlines to match indexing split
+        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
+            const trimmed = line.trim();
+            if (!trimmed) return match;
+            if (trimmed.endsWith('.')) return match;
+            if (trimmed.endsWith(';')) return match;
+            if (trimmed.endsWith(',')) return match;
+            if (trimmed.length > 120) return match;
+            return `### ${trimmed}\n\n`;
+        });
+        return processed;
+    }).join("");
 };
 
 
@@ -238,8 +247,98 @@ export default function Research() {
                             // To avoid double processing and ensure consistency, we use the helper
                             const processed = normalizeContent(text);
 
-                            // Split on double newlines (markdown paragraph breaks)
-                            const paragraphs = processed.split(/\n\n+/).filter(p => p.trim());
+                            // Split by double newlines, but preserve code blocks
+                            const splitSmart = (txt) => {
+                                const chunks = [];
+                                // Regex to match code blocks: ``` ... ``` (lazy)
+                                // or just text chunks separated by \n\n+
+                                // We iterate.
+                                let remaining = txt;
+                                while (remaining) {
+                                    // Find next code fence
+                                    const fenceIdx = remaining.indexOf("```");
+                                    if (fenceIdx === -1) {
+                                        // No more fences, split remainder by \n\n
+                                        const parts = remaining.split(/\n\n+/).filter(p => p.trim());
+                                        chunks.push(...parts);
+                                        break;
+                                    }
+
+                                    // Content before fence
+                                    const before = remaining.substring(0, fenceIdx);
+                                    if (before.trim()) {
+                                        const parts = before.split(/\n\n+/).filter(p => p.trim());
+                                        chunks.push(...parts);
+                                    }
+
+                                    // Find end of fence
+                                    // We need to skip the opening backticks
+                                    const openFenceEnd = remaining.indexOf("\n", fenceIdx);
+                                    if (openFenceEnd === -1) {
+                                        // Edge case: fence at end of string?
+                                        chunks.push(remaining.substring(fenceIdx));
+                                        break;
+                                    }
+
+                                    const closeFenceIdx = remaining.indexOf("```", openFenceEnd);
+                                    if (closeFenceIdx === -1) {
+                                        // Unclosed block? Treat as text
+                                        const rest = remaining.substring(fenceIdx);
+                                        // But wait, if we treat as text, subsequent \n\n will split it.
+                                        // Better to treat as one block if it looks like a code block.
+                                        chunks.push(rest);
+                                        break;
+                                    }
+
+                                    // Include closing fence lines
+                                    let closeFenceEnd = remaining.indexOf("\n", closeFenceIdx);
+                                    if (closeFenceEnd === -1) closeFenceEnd = remaining.length;
+
+                                    const codeBlock = remaining.substring(fenceIdx, closeFenceEnd);
+                                    chunks.push(codeBlock);
+
+                                    remaining = remaining.substring(closeFenceEnd).trimStart();
+                                }
+                                return chunks;
+                            };
+
+                            const mergeChunks = (chunks) => {
+                                if (chunks.length === 0) return chunks;
+
+                                const merged = [chunks[0]];
+
+                                // Helper to identify type
+                                const getType = (text) => {
+                                    const firstLine = text.split('\n')[0].trim();
+                                    if (/^```/.test(firstLine)) return 'code';
+                                    if (/^[-*]\s/.test(firstLine)) return 'ul';
+                                    if (/^\d+\.\s/.test(firstLine)) return 'ol';
+                                    if (/^>\s/.test(firstLine)) return 'quote';
+                                    return 'text';
+                                };
+
+                                for (let i = 1; i < chunks.length; i++) {
+                                    const prev = merged[merged.length - 1];
+                                    const curr = chunks[i];
+
+                                    const prevLastLine = prev.split('\n').pop().trim();
+                                    const currFirstLine = curr.split('\n')[0].trim();
+
+                                    const prevType = getType(prevLastLine);
+                                    const currType = getType(currFirstLine);
+
+                                    // Check strictly if types match and are list/quote
+                                    if (prevType === currType && ['ul', 'ol', 'quote'].includes(currType)) {
+                                        merged[merged.length - 1] += "\n\n" + curr;
+                                    } else {
+                                        merged.push(curr);
+                                    }
+                                }
+                                return merged;
+                            };
+
+                            const rawChunks = splitSmart(processed);
+                            const paragraphs = mergeChunks(rawChunks);
 
                             paragraphs.forEach((para, paraIndex) => {
 
@@ -380,7 +479,6 @@ export default function Research() {
 
                 if (groupRefs) {
                     // Final verification: ensure the matching paragraph actually contains all of the search terms
-                    // This fixes cases where partial token matches (from indexing) might not be what the user expects
                     const verifiedRefs = new Set();
                     [...groupRefs].forEach(ref => {
                         const [docId, paraIndex] = ref.split(':');
@@ -388,16 +486,22 @@ export default function Research() {
                         const paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
                         if (paragraph) {
                             const paraText = paragraph.toLowerCase();
-                            if (groupTerms.every(term => {
-                                // If term is alphanumeric, use word boundary for accuracy
+                            const isMatch = groupTerms.every(term => {
                                 if (/^[a-z0-9]+$/i.test(term)) {
                                     const regex = new RegExp(`\\b${term}\\b`, 'i');
                                     return regex.test(paraText);
                                 }
                                 return paraText.includes(term);
-                            })) {
+                            });
+
+                            if (isMatch) {
+                                console.log(`[Research] Match CONFIRMED: Doc ${docId} Para ${paraIndex}. Text: "${paraText.substring(0, 50)}..." Terms: ${groupTerms}`);
                                 verifiedRefs.add(ref);
+                            } else {
+                                console.log(`[Research] False positive filtered: Doc ${docId} Para ${paraIndex}. Text: "${paraText.substring(0, 50)}..." Terms: ${groupTerms}`);
                             }
+                        } else {
+                            console.warn(`[Research] Missing paragraph for ref ${ref}`);
                         }
                     });
 
@@ -700,7 +804,7 @@ export default function Research() {
             {hasSearched && filteredResults.length > 0 && (
                 <Box className={styles.resultsWrapper}>
                     <VariableSizeList
-                        height={size.height - (isMobile ? (searchCollapsed ? 40 : 180) : 250)} // Adjust for header/search bar
+                        height={size.height - (isMobile ? (searchCollapsed ? 40 : 180) : 200)} // Adjust for header/search bar
                         itemCount={filteredResults.length}
                         itemSize={getItemSize}
                         estimatedItemSize={500}
@@ -827,24 +931,10 @@ const SearchResultItem = ({ index, style, data }) => {
         }
     }, [index, setRowHeight, doc?.docId]);
 
-    // Transform text: convert single newlines to double newlines for proper paragraph separation
-    // This must match the transformation done during indexing
+    // Transform text: use shared normalization to match indexing
     const content = useMemo(() => {
         if (!doc?.text) return "";
-        let processed = doc.text.replace(/\r\n/g, "\n");
-        // Convert single newlines to double
-        processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
-        // Ensure headers are followed by double newlines to match indexing split
-        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
-            const trimmed = line.trim();
-            if (!trimmed) return match;
-            if (trimmed.endsWith('.')) return match;
-            if (trimmed.endsWith(';')) return match;
-            if (trimmed.endsWith(',')) return match;
-            if (trimmed.length > 120) return match;
-            return `### ${trimmed}\n\n`;
-        });
-        return processed;
+        return normalizeContent(doc.text);
     }, [doc]);
     // filteredParagraphs contains 1-based indices of paragraphs to display
     const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc]);

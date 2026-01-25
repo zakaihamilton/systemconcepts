@@ -130,7 +130,20 @@ function Article({
                 contentRef.current.focus();
             }
             if (type === 'paragraph') {
-                const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
+                let element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
+                if (!element) {
+                    // Fallback: search for element containing the paragraph index in its span
+                    const elements = contentRef.current.querySelectorAll('[data-paragraph-index]');
+                    for (const el of elements) {
+                        const index = parseInt(el.getAttribute('data-paragraph-index'), 10);
+                        const span = parseInt(el.getAttribute('data-paragraph-span') || '1', 10);
+                        if (value >= index && value < index + span) {
+                            element = el;
+                            break;
+                        }
+                    }
+                }
+
                 if (element) {
                     setCurrentParagraphIndex(value);
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
