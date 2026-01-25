@@ -67,6 +67,7 @@ function Article({
     onTitleClick,
     embedded,
     hidePlayer,
+    hideHeader,
     highlight
 }) {
     const translations = useTranslations();
@@ -258,6 +259,7 @@ function Article({
         if (!rootElement) return;
 
         const iframe = document.createElement("iframe");
+        iframe.id = "print-root";
         Object.assign(iframe.style, {
             position: "absolute",
             top: "-9999px",
@@ -302,7 +304,7 @@ function Article({
                 </style>
             </head>
             <body>
-                <div class="${styles.root}">
+                <div id="print-root" class="${styles.root}">
                     ${rootElement.outerHTML}
                 </div>
                 <script>
@@ -488,7 +490,7 @@ function Article({
     if (!content) return null;
 
     return (
-        <Box component="main" className={styles.root} minWidth={0} sx={{ ml: { sm: 2 }, overflow: embedded ? 'visible' : 'hidden !important', position: 'relative', height: embedded ? 'auto' : '100%' }} {...swipeHandlers}>
+        <Box component="main" className={[styles.root, embedded && styles.embedded].filter(Boolean).join(" ")} minWidth={0} sx={{ ml: { sm: 2 }, overflow: embedded ? 'visible' : 'hidden !important', position: 'relative', height: embedded ? 'auto' : '100%' }} {...swipeHandlers}>
             {!embedded && (
                 <ArticleToolbar
                     id="Article"
@@ -506,15 +508,17 @@ function Article({
                 sx={{ position: 'relative', height: embedded ? 'auto' : '100%', overflowY: embedded ? 'visible' : 'auto', overflowX: 'hidden', outline: 'none' }}
             >
                 <PageIndicator scrollInfo={scrollInfo} />
-                <Header
-                    selectedTag={selectedTag}
-                    isHeaderHidden={isHeaderHidden}
-                    showAbbreviations={showAbbreviations}
-                    title={title}
-                    translations={translations}
-                    currentParagraphIndex={currentParagraphIndex}
-                    onTitleClick={onTitleClick}
-                />
+                {!hideHeader && (
+                    <Header
+                        selectedTag={selectedTag}
+                        isHeaderHidden={isHeaderHidden}
+                        showAbbreviations={showAbbreviations}
+                        title={title}
+                        translations={translations}
+                        currentParagraphIndex={currentParagraphIndex}
+                        onTitleClick={onTitleClick}
+                    />
+                )}
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
                     <Box
                         key={i}

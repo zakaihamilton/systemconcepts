@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
+import ReactDOM from "react-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -29,6 +30,7 @@ import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
 import { Store } from "pullstate";
 import Article from "@pages/Library/Article";
+import Header from "@pages/Library/Article/Header";
 import { ContentSize } from "@components/Page/Content";
 import { VariableSizeList } from "react-window";
 import { useDeviceType } from "@util/styles";
@@ -55,6 +57,38 @@ function getTagHierarchy(tag) {
     }
     return hierarchy;
 }
+
+function getArticleTitle(tag) {
+    if (!tag) return { name: "Untitled", key: "" };
+    for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+        const key = LibraryTagKeys[i];
+        const value = tag[key];
+        if (value && String(value).trim()) {
+            return { name: value, key };
+        }
+    }
+    return { name: "Untitled", key: "" };
+}
+
+registerToolbar("Research");
+
+const normalizeContent = (text) => {
+    let processed = text.replace(/\r\n/g, "\n");
+    // Convert single newlines to double
+    processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
+    // Ensure headers are followed by double newlines to match indexing split
+    processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
+        const trimmed = line.trim();
+        if (!trimmed) return match;
+        if (trimmed.endsWith('.')) return match;
+        if (trimmed.endsWith(';')) return match;
+        if (trimmed.endsWith(',')) return match;
+        if (trimmed.length > 120) return match;
+        return `### ${trimmed}\n\n`;
+    });
+    return processed;
+};
+
 
 export default function Research() {
     const translations = useTranslations();
@@ -83,6 +117,7 @@ export default function Research() {
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [printing, setPrinting] = useState(false);
 
     useLocalStorage("ResearchStore", ResearchStore, ["query", "filterTags"]);
 
@@ -196,32 +231,12 @@ export default function Research() {
                                 paragraphs: []
                             };
 
-                            // Apply the same preprocessing as Markdown.js to split paragraphs
-                            // This must match how rehypeArticleEnrichment counts paragraphs
-                            let processed = text;
-
-                            // Convert Windows line endings
-                            processed = processed.replace(/\r\n/g, "\n");
-
-                            // Convert single newlines to double newlines (paragraph breaks)
-                            // This is critical because source content uses single newlines between paragraphs
-                            processed = processed.replace(/\n(?!\n)/g, "\n\n");
-
-                            // Bold numbered lists (same as Markdown.js)
-                            processed = processed.replace(/^\s*(\d+)([\.\\)])\s*/gm, (match, number, symbol) => {
-                                return `**${number}\\${symbol}** `;
-                            });
-
-                            // Detect headings (same heuristic as Markdown.js)
-                            processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
-                                const trimmed = line.trim();
-                                if (!trimmed) return match;
-                                if (trimmed.endsWith('.')) return match;
-                                if (trimmed.endsWith(';')) return match;
-                                if (trimmed.endsWith(',')) return match;
-                                if (trimmed.length > 120) return match;
-                                return `### ${trimmed}${newline}`;
-                            });
+                            // Store original text for display
+                            // Pre-normalize here to query paragraphs correctly
+                            // We do normalizing TWICE (once here, once in SearchResultItem) 
+                            // but splitting must happen on valid markdown
+                            // To avoid double processing and ensure consistency, we use the helper
+                            const processed = normalizeContent(text);
 
                             // Split on double newlines (markdown paragraph breaks)
                             const paragraphs = processed.split(/\n\n+/).filter(p => p.trim());
@@ -364,7 +379,29 @@ export default function Research() {
                 }
 
                 if (groupRefs) {
-                    groupRefs.forEach(ref => finalRefs.add(ref));
+                    // Final verification: ensure the matching paragraph actually contains all of the search terms
+                    // This fixes cases where partial token matches (from indexing) might not be what the user expects
+                    const verifiedRefs = new Set();
+                    [...groupRefs].forEach(ref => {
+                        const [docId, paraIndex] = ref.split(':');
+                        const doc = indexData.files[docId];
+                        const paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
+                        if (paragraph) {
+                            const paraText = paragraph.toLowerCase();
+                            if (groupTerms.every(term => {
+                                // If term is alphanumeric, use word boundary for accuracy
+                                if (/^[a-z0-9]+$/i.test(term)) {
+                                    const regex = new RegExp(`\\b${term}\\b`, 'i');
+                                    return regex.test(paraText);
+                                }
+                                return paraText.includes(term);
+                            })) {
+                                verifiedRefs.add(ref);
+                            }
+                        }
+                    });
+
+                    verifiedRefs.forEach(ref => finalRefs.add(ref));
                 }
             }
 
@@ -498,80 +535,33 @@ export default function Research() {
         }
     }, [filteredResults]);
 
-    const handlePrint = useCallback(() => {
-        const rootElement = document.createElement("div");
-        filteredResults.forEach((doc) => {
-            const docElement = document.createElement("div");
-            docElement.className = styles.printItem;
-            docElement.innerHTML = `
-                <div class="${styles.printHeader}">
-                    <h3>${doc.title || "Untitled"}</h3>
-                    <span class="${styles.printTag}">
-                        ${doc.tag && LibraryTagKeys.map(key => doc.tag[key]).filter(Boolean).join(" / ")}
-                    </span>
-                </div>
-                <div class="${styles.printContent}">
-                    ${doc.paragraphs.map(p => `<p>${p}</p>`).join("")}
-                </div>
-            `;
-            rootElement.appendChild(docElement);
-        });
+    useEffect(() => {
+        if (printing) {
+            const timer = setTimeout(() => {
+                // Ensure we listen for cleanup BEFORE printing
+                // This ensures we catch the event even if print() blocks synchronously
+                const cleanup = () => {
+                    setPrinting(false);
+                    window.removeEventListener("afterprint", cleanup);
+                };
+                window.addEventListener("afterprint", cleanup);
 
-        const iframe = document.createElement("iframe");
-        Object.assign(iframe.style, {
-            position: "absolute",
-            top: "-9999px",
-            left: "-9999px",
-            width: "100%",
-            height: "auto"
-        });
-        document.body.appendChild(iframe);
-
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body { font-family: sans-serif; padding: 20px; }
-                    .printItem { margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 20px; }
-                    .printHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-                    .printTag { font-size: 0.8em; color: #666; }
-                    h3 { margin: 0; }
-                    p { margin: 0 0 10px 0; }
-                    @media print {
-                        body { -webkit-print-color-adjust: exact; }
-                    }
-                </style>
-            </head>
-            <body>
-                ${rootElement.innerHTML}
-                <script>
-                    window.onload = () => {
-                        window.print();
-                        setTimeout(() => {
-                            window.top.postMessage("print-complete", "*");
-                        }, 500);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-        doc.close();
-
-        const cleanup = (e) => {
-            if (e.data === "print-complete") {
+                // Fallback: if afterprint doesn't fire (e.g. some browsers), reset anyway after a delay
+                // preventing the app from getting stuck in "print mode"
                 setTimeout(() => {
-                    if (document.body.contains(iframe)) {
-                        document.body.removeChild(iframe);
-                    }
+                    setPrinting(false);
+                    window.removeEventListener("afterprint", cleanup);
                 }, 5000);
-                window.removeEventListener("message", cleanup);
-            }
-        };
-        window.addEventListener("message", cleanup);
-    }, [filteredResults]);
+
+                window.print();
+            }, 500); // Short delay to allow render
+            return () => clearTimeout(timer);
+        }
+    }, [printing]);
+
+    const handlePrint = useCallback(() => {
+        setPrinting(true);
+    }, []);
 
     const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
@@ -762,6 +752,38 @@ export default function Research() {
                         pageLabel={translations.ARTICLE}
                         pageNumberLabel={translations.ARTICLE_NUMBER}
                     />
+                    {printing && ReactDOM.createPortal(
+                        <div id="print-root" className={styles.printContainer}>
+                            {filteredResults.map((doc, index) => {
+                                const content = normalizeContent(doc.text);
+                                const filteredParagraphs = doc.matches.map(m => m.index + 1);
+                                const title = getArticleTitle(doc.tag);
+                                return (
+                                    <div key={doc.tag._id || index} className={styles.printItem}>
+                                        <Header
+                                            selectedTag={doc.tag}
+                                            isHeaderHidden={false}
+                                            showAbbreviations={false}
+                                            title={title}
+                                            currentParagraphIndex={-2}
+                                        />
+                                        <div className={styles.printContent}>
+                                            <Article
+                                                selectedTag={doc.tag}
+                                                content={content}
+                                                filteredParagraphs={filteredParagraphs}
+                                                embedded={true}
+                                                hidePlayer={true}
+                                                hideHeader={true}
+                                                highlight={highlight}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>,
+                        document.body
+                    )}
                 </Box>
             )}
         </Box>
@@ -809,9 +831,20 @@ const SearchResultItem = ({ index, style, data }) => {
     // This must match the transformation done during indexing
     const content = useMemo(() => {
         if (!doc?.text) return "";
-        return doc.text
-            .replace(/\r\n/g, "\n")
-            .replace(/\n(?!\n)/g, "\n\n");
+        let processed = doc.text.replace(/\r\n/g, "\n");
+        // Convert single newlines to double
+        processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
+        // Ensure headers are followed by double newlines to match indexing split
+        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
+            const trimmed = line.trim();
+            if (!trimmed) return match;
+            if (trimmed.endsWith('.')) return match;
+            if (trimmed.endsWith(';')) return match;
+            if (trimmed.endsWith(',')) return match;
+            if (trimmed.length > 120) return match;
+            return `### ${trimmed}\n\n`;
+        });
+        return processed;
     }, [doc]);
     // filteredParagraphs contains 1-based indices of paragraphs to display
     const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc]);
