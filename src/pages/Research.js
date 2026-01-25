@@ -425,6 +425,7 @@ export default function Research() {
         {
             id: "toggleSearch",
             name: searchCollapsed ? translations.SHOW_SEARCH : translations.HIDE_SEARCH,
+            active: !searchCollapsed,
             icon: <SearchIcon />,
             onClick: () => setSearchCollapsed(prev => !prev),
             location: "header"
