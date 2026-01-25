@@ -2,6 +2,9 @@
   "name": "systemconcepts",
   "version": "2.1.3",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
