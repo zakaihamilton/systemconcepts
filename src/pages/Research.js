@@ -8,6 +8,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ClearIcon from "@mui/icons-material/Clear";
+import PrintIcon from "@mui/icons-material/Print";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import IconButton from "@mui/material/IconButton";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
@@ -18,7 +20,7 @@ import storage from "@util/storage";
 import { SyncActiveStore } from "@sync/syncState";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
-import { setPath } from "@util/pages";
+import { setPath, usePathItems } from "@util/pages";
 import { normalizeContent } from "@util/string";
 import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
@@ -30,10 +32,9 @@ import { ContentSize } from "@components/Page/Content";
 import { VariableSizeList } from "react-window";
 import { useDeviceType } from "@util/styles";
 import ScrollToTop from "@pages/Library/Article/ScrollToTop";
+import JumpDialog from "@pages/Library/Article/JumpDialog";
 
 const INDEX_FILE = "search_index.json";
-
-
 
 function getTagHierarchy(tag) {
     const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
@@ -43,11 +44,9 @@ function getTagHierarchy(tag) {
     return hierarchy;
 }
 
-
-
+registerToolbar("Research");
 
 export default function Research() {
-    registerToolbar("Research");
     const translations = useTranslations();
     const { query, filterTags, results, hasSearched, _loaded, highlight, indexing, progress, status, indexTimestamp } = ResearchStore.useState();
     const [indexData, setIndexData] = useState(null);
@@ -69,7 +68,19 @@ export default function Research() {
     const [lastSearch, setLastSearch] = useState({ query: "", filterTags: [] });
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
+    const [jumpOpen, setJumpOpen] = useState(false);
+    const [printing, setPrinting] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+
+    const handlePrint = useCallback(() => {
+        setPrinting(true);
+        setTimeout(() => {
+            window.print();
+            setPrinting(false);
+        }, 500);
+    }, []);
+
+
 
 
 
@@ -236,10 +247,7 @@ export default function Research() {
                             });
 
                             if (isMatch) {
-                                console.log(`[Research] Match CONFIRMED: Doc ${docId} Para ${paraIndex}. Text: "${paraText.substring(0, 50)}..." Terms: ${groupTerms}`);
                                 verifiedRefs.add(ref);
-                            } else {
-                                console.log(`[Research] False positive filtered: Doc ${docId} Para ${paraIndex}. Text: "${paraText.substring(0, 50)}..." Terms: ${groupTerms}`);
                             }
                         } else {
                             console.warn(`[Research] Missing paragraph for ref ${ref}`);
@@ -353,6 +361,33 @@ export default function Research() {
         return res;
     }, [results, appliedFilterTags]);
 
+    const handleJumpSubmit = useCallback((type, value) => {
+        setJumpOpen(false);
+        if (type === 'page' && listRef.current) {
+            const index = value - 1;
+            if (index >= 0 && index < filteredResults.length) {
+                listRef.current.scrollToItem(index, "start");
+            }
+        }
+    }, [filteredResults]);
+
+    const pathItems = usePathItems();
+
+    useEffect(() => {
+        if (pathItems.length === 1 && pathItems[0].startsWith("research") && filteredResults.length > 0) {
+            const lastPart = pathItems[0]?.split(":")[1];
+            if (lastPart) {
+                const articleNumber = parseInt(lastPart, 10);
+                const index = articleNumber - 1;
+                if (!isNaN(index) && index >= 0 && index < filteredResults.length) {
+                    if (scrollPages.current !== articleNumber) {
+                        listRef.current.scrollToItem(index, "start");
+                    }
+                }
+            }
+        }
+    }, [pathItems, filteredResults]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const matchCounts = useMemo(() => {
         let sum = 0;
         return filteredResults.map(doc => {
@@ -388,20 +423,41 @@ export default function Research() {
 
     const toolbarItems = useMemo(() => [
         {
+            id: "toggleSearch",
+            name: searchCollapsed ? translations.SHOW_SEARCH : translations.HIDE_SEARCH,
+            icon: <SearchIcon />,
+            onClick: () => setSearchCollapsed(prev => !prev),
+            location: "header"
+        },
+        {
             id: "rebuildIndex",
             name: translations.REBUILD_INDEX,
             icon: <RefreshIcon />,
             onClick: buildIndex,
             disabled: indexing,
             location: "header"
+        },
+        {
+            id: "jump",
+            name: translations.JUMP_TO_ARTICLE,
+            icon: <FormatListNumberedIcon />,
+            onClick: () => setJumpOpen(true),
+            location: "header"
+        },
+        {
+            id: "print",
+            name: translations.PRINT,
+            icon: <PrintIcon />,
+            onClick: handlePrint,
+            location: "header"
         }
-    ], [translations, buildIndex, indexing]);
+    ], [translations, buildIndex, indexing, searchCollapsed, handlePrint]);
 
     useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
     return (
         <Box className={styles.root}>
-            {(!isMobile || !searchCollapsed) && (
+            {!searchCollapsed && (
                 <Paper className={[styles.searchPaper, isMobile && searchCollapsed && styles.searchPaperCollapsed].join(" ")}>
                     <Box className={styles.searchHeader}>
                         <TextField
@@ -483,10 +539,10 @@ export default function Research() {
                     <Paper className={styles.overlayContent}>
                         <Typography variant="h6" gutterBottom>{status || translations.INDEXING}</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                            <Box sx={{ width: '100%', mr: 1 }}>
+                            <Box sx={{ width: '100%', mr: 2 }}>
                                 <LinearProgress variant="determinate" value={progress} />
                             </Box>
-                            <Box sx={{ minWidth: 35 }}>
+                            <Box sx={{ minWidth: 45 }}>
                                 <Typography variant="body2" color="text.secondary">{`${Math.round(progress)}%`}</Typography>
                             </Box>
                         </Box>
@@ -505,7 +561,7 @@ export default function Research() {
             {hasSearched && filteredResults.length > 0 && (
                 <Box className={styles.resultsWrapper}>
                     <VariableSizeList
-                        height={size.height - (isMobile ? (searchCollapsed ? 40 : 180) : 200)} // Adjust for header/search bar
+                        height={size.height - (isMobile ? (searchCollapsed ? 40 : 180) : (searchCollapsed ? 50 : 200))} // Adjust for header/search bar
                         itemCount={filteredResults.length}
                         itemSize={getItemSize}
                         estimatedItemSize={500}
@@ -515,7 +571,15 @@ export default function Research() {
                         onItemsRendered={({ visibleStartIndex }) => {
                             const current = visibleStartIndex + 1;
                             const total = filteredResults.length;
-                            setScrollPages(prev => ({ ...prev, current, total, visible: true }));
+                            setScrollPages(prev => {
+                                if (prev.current === current && prev.total === total && prev.visible === true) return prev;
+                                return { ...prev, current, total, visible: true };
+                            });
+
+                            const currentPath = `research:${current}`;
+                            if (pathItems[0] !== currentPath) {
+                                setPath(currentPath);
+                            }
 
                             if (scrollTimeoutRef.current) {
                                 clearTimeout(scrollTimeoutRef.current);
@@ -549,6 +613,33 @@ export default function Research() {
                     />
                 </Box>
             )}
+
+
+
+            <JumpDialog
+                open={jumpOpen}
+                onClose={() => setJumpOpen(false)}
+                onSubmit={handleJumpSubmit}
+                maxPage={filteredResults.length}
+                pageLabel={translations.ARTICLE}
+                pageNumberLabel={translations.ARTICLE_NUMBER}
+                title={translations.JUMP_TO_ARTICLE}
+            />
+
+            <div className={styles.printContainer}>
+                {printing && filteredResults.map((doc, index) => (
+                    <div key={doc.docId || index} className={styles.printItem}>
+                        <Article
+                            selectedTag={doc.tag}
+                            content={doc.content || normalizeContent(doc.text)} // handle potential missing content prop
+                            filteredParagraphs={doc.matches?.map(m => m.index + 1) || []}
+                            embedded={true}
+                            hidePlayer={true}
+                            highlight={highlight}
+                        />
+                    </div>
+                ))}
+            </div>
         </Box>
     );
 }

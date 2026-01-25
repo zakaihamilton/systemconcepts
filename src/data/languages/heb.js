@@ -150,6 +150,22 @@ export default {
             "value": "חיפוש"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "קפוץ למאמר"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "מספר מאמר"
+        },
+        {
+            "id": "SHOW_SEARCH",
+            "value": "הצג חיפוש"
+        },
+        {
+            "id": "HIDE_SEARCH",
+            "value": "הסתר חיפוש"
+        },
+        {
             "id": "RESET",
             "value": "איפוס"
         },

@@ -23,6 +23,7 @@ const Term = ({ term, entry, search }) => {
     const [hover, setHover] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({});
     const [bridgeStyle, setBridgeStyle] = useState({});
+    const [placement, setPlacement] = useState('top');
     const containerRef = useRef(null);
     const tooltipRef = useRef(null);
     const hoverTimeoutRef = useRef(null);
@@ -113,7 +114,7 @@ const Term = ({ term, entry, search }) => {
                     ...baseStyle,
                     top: `${topVal}px`,
                     bottom: 'auto',
-                    transform: 'translateX(-50%)',
+                    transform: 'translateX(-50%)', // Base transform for bottom
                     opacity: 1 // Make visible
                 };
                 newBridgeStyle = {
@@ -121,6 +122,7 @@ const Term = ({ term, entry, search }) => {
                     top: `${rect.bottom + scrollY}px`,
                     height: '10px'
                 };
+                setPlacement('bottom');
             } else {
                 // Place TOP (Default preference)
                 const topVal = rect.top + scrollY - 10;
@@ -128,8 +130,7 @@ const Term = ({ term, entry, search }) => {
                     ...baseStyle,
                     top: `${topVal}px`,
                     bottom: 'auto',
-                    // Use translate to shift it UP from the anchor point
-                    transform: 'translate(-50%, -100%)',
+                    transform: 'translate(-50%, -100%)', // Base transform for top
                     opacity: 1 // Make visible
                 };
                 newBridgeStyle = {
@@ -137,6 +138,7 @@ const Term = ({ term, entry, search }) => {
                     top: `${rect.top + scrollY - 10}px`,
                     height: '10px'
                 };
+                setPlacement('top');
             }
 
             setTooltipStyle(newTooltipStyle);
@@ -192,7 +194,7 @@ const Term = ({ term, entry, search }) => {
                     {isMeasured && <div className={styles['glossary-bridge']} style={bridgeStyle} />}
 
                     <div
-                        className={styles['glossary-tooltip']}
+                        className={clsx(styles['glossary-tooltip'], styles[placement])}
                         style={isMeasured ? tooltipStyle : { opacity: 0, position: 'fixed', top: -9999, left: -9999 }}
                         ref={tooltipRef}
                     >

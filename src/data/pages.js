@@ -250,6 +250,7 @@ export default [
         id: "research",
         path: "research",
         name: "RESEARCH",
+        custom: true,
         sidebar: true,
         apps: true,
         Icon: SearchIcon,

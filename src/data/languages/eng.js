@@ -166,6 +166,22 @@ export default {
             "value": "Search"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Jump to Article"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Article Number"
+        },
+        {
+            "id": "SHOW_SEARCH",
+            "value": "Show Search"
+        },
+        {
+            "id": "HIDE_SEARCH",
+            "value": "Hide Search"
+        },
+        {
             "id": "RESET",
             "value": "Reset"
         },

@@ -150,6 +150,22 @@ export default {
             "value": "Pesquisar"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Pular para o Artigo"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Número do Artigo"
+        },
+        {
+            "id": "SHOW_SEARCH",
+            "value": "Mostrar Pesquisa"
+        },
+        {
+            "id": "HIDE_SEARCH",
+            "value": "Ocultar Pesquisa"
+        },
+        {
             "id": "RESET",
             "value": "Restaurar"
         },
