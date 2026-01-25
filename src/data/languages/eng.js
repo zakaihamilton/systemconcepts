@@ -182,6 +182,14 @@ export default {
             "value": "Hide Search"
         },
         {
+            "id": "MATCH",
+            "value": "Match"
+        },
+        {
+            "id": "MATCH_NUMBER",
+            "value": "Match Number"
+        },
+        {
             "id": "RESET",
             "value": "Reset"
         },
@@ -1782,10 +1790,6 @@ export default {
             "value": "Done"
         },
         {
-            "id": "FILTER_BY_TAGS",
-            "value": "Tags"
-        },
-        {
             "id": "SEARCHING",
             "value": "Searching..."
         },
@@ -1800,10 +1804,6 @@ export default {
         {
             "id": "RESULTS",
             "value": "results"
-        },
-        {
-            "id": "TAG",
-            "value": "Tag"
         }
     ]
 };

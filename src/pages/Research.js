@@ -73,6 +73,15 @@ export default function Research() {
     const [printing, setPrinting] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [printRoot, setPrintRoot] = useState(null);
+    const isJumping = useRef(false);
+    const jumpTimeout = useRef(null);
+    const currentPageRef = useRef(1);
+    const pendingPathRef = useRef(null);
+    const initialUrlHandled = useRef(false);
+
+    useEffect(() => {
+        currentPageRef.current = scrollPages.current;
+    }, [scrollPages.current]);
 
     useEffect(() => {
         let element = document.getElementById("print-root");
@@ -378,32 +387,7 @@ export default function Research() {
         return res;
     }, [results, appliedFilterTags]);
 
-    const handleJumpSubmit = useCallback((type, value) => {
-        setJumpOpen(false);
-        if (type === 'page' && listRef.current) {
-            const index = value - 1;
-            if (index >= 0 && index < filteredResults.length) {
-                listRef.current.scrollToItem(index, "start");
-            }
-        }
-    }, [filteredResults]);
-
     const pathItems = usePathItems();
-
-    useEffect(() => {
-        if (pathItems.length === 1 && pathItems[0].startsWith("research") && filteredResults.length > 0) {
-            const lastPart = pathItems[0]?.split(":")[1];
-            if (lastPart) {
-                const articleNumber = parseInt(lastPart, 10);
-                const index = articleNumber - 1;
-                if (!isNaN(index) && index >= 0 && index < filteredResults.length) {
-                    if (scrollPages.current !== articleNumber) {
-                        listRef.current.scrollToItem(index, "start");
-                    }
-                }
-            }
-        }
-    }, [pathItems, filteredResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const matchCounts = useMemo(() => {
         let sum = 0;
@@ -416,6 +400,69 @@ export default function Research() {
     }, [filteredResults]);
 
     const totalMatches = matchCounts.length > 0 ? matchCounts[matchCounts.length - 1].total : 0;
+
+    const handleJumpSubmit = useCallback((type, value) => {
+        setJumpOpen(false);
+        isJumping.current = true;
+        initialUrlHandled.current = true;
+        if (jumpTimeout.current) clearTimeout(jumpTimeout.current);
+
+        if (type === 'page' && listRef.current) {
+            const index = value - 1;
+            if (index >= 0 && index < filteredResults.length) {
+                listRef.current.scrollToItem(index, "start");
+            }
+        } else if (type === 'paragraph' && listRef.current) {
+            // "Paragraph" in Research context is "Match number" across all results
+            const matchIndex = value;
+            const docIndex = matchCounts.findIndex(m => matchIndex >= m.start && matchIndex <= m.total);
+            if (docIndex !== -1) {
+                listRef.current.scrollToItem(docIndex, "start");
+                // Also scroll within the article if needed
+                const doc = filteredResults[docIndex];
+                const matchInDoc = doc.matches.find(m => (matchCounts[docIndex].start + doc.matches.indexOf(m)) === matchIndex);
+                if (matchInDoc) {
+                    LibraryStore.update(s => {
+                        s.scrollToParagraph = matchInDoc.index + 1;
+                    });
+                }
+            }
+        }
+
+        jumpTimeout.current = setTimeout(() => {
+            isJumping.current = false;
+        }, 1000);
+    }, [filteredResults, matchCounts]);
+
+    useEffect(() => {
+        if (filteredResults.length > 0) {
+            const path = pathItems[0];
+            const lastPart = path?.split(":")[1];
+            if (pathItems.length === 1 && path?.startsWith("research") && lastPart) {
+                if (path === pendingPathRef.current) {
+                    pendingPathRef.current = null;
+                    return;
+                }
+                pendingPathRef.current = null;
+
+                const articleNumber = parseInt(lastPart, 10);
+                const index = articleNumber - 1;
+                if (!isNaN(index) && index >= 0 && index < filteredResults.length) {
+                    if (currentPageRef.current !== articleNumber) {
+                        isJumping.current = true;
+                        if (jumpTimeout.current) clearTimeout(jumpTimeout.current);
+                        listRef.current.scrollToItem(index, "start");
+                        jumpTimeout.current = setTimeout(() => {
+                            isJumping.current = false;
+                            initialUrlHandled.current = true;
+                        }, 1000);
+                        return;
+                    }
+                }
+            }
+            initialUrlHandled.current = true;
+        }
+    }, [pathItems, filteredResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const getItemSize = useCallback((index) => {
         if (rowHeights.current[index]) return rowHeights.current[index];
@@ -532,7 +579,6 @@ export default function Research() {
                                     <TextField
                                         {...params}
                                         variant="outlined"
-                                        label={translations.FILTER_BY_TAGS}
                                         placeholder={translations.TAG}
                                         size="small"
                                     />
@@ -595,7 +641,8 @@ export default function Research() {
                             });
 
                             const currentPath = `research:${current}`;
-                            if (pathItems[0] !== currentPath) {
+                            if (!isJumping.current && pathItems[0] !== currentPath && initialUrlHandled.current) {
+                                pendingPathRef.current = currentPath;
                                 setPath(currentPath);
                             }
 
@@ -639,8 +686,11 @@ export default function Research() {
                 onClose={() => setJumpOpen(false)}
                 onSubmit={handleJumpSubmit}
                 maxPage={filteredResults.length}
+                maxParagraphs={totalMatches}
                 pageLabel={translations.ARTICLE}
                 pageNumberLabel={translations.ARTICLE_NUMBER}
+                paragraphLabel={translations.MATCH}
+                paragraphNumberLabel={translations.MATCH_NUMBER}
                 title={translations.JUMP_TO_ARTICLE}
             />
 

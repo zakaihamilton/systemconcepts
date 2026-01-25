@@ -166,6 +166,14 @@ export default {
             "value": "Ocultar Pesquisa"
         },
         {
+            "id": "MATCH",
+            "value": "Correspondência"
+        },
+        {
+            "id": "MATCH_NUMBER",
+            "value": "Número da Correspondência"
+        },
+        {
             "id": "RESET",
             "value": "Restaurar"
         },

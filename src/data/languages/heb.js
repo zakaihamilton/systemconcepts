@@ -166,6 +166,14 @@ export default {
             "value": "הסתר חיפוש"
         },
         {
+            "id": "MATCH",
+            "value": "התאמה"
+        },
+        {
+            "id": "MATCH_NUMBER",
+            "value": "מספר התאמה"
+        },
+        {
             "id": "RESET",
             "value": "איפוס"
         },
