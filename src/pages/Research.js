@@ -722,9 +722,9 @@ const PageIndicator = React.memo(({ current, total, visible, translations, label
                 elevation={4}
                 className={["print-hidden", styles.pageIndicator].join(" ")}
             >
-                <Typography variant="body2" className={styles.pageIndicatorText}>
+                <div className={styles.pageIndicatorText}>
                     {label || translations.PAGE || "Page"} {current} / {total}
-                </Typography>
+                </div>
             </Paper>
         </Fade>
     );
