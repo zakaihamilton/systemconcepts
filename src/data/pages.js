@@ -76,6 +76,9 @@ const Groups = dynamic(() => import("@pages/Groups"), { loading: () => <PageLoad
 import LabelIcon from "@mui/icons-material/Label";
 const Tags = dynamic(() => import("@pages/Tags"), { loading: () => <PageLoad /> });
 
+import SearchIcon from "@mui/icons-material/Search";
+const Research = dynamic(() => import("@pages/Research"), { loading: () => <PageLoad /> });
+
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 const Library = dynamic(() => import("@pages/Library"), { loading: () => <PageLoad /> });
 import { getLibrarySection } from "@pages/Library/Section";
@@ -242,6 +245,16 @@ export default [
         Icon: EventIcon,
         Component: Schedule,
         section: getScheduleSection
+    },
+    {
+        id: "research",
+        path: "research",
+        name: "RESEARCH",
+        custom: true,
+        sidebar: true,
+        apps: true,
+        Icon: SearchIcon,
+        Component: Research
     },
     {
         apps: true,

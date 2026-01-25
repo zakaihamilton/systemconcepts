@@ -23,8 +23,11 @@ const Term = ({ term, entry, search }) => {
     const [hover, setHover] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({});
     const [bridgeStyle, setBridgeStyle] = useState({});
+    const [placement, setPlacement] = useState('top');
     const containerRef = useRef(null);
+    const tooltipRef = useRef(null);
     const hoverTimeoutRef = useRef(null);
+    const [isMeasured, setIsMeasured] = useState(false);
 
     const styleInfo = getStyleInfo(entry.style);
     const phaseRaw = styleInfo?.phase;
@@ -34,61 +37,8 @@ const Term = ({ term, entry, search }) => {
 
     const handleMouseEnter = () => {
         hoverTimeoutRef.current = setTimeout(() => {
-            if (containerRef.current) {
-                const rect = containerRef.current.getBoundingClientRect();
-                const spaceTop = rect.top;
-
-                const scrollX = window.scrollX;
-                const scrollY = window.scrollY;
-
-                // Base style for Portal (absolute relative to document)
-                const baseStyle = {
-                    position: 'absolute',
-                    left: `${rect.left + scrollX + rect.width / 2}px`,
-                    zIndex: 1300,
-                    margin: 0
-                };
-
-                const bridgeBase = {
-                    position: 'absolute',
-                    left: `${rect.left + scrollX}px`,
-                    width: `${rect.width}px`,
-                    transform: 'none',
-                    zIndex: 1299
-                };
-
-                if (spaceTop < 250) {
-                    // Place BOTTOM
-                    const topVal = rect.bottom + scrollY + 10;
-                    setTooltipStyle({
-                        ...baseStyle,
-                        top: `${topVal}px`,
-                        bottom: 'auto',
-                        transform: 'translateX(-50%)'
-                    });
-                    setBridgeStyle({
-                        ...bridgeBase,
-                        top: `${rect.bottom + scrollY}px`,
-                        height: '10px'
-                    });
-                } else {
-                    // Place TOP
-                    const topVal = rect.top + scrollY - 10;
-                    setTooltipStyle({
-                        ...baseStyle,
-                        top: `${topVal}px`,
-                        bottom: 'auto',
-                        // Use translate to shift it UP from the anchor point
-                        transform: 'translate(-50%, -100%)'
-                    });
-                    setBridgeStyle({
-                        ...bridgeBase,
-                        top: `${rect.top + scrollY - 10}px`,
-                        height: '10px'
-                    });
-                }
-            }
             setHover(true);
+            setIsMeasured(false); // Reset measurement state
         }, 300); // 300ms delay
     };
 
@@ -98,12 +48,14 @@ const Term = ({ term, entry, search }) => {
             hoverTimeoutRef.current = null;
         }
         setHover(false);
+        setIsMeasured(false);
     };
 
     useEffect(() => {
         const handleScroll = () => {
             if (hover) {
                 setHover(false);
+                setIsMeasured(false);
                 if (hoverTimeoutRef.current) {
                     clearTimeout(hoverTimeoutRef.current);
                 }
@@ -114,19 +66,104 @@ const Term = ({ term, entry, search }) => {
         return () => window.removeEventListener('scroll', handleScroll, { capture: true });
     }, [hover]);
 
+    // Layout effect to measure and position tooltip once it renders
+    React.useLayoutEffect(() => {
+        if (hover && tooltipRef.current && containerRef.current && !isMeasured) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+            const tooltipHeight = tooltipRect.height;
+            const spaceTop = rect.top;
+            const spaceBottom = window.innerHeight - rect.bottom;
+
+            const scrollX = window.scrollX;
+            const scrollY = window.scrollY;
+
+            // Base style for Portal (absolute relative to document)
+            const baseStyle = {
+                position: 'absolute',
+                left: `${rect.left + scrollX + rect.width / 2}px`,
+                zIndex: 1300,
+                margin: 0,
+                opacity: 0 // Keep invisible until positioned
+            };
+
+            const bridgeBase = {
+                position: 'absolute',
+                left: `${rect.left + scrollX}px`,
+                width: `${rect.width}px`,
+                transform: 'none',
+                zIndex: 1299
+            };
+
+            let newTooltipStyle = {};
+            let newBridgeStyle = {};
+
+            // Logic: Prefer TOP if space permits, otherwise check BOTTOM
+            // Or stick to original logic: if (spaceTop < 250) -> BOTTOM
+            // New Logic: Check actual height against available space
+
+            // Padding/Margin buffer
+            const buffer = 20;
+
+            // If there is not enough space on top for actual height, go bottom
+            if (spaceTop < (tooltipHeight + buffer)) {
+                // Place BOTTOM
+                const topVal = rect.bottom + scrollY + 10;
+                newTooltipStyle = {
+                    ...baseStyle,
+                    top: `${topVal}px`,
+                    bottom: 'auto',
+                    transform: 'translateX(-50%)', // Base transform for bottom
+                    opacity: 1 // Make visible
+                };
+                newBridgeStyle = {
+                    ...bridgeBase,
+                    top: `${rect.bottom + scrollY}px`,
+                    height: '10px'
+                };
+                setPlacement('bottom');
+            } else {
+                // Place TOP (Default preference)
+                const topVal = rect.top + scrollY - 10;
+                newTooltipStyle = {
+                    ...baseStyle,
+                    top: `${topVal}px`,
+                    bottom: 'auto',
+                    transform: 'translate(-50%, -100%)', // Base transform for top
+                    opacity: 1 // Make visible
+                };
+                newBridgeStyle = {
+                    ...bridgeBase,
+                    top: `${rect.top + scrollY - 10}px`,
+                    height: '10px'
+                };
+                setPlacement('top');
+            }
+
+            setTooltipStyle(newTooltipStyle);
+            setBridgeStyle(newBridgeStyle);
+            setIsMeasured(true);
+        }
+    }, [hover, isMeasured]);
+
     const mainText = entry.en || entry.trans || term;
     const showAnnotation = entry.trans && entry.trans.toLowerCase() !== mainText.toLowerCase();
 
     // Check for search match
     let isMatch = false;
     if (search) {
-        const lowerSearch = search.toLowerCase();
-        isMatch = (
-            term.toLowerCase().includes(lowerSearch) ||
-            (entry.en && entry.en.toLowerCase().includes(lowerSearch)) ||
-            (entry.trans && entry.trans.toLowerCase().includes(lowerSearch)) ||
-            (entry.he && entry.he.includes(search))
-        );
+        const terms = Array.isArray(search) ? search : [search];
+        isMatch = terms.some(termStr => {
+            if (!termStr) return false;
+            const lowerSearch = termStr.toLowerCase();
+            return (
+                term.toLowerCase().includes(lowerSearch) ||
+                (entry.en && entry.en.toLowerCase().includes(lowerSearch)) ||
+                (entry.trans && entry.trans.toLowerCase().includes(lowerSearch)) ||
+                (entry.he && entry.he.includes(termStr))
+            );
+        });
     }
 
     // Combine classes: locally scoped style + global 'search-highlight' for Article.js to find
@@ -154,9 +191,13 @@ const Term = ({ term, entry, search }) => {
             {hover && ReactDOM.createPortal(
                 <>
                     {/* Bridge ensures connection between word and tooltip */}
-                    <div className={styles['glossary-bridge']} style={bridgeStyle} />
+                    {isMeasured && <div className={styles['glossary-bridge']} style={bridgeStyle} />}
 
-                    <div className={styles['glossary-tooltip']} style={tooltipStyle}>
+                    <div
+                        className={clsx(styles['glossary-tooltip'], styles[placement])}
+                        style={isMeasured ? tooltipStyle : { opacity: 0, position: 'fixed', top: -9999, left: -9999 }}
+                        ref={tooltipRef}
+                    >
                         {styleInfo?.category && (
                             <div className={styles['tt-category']} style={{
                                 display: 'inline-block',
@@ -461,40 +502,16 @@ ReferenceLink.displayName = "ReferenceLink";
 const rehypeArticleEnrichment = () => {
     return (tree) => {
         let paragraphIndex = 0;
+        const paragraphs = [];
+
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
-                if (node.type === "element" && node.tagName === "p") {
-                    const segments = [];
-                    let currentSegment = [];
-                    node.children.forEach(child => {
-                        if (child.type === "element" && child.tagName === "br") {
-                            if (currentSegment.length > 0) {
-                                segments.push(currentSegment);
-                                currentSegment = [];
-                            }
-                        } else {
-                            currentSegment.push(child);
-                        }
-                    });
-                    if (currentSegment.length > 0) segments.push(currentSegment);
-
-                    if (segments.length === 0) {
-                        paragraphIndex++;
-                        node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
-                        newNodes.push(node);
-                    } else {
-                        segments.forEach(seg => {
-                            paragraphIndex++;
-                            newNodes.push({
-                                type: "element",
-                                tagName: "p",
-                                properties: { ...node.properties, dataParagraphIndex: paragraphIndex },
-                                children: seg
-                            });
-                        });
-                    }
-
+                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "ul" || node.tagName === "ol" || node.tagName === "blockquote" || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
+                    paragraphIndex++;
+                    node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
+                    newNodes.push(node);
+                    paragraphs.push(node);
                 } else {
                     if (node.children) {
                         node.children = visitAndSplit(node.children);
@@ -508,11 +525,18 @@ const rehypeArticleEnrichment = () => {
         if (tree.children) {
             tree.children = visitAndSplit(tree.children);
         }
+
+        const totalParagraphs = paragraphIndex;
+        paragraphs.forEach(node => {
+            node.properties = { ...node.properties, dataTotalParagraphs: totalParagraphs };
+        });
+        // Optimization: We could attach totalParagraphs to root or context, 
+        // but here we just loop again or assume component updates
     };
 };
 
 
-export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag }) {
+export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag, filteredParagraphs }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -523,13 +547,18 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         }
         if (typeof content !== 'string') return content;
 
+        // Convert Windows line endings
+        content = content.replace(/\r\n/g, "\n");
+
+        // Convert single newlines to double newlines (paragraph breaks)
+        content = content.replace(/\n+/g, "\n\n");
+
         // Bold numbered lists (existing)
-        content = content.replace(/^\s*(\d+)([\.\)])\s*/gm, (match, number, symbol) => {
-            return `**${number}\\${symbol}** `;
+        content = content.replace(/^\s*(\d+)([\.\)])[ \t]*/gm, (match, number, symbol) => {
+            return `\n\n**${number}\\${symbol}** `;
         });
 
-        // Remove duplicate newlines (normalize to a single newline for paragraph breaks)
-        content = content.replace(/\n{2,}/g, '\n');
+
 
         // Detect headings
         // Heuristic: Start of line, Uppercase, No period/semicolon/comma at end, < 80 chars
@@ -575,29 +604,61 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
     const Highlight = useCallback(({ children }) => {
         if (!search || !children || typeof children !== 'string') return children;
-        const lowerSearch = search.toLowerCase();
+
+        const terms = Array.isArray(search) ? search : [search];
+        if (terms.length === 0) return children;
+
         const lowerChildren = children.toLowerCase();
-        if (!lowerChildren.includes(lowerSearch)) return children;
+        // Find all matches for all terms
+        const matches = [];
+        terms.forEach(term => {
+            if (!term) return;
+            const lowerTerm = term.toLowerCase();
+            let index = lowerChildren.indexOf(lowerTerm);
+            while (index !== -1) {
+                matches.push({ start: index, end: index + term.length });
+                index = lowerChildren.indexOf(lowerTerm, index + 1);
+            }
+        });
+
+        if (matches.length === 0) return children;
+
+        // Sort and merge overlapping matches
+        matches.sort((a, b) => a.start - b.start);
+        const merged = [];
+        if (matches.length > 0) {
+            let current = matches[0];
+            for (let i = 1; i < matches.length; i++) {
+                const next = matches[i];
+                if (next.start < current.end) {
+                    current.end = Math.max(current.end, next.end);
+                } else {
+                    merged.push(current);
+                    current = next;
+                }
+            }
+            merged.push(current);
+        }
 
         const parts = [];
         let currentIndex = 0;
-        let matchIndexPos = lowerChildren.indexOf(lowerSearch);
 
-        while (matchIndexPos !== -1) {
-            if (matchIndexPos > currentIndex) {
-                parts.push(children.slice(currentIndex, matchIndexPos));
+        merged.forEach(match => {
+            if (match.start > currentIndex) {
+                parts.push(children.slice(currentIndex, match.start));
             }
             parts.push(
-                <span key={matchIndexPos} className={`${styles['search-highlight']} search-highlight`}>
-                    {children.slice(matchIndexPos, matchIndexPos + search.length)}
+                <span key={match.start} className={`${styles['search-highlight']} search-highlight`}>
+                    {children.slice(match.start, match.end)}
                 </span>
             );
-            currentIndex = matchIndexPos + search.length;
-            matchIndexPos = lowerChildren.indexOf(lowerSearch, currentIndex);
-        }
+            currentIndex = match.end;
+        });
+
         if (currentIndex < children.length) {
             parts.push(children.slice(currentIndex));
         }
+
         return parts;
     }, [search]);
 
@@ -766,24 +827,36 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         const HeaderRenderer = (tag) => {
             const Header = ({ node, children }) => {
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
+                if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
+
+                const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
+                const needsGap = currentIndex > 0 && (paragraphIndex - filteredParagraphs[currentIndex - 1] > 1);
+
                 const paragraphSelected = currentParagraphIndex === paragraphIndex;
                 return (
-                    <Box
-                        component={tag}
-                        className={paragraphSelected ? styles.selected : ''}
-                        sx={{
-                            mt: 3,
-                            mb: 2,
-                            fontWeight: 'bold',
-                            position: 'relative',
-                            backgroundColor: 'var(--background-paper)',
-                            padding: '16px 16px',
-                            borderRadius: '8px'
-                        }}
-                        data-paragraph-index={paragraphIndex}
-                    >
-                        <TextRenderer>{children}</TextRenderer>
-                    </Box>
+                    <React.Fragment>
+                        {needsGap && (
+                            <Box className={styles.gapSeparator}>
+                                •••
+                            </Box>
+                        )}
+                        <Box
+                            component={tag}
+                            className={paragraphSelected ? styles.selected : ''}
+                            sx={{
+                                mt: 3,
+                                mb: 2,
+                                fontWeight: 'bold',
+                                position: 'relative',
+                                backgroundColor: 'var(--background-paper)',
+                                padding: '16px 16px',
+                                borderRadius: '8px'
+                            }}
+                            data-paragraph-index={paragraphIndex}
+                        >
+                            <TextRenderer>{children}</TextRenderer>
+                        </Box>
+                    </React.Fragment>
                 );
             };
             Header.displayName = `Header${tag}`;
@@ -792,6 +865,11 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
         const ParagraphRenderer = ({ node, children }) => {
             const [hoveringNumber, setHoveringNumber] = useState(false);
+            const paragraphIndex = node?.properties?.dataParagraphIndex;
+            const totalParagraphs = node?.properties?.dataTotalParagraphs;
+            const isLastParagraph = paragraphIndex === totalParagraphs;
+
+            if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
             if (!children || (Array.isArray(children) && children.length === 0)) return null;
 
             // Extract plain text from children for TTS
@@ -799,60 +877,108 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 if (typeof child === 'string') return child;
                 if (Array.isArray(child)) return child.map(extractText).join('');
                 if (React.isValidElement(child)) {
-                    // Check if this is a glossary term by looking for the Term component structure
-                    // The Term component renders: <span with glossary-main-text class>
-                    // We want to extract the main text (translation) not the original term
                     const props = child.props;
-
-                    // If it's a span with className containing 'glossary-main-text', get its text content
                     if (props?.className && typeof props.className === 'string' &&
                         props.className.includes('glossary-main-text')) {
                         return props.children || '';
                     }
-
-                    // Skip glossary annotations (transliteration above the word)
                     if (props?.className && typeof props.className === 'string' &&
                         props.className.includes('glossary-annotation')) {
                         return '';
                     }
-
                     return extractText(props.children);
                 }
                 return '';
             };
 
             const paragraphText = extractText(children);
-            const paragraphIndex = node?.properties?.dataParagraphIndex;
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
 
+            const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
+            const needsGap = currentIndex > 0 && (paragraphIndex - filteredParagraphs[currentIndex - 1] > 1);
+
             return (
-                <Box
-                    className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
-                    sx={{ marginBottom: '24px', lineHeight: 2.8 }}
-                    data-paragraph-index={paragraphIndex}
-                    data-paragraph-text={paragraphText}
-                >
-                    <TextRenderer>{children}</TextRenderer>
-                    <Tooltip title={translations?.ZOOM} placement="top" arrow>
-                        <span
-                            data-prevent-select="true"
-                            className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
-                            onMouseEnter={() => setHoveringNumber(true)}
-                            onMouseLeave={() => setHoveringNumber(false)}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                const number = node?.properties?.dataParagraphIndex;
-                                handleParagraphZoom(children, number);
-                            }}
-                        />
-                    </Tooltip>
-                </Box>
+                <React.Fragment>
+                    {needsGap && (
+                        <Box className={styles.gapSeparator}>
+                            •••
+                        </Box>
+                    )}
+                    <Box
+                        className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ''} ${hoveringNumber ? styles.suppressHover : ''}`}
+                        sx={{ marginBottom: '24px', lineHeight: 2.8 }}
+                        data-paragraph-index={paragraphIndex}
+                        data-paragraph-text={paragraphText}
+                    >
+                        <TextRenderer>{children}</TextRenderer>
+                        <Tooltip title={translations?.ZOOM} placement="top" arrow>
+                            <span
+                                data-prevent-select="true"
+                                className={clsx(styles.paragraphNumber, paragraphSelected && styles.selected)}
+                                onMouseEnter={() => setHoveringNumber(true)}
+                                onMouseLeave={() => setHoveringNumber(false)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const number = node?.properties?.dataParagraphIndex;
+                                    handleParagraphZoom(children, number);
+                                }}
+                            >
+                                {paragraphIndex !== undefined ? paragraphIndex : ''}
+                            </span>
+                        </Tooltip>
+                    </Box>
+                    {isLastParagraph && (
+                        <Box className={styles.endOfArticle}>
+                            <Box className={styles.endOfArticleLine} />
+                            <Box className={styles.endOfArticleOrnament}>✦</Box>
+                            <Box className={styles.endOfArticleLine} />
+                        </Box>
+                    )}
+                </React.Fragment>
             );
+        };
+
+        const BlockRenderer = (Tag) => {
+            const Renderer = ({ node, children }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                const span = node?.properties?.dataParagraphSpan || 1;
+
+                if (Array.isArray(filteredParagraphs)) {
+                    const isVisible = filteredParagraphs.some(p => p >= paragraphIndex && p < paragraphIndex + span);
+                    if (!isVisible) return null;
+                }
+
+                return <Tag>{children}</Tag>;
+            };
+            Renderer.displayName = `BlockRenderer${Tag}`;
+            return Renderer;
+        };
+
+        const VoidRenderer = (Tag) => {
+            const Renderer = ({ node }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                const span = node?.properties?.dataParagraphSpan || 1;
+
+                if (Array.isArray(filteredParagraphs)) {
+                    const isVisible = filteredParagraphs.some(p => p >= paragraphIndex && p < paragraphIndex + span);
+                    if (!isVisible) return null;
+                }
+
+                return <Tag />;
+            };
+            Renderer.displayName = `VoidRenderer${Tag}`;
+            return Renderer;
         };
 
         return {
             p: ParagraphRenderer,
             li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>,
+            ul: BlockRenderer('ul'),
+            ol: BlockRenderer('ol'),
+            blockquote: BlockRenderer('blockquote'),
+            pre: BlockRenderer('pre'),
+            table: BlockRenderer('table'),
+            hr: VoidRenderer('hr'),
             h1: HeaderRenderer('h1'),
             h2: HeaderRenderer('h2'),
             h3: HeaderRenderer('h3'),
@@ -861,7 +987,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             h6: HeaderRenderer('h6'),
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
-    }, [TextRenderer, handleParagraphZoom, currentParagraphIndex, translations]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [currentParagraphIndex, filteredParagraphs, translations, TextRenderer, handleParagraphZoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>
@@ -873,11 +999,6 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 >
                     {processedChildren}
                 </ReactMarkdown>
-                <Box className={styles.endOfArticle}>
-                    <Box className={styles.endOfArticleLine} />
-                    <Box className={styles.endOfArticleOrnament}>✦</Box>
-                    <Box className={styles.endOfArticleLine} />
-                </Box>
             </div>
 
             <Zoom

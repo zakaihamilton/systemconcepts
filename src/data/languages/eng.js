@@ -6,6 +6,18 @@ export default {
     "locale": "en-US",
     "translations": [
         {
+            "id": "NO_TAGS_FOUND",
+            "value": "No tags found."
+        },
+        {
+            "id": "INDEXING_FAILED",
+            "value": "Indexing failed"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "Loading tags..."
+        },
+        {
             "id": "APP_NAME",
             "value": "System Concepts"
         },
@@ -152,6 +164,30 @@ export default {
         {
             "id": "SEARCH",
             "value": "Search"
+        },
+        {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Jump to Article"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Article Number"
+        },
+        {
+            "id": "SHOW_SEARCH",
+            "value": "Show Search"
+        },
+        {
+            "id": "HIDE_SEARCH",
+            "value": "Hide Search"
+        },
+        {
+            "id": "MATCH",
+            "value": "Match"
+        },
+        {
+            "id": "MATCH_NUMBER",
+            "value": "Match Number"
         },
         {
             "id": "RESET",
@@ -1578,6 +1614,10 @@ export default {
             "value": "Jump To"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Jump To Article"
+        },
+        {
             "id": "PAGE",
             "value": "Page"
         },
@@ -1588,6 +1628,10 @@ export default {
         {
             "id": "PAGE_NUMBER",
             "value": "Page Number"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Article Number"
         },
         {
             "id": "PARAGRAPH_NUMBER",
@@ -1724,6 +1768,42 @@ export default {
         {
             "id": "SHOW_FULL_TERMS",
             "value": "Show Full Terms"
+        },
+        {
+            "id": "RESEARCH",
+            "value": "Research"
+        },
+        {
+            "id": "SEARCH_ARTICLES",
+            "value": "Search..."
+        },
+        {
+            "id": "REBUILD_INDEX",
+            "value": "Rebuild Index"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "Loading tags..."
+        },
+        {
+            "id": "DONE",
+            "value": "Done"
+        },
+        {
+            "id": "SEARCHING",
+            "value": "Searching..."
+        },
+        {
+            "id": "NO_RESULTS",
+            "value": "No results found."
+        },
+        {
+            "id": "RESULT",
+            "value": "result"
+        },
+        {
+            "id": "RESULTS",
+            "value": "results"
         }
     ]
 };

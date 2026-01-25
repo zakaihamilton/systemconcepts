@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useDeviceType } from "@util/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -12,6 +12,9 @@ import PrintIcon from "@mui/icons-material/Print";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useSwipe } from "@util/touch";
 import { LibraryTagKeys } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
@@ -32,23 +35,59 @@ import Header from "./Article/Header";
 import PageIndicator from "./Article/PageIndicator";
 import ScrollToTop from "./Article/ScrollToTop";
 import Content from "./Article/Content";
+import { useTranslations } from "@util/translations";
+import { useSearch } from "@components/Search";
+import Cookies from "js-cookie";
+import { roleAuth } from "@util/roles";
 
 registerToolbar("Article");
+
+/**
+ * ArticleToolbar Component
+ * Handles global toolbar registration for the Article page.
+ * Rendered only when the article is NOT embedded.
+ */
+function ArticleToolbar({ id, items, visible, depends }) {
+    useToolbar({ id, items, visible, depends });
+    return null;
+}
 
 function Article({
     selectedTag,
     content,
-    search,
-    translations,
-    isAdmin,
     openEditDialog,
-    isHeaderHidden,
-    handleScroll,
-    contentRef,
     openEditContentDialog,
-    loading
+    loading,
+
+    prevArticle,
+    nextArticle,
+    onPrev,
+    onNext,
+    filteredParagraphs = null,
+    onTitleClick,
+    embedded,
+    hidePlayer,
+    hideHeader,
+    highlight
 }) {
+    const translations = useTranslations();
+    const search = useSearch();
+    const contentRef = useRef(null);
+    const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+
+    const role = Cookies.get("role");
+    const isAdmin = roleAuth(role, "admin");
+
+    const handleScroll = useCallback((e) => {
+        const scrollTop = e.target.scrollTop;
+        const shouldHide = isHeaderHidden ? scrollTop > 100 : scrollTop > 150;
+        if (shouldHide !== isHeaderHidden) {
+            setIsHeaderHidden(shouldHide);
+        }
+    }, [isHeaderHidden]);
+
     const deviceType = useDeviceType();
+    const isMobile = deviceType !== "desktop";
     const isPhone = deviceType === "phone";
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(true);
@@ -67,6 +106,16 @@ function Article({
         scrollToTop,
     } = useArticleScroll(contentRef, handleScroll);
 
+    // Reset scroll position when article changes
+    useEffect(() => {
+        if (selectedTag) {
+            setIsHeaderHidden(false);
+            if (contentRef.current) {
+                contentRef.current.scrollTop = 0;
+            }
+        }
+    }, [selectedTag?._id, contentRef]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const {
         matchIndex,
         totalMatches,
@@ -81,7 +130,20 @@ function Article({
                 contentRef.current.focus();
             }
             if (type === 'paragraph') {
-                const element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
+                let element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
+                if (!element) {
+                    // Fallback: search for element containing the paragraph index in its span
+                    const elements = contentRef.current.querySelectorAll('[data-paragraph-index]');
+                    for (const el of elements) {
+                        const index = parseInt(el.getAttribute('data-paragraph-index'), 10);
+                        const span = parseInt(el.getAttribute('data-paragraph-span') || '1', 10);
+                        if (value >= index && value < index + span) {
+                            element = el;
+                            break;
+                        }
+                    }
+                }
+
                 if (element) {
                     setCurrentParagraphIndex(value);
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -210,6 +272,7 @@ function Article({
         if (!rootElement) return;
 
         const iframe = document.createElement("iframe");
+        iframe.id = "print-root";
         Object.assign(iframe.style, {
             position: "absolute",
             top: "-9999px",
@@ -254,7 +317,7 @@ function Article({
                 </style>
             </head>
             <body>
-                <div class="${styles.root}">
+                <div id="print-root" class="${styles.root}">
                     ${rootElement.outerHTML}
                 </div>
                 <script>
@@ -283,7 +346,7 @@ function Article({
             }
         };
         window.addEventListener("message", cleanup);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [contentRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
@@ -293,7 +356,7 @@ function Article({
     }, [selectedTag, content, formatArticleWithTags]);
 
     const toolbarItems = useMemo(() => {
-        if (!content || !selectedTag) {
+        if (!content || !selectedTag || embedded) {
             return [];
         }
         let items = [
@@ -329,25 +392,27 @@ function Article({
             }
         ];
         if (isAdmin) {
-            items = [
-                ...items,
-                {
+            if (openEditDialog) {
+                items.push({
                     id: "editTags",
                     name: translations.EDIT_TAGS,
                     icon: <EditIcon />,
                     onClick: openEditDialog,
                     menu: true
-                },
-                {
+                });
+            }
+            if (openEditContentDialog) {
+                items.push({
                     id: "editArticle",
                     name: translations.EDIT_ARTICLE,
                     icon: <ArticleIcon />,
                     onClick: openEditContentDialog,
                     menu: true,
                     divider: true
-                }
-            ];
+                });
+            }
         }
+
         // eslint-disable-next-line react-hooks/refs
         items.push({
             id: "export",
@@ -359,6 +424,7 @@ function Article({
             },
             menu: true
         });
+
         if (search && totalMatches > 0) {
             items = [
                 ...items,
@@ -384,17 +450,36 @@ function Article({
                 }
             ];
         }
+
+        if (onPrev && prevArticle) {
+            const previousTooltip = prevArticle.name ? <span className={styles.tooltip}><b>{translations.PREVIOUS}</b> {prevArticle.name}</span> : <b>{translations.PREVIOUS}</b>;
+            items.push({
+                id: "prevArticle",
+                name: previousTooltip,
+                icon: <ArrowBackIcon />,
+                onClick: onPrev,
+                location: isMobile ? undefined : "header"
+            });
+        }
+
+        if (onNext && nextArticle) {
+            const nextTooltip = nextArticle.name ? <span className={styles.tooltip}><b>{translations.NEXT}</b> {nextArticle.name}</span> : <b>{translations.NEXT}</b>;
+            items.push({
+                id: "nextArticle",
+                name: nextTooltip,
+                icon: <ArrowForwardIcon />,
+                onClick: onNext,
+                location: isMobile ? undefined : "header"
+            });
+        }
+
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations]);
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, prevArticle, nextArticle, onPrev, onNext, isMobile, embedded]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useToolbar({
-        id: "Article",
-        items: toolbarItems,
-        visible: !!content,
-        depends: [toolbarItems, content]
+    const swipeHandlers = useSwipe({
+        onSwipeLeft: onNext,
+        onSwipeRight: onPrev
     });
-
-
 
     if (loading) {
         return (
@@ -418,24 +503,35 @@ function Article({
     if (!content) return null;
 
     return (
-        <Box component="main" className={styles.root} minWidth={0} sx={{ ml: { sm: 2 }, overflow: 'hidden !important', position: 'relative' }}>
+        <Box component="main" className={[styles.root, embedded && styles.embedded].filter(Boolean).join(" ")} minWidth={0} sx={{ ml: { sm: 2 }, overflow: embedded ? 'visible' : 'hidden !important', position: 'relative', height: embedded ? 'auto' : '100%' }} {...swipeHandlers}>
+            {!embedded && (
+                <ArticleToolbar
+                    id="Article"
+                    items={toolbarItems}
+                    visible={!!content}
+                    depends={[toolbarItems, content]}
+                />
+            )}
             <ScrollToTop show={showScrollTop} onClick={scrollToTop} translations={translations} />
             <Box
                 ref={contentRef}
                 tabIndex={-1}
                 onScroll={handleScrollUpdate}
                 onClick={handleClick}
-                sx={{ position: 'relative', height: '100%', overflowY: 'auto', overflowX: 'hidden', outline: 'none' }}
+                sx={{ position: 'relative', height: embedded ? 'auto' : '100%', overflowY: embedded ? 'visible' : 'auto', overflowX: 'hidden', outline: 'none' }}
             >
                 <PageIndicator scrollInfo={scrollInfo} />
-                <Header
-                    selectedTag={selectedTag}
-                    isHeaderHidden={isHeaderHidden}
-                    showAbbreviations={showAbbreviations}
-                    title={title}
-                    translations={translations}
-                    currentParagraphIndex={currentParagraphIndex}
-                />
+                {!hideHeader && (
+                    <Header
+                        selectedTag={selectedTag}
+                        isHeaderHidden={isHeaderHidden}
+                        showAbbreviations={showAbbreviations}
+                        title={title}
+                        translations={translations}
+                        currentParagraphIndex={currentParagraphIndex}
+                        onTitleClick={onTitleClick}
+                    />
+                )}
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
                     <Box
                         key={i}
@@ -458,8 +554,10 @@ function Article({
                     currentParagraphIndex={currentParagraphIndex}
                     selectedTag={selectedTag}
                     processedContent={processedContent}
+                    filteredParagraphs={filteredParagraphs}
+                    highlight={highlight}
                 />
-                {content && showMarkdown && (
+                {content && showMarkdown && !hidePlayer && (
                     <Player
                         contentRef={contentRef}
                         onParagraphChange={setCurrentParagraphIndex}

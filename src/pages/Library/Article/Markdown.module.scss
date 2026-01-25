@@ -106,15 +106,17 @@
     min-width: 150px;
     text-align: center;
     pointer-events: auto;
-    animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    // animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); // Removed generic animation
     transform-origin: top center;
 
     &.bottom {
         transform-origin: top center;
+        animation: scaleInBottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     &.top {
         transform-origin: bottom center;
+        animation: scaleInTop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .tt-label {
@@ -146,20 +148,28 @@
     }
 }
 
-@keyframes scaleIn {
+@keyframes scaleInTop {
     from {
         opacity: 0;
-        transform: translateX(-50%) scale(0.9);
+        transform: translate(-50%, -100%) scale(0.9);
     }
 
     to {
         opacity: 1;
-        transform: translateX(-50%) scale(1);
+        transform: translate(-50%, -100%) scale(1);
     }
 }
 
-.container {
-    counter-reset: paragraph;
+@keyframes scaleInBottom {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
 }
 
 .paragraph {
@@ -172,7 +182,6 @@
         background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
         border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    counter-increment: paragraph;
     background-color: var(--background-paper);
 
     &:not(.selected) {
@@ -243,10 +252,10 @@
 
 .paragraphNumber {
     @extend %paragraph-label-shared;
+}
 
-    &::after {
-        content: counter(paragraph);
-    }
+.paragraphBadge {
+    @extend %paragraph-label-shared;
 }
 
 .paragraphBadge {
@@ -282,6 +291,19 @@
     color: var(--text-secondary);
     font-size: 1.2rem;
     opacity: 0.6;
+}
+
+.gapSeparator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 32px 0 16px;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+    opacity: 0.4;
+    pointer-events: none;
+    user-select: none;
 }
 
 @media print {

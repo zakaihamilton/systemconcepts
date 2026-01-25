@@ -56,3 +56,28 @@ export function copyToClipboard(text) {
     }
     return false;
 }
+
+export function normalizeContent(text) {
+    // Split by code blocks to protect them from normalization
+    const parts = text.split(/(```[\s\S]*?```)/g);
+
+    return parts.map(part => {
+        if (part.startsWith('```')) return part;
+
+        let processed = part.replace(/\r\n/g, "\n");
+        // Convert single newlines to double to ensure granular paragraphs
+        processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
+
+        // Ensure headers are followed by double newlines to match indexing split
+        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
+            const trimmed = line.trim();
+            if (!trimmed) return match;
+            if (trimmed.endsWith('.')) return match;
+            if (trimmed.endsWith(';')) return match;
+            if (trimmed.endsWith(',')) return match;
+            if (trimmed.length > 120) return match;
+            return `### ${trimmed}\n\n`;
+        });
+        return processed;
+    }).join("");
+};

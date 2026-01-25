@@ -17,7 +17,9 @@ export const ToolbarStore = new Store({
 
 export function registerToolbar(id, sortKey) {
     ToolbarStore.update(s => {
-        s.sections = [...s.sections, { items: [], used: 0, id, sortKey }];
+        if (!s.sections.find(item => item.id === id)) {
+            s.sections = [...s.sections, { items: [], used: 0, visible: true, id, sortKey }];
+        }
     });
 }
 

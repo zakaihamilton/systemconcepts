@@ -6,6 +6,18 @@ export default {
     "locale": "he-IL",
     "translations": [
         {
+            "id": "NO_TAGS_FOUND",
+            "value": "לא נמצאו תגיות."
+        },
+        {
+            "id": "INDEXING_FAILED",
+            "value": "יצירת אינדקס נכשל"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "טוען תגיות..."
+        },
+        {
             "id": "APP_NAME",
             "value": "עקרונות המערכת"
         },
@@ -136,6 +148,30 @@ export default {
         {
             "id": "SEARCH",
             "value": "חיפוש"
+        },
+        {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "קפוץ למאמר"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "מספר מאמר"
+        },
+        {
+            "id": "SHOW_SEARCH",
+            "value": "הצג חיפוש"
+        },
+        {
+            "id": "HIDE_SEARCH",
+            "value": "הסתר חיפוש"
+        },
+        {
+            "id": "MATCH",
+            "value": "התאמה"
+        },
+        {
+            "id": "MATCH_NUMBER",
+            "value": "מספר התאמה"
         },
         {
             "id": "RESET",
@@ -1570,6 +1606,10 @@ export default {
             "value": "קפוץ ל"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "קפוץ למאמר"
+        },
+        {
             "id": "PAGE",
             "value": "עמוד"
         },
@@ -1580,6 +1620,10 @@ export default {
         {
             "id": "PAGE_NUMBER",
             "value": "מספר עמוד"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "מספר מאמר"
         },
         {
             "id": "PARAGRAPH_NUMBER",
@@ -1716,6 +1760,10 @@ export default {
         {
             "id": "SHOW_FULL_TERMS",
             "value": "הצג מונחים מלאים"
+        },
+        {
+            "id": "RESEARCH",
+            "value": "מחקר"
         }
     ]
 };

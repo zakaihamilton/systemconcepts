@@ -1,55 +1,35 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useSearch } from "@components/Search";
+
 import storage from "@util/storage";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { makePath } from "@util/path";
 import Box from "@mui/material/Box";
-import { useTranslations } from "@util/translations";
 import { setPath, usePathItems } from "@util/pages";
 import { SyncActiveStore } from "@sync/syncState";
 import { LibraryStore } from "./Library/Store";
 import { LibraryTagKeys } from "./Library/Icons";
-import { useDeviceType } from "@util/styles";
 import Cookies from "js-cookie";
 import { roleAuth } from "@util/roles";
 import EditTagsDialog from "./Library/EditTagsDialog";
 import EditContentDialog from "./Library/EditContentDialog";
 import Article from "./Library/Article";
 import styles from "./Library.module.scss";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useSwipe } from "@util/touch";
+import { registerToolbar } from "@components/Toolbar";
+
 const fileCache = new Map();
 
 registerToolbar("Library");
 
 export default function Library() {
-    const isMobile = useDeviceType() !== "desktop";
-    const search = useSearch();
     const [tags, setTags] = useState([]);
     const [content, setContent] = useState(null);
     const [selectedTag, setSelectedTag] = useState(null);
     const [loading, setLoading] = useState(false);
-    const translations = useTranslations();
     const pathItems = usePathItems();
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editContentDialogOpen, setEditContentDialogOpen] = useState(false);
-    const [isHeaderHidden, setIsHeaderHidden] = useState(false);
     const [customOrder, setCustomOrder] = useState({});
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
-
-
-
-    const contentRef = React.useRef(null);
-    const handleScroll = useCallback((e) => {
-        const scrollTop = e.target.scrollTop;
-        // Use hysteresis: hide at 150px, but don't show until below 100px
-        const shouldHide = isHeaderHidden ? scrollTop > 100 : scrollTop > 150;
-        if (shouldHide !== isHeaderHidden) {
-            setIsHeaderHidden(shouldHide);
-        }
-    }, [isHeaderHidden]);
 
     const role = Cookies.get("role");
     const isAdmin = roleAuth(role, "admin");
@@ -247,15 +227,6 @@ export default function Library() {
         setTimeout(() => loadContent(), 0);
     }, [loadContent]);
 
-    // Reset scroll position when article changes
-    useEffect(() => {
-        if (selectedTag) {
-            setIsHeaderHidden(false);
-            if (contentRef.current) {
-                contentRef.current.scrollTop = 0;
-            }
-        }
-    }, [selectedTag?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
@@ -493,47 +464,14 @@ export default function Library() {
         onSelect(tag);
     }, [onSelect]);
 
-    const previousTooltip = useMemo(() => prevArticleName ? <span className={styles.tooltip}><b>{translations.PREVIOUS}</b> {prevArticleName}</span> : <b>{translations.PREVIOUS}</b>, [prevArticleName, translations]);
-    const nextTooltip = useMemo(() => nextArticleName ? <span className={styles.tooltip}><b>{translations.NEXT}</b> {nextArticleName}</span> : <b>{translations.NEXT}</b>, [nextArticleName, translations]);
 
-    const toolbarItems = [
-        !isMobile && {
-            id: "prevArticle",
-            name: previousTooltip,
-            icon: <ArrowBackIcon />,
-            onClick: () => prevArticle && gotoArticle(prevArticle),
-            location: "header",
-            disabled: !prevArticle
-        },
-        !isMobile && {
-            id: "nextArticle",
-            name: nextTooltip,
-            icon: <ArrowForwardIcon />,
-            onClick: () => nextArticle && gotoArticle(nextArticle),
-            location: "header",
-            disabled: !nextArticle
-        }
-    ];
-
-    useToolbar({ id: "Library", items: toolbarItems, depends: [prevArticle, nextArticle, prevArticleName, nextArticleName, translations, isMobile, previousTooltip, nextTooltip] });
-
-    const swipeHandlers = useSwipe({
-        onSwipeLeft: () => nextArticle && gotoArticle(nextArticle),
-        onSwipeRight: () => prevArticle && gotoArticle(prevArticle)
-    });
 
     return (
-        <Box className={styles.root} {...swipeHandlers}>
+        <Box className={styles.root}>
             <Article
                 selectedTag={selectedTag}
                 content={content}
-                search={search}
-                translations={translations}
-                isAdmin={isAdmin}
                 openEditDialog={openEditDialog}
-                isHeaderHidden={isHeaderHidden}
-                handleScroll={handleScroll}
-                contentRef={contentRef}
                 openEditContentDialog={openEditContentDialog}
                 loading={loading}
                 prevArticle={{ name: prevArticleName, tag: prevArticle }}

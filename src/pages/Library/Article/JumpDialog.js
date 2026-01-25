@@ -11,9 +11,9 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { useTranslations } from "@util/translations";
 
-export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxParagraphs = 0 }) {
+export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxParagraphs = 0, pageLabel, pageNumberLabel, title }) {
     const translations = useTranslations();
-    const [tab, setTab] = useState(0); // 0: Paragraph, 1: Page
+    const [tab, setTab] = useState(maxParagraphs > 0 ? 0 : 1); // 0: Paragraph, 1: Page
     const [paragraphNumber, setParagraphNumber] = useState('');
     const [pageNumber, setPageNumber] = useState('');
 
@@ -56,20 +56,22 @@ export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxPa
     return (
         <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
             <DialogTitle>
-                {translations.JUMP_TO}
+                {title || translations.JUMP_TO}
             </DialogTitle>
             <DialogContent>
-                <Tabs
-                    value={tab}
-                    onChange={(e, val) => setTab(val)}
-                    variant="fullWidth"
-                    textColor="primary"
-                    indicatorColor="primary"
-                    sx={{ marginBottom: 2 }}
-                >
-                    <Tab label={translations.PARAGRAPH} />
-                    <Tab label={translations.PAGE} />
-                </Tabs>
+                {maxParagraphs > 0 && maxPage > 0 && (
+                    <Tabs
+                        value={tab}
+                        onChange={(e, val) => setTab(val)}
+                        variant="fullWidth"
+                        textColor="primary"
+                        indicatorColor="primary"
+                        sx={{ marginBottom: 2 }}
+                    >
+                        <Tab label={translations.PARAGRAPH} />
+                        <Tab label={pageLabel || translations.PAGE} />
+                    </Tabs>
+                )}
 
                 {tab === 0 && (
                     <TextField
@@ -94,7 +96,7 @@ export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxPa
                             autoFocus
                             margin="dense"
                             id="page-number"
-                            label={`${translations.PAGE_NUMBER} (1-${maxPage})`}
+                            label={`${pageNumberLabel || translations.PAGE_NUMBER} (1-${maxPage})`}
                             type="number"
                             fullWidth
                             variant="outlined"

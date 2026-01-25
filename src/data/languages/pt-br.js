@@ -6,6 +6,18 @@ export default {
     "locale": "pt-BR",
     "translations": [
         {
+            "id": "NO_TAGS_FOUND",
+            "value": "Nenhuma tag encontrada."
+        },
+        {
+            "id": "INDEXING_FAILED",
+            "value": "Falha na indexação"
+        },
+        {
+            "id": "LOADING_TAGS",
+            "value": "Carregando tags..."
+        },
+        {
             "id": "APP_NAME",
             "value": "System Concepts"
         },
@@ -136,6 +148,30 @@ export default {
         {
             "id": "SEARCH",
             "value": "Pesquisar"
+        },
+        {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Pular para o Artigo"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Número do Artigo"
+        },
+        {
+            "id": "SHOW_SEARCH",
+            "value": "Mostrar Pesquisa"
+        },
+        {
+            "id": "HIDE_SEARCH",
+            "value": "Ocultar Pesquisa"
+        },
+        {
+            "id": "MATCH",
+            "value": "Correspondência"
+        },
+        {
+            "id": "MATCH_NUMBER",
+            "value": "Número da Correspondência"
         },
         {
             "id": "RESET",
@@ -1546,6 +1582,10 @@ export default {
             "value": "Ir Para"
         },
         {
+            "id": "JUMP_TO_ARTICLE",
+            "value": "Ir Para o Artigo"
+        },
+        {
             "id": "PAGE",
             "value": "Página"
         },
@@ -1556,6 +1596,10 @@ export default {
         {
             "id": "PAGE_NUMBER",
             "value": "Número da Página"
+        },
+        {
+            "id": "ARTICLE_NUMBER",
+            "value": "Número do Artigo"
         },
         {
             "id": "PARAGRAPH_NUMBER",
@@ -1684,6 +1728,10 @@ export default {
         {
             "id": "DELETE_FOREVER",
             "value": "Excluir para sempre"
+        },
+        {
+            "id": "RESEARCH",
+            "value": "Pesquisa"
         }
     ]
 };
