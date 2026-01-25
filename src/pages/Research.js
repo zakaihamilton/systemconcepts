@@ -864,13 +864,15 @@ export default function Research() {
                                 const title = getArticleTitle(doc.tag);
                                 return (
                                     <div key={doc.tag._id || index} className={styles.printItem}>
-                                        <Header
-                                            selectedTag={doc.tag}
-                                            isHeaderHidden={false}
-                                            showAbbreviations={false}
-                                            title={title}
-                                            currentParagraphIndex={-2}
-                                        />
+                                        <div className={styles.printHeaderWrapper}>
+                                            <Header
+                                                selectedTag={doc.tag}
+                                                isHeaderHidden={false}
+                                                showAbbreviations={false}
+                                                title={title}
+                                                currentParagraphIndex={-2}
+                                            />
+                                        </div>
                                         <div className={styles.printContent}>
                                             <Article
                                                 selectedTag={doc.tag}

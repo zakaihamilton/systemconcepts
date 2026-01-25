@@ -131,8 +131,15 @@
 
 .printItem {
     margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: none;
     padding-bottom: 20px;
+}
+
+.printHeaderWrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
 }
 
 .printHeader {
