@@ -3,14 +3,11 @@ import { makePath } from "@util/path";
 import storage from "@util/storage";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
-import { LibraryTagKeys } from "@pages/Library/Icons";
 import { ResearchStore } from "./ResearchStore";
 import { useLocalStorage } from "@util/store";
 import { normalizeContent } from "@util/string";
 
 const INDEX_FILE = "search_index.json";
-
-
 
 export default function ResearchIndexer() {
     const translations = useTranslations();

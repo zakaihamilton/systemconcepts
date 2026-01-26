@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
+import Cookies from "js-cookie";
 import { createPortal } from "react-dom";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -21,6 +22,7 @@ import storage from "@util/storage";
 import { SyncActiveStore } from "@sync/syncState";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
+import { roleAuth } from "@util/roles";
 import { setPath, usePathItems } from "@util/pages";
 import { normalizeContent } from "@util/string";
 import styles from "./Research.module.scss";
@@ -80,6 +82,8 @@ export default function Research() {
     const currentPageRef = useRef(1);
     const pendingPathRef = useRef(null);
     const initialUrlHandled = useRef(false);
+    const role = Cookies.get("role");
+    const isAdmin = roleAuth(role, "admin");
 
     useEffect(() => {
         currentPageRef.current = scrollPages.current;
@@ -496,7 +500,7 @@ export default function Research() {
             onClick: () => setSearchCollapsed(prev => !prev),
             location: "header"
         },
-        {
+        isAdmin && {
             id: "rebuildIndex",
             name: translations.REBUILD_INDEX,
             icon: <RefreshIcon />,
@@ -518,7 +522,7 @@ export default function Research() {
             onClick: handlePrint,
             location: "header"
         }
-    ], [translations, buildIndex, indexing, searchCollapsed, handlePrint]);
+    ], [translations, buildIndex, indexing, searchCollapsed, handlePrint, isAdmin]);
 
     useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
