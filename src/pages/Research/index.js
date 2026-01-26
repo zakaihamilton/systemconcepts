@@ -112,10 +112,6 @@ export default function Research() {
         }, 500);
     }, []);
 
-
-
-
-
     const setRowHeight = useCallback((index, height) => {
         if (rowHeights.current[index] !== height) {
             rowHeights.current[index] = height;
@@ -124,13 +120,6 @@ export default function Research() {
             }
         }
     }, []);
-
-
-    useEffect(() => {
-        if (_loaded) {
-            setAppliedFilterTags(filterTags);
-        }
-    }, [_loaded, filterTags]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         isMounted.current = true;
@@ -444,11 +433,11 @@ export default function Research() {
 
     const filteredResults = useMemo(() => {
         let res;
-        if (!filterTags.length) {
+        if (!appliedFilterTags.length) {
             res = results;
         } else {
             res = results.filter(doc => {
-                return filterTags.every(filter => {
+                return appliedFilterTags.every(filter => {
                     if (typeof filter === 'string') {
                         return LibraryTagKeys.some(key => {
                             const val = doc.tag?.[key];
@@ -461,7 +450,7 @@ export default function Research() {
             });
         }
         return res;
-    }, [results, filterTags]);
+    }, [results, appliedFilterTags]);
 
     const pathItems = usePathItems();
 
@@ -678,7 +667,17 @@ export default function Research() {
                                     value.map((option, index) => {
                                         const { key, ...tagProps } = getTagProps({ index });
                                         const label = typeof option === 'string' ? option : option.label;
-                                        return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
+                                        const type = typeof option === 'string' ? "" : (translations[option.type.toUpperCase()] || option.type);
+                                        return (
+                                            <Box key={key} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mr: 0.5, my: 0.5 }}>
+                                                {type && (
+                                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', mt: 0.25, textTransform: 'capitalize', fontWeight: 'bold' }}>
+                                                        {type}
+                                                    </Typography>
+                                                )}
+                                                <Chip variant="outlined" label={label} size="small" {...tagProps} />
+                                            </Box>
+                                        );
                                     })
                                 }
                                 renderInput={(params) => (
