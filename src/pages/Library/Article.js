@@ -126,9 +126,8 @@ function Article({
     const handleJump = useCallback((type, value) => {
         setJumpDialogOpen(false);
         setTimeout(() => {
-            if (contentRef.current) {
-                contentRef.current.focus();
-            }
+            if (!contentRef.current) return;
+            contentRef.current.focus();
             if (type === 'paragraph') {
                 let element = contentRef.current.querySelector(`[data-paragraph-index="${value}"]`);
                 if (!element) {
@@ -153,7 +152,7 @@ function Article({
                     }, 2000);
                 }
             } else if (type === 'page') {
-                if (contentRef.current && scrollInfo.clientHeight > 0) {
+                if (scrollInfo.clientHeight > 0) {
                     const scrollTop = (value - 1) * scrollInfo.clientHeight;
                     contentRef.current.scrollTo({ top: scrollTop, behavior: 'smooth' });
                 }
