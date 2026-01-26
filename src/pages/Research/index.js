@@ -76,6 +76,7 @@ export default function Research() {
     const [printing, setPrinting] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [printRoot, setPrintRoot] = useState(null);
+    const [filterInput, setFilterInput] = useState("");
     const isJumping = useRef(false);
     const jumpTimeout = useRef(null);
     const currentPageRef = useRef(1);
@@ -129,7 +130,7 @@ export default function Research() {
         if (_loaded) {
             setAppliedFilterTags(filterTags);
         }
-    }, [_loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [_loaded, filterTags]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         isMounted.current = true;
@@ -157,11 +158,16 @@ export default function Research() {
                 const unique = new Set();
                 tags.forEach(tag => {
                     LibraryTagKeys.forEach(key => {
-                        if (tag[key]) unique.add(String(tag[key]).trim());
+                        if (tag[key]) {
+                            const label = String(tag[key]).trim();
+                            unique.add(JSON.stringify({ label, type: key }));
+                        }
                     });
                 });
                 if (isMounted.current) {
-                    setAvailableFilters(Array.from(unique).sort());
+                    const filters = Array.from(unique).map(s => JSON.parse(s));
+                    filters.sort((a, b) => a.label.localeCompare(b.label));
+                    setAvailableFilters(filters);
                     LibraryStore.update(s => {
                         s.tags = tags;
                     });
@@ -375,7 +381,6 @@ export default function Research() {
                 ResearchStore.update(s => {
                     s.results = resultsWithTerms;
                     s.highlight = uniqueTerms;
-                    s.highlight = uniqueTerms;
                     s.hasSearched = true;
                 });
                 if (!isRestoring && listRef.current) {
@@ -409,6 +414,8 @@ export default function Research() {
 
     const handleClear = useCallback(() => {
         setQuery("");
+        setFilterTags([]);
+        setFilterInput("");
         ResearchStore.update(s => {
             s.results = [];
             s.highlight = [];
@@ -437,17 +444,24 @@ export default function Research() {
 
     const filteredResults = useMemo(() => {
         let res;
-        if (!appliedFilterTags.length) {
+        if (!filterTags.length) {
             res = results;
         } else {
             res = results.filter(doc => {
-                return appliedFilterTags.every(filter => {
-                    return LibraryTagKeys.some(key => doc.tag[key] === filter);
+                return filterTags.every(filter => {
+                    if (typeof filter === 'string') {
+                        return LibraryTagKeys.some(key => {
+                            const val = doc.tag?.[key];
+                            return val && String(val).trim() === filter;
+                        });
+                    }
+                    const val = doc.tag?.[filter.type];
+                    return val && String(val).trim() === filter.label;
                 });
             });
         }
         return res;
-    }, [results, appliedFilterTags]);
+    }, [results, filterTags]);
 
     const pathItems = usePathItems();
 
@@ -626,15 +640,45 @@ export default function Research() {
                                 multiple
                                 className={styles.autocomplete}
                                 options={availableFilters}
-                                freeSolo
+                                inputValue={filterInput}
+                                onInputChange={(event, newInputValue) => {
+                                    setFilterInput(newInputValue);
+                                }}
+                                filterOptions={(options, { inputValue }) => {
+                                    const lowerInput = inputValue.toLowerCase().trim();
+                                    if (!lowerInput) return options;
+                                    return options.filter(option => {
+                                        const label = (option.label || "").toLowerCase();
+                                        const type = (option.type || "").toLowerCase();
+                                        const translatedType = (translations[option.type?.toUpperCase()] || "").toLowerCase();
+                                        return label.includes(lowerInput) || type.includes(lowerInput) || translatedType.includes(lowerInput);
+                                    });
+                                }}
+                                isOptionEqualToValue={(option, value) => {
+                                    return option.label === value.label && option.type === value.type;
+                                }}
+                                getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+                                renderOption={(props, option) => {
+                                    const { key, ...otherProps } = props;
+                                    return (
+                                        <li key={`${option.type}-${option.label}`} {...otherProps}>
+                                            <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1, color: 'text.secondary', textTransform: 'capitalize', width: '85px', display: 'inline-block', flexShrink: 0 }}>
+                                                {translations[option.type.toUpperCase()] || option.type}
+                                            </Typography>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
                                 value={filterTags}
                                 onChange={(event, newValue) => {
                                     setFilterTags(newValue);
+                                    setFilterInput("");
                                 }}
                                 renderTags={(value, getTagProps) =>
                                     value.map((option, index) => {
                                         const { key, ...tagProps } = getTagProps({ index });
-                                        return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
+                                        const label = typeof option === 'string' ? option : `${translations[option.type.toUpperCase()] || option.type} ${option.label}`;
+                                        return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
                                     })
                                 }
                                 renderInput={(params) => (

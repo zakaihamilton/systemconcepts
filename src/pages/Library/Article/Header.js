@@ -13,6 +13,7 @@ export default function Header({
     isHeaderHidden,
     showAbbreviations,
     title,
+    translations,
     currentParagraphIndex,
     onTitleClick
 }) {
@@ -80,7 +81,7 @@ export default function Header({
                                     const Icon = LibraryIcons[key];
                                     const expansion = abbreviations[value];
                                     const displayValue = (!showAbbreviations && expansion) ? expansion.eng : value;
-                                    const label = key.charAt(0).toUpperCase() + key.slice(1);
+                                    const label = translations?.[key.toUpperCase()] || key.charAt(0).toUpperCase() + key.slice(1);
 
                                     return (
                                         <Tooltip key={key} title={`${label}: ${displayValue}`} arrow>
@@ -93,9 +94,12 @@ export default function Header({
                                                 aria-label={`${label}: ${displayValue}`}
                                                 onClick={() => navigator.clipboard.writeText(displayValue)}
                                                 onKeyDown={(e) => handleTagKeyPress(e, displayValue)}
-                                                sx={{ cursor: "pointer" }}
+                                                sx={{ cursor: "pointer", display: 'flex', alignItems: 'center' }}
                                             >
                                                 {Icon && <Icon sx={{ fontSize: "1rem" }} aria-hidden="true" />}
+                                                <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1, color: 'text.secondary', width: '70px', flexShrink: 0 }}>
+                                                    {label}
+                                                </Typography>
                                                 <Typography variant="caption">{displayValue}</Typography>
                                             </Paper>
                                         </Tooltip>
