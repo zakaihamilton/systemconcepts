@@ -162,6 +162,9 @@ export default function Research() {
                 });
                 if (isMounted.current) {
                     setAvailableFilters(Array.from(unique).sort());
+                    LibraryStore.update(s => {
+                        s.tags = tags;
+                    });
                 }
             }
         } catch (err) {
@@ -238,7 +241,7 @@ export default function Research() {
             const isV3 = indexData.v === 3;
 
             for (const group of groups) {
-                const groupTerms = group.split(/\s+/).filter(t => t !== "AND" && t !== "OR").map(t => t.toLowerCase());
+                const groupTerms = group.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(t => t !== "and" && t !== "or").filter(Boolean);
                 if (groupTerms.length === 0) continue;
                 searchTerms.push(...groupTerms);
 
