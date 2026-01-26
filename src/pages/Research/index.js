@@ -628,7 +628,7 @@ export default function Research() {
                             <Autocomplete
                                 multiple
                                 className={styles.autocomplete}
-                                options={availableFilters}
+                                options={availableFilters.filter(option => !filterTags.some(tag => tag.label === option.label && tag.type === option.type))}
                                 inputValue={filterInput}
                                 onInputChange={(event, newInputValue) => {
                                     setFilterInput(newInputValue);
