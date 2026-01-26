@@ -75,6 +75,7 @@ export default function TableWidget(props) {
         getSeparator,
         renderColumn,
         rowClassName,
+        emptyLabel,
         ...otherProps
     } = props;
     const translations = useTranslations();
@@ -564,7 +565,7 @@ export default function TableWidget(props) {
     const numItems = items && items.length;
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
-    const emptyElement = <Message Icon={InfoIcon} label={translations.NO_ITEMS} />;
+    const emptyElement = <Message Icon={InfoIcon} label={emptyLabel || translations.NO_ITEMS} />;
 
     if (viewMode === "list") {
         const itemCount = hideColumns ? numItems : numItems + 1;

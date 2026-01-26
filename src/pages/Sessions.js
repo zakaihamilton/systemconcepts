@@ -463,6 +463,7 @@ export default function SessionsPage() {
             getSeparator={getSeparator}
             renderColumn={renderColumn}
             rowClassName={item => item.isPlaying ? styles.playing : null}
+            emptyLabel={syncBusy ? translations.SYNCING + "..." : translations.NO_ITEMS}
         />
 
         {!!isMobile && <FilterBar />}
