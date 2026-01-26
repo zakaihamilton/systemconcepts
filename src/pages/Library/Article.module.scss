@@ -290,6 +290,8 @@
         display: block;
         transform: none !important;
         opacity: 1 !important;
+        break-after: avoid;
+        page-break-after: avoid;
     }
 
     .stickyHeader>*:not(.headerInfo):not(.headerContent) {
@@ -349,6 +351,8 @@
         height: auto !important;
         display: block !important;
         flex: none !important;
+        break-before: avoid;
+        page-break-before: avoid;
     }
 
     .contentWrapper {

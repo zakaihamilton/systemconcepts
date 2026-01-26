@@ -210,11 +210,6 @@
         width: 100%;
         height: auto;
 
-        // Hide the internal Article header to avoid duplication
-        :global([class*="Article_stickyHeader"]) {
-            display: none !important;
-        }
-
         // Force Article components to flow naturally instead of stacking absolutely
         :global([class*="Article_root"]) {
             position: relative !important;
