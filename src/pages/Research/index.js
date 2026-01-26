@@ -677,7 +677,7 @@ export default function Research() {
                                 renderTags={(value, getTagProps) =>
                                     value.map((option, index) => {
                                         const { key, ...tagProps } = getTagProps({ index });
-                                        const label = typeof option === 'string' ? option : `${translations[option.type.toUpperCase()] || option.type} ${option.label}`;
+                                        const label = typeof option === 'string' ? option : option.label;
                                         return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
                                     })
                                 }

@@ -97,9 +97,6 @@ export default function Header({
                                                 sx={{ cursor: "pointer", display: 'flex', alignItems: 'center' }}
                                             >
                                                 {Icon && <Icon sx={{ fontSize: "1rem" }} aria-hidden="true" />}
-                                                <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1, color: 'text.secondary', width: '70px', flexShrink: 0 }}>
-                                                    {label}
-                                                </Typography>
                                                 <Typography variant="caption">{displayValue}</Typography>
                                             </Paper>
                                         </Tooltip>
