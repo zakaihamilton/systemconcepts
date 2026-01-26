@@ -378,7 +378,7 @@ export default function Research() {
                     s.highlight = uniqueTerms;
                     s.hasSearched = true;
                 });
-                if (!isRestoring && isDifferentSearch && listRef.current) {
+                if (!isRestoring && listRef.current) {
                     listRef.current.scrollToItem(0, "start");
                 }
             }
@@ -613,7 +613,7 @@ export default function Research() {
                         <Button
                             variant="contained"
                             onClick={handleSearch}
-                            disabled={indexing || searching || !indexData || (query === lastSearch.query && JSON.stringify(filterTags) === JSON.stringify(lastSearch.filterTags))}
+                            disabled={indexing || searching || !indexData}
                             className={styles.searchButton}
                         >
                             {translations.SEARCH}
