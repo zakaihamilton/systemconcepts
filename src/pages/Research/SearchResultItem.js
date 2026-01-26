@@ -26,8 +26,9 @@ const SearchResultItem = ({ index, style, data }) => {
 
     // Transform text: use shared normalization to match indexing
     const content = useMemo(() => {
-        if (!doc?.text) return "";
-        return normalizeContent(doc.text);
+        if (doc?.text) return normalizeContent(doc.text);
+        if (doc?.paragraphs) return doc.paragraphs.join("\n\n");
+        return "";
     }, [doc]);
     // filteredParagraphs contains 1-based indices of paragraphs to display
     const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc]);

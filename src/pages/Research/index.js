@@ -16,7 +16,6 @@ import IconButton from "@mui/material/IconButton";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
-import Fade from "@mui/material/Fade";
 import { makePath } from "@util/path";
 import storage from "@util/storage";
 import { SyncActiveStore } from "@sync/syncState";
@@ -68,7 +67,7 @@ export default function Research() {
     const deviceType = useDeviceType();
     const isMobile = deviceType !== "desktop";
     const outerRef = useRef(null);
-    const [scrollPages, setScrollPages] = useState({ current: 1, total: 1, visible: false });
+    const [scrollPages, setScrollPages] = useState({ page: 1, count: 1, visible: false });
     const scrollTimeoutRef = useRef(null);
     const [lastSearch, setLastSearch] = useState({ query: "", filterTags: [] });
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
@@ -86,8 +85,8 @@ export default function Research() {
     const isAdmin = roleAuth(role, "admin");
 
     useEffect(() => {
-        currentPageRef.current = scrollPages.current;
-    }, [scrollPages.current]);
+        currentPageRef.current = scrollPages.page;
+    }, [scrollPages.page]);
 
     useEffect(() => {
         let element = document.getElementById("print-root");
@@ -229,10 +228,12 @@ export default function Research() {
         try {
             const groups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
             const searchTerms = [];
-            let finalRefs = new Set(); // Stores "docId:paraIndex"
+            let finalRefs = new Set(); // Stores "docId:paraIndex" or "fileIndex:paraIndex"
 
             const totalSteps = groups.reduce((acc, g) => acc + g.split(/\s+/).filter(t => t !== "AND" && t !== "OR").length, 0) + 1;
             let currentStep = 0;
+
+            const isV2 = indexData.v === 2;
 
             for (const group of groups) {
                 const groupTerms = group.split(/\s+/).filter(t => t !== "AND" && t !== "OR").map(t => t.toLowerCase());
@@ -244,10 +245,11 @@ export default function Research() {
                 for (const term of groupTerms) {
                     if (!isMounted.current) return;
 
-                    const matchingTokens = Object.keys(indexData.tokens).filter(k => k.includes(term));
+                    const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(term));
                     let termRefs = new Set();
                     matchingTokens.forEach(k => {
-                        indexData.tokens[k].forEach(ref => termRefs.add(ref));
+                        const refs = isV2 ? indexData.t[k] : indexData.tokens[k];
+                        refs.forEach(ref => termRefs.add(ref));
                     });
 
                     if (groupRefs === null) {
@@ -266,8 +268,15 @@ export default function Research() {
                     const verifiedRefs = new Set();
                     [...groupRefs].forEach(ref => {
                         const [docId, paraIndex] = ref.split(':');
-                        const doc = indexData.files[docId];
-                        const paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
+                        let paragraph = null;
+                        if (isV2) {
+                            const fileIndex = parseInt(docId, 10);
+                            paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
+                        } else {
+                            const doc = indexData.files[docId];
+                            paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
+                        }
+
                         if (paragraph) {
                             const paraText = paragraph.toLowerCase();
                             const isMatch = groupTerms.every(term => {
@@ -281,8 +290,6 @@ export default function Research() {
                             if (isMatch) {
                                 verifiedRefs.add(ref);
                             }
-                        } else {
-                            console.warn(`[Research] Missing paragraph for ref ${ref}`);
                         }
                     });
 
@@ -292,22 +299,45 @@ export default function Research() {
 
             // Group by doc
             const groupedResults = {};
+            const libraryTags = LibraryStore.getRawState().tags;
+
             [...finalRefs].forEach(ref => {
                 const [docId, paraIndex] = ref.split(':');
                 if (!groupedResults[docId]) {
-                    const doc = indexData.files[docId];
+                    let doc = null;
+                    if (isV2) {
+                        const fileIndex = parseInt(docId, 10);
+                        const tagId = indexData.f[fileIndex];
+                        const tag = libraryTags.find(t => t._id === tagId);
+                        if (tag) {
+                            doc = {
+                                docId: tagId,
+                                tag,
+                                paragraphs: indexData.d[fileIndex],
+                                matches: []
+                            };
+                        }
+                    } else {
+                        const v1Doc = indexData.files[docId];
+                        if (v1Doc) {
+                            doc = {
+                                ...v1Doc,
+                                docId,
+                                matches: []
+                            };
+                        }
+                    }
+
                     if (doc) {
-                        groupedResults[docId] = {
-                            ...doc,
-                            docId,
-                            matches: []
-                        };
+                        groupedResults[docId] = doc;
                     }
                 }
+
                 if (groupedResults[docId]) {
+                    const idx = parseInt(paraIndex, 10);
                     groupedResults[docId].matches.push({
-                        index: parseInt(paraIndex, 10),
-                        text: indexData.files[docId].paragraphs[parseInt(paraIndex, 10)]
+                        index: idx,
+                        text: groupedResults[docId].paragraphs[idx]
                     });
                 }
             });
@@ -468,7 +498,7 @@ export default function Research() {
             }
             initialUrlHandled.current = true;
         }
-    }, [pathItems, filteredResults]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [pathItems, filteredResults]);
 
     const getItemSize = useCallback((index) => {
         if (rowHeights.current[index]) return rowHeights.current[index];
@@ -639,14 +669,14 @@ export default function Research() {
                         ref={listRef}
                         outerRef={outerRef}
                         onItemsRendered={({ visibleStartIndex }) => {
-                            const current = visibleStartIndex + 1;
-                            const total = filteredResults.length;
+                            const page = visibleStartIndex + 1;
+                            const count = filteredResults.length;
                             setScrollPages(prev => {
-                                if (prev.current === current && prev.total === total && prev.visible === true) return prev;
-                                return { ...prev, current, total, visible: true };
+                                if (prev.page === page && prev.count === count && prev.visible === true) return prev;
+                                return { ...prev, page, count, visible: true };
                             });
 
-                            const currentPath = `research:${current}`;
+                            const currentPath = `research:${page}`;
                             if (!isJumping.current && pathItems[0] !== currentPath && initialUrlHandled.current) {
                                 pendingPathRef.current = currentPath;
                                 setPath(currentPath);
@@ -676,8 +706,8 @@ export default function Research() {
                     </VariableSizeList>
                     <ScrollToTop show={showScrollTop} onClick={scrollToTop} translations={translations} />
                     <PageIndicator
-                        current={scrollPages.current}
-                        total={scrollPages.total}
+                        current={scrollPages.page}
+                        total={scrollPages.count}
                         visible={scrollPages.visible}
                         translations={translations}
                         label={translations.ARTICLE}

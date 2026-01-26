@@ -57,15 +57,14 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
     const localFiles = await getLocalFiles(localPath);
     progress.completeStep('getLocalFiles');
 
-    // Step 2
-    progress.updateProgress('updateLocalManifest', { processed: 0, total: 1 });
-    let localManifest = await updateLocalManifest(localFiles, localPath);
-    progress.completeStep('updateLocalManifest');
-
-    // Step 3
+    // Step 2 & 3: Sync manifests
     progress.updateProgress('syncManifest', { processed: 0, total: 1 });
     let remoteManifest = await syncManifest(remotePath);
     progress.completeStep('syncManifest');
+
+    progress.updateProgress('updateLocalManifest', { processed: 0, total: 1 });
+    let localManifest = await updateLocalManifest(localFiles, localPath, remoteManifest);
+    progress.completeStep('updateLocalManifest');
 
     // Step 4
     progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });

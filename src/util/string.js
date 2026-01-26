@@ -69,7 +69,7 @@ export function normalizeContent(text) {
         processed = processed.replace(/\n+/g, (match) => match.length === 1 ? "\n\n" : match);
 
         // Ensure headers are followed by double newlines to match indexing split
-        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line, newline) => {
+        processed = processed.replace(/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm, (match, line) => {
             const trimmed = line.trim();
             if (!trimmed) return match;
             if (trimmed.endsWith('.')) return match;

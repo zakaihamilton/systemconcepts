@@ -346,7 +346,7 @@ function Article({
             }
         };
         window.addEventListener("message", cleanup);
-    }, [contentRef]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [contentRef]);
 
     const handleExport = useCallback(() => {
         if (!selectedTag || !content) return;
@@ -474,7 +474,7 @@ function Article({
         }
 
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, prevArticle, nextArticle, onPrev, onNext, isMobile, embedded]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, prevArticle, nextArticle, onPrev, onNext, isMobile, embedded]);
 
     const swipeHandlers = useSwipe({
         onSwipeLeft: onNext,

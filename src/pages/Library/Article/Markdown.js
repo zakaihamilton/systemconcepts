@@ -71,12 +71,10 @@ const Term = ({ term, entry, search }) => {
     React.useLayoutEffect(() => {
         if (hover && tooltipRef.current && containerRef.current && !isMeasured) {
             const rect = containerRef.current.getBoundingClientRect();
-            const tooltipRect = tooltipRef.current.getBoundingClientRect();
 
             // Use offsetHeight to avoid transform scaling issues (animation)
             const tooltipHeight = tooltipRef.current.offsetHeight;
             const spaceTop = rect.top;
-            const spaceBottom = window.innerHeight - rect.bottom;
 
             const scrollX = window.scrollX;
             const scrollY = window.scrollY;

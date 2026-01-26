@@ -34,11 +34,12 @@ async function computeFileInfo(file) {
  * Step 2: Update local manifest with file hashes
  * Uses parallel batch processing for performance
  */
-export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PATH) {
+export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PATH, remoteManifest = []) {
     const start = performance.now();
     addSyncLog("Step 2: Updating local manifest...", "info");
 
     const localManifestPath = makePath(localPath, FILES_MANIFEST);
+    const remoteManifestMap = new Map(remoteManifest.map(f => [f.path, f]));
 
     try {
         let manifest = [];
@@ -88,11 +89,15 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
         for (const { file, info } of fileInfos) {
             if (!manifestMap.has(file.path)) {
                 // New file
+                const remoteEntry = remoteManifestMap.get(file.path);
+                const remoteVer = remoteEntry ? (parseInt(remoteEntry.version) || 0) : 0;
+                const newVer = remoteVer + 1;
+
                 const newEntry = {
                     path: file.path,
                     hash: info.hash,
                     size: info.size,
-                    version: "1"
+                    version: newVer.toString()
                 };
                 manifest.push(newEntry);
                 manifestMap.set(file.path, newEntry);
@@ -102,11 +107,16 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
                 // Existing file - check if modified
                 const existingEntry = manifestMap.get(file.path);
                 if (existingEntry.hash !== info.hash) {
+                    const localVer = parseInt(existingEntry.version) || 0;
+                    const remoteEntry = remoteManifestMap.get(file.path);
+                    const remoteVer = remoteEntry ? (parseInt(remoteEntry.version) || 0) : 0;
+                    const newVer = Math.max(localVer, remoteVer) + 1;
+
                     existingEntry.hash = info.hash;
                     existingEntry.size = info.size;
-                    existingEntry.version = (parseInt(existingEntry.version) + 1).toString();
+                    existingEntry.version = newVer.toString();
                     changed = true;
-                    console.log(`[Sync] Updated file in manifest (version incremented): ${file.path}`);
+                    console.log(`[Sync] Updated file in manifest (version incremented to ${newVer}): ${file.path}`);
                 }
             }
         }

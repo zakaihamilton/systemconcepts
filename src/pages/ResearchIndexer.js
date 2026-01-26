@@ -6,8 +6,73 @@ import { useTranslations } from "@util/translations";
 import { ResearchStore } from "./ResearchStore";
 import { useLocalStorage } from "@util/store";
 import { normalizeContent } from "@util/string";
+import pLimit from "@util/p-limit";
+
+const limit = pLimit(20);
 
 const INDEX_FILE = "search_index.json";
+
+// Split by double newlines, but preserve code blocks
+const splitSmart = (txt) => {
+    const chunks = [];
+    let remaining = txt;
+    while (remaining) {
+        const fenceIdx = remaining.indexOf("```");
+        if (fenceIdx === -1) {
+            const parts = remaining.split(/\n\n+/).filter(p => p.trim());
+            chunks.push(...parts);
+            break;
+        }
+        const before = remaining.substring(0, fenceIdx);
+        if (before.trim()) {
+            const parts = before.split(/\n\n+/).filter(p => p.trim());
+            chunks.push(...parts);
+        }
+        const openFenceEnd = remaining.indexOf("\n", fenceIdx);
+        if (openFenceEnd === -1) {
+            chunks.push(remaining.substring(fenceIdx));
+            break;
+        }
+        const closeFenceIdx = remaining.indexOf("```", openFenceEnd);
+        if (closeFenceIdx === -1) {
+            chunks.push(remaining.substring(fenceIdx));
+            break;
+        }
+        let closeFenceEnd = remaining.indexOf("\n", closeFenceIdx);
+        if (closeFenceEnd === -1) closeFenceEnd = remaining.length;
+        const codeBlock = remaining.substring(fenceIdx, closeFenceEnd);
+        chunks.push(codeBlock);
+        remaining = remaining.substring(closeFenceEnd).trimStart();
+    }
+    return chunks;
+};
+
+const mergeChunks = (chunks) => {
+    if (chunks.length === 0) return chunks;
+    const merged = [chunks[0]];
+    const getType = (text) => {
+        const firstLine = text.split('\n')[0].trim();
+        if (/^```/.test(firstLine)) return 'code';
+        if (/^[-*]\s/.test(firstLine)) return 'ul';
+        if (/^>\s/.test(firstLine)) return 'quote';
+        if (/^\d+\.\s/.test(firstLine)) return 'ol';
+        return 'text';
+    };
+    for (let i = 1; i < chunks.length; i++) {
+        const prev = merged[merged.length - 1];
+        const curr = chunks[i];
+        const prevLastLine = prev.split('\n').pop().trim();
+        const currFirstLine = curr.split('\n')[0].trim();
+        const prevType = getType(prevLastLine);
+        const currType = getType(currFirstLine);
+        if (prevType === currType && ['ul', 'ol', 'quote'].includes(currType)) {
+            merged[merged.length - 1] += "\n\n" + curr;
+        } else {
+            merged.push(curr);
+        }
+    }
+    return merged;
+};
 
 export default function ResearchIndexer() {
     const translations = useTranslations();
@@ -45,175 +110,83 @@ export default function ResearchIndexer() {
             const tags = JSON.parse(tagsContent);
 
             const newIndex = {
+                v: 2,
                 timestamp: Date.now(),
-                files: {},
-                tokens: {}
+                f: [], // file IDs
+                d: {}, // doc paragraphs: { fileIndex: [paragraphs] }
+                t: {}  // tokens: { token: ["fileIndex:paraIndex"] }
             };
 
-            const total = tags.length;
-            let current = 0;
+            const tagsByPath = {};
+            tags.forEach(tag => {
+                if (!tagsByPath[tag.path]) tagsByPath[tag.path] = [];
+                tagsByPath[tag.path].push(tag);
+            });
 
-            for (const tag of tags) {
-                if (!isMounted.current) break;
+            const uniquePaths = Object.keys(tagsByPath);
+            const totalPaths = uniquePaths.length;
+            let pathsProcessed = 0;
 
-                const progressVal = (current / total) * 100;
-                ResearchStore.update(s => {
-                    s.progress = progressVal;
-                });
+            const processPath = async (path) => {
+                if (!isMounted.current) return;
 
-                const filePath = makePath(LIBRARY_LOCAL_PATH, tag.path);
+                const filePath = makePath(LIBRARY_LOCAL_PATH, path);
+                const pathTags = tagsByPath[path];
 
                 try {
                     if (await storage.exists(filePath)) {
                         const fileContent = await storage.readFile(filePath);
                         let data = JSON.parse(fileContent);
 
-                        let item = null;
-                        if (Array.isArray(data)) {
-                            item = data.find(i => i._id === tag._id);
-                        } else if (data._id === tag._id) {
-                            item = data;
-                        }
+                        for (const tag of pathTags) {
+                            let item = null;
+                            if (Array.isArray(data)) {
+                                item = data.find(i => i._id === tag._id);
+                            } else if (data._id === tag._id) {
+                                item = data;
+                            }
 
-                        if (item && item.text) {
-                            const text = item.text;
-                            // Store metadata and original text
-                            newIndex.files[tag._id] = {
-                                title: tag.title || tag.chapter || "Untitled",
-                                tag: tag,
-                                text: text, // Store original text for display
-                                paragraphs: []
-                            };
+                            if (item && item.text) {
+                                const text = item.text;
+                                const processed = normalizeContent(text);
+                                const rawChunks = splitSmart(processed);
+                                const paragraphs = mergeChunks(rawChunks);
 
-                            // Store original text for display
-                            // Pre-normalize here to query paragraphs correctly
-                            // We do normalizing TWICE (once here, once in SearchResultItem) 
-                            // but splitting must happen on valid markdown
-                            // To avoid double processing and ensure consistency, we use the helper
-                            const processed = normalizeContent(text);
+                                if (paragraphs.length > 0) {
+                                    // Atomic update (no await between these lines)
+                                    const fileIndex = newIndex.f.length;
+                                    newIndex.f.push(tag._id);
+                                    newIndex.d[fileIndex] = paragraphs;
 
-                            // Split by double newlines, but preserve code blocks
-                            const splitSmart = (txt) => {
-                                const chunks = [];
-                                // Regex to match code blocks: ``` ... ``` (lazy)
-                                // or just text chunks separated by \n\n+
-                                // We iterate.
-                                let remaining = txt;
-                                while (remaining) {
-                                    // Find next code fence
-                                    const fenceIdx = remaining.indexOf("```");
-                                    if (fenceIdx === -1) {
-                                        // No more fences, split remainder by \n\n
-                                        const parts = remaining.split(/\n\n+/).filter(p => p.trim());
-                                        chunks.push(...parts);
-                                        break;
-                                    }
+                                    paragraphs.forEach((para, paraIndex) => {
+                                        const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+                                        const uniqueTokens = [...new Set(paraTokens)];
 
-                                    // Content before fence
-                                    const before = remaining.substring(0, fenceIdx);
-                                    if (before.trim()) {
-                                        const parts = before.split(/\n\n+/).filter(p => p.trim());
-                                        chunks.push(...parts);
-                                    }
+                                        if (uniqueTokens.length === 0) return;
 
-                                    // Find end of fence
-                                    // We need to skip the opening backticks
-                                    const openFenceEnd = remaining.indexOf("\n", fenceIdx);
-                                    if (openFenceEnd === -1) {
-                                        // Edge case: fence at end of string?
-                                        chunks.push(remaining.substring(fenceIdx));
-                                        break;
-                                    }
-
-                                    const closeFenceIdx = remaining.indexOf("```", openFenceEnd);
-                                    if (closeFenceIdx === -1) {
-                                        // Unclosed block? Treat as text
-                                        const rest = remaining.substring(fenceIdx);
-                                        // But wait, if we treat as text, subsequent \n\n will split it.
-                                        // Better to treat as one block if it looks like a code block.
-                                        chunks.push(rest);
-                                        break;
-                                    }
-
-                                    // Include closing fence lines
-                                    let closeFenceEnd = remaining.indexOf("\n", closeFenceIdx);
-                                    if (closeFenceEnd === -1) closeFenceEnd = remaining.length;
-
-                                    const codeBlock = remaining.substring(fenceIdx, closeFenceEnd);
-                                    chunks.push(codeBlock);
-
-                                    remaining = remaining.substring(closeFenceEnd).trimStart();
+                                        uniqueTokens.forEach(token => {
+                                            if (!newIndex.t[token]) {
+                                                newIndex.t[token] = [];
+                                            }
+                                            newIndex.t[token].push(`${fileIndex}:${paraIndex}`);
+                                        });
+                                    });
                                 }
-                                return chunks;
-                            };
-
-                            const mergeChunks = (chunks) => {
-                                if (chunks.length === 0) return chunks;
-
-                                const merged = [chunks[0]];
-
-                                // Helper to identify type
-                                const getType = (text) => {
-                                    const firstLine = text.split('\n')[0].trim();
-                                    if (/^```/.test(firstLine)) return 'code';
-                                    if (/^[-*]\s/.test(firstLine)) return 'ul';
-                                    if (/^>\s/.test(firstLine)) return 'quote';
-                                    if (/^\d+\.\s/.test(firstLine)) return 'ol';
-                                    return 'text';
-                                };
-
-                                for (let i = 1; i < chunks.length; i++) {
-                                    const prev = merged[merged.length - 1];
-                                    const curr = chunks[i];
-
-                                    const prevLastLine = prev.split('\n').pop().trim();
-                                    const currFirstLine = curr.split('\n')[0].trim();
-
-                                    const prevType = getType(prevLastLine);
-                                    const currType = getType(currFirstLine);
-
-                                    // Check strictly if types match and are list/quote
-                                    if (prevType === currType && ['ul', 'ol', 'quote'].includes(currType)) {
-                                        merged[merged.length - 1] += "\n\n" + curr;
-                                    } else {
-                                        merged.push(curr);
-                                    }
-                                }
-                                return merged;
-                            };
-
-                            const rawChunks = splitSmart(processed);
-                            const paragraphs = mergeChunks(rawChunks);
-
-                            paragraphs.forEach((para, paraIndex) => {
-
-                                const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-                                const uniqueTokens = [...new Set(paraTokens)];
-
-                                if (uniqueTokens.length === 0) return;
-
-                                // Add to file data
-                                newIndex.files[tag._id].paragraphs.push(para);
-
-                                // Add to token index
-                                uniqueTokens.forEach(token => {
-                                    if (!newIndex.tokens[token]) {
-                                        newIndex.tokens[token] = [];
-                                    }
-                                    // Store reference as "docId:paraIndex"
-                                    newIndex.tokens[token].push(`${tag._id}:${paraIndex}`);
-                                });
-                            });
-                            // Store lengths for end indicator check
-                            newIndex.files[tag._id].totalParagraphs = paragraphs.length;
+                            }
                         }
                     }
                 } catch (err) {
-                    console.warn(`Failed to index file for tag ${tag._id}:`, err);
+                    console.warn(`Failed to index file at ${path}:`, err);
                 }
 
-                current++;
-            }
+                pathsProcessed++;
+                const progressVal = (pathsProcessed / totalPaths) * 100;
+                ResearchStore.update(s => {
+                    s.progress = progressVal;
+                });
+            };
+
+            await Promise.all(uniquePaths.map(path => limit(() => processPath(path))));
 
             if (isMounted.current) {
                 const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
