@@ -203,7 +203,8 @@ export default function Research() {
         }
     }, [libraryUpdateCounter, loadIndex, loadTags]);
 
-    const handleSearch = useCallback(async () => {
+    const handleSearch = useCallback(async (isRestoring = false) => {
+        const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
         const currentSearch = { query, filterTags };
         setLastSearch(currentSearch);
         setAppliedFilterTags(filterTags);
@@ -360,8 +361,12 @@ export default function Research() {
                 ResearchStore.update(s => {
                     s.results = resultsWithTerms;
                     s.highlight = uniqueTerms;
+                    s.highlight = uniqueTerms;
                     s.hasSearched = true;
                 });
+                if (!isRestoring && isDifferentSearch && listRef.current) {
+                    listRef.current.scrollToItem(0, "start");
+                }
             }
         } catch (err) {
             console.error("Search failed:", err);
@@ -377,14 +382,14 @@ export default function Research() {
             }
         }
 
-    }, [indexData, query, setResults, filterTags]);
+    }, [indexData, query, setResults, filterTags, lastSearch]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
     useEffect(() => {
         if (_loaded && query && indexData && !hasSearched && !searching && !initialSearchDone.current) {
             initialSearchDone.current = true;
-            handleSearch();
+            handleSearch(true);
         }
     }, [_loaded, indexData, hasSearched, searching, handleSearch, query]);
 
@@ -721,6 +726,18 @@ export default function Research() {
                     />
                 </Box>
             )}
+
+            {useEffect(() => {
+                if (hasSearched && filteredResults.length > 0) {
+                    setScrollPages(prev => ({ ...prev, visible: true }));
+                    if (scrollTimeoutRef.current) {
+                        clearTimeout(scrollTimeoutRef.current);
+                    }
+                    scrollTimeoutRef.current = setTimeout(() => {
+                        setScrollPages(prev => ({ ...prev, visible: false }));
+                    }, 1500);
+                }
+            }, [hasSearched, filteredResults]) || null}
 
 
 
