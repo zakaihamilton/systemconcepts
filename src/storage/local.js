@@ -1,11 +1,14 @@
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
 import { makePath } from "@util/path";
+import pLimit from "@util/p-limit";
+
+
 
 const fs = process.browser && new FS("systemconcepts-fs");
 
 async function getListing(path, options = {}) {
     const { useCount } = options;
-    let listing = [];
+
     let names = [];
     try {
         names = await fs.promises.readdir(path);
@@ -13,7 +16,8 @@ async function getListing(path, options = {}) {
     catch {
         return [];
     }
-    for (const name of names) {
+    const limit = pLimit(20);
+    const items = await Promise.all(names.map(name => limit(async () => {
         const item = {};
         const itemPath = makePath(path, name);
         try {
@@ -42,13 +46,14 @@ async function getListing(path, options = {}) {
             item.mtimeMs = mtimeMs || 0;
             item.id = item.path = makePath("local", itemPath);
             item.name = name;
-            listing.push(item);
+            return item;
         }
         catch (err) {
             console.error(err);
+            return null;
         }
-    }
-    return listing;
+    })));
+    return items.filter(Boolean);
 }
 
 async function createFolder(path) {
@@ -214,19 +219,22 @@ export async function clear() {
 }
 
 async function getRecursiveList(path) {
-    let listing = [];
-    const items = await getListing(path);
-    for (const item of items) {
+    const limit = pLimit(10);
+    const listing = [];
+
+    const processItem = async (item) => {
         if (item.type === "dir") {
-            // item.path is in format "/local/sync/subfolder"
-            // We need to pass just the filesystem path: "/sync/subfolder" (keep leading /)
             const pathWithoutDevice = item.path.replace(/^\/local/, "");
-            const children = await getRecursiveList(pathWithoutDevice);
-            listing.push(...children);
+            const children = await limit(() => getListing(pathWithoutDevice));
+            await Promise.all(children.map(child => processItem(child)));
         } else {
             listing.push(item);
         }
-    }
+    };
+
+    const rootItems = await limit(() => getListing(path));
+    await Promise.all(rootItems.map(item => processItem(item)));
+
     return listing;
 }
 

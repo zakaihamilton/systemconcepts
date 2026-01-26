@@ -2,6 +2,7 @@ import { fetchJSON, fetchText, fetchBlob } from "@util/fetch";
 import { makePath } from "@util/path";
 import { isBinaryFile } from "@util/path";
 import { binaryToString } from "@util/binary";
+import pLimit from "@util/p-limit";
 
 const fsEndPoint = "/api/aws";
 
@@ -193,6 +194,8 @@ async function getRecursiveList(path) {
 
     const MAX_DEPTH = 10;
 
+    const limit = pLimit(10);
+
     const addListing = async (dirPath, depth = 0) => {
         if (depth > MAX_DEPTH) {
             console.warn(`[AWS Storage] Max depth exceeded for: ${dirPath}`);
@@ -209,13 +212,16 @@ async function getRecursiveList(path) {
         visitedPaths.add(normalizedDirPath);
 
         try {
-            const items = await getListing(dirPath);
+            const items = await limit(() => getListing(dirPath));
             if (!items || !Array.isArray(items) || items.length === 0) {
                 return;
             }
 
             // Expected path prefix for items (with aws device prefix)
             const expectedPrefix = makePath("aws", normalizedDirPath);
+
+            const fileItems = [];
+            const dirItems = [];
 
             for (const item of items) {
                 // Validate item path belongs to this directory
@@ -226,13 +232,22 @@ async function getRecursiveList(path) {
 
                 const isDir = item.type === "dir" || item.stat?.type === "dir" || item.name?.endsWith("/");
                 if (isDir) {
-                    // item.path has "aws/" prefix from getListing, strip it for recursive call
-                    const itemPathWithoutDevice = item.path.replace(/^\/aws\//, "/").replace(/^aws\//, "");
-                    await addListing(itemPathWithoutDevice, depth + 1);
+                    dirItems.push(item);
                 } else {
-                    listing.push(item);
+                    fileItems.push(item);
                 }
             }
+
+            listing.push(...fileItems);
+
+            if (dirItems.length > 0) {
+                await Promise.all(dirItems.map(item => {
+                    // item.path has "aws/" prefix from getListing, strip it for recursive call
+                    const itemPathWithoutDevice = item.path.replace(/^\/aws\//, "/").replace(/^aws\//, "");
+                    return addListing(itemPathWithoutDevice, depth + 1);
+                }));
+            }
+
         } catch (err) {
             console.warn(`[AWS Storage] Failed to list ${dirPath}:`, err.message || err);
         }

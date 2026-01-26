@@ -27,7 +27,9 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH) {
             }
             return {
                 path: relPath,
-                fullPath: item.path
+                fullPath: item.path,
+                size: item.size,
+                mtime: item.mtimeMs
             };
         });
 

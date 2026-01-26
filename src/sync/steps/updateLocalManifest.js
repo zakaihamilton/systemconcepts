@@ -11,6 +11,11 @@ import { lockMutex } from "../mutex";
  */
 async function computeFileInfo(file) {
     try {
+        // Optimization: Check if file needs re-hashing
+        if (file.file && file.info && file.skipHash) {
+            return { file: file.file, info: file.info };
+        }
+
         const unlock = await lockMutex({ id: file.fullPath });
         let content;
         try {
@@ -77,7 +82,28 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
             });
 
             const results = await Promise.all(
-                batch.map(file => computeFileInfo(file))
+                batch.map(file => {
+                    // Check if we can skip hashing
+                    const existingEntry = manifestMap.get(file.path);
+                    if (existingEntry &&
+                        existingEntry.mtime &&
+                        file.mtime &&
+                        Math.abs(existingEntry.mtime - file.mtime) < 1000 && // Tolerance for FS timing diffs
+                        existingEntry.size === file.size
+                    ) {
+                        // File hasn't changed, reuse existing info
+                        return Promise.resolve({
+                            file,
+                            info: {
+                                hash: existingEntry.hash,
+                                size: existingEntry.size
+                            },
+                            skipHash: true
+                        });
+                    }
+                    // Otherwise compute
+                    return computeFileInfo(file);
+                })
             );
 
             fileInfos.push(...results.filter(Boolean));
@@ -97,6 +123,7 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
                     path: file.path,
                     hash: info.hash,
                     size: info.size,
+                    mtime: file.mtime, // Store mtime
                     version: newVer.toString()
                 };
                 manifest.push(newEntry);
@@ -114,6 +141,7 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
 
                     existingEntry.hash = info.hash;
                     existingEntry.size = info.size;
+                    existingEntry.mtime = file.mtime; // Update mtime
                     existingEntry.version = newVer.toString();
                     changed = true;
                     console.log(`[Sync] Updated file in manifest (version incremented to ${newVer}): ${file.path}`);
