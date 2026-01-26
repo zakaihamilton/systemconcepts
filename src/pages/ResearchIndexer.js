@@ -10,6 +10,12 @@ import pLimit from "@util/p-limit";
 
 const limit = pLimit(20);
 
+const STOP_WORDS = new Set([
+    "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it",
+    "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these",
+    "they", "this", "to", "was", "will", "with"
+]);
+
 const INDEX_FILE = "search_index.json";
 
 // Split by double newlines, but preserve code blocks
@@ -110,11 +116,11 @@ export default function ResearchIndexer() {
             const tags = JSON.parse(tagsContent);
 
             const newIndex = {
-                v: 2,
+                v: 3,
                 timestamp: Date.now(),
                 f: [], // file IDs
                 d: {}, // doc paragraphs: { fileIndex: [paragraphs] }
-                t: {}  // tokens: { token: ["fileIndex:paraIndex"] }
+                t: {}  // tokens: { token: [fileIndex, paraIndex, ...] }
             };
 
             const tagsByPath = {};
@@ -159,16 +165,21 @@ export default function ResearchIndexer() {
                                     newIndex.d[fileIndex] = paragraphs;
 
                                     paragraphs.forEach((para, paraIndex) => {
-                                        const paraTokens = para.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+                                        const paraTokens = para.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);
                                         const uniqueTokens = [...new Set(paraTokens)];
 
                                         if (uniqueTokens.length === 0) return;
 
                                         uniqueTokens.forEach(token => {
+                                            // Skip stop words and very short tokens (unless they are numeric)
+                                            if (STOP_WORDS.has(token)) return;
+                                            if (token.length < 3 && !/^\d+$/.test(token)) return;
+
                                             if (!newIndex.t[token]) {
                                                 newIndex.t[token] = [];
                                             }
-                                            newIndex.t[token].push(`${fileIndex}:${paraIndex}`);
+                                            // V3: flat integer array [fileIdx, paraIdx, ...]
+                                            newIndex.t[token].push(fileIndex, paraIndex);
                                         });
                                     });
                                 }
