@@ -230,53 +230,53 @@ export default function Research() {
         await new Promise(resolve => setTimeout(resolve, 0));
 
         try {
-            const groups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
+            const orGroups = query.split(/\s+OR\s+/).map(g => g.trim()).filter(Boolean);
             const searchTerms = [];
-            let finalRefs = new Set(); // Stores "docId:paraIndex" or "fileIndex:paraIndex"
-
-            const totalSteps = groups.reduce((acc, g) => acc + g.split(/\s+/).filter(t => t !== "AND" && t !== "OR").length, 0) + 1;
-            let currentStep = 0;
+            let finalRefs = new Set();
 
             const isV2 = indexData.v === 2;
             const isV3 = indexData.v === 3;
 
-            for (const group of groups) {
-                const groupTerms = group.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(t => t !== "and" && t !== "or").filter(Boolean);
-                if (groupTerms.length === 0) continue;
-                searchTerms.push(...groupTerms);
+            for (const orGroup of orGroups) {
+                const andClauses = orGroup.split(/\s+AND\s+/).map(c => c.trim()).filter(Boolean);
+                if (andClauses.length === 0) continue;
+
+                const parsedAndClauses = andClauses.map(clause => {
+                    const terms = clause.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);
+                    return { raw: clause, terms };
+                });
+
+                const allTokensInGroup = [...new Set(parsedAndClauses.flatMap(c => c.terms))];
+                searchTerms.push(...parsedAndClauses.map(c => c.raw));
 
                 let groupRefs = null;
 
-                for (const term of groupTerms) {
+                for (const token of allTokensInGroup) {
                     if (!isMounted.current) return;
 
-                    const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(term));
-                    let termRefs = new Set();
+                    const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
+                    let tokenRefs = new Set();
                     matchingTokens.forEach(k => {
                         const refs = isV3 ? indexData.t[k] : (isV2 ? indexData.t[k] : indexData.tokens[k]);
                         if (isV3) {
                             for (let i = 0; i < refs.length; i += 2) {
-                                termRefs.add(`${refs[i]}:${refs[i + 1]}`);
+                                tokenRefs.add(`${refs[i]}:${refs[i + 1]}`);
                             }
                         } else {
-                            refs.forEach(ref => termRefs.add(ref));
+                            refs.forEach(ref => tokenRefs.add(ref));
                         }
                     });
 
                     if (groupRefs === null) {
-                        groupRefs = termRefs;
+                        groupRefs = tokenRefs;
                     } else {
-                        groupRefs = new Set([...groupRefs].filter(x => termRefs.has(x)));
+                        groupRefs = new Set([...groupRefs].filter(x => tokenRefs.has(x)));
                     }
-
-                    currentStep++;
-                    setSearchProgress((currentStep / totalSteps) * 100);
-                    await new Promise(resolve => setTimeout(resolve, 0));
                 }
 
                 if (groupRefs) {
                     // Final verification: ensure the matching paragraph actually contains all of the search terms
-                    const verifiedRefs = new Set();
+                    // and phrases are adjacent
                     [...groupRefs].forEach(ref => {
                         const [docId, paraIndex] = ref.split(':');
                         let paragraph = null;
@@ -290,21 +290,32 @@ export default function Research() {
 
                         if (paragraph) {
                             const paraText = paragraph.toLowerCase();
-                            const isMatch = groupTerms.every(term => {
-                                if (/^[a-z0-9]+$/i.test(term)) {
-                                    const regex = new RegExp(`\\b${term}\\b`, 'i');
+                            const isMatch = parsedAndClauses.every(clause => {
+                                if (clause.terms.length === 0) return true;
+                                if (clause.terms.length === 1) {
+                                    const term = clause.terms[0];
+                                    if (/^[a-z0-9]+$/i.test(term)) {
+                                        const regex = new RegExp(`\\b${term}\\b`, 'i');
+                                        return regex.test(paraText);
+                                    }
+                                    return paraText.includes(term);
+                                } else {
+                                    // Phrase adjacency check
+                                    // Escape terms for regex and join with anything non-alphanumeric
+                                    const phraseRegexStr = clause.terms.map(t => {
+                                        return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                    }).join('[^a-z0-9\u0590-\u05FF]+');
+
+                                    const regex = new RegExp(`\\b${phraseRegexStr}\\b`, 'i');
                                     return regex.test(paraText);
                                 }
-                                return paraText.includes(term);
                             });
 
                             if (isMatch) {
-                                verifiedRefs.add(ref);
+                                finalRefs.add(ref);
                             }
                         }
                     });
-
-                    verifiedRefs.forEach(ref => finalRefs.add(ref));
                 }
             }
 
