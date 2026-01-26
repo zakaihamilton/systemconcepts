@@ -774,7 +774,7 @@ export default function Research() {
                         <div key={doc.docId || index} className={styles.printItem}>
                             <Article
                                 selectedTag={doc.tag}
-                                content={doc.content || normalizeContent(doc.text)} // handle potential missing content prop
+                                content={doc.text ? normalizeContent(doc.text) : (doc.paragraphs ? doc.paragraphs.join("\n\n") : "")}
                                 filteredParagraphs={doc.matches?.map(m => m.index + 1) || []}
                                 embedded={true}
                                 hidePlayer={true}

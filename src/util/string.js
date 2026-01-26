@@ -58,6 +58,7 @@ export function copyToClipboard(text) {
 }
 
 export function normalizeContent(text) {
+    if (typeof text !== "string") return "";
     // Split by code blocks to protect them from normalization
     const parts = text.split(/(```[\s\S]*?```)/g);
 
