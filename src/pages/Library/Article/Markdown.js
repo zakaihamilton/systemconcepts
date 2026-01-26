@@ -37,6 +37,7 @@ const Term = ({ term, entry, search }) => {
 
     const handleMouseEnter = () => {
         hoverTimeoutRef.current = setTimeout(() => {
+            setPlacement('top');
             setHover(true);
             setIsMeasured(false); // Reset measurement state
         }, 300); // 300ms delay
@@ -72,7 +73,8 @@ const Term = ({ term, entry, search }) => {
             const rect = containerRef.current.getBoundingClientRect();
             const tooltipRect = tooltipRef.current.getBoundingClientRect();
 
-            const tooltipHeight = tooltipRect.height;
+            // Use offsetHeight to avoid transform scaling issues (animation)
+            const tooltipHeight = tooltipRef.current.offsetHeight;
             const spaceTop = rect.top;
             const spaceBottom = window.innerHeight - rect.bottom;
 
