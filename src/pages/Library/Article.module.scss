@@ -16,6 +16,16 @@
     margin-left: 0px !important;
 }
 
+.root.embedded {
+    height: auto;
+    width: 100%;
+    margin: 0;
+    overflow: visible;
+    box-shadow: none;
+    background-color: transparent;
+    transition: none;
+}
+
 .stickyHeader {
     position: sticky;
     top: 0px;

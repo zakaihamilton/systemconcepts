@@ -503,7 +503,7 @@ function Article({
     if (!content) return null;
 
     return (
-        <Box component="main" className={[styles.root, embedded && styles.embedded].filter(Boolean).join(" ")} minWidth={0} sx={{ ml: { sm: 2 }, overflow: embedded ? 'visible' : 'hidden !important', position: 'relative', height: embedded ? 'auto' : '100%' }} {...swipeHandlers}>
+        <Box component="main" className={[styles.root, embedded && styles.embedded].filter(Boolean).join(" ")} minWidth={0} sx={{ ml: { sm: 2 }, position: 'relative', height: embedded ? 'auto' : '100%', minHeight: embedded ? 'unset' : undefined }} {...swipeHandlers}>
             {!embedded && (
                 <ArticleToolbar
                     id="Article"
@@ -518,7 +518,7 @@ function Article({
                 tabIndex={-1}
                 onScroll={handleScrollUpdate}
                 onClick={handleClick}
-                sx={{ position: 'relative', height: embedded ? 'auto' : '100%', overflowY: embedded ? 'visible' : 'auto', overflowX: 'hidden', outline: 'none' }}
+                sx={{ position: 'relative', height: embedded ? 'auto' : '100%', overflowY: embedded ? 'visible' : 'auto', overflowX: 'hidden', outline: 'none', display: embedded ? 'block' : 'flex', flexDirection: 'column' }}
             >
                 <PageIndicator scrollInfo={scrollInfo} />
                 {!hideHeader && (

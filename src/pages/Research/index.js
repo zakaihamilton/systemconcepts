@@ -79,6 +79,7 @@ export default function Research() {
     const [filterInput, setFilterInput] = useState("");
     const isJumping = useRef(false);
     const jumpTimeout = useRef(null);
+    const resetTimer = useRef(null);
     const currentPageRef = useRef(1);
     const pendingPathRef = useRef(null);
     const initialUrlHandled = useRef(false);
@@ -116,7 +117,15 @@ export default function Research() {
         if (rowHeights.current[index] !== height) {
             rowHeights.current[index] = height;
             if (listRef.current) {
-                listRef.current.resetAfterIndex(index);
+                if (resetTimer.current) {
+                    clearTimeout(resetTimer.current);
+                }
+                resetTimer.current = setTimeout(() => {
+                    if (listRef.current) {
+                        listRef.current.resetAfterIndex(0);
+                    }
+                    resetTimer.current = null;
+                }, 100);
             }
         }
     }, []);

@@ -15,7 +15,7 @@ const SearchResultItem = ({ index, style, data }) => {
                     const rect = entry.target.getBoundingClientRect();
                     const height = rect.height;
                     if (height > 0) {
-                        setRowHeight(index, height);
+                        setRowHeight(index, height + 4);
                     }
                 }
             });
