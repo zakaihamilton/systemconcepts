@@ -9,7 +9,7 @@ const PageIndicator = React.memo(({ current, total, visible, translations, label
                 className={["print-hidden", styles.pageIndicator].join(" ")}
             >
                 <div className={styles.pageIndicatorText}>
-                    {label || translations.PAGE || "Page"} {current} / {total}
+                    {label || translations.PAGE} {current} / {total}
                 </div>
             </div>
         </Fade>
