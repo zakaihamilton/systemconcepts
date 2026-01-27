@@ -404,9 +404,21 @@ export default function Research() {
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
     useEffect(() => {
-        if (_loaded && query && indexData && !hasSearched && !searching && !initialSearchDone.current) {
+        if (!_loaded) {
+            return;
+        }
+        if (initialSearchDone.current) {
+            return;
+        }
+        if (!query) {
             initialSearchDone.current = true;
-            handleSearch(true);
+            return;
+        }
+        if (indexData) {
+            initialSearchDone.current = true;
+            if (!hasSearched && !searching) {
+                handleSearch(true);
+            }
         }
     }, [_loaded, indexData, hasSearched, searching, handleSearch, query]);
 
