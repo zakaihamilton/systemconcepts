@@ -262,7 +262,7 @@ export default function Research() {
                     const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
                     let tokenRefs = new Set();
                     matchingTokens.forEach(k => {
-                        const refs = (isV3 || isV4) ? indexData.t[k] : (isV2 ? indexData.t[k] : indexData.tokens[k]);
+                        const refs = (isV2 || isV3 || isV4) ? indexData.t[k] : indexData.tokens[k];
                         if (isV4) {
                             let currentFileIndex = -1;
                             for (let i = 0; i < refs.length; i++) {
