@@ -234,6 +234,9 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 
     async function writeFile(path, body = "") {
         path = makePath(path);
+        if (Buffer.isBuffer(body) || body instanceof Uint8Array) {
+            body = Buffer.from(body).toString("base64");
+        }
         await fetchJSON(fsEndPoint, {
             method: "PUT",
             body: JSON.stringify([{

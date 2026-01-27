@@ -93,6 +93,21 @@ export function validatePathAccess(path) {
     }
 }
 
+export async function streamUpload({ req, path }) {
+    const s3 = await getS3({});
+    const contentLength = req.headers["content-length"];
+    const uploadParams = {
+        Bucket: process.env.AWS_BUCKET,
+        Key: normalizePath(path),
+        Body: req,
+        ACL: "public-read"
+    };
+    if (contentLength) {
+        uploadParams.ContentLength = parseInt(contentLength, 10);
+    }
+    return await s3.send(new PutObjectCommand(uploadParams));
+}
+
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
     const s3 = await getS3({});
 

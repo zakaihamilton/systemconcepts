@@ -180,6 +180,9 @@ async function readFiles(prefix, files) {
 
 async function writeFile(path, body) {
     path = makePath(path);
+    if (Buffer.isBuffer(body) || body instanceof Uint8Array) {
+        return await fs.promises.writeFile(path, body);
+    }
     return await fs.promises.writeFile(path, body, "utf8");
 }
 

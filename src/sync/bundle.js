@@ -122,9 +122,8 @@ export async function writeCompressedFile(path, data, folderCache = null) {
             const compressed = compressJSON(data);
             const buffer = Buffer.from(compressed);
 
-            // Both local and AWS need base64 encoding for .gz files
-            const base64 = buffer.toString('base64');
-            await storage.writeFile(path, base64);
+            // Pass buffer directly to storage (storage adapter handles encoding if needed)
+            await storage.writeFile(path, buffer);
         }
     } catch (err) {
         console.error(`[Bundle] Error writing file ${path}:`, err);

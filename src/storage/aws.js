@@ -147,14 +147,24 @@ async function readFiles(prefix, files) {
 
 async function writeFile(path, body) {
     path = makePath(path);
-    await fetchJSON(fsEndPoint, {
-        method: "PUT",
-        cache: "no-store",
-        body: JSON.stringify([{
-            path,
+    if (Buffer.isBuffer(body) || body instanceof Uint8Array) {
+        const encodedPath = encodeURIComponent(path.slice(1));
+        await fetchJSON(`/api/aws_upload?path=${encodedPath}`, {
+            method: "PUT",
+            cache: "no-store",
+            headers: { "Content-Type": "application/octet-stream" },
             body
-        }])
-    });
+        });
+    } else {
+        await fetchJSON(fsEndPoint, {
+            method: "PUT",
+            cache: "no-store",
+            body: JSON.stringify([{
+                path,
+                body
+            }])
+        });
+    }
 }
 
 async function writeFiles(prefix, files) {
