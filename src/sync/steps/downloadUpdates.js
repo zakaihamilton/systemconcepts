@@ -2,7 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST, FILES_MANIFEST_GZ, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
-import { readCompressedFile, writeCompressedFile } from "../bundle";
+import { readCompressedFile, readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 import { SyncActiveStore } from "../syncState";
@@ -17,15 +17,15 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
     let remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
 
     try {
-        let data = await readCompressedFile(remoteFilePath);
+        let content = await readCompressedFileRaw(remoteFilePath);
 
-        if (!data) {
+        if (content === null) {
             // Try without .gz extension
             remoteFilePath = makePath(remotePath, fileBasename);
-            data = await readCompressedFile(remoteFilePath);
+            content = await readCompressedFileRaw(remoteFilePath);
         }
 
-        if (!data) return null;
+        if (content === null) return null;
 
         if (createdFolders) {
             const folder = localFilePath.substring(0, localFilePath.lastIndexOf("/"));
@@ -36,7 +36,16 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
         } else {
             await storage.createFolderPath(localFilePath);
         }
-        const content = JSON.stringify(data, null, 4);
+
+        // Only parse and re-stringify small files to keep them pretty-printed
+        if (content.length < 500 * 1024) { // 500KB
+            try {
+                const obj = JSON.parse(content);
+                content = JSON.stringify(obj, null, 4);
+            } catch (e) {
+                // Ignore parse errors, just write as is
+            }
+        }
 
         const unlock = await lockMutex({ id: localFilePath });
         try {
