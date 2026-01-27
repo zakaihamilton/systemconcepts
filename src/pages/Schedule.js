@@ -27,6 +27,7 @@ import TracksView from "@pages/Schedule/TracksView";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { PlayerStore } from "@pages/Player";
+import { SyncActiveStore } from "@sync/syncState";
 
 export const ScheduleStore = new Store({
     date: null,
@@ -53,6 +54,26 @@ export default function SchedulePage() {
         date = new Date();
     }
     useLocalStorage("ScheduleStore", ScheduleStore, ["viewMode", "lastViewMode", "showBadges"]);
+
+    // Watch for sync completion and reload sessions if needed
+    const needsSessionReload = SyncActiveStore.useState(s => s.needsSessionReload);
+    const syncBusy = SyncActiveStore.useState(s => s.busy);
+
+    useEffect(() => {
+        // Only reload after sync completes (not during)
+        if (needsSessionReload && !syncBusy) {
+            // Force session reload by clearing sessions and marking as not busy
+            // This will trigger the useSessions hook to reload data
+            SessionsStore.update(s => {
+                s.sessions = null;
+                s.busy = false;
+            });
+            // Clear the flag to acknowledge the reload
+            SyncActiveStore.update(s => {
+                s.needsSessionReload = false;
+            });
+        }
+    }, [needsSessionReload, syncBusy]);
 
     const viewOptions = [
         {
