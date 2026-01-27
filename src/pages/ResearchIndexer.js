@@ -13,7 +13,14 @@ const limit = pLimit(20);
 const STOP_WORDS = new Set([
     "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it",
     "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these",
-    "they", "this", "to", "was", "will", "with"
+    "they", "this", "to", "was", "will", "with", "i", "me", "my", "myself", "we", "our", "ours", "ourselves",
+    "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers",
+    "herself", "its", "itself", "them", "theirs", "themselves", "what", "which", "who", "whom", "am", "were",
+    "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "because", "until", "while",
+    "about", "against", "between", "through", "during", "before", "after", "above", "below", "from", "up",
+    "down", "out", "off", "over", "under", "again", "further", "once", "here", "when", "where", "why", "how",
+    "all", "any", "both", "each", "few", "more", "most", "other", "some", "nor", "only", "own", "same", "so",
+    "than", "too", "very", "can", "just", "don", "should", "now"
 ]);
 
 const INDEX_FILE = "search_index.json";
@@ -116,7 +123,7 @@ export default function ResearchIndexer() {
             const tags = JSON.parse(tagsContent);
 
             const newIndex = {
-                v: 3,
+                v: 4,
                 timestamp: Date.now(),
                 f: [], // file IDs
                 d: {}, // doc paragraphs: { fileIndex: [paragraphs] }
@@ -178,7 +185,8 @@ export default function ResearchIndexer() {
                                             if (!newIndex.t[token]) {
                                                 newIndex.t[token] = [];
                                             }
-                                            // V3: flat integer array [fileIdx, paraIdx, ...]
+                                            // Initially populate as flat array [fileIdx, paraIdx, ...]
+                                            // We will compress this structure after processing all files
                                             newIndex.t[token].push(fileIndex, paraIndex);
                                         });
                                     });
@@ -199,7 +207,36 @@ export default function ResearchIndexer() {
 
             await Promise.all(uniquePaths.map(path => limit(() => processPath(path))));
 
+            // Post-processing: Compress index to V4 format
             if (isMounted.current) {
+                ResearchStore.update(s => { s.status = translations.OPTIMIZING_INDEX || "Optimizing index..."; });
+
+                Object.keys(newIndex.t).forEach(token => {
+                    const refs = newIndex.t[token];
+                    // refs is [f, p, f, p, ...]
+                    // Group by file
+                    const fileMap = new Map(); // fileIndex -> [paraIndices]
+                    for (let i = 0; i < refs.length; i += 2) {
+                        const f = refs[i];
+                        const p = refs[i+1];
+                        if (!fileMap.has(f)) fileMap.set(f, []);
+                        fileMap.get(f).push(p);
+                    }
+
+                    const compressed = [];
+                    // Sort by file index to ensure consistent ordering
+                    const sortedFiles = Array.from(fileMap.keys()).sort((a, b) => a - b);
+
+                    for (const f of sortedFiles) {
+                        // File header: negative value -(fileIndex + 1)
+                        compressed.push(-(f + 1));
+                        // Sort paragraph indices
+                        const paras = fileMap.get(f).sort((a, b) => a - b);
+                        compressed.push(...paras);
+                    }
+                    newIndex.t[token] = compressed;
+                });
+
                 const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
                 await storage.createFolderPath(indexPath);
                 await storage.writeFile(indexPath, JSON.stringify(newIndex));

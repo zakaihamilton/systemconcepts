@@ -240,6 +240,7 @@ export default function Research() {
 
             const isV2 = indexData.v === 2;
             const isV3 = indexData.v === 3;
+            const isV4 = indexData.v === 4;
 
             for (const orGroup of orGroups) {
                 const andClauses = orGroup.split(/\s+AND\s+/).map(c => c.trim()).filter(Boolean);
@@ -261,8 +262,20 @@ export default function Research() {
                     const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
                     let tokenRefs = new Set();
                     matchingTokens.forEach(k => {
-                        const refs = isV3 ? indexData.t[k] : (isV2 ? indexData.t[k] : indexData.tokens[k]);
-                        if (isV3) {
+                        const refs = (isV2 || isV3 || isV4) ? indexData.t[k] : indexData.tokens[k];
+                        if (isV4) {
+                            let currentFileIndex = -1;
+                            for (let i = 0; i < refs.length; i++) {
+                                const val = refs[i];
+                                if (val < 0) {
+                                    currentFileIndex = -val - 1;
+                                } else {
+                                    if (currentFileIndex !== -1) {
+                                        tokenRefs.add(`${currentFileIndex}:${val}`);
+                                    }
+                                }
+                            }
+                        } else if (isV3) {
                             for (let i = 0; i < refs.length; i += 2) {
                                 tokenRefs.add(`${refs[i]}:${refs[i + 1]}`);
                             }
@@ -284,7 +297,7 @@ export default function Research() {
                     [...groupRefs].forEach(ref => {
                         const [docId, paraIndex] = ref.split(':');
                         let paragraph = null;
-                        if (isV3 || isV2) {
+                        if (isV3 || isV2 || isV4) {
                             const fileIndex = parseInt(docId, 10);
                             paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
                         } else {
@@ -331,7 +344,7 @@ export default function Research() {
                 const [docId, paraIndex] = ref.split(':');
                 if (!groupedResults[docId]) {
                     let doc = null;
-                    if (isV3 || isV2) {
+                    if (isV3 || isV2 || isV4) {
                         const fileIndex = parseInt(docId, 10);
                         const tagId = indexData.f[fileIndex];
                         const tag = libraryTags.find(t => t._id === tagId);
