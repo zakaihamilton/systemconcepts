@@ -34,7 +34,21 @@ export default async function LOGIN_API(req, res) {
             res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
             res.setHeader("Pragma", "no-cache");
             res.setHeader("Expires", "0");
-            res.status(200).json({ ...(error && { err: getSafeError(error) }), ...params });
+
+            // SENTINEL: Whitelist fields to prevent leaking sensitive data like reset tokens or internal IDs
+            const safeParams = {};
+            if (params && params.id) {
+                safeParams.id = params.id;
+                // Note: The 'hash' is required for the legacy session system which uses the password hash as a session token.
+                // Refactoring this is a larger task (Issue: #LegacyAuth). For now, we must return it.
+                safeParams.hash = params.hash;
+                safeParams.role = params.role;
+                safeParams.firstName = params.firstName;
+                safeParams.lastName = params.lastName;
+                safeParams.email = params.email;
+            }
+
+            res.status(200).json({ ...(error && { err: getSafeError(error) }), ...safeParams });
         }
     }
     else if (req.method === "PUT") {
