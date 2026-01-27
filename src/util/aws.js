@@ -57,7 +57,9 @@ export async function getS3({
                 accessKeyId,
                 secretAccessKey
             },
-            forcePathStyle: true // Often needed for custom S3 endpoints (MinIO/DigitalOcean/etc)
+            forcePathStyle: true, // Often needed for custom S3 endpoints (MinIO/DigitalOcean/etc)
+            requestChecksumCalculation: "WHEN_REQUIRED",
+            responseChecksumValidation: "WHEN_REQUIRED"
         });
     }
     unlock();

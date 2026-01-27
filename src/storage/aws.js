@@ -155,7 +155,7 @@ async function writeFile(path, body) {
         });
         await fetch(url, {
             method: "PUT",
-            body: isBinaryFile(path) ? stringToBinary(body) : body
+            body
         });
     }
     else {
