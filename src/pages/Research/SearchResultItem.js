@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useMemo } from "react";
-import styles from "./Research.module.scss";
+import styles from "./SearchResultItem.module.scss";
 import Article from "@pages/Library/Article";
 import { normalizeContent } from "@util/string";
 
@@ -39,7 +39,7 @@ const SearchResultItem = ({ index, style, data }) => {
 
     return (
         <div style={style}>
-            <div ref={rowRef} className={!isLast ? styles.articleSeparator : ''}>
+            <div ref={rowRef} className={!isLast ? styles.separator : ''}>
                 <Article
                     selectedTag={doc.tag}
                     content={content}
