@@ -149,12 +149,17 @@ async function writeFile(path, body) {
     path = makePath(path);
     if (Buffer.isBuffer(body) || body instanceof Uint8Array) {
         const encodedPath = encodeURIComponent(path.slice(1));
-        await fetchJSON(`/api/aws_upload?path=${encodedPath}`, {
-            method: "PUT",
-            cache: "no-store",
-            headers: { "Content-Type": "application/octet-stream" },
-            body
+        const { signedUrl } = await fetchJSON(`/api/aws_upload?path=${encodedPath}`, {
+            method: "GET",
+            cache: "no-store"
         });
+        if (signedUrl) {
+            await fetch(signedUrl, {
+                method: "PUT",
+                headers: { "Content-Type": "application/octet-stream" },
+                body
+            });
+        }
     } else {
         await fetchJSON(fsEndPoint, {
             method: "PUT",

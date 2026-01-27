@@ -1,4 +1,4 @@
-import { streamUpload } from "@util/aws";
+import { getSignedUploadUrl } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
@@ -6,8 +6,8 @@ import { getSafeError } from "@util/safeError";
 
 export default async function AWS_UPLOAD_API(req, res) {
     try {
-        if (req.method !== "PUT") {
-            res.setHeader("Allow", "PUT");
+        if (req.method !== "GET") {
+            res.setHeader("Allow", "GET");
             res.status(405).end("Method Not Allowed");
             return;
         }
@@ -58,19 +58,12 @@ export default async function AWS_UPLOAD_API(req, res) {
             throw { message: "READ_ONLY_ACCESS", status: 403 };
         }
 
-        await streamUpload({ req, path });
+        const signedUrl = await getSignedUploadUrl({ path, contentType: "application/octet-stream" });
 
-        res.status(200).json({ success: true });
+        res.status(200).json({ signedUrl });
 
     } catch (err) {
         console.error("aws upload error: ", err);
         res.status(403).json({ err: getSafeError(err) });
     }
 }
-
-export const config = {
-    api: {
-        bodyParser: false,
-        responseLimit: false,
-    }
-};

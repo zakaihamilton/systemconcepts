@@ -7,6 +7,7 @@ import {
     HeadObjectCommand,
     ListObjectsV2Command
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { lockMutex } from "@sync/mutex";
 import fs from "fs";
 import { makePath, isBinaryFile } from "@util/path";
@@ -93,19 +94,15 @@ export function validatePathAccess(path) {
     }
 }
 
-export async function streamUpload({ req, path }) {
+export async function getSignedUploadUrl({ path, contentType }) {
     const s3 = await getS3({});
-    const contentLength = req.headers["content-length"];
-    const uploadParams = {
+    const command = new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET,
         Key: normalizePath(path),
-        Body: req,
-        ACL: "public-read"
-    };
-    if (contentLength) {
-        uploadParams.ContentLength = parseInt(contentLength, 10);
-    }
-    return await s3.send(new PutObjectCommand(uploadParams));
+        ACL: "public-read",
+        ContentType: contentType
+    });
+    return await getSignedUrl(s3, command, { expiresIn: 3600 });
 }
 
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
