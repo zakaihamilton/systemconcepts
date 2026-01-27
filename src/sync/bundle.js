@@ -24,39 +24,38 @@ export function decompressJSON(buffer) {
 }
 
 /**
- * Read and decompress a file (handles .gz and .json)
+ * Read and decompress a file (handles .gz and .json) returning the raw string content
  * @param {string} path - Path to the file
- * @returns {Object|null} - Parsed JSON data or null if file doesn't exist
+ * @returns {string|null} - Raw string content or null if file doesn't exist
  */
-export async function readCompressedFile(path) {
+export async function readCompressedFileRaw(path) {
     path = makePath(path);
     try {
         if (!await storage.exists(path)) {
             return null;
         }
-        console.log("Reading file", path);
+        // console.log("Reading file", path);
         const data = await storage.readFile(path);
         if (data === undefined || data === null || data === "") {
             return null;
         }
 
         if (path.endsWith(".json")) {
-            return typeof data === "string" ? JSON.parse(data) : data;
+            if (typeof data === "string") return data;
+            if (Buffer.isBuffer(data)) return data.toString('utf8');
+            return JSON.stringify(data);
         }
 
-        if (typeof data === "string") {
-            try {
-                // Try parsing as raw JSON first
-                return JSON.parse(data);
-            } catch {
-                // Not raw JSON, continue with base64/gzip
-            }
-        }
-
-        // All storage returns base64 string (both local and AWS)
         let buffer;
         if (typeof data === 'string') {
             try {
+                // If it looks like JSON, return it directly
+                // This mimics the behavior of trying JSON.parse first
+                const trimmed = data.trim();
+                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                    return data;
+                }
+
                 // Debug logging for invalid data
                 if (!data || data.length === 0) {
                     console.error(`[Bundle] Empty data string for ${path}`);
@@ -77,12 +76,11 @@ export async function readCompressedFile(path) {
         }
 
         try {
-            return decompressJSON(buffer);
+            return pako.ungzip(buffer, { to: 'string' });
         } catch (e) {
             try {
                 const text = new TextDecoder("utf-8").decode(buffer);
-                const json = JSON.parse(text);
-                return json;
+                return text;
             } catch {
                 console.error(`[Bundle] Failed to decompress ${path}: ${e.message || e}`);
                 return null;
@@ -90,6 +88,22 @@ export async function readCompressedFile(path) {
         }
     } catch (err) {
         console.error(`[Bundle] Error reading file ${path}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Read and decompress a file (handles .gz and .json)
+ * @param {string} path - Path to the file
+ * @returns {Object|null} - Parsed JSON data or null if file doesn't exist
+ */
+export async function readCompressedFile(path) {
+    const content = await readCompressedFileRaw(path);
+    if (content === null) return null;
+    try {
+        return JSON.parse(content);
+    } catch (e) {
+        console.error(`[Bundle] Failed to parse JSON for ${path}:`, e.message);
         return null;
     }
 }
