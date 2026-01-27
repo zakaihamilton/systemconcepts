@@ -48,7 +48,7 @@ export default async function AWS_UPLOAD_API(req, res) {
                 readOnly = false;
             } else {
                 console.log(`[AWS UPLOAD API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
-                throw new Error(`ACCESS_DENIED: ${user.id} cannot write to this path: ${path}`);
+                throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
             }
         } else {
             throw "ACCESS_DENIED: " + user.id + " is not authorized";
@@ -64,12 +64,13 @@ export default async function AWS_UPLOAD_API(req, res) {
 
     } catch (err) {
         console.error("aws upload error: ", err);
-        res.status(err.status || 403).json({ err: getSafeError(err.message || err) });
+        res.status(403).json({ err: getSafeError(err) });
     }
 }
 
 export const config = {
     api: {
         bodyParser: false,
+        responseLimit: false,
     }
 };
