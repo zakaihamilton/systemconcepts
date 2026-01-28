@@ -109,6 +109,9 @@ export default function ItemMenuWidget({ item, readOnly }) {
                     s.severity = "error";
                     s.onDone = async select => {
                         for (const item of select) {
+                            if (!item) {
+                                continue;
+                            }
                             try {
                                 if (item.type === "dir") {
                                     await storage.deleteFolder(item.path);
