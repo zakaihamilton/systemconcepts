@@ -60,7 +60,7 @@ async function deleteFolder(root) {
     const listing = await getListing(root);
     for (const item of listing) {
         const path = [root, item.name].filter(Boolean).join("/");
-        if (item.stat.type === "dir") {
+        if ((item.stat?.type === "dir") || item.type === "dir") {
             await deleteFolder(path);
         }
         else {
