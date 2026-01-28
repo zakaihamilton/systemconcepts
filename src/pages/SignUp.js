@@ -130,7 +130,11 @@ export default function SignUp() {
                 {inProgress && <LinearProgress className={styles.progress} />}
                 <div className={styles.header}>
                     <Tooltip title={translations.BACK} arrow>
-                        <IconButton className={clsx(styles.backButton, direction === "rtl" && styles.rtl)} onClick={() => setHash("account")}>
+                        <IconButton
+                            className={clsx(styles.backButton, direction === "rtl" && styles.rtl)}
+                            onClick={() => setHash("account")}
+                            aria-label={translations.BACK}
+                        >
                             <ArrowBackIcon />
                         </IconButton>
                     </Tooltip>
