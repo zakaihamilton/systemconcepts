@@ -15,7 +15,7 @@ import { usePageVisibility } from "@util/hooks";
 import { useFile } from "@util/storage";
 import Button from "@mui/material/Button";
 
-import { useMediaSession } from "@util/useMediaSession";
+import { useMediaSession } from "@util/mediaSession";
 
 const skipPoints = 10;
 
