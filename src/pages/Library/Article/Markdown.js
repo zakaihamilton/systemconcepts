@@ -824,6 +824,48 @@ export default React.memo(function Markdown({ children, search, currentParagraph
     }, []);
 
     const markdownComponents = useMemo(() => {
+        // Extract plain text from children for TTS
+        const extractText = (child) => {
+            if (typeof child === 'string') return child;
+            if (Array.isArray(child)) return child.map(extractText).join('');
+            if (React.isValidElement(child)) {
+                const props = child.props;
+                if (props?.className && typeof props.className === 'string' &&
+                    props.className.includes('glossary-main-text')) {
+                    return props.children || '';
+                }
+                if (props?.className && typeof props.className === 'string' &&
+                    props.className.includes('glossary-annotation')) {
+                    return '';
+                }
+                return extractText(props.children);
+            }
+            return '';
+        };
+
+        const getSpokenText = (text) => {
+            if (!text) return text;
+            return text.replace(termPattern, (match, capture, offset, string) => {
+                // Skip lowercase 'or'
+                if (match === 'or') {
+                    return match;
+                }
+                // Skip 'Or' at the start of a sentence
+                if (match === 'Or') {
+                    const isStartOfSentence = (offset === 0) || /[\.\!\?]\s+$/.test(string.slice(0, offset));
+                    if (isStartOfSentence) {
+                        return match;
+                    }
+                }
+                const lowerMatch = match.toLowerCase();
+                const entry = glossary[lowerMatch];
+                if (entry && entry.en) {
+                    return entry.en;
+                }
+                return match;
+            });
+        };
+
         const HeaderRenderer = (tag) => {
             const Header = ({ node, children }) => {
                 const paragraphIndex = node?.properties?.dataParagraphIndex;
@@ -832,6 +874,8 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
                 const needsGap = currentIndex > 0 && (paragraphIndex - filteredParagraphs[currentIndex - 1] > 1);
 
+                const rawText = extractText(children);
+                const paragraphText = getSpokenText(rawText);
                 const paragraphSelected = currentParagraphIndex === paragraphIndex;
                 return (
                     <React.Fragment>
@@ -853,6 +897,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                                 borderRadius: '8px'
                             }}
                             data-paragraph-index={paragraphIndex}
+                            data-paragraph-text={paragraphText}
                         >
                             <TextRenderer>{children}</TextRenderer>
                         </Box>
@@ -872,26 +917,8 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
             if (!children || (Array.isArray(children) && children.length === 0)) return null;
 
-            // Extract plain text from children for TTS
-            const extractText = (child) => {
-                if (typeof child === 'string') return child;
-                if (Array.isArray(child)) return child.map(extractText).join('');
-                if (React.isValidElement(child)) {
-                    const props = child.props;
-                    if (props?.className && typeof props.className === 'string' &&
-                        props.className.includes('glossary-main-text')) {
-                        return props.children || '';
-                    }
-                    if (props?.className && typeof props.className === 'string' &&
-                        props.className.includes('glossary-annotation')) {
-                        return '';
-                    }
-                    return extractText(props.children);
-                }
-                return '';
-            };
-
-            const paragraphText = extractText(children);
+            const rawText = extractText(children);
+            const paragraphText = getSpokenText(rawText);
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
 
             const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
