@@ -948,7 +948,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                     if (!isVisible) return null;
                 }
 
-                return <Tag>{children}</Tag>;
+                return <Tag data-paragraph-index={paragraphIndex} data-paragraph-span={span}>{children}</Tag>;
             };
             Renderer.displayName = `BlockRenderer${Tag}`;
             return Renderer;
@@ -964,7 +964,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                     if (!isVisible) return null;
                 }
 
-                return <Tag />;
+                return <Tag data-paragraph-index={paragraphIndex} data-paragraph-span={span} />;
             };
             Renderer.displayName = `VoidRenderer${Tag}`;
             return Renderer;
