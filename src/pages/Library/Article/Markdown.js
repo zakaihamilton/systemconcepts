@@ -507,7 +507,7 @@ const rehypeArticleEnrichment = () => {
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
-                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "ul" || node.tagName === "ol" || node.tagName === "blockquote" || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
+                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
                     paragraphIndex++;
                     node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
                     newNodes.push(node);

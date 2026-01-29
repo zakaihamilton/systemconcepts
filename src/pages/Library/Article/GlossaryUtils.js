@@ -49,37 +49,9 @@ export function scanForTerms(text) {
         const trimmed = line.trim();
         if (!trimmed) return;
 
-        // Determine if this line is a "Paragraph" that gets an index in the UI
-        // Logic must match Markdown.js rendering behavior
-
-        let isParagraph = true;
-
-        // 1. Check for Explicit Headers (#)
-        if (/^#+\s/.test(trimmed)) {
-            isParagraph = false;
-        }
-
-        // 2. Check for Bullet Lists (*, -, +). Note: Numbered lists are converted to paragraphs in Markdown.js, so they COUNT.
-        // We ensure it's a list marker followed by space
-        else if (/^[\*\-\+]\s/.test(trimmed)) {
-            isParagraph = false;
-        }
-
-        // 3. Check for Heuristic Headers (matches Markdown.js logic)
-        // Start of line, Uppercase, No period at end, < 80 chars
-        // Negative lookahead for #, -, *, digit to ensure not already a header or list
-        else if (/^(?!#|-|\*|\d)(?=[A-Z])(.*?)(?:\r?\n|$)/.test(line)) {
-            // Strictly check the same conditions as Markdown.js
-            if (!trimmed.endsWith('.') && trimmed.length <= 80) {
-                isParagraph = false;
-            }
-        }
-
-        if (!isParagraph) {
-            // If it's not a paragraph (e.g. Header), we skip associating it with a number
-            // because the UI doesn't assign indices to headers, so we can't jump to them.
-            return;
-        }
+        // All non-empty lines are counted as "paragraphs" (or indexed items) to match refined Markdown.js logic.
+        // Markdown.js converts single newlines to Paragraph breaks, so each line becomes a p (or h/etc).
+        // Containers (ul, ol, blockquote) are no longer indexed in Markdown.js, so line-by-line counting works.
 
         paragraphIndex++;
         const currentParagraphNumber = paragraphIndex;

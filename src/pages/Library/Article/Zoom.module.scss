@@ -1,26 +1,26 @@
-.root {
+.root.root {
     padding: 1rem;
     border: 3px solid var(--border-color);
     border-radius: 12px;
 }
 
-.itemWrapper {
+.itemWrapper.itemWrapper {
     position: relative;
     padding-right: 48px;
 }
 
-.item {
+.item.item {
     line-height: 3;
     font-size: 1.4rem;
 }
 
-.copyButton {
+.copyButton.copyButton {
     position: absolute;
     bottom: 0px;
     right: 0px;
 }
 
-.badge {
+.badge.badge {
     pointer-events: none;
     cursor: default;
 }
