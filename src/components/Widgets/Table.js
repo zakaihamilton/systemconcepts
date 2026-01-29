@@ -520,13 +520,22 @@ export default function TableWidget(props) {
                 top: 0, left: 0, width: "100%", height: itemHeightInPixels + "px"
             };
             return <div ref={ref} {...rest}>
-                {!hideColumns && <ListColumns key={0} columns={visibleColumns} style={{ ...style, ...itemStyles }} {...props} />}
+                {!hideColumns && <ListColumns
+                    key={0}
+                    columns={visibleColumns}
+                    style={{ ...style, ...itemStyles }}
+                    {...props}
+                    order={order}
+                    orderBy={orderBy}
+                    onSort={createSortHandler}
+                    showSort={showSort}
+                />}
                 {children}
             </div>;
         });
         Inner.displayName = "innerElementType";
         return Inner;
-    }, [viewMode, viewModes, itemHeightInPixels, hideColumns, visibleColumns]);
+    }, [viewMode, viewModes, itemHeightInPixels, hideColumns, visibleColumns, order, orderBy, createSortHandler, showSort]);
 
     // Delay showing "Loading" to prevent flicker on quick loads
     const [showLoading, setShowLoading] = useState(false);
