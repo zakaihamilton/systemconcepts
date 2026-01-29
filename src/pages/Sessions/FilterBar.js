@@ -36,6 +36,7 @@ export default function FilterBar({ hideYears = false }) {
             id: "thumbnail_header",
             name: translations.THUMBNAIL,
             header: true,
+            highlight: typeFilter.includes("with_thumbnail") || typeFilter.includes("without_thumbnail"),
             expanded: typeFilter.includes("with_thumbnail") || typeFilter.includes("without_thumbnail"),
             items: [
                 { id: "thumbnails_all", name: translations.ALL, radio: true },
@@ -47,6 +48,7 @@ export default function FilterBar({ hideYears = false }) {
             id: "summary_header",
             name: translations.SUMMARY,
             header: true,
+            highlight: typeFilter.includes("with_summary") || typeFilter.includes("without_summary"),
             expanded: typeFilter.includes("with_summary") || typeFilter.includes("without_summary"),
             items: [
                 { id: "summaries_all", name: translations.ALL, radio: true },
@@ -58,6 +60,7 @@ export default function FilterBar({ hideYears = false }) {
             id: "tags_header",
             name: translations.TAGS,
             header: true,
+            highlight: typeFilter.includes("with_tags") || typeFilter.includes("without_tags"),
             expanded: typeFilter.includes("with_tags") || typeFilter.includes("without_tags"),
             items: [
                 { id: "tags_all", name: translations.ALL, radio: true },
@@ -69,6 +72,7 @@ export default function FilterBar({ hideYears = false }) {
             "id": "duration_header",
             "name": translations.DURATION,
             "header": true,
+            highlight: typeFilter.includes("with_duration") || typeFilter.includes("without_duration"),
             "expanded": typeFilter.includes("with_duration") || typeFilter.includes("without_duration"),
             items: [
                 { id: "duration_all", name: translations.ALL, radio: true },
@@ -80,6 +84,7 @@ export default function FilterBar({ hideYears = false }) {
             id: "position_header",
             name: translations.POSITION,
             header: true,
+            highlight: typeFilter.includes("with_position") || typeFilter.includes("without_position"),
             expanded: typeFilter.includes("with_position") || typeFilter.includes("without_position"),
             items: [
                 { id: "position_all", name: translations.ALL, radio: true },
@@ -91,6 +96,7 @@ export default function FilterBar({ hideYears = false }) {
             id: "language_header",
             name: translations.LANGUAGE,
             header: true,
+            highlight: typeFilter.includes("with_english") || typeFilter.includes("with_hebrew"),
             expanded: typeFilter.includes("with_english") || typeFilter.includes("with_hebrew"),
             items: [
                 { id: "languages_all", name: translations.BOTH, radio: true },
@@ -133,13 +139,14 @@ export default function FilterBar({ hideYears = false }) {
     }, [groups, groupMetadata, groupFilter]);
 
     const typeMenuItems = useMemo(() => {
-        const mapItems = (list) => {
+        const mapItems = (list, insideHeader = false) => {
             return (list || []).map(type => ({
                 id: type.id,
                 name: type.name,
                 icon: type.icon,
                 divider: type.divider,
                 header: type.header,
+                highlight: insideHeader ? false : (type.header ? (type.highlight || false) : undefined),
                 radio: (type.id === "thumbnails_all" && !typeFilter.includes("with_thumbnail") && !typeFilter.includes("without_thumbnail")) ||
                     (type.id === "summaries_all" && !typeFilter.includes("with_summary") && !typeFilter.includes("without_summary")) ||
                     (type.id === "tags_all" && !typeFilter.includes("with_tags") && !typeFilter.includes("without_tags")) ||
@@ -149,7 +156,7 @@ export default function FilterBar({ hideYears = false }) {
                     (type.radio && typeFilter.includes(type.id)),
                 checked: !type.radio && typeFilter.includes(type.id),
                 selected: typeFilter,
-                items: mapItems(type.items),
+                items: mapItems(type.items, type.header || insideHeader),
                 onClick: (event) => {
                     console.log(`[FilterBar] Trace: Clicked on ${type.id}`);
                     console.log(`[FilterBar] Click on type:`, type.id, `radio:`, type.radio);
