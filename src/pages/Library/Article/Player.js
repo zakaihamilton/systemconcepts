@@ -127,7 +127,7 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
                     result.push({
                         element: null,
                         text: tagTexts.join('. '),
-                        index: -1, // Special index for tags
+                        index: -3, // Special index for tags
                         isVirtual: true,
                         type: 'tags'
                     });
