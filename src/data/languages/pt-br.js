@@ -74,6 +74,22 @@ export default {
             "value": "Configuração"
         },
         {
+            "id": "COMPLETE",
+            "value": "Completo"
+        },
+        {
+            "id": "BUNDLE",
+            "value": "Pacote"
+        },
+        {
+            "id": "SEPARATE",
+            "value": "Separado"
+        },
+        {
+            "id": "BUNDLED",
+            "value": "Empacotado"
+        },
+        {
             "id": "LANGUAGE",
             "value": "Idioma"
         },
@@ -566,7 +582,7 @@ export default {
             "value": "Sem miniatura"
         },
         {
-            "id": "THUMBNAILS_ALL",
+            "id": "ALL",
             "value": "Todos"
         },
         {
@@ -660,6 +676,10 @@ export default {
         {
             "id": "TERMS",
             "value": "Termos"
+        },
+        {
+            "id": "TRANSLATION",
+            "value": "Tradução"
         },
         {
             "id": "TRANSLITERATION",
@@ -772,6 +792,26 @@ export default {
         {
             "id": "ERRORS",
             "value": "Erros"
+        },
+        {
+            "id": "POSITION",
+            "value": "Posição"
+        },
+        {
+            "id": "WITH_POSITION",
+            "value": "Com Posição"
+        },
+        {
+            "id": "WITHOUT_POSITION",
+            "value": "Sem Posição"
+        },
+        {
+            "id": "WITH_DURATION",
+            "value": "Conhecido"
+        },
+        {
+            "id": "WITHOUT_DURATION",
+            "value": "Desconhecido"
         },
         {
             "id": "VIDEO",
@@ -908,6 +948,14 @@ export default {
         {
             "id": "COLLAPSE",
             "value": "Recolher"
+        },
+        {
+            "id": "SHOW_GROUP_COUNTERS",
+            "value": "Mostrar Contadores de Grupo"
+        },
+        {
+            "id": "HIDE_GROUP_COUNTERS",
+            "value": "Ocultar Contadores de Grupo"
         },
         {
             "id": "ID_DESCRIPTION",
@@ -1732,6 +1780,42 @@ export default {
         {
             "id": "RESEARCH",
             "value": "Pesquisa"
+        },
+        {
+            "id": "SHOW_ABBREVIATIONS",
+            "value": "Mostrar Abreviações"
+        },
+        {
+            "id": "SHOW_FULL_TERMS",
+            "value": "Mostrar Termos Completos"
+        },
+        {
+            "id": "SEARCH_ARTICLES",
+            "value": "Pesquisar..."
+        },
+        {
+            "id": "REBUILD_INDEX",
+            "value": "Reconstruir Índice"
+        },
+        {
+            "id": "DONE",
+            "value": "Concluído"
+        },
+        {
+            "id": "SEARCHING",
+            "value": "Pesquisando..."
+        },
+        {
+            "id": "NO_RESULTS",
+            "value": "Nenhum resultado encontrado."
+        },
+        {
+            "id": "RESULT",
+            "value": "resultado"
+        },
+        {
+            "id": "RESULTS",
+            "value": "resultados"
         }
     ]
 };

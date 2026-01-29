@@ -299,16 +299,15 @@ export default function SessionsPage() {
     }, [viewMode, typeFilter, target, gotoItem, handleIconClick]);
 
     const filter = useCallback(item => {
-        // Debug: trace first filter execution
-        if (!window._filterTrace) window._filterTrace = 0;
-        if (window._filterTrace < 1) {
-            console.log(`[Sessions] Trace: filter running. typeFilter:`, typeFilter);
-            window._filterTrace++;
-        }
         let { group, type, year, thumbnail } = item;
         let show = (!groupFilter.length || groupFilter.includes(group));
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all",
+                "with_summary", "without_summary", "summaries_all",
+                "with_tags", "without_tags", "tags_all",
+                "with_position", "without_position", "position_all",
+                "with_duration", "without_duration", "duration_all",
+                "with_english", "with_hebrew", "languages_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -318,6 +317,8 @@ export default function SessionsPage() {
             const withoutTags = typeFilter.includes("without_tags");
             const withPosition = typeFilter.includes("with_position");
             const withoutPosition = typeFilter.includes("without_position");
+            const withDuration = typeFilter.includes("with_duration");
+            const withoutDuration = typeFilter.includes("without_duration");
             const withEnglish = typeFilter.includes("with_english");
             const withHebrew = typeFilter.includes("with_hebrew");
 
@@ -353,19 +354,23 @@ export default function SessionsPage() {
             }
 
             let matchPosition = true;
-            const hasPosition = item.position > 0;
+            const hasPosition = parseInt(item.position) > 1;
             if (withPosition && withoutPosition) {
                 matchPosition = true;
             } else if (withPosition) {
                 matchPosition = hasPosition;
-                // Debug: log first few items checks
-                if (!window._posFilterCheck) window._posFilterCheck = 0;
-                if (window._posFilterCheck < 5) {
-                    console.log(`[Sessions debug] Checking ${item.name}: position=${item.position}, hasPosition=${hasPosition}, match=${matchPosition}`);
-                    window._posFilterCheck++;
-                }
             } else if (withoutPosition) {
                 matchPosition = !hasPosition;
+            }
+
+            let matchDuration = true;
+            const hasDuration = parseInt(item.duration) > 1;
+            if (withDuration && withoutDuration) {
+                matchDuration = true;
+            } else if (withDuration) {
+                matchDuration = hasDuration;
+            } else if (withoutDuration) {
+                matchDuration = !hasDuration;
             }
 
             const isHebrew = /[\u0590-\u05FF]/.test(item.name);
@@ -378,7 +383,7 @@ export default function SessionsPage() {
                 matchLanguage = isHebrew;
             }
 
-            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage;
+            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchDuration && matchLanguage;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);

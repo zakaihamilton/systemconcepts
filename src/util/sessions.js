@@ -484,7 +484,7 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all", "with_duration", "without_duration", "duration_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
@@ -496,6 +496,8 @@ export function useSessions(depends = [], options = {}) {
             const withoutPosition = typeFilter.includes("without_position");
             const withEnglish = typeFilter.includes("with_english");
             const withHebrew = typeFilter.includes("with_hebrew");
+            const withDuration = typeFilter.includes("with_duration");
+            const withoutDuration = typeFilter.includes("without_duration");
 
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
@@ -540,6 +542,16 @@ export function useSessions(depends = [], options = {}) {
                     matchPosition = !hasPosition;
                 }
 
+                const hasDuration = parseInt(session.duration) > 1;
+                let matchDuration = true;
+                if (withDuration && withoutDuration) {
+                    matchDuration = true;
+                } else if (withDuration) {
+                    matchDuration = hasDuration;
+                } else if (withoutDuration) {
+                    matchDuration = !hasDuration;
+                }
+
                 const isHebrew = /[\u0590-\u05FF]/.test(session.name);
                 let matchLanguage = true;
                 if (withEnglish && withHebrew) {
@@ -550,9 +562,7 @@ export function useSessions(depends = [], options = {}) {
                     matchLanguage = isHebrew;
                 }
 
-                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage;
-
-                return matchType && matchThumbnail && matchSummary && matchTags;
+                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage && matchDuration;
             });
         }
         if (yearFilter?.length) {

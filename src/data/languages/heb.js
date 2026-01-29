@@ -74,6 +74,22 @@ export default {
             "value": "הגדרה"
         },
         {
+            "id": "COMPLETE",
+            "value": "הושלם"
+        },
+        {
+            "id": "BUNDLE",
+            "value": "חבילה"
+        },
+        {
+            "id": "SEPARATE",
+            "value": "נפרד"
+        },
+        {
+            "id": "BUNDLED",
+            "value": "מאוגד"
+        },
+        {
             "id": "LANGUAGE",
             "value": "שפה"
         },
@@ -566,7 +582,7 @@ export default {
             "value": "ללא תמונה"
         },
         {
-            "id": "THUMBNAILS_ALL",
+            "id": "ALL",
             "value": "הכל"
         },
         {
@@ -776,6 +792,26 @@ export default {
         {
             "id": "ERRORS",
             "value": "שגיאות"
+        },
+        {
+            "id": "POSITION",
+            "value": "מיקום"
+        },
+        {
+            "id": "WITH_POSITION",
+            "value": "עם מיקום"
+        },
+        {
+            "id": "WITHOUT_POSITION",
+            "value": "ללא מיקום"
+        },
+        {
+            "id": "WITH_DURATION",
+            "value": "ידוע"
+        },
+        {
+            "id": "WITHOUT_DURATION",
+            "value": "לא ידוע"
         },
         {
             "id": "VIDEO",
@@ -1764,6 +1800,34 @@ export default {
         {
             "id": "RESEARCH",
             "value": "מחקר"
+        },
+        {
+            "id": "SEARCH_ARTICLES",
+            "value": "חפש..."
+        },
+        {
+            "id": "REBUILD_INDEX",
+            "value": "בנה אינדקס מחדש"
+        },
+        {
+            "id": "DONE",
+            "value": "בוצע"
+        },
+        {
+            "id": "SEARCHING",
+            "value": "מחפש..."
+        },
+        {
+            "id": "NO_RESULTS",
+            "value": "לא נמצאו תוצאות."
+        },
+        {
+            "id": "RESULT",
+            "value": "תוצאה"
+        },
+        {
+            "id": "RESULTS",
+            "value": "תוצאות"
         }
     ]
 };

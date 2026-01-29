@@ -586,7 +586,7 @@ export default {
             "value": "No Thumbnail"
         },
         {
-            "id": "THUMBNAILS_ALL",
+            "id": "ALL",
             "value": "All"
         },
         {
@@ -792,6 +792,26 @@ export default {
         {
             "id": "ERRORS",
             "value": "Errors"
+        },
+        {
+            "id": "POSITION",
+            "value": "Position"
+        },
+        {
+            "id": "WITH_POSITION",
+            "value": "With Position"
+        },
+        {
+            "id": "WITHOUT_POSITION",
+            "value": "No Position"
+        },
+        {
+            "id": "WITH_DURATION",
+            "value": "Known"
+        },
+        {
+            "id": "WITHOUT_DURATION",
+            "value": "Unknown"
         },
         {
             "id": "VIDEO",

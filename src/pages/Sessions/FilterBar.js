@@ -38,7 +38,7 @@ export default function FilterBar({ hideYears = false }) {
             header: true,
             expanded: typeFilter.includes("with_thumbnail") || typeFilter.includes("without_thumbnail"),
             items: [
-                { id: "thumbnails_all", name: translations.THUMBNAILS_ALL, radio: true },
+                { id: "thumbnails_all", name: translations.ALL, radio: true },
                 { id: "with_thumbnail", name: translations.WITH_THUMBNAIL, radio: true },
                 { id: "without_thumbnail", name: translations.WITHOUT_THUMBNAIL, radio: true }
             ]
@@ -49,7 +49,7 @@ export default function FilterBar({ hideYears = false }) {
             header: true,
             expanded: typeFilter.includes("with_summary") || typeFilter.includes("without_summary"),
             items: [
-                { id: "summaries_all", name: translations.THUMBNAILS_ALL, radio: true },
+                { id: "summaries_all", name: translations.ALL, radio: true },
                 { id: "with_summary", name: translations.WITH_SUMMARY, radio: true },
                 { id: "without_summary", name: translations.WITHOUT_SUMMARY, radio: true }
             ]
@@ -60,20 +60,31 @@ export default function FilterBar({ hideYears = false }) {
             header: true,
             expanded: typeFilter.includes("with_tags") || typeFilter.includes("without_tags"),
             items: [
-                { id: "tags_all", name: translations.THUMBNAILS_ALL, radio: true },
+                { id: "tags_all", name: translations.ALL, radio: true },
                 { id: "with_tags", name: translations.WITH_TAGS, radio: true },
                 { id: "without_tags", name: translations.WITHOUT_TAGS, radio: true }
             ]
         },
         {
+            "id": "duration_header",
+            "name": translations.DURATION,
+            "header": true,
+            "expanded": typeFilter.includes("with_duration") || typeFilter.includes("without_duration"),
+            items: [
+                { id: "duration_all", name: translations.ALL, radio: true },
+                { id: "with_duration", name: translations.WITH_DURATION, radio: true },
+                { id: "without_duration", name: translations.WITHOUT_DURATION, radio: true }
+            ]
+        },
+        {
             id: "position_header",
-            name: translations.POSITION || "Position",
+            name: translations.POSITION,
             header: true,
             expanded: typeFilter.includes("with_position") || typeFilter.includes("without_position"),
             items: [
-                { id: "position_all", name: translations.THUMBNAILS_ALL, radio: true },
-                { id: "with_position", name: translations.WITH_POSITION || "With Position", radio: true },
-                { id: "without_position", name: translations.WITHOUT_POSITION || "Without Position", radio: true }
+                { id: "position_all", name: translations.ALL, radio: true },
+                { id: "with_position", name: translations.WITH_POSITION, radio: true },
+                { id: "without_position", name: translations.WITHOUT_POSITION, radio: true }
             ]
         },
         {
@@ -133,6 +144,7 @@ export default function FilterBar({ hideYears = false }) {
                     (type.id === "summaries_all" && !typeFilter.includes("with_summary") && !typeFilter.includes("without_summary")) ||
                     (type.id === "tags_all" && !typeFilter.includes("with_tags") && !typeFilter.includes("without_tags")) ||
                     (type.id === "position_all" && !typeFilter.includes("with_position") && !typeFilter.includes("without_position")) ||
+                    (type.id === "duration_all" && !typeFilter.includes("with_duration") && !typeFilter.includes("without_duration")) ||
                     (type.id === "languages_all" && !typeFilter.includes("with_english") && !typeFilter.includes("with_hebrew")) ||
                     (type.radio && typeFilter.includes(type.id)),
                 checked: !type.radio && typeFilter.includes(type.id),
@@ -151,6 +163,7 @@ export default function FilterBar({ hideYears = false }) {
                             summaries_all: ["with_summary", "without_summary"],
                             tags_all: ["with_tags", "without_tags"],
                             position_all: ["with_position", "without_position"],
+                            duration_all: ["with_duration", "without_duration"],
                             languages_all: ["with_english", "with_hebrew"]
                         };
                         if (allRadios[type.id]) {
@@ -167,6 +180,8 @@ export default function FilterBar({ hideYears = false }) {
                                 without_tags: "with_tags",
                                 with_position: "without_position",
                                 without_position: "with_position",
+                                with_duration: "without_duration",
+                                without_duration: "with_duration",
                                 with_english: "with_hebrew",
                                 with_hebrew: "with_english"
                             };
