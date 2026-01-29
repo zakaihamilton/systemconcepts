@@ -7,15 +7,18 @@ import { LibraryTagKeys } from '../Icons';
 export default function Player({ contentRef, onParagraphChange, selectedTag, currentParagraphIndex: externalParagraphIndex }) {
     const translations = useTranslations();
     const [isPlaying, setIsPlaying] = useState(false);
-    const [currentParagraphIndex, setCurrentParagraphIndex] = useState(externalParagraphIndex ?? -1);
-    const [prevExternalIndex, setPrevExternalIndex] = useState(externalParagraphIndex);
-
-    if (externalParagraphIndex !== prevExternalIndex) {
-        setPrevExternalIndex(externalParagraphIndex);
-        setCurrentParagraphIndex(externalParagraphIndex);
-    }
-
+    const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
     const [paragraphs, setParagraphs] = useState([]);
+
+    // Sync external logical index to internal array index
+    useEffect(() => {
+        if (paragraphs.length > 0 && externalParagraphIndex !== undefined) {
+            const index = paragraphs.findIndex(p => p.index === externalParagraphIndex);
+            if (index !== -1 && index !== currentParagraphIndex) {
+                setCurrentParagraphIndex(index);
+            }
+        }
+    }, [externalParagraphIndex, paragraphs, currentParagraphIndex]);
     const [voices, setVoices] = useState([]);
     const [selectedVoice, setSelectedVoice] = useState(null);
     const [voiceMenuAnchor, setVoiceMenuAnchor] = useState(null);
@@ -124,7 +127,7 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
                     result.push({
                         element: null,
                         text: tagTexts.join('. '),
-                        index: -1, // Special index for tags
+                        index: -3, // Special index for tags
                         isVirtual: true,
                         type: 'tags'
                     });
@@ -252,7 +255,8 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
             synthRef.current.resume();
             setIsPlaying(true);
         } else {
-            const startIndex = currentParagraphIndex >= 0 ? currentParagraphIndex : 0;
+            // Default to 0 (Title/First paragraph in array) if no paragraph is selected
+            const startIndex = currentParagraphIndex !== -1 ? currentParagraphIndex : 0;
             speakParagraph(startIndex);
         }
     }, [currentParagraphIndex, speakParagraph]);

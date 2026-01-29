@@ -25,7 +25,7 @@ export default function Header({
     };
 
     const isTitleSelected = currentParagraphIndex === -2;
-    const isTagsSelected = currentParagraphIndex === -1;
+    const isTagsSelected = currentParagraphIndex === -3;
 
     return (
         <Box
