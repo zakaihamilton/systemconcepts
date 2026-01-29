@@ -23,7 +23,7 @@ const STOP_WORDS = new Set([
     "than", "too", "very", "can", "just", "don", "should", "now"
 ]);
 
-const INDEX_FILE = "search_index.json";
+const INDEX_FILE = "search_index.bin";
 
 // Split by double newlines, but preserve code blocks
 const splitSmart = (txt) => {
@@ -218,7 +218,7 @@ export default function ResearchIndexer() {
                     const fileMap = new Map(); // fileIndex -> [paraIndices]
                     for (let i = 0; i < refs.length; i += 2) {
                         const f = refs[i];
-                        const p = refs[i+1];
+                        const p = refs[i + 1];
                         if (!fileMap.has(f)) fileMap.set(f, []);
                         fileMap.get(f).push(p);
                     }

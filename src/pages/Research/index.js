@@ -38,7 +38,7 @@ import JumpDialog from "@pages/Library/Article/JumpDialog";
 import PageIndicator from "./PageIndicator";
 import SearchResultItem from "./SearchResultItem";
 
-const INDEX_FILE = "search_index.json";
+const INDEX_FILE = "search_index.bin";
 
 function getTagHierarchy(tag) {
     const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
