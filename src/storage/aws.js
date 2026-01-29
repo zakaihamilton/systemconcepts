@@ -1,7 +1,7 @@
 import { fetchJSON, fetchText, fetchBlob } from "@util/fetch";
 import { makePath } from "@util/path";
 import { isBinaryFile } from "@util/path";
-import { binaryToString } from "@util/binary";
+import { binaryToString, stringToBinary } from "@util/binary";
 
 const fsEndPoint = "/api/aws";
 
@@ -153,9 +153,13 @@ async function writeFile(path, body) {
             method: "GET",
             cache: "no-store"
         });
+        let data = body;
+        if (typeof body === "string" && isBinaryFile(path)) {
+            data = stringToBinary(body);
+        }
         await fetch(url, {
             method: "PUT",
-            body
+            body: data
         });
     }
     else {

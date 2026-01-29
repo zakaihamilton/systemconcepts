@@ -41,9 +41,12 @@ export async function readCompressedFileRaw(path) {
         }
 
         if (path.endsWith(".json")) {
-            if (typeof data === "string") return data;
-            if (Buffer.isBuffer(data)) return data.toString('utf8');
-            return JSON.stringify(data);
+            const trimmed = typeof data === "string" ? data.trim() : "";
+            if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+                if (typeof data === "string") return data;
+                if (Buffer.isBuffer(data)) return data.toString('utf8');
+                return JSON.stringify(data);
+            }
         }
 
         let buffer;
