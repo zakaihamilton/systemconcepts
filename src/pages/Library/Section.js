@@ -75,6 +75,15 @@ export function getLibrarySection({ id, path, translations }) {
         }
     }
 
+    // Strip numeric suffix (paragraph or article number) from the label
+    const lastColonIndex = label.lastIndexOf(":");
+    if (lastColonIndex !== -1) {
+        const suffix = label.substring(lastColonIndex + 1);
+        if (/^\d+$/.test(suffix)) {
+            label = label.substring(0, lastColonIndex);
+        }
+    }
+
     // Crucial: We must return BOTH Icon: null and icon: null to prevent 
     // the breadcrumb from falling back to the page definition's generic icon.
     const result = {
