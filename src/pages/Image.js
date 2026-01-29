@@ -112,7 +112,7 @@ export default function ImagePage({ name, ext = "png" }) {
     return <div className={styles.root}>
         <Download visible={!loading && !imageLoading && !error} onClick={downloadImage} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {!loading && !error && <img alt={name} className={styles.img} onError={onError} onLoad={onLoad} style={style} src={src} />}
+        {!loading && !error && src && <img alt={name} className={styles.img} onError={onError} onLoad={onLoad} style={{ ...style, visibility: imageLoading ? "hidden" : "visible" }} src={src} />}
         {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
         {!!error && <Message Icon={ErrorIcon} label={translations.CANNOT_LOAD_IMAGE} />}
     </div>;
