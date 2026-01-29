@@ -13,12 +13,17 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
     // Sync external logical index to internal array index
     useEffect(() => {
         if (paragraphs.length > 0 && externalParagraphIndex !== undefined) {
-            const index = paragraphs.findIndex(p => p.index === externalParagraphIndex);
-            if (index !== -1 && index !== currentParagraphIndex) {
-                setCurrentParagraphIndex(index);
+            const newIndex = paragraphs.findIndex(p => p.index === externalParagraphIndex);
+            if (newIndex !== -1) {
+                setCurrentParagraphIndex(currentIndex => {
+                    if (newIndex !== currentIndex) {
+                        return newIndex;
+                    }
+                    return currentIndex;
+                });
             }
         }
-    }, [externalParagraphIndex, paragraphs, currentParagraphIndex]);
+    }, [externalParagraphIndex, paragraphs]);
     const [voices, setVoices] = useState([]);
     const [selectedVoice, setSelectedVoice] = useState(null);
     const [voiceMenuAnchor, setVoiceMenuAnchor] = useState(null);
