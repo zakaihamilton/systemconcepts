@@ -963,7 +963,10 @@ export const glossary = {
         "he": "אדם קדמון",
         "en": "Primordial Man",
         "trans": "Adam Kadmon",
-        "style": "primordial man"
+        "style": {
+            "category": "World",
+            "phase": "root"
+        }
     },
     "perud": {
         "he": "פרוד",
