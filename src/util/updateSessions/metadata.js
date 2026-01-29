@@ -18,9 +18,14 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                         // Check if array has length for tags, or if value exists for others
                         const hasValue = Array.isArray(session[property]) ? session[property].length > 0 : session[property];
                         if (hasValue) {
-                            sessionMetadataMap[session.id] = session[property];
+                            let value = session[property];
+                            if (property === "tags" && Array.isArray(value)) {
+                                value = value.map(tag => typeof tag === "string" ? tag.trim() : tag).filter(tag => tag);
+                            }
+                            sessionMetadataMap[session.id] = value;
                             if (session.name) {
-                                sessionMetadataMap[session.name] = session[property];
+                                sessionMetadataMap[session.name] = value;
+
                                 if (session.name.startsWith(year.name)) {
                                     metadataLoaded = true;
                                 }
@@ -78,6 +83,9 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                 if (data && Array.isArray(data.sessions)) {
                     data.sessions.forEach(session => {
                         if (session.sessionName && session[property]) {
+                            if (property === 'duration' && session.sessionName.includes('Acceptance')) {
+                                console.log('[Metadata] Loading duration for', session.sessionName, ':', session[property]);
+                            }
                             sessionMetadataMap[session.sessionName] = session[property];
                         }
                     });
