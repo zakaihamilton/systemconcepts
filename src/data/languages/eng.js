@@ -1824,6 +1824,10 @@ export default {
         {
             "id": "RESULTS",
             "value": "results"
+        },
+        {
+            "id": "DOWNLOAD_TRANSCRIPT",
+            "value": "Download Transcript"
         }
     ]
 };

@@ -1828,6 +1828,10 @@ export default {
         {
             "id": "RESULTS",
             "value": "תוצאות"
+        },
+        {
+            "id": "DOWNLOAD_TRANSCRIPT",
+            "value": "הורדת תמליל"
         }
     ]
 };
