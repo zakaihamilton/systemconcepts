@@ -891,7 +891,20 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 return '';
             };
 
-            const paragraphText = extractText(children);
+            const getSpokenText = (text) => {
+                if (!text) return text;
+                return text.replace(termPattern, (match) => {
+                    const lowerMatch = match.toLowerCase();
+                    const entry = glossary[lowerMatch];
+                    if (entry && entry.en) {
+                        return entry.en;
+                    }
+                    return match;
+                });
+            };
+
+            const rawText = extractText(children);
+            const paragraphText = getSpokenText(rawText);
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
 
             const currentIndex = Array.isArray(filteredParagraphs) ? filteredParagraphs.indexOf(paragraphIndex) : -1;
