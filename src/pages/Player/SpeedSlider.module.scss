@@ -1,7 +1,7 @@
 .root {
     width: 100%;
     background-color: var(--paper-background);
-    padding: 1em 2em;
+    padding: 1em 4em;
     position: relative;
     z-index: 1300; // MUI AppBar default is 1100, Tabs typically use similar values
     display: flex;
