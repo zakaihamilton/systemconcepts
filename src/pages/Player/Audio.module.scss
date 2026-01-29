@@ -19,6 +19,10 @@
     pointer-events: none;
 }
 
+.hidden {
+    visibility: hidden;
+}
+
 .video::cue {
     color: var(--cue-color) !important;
     font-size: 1.1em;

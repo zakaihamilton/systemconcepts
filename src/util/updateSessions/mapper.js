@@ -37,7 +37,7 @@ export function createSessionItem(id, fileList, yearName, groupName, sessionTags
         year: yearName,
         group: groupName,
         ai,
-        tags: (sessionTags || []).map(tag => typeof tag === "string" ? tag.trim() : tag).filter(tag => tag),
+        tags: (sessionTags || []).map(tag => typeof tag === "string" ? tag.trim().replace(/\.+$/, "") : tag).filter(tag => tag),
         duration: sessionDuration
     };
 

@@ -208,12 +208,13 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         color,
         name,
         showDetails,
+        isTranscript,
         preload: "metadata",
         crossOrigin: "anonymous"
     };
-    if (isAudio) {
+    if (isAudio || (isVideo && isTranscript)) {
         MediaComponent = Audio;
-        mediaType = "audio/mp4";
+        mediaType = isAudio ? "audio/mp4" : "video/mp4";
     }
     else if (isVideo) {
         MediaComponent = Video;
@@ -249,10 +250,10 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         {statusBar}
         {speedToolbar === "top" && <SpeedSlider />}
         <Download visible={show && mediaPath && !isTranscript} onClick={downloadFile} target={mediaPath} />
-        {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps} elements={elements}>
+        {MediaComponent ? <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps} elements={elements}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
             {!isTranscript && subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
-        </MediaComponent>}
+        </MediaComponent> : (isTranscript ? elements : null)}
         {speedToolbar === "bottom" && <SpeedSlider />}
         {!!loading && !mediaPath && <Progress />}
     </div>;

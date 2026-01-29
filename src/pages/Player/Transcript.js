@@ -155,7 +155,10 @@ export default function Transcript({ show }) {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement("a");
         link.href = url;
-        const name = decodeURIComponent(subtitles).split("/").pop();
+        let name = decodeURIComponent(subtitles).split("/").pop();
+        if (!name.endsWith(".vtt")) {
+            name += ".vtt";
+        }
         link.setAttribute("download", name);
         document.body.appendChild(link);
         link.click();

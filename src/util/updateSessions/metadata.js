@@ -20,7 +20,7 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                         if (hasValue) {
                             let value = session[property];
                             if (property === "tags" && Array.isArray(value)) {
-                                value = value.map(tag => typeof tag === "string" ? tag.trim() : tag).filter(tag => tag);
+                                value = value.map(tag => typeof tag === "string" ? tag.trim().replace(/\.+$/, "") : tag).filter(tag => tag);
                             }
                             sessionMetadataMap[session.id] = value;
                             if (session.name) {

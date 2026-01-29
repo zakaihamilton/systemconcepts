@@ -4,7 +4,7 @@ import Toolbar from "./Toolbar";
 import { PlayerStore } from "../Player";
 import styles from "./Video.module.scss";
 
-export default function Video({ show, metadataPath, metadataKey, name, path, color, group, children, ...props }) {
+export default function Video({ show, metadataPath, metadataKey, name, path, color, group, children, elements, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     useEffect(() => {
@@ -22,6 +22,7 @@ export default function Video({ show, metadataPath, metadataKey, name, path, col
         <video ref={ref} {...props}>
             {children}
         </video>
+        {elements}
         <div className={styles.root}>
             {playerRef && <Controls
                 playerRef={playerRef}

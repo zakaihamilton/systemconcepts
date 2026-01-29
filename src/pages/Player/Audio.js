@@ -9,7 +9,7 @@ import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 
-export default function Audio({ show, metadataPath, metadataKey, name, path, date, group, color, children, elements, showDetails, ...props }) {
+export default function Audio({ show, metadataPath, metadataKey, name, path, date, group, color, children, elements, showDetails, isTranscript, ...props }) {
     const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
@@ -88,7 +88,7 @@ export default function Audio({ show, metadataPath, metadataKey, name, path, dat
             </div>
         </div>
         {elements}
-        <video ref={ref} className={styles.video} {...rest}>
+        <video ref={ref} className={clsx(styles.video, isTranscript && styles.hidden)} {...rest}>
             {children}
         </video>
         {playerRef && <Controls
