@@ -845,7 +845,18 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
         const getSpokenText = (text) => {
             if (!text) return text;
-            return text.replace(termPattern, (match) => {
+            return text.replace(termPattern, (match, capture, offset, string) => {
+                // Skip lowercase 'or'
+                if (match === 'or') {
+                    return match;
+                }
+                // Skip 'Or' at the start of a sentence
+                if (match === 'Or') {
+                    const isStartOfSentence = (offset === 0) || /[\.\!\?]\s+$/.test(string.slice(0, offset));
+                    if (isStartOfSentence) {
+                        return match;
+                    }
+                }
                 const lowerMatch = match.toLowerCase();
                 const entry = glossary[lowerMatch];
                 if (entry && entry.en) {
