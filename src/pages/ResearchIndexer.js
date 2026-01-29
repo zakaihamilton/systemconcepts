@@ -23,7 +23,7 @@ const STOP_WORDS = new Set([
     "than", "too", "very", "can", "just", "don", "should", "now"
 ]);
 
-const INDEX_FILE = "search_index.bin";
+const INDEX_FILE = "search_index.json";
 
 // Split by double newlines, but preserve code blocks
 const splitSmart = (txt) => {
