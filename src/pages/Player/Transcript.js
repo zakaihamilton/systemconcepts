@@ -1,18 +1,28 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import styles from "./Transcript.module.scss";
 import { PlayerStore } from "../Player";
 
 import { useFetch } from "@util/fetch";
 import Progress from "@widgets/Progress";
 import Download from "@widgets/Download";
+import { useTranslations } from "@util/translations";
+import { useSearch } from "@components/Search";
+import { useToolbar } from "@components/Toolbar";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export default function Transcript() {
+    const translations = useTranslations();
     const { subtitles, player } = PlayerStore.useState();
     const [transcript, setTranscript] = useState([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(-1);
     const [data, , loading] = useFetch(subtitles);
     const scrollRef = useRef();
     const lineRefs = useRef({});
+    const [matches, setMatches] = useState([]);
+    const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+
+    const searchTerm = useSearch("Transcript");
 
     useEffect(() => {
         if (!data) {
@@ -54,6 +64,39 @@ export default function Transcript() {
     }, [data]);
 
     useEffect(() => {
+        if (!searchTerm || !transcript.length) {
+            setMatches([]);
+            setCurrentMatchIndex(-1);
+            return;
+        }
+
+        const lowerSearch = searchTerm.toLowerCase();
+        const newMatches = [];
+
+        transcript.forEach((line, lineIndex) => {
+            const text = line.text.toLowerCase();
+            let startIndex = 0;
+            let index;
+
+            while ((index = text.indexOf(lowerSearch, startIndex)) > -1) {
+                newMatches.push({
+                    lineIndex,
+                    start: index,
+                    end: index + searchTerm.length
+                });
+                startIndex = index + searchTerm.length;
+            }
+        });
+
+        setMatches(newMatches);
+        if (newMatches.length > 0) {
+            setCurrentMatchIndex(0);
+        } else {
+            setCurrentMatchIndex(-1);
+        }
+    }, [searchTerm, transcript]);
+
+    useEffect(() => {
         if (!player) return;
 
         const updateTime = () => {
@@ -69,11 +112,21 @@ export default function Transcript() {
     }, [player, transcript]);
 
     useEffect(() => {
-        if (currentLineIndex !== -1 && lineRefs.current[currentLineIndex] && scrollRef.current) {
+        if (currentLineIndex !== -1 && lineRefs.current[currentLineIndex] && scrollRef.current && matches.length === 0) {
             const element = lineRefs.current[currentLineIndex];
             element.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-    }, [currentLineIndex]);
+    }, [currentLineIndex, matches.length]);
+
+    useEffect(() => {
+        if (currentMatchIndex !== -1 && matches[currentMatchIndex]) {
+            const { lineIndex } = matches[currentMatchIndex];
+            const element = lineRefs.current[lineIndex];
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    }, [currentMatchIndex, matches]);
 
     const jumpTo = (time) => {
         if (player) {
@@ -104,11 +157,70 @@ export default function Transcript() {
         document.body.removeChild(link);
     };
 
+    const nextMatch = () => {
+        setCurrentMatchIndex((prev) => (prev + 1) % matches.length);
+    };
+
+    const prevMatch = () => {
+        setCurrentMatchIndex((prev) => (prev - 1 + matches.length) % matches.length);
+    };
+
+    const toolbarItems = [
+        matches.length > 0 && {
+            id: "prevMatch",
+            name: translations.PREVIOUS_MATCH,
+            icon: <ArrowUpwardIcon />,
+            onClick: prevMatch,
+            location: "header"
+        },
+        matches.length > 0 && {
+            id: "nextMatch",
+            name: translations.NEXT_MATCH,
+            icon: <ArrowDownwardIcon />,
+            onClick: nextMatch,
+            location: "header"
+        }
+    ].filter(Boolean);
+
+    useToolbar({ id: "Transcript", items: toolbarItems, depends: [matches.length, translations] });
+
+    const highlightText = (text, lineIndex) => {
+        if (!searchTerm || !matches.length) return text;
+
+        const lineMatches = matches
+            .map((match, index) => ({ ...match, globalIndex: index }))
+            .filter(match => match.lineIndex === lineIndex);
+
+        if (!lineMatches.length) return text;
+
+        const parts = [];
+        let lastIndex = 0;
+
+        lineMatches.forEach((match, i) => {
+            if (match.start > lastIndex) {
+                parts.push(text.substring(lastIndex, match.start));
+            }
+            const isCurrent = match.globalIndex === currentMatchIndex;
+            parts.push(
+                <span key={i} className={`${styles.highlight} ${isCurrent ? styles.currentMatch : ""}`}>
+                    {text.substring(match.start, match.end)}
+                </span>
+            );
+            lastIndex = match.end;
+        });
+
+        if (lastIndex < text.length) {
+            parts.push(text.substring(lastIndex));
+        }
+
+        return parts;
+    };
+
     return <div className={styles.root}>
         {loading && <div className={styles.loadingContainer}>
             <Progress fullscreen />
         </div>}
-        <Download onClick={handleDownload} visible={!loading && !!data} />
+        <Download onClick={handleDownload} visible={!loading && !!data} title={translations.DOWNLOAD_TRANSCRIPT} />
         <div className={styles.transcript} ref={scrollRef}>
             {transcript.map((line, index) => {
                 const isCurrent = index === currentLineIndex;
@@ -121,7 +233,7 @@ export default function Transcript() {
                     <span className={styles.time}>
                         {formatTime(line.start)}
                     </span>
-                    {line.text}
+                    {highlightText(line.text, index)}
                 </div>;
             })}
         </div>

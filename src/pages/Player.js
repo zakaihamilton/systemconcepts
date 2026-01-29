@@ -248,7 +248,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     return <div className={styles.root} style={style}>
         {statusBar}
         {speedToolbar === "top" && <SpeedSlider />}
-        <Download visible={show && mediaPath} onClick={downloadFile} target={mediaPath} />
+        <Download visible={show && mediaPath && !isTranscript} onClick={downloadFile} target={mediaPath} />
         {MediaComponent && <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps} elements={elements}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
             {!isTranscript && subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}

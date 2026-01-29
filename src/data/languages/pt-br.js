@@ -1816,6 +1816,10 @@ export default {
         {
             "id": "RESULTS",
             "value": "resultados"
+        },
+        {
+            "id": "DOWNLOAD_TRANSCRIPT",
+            "value": "Baixar Transcrição"
         }
     ]
 };
