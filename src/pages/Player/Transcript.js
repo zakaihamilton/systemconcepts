@@ -27,7 +27,48 @@ export default function Transcript({ show }) {
         setCurrentMatchIndex((prev) => (prev - 1 + matches.length) % matches.length);
     }, [matches.length]);
 
-    const searchTerm = useSearch("Transcript", null, show, { prevMatch, nextMatch, matchesCount: matches.length });
+    const formatTime = useCallback((seconds) => {
+        const date = new Date(seconds * 1000);
+        const hh = date.getUTCHours();
+        const mm = date.getUTCMinutes();
+        const ss = date.getUTCSeconds();
+        if (hh > 0) {
+            return `${hh}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
+        }
+        return `${mm}:${ss.toString().padStart(2, '0')}`;
+    }, []);
+
+    const prevName = useMemo(() => {
+        if (matches.length > 0 && currentMatchIndex !== -1) {
+            const prevIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
+            const match = matches[prevIndex];
+            const line = transcript[match.lineIndex];
+            if (line) {
+                return translations.PREVIOUS_MATCH + " (" + formatTime(line.start) + ")";
+            }
+        }
+        return translations.PREVIOUS_MATCH;
+    }, [matches, currentMatchIndex, transcript, translations.PREVIOUS_MATCH, formatTime]);
+
+    const nextName = useMemo(() => {
+        if (matches.length > 0 && currentMatchIndex !== -1) {
+            const nextIndex = (currentMatchIndex + 1) % matches.length;
+            const match = matches[nextIndex];
+            const line = transcript[match.lineIndex];
+            if (line) {
+                return translations.NEXT_MATCH + " (" + formatTime(line.start) + ")";
+            }
+        }
+        return translations.NEXT_MATCH;
+    }, [matches, currentMatchIndex, transcript, translations.NEXT_MATCH, formatTime]);
+
+    const searchTerm = useSearch("Transcript", null, show, {
+        prevMatch,
+        nextMatch,
+        prevName,
+        nextName,
+        matchesCount: matches.length
+    });
 
     useEffect(() => {
         if (!data) {
@@ -138,17 +179,6 @@ export default function Transcript({ show }) {
             player.currentTime = time; // eslint-disable-line react-hooks/immutability
             player.play();
         }
-    };
-
-    const formatTime = (seconds) => {
-        const date = new Date(seconds * 1000);
-        const hh = date.getUTCHours();
-        const mm = date.getUTCMinutes();
-        const ss = date.getUTCSeconds();
-        if (hh > 0) {
-            return `${hh}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
-        }
-        return `${mm}:${ss.toString().padStart(2, '0')}`;
     };
 
     const handleDownload = () => {

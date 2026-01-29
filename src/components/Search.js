@@ -64,7 +64,7 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange })
 }
 
 export function useSearch(name, updateCallback, visible = true, options = {}) {
-    const { prevMatch, nextMatch, matchesCount, matchElement, toolbarId = "Search" } = options;
+    const { prevMatch, nextMatch, prevName, nextName, matchesCount, matchElement, toolbarId = "Search" } = options;
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
@@ -114,7 +114,7 @@ export function useSearch(name, updateCallback, visible = true, options = {}) {
         },
         matchesCount > 0 && prevMatch && {
             id: "prevMatch",
-            name: translations.PREVIOUS_MATCH,
+            name: prevName || translations.PREVIOUS_MATCH,
             icon: <ArrowUpwardIcon />,
             sortKey: -1,
             onClick: prevMatch,
@@ -127,13 +127,13 @@ export function useSearch(name, updateCallback, visible = true, options = {}) {
         },
         matchesCount > 0 && nextMatch && {
             id: "nextMatch",
-            name: translations.NEXT_MATCH,
+            name: nextName || translations.NEXT_MATCH,
             icon: <ArrowDownwardIcon />,
             sortKey: -1,
             onClick: nextMatch,
             location: isPhone && "header"
         }
-    ].filter(Boolean), [isPhone, searchElement, matchesCount, prevMatch, nextMatch, translations, matchElement]);
+    ].filter(Boolean), [isPhone, searchElement, matchesCount, prevMatch, nextMatch, translations, matchElement, prevName, nextName]);
 
     useToolbar({ id: toolbarId, items: toolbarItems, visible, depends: [isPhone, deviceType, toolbarItems] });
 
