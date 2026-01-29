@@ -243,7 +243,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         });
     }, [isSignedIn, translations, error]);
 
-    const elements = isTranscript ? <Transcript /> : null;
+    const elements = isTranscript ? <Transcript show={show} /> : null;
 
     return <div className={styles.root} style={style}>
         {statusBar}

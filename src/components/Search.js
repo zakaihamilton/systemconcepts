@@ -61,7 +61,7 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange })
     );
 }
 
-export function useSearch(name, updateCallback) {
+export function useSearch(name, updateCallback, visible = true) {
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
@@ -111,7 +111,7 @@ export function useSearch(name, updateCallback) {
         }
     ], [isPhone, searchElement]);
 
-    useToolbar({ id: "Search", items: toolbarItems, depends: [isPhone, deviceType] });
+    useToolbar({ id: "Search", items: toolbarItems, visible, depends: [isPhone, deviceType] });
 
     return searchTerm;
 }

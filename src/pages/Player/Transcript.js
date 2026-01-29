@@ -7,11 +7,13 @@ import Progress from "@widgets/Progress";
 import Download from "@widgets/Download";
 import { useTranslations } from "@util/translations";
 import { useSearch } from "@components/Search";
-import { useToolbar } from "@components/Toolbar";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
-export default function Transcript() {
+registerToolbar("Transcript");
+
+export default function Transcript({ show }) {
     const translations = useTranslations();
     const { subtitles, player } = PlayerStore.useState();
     const [transcript, setTranscript] = useState([]);
@@ -22,7 +24,7 @@ export default function Transcript() {
     const [matches, setMatches] = useState([]);
     const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
 
-    const searchTerm = useSearch("Transcript");
+    const searchTerm = useSearch("Transcript", null, show);
 
     useEffect(() => {
         if (!data) {
@@ -170,6 +172,7 @@ export default function Transcript() {
             id: "prevMatch",
             name: translations.PREVIOUS_MATCH,
             icon: <ArrowUpwardIcon />,
+            sortKey: -1,
             onClick: prevMatch,
             location: "header"
         },
@@ -177,21 +180,31 @@ export default function Transcript() {
             id: "nextMatch",
             name: translations.NEXT_MATCH,
             icon: <ArrowDownwardIcon />,
+            sortKey: -1,
             onClick: nextMatch,
             location: "header"
         }
     ].filter(Boolean);
 
-    useToolbar({ id: "Transcript", items: toolbarItems, depends: [matches.length, translations] });
+    useToolbar({ id: "Transcript", items: toolbarItems, visible: show, depends: [matches.length, translations, show] });
+
+    const matchesByLine = useMemo(() => {
+        const byLine = {};
+        matches.forEach((match, index) => {
+            if (!byLine[match.lineIndex]) {
+                byLine[match.lineIndex] = [];
+            }
+            byLine[match.lineIndex].push({ ...match, globalIndex: index });
+        });
+        return byLine;
+    }, [matches]);
 
     const highlightText = (text, lineIndex) => {
         if (!searchTerm || !matches.length) return text;
 
-        const lineMatches = matches
-            .map((match, index) => ({ ...match, globalIndex: index }))
-            .filter(match => match.lineIndex === lineIndex);
+        const lineMatches = matchesByLine[lineIndex];
 
-        if (!lineMatches.length) return text;
+        if (!lineMatches || !lineMatches.length) return text;
 
         const parts = [];
         let lastIndex = 0;

@@ -71,7 +71,7 @@ function Article({
     highlight
 }) {
     const translations = useTranslations();
-    const search = useSearch();
+    const search = useSearch("default", null, !embedded);
     const contentRef = useRef(null);
     const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
