@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import styles from "./Transcript.module.scss";
 import { PlayerStore } from "../Player";
 
@@ -7,11 +7,6 @@ import Progress from "@widgets/Progress";
 import Download from "@widgets/Download";
 import { useTranslations } from "@util/translations";
 import { useSearch } from "@components/Search";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-
-registerToolbar("Transcript");
 
 export default function Transcript({ show }) {
     const translations = useTranslations();
@@ -24,7 +19,15 @@ export default function Transcript({ show }) {
     const [matches, setMatches] = useState([]);
     const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
 
-    const searchTerm = useSearch("Transcript", null, show);
+    const nextMatch = useCallback(() => {
+        setCurrentMatchIndex((prev) => (prev + 1) % matches.length);
+    }, [matches.length]);
+
+    const prevMatch = useCallback(() => {
+        setCurrentMatchIndex((prev) => (prev - 1 + matches.length) % matches.length);
+    }, [matches.length]);
+
+    const searchTerm = useSearch("Transcript", null, show, { prevMatch, nextMatch, matchesCount: matches.length });
 
     useEffect(() => {
         if (!data) {
@@ -159,34 +162,7 @@ export default function Transcript({ show }) {
         document.body.removeChild(link);
     };
 
-    const nextMatch = () => {
-        setCurrentMatchIndex((prev) => (prev + 1) % matches.length);
-    };
 
-    const prevMatch = () => {
-        setCurrentMatchIndex((prev) => (prev - 1 + matches.length) % matches.length);
-    };
-
-    const toolbarItems = [
-        matches.length > 0 && {
-            id: "prevMatch",
-            name: translations.PREVIOUS_MATCH,
-            icon: <ArrowUpwardIcon />,
-            sortKey: -1,
-            onClick: prevMatch,
-            location: "header"
-        },
-        matches.length > 0 && {
-            id: "nextMatch",
-            name: translations.NEXT_MATCH,
-            icon: <ArrowDownwardIcon />,
-            sortKey: -1,
-            onClick: nextMatch,
-            location: "header"
-        }
-    ].filter(Boolean);
-
-    useToolbar({ id: "Transcript", items: toolbarItems, visible: show, depends: [matches.length, translations, show] });
 
     const matchesByLine = useMemo(() => {
         const byLine = {};

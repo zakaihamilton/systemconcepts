@@ -7,6 +7,8 @@ import { Store } from "pullstate";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { useTimeout } from "@util/timers";
 import { useDeviceType } from "@util/styles";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import clsx from "clsx";
 
 registerToolbar("Search", 200);
@@ -61,7 +63,8 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange })
     );
 }
 
-export function useSearch(name, updateCallback, visible = true) {
+export function useSearch(name, updateCallback, visible = true, options = {}) {
+    const { prevMatch, nextMatch, matchesCount, matchElement, toolbarId = "Search" } = options;
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
@@ -108,10 +111,31 @@ export function useSearch(name, updateCallback, visible = true) {
             sortKey: -1,
             location: isPhone && "header",
             element: searchElement
+        },
+        matchesCount > 0 && prevMatch && {
+            id: "prevMatch",
+            name: translations.PREVIOUS_MATCH,
+            icon: <ArrowUpwardIcon />,
+            sortKey: -1,
+            onClick: prevMatch,
+            location: isPhone && "header"
+        },
+        matchesCount > 0 && matchElement && {
+            id: "matchElement",
+            element: matchElement,
+            location: isPhone && "header"
+        },
+        matchesCount > 0 && nextMatch && {
+            id: "nextMatch",
+            name: translations.NEXT_MATCH,
+            icon: <ArrowDownwardIcon />,
+            sortKey: -1,
+            onClick: nextMatch,
+            location: isPhone && "header"
         }
-    ], [isPhone, searchElement]);
+    ].filter(Boolean), [isPhone, searchElement, matchesCount, prevMatch, nextMatch, translations, matchElement]);
 
-    useToolbar({ id: "Search", items: toolbarItems, visible, depends: [isPhone, deviceType] });
+    useToolbar({ id: toolbarId, items: toolbarItems, visible, depends: [isPhone, deviceType, toolbarItems] });
 
     return searchTerm;
 }
