@@ -85,7 +85,7 @@ export function useUpdateSessions(groups) {
                 if (!includeDisabled && isDisabled) {
                     return null;
                 }
-                return limit(() => updateGroupProcess(item.name, true, false, isMerged, isBundled));
+                return limit(() => updateGroupProcess(item.name, true, true, isMerged, isBundled));
             }).filter(Boolean);
             const results = await Promise.all(promises);
             const bundledSessions = results.filter(r => r && Array.isArray(r)).flat();
