@@ -304,11 +304,9 @@ export function useSessions(depends = [], options = {}) {
                     const personal = personalMetadata[personalKey];
                     if (personal) {
                         session.position = personal.position;
-                        session.duration = personal.duration;
-                    }
-                    if (personal) {
-                        session.position = personal.position;
-                        session.duration = personal.duration;
+                        if (personal.duration) {
+                            session.duration = personal.duration;
+                        }
                     }
                 }
             }
@@ -363,7 +361,9 @@ export function useSessions(depends = [], options = {}) {
                             const personal = personalMetadata[personalKey];
                             if (personal) {
                                 session.position = personal.position;
-                                session.duration = personal.duration;
+                                if (personal.duration) {
+                                    session.duration = personal.duration;
+                                }
                             }
                         }
 
