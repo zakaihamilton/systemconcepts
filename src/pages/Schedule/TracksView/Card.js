@@ -72,7 +72,7 @@ const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick, i
                                 {session.date}
                             </Typography>
                             <Typography variant="caption" className={styles.duration}>
-                                {duration ? formatDuration(duration * 1000, true) : ''}
+                                {duration && session.type !== 'image' ? formatDuration(duration * 1000, true) : ''}
                             </Typography>
                         </div>
                     </div>
