@@ -13,17 +13,12 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
     // Sync external logical index to internal array index
     useEffect(() => {
         if (paragraphs.length > 0 && externalParagraphIndex !== undefined) {
-            const newIndex = paragraphs.findIndex(p => p.index === externalParagraphIndex);
-            if (newIndex !== -1) {
-                setCurrentParagraphIndex(currentIndex => {
-                    if (newIndex !== currentIndex) {
-                        return newIndex;
-                    }
-                    return currentIndex;
-                });
+            const index = paragraphs.findIndex(p => p.index === externalParagraphIndex);
+            if (index !== -1 && index !== currentParagraphIndex) {
+                setCurrentParagraphIndex(index);
             }
         }
-    }, [externalParagraphIndex, paragraphs]);
+    }, [externalParagraphIndex, paragraphs, currentParagraphIndex]);
     const [voices, setVoices] = useState([]);
     const [selectedVoice, setSelectedVoice] = useState(null);
     const [voiceMenuAnchor, setVoiceMenuAnchor] = useState(null);
@@ -260,7 +255,8 @@ export default function Player({ contentRef, onParagraphChange, selectedTag, cur
             synthRef.current.resume();
             setIsPlaying(true);
         } else {
-            const startIndex = currentParagraphIndex >= 0 ? currentParagraphIndex : 0;
+            // Default to 0 (Title/First paragraph in array) if no paragraph is selected
+            const startIndex = currentParagraphIndex !== -1 ? currentParagraphIndex : 0;
             speakParagraph(startIndex);
         }
     }, [currentParagraphIndex, speakParagraph]);
