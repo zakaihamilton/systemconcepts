@@ -137,14 +137,17 @@ export default function ItemMenuWidget({ item, readOnly }) {
             icon: <GetAppIcon />,
             onClick: async () => {
                 let data = null;
+                let type = "application/json";
+                let name = item.name;
                 if (item.type === "dir") {
-                    const object = await storage.exportFolder(item.path);
-                    data = JSON.stringify({ [item.name]: object }, null, 4);
+                    data = await storage.exportFolderAsZip(item.path);
+                    type = "application/zip";
+                    name = item.name + ".zip";
                 }
                 else {
                     data = await storage.readFile(item.path);
                 }
-                exportData(data, item.name, "application/json");
+                exportData(data, name, type);
             }
         }
     ].filter(Boolean);

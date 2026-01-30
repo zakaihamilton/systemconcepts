@@ -1,6 +1,5 @@
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
 import { makePath, isBinaryFile } from "@util/path";
-import { encode } from "base64-arraybuffer-es6";
 
 const fs = process.browser && new FS("systemconcepts-fs");
 
@@ -163,8 +162,7 @@ async function readFile(path) {
     path = makePath(path);
     try {
         if (isBinaryFile(path)) {
-            const buffer = await fs.promises.readFile(path);
-            return encode(buffer);
+            return await fs.promises.readFile(path);
         }
         return await fs.promises.readFile(path, "utf8");
     } catch (err) {

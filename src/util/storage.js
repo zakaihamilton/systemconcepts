@@ -404,7 +404,12 @@ async function exportFolderAsZip(path) {
                     const content = await storageMethods.readFile(itemPath);
                     if (content !== null) {
                         const isBinary = isBinaryFile(itemPath);
-                        currentZipFolder.file(name, content, { base64: isBinary });
+                        if (isBinary && typeof content === "string") {
+                            currentZipFolder.file(name, content, { base64: true });
+                        }
+                        else {
+                            currentZipFolder.file(name, content);
+                        }
                     }
                 }
             }

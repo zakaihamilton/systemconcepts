@@ -392,7 +392,7 @@ export default function TableWidget(props) {
                 let filename = name;
                 if (onExport) {
                     const result = await onExport();
-                    if (result && typeof result === "object" && result.data !== undefined) {
+                    if (result && typeof result === "object" && result.data) {
                         body = result.data;
                         if (result.type) type = result.type;
                         if (result.name) filename = result.name;
