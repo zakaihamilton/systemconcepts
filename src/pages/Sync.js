@@ -17,14 +17,19 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
-import CachedIcon from "@mui/icons-material/Cached";
 import { useContext } from "react";
 import { SyncContext } from "@components/Sync";
+import CachedIcon from "@mui/icons-material/Cached";
 import { clearBundleCache } from "@sync/sync";
+import { SyncActiveStore } from "@sync/syncState";
 import Dialog from "@widgets/Dialog";
 
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { fileTitle } from "@util/path";
 
@@ -33,7 +38,9 @@ registerToolbar("Sync");
 export default function Sync() {
     const online = useOnline();
     const translations = useTranslations();
-    const { updateSync } = useContext(SyncContext);
+    const context = useContext(SyncContext);
+    const { update: updateSyncStore, subscribe: subscribeSyncStore, getRawState: getSyncState } = context || SyncActiveStore;
+
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
     const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
@@ -41,6 +48,25 @@ export default function Sync() {
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
     const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+    const [debugLevel, setDebugLevel] = React.useState("info");
+
+    React.useEffect(() => {
+        const currentLevel = getSyncState().debugLevel || "info";
+        setDebugLevel(currentLevel);
+
+        const unsubscribe = subscribeSyncStore(s => s.debugLevel, level => {
+            setDebugLevel(level || "info");
+        });
+        return unsubscribe;
+    }, [getSyncState, subscribeSyncStore]);
+
+    const handleDebugLevelChange = (event) => {
+        const newLevel = event.target.value;
+        setDebugLevel(newLevel);
+        updateSyncStore(s => {
+            s.debugLevel = newLevel;
+        });
+    };
 
     React.useEffect(() => {
         let interval;
@@ -170,7 +196,20 @@ export default function Sync() {
                                 </Box>
                             </Box>
 
-                            <Box sx={{ ml: 'auto' }}>
+                            <Box sx={{ ml: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <FormControl size="small" sx={{ minWidth: 120 }}>
+                                    <InputLabel id="debug-level-label">{translations.LOG_LEVEL || "Log Level"}</InputLabel>
+                                    <Select
+                                        labelId="debug-level-label"
+                                        id="debug-level-select"
+                                        value={debugLevel}
+                                        label={translations.LOG_LEVEL || "Log Level"}
+                                        onChange={handleDebugLevelChange}
+                                    >
+                                        <MenuItem value="info">Info</MenuItem>
+                                        <MenuItem value="verbose">Verbose</MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <Button
                                     variant="outlined"
                                     color="warning"

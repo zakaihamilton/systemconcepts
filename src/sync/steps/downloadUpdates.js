@@ -65,11 +65,13 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
         if (remoteFile.hash) {
             if (rawInfo.hash === remoteFile.hash) {
                 // Raw matches! Use raw to stay in sync.
+                addSyncLog(`${fileBasename}: Matches RAW remote hash (${remoteFile.hash}). Writing raw.`, "verbose");
                 contentToWrite = content;
                 finalHash = rawInfo.hash;
                 finalSize = rawInfo.size;
             } else if (prettyInfo && prettyInfo.hash === remoteFile.hash) {
                 // Pretty matches! Use pretty.
+                addSyncLog(`${fileBasename}: Matches PRETTY remote hash (${remoteFile.hash}). Writing pretty-printed.`, "verbose");
                 contentToWrite = prettyContent;
                 finalHash = prettyInfo.hash;
                 finalSize = prettyInfo.size;
@@ -86,6 +88,7 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
         } else {
             // No remote hash? Default to pretty for readability
             if (prettyInfo) {
+                addSyncLog(`${fileBasename}: No remote hash. Defaulting to pretty-printed.`, "verbose");
                 contentToWrite = prettyContent;
                 finalHash = prettyInfo.hash;
                 finalSize = prettyInfo.size;

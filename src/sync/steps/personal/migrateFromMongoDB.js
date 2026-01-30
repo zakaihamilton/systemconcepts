@@ -21,6 +21,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
 
     // Create a Set for efficient O(1) lookups of remote paths
     const remotePathSet = new Set(Array.isArray(remoteManifest) ? remoteManifest.map(f => f.path) : []);
+    addSyncLog(`Migration check: Remote manifest has ${remotePathSet.size} files (Array check: ${Array.isArray(remoteManifest)})`, "verbose");
 
     // Check if migration has already occurred by looking at remote manifest
     // If the user has files in the personal folder, we assume migration is done.

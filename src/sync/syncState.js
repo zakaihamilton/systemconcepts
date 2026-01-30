@@ -17,7 +17,8 @@ export const SyncActiveStore = new Store({
     personalSyncBusy: false, // Track personal sync status
     personalSyncError: null,
     locked: false, // Track if sync upload is locked
-    autoSync: true // Track if automatic sync is enabled (default: true)
+    autoSync: true, // Track if automatic sync is enabled (default: true)
+    debugLevel: "info" // Track debug level (info/verbose)
 });
 
 export const UpdateSessionsStore = new Store({
@@ -42,11 +43,22 @@ if (typeof window !== "undefined") {
         });
     }
 
+    const debugLevel = localStorage.getItem("sync_debugLevel");
+    if (debugLevel !== null) {
+        SyncActiveStore.update(s => {
+            s.debugLevel = debugLevel;
+        });
+    }
+
     SyncActiveStore.subscribe(s => s.locked, locked => {
         localStorage.setItem("sync_locked", locked);
     });
 
     SyncActiveStore.subscribe(s => s.autoSync, autoSync => {
         localStorage.setItem("sync_autoSync", autoSync);
+    });
+
+    SyncActiveStore.subscribe(s => s.debugLevel, debugLevel => {
+        localStorage.setItem("sync_debugLevel", debugLevel);
     });
 }
