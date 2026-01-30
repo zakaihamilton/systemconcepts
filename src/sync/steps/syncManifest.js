@@ -22,8 +22,12 @@ function normalizeManifest(manifest) {
     const pathMap = new Map();
 
     for (const entry of manifest) {
-        if (!entry.path) {
-            console.warn("[Sync] Skipping invalid manifest entry (missing path):", JSON.stringify(entry));
+        if (!entry.path || entry.path === "loadedFromManifest") {
+            if (entry.path === "loadedFromManifest") {
+                console.log("[Sync] Filtering internal flag from manifest entries");
+            } else {
+                console.warn("[Sync] Skipping invalid manifest entry (missing path):", JSON.stringify(entry));
+            }
             continue;
         }
         const normalizedPath = normalizePath(entry.path);

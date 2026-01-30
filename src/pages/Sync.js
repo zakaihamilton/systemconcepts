@@ -204,7 +204,7 @@ export default function Sync() {
                                         onClick={stop}
                                         sx={{ whiteSpace: 'nowrap' }}
                                     >
-                                        {translations.STOP}
+                                        {translations.STOP || "Stop"}
                                     </Button>
                                 )}
                                 <FormControl size="small" sx={{ minWidth: 120 }}>
