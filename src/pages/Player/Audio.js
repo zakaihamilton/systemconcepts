@@ -88,7 +88,7 @@ export default function Audio({ show, metadataPath, metadataKey, name, path, dat
             </div>
         </div>
         {elements}
-        <video ref={ref} className={clsx(styles.video, isTranscript && styles.hidden)} {...rest}>
+        <video ref={ref} className={clsx(styles.video, isTranscript && styles.hidden)} {...rest} playsInline>
             {children}
         </video>
         {playerRef && <Controls

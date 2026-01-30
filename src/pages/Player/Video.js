@@ -19,7 +19,7 @@ export default function Video({ show, metadataPath, metadataKey, name, path, col
         });
     }, [playerRef]);
     return <>
-        <video ref={ref} {...props}>
+        <video ref={ref} {...props} playsInline>
             {children}
         </video>
         {elements}
