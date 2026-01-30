@@ -21,7 +21,7 @@ async function uploadNewFile(localFile, createdFolders, localPath, remotePath) {
         const data = JSON.parse(content);
         await writeCompressedFile(remoteFilePath, data, createdFolders);
 
-        addSyncLog(`Uploaded new: ${fileBasename}`, "info");
+        addSyncLog(`Uploaded new: ${makePath(remotePath, fileBasename)}`, "info");
         // Hash verification is already done locally, skip re-download
         return localFile;
     } catch (err) {

@@ -58,7 +58,7 @@ export async function removeDeletedFiles(localManifest, remoteManifest, localPat
                 const filePath = makePath(localPath, file.path);
                 if (await storage.exists(filePath)) {
                     await storage.deleteFile(filePath);
-                    addSyncLog(`Removed: ${file.path}`, "info");
+                    addSyncLog(`Removed: ${filePath}`, "info");
                     deletedPaths.add(file.path);
                 }
             } catch (err) {

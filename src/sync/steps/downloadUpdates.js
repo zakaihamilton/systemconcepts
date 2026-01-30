@@ -144,7 +144,7 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
             unlock();
         }
 
-        addSyncLog(`Downloaded: ${fileBasename}`, "info");
+        addSyncLog(`Downloaded: ${makePath(remotePath, fileBasename)}`, "info");
 
         // Return the actual properties of what we wrote
         // This ensures the local manifest is accurate to what is on disk
