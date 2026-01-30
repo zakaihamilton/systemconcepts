@@ -1,6 +1,6 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { LOCAL_SYNC_PATH, FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
+import { FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { getFileInfo } from "../hash";

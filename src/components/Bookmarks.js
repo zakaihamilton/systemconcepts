@@ -5,7 +5,7 @@ import { Store } from "pullstate";
 import { useActivePages, getPagesFromHash, usePages } from "@util/pages";
 import { MainStore } from "@components/Main";
 import storage from "@util/storage";
-import { LOCAL_PERSONAL_PATH } from "@personal/constants";
+import { SYNC_CONFIG } from "@sync/config";
 import { makePath } from "@util/path";
 import { useEffect } from "react";
 
@@ -15,6 +15,8 @@ export const BookmarksStore = new Store({
     bookmarks: []
 });
 
+const personalConfig = SYNC_CONFIG.find(c => c.name === "Personal");
+const LOCAL_PERSONAL_PATH = personalConfig ? personalConfig.localPath : "local/personal";
 const BOOKMARKS_PATH = makePath(LOCAL_PERSONAL_PATH, "bookmarks.json");
 
 let storageSubscription = null;

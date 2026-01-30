@@ -3,8 +3,9 @@ import { makePath } from "@util/path";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
 import { readGroups } from "@sync/groups";
+
 import { SyncActiveStore } from "@sync/syncState";
-import { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } from "../constants";
+import { FILES_MANIFEST } from "../../constants";
 
 const MIGRATION_FILE = "migration.json";
 
@@ -13,10 +14,10 @@ const MIGRATION_FILE = "migration.json";
  * Uses local migration.json to track progress and allow resumable migration
  * Files are copied to local storage immediately so user sees progress
  */
-export async function migrateFromMongoDB(userid, remoteManifest) {
+export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
     const start = performance.now();
-    const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
-    const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
+    const migrationPath = makePath(localPath, MIGRATION_FILE);
+    const localManifestPath = makePath(localPath, FILES_MANIFEST);
 
     // Check if migration has already occurred by looking at remote manifest
     // If the user has files in the personal folder, we assume migration is done.
@@ -340,7 +341,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
         const flushBundles = async () => {
             for (const [cacheKey, cache] of Object.entries(bundleCache)) {
                 if (cache.dirty) {
-                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, `${cacheKey}.json`);
+                    const bundlePath = makePath(localPath, `${cacheKey}.json`);
 
                     // Optimization: Only read existing file if we haven't loaded it yet
                     // This prevents reading the file repeatedly in subsequent batches
@@ -427,11 +428,6 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                     }
 
                     // Read from MongoDB using batch cache
-                    // Key returned by readFiles matches the key used in request (with device-relative path)
-                    // remote.js/readFiles maps input paths using makePath(prefix + name).
-                    // We passed prefix="personal" and name="metadata/sessions/..."
-                    // so it requested makePath("personal/metadata/sessions/...") -> "/metadata/sessions/..."
-                    // And results are keyed by that absolute path.
                     const fileParts = file.path.split("/").filter(Boolean);
                     const lookupKey = "/" + fileParts.slice(1).join("/");
                     const content = batchContents[lookupKey];

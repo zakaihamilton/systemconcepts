@@ -2,7 +2,7 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { SYNC_BASE_PATH, FILES_MANIFEST_GZ, FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
-import { readCompressedFile } from "../bundle";
+import { readCompressedFile, writeCompressedFile } from "../bundle";
 
 /**
  * Normalize a file path to ensure it starts with a leading slash
@@ -48,7 +48,7 @@ function normalizeManifest(manifest) {
 /**
  * Step 3: Download the files.json or generate it from listing
  */
-export async function syncManifest(remotePath = SYNC_BASE_PATH) {
+export async function syncManifest(remotePath = SYNC_BASE_PATH, isLocked = false) {
     const start = performance.now();
     addSyncLog("Step 3: Syncing manifest...", "info");
 
@@ -70,6 +70,21 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
                 if (deduped === rawManifest.length && rawManifest.length > 0) {
                     console.error("[Sync] CRITICAL: All items removed during normalization!");
                 }
+
+                // If we cleaned up duplicates, save the cleaned manifest back
+                if (deduped > 0) {
+                    if (!isLocked) {
+                        try {
+                            await writeCompressedFile(remoteManifestPathGz, remoteManifest);
+                            console.log(`[Sync] Saved cleaned manifest to ${remoteManifestPathGz}`);
+                        } catch (e) {
+                            console.warn(`[Sync] Failed to save cleaned manifest: ${e.message}`);
+                        }
+                    } else {
+                        console.log(`[Sync] Skipping manifest cleanup save (locked)`);
+                    }
+                }
+
                 loadedFromManifest = true;
             } catch (err) {
                 console.warn(`[Sync] Failed to read compressed manifest ${remoteManifestPathGz}:`, err.message || err);
@@ -139,6 +154,20 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH) {
         // Attach flag to indicate if manifest was loaded from file vs generated/empty
         // This is crucial for preventing mass deletion when remote is missing/corrupted
         remoteManifest.loadedFromManifest = loadedFromManifest;
+
+        // If we generated the manifest (and it's not empty), save it to speed up next time
+        if (!loadedFromManifest && remoteManifest.length > 0) {
+            if (!isLocked) {
+                try {
+                    await writeCompressedFile(remoteManifestPathGz, remoteManifest);
+                    addSyncLog(`Saved generated manifest (${remoteManifest.length} files)`, "info");
+                } catch (e) {
+                    console.warn(`[Sync] Failed to save generated manifest: ${e.message}`);
+                }
+            } else {
+                addSyncLog(`Generated manifest (not saved - locked)`, "info");
+            }
+        }
 
         return remoteManifest;
     } catch (err) {

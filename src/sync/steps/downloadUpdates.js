@@ -1,8 +1,8 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST, FILES_MANIFEST_GZ, SYNC_BATCH_SIZE } from "../constants";
+import { SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
-import { readCompressedFile, readCompressedFileRaw, writeCompressedFile } from "../bundle";
+import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 import { SyncActiveStore } from "../syncState";
@@ -42,7 +42,7 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
             try {
                 const obj = JSON.parse(content);
                 content = JSON.stringify(obj, null, 4);
-            } catch (e) {
+            } catch {
                 // Ignore parse errors, just write as is
             }
         }

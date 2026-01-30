@@ -1,6 +1,6 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
+import { FILES_MANIFEST } from "../constants";
 import { addSyncLog } from "../logs";
 
 /**

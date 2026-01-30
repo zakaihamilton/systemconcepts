@@ -1,6 +1,6 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
+import { SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
 import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
