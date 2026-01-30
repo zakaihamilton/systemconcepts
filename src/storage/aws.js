@@ -2,6 +2,7 @@ import { fetchJSON, fetchText, fetchBlob } from "@util/fetch";
 import { makePath } from "@util/path";
 import { isBinaryFile } from "@util/path";
 import { binaryToString, stringToBinary } from "@util/binary";
+import pLimit from "p-limit";
 
 const fsEndPoint = "/api/aws";
 
@@ -125,7 +126,7 @@ async function readFiles(prefix, files) {
         prefix = prefix + '/';
     }
     // Read files in parallel with a concurrency limit
-    const limit = (await import("p-limit")).default(10);
+    const limit = pLimit(10);
     await Promise.all(files.map(name => limit(async () => {
         try {
             const path = prefix + name;

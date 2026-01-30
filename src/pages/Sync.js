@@ -39,7 +39,7 @@ export default function Sync() {
     const online = useOnline();
     const translations = useTranslations();
     const context = useContext(SyncContext);
-    const { update: updateSyncStore, subscribe: subscribeSyncStore, getRawState: getSyncState } = context || SyncActiveStore;
+    const store = (context && typeof context.getRawState === 'function') ? context : SyncActiveStore;
 
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
@@ -51,19 +51,19 @@ export default function Sync() {
     const [debugLevel, setDebugLevel] = React.useState("info");
 
     React.useEffect(() => {
-        const currentLevel = getSyncState().debugLevel || "info";
+        const currentLevel = store.getRawState().debugLevel || "info";
         setDebugLevel(currentLevel);
 
-        const unsubscribe = subscribeSyncStore(s => s.debugLevel, level => {
+        const unsubscribe = store.subscribe(s => s.debugLevel, level => {
             setDebugLevel(level || "info");
         });
         return unsubscribe;
-    }, [getSyncState, subscribeSyncStore]);
+    }, [store]);
 
     const handleDebugLevelChange = (event) => {
         const newLevel = event.target.value;
         setDebugLevel(newLevel);
-        updateSyncStore(s => {
+        store.update(s => {
             s.debugLevel = newLevel;
         });
     };

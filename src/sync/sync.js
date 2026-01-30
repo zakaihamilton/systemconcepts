@@ -7,7 +7,7 @@ import { fetchJSON } from "@util/fetch";
 import { usePageVisibility } from "@util/hooks";
 import { roleAuth } from "@util/roles";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { lockMutex, isMutexLocked } from "@sync/mutex";
+import { lockMutex, isMutexLocked, getMutex } from "@sync/mutex";
 import { SYNC_CONFIG } from "./config";
 import { FILES_MANIFEST } from "./constants";
 import { addSyncLog } from "./logs";
@@ -23,6 +23,7 @@ import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { removeDeletedFiles } from "./steps/removeDeletedFiles";
 import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
 import { uploadManifest } from "./steps/uploadManifest";
+import { migrateFromMongoDB } from "./steps/personal/migrateFromMongoDB";
 import { SyncProgressTracker, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 
 const SYNC_INTERVAL = 60; // seconds
@@ -75,7 +76,6 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
         progress.updateProgress('migrateFromMongoDB', { processed: 0, total: 1 });
         try {
             // The file has been moved to src/sync/steps/personal/migrateFromMongoDB.js
-            const { migrateFromMongoDB } = await import("./steps/personal/migrateFromMongoDB");
             const migrationResult = await migrateFromMongoDB(userid, remoteManifest, localPath);
 
             if (migrationResult.migrated) {
@@ -305,7 +305,6 @@ export async function performSync() {
         unlock();
         // Force unlock if still reports locked (double-safety)
         if (isMutexLocked({ id: "sync_process" })) {
-            const { getMutex } = await import("@sync/mutex");
             const lock = getMutex({ id: "sync_process" });
             if (lock) {
                 lock._locks = 0;

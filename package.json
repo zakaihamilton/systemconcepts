@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "node src/sync/test/integration.js",
     "full-start": "next build && next start"
   },
   "dependencies": {
