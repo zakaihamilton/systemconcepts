@@ -82,9 +82,8 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
                 addSyncLog(`[${label}] Migration complete: ${migrationResult.fileCount} files`, "success");
 
                 if (migrationResult.deletedKeys) {
-                    migrationResult.deletedKeys.forEach(key => {
-                        delete remoteManifest[key];
-                    });
+                    const deletedKeysSet = new Set(migrationResult.deletedKeys);
+                    remoteManifest = remoteManifest.filter(entry => !deletedKeysSet.has(entry.path));
                 }
 
                 // Update local manifest
@@ -94,14 +93,16 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
                 }
 
                 if (migrationResult.manifest) {
+                    const remotePaths = new Set(remoteManifest.map(e => e.path));
                     for (const [key, entry] of Object.entries(migrationResult.manifest)) {
-                        if (!remoteManifest[key]) {
-                            remoteManifest[key] = {
+                        if (!remotePaths.has(key)) {
+                            remoteManifest.push({
                                 ...entry,
+                                path: key,
                                 hash: "FORCE_UPLOAD",
                                 modified: 0,
                                 version: (entry.version || 1)
-                            };
+                            });
                         }
                     }
                 }

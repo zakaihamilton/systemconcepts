@@ -19,9 +19,12 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
     const migrationPath = makePath(localPath, MIGRATION_FILE);
     const localManifestPath = makePath(localPath, FILES_MANIFEST);
 
+    // Create a Set for efficient O(1) lookups of remote paths
+    const remotePathSet = new Set(Array.isArray(remoteManifest) ? remoteManifest.map(f => f.path) : []);
+
     // Check if migration has already occurred by looking at remote manifest
     // If the user has files in the personal folder, we assume migration is done.
-    const hasRemoteFiles = Object.keys(remoteManifest).some(key =>
+    const hasRemoteFiles = Array.from(remotePathSet).some(key =>
         key.endsWith(".json")
     );
 
@@ -54,7 +57,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
                 if (migrationState.complete) {
                     // Check for zombie state: Migration thinks it's done, but remote is empty.
                     // This implies the files were migrated locally, but then deleted before upload.
-                    const remoteHasJson = Object.keys(remoteManifest).some(k => k.endsWith(".json"));
+                    const remoteHasJson = Array.from(remotePathSet).some(k => k.endsWith(".json"));
 
                     if (!remoteHasJson) {
                         console.log("[Personal] Migration marked complete but remote is empty. Forcing re-migration.");
@@ -184,18 +187,18 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
             if (isBundled) {
                 // Check if the common bundle exists in manifest
                 const bundleKey = "bundle.json";
-                if (remoteManifest[bundleKey]) {
+                if (remotePathSet.has(bundleKey)) {
                     existsRemote = true;
                 }
             } else if (isMerged) {
                 // Check if the group bundle exists in manifest
                 const bundleKey = `${groupName}.json`;
-                if (remoteManifest[bundleKey]) {
+                if (remotePathSet.has(bundleKey)) {
                     existsRemote = true;
                 }
             } else {
                 const manifestKey = `${relativePath}`;
-                if (remoteManifest[manifestKey]) {
+                if (remotePathSet.has(manifestKey)) {
                     existsRemote = true;
                 }
             }
