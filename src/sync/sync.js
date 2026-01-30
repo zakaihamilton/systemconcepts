@@ -265,6 +265,13 @@ export async function performSync() {
             const result = await executeSyncPipeline(config, role, id, currentOffset, TOTAL_COMBINED_WEIGHT);
             currentOffset = result.newOffset;
             hasAnyChanges = hasAnyChanges || result.hasChanges;
+
+            if (config.name === "Library" && result.hasChanges) {
+                SyncActiveStore.update(s => {
+                    s.libraryUpdateCounter = (s.libraryUpdateCounter || 0) + 1;
+                });
+                addSyncLog(`Library changes detected`, "info");
+            }
         }
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
