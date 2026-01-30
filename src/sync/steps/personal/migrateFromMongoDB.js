@@ -14,7 +14,7 @@ const MIGRATION_FILE = "migration.json";
  * Uses local migration.json to track progress and allow resumable migration
  * Files are copied to local storage immediately so user sees progress
  */
-export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
+export async function migrateFromMongoDB(userid, remoteManifest, localPath, canUpload = true) {
     const start = performance.now();
     const migrationPath = makePath(localPath, MIGRATION_FILE);
     const localManifestPath = makePath(localPath, FILES_MANIFEST);
@@ -60,13 +60,30 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
                     // This implies the files were migrated locally, but then deleted before upload.
                     const remoteHasJson = Array.from(remotePathSet).some(k => k.endsWith(".json"));
 
-                    if (!remoteHasJson) {
-                        console.log("[Personal] Migration marked complete but remote is empty. Forcing re-migration.");
-                        migrationState.complete = false;
-                        migrationState.migrated = {};
-                        // Fall through to normal logic
+                    if (!remoteHasJson && canUpload) {
+                        // Double check local storage. If we have local files, it's not a zombie state, 
+                        // it's just a "waiting to upload" state.
+                        const localListing = await storage.getRecursiveList(localPath);
+                        const localHasJson = localListing.some(l =>
+                            l.name.endsWith(".json") &&
+                            l.name !== MIGRATION_FILE &&
+                            l.name !== FILES_MANIFEST
+                        );
+
+                        if (!localHasJson) {
+                            console.log("[Personal] Migration marked complete but local and remote are empty. Forcing re-migration.");
+                            migrationState.complete = false;
+                            migrationState.migrated = {};
+                            // Fall through to normal logic
+                        } else {
+                            console.log("[Personal] Migration already complete locally, waiting for upload.");
+                            return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+                        }
+                    } else if (!remoteHasJson && !canUpload) {
+                        console.log("[Personal] Migration marked complete locally. Skipping remote check (read-only mode)");
+                        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
                     } else {
-                        console.log("[Personal] Migration already complete, skipping");
+                        console.log("[Personal] Migration already complete (verified by remote), skipping");
                         return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
                     }
                 }

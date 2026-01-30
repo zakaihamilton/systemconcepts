@@ -76,7 +76,7 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
         progress.updateProgress('migrateFromMongoDB', { processed: 0, total: 1 });
         try {
             // The file has been moved to src/sync/steps/personal/migrateFromMongoDB.js
-            const migrationResult = await migrateFromMongoDB(userid, remoteManifest, localPath);
+            const migrationResult = await migrateFromMongoDB(userid, remoteManifest, localPath, canUpload);
 
             if (migrationResult.migrated) {
                 addSyncLog(`[${label}] Migration complete: ${migrationResult.fileCount} files`, "success");
