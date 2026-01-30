@@ -36,13 +36,59 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
             await storage.createFolderPath(localFilePath);
         }
 
-        // Only parse and re-stringify small files to keep them pretty-printed
+        // --- HASH VERIFICATION & PRETTY PRINTING ---
+        let contentToWrite = content;
+        let finalHash = null;
+        let finalSize = 0;
+
+        // 1. Calculate hash of RAW content
+        const rawInfo = await getFileInfo(content);
+        finalHash = rawInfo.hash;
+        finalSize = rawInfo.size;
+
+        // 2. Try to pretty-print if small json
+        let prettyContent = null;
+        let prettyInfo = null;
+
         if (content.length < 500 * 1024) { // 500KB
             try {
                 const obj = JSON.parse(content);
-                content = JSON.stringify(obj, null, 4);
+                prettyContent = JSON.stringify(obj, null, 4);
+                prettyInfo = await getFileInfo(prettyContent);
             } catch {
-                // Ignore parse errors, just write as is
+                // Ignore parse errors
+            }
+        }
+
+        // 3. Decide which content to write
+        // If we have a remote hash, we MUST match it to avoid conflicts
+        if (remoteFile.hash) {
+            if (rawInfo.hash === remoteFile.hash) {
+                // Raw matches! Use raw to stay in sync.
+                contentToWrite = content;
+                finalHash = rawInfo.hash;
+                finalSize = rawInfo.size;
+            } else if (prettyInfo && prettyInfo.hash === remoteFile.hash) {
+                // Pretty matches! Use pretty.
+                contentToWrite = prettyContent;
+                finalHash = prettyInfo.hash;
+                finalSize = prettyInfo.size;
+            } else {
+                // Neither matches (rare corruption or different hashing?)
+                // Default to pretty if available for readability, otherwise raw
+                console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Raw: ${rawInfo.hash}, Pretty: ${prettyInfo?.hash}`);
+                if (prettyInfo) {
+                    contentToWrite = prettyContent;
+                    finalHash = prettyInfo.hash;
+                    finalSize = prettyInfo.size;
+                }
+            }
+        } else {
+            // No remote hash? Default to pretty for readability
+            if (prettyInfo) {
+                contentToWrite = prettyContent;
+                finalHash = prettyInfo.hash;
+                finalSize = prettyInfo.size;
             }
         }
 
@@ -78,21 +124,20 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
                 }
             }
 
-            await storage.writeFile(localFilePath, content);
+            await storage.writeFile(localFilePath, contentToWrite);
         } finally {
             unlock();
         }
 
-        // Verify hash
-        if (remoteFile.hash) {
-            const info = await getFileInfo(content);
-            if (info.hash !== remoteFile.hash) {
-                console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
-            }
-        }
-
         addSyncLog(`Downloaded: ${fileBasename}`, "info");
-        return remoteFile;
+
+        // Return the actual properties of what we wrote
+        // This ensures the local manifest is accurate to what is on disk
+        return {
+            ...remoteFile,
+            hash: finalHash,
+            size: finalSize
+        };
     } catch (err) {
         console.error(`[Sync] Failed to download ${fileBasename}:`, err);
         addSyncLog(`Failed to download: ${fileBasename}`, "error");
