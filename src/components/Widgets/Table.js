@@ -388,13 +388,23 @@ export default function TableWidget(props) {
             icon: <GetAppIcon />,
             onClick: async () => {
                 let body = null;
+                let type = "application/json";
+                let filename = name;
                 if (onExport) {
-                    body = await onExport();
+                    const result = await onExport();
+                    if (result && typeof result === "object" && result.data) {
+                        body = result.data;
+                        if (result.type) type = result.type;
+                        if (result.name) filename = result.name;
+                    }
+                    else {
+                        body = result;
+                    }
                 }
                 else {
                     body = JSON.stringify({ [name]: rawItems }, null, 4);
                 }
-                exportData(body, name, "application/json");
+                exportData(body, filename, type);
             },
             location: "header",
             menu: "true"

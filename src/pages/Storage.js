@@ -214,10 +214,13 @@ export default function Storage({ path = "" }) {
     const name = path.split("/").pop();
 
     const onExport = useCallback(async () => {
-        const object = await storage.exportFolder(path);
-        const data = JSON.stringify(object, null, 4);
-        return data;
-    }, [path]);
+        const data = await storage.exportFolderAsZip(path);
+        return {
+            data,
+            type: "application/zip",
+            name: name + ".zip"
+        };
+    }, [path, name]);
 
     return <>
         <Table
