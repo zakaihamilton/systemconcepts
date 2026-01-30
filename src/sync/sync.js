@@ -94,11 +94,10 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 
                 if (migrationResult.manifest) {
                     const remotePaths = new Set(remoteManifest.map(e => e.path));
-                    for (const [key, entry] of Object.entries(migrationResult.manifest)) {
-                        if (!remotePaths.has(key)) {
+                    for (const entry of migrationResult.manifest) {
+                        if (!remotePaths.has(entry.path)) {
                             remoteManifest.push({
                                 ...entry,
-                                path: key,
                                 hash: "FORCE_UPLOAD",
                                 modified: 0,
                                 version: (entry.version || 1)
@@ -253,6 +252,9 @@ export async function performSync() {
             }
         }
 
+        // Reset stopping state before we begin
+        SyncActiveStore.update(s => { s.stopping = false; });
+
         addSyncLog("Starting sync process...", "info");
         const startTime = performance.now();
 
@@ -262,6 +264,10 @@ export async function performSync() {
         let hasAnyChanges = false;
 
         for (const config of SYNC_CONFIG) {
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Sync stopped by user", "warning");
+                break;
+            }
             SyncActiveStore.update(s => { s.phase = config.name.toLowerCase(); });
             const result = await executeSyncPipeline(config, role, id, currentOffset, TOTAL_COMBINED_WEIGHT);
             currentOffset = result.newOffset;
@@ -321,6 +327,13 @@ export async function performSync() {
     }
 }
 
+export async function stopSync() {
+    addSyncLog("Stopping sync...", "warning");
+    SyncActiveStore.update(s => {
+        s.stopping = true;
+    });
+}
+
 
 
 export async function requestSync() {
@@ -333,10 +346,16 @@ export async function requestSync() {
         addSyncLog("Sync is locked (skipping upload)", "warning");
     }
 
-    if (isBusy || isSessionsBusy) return;
+    if (isBusy || isSessionsBusy) {
+        if (state.stopping) {
+            addSyncLog("Waiting for current sync to stop...", "info");
+        }
+        return;
+    }
 
     SyncActiveStore.update(s => {
         s.busy = true;
+        s.stopping = false; // Reset stopping state
         s.startTime = Date.now();
         s.lastSyncTime = Date.now(); // Track when we started this sync
         s.logs = [];
@@ -385,6 +404,7 @@ export function useSyncFeature() {
 
     return {
         sync: requestSync,
+        stop: stopSync,
         busy,
         lastSynced,
         duration,

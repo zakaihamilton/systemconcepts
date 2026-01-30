@@ -1,9 +1,10 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BATCH_SIZE } from "../constants";
+import { SYNC_BATCH_SIZE, LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";
+import { SyncActiveStore } from "../syncState";
 
 /**
  * Helper function to upload a new file
@@ -39,7 +40,7 @@ export async function uploadNewFiles(localManifest, remoteManifest, localPath = 
     addSyncLog("Step 6: Uploading new files...", "info");
 
     try {
-        const remoteMap = new Map(remoteManifest.map(f => [f.path, f]));
+        const remoteMap = new Map((remoteManifest || []).map(f => [f.path, f]));
         const toUpload = [];
         const createdFolders = new Set();
 
@@ -64,6 +65,11 @@ export async function uploadNewFiles(localManifest, remoteManifest, localPath = 
         // Upload in parallel batches
         const updates = [];
         for (let i = 0; i < toUpload.length; i += SYNC_BATCH_SIZE) {
+            // Check for cancellation
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Upload stopped by user", "warning");
+                break;
+            }
             const batch = toUpload.slice(i, i + SYNC_BATCH_SIZE);
             const progress = Math.min(i + batch.length, toUpload.length);
             const percent = Math.round((progress / toUpload.length) * 100);

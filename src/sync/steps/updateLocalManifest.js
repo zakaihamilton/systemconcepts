@@ -39,7 +39,7 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
     addSyncLog("Step 2: Updating local manifest...", "info");
 
     const localManifestPath = makePath(localPath, FILES_MANIFEST);
-    const remoteManifestMap = new Map(remoteManifest.map(f => [f.path, f]));
+    const remoteManifestMap = new Map((remoteManifest || []).map(f => [f.path, f]));
 
     try {
         let manifest = [];
@@ -55,7 +55,15 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
         }
 
         // Create a map for faster lookup
-        const manifestMap = new Map(manifest.map(f => [f.path, f]));
+        // Handle old dictionary-style manifest or corruption
+        if (manifest && !Array.isArray(manifest)) {
+            console.log("[Sync] Converting legacy dictionary manifest to array format");
+            manifest = Object.entries(manifest).map(([path, info]) => ({
+                path,
+                ...info
+            }));
+        }
+        const manifestMap = new Map((manifest || []).map(f => [f.path, f]));
 
         // Compute file info in parallel batches
         addSyncLog(`Computing hashes for ${localFiles.length} file(s)...`, "info");
@@ -66,6 +74,11 @@ export async function updateLocalManifest(localFiles, localPath = LOCAL_SYNC_PAT
         });
 
         for (let i = 0; i < localFiles.length; i += SYNC_BATCH_SIZE) {
+            // Check for cancellation
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Hashing stopped by user", "warning");
+                break;
+            }
             const batch = localFiles.slice(i, i + SYNC_BATCH_SIZE);
             const progress = Math.min(i + batch.length, localFiles.length);
             const percent = Math.round((progress / localFiles.length) * 100);

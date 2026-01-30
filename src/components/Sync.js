@@ -80,8 +80,7 @@ export default function Sync({ children }) {
                     sync();
                 }
             }
-        },
-
+        }
     ].filter(Boolean);
 
     useToolbar({ id: "Sync", items: toolbarItems, depends: [busy, translations, sync, changed, duration, error, percentage, sessionsBusy, personalSyncBusy, personalSyncError, showPercentage, ariaLabel] });

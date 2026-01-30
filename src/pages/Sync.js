@@ -43,7 +43,7 @@ export default function Sync() {
 
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
-    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
+    const { sync, stop, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
@@ -197,6 +197,16 @@ export default function Sync() {
                             </Box>
 
                             <Box sx={{ ml: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
+                                {syncBusy && (
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        onClick={stop}
+                                        sx={{ whiteSpace: 'nowrap' }}
+                                    >
+                                        {translations.STOP}
+                                    </Button>
+                                )}
                                 <FormControl size="small" sx={{ minWidth: 120 }}>
                                     <InputLabel id="debug-level-label">{translations.LOG_LEVEL || "Log Level"}</InputLabel>
                                     <Select

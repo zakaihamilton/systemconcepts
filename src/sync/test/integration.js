@@ -121,7 +121,10 @@ const commonMocks = {
     // Mocks for migrateFromMongoDB.js
     calculateHash: async (c) => calculateHash(c),
     readGroups: async () => ({ groups: [] }),
-    SyncActiveStore: { update: () => { } }
+    SyncActiveStore: {
+        update: () => { },
+        getRawState: () => ({ stopping: false })
+    }
 };
 
 // --- TESTS ---

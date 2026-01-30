@@ -11,8 +11,24 @@ export async function updateManifestEntry(manifestPath, entry) {
             manifest = await readCompressedFile(manifestPath) || [];
         } else {
             const content = await storage.readFile(manifestPath);
-            manifest = JSON.parse(content);
+            if (content) {
+                try {
+                    manifest = JSON.parse(content);
+                } catch (e) {
+                    console.error("[Sync] Failed to parse manifest:", e);
+                    manifest = [];
+                }
+            }
         }
+    }
+
+    // Handle legacy dictionary-style manifest
+    if (manifest && !Array.isArray(manifest)) {
+        console.log("[Sync] Converting legacy dictionary manifest to array format");
+        manifest = Object.entries(manifest).map(([path, info]) => ({
+            path,
+            ...info
+        }));
     }
 
     // Check if entry exists
@@ -38,7 +54,7 @@ export async function updateManifestEntry(manifestPath, entry) {
 export async function applyManifestUpdates(baseManifest, updates) {
     if (!updates || updates.length === 0) return baseManifest;
 
-    const manifest = [...baseManifest];
+    const manifest = Array.isArray(baseManifest) ? [...baseManifest] : [];
     const pathMap = new Map(manifest.map((f, i) => [f.path, i]));
 
     for (const update of updates) {

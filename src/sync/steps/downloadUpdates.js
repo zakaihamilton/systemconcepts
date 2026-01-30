@@ -1,11 +1,12 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BATCH_SIZE } from "../constants";
+import { SYNC_BATCH_SIZE, FILES_MANIFEST, FILES_MANIFEST_GZ, LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
 import { lockMutex } from "../mutex";
+import { SyncActiveStore } from "../syncState";
 
 /**
  * Helper function to download a single file
@@ -127,7 +128,18 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
                 }
             }
 
-            await storage.writeFile(localFilePath, contentToWrite);
+            try {
+                await storage.writeFile(localFilePath, contentToWrite);
+            } catch (err) {
+                const errorStr = (err.message || String(err)).toLowerCase();
+                if (errorStr.includes("eisdir")) {
+                    console.warn(`[Sync] Path ${localFilePath} is a directory, removing to write file.`);
+                    await storage.deleteFolder(localFilePath);
+                    await storage.writeFile(localFilePath, contentToWrite);
+                } else {
+                    throw err;
+                }
+            }
         } finally {
             unlock();
         }
@@ -157,7 +169,7 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
     addSyncLog("Step 4: Downloading updates...", "info");
 
     try {
-        const localMap = new Map(localManifest.map(f => [f.path, f]));
+        const localMap = new Map((localManifest || []).map(f => [f.path, f]));
         const toDownload = [];
         const createdFolders = new Set();
         const missingOnRemote = [];
@@ -199,6 +211,11 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
         // Download in parallel batches
         const updates = [];
         for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
+            // Check for cancellation
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Download stopped by user", "warning");
+                break;
+            }
             const batch = toDownload.slice(i, i + SYNC_BATCH_SIZE);
             const progress = Math.min(i + batch.length, toDownload.length);
             const percent = Math.round((progress / toDownload.length) * 100);
@@ -226,7 +243,7 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
         // Clean remote manifest if we found missing files
         let cleanedRemoteManifest = remoteManifest;
-        if (missingOnRemote.length > 0) {
+        if (missingOnRemote.length > 0 && !SyncActiveStore.getRawState().stopping) {
             addSyncLog(`Found ${missingOnRemote.length} missing file(s) on remote, cleaning manifest...`, "info");
 
             const missingPaths = new Set(missingOnRemote.map(f => f.path));

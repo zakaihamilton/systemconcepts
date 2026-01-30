@@ -232,24 +232,26 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
         const done = total - filesToMigrate.length;
         addSyncLog(`[Personal] Migrating ${filesToMigrate.length} remaining files (${done}/${total} done)`, "info");
 
+        // Create a map of current manifest entries for updates
+        const manifestMap = new Map((remoteManifest || []).map(entry => [entry.path, entry]));
+
         // Load current local manifest to update it
-        let manifest = { ...remoteManifest };
         if (await storage.exists(localManifestPath)) {
             try {
                 const content = await storage.readFile(localManifestPath);
                 const localManifest = JSON.parse(content);
-                manifest = { ...manifest, ...localManifest };
+                if (Array.isArray(localManifest)) {
+                    localManifest.forEach(entry => manifestMap.set(entry.path, entry));
+                }
             } catch { }
         }
 
-        const deletedKeys = [];
-        // Track unique keys to add to deletedKeys array
         const deletedKeysSet = new Set();
 
         // Helper to mark key as deleted
         const markAsDeleted = (key) => {
-            if (manifest[key]) {
-                delete manifest[key];
+            if (manifestMap.has(key)) {
+                manifestMap.delete(key);
                 deletedKeysSet.add(key);
             }
         };
@@ -269,7 +271,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
                 if (rawRelativePath.startsWith("/")) {
                     const badManifestKey = `metadata/sessions/${rawRelativePath}`;
 
-                    if (manifest[badManifestKey]) {
+                    if (manifestMap.has(badManifestKey)) {
                         // Found a bad entry - blacklist
                         markAsDeleted(badManifestKey);
 
@@ -291,11 +293,11 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
                         let cleanEntryExists = false;
                         if (isBundled) {
                             const bundleKey = `${groupName}.json`;
-                            if (manifest[bundleKey]) {
+                            if (manifestMap.has(bundleKey)) {
                                 cleanEntryExists = true;
                             }
                         } else {
-                            if (manifest[cleanManifestKey]) {
+                            if (manifestMap.has(cleanManifestKey)) {
                                 cleanEntryExists = true;
                             }
                         }
@@ -365,13 +367,14 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
                     const hash = await calculateHash(content);
 
                     const manifestKey = `${cacheKey}.json`;
-                    const oldEntry = manifest[manifestKey];
+                    const oldEntry = manifestMap.get(manifestKey);
                     const version = oldEntry ? (oldEntry.version || 1) + 1 : 1;
-                    manifest[manifestKey] = {
+                    manifestMap.set(manifestKey, {
+                        path: manifestKey,
                         hash,
                         modified: Date.now(),
                         version
-                    };
+                    });
 
                     cache.dirty = false;
                 }
@@ -508,7 +511,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
             // Save progress after each batch
             await flushBundles();
             await safeWriteMigration(migrationState, "batch_progress");
-            await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
+            await storage.writeFile(localManifestPath, JSON.stringify(Array.from(manifestMap.values()), null, 4));
             addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
             SyncActiveStore.update(s => {
                 s.personalSyncProgress = {
@@ -518,11 +521,14 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
             });
         }
 
+        // Final manifest as array
+        const finalManifest = Array.from(manifestMap.values());
+
         // Final save
         await flushBundles();
 
         await safeWriteMigration(migrationState, "final_save");
-        await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
+        await storage.writeFile(localManifestPath, JSON.stringify(finalManifest, null, 4));
 
 
         // Check if complete
@@ -537,9 +543,9 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath) {
         addSyncLog(`[Personal] ✓ Migrated ${migratedCount} files in ${duration}s (${done + migratedCount}/${total} total)`, "success");
 
         // Convert set to array
-        deletedKeys.push(...deletedKeysSet);
+        const deletedKeys = Array.from(deletedKeysSet);
 
-        return { migrated: (deletedKeysSet.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest, deletedKeys };
+        return { migrated: (deletedKeysSet.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest: finalManifest, deletedKeys };
 
     } catch (err) {
         console.error("[Personal] Migration error:", err);

@@ -1,5 +1,5 @@
 import { makePath } from "@util/path";
-import { FILES_MANIFEST_GZ } from "../constants";
+import { FILES_MANIFEST_GZ, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";

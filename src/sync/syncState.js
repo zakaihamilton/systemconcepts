@@ -18,6 +18,7 @@ export const SyncActiveStore = new Store({
     personalSyncError: null,
     locked: false, // Track if sync upload is locked
     autoSync: true, // Track if automatic sync is enabled (default: true)
+    stopping: false, // Track if sync is currently being stopped
     debugLevel: "info" // Track debug level (info/verbose)
 });
 
