@@ -2,7 +2,6 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
-import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";
 
@@ -35,7 +34,7 @@ async function uploadNewFile(localFile, createdFolders, localPath, remotePath) {
  * Step 6: Upload new files not present in remote manifest
  * Uses parallel batch processing for performance
  */
-export async function uploadNewFiles(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH) {
+export async function uploadNewFiles(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, progressTracker = null) {
     const start = performance.now();
     addSyncLog("Step 6: Uploading new files...", "info");
 
@@ -58,9 +57,9 @@ export async function uploadNewFiles(localManifest, remoteManifest, localPath = 
 
         addSyncLog(`Uploading ${toUpload.length} new file(s)...`, "info");
 
-        SyncActiveStore.update(s => {
-            s.progress = { total: toUpload.length, processed: 0 };
-        });
+        if (progressTracker) {
+            progressTracker.updateProgress('uploadNewFiles', { processed: 0, total: toUpload.length });
+        }
 
         // Upload in parallel batches
         const updates = [];
@@ -71,9 +70,9 @@ export async function uploadNewFiles(localManifest, remoteManifest, localPath = 
 
             addSyncLog(`Uploading ${progress}/${toUpload.length} (${percent}%)...`, "info");
 
-            SyncActiveStore.update(s => {
-                s.progress = { total: toUpload.length, processed: progress };
-            });
+            if (progressTracker) {
+                progressTracker.updateProgress('uploadNewFiles', { processed: progress, total: toUpload.length });
+            }
 
             const results = await Promise.all(
                 batch.map(localFile => uploadNewFile(localFile, createdFolders, localPath, remotePath))

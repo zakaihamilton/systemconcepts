@@ -119,7 +119,7 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 
     // Step 4
     progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
-    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, canUpload);
+    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, canUpload, progress);
     localManifest = downloadResult.manifest;
     remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
     hasChanges = hasChanges || downloadResult.hasChanges;
@@ -135,14 +135,14 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
     if (canUpload) {
         // Step 5
         progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
-        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath);
+        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, progress);
         remoteManifest = uploadUpdatesResult.manifest;
         hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
         progress.completeStep('uploadUpdates');
 
         // Step 6
         progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
-        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, resolvedRemotePath);
+        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, resolvedRemotePath, progress);
         remoteManifest = uploadNewResult.manifest;
         hasChanges = hasChanges || uploadNewResult.hasChanges;
         progress.completeStep('uploadNewFiles');

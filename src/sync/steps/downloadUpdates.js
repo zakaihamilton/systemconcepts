@@ -5,7 +5,6 @@ import { addSyncLog } from "../logs";
 import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
-import { SyncActiveStore } from "../syncState";
 import { lockMutex } from "../mutex";
 
 /**
@@ -105,7 +104,7 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
  * Step 4: Download files that have higher version on remote
  * Uses parallel batch processing for performance
  */
-export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true) {
+export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true, progressTracker = null) {
     const start = performance.now();
     addSyncLog("Step 4: Downloading updates...", "info");
 
@@ -145,9 +144,9 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
         addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
 
-        SyncActiveStore.update(s => {
-            s.progress = { total: toDownload.length, processed: 0 };
-        });
+        if (progressTracker) {
+            progressTracker.updateProgress('downloadUpdates', { processed: 0, total: toDownload.length });
+        }
 
         // Download in parallel batches
         const updates = [];
@@ -158,9 +157,9 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
             addSyncLog(`Downloading ${progress}/${toDownload.length} (${percent}%)...`, "info");
 
-            SyncActiveStore.update(s => {
-                s.progress = { total: toDownload.length, processed: progress };
-            });
+            if (progressTracker) {
+                progressTracker.updateProgress('downloadUpdates', { processed: progress, total: toDownload.length });
+            }
 
             const results = await Promise.all(
                 batch.map(async remoteFile => {

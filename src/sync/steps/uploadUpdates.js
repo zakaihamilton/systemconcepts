@@ -2,7 +2,6 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { SYNC_BATCH_SIZE } from "../constants";
 import { addSyncLog } from "../logs";
-import { SyncActiveStore } from "../syncState";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";
 import { applyManifestUpdates } from "../manifest";
@@ -43,7 +42,7 @@ async function uploadFile(localFile, createdFolders, localPath, remotePath) {
  * Step 5: Upload files that have higher version locally
  * Uses parallel batch processing for performance
  */
-export async function uploadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH) {
+export async function uploadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, progressTracker = null) {
     const start = performance.now();
     addSyncLog("Step 5: Uploading updates...", "info");
 
@@ -70,9 +69,9 @@ export async function uploadUpdates(localManifest, remoteManifest, localPath = L
 
         addSyncLog(`Uploading ${toUpload.length} update(s)...`, "info");
 
-        SyncActiveStore.update(s => {
-            s.progress = { total: toUpload.length, processed: 0 };
-        });
+        if (progressTracker) {
+            progressTracker.updateProgress('uploadUpdates', { processed: 0, total: toUpload.length });
+        }
 
         // Upload in parallel batches
         const updates = [];
@@ -83,9 +82,9 @@ export async function uploadUpdates(localManifest, remoteManifest, localPath = L
 
             addSyncLog(`Uploading ${progress}/${toUpload.length} (${percent}%)...`, "info");
 
-            SyncActiveStore.update(s => {
-                s.progress = { total: toUpload.length, processed: progress };
-            });
+            if (progressTracker) {
+                progressTracker.updateProgress('uploadUpdates', { processed: progress, total: toUpload.length });
+            }
 
             const results = await Promise.all(
                 batch.map(localFile => uploadFile(localFile, createdFolders, localPath, remotePath))
