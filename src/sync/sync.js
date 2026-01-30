@@ -68,7 +68,10 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 
     // Step 2 & 3: Sync manifests
     progress.updateProgress('syncManifest', { processed: 0, total: 1 });
-    let remoteManifest = await syncManifest(resolvedRemotePath, isLocked);
+    // Personal sync uses migration to populate manifest, so we skip the expensive scan
+    // if the manifest is missing (it will be created during migration)
+    const skipScan = !!migration;
+    let remoteManifest = await syncManifest(resolvedRemotePath, isLocked, skipScan);
     progress.completeStep('syncManifest');
 
     // Step 3.5: Migrate from MongoDB if needed

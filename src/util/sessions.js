@@ -152,22 +152,13 @@ export function useSessions(depends = [], options = {}) {
 
                                 if (isBundleFile) {
                                     // bundleKey: group/year/session.json or group/session.json
-                                    const bParts = bundleKey.split("/");
-                                    if (bParts.length >= 2) {
-                                        const bGroup = bParts[0];
-                                        const bSessionName = bParts[bParts.length - 1].replace(".json", "");
-
-                                        // We need to construct the key used for lookup: group + date + name
-                                        // But we only have group + sessionName. 
-                                        // The SessionsStore loading logic matches strictly on "group/sessionName" (derived from filename)?
-                                        // No, verify key format.
-                                        // Lines 137/161 used "group/sessionName". Matches below.
-                                        key = `${bGroup}/${bSessionName}`;
-                                    }
+                                    // We want to keep the full path as the key, but without the .json extension
+                                    key = bundleKey.replace(/\.json$/, "");
                                 } else {
-                                    const keyParts = bundleKey.split("/");
-                                    const sessionName = keyParts[keyParts.length - 1].replace(".json", "");
-                                    key = `${groupName}/${sessionName}`;
+                                    // bundleKey: year/session.json (merged) or session.json (split)
+                                    // Construct unambiguous key: group/year/session or group/session
+                                    const bName = bundleKey.replace(/\.json$/, "");
+                                    key = `${groupName}/${bName}`;
                                 }
 
                                 if (key) {
@@ -300,7 +291,8 @@ export function useSessions(depends = [], options = {}) {
                     }
 
                     // Merge personal metadata (position/duration)
-                    const personalKey = `${session.group}/${session.date} ${session.name}`;
+                    const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
+                    const personalKey = `${session.group}/${(isMerged || groupInfo?.bundled) && session.year ? session.year + "/" : ""}${session.date} ${session.name}`;
                     const personal = personalMetadata[personalKey];
                     if (personal) {
                         session.position = personal.position;
@@ -357,7 +349,8 @@ export function useSessions(depends = [], options = {}) {
                             }
 
                             // Merge personal metadata (position/duration)
-                            const personalKey = `${session.group}/${session.date} ${session.name}`;
+                            const isMerged = groupInfo?.merged;
+                            const personalKey = `${session.group}/${(isMerged || groupInfo?.bundled) && session.year ? session.year + "/" : ""}${session.date} ${session.name}`;
                             const personal = personalMetadata[personalKey];
                             if (personal) {
                                 session.position = personal.position;
