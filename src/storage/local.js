@@ -1,5 +1,5 @@
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
-import { makePath } from "@util/path";
+import { makePath, isBinaryFile } from "@util/path";
 
 const fs = process.browser && new FS("systemconcepts-fs");
 
@@ -161,6 +161,9 @@ async function deleteFile(path) {
 async function readFile(path) {
     path = makePath(path);
     try {
+        if (isBinaryFile(path)) {
+            return await fs.promises.readFile(path);
+        }
         return await fs.promises.readFile(path, "utf8");
     } catch (err) {
         if (err.code !== "ENOENT" && !err.message.includes("ENOENT")) {

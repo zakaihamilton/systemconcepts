@@ -2,6 +2,7 @@ import storage from "@data/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { makePath, isBinaryFile } from "@util/path";
 import { useGlobalState } from "@util/store";
+import JSZip from "jszip";
 import pLimit from "./p-limit";
 
 const limit = pLimit(20);
@@ -386,6 +387,42 @@ async function exportFolder(path) {
     return data;
 }
 
+async function exportFolderAsZip(path) {
+    const zip = new JSZip();
+    const rootPath = makePath(path);
+
+    const addToZip = async (currentPath, currentZipFolder) => {
+        const items = await storageMethods.getListing(currentPath);
+        for (const item of items) {
+            const { name, type, path: itemPath } = item;
+            try {
+                if (type === "dir") {
+                    const folder = currentZipFolder.folder(name);
+                    await addToZip(itemPath, folder);
+                }
+                else {
+                    const content = await storageMethods.readFile(itemPath);
+                    if (content !== null) {
+                        const isBinary = isBinaryFile(itemPath);
+                        if (isBinary && typeof content === "string") {
+                            currentZipFolder.file(name, content, { base64: true });
+                        }
+                        else {
+                            currentZipFolder.file(name, content);
+                        }
+                    }
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }
+    };
+
+    await addToZip(rootPath, zip);
+    return await zip.generateAsync({ type: "blob" });
+}
+
 async function importFolder(path, data) {
     const fromData = async (root, data) => {
         await storageMethods.createFolder(root);
@@ -461,6 +498,7 @@ async function moveFile(from, to) {
 export default {
     ...storageMethods,
     exportFolder,
+    exportFolderAsZip,
     importFolder,
     copyFolder,
     copyFile,
