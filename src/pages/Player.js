@@ -37,7 +37,7 @@ export const PlayerStore = new Store({
 
 registerToolbar("Player");
 
-export default function PlayerPage({ show = false, suffix, mode }) {
+export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
     const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
@@ -45,7 +45,7 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
     const [, , groups] = useSessions([], { filterSessions: false, skipSync: true, active: false });
-    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = useParentParams();
+    const { prefix = "sessions", group = "", year = "", date = "", name = "" } = { ...useParentParams(), ...props };
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);

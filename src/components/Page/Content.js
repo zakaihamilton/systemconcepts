@@ -2,13 +2,14 @@ import { useRef, createContext, useState, useEffect } from "react";
 import styles from "./Content.module.scss";
 import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
-import { useActivePages } from "@util/pages";
+import { useActivePages, useParentParams } from "@util/pages";
 import pages from "@data/pages";
 
 export const ContentSize = createContext();
 
 export default function Content() {
     const activePages = useActivePages();
+    const parentParams = useParentParams();
     const { hash, showSideBar } = MainStore.useState();
     const activePage = activePages[activePages.length - 1];
     const ref = useRef();
@@ -22,15 +23,16 @@ export default function Content() {
         const timerHandle = setTimeout(() => {
             if (showPlayer) {
                 setPlayerPage(prev => {
-                    if (prev && prev.id === activePage.id && prev.url === activePage.url) {
+                    const newPage = { ...activePage, ...parentParams };
+                    if (prev && prev.id === newPage.id && prev.url === newPage.url && prev.group === newPage.group && prev.name === newPage.name) {
                         return prev;
                     }
-                    return { ...activePage };
+                    return newPage;
                 });
             }
         }, 0);
         return () => clearTimeout(timerHandle);
-    }, [showPlayer, activePage]);
+    }, [showPlayer, activePage, parentParams]);
     if (!activePage) {
         return null;
     }
