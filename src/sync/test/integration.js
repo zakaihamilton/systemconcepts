@@ -545,6 +545,34 @@ async function runTests() {
         assert.strictEqual(getLocalFilesCallCount, 2, "getLocalFiles should be called twice (once before migration, once after)");
         console.log("  [PASS] Migration triggers reload of local files");
 
+        // --- Test 11: Personal Sync Restore Safety ---
+        console.log("\nTest 11: Personal Sync Restore Safety");
+        const downloadModuleRestore = loadModule('src/sync/steps/downloadUpdates.js', smartMocks);
+
+        // Case: User is Admin (canUpload=true), but restoreMissingFiles=true
+        // Logic should restore the file instead of skipping it (which leads to deletion)
+
+        const localManifestRestore = [{ path: "restore_me.json", deleted: true, version: 1 }];
+        const remoteManifestRestore = [{ path: "restore_me.json", version: 1, hash: "remote_hash" }];
+
+        mockStorage.files['aws/sync/restore_me.json'] = "remote content";
+        mockStorage.ops = [];
+
+        // Run with restoreMissingFiles = true
+        await downloadModuleRestore.downloadUpdates(
+            localManifestRestore,
+            remoteManifestRestore,
+            'local/sync',
+            'aws/sync',
+            true, // canUpload (Admin)
+            null,
+            true  // restoreMissingFiles
+        );
+
+        const writeOpRestore = mockStorage.ops.find(o => o.op === 'write' && o.path.includes('restore_me.json'));
+        assert.ok(writeOpRestore, "Should restore file even if Admin, when restoreMissingFiles is true");
+        console.log("  [PASS] Restores missing files with safety flag enabled");
+
     } catch (err) {
         console.error("\n[FAIL] Test Failed:", err);
         process.exit(1);

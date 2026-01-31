@@ -20,6 +20,7 @@ export const SYNC_CONFIG = [
         remotePath: "aws/personal/{userid}",
         direction: "bi",
         uploadsRole: "student",
-        migration: true
+        migration: true,
+        restoreMissingFiles: true
     }
 ];

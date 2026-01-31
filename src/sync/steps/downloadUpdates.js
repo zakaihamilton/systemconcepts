@@ -164,7 +164,7 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
  * Step 4: Download files that have higher version on remote
  * Uses parallel batch processing for performance
  */
-export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true, progressTracker = null) {
+export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true, progressTracker = null, restoreMissingFiles = false) {
     const start = performance.now();
     addSyncLog("Step 4: Downloading updates...", "info");
 
@@ -186,9 +186,15 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
                 toDownload.push(remoteFile);
             }
             else if (localFile.deleted) {
-                if (canUpload) {
+                if (canUpload && !restoreMissingFiles) {
                     // Admin: Keep it deleted locally, skip download
                     console.log(`[Sync] Skipping download for locally deleted file: ${remoteFile.path}`);
+                } else if (restoreMissingFiles) {
+                    // Restore Missing Files Safety:
+                    // If file is missing/deleted locally, we force restore it to avoid data loss on remote
+                    console.log(`[Sync] Restoring missing/deleted file (Safety Policy): ${remoteFile.path}`);
+                    addSyncLog(`Safety Restore: ${remoteFile.path}`, "warning");
+                    toDownload.push(remoteFile);
                 } else {
                     // Student/Visitor: Re-download to restore from remote
                     console.log(`[Sync] Restoring locally deleted file from remote: ${remoteFile.path}`);

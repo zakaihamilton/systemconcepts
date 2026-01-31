@@ -35,7 +35,7 @@ const SYNC_INTERVAL = 60; // seconds
  * @param {string} userid - Current user ID
  */
 async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combinedTotalWeight = null) {
-    const { name, localPath, remotePath, uploadsRole, migration } = config;
+    const { name, localPath, remotePath, uploadsRole, migration, restoreMissingFiles } = config;
     const label = name;
 
     const start = performance.now();
@@ -124,7 +124,7 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 
     // Step 4
     progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
-    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, canUpload, progress);
+    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, canUpload, progress, restoreMissingFiles);
     localManifest = downloadResult.manifest;
     remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
     hasChanges = hasChanges || downloadResult.hasChanges;
