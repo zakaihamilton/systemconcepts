@@ -153,7 +153,7 @@ export default function SessionPage({ group, year, date, name }) {
                 </div>}
                 <div className={styles.details}>
                     {session.type !== "image" && <div className={styles.summary}>
-                        <Summary path={session.summary?.path} key={session.summary?.path} />
+                        <Summary path={session.summary?.path} content={session.summaryText} key={session.summary?.path || session.name} />
                     </div>}
                 </div>
             </div>

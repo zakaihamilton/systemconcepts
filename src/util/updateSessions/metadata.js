@@ -106,3 +106,112 @@ export async function loadTags(year, name, path, forceUpdate, isMerged, isBundle
 export async function loadDurations(year, name, path, forceUpdate, isMerged, isBundled) {
     return loadMetadata("duration", ".duration", year, name, path, forceUpdate, isMerged, isBundled);
 }
+
+export async function loadSummaries(year, name, path, forceUpdate, isMerged, isBundled) {
+    const sessionMetadataMap = {};
+    let updateLocalMetadata = true;
+    const property = "summaryText";
+
+    if (!forceUpdate) {
+        let metadataLoaded = false;
+        const metadataLoader = (data) => {
+            if (data && Array.isArray(data.sessions)) {
+                data.sessions.forEach(session => {
+                    if (session.name && session.name.startsWith(year.name)) {
+                        return;
+                    }
+                    if (session && session[property]) {
+                        const value = session[property];
+                        if (value) {
+                            sessionMetadataMap[session.id] = value;
+                            if (session.name) {
+                                sessionMetadataMap[session.name] = value;
+                                if (session.name.startsWith(year.name)) {
+                                    metadataLoaded = true;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        try {
+            if (isBundled) {
+                const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+                if (await storage.exists(bundlePath)) {
+                    const content = await storage.readFile(bundlePath);
+                    const data = JSON.parse(content);
+                    metadataLoader(data);
+                }
+            }
+
+            if (!metadataLoaded && isMerged) {
+                const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+                if (await storage.exists(mergedPath)) {
+                    const content = await storage.readFile(mergedPath);
+                    const data = JSON.parse(content);
+                    metadataLoader(data);
+                }
+            }
+
+            if (!metadataLoaded) {
+                const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
+                if (await storage.exists(localYearPath)) {
+                    const content = await storage.readFile(localYearPath);
+                    const data = JSON.parse(content);
+                    metadataLoader(data);
+                }
+            }
+
+            if (!metadataLoaded) {
+                updateLocalMetadata = true;
+            }
+
+        } catch (err) {
+            console.warn(`[Sync] Failed to read cache for ${property}`, err);
+        }
+    }
+
+    if (updateLocalMetadata) {
+        const metadataFileName = `${year.name}.md`;
+        const metadataRemotePath = makePath(path, metadataFileName);
+        if (await storage.exists(metadataRemotePath)) {
+            try {
+                const content = await storage.readFile(metadataRemotePath);
+
+                const lines = content.split('\n');
+                let currentSessionId = null;
+                let currentBuffer = [];
+
+                for (let line of lines) {
+                    if (line.startsWith('## ')) {
+                        if (currentSessionId && currentBuffer.length > 0) {
+                            sessionMetadataMap[currentSessionId] = currentBuffer.join('\n').trim();
+                        }
+
+                        const header = line.substring(3).trim();
+                        // header usually is "YYYY-MM-DD Title" which matches session ID
+                        if (/^\d{4}-\d{2}-\d{2}/.test(header)) {
+                            currentSessionId = header;
+                            currentBuffer = [];
+                        } else {
+                            currentSessionId = null;
+                        }
+                    } else if (currentSessionId) {
+                        if (line.trim() === '---') continue;
+                        currentBuffer.push(line);
+                    }
+                }
+                if (currentSessionId && currentBuffer.length > 0) {
+                    sessionMetadataMap[currentSessionId] = currentBuffer.join('\n').trim();
+                }
+
+            } catch (err) {
+                console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
+                throw err;
+            }
+        }
+    }
+    return sessionMetadataMap;
+}
