@@ -17,14 +17,19 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
-import CachedIcon from "@mui/icons-material/Cached";
 import { useContext } from "react";
 import { SyncContext } from "@components/Sync";
+import CachedIcon from "@mui/icons-material/Cached";
 import { clearBundleCache } from "@sync/sync";
+import { SyncActiveStore } from "@sync/syncState";
 import Dialog from "@widgets/Dialog";
 
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { fileTitle } from "@util/path";
 
@@ -33,14 +38,36 @@ registerToolbar("Sync");
 export default function Sync() {
     const online = useOnline();
     const translations = useTranslations();
-    const { updateSync } = useContext(SyncContext);
+    const context = useContext(SyncContext);
+    const store = (context && typeof context.getRawState === 'function') ? context : SyncActiveStore;
+
     const [groups] = useGroups([]);
     const { busy: sessionsBusy } = useUpdateSessions(groups);
-    const { sync, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
+    const { sync, stop, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
+    const isAdmin = Cookies.get("role") === "admin";
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
     const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+    const [debugLevel, setDebugLevel] = React.useState("info");
+
+    React.useEffect(() => {
+        const currentLevel = store.getRawState().debugLevel || "info";
+        setDebugLevel(currentLevel);
+
+        const unsubscribe = store.subscribe(s => s.debugLevel, level => {
+            setDebugLevel(level || "info");
+        });
+        return unsubscribe;
+    }, [store]);
+
+    const handleDebugLevelChange = (event) => {
+        const newLevel = event.target.value;
+        setDebugLevel(newLevel);
+        store.update(s => {
+            s.debugLevel = newLevel;
+        });
+    };
 
     React.useEffect(() => {
         let interval;
@@ -89,7 +116,7 @@ export default function Sync() {
         try {
             await clearBundleCache();
             setConfirmFullSync(false);
-            await updateSync(false);
+            await sync();
         } catch (err) {
             console.error("Failed to full sync", err);
         }
@@ -170,7 +197,30 @@ export default function Sync() {
                                 </Box>
                             </Box>
 
-                            <Box sx={{ ml: 'auto' }}>
+                            <Box sx={{ ml: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
+                                {syncBusy && (
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        onClick={stop}
+                                        sx={{ whiteSpace: 'nowrap' }}
+                                    >
+                                        {translations.STOP || "Stop"}
+                                    </Button>
+                                )}
+                                {isAdmin && <FormControl size="small" sx={{ minWidth: 120 }}>
+                                    <InputLabel id="debug-level-label">{translations.LOG_LEVEL || "Log Level"}</InputLabel>
+                                    <Select
+                                        labelId="debug-level-label"
+                                        id="debug-level-select"
+                                        value={debugLevel}
+                                        label={translations.LOG_LEVEL || "Log Level"}
+                                        onChange={handleDebugLevelChange}
+                                    >
+                                        <MenuItem value="info">Info</MenuItem>
+                                        <MenuItem value="verbose">Verbose</MenuItem>
+                                    </Select>
+                                </FormControl>}
                                 <Button
                                     variant="outlined"
                                     color="warning"

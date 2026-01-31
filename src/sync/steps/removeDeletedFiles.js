@@ -1,7 +1,8 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "../constants";
+import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "../constants";
 import { addSyncLog } from "../logs";
+import { SyncActiveStore } from "../syncState";
 
 /**
  * Step: Remove local files that no longer exist on remote
@@ -23,7 +24,7 @@ export async function removeDeletedFiles(localManifest, remoteManifest, localPat
             return { manifest: localManifest, hasChanges: false };
         }
 
-        const remotePathsSet = new Set(remoteManifest.map(f => f.path));
+        const remotePathsSet = new Set((remoteManifest || []).map(f => f.path));
 
         // Only delete files that were previously synced (version > 1)
         // Don't delete new files (version = 1) that haven't been uploaded yet
@@ -46,12 +47,19 @@ export async function removeDeletedFiles(localManifest, remoteManifest, localPat
         addSyncLog(`Removing ${toDelete.length} deleted file(s)...`, "info");
 
         // Delete files
+        const deletedPaths = new Set();
         for (const file of toDelete) {
+            // Check for cancellation
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Cleanup stopped by user", "warning");
+                break;
+            }
             try {
                 const filePath = makePath(localPath, file.path);
                 if (await storage.exists(filePath)) {
                     await storage.deleteFile(filePath);
-                    addSyncLog(`Removed: ${file.path}`, "info");
+                    addSyncLog(`Removed: ${filePath}`, "info");
+                    deletedPaths.add(file.path);
                 }
             } catch (err) {
                 console.error(`[Sync] Failed to delete ${file.path}:`, err);
@@ -59,8 +67,8 @@ export async function removeDeletedFiles(localManifest, remoteManifest, localPat
             }
         }
 
-        // Update manifest to remove deleted files
-        const updatedManifest = localManifest.filter(f => remotePathsSet.has(f.path));
+        // Update manifest to remove ONLY files that were actually deleted
+        const updatedManifest = localManifest.filter(f => !deletedPaths.has(f.path));
 
         // Write updated manifest
         const manifestPath = makePath(localPath, FILES_MANIFEST);

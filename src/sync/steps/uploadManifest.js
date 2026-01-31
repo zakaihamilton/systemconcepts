@@ -1,5 +1,5 @@
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, FILES_MANIFEST_GZ } from "../constants";
+import { FILES_MANIFEST_GZ, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { writeCompressedFile } from "../bundle";
 import Cookies from "js-cookie";
@@ -48,14 +48,8 @@ export async function uploadManifest(remoteManifest, remotePath = SYNC_BASE_PATH
     const start = performance.now();
     addSyncLog("Step 7: Uploading manifest...", "info");
 
-    const role = Cookies.get("role");
-    // Only Admin can upload the global manifest
-    if (role !== "admin") {
-        addSyncLog("Skipping global manifest upload (Student/ReadOnly)", "info");
-        return;
-    }
+    // Role check is handled by caller (sync.js)
 
-    // Normalize and deduplicate before checking count
     const normalizedManifest = normalizeManifest(remoteManifest);
     const deduped = (remoteManifest?.length || 0) - normalizedManifest.length;
     if (deduped > 0) {

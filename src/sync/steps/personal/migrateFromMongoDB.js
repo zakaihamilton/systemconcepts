@@ -3,8 +3,9 @@ import { makePath } from "@util/path";
 import { addSyncLog } from "@sync/logs";
 import { calculateHash } from "@sync/hash";
 import { readGroups } from "@sync/groups";
+
 import { SyncActiveStore } from "@sync/syncState";
-import { LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST } from "../constants";
+import { FILES_MANIFEST } from "../../constants";
 
 const MIGRATION_FILE = "migration.json";
 
@@ -13,14 +14,18 @@ const MIGRATION_FILE = "migration.json";
  * Uses local migration.json to track progress and allow resumable migration
  * Files are copied to local storage immediately so user sees progress
  */
-export async function migrateFromMongoDB(userid, remoteManifest) {
+export async function migrateFromMongoDB(userid, remoteManifest, localPath, canUpload = true) {
     const start = performance.now();
-    const migrationPath = makePath(LOCAL_PERSONAL_PATH, MIGRATION_FILE);
-    const localManifestPath = makePath(LOCAL_PERSONAL_PATH, LOCAL_PERSONAL_MANIFEST);
+    const migrationPath = makePath(localPath, MIGRATION_FILE);
+    const localManifestPath = makePath(localPath, FILES_MANIFEST);
+
+    // Create a Set for efficient O(1) lookups of remote paths
+    const remotePathSet = new Set(Array.isArray(remoteManifest) ? remoteManifest.map(f => f.path) : []);
+    addSyncLog(`Migration check: Remote manifest has ${remotePathSet.size} files (Array check: ${Array.isArray(remoteManifest)})`, "verbose");
 
     // Check if migration has already occurred by looking at remote manifest
     // If the user has files in the personal folder, we assume migration is done.
-    const hasRemoteFiles = Object.keys(remoteManifest).some(key =>
+    const hasRemoteFiles = Array.from(remotePathSet).some(key =>
         key.endsWith(".json")
     );
 
@@ -53,15 +58,32 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                 if (migrationState.complete) {
                     // Check for zombie state: Migration thinks it's done, but remote is empty.
                     // This implies the files were migrated locally, but then deleted before upload.
-                    const remoteHasJson = Object.keys(remoteManifest).some(k => k.endsWith(".json"));
+                    const remoteHasJson = Array.from(remotePathSet).some(k => k.endsWith(".json"));
 
-                    if (!remoteHasJson) {
-                        console.log("[Personal] Migration marked complete but remote is empty. Forcing re-migration.");
-                        migrationState.complete = false;
-                        migrationState.migrated = {};
-                        // Fall through to normal logic
+                    if (!remoteHasJson && canUpload) {
+                        // Double check local storage. If we have local files, it's not a zombie state, 
+                        // it's just a "waiting to upload" state.
+                        const localListing = await storage.getRecursiveList(localPath);
+                        const localHasJson = localListing.some(l =>
+                            l.name.endsWith(".json") &&
+                            l.name !== MIGRATION_FILE &&
+                            l.name !== FILES_MANIFEST
+                        );
+
+                        if (!localHasJson) {
+                            console.log("[Personal] Migration marked complete but local and remote are empty. Forcing re-migration.");
+                            migrationState.complete = false;
+                            migrationState.migrated = {};
+                            // Fall through to normal logic
+                        } else {
+                            console.log("[Personal] Migration already complete locally, waiting for upload.");
+                            return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+                        }
+                    } else if (!remoteHasJson && !canUpload) {
+                        console.log("[Personal] Migration marked complete locally. Skipping remote check (read-only mode)");
+                        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
                     } else {
-                        console.log("[Personal] Migration already complete, skipping");
+                        console.log("[Personal] Migration already complete (verified by remote), skipping");
                         return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
                     }
                 }
@@ -183,18 +205,18 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
             if (isBundled) {
                 // Check if the common bundle exists in manifest
                 const bundleKey = "bundle.json";
-                if (remoteManifest[bundleKey]) {
+                if (remotePathSet.has(bundleKey)) {
                     existsRemote = true;
                 }
             } else if (isMerged) {
                 // Check if the group bundle exists in manifest
                 const bundleKey = `${groupName}.json`;
-                if (remoteManifest[bundleKey]) {
+                if (remotePathSet.has(bundleKey)) {
                     existsRemote = true;
                 }
             } else {
                 const manifestKey = `${relativePath}`;
-                if (remoteManifest[manifestKey]) {
+                if (remotePathSet.has(manifestKey)) {
                     existsRemote = true;
                 }
             }
@@ -227,24 +249,26 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
         const done = total - filesToMigrate.length;
         addSyncLog(`[Personal] Migrating ${filesToMigrate.length} remaining files (${done}/${total} done)`, "info");
 
+        // Create a map of current manifest entries for updates
+        const manifestMap = new Map((remoteManifest || []).map(entry => [entry.path, entry]));
+
         // Load current local manifest to update it
-        let manifest = { ...remoteManifest };
         if (await storage.exists(localManifestPath)) {
             try {
                 const content = await storage.readFile(localManifestPath);
                 const localManifest = JSON.parse(content);
-                manifest = { ...manifest, ...localManifest };
+                if (Array.isArray(localManifest)) {
+                    localManifest.forEach(entry => manifestMap.set(entry.path, entry));
+                }
             } catch { }
         }
 
-        const deletedKeys = [];
-        // Track unique keys to add to deletedKeys array
         const deletedKeysSet = new Set();
 
         // Helper to mark key as deleted
         const markAsDeleted = (key) => {
-            if (manifest[key]) {
-                delete manifest[key];
+            if (manifestMap.has(key)) {
+                manifestMap.delete(key);
                 deletedKeysSet.add(key);
             }
         };
@@ -264,14 +288,14 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                 if (rawRelativePath.startsWith("/")) {
                     const badManifestKey = `metadata/sessions/${rawRelativePath}`;
 
-                    if (manifest[badManifestKey]) {
+                    if (manifestMap.has(badManifestKey)) {
                         // Found a bad entry - blacklist
                         markAsDeleted(badManifestKey);
 
                         // Check if we ALREADY have the clean entry (e.g. from previous partial run)
                         // If so, we don't need to re-migrate, just clean the manifest
                         const cleanRelativePath = rawRelativePath.replace(/^[\/\\]+/, "");
-                        const cleanManifestKey = `${cleanRelativePath}`;
+                        const cleanManifestKey = makePath(cleanRelativePath);
 
                         const parts = cleanRelativePath.split("/");
                         const groupName = parts[0];
@@ -285,12 +309,12 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
 
                         let cleanEntryExists = false;
                         if (isBundled) {
-                            const bundleKey = `${groupName}.json`;
-                            if (manifest[bundleKey]) {
+                            const bundleKey = makePath(`${groupName}.json`);
+                            if (manifestMap.has(bundleKey)) {
                                 cleanEntryExists = true;
                             }
                         } else {
-                            if (manifest[cleanManifestKey]) {
+                            if (manifestMap.has(cleanManifestKey)) {
                                 cleanEntryExists = true;
                             }
                         }
@@ -322,7 +346,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
         for (const file of migrationState.files) {
             if (migrationState.migrated[file.path]) {
                 const relativePath = file.path.substring(mongoPath.length + 1).replace(/^[\/\\]+/, "");
-                const manifestKey = `${relativePath}`;
+                const manifestKey = makePath(relativePath);
                 markAsDeleted(manifestKey);
             }
         }
@@ -340,7 +364,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
         const flushBundles = async () => {
             for (const [cacheKey, cache] of Object.entries(bundleCache)) {
                 if (cache.dirty) {
-                    const bundlePath = makePath(LOCAL_PERSONAL_PATH, `${cacheKey}.json`);
+                    const bundlePath = makePath(localPath, `${cacheKey}.json`);
 
                     // Optimization: Only read existing file if we haven't loaded it yet
                     // This prevents reading the file repeatedly in subsequent batches
@@ -359,14 +383,15 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
 
                     const hash = await calculateHash(content);
 
-                    const manifestKey = `${cacheKey}.json`;
-                    const oldEntry = manifest[manifestKey];
+                    const manifestKey = makePath(`${cacheKey}.json`);
+                    const oldEntry = manifestMap.get(manifestKey);
                     const version = oldEntry ? (oldEntry.version || 1) + 1 : 1;
-                    manifest[manifestKey] = {
+                    manifestMap.set(manifestKey, {
+                        path: manifestKey,
                         hash,
                         modified: Date.now(),
                         version
-                    };
+                    });
 
                     cache.dirty = false;
                 }
@@ -427,11 +452,6 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                     }
 
                     // Read from MongoDB using batch cache
-                    // Key returned by readFiles matches the key used in request (with device-relative path)
-                    // remote.js/readFiles maps input paths using makePath(prefix + name).
-                    // We passed prefix="personal" and name="metadata/sessions/..."
-                    // so it requested makePath("personal/metadata/sessions/...") -> "/metadata/sessions/..."
-                    // And results are keyed by that absolute path.
                     const fileParts = file.path.split("/").filter(Boolean);
                     const lookupKey = "/" + fileParts.slice(1).join("/");
                     const content = batchContents[lookupKey];
@@ -464,7 +484,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
 
                             bundleCache[cacheKey].content[bundleKey] = data;
                             bundleCache[cacheKey].dirty = true;
-                            markAsDeleted(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(makePath(`metadata/sessions/${relativePath}`));
                         } catch {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
                             // Intentionally continue to mark as migrated so we don't loop forever
@@ -489,7 +509,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
                             const sessionKey = parts.slice(2).join("/");
                             bundleCache[yearBundleKey].content[sessionKey] = data;
                             bundleCache[yearBundleKey].dirty = true;
-                            markAsDeleted(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(makePath(`metadata/sessions/${relativePath}`));
                         } catch {
                             console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
                         }
@@ -508,7 +528,7 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
             // Save progress after each batch
             await flushBundles();
             await safeWriteMigration(migrationState, "batch_progress");
-            await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
+            await storage.writeFile(localManifestPath, JSON.stringify(Array.from(manifestMap.values()), null, 4));
             addSyncLog(`[Personal] Progress: ${done + migratedCount}/${total} files`, "info");
             SyncActiveStore.update(s => {
                 s.personalSyncProgress = {
@@ -518,11 +538,14 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
             });
         }
 
+        // Final manifest as array
+        const finalManifest = Array.from(manifestMap.values());
+
         // Final save
         await flushBundles();
 
         await safeWriteMigration(migrationState, "final_save");
-        await storage.writeFile(localManifestPath, JSON.stringify(manifest, null, 4));
+        await storage.writeFile(localManifestPath, JSON.stringify(finalManifest, null, 4));
 
 
         // Check if complete
@@ -537,9 +560,9 @@ export async function migrateFromMongoDB(userid, remoteManifest) {
         addSyncLog(`[Personal] ✓ Migrated ${migratedCount} files in ${duration}s (${done + migratedCount}/${total} total)`, "success");
 
         // Convert set to array
-        deletedKeys.push(...deletedKeysSet);
+        const deletedKeys = Array.from(deletedKeysSet);
 
-        return { migrated: (deletedKeysSet.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest, deletedKeys };
+        return { migrated: (deletedKeysSet.size > 0 || migratedCount > 0), fileCount: migratedCount, manifest: finalManifest, deletedKeys };
 
     } catch (err) {
         console.error("[Personal] Migration error:", err);

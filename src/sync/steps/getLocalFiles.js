@@ -7,7 +7,7 @@ import { addSyncLog } from "../logs";
  * Step 1: Read the listing of the sync folder (ignoring the files.json)
  * @param {string} localPath - The local path to sync
  */
-export async function getLocalFiles(localPath = LOCAL_SYNC_PATH) {
+export async function getLocalFiles(localPath = LOCAL_SYNC_PATH, config = {}) {
     const start = performance.now();
     addSyncLog("Step 1: Reading local files...", "info");
 
@@ -17,8 +17,8 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH) {
             item.type !== "dir" &&
             item.name !== FILES_MANIFEST &&
             !item.name.endsWith(".DS_Store") &&
-            // Only allow year-based tag files e.g. "2021.tags", not individual session tags
-            (!item.name.endsWith(".tags") || /^\d{4}\.tags$/.test(item.name))
+            // Only allow year-based tag files e.g. "2021.tags" if tags filter is enabled
+            (!item.name.endsWith(".tags") || (config.filters?.tags && /^\d{4}\.tags$/.test(item.name)))
         ).map(item => {
             const prefix = makePath(localPath);
             let relPath = item.path.substring(prefix.length);

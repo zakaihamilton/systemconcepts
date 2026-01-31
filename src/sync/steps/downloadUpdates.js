@@ -1,12 +1,12 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
-import { SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST, FILES_MANIFEST_GZ, SYNC_BATCH_SIZE } from "../constants";
+import { SYNC_BATCH_SIZE, FILES_MANIFEST, FILES_MANIFEST_GZ, LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
-import { readCompressedFile, readCompressedFileRaw, writeCompressedFile } from "../bundle";
+import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
 import { applyManifestUpdates } from "../manifest";
-import { SyncActiveStore } from "../syncState";
 import { lockMutex } from "../mutex";
+import { SyncActiveStore } from "../syncState";
 
 /**
  * Helper function to download a single file
@@ -37,13 +37,62 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
             await storage.createFolderPath(localFilePath);
         }
 
-        // Only parse and re-stringify small files to keep them pretty-printed
+        // --- HASH VERIFICATION & PRETTY PRINTING ---
+        let contentToWrite = content;
+        let finalHash = null;
+        let finalSize = 0;
+
+        // 1. Calculate hash of RAW content
+        const rawInfo = await getFileInfo(content);
+        finalHash = rawInfo.hash;
+        finalSize = rawInfo.size;
+
+        // 2. Try to pretty-print if small json
+        let prettyContent = null;
+        let prettyInfo = null;
+
         if (content.length < 500 * 1024) { // 500KB
             try {
                 const obj = JSON.parse(content);
-                content = JSON.stringify(obj, null, 4);
-            } catch (e) {
-                // Ignore parse errors, just write as is
+                prettyContent = JSON.stringify(obj, null, 4);
+                prettyInfo = await getFileInfo(prettyContent);
+            } catch {
+                // Ignore parse errors
+            }
+        }
+
+        // 3. Decide which content to write
+        // If we have a remote hash, we MUST match it to avoid conflicts
+        if (remoteFile.hash) {
+            if (rawInfo.hash === remoteFile.hash) {
+                // Raw matches! Use raw to stay in sync.
+                addSyncLog(`${fileBasename}: Matches RAW remote hash (${remoteFile.hash}). Writing raw.`, "verbose");
+                contentToWrite = content;
+                finalHash = rawInfo.hash;
+                finalSize = rawInfo.size;
+            } else if (prettyInfo && prettyInfo.hash === remoteFile.hash) {
+                // Pretty matches! Use pretty.
+                addSyncLog(`${fileBasename}: Matches PRETTY remote hash (${remoteFile.hash}). Writing pretty-printed.`, "verbose");
+                contentToWrite = prettyContent;
+                finalHash = prettyInfo.hash;
+                finalSize = prettyInfo.size;
+            } else {
+                // Neither matches (rare corruption or different hashing?)
+                // Default to pretty if available for readability, otherwise raw
+                console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Raw: ${rawInfo.hash}, Pretty: ${prettyInfo?.hash}`);
+                if (prettyInfo) {
+                    contentToWrite = prettyContent;
+                    finalHash = prettyInfo.hash;
+                    finalSize = prettyInfo.size;
+                }
+            }
+        } else {
+            // No remote hash? Default to pretty for readability
+            if (prettyInfo) {
+                addSyncLog(`${fileBasename}: No remote hash. Defaulting to pretty-printed.`, "verbose");
+                contentToWrite = prettyContent;
+                finalHash = prettyInfo.hash;
+                finalSize = prettyInfo.size;
             }
         }
 
@@ -79,21 +128,31 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
                 }
             }
 
-            await storage.writeFile(localFilePath, content);
+            try {
+                await storage.writeFile(localFilePath, contentToWrite);
+            } catch (err) {
+                const errorStr = (err.message || String(err)).toLowerCase();
+                if (errorStr.includes("eisdir")) {
+                    console.warn(`[Sync] Path ${localFilePath} is a directory, removing to write file.`);
+                    await storage.deleteFolder(localFilePath);
+                    await storage.writeFile(localFilePath, contentToWrite);
+                } else {
+                    throw err;
+                }
+            }
         } finally {
             unlock();
         }
 
-        // Verify hash
-        if (remoteFile.hash) {
-            const info = await getFileInfo(content);
-            if (info.hash !== remoteFile.hash) {
-                console.warn(`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Local: ${info.hash}`);
-            }
-        }
+        addSyncLog(`Downloaded: ${makePath(remotePath, fileBasename)}`, "info");
 
-        addSyncLog(`Downloaded: ${fileBasename}`, "info");
-        return remoteFile;
+        // Return the actual properties of what we wrote
+        // This ensures the local manifest is accurate to what is on disk
+        return {
+            ...remoteFile,
+            hash: finalHash,
+            size: finalSize
+        };
     } catch (err) {
         console.error(`[Sync] Failed to download ${fileBasename}:`, err);
         addSyncLog(`Failed to download: ${fileBasename}`, "error");
@@ -105,12 +164,12 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
  * Step 4: Download files that have higher version on remote
  * Uses parallel batch processing for performance
  */
-export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true) {
+export async function downloadUpdates(localManifest, remoteManifest, localPath = LOCAL_SYNC_PATH, remotePath = SYNC_BASE_PATH, canUpload = true, progressTracker = null) {
     const start = performance.now();
     addSyncLog("Step 4: Downloading updates...", "info");
 
     try {
-        const localMap = new Map(localManifest.map(f => [f.path, f]));
+        const localMap = new Map((localManifest || []).map(f => [f.path, f]));
         const toDownload = [];
         const createdFolders = new Set();
         const missingOnRemote = [];
@@ -145,22 +204,27 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
         addSyncLog(`Downloading ${toDownload.length} file(s)...`, "info");
 
-        SyncActiveStore.update(s => {
-            s.progress = { total: toDownload.length, processed: 0 };
-        });
+        if (progressTracker) {
+            progressTracker.updateProgress('downloadUpdates', { processed: 0, total: toDownload.length });
+        }
 
         // Download in parallel batches
         const updates = [];
         for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
+            // Check for cancellation
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Download stopped by user", "warning");
+                break;
+            }
             const batch = toDownload.slice(i, i + SYNC_BATCH_SIZE);
             const progress = Math.min(i + batch.length, toDownload.length);
             const percent = Math.round((progress / toDownload.length) * 100);
 
             addSyncLog(`Downloading ${progress}/${toDownload.length} (${percent}%)...`, "info");
 
-            SyncActiveStore.update(s => {
-                s.progress = { total: toDownload.length, processed: progress };
-            });
+            if (progressTracker) {
+                progressTracker.updateProgress('downloadUpdates', { processed: progress, total: toDownload.length });
+            }
 
             const results = await Promise.all(
                 batch.map(async remoteFile => {
@@ -179,7 +243,7 @@ export async function downloadUpdates(localManifest, remoteManifest, localPath =
 
         // Clean remote manifest if we found missing files
         let cleanedRemoteManifest = remoteManifest;
-        if (missingOnRemote.length > 0) {
+        if (missingOnRemote.length > 0 && !SyncActiveStore.getRawState().stopping) {
             addSyncLog(`Found ${missingOnRemote.length} missing file(s) on remote, cleaning manifest...`, "info");
 
             const missingPaths = new Set(missingOnRemote.map(f => f.path));

@@ -7,8 +7,9 @@ import { fetchJSON } from "@util/fetch";
 import { usePageVisibility } from "@util/hooks";
 import { roleAuth } from "@util/roles";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { lockMutex, isMutexLocked } from "@sync/mutex";
-import { LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, SYNC_BASE_PATH, LOCAL_SYNC_PATH, FILES_MANIFEST } from "./constants";
+import { lockMutex, isMutexLocked, getMutex } from "@sync/mutex";
+import { SYNC_CONFIG } from "./config";
+import { FILES_MANIFEST } from "./constants";
 import { addSyncLog } from "./logs";
 import { makePath } from "@util/path";
 
@@ -22,23 +23,31 @@ import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { removeDeletedFiles } from "./steps/removeDeletedFiles";
 import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
 import { uploadManifest } from "./steps/uploadManifest";
+import { migrateFromMongoDB } from "./steps/personal/migrateFromMongoDB";
 import { SyncProgressTracker, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 
 const SYNC_INTERVAL = 60; // seconds
 
 /**
- * Execute a single sync pipeline for a given path pair
- * @param {string} localPath - Local path to sync
- * @param {string} remotePath - Remote path to sync to
- * @param {string} label - Label for logging
+ * Execute a single sync pipeline for a given configuration
+ * @param {object} config - Sync configuration object
+ * @param {string} role - Current user role
+ * @param {string} userid - Current user ID
  */
-async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffset = 0, combinedTotalWeight = null) {
+async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combinedTotalWeight = null) {
+    const { name, localPath, remotePath, uploadsRole, migration } = config;
+    const label = name;
+
     const start = performance.now();
     addSyncLog(`Starting ${label} sync...`, "info");
     const progress = new SyncProgressTracker(phaseOffset, combinedTotalWeight);
     let hasChanges = false;
     const isLocked = SyncActiveStore.getRawState().locked;
-    const canUpload = roleAuth(role, "admin") && !isLocked;
+
+    // Resolve paths (handle {userid} interpolation)
+    const resolvedRemotePath = remotePath.replace("{userid}", userid);
+
+    const canUpload = roleAuth(role, uploadsRole) && !isLocked;
 
     if (!canUpload) {
         console.log(`[Sync] Upload blocked. Role: ${role}, Admin Auth: ${roleAuth(role, "admin")}, Locked: ${isLocked}`);
@@ -54,13 +63,60 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
 
     // Step 1
     progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
-    const localFiles = await getLocalFiles(localPath);
+    let localFiles = await getLocalFiles(localPath, config);
     progress.completeStep('getLocalFiles');
 
     // Step 2 & 3: Sync manifests
     progress.updateProgress('syncManifest', { processed: 0, total: 1 });
-    let remoteManifest = await syncManifest(remotePath);
+    // Personal sync uses migration to populate manifest, so we skip the expensive scan
+    // if the manifest is missing (it will be created during migration)
+    const skipScan = !!migration;
+    let remoteManifest = await syncManifest(resolvedRemotePath, isLocked, skipScan);
     progress.completeStep('syncManifest');
+
+    // Step 3.5: Migrate from MongoDB if needed
+    if (migration) {
+        progress.updateProgress('migrateFromMongoDB', { processed: 0, total: 1 });
+        try {
+            // The file has been moved to src/sync/steps/personal/migrateFromMongoDB.js
+            const migrationResult = await migrateFromMongoDB(userid, remoteManifest, localPath, canUpload);
+
+            if (migrationResult.migrated) {
+                addSyncLog(`[${label}] Migration complete: ${migrationResult.fileCount} files`, "success");
+
+                if (migrationResult.deletedKeys) {
+                    const deletedKeysSet = new Set(migrationResult.deletedKeys);
+                    remoteManifest = remoteManifest.filter(entry => !deletedKeysSet.has(entry.path));
+                }
+
+                // Update local manifest
+                const manifestPath = makePath(localPath, FILES_MANIFEST);
+                if (await storage.exists(manifestPath)) {
+                    // Just verify it exists
+                }
+
+                if (migrationResult.manifest) {
+                    const remotePaths = new Set(remoteManifest.map(e => e.path));
+                    for (const entry of migrationResult.manifest) {
+                        if (!remotePaths.has(entry.path)) {
+                            remoteManifest.push({
+                                ...entry,
+                                hash: "FORCE_UPLOAD",
+                                modified: 0,
+                                version: (entry.version || 1)
+                            });
+                        }
+                    }
+                }
+
+                localFiles = await getLocalFiles(localPath, config);
+            }
+        } catch (err) {
+            console.error(`[${label}] Migration failed:`, err);
+            addSyncLog(`Migration failed: ${err.message}`, "error");
+        }
+        progress.completeStep('migrateFromMongoDB');
+    }
 
     progress.updateProgress('updateLocalManifest', { processed: 0, total: 1 });
     let localManifest = await updateLocalManifest(localFiles, localPath, remoteManifest);
@@ -68,7 +124,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
 
     // Step 4
     progress.updateProgress('downloadUpdates', { processed: 0, total: 1 });
-    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, remotePath, canUpload);
+    const downloadResult = await downloadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, canUpload, progress);
     localManifest = downloadResult.manifest;
     remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
     hasChanges = hasChanges || downloadResult.hasChanges;
@@ -84,21 +140,21 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
     if (canUpload) {
         // Step 5
         progress.updateProgress('uploadUpdates', { processed: 0, total: 1 });
-        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, remotePath);
+        const uploadUpdatesResult = await uploadUpdates(localManifest, remoteManifest, localPath, resolvedRemotePath, progress);
         remoteManifest = uploadUpdatesResult.manifest;
         hasChanges = hasChanges || uploadUpdatesResult.hasChanges;
         progress.completeStep('uploadUpdates');
 
         // Step 6
         progress.updateProgress('uploadNewFiles', { processed: 0, total: 1 });
-        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, remotePath);
+        const uploadNewResult = await uploadNewFiles(localManifest, remoteManifest, localPath, resolvedRemotePath, progress);
         remoteManifest = uploadNewResult.manifest;
         hasChanges = hasChanges || uploadNewResult.hasChanges;
         progress.completeStep('uploadNewFiles');
 
         // Step 6.5: Delete files from remote that were marked as deleted locally
         progress.updateProgress('deleteRemoteFiles', { processed: 0, total: 1 });
-        const deletedPaths = await deleteRemoteFiles(localManifest, remotePath);
+        const deletedPaths = await deleteRemoteFiles(localManifest, resolvedRemotePath);
         if (deletedPaths.length > 0) {
             hasChanges = true;
             // Clean up local manifest: remove the tombstoned entries
@@ -116,7 +172,7 @@ async function executeSyncPipeline(localPath, remotePath, label, role, phaseOffs
 
         // Step 7
         progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
-        await uploadManifest(remoteManifest, remotePath);
+        await uploadManifest(remoteManifest, resolvedRemotePath);
         progress.completeStep('uploadManifest'); // Fix: actually complete step 7
     } else {
         // Skip upload steps UI progress
@@ -201,34 +257,40 @@ export async function performSync() {
             }
         }
 
+        // Reset stopping state before we begin
+        SyncActiveStore.update(s => { s.stopping = false; });
+
         addSyncLog("Starting sync process...", "info");
         const startTime = performance.now();
 
         // 1. Main Sync (starts at offset 0)
-        SyncActiveStore.update(s => { s.phase = "main"; });
-        const mainResult = await executeSyncPipeline(LOCAL_SYNC_PATH, SYNC_BASE_PATH, "Main", role, 0, TOTAL_COMBINED_WEIGHT);
+        // Execute pipelines from config
+        let currentOffset = 0;
+        let hasAnyChanges = false;
 
-        // 2. Library Sync (starts where main left off)
-        SyncActiveStore.update(s => { s.phase = "library"; });
-        const libraryResult = await executeSyncPipeline(LIBRARY_LOCAL_PATH, LIBRARY_REMOTE_PATH, "Library", role, mainResult.newOffset, TOTAL_COMBINED_WEIGHT);
+        for (const config of SYNC_CONFIG) {
+            if (SyncActiveStore.getRawState().stopping) {
+                addSyncLog("Sync stopped by user", "warning");
+                break;
+            }
+            SyncActiveStore.update(s => { s.phase = config.name.toLowerCase(); });
+            const result = await executeSyncPipeline(config, role, id, currentOffset, TOTAL_COMBINED_WEIGHT);
+            currentOffset = result.newOffset;
+            hasAnyChanges = hasAnyChanges || result.hasChanges;
 
-        const mainChanges = mainResult.hasChanges;
-        const libraryChanges = libraryResult.hasChanges;
-
-        if (libraryChanges) {
-            SyncActiveStore.update(s => {
-                s.libraryUpdateCounter = (s.libraryUpdateCounter || 0) + 1;
-            });
-            addSyncLog(`Library changes detected`, "info");
+            if (config.name === "Library" && result.hasChanges) {
+                SyncActiveStore.update(s => {
+                    s.libraryUpdateCounter = (s.libraryUpdateCounter || 0) + 1;
+                });
+                addSyncLog(`Library changes detected`, "info");
+            }
         }
-
-        const hasChanges = mainChanges || libraryChanges;
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
         addSyncLog(`Total sync time: ${duration}s`, "success");
 
         // Only trigger reload if sync actually changed something
-        if (hasChanges) {
+        if (hasAnyChanges) {
             SyncActiveStore.update(s => {
                 s.needsSessionReload = true;
             });
@@ -239,10 +301,6 @@ export async function performSync() {
                 s.busy = false;
             });
         }
-
-        // Run personal sync after main sync completes (starts where library left off)
-        await runPersonalSync(libraryResult.newOffset);
-
     } catch (err) {
         console.error("[Sync] Sync failed:", err);
         let errorMessage = err.message || String(err);
@@ -258,7 +316,6 @@ export async function performSync() {
         unlock();
         // Force unlock if still reports locked (double-safety)
         if (isMutexLocked({ id: "sync_process" })) {
-            const { getMutex } = await import("@sync/mutex");
             const lock = getMutex({ id: "sync_process" });
             if (lock) {
                 lock._locks = 0;
@@ -275,40 +332,14 @@ export async function performSync() {
     }
 }
 
-/**
- * Run personal files sync
- */
-async function runPersonalSync(phaseOffset = 0) {
-    try {
-        SyncActiveStore.update(s => {
-            s.personalSyncBusy = true;
-            s.personalSyncError = null;
-            s.phase = "personal";
-        });
-
-        const { performPersonalSync } = await import("@personal/personalSync");
-        const result = await performPersonalSync(phaseOffset, TOTAL_COMBINED_WEIGHT, SyncActiveStore.getRawState().locked);
-
-        SyncActiveStore.update(s => {
-            s.personalSyncBusy = false;
-            if (!result.success) {
-                s.personalSyncError = result.error?.message || "Personal sync failed";
-            }
-        });
-    } catch (err) {
-        console.error("[Personal Sync] Failed:", err);
-        let errorMessage = err.message || "Unknown error";
-
-        if (err.code === "NOT_LOGGED_IN" || errorMessage.includes("User not logged in") || errorMessage.includes("User ID not found")) {
-            errorMessage = "Please login to sync personal files";
-        }
-
-        SyncActiveStore.update(s => {
-            s.personalSyncBusy = false;
-            s.personalSyncError = errorMessage;
-        });
-    }
+export async function stopSync() {
+    addSyncLog("Stopping sync...", "warning");
+    SyncActiveStore.update(s => {
+        s.stopping = true;
+    });
 }
+
+
 
 export async function requestSync() {
     const state = SyncActiveStore.getRawState();
@@ -320,10 +351,16 @@ export async function requestSync() {
         addSyncLog("Sync is locked (skipping upload)", "warning");
     }
 
-    if (isBusy || isSessionsBusy) return;
+    if (isBusy || isSessionsBusy) {
+        if (state.stopping) {
+            addSyncLog("Waiting for current sync to stop...", "info");
+        }
+        return;
+    }
 
     SyncActiveStore.update(s => {
         s.busy = true;
+        s.stopping = false; // Reset stopping state
         s.startTime = Date.now();
         s.lastSyncTime = Date.now(); // Track when we started this sync
         s.logs = [];
@@ -372,6 +409,7 @@ export function useSyncFeature() {
 
     return {
         sync: requestSync,
+        stop: stopSync,
         busy,
         lastSynced,
         duration,
@@ -443,11 +481,16 @@ export function useSync(options = {}) {
 export async function clearBundleCache() {
     try {
         addSyncLog('Clearing all sync data...', "warning");
-        await storage.deleteFolder(LOCAL_SYNC_PATH);
+
+        for (const config of SYNC_CONFIG) {
+            await storage.deleteFolder(config.localPath);
+        }
+
         SyncActiveStore.update(s => {
             s.lastSynced = 0;
             s.counter = 0;
-            s.busy = false;
+            s.busy = false; // Reset busy state
+            s.phase = null; // Reset phase
             s.logs = [];
         });
         addSyncLog('✓ All sync data cleared', "success");

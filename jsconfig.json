@@ -28,9 +28,6 @@
             ],
             "@sync/*": [
                 "src/sync/*"
-            ],
-            "@personal/*": [
-                "src/personal/*"
             ]
         }
     }

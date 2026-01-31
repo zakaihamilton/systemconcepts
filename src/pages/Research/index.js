@@ -69,7 +69,6 @@ export default function Research() {
     const outerRef = useRef(null);
     const [scrollPages, setScrollPages] = useState({ page: 1, count: 1, visible: false });
     const scrollTimeoutRef = useRef(null);
-    const [lastSearch, setLastSearch] = useState({ query: "", filterTags: [] });
     const [appliedFilterTags, setAppliedFilterTags] = useState([]);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [jumpOpen, setJumpOpen] = useState(false);
@@ -211,9 +210,9 @@ export default function Research() {
     }, [libraryUpdateCounter, loadIndex, loadTags]);
 
     const handleSearch = useCallback(async (isRestoring = false) => {
-        const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
-        const currentSearch = { query, filterTags };
-        setLastSearch(currentSearch);
+        // const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
+        // const currentSearch = { query, filterTags };
+        // setLastSearch(currentSearch);
         setAppliedFilterTags(filterTags);
         if (!indexData || !query.trim()) {
             setResults([]);
@@ -412,7 +411,7 @@ export default function Research() {
             }
         }
 
-    }, [indexData, query, setResults, filterTags, lastSearch]);
+    }, [indexData, query, setResults, filterTags]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
@@ -445,7 +444,7 @@ export default function Research() {
             s.hasSearched = false;
         });
         setAppliedFilterTags([]);
-    }, [setQuery]);
+    }, [setQuery, setFilterTags, setFilterInput, setAppliedFilterTags]);
 
     const onKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -682,7 +681,7 @@ export default function Research() {
                                 }}
                                 getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
                                 renderOption={(props, option) => {
-                                    const { key, ...otherProps } = props;
+                                    const { key: _key, ...otherProps } = props;
                                     return (
                                         <li key={`${option.type}-${option.label}`} {...otherProps}>
                                             <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1, color: 'text.secondary', textTransform: 'capitalize', width: '85px', display: 'inline-block', flexShrink: 0 }}>
