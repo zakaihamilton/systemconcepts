@@ -1820,6 +1820,26 @@ export default {
         {
             "id": "DOWNLOAD_TRANSCRIPT",
             "value": "Baixar Transcrição"
+        },
+        {
+            "id": "LOG_LEVEL",
+            "value": "Nível de Registro"
+        },
+        {
+            "id": "OPTIMIZING_INDEX",
+            "value": "Otimizando Índice..."
+        },
+        {
+            "id": "NO_CHANGES_DETECTED",
+            "value": "Nenhuma alteração detectada."
+        },
+        {
+            "id": "FILTER_TAGS",
+            "value": "Filtrar Tags"
+        },
+        {
+            "id": "IMPORT_GROUPS",
+            "value": "Importar Grupos"
         }
     ]
 };

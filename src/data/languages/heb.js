@@ -1832,6 +1832,26 @@ export default {
         {
             "id": "DOWNLOAD_TRANSCRIPT",
             "value": "הורדת תמליל"
+        },
+        {
+            "id": "LOG_LEVEL",
+            "value": "רמת רישום"
+        },
+        {
+            "id": "OPTIMIZING_INDEX",
+            "value": "מייעל אינדקס..."
+        },
+        {
+            "id": "NO_CHANGES_DETECTED",
+            "value": "לא נמצאו שינויים."
+        },
+        {
+            "id": "FILTER_TAGS",
+            "value": "סנן תגיות"
+        },
+        {
+            "id": "IMPORT_GROUPS",
+            "value": "ייבא קבוצות"
         }
     ]
 };

@@ -1828,6 +1828,34 @@ export default {
         {
             "id": "DOWNLOAD_TRANSCRIPT",
             "value": "Download Transcript"
+        },
+        {
+            "id": "SHOW_PASSWORD",
+            "value": "Show Password"
+        },
+        {
+            "id": "HIDE_PASSWORD",
+            "value": "Hide Password"
+        },
+        {
+            "id": "LOG_LEVEL",
+            "value": "Log Level"
+        },
+        {
+            "id": "OPTIMIZING_INDEX",
+            "value": "Optimizing Index..."
+        },
+        {
+            "id": "NO_CHANGES_DETECTED",
+            "value": "No changes detected."
+        },
+        {
+            "id": "FILTER_TAGS",
+            "value": "Filter Tags"
+        },
+        {
+            "id": "IMPORT_GROUPS",
+            "value": "Import Groups"
         }
     ]
 };
