@@ -115,7 +115,7 @@ export default function Sync() {
         try {
             await clearBundleCache();
             setConfirmFullSync(false);
-            await updateSync(false);
+            await sync();
         } catch (err) {
             console.error("Failed to full sync", err);
         }
