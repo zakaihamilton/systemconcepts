@@ -48,6 +48,7 @@ function loadModule(relativePath, mocks) {
     code = code.replace(/export function/g, 'function');
     code = code.replace(/export const/g, 'const');
     code = code.replace(/export default/g, '');
+    code = code.replace(/export\s*\{[^}]*\}\s*;/g, '');
 
     const sandbox = {
         console,
@@ -63,6 +64,7 @@ function loadModule(relativePath, mocks) {
         Object,
         Promise,
         performance: { now: () => Date.now() },
+        process: { env: { NEXT_PUBLIC_VERSION: "0.0.0" } },
         ...mocks
     };
 
@@ -452,6 +454,96 @@ async function runTests() {
         const deleteOpMirror = mockStorage.ops.find(o => o.op === 'delete' && o.path.includes('new_unsynced.json'));
         assert.ok(deleteOpMirror, "Should delete even version 1 files in read-only mode (Locked Mirror)");
         console.log("  [PASS] Enforces strict mirror in read-only mode");
+
+
+        // --- Test 10: Migration Refresh ---
+        console.log("\nTest 10: Migration Refresh");
+        // Verify that getLocalFiles is called twice if migration occurs (Fix for recent bug)
+
+        let getLocalFilesCallCount = 0;
+
+        const syncMocks = {
+            ...commonMocks,
+            // React & Utils
+            useRef: () => ({ current: null }),
+            useEffect: () => { },
+            useState: (v) => [v, () => { }],
+            useOnline: () => true,
+            fetchJSON: async () => { },
+            usePageVisibility: () => true,
+            roleAuth: () => true,
+
+            // Config & Logic
+            SYNC_CONFIG: [{
+                name: "TestConfig",
+                localPath: "local/test",
+                remotePath: "aws/test",
+                uploadsRole: "student",
+                migration: true // Enable migration 
+            }],
+            FILES_MANIFEST: "files.json",
+
+            // Step Spies/Mocks. 
+            // Crucial: getLocalFiles spy
+            getLocalFiles: async () => {
+                getLocalFilesCallCount++;
+                return [];
+            },
+            syncManifest: async () => [],
+            migrateFromMongoDB: async () => {
+                // Return success to trigger the re-fetch logic
+                return { migrated: true, fileCount: 1 };
+            },
+            updateLocalManifest: async () => [],
+            downloadUpdates: async () => ({ manifest: [], cleanedRemoteManifest: [], hasChanges: false }),
+            removeDeletedFiles: async () => ({ manifest: [], hasChanges: false }),
+            uploadUpdates: async () => ({ manifest: [], hasChanges: false }),
+            uploadNewFiles: async () => ({ manifest: [], hasChanges: false }),
+            deleteRemoteFiles: async () => [],
+            uploadManifest: async () => { },
+
+            // Tracker Class Mock
+            SyncProgressTracker: class {
+                updateProgress() { }
+                completeStep() { }
+                setComplete() { }
+                getCurrentOffset() { return 0; }
+            },
+            TOTAL_COMBINED_WEIGHT: 100,
+
+            // Stores
+            SyncActiveStore: {
+                getRawState: () => ({ locked: false }),
+                update: () => { },
+                useState: () => ({})
+            },
+            UpdateSessionsStore: {
+                update: () => { }
+            },
+
+            // Mutex
+            lockMutex: async () => () => { },
+            isMutexLocked: () => false,
+            getMutex: () => null,
+            Cookies: {
+                get: (key) => {
+                    if (key === "role") return "student";
+                    if (key === "id") return "user1";
+                    if (key === "hash") return "hash1";
+                },
+                set: () => { }
+            }
+        };
+
+        const syncModule = loadModule('src/sync/sync.js', syncMocks);
+
+
+
+        // Run performSync
+        await syncModule.performSync();
+
+        assert.strictEqual(getLocalFilesCallCount, 2, "getLocalFiles should be called twice (once before migration, once after)");
+        console.log("  [PASS] Migration triggers reload of local files");
 
     } catch (err) {
         console.error("\n[FAIL] Test Failed:", err);

@@ -295,7 +295,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
                         // Check if we ALREADY have the clean entry (e.g. from previous partial run)
                         // If so, we don't need to re-migrate, just clean the manifest
                         const cleanRelativePath = rawRelativePath.replace(/^[\/\\]+/, "");
-                        const cleanManifestKey = `${cleanRelativePath}`;
+                        const cleanManifestKey = makePath(cleanRelativePath);
 
                         const parts = cleanRelativePath.split("/");
                         const groupName = parts[0];
@@ -309,7 +309,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
 
                         let cleanEntryExists = false;
                         if (isBundled) {
-                            const bundleKey = `${groupName}.json`;
+                            const bundleKey = makePath(`${groupName}.json`);
                             if (manifestMap.has(bundleKey)) {
                                 cleanEntryExists = true;
                             }
@@ -346,7 +346,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
         for (const file of migrationState.files) {
             if (migrationState.migrated[file.path]) {
                 const relativePath = file.path.substring(mongoPath.length + 1).replace(/^[\/\\]+/, "");
-                const manifestKey = `${relativePath}`;
+                const manifestKey = makePath(relativePath);
                 markAsDeleted(manifestKey);
             }
         }
@@ -383,7 +383,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
 
                     const hash = await calculateHash(content);
 
-                    const manifestKey = `${cacheKey}.json`;
+                    const manifestKey = makePath(`${cacheKey}.json`);
                     const oldEntry = manifestMap.get(manifestKey);
                     const version = oldEntry ? (oldEntry.version || 1) + 1 : 1;
                     manifestMap.set(manifestKey, {
@@ -484,7 +484,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
 
                             bundleCache[cacheKey].content[bundleKey] = data;
                             bundleCache[cacheKey].dirty = true;
-                            markAsDeleted(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(makePath(`metadata/sessions/${relativePath}`));
                         } catch {
                             console.warn(`[Personal] Skipping corrupted JSON file: ${file.path}`);
                             // Intentionally continue to mark as migrated so we don't loop forever
@@ -509,7 +509,7 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
                             const sessionKey = parts.slice(2).join("/");
                             bundleCache[yearBundleKey].content[sessionKey] = data;
                             bundleCache[yearBundleKey].dirty = true;
-                            markAsDeleted(`metadata/sessions/${relativePath}`);
+                            markAsDeleted(makePath(`metadata/sessions/${relativePath}`));
                         } catch {
                             console.warn(`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`);
                         }

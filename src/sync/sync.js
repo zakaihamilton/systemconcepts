@@ -63,7 +63,7 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 
     // Step 1
     progress.updateProgress('getLocalFiles', { processed: 0, total: 1 });
-    const localFiles = await getLocalFiles(localPath, config);
+    let localFiles = await getLocalFiles(localPath, config);
     progress.completeStep('getLocalFiles');
 
     // Step 2 & 3: Sync manifests
@@ -108,6 +108,8 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
                         }
                     }
                 }
+
+                localFiles = await getLocalFiles(localPath, config);
             }
         } catch (err) {
             console.error(`[${label}] Migration failed:`, err);

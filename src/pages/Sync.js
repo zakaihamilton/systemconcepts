@@ -45,6 +45,7 @@ export default function Sync() {
     const { busy: sessionsBusy } = useUpdateSessions(groups);
     const { sync, stop, busy: syncBusy, lastSynced, percentage: syncPercentage, duration: syncDuration, currentBundle, logs, startTime } = useSyncFeature();
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
+    const isAdmin = Cookies.get("role") === "admin";
     const syncEnabled = online && isSignedIn;
     const logRef = React.useRef(null);
     const [currentTime, setCurrentTime] = React.useState(() => Date.now());
@@ -207,7 +208,7 @@ export default function Sync() {
                                         {translations.STOP || "Stop"}
                                     </Button>
                                 )}
-                                <FormControl size="small" sx={{ minWidth: 120 }}>
+                                {isAdmin && <FormControl size="small" sx={{ minWidth: 120 }}>
                                     <InputLabel id="debug-level-label">{translations.LOG_LEVEL || "Log Level"}</InputLabel>
                                     <Select
                                         labelId="debug-level-label"
@@ -219,7 +220,7 @@ export default function Sync() {
                                         <MenuItem value="info">Info</MenuItem>
                                         <MenuItem value="verbose">Verbose</MenuItem>
                                     </Select>
-                                </FormControl>
+                                </FormControl>}
                                 <Button
                                     variant="outlined"
                                     color="warning"
