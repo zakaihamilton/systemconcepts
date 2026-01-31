@@ -31,11 +31,16 @@ export function decompressJSON(buffer) {
 export async function readCompressedFileRaw(path) {
     path = makePath(path);
     try {
-        if (!await storage.exists(path)) {
-            return null;
-        }
         // console.log("Reading file", path);
-        const data = await storage.readFile(path);
+        const data = await storage.readFile(path).catch(err => {
+            // treat missing file as null without logging error
+            const errorStr = (err.message || String(err)).toLowerCase();
+            if (errorStr.includes("no such key") || errorStr.includes("enoent")) {
+                return null;
+            }
+            throw err;
+        });
+
         if (data === undefined || data === null || data === "") {
             return null;
         }
@@ -90,6 +95,7 @@ export async function readCompressedFileRaw(path) {
             }
         }
     } catch (err) {
+        // Only log errors that aren't "Not Found"
         console.error(`[Bundle] Error reading file ${path}:`, err);
         return null;
     }

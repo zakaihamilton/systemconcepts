@@ -578,6 +578,91 @@ async function runTests() {
         process.exit(1);
     }
 
+    // --- Test 12: Conditional Manifest Upload ---
+    console.log("\nTest 12: Conditional Manifest Upload");
+    // Verify uploadManifest is NOT called when no changes occur
+    let uploadManifestCallCount = 0;
+
+    const noChangeMocks = {
+        ...commonMocks,
+        // React & Utils
+        useRef: () => ({ current: null }),
+        useEffect: () => { },
+        useState: (v) => [v, () => { }],
+        useOnline: () => true,
+        fetchJSON: async () => { },
+        usePageVisibility: () => true,
+        roleAuth: () => true,
+
+        // Config & Logic
+        SYNC_CONFIG: [{
+            name: "TestConfig",
+            localPath: "local/test",
+            remotePath: "aws/test",
+            uploadsRole: "student",
+            migration: false // Disable migration
+        }],
+        FILES_MANIFEST: "files.json",
+
+        // Steps
+        getLocalFiles: async () => [],
+        syncManifest: async () => {
+            const manifest = [];
+            manifest.loadedFromManifest = true; // Pretend loaded successfully
+            return manifest;
+        },
+        migrateFromMongoDB: async () => ({ migrated: false }),
+        updateLocalManifest: async () => [],
+        downloadUpdates: async (l, r) => ({ manifest: [], cleanedRemoteManifest: r, hasChanges: false }),
+        removeDeletedFiles: async () => ({ manifest: [], hasChanges: false }),
+        uploadUpdates: async () => ({ manifest: [], hasChanges: false }),
+        uploadNewFiles: async () => ({ manifest: [], hasChanges: false }),
+        deleteRemoteFiles: async () => [],
+        uploadManifest: async () => {
+            uploadManifestCallCount++;
+        },
+
+        // Tracker Class Mock
+        SyncProgressTracker: class {
+            updateProgress() { }
+            completeStep() { }
+            setComplete() { }
+            getCurrentOffset() { return 0; }
+        },
+        TOTAL_COMBINED_WEIGHT: 100,
+
+        // Stores
+        SyncActiveStore: {
+            getRawState: () => ({ locked: false }),
+            update: () => { },
+            useState: () => ({})
+        },
+        UpdateSessionsStore: {
+            update: () => { }
+        },
+
+        // Mutex
+        lockMutex: async () => () => { },
+        isMutexLocked: () => false,
+        getMutex: () => null,
+        Cookies: {
+            get: (key) => {
+                if (key === "role") return "student";
+                if (key === "id") return "user1";
+                if (key === "hash") return "hash1";
+            },
+            set: () => { }
+        }
+    };
+
+    const syncModuleNoChange = loadModule('src/sync/sync.js', noChangeMocks);
+
+    await syncModuleNoChange.performSync();
+
+    assert.strictEqual(uploadManifestCallCount, 0, "uploadManifest should NOT be called when no changes occur");
+    console.log("  [PASS] uploadManifest skipped when no changes occur");
+
+
     console.log("\nAll Tests Passed!");
 }
 

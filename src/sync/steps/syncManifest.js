@@ -64,9 +64,9 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH, isLocked = false
         let loadedFromManifest = false;
 
         // 1. Try files.gz
-        if (await storage.exists(remoteManifestPathGz)) {
-            try {
-                const rawManifest = await readCompressedFile(remoteManifestPathGz) || [];
+        try {
+            const rawManifest = await readCompressedFile(remoteManifestPathGz) || [];
+            if (rawManifest && rawManifest.length > 0) {
                 // console.log(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
                 remoteManifest = normalizeManifest(rawManifest);
                 const deduped = rawManifest.length - remoteManifest.length;
@@ -90,13 +90,14 @@ export async function syncManifest(remotePath = SYNC_BASE_PATH, isLocked = false
                 }
 
                 loadedFromManifest = true;
-            } catch (err) {
-                console.warn(`[Sync] Failed to read compressed manifest ${remoteManifestPathGz}:`, err.message || err);
-                // Fall through to try JSON or directory listing
             }
+        } catch (err) {
+            console.warn(`[Sync] Failed to read compressed manifest ${remoteManifestPathGz}:`, err.message || err);
+            // Fall through to try JSON or directory listing
         }
+
         // 2. Try files.json
-        if (remoteManifest.length === 0 && await storage.exists(remoteManifestPathJson)) {
+        if (remoteManifest.length === 0) {
             const content = await storage.readFile(remoteManifestPathJson);
             if (content) {
                 try {

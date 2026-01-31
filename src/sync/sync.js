@@ -72,6 +72,7 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
     // if the manifest is missing (it will be created during migration)
     const skipScan = !!migration;
     let remoteManifest = await syncManifest(resolvedRemotePath, isLocked, skipScan);
+    const loadedFromManifest = !!remoteManifest.loadedFromManifest;
     progress.completeStep('syncManifest');
 
     // Step 3.5: Migrate from MongoDB if needed
@@ -172,7 +173,15 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 
         // Step 7
         progress.updateProgress('uploadManifest', { processed: 0, total: 1 });
-        await uploadManifest(remoteManifest, resolvedRemotePath);
+        // Only upload manifest if:
+        // 1. We have changes to sync
+        // 2. OR The manifest was generated from listing (loadedFromManifest=false) and needs saving
+        // 3. OR Migration occurred (which means we might have new files not yet in manifest)
+        if (hasChanges || !loadedFromManifest || migration) {
+            await uploadManifest(remoteManifest, resolvedRemotePath);
+        } else {
+            console.log(`[Sync] Skipping manifest upload (no changes and manifest unchanged)`);
+        }
         progress.completeStep('uploadManifest'); // Fix: actually complete step 7
     } else {
         // Skip upload steps UI progress
