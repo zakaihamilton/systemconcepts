@@ -162,13 +162,19 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
             }
         };
 
-        // Update on timeupdate events
-        playerRef.addEventListener("timeupdate", updatePositionState);
+        // Update on state changes instead of timeupdate
+        playerRef.addEventListener("play", updatePositionState);
+        playerRef.addEventListener("pause", updatePositionState);
+        playerRef.addEventListener("seeked", updatePositionState);
+        playerRef.addEventListener("durationchange", updatePositionState);
         playerRef.addEventListener("loadedmetadata", updatePositionState);
         playerRef.addEventListener("ratechange", updatePositionState);
 
         return () => {
-            playerRef.removeEventListener("timeupdate", updatePositionState);
+            playerRef.removeEventListener("play", updatePositionState);
+            playerRef.removeEventListener("pause", updatePositionState);
+            playerRef.removeEventListener("seeked", updatePositionState);
+            playerRef.removeEventListener("durationchange", updatePositionState);
             playerRef.removeEventListener("loadedmetadata", updatePositionState);
             playerRef.removeEventListener("ratechange", updatePositionState);
         };
