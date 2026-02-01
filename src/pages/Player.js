@@ -97,8 +97,8 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     }
 
 
-    const mediaPath = (data && data.path) || storeMediaPath;
-    const subtitles = (data && data.subtitles) || storeSubtitles;
+    const mediaPath = data?.path || storeMediaPath;
+    const subtitles = data?.subtitles || storeSubtitles;
 
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
