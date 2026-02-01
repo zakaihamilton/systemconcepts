@@ -32,6 +32,11 @@ export async function callMethod(item, url = "", ...params) {
                     const items = (await storageMethods.getListing(device.id, ...params)) || [];
                     result.count = items.length;
                 }
+                const method = device.getSize;
+                if (method) {
+                    result.size = await method.call(device);
+                    console.log(`[Storage] Device: ${device.id}, fetched size: ${result.size}`);
+                }
                 results.push(result);
             }
             return results;
@@ -129,6 +134,9 @@ const storageMethods = Object.fromEntries([
     {
         name: "copyFile",
         types: ["path"]
+    },
+    {
+        name: "getSize"
     }
 ].map(item => {
     const { name } = item;

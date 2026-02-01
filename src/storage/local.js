@@ -244,6 +244,17 @@ export default {
     readFiles,
     writeFile,
     writeFiles,
-    exists,
+    async exists(path) {
+        return exists(path);
+    },
+    async getSize() {
+        if (typeof navigator !== "undefined" && navigator.storage && navigator.storage.estimate) {
+            const estimate = await navigator.storage.estimate();
+            console.log(`[Local Storage] getSize - estimate usage: ${estimate.usage}, quota: ${estimate.quota}`);
+            return estimate.usage;
+        }
+        console.log(`[Local Storage] getSize - navigator.storage.estimate not available`);
+        return 0;
+    },
     getRecursiveList
 };

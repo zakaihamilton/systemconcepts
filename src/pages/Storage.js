@@ -145,6 +145,7 @@ export default function Storage({ path = "" }) {
         }
         else {
             name = translations[item.name] || name;
+            console.log(`[Storage Mapper] Root item: ${name}, size: ${item.size}, type: ${typeof item.size}`);
         }
 
         const size = item.size || 0;
@@ -155,7 +156,7 @@ export default function Storage({ path = "" }) {
             id,
             tooltip,
             icon,
-            sizeWidget: item.type === "file" && <Tooltip
+            sizeWidget: (item.type === "file" || (!path && typeof item.size === "number")) && <Tooltip
                 title={size + " " + translations.BYTES}
                 arrow>
                 <Typography style={{ display: "inline-block" }}>
