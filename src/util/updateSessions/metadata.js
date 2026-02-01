@@ -66,22 +66,7 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
             }
         };
 
-        if (isBundled || isMerged) {
-            await loadFromCache(property, name, year, isMerged, isBundled, metadataLoader, () => metadataLoaded);
-        } else {
-            // If neither bundled nor merged, we might still want to try loading from cache logic if that was the intended behavior? 
-            // Actually original code checks `isBundled` then `isMerged` then falls through to year check if not loaded.
-            // My helper includes the year check as the 3rd step.
-            // But the original code ALWAYS checks the year file if not loaded, regardless of flags?
-            // Wait, looking at original code:
-            // if (isBundled) { ... }
-            // if (!metadataLoaded && isMerged) { ... }
-            // if (!metadataLoaded) { ... year file ... }
-
-            // So yes, it always checks year file if not loaded. 
-            // So my helper function implementation is correct for ALL cases if I just pass the flags.
-            await loadFromCache(property, name, year, isMerged, isBundled, metadataLoader, () => metadataLoaded);
-        }
+        await loadFromCache(property, name, year, isMerged, isBundled, metadataLoader, () => metadataLoaded);
 
         if (!metadataLoaded) {
             updateLocalMetadata = true;
