@@ -122,6 +122,48 @@ export default function ResearchIndexer() {
             const tagsContent = await storage.readFile(tagsPath);
             const tags = JSON.parse(tagsContent);
 
+            // Load Sessions
+            const sessions = [];
+            try {
+                const groupsPath = makePath("local/sync/groups.json");
+                if (await storage.exists(groupsPath)) {
+                    const groupsContent = await storage.readFile(groupsPath);
+                    const groupsData = JSON.parse(groupsContent);
+                    const groups = Array.isArray(groupsData?.groups) ? groupsData.groups : [];
+
+                    for (const group of groups) {
+const mergedPath = makePath(`local/sync/${group.name.replace(/\.\.\//g, "")}.json`);
+                        if (await storage.exists(mergedPath)) {
+                            const content = await storage.readFile(mergedPath);
+                            const data = JSON.parse(content);
+                            if (data?.sessions) {
+                                sessions.push(...data.sessions);
+                                continue;
+                            }
+                        }
+
+                        try {
+                            const listing = await storage.getListing(makePath("local/sync", group.name));
+                            if (listing) {
+                                const yearFiles = listing.filter(f => f.name.endsWith(".json"));
+                                for (const yearFile of yearFiles) {
+                                    const yearPath = makePath("local/sync", group.name, yearFile.name);
+                                    const content = await storage.readFile(yearPath);
+                                    const data = JSON.parse(content);
+                                    if (data?.sessions) {
+                                        sessions.push(...data.sessions);
+                                    }
+                                }
+                            }
+                        } catch (err) {
+                            // ignore missing dir
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load sessions for indexing:", err);
+            }
+
             const newIndex = {
                 v: 4,
                 timestamp: Date.now(),
@@ -137,8 +179,16 @@ export default function ResearchIndexer() {
             });
 
             const uniquePaths = Object.keys(tagsByPath);
-            const totalPaths = uniquePaths.length;
-            let pathsProcessed = 0;
+            const totalTasks = uniquePaths.length + sessions.length;
+            let tasksProcessed = 0;
+
+            const updateProgress = () => {
+                tasksProcessed++;
+                const progressVal = (tasksProcessed / totalTasks) * 100;
+                ResearchStore.update(s => {
+                    s.progress = progressVal;
+                });
+            };
 
             const processPath = async (path) => {
                 if (!isMounted.current) return;
@@ -166,7 +216,6 @@ export default function ResearchIndexer() {
                                 const paragraphs = mergeChunks(rawChunks);
 
                                 if (paragraphs.length > 0) {
-                                    // Atomic update (no await between these lines)
                                     const fileIndex = newIndex.f.length;
                                     newIndex.f.push(tag._id);
                                     newIndex.d[fileIndex] = paragraphs;
@@ -178,15 +227,12 @@ export default function ResearchIndexer() {
                                         if (uniqueTokens.length === 0) return;
 
                                         uniqueTokens.forEach(token => {
-                                            // Skip stop words and very short tokens (unless they are numeric)
                                             if (STOP_WORDS.has(token)) return;
                                             if (token.length < 3 && !/^\d+$/.test(token)) return;
 
                                             if (!newIndex.t[token]) {
                                                 newIndex.t[token] = [];
                                             }
-                                            // Initially populate as flat array [fileIdx, paraIdx, ...]
-                                            // We will compress this structure after processing all files
                                             newIndex.t[token].push(fileIndex, paraIndex);
                                         });
                                     });
@@ -197,15 +243,59 @@ export default function ResearchIndexer() {
                 } catch (err) {
                     console.warn(`Failed to index file at ${path}:`, err);
                 }
-
-                pathsProcessed++;
-                const progressVal = (pathsProcessed / totalPaths) * 100;
-                ResearchStore.update(s => {
-                    s.progress = progressVal;
-                });
+                updateProgress();
             };
 
-            await Promise.all(uniquePaths.map(path => limit(() => processPath(path))));
+            const processSession = async (session) => {
+                if (!isMounted.current) return;
+
+                const sessionId = `session|${session.group}|${session.year}|${session.date}|${session.name}`;
+
+                let text = `${session.name}\n${session.description || ""}`;
+
+                if (session.summaryText) {
+                    text += "\n" + session.summaryText;
+                } else if (session.summary?.path) {
+const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//g, ""));
+                    if (await storage.exists(summaryPath)) {
+                        const content = await storage.readFile(summaryPath);
+                        text += "\n" + content;
+                    }
+                }
+
+                const processed = normalizeContent(text);
+                const rawChunks = splitSmart(processed);
+                const paragraphs = mergeChunks(rawChunks);
+
+                if (paragraphs.length > 0) {
+                    const fileIndex = newIndex.f.length;
+                    newIndex.f.push(sessionId);
+                    newIndex.d[fileIndex] = paragraphs;
+
+                    paragraphs.forEach((para, paraIndex) => {
+                        const paraTokens = para.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);
+                        const uniqueTokens = [...new Set(paraTokens)];
+
+                        if (uniqueTokens.length === 0) return;
+
+                        uniqueTokens.forEach(token => {
+                            if (STOP_WORDS.has(token)) return;
+                            if (token.length < 3 && !/^\d+$/.test(token)) return;
+
+                            if (!newIndex.t[token]) {
+                                newIndex.t[token] = [];
+                            }
+                            newIndex.t[token].push(fileIndex, paraIndex);
+                        });
+                    });
+                }
+                updateProgress();
+            };
+
+            await Promise.all([
+                ...uniquePaths.map(path => limit(() => processPath(path))),
+                ...sessions.map(session => limit(() => processSession(session)))
+            ]);
 
             // Post-processing: Compress index to V4 format
             if (isMounted.current) {
