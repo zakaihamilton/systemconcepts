@@ -477,8 +477,9 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => groupFilter.includes(session.group));
         }
         if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all", "with_duration", "without_duration", "duration_all"];
+            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all", "with_summary", "without_summary", "summaries_all", "with_tags", "without_tags", "tags_all", "with_position", "without_position", "position_all", "with_english", "with_hebrew", "languages_all", "with_duration", "without_duration", "duration_all", "exclude_image_only"];
             const types = typeFilter.filter(t => !excluded.includes(t));
+            const excludeImageOnly = typeFilter.includes("exclude_image_only");
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
             const withSummary = typeFilter.includes("with_summary");
@@ -494,6 +495,11 @@ export function useSessions(depends = [], options = {}) {
 
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
+
+                let matchImage = true;
+                if (excludeImageOnly && session.type === "image") {
+                    matchImage = false;
+                }
 
                 const hasThumbnail = !!session.thumbnail;
                 let matchThumbnail = true;
@@ -555,7 +561,7 @@ export function useSessions(depends = [], options = {}) {
                     matchLanguage = isHebrew;
                 }
 
-                return matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage && matchDuration;
+                return matchType && matchImage && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage && matchDuration;
             });
         }
         if (yearFilter?.length) {

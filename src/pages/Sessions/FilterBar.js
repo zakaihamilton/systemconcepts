@@ -33,6 +33,16 @@ export default function FilterBar({ hideYears = false }) {
         { id: "overview", name: translations.OVERVIEW, icon: <MovieFilterIcon /> },
         { id: "ai", name: translations.AI, icon: <AutoAwesomeIcon />, divider: true },
         {
+            id: "image_header",
+            name: translations.EXCLUDE,
+            header: true,
+            highlight: typeFilter.includes("exclude_image_only"),
+            expanded: typeFilter.includes("exclude_image_only"),
+            items: [
+                { id: "exclude_image_only", name: translations.EXCLUDE_IMAGE_ONLY }
+            ]
+        },
+        {
             id: "thumbnail_header",
             name: translations.THUMBNAIL,
             header: true,

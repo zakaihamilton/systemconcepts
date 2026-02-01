@@ -119,7 +119,6 @@ export default function SessionsPage() {
             id: "groupWidget",
             title: translations.GROUP,
             sortable: "group",
-            selected: () => groupFilter.length,
             onSelectable: item => typeof item.group !== "undefined",
             onClick: item => SessionsStore.update(s => {
                 const group = typeof item.group !== "undefined" && item.group;
@@ -219,7 +218,7 @@ export default function SessionsPage() {
                 const icon = (
                     <div
                         style={style}
-                        className={clsx(styles.icon, typeFilter.length && styles.active)}
+                        className={styles.icon}
                         onClick={() => handleIconClick(item.type)}
                         id={item.type}
                     >
@@ -307,8 +306,10 @@ export default function SessionsPage() {
                 "with_tags", "without_tags", "tags_all",
                 "with_position", "without_position", "position_all",
                 "with_duration", "without_duration", "duration_all",
-                "with_english", "with_hebrew", "languages_all"];
+                "with_english", "with_hebrew", "languages_all",
+                "exclude_image_only", "images_all"];
             const types = typeFilter.filter(t => !excluded.includes(t));
+            const excludeImageOnly = typeFilter.includes("exclude_image_only");
             const withThumbnail = typeFilter.includes("with_thumbnail");
             const withoutThumbnail = typeFilter.includes("without_thumbnail");
             const withSummary = typeFilter.includes("with_summary");
@@ -323,6 +324,8 @@ export default function SessionsPage() {
             const withHebrew = typeFilter.includes("with_hebrew");
 
             const matchType = !types.length || types.includes(type);
+
+            const matchImage = !(excludeImageOnly && type === "image");
 
             let matchThumbnail = true;
             if (withThumbnail && withoutThumbnail) {
@@ -383,7 +386,7 @@ export default function SessionsPage() {
                 matchLanguage = isHebrew;
             }
 
-            show = show && matchType && matchThumbnail && matchSummary && matchTags && matchPosition && matchDuration && matchLanguage;
+            show = show && matchType && matchImage && matchThumbnail && matchSummary && matchTags && matchPosition && matchDuration && matchLanguage;
         }
         if (yearFilter?.length) {
             show = show && yearFilter?.includes(year);
