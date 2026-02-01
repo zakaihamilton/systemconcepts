@@ -99,6 +99,9 @@ export function preprocessMarkdown(content) {
     result = result.replace(/\s+-\s+\*\*/g, '\n\n- **');
     result = result.replace(/\s+-\s+(?!\*)/g, '\n- ');
 
+    // Add line breaks before triple hash headers
+    result = result.replace(/\s*(###)/g, '\n\n$1');
+
     // Add line breaks before numbered items (1. item, 2. item, etc.)
     result = result.replace(/\s+(\d+\.)\s+/g, '\n$1 ');
 
