@@ -1,6 +1,7 @@
 import storage from "@util/storage";
 import { makePath, fileTitle, isVideoFile, isSubtitleFile, isTagsFile, isDurationFile } from "@util/path";
-import { shrinkImage } from "@util/image";
+import { shrinkImage, blobToBase64 } from "@util/image";
+import { readBinary } from "@util/binary";
 import pLimit from "../p-limit";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { addSyncLog } from "@sync/sync";
@@ -197,21 +198,18 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             }).filter(Boolean);
 
             // Generate thumbnails for sessions that have images but no thumbnail data yet
-            for (const session of yearSessions) {
-                if (session.thumbnail === true && session.image) {
+            const thumbnailLimit = pLimit(2);
+            const thumbnailPromises = yearSessions
+                .filter(session => session.thumbnail === true && session.image)
+                .map(session => thumbnailLimit(async () => {
                     if (existingThumbnails[session.id]) {
                         session.thumbnail = existingThumbnails[session.id];
                     } else {
                         try {
-                            const content = await storage.readFile(session.image.path);
-                            if (content) {
-                                const blob = new Blob([content]);
-                                const thumbnailBlob = await shrinkImage(blob, 4);
-                                const base64String = await new Promise((resolve) => {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => resolve(reader.result);
-                                    reader.readAsDataURL(thumbnailBlob);
-                                });
+                            const blob = await readBinary(session.image.path);
+                            if (blob) {
+                                const thumbnailBlob = await shrinkImage(blob);
+                                const base64String = await blobToBase64(thumbnailBlob);
                                 session.thumbnail = base64String;
                             }
                         } catch (err) {
@@ -220,8 +218,8 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                             delete session.thumbnail;
                         }
                     }
-                }
-            }
+                }));
+            await Promise.all(thumbnailPromises);
 
             if (isMerged || isBundled) {
                 allSessions.push(...yearSessions);

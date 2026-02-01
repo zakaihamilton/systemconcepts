@@ -40,6 +40,13 @@ export function isImageFile(path) {
     return hasImageExt;
 }
 
+export function getImageMimeType(path) {
+    path = makePath(path).toLowerCase();
+    if (path.endsWith(".png")) return "image/png";
+    if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+    return "application/octet-stream";
+}
+
 export function isSubtitleFile(path) {
     path = makePath(path);
     const subtitleExtensions = [".vtt"];
