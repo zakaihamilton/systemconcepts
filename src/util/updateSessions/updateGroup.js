@@ -87,7 +87,11 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         if (fullListing && fullListing.length > 0) {
             console.log(`[UpdateGroup] First item:`, JSON.stringify(fullListing[0]));
         }
-        years = fullListing.filter(year => !year.name.endsWith(".tags") && !year.name.endsWith(".duration"));
+        years = fullListing.filter(item => {
+            const isDir = item.type === "dir" || item.stat?.type === "dir";
+            const isYear = !isNaN(parseInt(item.name)) && /^\d+$/.test(item.name);
+            return isDir && isYear;
+        });
         console.log(`[UpdateGroup] Filtered to ${years.length} year folders:`, years.map(y => y.name));
     }
     catch (err) {

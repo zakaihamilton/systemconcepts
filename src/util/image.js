@@ -1,5 +1,5 @@
-const MAX_THUMBNAIL_SIZE = 600;
-const JPEG_QUALITY = 0.7;
+const MAX_THUMBNAIL_SIZE = 300;
+const IMAGE_QUALITY = 0.7;
 
 export async function thumbnailify(base64Image, maxSize = MAX_THUMBNAIL_SIZE) {
     var img = new Image();
@@ -21,8 +21,8 @@ export async function thumbnailify(base64Image, maxSize = MAX_THUMBNAIL_SIZE) {
 
             ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
-            // Use JPEG with compression for smaller file sizes
-            canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY);
+            // Use WebP with compression for significantly smaller file sizes
+            canvas.toBlob(resolve, 'image/webp', IMAGE_QUALITY);
         };
 
         img.onerror = () => {
