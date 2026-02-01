@@ -71,7 +71,7 @@ export default function Research() {
     const outerRef = useRef(null);
     const [scrollPages, setScrollPages] = useState({ page: 1, count: 1, visible: false });
     const scrollTimeoutRef = useRef(null);
-    const [appliedFilterTags, setAppliedFilterTags] = useState([]);
+    const [appliedFilterTags, setAppliedFilterTags] = useState(hasSearched ? filterTags : []);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [jumpOpen, setJumpOpen] = useState(false);
     const [printing, setPrinting] = useState(false);
@@ -677,8 +677,7 @@ export default function Research() {
                     const filterType = typeof filter === 'string' ? null : filter.type;
 
                     if (filterType === "source") {
-                        const isSessionsFilter = filter.id === "SESSIONS" || filterLabel === translations.SESSIONS;
-                        const isArticlesFilter = filter.id === "ARTICLES" || filterLabel === translations.ARTICLES;
+
                         if (filterLabel === translations.SESSIONS) return doc.isSession;
                         if (filterLabel === translations.ARTICLES) return !doc.isSession;
                     }
