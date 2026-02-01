@@ -68,7 +68,8 @@ function Article({
     embedded,
     hidePlayer,
     hideHeader,
-    highlight
+    highlight,
+    customTags
 }) {
     const translations = useTranslations();
     const search = useSearch("default", null, !embedded);
@@ -529,6 +530,7 @@ function Article({
                         translations={translations}
                         currentParagraphIndex={currentParagraphIndex}
                         onTitleClick={onTitleClick}
+                        customTags={customTags}
                     />
                 )}
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (

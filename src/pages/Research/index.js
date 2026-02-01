@@ -22,12 +22,13 @@ import { SyncActiveStore } from "@sync/syncState";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
 import { roleAuth } from "@util/roles";
-import { setPath, usePathItems } from "@util/pages";
+import { setPath, usePathItems, setHash } from "@util/pages";
 import { normalizeContent } from "@util/string";
 import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
+import { useSessions, SessionsStore } from "@util/sessions";
 import { ResearchStore } from "@pages/ResearchStore";
 import Article from "@pages/Library/Article";
 import { ContentSize } from "@components/Page/Content";
@@ -53,6 +54,7 @@ registerToolbar("Research");
 export default function Research() {
     const translations = useTranslations();
     const { query, filterTags, results, hasSearched, _loaded, highlight, indexing, progress, status, indexTimestamp } = ResearchStore.useState();
+    const [sessions] = useSessions([], { filterSessions: false, skipSync: true });
     const [indexData, setIndexData] = useState(null);
     const [availableFilters, setAvailableFilters] = useState([]);
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
@@ -161,6 +163,16 @@ export default function Research() {
                         }
                     });
                 });
+
+                if (sessions) {
+                    sessions.forEach(session => {
+                        if (session.group) unique.add(JSON.stringify({ label: session.group, type: "group" }));
+                        if (session.year) unique.add(JSON.stringify({ label: session.year, type: "year" }));
+                        if (session.type) unique.add(JSON.stringify({ label: session.type, type: "type" }));
+                        if (session.date) unique.add(JSON.stringify({ label: session.date, type: "date" }));
+                    });
+                }
+
                 if (isMounted.current) {
                     const filters = Array.from(unique).map(s => JSON.parse(s));
                     filters.sort((a, b) => a.label.localeCompare(b.label));
@@ -173,7 +185,7 @@ export default function Research() {
         } catch (err) {
             console.error("Failed to load tags for filters:", err);
         }
-    }, []);
+    }, [sessions]);
 
     const buildIndex = useCallback(async () => {
         ResearchStore.update(s => { s.indexing = true; });
@@ -200,14 +212,14 @@ export default function Research() {
     useEffect(() => {
         loadTags();
         loadIndex();
-    }, [loadTags, loadIndex, indexTimestamp]);
+    }, [loadTags, loadIndex, indexTimestamp, sessions]);
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
             loadIndex();
             loadTags();
         }
-    }, [libraryUpdateCounter, loadIndex, loadTags]);
+    }, [libraryUpdateCounter, loadIndex, loadTags, sessions]);
 
     const handleSearch = useCallback(async (isRestoring = false) => {
         // const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
@@ -346,14 +358,43 @@ export default function Research() {
                     if (isV3 || isV2 || isV4) {
                         const fileIndex = parseInt(docId, 10);
                         const tagId = indexData.f[fileIndex];
-                        const tag = libraryTags.find(t => t._id === tagId);
-                        if (tag) {
-                            doc = {
-                                docId: tagId,
-                                tag,
-                                paragraphs: indexData.d[fileIndex],
-                                matches: []
-                            };
+                        if (tagId.startsWith("session|")) {
+                            if (sessions) {
+                                const parts = tagId.split("|");
+                                if (parts.length >= 5) {
+                                    const group = parts[1];
+                                    const year = parts[2];
+                                    const date = parts[3];
+                                    const name = parts.slice(4).join("|");
+                                    const session = sessions.find(s => s.group === group && s.year === year && s.date === date && s.name === name);
+                                    if (session) {
+                                        doc = {
+                                            ...session,
+                                            docId: tagId,
+                                            isSession: true,
+                                            customTags: [
+                                                { label: "Group", value: session.group },
+                                                { label: "Year", value: session.year },
+                                                { label: "Date", value: session.date },
+                                                { label: "Type", value: session.type }
+                                            ],
+                                            tag: { title: session.name, _id: tagId },
+                                            paragraphs: indexData.d[fileIndex],
+                                            matches: []
+                                        };
+                                    }
+                                }
+                            }
+                        } else {
+                            const tag = libraryTags.find(t => t._id === tagId);
+                            if (tag) {
+                                doc = {
+                                    docId: tagId,
+                                    tag,
+                                    paragraphs: indexData.d[fileIndex],
+                                    matches: []
+                                };
+                            }
                         }
                     } else {
                         const v1Doc = indexData.files[docId];
@@ -411,7 +452,7 @@ export default function Research() {
             }
         }
 
-    }, [indexData, query, setResults, filterTags]);
+    }, [indexData, query, setResults, filterTags, sessions]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
@@ -453,6 +494,17 @@ export default function Research() {
     };
 
     const gotoArticle = (tag, paragraphId) => {
+        if (tag._id && tag._id.startsWith("session|")) {
+            const parts = tag._id.split("|");
+            if (parts.length >= 5) {
+                const group = parts[1];
+                const year = parts[2];
+                const date = parts[3];
+                const name = parts.slice(4).join("|");
+                setHash(`session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`);
+            }
+            return;
+        }
         const hierarchy = getTagHierarchy(tag);
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
@@ -471,6 +523,21 @@ export default function Research() {
         } else {
             res = results.filter(doc => {
                 return appliedFilterTags.every(filter => {
+                    if (doc.isSession) {
+                        const filterLabel = typeof filter === 'string' ? filter : filter.label;
+                        const filterType = typeof filter === 'string' ? null : filter.type;
+
+                        if (filterType) {
+                            if (filterType === "group" && doc.group === filterLabel) return true;
+                            if (filterType === "year" && doc.year === filterLabel) return true;
+                            if (filterType === "date" && doc.date === filterLabel) return true;
+                            if (filterType === "type" && doc.type === filterLabel) return true;
+                            return false;
+                        } else {
+                            return doc.group === filterLabel || doc.year === filterLabel || doc.date === filterLabel || doc.type === filterLabel;
+                        }
+                    }
+
                     if (typeof filter === 'string') {
                         return LibraryTagKeys.some(key => {
                             const val = doc.tag?.[key];

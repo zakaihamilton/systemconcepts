@@ -15,7 +15,8 @@ export default function Header({
     title,
     translations,
     currentParagraphIndex,
-    onTitleClick
+    onTitleClick,
+    customTags
 }) {
     const handleTagKeyPress = (e, value) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -71,6 +72,22 @@ export default function Header({
                             role="list"
                             aria-label="Metadata tags"
                         >
+                            {customTags && customTags.map((tag, index) => (
+                                <Tooltip key={`custom-${index}`} title={`${tag.label}: ${tag.value}`} arrow>
+                                    <Paper
+                                        elevation={0}
+                                        className={styles.metadataTag}
+                                        role="listitem"
+                                        tabIndex={0}
+                                        aria-label={`${tag.label}: ${tag.value}`}
+                                        onClick={() => navigator.clipboard.writeText(tag.value)}
+                                        onKeyDown={(e) => handleTagKeyPress(e, tag.value)}
+                                        sx={{ cursor: "pointer", display: 'flex', alignItems: 'center' }}
+                                    >
+                                        <Typography variant="caption">{tag.value}</Typography>
+                                    </Paper>
+                                </Tooltip>
+                            ))}
                             {LibraryTagKeys.filter(key => key !== "book" && key !== "author")
                                 .concat(["book", "author"])
                                 .map(key => {

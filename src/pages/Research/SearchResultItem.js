@@ -48,6 +48,7 @@ const SearchResultItem = ({ index, style, data }) => {
                     embedded={true}
                     hidePlayer={true}
                     highlight={highlight}
+                    customTags={doc.customTags}
                 />
             </div>
         </div>
