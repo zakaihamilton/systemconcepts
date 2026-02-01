@@ -221,6 +221,17 @@ export default function Research() {
         }
     }, [libraryUpdateCounter, loadIndex, loadTags, sessions]);
 
+    const sessionsById = useMemo(() => {
+        if (!sessions) {
+            return new Map();
+        }
+        return sessions.reduce((map, session) => {
+            const sessionId = `session|${session.group}|${session.year}|${session.date}|${session.name}`;
+            map.set(sessionId, session);
+            return map;
+        }, new Map());
+    }, [sessions]);
+
     const handleSearch = useCallback(async (isRestoring = false) => {
         // const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
         // const currentSearch = { query, filterTags };
@@ -362,11 +373,7 @@ export default function Research() {
                             if (sessions) {
                                 const parts = tagId.split("|");
                                 if (parts.length >= 5) {
-                                    const group = parts[1];
-                                    const year = parts[2];
-                                    const date = parts[3];
-                                    const name = parts.slice(4).join("|");
-                                    const session = sessions.find(s => s.group === group && s.year === year && s.date === date && s.name === name);
+                                    const session = sessionsById.get(tagId);
                                     if (session) {
                                         doc = {
                                             ...session,
