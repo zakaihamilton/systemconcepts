@@ -1,5 +1,6 @@
 import storage from "@util/storage";
 import { makePath, fileTitle, isVideoFile, isSubtitleFile, isTagsFile, isDurationFile } from "@util/path";
+import { shrinkImage } from "@util/image";
 import pLimit from "../p-limit";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { addSyncLog } from "@sync/sync";
@@ -156,6 +157,33 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
             const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
 
+            // Load existing sessions for the current year to preserve thumbnails
+            const existingThumbnails = {};
+            if (!isMerged && !isBundled) {
+                const existingYearPath = makePath(LOCAL_SYNC_PATH, name, year.name + ".json");
+                if (await storage.exists(existingYearPath)) {
+                    try {
+                        const content = await storage.readFile(existingYearPath);
+                        const data = JSON.parse(content);
+                        if (data && Array.isArray(data.sessions)) {
+                            data.sessions.forEach(session => {
+                                if (session.id && session.thumbnail && typeof session.thumbnail === "string" && !session.thumbnail.startsWith("http")) {
+                                    existingThumbnails[session.id] = session.thumbnail;
+                                }
+                            });
+                        }
+                    } catch (err) {
+                        console.warn(`[Sync] Failed to read existing year file for thumbnails: ${existingYearPath}`, err);
+                    }
+                }
+            } else if (existingSessions.length > 0) {
+                existingSessions.forEach(session => {
+                    if (session.id && session.thumbnail && typeof session.thumbnail === "string" && !session.thumbnail.startsWith("http")) {
+                        existingThumbnails[session.id] = session.thumbnail;
+                    }
+                });
+            }
+
             const yearSessions = sortedIds.map(id => {
                 return createSessionItem(
                     id,
@@ -167,6 +195,33 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     sessionSummariesMap[id]
                 );
             }).filter(Boolean);
+
+            // Generate thumbnails for sessions that have images but no thumbnail data yet
+            for (const session of yearSessions) {
+                if (session.thumbnail === true && session.image) {
+                    if (existingThumbnails[session.id]) {
+                        session.thumbnail = existingThumbnails[session.id];
+                    } else {
+                        try {
+                            const content = await storage.readFile(session.image.path);
+                            if (content) {
+                                const blob = new Blob([content]);
+                                const thumbnailBlob = await shrinkImage(blob, 4);
+                                const base64String = await new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.readAsDataURL(thumbnailBlob);
+                                });
+                                session.thumbnail = base64String;
+                            }
+                        } catch (err) {
+                            console.error(`[Sync] Error generating thumbnail for ${session.id}:`, err);
+                            // If we fail, remove thumbnail flag so UI doesn't try to load "true"
+                            delete session.thumbnail;
+                        }
+                    }
+                }
+            }
 
             if (isMerged || isBundled) {
                 allSessions.push(...yearSessions);

@@ -96,8 +96,11 @@ export default function SessionPage({ group, year, date, name }) {
     const { duration, thumbnail } = session;
 
     const viewImage = () => {
-        const extension = thumbnail.split(".").pop();
-        addPath(extension === "png" ? "image" : "image?ext=" + extension);
+        const path = session.image ? session.image.path : (typeof thumbnail === "string" && !thumbnail.startsWith("data:") ? thumbnail : null);
+        if (path) {
+            const extension = path.split(".").pop();
+            addPath(extension === "png" ? "image" : "image?ext=" + extension);
+        }
     };
 
     let dateWidget = "";
