@@ -198,7 +198,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             }).filter(Boolean);
 
             // Generate thumbnails for sessions that have images but no thumbnail data yet
-            const thumbnailLimit = pLimit(2);
+            const thumbnailLimit = pLimit(4);
             const thumbnailPromises = yearSessions
                 .filter(session => session.thumbnail === true && session.image)
                 .map(session => thumbnailLimit(async () => {
