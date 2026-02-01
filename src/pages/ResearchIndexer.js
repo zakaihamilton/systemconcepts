@@ -132,7 +132,7 @@ export default function ResearchIndexer() {
                     const groups = Array.isArray(groupsData?.groups) ? groupsData.groups : [];
 
                     for (const group of groups) {
-                        const mergedPath = makePath(`local/sync/${group.name}.json`);
+const mergedPath = makePath(`local/sync/${group.name.replace(/\.\.\//g, "")}.json`);
                         if (await storage.exists(mergedPath)) {
                             const content = await storage.readFile(mergedPath);
                             const data = JSON.parse(content);
@@ -256,7 +256,7 @@ export default function ResearchIndexer() {
                 if (session.summaryText) {
                     text += "\n" + session.summaryText;
                 } else if (session.summary?.path) {
-                    const summaryPath = makePath("local/sync", session.summary.path);
+const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//g, ""));
                     if (await storage.exists(summaryPath)) {
                         const content = await storage.readFile(summaryPath);
                         text += "\n" + content;
