@@ -22,12 +22,13 @@ import { SyncActiveStore } from "@sync/syncState";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { useTranslations } from "@util/translations";
 import { roleAuth } from "@util/roles";
-import { setPath, usePathItems } from "@util/pages";
+import { setPath, usePathItems, setHash } from "@util/pages";
 import { normalizeContent } from "@util/string";
 import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
+import { useSessions, SessionsStore } from "@util/sessions";
 import { ResearchStore } from "@pages/ResearchStore";
 import Article from "@pages/Library/Article";
 import { ContentSize } from "@components/Page/Content";
@@ -53,6 +54,7 @@ registerToolbar("Research");
 export default function Research() {
     const translations = useTranslations();
     const { query, filterTags, results, hasSearched, _loaded, highlight, indexing, progress, status, indexTimestamp } = ResearchStore.useState();
+    const [sessions] = useSessions([], { filterSessions: false, skipSync: true });
     const [indexData, setIndexData] = useState(null);
     const [availableFilters, setAvailableFilters] = useState([]);
     const libraryUpdateCounter = SyncActiveStore.useState(s => s.libraryUpdateCounter);
@@ -69,7 +71,7 @@ export default function Research() {
     const outerRef = useRef(null);
     const [scrollPages, setScrollPages] = useState({ page: 1, count: 1, visible: false });
     const scrollTimeoutRef = useRef(null);
-    const [appliedFilterTags, setAppliedFilterTags] = useState([]);
+    const [appliedFilterTags, setAppliedFilterTags] = useState(hasSearched ? filterTags : []);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [jumpOpen, setJumpOpen] = useState(false);
     const [printing, setPrinting] = useState(false);
@@ -112,19 +114,23 @@ export default function Research() {
         }, 500);
     }, []);
 
+    const minResetIndex = useRef(Infinity);
+
     const setRowHeight = useCallback((index, height) => {
-        if (rowHeights.current[index] !== height) {
+        if (Math.abs((rowHeights.current[index] || 0) - height) > 5) {
             rowHeights.current[index] = height;
+            minResetIndex.current = Math.min(minResetIndex.current, index);
             if (listRef.current) {
                 if (resetTimer.current) {
                     clearTimeout(resetTimer.current);
                 }
                 resetTimer.current = setTimeout(() => {
                     if (listRef.current) {
-                        listRef.current.resetAfterIndex(0);
+                        listRef.current.resetAfterIndex(minResetIndex.current);
+                        minResetIndex.current = Infinity;
                     }
                     resetTimer.current = null;
-                }, 100);
+                }, 200);
             }
         }
     }, []);
@@ -161,6 +167,23 @@ export default function Research() {
                         }
                     });
                 });
+
+                if (sessions) {
+                    const capitalize = (s) => {
+                        if (!s) return "";
+                        const str = String(s);
+                        if (str.toLowerCase() === "ai") return "AI";
+                        return str.charAt(0).toUpperCase() + str.slice(1);
+                    };
+                    sessions.forEach(session => {
+                        if (session.group) unique.add(JSON.stringify({ label: capitalize(session.group), type: "group" }));
+                        if (session.year) unique.add(JSON.stringify({ label: session.year, type: "year" }));
+                        if (session.type) unique.add(JSON.stringify({ label: capitalize(session.type), type: "type" }));
+                    });
+                }
+                unique.add(JSON.stringify({ label: translations.SESSIONS, type: "source", id: "SESSIONS" }));
+                unique.add(JSON.stringify({ label: translations.ARTICLES, type: "source", id: "ARTICLES" }));
+
                 if (isMounted.current) {
                     const filters = Array.from(unique).map(s => JSON.parse(s));
                     filters.sort((a, b) => a.label.localeCompare(b.label));
@@ -173,7 +196,7 @@ export default function Research() {
         } catch (err) {
             console.error("Failed to load tags for filters:", err);
         }
-    }, []);
+    }, [sessions, translations]);
 
     const buildIndex = useCallback(async () => {
         ResearchStore.update(s => { s.indexing = true; });
@@ -200,21 +223,35 @@ export default function Research() {
     useEffect(() => {
         loadTags();
         loadIndex();
-    }, [loadTags, loadIndex, indexTimestamp]);
+    }, [loadTags, loadIndex, indexTimestamp, sessions]);
 
     useEffect(() => {
         if (libraryUpdateCounter > 0) {
             loadIndex();
             loadTags();
         }
-    }, [libraryUpdateCounter, loadIndex, loadTags]);
+    }, [libraryUpdateCounter, loadIndex, loadTags, sessions]);
+
+    const sessionsById = useMemo(() => {
+        if (!sessions) {
+            return new Map();
+        }
+        return sessions.reduce((map, session) => {
+            const sessionId = `session|${session.group}|${session.year}|${session.date}|${session.name}`;
+            map.set(sessionId, session);
+            return map;
+        }, new Map());
+    }, [sessions]);
 
     const handleSearch = useCallback(async (isRestoring = false) => {
         // const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
         // const currentSearch = { query, filterTags };
         // setLastSearch(currentSearch);
+        if (filterTags.length > 0) {
+            // Debug logs removed
+        }
         setAppliedFilterTags(filterTags);
-        if (!indexData || !query.trim()) {
+        if (!indexData || (!query.trim() && !filterTags.length)) {
             setResults([]);
             ResearchStore.update(s => { s.hasSearched = true; });
             return;
@@ -241,97 +278,106 @@ export default function Research() {
             const isV3 = indexData.v === 3;
             const isV4 = indexData.v === 4;
 
-            for (const orGroup of orGroups) {
-                const andClauses = orGroup.split(/\s+AND\s+/).map(c => c.trim()).filter(Boolean);
-                if (andClauses.length === 0) continue;
-
-                const parsedAndClauses = andClauses.map(clause => {
-                    const terms = clause.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);
-                    return { raw: clause, terms };
-                });
-
-                const allTokensInGroup = [...new Set(parsedAndClauses.flatMap(c => c.terms))];
-                searchTerms.push(...parsedAndClauses.map(c => c.raw));
-
-                let groupRefs = null;
-
-                for (const token of allTokensInGroup) {
-                    if (!isMounted.current) return;
-
-                    const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
-                    let tokenRefs = new Set();
-                    matchingTokens.forEach(k => {
-                        const refs = (isV2 || isV3 || isV4) ? indexData.t[k] : indexData.tokens[k];
-                        if (isV4) {
-                            let currentFileIndex = -1;
-                            for (let i = 0; i < refs.length; i++) {
-                                const val = refs[i];
-                                if (val < 0) {
-                                    currentFileIndex = -val - 1;
-                                } else {
-                                    if (currentFileIndex !== -1) {
-                                        tokenRefs.add(`${currentFileIndex}:${val}`);
-                                    }
-                                }
-                            }
-                        } else if (isV3) {
-                            for (let i = 0; i < refs.length; i += 2) {
-                                tokenRefs.add(`${refs[i]}:${refs[i + 1]}`);
-                            }
-                        } else {
-                            refs.forEach(ref => tokenRefs.add(ref));
-                        }
-                    });
-
-                    if (groupRefs === null) {
-                        groupRefs = tokenRefs;
-                    } else {
-                        groupRefs = new Set([...groupRefs].filter(x => tokenRefs.has(x)));
+            if (!query.trim()) {
+                if (indexData.f) {
+                    for (let i = 0; i < indexData.f.length; i++) {
+                        finalRefs.add(`${i}:0`);
                     }
                 }
+            } else {
 
-                if (groupRefs) {
-                    // Final verification: ensure the matching paragraph actually contains all of the search terms
-                    // and phrases are adjacent
-                    [...groupRefs].forEach(ref => {
-                        const [docId, paraIndex] = ref.split(':');
-                        let paragraph = null;
-                        if (isV3 || isV2 || isV4) {
-                            const fileIndex = parseInt(docId, 10);
-                            paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
+                for (const orGroup of orGroups) {
+                    const andClauses = orGroup.split(/\s+AND\s+/).map(c => c.trim()).filter(Boolean);
+                    if (andClauses.length === 0) continue;
+
+                    const parsedAndClauses = andClauses.map(clause => {
+                        const terms = clause.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);
+                        return { raw: clause, terms };
+                    });
+
+                    const allTokensInGroup = [...new Set(parsedAndClauses.flatMap(c => c.terms))];
+                    searchTerms.push(...parsedAndClauses.map(c => c.raw));
+
+                    let groupRefs = null;
+
+                    for (const token of allTokensInGroup) {
+                        if (!isMounted.current) return;
+
+                        const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
+                        let tokenRefs = new Set();
+                        matchingTokens.forEach(k => {
+                            const refs = (isV2 || isV3 || isV4) ? indexData.t[k] : indexData.tokens[k];
+                            if (isV4) {
+                                let currentFileIndex = -1;
+                                for (let i = 0; i < refs.length; i++) {
+                                    const val = refs[i];
+                                    if (val < 0) {
+                                        currentFileIndex = -val - 1;
+                                    } else {
+                                        if (currentFileIndex !== -1) {
+                                            tokenRefs.add(`${currentFileIndex}:${val}`);
+                                        }
+                                    }
+                                }
+                            } else if (isV3) {
+                                for (let i = 0; i < refs.length; i += 2) {
+                                    tokenRefs.add(`${refs[i]}:${refs[i + 1]}`);
+                                }
+                            } else {
+                                refs.forEach(ref => tokenRefs.add(ref));
+                            }
+                        });
+
+                        if (groupRefs === null) {
+                            groupRefs = tokenRefs;
                         } else {
-                            const doc = indexData.files[docId];
-                            paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
+                            groupRefs = new Set([...groupRefs].filter(x => tokenRefs.has(x)));
                         }
+                    }
 
-                        if (paragraph) {
-                            const paraText = paragraph.toLowerCase();
-                            const isMatch = parsedAndClauses.every(clause => {
-                                if (clause.terms.length === 0) return true;
-                                if (clause.terms.length === 1) {
-                                    const term = clause.terms[0];
-                                    if (/^[a-z0-9]+$/i.test(term)) {
-                                        const regex = new RegExp(`\\b${term}\\b`, 'i');
+                    if (groupRefs) {
+                        // Final verification: ensure the matching paragraph actually contains all of the search terms
+                        // and phrases are adjacent
+                        [...groupRefs].forEach(ref => {
+                            const [docId, paraIndex] = ref.split(':');
+                            let paragraph = null;
+                            if (isV3 || isV2 || isV4) {
+                                const fileIndex = parseInt(docId, 10);
+                                paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
+                            } else {
+                                const doc = indexData.files[docId];
+                                paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
+                            }
+
+                            if (paragraph) {
+                                const paraText = paragraph.toLowerCase();
+                                const isMatch = parsedAndClauses.every(clause => {
+                                    if (clause.terms.length === 0) return true;
+                                    if (clause.terms.length === 1) {
+                                        const term = clause.terms[0];
+                                        if (/^[a-z0-9]+$/i.test(term)) {
+                                            const regex = new RegExp(`\\b${term}\\b`, 'i');
+                                            return regex.test(paraText);
+                                        }
+                                        return paraText.includes(term);
+                                    } else {
+                                        // Phrase adjacency check
+                                        // Escape terms for regex and join with anything non-alphanumeric
+                                        const phraseRegexStr = clause.terms.map(t => {
+                                            return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                        }).join('[^a-z0-9\u0590-\u05FF]+');
+
+                                        const regex = new RegExp(`\\b${phraseRegexStr}\\b`, 'i');
                                         return regex.test(paraText);
                                     }
-                                    return paraText.includes(term);
-                                } else {
-                                    // Phrase adjacency check
-                                    // Escape terms for regex and join with anything non-alphanumeric
-                                    const phraseRegexStr = clause.terms.map(t => {
-                                        return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                                    }).join('[^a-z0-9\u0590-\u05FF]+');
+                                });
 
-                                    const regex = new RegExp(`\\b${phraseRegexStr}\\b`, 'i');
-                                    return regex.test(paraText);
+                                if (isMatch) {
+                                    finalRefs.add(ref);
                                 }
-                            });
-
-                            if (isMatch) {
-                                finalRefs.add(ref);
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             }
 
@@ -339,21 +385,55 @@ export default function Research() {
             const groupedResults = {};
             const libraryTags = LibraryStore.getRawState().tags;
 
+            // Helper for capitalization
+            const capitalize = (s) => {
+                if (!s) return "";
+                const str = String(s);
+                if (str.toLowerCase() === "ai") return "AI";
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            };
+
             [...finalRefs].forEach(ref => {
                 const [docId, paraIndex] = ref.split(':');
+
                 if (!groupedResults[docId]) {
                     let doc = null;
                     if (isV3 || isV2 || isV4) {
                         const fileIndex = parseInt(docId, 10);
                         const tagId = indexData.f[fileIndex];
-                        const tag = libraryTags.find(t => t._id === tagId);
-                        if (tag) {
-                            doc = {
-                                docId: tagId,
-                                tag,
-                                paragraphs: indexData.d[fileIndex],
-                                matches: []
-                            };
+                        if (tagId.startsWith("session|")) {
+                            if (sessions) {
+                                const parts = tagId.split("|");
+                                if (parts.length >= 5) {
+                                    const session = sessionsById.get(tagId);
+                                    if (session) {
+                                        doc = {
+                                            ...session,
+                                            docId: tagId,
+                                            isSession: true,
+                                            customTags: [
+                                                { label: "Group", value: capitalize(session.group) },
+                                                { label: "Year", value: session.year },
+                                                { label: "Date", value: session.date },
+                                                { label: "Type", value: capitalize(session.type) }
+                                            ],
+                                            tag: { title: session.name, _id: tagId },
+                                            paragraphs: indexData.d[fileIndex],
+                                            matches: []
+                                        };
+                                    }
+                                }
+                            }
+                        } else {
+                            const tag = libraryTags.find(t => t._id === tagId);
+                            if (tag) {
+                                doc = {
+                                    docId: tagId,
+                                    tag,
+                                    paragraphs: indexData.d[fileIndex],
+                                    matches: []
+                                };
+                            }
                         }
                     } else {
                         const v1Doc = indexData.files[docId];
@@ -372,24 +452,116 @@ export default function Research() {
                 }
 
                 if (groupedResults[docId]) {
-                    const idx = parseInt(paraIndex, 10);
-                    groupedResults[docId].matches.push({
-                        index: idx,
-                        text: groupedResults[docId].paragraphs[idx]
-                    });
+                    // Logic to handle empty query cases (filter only) where we want to show a summary
+                    if (!query.trim() && groupedResults[docId].isSession) {
+                        if (groupedResults[docId].matches.length === 0) {
+                            let summaryText = groupedResults[docId].summary || groupedResults[docId].description;
+
+                            // If we have no summary, or the summary matches the title, try to find a better one from paragraphs
+                            const normalize = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, "");
+                            let useParagraphs = !summaryText;
+
+                            if (summaryText && groupedResults[docId].tag) {
+                                const pText = normalize(summaryText);
+                                const tText = normalize(groupedResults[docId].tag.title);
+                                // Check for match or substring (e.g. title "Foo", content "Foo - description")
+                                if (pText === tText || pText.includes(tText) || tText.includes(pText)) {
+                                    useParagraphs = true;
+                                }
+                            }
+
+                            if (useParagraphs && groupedResults[docId].paragraphs && groupedResults[docId].paragraphs.length > 0) {
+                                let found = false;
+                                if (groupedResults[docId].tag) {
+                                    const tText = normalize(groupedResults[docId].tag.title);
+                                    for (const para of groupedResults[docId].paragraphs) {
+                                        const pText = normalize(para);
+                                        // Ignore empty paragraphs or paragraphs that are nearly identical to title
+                                        if (pText && pText !== tText && !pText.includes(tText) && !tText.includes(pText)) {
+                                            summaryText = para;
+                                            found = true;
+                                            break;
+                                        }
+                                        // RELAXED CHECK: If paragraph contains title but has significantly more content
+                                        if (pText && pText.includes(tText) && pText.length > tText.length + 10) {
+                                            summaryText = para;
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!found) {
+                                    if (!summaryText && groupedResults[docId].paragraphs.length > 0) {
+                                        const p0 = groupedResults[docId].paragraphs[0];
+                                        const tText = groupedResults[docId].tag ? normalize(groupedResults[docId].tag.title) : "";
+                                        const p0Norm = normalize(p0);
+                                        if (p0Norm !== tText && !p0Norm.includes(tText)) {
+                                            summaryText = p0;
+                                        }
+                                    }
+                                }
+                            }
+
+                            summaryText = summaryText || "";
+
+                            // Set matches to this summary
+                            groupedResults[docId].paragraphs = [summaryText];
+                            groupedResults[docId].matches.push({
+                                index: 0,
+                                text: summaryText
+                            });
+                        }
+                    } else {
+                        // Standard search: add specific paragraph match
+                        const idx = parseInt(paraIndex, 10);
+                        if (groupedResults[docId].paragraphs && groupedResults[docId].paragraphs[idx]) {
+                            groupedResults[docId].matches.push({
+                                index: idx,
+                                text: groupedResults[docId].paragraphs[idx]
+                            });
+                        }
+                    }
                 }
             });
 
             // Sort paragraphs within docs
+            const normalize = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, "");
+
             Object.values(groupedResults).forEach(doc => {
                 doc.matches.sort((a, b) => a.index - b.index);
+
+                // Post-processing for Sessions:
+                // 1. Remove match if it is just the Title (redundant)
+                // 2. Adjust remaining indices if we removed top one, so it looks nice (starts from 1)
+                if (doc.isSession && doc.tag && doc.matches.length > 0) {
+                    const tText = normalize(doc.tag.title);
+                    // Check first match (usually Title is index 0)
+                    const m0 = doc.matches[0];
+                    if (m0.index === 0) {
+                        const pText = normalize(m0.text);
+                        // If first match IS the title (or subset), remove it
+                        if (pText === tText || pText.includes(tText) || tText.includes(pText)) {
+                            doc.matches.shift();
+
+                            // If we removed all matches, add a fallback match using next paragraph
+                            if (doc.matches.length === 0 && doc.paragraphs && doc.paragraphs.length > 1) {
+                                doc.matches.push({
+                                    index: 1,
+                                    text: doc.paragraphs[1]
+                                });
+                            }
+                        }
+                    }
+                }
             });
+
+            // Filter out documents with no matches
+            const filteredResults = Object.values(groupedResults).filter(doc => doc.matches.length > 0);
 
             if (isMounted.current) {
                 const uniqueTerms = [...new Set(searchTerms)];
-                const resultsWithTerms = Object.values(groupedResults);
                 ResearchStore.update(s => {
-                    s.results = resultsWithTerms;
+                    s.results = filteredResults;
                     s.highlight = uniqueTerms;
                     s.hasSearched = true;
                 });
@@ -410,19 +582,31 @@ export default function Research() {
                 }
             }
         }
-
-    }, [indexData, query, setResults, filterTags]);
+    }, [indexData, query, setResults, filterTags, sessions]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
+    const prevSessionCount = useRef(0);
+
     useEffect(() => {
         if (!_loaded) {
             return;
         }
+
+        // If sessions updated (length changed), re-run search to ensure we have all results
+        if (sessions && sessions.length !== prevSessionCount.current) {
+            prevSessionCount.current = sessions.length;
+            // Force re-search if we already ran one
+            if (initialSearchDone.current && indexData) {
+                handleSearch(true);
+            }
+        }
+
         if (initialSearchDone.current) {
             return;
         }
-        if (!query) {
+        // Trigger search if there's a query OR if there are filter tags
+        if (!query && !filterTags.length) {
             initialSearchDone.current = true;
             return;
         }
@@ -432,7 +616,7 @@ export default function Research() {
                 handleSearch(true);
             }
         }
-    }, [_loaded, indexData, hasSearched, searching, handleSearch, query]);
+    }, [_loaded, indexData, hasSearched, searching, handleSearch, query, sessions]);
 
     const handleClear = useCallback(() => {
         setQuery("");
@@ -453,6 +637,17 @@ export default function Research() {
     };
 
     const gotoArticle = (tag, paragraphId) => {
+        if (tag._id && tag._id.startsWith("session|")) {
+            const parts = tag._id.split("|");
+            if (parts.length >= 5) {
+                const group = parts[1];
+                const year = parts[2];
+                const date = parts[3];
+                const name = parts.slice(4).join("|");
+                setHash(`session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`);
+            }
+            return;
+        }
         const hierarchy = getTagHierarchy(tag);
         if (hierarchy.length > 0) {
             setPath("library", ...hierarchy);
@@ -471,19 +666,44 @@ export default function Research() {
         } else {
             res = results.filter(doc => {
                 return appliedFilterTags.every(filter => {
-                    if (typeof filter === 'string') {
+                    const filterLabel = typeof filter === 'string' ? filter : filter.label;
+                    const filterType = typeof filter === 'string' ? null : filter.type;
+
+                    if (filterType === "source") {
+
+                        if (filterLabel === translations.SESSIONS) return doc.isSession;
+                        if (filterLabel === translations.ARTICLES) return !doc.isSession;
+                    }
+
+                    if (doc.isSession) {
+                        const filterLabelStr = String(filterLabel).toLowerCase();
+                        if (filterType === "group" && String(doc.group).toLowerCase() === filterLabelStr) return true;
+                        if (filterType === "year" && String(doc.year) === filterLabel) return true;
+                        if (filterType === "date" && doc.date === filterLabel) return true;
+                        if (filterType === "type" && String(doc.type).toLowerCase() === filterLabelStr) return true;
+                        return false;
+                    } else {
+                        // For non-session docs, we might want to check exact match or similar logic?
+                        // But original logic was:
+                        // return doc.group === filterLabel || ...
+                        // We should probably safeguard this too if tags are capitalized in UI but not in doc.
+                        // But library tags usually match ID or Label directly.
+                        if (filterType && doc.tag?.[filterType]) {
+                            return String(doc.tag[filterType]).toLowerCase() === String(filterLabel).toLowerCase();
+                        }
+                        // This handles the case where filter is a string (no filterType) or filterType is not a direct tag property
                         return LibraryTagKeys.some(key => {
                             const val = doc.tag?.[key];
-                            return val && String(val).trim() === filter;
+                            return val && String(val).trim().toLowerCase() === String(filterLabel).toLowerCase();
                         });
                     }
-                    const val = doc.tag?.[filter.type];
-                    return val && String(val).trim() === filter.label;
+                    const val = doc.tag?.[filterType];
+                    return val && String(val).trim() === filterLabel;
                 });
             });
         }
         return res;
-    }, [results, appliedFilterTags]);
+    }, [results, appliedFilterTags, translations]);
 
     const pathItems = usePathItems();
 

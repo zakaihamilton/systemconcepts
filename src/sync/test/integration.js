@@ -332,7 +332,6 @@ async function runTests() {
 
         await deleteModule.removeDeletedFiles(localManifestSafe, remoteManifestClean, 'local/sync');
 
-        const deleteOpReal = mockStorage.ops.find(o => o.op === 'delete' && o.path.includes('keep.json'));
         // deleteFile calls mockStorage.deleteFile. In our mock, deleteFile is async () => {}.
         // But mockStorage.ops doesn't capture delete in the *original* mock.
         // Check mock definition:

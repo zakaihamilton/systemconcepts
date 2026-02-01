@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
-export function useArticleScroll(contentRef, handleScroll) {
+export function useArticleScroll(contentRef, handleScroll, disabled) {
     const [scrollInfo, setScrollInfo] = useState({ page: 1, total: 1, visible: false, clientHeight: 0, scrollHeight: 0 });
     const [showScrollTop, setShowScrollTop] = useState(false);
     const scrollTimeoutRef = useRef(null);
@@ -56,7 +56,7 @@ export function useArticleScroll(contentRef, handleScroll) {
 
     useEffect(() => {
         const element = contentRef.current;
-        if (!element) return;
+        if (!element || disabled) return;
 
         const observer = new ResizeObserver(() => {
             updateScrollInfo(element);
@@ -64,7 +64,7 @@ export function useArticleScroll(contentRef, handleScroll) {
         observer.observe(element);
 
         return () => observer.disconnect();
-    }, [updateScrollInfo, contentRef]);
+    }, [updateScrollInfo, contentRef, disabled]);
 
     return {
         scrollInfo,

@@ -30,12 +30,22 @@ export function useDateFormatter(options, locale) {
 
     // 3. Return a formatting function that includes ordinal logic
     return {
-        format: (date) => formatter.format(date),
+        format: (date) => {
+            try {
+                return formatter.format(date);
+            } catch (_e) {
+                return "";
+            }
+        },
         formatWithOrdinal: (date) => {
-            const parts = formatter.formatToParts(date);
-            return parts.map(part =>
-                part.type === 'day' ? getOrdinal(parseInt(part.value), effectiveLocale) : part.value
-            ).join('');
+            try {
+                const parts = formatter.formatToParts(date);
+                return parts.map(part =>
+                    part.type === 'day' ? getOrdinal(parseInt(part.value), effectiveLocale) : part.value
+                ).join('');
+            } catch (_e) {
+                return "";
+            }
         }
     };
 }

@@ -68,7 +68,8 @@ function Article({
     embedded,
     hidePlayer,
     hideHeader,
-    highlight
+    highlight,
+    customTags
 }) {
     const translations = useTranslations();
     const search = useSearch("default", null, !embedded);
@@ -104,7 +105,7 @@ function Article({
         showScrollTop,
         handleScrollUpdate,
         scrollToTop,
-    } = useArticleScroll(contentRef, handleScroll);
+    } = useArticleScroll(contentRef, handleScroll, embedded);
 
     // Reset scroll position when article changes
     useEffect(() => {
@@ -529,6 +530,7 @@ function Article({
                         translations={translations}
                         currentParagraphIndex={currentParagraphIndex}
                         onTitleClick={onTitleClick}
+                        customTags={customTags}
                     />
                 )}
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (
@@ -555,6 +557,7 @@ function Article({
                     processedContent={processedContent}
                     filteredParagraphs={filteredParagraphs}
                     highlight={highlight}
+                    disableGlossary={embedded}
                 />
                 {content && showMarkdown && !hidePlayer && (
                     <Player

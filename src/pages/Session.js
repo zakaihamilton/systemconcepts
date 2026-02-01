@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useTranslations } from "@util/translations";
 import { useSessions, SessionsStore } from "@util/sessions";
+import { useFetch } from "@util/fetch";
 import { getComparator, stableSort } from "@util/sort";
 import { useDateFormatter } from "@util/locale";
 import Group from "@widgets/Group";
@@ -12,6 +13,7 @@ import { addPath, replacePath } from "@util/pages";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import DownloadIcon from '@mui/icons-material/Download';
 import { useDeviceType } from "@util/styles";
 import { useSwipe } from "@util/touch";
 import Chip from "@mui/material/Chip";
@@ -43,30 +45,6 @@ export default function SessionPage({ group, year, date, name }) {
     const prevSession = currentIndex > 0 && sortedFilteredSessions[currentIndex - 1];
     const nextSession = currentIndex !== -1 && currentIndex < sortedFilteredSessions.length - 1 && sortedFilteredSessions[currentIndex + 1];
 
-    const gotoSession = session => {
-        replacePath(`session?group=${session.group}&year=${session.year}&date=${session.date}&name=${encodeURIComponent(session.name)}`);
-    }
-
-    const toolbarItems = [
-        !isMobile && {
-            id: "prevSession",
-            name: translations.PREVIOUS,
-            icon: <ArrowBackIcon />,
-            onClick: () => prevSession && gotoSession(prevSession),
-            location: "header",
-            disabled: !prevSession
-        },
-        !isMobile && {
-            id: "nextSession",
-            name: translations.NEXT,
-            icon: <ArrowForwardIcon />,
-            onClick: () => nextSession && gotoSession(nextSession),
-            location: "header",
-            disabled: !nextSession
-        }
-    ];
-
-    useToolbar({ id: "Session", items: toolbarItems, depends: [prevSession, nextSession, translations, isMobile] });
     const dateFormatter = useDateFormatter({
         weekday: "long",
         year: "numeric",
@@ -85,6 +63,67 @@ export default function SessionPage({ group, year, date, name }) {
         session.date === date &&
         session.year === year);
 
+    const gotoSession = session => {
+        replacePath(`session?group=${session.group}&year=${session.year}&date=${session.date}&name=${encodeURIComponent(session.name)}`);
+    }
+
+
+
+    const summaryUrl = session && session.summary?.path && !session.summaryText ? "/api/summary?path=" + encodeURIComponent(session.summary.path) : null;
+    const [summaryData, , summaryLoading] = useFetch(summaryUrl);
+    const summaryContent = session && (session.summaryText || summaryData);
+
+    const downloadSummary = useCallback(() => {
+        const filename = `${date} ${session.name}.md`.replace(/[\/\\:*?"<>|]/g, "_");
+        const blob = new Blob([summaryContent], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }, [date, summaryContent, session?.name]);
+
+    let dateWidget = "";
+    try {
+        dateWidget = date && dateFormatter.format(new Date(date));
+    }
+    catch (err) {
+        console.error("err", err);
+    }
+
+    const toolbarItems = [
+        !isMobile && {
+            id: "prevSession",
+            name: translations.PREVIOUS,
+            icon: <ArrowBackIcon />,
+            onClick: () => prevSession && gotoSession(prevSession),
+            location: "header",
+            disabled: !prevSession
+        },
+        !isMobile && {
+            id: "nextSession",
+            name: translations.NEXT,
+            icon: <ArrowForwardIcon />,
+            onClick: () => nextSession && gotoSession(nextSession),
+            location: "header",
+            disabled: !nextSession
+        },
+        {
+            id: "download",
+            name: translations.DOWNLOAD,
+            icon: <DownloadIcon />,
+            onClick: downloadSummary,
+            location: "header",
+            disabled: !summaryContent,
+            menu: true
+        }
+    ];
+
+    useToolbar({ id: "Session", items: toolbarItems, depends: [prevSession, nextSession, translations, isMobile, summaryContent] });
+
+
+
     if (loading && !session) {
         return <div className={styles.root}>{translations.LOADING}...</div>;
     }
@@ -99,16 +138,6 @@ export default function SessionPage({ group, year, date, name }) {
         const extension = thumbnail.split(".").pop();
         addPath(extension === "png" ? "image" : "image?ext=" + extension);
     };
-
-    let dateWidget = "";
-    try {
-        dateWidget = date && dateFormatter.format(new Date(date));
-    }
-    catch (err) {
-        console.error("err", err);
-    }
-
-
 
     return <div className={styles.root} {...swipeHandlers}>
         <div className={styles.card} style={{ "--group-color": session.color }}>
@@ -153,7 +182,7 @@ export default function SessionPage({ group, year, date, name }) {
                 </div>}
                 <div className={styles.details}>
                     {session.type !== "image" && <div className={styles.summary}>
-                        <Summary path={session.summary?.path} content={session.summaryText} key={session.summary?.path || session.name} />
+                        <Summary path={session.summary?.path} content={summaryContent} loading={summaryLoading} key={session.summary?.path || session.name} />
                     </div>}
                 </div>
             </div>

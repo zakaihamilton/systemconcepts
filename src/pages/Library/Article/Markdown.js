@@ -507,7 +507,7 @@ const rehypeArticleEnrichment = () => {
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
-                if (node.type === "element" && (node.tagName === "p" || /^h[1-6]$/.test(node.tagName) || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
+                if (node.type === "element" && (node.tagName === "p" || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
                     paragraphIndex++;
                     node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
                     newNodes.push(node);
@@ -515,11 +515,29 @@ const rehypeArticleEnrichment = () => {
                 } else {
                     if (node.children) {
                         node.children = visitAndSplit(node.children);
+                        if (node.tagName === "li") {
+                            const index = findIndex(node.children);
+                            if (index !== undefined) {
+                                node.properties = { ...node.properties, dataParagraphIndex: index };
+                            }
+                        }
                     }
                     newNodes.push(node);
                 }
             });
             return newNodes;
+        };
+
+        const findIndex = (nodes) => {
+            if (!nodes) return undefined;
+            for (const node of nodes) {
+                if (node.properties?.dataParagraphIndex !== undefined) return node.properties.dataParagraphIndex;
+                if (node.children) {
+                    const found = findIndex(node.children);
+                    if (found !== undefined) return found;
+                }
+            }
+            return undefined;
         };
 
         if (tree.children) {
@@ -536,7 +554,7 @@ const rehypeArticleEnrichment = () => {
 };
 
 
-export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag, filteredParagraphs }) {
+export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag, filteredParagraphs, disableGlossary }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
 
@@ -674,6 +692,11 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         }
 
         if (typeof children === 'string') {
+            // Fast path: skip expensive glossary/reference processing when disabled
+            if (disableGlossary) {
+                return <Highlight>{children}</Highlight>;
+            }
+
             // Unconditional cleanup in renderer as final safety net
             let cleanChildren = children;
             cleanChildren = cleanChildren.replace(/\u00A0/g, ' ');
@@ -817,7 +840,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         }
 
         return children;
-    }, [Highlight, search, selectedTag]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [Highlight, search, selectedTag, disableGlossary]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleParagraphZoom = useCallback((children, number) => {
         setZoomedData({ content: children, number });
@@ -909,7 +932,6 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         };
 
         const ParagraphRenderer = ({ node, children }) => {
-            const [hoveringNumber, setHoveringNumber] = useState(false);
             const paragraphIndex = node?.properties?.dataParagraphIndex;
             const totalParagraphs = node?.properties?.dataTotalParagraphs;
             const isLastParagraph = paragraphIndex === totalParagraphs;
@@ -917,6 +939,33 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
             if (!children || (Array.isArray(children) && children.length === 0)) return null;
 
+            // Fast path for embedded/disableGlossary: skip expensive operations
+            if (disableGlossary) {
+                return (
+                    <Box
+                        className={styles.paragraph}
+                        sx={{ marginBottom: '24px', lineHeight: 2.8 }}
+                        data-paragraph-index={paragraphIndex}
+                    >
+                        <TextRenderer>{children}</TextRenderer>
+                        <Tooltip title={translations?.ZOOM} placement="top" arrow>
+                            <span
+                                className={styles.paragraphNumber}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleParagraphZoom(children, paragraphIndex);
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {paragraphIndex !== undefined ? paragraphIndex : ''}
+                            </span>
+                        </Tooltip>
+                    </Box>
+                );
+            }
+
+            // Full path: with hover state, tooltips, zoom, etc.
+            const [hoveringNumber, setHoveringNumber] = useState(false);
             const rawText = extractText(children);
             const paragraphText = getSpokenText(rawText);
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
@@ -997,9 +1046,16 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             return Renderer;
         };
 
-        return {
+        const fullComponents = {
             p: ParagraphRenderer,
-            li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>,
+            li: ({ node, children }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                if (Array.isArray(filteredParagraphs)) {
+                    // If we have an index and it's not in the allowed list, hide it.
+                    if (paragraphIndex !== undefined && !filteredParagraphs.includes(paragraphIndex)) return null;
+                }
+                return <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>;
+            },
             ul: BlockRenderer('ul'),
             ol: BlockRenderer('ol'),
             blockquote: BlockRenderer('blockquote'),
@@ -1014,6 +1070,18 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             h6: HeaderRenderer('h6'),
             br: () => <span style={{ display: "block", marginBottom: "1.2rem" }} />
         };
+
+        const embeddedComponents = {
+            p: ParagraphRenderer,
+            h1: HeaderRenderer('h1'),
+            h2: HeaderRenderer('h2'),
+            h3: HeaderRenderer('h3'),
+            h4: HeaderRenderer('h4'),
+            h5: HeaderRenderer('h5'),
+            h6: HeaderRenderer('h6'),
+        };
+
+        return { full: fullComponents, embedded: embeddedComponents };
     }, [currentParagraphIndex, filteredParagraphs, translations, TextRenderer, handleParagraphZoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
@@ -1022,7 +1090,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 <ReactMarkdown
                     remarkPlugins={[remarkBreaks]}
                     rehypePlugins={[rehypeArticleEnrichment]}
-                    components={markdownComponents}
+                    components={disableGlossary ? markdownComponents.embedded : markdownComponents.full}
                 >
                     {processedChildren}
                 </ReactMarkdown>
