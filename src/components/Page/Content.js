@@ -24,7 +24,7 @@ export default function Content() {
             if (showPlayer) {
                 setPlayerPage(prev => {
                     const newPage = { ...activePage, ...parentParams };
-                    if (prev && prev.id === newPage.id && prev.url === newPage.url && prev.group === newPage.group && prev.name === newPage.name) {
+                    if (prev && ['id', 'url', 'group', 'name'].every(key => prev[key] === newPage[key])) {
                         return prev;
                     }
                     return newPage;
