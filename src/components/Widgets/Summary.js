@@ -6,13 +6,13 @@ import { useTranslations } from "@util/translations";
 
 import { preprocessMarkdown } from "@util/string";
 
-export default function Summary({ path, content }) {
+export default function Summary({ path, content, loading }) {
     const translations = useTranslations();
     const url = path && !content ? "/api/summary?path=" + encodeURIComponent(path) : null;
-    const [data, , loading] = useFetch(url);
-    const displayedContent = content || (path && !loading && data);
+    const [data, , loadingData] = useFetch(url);
+    const displayedContent = content || (path && !loadingData && data);
 
-    if (loading && !content) {
+    if ((loading || loadingData) && !content) {
         return <div className={styles.progress}>
             <LinearProgress />
         </div>;
