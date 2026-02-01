@@ -6,7 +6,7 @@ import { addSyncLog } from "@sync/sync";
 import { writeCompressedFile } from "@sync/bundle";
 import { LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "@sync/constants";
 import { getListing, updateYearSync } from "./utils";
-import { loadTags, loadDurations } from "./metadata";
+import { loadTags, loadDurations, loadSummaries } from "./metadata";
 import { createSessionItem } from "./mapper";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 
@@ -128,6 +128,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             // Load Metadata
             const sessionTagsMap = await loadTags(year, name, path, forceUpdate, isMerged, isBundled);
             const sessionDurationMap = await loadDurations(year, name, path, forceUpdate, isMerged, isBundled);
+            const sessionSummariesMap = await loadSummaries(year, name, path, forceUpdate, isMerged, isBundled);
 
             // Group files by session ID
             const sessionFilesMap = {};
@@ -143,7 +144,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 if (isSubtitleFile(file.name)) {
                     id = id.replace(/\.[a-z]{2,3}$/, "");
                 }
-                if (isTagsFile(file.name) || isDurationFile(file.name)) {
+                if (isTagsFile(file.name) || isDurationFile(file.name) || file.name === year.name + ".md") {
                     continue;
                 }
 
@@ -162,7 +163,8 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     year.name,
                     name,
                     sessionTagsMap[id] || [],
-                    sessionDurationMap[id]
+                    sessionDurationMap[id],
+                    sessionSummariesMap[id]
                 );
             }).filter(Boolean);
 

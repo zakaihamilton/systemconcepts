@@ -29,13 +29,13 @@ function preprocessMarkdown(content) {
     return result.trim();
 }
 
-export default function Summary({ path }) {
+export default function Summary({ path, content }) {
     const translations = useTranslations();
-    const url = path ? "/api/summary?path=" + encodeURIComponent(path) : null;
+    const url = path && !content ? "/api/summary?path=" + encodeURIComponent(path) : null;
     const [data, , loading] = useFetch(url);
-    const displayedContent = path && !loading && data;
+    const displayedContent = content || (path && !loading && data);
 
-    if (loading) {
+    if (loading && !content) {
         return <div className={styles.progress}>
             <LinearProgress />
         </div>;

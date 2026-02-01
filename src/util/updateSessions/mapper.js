@@ -1,6 +1,6 @@
 import { fileTitle, isAudioFile, isVideoFile, isImageFile, isSubtitleFile, isSummaryFile } from "@util/path";
 
-export function createSessionItem(id, fileList, yearName, groupName, sessionTags, sessionDuration) {
+export function createSessionItem(id, fileList, yearName, groupName, sessionTags, sessionDuration, sessionSummaryText) {
     const [, date, sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
     if (!date || !sessionName) {
         return null;
@@ -38,7 +38,8 @@ export function createSessionItem(id, fileList, yearName, groupName, sessionTags
         group: groupName,
         ai,
         tags: (sessionTags || []).map(tag => typeof tag === "string" ? tag.trim().replace(/\.+$/, "") : tag).filter(tag => tag),
-        duration: sessionDuration
+        duration: sessionDuration,
+        summaryText: sessionSummaryText
     };
 
     if (audioFile) {
