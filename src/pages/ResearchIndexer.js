@@ -256,7 +256,7 @@ export default function ResearchIndexer() {
                 if (session.summaryText) {
                     text += "\n" + session.summaryText;
                 } else if (session.summary?.path) {
-                    const summaryPath = makePath("local/sync", session.summary.path);
+const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//g, ""));
                     if (await storage.exists(summaryPath)) {
                         const content = await storage.readFile(summaryPath);
                         text += "\n" + content;
