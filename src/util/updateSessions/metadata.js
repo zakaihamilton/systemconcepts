@@ -2,6 +2,39 @@ import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { LOCAL_SYNC_PATH } from "@sync/constants";
 
+async function loadFromCache(property, name, year, isMerged, isBundled, loader, isLoaded) {
+    try {
+        if (isBundled) {
+            const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+            if (await storage.exists(bundlePath)) {
+                const content = await storage.readFile(bundlePath);
+                const data = JSON.parse(content);
+                loader(data);
+            }
+        }
+
+        if (!isLoaded() && isMerged) {
+            const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+            if (await storage.exists(mergedPath)) {
+                const content = await storage.readFile(mergedPath);
+                const data = JSON.parse(content);
+                loader(data);
+            }
+        }
+
+        if (!isLoaded()) {
+            const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
+            if (await storage.exists(localYearPath)) {
+                const content = await storage.readFile(localYearPath);
+                const data = JSON.parse(content);
+                loader(data);
+            }
+        }
+    } catch (err) {
+        console.warn(`[Sync] Failed to read cache for ${property}`, err);
+    }
+}
+
 async function loadMetadata(property, extension, year, name, path, forceUpdate, isMerged, isBundled) {
     const sessionMetadataMap = {};
     let updateLocalMetadata = true;
@@ -11,9 +44,6 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
         const metadataLoader = (data) => {
             if (data && Array.isArray(data.sessions)) {
                 data.sessions.forEach(session => {
-                    if (session.name && session.name.startsWith(year.name)) {
-                        return;
-                    }
                     if (session && session[property]) {
                         // Check if array has length for tags, or if value exists for others
                         const hasValue = Array.isArray(session[property]) ? session[property].length > 0 : session[property];
@@ -36,40 +66,25 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
             }
         };
 
-        try {
-            if (isBundled) {
-                const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
-                if (await storage.exists(bundlePath)) {
-                    const content = await storage.readFile(bundlePath);
-                    const data = JSON.parse(content);
-                    metadataLoader(data);
-                }
-            }
+        if (isBundled || isMerged) {
+            await loadFromCache(property, name, year, isMerged, isBundled, metadataLoader, () => metadataLoaded);
+        } else {
+            // If neither bundled nor merged, we might still want to try loading from cache logic if that was the intended behavior? 
+            // Actually original code checks `isBundled` then `isMerged` then falls through to year check if not loaded.
+            // My helper includes the year check as the 3rd step.
+            // But the original code ALWAYS checks the year file if not loaded, regardless of flags?
+            // Wait, looking at original code:
+            // if (isBundled) { ... }
+            // if (!metadataLoaded && isMerged) { ... }
+            // if (!metadataLoaded) { ... year file ... }
 
-            if (!metadataLoaded && isMerged) {
-                const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-                if (await storage.exists(mergedPath)) {
-                    const content = await storage.readFile(mergedPath);
-                    const data = JSON.parse(content);
-                    metadataLoader(data);
-                }
-            }
+            // So yes, it always checks year file if not loaded. 
+            // So my helper function implementation is correct for ALL cases if I just pass the flags.
+            await loadFromCache(property, name, year, isMerged, isBundled, metadataLoader, () => metadataLoaded);
+        }
 
-            if (!metadataLoaded) {
-                const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
-                if (await storage.exists(localYearPath)) {
-                    const content = await storage.readFile(localYearPath);
-                    const data = JSON.parse(content);
-                    metadataLoader(data);
-                }
-            }
-
-            if (!metadataLoaded) {
-                updateLocalMetadata = true;
-            }
-
-        } catch (err) {
-            console.warn(`[Sync] Failed to read cache for ${property}`, err);
+        if (!metadataLoaded) {
+            updateLocalMetadata = true;
         }
     }
 
@@ -83,9 +98,8 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                 if (data && Array.isArray(data.sessions)) {
                     data.sessions.forEach(session => {
                         if (session.sessionName && session[property]) {
-                            if (property === 'duration' && session.sessionName.includes('Acceptance')) {
-                                console.log('[Metadata] Loading duration for', session.sessionName, ':', session[property]);
-                            }
+
+
                             sessionMetadataMap[session.sessionName] = session[property];
                         }
                     });
@@ -117,9 +131,6 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
         const metadataLoader = (data) => {
             if (data && Array.isArray(data.sessions)) {
                 data.sessions.forEach(session => {
-                    if (session.name && session.name.startsWith(year.name)) {
-                        return;
-                    }
                     if (session && session[property]) {
                         const value = session[property];
                         if (value) {
@@ -136,40 +147,10 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
             }
         };
 
-        try {
-            if (isBundled) {
-                const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
-                if (await storage.exists(bundlePath)) {
-                    const content = await storage.readFile(bundlePath);
-                    const data = JSON.parse(content);
-                    metadataLoader(data);
-                }
-            }
+        await loadFromCache(property, name, year, isMerged, isBundled, metadataLoader, () => metadataLoaded);
 
-            if (!metadataLoaded && isMerged) {
-                const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-                if (await storage.exists(mergedPath)) {
-                    const content = await storage.readFile(mergedPath);
-                    const data = JSON.parse(content);
-                    metadataLoader(data);
-                }
-            }
-
-            if (!metadataLoaded) {
-                const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${year.name}.json`);
-                if (await storage.exists(localYearPath)) {
-                    const content = await storage.readFile(localYearPath);
-                    const data = JSON.parse(content);
-                    metadataLoader(data);
-                }
-            }
-
-            if (!metadataLoaded) {
-                updateLocalMetadata = true;
-            }
-
-        } catch (err) {
-            console.warn(`[Sync] Failed to read cache for ${property}`, err);
+        if (!metadataLoaded) {
+            updateLocalMetadata = true;
         }
     }
 
@@ -184,11 +165,15 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
                 let currentSessionId = null;
                 let currentBuffer = [];
 
-                for (let line of lines) {
+                const saveCurrentBuffer = () => {
+                    if (currentSessionId && currentBuffer.length > 0) {
+                        sessionMetadataMap[currentSessionId] = currentBuffer.join('\n').trim();
+                    }
+                };
+
+                for (const line of lines) {
                     if (line.startsWith('## ')) {
-                        if (currentSessionId && currentBuffer.length > 0) {
-                            sessionMetadataMap[currentSessionId] = currentBuffer.join('\n').trim();
-                        }
+                        saveCurrentBuffer();
 
                         const header = line.substring(3).trim();
                         // header usually is "YYYY-MM-DD Title" which matches session ID
@@ -203,9 +188,7 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
                         currentBuffer.push(line);
                     }
                 }
-                if (currentSessionId && currentBuffer.length > 0) {
-                    sessionMetadataMap[currentSessionId] = currentBuffer.join('\n').trim();
-                }
+                saveCurrentBuffer();
 
             } catch (err) {
                 console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
