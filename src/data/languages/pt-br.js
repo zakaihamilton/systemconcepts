@@ -582,6 +582,14 @@ export default {
             "value": "Sem miniatura"
         },
         {
+            "id": "EXCLUDE",
+            "value": "Excluir"
+        },
+        {
+            "id": "EXCLUDE_IMAGE_ONLY",
+            "value": "Apenas Imagem"
+        },
+        {
             "id": "ALL",
             "value": "Todos"
         },

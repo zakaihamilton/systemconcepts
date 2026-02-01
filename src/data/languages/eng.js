@@ -586,8 +586,12 @@ export default {
             "value": "No Thumbnail"
         },
         {
-            "id": "WITHOUT_IMAGE",
-            "value": "No Image"
+            "id": "EXCLUDE",
+            "value": "Exclude"
+        },
+        {
+            "id": "EXCLUDE_IMAGE_ONLY",
+            "value": "Image Only"
         },
         {
             "id": "ALL",

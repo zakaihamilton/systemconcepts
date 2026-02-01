@@ -582,8 +582,12 @@ export default {
             "value": "ללא תמונה"
         },
         {
-            "id": "WITHOUT_IMAGE",
-            "value": "ללא תמונה"
+            "id": "EXCLUDE",
+            "value": "החרגה"
+        },
+        {
+            "id": "EXCLUDE_IMAGE_ONLY",
+            "value": "תמונה בלבד"
         },
         {
             "id": "ALL",

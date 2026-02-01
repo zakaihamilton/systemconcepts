@@ -34,13 +34,12 @@ export default function FilterBar({ hideYears = false }) {
         { id: "ai", name: translations.AI, icon: <AutoAwesomeIcon />, divider: true },
         {
             id: "image_header",
-            name: translations.IMAGE,
+            name: translations.EXCLUDE,
             header: true,
-            highlight: typeFilter.includes("without_image"),
-            expanded: typeFilter.includes("without_image"),
+            highlight: typeFilter.includes("exclude_image_only"),
+            expanded: typeFilter.includes("exclude_image_only"),
             items: [
-                { id: "images_all", name: translations.ALL, radio: true },
-                { id: "without_image", name: translations.WITHOUT_IMAGE, radio: true }
+                { id: "exclude_image_only", name: translations.EXCLUDE_IMAGE_ONLY }
             ]
         },
         {
@@ -182,8 +181,7 @@ export default function FilterBar({ hideYears = false }) {
                             tags_all: ["with_tags", "without_tags"],
                             position_all: ["with_position", "without_position"],
                             duration_all: ["with_duration", "without_duration"],
-                            languages_all: ["with_english", "with_hebrew"],
-                            images_all: ["without_image"]
+                            languages_all: ["with_english", "with_hebrew"]
                         };
                         if (allRadios[type.id]) {
                             s.typeFilter = s.typeFilter.filter(t => !allRadios[type.id].includes(t));
