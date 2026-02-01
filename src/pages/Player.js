@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
 import { useTranslations } from "@util/translations";
@@ -40,7 +40,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath, subtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
+    const { hash, mediaPath: storeMediaPath, subtitles: storeSubtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
@@ -49,6 +49,14 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
+    const [loadedPath, setLoadedPath] = useState(null);
+
+    useEffect(() => {
+        if (data && !loading) {
+            setLoadedPath(path);
+        }
+    }, [data, loading, path]);
+
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
@@ -88,6 +96,9 @@ export default function PlayerPage({ show = false, suffix, mode }) {
         }
     }
 
+
+    const mediaPath = data?.path || storeMediaPath;
+    const subtitles = data?.subtitles || storeSubtitles;
 
     const isAudio = isAudioFile(mediaPath);
     const isVideo = isVideoFile(mediaPath);
@@ -197,9 +208,11 @@ export default function PlayerPage({ show = false, suffix, mode }) {
     }
     let MediaComponent = null;
     let mediaType = undefined;
+    const activeMetadataKey = (loadedPath === path && !loading) ? metadataKey : null;
+
     const mediaProps = {
         metadataPath,
-        metadataKey,
+        metadataKey: activeMetadataKey,
         path: mediaPath,
         date,
         year,
