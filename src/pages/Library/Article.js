@@ -557,6 +557,7 @@ function Article({
                     processedContent={processedContent}
                     filteredParagraphs={filteredParagraphs}
                     highlight={highlight}
+                    disableGlossary={embedded}
                 />
                 {content && showMarkdown && !hidePlayer && (
                     <Player

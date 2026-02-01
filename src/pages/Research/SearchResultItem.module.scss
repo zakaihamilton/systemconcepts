@@ -8,3 +8,36 @@
         border-bottom-color: rgba(255, 255, 255, 0.2);
     }
 }
+
+.sessionResult {
+    padding: 1rem 2rem;
+}
+
+.sessionTitle {
+    color: var(--text-primary);
+    font-weight: 600;
+
+    &:hover {
+        color: var(--primary);
+    }
+}
+
+.sessionContent {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+
+    p {
+        margin-bottom: 0.75rem;
+    }
+
+    ol,
+    ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+
+    li {
+        margin-bottom: 0.25rem;
+    }
+}

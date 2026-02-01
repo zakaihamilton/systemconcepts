@@ -43,13 +43,13 @@ const SearchResultItem = ({ index, style, data }) => {
         }
         return "";
     }, [doc]);
-    // filteredParagraphs: 1-based indices of matches (adjusted for title removal in sessions)
+
+    // filteredParagraphs: 
+    // - For sessions: null (show all paragraphs)
+    // - For articles: 1-based indices of matches
     const filteredParagraphs = useMemo(() => {
         if (!doc?.matches) return [];
-        // For sessions, we sliced off the title (index 0), so adjust indices by -1
-        if (doc.isSession) {
-            return doc.matches.map(m => m.index); // m.index was already 1-based paragraph index; after slice(1), paragraph at original index 1 is now at 0
-        }
+        if (doc.isSession) return null; // Show all paragraphs for sessions
         return doc.matches.map(m => m.index + 1);
     }, [doc]);
 
