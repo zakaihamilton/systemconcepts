@@ -41,6 +41,9 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
     const start = performance.now();
     addSyncLog(`Starting ${label} sync...`, "info");
     const progress = new SyncProgressTracker(phaseOffset, combinedTotalWeight);
+    if (migration) {
+        progress.usePersonalWeights();
+    }
     let hasChanges = false;
     const isLocked = SyncActiveStore.getRawState().locked;
 
