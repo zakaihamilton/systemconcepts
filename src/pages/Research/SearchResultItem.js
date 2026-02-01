@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useMemo } from "react";
 import styles from "./SearchResultItem.module.scss";
 import Article from "@pages/Library/Article";
-import { normalizeContent } from "@util/string";
+import { normalizeContent, preprocessMarkdown } from "@util/string";
 
 const SearchResultItem = ({ index, style, data }) => {
     const { results, gotoArticle, setRowHeight, highlight } = data || {};
@@ -27,11 +27,31 @@ const SearchResultItem = ({ index, style, data }) => {
     // Transform text: use shared normalization to match indexing
     const content = useMemo(() => {
         if (doc?.text) return normalizeContent(doc.text);
-        if (doc?.paragraphs) return doc.paragraphs.join("\n\n");
+        if (doc?.paragraphs) {
+            let paragraphs = doc.paragraphs;
+            // For sessions, exclude the title (index 0) so numbering starts at 1 for the summary
+            if (doc.isSession && paragraphs.length > 0) {
+                paragraphs = paragraphs.slice(1);
+            }
+            let text = paragraphs.join("\n\n");
+
+            // Fix formatting for session summaries: ensure numbered lists start on new lines
+            if (doc.isSession) {
+                text = preprocessMarkdown(text);
+            }
+            return text;
+        }
         return "";
     }, [doc]);
-    // filteredParagraphs contains 1-based indices of paragraphs to display
-    const filteredParagraphs = useMemo(() => doc?.matches?.map(m => m.index + 1) || [], [doc]);
+    // filteredParagraphs: 1-based indices of matches (adjusted for title removal in sessions)
+    const filteredParagraphs = useMemo(() => {
+        if (!doc?.matches) return [];
+        // For sessions, we sliced off the title (index 0), so adjust indices by -1
+        if (doc.isSession) {
+            return doc.matches.map(m => m.index); // m.index was already 1-based paragraph index; after slice(1), paragraph at original index 1 is now at 0
+        }
+        return doc.matches.map(m => m.index + 1);
+    }, [doc]);
 
     if (!doc) return null;
 
@@ -55,4 +75,4 @@ const SearchResultItem = ({ index, style, data }) => {
     );
 };
 
-export default SearchResultItem;
+export default React.memo(SearchResultItem);

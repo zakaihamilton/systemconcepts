@@ -114,19 +114,23 @@ export default function Research() {
         }, 500);
     }, []);
 
+    const minResetIndex = useRef(Infinity);
+
     const setRowHeight = useCallback((index, height) => {
-        if (rowHeights.current[index] !== height) {
+        if (Math.abs((rowHeights.current[index] || 0) - height) > 5) {
             rowHeights.current[index] = height;
+            minResetIndex.current = Math.min(minResetIndex.current, index);
             if (listRef.current) {
                 if (resetTimer.current) {
                     clearTimeout(resetTimer.current);
                 }
                 resetTimer.current = setTimeout(() => {
                     if (listRef.current) {
-                        listRef.current.resetAfterIndex(0);
+                        listRef.current.resetAfterIndex(minResetIndex.current);
+                        minResetIndex.current = Infinity;
                     }
                     resetTimer.current = null;
-                }, 100);
+                }, 200);
             }
         }
     }, []);
@@ -601,7 +605,8 @@ export default function Research() {
         if (initialSearchDone.current) {
             return;
         }
-        if (!query) {
+        // Trigger search if there's a query OR if there are filter tags
+        if (!query && !filterTags.length) {
             initialSearchDone.current = true;
             return;
         }

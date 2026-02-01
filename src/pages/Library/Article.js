@@ -105,7 +105,7 @@ function Article({
         showScrollTop,
         handleScrollUpdate,
         scrollToTop,
-    } = useArticleScroll(contentRef, handleScroll);
+    } = useArticleScroll(contentRef, handleScroll, embedded);
 
     // Reset scroll position when article changes
     useEffect(() => {
