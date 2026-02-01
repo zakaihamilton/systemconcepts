@@ -122,7 +122,7 @@ export async function loadDurations(year, name, path, forceUpdate, isMerged, isB
 }
 
 export async function loadSummaries(year, name, path, forceUpdate, isMerged, isBundled) {
-    const sessionMetadataMap = {};
+    const sessionMetadataMap = Object.create(null);
     let updateLocalMetadata = true;
     const property = "summaryText";
 
