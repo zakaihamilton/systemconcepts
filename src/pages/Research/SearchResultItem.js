@@ -49,7 +49,9 @@ const SearchResultItem = ({ index, style, data }) => {
     // - For articles: 1-based indices of matches
     const filteredParagraphs = useMemo(() => {
         if (!doc?.matches) return [];
-        if (doc.isSession) return null; // Show all paragraphs for sessions
+        // For sessions, show all paragraphs (return null to disable filtering)
+        // For articles, use 1-based indexing for rendered paragraphs
+        if (doc.isSession) return null;
         return doc.matches.map(m => m.index + 1);
     }, [doc]);
 

@@ -515,11 +515,29 @@ const rehypeArticleEnrichment = () => {
                 } else {
                     if (node.children) {
                         node.children = visitAndSplit(node.children);
+                        if (node.tagName === "li") {
+                            const index = findIndex(node.children);
+                            if (index !== undefined) {
+                                node.properties = { ...node.properties, dataParagraphIndex: index };
+                            }
+                        }
                     }
                     newNodes.push(node);
                 }
             });
             return newNodes;
+        };
+
+        const findIndex = (nodes) => {
+            if (!nodes) return undefined;
+            for (const node of nodes) {
+                if (node.properties?.dataParagraphIndex !== undefined) return node.properties.dataParagraphIndex;
+                if (node.children) {
+                    const found = findIndex(node.children);
+                    if (found !== undefined) return found;
+                }
+            }
+            return undefined;
         };
 
         if (tree.children) {
@@ -1030,7 +1048,14 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
         const fullComponents = {
             p: ParagraphRenderer,
-            li: ({ children }) => <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>,
+            li: ({ node, children }) => {
+                const paragraphIndex = node?.properties?.dataParagraphIndex;
+                if (Array.isArray(filteredParagraphs)) {
+                    // If we have an index and it's not in the allowed list, hide it.
+                    if (paragraphIndex !== undefined && !filteredParagraphs.includes(paragraphIndex)) return null;
+                }
+                return <Box sx={{ mb: 1, lineHeight: 2.2, position: 'relative', backgroundColor: 'var(--background-paper)' }}><TextRenderer>{children}</TextRenderer></Box>;
+            },
             ul: BlockRenderer('ul'),
             ol: BlockRenderer('ol'),
             blockquote: BlockRenderer('blockquote'),
