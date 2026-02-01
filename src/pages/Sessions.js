@@ -326,10 +326,7 @@ export default function SessionsPage() {
 
             const matchType = !types.length || types.includes(type);
 
-            let matchImage = true;
-            if (withoutImage && type === "image") {
-                matchImage = false;
-            }
+            const matchImage = !(withoutImage && type === "image");
 
             let matchThumbnail = true;
             if (withThumbnail && withoutThumbnail) {
