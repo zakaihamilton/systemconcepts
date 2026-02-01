@@ -930,9 +930,18 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                         data-paragraph-index={paragraphIndex}
                     >
                         <TextRenderer>{children}</TextRenderer>
-                        <span className={styles.paragraphNumber}>
-                            {paragraphIndex !== undefined ? paragraphIndex : ''}
-                        </span>
+                        <Tooltip title={translations?.ZOOM} placement="top" arrow>
+                            <span
+                                className={styles.paragraphNumber}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleParagraphZoom(children, paragraphIndex);
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {paragraphIndex !== undefined ? paragraphIndex : ''}
+                            </span>
+                        </Tooltip>
                     </Box>
                 );
             }

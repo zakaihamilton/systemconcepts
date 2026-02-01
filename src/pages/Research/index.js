@@ -664,13 +664,6 @@ export default function Research() {
         if (!appliedFilterTags.length) {
             res = results;
         } else {
-            console.log("Filter Debug:", {
-                filters: appliedFilterTags,
-                totalResults: results.length,
-                sampleDoc: results[0] ? { id: results[0].docId, isSession: results[0].isSession, type: results[0].type } : "No results",
-                transSessions: translations.SESSIONS,
-                transArticles: translations.ARTICLES
-            });
             res = results.filter(doc => {
                 return appliedFilterTags.every(filter => {
                     const filterLabel = typeof filter === 'string' ? filter : filter.label;
