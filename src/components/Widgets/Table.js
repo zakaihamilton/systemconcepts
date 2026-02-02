@@ -36,6 +36,7 @@ import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import LinearProgress from "@mui/material/LinearProgress";
 
 import { getComparator, stableSort } from "@util/sort";
 
@@ -114,7 +115,7 @@ export default function TableWidget(props) {
         const depsChanged = JSON.stringify(lastResetDepsRef.current) !== JSON.stringify(resetScrollDeps);
         lastResetDepsRef.current = resetScrollDeps;
 
-        if (depsChanged && resetScrollDeps.length > 0) {
+        if (depsChanged && resetScrollDeps.length > 0 && !loading) {
             // Reset scroll position
             if (listRef.current) {
                 listRef.current.scrollTo(0);
@@ -129,7 +130,7 @@ export default function TableWidget(props) {
             hasRestoredScrollRef.current = true; // Prevent restoration after reset
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [...resetScrollDeps]);
+    }, [...resetScrollDeps, loading]);
 
     // Save scroll position on user scroll (debounced)
     const saveScrollPosition = React.useCallback((offset) => {
@@ -585,16 +586,18 @@ export default function TableWidget(props) {
 
     const loadingElement = <Message animated={true} Icon={DataUsageIcon} label={translations.LOADING + "..."} />;
     const emptyElement = <Message Icon={InfoIcon} label={emptyLabel || translations.NO_ITEMS} />;
+    const loader = <div className={clsx(styles.loader, loading && styles.loading)}><LinearProgress /></div>;
 
     if (viewMode === "list") {
         const itemCount = hideColumns ? numItems : numItems + 1;
 
         return <>
-            {!!showLoading && loadingElement}
+            {!!showLoading && !numItems && loadingElement}
             {!!showEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
-            {!loading && !!numItems && !error && <FixedSizeList
-                className={styles.tableList}
+            {loader}
+            {!!numItems && !error && <FixedSizeList
+                className={clsx(styles.tableList, loading && styles.loading)}
                 ref={listRef}
                 height={height}
                 innerElementType={innerElementType}
@@ -669,10 +672,11 @@ export default function TableWidget(props) {
         });
 
         return (<>
-            {!!showLoading && loadingElement}
+            {!!showLoading && !numItems && loadingElement}
             {!!showEmpty && !loading && emptyElement}
-            {!loading && !!numItems && <TableContainer className={clsx(styles.tableContainer, className)} style={style} {...otherProps}>
+            {!!numItems && <TableContainer className={clsx(styles.tableContainer, className, loading && styles.loading)} style={style} {...otherProps}>
                 {!!statusBarVisible && statusBar}
+                {loader}
                 {!error && <Table classes={{ root: styles.table }} stickyHeader style={style}>
                     {!hideColumns && <TableHead>
                         <TableRow>
@@ -694,11 +698,12 @@ export default function TableWidget(props) {
     }
     else if (viewMode === "grid") {
         return <>
-            {!!showLoading && loadingElement}
+            {!!showLoading && !numItems && loadingElement}
             {!!showEmpty && !loading && emptyElement}
             {!!statusBarVisible && statusBar}
-            {!loading && !!numItems && !error && <FixedSizeGrid
-                className={styles.grid}
+            {loader}
+            {!!numItems && !error && <FixedSizeGrid
+                className={clsx(styles.grid, loading && styles.loading)}
                 ref={gridRef}
                 columnCount={columnCount}
                 columnWidth={cellWidthInPixels}

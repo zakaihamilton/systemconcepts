@@ -12,10 +12,17 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    position: relative;
+    transition: opacity 0.2s ease;
+
+    &.loading {
+        opacity: 0.6;
+    }
 }
 
 .tableList {
     display: flex;
+    position: relative;
 
     [dir=ltr] & {
         direction: ltr !important;
@@ -28,6 +35,7 @@
 
 .grid {
     display: flex;
+    position: relative;
 
     [dir=ltr] & {
         direction: ltr !important;
@@ -64,4 +72,20 @@
     color: var(--primary-main) !important;
     opacity: 1;
     font-weight: 600;
+}
+
+.loader {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    height: 0;
+}
+
+.loader.loading {
+    opacity: 1;
 }

@@ -40,7 +40,8 @@ export const StorageStoreDefaults = {
     destination: "",
     order: "desc",
     offset: 0,
-    orderBy: ""
+    orderBy: "",
+    scrollOffset: 0
 };
 
 export const StorageStore = new Store({ viewMode: "list", ...StorageStoreDefaults });
@@ -124,6 +125,9 @@ export default function Storage({ path = "" }) {
             }
         }
         else {
+            StorageStore.update(s => {
+                Object.assign(s, StorageStoreDefaults);
+            });
             setPath("storage/" + id.split("/").filter(Boolean).join("/"));
         }
     }, [select]);
@@ -148,7 +152,8 @@ export default function Storage({ path = "" }) {
             console.log(`[Storage Mapper] Root item: ${name}, size: ${item.size}, type: ${typeof item.size}`);
         }
 
-        const size = item.size || 0;
+        const size = item.size;
+        const hasSize = typeof size === "number";
 
         let result = {
             ...item,
@@ -156,7 +161,7 @@ export default function Storage({ path = "" }) {
             id,
             tooltip,
             icon,
-            sizeWidget: (item.type === "file" || item.type === "dir" || (!path && typeof item.size === "number")) && <Tooltip
+            sizeWidget: (item.type === "file" || (item.type === "dir" && hasSize) || (!path && hasSize)) && <Tooltip
                 title={size + " " + translations.BYTES}
                 arrow>
                 <Typography style={{ display: "inline-block" }}>
