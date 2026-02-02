@@ -47,6 +47,15 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
     });
 
     const lastUpdateTimeRef = useRef(0);
+    const metadataRef = useRef(metadata);
+    const visibleRef = useRef(visible);
+    const showRef = useRef(show);
+
+    useEffect(() => {
+        metadataRef.current = metadata;
+        visibleRef.current = visible;
+        showRef.current = show;
+    }, [metadata, visible, show]);
 
     useEffect(() => {
         const update = name => {
@@ -58,7 +67,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             }
             else if (name === "loadedmetadata") {
                 if (!metadataKey) return; // Skip if metadataKey not ready
-                const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
+                const currentMetadata = metadataKey ? (metadataRef.current?.[metadataKey] || {}) : (metadataRef.current || {});
                 if (currentMetadata.position) {
                     playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
                     setCurrentTime(playerRef.currentTime);
@@ -67,7 +76,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             if (name === "timeupdate" && !dragging.current) {
                 const currentTime = parseInt(playerRef.currentTime);
 
-                if (visible && show) {
+                if (visibleRef.current && showRef.current) {
                     // When visible, update on every timeupdate
                     setCurrentTime(currentTime);
                     lastUpdateTimeRef.current = currentTime;
@@ -93,7 +102,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
         return () => {
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, [visible, show, metadata, playerRef, metadataKey]);
+    }, [playerRef, metadataKey]);
 
     useEffect(() => {
         console.log("[Controls] Metadata effect triggered", {

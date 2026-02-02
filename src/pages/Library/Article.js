@@ -98,6 +98,8 @@ function Article({
     const [termsDialogOpen, setTermsDialogOpen] = useState(false);
     const [articleTerms, setArticleTerms] = useState([]);
     const [totalParagraphs, setTotalParagraphs] = useState(0);
+    const printCleanupRef = useRef(null);
+    const printIframeRef = useRef(null);
 
     const {
         scrollInfo,
@@ -106,6 +108,18 @@ function Article({
         handleScrollUpdate,
         scrollToTop,
     } = useArticleScroll(contentRef, handleScroll, embedded);
+
+    // Clean up print listener on unmount
+    useEffect(() => {
+        return () => {
+            if (printCleanupRef.current) {
+                window.removeEventListener("message", printCleanupRef.current);
+            }
+            if (printIframeRef.current && document.body.contains(printIframeRef.current)) {
+                document.body.removeChild(printIframeRef.current);
+            }
+        };
+    }, []);
 
     // Reset scroll position when article changes
     useEffect(() => {
@@ -271,7 +285,18 @@ function Article({
         const rootElement = contentRef.current;
         if (!rootElement) return;
 
+        // Cleanup previous print job if exists
+        if (printCleanupRef.current) {
+            window.removeEventListener("message", printCleanupRef.current);
+            printCleanupRef.current = null;
+        }
+        if (printIframeRef.current && document.body.contains(printIframeRef.current)) {
+            document.body.removeChild(printIframeRef.current);
+            printIframeRef.current = null;
+        }
+
         const iframe = document.createElement("iframe");
+        printIframeRef.current = iframe;
         iframe.id = "print-root";
         Object.assign(iframe.style, {
             position: "absolute",
@@ -341,10 +366,17 @@ function Article({
                     if (document.body.contains(iframe)) {
                         document.body.removeChild(iframe);
                     }
+                    if (printIframeRef.current === iframe) {
+                        printIframeRef.current = null;
+                    }
                 }, 5000);
                 window.removeEventListener("message", cleanup);
+                if (printCleanupRef.current === cleanup) {
+                    printCleanupRef.current = null;
+                }
             }
         };
+        printCleanupRef.current = cleanup;
         window.addEventListener("message", cleanup);
     }, [contentRef]);
 

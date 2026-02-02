@@ -853,6 +853,23 @@ export default function Research() {
 
     useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
+    useEffect(() => {
+        if (hasSearched && filteredResults.length > 0) {
+            setScrollPages(prev => ({ ...prev, visible: true }));
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+            scrollTimeoutRef.current = setTimeout(() => {
+                setScrollPages(prev => ({ ...prev, visible: false }));
+            }, 1500);
+        }
+        return () => {
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, [hasSearched, filteredResults]);
+
     return (
         <Box className={styles.root}>
             {!searchCollapsed && (
@@ -1051,20 +1068,6 @@ export default function Research() {
                     />
                 </Box>
             )}
-
-            {useEffect(() => {
-                if (hasSearched && filteredResults.length > 0) {
-                    setScrollPages(prev => ({ ...prev, visible: true }));
-                    if (scrollTimeoutRef.current) {
-                        clearTimeout(scrollTimeoutRef.current);
-                    }
-                    scrollTimeoutRef.current = setTimeout(() => {
-                        setScrollPages(prev => ({ ...prev, visible: false }));
-                    }, 1500);
-                }
-            }, [hasSearched, filteredResults]) || null}
-
-
 
             <JumpDialog
                 open={jumpOpen}
