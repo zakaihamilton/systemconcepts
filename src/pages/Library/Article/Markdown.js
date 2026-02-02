@@ -53,6 +53,8 @@ const Term = ({ term, entry, search }) => {
     };
 
     useEffect(() => {
+        if (!hover) return;
+
         const handleScroll = () => {
             if (hover) {
                 setHover(false);
@@ -935,6 +937,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             const paragraphIndex = node?.properties?.dataParagraphIndex;
             const totalParagraphs = node?.properties?.dataTotalParagraphs;
             const isLastParagraph = paragraphIndex === totalParagraphs;
+            const [hoveringNumber, setHoveringNumber] = useState(false);
 
             if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
             if (!children || (Array.isArray(children) && children.length === 0)) return null;
@@ -965,7 +968,6 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             }
 
             // Full path: with hover state, tooltips, zoom, etc.
-            const [hoveringNumber, setHoveringNumber] = useState(false);
             const rawText = extractText(children);
             const paragraphText = getSpokenText(rawText);
             const paragraphSelected = currentParagraphIndex === paragraphIndex;
