@@ -21,7 +21,6 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange, o
     const [focused, setFocused] = useState(false);
     const inputRef = useRef(null);
     const containerRef = useRef(null);
-    const translations = useTranslations();
 
     // Update expanded class via DOM to avoid recreating the element
     useEffect(() => {

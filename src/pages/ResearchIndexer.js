@@ -156,7 +156,7 @@ export default function ResearchIndexer() {
                                     }
                                 }
                             }
-                        } catch (err) {
+                        } catch (_) {
                             // ignore missing dir
                         }
                     }

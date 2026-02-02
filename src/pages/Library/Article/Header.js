@@ -72,7 +72,7 @@ export default function Header({
                             role="list"
                             aria-label="Metadata tags"
                         >
-                            {customTags && customTags.map((tag, index) => (
+                            {customTags && customTags.map((tag) => (
                                 <Tooltip key={`custom-${tag.label}`} title={`${tag.label}: ${tag.value}`} arrow>
                                     <Paper
                                         elevation={0}

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
 import { useTranslations } from "@util/translations";
@@ -49,14 +49,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
-    const [loadedPath, setLoadedPath] = useState(null);
-
-    useEffect(() => {
-        if (data && !loading) {
-            setLoadedPath(path);
-        }
-    }, [data, loading, path]);
-
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
@@ -208,7 +200,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     }
     let MediaComponent = null;
     let mediaType = undefined;
-    const activeMetadataKey = (loadedPath === path && !loading) ? metadataKey : null;
+    const activeMetadataKey = (data && !loading) ? metadataKey : null;
 
     const mediaProps = {
         metadataPath,

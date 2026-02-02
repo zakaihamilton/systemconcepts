@@ -10,20 +10,24 @@ import SessionIcon from "@widgets/SessionIcon";
 
 const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick, isPlaying }) {
     const rootRef = useRef(null);
-    const [showThumbnail, setShowThumbnail] = useState(false);
-    const [imageLoaded, setImageLoaded] = useState(false);
-
     const { thumbnail, name, duration, color, group, id } = session;
+
+    const [showThumbnail, setShowThumbnail] = useState(typeof thumbnail === "string");
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [prevId, setPrevId] = useState(id);
+    const [prevThumbnail, setPrevThumbnail] = useState(thumbnail);
+
+    if (id !== prevId || thumbnail !== prevThumbnail) {
+        setPrevId(id);
+        setPrevThumbnail(thumbnail);
+        setShowThumbnail(typeof thumbnail === "string");
+        setImageLoaded(false);
+    }
 
     useEffect(() => {
         if (typeof thumbnail === "string") {
-            setShowThumbnail(true);
             return;
         }
-        setTimeout(() => {
-            setShowThumbnail(false);
-            setImageLoaded(false);
-        }, 0);
         const timer = setTimeout(() => {
             setShowThumbnail(true);
         }, 1000);

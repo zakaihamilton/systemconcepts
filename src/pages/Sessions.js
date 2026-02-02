@@ -154,7 +154,7 @@ export default function SessionsPage() {
             sortable: false,
             visible: false
         }
-    ].filter(Boolean), [translations, isMobile, orderBy, groupFilter]);
+    ].filter(Boolean), [translations, isMobile, orderBy]);
 
     const handleIconClick = useCallback((itemType) => {
         SessionsStore.update(s => {
@@ -295,7 +295,7 @@ export default function SessionsPage() {
             default:
                 return item[columnId];
         }
-    }, [viewMode, typeFilter, target, gotoItem, handleIconClick]);
+    }, [viewMode, target, gotoItem, handleIconClick]);
 
     const filter = useCallback(item => {
         let { group, type, year, thumbnail } = item;

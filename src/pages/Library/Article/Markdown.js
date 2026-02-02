@@ -932,6 +932,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         };
 
         const ParagraphRenderer = ({ node, children }) => {
+            const [hoveringNumber, setHoveringNumber] = useState(false);
             const paragraphIndex = node?.properties?.dataParagraphIndex;
             const totalParagraphs = node?.properties?.dataTotalParagraphs;
             const isLastParagraph = paragraphIndex === totalParagraphs;
@@ -965,7 +966,6 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             }
 
             // Full path: with hover state, tooltips, zoom, etc.
-            const [hoveringNumber, setHoveringNumber] = useState(false);
             const rawText = extractText(children);
             const paragraphText = getSpokenText(rawText);
             const paragraphSelected = currentParagraphIndex === paragraphIndex;

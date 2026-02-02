@@ -28,7 +28,7 @@ import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
-import { useSessions, SessionsStore } from "@util/sessions";
+import { useSessions } from "@util/sessions";
 import { ResearchStore } from "@pages/ResearchStore";
 import Article from "@pages/Library/Article";
 import { ContentSize } from "@components/Page/Content";
@@ -596,7 +596,7 @@ export default function Research() {
                 }
             }
         }
-    }, [indexData, query, setResults, filterTags, sessions]);
+    }, [indexData, query, setResults, filterTags, sessions, sessionsById]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
@@ -630,7 +630,7 @@ export default function Research() {
                 handleSearch(true);
             }
         }
-    }, [_loaded, indexData, hasSearched, searching, handleSearch, query, sessions]);
+    }, [_loaded, indexData, hasSearched, searching, handleSearch, query, sessions, filterTags.length]);
 
     const handleClear = useCallback(() => {
         setQuery("");
