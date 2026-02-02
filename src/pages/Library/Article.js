@@ -99,6 +99,7 @@ function Article({
     const [articleTerms, setArticleTerms] = useState([]);
     const [totalParagraphs, setTotalParagraphs] = useState(0);
     const printCleanupRef = useRef(null);
+    const printIframeRef = useRef(null);
 
     const {
         scrollInfo,
@@ -113,6 +114,9 @@ function Article({
         return () => {
             if (printCleanupRef.current) {
                 window.removeEventListener("message", printCleanupRef.current);
+            }
+            if (printIframeRef.current && document.body.contains(printIframeRef.current)) {
+                document.body.removeChild(printIframeRef.current);
             }
         };
     }, []);
@@ -281,7 +285,18 @@ function Article({
         const rootElement = contentRef.current;
         if (!rootElement) return;
 
+        // Cleanup previous print job if exists
+        if (printCleanupRef.current) {
+            window.removeEventListener("message", printCleanupRef.current);
+            printCleanupRef.current = null;
+        }
+        if (printIframeRef.current && document.body.contains(printIframeRef.current)) {
+            document.body.removeChild(printIframeRef.current);
+            printIframeRef.current = null;
+        }
+
         const iframe = document.createElement("iframe");
+        printIframeRef.current = iframe;
         iframe.id = "print-root";
         Object.assign(iframe.style, {
             position: "absolute",
@@ -350,6 +365,9 @@ function Article({
                 setTimeout(() => {
                     if (document.body.contains(iframe)) {
                         document.body.removeChild(iframe);
+                    }
+                    if (printIframeRef.current === iframe) {
+                        printIframeRef.current = null;
                     }
                 }, 5000);
                 window.removeEventListener("message", cleanup);
