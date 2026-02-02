@@ -45,10 +45,17 @@ export default async function USERS_API(req, res) {
         }
         else if (req.method === "PUT") {
             const body = req.body;
-            const parsedId = decodeURIComponent(queryId);
-            const record = await findRecord({ query: { id: parsedId }, collectionName });
+            const parsedId = queryId ? decodeURIComponent(queryId) : (body && body.id);
+            const record = parsedId ? await findRecord({ query: { id: parsedId }, collectionName }) : null;
             if (record) {
-                body.hash = record.hash;
+                if (body.password) {
+                    const { hash } = require("bcryptjs");
+                    body.hash = await hash(body.password, 10);
+                    delete body.password;
+                }
+                else {
+                    body.hash = record.hash;
+                }
                 body.salt = record.salt;
                 body.date = record.date;
                 body.utc = record.utc;

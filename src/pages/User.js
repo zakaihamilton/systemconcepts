@@ -13,6 +13,7 @@ import { goBackPage } from "@util/pages";
 import roles from "@data/roles";
 import { useFetchJSON, fetchJSON } from "@util/fetch";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useParentPath } from "@util/pages";
@@ -80,6 +81,7 @@ export default function User({ path = "" }) {
             setProgress(true);
             fetchJSON("/api/users", {
                 method: "PUT",
+                headers: { id: data.id },
                 body: JSON.stringify(data)
             }).then(({ err }) => {
                 if (err) {
@@ -179,6 +181,17 @@ export default function User({ path = "" }) {
                                 mapping={roleTypeMapping}
                                 select={true}
                                 background={true}
+                            />
+                        </Grid>}
+                        {!editAccount && <Grid size={12}>
+                            <Input
+                                id="password"
+                                state={getState("password")}
+                                icon={<VpnKeyIcon />}
+                                label={translations.PASSWORD}
+                                type="password"
+                                background={true}
+                                autoComplete="new-password"
                             />
                         </Grid>}
                     </Grid>
