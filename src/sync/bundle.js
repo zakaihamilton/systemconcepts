@@ -139,11 +139,19 @@ export async function writeCompressedFile(path, data, folderCache = null) {
         }
 
         if (path.endsWith(".json")) {
-            const jsonString = JSON.stringify(data, null, 4);
+            let jsonString = data;
+            if (typeof data !== "string") {
+                jsonString = JSON.stringify(data, null, 4);
+            }
             await storage.writeFile(path, jsonString);
         } else {
-            const compressed = compressJSON(data);
-            const buffer = Buffer.from(compressed);
+            let buffer;
+            if (Buffer.isBuffer(data) || data instanceof Uint8Array) {
+                buffer = Buffer.from(pako.gzip(data));
+            } else {
+                const compressed = compressJSON(data);
+                buffer = Buffer.from(compressed);
+            }
 
             // Both local and AWS need base64 encoding for .gz files
             const base64 = buffer.toString('base64');

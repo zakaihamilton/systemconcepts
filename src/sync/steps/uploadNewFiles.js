@@ -1,5 +1,5 @@
 import storage from "@util/storage";
-import { makePath } from "@util/path";
+import { makePath, isBinaryFile } from "@util/path";
 import { SYNC_BATCH_SIZE, LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { writeCompressedFile } from "../bundle";
@@ -18,7 +18,10 @@ async function uploadNewFile(localFile, createdFolders, localPath, remotePath) {
         const content = await storage.readFile(localFilePath);
         if (!content) return null;
 
-        const data = JSON.parse(content);
+        let data = content;
+        if (!isBinaryFile(localFilePath)) {
+            data = JSON.parse(content);
+        }
         await writeCompressedFile(remoteFilePath, data, createdFolders);
 
         addSyncLog(`Uploaded new: ${makePath(remotePath, fileBasename)}`, "info");
