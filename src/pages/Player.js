@@ -260,6 +260,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const elements = isTranscript ? <Transcript show={show} /> : null;
 
     return <div className={styles.root} style={style}>
+        <div id="search-status-portal" />
         {statusBar}
         {speedToolbar === "top" && <SpeedSlider />}
         <Download visible={show && mediaPath && !isTranscript} onClick={downloadFile} target={mediaPath} />

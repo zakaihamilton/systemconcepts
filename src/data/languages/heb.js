@@ -1326,6 +1326,10 @@ export default {
             "value": "תמליל"
         },
         {
+            "id": "MATCHES",
+            "value": "{current} מתוך {total} התאמות"
+        },
+        {
             "id": "SUMMARY",
             "value": "סיכום"
         },

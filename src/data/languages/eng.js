@@ -1326,6 +1326,10 @@ export default {
             "value": "Transcript"
         },
         {
+            "id": "MATCHES",
+            "value": "{current} of {total} matches"
+        },
+        {
             "id": "SUMMARY",
             "value": "Summary"
         },

@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import styles from "./Transcript.module.scss";
 import { PlayerStore } from "../Player";
 
@@ -7,6 +8,10 @@ import Progress from "@widgets/Progress";
 import Download from "@widgets/Download";
 import { useTranslations } from "@util/translations";
 import { useSearch } from "@components/Search";
+import { IconButton, Tooltip } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export default function Transcript({ show }) {
     const translations = useTranslations();
@@ -18,6 +23,7 @@ export default function Transcript({ show }) {
     const lineRefs = useRef({});
     const [matches, setMatches] = useState([]);
     const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+    const [showHeader, setShowHeader] = useState(false);
 
     const nextMatch = useCallback(() => {
         setCurrentMatchIndex((prev) => (prev + 1) % matches.length);
@@ -63,11 +69,8 @@ export default function Transcript({ show }) {
     }, [matches, currentMatchIndex, transcript, translations.NEXT_MATCH, formatTime]);
 
     const searchTerm = useSearch("Transcript", null, show, {
-        prevMatch,
-        nextMatch,
-        prevName,
-        nextName,
-        matchesCount: matches.length
+        matchesCount: matches.length,
+        onEnter: () => setShowHeader(true)
     });
 
     useEffect(() => {
@@ -137,8 +140,10 @@ export default function Transcript({ show }) {
         setMatches(newMatches);
         if (newMatches.length > 0) {
             setCurrentMatchIndex(0);
+            setShowHeader(true);
         } else {
             setCurrentMatchIndex(-1);
+            setShowHeader(false);
         }
     }, [searchTerm, transcript]);
 
@@ -179,6 +184,10 @@ export default function Transcript({ show }) {
             player.currentTime = time; // eslint-disable-line react-hooks/immutability
             player.play();
         }
+    };
+
+    const clearSearch = () => {
+        setShowHeader(false);
     };
 
     const handleDownload = () => {
@@ -242,6 +251,30 @@ export default function Transcript({ show }) {
         {loading && <div className={styles.loadingContainer}>
             <Progress fullscreen />
         </div>}
+        {!!searchTerm && matches.length > 0 && showHeader && createPortal(<div className={styles.searchStatus}>
+            <div className={styles.searchActions}>
+                <Tooltip title={prevName} arrow>
+                    <IconButton onClick={prevMatch} size="small">
+                        <ArrowUpwardIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title={nextName} arrow>
+                    <IconButton onClick={nextMatch} size="small">
+                        <ArrowDownwardIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </div>
+            <div className={styles.searchMatches}>
+                {(translations.MATCHES || "{current} of {total}")
+                    .replace("{current}", currentMatchIndex + 1)
+                    .replace("{total}", matches.length)}
+            </div>
+            <Tooltip title={translations.CLOSE} arrow>
+                <IconButton onClick={clearSearch} size="small">
+                    <CloseIcon fontSize="small" />
+                </IconButton>
+            </Tooltip>
+        </div>, document.getElementById("search-status-portal"))}
         <Download onClick={handleDownload} visible={!loading && !!data} title={translations.DOWNLOAD_TRANSCRIPT} />
         <div className={styles.transcript} ref={scrollRef}>
             {transcript.map((line, index) => {

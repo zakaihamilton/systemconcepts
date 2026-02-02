@@ -17,10 +17,11 @@ export const SearchStore = new Store({
     search: {}
 });
 
-export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange }) {
+export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange, onEnter }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef(null);
     const containerRef = useRef(null);
+    const translations = useTranslations();
 
     // Update expanded class via DOM to avoid recreating the element
     useEffect(() => {
@@ -41,6 +42,12 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange })
         }
     }, []);
 
+    const onKeyDown = useCallback(event => {
+        if (event.keyCode === 13 && onEnter) {
+            onEnter();
+        }
+    }, [onEnter]);
+
     return (
         <div ref={containerRef} className={clsx(styles.search, isDesktop && styles.searchExpanded)} onClick={handleClick}>
             <div className={styles.searchIcon}>
@@ -51,6 +58,7 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange })
                 placeholder={placeholder}
                 defaultValue={defaultValue}
                 onChange={onChange}
+                onKeyDown={onKeyDown}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 type="search"
@@ -64,7 +72,7 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange })
 }
 
 export function useSearch(name, updateCallback, visible = true, options = {}) {
-    const { prevMatch, nextMatch, prevName, nextName, matchesCount, matchElement, toolbarId = "Search" } = options;
+    const { prevMatch, nextMatch, prevName, nextName, matchesCount, matchElement, onEnter, toolbarId = "Search" } = options;
     const deviceType = useDeviceType();
     const isPhone = deviceType === "phone";
     const isDesktop = deviceType === "desktop";
@@ -101,8 +109,9 @@ export function useSearch(name, updateCallback, visible = true, options = {}) {
             placeholder={translations.SEARCH + "…"}
             defaultValue={initialValue}
             onChange={onChangeText}
+            onEnter={onEnter}
         />
-    ), [isDesktop, initialValue, onChangeText, translations.SEARCH]);
+    ), [isDesktop, initialValue, onChangeText, translations.SEARCH, onEnter]);
 
     const toolbarItems = useMemo(() => [
         {

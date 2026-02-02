@@ -1314,6 +1314,10 @@ export default {
             "value": "Transcrição"
         },
         {
+            "id": "MATCHES",
+            "value": "{current} de {total} correspondências"
+        },
+        {
             "id": "SUMMARY",
             "value": "Resumo"
         },

@@ -114,3 +114,39 @@
     background-color: orange;
     color: black;
 }
+
+.searchStatus {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--main-background-alternative);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    z-index: 5;
+    gap: 1rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.searchMatches {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    text-align: center;
+}
+
+.searchActions {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
