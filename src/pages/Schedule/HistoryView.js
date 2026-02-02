@@ -25,7 +25,7 @@ export default function HistoryView() {
         addPath(itemPath(item));
     }, []);
 
-    const [sessions] = useSessions([], { filterSessions: true, skipSync: true, active: false });
+    const [sessions] = useSessions([], { filterSessions: true, skipSync: true, active: false, showToolbar: false });
     const search = useSearch("schedule");
 
     const groupedHistory = useMemo(() => {
