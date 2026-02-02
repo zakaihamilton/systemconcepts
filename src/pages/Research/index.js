@@ -38,8 +38,10 @@ import ScrollToTop from "@pages/Library/Article/ScrollToTop";
 import JumpDialog from "@pages/Library/Article/JumpDialog";
 import PageIndicator from "./PageIndicator";
 import SearchResultItem from "./SearchResultItem";
+import { decodeBinaryIndex } from "@util/searchIndexBinary";
 
-const INDEX_FILE = "search_index.json";
+const INDEX_FILE = "search_index.bin";
+const LEGACY_INDEX_FILE = "search_index.json";
 
 function getTagHierarchy(tag) {
     const hierarchy = LibraryTagKeys.map(key => tag[key]).map(v => v ? String(v).trim() : null).filter(Boolean);
@@ -209,13 +211,23 @@ export default function Research() {
             const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
             if (await storage.exists(indexPath)) {
                 const content = await storage.readFile(indexPath);
-                const data = JSON.parse(content);
+                const data = decodeBinaryIndex(content);
                 if (isMounted.current) {
                     setIndexData(data);
                 }
             } else {
-                // Auto-build if not exists
-                buildIndex();
+                // Try legacy JSON format for migration
+                const legacyPath = makePath(LIBRARY_LOCAL_PATH, LEGACY_INDEX_FILE);
+                if (await storage.exists(legacyPath)) {
+                    const content = await storage.readFile(legacyPath);
+                    const data = JSON.parse(content);
+                    if (isMounted.current) {
+                        setIndexData(data);
+                    }
+                } else {
+                    // Auto-build if not exists
+                    buildIndex();
+                }
             }
         } catch (err) {
             console.error("Failed to load search index:", err);

@@ -6,6 +6,7 @@ import { useTranslations } from "@util/translations";
 import { ResearchStore } from "./ResearchStore";
 import { useLocalStorage } from "@util/store";
 import { normalizeContent } from "@util/string";
+import { encodeBinaryIndex } from "@util/searchIndexBinary";
 import pLimit from "@util/p-limit";
 
 const limit = pLimit(20);
@@ -23,7 +24,7 @@ const STOP_WORDS = new Set([
     "than", "too", "very", "can", "just", "don", "should", "now"
 ]);
 
-const INDEX_FILE = "search_index.json";
+const INDEX_FILE = "search_index.bin";
 
 // Split by double newlines, but preserve code blocks
 const splitSmart = (txt) => {
@@ -132,7 +133,7 @@ export default function ResearchIndexer() {
                     const groups = Array.isArray(groupsData?.groups) ? groupsData.groups : [];
 
                     for (const group of groups) {
-const mergedPath = makePath(`local/sync/${group.name.replace(/\.\.\//g, "")}.json`);
+                        const mergedPath = makePath(`local/sync/${group.name.replace(/\.\.\//g, "")}.json`);
                         if (await storage.exists(mergedPath)) {
                             const content = await storage.readFile(mergedPath);
                             const data = JSON.parse(content);
@@ -256,7 +257,7 @@ const mergedPath = makePath(`local/sync/${group.name.replace(/\.\.\//g, "")}.jso
                 if (session.summaryText) {
                     text += "\n" + session.summaryText;
                 } else if (session.summary?.path) {
-const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//g, ""));
+                    const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//g, ""));
                     if (await storage.exists(summaryPath)) {
                         const content = await storage.readFile(summaryPath);
                         text += "\n" + content;
@@ -329,7 +330,8 @@ const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//
 
                 const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
                 await storage.createFolderPath(indexPath);
-                await storage.writeFile(indexPath, JSON.stringify(newIndex));
+                const binaryData = encodeBinaryIndex(newIndex);
+                await storage.writeFile(indexPath, binaryData);
 
                 ResearchStore.update(s => {
                     s.status = translations.DONE;
