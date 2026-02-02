@@ -109,6 +109,10 @@
     transition: opacity 0.2s;
     display: flex;
     align-items: center;
+
+    @media (hover: none) and (pointer: coarse) {
+        opacity: 1;
+    }
 }
 
 .removeButton {
