@@ -6,7 +6,8 @@ import { useTranslations } from "@util/translations";
 
 export default function Error({ error }) {
     const translations = useTranslations();
-    const text = translations[error] || error;
+    const message = error?.message || error;
+    const text = translations[message] || message;
     return <Label
         className={styles.root}
         icon={<Tooltip title={translations.ERROR} arrow>

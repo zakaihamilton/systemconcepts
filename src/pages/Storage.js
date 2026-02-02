@@ -51,7 +51,7 @@ export default function Storage({ path = "" }) {
     const translations = useTranslations();
     const { item: editedItem, mode, select, counter, editing } = StorageStore.useState();
     useLocalStorage("StorageStore", StorageStore, ["viewMode"]);
-    const [data, loading, error] = useListing(path, [counter, syncCounter]);
+    const [data, loading, error] = useListing(path, [counter, syncCounter], { useSize: path.startsWith("local") || !path });
     const device = devices.find(item => item.id === path.split("/")[0]);
     const { readOnly } = device || {};
     const dateFormatter = useDateFormatter({
@@ -156,7 +156,7 @@ export default function Storage({ path = "" }) {
             id,
             tooltip,
             icon,
-            sizeWidget: (item.type === "file" || (!path && typeof item.size === "number")) && <Tooltip
+            sizeWidget: (item.type === "file" || item.type === "dir" || (!path && typeof item.size === "number")) && <Tooltip
                 title={size + " " + translations.BYTES}
                 arrow>
                 <Typography style={{ display: "inline-block" }}>

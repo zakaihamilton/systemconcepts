@@ -17,7 +17,7 @@ export async function callMethod(item, url = "", ...params) {
     if (!deviceId) {
         if (name === "getListing") {
             const options = params[0] || {};
-            const { useCount } = options;
+            const { useCount, useSize } = options;
             const results = [];
             for (const device of storage) {
                 let enabled = device.enabled;
@@ -32,10 +32,24 @@ export async function callMethod(item, url = "", ...params) {
                     const items = (await storageMethods.getListing(device.id, ...params)) || [];
                     result.count = items.length;
                 }
-                const method = device.getSize;
-                if (method) {
-                    result.size = await method.call(device);
-                    console.log(`[Storage] Device: ${device.id}, fetched size: ${result.size}`);
+                if (useSize) {
+                    if (device.id === "local") {
+                        try {
+                            const items = await getRecursiveList(device.id);
+                            result.size = (items || []).reduce((total, item) => total + (item.size || 0), 0);
+                        }
+                        catch (err) {
+                            console.error(err);
+                            result.size = 0;
+                        }
+                    }
+                    else {
+                        const method = device.getSize;
+                        if (method) {
+                            result.size = await method.call(device);
+                            console.log(`[Storage] Device: ${device.id}, fetched size: ${result.size}`);
+                        }
+                    }
                 }
                 results.push(result);
             }
@@ -50,6 +64,27 @@ export async function callMethod(item, url = "", ...params) {
     const method = device[name];
     if (!method) {
         return null;
+    }
+
+    if (name === "getListing" && deviceId) {
+        const options = params[0] || {};
+        const { useSize } = options;
+        const items = await method(makePath(path), ...params);
+        if (useSize && deviceId === "local" && items) {
+            for (const item of items) {
+                if (item.type === "dir") {
+                    try {
+                        const children = await getRecursiveList(item.id);
+                        item.size = (children || []).reduce((total, child) => total + (child.size || 0), 0);
+                    }
+                    catch (err) {
+                        console.error(err);
+                        item.size = 0;
+                    }
+                }
+            }
+        }
+        return items;
     }
     if (types) {
         params = params.map((param, index) => {
