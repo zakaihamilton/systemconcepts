@@ -40,6 +40,12 @@ export default function ResetPassword({ path = "" }) {
         if (!text) {
             error = translations.EMPTY_PASSWORD;
         }
+        else if (text.length < 8) {
+            error = translations.PASSWORD_TOO_SHORT;
+        }
+        else if (text.length > 72) {
+            error = translations.PASSWORD_TOO_LONG;
+        }
         return error;
     };
 

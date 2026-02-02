@@ -614,6 +614,14 @@ export default {
             "value": "Tem certeza de que deseja remover esta passkey?"
         },
         {
+            "id": "PASSWORD_TOO_SHORT",
+            "value": "A senha deve ter pelo menos 8 caracteres."
+        },
+        {
+            "id": "PASSWORD_TOO_LONG",
+            "value": "A senha não deve ter mais de 72 caracteres."
+        },
+        {
             "id": "ACCOUNT",
             "value": "Conta"
         },

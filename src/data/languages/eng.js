@@ -618,6 +618,14 @@ export default {
             "value": "Are you sure you want to remove this passkey?"
         },
         {
+            "id": "PASSWORD_TOO_SHORT",
+            "value": "Password must be at least 8 characters long."
+        },
+        {
+            "id": "PASSWORD_TOO_LONG",
+            "value": "Password must be no more than 72 characters long."
+        },
+        {
             "id": "ACCOUNT",
             "value": "Account"
         },

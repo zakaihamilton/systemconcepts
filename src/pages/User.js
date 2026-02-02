@@ -49,6 +49,20 @@ export default function User({ path = "" }) {
         return error;
     };
 
+    const onValidatePassword = text => {
+        let error = "";
+        if (!text) {
+            error = translations.EMPTY_PASSWORD;
+        }
+        else if (text.length < 8) {
+            error = translations.PASSWORD_TOO_SHORT;
+        }
+        else if (text.length > 72) {
+            error = translations.PASSWORD_TOO_LONG;
+        }
+        return error;
+    };
+
     const onValidateField = text => {
         let error = "";
         if (!text) {
@@ -191,6 +205,8 @@ export default function User({ path = "" }) {
                                 label={translations.PASSWORD}
                                 type="password"
                                 background={true}
+                                onValidate={onValidatePassword}
+                                validate={validate}
                                 autoComplete="new-password"
                             />
                         </Grid>}
