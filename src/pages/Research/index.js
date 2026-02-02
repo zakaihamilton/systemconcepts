@@ -28,7 +28,7 @@ import styles from "./Research.module.scss";
 import { LibraryTagKeys } from "@pages/Library/Icons";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@pages/Library/Store";
-import { useSessions, SessionsStore } from "@util/sessions";
+import { useSessions } from "@util/sessions";
 import { ResearchStore } from "@pages/ResearchStore";
 import Article from "@pages/Library/Article";
 import { ContentSize } from "@components/Page/Content";
@@ -243,6 +243,11 @@ export default function Research() {
         }, new Map());
     }, [sessions]);
 
+    const indexKeys = useMemo(() => {
+        if (!indexData) return [];
+        return Object.keys(indexData.t || indexData.tokens || {});
+    }, [indexData]);
+
     const handleSearch = useCallback(async (isRestoring = false) => {
         // const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
         // const currentSearch = { query, filterTags };
@@ -303,7 +308,7 @@ export default function Research() {
                     for (const token of allTokensInGroup) {
                         if (!isMounted.current) return;
 
-                        const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
+                        const matchingTokens = indexKeys.filter(k => k.includes(token));
                         let tokenRefs = new Set();
                         matchingTokens.forEach(k => {
                             const refs = (isV2 || isV3 || isV4) ? indexData.t[k] : indexData.tokens[k];
@@ -582,7 +587,7 @@ export default function Research() {
                 }
             }
         }
-    }, [indexData, query, setResults, filterTags, sessions]);
+    }, [indexData, indexKeys, query, setResults, filterTags, sessions, sessionsById]);
 
     // Only auto-search on initial page load if there's a saved query from localStorage
     const initialSearchDone = useRef(false);
