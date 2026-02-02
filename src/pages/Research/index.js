@@ -183,6 +183,8 @@ export default function Research() {
                 }
                 unique.add(JSON.stringify({ label: translations.SESSIONS, type: "source", id: "SESSIONS" }));
                 unique.add(JSON.stringify({ label: translations.ARTICLES, type: "source", id: "ARTICLES" }));
+                unique.add(JSON.stringify({ label: translations.SUMMARIES, type: "source", id: "SUMMARIES" }));
+                unique.add(JSON.stringify({ label: translations.TRANSCRIPTIONS, type: "source", id: "TRANSCRIPTIONS" }));
 
                 if (isMounted.current) {
                     const filters = Array.from(unique).map(s => JSON.parse(s));
@@ -670,9 +672,10 @@ export default function Research() {
                     const filterType = typeof filter === 'string' ? null : filter.type;
 
                     if (filterType === "source") {
-
                         if (filterLabel === translations.SESSIONS) return doc.isSession;
                         if (filterLabel === translations.ARTICLES) return !doc.isSession;
+                        if (filterLabel === translations.SUMMARIES) return doc.isSession && (!!doc.summaryText || !!doc.summary);
+                        if (filterLabel === translations.TRANSCRIPTIONS) return doc.isSession && !!doc.transcription;
                     }
 
                     if (doc.isSession) {

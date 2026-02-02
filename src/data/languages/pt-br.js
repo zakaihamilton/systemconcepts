@@ -602,6 +602,14 @@ export default {
             "value": "Sem resumo"
         },
         {
+            "id": "SUMMARIES",
+            "value": "Resumos"
+        },
+        {
+            "id": "TRANSCRIPTIONS",
+            "value": "Transcrições"
+        },
+        {
             "id": "WITH_TAGS",
             "value": "Com tags"
         },

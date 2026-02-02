@@ -602,6 +602,14 @@ export default {
             "value": "ללא סיכום"
         },
         {
+            "id": "SUMMARIES",
+            "value": "סיכומים"
+        },
+        {
+            "id": "TRANSCRIPTIONS",
+            "value": "תמלולים"
+        },
+        {
             "id": "WITH_TAGS",
             "value": "עם תגיות"
         },
