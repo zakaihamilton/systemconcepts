@@ -131,7 +131,7 @@ export default function ItemMenuWidget({ item, readOnly }) {
                 });
             }
         },
-        !isBinaryFile(item.name) && {
+        {
             id: "export",
             name: translations.EXPORT,
             icon: <GetAppIcon />,
@@ -146,6 +146,9 @@ export default function ItemMenuWidget({ item, readOnly }) {
                 }
                 else {
                     data = await storage.readFile(item.path);
+                    if (isBinaryFile(item.name)) {
+                        type = "application/octet-stream";
+                    }
                 }
                 exportData(data, name, type);
             }
