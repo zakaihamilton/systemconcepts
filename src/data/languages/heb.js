@@ -558,6 +558,62 @@ export default {
             "value": "משתמש כבר קיים!"
         },
         {
+            "id": "NO_RESET_TOKEN",
+            "value": "לא נמצא קוד איפוס!"
+        },
+        {
+            "id": "INVALID_TOKEN",
+            "value": "קוד איפוס לא תקין!"
+        },
+        {
+            "id": "TOKEN_EXPIRED",
+            "value": "פג תוקפו של קוד האיפוס!"
+        },
+        {
+            "id": "EMAIL_SERVICE_ERROR",
+            "value": "שגיאה בשירות האימייל!"
+        },
+        {
+            "id": "MISSING_ID",
+            "value": "מזהה חסר!"
+        },
+        {
+            "id": "CHALLENGE_NOT_FOUND",
+            "value": "אתגר לא נמצא!"
+        },
+        {
+            "id": "VERIFICATION_FAILED",
+            "value": "אימות נכשל!"
+        },
+        {
+            "id": "CREDENTIAL_NOT_FOUND",
+            "value": "קרדנציאל לא נמצא!"
+        },
+        {
+            "id": "RATE_LIMIT_EXCEEDED",
+            "value": "יותר מדי ניסיונות, אנא נסה שוב מאוחר יותר."
+        },
+        {
+            "id": "PASSKEY_REGISTERED",
+            "value": "מפתח גישה נרשם בהצלחה!"
+        },
+        {
+            "id": "PASSKEY_REGISTRATION_FAILED",
+            "value": "רישום מפתח גישה נכשל!"
+        },
+        {
+            "id": "PASSKEY_LOGIN_FAILED",
+            "value": "התחברות עם מפתח גישה נכשלה!"
+        },
+        {
+            "id": "ENTER_PASSKEY_NAME",
+            "value": "הכנס שם עבור מפתח גישה זה"
+        },
+        {
+            "id": "CONFIRM_DELETE_PASSKEY",
+            "value": "האם אתה בטוח שברצונך להסיר את מפתח הגישה הזה?"
+        },
+        {
             "id": "ACCOUNT",
             "value": "חשבון"
         },

@@ -135,8 +135,8 @@ export async function resetPassword({ id, code, newPassword, salt = 10 }) {
 
     // Verify reset token
     if (!user.resetToken) {
-        console.error("Invalid reset token for user", id);
-        throw "INVALID_TOKEN";
+        console.error("No reset token for user", id);
+        throw "NO_RESET_TOKEN";
     }
 
     const match = await compare(code, user.resetToken);

@@ -558,6 +558,62 @@ export default {
             "value": "Usuário já existe!"
         },
         {
+            "id": "NO_RESET_TOKEN",
+            "value": "Token de redefinição não encontrado!"
+        },
+        {
+            "id": "INVALID_TOKEN",
+            "value": "Token de redefinição inválido!"
+        },
+        {
+            "id": "TOKEN_EXPIRED",
+            "value": "O token de redefinição expirou!"
+        },
+        {
+            "id": "EMAIL_SERVICE_ERROR",
+            "value": "Erro no serviço de e-mail!"
+        },
+        {
+            "id": "MISSING_ID",
+            "value": "ID ausente!"
+        },
+        {
+            "id": "CHALLENGE_NOT_FOUND",
+            "value": "Desafio não encontrado!"
+        },
+        {
+            "id": "VERIFICATION_FAILED",
+            "value": "Falha na verificação!"
+        },
+        {
+            "id": "CREDENTIAL_NOT_FOUND",
+            "value": "Credencial não encontrada!"
+        },
+        {
+            "id": "RATE_LIMIT_EXCEEDED",
+            "value": "Muitas tentativas, tente novamente mais tarde."
+        },
+        {
+            "id": "PASSKEY_REGISTERED",
+            "value": "Passkey registrada com sucesso!"
+        },
+        {
+            "id": "PASSKEY_REGISTRATION_FAILED",
+            "value": "Falha no registro da passkey!"
+        },
+        {
+            "id": "PASSKEY_LOGIN_FAILED",
+            "value": "Falha no login com passkey!"
+        },
+        {
+            "id": "ENTER_PASSKEY_NAME",
+            "value": "Digite um nome para esta passkey"
+        },
+        {
+            "id": "CONFIRM_DELETE_PASSKEY",
+            "value": "Tem certeza de que deseja remover esta passkey?"
+        },
+        {
             "id": "ACCOUNT",
             "value": "Conta"
         },

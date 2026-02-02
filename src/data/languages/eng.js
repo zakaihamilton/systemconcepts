@@ -562,6 +562,62 @@ export default {
             "value": "User already exists!"
         },
         {
+            "id": "NO_RESET_TOKEN",
+            "value": "No reset token found!"
+        },
+        {
+            "id": "INVALID_TOKEN",
+            "value": "Invalid reset token!"
+        },
+        {
+            "id": "TOKEN_EXPIRED",
+            "value": "Reset token has expired!"
+        },
+        {
+            "id": "EMAIL_SERVICE_ERROR",
+            "value": "Email service error!"
+        },
+        {
+            "id": "MISSING_ID",
+            "value": "Missing ID!"
+        },
+        {
+            "id": "CHALLENGE_NOT_FOUND",
+            "value": "Challenge not found!"
+        },
+        {
+            "id": "VERIFICATION_FAILED",
+            "value": "Verification failed!"
+        },
+        {
+            "id": "CREDENTIAL_NOT_FOUND",
+            "value": "Credential not found!"
+        },
+        {
+            "id": "RATE_LIMIT_EXCEEDED",
+            "value": "Too many attempts, please try again later."
+        },
+        {
+            "id": "PASSKEY_REGISTERED",
+            "value": "Passkey registered successfully!"
+        },
+        {
+            "id": "PASSKEY_REGISTRATION_FAILED",
+            "value": "Passkey registration failed!"
+        },
+        {
+            "id": "PASSKEY_LOGIN_FAILED",
+            "value": "Passkey login failed!"
+        },
+        {
+            "id": "ENTER_PASSKEY_NAME",
+            "value": "Enter a name for this passkey"
+        },
+        {
+            "id": "CONFIRM_DELETE_PASSKEY",
+            "value": "Are you sure you want to remove this passkey?"
+        },
+        {
             "id": "ACCOUNT",
             "value": "Account"
         },
