@@ -53,6 +53,8 @@
     flex-direction: column;
     justify-content: flex-end;
     height: 60%;
+    z-index: 2;
+    /* Ensure overlay is above background but below interactivity if needed */
 }
 
 .info {
@@ -135,4 +137,21 @@
 
 .card.playing {
     border: 3px solid #c084fc;
+}
+
+.progressContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    z-index: 10;
+}
+
+.progressBar {
+    height: 100%;
+    background-color: var(--primary-color, #90caf9);
+    /* Use primary color or fallback */
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }

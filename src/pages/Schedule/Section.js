@@ -1,9 +1,10 @@
+import { ScheduleStore } from "@pages/Schedule";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import CalendarViewDayIcon from "@mui/icons-material/CalendarViewDay";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
-import { ScheduleStore } from "@pages/Schedule";
+import RestoreIcon from '@mui/icons-material/Restore';
 
 export function getScheduleSection({ translations }) {
     const { viewMode } = ScheduleStore.getRawState();
@@ -28,6 +29,10 @@ export function getScheduleSection({ translations }) {
     else if (viewMode === "tracks") {
         description = translations.TRACKS_VIEW;
         Icon = ViewStreamIcon;
+    }
+    else if (viewMode === "history") {
+        description = translations.HISTORY_VIEW;
+        Icon = RestoreIcon;
     }
     const menuItems = [
         {
@@ -63,6 +68,13 @@ export function getScheduleSection({ translations }) {
             icon: <ViewStreamIcon />,
             onClick: () => {
                 ScheduleStore.update(s => { s.viewMode = "tracks"; });
+            }
+        },
+        {
+            name: translations.HISTORY_VIEW,
+            icon: <RestoreIcon />,
+            onClick: () => {
+                ScheduleStore.update(s => { s.viewMode = "history"; });
             }
         }
     ];

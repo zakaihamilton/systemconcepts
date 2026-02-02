@@ -1936,6 +1936,30 @@ export default {
         {
             "id": "IMPORT_GROUPS",
             "value": "ייבא קבוצות"
+        },
+        {
+            "id": "HISTORY_VIEW",
+            "value": "תצוגת היסטוריה"
+        },
+        {
+            "id": "TODAY",
+            "value": "היום"
+        },
+        {
+            "id": "YESTERDAY",
+            "value": "אתמול"
+        },
+        {
+            "id": "THIS_WEEK",
+            "value": "השבוע"
+        },
+        {
+            "id": "LAST_WEEK",
+            "value": "שבוע שעבר"
+        },
+        {
+            "id": "OLDER",
+            "value": "ישן יותר"
         }
     ]
 };

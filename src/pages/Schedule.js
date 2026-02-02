@@ -2,6 +2,7 @@ import { useMemo, useEffect } from "react";
 import styles from "./Schedule.module.scss";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
+import HistoryView from "./Schedule/HistoryView";
 import { Store } from "pullstate";
 import { useSessions, SessionsStore } from "@util/sessions";
 import { useTranslations } from "@util/translations";
@@ -26,6 +27,7 @@ import Tooltip from "@mui/material/Tooltip";
 import TracksView from "@pages/Schedule/TracksView";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import RestoreIcon from '@mui/icons-material/Restore';
 import { PlayerStore } from "@pages/Player";
 import { SyncActiveStore } from "@sync/syncState";
 
@@ -130,6 +132,17 @@ export default function SchedulePage() {
                     s.lastViewMode = null;
                 });
             }
+        },
+        {
+            id: "history",
+            name: translations.HISTORY_VIEW,
+            icon: <RestoreIcon />,
+            onClick: () => {
+                ScheduleStore.update(s => {
+                    s.viewMode = "history";
+                    s.lastViewMode = null;
+                });
+            }
         }
     ];
 
@@ -221,6 +234,7 @@ export default function SchedulePage() {
                 viewModes={{ tracks: {} }}
                 playingSession={playingSession}
             />}
+            {!loading && viewMode === "history" && <HistoryView />}
             {!!loading && loadingElement}
         </div>
         {!!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}

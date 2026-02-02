@@ -2,10 +2,11 @@ import { useTranslations } from "@util/translations";
 import { SessionsStore } from "@util/sessions";
 import { useMemo } from "react";
 import MovieIcon from "@mui/icons-material/Movie";
+import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import AudioIcon from "@icons/Audio";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertPhotoOutlinedIcon from '@mui/icons-material/InsertPhotoOutlined';
-import MovieFilterIcon from '@mui/icons-material/MovieFilter';
+
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";

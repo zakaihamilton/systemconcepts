@@ -1940,6 +1940,34 @@ export default {
         {
             "id": "IMPORT_GROUPS",
             "value": "Import Groups"
+        },
+        {
+            "id": "HISTORY_VIEW",
+            "value": "History View"
+        },
+        {
+            "id": "TODAY",
+            "value": "Today"
+        },
+        {
+            "id": "YESTERDAY",
+            "value": "Yesterday"
+        },
+        {
+            "id": "THIS_WEEK",
+            "value": "This Week"
+        },
+        {
+            "id": "LAST_WEEK",
+            "value": "Last Week"
+        },
+        {
+            "id": "OLDER",
+            "value": "Older"
+        },
+        {
+            "id": "REMOVE_FROM_HISTORY",
+            "value": "Remove from History"
         }
     ]
 };

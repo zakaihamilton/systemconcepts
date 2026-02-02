@@ -23,19 +23,21 @@ import SessionIcon from "@widgets/SessionIcon";
 import Chip from "@mui/material/Chip";
 import { SyncActiveStore } from "@sync/syncState";
 import { PlayerStore } from "@pages/Player";
+import { useRecentHistory } from "@util/history";
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isMobile = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
-    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order } = SessionsStore.useState();
+    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order, showHistory } = SessionsStore.useState();
     const { session } = PlayerStore.useState();
-    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset"]);
+    const [history] = useRecentHistory();
+    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset", "showHistory"]);
 
     // Memoize dependencies to prevent unnecessary resets
-    const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode]);
-    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode, session], [groupFilter, typeFilter, yearFilter, translations, viewMode, session]);
+    const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode, showHistory, history], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode, showHistory, history]);
+    const tableDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, translations, viewMode, session, showHistory, history], [groupFilter, typeFilter, yearFilter, translations, viewMode, session, showHistory, history]);
     const itemPath = item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
     };

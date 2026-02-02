@@ -1924,6 +1924,30 @@ export default {
         {
             "id": "IMPORT_GROUPS",
             "value": "Importar Grupos"
+        },
+        {
+            "id": "HISTORY_VIEW",
+            "value": "Visualização do Histórico"
+        },
+        {
+            "id": "TODAY",
+            "value": "Hoje"
+        },
+        {
+            "id": "YESTERDAY",
+            "value": "Ontem"
+        },
+        {
+            "id": "THIS_WEEK",
+            "value": "Esta Semana"
+        },
+        {
+            "id": "LAST_WEEK",
+            "value": "Semana Passada"
+        },
+        {
+            "id": "OLDER",
+            "value": "Mais Antigo"
         }
     ]
 };

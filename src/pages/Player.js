@@ -23,6 +23,7 @@ import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 import InfoIcon from "@mui/icons-material/Info";
 import SpeedSlider from "./Player/SpeedSlider";
 import Transcript from "./Player/Transcript";
+import { useRecentHistory } from "@util/history";
 
 export const PlayerStore = new Store({
     mediaPath: "",
@@ -51,8 +52,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
-    // Personal metadata stored in local/personal/metadata/sessions/<group>/<sessionName>.json
-    // Or in bundle: local/personal/metadata/sessions/<group>.json
     const groupInfo = groups.find(g => g.name === group);
     const isBundled = groupInfo?.bundled;
     const isMerged = groupInfo?.merged;
@@ -120,15 +119,18 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
         }
     }, [data]);
 
+    const [, addToHistory] = useRecentHistory();
+
     useEffect(() => {
         if (group && date && name) {
             PlayerStore.update(s => {
                 const session = { group, date, name };
                 console.log("sesion playing", session);
                 s.session = session;
+                addToHistory(session);
             });
         }
-    }, [group, date, name]);
+    }, [group, date, name, addToHistory]);
 
     const color = groups.find(item => item.name === group)?.color;
 

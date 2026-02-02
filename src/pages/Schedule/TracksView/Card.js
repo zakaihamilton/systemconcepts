@@ -88,6 +88,14 @@ const TrackCard = memo(function TrackCard({ session, isActive, onSessionClick, i
                 <div className={styles.groupPill} style={{ backgroundColor: groupColor, color: textColor }}>
                     {group}
                 </div>
+                {session.position > 0 && session.duration > 0 && (
+                    <div className={styles.progressContainer}>
+                        <div
+                            className={styles.progressBar}
+                            style={{ width: `${Math.min(100, (session.position / session.duration) * 100)}%` }}
+                        />
+                    </div>
+                )}
                 <div className={styles.typeIcon}>
                     <SessionIcon type={session.type} />
                 </div>
