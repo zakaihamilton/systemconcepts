@@ -168,7 +168,7 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
         };
 
         const events = [
-            "play",
+            "playing",
             "pause",
             "seeking",
             "seeked",
@@ -223,6 +223,9 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
         if (!enabled || !playerRef) return;
 
         const handleVisibilityChange = () => {
+            if (playerRef.ended) {
+                return;
+            }
             if (document.visibilityState === "hidden") {
                 // Store whether we were playing before hiding
                 wasPlayingRef.current = !playerRef.paused;
