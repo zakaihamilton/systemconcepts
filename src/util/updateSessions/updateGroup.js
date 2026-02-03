@@ -1,5 +1,5 @@
 import storage from "@util/storage";
-import { makePath, fileTitle, isVideoFile, isSubtitleFile, isTagsFile, isDurationFile } from "@util/path";
+import { makePath, fileTitle, isVideoFile, isSubtitleFile, isTagsFile, isDurationFile, isSummaryFile } from "@util/path";
 import { shrinkImage, blobToBase64 } from "@util/image";
 import { readBinary } from "@util/binary";
 import pLimit from "../p-limit";
@@ -150,7 +150,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 if (isSubtitleFile(file.name)) {
                     id = id.replace(/\.[a-z]{2,3}$/, "");
                 }
-                if (isTagsFile(file.name) || isDurationFile(file.name) || file.name === year.name + ".md") {
+                if (file.name === year.name + ".tags" || file.name === year.name + ".duration" || file.name === year.name + ".md") {
                     continue;
                 }
 
@@ -189,17 +189,70 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 });
             }
 
-            const yearSessions = sortedIds.map(id => {
+            const yearSessionsLimit = pLimit(10);
+            const yearSessions = (await Promise.all(sortedIds.map(id => yearSessionsLimit(async () => {
+                let tags = sessionTagsMap[id] || [];
+                let duration = sessionDurationMap[id];
+                let summary = sessionSummariesMap[id];
+                const files = sessionFilesMap[id];
+
+                if (!tags.length) {
+                    const tagsFile = files.find(f => isTagsFile(f.name));
+                    if (tagsFile) {
+                        try {
+                            const content = await storage.readFile(tagsFile.path);
+                            const parsed = JSON.parse(content);
+                            if (Array.isArray(parsed)) {
+                                tags = parsed;
+                            }
+                        } catch (err) {
+                            console.warn(`[Sync] Failed to read tags file ${tagsFile.path}`, err);
+                        }
+                    }
+                }
+
+                if (!duration || duration < 1) {
+                    const durationFile = files.find(f => isDurationFile(f.name));
+                    if (durationFile) {
+                        try {
+                            const content = await storage.readFile(durationFile.path);
+                            try {
+                                const parsed = JSON.parse(content);
+                                if (parsed && typeof parsed.duration === "number") {
+                                    duration = parsed.duration;
+                                } else {
+                                    duration = parseFloat(content);
+                                }
+                            } catch (e) {
+                                duration = parseFloat(content);
+                            }
+                        } catch (err) {
+                            console.warn(`[Sync] Failed to read duration file ${durationFile.path}`, err);
+                        }
+                    }
+                }
+
+                if (!summary) {
+                    const summaryFile = files.find(f => isSummaryFile(f.name));
+                    if (summaryFile) {
+                        try {
+                            summary = await storage.readFile(summaryFile.path);
+                        } catch (err) {
+                            console.warn(`[Sync] Failed to read summary file ${summaryFile.path}`, err);
+                        }
+                    }
+                }
+
                 return createSessionItem(
                     id,
-                    sessionFilesMap[id],
+                    files,
                     year.name,
                     name,
-                    sessionTagsMap[id] || [],
-                    sessionDurationMap[id],
-                    sessionSummariesMap[id]
+                    tags,
+                    duration,
+                    summary
                 );
-            }).filter(Boolean);
+            })))).filter(Boolean);
 
             // Generate thumbnails for sessions that have images but no thumbnail data yet
             const thumbnailLimit = pLimit(4);
