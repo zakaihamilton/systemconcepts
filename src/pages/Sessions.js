@@ -299,102 +299,7 @@ export default function SessionsPage() {
         }
     }, [viewMode, target, gotoItem, handleIconClick]);
 
-    const filter = useCallback(item => {
-        let { group, type, year, thumbnail } = item;
-        let show = (!groupFilter.length || groupFilter.includes(group));
-        if (typeFilter?.length) {
-            const excluded = ["with_thumbnail", "without_thumbnail", "thumbnails_all",
-                "with_summary", "without_summary", "summaries_all",
-                "with_tags", "without_tags", "tags_all",
-                "with_position", "without_position", "position_all",
-                "with_duration", "without_duration", "duration_all",
-                "with_english", "with_hebrew", "languages_all",
-                "exclude_image_only", "images_all"];
-            const types = typeFilter.filter(t => !excluded.includes(t));
-            const excludeImageOnly = typeFilter.includes("exclude_image_only");
-            const withThumbnail = typeFilter.includes("with_thumbnail");
-            const withoutThumbnail = typeFilter.includes("without_thumbnail");
-            const withSummary = typeFilter.includes("with_summary");
-            const withoutSummary = typeFilter.includes("without_summary");
-            const withTags = typeFilter.includes("with_tags");
-            const withoutTags = typeFilter.includes("without_tags");
-            const withPosition = typeFilter.includes("with_position");
-            const withoutPosition = typeFilter.includes("without_position");
-            const withDuration = typeFilter.includes("with_duration");
-            const withoutDuration = typeFilter.includes("without_duration");
-            const withEnglish = typeFilter.includes("with_english");
-            const withHebrew = typeFilter.includes("with_hebrew");
 
-            const matchType = !types.length || types.includes(type);
-
-            const matchImage = !(excludeImageOnly && type === "image");
-
-            let matchThumbnail = true;
-            if (withThumbnail && withoutThumbnail) {
-                matchThumbnail = true;
-            } else if (withThumbnail) {
-                matchThumbnail = !!thumbnail;
-            } else if (withoutThumbnail) {
-                matchThumbnail = !thumbnail;
-            }
-
-            let matchSummary = true;
-            const hasSummary = !!item.summary;
-            if (withSummary && withoutSummary) {
-                matchSummary = true;
-            } else if (withSummary) {
-                matchSummary = hasSummary;
-            } else if (withoutSummary) {
-                matchSummary = !hasSummary;
-            }
-
-            let matchTags = true;
-            const hasTags = !!item.tags?.length;
-            if (withTags && withoutTags) {
-                matchTags = true;
-            } else if (withTags) {
-                matchTags = hasTags;
-            } else if (withoutTags) {
-                matchTags = !hasTags;
-            }
-
-            let matchPosition = true;
-            const hasPosition = parseInt(item.position) > 1;
-            if (withPosition && withoutPosition) {
-                matchPosition = true;
-            } else if (withPosition) {
-                matchPosition = hasPosition;
-            } else if (withoutPosition) {
-                matchPosition = !hasPosition;
-            }
-
-            let matchDuration = true;
-            const hasDuration = parseInt(item.duration) > 1;
-            if (withDuration && withoutDuration) {
-                matchDuration = true;
-            } else if (withDuration) {
-                matchDuration = hasDuration;
-            } else if (withoutDuration) {
-                matchDuration = !hasDuration;
-            }
-
-            const isHebrew = /[\u0590-\u05FF]/.test(item.name);
-            let matchLanguage = true;
-            if (withEnglish && withHebrew) {
-                matchLanguage = true;
-            } else if (withEnglish) {
-                matchLanguage = !isHebrew;
-            } else if (withHebrew) {
-                matchLanguage = isHebrew;
-            }
-
-            show = show && matchType && matchImage && matchThumbnail && matchSummary && matchTags && matchPosition && matchDuration && matchLanguage;
-        }
-        if (yearFilter?.length) {
-            show = show && yearFilter?.includes(year);
-        }
-        return show;
-    }, [groupFilter, typeFilter, yearFilter]);
 
     const getSeparator = useCallback((item, prevItem, orderBy) => {
         if (orderBy === "date") {
@@ -466,7 +371,6 @@ export default function SessionsPage() {
             loading={loading}
             statusBar={statusBar}
             mapper={mapper}
-            filter={filter}
             viewModes={viewModes}
             depends={tableDeps}
             resetScrollDeps={resetScrollDeps}

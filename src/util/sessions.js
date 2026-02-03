@@ -299,6 +299,9 @@ export function useSessions(depends = [], options = {}) {
                             session.duration = Math.max(session.duration || 0, personal.duration);
                         }
                     }
+
+                    session.isHebrew = /[\u0590-\u05FF]/.test(session.name);
+                    session.hasDuration = parseInt(session.duration) > 1;
                 }
             }
 
@@ -357,6 +360,9 @@ export function useSessions(depends = [], options = {}) {
                                     session.duration = Math.max(session.duration || 0, personal.duration);
                                 }
                             }
+
+                            session.isHebrew = /[\u0590-\u05FF]/.test(session.name);
+                            session.hasDuration = parseInt(session.duration) > 1;
                         }
 
                         return dataSessions;
@@ -495,72 +501,63 @@ export function useSessions(depends = [], options = {}) {
             results = results.filter(session => {
                 const matchType = !types.length || types.includes(session.type);
 
-                let matchImage = true;
                 if (excludeImageOnly && session.type === "image") {
-                    matchImage = false;
+                    return false;
+                }
+
+                if (!matchType) {
+                    return false;
                 }
 
                 const hasThumbnail = !!session.thumbnail;
                 let matchThumbnail = true;
-                if (withThumbnail && withoutThumbnail) {
-                    matchThumbnail = true;
-                } else if (withThumbnail) {
+                if (withThumbnail && !withoutThumbnail) {
                     matchThumbnail = hasThumbnail;
-                } else if (withoutThumbnail) {
+                } else if (withoutThumbnail && !withThumbnail) {
                     matchThumbnail = !hasThumbnail;
                 }
 
                 const hasSummary = !!session.summary;
                 let matchSummary = true;
-                if (withSummary && withoutSummary) {
-                    matchSummary = true;
-                } else if (withSummary) {
+                if (withSummary && !withoutSummary) {
                     matchSummary = hasSummary;
-                } else if (withoutSummary) {
+                } else if (withoutSummary && !withSummary) {
                     matchSummary = !hasSummary;
                 }
 
                 const hasTags = !!session.tags?.length;
                 let matchTags = true;
-                if (withTags && withoutTags) {
-                    matchTags = true;
-                } else if (withTags) {
+                if (withTags && !withoutTags) {
                     matchTags = hasTags;
-                } else if (withoutTags) {
+                } else if (withoutTags && !withTags) {
                     matchTags = !hasTags;
                 }
 
                 const hasPosition = !!session.position;
                 let matchPosition = true;
-                if (withPosition && withoutPosition) {
-                    matchPosition = true;
-                } else if (withPosition) {
+                if (withPosition && !withoutPosition) {
                     matchPosition = hasPosition;
-                } else if (withoutPosition) {
+                } else if (withoutPosition && !withPosition) {
                     matchPosition = !hasPosition;
                 }
 
-                const hasDuration = parseInt(session.duration) > 1;
+                const hasDuration = session.hasDuration;
                 let matchDuration = true;
-                if (withDuration && withoutDuration) {
-                    matchDuration = true;
-                } else if (withDuration) {
+                if (withDuration && !withoutDuration) {
                     matchDuration = hasDuration;
-                } else if (withoutDuration) {
+                } else if (withoutDuration && !withDuration) {
                     matchDuration = !hasDuration;
                 }
 
-                const isHebrew = /[\u0590-\u05FF]/.test(session.name);
+                const isHebrew = session.isHebrew;
                 let matchLanguage = true;
-                if (withEnglish && withHebrew) {
-                    matchLanguage = true;
-                } else if (withEnglish) {
+                if (withEnglish && !withHebrew) {
                     matchLanguage = !isHebrew;
-                } else if (withHebrew) {
+                } else if (withHebrew && !withEnglish) {
                     matchLanguage = isHebrew;
                 }
 
-                return matchType && matchImage && matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage && matchDuration;
+                return matchThumbnail && matchSummary && matchTags && matchPosition && matchLanguage && matchDuration;
             });
         }
         if (yearFilter?.length) {
