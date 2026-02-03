@@ -28,40 +28,51 @@ export default async function AWS_API(req, res) {
         console.log(`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${req.method}, Path: ${path}`);
         console.log(`[AWS API] Request headers:`, { type: headers.type, binary: headers.binary, exists: headers.exists });
 
-        // Determine access level based on role and path
-        const isAdmin = roleAuth(user.role, "admin");
-        const isStudent = roleAuth(user.role, "student");
+        const validateUserAccess = (user, path, method) => {
+            if (roleAuth(user.role, "admin")) return true;
+
+            if (!path) return false;
+
+            const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
+
+            if (roleAuth(user.role, "student")) {
+                const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`) || checkPath === `personal/${user.id}`;
+
+                if (method === "GET") {
+                    const isSyncPath = checkPath.startsWith("sync/") || checkPath === "sync";
+                    const isLibraryPath = checkPath.startsWith("library/") || checkPath === "library";
+                    return isSyncPath || isPersonalPath || isLibraryPath;
+                } else if (method === "PUT" || method === "DELETE") {
+                    return isPersonalPath;
+                }
+            }
+            return false;
+        };
+
+        // 1. Validate the primary path
+        if (!validateUserAccess(user, path, req.method)) {
+            console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot ${req.method} path: ${path}`);
+            throw "ACCESS_DENIED: " + user.id + " cannot " + req.method + " path: " + path;
+        }
+
+        // 2. SENTINEL: If Batch PUT, validate all item paths to prevent Mass Assignment/Bypass
+        if (req.method === "PUT" && Array.isArray(req.body)) {
+            for (const item of req.body) {
+                let itemPath = item.path || "";
+                if (itemPath) itemPath = decodeURIComponent(itemPath);
+                if (!validateUserAccess(user, itemPath, req.method)) {
+                    console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot ${req.method} batch item path: ${itemPath}`);
+                    throw "ACCESS_DENIED: Batch item unauthorized";
+                }
+            }
+        }
 
         let readOnly = true;
         const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
 
-        if (isAdmin) {
-            // Admins can read/write anywhere
+        if (req.method === "PUT" || req.method === "DELETE") {
+            // We validated access above, so we can allow write.
             readOnly = false;
-        } else if (isStudent) {
-            // Students can read from /sync, read/write to /personal/<userid>
-            const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`) || checkPath === `personal/${user.id}`;
-            const isSyncPath = checkPath.startsWith("sync/") || checkPath === "sync";
-            const isLibraryPath = checkPath.startsWith("library/") || checkPath === "library";
-
-            if (req.method === "GET") {
-                // For GET requests, we must explicitly deny access to unauthorized paths.
-                if (!isSyncPath && !isPersonalPath && !isLibraryPath) {
-                    console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot read from path: ${path}`);
-                    throw "ACCESS_DENIED: " + user.id + " cannot read from this path: " + path;
-                }
-                // readOnly remains true for GET, which is correct.
-            } else if ((req.method === "PUT" || req.method === "DELETE") && isPersonalPath) {
-                // Allow write/delete only to own personal directory
-                readOnly = false;
-            } else if (req.method !== "GET") {
-                // Block writes to other paths
-                console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
-                throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
-            }
-        }
-        else {
-            throw "ACCESS_DENIED: " + user.id + " is not authorized";
         }
 
         console.log(`[AWS API] Access granted for user ${user.id} - ReadOnly: ${readOnly}, Path: ${path} Role: ${user.role} Method: ${req.method}`);
