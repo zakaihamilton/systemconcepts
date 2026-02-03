@@ -1,5 +1,6 @@
 import storage from "@util/storage";
-import { makePath } from "@util/path";
+import { makePath, isBinaryFile } from "@util/path";
+import { stringToBinary } from "@util/binary";
 import { SYNC_BATCH_SIZE, FILES_MANIFEST, FILES_MANIFEST_GZ, LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "../constants";
 import { addSyncLog } from "../logs";
 import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
@@ -14,15 +15,32 @@ import { SyncActiveStore } from "../syncState";
 async function downloadFile(remoteFile, localEntry, createdFolders, localPath, remotePath) {
     const fileBasename = remoteFile.path;
     const localFilePath = makePath(localPath, fileBasename);
-    let remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
+    const isBinary = isBinaryFile(localFilePath);
+
+    // Binary files are stored without .gz extension, non-binary files have .gz
+    let remoteFilePath = isBinary
+        ? makePath(remotePath, fileBasename)
+        : makePath(remotePath, `${fileBasename}.gz`);
 
     try {
-        let content = await readCompressedFileRaw(remoteFilePath);
+        let content;
 
-        if (content === null) {
-            // Try without .gz extension
-            remoteFilePath = makePath(remotePath, fileBasename);
+        if (isBinary) {
+            // Binary files: read directly without decompression
+            content = await storage.readFile(remoteFilePath);
+            if (content === null) {
+                // Legacy: try with .gz extension for backwards compatibility
+                remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
+                content = await readCompressedFileRaw(remoteFilePath);
+            }
+        } else {
+            // Non-binary files: read through compressed file handler
             content = await readCompressedFileRaw(remoteFilePath);
+            if (content === null) {
+                // Try without .gz extension
+                remoteFilePath = makePath(remotePath, fileBasename);
+                content = await readCompressedFileRaw(remoteFilePath);
+            }
         }
 
         if (content === null) return null;
@@ -37,7 +55,30 @@ async function downloadFile(remoteFile, localEntry, createdFolders, localPath, r
             await storage.createFolderPath(localFilePath);
         }
 
-        // --- HASH VERIFICATION & PRETTY PRINTING ---
+        // For binary files, skip all JSON processing and write directly
+        if (isBinary) {
+            const unlock = await lockMutex({ id: localFilePath });
+            try {
+                // AWS returns binary files as base64 strings, convert back to binary
+                // Note: content is a base64 string from AWS, need to convert to binary for local storage
+                let binaryContent = content;
+                if (typeof content === 'string') {
+                    // Convert base64 string to Blob, then to ArrayBuffer for writing
+                    const blob = stringToBinary(content);
+                    binaryContent = new Uint8Array(await blob.arrayBuffer());
+                }
+                await storage.writeFile(localFilePath, binaryContent);
+            } finally {
+                unlock();
+            }
+
+            addSyncLog(`Downloaded: ${makePath(remotePath, fileBasename)}`, "info");
+            return {
+                ...remoteFile
+            };
+        }
+
+        // --- HASH VERIFICATION & PRETTY PRINTING (for non-binary files only) ---
         let contentToWrite = content;
         let finalHash = null;
         let finalSize = 0;

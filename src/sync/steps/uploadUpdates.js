@@ -14,7 +14,11 @@ import { SyncActiveStore } from "../syncState";
 async function uploadFile(localFile, createdFolders, localPath, remotePath) {
     const fileBasename = localFile.path;
     const localFilePath = makePath(localPath, fileBasename);
-    const remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
+    const isBinary = isBinaryFile(localFilePath);
+    // Don't add .gz extension for binary files - they're already compressed or should stay as-is
+    const remoteFilePath = isBinary
+        ? makePath(remotePath, fileBasename)
+        : makePath(remotePath, `${fileBasename}.gz`);
 
     try {
         const unlock = await lockMutex({ id: localFilePath });
@@ -26,11 +30,16 @@ async function uploadFile(localFile, createdFolders, localPath, remotePath) {
         }
         if (!content) return null;
 
-        let data = content;
-        if (!isBinaryFile(localFilePath)) {
-            data = JSON.parse(content);
+        if (isBinary) {
+            // Binary files: write directly without additional compression
+            // Content is already in the correct format (base64 string or Uint8Array)
+            await storage.createFolderPath(remoteFilePath);
+            await storage.writeFile(remoteFilePath, content);
+        } else {
+            // Non-binary files: parse as JSON and compress
+            const data = JSON.parse(content);
+            await writeCompressedFile(remoteFilePath, data, createdFolders);
         }
-        await writeCompressedFile(remoteFilePath, data, createdFolders);
 
         addSyncLog(`Uploaded: ${makePath(remotePath, fileBasename)}`, "info");
         // Hash verification is already done locally, skip re-download
