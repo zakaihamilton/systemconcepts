@@ -557,6 +557,7 @@ const rehypeArticleEnrichment = () => {
 export default React.memo(function Markdown({ children, search, currentParagraphIndex, selectedTag, filteredParagraphs, disableGlossary }) {
     const translations = useTranslations();
     const [zoomedData, setZoomedData] = useState(null);
+    const paragraphsRef = useRef({});
 
     const processedChildren = useMemo(() => {
         let content = children;
@@ -937,6 +938,12 @@ export default React.memo(function Markdown({ children, search, currentParagraph
             const totalParagraphs = node?.properties?.dataTotalParagraphs;
             const isLastParagraph = paragraphIndex === totalParagraphs;
 
+            useEffect(() => {
+                if (paragraphIndex !== undefined) {
+                    paragraphsRef.current[paragraphIndex] = children;
+                }
+            }, [paragraphIndex, children]);
+
             if (Array.isArray(filteredParagraphs) && !filteredParagraphs.includes(paragraphIndex)) return null;
             if (!children || (Array.isArray(children) && children.length === 0)) return null;
 
@@ -1104,6 +1111,12 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                 badgeClass={styles.paragraphBadge}
                 Renderer={TextRenderer}
                 copyExcludeSelectors={[`.${styles['glossary-annotation']}`]}
+                onNavigate={(number) => {
+                    const content = paragraphsRef.current[number];
+                    if (content) {
+                        setZoomedData({ content, number });
+                    }
+                }}
             />
         </>
     );

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import Dialog from "@mui/material/Dialog";
 import Tooltip from "@mui/material/Tooltip";
 import DialogContent from "@mui/material/DialogContent";
@@ -8,8 +8,9 @@ import styles from "./Zoom.module.scss";
 import IconButton from "@mui/material/IconButton";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useTranslations } from "@util/translations";
+import { useSwipe } from "@util/touch";
 
-export default function Zoom({ open, onClose, content, number, badgeClass, Renderer, copyExcludeSelectors }) {
+export default function Zoom({ open, onClose, content, number, badgeClass, Renderer, copyExcludeSelectors, onNavigate }) {
     const contentRef = useRef(null);
     const translations = useTranslations();
 
@@ -32,6 +33,38 @@ export default function Zoom({ open, onClose, content, number, badgeClass, Rende
         }
     };
 
+    const handlePrevious = useCallback(() => {
+        if (onNavigate) {
+            onNavigate(number - 1);
+        }
+    }, [onNavigate, number]);
+
+    const handleNext = useCallback(() => {
+        if (onNavigate) {
+            onNavigate(number + 1);
+        }
+    }, [onNavigate, number]);
+
+    const swipeHandlers = useSwipe({
+        onSwipeDown: handlePrevious,
+        onSwipeUp: handleNext
+    });
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!open) return;
+            if (e.key === "ArrowUp") {
+                e.preventDefault();
+                handlePrevious();
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                handleNext();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [open, handlePrevious, handleNext]);
+
     return (
         <Dialog
             open={open}
@@ -39,7 +72,7 @@ export default function Zoom({ open, onClose, content, number, badgeClass, Rende
             maxWidth="md"
             fullWidth
         >
-            <DialogContent className={styles.root}>
+            <DialogContent className={styles.root} {...swipeHandlers}>
                 <Box className={styles.itemWrapper}>
                     {number && <span className={`${badgeClass} ${styles.badge}`}>{number}</span>}
                     <Tooltip title={translations.COPY} arrow>

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-export function useSwipe({ onSwipeLeft, onSwipeRight, threshold = 50 }) {
+export function useSwipe({ onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown, threshold = 50 }) {
     const touchStart = useRef(null);
     const touchEnd = useRef(null);
 
@@ -28,13 +28,20 @@ export function useSwipe({ onSwipeLeft, onSwipeRight, threshold = 50 }) {
         const absDistanceX = Math.abs(distanceX);
         const absDistanceY = Math.abs(distanceY);
 
-        // Only trigger swipe if horizontal movement is significantly greater than vertical
-        // and meets the threshold
+        // Horizontal swipe
         if (absDistanceX > threshold && absDistanceX > absDistanceY * 1.5) {
             if (distanceX > 0) {
                 onSwipeLeft && onSwipeLeft();
             } else {
                 onSwipeRight && onSwipeRight();
+            }
+        }
+        // Vertical swipe
+        else if (absDistanceY > threshold && absDistanceY > absDistanceX * 1.5) {
+            if (distanceY > 0) {
+                onSwipeUp && onSwipeUp();
+            } else {
+                onSwipeDown && onSwipeDown();
             }
         }
     };
