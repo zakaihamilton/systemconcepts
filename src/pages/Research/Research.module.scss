@@ -93,7 +93,7 @@
 .autocomplete {
     :global(.MuiInputBase-root) {
         height: 3em;
-        overflow-y: auto !important;
+        overflow-y: hidden !important;
         align-content: center;
     }
 }
