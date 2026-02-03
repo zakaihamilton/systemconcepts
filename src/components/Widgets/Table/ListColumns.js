@@ -28,7 +28,7 @@ export default function ListColumns({ className = "", viewMode, columns, index, 
                 <span>
                     {sortable ? (
                         <TableSortLabel
-                            active={showSort && orderBy === sortId}
+                            active={showSort && orderBy === sortId ? true : undefined}
                             direction={orderBy === sortId ? order : "desc"}
                             onClick={showSort ? onSort(sortId) : undefined}
                         >

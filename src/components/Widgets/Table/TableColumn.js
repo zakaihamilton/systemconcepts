@@ -18,7 +18,7 @@ export default function TableColumn({ item, order, orderBy, showSort, createSort
         <div className={styles.root}>
             {sortable && <TableSortLabel
                 className={styles.sortLabel}
-                active={showSort && orderBy === sortId}
+                active={showSort && orderBy === sortId ? true : undefined}
                 direction={orderBy === sortId ? order : "desc"}
                 onClick={showSort ? createSortHandler(sortId) : undefined}
                 {...labelProps}

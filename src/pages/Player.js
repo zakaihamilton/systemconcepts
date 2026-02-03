@@ -56,16 +56,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const isBundled = groupInfo?.bundled;
     const isMerged = groupInfo?.merged;
 
-    console.log("[Player] Metadata setup:", {
-        group,
-        groupInfo: groupInfo?.name,
-        isBundled,
-        isMerged,
-        year,
-        sessionName,
-        groupsLoaded: groups.length
-    });
-
     let metadataPath = null;
     let metadataKey = null;
 
