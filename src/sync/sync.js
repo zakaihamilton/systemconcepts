@@ -206,7 +206,7 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
 /**
  * Main sync function
  */
-export async function performSync() {
+export async function performSync(forceReload) {
     const unlock = await lockMutex({ id: "sync_process" });
     try {
         console.log(`[Sync] Version: ${process.env.NEXT_PUBLIC_VERSION}`);
@@ -302,7 +302,7 @@ export async function performSync() {
         addSyncLog(`Total sync time: ${duration}s`, "success");
 
         // Only trigger reload if sync actually changed something
-        if (hasAnyChanges) {
+        if (hasAnyChanges || forceReload) {
             SyncActiveStore.update(s => {
                 s.needsSessionReload = true;
             });
@@ -353,7 +353,7 @@ export async function stopSync() {
 
 
 
-export async function requestSync() {
+export async function requestSync(forceReload) {
     const state = SyncActiveStore.getRawState();
     const isBusy = state.busy;
     const isLocked = state.locked;
@@ -379,7 +379,7 @@ export async function requestSync() {
     });
 
     try {
-        await performSync();
+        await performSync(forceReload);
 
         const endTime = Date.now();
         const syncDuration = endTime - SyncActiveStore.getRawState().startTime;
@@ -420,7 +420,7 @@ export function useSyncFeature() {
     const displayPercentage = (isSyncing && percentage >= 100) ? 99 : percentage;
 
     return {
-        sync: requestSync,
+        sync: () => requestSync(true),
         stop: stopSync,
         busy,
         lastSynced,
@@ -455,7 +455,7 @@ export function useSync(options = {}) {
             const sessionsBusy = UpdateSessionsStore.getRawState().busy;
 
             if (timeSinceLastSync >= SYNC_INTERVAL && !busy && !sessionsBusy) {
-                requestSync();
+                requestSync(false);
             }
         };
 
@@ -464,7 +464,7 @@ export function useSync(options = {}) {
         if (lastSyncTime === 0) {
             const sessionsBusy = UpdateSessionsStore.getRawState().busy;
             if (!sessionsBusy) {
-                requestSync();
+                requestSync(false);
             }
         }
 
