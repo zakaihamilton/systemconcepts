@@ -73,6 +73,10 @@
     &.selected {
         background-color: rgba(var(--primary-color-rgb, 63, 81, 181), 0.08) !important;
         color: var(--primary-color) !important;
+
+        &:hover {
+            background-color: rgba(var(--primary-color-rgb, 63, 81, 181), 0.12) !important;
+        }
     }
 }
 
