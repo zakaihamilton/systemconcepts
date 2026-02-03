@@ -183,6 +183,9 @@ async function readFiles(prefix, files) {
 
 async function writeFile(path, body) {
     path = makePath(path);
+    if (isBinaryFile(path)) {
+        return await fs.promises.writeFile(path, body);
+    }
     return await fs.promises.writeFile(path, body, "utf8");
 }
 
