@@ -1,4 +1,22 @@
 export function exportData(data, filename, type) {
+    // Detect and decode base64-encoded binary data
+    // Gzip files start with magic bytes 1f 8b which is "H4sI" in base64
+    if (typeof data === 'string' && data.startsWith('H4sI')) {
+        try {
+            // Decode base64 to binary string
+            const binaryString = atob(data);
+            // Convert binary string to Uint8Array
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            data = bytes;
+        } catch (err) {
+            console.error('Failed to decode base64 data:', err);
+            // Fall through to use original data
+        }
+    }
+
     var file = type ? new Blob([data], { type: type }) : data;
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
