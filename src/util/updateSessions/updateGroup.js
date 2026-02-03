@@ -205,6 +205,9 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                             if (Array.isArray(parsed)) {
                                 tags = parsed;
                             }
+                            else if (parsed && Array.isArray(parsed.tags)) {
+                                tags = parsed.tags;
+                            }
                         } catch (err) {
                             console.warn(`[Sync] Failed to read tags file ${tagsFile.path}`, err);
                         }
