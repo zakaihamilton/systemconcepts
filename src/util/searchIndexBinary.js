@@ -205,10 +205,22 @@ export function encodeBinaryIndex(indexData) {
  * Decode binary format to search index object
  */
 export function decodeBinaryIndex(compressedData) {
-    // Handle Uint8Array or ArrayBuffer
-    const inputData = compressedData instanceof ArrayBuffer
-        ? new Uint8Array(compressedData)
-        : compressedData;
+    // Handle various input types from different storage backends
+    let inputData;
+    if (compressedData instanceof ArrayBuffer) {
+        inputData = new Uint8Array(compressedData);
+    } else if (compressedData instanceof Uint8Array) {
+        inputData = compressedData;
+    } else if (Array.isArray(compressedData)) {
+        // lightning-fs sometimes returns binary data as a regular Array
+        inputData = new Uint8Array(compressedData);
+    } else if (typeof compressedData === 'string') {
+        // If it's a string (was read incorrectly as text), try to convert
+        // This shouldn't happen with proper binary reading, but handle gracefully
+        throw new Error("Search index was read as text instead of binary. Please rebuild the index.");
+    } else {
+        inputData = compressedData;
+    }
 
     // Decompress
     const buffer = pako.ungzip(inputData);

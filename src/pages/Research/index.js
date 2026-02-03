@@ -232,6 +232,17 @@ export default function Research() {
             }
         } catch (err) {
             console.error("Failed to load search index:", err);
+            // If the index is corrupted, delete it and rebuild
+            try {
+                const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
+                if (await storage.exists(indexPath)) {
+                    await storage.deleteFile(indexPath);
+                    console.log("Deleted corrupted search index, rebuilding...");
+                    buildIndex();
+                }
+            } catch (deleteErr) {
+                console.error("Failed to delete corrupted index:", deleteErr);
+            }
         }
     }, [buildIndex]);
 
