@@ -117,6 +117,9 @@ export default function Storage({ path = "" }) {
             if (isImageFile(item.name)) {
                 addPath(`image?name=${item.name}`);
             }
+            else if (item.name.endsWith(".json.gz")) {
+                addPath(`editor?name=${item.name}`);
+            }
             else if (isBinaryFile(item.name)) {
                 /* add media player here */
             }

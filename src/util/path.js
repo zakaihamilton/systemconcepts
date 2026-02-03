@@ -12,6 +12,11 @@ export function isBinaryFile(path) {
     return hasMediaExt;
 }
 
+export function isCompressedJSONFile(path) {
+    path = makePath(path);
+    return path.endsWith(".json.gz");
+}
+
 export function isMediaFile(path) {
     path = makePath(path);
     const mediaExtensions = [".mp4", ".m4a"];

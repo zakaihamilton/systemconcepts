@@ -9,6 +9,8 @@ import { useSync } from "@sync/sync";
 import Download from "@widgets/Download";
 import Save from "@widgets/Save";
 import { exportData } from "@util/importExport";
+import pako from "pako";
+import { isCompressedJSONFile } from "@util/path";
 
 const EditorStoreDefaults = {
     content: ""
@@ -25,6 +27,28 @@ export default function Editor({ name, path }) {
     const [saving, setSaving] = useState(false);
     const readFile = useCallback(() => {
         storage.readFile(path).then(content => {
+            // Handle .json.gz files - decompress them
+            if (isCompressedJSONFile(path) && content) {
+                try {
+                    // If content is base64-encoded (string starting with H4sI)
+                    if (typeof content === 'string' && content.startsWith('H4sI')) {
+                        // Decode base64 to binary
+                        const binaryString = atob(content);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        content = bytes;
+                    }
+                    // Decompress using pako
+                    const decompressed = pako.ungzip(content, { to: 'string' });
+                    content = decompressed;
+                } catch (err) {
+                    console.error('Failed to decompress .json.gz file:', err);
+                    content = content || "";
+                }
+            }
+
             EditorStore.update(s => {
                 s.content = content || "";
             });
@@ -44,7 +68,28 @@ export default function Editor({ name, path }) {
     const saveFile = async () => {
         setSaving(true);
         await storage.createFolderPath(path);
-        await storage.writeFile(path, content[0]);
+
+        let contentToSave = content[0];
+
+        // Handle .json.gz files - compress them before saving
+        if (isCompressedJSONFile(path)) {
+            try {
+                // Compress using pako
+                const compressed = pako.gzip(contentToSave);
+                // Convert to base64 for storage
+                let binary = '';
+                const bytes = new Uint8Array(compressed);
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                contentToSave = btoa(binary);
+            } catch (err) {
+                console.error('Failed to compress .json.gz file:', err);
+                // Fall back to saving uncompressed
+            }
+        }
+
+        await storage.writeFile(path, contentToSave);
         setSaving(false);
     };
 
