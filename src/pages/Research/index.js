@@ -39,6 +39,7 @@ import JumpDialog from "@pages/Library/Article/JumpDialog";
 import PageIndicator from "./PageIndicator";
 import SearchResultItem from "./SearchResultItem";
 import { decodeBinaryIndex } from "@util/searchIndexBinary";
+import { loadParagraphsForFile } from "@util/loadParagraphs";
 
 const INDEX_FILE = "search_index.bin";
 const LEGACY_INDEX_FILE = "search_index.json";
@@ -291,6 +292,7 @@ export default function Research() {
             const isV2 = indexData.v === 2;
             const isV3 = indexData.v === 3;
             const isV4 = indexData.v === 4;
+            const isV5 = indexData.v >= 5;
 
             if (!query.trim()) {
                 if (indexData.f) {
@@ -320,8 +322,8 @@ export default function Research() {
                         const matchingTokens = Object.keys(indexData.t || indexData.tokens || {}).filter(k => k.includes(token));
                         let tokenRefs = new Set();
                         matchingTokens.forEach(k => {
-                            const refs = (isV2 || isV3 || isV4) ? indexData.t[k] : indexData.tokens[k];
-                            if (isV4) {
+                            const refs = (isV2 || isV3 || isV4 || isV5) ? indexData.t[k] : indexData.tokens[k];
+                            if (isV4 || isV5) {
                                 let currentFileIndex = -1;
                                 for (let i = 0; i < refs.length; i++) {
                                     const val = refs[i];
@@ -350,12 +352,49 @@ export default function Research() {
                     }
 
                     if (groupRefs) {
+                        // For v5 indexes, we need to load paragraphs on-demand
+                        const paragraphCache = new Map(); // fileId -> paragraphs array
+
+                        // Load paragraphs for all unique files in this group
+                        if (isV5) {
+                            const uniqueFileIndices = new Set();
+                            [...groupRefs].forEach(ref => {
+                                const [docId] = ref.split(':');
+                                uniqueFileIndices.add(parseInt(docId, 10));
+                            });
+
+                            const fileIndicesArray = [...uniqueFileIndices];
+                            let loadedCount = 0;
+                            const totalFiles = fileIndicesArray.length;
+
+                            // Load files with progress tracking
+                            await Promise.all(fileIndicesArray.map(async (fileIndex) => {
+                                const fileId = indexData.f[fileIndex];
+                                const paragraphs = await loadParagraphsForFile(fileId, sessionsById);
+                                paragraphCache.set(fileIndex, paragraphs);
+
+                                loadedCount++;
+                                if (isMounted.current) {
+                                    setSearchProgress(Math.floor((loadedCount / totalFiles) * 50)); // 0-50% for loading
+                                }
+                            }));
+
+                            // Ensure we show 50% after verification loading completes
+                            if (isMounted.current) {
+                                setSearchProgress(50);
+                            }
+                        }
+
                         // Final verification: ensure the matching paragraph actually contains all of the search terms
                         // and phrases are adjacent
                         [...groupRefs].forEach(ref => {
                             const [docId, paraIndex] = ref.split(':');
                             let paragraph = null;
-                            if (isV3 || isV2 || isV4) {
+                            if (isV5) {
+                                const fileIndex = parseInt(docId, 10);
+                                const paragraphs = paragraphCache.get(fileIndex);
+                                paragraph = paragraphs?.[parseInt(paraIndex, 10)];
+                            } else if (isV3 || isV2 || isV4) {
                                 const fileIndex = parseInt(docId, 10);
                                 paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
                             } else {
@@ -407,14 +446,48 @@ export default function Research() {
                 return str.charAt(0).toUpperCase() + str.slice(1);
             };
 
+            // For v5, load paragraphs for all matched files
+            const paragraphsMap = new Map(); // fileIndex -> paragraphs array
+
+            if (isV5) {
+                const uniqueFileIndices = new Set();
+                [...finalRefs].forEach(ref => {
+                    const [docId] = ref.split(':');
+                    uniqueFileIndices.add(parseInt(docId, 10));
+                });
+
+                const fileIndicesArray = [...uniqueFileIndices];
+                let loadedCount = 0;
+                const totalFiles = fileIndicesArray.length;
+
+                // Load files with progress tracking (50-100%)
+                await Promise.all(fileIndicesArray.map(async (fileIndex) => {
+                    const fileId = indexData.f[fileIndex];
+                    const paragraphs = await loadParagraphsForFile(fileId, sessionsById);
+                    paragraphsMap.set(fileIndex, paragraphs);
+
+                    loadedCount++;
+                    if (isMounted.current) {
+                        setSearchProgress(50 + Math.floor((loadedCount / totalFiles) * 50)); // 50-100% for results
+                    }
+                }));
+
+                // Ensure we show 100% after all loading completes
+                if (isMounted.current) {
+                    setSearchProgress(100);
+                }
+            }
+
             [...finalRefs].forEach(ref => {
                 const [docId, paraIndex] = ref.split(':');
 
                 if (!groupedResults[docId]) {
                     let doc = null;
-                    if (isV3 || isV2 || isV4) {
+                    if (isV3 || isV2 || isV4 || isV5) {
                         const fileIndex = parseInt(docId, 10);
                         const tagId = indexData.f[fileIndex];
+                        const paragraphs = isV5 ? paragraphsMap.get(fileIndex) : indexData.d[fileIndex];
+
                         if (tagId.startsWith("session|")) {
                             if (sessions) {
                                 const parts = tagId.split("|");
@@ -432,7 +505,7 @@ export default function Research() {
                                                 { label: "Type", value: capitalize(session.type) }
                                             ],
                                             tag: { title: session.name, _id: tagId },
-                                            paragraphs: indexData.d[fileIndex],
+                                            paragraphs,
                                             matches: []
                                         };
                                     }
@@ -444,7 +517,7 @@ export default function Research() {
                                 doc = {
                                     docId: tagId,
                                     tag,
-                                    paragraphs: indexData.d[fileIndex],
+                                    paragraphs,
                                     matches: []
                                 };
                             }
@@ -589,7 +662,12 @@ export default function Research() {
             if (isMounted.current) {
                 setSearching(false);
                 setSearchProgress(100);
-                setShowProgress(false);
+                // Keep progress bar visible briefly to show 100% completion
+                setTimeout(() => {
+                    if (isMounted.current) {
+                        setShowProgress(false);
+                    }
+                }, 500);
                 if (searchTimer.current) {
                     clearTimeout(searchTimer.current);
                     searchTimer.current = null;

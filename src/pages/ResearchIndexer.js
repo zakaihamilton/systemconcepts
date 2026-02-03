@@ -166,10 +166,9 @@ export default function ResearchIndexer() {
             }
 
             const newIndex = {
-                v: 4,
+                v: 5,
                 timestamp: Date.now(),
                 f: [], // file IDs
-                d: {}, // doc paragraphs: { fileIndex: [paragraphs] }
                 t: {}  // tokens: { token: [fileIndex, paraIndex, ...] }
             };
 
@@ -219,7 +218,6 @@ export default function ResearchIndexer() {
                                 if (paragraphs.length > 0) {
                                     const fileIndex = newIndex.f.length;
                                     newIndex.f.push(tag._id);
-                                    newIndex.d[fileIndex] = paragraphs;
 
                                     paragraphs.forEach((para, paraIndex) => {
                                         const paraTokens = para.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);
@@ -271,7 +269,6 @@ export default function ResearchIndexer() {
                 if (paragraphs.length > 0) {
                     const fileIndex = newIndex.f.length;
                     newIndex.f.push(sessionId);
-                    newIndex.d[fileIndex] = paragraphs;
 
                     paragraphs.forEach((para, paraIndex) => {
                         const paraTokens = para.toLowerCase().split(/[^a-z0-9\u0590-\u05FF]+/).filter(Boolean);

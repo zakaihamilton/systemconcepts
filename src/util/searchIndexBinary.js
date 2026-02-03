@@ -87,13 +87,15 @@ export function encodeBinaryIndex(indexData) {
     // Add file IDs
     const fileIdIndices = indexData.f.map(id => addString(id));
 
-    // Add paragraphs and compute document structure
+    // Add paragraphs and compute document structure (only for v4 and below)
     const docStructure = [];
-    const fileIndices = Object.keys(indexData.d).map(k => parseInt(k, 10)).sort((a, b) => a - b);
-    for (const fileIdx of fileIndices) {
-        const paragraphs = indexData.d[fileIdx];
-        const paraIndices = paragraphs.map(p => addString(p));
-        docStructure.push({ fileIdx, paraIndices });
+    if (indexData.d) {
+        const fileIndices = Object.keys(indexData.d).map(k => parseInt(k, 10)).sort((a, b) => a - b);
+        for (const fileIdx of fileIndices) {
+            const paragraphs = indexData.d[fileIdx];
+            const paraIndices = paragraphs.map(p => addString(p));
+            docStructure.push({ fileIdx, paraIndices });
+        }
     }
 
     // Add token strings
@@ -120,13 +122,15 @@ export function encodeBinaryIndex(indexData) {
         size += varIntSize(idx);
     }
 
-    // Documents size
-    size += varIntSize(docStructure.length);
-    for (const doc of docStructure) {
-        size += varIntSize(doc.fileIdx);
-        size += varIntSize(doc.paraIndices.length);
-        for (const paraIdx of doc.paraIndices) {
-            size += varIntSize(paraIdx);
+    // Documents size (only for v4 and below)
+    if (docStructure.length > 0) {
+        size += varIntSize(docStructure.length);
+        for (const doc of docStructure) {
+            size += varIntSize(doc.fileIdx);
+            size += varIntSize(doc.paraIndices.length);
+            for (const paraIdx of doc.paraIndices) {
+                size += varIntSize(paraIdx);
+            }
         }
     }
 
@@ -171,13 +175,15 @@ export function encodeBinaryIndex(indexData) {
         offset += writeVarInt(idx, buffer, offset);
     }
 
-    // Write documents
-    offset += writeVarInt(docStructure.length, buffer, offset);
-    for (const doc of docStructure) {
-        offset += writeVarInt(doc.fileIdx, buffer, offset);
-        offset += writeVarInt(doc.paraIndices.length, buffer, offset);
-        for (const paraIdx of doc.paraIndices) {
-            offset += writeVarInt(paraIdx, buffer, offset);
+    // Write documents (only for v4 and below)
+    if (docStructure.length > 0) {
+        offset += writeVarInt(docStructure.length, buffer, offset);
+        for (const doc of docStructure) {
+            offset += writeVarInt(doc.fileIdx, buffer, offset);
+            offset += writeVarInt(doc.paraIndices.length, buffer, offset);
+            for (const paraIdx of doc.paraIndices) {
+                offset += writeVarInt(paraIdx, buffer, offset);
+            }
         }
     }
 
@@ -253,28 +259,32 @@ export function decodeBinaryIndex(compressedData) {
         offset += result.bytesRead;
     }
 
-    // Read documents
-    result = readVarInt(buffer, offset);
-    const docCount = result.value;
-    offset += result.bytesRead;
-
+    // Read documents (only for v4 and below)
     const d = {};
-    for (let i = 0; i < docCount; i++) {
+    const isV5 = version >= 5;
+
+    if (!isV5) {
         result = readVarInt(buffer, offset);
-        const fileIdx = result.value;
+        const docCount = result.value;
         offset += result.bytesRead;
 
-        result = readVarInt(buffer, offset);
-        const paraCount = result.value;
-        offset += result.bytesRead;
-
-        const paragraphs = [];
-        for (let j = 0; j < paraCount; j++) {
+        for (let i = 0; i < docCount; i++) {
             result = readVarInt(buffer, offset);
-            paragraphs.push(strings[result.value]);
+            const fileIdx = result.value;
             offset += result.bytesRead;
+
+            result = readVarInt(buffer, offset);
+            const paraCount = result.value;
+            offset += result.bytesRead;
+
+            const paragraphs = [];
+            for (let j = 0; j < paraCount; j++) {
+                result = readVarInt(buffer, offset);
+                paragraphs.push(strings[result.value]);
+                offset += result.bytesRead;
+            }
+            d[fileIdx] = paragraphs;
         }
-        d[fileIdx] = paragraphs;
     }
 
     // Read tokens
