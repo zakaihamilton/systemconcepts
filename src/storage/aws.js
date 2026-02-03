@@ -158,7 +158,7 @@ async function writeFile(path, body) {
         bodyToSend = await bodyToSend;
     }
 
-    if (body && body.length > 4 * 1024 * 1024) {
+    if (bodyToSend && bodyToSend.length > 4 * 1024 * 1024) {
         const encodedPath = encodeURIComponent(path.slice(1));
         const { url } = await fetchJSON(`/api/aws_upload?path=${encodedPath}`, {
             method: "GET",
