@@ -148,6 +148,16 @@ async function readFiles(prefix, files) {
 
 async function writeFile(path, body) {
     path = makePath(path);
+
+    // For binary files with Uint8Array body, convert to base64 for JSON transport
+    let bodyToSend = body;
+    if (isBinaryFile(path) && (body instanceof Uint8Array || ArrayBuffer.isView(body))) {
+        // Convert Uint8Array to base64 string for JSON transport
+        bodyToSend = binaryToString(new Blob([body]));
+        // binaryToString is async, need to await it
+        bodyToSend = await bodyToSend;
+    }
+
     if (body && body.length > 4 * 1024 * 1024) {
         const encodedPath = encodeURIComponent(path.slice(1));
         const { url } = await fetchJSON(`/api/aws_upload?path=${encodedPath}`, {
@@ -157,6 +167,8 @@ async function writeFile(path, body) {
         let data = body;
         if (typeof body === "string" && isBinaryFile(path)) {
             data = stringToBinary(body);
+        } else if (body instanceof Uint8Array || ArrayBuffer.isView(body)) {
+            data = new Blob([body]);
         }
         await fetch(url, {
             method: "PUT",
@@ -169,7 +181,7 @@ async function writeFile(path, body) {
             cache: "no-store",
             body: JSON.stringify([{
                 path,
-                body
+                body: bodyToSend
             }])
         });
     }
