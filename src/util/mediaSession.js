@@ -141,36 +141,51 @@ export function useMediaSession({ playerRef, title, artist, artworkUrl, enabled 
         }
     }, [enabled, title, artist, artworkUrl]);
 
-    // Update position state periodically
+    // Update position state
     useEffect(() => {
         if (!enabled || !playerRef || !("mediaSession" in navigator)) {
             return;
         }
 
         const updatePositionState = () => {
-            if (!playerRef.duration || isNaN(playerRef.duration)) {
-                return;
-            }
             try {
+                if (!playerRef.duration || isNaN(playerRef.duration)) {
+                    // Clear position state if duration is not available (e.g. loading new track)
+                    // This prevents the notification from showing the end of the previous track
+                    navigator.mediaSession.setPositionState(null);
+                    return;
+                }
+
                 navigator.mediaSession.setPositionState({
                     duration: playerRef.duration,
                     playbackRate: playerRef.playbackRate || 1,
                     position: playerRef.currentTime || 0
                 });
-            } catch {
+            } catch (err) {
                 // setPositionState may throw if duration is 0 or invalid
+                console.warn("[MediaSession] Failed to update position state:", err);
             }
         };
 
-        // Update on timeupdate events
-        playerRef.addEventListener("timeupdate", updatePositionState);
-        playerRef.addEventListener("loadedmetadata", updatePositionState);
-        playerRef.addEventListener("ratechange", updatePositionState);
+        const events = [
+            "play",
+            "pause",
+            "seeking",
+            "seeked",
+            "ratechange",
+            "durationchange",
+            "loadedmetadata",
+            "loadstart",
+            "emptied"
+        ];
+
+        events.forEach(event => playerRef.addEventListener(event, updatePositionState));
+
+        // Initial update
+        updatePositionState();
 
         return () => {
-            playerRef.removeEventListener("timeupdate", updatePositionState);
-            playerRef.removeEventListener("loadedmetadata", updatePositionState);
-            playerRef.removeEventListener("ratechange", updatePositionState);
+            events.forEach(event => playerRef.removeEventListener(event, updatePositionState));
         };
     }, [enabled, playerRef]);
 

@@ -101,6 +101,13 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     }, [show, path]);
 
     useEffect(() => {
+        PlayerStore.update(s => {
+            s.mediaPath = "";
+            s.subtitles = "";
+        });
+    }, [path]);
+
+    useEffect(() => {
         if (data && data.path) {
             PlayerStore.update(s => {
                 s.mediaPath = data && data.path;
