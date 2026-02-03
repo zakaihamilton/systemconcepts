@@ -257,7 +257,7 @@ export default function FilterBar({ hideYears = false }) {
             const type = findType(types);
             return {
                 main: type?.name,
-                sub: translations.TYPE
+                sub: translations.ATTRIBUTE
             };
         }
         return {

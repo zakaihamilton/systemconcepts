@@ -1418,6 +1418,10 @@ export default {
             "value": "Filtro"
         },
         {
+            "id": "ATTRIBUTE",
+            "value": "Atributo"
+        },
+        {
             "id": "ATTRIBUTES",
             "value": "Atributos"
         },

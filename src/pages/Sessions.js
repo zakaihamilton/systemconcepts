@@ -14,7 +14,6 @@ import Image from "@widgets/Image";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import clsx from "clsx";
 import { useLocalStorage } from "@util/store";
-import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
@@ -201,12 +200,10 @@ export default function SessionsPage() {
             // Pre-computed display values
             summary: item.summary,
             tags: item.tags || [],
-            tagsString: (item.tags || []).join(" "),
+            tagsString: item.tagsString,
             formattedDuration: item.type === "image"
                 ? ""
-                : (item.duration > 1
-                    ? formatDuration(item.duration * 1000, true)
-                    : translations.UNKNOWN),
+                : (item.durationStr || translations.UNKNOWN),
             isPlaying
         };
     }, [translations, session]);

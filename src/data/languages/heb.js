@@ -1430,6 +1430,10 @@ export default {
             "value": "סינון"
         },
         {
+            "id": "ATTRIBUTE",
+            "value": "מאפיין"
+        },
+        {
             "id": "ATTRIBUTES",
             "value": "מאפיינים"
         },

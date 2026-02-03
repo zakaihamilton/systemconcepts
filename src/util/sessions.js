@@ -1,5 +1,6 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
+import { formatDuration } from "@util/string";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -302,6 +303,8 @@ export function useSessions(depends = [], options = {}) {
 
                     session.isHebrew = /[\u0590-\u05FF]/.test(session.name);
                     session.hasDuration = parseInt(session.duration) > 1;
+                    session.tagsString = (session.tags || []).join(" ");
+                    session.durationStr = session.duration > 1 ? formatDuration(session.duration * 1000, true) : null;
                 }
             }
 
@@ -363,6 +366,8 @@ export function useSessions(depends = [], options = {}) {
 
                             session.isHebrew = /[\u0590-\u05FF]/.test(session.name);
                             session.hasDuration = parseInt(session.duration) > 1;
+                            session.tagsString = (session.tags || []).join(" ");
+                            session.durationStr = session.duration > 1 ? formatDuration(session.duration * 1000, true) : null;
                         }
 
                         return dataSessions;
