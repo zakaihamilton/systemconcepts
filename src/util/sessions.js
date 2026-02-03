@@ -23,7 +23,6 @@ export const SessionsStore = new Store({
     busy: false,
     counter: 0,
     syncCounter: 0,
-    groupsMetadata: "",
     groupsHash: "",
     showFilterDialog: false,
     order: "asc",

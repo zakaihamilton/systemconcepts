@@ -16,16 +16,7 @@ import clsx from "clsx";
 
 export default function FilterBar({ hideYears = false }) {
     const translations = useTranslations();
-    const { typeFilter, yearFilter, groupFilter, sessions, groups, groupsMetadata, showFilterDialog } = SessionsStore.useState();
-
-    // Parse groups metadata
-    const groupMetadata = useMemo(() => {
-        try {
-            return groupsMetadata ? JSON.parse(groupsMetadata) : [];
-        } catch {
-            return [];
-        }
-    }, [groupsMetadata]);
+    const { typeFilter, yearFilter, groupFilter, sessions, groups, showFilterDialog } = SessionsStore.useState();
 
     const types = useMemo(() => [
         { id: "audio", name: translations.AUDIO, icon: <AudioIcon /> },
@@ -128,14 +119,14 @@ export default function FilterBar({ hideYears = false }) {
 
     const groupMenuItems = useMemo(() => {
         return (groups || []).map(group => {
-            const metadata = (groupMetadata || []).find(item => item.name === group.name) || {};
             const capitalizedName = group.name[0].toUpperCase() + group.name.slice(1);
+            const groupColor = group.color;
             return {
                 id: group.name,
                 name: capitalizedName,
                 checked: groupFilter.includes(group.name),
                 selected: groupFilter,
-                backgroundColor: metadata.color,
+                background: groupColor,
                 onClick: () => {
                     SessionsStore.update(s => {
                         if (s.groupFilter.includes(group.name)) {
@@ -147,7 +138,7 @@ export default function FilterBar({ hideYears = false }) {
                 }
             };
         });
-    }, [groups, groupMetadata, groupFilter]);
+    }, [groups, groupFilter]);
 
     const typeMenuItems = useMemo(() => {
         const mapItems = (list, insideHeader = false) => {

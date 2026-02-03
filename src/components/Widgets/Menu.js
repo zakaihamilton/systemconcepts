@@ -1,4 +1,4 @@
-import { useState, Children, cloneElement } from "react";
+import { useState, useEffect, useRef, Children, cloneElement } from "react";
 import { styled } from '@mui/material/styles';
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -28,6 +28,8 @@ const StyledMenuRoot = styled(Menu)(({ theme: _theme }) => ({
         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         border: `1px solid var(--border-color)`,
         backgroundColor: 'var(--bar-background)',
+        maxHeight: "50vh",
+        overflow: "auto",
         '& .MuiList-root': {
             padding: '4px 0',
         },
@@ -57,6 +59,20 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
     const hoverEnabled = clickEnabled && hover;
     const [hoverRef, setHoverRef] = useState(null);
     const [expanded, setExpanded] = useState({});
+    const prevExpandedRef = useRef({});
+
+    useEffect(() => {
+        const prevExpanded = prevExpandedRef.current;
+        const newlyExpandedId = Object.keys(expanded).find(id => expanded[id] && !prevExpanded[id]);
+
+        if (newlyExpandedId) {
+            const element = document.querySelector(`[data-menu-id="${newlyExpandedId}"]`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        prevExpandedRef.current = expanded;
+    }, [expanded]);
 
     const handleToggleExpand = (id) => {
         setExpanded(prev => ({
@@ -98,7 +114,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
         const hasAnyIcon = hasSelector || hasIcon;
         return (itemsList || []).flatMap((item, index, list) => {
             const isLast = list.length - 1 === index;
-            const { checked, radio, header, divider, name, target, icon, items: subItems, onClick: itemOnClick, id, menu: _menu, backgroundColor, description, selected, expanded: itemExpanded, highlight, ...props } = item;
+            const { checked, radio, header, divider, name, target, icon, items: subItems, onClick: itemOnClick, id, menu: _menu, backgroundColor, background, description, selected, expanded: itemExpanded, highlight, ...props } = item;
             const selectedItem = typeof selected !== "undefined" ? selected : menuSelected;
             const selectedArray = Array.isArray(selectedItem);
             const isSelected = selectedArray ? selectedItem.includes(id) : selectedItem === id;
@@ -124,13 +140,14 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                     itemOnClick(event);
                 }
             };
-            const style = { backgroundColor };
+            const style = { backgroundColor, background };
 
             const rightIcon = header && hasSubItems ? (isExpanded ? <ExpandMoreIcon /> : <ChevronRightIcon />) : null;
 
             const result = [
                 <MenuItem
                     key={id}
+                    data-menu-id={id}
                     className={clsx(styles.menuItem, isSelectedFinal && styles.selected, header && styles.headerItem)}
                     component={target ? Link : "div"}
                     underline="none"
@@ -173,7 +190,7 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
                             {rightIcon}
                         </ListItemIcon>
                     )}
-                    {backgroundColor && <div className={styles.backgroundBorder} style={style} />}
+                    {(backgroundColor || background) && <div className={styles.backgroundBorder} style={style} />}
                 </MenuItem>,
                 divider && !isLast && <Divider key={"_" + id + "_"} className={styles.divider} />
             ];
