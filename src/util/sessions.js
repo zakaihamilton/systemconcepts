@@ -297,7 +297,7 @@ export function useSessions(depends = [], options = {}) {
                     if (personal) {
                         session.position = personal.position;
                         if (personal.duration) {
-                            session.duration = personal.duration;
+                            session.duration = Math.max(session.duration || 0, personal.duration);
                         }
                     }
                 }
@@ -355,7 +355,7 @@ export function useSessions(depends = [], options = {}) {
                             if (personal) {
                                 session.position = personal.position;
                                 if (personal.duration) {
-                                    session.duration = personal.duration;
+                                    session.duration = Math.max(session.duration || 0, personal.duration);
                                 }
                             }
                         }

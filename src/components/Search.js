@@ -17,7 +17,7 @@ export const SearchStore = new Store({
     search: {}
 });
 
-export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange, onEnter }) {
+export function SearchWidget({ isDesktop, placeholder, value, onChange, onEnter }) {
     const [focused, setFocused] = useState(false);
     const inputRef = useRef(null);
     const containerRef = useRef(null);
@@ -55,7 +55,7 @@ export function SearchWidget({ isDesktop, placeholder, defaultValue, onChange, o
             <InputBase
                 inputRef={inputRef}
                 placeholder={placeholder}
-                defaultValue={defaultValue}
+                value={value}
                 onChange={onChange}
                 onKeyDown={onKeyDown}
                 onFocus={handleFocus}
@@ -86,8 +86,10 @@ export function useSearch(name, updateCallback, visible = true, options = {}) {
     const searchTerm = search[effectiveName] || "";
     const [value, setValue] = useState(searchTerm);
     const translations = useTranslations();
-    // Track initial value for uncontrolled input
-    const [initialValue] = useState(searchTerm);
+
+    useEffect(() => {
+        setValue(searchTerm);
+    }, [searchTerm]);
 
     useTimeout(() => {
         SearchStore.update(s => {
@@ -106,11 +108,11 @@ export function useSearch(name, updateCallback, visible = true, options = {}) {
         <SearchWidget
             isDesktop={isDesktop}
             placeholder={translations.SEARCH + "…"}
-            defaultValue={initialValue}
+            value={value}
             onChange={onChangeText}
             onEnter={onEnter}
         />
-    ), [isDesktop, initialValue, onChangeText, translations.SEARCH, onEnter]);
+    ), [isDesktop, value, onChangeText, translations.SEARCH, onEnter]);
 
     const toolbarItems = useMemo(() => [
         {
