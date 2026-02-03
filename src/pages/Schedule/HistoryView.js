@@ -17,13 +17,13 @@ export default function HistoryView() {
     const [history, , , , removeFromHistory] = useRecentHistory();
     const { session } = PlayerStore.useState();
 
-    const itemPath = item => {
+    const itemPath = useCallback(item => {
         return `session?group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
-    };
+    }, []);
 
     const gotoItem = useCallback(item => {
         addPath(itemPath(item));
-    }, []);
+    }, [itemPath]);
 
     const [sessions] = useSessions([], { filterSessions: true, skipSync: true, active: false, showToolbar: false });
     const search = useSearch("schedule");

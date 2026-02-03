@@ -335,17 +335,24 @@ function Article({
         `);
         doc.close();
 
+        let cleanupExecuted = false;
         const cleanup = (e) => {
-            if (e.data === "print-complete") {
-                setTimeout(() => {
-                    if (document.body.contains(iframe)) {
-                        document.body.removeChild(iframe);
-                    }
-                }, 5000);
-                window.removeEventListener("message", cleanup);
-            }
+            if (cleanupExecuted) return;
+            if (e && e.data !== "print-complete") return;
+
+            cleanupExecuted = true;
+            setTimeout(() => {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+            }, 5000);
+            window.removeEventListener("message", cleanup);
         };
+
         window.addEventListener("message", cleanup);
+
+        // Fallback cleanup after 30 seconds to prevent memory leak
+        setTimeout(() => cleanup(), 30000);
     }, [contentRef]);
 
     const handleExport = useCallback(() => {
