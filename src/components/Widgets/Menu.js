@@ -75,10 +75,12 @@ export default function MenuWidget({ hover, items, children, onClick, selected: 
     }, [expanded]);
 
     const handleToggleExpand = (id) => {
-        setExpanded(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }));
+        setExpanded(prev => {
+            const isExpanded = !prev[id];
+            return {
+                [id]: isExpanded
+            };
+        });
     };
 
     const handleClick = (event) => {

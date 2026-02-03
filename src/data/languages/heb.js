@@ -1430,6 +1430,10 @@ export default {
             "value": "סינון"
         },
         {
+            "id": "ATTRIBUTES",
+            "value": "מאפיינים"
+        },
+        {
             "id": "CLEAR_FILTER",
             "value": "נקה סינון"
         },

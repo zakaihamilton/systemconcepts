@@ -19,11 +19,20 @@ export default function FilterBar({ hideYears = false }) {
     const { typeFilter, yearFilter, groupFilter, sessions, groups, showFilterDialog } = SessionsStore.useState();
 
     const types = useMemo(() => [
-        { id: "audio", name: translations.AUDIO, icon: <AudioIcon /> },
-        { id: "video", name: translations.VIDEO, icon: <MovieIcon /> },
-        { id: "image", name: translations.IMAGE, icon: <InsertPhotoOutlinedIcon /> },
-        { id: "overview", name: translations.OVERVIEW, icon: <MovieFilterIcon /> },
-        { id: "ai", name: translations.AI, icon: <AutoAwesomeIcon />, divider: true },
+        {
+            id: "category_header",
+            name: translations.TYPES,
+            header: true,
+            highlight: ["audio", "video", "image", "overview", "ai"].some(id => typeFilter.includes(id)),
+            expanded: ["audio", "video", "image", "overview", "ai"].some(id => typeFilter.includes(id)),
+            items: [
+                { id: "audio", name: translations.AUDIO, icon: <AudioIcon /> },
+                { id: "video", name: translations.VIDEO, icon: <MovieIcon /> },
+                { id: "image", name: translations.IMAGE, icon: <InsertPhotoOutlinedIcon /> },
+                { id: "overview", name: translations.OVERVIEW, icon: <MovieFilterIcon /> },
+                { id: "ai", name: translations.AI, icon: <AutoAwesomeIcon /> }
+            ]
+        },
         {
             id: "image_header",
             name: translations.EXCLUDE,
@@ -233,7 +242,7 @@ export default function FilterBar({ hideYears = false }) {
     }, [years, yearFilter]);
 
     const getTypeLabel = () => {
-        if (typeFilter.length === 0) return translations.TYPES;
+        if (typeFilter.length === 0) return translations.ATTRIBUTES;
         if (typeFilter.length === 1) {
             const findType = (list) => {
                 for (const item of list) {
@@ -253,7 +262,7 @@ export default function FilterBar({ hideYears = false }) {
         }
         return {
             main: `${typeFilter.length} ${translations.SELECTED}`,
-            sub: translations.TYPES
+            sub: translations.ATTRIBUTES
         };
     };
 
