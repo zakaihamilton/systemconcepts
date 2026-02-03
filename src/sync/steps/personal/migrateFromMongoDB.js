@@ -23,15 +23,24 @@ export async function migrateFromMongoDB(userid, remoteManifest, localPath, canU
     const remotePathSet = new Set(Array.isArray(remoteManifest) ? remoteManifest.map(f => f.path) : []);
     addSyncLog(`Migration check: Remote manifest has ${remotePathSet.size} files (Array check: ${Array.isArray(remoteManifest)})`, "verbose");
 
-    // Check if migration has already occurred by looking at remote manifest
-    // If the user has files in the personal folder, we assume migration is done.
+    // Check if migration has already occurred by looking for migration.json in remote manifest
+    // This file is synced to remote upon completion, so its existence means we are done.
+    const hasMigrationFile = remotePathSet.has("/migration.json") || remotePathSet.has("migration.json");
+
+    if (hasMigrationFile) {
+        console.log("[Personal] Remote migration.json exists, skipping migration.");
+        return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+    }
+
+    // Fallback: Check if *any* remote files exist (for legacy cases where migration.json might be missing)
     const hasRemoteFiles = Array.from(remotePathSet).some(key =>
-        key.endsWith(".json")
+        key.endsWith(".json") && !key.endsWith("migration.json")
     );
 
     if (hasRemoteFiles) {
-        console.log("[Personal] Remote personal files exist, but proceeding to scan in case of broken migration");
-        // return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
+        console.log("[Personal] Remote personal files exist (but no migration.json), proceeding to scan in case of broken migration");
+        // We continue here because the absence of migration.json might imply an incomplete migration
+        // or a very old state. We rely on the internal logic to handle duplicates.
     }
 
     const safeWriteMigration = async (data) => {

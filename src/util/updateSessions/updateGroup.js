@@ -223,7 +223,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                                 } else {
                                     duration = parseFloat(content);
                                 }
-                            } catch (e) {
+                            } catch {
                                 duration = parseFloat(content);
                             }
                         } catch (err) {
