@@ -359,7 +359,7 @@ export default function Account({ redirect }) {
                                     <ListItem key={pk.id}>
                                         <ListItemText primary={pk.name} secondary={new Date(pk.createdAt).toLocaleDateString()} />
                                         <ListItemSecondaryAction>
-                                            <IconButton edge="end" aria-label="delete" onClick={() => onDeletePasskey(pk.id)}>
+                                            <IconButton edge="end" aria-label={`${translations.DELETE} ${pk.name}`} onClick={() => onDeletePasskey(pk.id)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         </ListItemSecondaryAction>
