@@ -220,7 +220,7 @@ export default function SchedulePage() {
 
     return <div className={styles.root}>
         {statusBar}
-        {!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}
+        {!isMobile && <FilterBar hideYears={viewMode !== "tracks" && viewMode !== "history"} />}
         <div className={clsx(styles.content, isMobile && styles.mobile, viewMode === "tracks" && styles.noScroll)}>
             {!loading && viewMode === "year" && <YearView sessions={items} date={date} store={ScheduleStore} playingSession={playingSession} />}
             {!loading && viewMode === "month" && <MonthView sessions={items} date={date} store={ScheduleStore} playingSession={playingSession} />}
@@ -237,6 +237,6 @@ export default function SchedulePage() {
             {!loading && viewMode === "history" && <HistoryView />}
             {!!loading && loadingElement}
         </div>
-        {!!isMobile && <FilterBar hideYears={viewMode !== "tracks"} />}
+        {!!isMobile && <FilterBar hideYears={viewMode !== "tracks" && viewMode !== "history"} />}
     </div>;
 }

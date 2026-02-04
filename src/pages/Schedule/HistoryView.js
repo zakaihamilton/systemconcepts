@@ -2,7 +2,7 @@ import { useMemo, useCallback } from "react";
 import { useTranslations } from "@util/translations";
 import styles from "./HistoryView.module.scss";
 import { useRecentHistory } from "@util/history";
-import { useSessions } from "@util/sessions";
+import { useSessions, SessionsStore } from "@util/sessions";
 import { PlayerStore } from "@pages/Player";
 import { addPath } from "@util/pages";
 import { isDateToday, diffDays } from "@util/date";
@@ -26,6 +26,7 @@ export default function HistoryView() {
     }, [itemPath]);
 
     const [sessions] = useSessions([], { filterSessions: true, skipSync: true, active: false, showToolbar: false });
+    const { yearFilter } = SessionsStore.useState();
     const search = useSearch("schedule");
 
     const groupedHistory = useMemo(() => {
@@ -56,6 +57,14 @@ export default function HistoryView() {
                 const name = (session ? session.name : item.name).toLowerCase();
                 const group = (session ? session.group : item.group).toLowerCase();
                 return name.includes(searchLower) || group.includes(searchLower);
+            });
+        }
+
+        // Apply year filter
+        if (yearFilter.length > 0) {
+            filteredHistory = filteredHistory.filter(item => {
+                const session = sessions.find(s => s.group === item.group && s.date === item.date && s.name === item.name);
+                return session && yearFilter.includes(session.year);
             });
         }
 
