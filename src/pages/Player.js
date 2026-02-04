@@ -116,10 +116,10 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
         }
     }, [data]);
 
-    const [, addToHistory] = useRecentHistory();
+    const [, addToHistory, loadingHistory] = useRecentHistory();
 
     useEffect(() => {
-        if (group && date && name) {
+        if (group && date && name && !loadingHistory) {
             PlayerStore.update(s => {
                 const session = { group, date, name };
                 console.log("sesion playing", session);
@@ -127,7 +127,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
                 addToHistory(session);
             });
         }
-    }, [group, date, name, addToHistory]);
+    }, [group, date, name, addToHistory, loadingHistory]);
 
     const color = groups.find(item => item.name === group)?.color;
 

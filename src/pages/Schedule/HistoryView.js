@@ -103,7 +103,7 @@ export default function HistoryView() {
 
                             return (
                                 <div
-                                    key={item.key || `${item.group}-${item.date}-${item.name}`}
+                                    key={item.key || `${item.group}-${item.date}-${item.name}-${item.timestamp}`}
                                     className={styles.timelineEntry}
                                     style={{ "--dot-color": item.color || "var(--neutral-400)" }}
                                 >

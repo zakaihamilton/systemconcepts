@@ -12,9 +12,14 @@ export function useRecentHistory() {
         }
         writeHistory(history => {
             let items = history || [];
-            items = items.filter(item => item.group !== session.group || item.name !== session.name || item.date !== session.date);
+            const lastItem = items[0];
+            const isSameSession = lastItem && lastItem.group === session.group && lastItem.name === session.name && lastItem.date === session.date;
+            if (isSameSession) {
+                return items;
+            }
+            items = [...items];
             items.unshift({ ...session, timestamp: Date.now() });
-            items = items.slice(0, 100);
+            items = items.slice(0, 300);
             return items;
         });
     }, [writeHistory]);
