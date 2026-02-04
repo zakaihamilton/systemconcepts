@@ -241,19 +241,23 @@ export function useFile(urlArgument, depends = [], mapping) {
     const write = useCallback(async (data, path) => {
         path = path || url;
         if (typeof data === "function") {
-            let updatedData = await new Promise((resolve) => {
+            let stringData = "";
+            await new Promise((resolve) => {
                 setState(state => {
                     const updatedData = data(state.data);
-                    resolve(updatedData);
+                    if (typeof updatedData !== "string") {
+                        stringData = JSON.stringify(updatedData, null, 4);
+                    }
+                    else {
+                        stringData = updatedData;
+                    }
+                    resolve();
                     state.data = updatedData;
                     return { ...state };
                 });
             });
-            if (typeof updatedData !== "string") {
-                updatedData = JSON.stringify(updatedData, null, 4);
-            }
             await storageMethods.createFolderPath(path);
-            await storageMethods.writeFile(path, updatedData);
+            await storageMethods.writeFile(path, stringData);
         }
         else {
             let stringData = data;
