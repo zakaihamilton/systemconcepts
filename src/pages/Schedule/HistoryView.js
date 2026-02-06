@@ -99,7 +99,7 @@ export default function HistoryView() {
             name: translations[key],
             items
         }));
-    }, [history, translations, sessions, search]);
+    }, [history, translations, sessions, search, yearFilter]);
 
     return (
         <div className={styles.historyView}>
