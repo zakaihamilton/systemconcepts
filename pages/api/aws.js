@@ -62,7 +62,7 @@ export default async function AWS_API(req, res) {
                 if (itemPath) itemPath = decodeURIComponent(itemPath);
                 if (!validateUserAccess(user, itemPath, req.method)) {
                     console.log(`[AWS API] ACCESS DENIED: User ${user.id} cannot ${req.method} batch item path: ${itemPath}`);
-                    throw "ACCESS_DENIED: Batch item unauthorized";
+                    throw "ACCESS_DENIED: Batch item unauthorized for path: " + itemPath;
                 }
             }
         }
