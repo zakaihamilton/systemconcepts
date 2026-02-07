@@ -172,7 +172,7 @@
     }
 }
 
-.paragraph {
+%interactive-block {
     border: 1px solid transparent;
     padding: 8px 16px;
     padding-right: 48px;
@@ -199,6 +199,18 @@
         box-shadow: none;
         background-color: var(--background-paper);
     }
+}
+
+.paragraph {
+    @extend %interactive-block;
+}
+
+.header {
+    @extend %interactive-block;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: bold;
+    padding: 16px 16px;
 }
 
 .selected {

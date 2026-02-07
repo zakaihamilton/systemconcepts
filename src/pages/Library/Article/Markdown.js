@@ -910,17 +910,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                         )}
                         <Box
                             component={tag}
-                            className={paragraphSelected ? styles.selected : ''}
-                            sx={{
-                                mt: 3,
-                                mb: 2,
-                                fontWeight: 'bold',
-                                position: 'relative',
-                                backgroundColor: 'var(--background-paper)',
-                                padding: '16px 16px',
-                                borderRadius: '8px',
-                                cursor: 'pointer'
-                            }}
+                            className={`${styles.header} ${paragraphSelected ? styles.selected : ''}`}
                             data-paragraph-index={paragraphIndex}
                             data-paragraph-text={paragraphText}
                         >
