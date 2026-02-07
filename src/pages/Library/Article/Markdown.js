@@ -918,7 +918,8 @@ export default React.memo(function Markdown({ children, search, currentParagraph
                                 position: 'relative',
                                 backgroundColor: 'var(--background-paper)',
                                 padding: '16px 16px',
-                                borderRadius: '8px'
+                                borderRadius: '8px',
+                                cursor: 'pointer'
                             }}
                             data-paragraph-index={paragraphIndex}
                             data-paragraph-text={paragraphText}
