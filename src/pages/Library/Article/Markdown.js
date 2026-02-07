@@ -507,7 +507,7 @@ const rehypeArticleEnrichment = () => {
         const visitAndSplit = (nodes) => {
             const newNodes = [];
             nodes.forEach(node => {
-                if (node.type === "element" && (node.tagName === "p" || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr")) {
+                if (node.type === "element" && (node.tagName === "p" || node.tagName === "pre" || node.tagName === "table" || node.tagName === "hr" || /^h[1-6]$/.test(node.tagName))) {
                     paragraphIndex++;
                     node.properties = { ...node.properties, dataParagraphIndex: paragraphIndex };
                     newNodes.push(node);
