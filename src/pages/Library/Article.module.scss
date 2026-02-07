@@ -113,10 +113,10 @@ h1.title {
 
 .tagNumber {
     padding: 2px 8px;
-    background-color: var(--primary-main);
-    color: var(--primary-contrast-text);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
+    background-color: var(--primary-main) !important;
+    color: var(--primary-contrast-text) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--shadow-sm) !important;
     font-weight: 800;
     font-size: 0.875rem;
     display: inline-block;
