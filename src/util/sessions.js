@@ -282,8 +282,12 @@ export function useSessions(depends = [], options = {}) {
                     // Skip if group is not actually bundled
                     if (!bundledGroups.has(session.group)) continue;
 
-                    if (session.image && cdn.url && (!session.thumbnail || session.thumbnail === true)) {
-                        session.thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                    if (session.image && cdn.url) {
+                        session.imagePath = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+
+                        if (!session.thumbnail || session.thumbnail === true) {
+                            session.thumbnail = session.imagePath;
+                        }
                     }
 
                     if (groupInfo?.color && !session.color) {
@@ -344,8 +348,12 @@ export function useSessions(depends = [], options = {}) {
                             const session = dataSessions[i];
 
                             // Update thumbnail if CDN URL exists
-                            if (session.image && cdn.url && (!session.thumbnail || session.thumbnail === true)) {
-                                session.thumbnail = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+                            if (session.image && cdn.url) {
+                                session.imagePath = cdn.url + encodeURI(session.image.path.replace("/aws", ""));
+
+                                if (!session.thumbnail || session.thumbnail === true) {
+                                    session.thumbnail = session.imagePath;
+                                }
                             }
 
                             // Add color if available and not already set

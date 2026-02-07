@@ -4,7 +4,7 @@ import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import Link from "@mui/material/Link";
 
-export default function ImageWidget({ className, onClick, href, loading, path, width, height, alt, showProgress = true, onLoad: onLoadCallback }) {
+export default function ImageWidget({ className, onClick, href, loading, path, thumbnail, width, height, alt, showProgress = true, onLoad: onLoadCallback }) {
     const [imageLoading, setImageLoading] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
@@ -67,9 +67,11 @@ export default function ImageWidget({ className, onClick, href, loading, path, w
     const clickable = !!onClick;
 
     return <Link underline="none" href={href} color="initial" style={buttonStyle} className={clsx(styles.root, className, clickable && styles.clickable)} disabled={(!hasPath || !!error)} onClick={clickable ? onClick : undefined}>
-        {showProgress && (!!isExternalLoading || (!!imageLoading && !loaded)) && <Progress fullscreen={true} />}
+        {showProgress && (!!isExternalLoading || (!!imageLoading && !loaded && !thumbnail)) && <Progress fullscreen={true} />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {hasPath && !error && <img loading={loadingAttribute} key={path} ref={imgRef} draggable={false} style={imageStyle} className={clsx(styles.img, !loaded && styles.hidden)} onError={onError} onLoad={onLoad} src={path} alt={alt} />}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {thumbnail && thumbnail !== path && <img src={thumbnail} style={imageStyle} className={clsx(styles.img, loaded && styles.hidden)} alt={alt} />}
         {showAlt && <div className={styles.alt}>{alt}</div>}
     </Link>;
 }

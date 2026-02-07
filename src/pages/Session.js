@@ -142,6 +142,8 @@ export default function SessionPage({ group, year, date, name }) {
         }
     };
 
+    const imagePath = session.imagePath || thumbnail;
+
     return <div className={styles.root} {...swipeHandlers}>
         <div className={styles.card} style={{ "--group-color": session.color }}>
             <div className={styles.header}>
@@ -173,9 +175,10 @@ export default function SessionPage({ group, year, date, name }) {
                 )}
             </div>
             <div className={styles.content}>
-                {thumbnail && <div className={styles.media}>
+                {!!imagePath && <div className={styles.media}>
                     <Image
-                        path={thumbnail}
+                        path={imagePath}
+                        thumbnail={thumbnail}
                         className={styles.thumbnail}
                         width="100%"
                         height="auto"
