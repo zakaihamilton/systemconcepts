@@ -133,7 +133,7 @@ export default function Research() {
                         minResetIndex.current = Infinity;
                     }
                     resetTimer.current = null;
-                }, 200);
+                }, 10);
             }
         }
     }, []);
@@ -739,7 +739,7 @@ export default function Research() {
         }
     };
 
-    const gotoArticle = (tag, paragraphId) => {
+    const gotoArticle = useCallback((tag, paragraphId) => {
         if (tag._id && tag._id.startsWith("session|")) {
             const parts = tag._id.split("|");
             if (parts.length >= 5) {
@@ -760,7 +760,7 @@ export default function Research() {
                 });
             }
         }
-    };
+    }, []);
 
     const filteredResults = useMemo(() => {
         let res;
@@ -906,6 +906,14 @@ export default function Research() {
             listRef.current.scrollToItem(0, "start");
         }
     }, [listRef]);
+
+    const itemData = useMemo(() => ({
+        results: filteredResults,
+        gotoArticle,
+        setRowHeight,
+        listRef,
+        highlight
+    }), [filteredResults, gotoArticle, setRowHeight, listRef, highlight]);
 
     const toolbarItems = useMemo(() => [
         {
@@ -1120,13 +1128,7 @@ export default function Research() {
                             }
                             setShowScrollTop(visibleStartIndex > 0);
                         }}
-                        itemData={{
-                            results: filteredResults,
-                            gotoArticle,
-                            setRowHeight,
-                            listRef,
-                            highlight
-                        }}
+                        itemData={itemData}
                     >
                         {SearchResultItem}
                     </VariableSizeList>
