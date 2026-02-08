@@ -3,16 +3,16 @@ import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 import { error } from "@util/logger";
+import { NextResponse } from "next/server";
 
 const component = "summary";
 
-export default async function SUMMARY_API(req, res) {
+export async function GET(req) {
     try {
-        const { query } = req;
-        const { path } = query;
+        const path = req.nextUrl.searchParams.get("path");
+        const headers = req.headers;
+        const cookie = headers.get("cookie");
 
-        const { headers } = req || {};
-        const { cookie } = headers || {};
         if (!cookie) {
             throw "ACCESS_DENIED";
         }
@@ -29,14 +29,17 @@ export default async function SUMMARY_API(req, res) {
             throw "ACCESS_DENIED";
         }
 
-        const decodedPath = decodeURIComponent(path);
-        validatePathAccess(decodedPath);
-        const data = await downloadData({ path: decodedPath });
-        res.setHeader("Content-Type", "text/markdown");
-        res.status(200).send(data);
-    }
-    catch (err) {
+        validatePathAccess(path);
+        const data = await downloadData({ path });
+
+        return new NextResponse(data, {
+            status: 200,
+            headers: {
+                "Content-Type": "text/markdown"
+            }
+        });
+    } catch (err) {
         error({ component, error: "error", err });
-        res.status(404).end();
+        return new NextResponse(null, { status: 404 });
     }
 }

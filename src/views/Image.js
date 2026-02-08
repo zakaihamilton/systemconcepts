@@ -8,7 +8,7 @@ import { ContentSize } from "@components/Page/Content";
 import Download from "@widgets/Download";
 import { exportData, exportFile } from "@util/importExport";
 import { makePath } from "@util/path";
-import { useFetchJSON } from "@util/fetch";
+import { getPlayerMetadata } from "@actions/player";
 import Message from "@widgets/Message";
 import { useTranslations } from "@util/translations";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -16,18 +16,29 @@ import ErrorIcon from "@mui/icons-material/Error";
 function useImagePath(imageName = "", extension) {
     const { prefix = "sessions", group = "", year = "", date = "", name } = useParentParams();
     const parentPath = useParentPath();
-    let path = "";
-    if (group) {
-        let components = [prefix, group, year, date + " " + name + "." + extension].filter(Boolean).join("/");
-        path = makePath(components).split("/").join("/");
-    }
-    else {
-        path = (parentPath + "/" + imageName + "." + extension).split("/").slice(1).join("/");
-    }
-    const [data] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
-    if (path && group) {
-        path = data && data.path || "";
-    }
+    const [path, setPath] = useState("");
+
+    useEffect(() => {
+        let rawPath = "";
+        if (group) {
+            let components = [prefix, group, year, date + " " + name + "." + extension].filter(Boolean).join("/");
+            rawPath = makePath(components).split("/").join("/");
+        }
+        else {
+            rawPath = (parentPath + "/" + imageName + "." + extension).split("/").slice(1).join("/");
+        }
+
+        if (rawPath && group) {
+            getPlayerMetadata({ path: rawPath }).then(data => {
+                if (data && data.path) {
+                    setPath(data.path);
+                }
+            });
+        }
+        else {
+            setPath(rawPath);
+        }
+    }, [prefix, group, year, date, name, extension, imageName, parentPath]);
 
     return path;
 }

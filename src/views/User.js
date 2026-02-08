@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "@util/translations";
 import EmailIcon from "@mui/icons-material/Email";
 import Input from "@widgets/Input";
@@ -11,7 +11,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import clsx from "clsx";
 import { goBackPage } from "@util/pages";
 import roles from "@data/roles";
-import { useFetchJSON, fetchJSON } from "@util/fetch";
+import { getUsers, updateUsers } from "@actions/users";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import RecentActorsIcon from "@mui/icons-material/RecentActors";
@@ -25,9 +25,22 @@ export default function User({ path = "" }) {
     const translations = useTranslations();
     const parentPath = useParentPath();
     const editAccount = parentPath === "#account";
-    const [data, setData, loading] = useFetchJSON("/api/users", { headers: { id: path } });
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [validate, setValidate] = useState(false);
     const [inProgress, setProgress] = useState(false);
+
+    useEffect(() => {
+        if (path) {
+            setLoading(true);
+            getUsers({ id: path }).then(res => {
+                if (res && !res.err) {
+                    setData(res);
+                }
+                setLoading(false);
+            });
+        }
+    }, [path]);
     const [error, setError] = useState(false);
 
     const roleTypeMapping = item => {
@@ -93,11 +106,7 @@ export default function User({ path = "" }) {
         setValidate(true);
         if (!invalidFields && !inProgress) {
             setProgress(true);
-            fetchJSON("/api/users", {
-                method: "PUT",
-                headers: { id: data.id },
-                body: JSON.stringify(data)
-            }).then(({ err }) => {
+            updateUsers(data).then(({ err }) => {
                 if (err) {
                     console.error(err);
                     throw err;
