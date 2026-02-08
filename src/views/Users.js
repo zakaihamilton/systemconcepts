@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
-import { useFetchJSON, fetchJSON } from "@util/fetch";
+import { getUsers, updateUsers } from "@actions/users";
 import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import { Store } from "pullstate";
@@ -36,8 +36,19 @@ export default function Users() {
     const translations = useTranslations();
     const { roleFilter, viewMode = "table", mode, select, counter } = UsersStore.useState();
     useLocalStorage("UsersStore", UsersStore, ["viewMode"]);
-    const [data, , loading] = useFetchJSON("/api/users", {}, [counter]);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [inProgress, setProgress] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        getUsers().then(result => {
+            if (result && !result.err) {
+                setData(result);
+            }
+            setLoading(false);
+        });
+    }, [counter]);
 
     useEffect(() => {
         UsersStore.update(s => {
@@ -137,12 +148,8 @@ export default function Users() {
     const statusBar = <StatusBar data={data} mapper={mapper} store={UsersStore} />;
 
     const onImport = data => {
-        const body = JSON.stringify(data);
         setProgress(true);
-        fetchJSON("/api/users", {
-            method: "PUT",
-            body
-        }).then(({ err }) => {
+        updateUsers(data).then(({ err }) => {
             if (err) {
                 console.error(err);
                 throw err;

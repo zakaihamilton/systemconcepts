@@ -1,3 +1,4 @@
+"use client";
 import { useEffect } from "react";
 import SideBar from "./SideBar";
 import styles from "./Main.module.scss";
@@ -7,7 +8,6 @@ import { useDeviceType } from "@util/styles";
 import Page from "./Page";
 import { useLanguage } from "@util/language";
 import Sync from "./Sync";
-import Head from "./Head";
 import Bookmarks from "./Bookmarks";
 import Title from "./Title";
 import { useResize } from "@util/size";
@@ -66,7 +66,6 @@ export default function Main() {
     );
 
     return <>
-        <Head />
         <CssBaseline />
         <div className={className}>
             <Title />

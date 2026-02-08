@@ -18,6 +18,8 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import Input from "@widgets/Input";
 import Cookies from "js-cookie";
 import { fetchJSON } from "@util/fetch";
+import { login } from "@actions/login";
+import { listPasskeys, registerOptions, registerVerify, authOptions, authVerify, deletePasskey } from "@actions/passkey";
 import { setPath, setHash } from "@util/pages";
 import LinearProgress from "@mui/material/LinearProgress";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -50,7 +52,7 @@ export default function Account({ redirect }) {
 
     useEffect(() => {
         if (isSignedIn) {
-            fetchJSON("/api/passkey?action=list&id=" + userId)
+            listPasskeys({ id: userId })
                 .then(data => {
                     if (Array.isArray(data)) {
                         setPasskeys(data);
@@ -64,7 +66,7 @@ export default function Account({ redirect }) {
         const idToRegister = targetId || userId;
         setProgress(true);
         try {
-            const options = await fetchJSON("/api/passkey?action=register-options&id=" + idToRegister);
+            const options = await registerOptions({ id: idToRegister });
 
             if (options.err) {
                 throw options.err;
@@ -82,10 +84,7 @@ export default function Account({ redirect }) {
                 name = window.prompt(translations.ENTER_PASSKEY_NAME || "Enter a name for this passkey", defaultName);
             }
 
-            const verification = await fetchJSON("/api/passkey?action=register-verify&id=" + idToRegister, {
-                method: "POST",
-                body: JSON.stringify({ ...attResp, name })
-            });
+            const verification = await registerVerify({ id: idToRegister, response: attResp, name });
 
             if (verification.verified) {
                 setError("PASSKEY_REGISTERED");
@@ -107,9 +106,7 @@ export default function Account({ redirect }) {
         }
         setProgress(true);
         try {
-            await fetchJSON(`/api/passkey?id=${userId}&credentialId=${credentialId}`, {
-                method: "DELETE"
-            });
+            await deletePasskey({ id: userId, credentialId });
             setCounter(c => c + 1);
         } catch (err) {
             console.error(err);
@@ -128,7 +125,7 @@ export default function Account({ redirect }) {
         try {
             let [id] = idState;
             id = id.toLowerCase();
-            const options = await fetchJSON("/api/passkey?action=auth-options&id=" + id);
+            const options = await authOptions({ id });
 
             if (options.err) {
                 throw options.err;
@@ -136,10 +133,7 @@ export default function Account({ redirect }) {
 
             const asseResp = await startAuthentication({ optionsJSON: options });
 
-            const verification = await fetchJSON("/api/passkey?action=auth-verify&id=" + id, {
-                method: "POST",
-                body: JSON.stringify(asseResp)
-            });
+            const verification = await authVerify({ id, response: asseResp });
 
             if (verification.hash) {
                 Cookies.set("id", id, remember && { expires: 60 });
@@ -192,11 +186,9 @@ export default function Account({ redirect }) {
                 const [password] = passwordState;
                 id = id.toLowerCase();
                 setProgress(true);
-                fetchJSON("/api/login", {
-                    headers: {
-                        id,
-                        password: encodeURIComponent(password)
-                    }
+                login({
+                    id,
+                    password
                 }).then(async (data) => {
                     const { err, hash } = data;
                     if (err) {

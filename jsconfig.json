@@ -18,7 +18,7 @@
                 "src/data/*"
             ],
             "@pages/*": [
-                "src/pages/*"
+                "src/views/*"
             ],
             "@storage/*": [
                 "src/storage/*"
@@ -28,6 +28,9 @@
             ],
             "@sync/*": [
                 "src/sync/*"
+            ],
+            "@actions/*": [
+                "src/actions/*"
             ]
         }
     }

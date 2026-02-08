@@ -1,6 +1,7 @@
+"use client";
 import React from "react";
 import Theme from "./Theme";
-import Head from "./Head";
+import ClientHead from "./ClientHead";
 import Main from "./Main";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
@@ -10,7 +11,7 @@ export default function App() {
     return <React.StrictMode>
         <SpeedInsights />
         <Analytics />
-        <Head />
+        <ClientHead />
         <NoSsr>
             <Theme>
                 <Main />
