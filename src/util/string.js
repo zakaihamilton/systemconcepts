@@ -110,3 +110,17 @@ export function preprocessMarkdown(content) {
 
     return result.trim();
 }
+
+export function escapeHTML(text) {
+    if (typeof text !== "string") return text;
+    return text.replace(/[&<>"']/g, function(m) {
+        switch (m) {
+            case '&': return '&amp;';
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '"': return '&quot;';
+            case "'": return '&#039;';
+            default: return m;
+        }
+    });
+}

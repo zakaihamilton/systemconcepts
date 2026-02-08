@@ -3,6 +3,7 @@ import { findRecord, bulkWrite, listCollection } from "@util/mongo";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
+import { escapeHTML } from "@util/string";
 import parseCookie from "@util/cookie";
 import { headers } from "next/headers";
 import bcrypt from "bcryptjs";
@@ -78,16 +79,15 @@ export async function updateUsers(data) {
                      throw "ACCESS_DENIED";
                 }
 
-                const allowedFields = ["firstName", "lastName", "email"];
-                const safeBody = {};
-                allowedFields.forEach(field => {
-                    if (body[field] !== undefined) {
-                        safeBody[field] = body[field];
+                const allowedFields = new Set(["firstName", "lastName", "email"]);
+                Object.keys(body).forEach(key => {
+                    if (!allowedFields.has(key)) {
+                        delete body[key];
                     }
                 });
 
-                Object.keys(body).forEach(key => delete body[key]);
-                Object.assign(body, safeBody);
+                if (body.firstName) body.firstName = escapeHTML(body.firstName);
+                if (body.lastName) body.lastName = escapeHTML(body.lastName);
 
                 body.id = userId;
                 body.hash = record.hash;
