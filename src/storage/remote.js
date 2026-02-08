@@ -1,19 +1,28 @@
 import { fetchJSON } from "@util/fetch";
 import { makePath } from "@util/path";
 
-export default function remoteStorage({ fsEndPoint, deviceId }) {
+export default function remoteStorage({ fsEndPoint, deviceId, action }) {
 
     async function getListing(path, options = {}) {
         path = makePath(path);
         const { useCount } = options;
         const listing = [];
-        const items = await fetchJSON(fsEndPoint, {
-            method: "GET",
-            headers: {
-                query: encodeURIComponent(JSON.stringify({ folder: path })),
-                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1 }))
-            }
-        });
+        let items = [];
+        if (action) {
+            items = await action.get({
+                query: { folder: path },
+                fields: { folder: 1, name: 1, stat: 1, deleted: 1 }
+            });
+        }
+        else {
+            items = await fetchJSON(fsEndPoint, {
+                method: "GET",
+                headers: {
+                    query: encodeURIComponent(JSON.stringify({ folder: path })),
+                    fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1 }))
+                }
+            });
+        }
         for (const item of items) {
             const { name, stat = {}, deleted } = item;
             const itemPath = makePath(path, name);
@@ -21,13 +30,22 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 continue;
             }
             if (useCount && stat.type === "dir") {
-                const children = await fetchJSON(fsEndPoint, {
-                    method: "GET",
-                    headers: {
-                        query: encodeURIComponent(JSON.stringify({ folder: itemPath })),
-                        fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 })),
-                    }
-                });
+                let children = [];
+                if (action) {
+                    children = await action.get({
+                        query: { folder: itemPath },
+                        fields: { folder: 1, name: 1, stat: 1 }
+                    });
+                }
+                else {
+                    children = await fetchJSON(fsEndPoint, {
+                        method: "GET",
+                        headers: {
+                            query: encodeURIComponent(JSON.stringify({ folder: itemPath })),
+                            fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1 })),
+                        }
+                    });
+                }
                 let count = 0;
                 for (const item of children) {
                     if (item.stat.type === "dir") {
@@ -55,13 +73,22 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         // e.g. "metadata/session" matching "metadata/sessions_old"
         const prefix = path.endsWith("/") ? path : path + "/";
 
-        const items = await fetchJSON(fsEndPoint, {
-            method: "GET",
-            headers: {
-                prefix: encodeURIComponent(prefix),
-                fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1, id: 1 }))
-            }
-        });
+        let items = [];
+        if (action) {
+            items = await action.get({
+                prefix,
+                fields: { folder: 1, name: 1, stat: 1, deleted: 1, id: 1 }
+            });
+        }
+        else {
+            items = await fetchJSON(fsEndPoint, {
+                method: "GET",
+                headers: {
+                    prefix: encodeURIComponent(prefix),
+                    fields: encodeURIComponent(JSON.stringify({ folder: 1, name: 1, stat: 1, deleted: 1, id: 1 }))
+                }
+            });
+        }
 
         const validFolders = new Set([path]);
         for (const item of items) {
@@ -95,18 +122,24 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
     async function createFolder(path) {
         path = makePath(path);
         if (!(await exists(path))) {
-            await fetchJSON(fsEndPoint, {
-                method: "PUT",
-                body: JSON.stringify([{
-                    id: path,
-                    name: path.split("/").filter(Boolean).pop(),
-                    folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
-                    stat: {
-                        type: "dir",
-                        mtimeMs: new Date().getTime()
-                    }
-                }])
-            });
+            const body = [{
+                id: path,
+                name: path.split("/").filter(Boolean).pop(),
+                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+                stat: {
+                    type: "dir",
+                    mtimeMs: new Date().getTime()
+                }
+            }];
+            if (action) {
+                await action.update(body);
+            }
+            else {
+                await fetchJSON(fsEndPoint, {
+                    method: "PUT",
+                    body: JSON.stringify(body)
+                });
+            }
         }
     }
 
@@ -116,10 +149,15 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         for (const name of folders) {
             const path = makePath(prefix + name);
             if (JSON.stringify(batch).length > maxBytes) {
-                await fetchJSON(fsEndPoint, {
-                    method: "PUT",
-                    body: batch
-                });
+                if (action) {
+                    await action.update(batch);
+                }
+                else {
+                    await fetchJSON(fsEndPoint, {
+                        method: "PUT",
+                        body: batch
+                    });
+                }
                 batch = [];
             }
             batch.push({
@@ -133,10 +171,15 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             });
         }
         if (batch.length) {
-            await fetchJSON(fsEndPoint, {
-                method: "PUT",
-                body: JSON.stringify(batch)
-            });
+            if (action) {
+                await action.update(batch);
+            }
+            else {
+                await fetchJSON(fsEndPoint, {
+                    method: "PUT",
+                    body: JSON.stringify(batch)
+                });
+            }
         }
     }
 
@@ -168,48 +211,66 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
                 await deleteFile(path);
             }
         }
-        await fetchJSON(fsEndPoint, {
-            method: "PUT",
-            body: JSON.stringify([{
-                id: root,
-                name: root.split("/").filter(Boolean).pop(),
-                folder: "/" + root.split("/").filter(Boolean).slice(0, -1).join("/"),
-                stat: {
-                    type: "dir",
-                    mtimeMs: new Date().getTime()
-                },
-                deleted: true
-            }])
-        });
+        const body = [{
+            id: root,
+            name: root.split("/").filter(Boolean).pop(),
+            folder: "/" + root.split("/").filter(Boolean).slice(0, -1).join("/"),
+            stat: {
+                type: "dir",
+                mtimeMs: new Date().getTime()
+            },
+            deleted: true
+        }];
+        if (action) {
+            await action.update(body);
+        }
+        else {
+            await fetchJSON(fsEndPoint, {
+                method: "PUT",
+                body: JSON.stringify(body)
+            });
+        }
     }
 
     async function deleteFile(path) {
         path = makePath(path);
-        await fetchJSON(fsEndPoint, {
-            method: "PUT",
-            body: JSON.stringify([{
-                id: path,
-                name: path.split("/").filter(Boolean).pop(),
-                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
-                stat: {
-                    type: "file",
-                    size: 0,
-                    mtimeMs: new Date().getTime()
-                },
-                body: "",
-                deleted: true
-            }])
-        });
+        const body = [{
+            id: path,
+            name: path.split("/").filter(Boolean).pop(),
+            folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+            stat: {
+                type: "file",
+                size: 0,
+                mtimeMs: new Date().getTime()
+            },
+            body: "",
+            deleted: true
+        }];
+        if (action) {
+            await action.update(body);
+        }
+        else {
+            await fetchJSON(fsEndPoint, {
+                method: "PUT",
+                body: JSON.stringify(body)
+            });
+        }
     }
 
     async function readFile(path) {
         path = makePath(path);
-        const item = await fetchJSON(fsEndPoint, {
-            method: "GET",
-            headers: {
-                id: encodeURIComponent(path)
-            }
-        });
+        let item = null;
+        if (action) {
+            item = await action.get({ id: path });
+        }
+        else {
+            item = await fetchJSON(fsEndPoint, {
+                method: "GET",
+                headers: {
+                    id: encodeURIComponent(path)
+                }
+            });
+        }
         return item && !item.deleted && item.body;
     }
 
@@ -217,10 +278,16 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         let results = {};
         files = files.map(name => makePath(prefix + name));
         while (files.length) {
-            const result = await fetchJSON(fsEndPoint, {
-                method: "POST",
-                body: JSON.stringify(files)
-            });
+            let result = [];
+            if (action) {
+                result = await action.get({ ids: files });
+            }
+            else {
+                result = await fetchJSON(fsEndPoint, {
+                    method: "POST",
+                    body: JSON.stringify(files)
+                });
+            }
             if (!result || !result.length) {
                 break;
             }
@@ -234,20 +301,26 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 
     async function writeFile(path, body = "") {
         path = makePath(path);
-        await fetchJSON(fsEndPoint, {
-            method: "PUT",
-            body: JSON.stringify([{
-                id: path,
-                name: path.split("/").filter(Boolean).pop(),
-                folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
-                stat: {
-                    type: "file",
-                    size: body.length,
-                    mtimeMs: new Date().getTime()
-                },
-                body
-            }])
-        });
+        const data = [{
+            id: path,
+            name: path.split("/").filter(Boolean).pop(),
+            folder: "/" + path.split("/").filter(Boolean).slice(0, -1).join("/"),
+            stat: {
+                type: "file",
+                size: body.length,
+                mtimeMs: new Date().getTime()
+            },
+            body
+        }];
+        if (action) {
+            await action.update(data);
+        }
+        else {
+            await fetchJSON(fsEndPoint, {
+                method: "PUT",
+                body: JSON.stringify(data)
+            });
+        }
     }
 
     async function writeFiles(prefix, files) {
@@ -257,10 +330,15 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             const path = makePath(prefix + name);
             const body = files[name] || "";
             if (JSON.stringify(batch).length + body.length > maxBytes) {
-                await fetchJSON(fsEndPoint, {
-                    method: "PUT",
-                    body: JSON.stringify(batch)
-                });
+                if (action) {
+                    await action.update(batch);
+                }
+                else {
+                    await fetchJSON(fsEndPoint, {
+                        method: "PUT",
+                        body: JSON.stringify(batch)
+                    });
+                }
                 batch = [];
             }
             batch.push({
@@ -276,10 +354,15 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
             });
         }
         if (batch.length) {
-            await fetchJSON(fsEndPoint, {
-                method: "PUT",
-                body: JSON.stringify(batch)
-            });
+            if (action) {
+                await action.update(batch);
+            }
+            else {
+                await fetchJSON(fsEndPoint, {
+                    method: "PUT",
+                    body: JSON.stringify(batch)
+                });
+            }
         }
     }
 
@@ -287,12 +370,18 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
         path = makePath(path);
         let exists = false;
         try {
-            const item = await fetchJSON(fsEndPoint, {
-                method: "GET",
-                headers: {
-                    id: encodeURIComponent(path)
-                }
-            });
+            let item = null;
+            if (action) {
+                item = await action.get({ id: path });
+            }
+            else {
+                item = await fetchJSON(fsEndPoint, {
+                    method: "GET",
+                    headers: {
+                        id: encodeURIComponent(path)
+                    }
+                });
+            }
             exists = item && !item.deleted;
         }
         catch {

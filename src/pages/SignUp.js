@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useTranslations } from "@util/translations";
 import EmailIcon from "@mui/icons-material/Email";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { fetchJSON } from "@util/fetch";
+import { register } from "@actions/login";
 import Cookies from "js-cookie";
 import Input from "@widgets/Input";
 import { setPath, setHash } from "@util/pages";
@@ -102,15 +102,12 @@ export default function SignUp() {
             const [email] = emailState;
             const [password] = passwordState;
             setProgress(true);
-            fetchJSON("/api/login", {
-                method: "PUT",
-                headers: {
-                    id,
-                    first_name: encodeURIComponent(firstName),
-                    last_name: encodeURIComponent(lastName),
-                    email,
-                    password: encodeURIComponent(password)
-                }
+            register({
+                id,
+                firstName,
+                lastName,
+                email,
+                password
             }).then(({ err, hash }) => {
                 if (err) {
                     console.error(err);

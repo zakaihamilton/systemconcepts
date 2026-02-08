@@ -3,6 +3,7 @@ import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
 import { fetchJSON } from "@util/fetch";
+import { login } from "@actions/login";
 
 import { usePageVisibility } from "@util/hooks";
 import { roleAuth } from "@util/roles";
@@ -217,9 +218,7 @@ export async function performSync(forceReload) {
         if (!role && id && hash) {
             console.log("[Sync] Role undefined but logged in, fetching...");
             try {
-                const user = await fetchJSON("/api/login", {
-                    headers: { id, hash }
-                });
+                const user = await login({ id, hash });
                 if (user && user.role) {
                     role = user.role;
                     Cookies.set("role", role, { expires: 60 });
@@ -239,9 +238,7 @@ export async function performSync(forceReload) {
                 const id = Cookies.get("id");
                 const hash = Cookies.get("hash");
                 if (id && hash) {
-                    const user = await fetchJSON("/api/login", {
-                        headers: { id, hash }
-                    });
+                    const user = await login({ id, hash });
                     console.log("[Sync] Refresh result:", user);
                     if (user && user.role) {
                         role = user.role;

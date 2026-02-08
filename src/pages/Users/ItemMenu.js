@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { fetchJSON } from "@util/fetch";
+import { deleteUsers } from "@actions/users";
 import ItemMenu from "@components/ItemMenu";
 
 export default function ItemMenuWidget({ item, store }) {
@@ -18,7 +18,7 @@ export default function ItemMenuWidget({ item, store }) {
                     s.severity = "error";
                     s.onDone = async select => {
                         const records = select.map(item => ({ id: item.id }));
-                        await fetchJSON("/api/users", { body: JSON.stringify(records), method: "DELETE" });
+                        await deleteUsers(records);
                     };
                 });
             }

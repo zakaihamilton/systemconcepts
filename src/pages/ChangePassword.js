@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "@util/translations";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { fetchJSON } from "@util/fetch";
+import { changePassword } from "@actions/login";
 import Cookies from "js-cookie";
 import Input from "@widgets/Input";
 import { setPath, setHash } from "@util/pages";
@@ -68,13 +68,10 @@ export default function ChangePassword() {
             const [oldPassword] = oldPasswordState;
             const [newPassword] = newPasswordState;
             setProgress(true);
-            fetchJSON("/api/login", {
-                method: "PUT",
-                headers: {
-                    id,
-                    oldpassword: encodeURIComponent(oldPassword),
-                    newpassword: encodeURIComponent(newPassword)
-                }
+            changePassword({
+                id,
+                oldPassword,
+                newPassword
             }).then(({ err, hash }) => {
                 if (err) {
                     console.error(err);

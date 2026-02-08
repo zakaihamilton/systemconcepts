@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
 import { useTranslations } from "@util/translations";
@@ -11,7 +11,7 @@ import Video from "./Player/Video";
 import { ContentSize } from "@components/Page/Content";
 import Download from "@widgets/Download";
 import { exportFile } from "@util/importExport";
-import { useFetchJSON } from "@util/fetch";
+import { getPlayerMetadata } from "@actions/player";
 import Progress from "@widgets/Progress";
 import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import { useParentParams } from "@util/pages";
@@ -49,7 +49,24 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = { ...useParentParams(), ...props };
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
-    const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (path && group) {
+            setLoading(true);
+            setError(null);
+            getPlayerMetadata({ path }).then(res => {
+                if (res.err) {
+                    setError(res.err);
+                } else {
+                    setData(res);
+                }
+                setLoading(false);
+            });
+        }
+    }, [path, group]);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const groupInfo = groups.find(g => g.name === group);
