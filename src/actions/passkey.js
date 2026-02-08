@@ -4,9 +4,14 @@ import { getPasskeyRegistrationOptions, verifyPasskeyRegistration, getPasskeyAut
 import { login } from "@util/login";
 import { headers } from "next/headers";
 import parseCookie from "@util/cookie";
+import { getIP } from "@util/network";
+import { checkRateLimit } from "@util/rateLimit";
 
 export async function registerOptions({ id, email, firstName, lastName }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const h = await headers();
         const host = h.get("x-forwarded-host") || h.get("host");
         const rpID = host.split(":")[0];
@@ -39,6 +44,9 @@ export async function registerOptions({ id, email, firstName, lastName }) {
 
 export async function registerVerify({ id, response, name }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const h = await headers();
         const host = h.get("x-forwarded-host") || h.get("host");
         const protocol = host.includes("localhost") ? "http" : "https";
@@ -66,6 +74,9 @@ export async function registerVerify({ id, response, name }) {
 
 export async function authOptions({ id }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const h = await headers();
         const host = h.get("x-forwarded-host") || h.get("host");
         const rpID = host.split(":")[0];
@@ -79,6 +90,9 @@ export async function authOptions({ id }) {
 
 export async function authVerify({ id, response }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const h = await headers();
         const host = h.get("x-forwarded-host") || h.get("host");
         const protocol = host.includes("localhost") ? "http" : "https";

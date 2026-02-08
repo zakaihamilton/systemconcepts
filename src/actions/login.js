@@ -1,21 +1,14 @@
 "use server";
 import { login as loginUtil, register as registerUtil, changePassword as changePasswordUtil, resetPassword as resetPasswordUtil, sendResetEmail as sendResetEmailUtil } from "@util/login";
 import { getSafeError } from "@util/safeError";
-import { headers } from "next/headers";
 import { checkRateLimit } from "@util/rateLimit";
-
-async function getIP() {
-    const h = await headers();
-    const forwarded = h.get("x-forwarded-for");
-    return forwarded ? forwarded.split(',')[0].trim() : "127.0.0.1";
-}
+import { getIP } from "@util/network";
 
 export async function login({ id, password, hash }) {
     try {
-        if (password) {
-            const ip = await getIP();
-            await checkRateLimit(ip);
-        }
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const params = await loginUtil({
             id,
             password,
@@ -46,6 +39,9 @@ export async function login({ id, password, hash }) {
 
 export async function register({ id, email, firstName, lastName, password }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const hash = await registerUtil({
             id,
             email,
@@ -62,6 +58,9 @@ export async function register({ id, email, firstName, lastName, password }) {
 
 export async function resetPassword({ id, code, newPassword }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         const hash = await resetPasswordUtil({
             id,
             code,
@@ -77,6 +76,9 @@ export async function resetPassword({ id, code, newPassword }) {
 
 export async function changePassword({ id, oldPassword, newPassword }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
          const hash = await changePasswordUtil({
             id,
             oldPassword,
@@ -92,6 +94,9 @@ export async function changePassword({ id, oldPassword, newPassword }) {
 
 export async function sendResetEmail({ id }) {
     try {
+        const ip = await getIP();
+        await checkRateLimit(ip);
+
         await sendResetEmailUtil({ id });
         return {};
     } catch (err) {

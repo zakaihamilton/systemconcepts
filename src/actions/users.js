@@ -77,6 +77,19 @@ export async function updateUsers(data) {
                 if (record.id !== body.id || record.role !== body.role) {
                      throw "ACCESS_DENIED";
                 }
+
+                const allowedFields = ["firstName", "lastName", "email"];
+                const safeBody = {};
+                allowedFields.forEach(field => {
+                    if (body[field] !== undefined) {
+                        safeBody[field] = body[field];
+                    }
+                });
+
+                Object.keys(body).forEach(key => delete body[key]);
+                Object.assign(body, safeBody);
+
+                body.id = userId;
                 body.hash = record.hash;
                 body.salt = record.salt;
                 body.role = record.role;
@@ -95,6 +108,7 @@ export async function updateUsers(data) {
                         delete body.password;
                     } else {
                         body.hash = record.hash;
+                        delete body.password;
                     }
                     body.salt = record.salt;
                     body.date = record.date;
