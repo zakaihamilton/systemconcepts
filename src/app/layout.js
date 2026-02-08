@@ -1,5 +1,5 @@
 import "@fontsource/roboto";
-import "../src/scss/app.scss";
+import "../scss/app.scss";
 import Script from "next/script";
 
 export const metadata = {
@@ -17,8 +17,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Script src="/noflash.js" strategy="beforeInteractive" />
         {children}
       </body>
