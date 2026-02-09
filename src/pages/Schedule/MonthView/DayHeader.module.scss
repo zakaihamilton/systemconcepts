@@ -1,0 +1,23 @@
+.root {
+    display: flex;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--border-color);
+    border-left: 1px solid transparent;
+    color: var(--text-color);
+    align-items: center;
+    justify-content: center;
+    top: var(--filter-height, 0);
+    z-index: 10;
+    background-color: var(--main-background);
+}
+
+.root.today {
+    background-color: var(--info-background);
+    color: var(--info-color);
+    border-top: 1px solid var(--info-color);
+    border-bottom: 1px solid var(--info-color);
+}
+
+.root:not(.last) {
+    border-right: 1px solid var(--border-color);
+}

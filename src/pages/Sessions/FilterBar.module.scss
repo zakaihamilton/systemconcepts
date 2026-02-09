@@ -1,0 +1,150 @@
+.root {
+    width: 100%;
+    background: var(--app-bar-background);
+    border-top: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
+    border-bottom: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.5s ease-in-out, opacity 0.5s ease-in-out, border-width 0.5s ease-in-out, transform 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    opacity: 1;
+    overflow: hidden;
+    visibility: visible;
+
+    // Desktop: Top Stickiness
+    position: sticky;
+    top: 0px;
+    bottom: auto;
+    transform: translateY(0);
+    border-bottom: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
+    z-index: 200;
+}
+
+.root.hide {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    padding: 0;
+    border-width: 0;
+    visibility: hidden;
+    transform: translateY(-100%); // Slide Up on Desktop
+}
+
+@media (max-width: 768px) {
+    .root {
+        bottom: 0px;
+        top: auto;
+        transform: translateY(0);
+        border-top: 1px solid rgba(var(--text-color-rgb, 128, 128, 128), 0.1);
+        border-bottom: 0;
+    }
+
+    .root.hide {
+        transform: translateY(100%); // Slide Down on Mobile
+    }
+}
+
+.container {
+    min-height: 0;
+    /* Required for grid transition */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    max-width: 100%;
+}
+
+.dropdownButton {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    background: var(--toolbar-background);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: var(--text-color);
+    min-height: 50px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    width: 200px;
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+    justify-content: space-between;
+    padding: 0 1em;
+
+    &:hover {
+        background: var(--hover-background);
+        border-color: rgba(var(--primary-color-rgb, 66, 133, 244), 0.3);
+    }
+
+    @media (max-width: 768px) {
+        width: 120px;
+        padding: 0.5em 0.5em;
+        font-size: 0.85em;
+    }
+}
+
+.labelContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1em;
+    overflow: hidden;
+    flex: 1;
+}
+
+.mainLabel {
+    font-size: 1em;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
+}
+
+.subLabel {
+    font-size: 0.7em;
+    opacity: 0.7;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
+}
+
+
+.clearIcon {
+    font-size: 1.5em;
+    opacity: 0.7;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.25em;
+    transform: scale(1);
+    transition: all 0.1s ease;
+
+    &:hover {
+        opacity: 1;
+        background: var(--inverse-main-background);
+        color: var(--inverse-text-color);
+    }
+
+    &:active {
+        transform: scale(1.2);
+    }
+}
+
+.arrow {
+    transition: transform 0.2s ease;
+    font-size: 1.3em;
+    opacity: 0.7;
+}

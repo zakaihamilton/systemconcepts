@@ -4,14 +4,9 @@ export async function checkRateLimit(req, { limit = 5, windowMs = 60 * 1000 } = 
     // Only rate limit in production/staging environments
     // But for this task, we enable it always.
 
-    let ip;
-    if (typeof req === 'string') {
-        ip = req;
-    } else {
-        // Get IP address (parse first IP from x-forwarded-for to avoid spoofing via extra values)
-        const forwarded = req.headers["x-forwarded-for"];
-        ip = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
-    }
+    // Get IP address (parse first IP from x-forwarded-for to avoid spoofing via extra values)
+    const forwarded = req.headers["x-forwarded-for"];
+    const ip = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
 
     if (!ip) {
         // Fallback or ignore if IP cannot be determined (unlikely in HTTP)

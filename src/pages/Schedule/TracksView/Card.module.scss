@@ -1,0 +1,157 @@
+@use "../../../scss/mixins" as *;
+
+.card {
+    width: 100%;
+    height: 100%;
+    /* Adjust based on needs, approx 320px */
+    background-color: black;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    overflow: hidden;
+    border-radius: 8px;
+    user-select: none;
+
+    &:hover {
+        transform: scale(1.02);
+        z-index: 10;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    &.active {
+        transform: scale(1.05);
+        z-index: 20;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.6);
+    }
+}
+
+.cardInner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.thumbnail {
+    border-radius: 8px;
+    overflow: hidden;
+    object-fit: cover;
+}
+
+.overlay {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.95) 0%,
+            rgba(0, 0, 0, 0.8) 40%,
+            rgba(0, 0, 0, 0.4) 70%,
+            transparent 100%);
+    padding: 1.25em 0.75em 0.75em 0.75em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 60%;
+    z-index: 2;
+    /* Ensure overlay is above background but below interactivity if needed */
+}
+
+.info {
+    color: white;
+    width: 100%;
+}
+
+.title {
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.2 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 4px !important;
+}
+
+.details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 6px;
+    margin-top: 2px;
+}
+
+.date {
+    opacity: 0.9;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em;
+}
+
+.duration {
+    opacity: 1;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    color: var(--primary-light, #90caf9);
+}
+
+.groupPill {
+    position: absolute;
+    top: 0.7em;
+    right: 0.7em;
+    z-index: 5;
+    padding: 0.25em 0.75em;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    text-transform: capitalize;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.typeIcon {
+    position: absolute;
+    top: 0.5em;
+    left: 0.5em;
+    z-index: 5;
+    color: white;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+    & :global(.MuiSvgIcon-root) {
+        font-size: 1.1rem;
+        margin-top: 5px;
+    }
+}
+
+.card.playing {
+    border: 3px solid #c084fc;
+}
+
+.progressContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    z-index: 10;
+}
+
+.progressBar {
+    height: 100%;
+    background-color: var(--primary-color, #90caf9);
+    /* Use primary color or fallback */
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}

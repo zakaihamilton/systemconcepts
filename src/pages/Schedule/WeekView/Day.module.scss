@@ -1,0 +1,25 @@
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.root:not(.mobile) {
+    min-width: 0;
+}
+
+.root:not(.last) {
+    [dir=ltr] & {
+        margin-right: 0;
+    }
+
+    [dir=rtl] & {
+        margin-left: 0;
+    }
+}
+
+.sessions {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.1rem;
+}

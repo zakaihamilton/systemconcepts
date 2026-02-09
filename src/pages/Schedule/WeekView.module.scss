@@ -1,0 +1,26 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.grid {
+    display: grid;
+    flex: 1;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 4em auto;
+    column-gap: 3px;
+}
+
+.grid.mobile {
+    grid-template-columns: repeat(7, 150px);
+    width: max-content;
+    min-width: 100%;
+}
+
+.input {
+    margin-left: 0em;
+    margin-right: 0em;
+}

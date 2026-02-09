@@ -1,0 +1,29 @@
+.root.root {
+    padding: 1rem;
+    border: 3px solid var(--border-color);
+    border-radius: 12px;
+    min-height: 150px;
+}
+
+.itemWrapper.itemWrapper {
+    position: relative;
+    padding-right: 48px;
+}
+
+.item.item {
+    line-height: 3;
+    font-size: 1.4rem;
+}
+
+.copyButton.copyButton {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.badge.badge {
+    pointer-events: none;
+    cursor: default;
+}

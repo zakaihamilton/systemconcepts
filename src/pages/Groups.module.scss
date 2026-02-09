@@ -1,0 +1,25 @@
+.animated {
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.listItem {
+    grid-template-columns: 1fr 6em 6em 6em;
+}
+
+.listItemWithProgress {
+    grid-template-columns: 1fr 6em 6em 6em 6em;
+}
+
+.disabled {
+    opacity: 0.5;
+}

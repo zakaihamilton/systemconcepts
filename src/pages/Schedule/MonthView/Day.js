@@ -1,0 +1,74 @@
+import clsx from "clsx";
+import styles from "./Day.module.scss";
+import { isDateToday, isDateMonth, getDateString } from "@util/date";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
+import { addPath, toPath } from "@util/pages";
+import SessionIcon from "@widgets/SessionIcon";
+
+import { getSessionTextColor } from "@util/colors";
+import { useTheme } from "@mui/material/styles";
+import { useTranslations } from "@util/translations";
+export default function Day({ sessions, month, column, row, date, columnCount, rowCount, dateFormatter, onOpenDay, playingSession }) {
+    const translations = useTranslations();
+    const theme = useTheme();
+
+    const style = {
+        gridColumn: column,
+        gridRow: row
+    };
+    const onDayClick = () => {
+        onOpenDay && onOpenDay(date);
+    };
+    const dayNumber = dateFormatter.format(date);
+    const isToday = isDateToday(date);
+    const isMonth = isDateMonth(date, month);
+    const sessionDate = getDateString(date);
+    const sessionItems = (sessions || []).filter(session => session.date === sessionDate);
+    const items = sessionItems.map(item => {
+        const groupName = item.group && (item.group[0].toUpperCase() + item.group.slice(1));
+        const path = `session?&group=${item.group}&year=${item.year}&date=${item.date}&name=${encodeURIComponent(item.name)}`;
+        const icon = <SessionIcon type={item.type} />;
+        return {
+            id: item.name,
+            name: item.name,
+            group: item.group,
+            date: item.date,
+            description: groupName,
+            backgroundColor: item.color,
+            style: { color: getSessionTextColor(item.color, theme) },
+            icon,
+            target: "#schedule/" + toPath(path),
+            onClick: () => addPath(path)
+        };
+    });
+    const className = clsx(
+        styles.root,
+        column === columnCount && styles.lastColumn,
+        row === rowCount && styles.lastRow
+    );
+
+    return <div className={className} style={style}>
+        <div className={styles.title}>
+            <Tooltip arrow title={translations.SESSIONS}>
+                <Avatar className={clsx(styles.day, isToday && styles.today, isMonth && styles.active)} onClick={onDayClick} style={{ cursor: "pointer" }}>
+                    {dayNumber}
+                </Avatar>
+            </Tooltip>
+        </div>
+        <div className={styles.sessions}>
+            {!!items.length && <div className={styles.container}>
+                <div className={styles.indicators}>
+                    {items.slice(0, 12).map((item, index) => <Tooltip arrow title={<div style={{ textAlign: "center" }}>
+                        {item.description && <div style={{ fontWeight: "bold" }}>{item.description}</div>}
+                        <div>{item.name}</div>
+                    </div>} key={index}>
+                        <span>
+                            <div className={clsx(styles.dot, playingSession && playingSession.name === item.name && playingSession.group === item.group && playingSession.date === item.date && styles.playing)} style={{ backgroundColor: item.backgroundColor }} onClick={item.onClick} />
+                        </span>
+                    </Tooltip>)}
+                </div>
+            </div>}
+        </div>
+    </div>;
+}

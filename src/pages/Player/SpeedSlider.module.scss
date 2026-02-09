@@ -1,0 +1,26 @@
+.root {
+    width: 100%;
+    background-color: var(--paper-background);
+    padding: 1em 4em;
+    position: relative;
+    z-index: 1300; // MUI AppBar default is 1100, Tabs typically use similar values
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    overflow: visible;
+    height: 120px;
+    align-items: flex-end;
+
+    &.top {
+        box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    &.bottom {
+        box-shadow: 0px -2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+}
+
+.sliderContainer {
+    width: 100%;
+}

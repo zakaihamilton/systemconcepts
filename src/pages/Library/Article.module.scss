@@ -1,0 +1,388 @@
+.root {
+    flex-grow: 1;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: var(--background-paper);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-left: 0px !important;
+}
+
+.root.embedded {
+    height: auto;
+    width: 100%;
+    margin: 0;
+    overflow: visible;
+    box-shadow: none;
+    background-color: transparent;
+    transition: none;
+}
+
+.stickyHeader {
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    background-color: var(--background-paper);
+    border-bottom: 1px solid var(--divider);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    will-change: transform, opacity;
+
+    .headerContent {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 auto;
+        padding: 0 24px;
+
+        @media (max-width: 600px) {
+            padding: 0 16px;
+        }
+    }
+}
+
+.stickyHeader.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.headerInfo {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+
+    @media (min-width: 601px) {
+        justify-content: center;
+    }
+}
+
+
+
+.headerTitleWrapper {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    @media (min-width: 601px) {
+        align-items: center;
+        text-align: center;
+    }
+}
+
+.titleRow {
+    display: block;
+
+    @media (min-width: 601px) {
+        text-align: center;
+    }
+}
+
+h1.title {
+    font-weight: 900 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 !important;
+    font-size: 2.125rem !important;
+    display: inline;
+    vertical-align: middle;
+    word-break: break-word;
+
+    @media (max-width: 600px) {
+        font-size: 1.5rem !important;
+    }
+}
+
+.tagNumber {
+    padding: 2px 8px;
+    background-color: var(--primary-main) !important;
+    color: var(--primary-contrast-text) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-weight: 800;
+    font-size: 0.875rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 12px;
+}
+
+.metadataRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 4px 0;
+
+    @media (min-width: 601px) {
+        justify-content: center;
+    }
+}
+
+.metadataTag.metadataTag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background-color: var(--action-hover) !important;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-full);
+    color: var(--text-primary) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm) !important;
+    white-space: nowrap;
+
+    &:hover {
+        background-color: var(--action-selected) !important;
+        border-color: var(--primary-main);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md) !important;
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.96);
+        box-shadow: var(--shadow-sm) !important;
+    }
+
+    span {
+        font-weight: 700;
+        font-size: 0.75rem;
+    }
+
+    svg {
+        color: var(--primary-main);
+    }
+}
+
+.contentScrollArea {
+    padding: 1rem;
+    padding-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.centeredContent {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @media (max-width: 600px) {
+        padding: 0 16px;
+    }
+}
+
+
+
+.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 2rem;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    width: fit-content;
+    margin: auto;
+
+    svg {
+        transition: all 0.3s ease;
+        font-size: 3rem;
+    }
+
+    p {
+        font-weight: 500;
+        margin: 0;
+    }
+}
+
+
+.highlightedParagraph {
+    animation: highlightFade 2s ease-in-out;
+    border-radius: 4px;
+}
+
+@keyframes highlightFade {
+    0% {
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    15%,
+    35% {
+        background-color: rgba(255, 152, 0, 0.15);
+        box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
+    }
+
+    100% {
+        background-color: transparent;
+        box-shadow: none;
+    }
+}
+
+@media print {
+
+    :global(html),
+    :global(body) {
+        visibility: hidden;
+        background-color: white;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .root {
+        visibility: visible;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        height: auto;
+        overflow: visible;
+        background-color: white;
+        box-shadow: none;
+        display: block;
+        color: black;
+
+        // Reset positioning for embedded matches (search results)
+        // so they flow naturally down the page instead of stacking
+        &.embedded {
+            position: relative;
+            left: auto;
+            top: auto;
+            width: 100%;
+            height: auto;
+            padding: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+    }
+
+    .root * {
+        visibility: visible;
+    }
+
+    .stickyHeader {
+        position: static;
+        border-bottom: 2px solid #333;
+        padding: 0 0 20px 0;
+        margin-bottom: 30px;
+        display: block;
+        transform: none !important;
+        opacity: 1 !important;
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .stickyHeader>*:not(.headerInfo):not(.headerContent) {
+        display: none !important;
+    }
+
+    .headerInfo {
+        display: block;
+    }
+
+    .headerInfo>*:not(.headerTitleWrapper) {
+        display: none !important;
+    }
+
+    .title {
+        font-size: 24pt;
+        color: black;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .metadataRow {
+        justify-content: center;
+        gap: 6px;
+        padding: 4px 0;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .metadataTag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background-color: #f5f5f5 !important;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        color: #333;
+        box-shadow: none;
+        margin: 0;
+
+        svg {
+            font-size: 1rem !important;
+            color: #555 !important;
+            margin: 0 !important;
+        }
+
+        span {
+            font-size: 0.75rem !important;
+            font-weight: 700;
+        }
+    }
+
+    .contentScrollArea {
+        padding: 0;
+        overflow: visible;
+        height: auto !important;
+        display: block !important;
+        flex: none !important;
+        break-before: avoid;
+        page-break-before: avoid;
+    }
+
+    .contentWrapper {
+        max-width: 100%;
+        height: auto !important;
+        overflow: visible !important;
+
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        * {
+            color: black !important;
+        }
+    }
+
+    .placeholder {
+        display: none;
+    }
+
+    .pageSeparator {
+        display: none !important;
+    }
+}
+
+.tooltip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

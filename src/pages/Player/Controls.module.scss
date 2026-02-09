@@ -1,0 +1,113 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.5rem;
+}
+
+.progress {
+    justify-content: center;
+    display: flex;
+    padding: 0.5rem;
+}
+
+.progressLine {
+    display: flex;
+    height: 3em;
+    border: 1px solid var(--border-color);
+    background: var(--bar-background);
+    color: var(--text-color);
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    direction: ltr;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px var(--box-shadow-color);
+    transition: border-color 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+}
+
+.progressBack {
+    display: flex;
+    height: 4em;
+    position: absolute;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+
+    &:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: -2px;
+    }
+}
+
+.progressPlayed {
+    display: flex;
+    height: 4em;
+    position: absolute;
+    background-color: var(--hover-color);
+    opacity: 0.5;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.progressPosition {
+    display: flex;
+    width: 0.4em;
+    height: 4em;
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.6;
+    background-color: var(--hover-fill);
+    border: 1px solid var(--hover-color);
+    opacity: 0.5;
+}
+
+.progressText {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    user-select: none;
+    font-weight: 600;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5em;
+    gap: 0.5em;
+}
+
+.avatar {
+    font-size: 100% !important;
+    background: var(--hover-color) !important;
+    transition: background 0.2s ease !important;
+
+    &:hover {
+        background: var(--selected-color) !important;
+    }
+}
+
+.error {
+    position: fixed;
+    top: 0px;
+    z-index: 1000;
+    user-select: none;
+    background: var(--error-background);
+    color: var(--error-color);
+    border-radius: 0 0 4px 4px;
+    padding: 0.75em 1.5em;
+    box-shadow: 0 2px 8px var(--box-shadow-color);
+}
+
+.error>* {
+    margin-left: 0.25em !important;
+    margin-right: 0.25em !important;
+}
