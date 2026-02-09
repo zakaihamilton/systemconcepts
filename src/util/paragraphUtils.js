@@ -24,11 +24,10 @@ export const splitSmart = (txt) => {
             chunks.push(remaining.substring(fenceIdx));
             break;
         }
-        let closeFenceEnd = remaining.indexOf("\n", closeFenceIdx);
-        if (closeFenceEnd === -1) closeFenceEnd = remaining.length;
-        const codeBlock = remaining.substring(fenceIdx, closeFenceEnd);
+        const endOfFence = closeFenceIdx + 3;
+        const codeBlock = remaining.substring(fenceIdx, endOfFence);
         chunks.push(codeBlock);
-        remaining = remaining.substring(closeFenceEnd).trimStart();
+        remaining = remaining.substring(endOfFence).trimStart();
     }
     return chunks;
 };
@@ -47,10 +46,8 @@ export const mergeChunks = (chunks) => {
     for (let i = 1; i < chunks.length; i++) {
         const prev = merged[merged.length - 1];
         const curr = chunks[i];
-        const prevLastLine = prev.split('\n').pop().trim();
-        const currFirstLine = curr.split('\n')[0].trim();
-        const prevType = getType(prevLastLine);
-        const currType = getType(currFirstLine);
+        const prevType = getType(prev);
+        const currType = getType(curr);
         if (prevType === currType && ['ul', 'ol', 'quote'].includes(currType)) {
             merged[merged.length - 1] += "\n\n" + curr;
         } else {
