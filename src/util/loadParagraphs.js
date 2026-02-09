@@ -4,7 +4,7 @@ import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { normalizeContent } from "@util/string";
 
 // Split by double newlines, but preserve code blocks
-const splitSmart = (txt) => {
+export const splitSmart = (txt) => {
     const chunks = [];
     let remaining = txt;
     while (remaining) {
@@ -38,22 +38,36 @@ const splitSmart = (txt) => {
     return chunks;
 };
 
-const mergeChunks = (chunks) => {
+const getLastLine = (text) => {
+    const lastIndex = text.lastIndexOf('\n');
+    if (lastIndex === -1) return text;
+    return text.substring(lastIndex + 1);
+};
+
+const getFirstLine = (text) => {
+    const firstIndex = text.indexOf('\n');
+    if (firstIndex === -1) return text;
+    return text.substring(0, firstIndex);
+};
+
+export const mergeChunks = (chunks) => {
     if (chunks.length === 0) return chunks;
     const merged = [chunks[0]];
-    const getType = (text) => {
-        const firstLine = text.split('\n')[0].trim();
-        if (/^```/.test(firstLine)) return 'code';
-        if (/^[-*]\s/.test(firstLine)) return 'ul';
-        if (/^>\s/.test(firstLine)) return 'quote';
-        if (/^\d+\.\s/.test(firstLine)) return 'ol';
+    const getType = (line) => {
+        const trimmed = line.trim();
+        if (/^```/.test(trimmed)) return 'code';
+        if (/^[-*]\s/.test(trimmed)) return 'ul';
+        if (/^>\s/.test(trimmed)) return 'quote';
+        if (/^\d+\.\s/.test(trimmed)) return 'ol';
         return 'text';
     };
     for (let i = 1; i < chunks.length; i++) {
         const prev = merged[merged.length - 1];
         const curr = chunks[i];
-        const prevLastLine = prev.split('\n').pop().trim();
-        const currFirstLine = curr.split('\n')[0].trim();
+
+        const prevLastLine = getLastLine(prev);
+        const currFirstLine = getFirstLine(curr);
+
         const prevType = getType(prevLastLine);
         const currType = getType(currFirstLine);
         if (prevType === currType && ['ul', 'ol', 'quote'].includes(currType)) {
