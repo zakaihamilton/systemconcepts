@@ -16,8 +16,7 @@ export default function Header({
     translations,
     currentParagraphIndex,
     onTitleClick,
-    customTags,
-    url
+    customTags
 }) {
     const handleTagKeyPress = (e, value) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -58,19 +57,9 @@ export default function Header({
                             <Typography
                                 variant="h4"
                                 className={styles.title}
-                                component={url ? "a" : "h1"}
-                                href={url}
-                                onClick={(e) => {
-                                    if (url && (e.metaKey || e.ctrlKey || e.button === 1)) {
-                                        // Allow default behavior (new tab)
-                                        return;
-                                    }
-                                    e.preventDefault();
-                                    if (onTitleClick) {
-                                        onTitleClick();
-                                    }
-                                }}
-                                sx={onTitleClick ? { cursor: "pointer", "&:hover": { textDecoration: "underline" }, textDecoration: "none", color: "inherit" } : undefined}
+                                component="h1"
+                                onClick={onTitleClick}
+                                sx={onTitleClick ? { cursor: "pointer", "&:hover": { textDecoration: "underline" } } : undefined}
                             >
                                 {(() => {
                                     const expansion = abbreviations[title.name];

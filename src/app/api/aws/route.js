@@ -23,7 +23,7 @@ async function handler(req) {
         if (method === "PUT" || method === "POST") {
             try {
                 body = await req.json();
-            } catch (_e) {
+            } catch (e) {
                 // If parsing fails, body remains empty object or handled as null depending on need.
                 // handleRequest expects body for PUT.
                 // If it's a file upload not via JSON? `aws.js` seems to expect JSON body with `path` and `body` fields for PUT.

@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";
-
+import { fetchJSON } from "@util/fetch";
 import { login } from "@actions/login";
 
 import { usePageVisibility } from "@util/hooks";

@@ -4,7 +4,7 @@ import Article from "@pages/Library/Article";
 import { normalizeContent, preprocessMarkdown } from "@util/string";
 
 const SearchResultItem = ({ index, style, data }) => {
-    const { results, gotoArticle, getArticleUrl, setRowHeight, highlight } = data || {};
+    const { results, gotoArticle, setRowHeight, highlight } = data || {};
     const doc = results ? results[index] : null;
     const rowRef = useRef(null);
 
@@ -67,7 +67,6 @@ const SearchResultItem = ({ index, style, data }) => {
                     content={content}
                     filteredParagraphs={filteredParagraphs}
                     onTitleClick={() => gotoArticle(doc.tag)}
-                    url={getArticleUrl ? getArticleUrl(doc.tag) : ""}
                     embedded={true}
                     hidePlayer={true}
                     highlight={highlight}

@@ -42,8 +42,6 @@ export default function Library() {
         return hierarchy;
     }, []);
 
-
-
     const onSelect = useCallback((tag) => {
         if (!selectedTag || tag._id !== selectedTag._id) {
             setLoading(true);

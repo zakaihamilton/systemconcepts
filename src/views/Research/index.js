@@ -143,28 +143,6 @@ export default function Research() {
         return () => { isMounted.current = false; };
     }, []);
 
-
-
-    const getArticleUrl = useCallback((tag) => {
-        if (!tag) return "";
-        if (tag._id && tag._id.startsWith("session|")) {
-            const parts = tag._id.split("|");
-            if (parts.length >= 5) {
-                const group = parts[1];
-                const year = parts[2];
-                const date = parts[3];
-                const name = parts.slice(4).join("|");
-                return `#/session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`;
-            }
-            return "";
-        }
-        const hierarchy = getTagHierarchy(tag);
-        if (hierarchy.length > 0) {
-            return "#/library/" + hierarchy.map(item => encodeURIComponent(item).replace(/%3A/g, ":")).join("/");
-        }
-        return "";
-    }, []);
-
     const setQuery = useCallback((val) => {
         ResearchStore.update(s => { s.query = val; });
     }, []);
@@ -1145,7 +1123,6 @@ export default function Research() {
                         itemData={{
                             results: filteredResults,
                             gotoArticle,
-                            getArticleUrl,
                             setRowHeight,
                             listRef,
                             highlight

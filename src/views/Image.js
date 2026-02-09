@@ -36,7 +36,7 @@ function useImagePath(imageName = "", extension) {
             });
         }
         else {
-            setTimeout(() => setPath(rawPath), 0);
+            setPath(rawPath);
         }
     }, [prefix, group, year, date, name, extension, imageName, parentPath]);
 
