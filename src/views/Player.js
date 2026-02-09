@@ -55,8 +55,10 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 
     useEffect(() => {
         if (path && group) {
-            setLoading(true);
-            setError(null);
+            setTimeout(() => {
+                setLoading(true);
+                setError(null);
+            }, 0);
             getPlayerMetadata({ path }).then(res => {
                 if (res.err) {
                     setError(res.err);

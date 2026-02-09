@@ -4,16 +4,17 @@ import { MainStore } from "@components/Main";
 
 export function useLanguage() {
     const { language: storeLanguage } = MainStore.useState();
-    const [language, setLanguage] = useState(languages[0].id);
+    const [clientLanguage, setClientLanguage] = useState(languages[0].id);
 
     useEffect(() => {
-        if (storeLanguage === "auto") {
-            const detected = (typeof navigator !== "undefined" && languages.find(item => navigator.language.includes(item.code)) || languages[0]).id;
-            setLanguage(detected);
-        } else {
-            setLanguage(storeLanguage);
+        if (typeof navigator !== "undefined") {
+            const detected = (languages.find(item => navigator.language.includes(item.code)) || languages[0]).id;
+            setTimeout(() => setClientLanguage(detected), 0);
         }
-    }, [storeLanguage]);
+    }, []);
 
-    return language;
+    if (storeLanguage === "auto") {
+        return clientLanguage;
+    }
+    return storeLanguage;
 }

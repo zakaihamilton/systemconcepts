@@ -112,6 +112,26 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
         return hierarchy;
     }, []);
 
+    const getArticleUrl = useCallback((tag) => {
+        if (!tag) return "";
+        if (tag._id && tag._id.startsWith("session|")) {
+            const parts = tag._id.split("|");
+            if (parts.length >= 5) {
+                const group = parts[1];
+                const year = parts[2];
+                const date = parts[3];
+                const name = parts.slice(4).join("|");
+                return `#/session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`;
+            }
+            return "";
+        }
+        const hierarchy = getTagHierarchy(tag);
+        if (hierarchy.length > 0) {
+            return "#/library/" + hierarchy.map(item => encodeURIComponent(item).replace(/%3A/g, ":")).join("/");
+        }
+        return "";
+    }, [getTagHierarchy]);
+
     // Sync selectedTag with URL
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
@@ -451,6 +471,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
                             onSelect={onSelect}
                             onToggle={handleToggle}
                             level={0}
+                            getArticleUrl={getArticleUrl}
                         />
                     ))}
                 </List>

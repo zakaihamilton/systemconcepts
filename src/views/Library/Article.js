@@ -69,7 +69,8 @@ function Article({
     hidePlayer,
     hideHeader,
     highlight,
-    customTags
+    customTags,
+    url
 }) {
     const translations = useTranslations();
     const search = useSearch("default", null, !embedded);
@@ -538,6 +539,7 @@ function Article({
                         currentParagraphIndex={currentParagraphIndex}
                         onTitleClick={onTitleClick}
                         customTags={customTags}
+                        url={url}
                     />
                 )}
                 {scrollInfo.clientHeight > 0 && Array.from({ length: Math.max(0, scrollInfo.total - 1) }).map((_, i) => (

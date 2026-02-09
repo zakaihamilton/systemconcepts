@@ -12,8 +12,9 @@ import clsx from "clsx";
 import { LibraryStore } from "./Store";
 import { abbreviations } from "@data/abbreviations";
 
-const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 }) {
+const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0, getArticleUrl }) {
     const hasChildren = node.children && node.children.length > 0;
+    const url = !hasChildren && getArticleUrl ? getArticleUrl(node) : "";
     const isSelected = LibraryStore.useState(s => s.selectedId === node._id);
     const selectPath = LibraryStore.useState(s => s.selectPath);
     const [isTruncated, setIsTruncated] = useState(false);
@@ -106,6 +107,10 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
 
     const handleSelect = useCallback((e) => {
         if (e) {
+            if (url && (e.metaKey || e.ctrlKey || e.button === 1)) {
+                // Allow default behavior (new tab)
+                return;
+            }
             e.preventDefault();
         }
         LibraryStore.update(s => {
@@ -125,7 +130,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
         } else {
             handleToggle();
         }
-    }, [hasChildren, onSelect, node, handleToggle]);
+    }, [hasChildren, onSelect, node, handleToggle, url]);
 
     const Icon = node.Icon;
 
@@ -133,6 +138,8 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
         <Box sx={{ display: "flex", flexDirection: "column" }}>
             <ListItemButton
                 ref={itemRef}
+                component={url ? "a" : "div"}
+                href={url || undefined}
                 onClick={handleSelect}
                 selected={isSelected}
                 className={clsx(styles.itemButton, isSelected && styles.selected)}
@@ -222,6 +229,7 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
                             onSelect={onSelect}
                             onToggle={handleChildToggle}
                             level={level + 1}
+                            getArticleUrl={getArticleUrl}
                         />
                     ))}
                 </List>

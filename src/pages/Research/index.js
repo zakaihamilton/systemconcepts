@@ -143,28 +143,6 @@ export default function Research() {
         return () => { isMounted.current = false; };
     }, []);
 
-
-
-    const getArticleUrl = useCallback((tag) => {
-        if (!tag) return "";
-        if (tag._id && tag._id.startsWith("session|")) {
-            const parts = tag._id.split("|");
-            if (parts.length >= 5) {
-                const group = parts[1];
-                const year = parts[2];
-                const date = parts[3];
-                const name = parts.slice(4).join("|");
-                return `#/session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`;
-            }
-            return "";
-        }
-        const hierarchy = getTagHierarchy(tag);
-        if (hierarchy.length > 0) {
-            return "#/library/" + hierarchy.map(item => encodeURIComponent(item).replace(/%3A/g, ":")).join("/");
-        }
-        return "";
-    }, []);
-
     const setQuery = useCallback((val) => {
         ResearchStore.update(s => { s.query = val; });
     }, []);
@@ -755,13 +733,13 @@ export default function Research() {
         setAppliedFilterTags([]);
     }, [setQuery, setFilterTags, setFilterInput, setAppliedFilterTags]);
 
-    const onKeyDown = (e) => {
+    const onKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
-    };
+    }, [handleSearch]);
 
-    const gotoArticle = (tag, paragraphId) => {
+    const gotoArticle = useCallback((tag, paragraphId) => {
         if (tag._id && tag._id.startsWith("session|")) {
             const parts = tag._id.split("|");
             if (parts.length >= 5) {
@@ -782,7 +760,7 @@ export default function Research() {
                 });
             }
         }
-    };
+    }, []);
 
     const filteredResults = useMemo(() => {
         let res;
@@ -928,6 +906,14 @@ export default function Research() {
             listRef.current.scrollToItem(0, "start");
         }
     }, [listRef]);
+
+    const itemData = useMemo(() => ({
+        results: filteredResults,
+        gotoArticle,
+        setRowHeight,
+        listRef,
+        highlight
+    }), [filteredResults, gotoArticle, setRowHeight, listRef, highlight]);
 
     const toolbarItems = useMemo(() => [
         {
@@ -1142,14 +1128,7 @@ export default function Research() {
                             }
                             setShowScrollTop(visibleStartIndex > 0);
                         }}
-                        itemData={{
-                            results: filteredResults,
-                            gotoArticle,
-                            getArticleUrl,
-                            setRowHeight,
-                            listRef,
-                            highlight
-                        }}
+                        itemData={itemData}
                     >
                         {SearchResultItem}
                     </VariableSizeList>

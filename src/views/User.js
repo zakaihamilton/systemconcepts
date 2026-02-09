@@ -32,7 +32,7 @@ export default function User({ path = "" }) {
 
     useEffect(() => {
         if (path) {
-            setLoading(true);
+            setTimeout(() => setLoading(true), 0);
             getUsers({ id: path }).then(res => {
                 if (res && !res.err) {
                     setData(res);
