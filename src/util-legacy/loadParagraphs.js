@@ -102,7 +102,8 @@ export async function loadParagraphsForFile(fileId, sessionsById) {
             if (session.summaryText) {
                 text += "\n" + session.summaryText;
             } else if (session.summary?.path) {
-                const summaryPath = makePath("local/sync", session.summary.path.replace(/\.\.\//g, ""));
+                const safePath = session.summary.path.split("/").filter(p => p !== ".." && p !== ".").join("/");
+                const summaryPath = makePath("local/sync", safePath);
                 if (await storage.exists(summaryPath)) {
                     const content = await storage.readFile(summaryPath);
                     text += "\n" + content;
