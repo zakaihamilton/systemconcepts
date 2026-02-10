@@ -84,16 +84,8 @@ function sanitizeQuery(query) {
     for (const key in query) {
         // Check for dangerous operators
         if (key.startsWith('$')) {
-            const lowerKey = key.toLowerCase();
-            // Block operators that allow code execution or ReDoS
-            if (lowerKey === '$where' ||
-                lowerKey === '$function' ||
-                lowerKey === '$accumulator' ||
-                lowerKey === '$regex' ||
-                lowerKey === '$expr' ||
-                lowerKey === '$jsonschema') {
-                 throw new Error("Invalid query operator: " + key);
-            }
+            // Block ALL operators starting with $ to be safe
+            throw new Error("Invalid query operator: " + key);
         }
 
         // Recursively check nested objects
@@ -230,14 +222,28 @@ async function bulkWrite({ operations, ordered, ...params }) {
     await collection.bulkWrite(operations, { ordered });
 }
 
+// Helper to safely retrieve single header value from potentially array-typed headers
+const getFirstHeader = (headers, key) => {
+    if (!headers || !headers[key]) return undefined;
+    const val = headers[key];
+    return Array.isArray(val) ? val[0] : val;
+};
+
 async function handleRequest({ dbName, collectionName, readOnly, req }) {
     const headers = req.headers || {};
     if (req.method === "GET" || req.method === "POST") {
         try {
             const body = req.body;
-            const { id, query, fields } = headers;
+            const id = getFirstHeader(headers, 'id');
+            const query = getFirstHeader(headers, 'query');
+            const fields = getFirstHeader(headers, 'fields');
+            const prefix = getFirstHeader(headers, 'prefix');
+            const skip = getFirstHeader(headers, 'skip');
+            const limit = getFirstHeader(headers, 'limit');
+
             const parsedId = id && decodeURIComponent(id);
             const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
+
             if (Array.isArray(body)) {
                 const maxBytes = 4000 * 1000;
                 let records = await listCollection({
@@ -265,11 +271,10 @@ async function handleRequest({ dbName, collectionName, readOnly, req }) {
                 console.log("found an item for collection", collectionName, "id", parsedId);
                 return result;
             }
-            else if (headers.prefix) {
-                const prefix = decodeURIComponent(headers.prefix);
-                const parsedFields = headers.fields && JSON.parse(decodeURIComponent(headers.fields));
+            else if (prefix) {
+                const decodedPrefix = decodeURIComponent(prefix);
                 const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const safePrefix = escapeRegex(prefix);
+                const safePrefix = escapeRegex(decodedPrefix);
                 const query = { id: { $regex: `^${safePrefix}` } };
                 const result = await listCollection({
                     dbName,
@@ -277,21 +282,21 @@ async function handleRequest({ dbName, collectionName, readOnly, req }) {
                     query,
                     fields: parsedFields
                 });
-                console.log("found", result.length, "items with prefix", prefix, "for collection", collectionName);
+                console.log("found", result.length, "items with prefix", decodedPrefix, "for collection", collectionName);
                 return result;
             }
             else {
                 const parsedQuery = query && JSON.parse(decodeURIComponent(query));
                 sanitizeQuery(parsedQuery);
-                const skip = headers.skip ? parseInt(headers.skip) : undefined;
-                const limit = headers.limit ? parseInt(headers.limit) : undefined;
+                const parsedSkip = skip ? parseInt(skip) : undefined;
+                const parsedLimit = limit ? parseInt(limit) : undefined;
                 let result = await listCollection({
                     dbName,
                     collectionName,
                     query: parsedQuery,
                     fields: parsedFields,
-                    skip,
-                    limit
+                    skip: parsedSkip,
+                    limit: parsedLimit
                 });
                 if (!result) {
                     result = [];
@@ -309,16 +314,22 @@ async function handleRequest({ dbName, collectionName, readOnly, req }) {
             const result = req.body;
             let records = result;
             if (!Array.isArray(records)) {
-                if (typeof records === "object" && records[collectionName]) {
+                if (records && typeof records === "object" && records[collectionName]) {
                     records = records[collectionName];
                 }
                 else {
                     records = [result];
                 }
             }
+            if (!Array.isArray(records)) {
+                // Ensure records is an array before processing
+                records = [records];
+            }
+
             console.log("pushing " + records.length + " records");
             const operations = [];
             for (const record of records) {
+                if (!record) continue;
                 const { id } = record;
                 if (typeof id !== "string") {
                     continue;
@@ -399,7 +410,9 @@ const collectionName = "users";
 export default async function USERS_API(req, res) {
     try {
         const { headers } = req || {};
-        const { cookie, id: queryId } = headers || {};
+        const cookie = getFirstHeader(headers, 'cookie');
+        const queryId = getFirstHeader(headers, 'id');
+
         const cookies = parseCookie(cookie);
         const { id, hash: userHash } = cookies || {};
         if (!id || !userHash) {
