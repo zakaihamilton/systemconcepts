@@ -1,8 +1,8 @@
-import { handleRequest, findRecord } from "@util/mongo";
-import { login } from "@util/login";
-import { roleAuth } from "@util/roles";
-import parseCookie from "@util/cookie";
-import { getSafeError } from "@util/safeError";
+import { handleRequest, findRecord } from "@util-legacy/mongo";
+import { login } from "@util-legacy/login";
+import { roleAuth } from "@util-legacy/roles";
+import parseCookie from "@util-legacy/cookie";
+import { getSafeError } from "@util-legacy/safeError";
 
 const collectionName = "users";
 
