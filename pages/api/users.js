@@ -312,18 +312,23 @@ async function handleRequest({ dbName, collectionName, readOnly, req }) {
     } else if (!readOnly && (req.method === "PUT" || req.method === "DELETE")) {
         try {
             const result = req.body;
-            let records = result;
-            if (!Array.isArray(records)) {
-                if (records && typeof records === "object" && records[collectionName]) {
-                    records = records[collectionName];
-                }
-                else {
+            let records = [];
+
+            if (Array.isArray(result)) {
+                records = result;
+            } else if (result && typeof result === "object") {
+                if (Array.isArray(result[collectionName])) {
+                    records = result[collectionName];
+                } else {
                     records = [result];
                 }
+            } else {
+                records = [result];
             }
+
+            // Final safety check: ensure records is definitely an array
             if (!Array.isArray(records)) {
-                // Ensure records is an array before processing
-                records = [records];
+                records = [];
             }
 
             console.log("pushing " + records.length + " records");
