@@ -1,9 +1,399 @@
-import { handleRequest, findRecord } from "@util/mongo";
-import { login } from "@util/login";
-import { roleAuth } from "@util/roles";
-import parseCookie from "@util/cookie";
-import { getSafeError } from "@util/safeError";
+import { MongoClient } from "mongodb";
+import { compare, hash } from "bcryptjs";
 
+// --- Data: roles ---
+const roles = [
+    {
+        id: "visitor",
+        name: "VISITOR",
+        level: 1
+    },
+    {
+        id: "student",
+        name: "STUDENT",
+        level: 2
+    },
+    {
+        id: "upper",
+        name: "UPPER",
+        level: 3
+    },
+    {
+        id: "teacher",
+        name: "TEACHER",
+        level: 4
+    },
+    {
+        id: "admin",
+        name: "ADMIN",
+        level: 5
+    }
+];
+
+// --- Helper: safeError ---
+function getSafeError(err) {
+    const mapping = {
+        "RATE_LIMIT_EXCEEDED": "Too many attempts, please try again later"
+    };
+    if (mapping[err]) {
+        return mapping[err];
+    }
+    if (typeof err === "string") {
+        return err;
+    }
+    return "INTERNAL_ERROR";
+}
+
+// --- Helper: roleAuth ---
+function roleAuth(roleId, compareId) {
+    const role = roles.find(role => role.id === roleId);
+    const compare = roles.find(role => role.id === compareId);
+    if (!role || !compare) {
+        return false;
+    }
+    return role.level >= compare.level;
+}
+
+// --- Helper: cookie ---
+function parseCookie(cookieHeader) {
+    if (!cookieHeader) return {};
+
+    const cookies = {};
+    cookieHeader.split(';').forEach(cookieStr => {
+        const [name, value] = cookieStr.trim().split('=');
+        if (name && value) {
+            cookies[name] = value;
+        }
+    });
+    return cookies;
+}
+
+// --- Helper: mongoSanitize ---
+function sanitizeQuery(query) {
+    if (!query) return query;
+    if (typeof query !== 'object') return query;
+
+    // Iterate over array items if it's an array
+    if (Array.isArray(query)) {
+        for (const item of query) {
+            sanitizeQuery(item);
+        }
+        return query;
+    }
+
+    for (const key in query) {
+        // Check for dangerous operators
+        if (key.startsWith('$')) {
+            const lowerKey = key.toLowerCase();
+            // Block operators that allow code execution or ReDoS
+            if (lowerKey === '$where' ||
+                lowerKey === '$function' ||
+                lowerKey === '$accumulator' ||
+                lowerKey === '$regex' ||
+                lowerKey === '$expr' ||
+                lowerKey === '$jsonschema') {
+                 throw new Error("Invalid query operator: " + key);
+            }
+        }
+
+        // Recursively check nested objects
+        if (typeof query[key] === 'object' && query[key] !== null) {
+            sanitizeQuery(query[key]);
+        }
+    }
+    return query;
+}
+
+// --- Helper: mutex ---
+const locks = {};
+
+function getMutex({ id }) {
+    var lock = locks[id];
+    if (!lock) {
+        lock = locks[id] = {};
+        lock._locking = Promise.resolve();
+        lock._locks = 0;
+        lock._disabled = false;
+        lockMutex({ id }).then(unlock => {
+            if (lock._disabled) {
+                lock._disabled = unlock;
+            } else {
+                unlock();
+            }
+        });
+    }
+    return lock;
+}
+
+function isMutexLocked({ id }) {
+    var lock = getMutex({ id });
+    if (lock) {
+        return lock._locks > 0;
+    }
+}
+
+function lockMutex({ id }) {
+    var lock = getMutex({ id });
+    if (lock) {
+        lock._locks += 1;
+        let unlockNext;
+        let willLock = new Promise(resolve => unlockNext = () => {
+            lock._locks -= 1;
+            resolve();
+        });
+        let willUnlock = lock._locking.then(() => unlockNext);
+        lock._locking = lock._locking.then(() => willLock);
+        return willUnlock;
+    }
+}
+
+// --- Helper: mongo ---
+const _clusters = [];
+
+async function getCluster({ url = process.env.MONGO_URL }) {
+    if (!url) {
+        throw "Empty URI";
+    }
+    const unlock = await lockMutex({ id: "mongo" });
+    let cluster = _clusters[url];
+    if (!cluster) {
+        console.log("connecting to database");
+        cluster = _clusters[url] = await MongoClient.connect(url);
+        if (!cluster) {
+            throw "Cannot connect to database, url: " + url;
+        }
+        console.log("connected to database: " + url);
+    }
+    unlock();
+    return cluster;
+}
+
+async function getDatabase({ dbName = process.env.MONGO_DB, ...params }) {
+    const cluster = await getCluster({ ...params });
+    const db = cluster.db(dbName);
+    return db;
+}
+
+async function getCollection({ dbName, collectionName, ...params }) {
+    const db = await getDatabase({ dbName, ...params });
+    const collection = db.collection(collectionName);
+    return collection;
+}
+
+async function listCollection({ collectionName, query = {}, fields, skip, limit, ...params }) {
+    const collection = await getCollection({ collectionName, ...params });
+    let cursor = collection.find(query, fields);
+    if (fields) {
+        cursor = cursor.project(fields);
+    }
+    if (skip !== undefined) {
+        cursor = cursor.skip(skip);
+    }
+    if (limit !== undefined) {
+        cursor = cursor.limit(limit);
+    }
+    const results = await cursor.toArray();
+    return results;
+}
+
+async function listCollections({ ...params }) {
+    const db = await getDatabase({ ...params });
+    const collections = await db.listCollections().toArray();
+    const names = collections.map(collection => collection.name);
+    return names;
+}
+
+async function insertRecord({ record, ...params }) {
+    const collection = await getCollection(params);
+    await collection.insertOne(record);
+}
+
+async function findRecord({ query, fields, ...params }) {
+    const collection = await getCollection(params);
+    return await collection.findOne(query, fields);
+}
+
+async function deleteRecord({ query, ...params }) {
+    const collection = await getCollection(params);
+    await collection.deleteOne(query);
+}
+
+async function replaceRecord({ query, record, ...params }) {
+    const collection = await getCollection(params);
+    await collection.replaceOne(query, record, {
+        upsert: true
+    });
+}
+
+async function bulkWrite({ operations, ordered, ...params }) {
+    const collection = await getCollection(params);
+    await collection.bulkWrite(operations, { ordered });
+}
+
+async function handleRequest({ dbName, collectionName, readOnly, req }) {
+    const headers = req.headers || {};
+    if (req.method === "GET" || req.method === "POST") {
+        try {
+            const body = req.body;
+            const { id, query, fields } = headers;
+            const parsedId = id && decodeURIComponent(id);
+            const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
+            if (Array.isArray(body)) {
+                const maxBytes = 4000 * 1000;
+                let records = await listCollection({
+                    dbName, collectionName, query: {
+                        "id": {
+                            "$in": body
+                        }
+                    }, fields: parsedFields
+                });
+                if (!records) {
+                    records = [];
+                }
+                const results = [];
+                for (const record of records) {
+                    if (JSON.stringify(results).length > maxBytes) {
+                        break;
+                    }
+                    results.push(record);
+                }
+                console.log("found", results.length, "items for collection", collectionName, "fields", parsedFields);
+                return results;
+            }
+            else if (id) {
+                const result = await findRecord({ query: { id: parsedId }, fields: parsedFields, dbName, collectionName });
+                console.log("found an item for collection", collectionName, "id", parsedId);
+                return result;
+            }
+            else if (headers.prefix) {
+                const prefix = decodeURIComponent(headers.prefix);
+                const parsedFields = headers.fields && JSON.parse(decodeURIComponent(headers.fields));
+                const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const safePrefix = escapeRegex(prefix);
+                const query = { id: { $regex: `^${safePrefix}` } };
+                const result = await listCollection({
+                    dbName,
+                    collectionName,
+                    query,
+                    fields: parsedFields
+                });
+                console.log("found", result.length, "items with prefix", prefix, "for collection", collectionName);
+                return result;
+            }
+            else {
+                const parsedQuery = query && JSON.parse(decodeURIComponent(query));
+                sanitizeQuery(parsedQuery);
+                const skip = headers.skip ? parseInt(headers.skip) : undefined;
+                const limit = headers.limit ? parseInt(headers.limit) : undefined;
+                let result = await listCollection({
+                    dbName,
+                    collectionName,
+                    query: parsedQuery,
+                    fields: parsedFields,
+                    skip,
+                    limit
+                });
+                if (!result) {
+                    result = [];
+                }
+                console.log("found", result.length, "items for collection", collectionName);
+                return result;
+            }
+        }
+        catch (err) {
+            console.error("get error: ", err);
+            return { err: getSafeError(err) };
+        }
+    } else if (!readOnly && (req.method === "PUT" || req.method === "DELETE")) {
+        try {
+            const result = req.body;
+            let records = result;
+            if (!Array.isArray(records)) {
+                if (typeof records === "object" && records[collectionName]) {
+                    records = records[collectionName];
+                }
+                else {
+                    records = [result];
+                }
+            }
+            console.log("pushing " + records.length + " records");
+            const operations = [];
+            for (const record of records) {
+                const { id } = record;
+                if (typeof id !== "string") {
+                    continue;
+                }
+                delete record._id;
+                console.log(id);
+                if (req.method === "DELETE") {
+                    operations.push({ deleteOne: { filter: { id } } });
+                }
+                else {
+                    operations.push({ replaceOne: { filter: { id }, replacement: record, upsert: true } });
+                }
+            }
+            await bulkWrite({ dbName, collectionName, operations, ordered: false });
+            return {};
+        }
+        catch (err) {
+            console.error("put error: ", err);
+            return { err: getSafeError(err) };
+        }
+    }
+}
+
+// --- Helper: login ---
+async function login({ id, password, hash, api, path }) {
+    if (!id) {
+        console.error("empty user id");
+        throw "USER_NOT_FOUND";
+    }
+    console.log("user:", id, "api:", api, "path", path);
+    id = id.toLowerCase();
+    let user = null;
+    try {
+        user = await findRecord({ collectionName: "users", query: { id } });
+    }
+    catch (err) {
+        console.error("Error finding record for user", id, err);
+        throw "USER_NOT_FOUND";
+    }
+    if (!user) {
+        console.error("cannot find user for: ", id);
+        throw "USER_NOT_FOUND";
+    }
+    if (password) {
+        const result = await compare(password, user.hash);
+        if (!result) {
+            console.error("wrong password for user", id);
+            throw "WRONG_PASSWORD";
+        }
+    }
+    else if (hash !== user.hash) {
+        console.error("wrong password for user", id);
+        throw "WRONG_PASSWORD";
+    }
+    const dateObj = new Date();
+    const date = dateObj.toString();
+    const utc = dateObj.getTime();
+    await replaceRecord({
+        collectionName: "users",
+        query: { id },
+        record: {
+            ...user,
+            role: user.role || "visitor",
+            date,
+            utc
+        }
+    });
+    // Ensure the returned user object also has the role
+    if (!user.role) {
+        user.role = "visitor";
+    }
+    return user;
+}
+
+// --- Main Handler ---
 const collectionName = "users";
 
 export default async function USERS_API(req, res) {
@@ -11,11 +401,11 @@ export default async function USERS_API(req, res) {
         const { headers } = req || {};
         const { cookie, id: queryId } = headers || {};
         const cookies = parseCookie(cookie);
-        const { id, hash } = cookies || {};
-        if (!id || !hash) {
+        const { id, hash: userHash } = cookies || {};
+        if (!id || !userHash) {
             throw "ACCESS_DENIED";
         }
-        const user = await login({ id, hash, api: "users" });
+        const user = await login({ id, hash: userHash, api: "users" });
         if (!roleAuth(user && user.role, "admin")) {
             if (!queryId) {
                 throw "ACCESS_DENIED";
@@ -49,7 +439,6 @@ export default async function USERS_API(req, res) {
             const record = parsedId ? await findRecord({ query: { id: parsedId }, collectionName }) : null;
             if (record) {
                 if (body.password) {
-                    const { hash } = require("bcryptjs");
                     body.hash = await hash(body.password, 10);
                     delete body.password;
                 }
