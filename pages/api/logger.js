@@ -1,4 +1,4 @@
-import { handle } from "@util/logger";
+import { handle } from "@util-legacy/logger";
 
 export default function LOGGER_API(req, res) {
     handle({ ...req.body, throwError: false });

@@ -1,7 +1,7 @@
-import { handleRequest } from "@util/mongo";
-import { login } from "@util/login";
-import parseCookie from "@util/cookie";
-import { getSafeError } from "@util/safeError";
+import { handleRequest } from "@util-legacy/mongo";
+import { login } from "@util-legacy/login";
+import parseCookie from "@util-legacy/cookie";
+import { getSafeError } from "@util-legacy/safeError";
 
 export default async function PERSONAL_API(req, res) {
     try {

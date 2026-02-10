@@ -1,6 +1,6 @@
-import { login, register, changePassword, resetPassword, sendResetEmail } from "@util/login";
-import { getSafeError } from "@util/safeError";
-import { checkRateLimit } from "@util/rateLimit";
+import { login, register, changePassword, resetPassword, sendResetEmail } from "@util-legacy/login";
+import { getSafeError } from "@util-legacy/safeError";
+import { checkRateLimit } from "@util-legacy/rateLimit";
 
 export default async function LOGIN_API(req, res) {
     if (req.method === "GET") {

@@ -1,8 +1,8 @@
-import { downloadData, validatePathAccess } from "@util/aws";
-import { login } from "@util/login";
-import parseCookie from "@util/cookie";
-import { roleAuth } from "@util/roles";
-import { error } from "@util/logger";
+import { downloadData, validatePathAccess } from "@util-legacy/aws";
+import { login } from "@util-legacy/login";
+import parseCookie from "@util-legacy/cookie";
+import { roleAuth } from "@util-legacy/roles";
+import { error } from "@util-legacy/logger";
 
 const component = "subtitle";
 

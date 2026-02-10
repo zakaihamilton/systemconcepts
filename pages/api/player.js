@@ -1,9 +1,9 @@
-import { cdnUrl, metadataInfo, validatePathAccess } from "@util/aws";
-import { login } from "@util/login";
-import parseCookie from "@util/cookie";
-import { roleAuth } from "@util/roles";
-import { error, log } from "@util/logger";
-import { getSafeError } from "@util/safeError";
+import { cdnUrl, metadataInfo, validatePathAccess } from "@util-legacy/aws";
+import { login } from "@util-legacy/login";
+import parseCookie from "@util-legacy/cookie";
+import { roleAuth } from "@util-legacy/roles";
+import { error, log } from "@util-legacy/logger";
+import { getSafeError } from "@util-legacy/safeError";
 
 const component = "player";
 

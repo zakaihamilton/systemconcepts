@@ -1,8 +1,8 @@
-import { handleRequest } from "@util/aws";
-import { login } from "@util/login";
-import parseCookie from "@util/cookie";
-import { roleAuth } from "@util/roles";
-import { getSafeError } from "@util/safeError";
+import { handleRequest } from "@util-legacy/aws";
+import { login } from "@util-legacy/login";
+import parseCookie from "@util-legacy/cookie";
+import { roleAuth } from "@util-legacy/roles";
+import { getSafeError } from "@util-legacy/safeError";
 
 export default async function AWS_API(req, res) {
     try {

@@ -1,6 +1,6 @@
-import { getSafeError } from "@util/safeError";
-import { getPasskeyRegistrationOptions, verifyPasskeyRegistration, getPasskeyAuthOptions, verifyPasskeyAuth, getPasskeys, deletePasskey } from "@util/passkey";
-import { login } from "@util/login";
+import { getSafeError } from "@util-legacy/safeError";
+import { getPasskeyRegistrationOptions, verifyPasskeyRegistration, getPasskeyAuthOptions, verifyPasskeyAuth, getPasskeys, deletePasskey } from "@util-legacy/passkey";
+import { login } from "@util-legacy/login";
 
 export default async function PASSKEY_API(req, res) {
     // Determine RP ID and Origin from the request

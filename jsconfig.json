@@ -14,6 +14,9 @@
             "@util/*": [
                 "src/util/*"
             ],
+            "@util-legacy/*": [
+                "src/util-legacy/*"
+            ],
             "@data/*": [
                 "src/data/*"
             ],
