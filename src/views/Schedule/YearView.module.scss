@@ -1,9 +1,0 @@
-.root {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 0.5em;
-    padding: 0.5em;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    flex: 1;
-}

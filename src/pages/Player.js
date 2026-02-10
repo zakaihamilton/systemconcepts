@@ -27,6 +27,7 @@ import { useRecentHistory } from "@util/history";
 
 export const PlayerStore = new Store({
     mediaPath: "",
+    downloadUrl: "",
     subtitles: "",
     showSubtitles: true,
     showDetails: true,
@@ -41,7 +42,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath: storeMediaPath, subtitles: storeSubtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
+    const { hash, mediaPath: storeMediaPath, downloadUrl, subtitles: storeSubtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
@@ -81,8 +82,8 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const mediaPath = data?.path || storeMediaPath;
     const subtitles = data?.subtitles || storeSubtitles;
 
-    const isAudio = isAudioFile(mediaPath);
-    const isVideo = isVideoFile(mediaPath);
+    const isAudio = isAudioFile(path);
+    const isVideo = isVideoFile(path);
 
     const gotoPlayer = () => {
         let hashPath = hash;
@@ -110,8 +111,9 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     useEffect(() => {
         if (data && data.path) {
             PlayerStore.update(s => {
-                s.mediaPath = data && data.path;
-                s.subtitles = data && data.subtitles;
+                s.mediaPath = data.path;
+                s.downloadUrl = data.downloadUrl;
+                s.subtitles = data.subtitles;
             });
         }
     }, [data]);
@@ -226,9 +228,10 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     }
 
     const downloadFile = () => {
-        exportFile(mediaPath, fileName(path));
+        if (downloadUrl) {
+            exportFile(downloadUrl, fileName(path));
+        }
     };
-
     const statusBar = <StatusBar store={PlayerStore} />;
 
     useEffect(() => {
@@ -254,7 +257,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
         <div id="search-status-portal" />
         {statusBar}
         {speedToolbar === "top" && <SpeedSlider />}
-        <Download visible={show && mediaPath && !isTranscript} onClick={downloadFile} target={mediaPath} />
+        <Download visible={show && downloadUrl && !isTranscript} onClick={downloadFile} target={downloadUrl} />
         {MediaComponent ? <MediaComponent key={subtitles} style={mediaStyles} {...mediaProps} elements={elements}>
             {mediaPath && <source src={mediaPath} type={mediaType} />}
             {!isTranscript && subtitles && showSubtitles && <track label="English" kind="subtitles" srcLang="en" src={subtitles} default />}
