@@ -104,6 +104,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     useEffect(() => {
         PlayerStore.update(s => {
             s.mediaPath = "";
+            s.downloadUrl = "";
             s.subtitles = "";
         });
     }, [path]);

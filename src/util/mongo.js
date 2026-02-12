@@ -15,9 +15,9 @@ export async function getCluster({ url = process.env.MONGO_URL }) {
         console.log("connecting to database");
         cluster = _clusters[url] = await MongoClient.connect(url);
         if (!cluster) {
-            throw "Cannot connect to database, url: " + url;
+            throw "Cannot connect to database";
         }
-        console.log("connected to database: " + url);
+        console.log("connected to database");
     }
     unlock();
     return cluster;

@@ -29,6 +29,43 @@ function parseUrl(url) {
     return [process.env.AWS_BUCKET, url];
 }
 
+let wasabiClient = null;
+let wasabiBucket = null;
+
+async function getWasabi() {
+    if (wasabiClient) return { client: wasabiClient, bucket: wasabiBucket };
+    const unlock = await lockMutex({ id: "wasabi" });
+    if (!wasabiClient) {
+        if (!process.env.WASABI_URL) {
+            throw new Error("WASABI_URL not defined");
+        }
+        const wasabiUri = new URL(process.env.WASABI_URL);
+        wasabiBucket = wasabiUri.pathname.replace("/", "");
+        wasabiClient = new S3Client({
+            endpoint: `https://${wasabiUri.host}`,
+            region: wasabiUri.searchParams.get("region") || "us-east-1",
+            credentials: {
+                accessKeyId: decodeURIComponent(wasabiUri.username),
+                secretAccessKey: decodeURIComponent(wasabiUri.password),
+            },
+            forcePathStyle: true,
+            requestChecksumCalculation: "WHEN_REQUIRED",
+            responseChecksumValidation: "WHEN_REQUIRED"
+        });
+    }
+    unlock();
+    return { client: wasabiClient, bucket: wasabiBucket };
+}
+
+function isWasabiPath(path) {
+    return path && (path.startsWith("sessions/") || path === "sessions");
+}
+
+function getWasabiPath(path) {
+    if (path === "sessions") return "";
+    return path.substring("sessions/".length);
+}
+
 export async function getS3({
     accessKeyId = process.env.AWS_ID,
     secretAccessKey = process.env.AWS_SECRET,
@@ -96,7 +133,19 @@ export function validatePathAccess(path) {
 }
 
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
+    const isWasabi = isWasabiPath(to);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(to);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = normalizePath(to);
+    }
 
     // Note: In Next.js (Serverless), 'from' must be in /tmp/ or accessible via fs.
     if (!fs.existsSync(from)) {
@@ -105,8 +154,8 @@ export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET
 
     const fileStream = fs.createReadStream(from);
     const uploadParams = {
-        Bucket: bucketName,
-        Key: normalizePath(to),
+        Bucket: bucket,
+        Key: key,
         Body: fileStream,
         // Note: Check if your bucket blocks public ACLs. If so, remove the line below.
         ACL: "public-read"
@@ -115,10 +164,23 @@ export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET
 }
 
 export async function downloadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
+    const isWasabi = isWasabiPath(from);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(from);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = from;
+    }
+
     const downloadParams = {
-        Bucket: bucketName,
-        Key: from
+        Bucket: bucket,
+        Key: key
     };
 
     const response = await s3.send(new GetObjectCommand(downloadParams));
@@ -145,10 +207,23 @@ export async function downloadFile({ from, to, bucketName = process.env.AWS_BUCK
 }
 
 export async function uploadData({ path, data, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
+    const isWasabi = isWasabiPath(path);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(path);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = normalizePath(path);
+    }
+
     const uploadParams = {
-        Bucket: bucketName,
-        Key: normalizePath(path),
+        Bucket: bucket,
+        Key: key,
         Body: data,
         ACL: "public-read"
     };
@@ -156,10 +231,23 @@ export async function uploadData({ path, data, bucketName = process.env.AWS_BUCK
 }
 
 export async function downloadData({ path, binary, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
+    const isWasabi = isWasabiPath(path);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(path);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = normalizePath(path);
+    }
+
     const downloadParams = {
-        Bucket: bucketName,
-        Key: normalizePath(path)
+        Bucket: bucket,
+        Key: key
     };
 
     const response = await s3.send(new GetObjectCommand(downloadParams));
@@ -206,20 +294,45 @@ export async function moveFile({ from, to, bucketName = process.env.AWS_BUCKET }
 }
 
 export async function deleteFile({ path, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
+    const isWasabi = isWasabiPath(path);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(path);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = normalizePath(path);
+    }
+
     const deleteParams = {
-        Bucket: bucketName,
-        Key: normalizePath(path)
+        Bucket: bucket,
+        Key: key
     };
     return await s3.send(new DeleteObjectCommand(deleteParams));
 }
 
 export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }) {
     path = normalizePath(path);
-    const s3 = await getS3({});
+    const isWasabi = isWasabiPath(path);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(path);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = path;
+    }
 
     try {
-        const headParams = { Bucket: bucketName, Key: path };
+        const headParams = { Bucket: bucket, Key: key };
         const headResponse = await s3.send(new HeadObjectCommand(headParams));
         const name = path.split("/").pop();
         return {
@@ -231,9 +344,9 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
     } catch {
         // If file not found, check if it is a folder (CommonPrefixes)
         const listParams = {
-            Bucket: bucketName,
+            Bucket: bucket,
             Delimiter: "/",
-            Prefix: path ? path + "/" : "",
+            Prefix: key ? key + "/" : "",
             MaxKeys: 1
         };
 
@@ -257,15 +370,29 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
 export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
     path = normalizePath(path);
     console.log(`[S3 list] Listing path: ${path}, bucket: ${bucketName}`);
-    const s3 = await getS3({});
+
+    const isWasabi = isWasabiPath(path);
+    let s3, bucket, key;
+
+    if (isWasabi) {
+        const wasabi = await getWasabi();
+        s3 = wasabi.client;
+        bucket = wasabi.bucket;
+        key = getWasabiPath(path);
+    } else {
+        s3 = await getS3({});
+        bucket = bucketName;
+        key = path;
+    }
+
     const items = [];
     let continuationToken = undefined;
 
     do {
         const listParams = {
-            Bucket: bucketName,
+            Bucket: bucket,
             Delimiter: "/",
-            Prefix: path ? path + "/" : "",
+            Prefix: key ? key + "/" : "",
             ContinuationToken: continuationToken
         };
         console.log(`[S3 list] ListParams:`, listParams);
@@ -299,16 +426,6 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
     } while (continuationToken);
 
     return items;
-}
-
-export function cdnUrl(path) {
-    let tokens = makePath(path).split("/");
-    tokens.shift(); // Remove empty or root element
-    let fileName = tokens.pop();
-    path = tokens.join("/");
-    // Note: ensure makePath handles undefined args gracefully or process.env.AWS_CDN is defined
-    const url = `https://${makePath(process.env.AWS_CDN || "", path, encodeURIComponent(fileName))}`;
-    return url;
 }
 
 export async function handleRequest({ readOnly, req, path }) {
