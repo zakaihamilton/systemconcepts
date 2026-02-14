@@ -12,7 +12,7 @@ import { loadTags, loadDurations, loadSummaries } from "./metadata";
 import { createSessionItem } from "./mapper";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 
-const prefix = makePath("aws/sessions") + "/";
+const prefix = "wasabi/";
 
 export async function updateGroupProcess(name, updateAll, forceUpdate = false, isMerged = false, isBundled = false) {
     const path = prefix + name;
@@ -132,9 +132,10 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             yearItems.sort((a, b) => a.name.localeCompare(b.name));
 
             // Load Metadata
-            const sessionTagsMap = await loadTags(year, name, path, forceUpdate, isMerged, isBundled);
-            const sessionDurationMap = await loadDurations(year, name, path, forceUpdate, isMerged, isBundled);
-            const sessionSummariesMap = await loadSummaries(year, name, path, forceUpdate, isMerged, isBundled);
+            const awsPath = makePath("aws/sessions", name);
+            const sessionTagsMap = await loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled);
+            const sessionDurationMap = await loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled);
+            const sessionSummariesMap = await loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled);
 
             // Group files by session ID
             const sessionFilesMap = {};

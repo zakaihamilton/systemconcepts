@@ -14,6 +14,62 @@ import { getSafeError } from "./safeError";
 
 let s3Client = null;
 
+export async function getS3(params) {
+    const unlock = await lockMutex({ id: "s3" });
+    try {
+        if (s3Client) {
+            console.log("getS3: returning existing s3Client");
+            return s3Client;
+        }
+        console.log("getS3: initializing s3Client");
+
+        const { endpoint, region } = params || {};
+        let finalEndpoint = endpoint || process.env.AWS_ENDPOINT;
+        const finalRegion = region || "us-east-1";
+
+        if (finalEndpoint) {
+            if (!finalEndpoint.startsWith("http")) {
+                finalEndpoint = `https://${finalEndpoint}`;
+            }
+            try {
+                new URL(finalEndpoint);
+            } catch (err) {
+                console.error("getS3: Invalid endpoint URL:", finalEndpoint);
+                // Fallback to undefined to let AWS SDK use defaults if appropriate,
+                // or let new S3Client throw with a clear error
+            }
+        }
+
+        console.log("getS3: initializing s3Client", { finalEndpoint, finalRegion });
+
+        const accessKeyId = process.env.AWS_ID;
+        const secretAccessKey = process.env.AWS_SECRET;
+
+        console.log("getS3: credentials check", {
+            hasAccessKey: !!accessKeyId,
+            hasSecretKey: !!secretAccessKey,
+            accessKeyLength: accessKeyId ? accessKeyId.length : 0
+        });
+
+        if (!accessKeyId || !secretAccessKey) {
+            console.error("getS3: Missing AWS credentials! Check AWS_ID and AWS_SECRET in .env");
+        }
+
+        s3Client = new S3Client({
+            endpoint: finalEndpoint,
+            region: finalRegion,
+            credentials: {
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretAccessKey
+            }
+        });
+        console.log("getS3: created s3Client", typeof s3Client, typeof s3Client.send);
+        return s3Client;
+    } finally {
+        unlock();
+    }
+}
+
 /**
  * Helper to parse S3 location strings. 
  * Supports "bucket/key" or just "key" (uses default bucket).
@@ -27,80 +83,6 @@ function parseUrl(url) {
     }
     // Default to environment bucket if just a key is provided
     return [process.env.AWS_BUCKET, url];
-}
-
-let wasabiClient = null;
-let wasabiBucket = null;
-
-async function getWasabi() {
-    if (wasabiClient) return { client: wasabiClient, bucket: wasabiBucket };
-    const unlock = await lockMutex({ id: "wasabi" });
-    if (!wasabiClient) {
-        if (!process.env.WASABI_URL) {
-            throw new Error("WASABI_URL not defined");
-        }
-        const wasabiUri = new URL(process.env.WASABI_URL);
-        wasabiBucket = wasabiUri.pathname.replace("/", "");
-        wasabiClient = new S3Client({
-            endpoint: `https://${wasabiUri.host}`,
-            region: wasabiUri.searchParams.get("region") || "us-east-1",
-            credentials: {
-                accessKeyId: decodeURIComponent(wasabiUri.username),
-                secretAccessKey: decodeURIComponent(wasabiUri.password),
-            },
-            forcePathStyle: true,
-            requestChecksumCalculation: "WHEN_REQUIRED",
-            responseChecksumValidation: "WHEN_REQUIRED"
-        });
-    }
-    unlock();
-    return { client: wasabiClient, bucket: wasabiBucket };
-}
-
-function isWasabiPath(path) {
-    return path && (path.startsWith("sessions/") || path === "sessions");
-}
-
-function getWasabiPath(path) {
-    if (path === "sessions") return "";
-    return path.substring("sessions/".length);
-}
-
-export async function getS3({
-    accessKeyId = process.env.AWS_ID,
-    secretAccessKey = process.env.AWS_SECRET,
-    endpointUrl = process.env.AWS_ENDPOINT
-}) {
-    // 1. Performance: Check if client exists before locking (Double-Checked Locking)
-    if (s3Client) {
-        return s3Client;
-    }
-
-    if (!accessKeyId) throw new Error("No Access ID");
-    if (!secretAccessKey) throw new Error("No Secret Key");
-    if (!endpointUrl) throw new Error("No End Point");
-
-    const unlock = await lockMutex({ id: "aws" });
-
-    // Re-check inside lock
-    if (!s3Client) {
-        // 2. Reliability: Better region fallback than splitting by dot
-        const region = process.env.AWS_REGION || (endpointUrl.includes(".") ? endpointUrl.split(".")[1] : "us-east-1");
-
-        s3Client = new S3Client({
-            region,
-            endpoint: "https://" + endpointUrl,
-            credentials: {
-                accessKeyId,
-                secretAccessKey
-            },
-            forcePathStyle: true, // Often needed for custom S3 endpoints (MinIO/DigitalOcean/etc)
-            requestChecksumCalculation: "WHEN_REQUIRED",
-            responseChecksumValidation: "WHEN_REQUIRED"
-        });
-    }
-    unlock();
-    return s3Client;
 }
 
 /**
@@ -133,19 +115,9 @@ export function validatePathAccess(path) {
 }
 
 export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const isWasabi = isWasabiPath(to);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(to);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = normalizePath(to);
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = normalizePath(to);
 
     // Note: In Next.js (Serverless), 'from' must be in /tmp/ or accessible via fs.
     if (!fs.existsSync(from)) {
@@ -164,19 +136,9 @@ export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET
 }
 
 export async function downloadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const isWasabi = isWasabiPath(from);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(from);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = from;
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = from;
 
     const downloadParams = {
         Bucket: bucket,
@@ -207,19 +169,9 @@ export async function downloadFile({ from, to, bucketName = process.env.AWS_BUCK
 }
 
 export async function uploadData({ path, data, bucketName = process.env.AWS_BUCKET }) {
-    const isWasabi = isWasabiPath(path);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(path);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = normalizePath(path);
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = normalizePath(path);
 
     const uploadParams = {
         Bucket: bucket,
@@ -231,19 +183,9 @@ export async function uploadData({ path, data, bucketName = process.env.AWS_BUCK
 }
 
 export async function downloadData({ path, binary, bucketName = process.env.AWS_BUCKET }) {
-    const isWasabi = isWasabiPath(path);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(path);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = normalizePath(path);
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = normalizePath(path);
 
     const downloadParams = {
         Bucket: bucket,
@@ -294,19 +236,9 @@ export async function moveFile({ from, to, bucketName = process.env.AWS_BUCKET }
 }
 
 export async function deleteFile({ path, bucketName = process.env.AWS_BUCKET }) {
-    const isWasabi = isWasabiPath(path);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(path);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = normalizePath(path);
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = normalizePath(path);
 
     const deleteParams = {
         Bucket: bucket,
@@ -317,19 +249,9 @@ export async function deleteFile({ path, bucketName = process.env.AWS_BUCKET }) 
 
 export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }) {
     path = normalizePath(path);
-    const isWasabi = isWasabiPath(path);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(path);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = path;
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = path;
 
     try {
         const headParams = { Bucket: bucket, Key: key };
@@ -371,19 +293,9 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
     path = normalizePath(path);
     console.log(`[S3 list] Listing path: ${path}, bucket: ${bucketName}`);
 
-    const isWasabi = isWasabiPath(path);
-    let s3, bucket, key;
-
-    if (isWasabi) {
-        const wasabi = await getWasabi();
-        s3 = wasabi.client;
-        bucket = wasabi.bucket;
-        key = getWasabiPath(path);
-    } else {
-        s3 = await getS3({});
-        bucket = bucketName;
-        key = path;
-    }
+    const s3 = await getS3({});
+    const bucket = bucketName;
+    const key = path;
 
     const items = [];
     let continuationToken = undefined;
