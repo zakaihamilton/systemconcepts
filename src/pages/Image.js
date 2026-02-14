@@ -22,7 +22,12 @@ function useImagePath(imageName = "", extension) {
         path = makePath(components).split("/").join("/");
     }
     else {
-        path = (parentPath + "/" + imageName + "." + extension).split("/").slice(1).join("/");
+        if (imageName.endsWith("." + extension)) {
+            path = (parentPath + "/" + imageName).split("/").slice(1).join("/");
+        }
+        else {
+            path = (parentPath + "/" + imageName + "." + extension).split("/").slice(1).join("/");
+        }
     }
     const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     let downloadUrl = "";
