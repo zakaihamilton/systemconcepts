@@ -125,7 +125,7 @@ export default function ImagePage({ name, ext = "png" }) {
     const style = { height: size.height - 22, width: size.width - 22 };
 
     return <div className={styles.root}>
-        <Download visible={!loading && !imageLoading && !error && !signingLoading} onClick={downloadImage} target={downloadUrl} />
+        <Download visible={!loading && !imageLoading && !error && !signingLoading} onClick={downloadUrl ? undefined : downloadImage} target={downloadUrl} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {!loading && !error && src && <img alt={name} className={styles.img} onError={onError} onLoad={onLoad} style={{ ...style, visibility: imageLoading ? "hidden" : "visible" }} src={src} />}
         {(!!loading || !!imageLoading || !!signingLoading) && <Progress fullscreen={true} />}
