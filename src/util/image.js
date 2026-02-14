@@ -1,5 +1,5 @@
-const MAX_THUMBNAIL_SIZE = 300;
-const IMAGE_QUALITY = 0.7;
+const MAX_THUMBNAIL_SIZE = 600;
+const IMAGE_QUALITY = 0.8;
 
 export async function thumbnailify(base64Image, maxSize = MAX_THUMBNAIL_SIZE) {
     var img = new Image();

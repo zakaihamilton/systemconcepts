@@ -263,7 +263,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             const thumbnailPromises = yearSessions
                 .filter(session => session.thumbnail === true && session.image)
                 .map(session => thumbnailLimit(async () => {
-                    if (existingThumbnails[session.id]) {
+                    if (existingThumbnails[session.id] && !forceUpdate) {
                         session.thumbnail = existingThumbnails[session.id];
                     } else {
                         try {

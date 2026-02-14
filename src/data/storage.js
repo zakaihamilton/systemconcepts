@@ -7,13 +7,13 @@ import wasabi from "@storage/wasabi";
 export default [
     {
         id: "local",
-        name: "LOCAL",
+        name: "Local",
         enabled: true,
         ...local
     },
     {
         id: "personal",
-        name: "PERSONAL",
+        name: "Personal",
         enabled: () => {
             return Cookies.get("id") && Cookies.get("hash");
         },
@@ -21,7 +21,7 @@ export default [
     },
     {
         "id": "aws",
-        name: "AWS",
+        name: "DigitalOcean",
         enabled: () => {
             return Cookies.get("id") && Cookies.get("hash");
         },
@@ -29,7 +29,7 @@ export default [
     },
     {
         "id": "wasabi",
-        name: "WASABI",
+        name: "Wasabi",
         enabled: () => {
             return Cookies.get("id") && Cookies.get("hash");
         },
