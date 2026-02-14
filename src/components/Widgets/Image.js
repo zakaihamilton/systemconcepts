@@ -3,13 +3,19 @@ import { useState, useEffect, useRef } from "react";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import Link from "@mui/material/Link";
+import { useFetchJSON } from "@util/fetch";
 
 export default function ImageWidget({ className, onClick, href, loading, path, thumbnail, width, height, alt, showProgress = true, onLoad: onLoadCallback }) {
+    const isWasabi = path && path.startsWith("wasabi/");
+    const [data] = useFetchJSON(isWasabi && "/api/player", { headers: { path: encodeURIComponent(path) } }, [path], isWasabi);
     const [imageLoading, setImageLoading] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
     const imgRef = useRef(null);
     const currentPathRef = useRef("INITIAL_SENTINEL");
+
+    const effectivePath = isWasabi ? (data && data.path) : path;
+    const loadingAttribute = typeof loading === "string" ? loading : undefined;
 
     const onLoad = () => {
         setImageLoading(false);
@@ -26,12 +32,12 @@ export default function ImageWidget({ className, onClick, href, loading, path, t
     const buttonStyle = { minWidth: width, minHeight: height };
     const imageStyle = { width, height };
 
-    const hasPath = typeof path === "string" && path;
+    const hasPath = typeof effectivePath === "string" && effectivePath;
 
     // Handle path changes
     useEffect(() => {
-        if (path !== currentPathRef.current) {
-            currentPathRef.current = path;
+        if (effectivePath !== currentPathRef.current) {
+            currentPathRef.current = effectivePath;
 
             if (hasPath) {
                 const img = imgRef.current;
@@ -58,10 +64,9 @@ export default function ImageWidget({ className, onClick, href, loading, path, t
                 }, 0);
             }
         }
-    }, [path, hasPath, onLoadCallback]);
+    }, [effectivePath, hasPath, onLoadCallback]);
 
-    const isExternalLoading = typeof loading === "boolean" && loading;
-    const loadingAttribute = typeof loading === "string" ? loading : undefined;
+    const isExternalLoading = (typeof loading === "boolean" && loading) || (isWasabi && !data);
 
     const showAlt = (!hasPath || !!error) && (!isExternalLoading && !imageLoading);
     const clickable = !!onClick;
@@ -69,9 +74,9 @@ export default function ImageWidget({ className, onClick, href, loading, path, t
     return <Link underline="none" href={href} color="initial" style={buttonStyle} className={clsx(styles.root, className, clickable && styles.clickable)} disabled={(!hasPath || !!error)} onClick={clickable ? onClick : undefined}>
         {showProgress && (!!isExternalLoading || (!!imageLoading && !loaded && !thumbnail)) && <Progress fullscreen={true} />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {hasPath && !error && <img loading={loadingAttribute} key={path} ref={imgRef} draggable={false} style={imageStyle} className={clsx(styles.img, !loaded && styles.hidden)} onError={onError} onLoad={onLoad} src={path} alt={alt} />}
+        {hasPath && !error && <img loading={loadingAttribute} key={effectivePath} ref={imgRef} draggable={false} style={imageStyle} className={clsx(styles.img, !loaded && styles.hidden)} onError={onError} onLoad={onLoad} src={effectivePath} alt={alt} />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {thumbnail && thumbnail !== path && <img src={thumbnail} style={imageStyle} className={clsx(styles.img, loaded && styles.hidden)} alt={alt} />}
+        {thumbnail && thumbnail !== effectivePath && <img src={thumbnail} style={imageStyle} className={clsx(styles.img, loaded && styles.hidden)} alt={alt} />}
         {showAlt && <div className={styles.alt}>{alt}</div>}
     </Link>;
 }

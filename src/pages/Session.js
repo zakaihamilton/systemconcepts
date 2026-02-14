@@ -142,7 +142,7 @@ export default function SessionPage({ group, year, date, name }) {
         }
     };
 
-    const imagePath = session.imagePath || thumbnail;
+    const imagePath = session.imagePath || (typeof thumbnail === "string" ? thumbnail : (session.image && session.image.path));
 
     return <div className={styles.root} {...swipeHandlers}>
         <div className={styles.card} style={{ "--group-color": session.color }}>

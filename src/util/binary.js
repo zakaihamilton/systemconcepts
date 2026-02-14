@@ -16,6 +16,9 @@ export function stringToBinary(string, type) {
 
 export async function readBinary(path) {
     const buffer = await storage.readFile(path);
+    if (!buffer) {
+        throw "FILE_NOT_FOUND - " + path;
+    }
     const type = getImageMimeType(path);
     return stringToBinary(buffer, type);
 }

@@ -24,19 +24,23 @@ function useImagePath(imageName = "", extension) {
     else {
         path = (parentPath + "/" + imageName + "." + extension).split("/").slice(1).join("/");
     }
-    const [data] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
+    const [data, , loading] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
+    let downloadUrl = "";
     if (path && group) {
-        path = data && data.path || "";
+        if (data) {
+            path = data.path || "";
+            downloadUrl = data.downloadUrl || "";
+        }
     }
 
-    return path;
+    return { path, downloadUrl, loading };
 }
 
 export default function ImagePage({ name, ext = "png" }) {
     const translations = useTranslations();
     const size = useContext(ContentSize);
     const [syncCounter] = useSync();
-    const path = useImagePath(name, ext);
+    const { path, downloadUrl, loading: signingLoading } = useImagePath(name, ext);
     const busyRef = useRef(false);
     const [loading, setLoading] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
@@ -58,6 +62,7 @@ export default function ImagePage({ name, ext = "png" }) {
         }
         busyRef.current = true;
         setLoading(true);
+        setError(null);
         try {
             if (path.startsWith("https")) {
                 setSrc(path);
@@ -69,13 +74,20 @@ export default function ImagePage({ name, ext = "png" }) {
             setLoading(false);
         }
         catch (err) {
-            console.warn("Failed to read image", err);
-            setError(err);
-            setContent(null);
-            setLoading(false);
+            const errorString = String(err);
+            if (errorString.includes("FILE_NOT_FOUND") && signingLoading) {
+                // Ignore local file not found if we are still fetching signed URL
+                console.log("Local image not found, waiting for signed URL...");
+                setLoading(false);
+            } else {
+                console.warn("Failed to read image", err);
+                setError(err);
+                setContent(null);
+                setLoading(false);
+            }
         }
         busyRef.current = false;
-    }, [path]);
+    }, [path, signingLoading]);
     useEffect(() => {
         if (path) {
             readFile();
@@ -100,7 +112,10 @@ export default function ImagePage({ name, ext = "png" }) {
 
 
     const downloadImage = () => {
-        if (content) {
+        if (downloadUrl) {
+            exportFile(downloadUrl, name + "." + ext);
+        }
+        else if (content) {
             exportData(content, name);
         }
         else {
@@ -110,10 +125,10 @@ export default function ImagePage({ name, ext = "png" }) {
     const style = { height: size.height - 22, width: size.width - 22 };
 
     return <div className={styles.root}>
-        <Download visible={!loading && !imageLoading && !error} onClick={downloadImage} />
+        <Download visible={!loading && !imageLoading && !error && !signingLoading} onClick={downloadImage} target={downloadUrl} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {!loading && !error && src && <img alt={name} className={styles.img} onError={onError} onLoad={onLoad} style={{ ...style, visibility: imageLoading ? "hidden" : "visible" }} src={src} />}
-        {(!!loading || !!imageLoading) && <Progress fullscreen={true} />}
+        {(!!loading || !!imageLoading || !!signingLoading) && <Progress fullscreen={true} />}
         {!!error && <Message Icon={ErrorIcon} label={translations.CANNOT_LOAD_IMAGE} />}
     </div>;
 }

@@ -38,6 +38,8 @@ export default async function PLAYER_API(req, res) {
         const prefix = "sessions/";
         if (s3Key.startsWith(prefix)) {
             s3Key = s3Key.substring(prefix.length);
+        } else if (s3Key.startsWith("wasabi/")) {
+            s3Key = s3Key.substring("wasabi/".length);
         }
 
         const fileName = s3Key.split('/').pop();
