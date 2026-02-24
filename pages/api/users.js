@@ -3,6 +3,7 @@ import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import parseCookie from "@util/cookie";
 import { getSafeError } from "@util/safeError";
+import { escapeHTML } from "@util/string";
 
 const collectionName = "users";
 
@@ -30,17 +31,20 @@ export default async function USERS_API(req, res) {
                 if (record.id !== body.id || record.role !== body.role) {
                     throw "ACCESS_DENIED";
                 }
-                // SENTINEL: Restore sensitive fields from DB record to prevent Mass Assignment
-                // This ensures a user cannot overwrite their password, role, or other critical fields
-                // by simply including them in the PUT body.
-                body.hash = record.hash;
-                body.salt = record.salt;
-                body.role = record.role;
-                body.credentials = record.credentials;
-                body.resetToken = record.resetToken;
-                body.resetTokenExpiry = record.resetTokenExpiry;
-                body.date = record.date;
-                body.utc = record.utc;
+
+                // SENTINEL FIX: Use whitelist instead of blacklist/restore
+                // Prevents Mass Assignment and XSS by sanitizing allowed fields
+                const whitelist = ["firstName", "lastName", "email"];
+                const cleanBody = { ...record }; // Start with existing record (preserves hash, role, etc.)
+
+                for (const field of whitelist) {
+                    if (body[field] !== undefined) {
+                        cleanBody[field] = escapeHTML(body[field]);
+                    }
+                }
+
+                // Replace req.body with the clean version
+                req.body = cleanBody;
             }
         }
         else if (req.method === "PUT") {
