@@ -1,5 +1,6 @@
+ WARN  Unsupported engine: wanted: {"node":">=24"} (current: {"node":"v22.22.0","pnpm":"10.28.0"})
 
-> systemconcepts@2.0.2 dev
+> systemconcepts@2.1.4 dev /app
 > next dev
 
 ▲ Next.js 16.1.1 (Turbopack)
@@ -7,8 +8,20 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-✓ Ready in 1527ms
+✓ Ready in 1614ms
 ○ Compiling / ...
- GET / 200 in 15.6s (compile: 14.9s, render: 601ms)
- GET / 200 in 42ms (compile: 12ms, render: 30ms)
-[?25h
+ HEAD / 200 in 14.1s (compile: 13.5s, render: 599ms)
+ GET / 200 in 46ms (compile: 9ms, render: 36ms)
+⨯ TypeError: Invalid URL
+    at <unknown> (pages/api/player.js:13:19)
+  11 |
+  12 | // Wasabi client for signed URLs (Read-only)
+> 13 | const wasabiUri = new URL(process.env.WASABI_URL);
+     |                   ^
+  14 | const wasabiClient = new S3Client({
+  15 |     endpoint: `https://${wasabiUri.host}`,
+  16 |     region: wasabiUri.searchParams.get("region") || "us-east-1", {
+  code: 'ERR_INVALID_URL',
+  input: 'undefined'
+}
+ GET /api/player 500 in 907ms (compile: 661ms, render: 247ms)
