@@ -4,7 +4,7 @@ import { lockMutex } from "@sync/mutex";
 let wasabiClient = null;
 let wasabiBucket = null;
 
-async function getWasabi() {
+export async function getWasabi() {
     if (wasabiClient) return { client: wasabiClient, bucket: wasabiBucket };
     const unlock = await lockMutex({ id: "wasabi" });
     if (!wasabiClient) {

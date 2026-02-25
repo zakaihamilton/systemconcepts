@@ -1,6 +1,7 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { metadataInfo as awsMetadataInfo } from "@util/aws";
+import { getWasabi } from "@util/wasabi";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
@@ -9,20 +10,9 @@ import { getSafeError } from "@util/safeError";
 
 const component = "player";
 
-// Wasabi client for signed URLs (Read-only)
-const wasabiUri = new URL(process.env.WASABI_URL);
-const wasabiClient = new S3Client({
-    endpoint: `https://${wasabiUri.host}`,
-    region: wasabiUri.searchParams.get("region") || "us-east-1",
-    credentials: {
-        accessKeyId: decodeURIComponent(wasabiUri.username),
-        secretAccessKey: decodeURIComponent(wasabiUri.password),
-    },
-});
-const BUCKET_NAME = wasabiUri.pathname.replace("/", "");
-
 export default async function PLAYER_API(req, res) {
     try {
+        const { client: wasabiClient, bucket: BUCKET_NAME } = await getWasabi();
         const { headers } = req || {};
         const { cookie, path } = headers || {};
 
