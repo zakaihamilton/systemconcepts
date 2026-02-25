@@ -1,4 +1,4 @@
-import { handleRequest, findRecord } from "@util/mongo";
+import { handleRequest, findRecord, listCollection } from "@util/mongo";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import parseCookie from "@util/cookie";
@@ -45,22 +45,62 @@ export default async function USERS_API(req, res) {
         }
         else if (req.method === "PUT") {
             const body = req.body;
-            const parsedId = queryId ? decodeURIComponent(queryId) : (body && body.id);
-            const record = parsedId ? await findRecord({ query: { id: parsedId }, collectionName }) : null;
-            if (record) {
+            if (Array.isArray(body)) {
+                const ids = body.map(i => i.id).filter(Boolean);
+                const existing = await listCollection({ collectionName, query: { id: { $in: ids } } });
+                const existingMap = new Map(existing.map(e => [e.id, e]));
+
+                for (const item of body) {
+                    const record = existingMap.get(item.id);
+                    if (item.password) {
+                        const { hash } = require("bcryptjs");
+                        item.hash = await hash(item.password, 10);
+                        delete item.password;
+                    }
+                    else if (record) {
+                        item.hash = record.hash;
+                    }
+                    if (record) {
+                        item.salt = record.salt;
+                        if (!item.date) item.date = record.date;
+                        if (!item.utc) item.utc = record.utc;
+                        // Admins can update roles, so we don't force record.role unless not provided
+                        if (!item.role) item.role = record.role;
+                    }
+                    else {
+                        const dateObj = new Date();
+                        item.date = dateObj.toString();
+                        item.utc = dateObj.getTime();
+                        if (!item.role) item.role = "visitor";
+                    }
+                }
+            }
+            else {
+                const parsedId = queryId ? decodeURIComponent(queryId) : (body && body.id);
+                const record = parsedId ? await findRecord({ query: { id: parsedId }, collectionName }) : null;
+
                 if (body.password) {
                     const { hash } = require("bcryptjs");
                     body.hash = await hash(body.password, 10);
                     delete body.password;
                 }
-                else {
+                else if (record) {
                     body.hash = record.hash;
                 }
-                body.salt = record.salt;
-                body.date = record.date;
-                body.utc = record.utc;
-                // Admins trigger this branch, so we DO NOT restore body.role from record.role,
-                // allowing the Admin's change to persist.
+
+                if (record) {
+                    body.salt = record.salt;
+                    body.date = record.date;
+                    body.utc = record.utc;
+                    // Admins trigger this branch, so we DO NOT restore body.role from record.role,
+                    // allowing the Admin's change to persist.
+                }
+                else {
+                    const dateObj = new Date();
+                    body.date = dateObj.toString();
+                    body.utc = dateObj.getTime();
+                    if (!body.role) body.role = "visitor";
+                }
             }
         }
         const result = await handleRequest({ collectionName, req });
