@@ -739,7 +739,7 @@ export default function Research() {
         }
     };
 
-    const gotoArticle = (tag, paragraphId) => {
+    const gotoArticle = useCallback((tag, paragraphId) => {
         if (tag._id && tag._id.startsWith("session|")) {
             const parts = tag._id.split("|");
             if (parts.length >= 5) {
@@ -760,7 +760,7 @@ export default function Research() {
                 });
             }
         }
-    };
+    }, []);
 
     const filteredResults = useMemo(() => {
         let res;
@@ -942,6 +942,15 @@ export default function Research() {
 
     useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
+    // Memoize itemData to prevent SearchResultItem re-renders when parent Research re-renders (e.g. on scroll)
+    const itemData = useMemo(() => ({
+        results: filteredResults,
+        gotoArticle,
+        setRowHeight,
+        listRef,
+        highlight
+    }), [filteredResults, gotoArticle, setRowHeight, listRef, highlight]);
+
     return (
         <Box className={styles.root}>
             {!searchCollapsed && (
@@ -1120,13 +1129,7 @@ export default function Research() {
                             }
                             setShowScrollTop(visibleStartIndex > 0);
                         }}
-                        itemData={{
-                            results: filteredResults,
-                            gotoArticle,
-                            setRowHeight,
-                            listRef,
-                            highlight
-                        }}
+                        itemData={itemData}
                     >
                         {SearchResultItem}
                     </VariableSizeList>
