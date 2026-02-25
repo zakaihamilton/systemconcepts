@@ -140,6 +140,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
         hash && !show && {
             id: "player",
             name: playingSessionName,
+            ariaLabel: session ? `${session.group} ${session.date} ${session.name}` : translations.PLAYER,
             icon: <VideoLabelIcon />,
             menu: false,
             target: hash,
