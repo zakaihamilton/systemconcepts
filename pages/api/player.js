@@ -18,6 +18,7 @@ const wasabiClient = new S3Client({
         accessKeyId: decodeURIComponent(wasabiUri.username),
         secretAccessKey: decodeURIComponent(wasabiUri.password),
     },
+    forcePathStyle: true
 });
 const BUCKET_NAME = wasabiUri.pathname.replace("/", "");
 
