@@ -253,16 +253,19 @@ export default function TableWidget(props) {
 
         return raw.map(item => {
             const mapped = mapper ? mapper(item) : item;
-            // Pre-compute searchable text
-            const searchableText = searchKeys.map(key => {
-                const val = mapped[key];
-                return (typeof val === "string") ? val.toLowerCase() : "";
-            }).join("\0"); // Use null character as separator to prevent boundary matches
 
             return {
                 raw: item,
                 mapped,
-                searchableText
+                // Lazy-compute searchable text
+                get searchableText() {
+                    const text = searchKeys.map(key => {
+                        const val = mapped[key];
+                        return (typeof val === "string") ? val.toLowerCase() : "";
+                    }).join("\0"); // Use null character as separator to prevent boundary matches
+                    Object.defineProperty(this, "searchableText", { value: text });
+                    return text;
+                }
             };
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
