@@ -9,7 +9,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { lockMutex } from "@sync/mutex";
 import fs from "fs";
-import { makePath, isBinaryFile } from "@util/path";
+import { isBinaryFile } from "@util/path";
 import { getSafeError } from "./safeError";
 
 let s3Client = null;
@@ -33,7 +33,7 @@ export async function getS3(params) {
             }
             try {
                 new URL(finalEndpoint);
-            } catch (err) {
+            } catch {
                 console.error("getS3: Invalid endpoint URL:", finalEndpoint);
                 // Fallback to undefined to let AWS SDK use defaults if appropriate,
                 // or let new S3Client throw with a clear error
