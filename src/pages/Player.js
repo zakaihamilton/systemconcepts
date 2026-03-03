@@ -29,6 +29,7 @@ export const PlayerStore = new Store({
     mediaPath: "",
     downloadUrl: "",
     subtitles: "",
+    transcriptionUrl: "",
     showSubtitles: true,
     showDetails: true,
     showSpeed: false,
@@ -42,7 +43,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath: storeMediaPath, downloadUrl, subtitles: storeSubtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
+    const { hash, mediaPath: storeMediaPath, downloadUrl, subtitles: storeSubtitles, transcriptionUrl: storeTranscriptionUrl, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);
@@ -106,6 +107,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
             s.mediaPath = "";
             s.downloadUrl = "";
             s.subtitles = "";
+            s.transcriptionUrl = "";
         });
     }, [path]);
 
@@ -115,6 +117,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
                 s.mediaPath = data.path;
                 s.downloadUrl = data.downloadUrl;
                 s.subtitles = data.subtitles;
+                s.transcriptionUrl = data.transcriptionUrl;
             });
         }
     }, [data]);

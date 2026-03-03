@@ -62,6 +62,7 @@ export default async function PLAYER_API(req, res) {
 
         // 3. Subtitles Logic (DigitalOcean)
         let subtitles = null;
+        let transcriptionUrl = null;
         const dotIndex = s3Key.lastIndexOf(".");
         if (dotIndex !== -1) {
             const vttPath = s3Key.substring(0, dotIndex) + ".vtt";
@@ -70,6 +71,15 @@ export default async function PLAYER_API(req, res) {
             if (exists) {
                 subtitles = "/api/subtitle?path=" + encodeURIComponent("sessions/" + vttPath);
             }
+
+            // Transcription (.txt) logic
+            const txtPath = s3Key.substring(0, dotIndex) + ".txt";
+            const txtCommand = new GetObjectCommand({
+                Bucket: BUCKET_NAME,
+                Key: txtPath,
+                ResponseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`
+            });
+            transcriptionUrl = await getSignedUrl(wasabiClient, txtCommand, { expiresIn: 10800 });
         }
 
         log({ component, message: `User ${id} generated player & download URLs for: ${s3Key}` });
@@ -77,7 +87,8 @@ export default async function PLAYER_API(req, res) {
         res.status(200).json({
             path: playerUrl,
             downloadUrl: downloadUrl,
-            subtitles
+            subtitles,
+            transcriptionUrl
         });
 
     } catch (err) {

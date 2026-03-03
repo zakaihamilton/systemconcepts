@@ -8,7 +8,7 @@ import { addSyncLog } from "@sync/sync";
 import { writeCompressedFile } from "@sync/bundle";
 import { LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "@sync/constants";
 import { getListing, updateYearSync } from "./utils";
-import { loadTags, loadDurations, loadSummaries } from "./metadata";
+import { loadTags, loadDurations, loadSummaries, loadTranscriptions } from "./metadata";
 import { createSessionItem } from "./mapper";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 
@@ -136,6 +136,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             const sessionTagsMap = await loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled);
             const sessionDurationMap = await loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled);
             const sessionSummariesMap = await loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled);
+            const sessionTranscriptionMap = await loadTranscriptions(year, name, awsPath, forceUpdate, isMerged, isBundled);
 
             // Group files by session ID
             const sessionFilesMap = {};
@@ -151,7 +152,8 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 if (isSubtitleFile(file.name)) {
                     id = id.replace(/\.[a-z]{2,3}$/, "");
                 }
-                if (file.name === year.name + ".tags" || file.name === year.name + ".duration" || file.name === year.name + ".md") {
+                // Ignore special metadata files, including the year.zip transcriptions file
+                if (file.name === year.name + ".tags" || file.name === year.name + ".duration" || file.name === year.name + ".md" || file.name === year.name + ".zip") {
                     continue;
                 }
 
@@ -195,6 +197,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 let tags = sessionTagsMap[id] || [];
                 let duration = sessionDurationMap[id];
                 let summary = sessionSummariesMap[id];
+                let transcription = sessionTranscriptionMap[id];
                 const files = sessionFilesMap[id];
 
                 if (!tags.length) {
@@ -247,6 +250,15 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     }
                 }
 
+                // If not in consolidated zip, check for individual file or .txt inside the folder.
+                // Usually it's sessionID.txt. If we didn't get it from zip, check files list.
+                if (!transcription) {
+                    const txtFile = files.find(f => f.name.endsWith('.txt'));
+                    if (txtFile) {
+                        transcription = true;
+                    }
+                }
+
                 return createSessionItem(
                     id,
                     files,
@@ -254,7 +266,8 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     name,
                     tags,
                     duration,
-                    summary
+                    summary,
+                    transcription
                 );
             })))).filter(Boolean);
 

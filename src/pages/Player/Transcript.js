@@ -15,10 +15,12 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export default function Transcript({ show }) {
     const translations = useTranslations();
-    const { subtitles, player } = PlayerStore.useState();
+    const { subtitles, transcriptionUrl, player } = PlayerStore.useState();
+    const activeUrl = subtitles || transcriptionUrl;
+    const isTxt = activeUrl === transcriptionUrl && !subtitles;
     const [transcript, setTranscript] = useState([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(-1);
-    const [data, , loading] = useFetch(subtitles);
+    const [data, , loading] = useFetch(activeUrl);
     const scrollRef = useRef();
     const lineRefs = useRef({});
     const [matches, setMatches] = useState([]);
@@ -79,37 +81,74 @@ export default function Transcript({ show }) {
             return;
         }
 
-        const lines = data.split(/\r?\n\r?\n/);
-        const parsed = lines.map((block) => {
-            const parts = block.split(/\n/);
-            if (parts.length < 2) return null;
-            // Handle optional index line (subtitle number)
-            let timeString = parts[0];
-            let textStartIndex = 1;
-            if (!timeString.includes("-->")) {
-                timeString = parts[1];
-                textStartIndex = 2;
+        if (data.includes("WEBVTT") || data.includes("-->")) {
+            const lines = data.split(/\r?\n\r?\n/);
+            const parsed = lines.map((block) => {
+                const parts = block.split(/\n/);
+                if (parts.length < 2) return null;
+                // Handle optional index line (subtitle number)
+                let timeString = parts[0];
+                let textStartIndex = 1;
+                if (!timeString.includes("-->")) {
+                    timeString = parts[1];
+                    textStartIndex = 2;
+                }
+                if (!timeString || !timeString.includes("-->")) return null;
+
+                const [start, end] = timeString.split(" --> ");
+                const text = parts.slice(textStartIndex).join("\n");
+
+                const parseTime = (t) => {
+                    if (!t) return 0;
+                    const [hms, ms] = t.split(".");
+                    const [h, m, s] = hms.split(":").map(Number);
+                    return h * 3600 + m * 60 + s + (parseInt(ms) || 0) / 1000;
+                };
+
+                return {
+                    start: parseTime(start),
+                    end: parseTime(end),
+                    text
+                };
+            }).filter(Boolean);
+            setTranscript(parsed);
+        } else {
+            // TXT parsing format: [HH:MM:SS] Text...
+            const pattern = /\[(\d{1,2}:\d{2}:\d{2})\]\s*(.+?)(?=\[\d{1,2}:\d{2}:\d{2}\]|$)/gs;
+            const segments = [];
+            let match;
+
+            const parseTimestamp = (timestampStr) => {
+                const tMatch = timestampStr.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+                if (tMatch) {
+                    const [, h, m, s] = tMatch.map(Number);
+                    return h * 3600 + m * 60 + s;
+                }
+                return 0;
+            };
+
+            while ((match = pattern.exec(data)) !== null) {
+                const timestamp = match[1];
+                const text = match[2].replace(/\s+/g, ' ').trim();
+                if (text) {
+                    segments.push({
+                        start: parseTimestamp(timestamp),
+                        text: text
+                    });
+                }
             }
-            if (!timeString || !timeString.includes("-->")) return null;
 
-            const [start, end] = timeString.split(" --> ");
-            const text = parts.slice(textStartIndex).join("\n");
+            // Estimate end times for TXT format since they aren't provided
+            for (let i = 0; i < segments.length; i++) {
+                if (i < segments.length - 1) {
+                    segments[i].end = segments[i + 1].start;
+                } else {
+                    segments[i].end = segments[i].start + 5; // Default 5s for the last segment
+                }
+            }
 
-            const parseTime = (t) => {
-                if (!t) return 0;
-                const [hms, ms] = t.split(".");
-                const [h, m, s] = hms.split(":").map(Number);
-                return h * 3600 + m * 60 + s + (parseInt(ms) || 0) / 1000;
-            };
-
-            return {
-                start: parseTime(start),
-                end: parseTime(end),
-                text
-            };
-        }).filter(Boolean);
-
-        setTranscript(parsed);
+            setTranscript(segments);
+        }
     }, [data]);
 
     useEffect(() => {
@@ -194,9 +233,9 @@ export default function Transcript({ show }) {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement("a");
         link.href = url;
-        let name = decodeURIComponent(subtitles).split("/").pop();
-        if (!name.endsWith(".vtt")) {
-            name += ".vtt";
+        let name = decodeURIComponent(activeUrl).split("/").pop().split("?")[0];
+        if (!name.endsWith(".vtt") && !name.endsWith(".txt")) {
+            name += isTxt ? ".txt" : ".vtt";
         }
         link.setAttribute("download", name);
         document.body.appendChild(link);

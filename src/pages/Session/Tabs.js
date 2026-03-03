@@ -50,7 +50,7 @@ export default function Tabs({ Container }) {
             icon: <ImageIcon />,
             value: basePath + "/" + encodeURIComponent("image")
         },
-        session.subtitles && {
+        (session.subtitles || session.transcription) && {
             label: translations.TRANSCRIPT,
             icon: <DescriptionIcon />,
             value: basePath + "/" + encodeURIComponent("player?suffix=" + (session.audio ? ".m4a" : ".mp4") + "&mode=transcript")
