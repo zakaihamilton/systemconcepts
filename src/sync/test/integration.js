@@ -118,6 +118,7 @@ const commonMocks = {
     lockMutex: async () => () => { },
     SYNC_BATCH_SIZE: 1,
     FILES_MANIFEST: "files.json",
+    isBinaryFile: () => false,
     FILES_MANIFEST_GZ: "files.json.gz",
 
     // Mocks for migrateFromMongoDB.js
@@ -507,6 +508,7 @@ async function runTests() {
                 completeStep() { }
                 setComplete() { }
                 getCurrentOffset() { return 0; }
+                usePersonalWeights() { }
             },
             TOTAL_COMBINED_WEIGHT: 100,
 
@@ -623,11 +625,12 @@ async function runTests() {
 
         // Tracker Class Mock
         SyncProgressTracker: class {
-            updateProgress() { }
-            completeStep() { }
-            setComplete() { }
-            getCurrentOffset() { return 0; }
-        },
+                updateProgress() { }
+                completeStep() { }
+                setComplete() { }
+                getCurrentOffset() { return 0; }
+                usePersonalWeights() { }
+            },
         TOTAL_COMBINED_WEIGHT: 100,
 
         // Stores

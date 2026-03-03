@@ -34,6 +34,22 @@ function normalizePath(path) {
     return path.startsWith('/') ? path.substring(1) : path;
 }
 
+
+export function validatePathAccess(path) {
+    if (!path) return;
+
+    const decoded = decodeURIComponent(path);
+    const normalized = normalizePath(decoded);
+
+    if (normalized.split("/").includes("..")) {
+        throw new Error("ACCESS_DENIED");
+    }
+
+    if (normalized.startsWith("private/") || normalized === "private") {
+        throw new Error("ACCESS_DENIED");
+    }
+}
+
 export async function downloadData({ path, binary }) {
     const { client, bucket } = await getWasabi();
     const key = normalizePath(path);
@@ -144,6 +160,10 @@ export async function handleRequest({ req, path }) {
     };
 
     const currentPath = resolvePath();
+
+    if (currentPath) {
+        validatePathAccess(currentPath);
+    }
 
     if (req.method === "GET") {
         const query = req.query || {};
