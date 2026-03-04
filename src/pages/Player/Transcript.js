@@ -293,12 +293,12 @@ export default function Transcript({ show }) {
         {!!searchTerm && matches.length > 0 && showHeader && createPortal(<div className={styles.searchStatus}>
             <div className={styles.searchActions}>
                 <Tooltip title={prevName} arrow>
-                    <IconButton onClick={prevMatch} size="small">
+                    <IconButton onClick={prevMatch} size="small" aria-label={prevName}>
                         <ArrowUpwardIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
                 <Tooltip title={nextName} arrow>
-                    <IconButton onClick={nextMatch} size="small">
+                    <IconButton onClick={nextMatch} size="small" aria-label={nextName}>
                         <ArrowDownwardIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
@@ -309,7 +309,7 @@ export default function Transcript({ show }) {
                     .replace("{total}", matches.length)}
             </div>
             <Tooltip title={translations.CLOSE} arrow>
-                <IconButton onClick={clearSearch} size="small">
+                <IconButton onClick={clearSearch} size="small" aria-label={translations.CLOSE}>
                     <CloseIcon fontSize="small" />
                 </IconButton>
             </Tooltip>
