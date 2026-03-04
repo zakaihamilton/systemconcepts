@@ -131,12 +131,19 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             console.log(`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`);
             yearItems.sort((a, b) => a.name.localeCompare(b.name));
 
-            // Load Metadata
+            // Load Metadata concurrently to improve performance
             const awsPath = makePath("aws/sessions", name);
-            const sessionTagsMap = await loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled);
-            const sessionDurationMap = await loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled);
-            const sessionSummariesMap = await loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled);
-            const sessionTranscriptionMap = await loadTranscriptions(year, name, awsPath, forceUpdate, isMerged, isBundled);
+            const [
+                sessionTagsMap,
+                sessionDurationMap,
+                sessionSummariesMap,
+                sessionTranscriptionMap
+            ] = await Promise.all([
+                loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled),
+                loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled),
+                loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled),
+                loadTranscriptions(year, name, awsPath, forceUpdate, isMerged, isBundled)
+            ]);
 
             // Group files by session ID
             const sessionFilesMap = {};
@@ -164,11 +171,6 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             }
 
             const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
-
-            console.log(`[UpdateGroup] Sample ID matching check:
-- Files Map Keys: ${sortedIds.slice(0, 3).join(", ")}
-- Duration Map Keys: ${Object.keys(sessionDurationMap).slice(0, 3).join(", ")}
-- Transcript Map Keys: ${Object.keys(sessionTranscriptionMap).slice(0, 3).join(", ")}`);
 
             // Load existing sessions for the current year to preserve thumbnails
             const existingThumbnails = {};
@@ -274,13 +276,6 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     summary,
                     transcription
                 );
-
-                // Compare new item with existing item to see if there's a difference
-                const existing = existingSessions.find(s => s.id === id);
-                if (existing) {
-                    if (existing.duration !== item.duration) console.log(`[UpdateGroup] Duration changed for ${id}: ${existing.duration} -> ${item.duration}`);
-                    if (existing.transcription !== item.transcription) console.log(`[UpdateGroup] Transcription changed for ${id}: ${existing.transcription} -> ${item.transcription}`);
-                }
 
                 return item;
             })))).filter(Boolean);

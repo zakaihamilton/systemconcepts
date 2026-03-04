@@ -78,14 +78,11 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
     if (updateLocalMetadata) {
         const metadataFileName = `${year.name}${extension}`;
         const metadataRemotePath = makePath(path, metadataFileName);
-        console.log(`[Sync ${property}] Checking remote file at ${metadataRemotePath}, forceUpdate: ${forceUpdate}`);
         if (await storage.exists(metadataRemotePath)) {
-            console.log(`[Sync ${property}] Remote file exists at ${metadataRemotePath}, reading...`);
             try {
                 const content = await storage.readFile(metadataRemotePath);
                 const data = JSON.parse(content);
                 if (data && Array.isArray(data.sessions)) {
-                    console.log(`[Sync ${property}] Loaded ${data.sessions.length} sessions from ${metadataFileName}`);
                     data.sessions.forEach(session => {
                         if (session.sessionName && session[property]) {
 
@@ -98,8 +95,6 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                 console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
                 throw err;
             }
-        } else {
-            console.log(`[Sync ${property}] Remote file does NOT exist at ${metadataRemotePath}`);
         }
     }
     return sessionMetadataMap;
@@ -149,9 +144,7 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
     if (updateLocalMetadata) {
         const metadataFileName = `${year.name}.md`;
         const metadataRemotePath = makePath(path, metadataFileName);
-        console.log(`[Sync ${property}] Checking remote md file at ${metadataRemotePath}, forceUpdate: ${forceUpdate}`);
         if (await storage.exists(metadataRemotePath)) {
-            console.log(`[Sync ${property}] Remote md file exists at ${metadataRemotePath}, reading text...`);
             try {
                 const content = await storage.readFile(metadataRemotePath);
 
@@ -183,13 +176,10 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
                     }
                 }
                 saveCurrentBuffer();
-                console.log(`[Sync ${property}] Loaded ${Object.keys(sessionMetadataMap).length} summaries from ${metadataFileName}`);
             } catch (err) {
                 console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
                 throw err;
             }
-        } else {
-            console.log(`[Sync ${property}] Remote md file does NOT exist at ${metadataRemotePath}`);
         }
     }
     return sessionMetadataMap;
@@ -231,13 +221,10 @@ export async function loadTranscriptions(year, name, path, forceUpdate, isMerged
     if (updateLocalMetadata) {
         const metadataFileName = `${year.name}.zip`;
         const metadataRemotePath = makePath(path, metadataFileName);
-        console.log(`[Sync Transcription] Checking zip file at ${metadataRemotePath}, forceUpdate: ${forceUpdate}`);
         if (await storage.exists(metadataRemotePath)) {
-            console.log(`[Sync Transcription] Zip file exists at ${metadataRemotePath}, reading binary...`);
             try {
                 const blob = await readBinary(metadataRemotePath);
                 if (blob) {
-                    console.log(`[Sync Transcription] Dropped Blob of size ${blob.size}, feeding to JSZip...`);
                     const zip = new JSZip();
                     await zip.loadAsync(blob);
 
@@ -249,17 +236,12 @@ export async function loadTranscriptions(year, name, path, forceUpdate, isMerged
                             sessionMetadataMap[id] = true;
                         }
                     });
-                    console.log(`[Sync Transcription] JSZip read ${Object.keys(sessionMetadataMap).length} transcripts in ${metadataFileName}`);
-                } else {
-                    console.log(`[Sync Transcription] Blob was null/undefined for ${metadataRemotePath}`);
                 }
             } catch (err) {
                 console.error(`[Sync Transcription] Error reading ${property} file ${metadataRemotePath}:`, err);
                 // Don't throw, as the zip might simply not exist yet or be corrupted, 
                 // but we should still allow sync to continue
             }
-        } else {
-            console.log(`[Sync Transcription] Zip file does NOT exist at ${metadataRemotePath}`);
         }
     }
     return sessionMetadataMap;
