@@ -1542,6 +1542,10 @@ export default {
             "value": "Update Metadata"
         },
         {
+            "id": "UPDATE_METADATA_CURRENT_YEAR",
+            "value": "Update Metadata (Current Year)"
+        },
+        {
             "id": "PERSONAL_SYNC",
             "value": "Personal Sync"
         },

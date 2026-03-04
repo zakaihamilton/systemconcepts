@@ -37,6 +37,14 @@ export default function ItemMenuWidget({ item, updateGroup, store, setGroups, se
             }
         },
         {
+            id: "update_metadata_current_year",
+            name: translations.UPDATE_METADATA_CURRENT_YEAR,
+            icon: <UpdateIcon />,
+            onClick: () => {
+                updateGroup && updateGroup(item.name, false, true);
+            }
+        },
+        {
             id: "update_metadata",
             name: translations.UPDATE_METADATA,
             icon: <UpdateIcon />,

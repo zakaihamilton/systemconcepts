@@ -31,7 +31,7 @@ export default function Groups() {
     const isMobile = useDeviceType() !== "desktop";
     const { counter, showDisabled } = GroupsStore.useState();
     const [sessions, loading, groups, setGroups] = useSessions([counter], { filterSessions: false });
-    const { status, busy, start, updateSessions, updateAllSessions, updateGroup } = useUpdateSessions(groups);
+    const { status, busy, start, updateSessions, updateAllSessions, updateAllMetadataCurrentYear, updateGroup } = useUpdateSessions(groups);
     const sync = requestSync;
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const syncEnabled = online && isSignedIn;
@@ -157,6 +157,11 @@ export default function Groups() {
         sync && sync();
     };
 
+    const updateAllMetadataCurrentYearWithSync = async () => {
+        await updateAllMetadataCurrentYear(showDisabled);
+        sync && sync();
+    };
+
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
 
     useEffect(() => {
@@ -251,6 +256,14 @@ export default function Groups() {
             name: translations.SYNC_ALL_SESSIONS,
             icon: <UpdateIcon className={animatedClassName} />,
             onClick: updateAllSessionsWithSync,
+            location: "header",
+            menu: true
+        },
+        !busy && syncEnabled && {
+            id: "update_metadata_all_current_year",
+            name: translations.UPDATE_METADATA_CURRENT_YEAR,
+            icon: <UpdateIcon className={animatedClassName} />,
+            onClick: updateAllMetadataCurrentYearWithSync,
             location: "header",
             menu: true
         },

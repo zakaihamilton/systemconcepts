@@ -1494,6 +1494,10 @@ export default {
             "value": "עדכון מידע"
         },
         {
+            "id": "UPDATE_METADATA_CURRENT_YEAR",
+            "value": "עדכון מידע (שנה נוכחית)"
+        },
+        {
             "id": "PERSONAL_SYNC",
             "value": "הסנכרון האישי"
         },

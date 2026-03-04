@@ -1482,6 +1482,10 @@ export default {
             "value": "Atualizar metadados"
         },
         {
+            "id": "UPDATE_METADATA_CURRENT_YEAR",
+            "value": "Atualizar metadados (ano atual)"
+        },
+        {
             "id": "PERSONAL_SYNC",
             "value": "Arquivos Pessoais"
         },

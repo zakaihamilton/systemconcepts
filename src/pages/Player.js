@@ -43,7 +43,7 @@ registerToolbar("Player");
 export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const translations = useTranslations();
-    const { hash, mediaPath: storeMediaPath, downloadUrl, subtitles: storeSubtitles, transcriptionUrl: storeTranscriptionUrl, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
+    const { hash, mediaPath: storeMediaPath, downloadUrl, subtitles: storeSubtitles, showSubtitles, showSpeed, showDetails, session } = PlayerStore.useState();
     const { speedToolbar } = MainStore.useState();
     const size = useContext(ContentSize);
     useLocalStorage("PlayerStore", PlayerStore, ["showSpeed", "showSubtitles", "showDetails"]);

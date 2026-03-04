@@ -100,6 +100,50 @@ export function useUpdateSessions(groups) {
         }
     }, [groups, prefix]);
 
+    const updateAllMetadataCurrentYear = useCallback(async (includeDisabled) => {
+        UpdateSessionsStore.update(s => {
+            s.busy = true;
+            s.start = new Date().getTime();
+        });
+        try {
+            let items = [];
+            try {
+                items = await getListing(prefix);
+            }
+            catch (err) {
+                console.error(err);
+            }
+            if (!items) {
+                return;
+            }
+            const limit = pLimit(4);
+            const promises = items.map(item => {
+                const groupInfo = groups.find(group => group.name === item.name);
+                if (!groupInfo) {
+                    return null;
+                }
+                const isDisabled = groupInfo.disabled;
+                const isMerged = groupInfo.merged ?? groupInfo?.disabled;
+                const isBundled = groupInfo.bundled;
+                if (!includeDisabled && isDisabled) {
+                    return null;
+                }
+                // Passing updateAll=false and forceUpdate=true
+                return limit(() => updateGroupProcess(item.name, false, true, isMerged, isBundled));
+            }).filter(Boolean);
+            const results = await Promise.all(promises);
+            const bundledSessions = results.filter(r => r && Array.isArray(r)).flat();
+            if (bundledSessions.length > 0) {
+                await updateBundleFile(bundledSessions);
+            }
+            return results;
+        } finally {
+            UpdateSessionsStore.update(s => {
+                s.busy = false;
+            });
+        }
+    }, [groups, prefix]);
+
     const updateSpecificGroup = useCallback(async (name, updateAll, forceUpdate) => {
         UpdateSessionsStore.update(s => {
             s.busy = true;
@@ -127,6 +171,7 @@ export function useUpdateSessions(groups) {
         start,
         updateSessions: !busy && updateSessions,
         updateAllSessions: !busy && updateAllSessions,
+        updateAllMetadataCurrentYear: !busy && updateAllMetadataCurrentYear,
         updateGroup: !busy && updateSpecificGroup
-    }), [status, busy, start, updateSessions, updateAllSessions, updateSpecificGroup]);
+    }), [status, busy, start, updateSessions, updateAllSessions, updateAllMetadataCurrentYear, updateSpecificGroup]);
 }
