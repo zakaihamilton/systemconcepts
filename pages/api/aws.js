@@ -83,7 +83,9 @@ export default async function AWS_API(req, res) {
         const isExists = (req.query && req.query.exists) || (headers && headers.exists);
 
         if (checkPath.startsWith("sessions/") && !isDir && !isExists) {
-            res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+            res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
         }
         else {
             res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
