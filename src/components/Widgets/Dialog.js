@@ -19,7 +19,7 @@ export default function Dialog({ title, children, actions, onClose, className, .
                         </Typography>
                         <div style={{ flex: 1 }} />
                         <Tooltip title={translations.CLOSE} arrow>
-                            <IconButton className={styles.closeDialog} onClick={onClose} size="large">
+                            <IconButton className={styles.closeDialog} onClick={onClose} size="large" aria-label={translations.CLOSE}>
                                 <CancelIcon />
                             </IconButton>
                         </Tooltip>

@@ -102,6 +102,7 @@ const commonMocks = {
     // Mocks for downloadUpdates.js
     storage: mockStorage,
     makePath: (a, b) => path.join(a, b),
+    isBinaryFile: (_path) => false,
     readCompressedFileRaw: async (p) => mockStorage.files[p] || null, // Mock reading directly
     writeCompressedFile: async () => { }, // Mock
     getFileInfo,
@@ -507,6 +508,7 @@ async function runTests() {
                 completeStep() { }
                 setComplete() { }
                 getCurrentOffset() { return 0; }
+                usePersonalWeights() { }
             },
             TOTAL_COMBINED_WEIGHT: 100,
 
@@ -627,6 +629,7 @@ async function runTests() {
             completeStep() { }
             setComplete() { }
             getCurrentOffset() { return 0; }
+            usePersonalWeights() { }
         },
         TOTAL_COMBINED_WEIGHT: 100,
 
