@@ -39,7 +39,7 @@ async function loadFromCache(property, name, year, isMerged, isBundled, loader, 
 
 async function loadMetadata(property, extension, year, name, path, forceUpdate, isMerged, isBundled) {
     const sessionMetadataMap = {};
-    let updateLocalMetadata = true;
+    let updateLocalMetadata = forceUpdate;
 
     if (!forceUpdate) {
         let metadataLoaded = false;
@@ -110,7 +110,7 @@ export async function loadDurations(year, name, path, forceUpdate, isMerged, isB
 
 export async function loadSummaries(year, name, path, forceUpdate, isMerged, isBundled) {
     const sessionMetadataMap = Object.create(null);
-    let updateLocalMetadata = true;
+    let updateLocalMetadata = forceUpdate;
     const property = "summaryText";
 
     if (!forceUpdate) {
@@ -188,7 +188,7 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
 
 export async function loadTranscriptions(year, name, path, forceUpdate, isMerged, isBundled) {
     const sessionMetadataMap = Object.create(null);
-    let updateLocalMetadata = true;
+    let updateLocalMetadata = forceUpdate;
     const property = "transcription";
 
     if (!forceUpdate) {
@@ -222,13 +222,16 @@ export async function loadTranscriptions(year, name, path, forceUpdate, isMerged
     if (updateLocalMetadata) {
         const metadataFileName = `${year.name}.zip`;
         const metadataRemotePath = makePath(path, metadataFileName);
+        console.log(`[Sync Transcription] Checking zip file at ${metadataRemotePath}, forceUpdate: ${forceUpdate}`);
         if (await storage.exists(metadataRemotePath)) {
+            console.log(`[Sync Transcription] Zip file exists at ${metadataRemotePath}, reading binary...`);
             try {
                 const blob = await readBinary(metadataRemotePath);
                 if (blob) {
+                    console.log(`[Sync Transcription] Dropped Blob of size ${blob.size}, feeding to JSZip...`);
                     const zip = new JSZip();
                     await zip.loadAsync(blob);
-                    
+
                     zip.forEach((relativePath, zipEntry) => {
                         if (!zipEntry.dir && relativePath.endsWith('.txt')) {
                             // Extract the session ID from the filename
@@ -237,12 +240,17 @@ export async function loadTranscriptions(year, name, path, forceUpdate, isMerged
                             sessionMetadataMap[id] = true;
                         }
                     });
+                    console.log(`[Sync Transcription] JSZip read ${Object.keys(sessionMetadataMap).length} transcripts in ${metadataFileName}`);
+                } else {
+                    console.log(`[Sync Transcription] Blob was null/undefined for ${metadataRemotePath}`);
                 }
             } catch (err) {
-                console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
+                console.error(`[Sync Transcription] Error reading ${property} file ${metadataRemotePath}:`, err);
                 // Don't throw, as the zip might simply not exist yet or be corrupted, 
                 // but we should still allow sync to continue
             }
+        } else {
+            console.log(`[Sync Transcription] Zip file does NOT exist at ${metadataRemotePath}`);
         }
     }
     return sessionMetadataMap;
