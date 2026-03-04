@@ -165,6 +165,11 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
             const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
 
+            console.log(`[UpdateGroup] Sample ID matching check:
+- Files Map Keys: ${sortedIds.slice(0, 3).join(", ")}
+- Duration Map Keys: ${Object.keys(sessionDurationMap).slice(0, 3).join(", ")}
+- Transcript Map Keys: ${Object.keys(sessionTranscriptionMap).slice(0, 3).join(", ")}`);
+
             // Load existing sessions for the current year to preserve thumbnails
             const existingThumbnails = {};
             if (!isMerged && !isBundled) {
@@ -259,7 +264,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     }
                 }
 
-                return createSessionItem(
+                const item = createSessionItem(
                     id,
                     files,
                     year.name,
@@ -269,6 +274,15 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     summary,
                     transcription
                 );
+
+                // Compare new item with existing item to see if there's a difference
+                const existing = existingSessions.find(s => s.id === id);
+                if (existing) {
+                    if (existing.duration !== item.duration) console.log(`[UpdateGroup] Duration changed for ${id}: ${existing.duration} -> ${item.duration}`);
+                    if (existing.transcription !== item.transcription) console.log(`[UpdateGroup] Transcription changed for ${id}: ${existing.transcription} -> ${item.transcription}`);
+                }
+
+                return item;
             })))).filter(Boolean);
 
             // Generate thumbnails for sessions that have images but no thumbnail data yet

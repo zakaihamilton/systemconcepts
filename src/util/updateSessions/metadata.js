@@ -78,11 +78,14 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
     if (updateLocalMetadata) {
         const metadataFileName = `${year.name}${extension}`;
         const metadataRemotePath = makePath(path, metadataFileName);
+        console.log(`[Sync ${property}] Checking remote file at ${metadataRemotePath}, forceUpdate: ${forceUpdate}`);
         if (await storage.exists(metadataRemotePath)) {
+            console.log(`[Sync ${property}] Remote file exists at ${metadataRemotePath}, reading...`);
             try {
                 const content = await storage.readFile(metadataRemotePath);
                 const data = JSON.parse(content);
                 if (data && Array.isArray(data.sessions)) {
+                    console.log(`[Sync ${property}] Loaded ${data.sessions.length} sessions from ${metadataFileName}`);
                     data.sessions.forEach(session => {
                         if (session.sessionName && session[property]) {
 
@@ -95,6 +98,8 @@ async function loadMetadata(property, extension, year, name, path, forceUpdate, 
                 console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
                 throw err;
             }
+        } else {
+            console.log(`[Sync ${property}] Remote file does NOT exist at ${metadataRemotePath}`);
         }
     }
     return sessionMetadataMap;
@@ -144,7 +149,9 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
     if (updateLocalMetadata) {
         const metadataFileName = `${year.name}.md`;
         const metadataRemotePath = makePath(path, metadataFileName);
+        console.log(`[Sync ${property}] Checking remote md file at ${metadataRemotePath}, forceUpdate: ${forceUpdate}`);
         if (await storage.exists(metadataRemotePath)) {
+            console.log(`[Sync ${property}] Remote md file exists at ${metadataRemotePath}, reading text...`);
             try {
                 const content = await storage.readFile(metadataRemotePath);
 
@@ -176,11 +183,13 @@ export async function loadSummaries(year, name, path, forceUpdate, isMerged, isB
                     }
                 }
                 saveCurrentBuffer();
-
+                console.log(`[Sync ${property}] Loaded ${Object.keys(sessionMetadataMap).length} summaries from ${metadataFileName}`);
             } catch (err) {
                 console.error(`[Sync] Error reading ${property} file ${metadataRemotePath}:`, err);
                 throw err;
             }
+        } else {
+            console.log(`[Sync ${property}] Remote md file does NOT exist at ${metadataRemotePath}`);
         }
     }
     return sessionMetadataMap;
