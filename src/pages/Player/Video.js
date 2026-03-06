@@ -4,9 +4,19 @@ import Toolbar from "./Toolbar";
 import { PlayerStore } from "../Player";
 import styles from "./Video.module.scss";
 
-export default function Video({ show, metadataPath, metadataKey, name, path, color, group, children, elements, showDetails: _showDetails, isTranscript: _isTranscript, ...props }) {
+export default function Video({ show, metadataPath, metadataKey, name, path, renewUrl, color, group, children, elements, showDetails: _showDetails, isTranscript: _isTranscript, ...props }) {
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
+    const [errorCount, setErrorCount] = useState(0);
+
+    const onError = () => {
+        if (errorCount < 3) {
+            console.log("Video error, renewing URL...");
+            renewUrl();
+            setErrorCount(count => count + 1);
+        }
+    };
+
     useEffect(() => {
         setPlayerRef(ref.current);
         return () => {
@@ -19,7 +29,7 @@ export default function Video({ show, metadataPath, metadataKey, name, path, col
         });
     }, [playerRef]);
     return <>
-        <video ref={ref} {...props} playsInline>
+        <video ref={ref} {...props} playsInline onError={onError}>
             {children}
         </video>
         {elements}

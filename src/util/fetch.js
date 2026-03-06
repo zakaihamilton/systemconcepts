@@ -81,10 +81,14 @@ export function fetchJSON(url, options) {
 
 export function useFetchJSON(url, options, depends = [], cond = true, delay = 0) {
     const isOnline = useOnline();
+    const [reloadCount, setReloadCount] = useState(0);
     const [inProgress, setProgress] = useState(!!url && cond && isOnline);
     const [result, setResult] = useState(null);
     const timeoutRef = useRef(null);
     const [error, setError] = useState("");
+    const reload = () => {
+        setReloadCount(count => count + 1);
+    };
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
@@ -122,16 +126,20 @@ export function useFetchJSON(url, options, depends = [], cond = true, delay = 0)
                 timeoutRef.current = null;
             }
         };
-    }, [url, cond, optionsString, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
-    return [result, setResult, inProgress, error];
+    }, [url, cond, optionsString, isOnline, delay, dependsString, reloadCount]); // eslint-disable-line react-hooks/exhaustive-deps
+    return [result, setResult, inProgress, error, reload];
 }
 
 export function useFetch(url, options, depends = [], cond = true, delay = 0) {
     const isOnline = useOnline();
+    const [reloadCount, setReloadCount] = useState(0);
     const [inProgress, setProgress] = useState(!!url && cond && isOnline);
     const [result, setResult] = useState(null);
     const timeoutRef = useRef(null);
     const [error, setError] = useState("");
+    const reload = () => {
+        setReloadCount(count => count + 1);
+    };
     const dependsString = JSON.stringify(depends);
     const optionsString = JSON.stringify(options);
     useEffect(() => {
@@ -169,6 +177,6 @@ export function useFetch(url, options, depends = [], cond = true, delay = 0) {
                 timeoutRef.current = null;
             }
         };
-    }, [url, optionsString, cond, isOnline, delay, dependsString]); // eslint-disable-line react-hooks/exhaustive-deps
-    return [result, setResult, inProgress, error];
+    }, [url, optionsString, cond, isOnline, delay, dependsString, reloadCount]); // eslint-disable-line react-hooks/exhaustive-deps
+    return [result, setResult, inProgress, error, reload];
 }
