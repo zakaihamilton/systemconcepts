@@ -39,7 +39,8 @@ export function validatePathAccess(path) {
     if (!path) return;
 
     const decoded = decodeURIComponent(path);
-    const normalized = normalizePath(decoded);
+    const decoded = decodeURIComponent(path);
+    const normalized = decoded.replace(/^\/+/g, '');
 
     if (normalized.split("/").includes("..")) {
         throw new Error("ACCESS_DENIED");
