@@ -9,11 +9,20 @@ import { formatDuration } from "@util/string";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 
-export default function Audio({ show, metadataPath, metadataKey, name, path, date, group, color, children, elements, showDetails, isTranscript, ...props }) {
+export default function Audio({ show, metadataPath, metadataKey, name, path, renewUrl, date, group, color, children, elements, showDetails, isTranscript, ...props }) {
     const isMobile = useDeviceType() !== "desktop";
     const ref = useRef();
     const [playerRef, setPlayerRef] = useState(null);
     const [duration, setDuration] = useState(0);
+    const [errorCount, setErrorCount] = useState(0);
+
+    const onError = () => {
+        if (errorCount < 3) {
+            console.log("Audio error, renewing URL...");
+            renewUrl();
+            setErrorCount(count => count + 1);
+        }
+    };
 
     useEffect(() => {
         setPlayerRef(ref.current);
@@ -88,7 +97,7 @@ export default function Audio({ show, metadataPath, metadataKey, name, path, dat
             </div>
         </div>
         {elements}
-        <video ref={ref} className={clsx(styles.video, isTranscript && styles.hidden)} {...rest} playsInline>
+        <video ref={ref} className={clsx(styles.video, isTranscript && styles.hidden)} {...rest} playsInline onError={onError}>
             {children}
         </video>
         {playerRef && <Controls

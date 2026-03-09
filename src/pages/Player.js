@@ -51,7 +51,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
     const { prefix = "sessions", group = "", year = "", date = "", name = "" } = { ...useParentParams(), ...props };
     let components = [prefix, group, year, date + " " + name + (suffix || "")].filter(Boolean).join("/");
     const path = makePath(components).split("/").join("/");
-    const [data, , loading, error] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
+    const [data, , loading, error, reload] = useFetchJSON("/api/player", { headers: { path: encodeURIComponent(path) } }, [path], path && group);
     const folder = fileFolder(path);
     const sessionName = fileTitle(path);
     const groupInfo = groups.find(g => g.name === group);
@@ -211,6 +211,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
         metadataPath,
         metadataKey: activeMetadataKey,
         path: mediaPath,
+        renewUrl: reload,
         date,
         year,
         show,
