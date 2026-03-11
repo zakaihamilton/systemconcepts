@@ -289,7 +289,7 @@ export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }
     return null;
 }
 
-export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
+export async function list({ path, bucketName = process.env.AWS_BUCKET, maxKeys, continuationToken }) {
     path = normalizePath(path);
     console.log(`[S3 list] Listing path: ${path}, bucket: ${bucketName}`);
 
@@ -298,14 +298,15 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
     const key = path;
 
     const items = [];
-    let continuationToken = undefined;
+    let currentContinuationToken = continuationToken;
 
     do {
         const listParams = {
             Bucket: bucket,
             Delimiter: "/",
             Prefix: key ? key + "/" : "",
-            ContinuationToken: continuationToken
+            ContinuationToken: currentContinuationToken,
+            MaxKeys: maxKeys
         };
         console.log(`[S3 list] ListParams:`, listParams);
         const listResponse = await s3.send(new ListObjectsV2Command(listParams));
@@ -334,9 +335,14 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
             });
         });
 
-        continuationToken = listResponse.NextContinuationToken;
-    } while (continuationToken);
+        currentContinuationToken = listResponse.NextContinuationToken;
+        if (maxKeys) break; // If pagination is requested, stop after one fetch
+    } while (currentContinuationToken);
 
+    // If maxKeys was passed, return an object containing the token. Otherwise, just return items to preserve legacy behavior.
+    if (maxKeys) {
+        return { items, continuationToken: currentContinuationToken };
+    }
     return items;
 }
 

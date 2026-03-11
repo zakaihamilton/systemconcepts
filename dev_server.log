@@ -1,5 +1,6 @@
+ WARN  Unsupported engine: wanted: {"node":">=24"} (current: {"node":"v22.22.0","pnpm":"10.28.0"})
 
-> systemconcepts@2.0.2 dev
+> systemconcepts@2.1.4 dev /app
 > next dev
 
 ▲ Next.js 16.1.1 (Turbopack)
@@ -7,8 +8,15 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-✓ Ready in 1527ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+✓ Ready in 1824ms
 ○ Compiling / ...
- GET / 200 in 15.6s (compile: 14.9s, render: 601ms)
- GET / 200 in 42ms (compile: 12ms, render: 30ms)
-[?25h
+ GET / 200 in 18.5s (compile: 17.6s, render: 903ms)
+ GET / 200 in 46ms (compile: 11ms, render: 35ms)
+ GET / 200 in 36ms (compile: 7ms, render: 30ms)
+login error:  Empty URI
+ GET /api/login 200 in 565ms (compile: 527ms, render: 38ms)
