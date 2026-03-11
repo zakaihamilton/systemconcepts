@@ -1972,6 +1972,30 @@ export default {
         {
             "id": "OLDER",
             "value": "ישן יותר"
+        },
+        {
+            "id": "API_KEYS",
+            "value": "מפתחות API"
+        },
+        {
+            "id": "CREATE_API_KEY",
+            "value": "צור מפתח API"
+        },
+        {
+            "id": "ENTER_API_KEY_NAME",
+            "value": "הזן שם עבור מפתח ה-API הזה"
+        },
+        {
+            "id": "API_KEY_CREATED",
+            "value": "מפתח API נוצר בהצלחה. אנא העתק אותו כעת מכיוון שלא תוכל לראות אותו שוב:"
+        },
+        {
+            "id": "CONFIRM_DELETE_API_KEY",
+            "value": "האם אתה בטוח שברצונך להסיר את מפתח ה-API הזה?"
+        },
+        {
+            "id": "API_KEY_INSTRUCTIONS",
+            "value": "צור מפתח API כדי לגשת לשיעורים ולספרייה שלך באמצעות קוד. כדי לבדוק את המפתח שלך, כלול אותו בכותרת ההרשאה (Authorization header) של הבקשה שלך: `Authorization: Bearer <API_KEY>`."
         }
     ]
 };

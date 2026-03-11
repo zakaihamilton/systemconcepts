@@ -1980,6 +1980,30 @@ export default {
         {
             "id": "REMOVE_FROM_HISTORY",
             "value": "Remove from History"
+        },
+        {
+            "id": "API_KEYS",
+            "value": "API Keys"
+        },
+        {
+            "id": "CREATE_API_KEY",
+            "value": "Create API Key"
+        },
+        {
+            "id": "ENTER_API_KEY_NAME",
+            "value": "Enter a name for this API Key"
+        },
+        {
+            "id": "API_KEY_CREATED",
+            "value": "API Key created successfully. Please copy it now as you won't be able to see it again:"
+        },
+        {
+            "id": "CONFIRM_DELETE_API_KEY",
+            "value": "Are you sure you want to remove this API Key?"
+        },
+        {
+            "id": "API_KEY_INSTRUCTIONS",
+            "value": "Create an API Key to programmatically access your sessions and library content. To test your key, include it in the Authorization header of your request: `Authorization: Bearer <API_KEY>`."
         }
     ]
 };

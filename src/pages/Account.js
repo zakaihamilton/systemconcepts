@@ -41,7 +41,6 @@ export default function Account({ redirect }) {
     const [inProgress, setProgress] = useState(false);
     const [passkeys, setPasskeys] = useState([]);
     const [createPasskey, setCreatePasskey] = useState(false);
-    const [apiKeys, setApiKeys] = useState([]);
 
     const userId = Cookies.get("id");
     const isSignedIn = userId && Cookies.get("hash");
@@ -55,14 +54,6 @@ export default function Account({ redirect }) {
                 .then(data => {
                     if (Array.isArray(data)) {
                         setPasskeys(data);
-                    }
-                })
-                .catch(console.error);
-
-            fetchJSON("/api/apikey?action=list&id=" + userId)
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        setApiKeys(data);
                     }
                 })
                 .catch(console.error);
@@ -102,51 +93,6 @@ export default function Account({ redirect }) {
             } else {
                 throw "PASSKEY_REGISTRATION_FAILED";
             }
-        } catch (err) {
-            console.error(err);
-            setError(translations[err] || String(err));
-        } finally {
-            setProgress(false);
-        }
-    };
-
-    const onCreateApiKey = async () => {
-        const defaultName = "API Key " + (apiKeys.length + 1);
-        const name = window.prompt(translations.ENTER_API_KEY_NAME || "Enter a name for this API Key", defaultName);
-        if (!name) return;
-
-        setProgress(true);
-        try {
-            const data = await fetchJSON("/api/apikey?action=create&id=" + userId, {
-                method: "POST",
-                body: JSON.stringify({ name })
-            });
-
-            if (data.apiKey) {
-                // Show the API key to the user (they must copy it now)
-                window.alert(`${translations.API_KEY_CREATED || "API Key created successfully. Please copy it now as you won't be able to see it again:"}\n\n${data.apiKey}`);
-                setCounter(c => c + 1);
-            } else if (data.err) {
-                throw data.err;
-            }
-        } catch (err) {
-            console.error(err);
-            setError(translations[err] || String(err));
-        } finally {
-            setProgress(false);
-        }
-    };
-
-    const onDeleteApiKey = async (keyId) => {
-        if (!window.confirm(translations.CONFIRM_DELETE_API_KEY || "Are you sure you want to remove this API Key?")) {
-            return;
-        }
-        setProgress(true);
-        try {
-            await fetchJSON(`/api/apikey?id=${userId}&keyId=${keyId}`, {
-                method: "DELETE"
-            });
-            setCounter(c => c + 1);
         } catch (err) {
             console.error(err);
             setError(translations[err] || String(err));
@@ -421,34 +367,6 @@ export default function Account({ redirect }) {
                                 ))}
                             </List>
                         </Grid>}
-                        {isSignedIn && <Grid size={12}>
-                            <Button
-                                onClick={() => onCreateApiKey()}
-                                disabled={inProgress}
-                                fullWidth
-                                variant="outlined"
-                                color="primary"
-                                className={styles.secondaryButton}
-                                startIcon={<VpnKeyIcon />}
-                            >
-                                {translations.CREATE_API_KEY || "Create API Key"}
-                            </Button>
-                        </Grid>}
-                        {isSignedIn && apiKeys.length > 0 && <Grid size={12}>
-                            <Typography className={styles.passkeyTitle}>{translations.API_KEYS || "API Keys"}</Typography>
-                            <List dense className={styles.passkeyList}>
-                                {apiKeys.map(ak => (
-                                    <ListItem key={ak.id}>
-                                        <ListItemText primary={ak.name} secondary={new Date(ak.createdAt).toLocaleDateString()} />
-                                        <ListItemSecondaryAction>
-                                            <IconButton edge="end" aria-label={`${translations.DELETE} ${ak.name}`} onClick={() => onDeleteApiKey(ak.id)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Grid>}
                         <Grid size={12}>
                             <div className={styles.links}>
                                 {!isSignedIn && (
@@ -468,6 +386,9 @@ export default function Account({ redirect }) {
                                         </Link>
                                         <Link href={"#account/" + encodeURIComponent(`user/${userId}`)}>
                                             {translations.EDIT_ACCOUNT}
+                                        </Link>
+                                        <Link href="#apikeys">
+                                            {translations.API_KEYS || "API Keys"}
                                         </Link>
                                     </>
                                 )}
