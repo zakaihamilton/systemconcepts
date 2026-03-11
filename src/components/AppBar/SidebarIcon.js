@@ -23,7 +23,7 @@ export default function SidebarIcon() {
 
     return (
         <Tooltip arrow title={translations.SIDEBAR}>
-            <IconButton onClick={toggleMenu} size="large">
+            <IconButton aria-label={translations.SIDEBAR} onClick={toggleMenu} size="large">
                 <MenuIcon />
             </IconButton>
         </Tooltip>
