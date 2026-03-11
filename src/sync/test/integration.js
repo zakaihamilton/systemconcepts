@@ -65,6 +65,10 @@ function loadModule(relativePath, mocks) {
         Promise,
         performance: { now: () => Date.now() },
         process: { env: { NEXT_PUBLIC_VERSION: "0.0.0" } },
+        isBinaryFile: (filePath) => {
+            const ext = filePath.split('.').pop();
+            return ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'mp3', 'mp4', 'pdf', 'zip', 'tar', 'gz'].includes(ext);
+        },
         ...mocks
     };
 
@@ -629,6 +633,7 @@ async function runTests() {
             completeStep() { }
             setComplete() { }
             getCurrentOffset() { return 0; }
+            usePersonalWeights() { }
         },
         TOTAL_COMBINED_WEIGHT: 100,
 

@@ -1,4 +1,4 @@
-import { downloadData } from "@util/aws";
+import { downloadData, validatePathAccess } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
@@ -19,6 +19,9 @@ export default async function SUBTITLE_API(req, res) {
         if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
         let decodedPath = decodeURIComponent(path);
+
+        // SENTINEL: Validate path to prevent path traversal vulnerability
+        validatePathAccess(decodedPath);
 
         // Ensure we are reading from DigitalOcean (no wasabi flag)
         const data = await downloadData({ path: decodedPath });
