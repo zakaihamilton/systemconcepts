@@ -86,7 +86,7 @@ export async function GET(req) {
                         content: text
                     });
                 } catch (err) {
-                    console.error(`Failed to fetch article ${itemPath}:`, err);
+                    console.error("Failed to fetch article", itemPath, err);
                     articles.push({
                         path: itemPath,
                         type: "file",
