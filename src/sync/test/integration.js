@@ -101,6 +101,7 @@ const mockLogs = {
 const commonMocks = {
     // Mocks for downloadUpdates.js
     storage: mockStorage,
+    isBinaryFile: (path) => path.endsWith('.gz'), // Mock
     makePath: (a, b) => path.join(a, b),
     readCompressedFileRaw: async (p) => mockStorage.files[p] || null, // Mock reading directly
     writeCompressedFile: async () => { }, // Mock
@@ -507,6 +508,7 @@ async function runTests() {
                 completeStep() { }
                 setComplete() { }
                 getCurrentOffset() { return 0; }
+                usePersonalWeights() { }
             },
             TOTAL_COMBINED_WEIGHT: 100,
 
