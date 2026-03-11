@@ -46,6 +46,11 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
         return data ? JSON.parse(data) : {};
     });
 
+    const stateRef = useRef({ visible, show, metadata });
+    useEffect(() => {
+        stateRef.current = { visible, show, metadata };
+    }, [visible, show, metadata]);
+
     const lastUpdateTimeRef = useRef(0);
 
     useEffect(() => {
@@ -58,7 +63,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             }
             else if (name === "loadedmetadata") {
                 if (!metadataKey) return; // Skip if metadataKey not ready
-                const currentMetadata = metadataKey ? (metadata?.[metadataKey] || {}) : (metadata || {});
+                const currentMetadata = metadataKey ? (stateRef.current.metadata?.[metadataKey] || {}) : (stateRef.current.metadata || {});
                 if (currentMetadata.position) {
                     playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
                     setCurrentTime(playerRef.currentTime);
@@ -67,7 +72,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
             if (name === "timeupdate" && !dragging.current) {
                 const currentTime = parseInt(playerRef.currentTime);
 
-                if (visible && show) {
+                if (stateRef.current.visible && stateRef.current.show) {
                     // When visible, update on every timeupdate
                     setCurrentTime(currentTime);
                     lastUpdateTimeRef.current = currentTime;
@@ -93,7 +98,7 @@ export default function Controls({ show, path, playerRef, metadataPath, metadata
         return () => {
             listeners.map(({ name, callback }) => playerRef.removeEventListener(name, callback));
         };
-    }, [visible, show, metadata, playerRef, metadataKey]);
+    }, [playerRef, metadataKey]);
 
     useEffect(() => {
         console.log("[Controls] Metadata effect triggered", {
