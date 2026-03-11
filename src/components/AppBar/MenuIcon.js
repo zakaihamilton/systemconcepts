@@ -23,7 +23,7 @@ export default function Menu() {
 
     return (
         <Tooltip arrow title={translations.MENU}>
-            <IconButton onClick={toggleMenu} size="large">
+            <IconButton aria-label={translations.MENU} onClick={toggleMenu} size="large">
                 <MenuIcon />
             </IconButton>
         </Tooltip>

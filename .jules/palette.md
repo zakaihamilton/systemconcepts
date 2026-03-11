@@ -1,3 +1,3 @@
-## 2026-02-04 - Dynamic ARIA Labels in Lists
-**Learning:** Icon-only buttons in lists (like "Delete") are ambiguous to screen readers if they all share the same static label.
-**Action:** Always append the item's name/identifier to the action label (e.g., "Delete [Item Name]") to provide necessary context.
+## 2026-03-11 - Adding ARIA Labels to Tooltip-wrapped IconButtons
+**Learning:** Icon buttons that rely purely on iconography often lack native `aria-label` attributes even when wrapped in a `Tooltip` component, affecting screen reader accessibility. Tooltips usually provide visual context, but adding explicit `aria-label` attributes directly on the `IconButton` ensures robust screen reader support.
+**Action:** When creating or modifying an `IconButton` that contains only an icon, ensure an explicit `aria-label` is provided on the button itself, often matching the tooltip content.

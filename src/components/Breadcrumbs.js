@@ -79,7 +79,7 @@ export function BreadcrumbItem({ index, count, items, label, name, tooltip, Icon
                     <Tooltip arrow title={path || ""}>
                         <span>
                             <Link className={styles.item} color="inherit" onClick={gotoItem} href={href}>
-                                <IconButton className={styles.iconButton} size="small">
+                                <IconButton className={styles.iconButton} size="small" aria-label={path || "More items"}>
                                     <MoreHorizIcon />
                                 </IconButton>
                             </Link>

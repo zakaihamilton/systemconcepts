@@ -143,12 +143,12 @@ export default function StatusBar({ data, mapper, store }) {
     return (
         (<div className={clsx(styles.root, styles[severity])}>
             {selectTitle && selectIcon && <Tooltip title={selectTitle} arrow>
-                <IconButton variant="contained" onClick={selectClick} size="large">
+                <IconButton aria-label={selectTitle} variant="contained" onClick={selectClick} size="large">
                     {selectIcon}
                 </IconButton>
             </Tooltip>}
             {mode === "delete" && !busy && <Tooltip title={translations[mode.toUpperCase()]} arrow>
-                <IconButton variant="contained" onClick={onClick} size="large">
+                <IconButton aria-label={translations[mode.toUpperCase()]} variant="contained" onClick={onClick} size="large">
                     <DeleteIcon />
                 </IconButton>
             </Tooltip>}
@@ -164,7 +164,7 @@ export default function StatusBar({ data, mapper, store }) {
                 {translations.ACCOUNT}
             </Button>}
             {!busy && <Tooltip title={translations.CLOSE} arrow>
-                <IconButton variant="contained" onClick={handleClose} size="large">
+                <IconButton aria-label={translations.CLOSE} variant="contained" onClick={handleClose} size="large">
                     <CancelIcon />
                 </IconButton>
             </Tooltip>}
