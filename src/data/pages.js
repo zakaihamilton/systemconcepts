@@ -46,6 +46,8 @@ import { getImageSection } from "@pages/Image/Section";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 const Account = dynamic(() => import("@pages/Account"), { loading: () => <PageLoad /> });
 
+const ApiKeys = dynamic(() => import("@pages/ApiKeys"), { loading: () => <PageLoad /> });
+
 import CreateIcon from "@mui/icons-material/Create";
 const SignUp = dynamic(() => import("@pages/SignUp"), { loading: () => <PageLoad /> });
 
@@ -200,6 +202,12 @@ export default [
         Component: Account,
         divider: true,
         sidebar: true
+    },
+    {
+        id: "apikeys",
+        name: "API_KEYS",
+        Icon: VpnKeyIcon,
+        Component: ApiKeys
     },
     {
         id: "signup",

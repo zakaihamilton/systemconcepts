@@ -387,6 +387,9 @@ export default function Account({ redirect }) {
                                         <Link href={"#account/" + encodeURIComponent(`user/${userId}`)}>
                                             {translations.EDIT_ACCOUNT}
                                         </Link>
+                                        <Link href="#apikeys">
+                                            {translations.API_KEYS || "API Keys"}
+                                        </Link>
                                     </>
                                 )}
                             </div>

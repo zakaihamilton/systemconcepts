@@ -1,0 +1,5 @@
+
+> systemconcepts@2.1.4 full-start
+> next build && next start
+
+sh: 1: next: not found

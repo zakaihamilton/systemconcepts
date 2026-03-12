@@ -1960,6 +1960,30 @@ export default {
         {
             "id": "OLDER",
             "value": "Mais Antigo"
+        },
+        {
+            "id": "API_KEYS",
+            "value": "Chaves de API"
+        },
+        {
+            "id": "CREATE_API_KEY",
+            "value": "Criar Chave de API"
+        },
+        {
+            "id": "ENTER_API_KEY_NAME",
+            "value": "Insira um nome para esta Chave de API"
+        },
+        {
+            "id": "API_KEY_CREATED",
+            "value": "Chave de API criada com sucesso. Por favor, copie-a agora, pois você não poderá vê-la novamente:"
+        },
+        {
+            "id": "CONFIRM_DELETE_API_KEY",
+            "value": "Tem certeza de que deseja remover esta Chave de API?"
+        },
+        {
+            "id": "API_KEY_INSTRUCTIONS",
+            "value": "Crie uma Chave de API para acessar programaticamente suas sessões e conteúdo da biblioteca. Para testar sua chave, inclua-a no cabeçalho de Autorização de sua solicitação: `Authorization: Bearer <API_KEY>`."
         }
     ]
 };
