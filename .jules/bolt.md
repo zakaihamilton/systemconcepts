@@ -1,0 +1,3 @@
+## 2024-05-18 - Prevent VariableSizeList Unnecessary Re-renders
+**Learning:** Using an inline object for `itemData` prop in `react-window`'s `VariableSizeList` breaks `React.memo` for the list items (e.g. `SearchResultItem`), causing them to re-render on every list update, scroll, or state change, regardless of whether their props have actually changed.
+**Action:** Always wrap `itemData` and its dependencies (like functions e.g. `gotoArticle`) using `useMemo` and `useCallback` when using `react-window` to ensure that item components are not unnecessarily re-rendered.
