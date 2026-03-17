@@ -1,6 +1,6 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { metadataInfo as awsMetadataInfo } from "@util/aws";
+import { metadataInfo as awsMetadataInfo, validatePathAccess } from "@util/aws";
 import { getWasabi } from "@util/wasabi";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
@@ -23,6 +23,7 @@ export default async function PLAYER_API(req, res) {
         if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
         let decodedPath = decodeURIComponent(path);
+        validatePathAccess(decodedPath);
         let s3Key = decodedPath.startsWith("/") ? decodedPath.substring(1) : decodedPath;
 
         const prefix = "sessions/";
