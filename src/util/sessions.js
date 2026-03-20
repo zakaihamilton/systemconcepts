@@ -29,7 +29,8 @@ export const SessionsStore = new Store({
     order: "asc",
     orderBy: "date",
     viewMode: "list",
-    scrollOffset: 0
+    scrollOffset: 0,
+    expandedTreeGroups: []
 });
 
 export function useSessions(depends = [], options = {}) {
@@ -39,7 +40,16 @@ export function useSessions(depends = [], options = {}) {
     const translations = useTranslations();
     const { settings: groupsSettings } = GroupsStore.useState();
     const [groupMetadata, loading, setGroups] = useGroups([syncCounter, ...depends]);
-    const { busy, sessions, groups, groupFilter, typeFilter, yearFilter, syncCounter: savedSyncCounter, groupsHash, showFilterDialog, counter } = SessionsStore.useState();
+    const busy = SessionsStore.useState(s => s.busy);
+    const sessions = SessionsStore.useState(s => s.sessions);
+    const groups = SessionsStore.useState(s => s.groups);
+    const groupFilter = SessionsStore.useState(s => s.groupFilter);
+    const typeFilter = SessionsStore.useState(s => s.typeFilter);
+    const yearFilter = SessionsStore.useState(s => s.yearFilter);
+    const savedSyncCounter = SessionsStore.useState(s => s.syncCounter);
+    const groupsHash = SessionsStore.useState(s => s.groupsHash);
+    const showFilterDialog = SessionsStore.useState(s => s.showFilterDialog);
+    const counter = SessionsStore.useState(s => s.counter);
     useLocalStorage("sessions", SessionsStore, ["groupFilter", "typeFilter", "yearFilter", "showFilterDialog"]);
     const lastCounterRef = useRef(counter);
     const updateSessions = useCallback(async (syncCounter) => {

@@ -1186,6 +1186,10 @@ export default {
             "value": "Vista de lista"
         },
         {
+            "id": "TREE_VIEW",
+            "value": "Vista de árvore"
+        },
+        {
             "id": "TABLE_VIEW",
             "value": "Vista de mesa"
         },

@@ -23,16 +23,25 @@ import Chip from "@mui/material/Chip";
 import { SyncActiveStore } from "@sync/syncState";
 import { PlayerStore } from "@pages/Player";
 import { useRecentHistory } from "@util/history";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 export default function SessionsPage() {
     const isSignedIn = Cookies.get("id") && Cookies.get("hash");
     const isMobile = useDeviceType() === "phone";
     const translations = useTranslations();
     const [sessions, loading] = useSessions();
-    const { viewMode, groupFilter, typeFilter, yearFilter, orderBy, order, showHistory } = SessionsStore.useState();
+    const viewMode = SessionsStore.useState(s => s.viewMode);
+    const groupFilter = SessionsStore.useState(s => s.groupFilter);
+    const typeFilter = SessionsStore.useState(s => s.typeFilter);
+    const yearFilter = SessionsStore.useState(s => s.yearFilter);
+    const orderBy = SessionsStore.useState(s => s.orderBy);
+    const order = SessionsStore.useState(s => s.order);
+    const showHistory = SessionsStore.useState(s => s.showHistory);
+    const expandedTreeGroups = SessionsStore.useState(s => s.expandedTreeGroups) || [];
     const { session } = PlayerStore.useState();
     const [history] = useRecentHistory();
-    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset", "showHistory"]);
+    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset", "showHistory", "expandedTreeGroups"]);
 
     // Memoize dependencies to prevent unnecessary resets
     const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode, showHistory, history], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode, showHistory, history]);
@@ -65,6 +74,7 @@ export default function SessionsPage() {
             sortable: "name",
             padding: false,
             viewModes: {
+                "tree": null,
                 "list": null,
                 "table": null,
                 "grid": {
@@ -85,7 +95,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                ...((!isMobile || orderBy !== "duration") && { "list": null, "table": null }),
+                ...((!isMobile || orderBy !== "duration") && { "tree": null, "list": null, "table": null }),
                 "grid": {
                     className: styles.gridDate
                 }
@@ -110,7 +120,7 @@ export default function SessionsPage() {
                 }
             },
             viewModes: {
-                ...((!isMobile || orderBy === "duration") && { "list": null, "table": null }),
+                ...((!isMobile || orderBy === "duration") && { "tree": null, "list": null, "table": null }),
                 "grid": {
                     className: styles.gridDuration
                 }
@@ -140,6 +150,7 @@ export default function SessionsPage() {
                 justifyContent: "center"
             },
             viewModes: {
+                "tree": null,
                 "list": null,
                 "table": null,
                 "grid": {
@@ -177,6 +188,12 @@ export default function SessionsPage() {
         const percentage = item.duration && (item.position / item.duration * 100);
         const isPlaying = session && session.group === item.group && session.date === item.date && session.name === item.name;
 
+        let treePrefix = item.name ? item.name.split(" - ")[0].trim() : "";
+        if (item.type === "overview") {
+            treePrefix = `_overview_${item.id}`;
+        }
+        const treeGroupKey = `${item.group}||${item.date}||${treePrefix}`;
+
         return {
             // Identity & core data
             key: item.key,
@@ -204,6 +221,8 @@ export default function SessionsPage() {
             formattedDuration: item.type === "image"
                 ? ""
                 : (item.durationStr || translations.UNKNOWN),
+            treePrefix,
+            treeGroupKey,
             isPlaying
         };
     }, [translations, session]);
@@ -213,6 +232,34 @@ export default function SessionsPage() {
             case 'name':
             case 'nameWidget': {
                 const style = {};
+
+                if (item.isGroupHeader) {
+                    const toggleFolder = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        SessionsStore.update(s => {
+                            const expanded = s.expandedTreeGroups || [];
+                            if (expanded.includes(item.prefix)) {
+                                s.expandedTreeGroups = expanded.filter(p => p !== item.prefix);
+                            } else {
+                                s.expandedTreeGroups = [...expanded, item.prefix];
+                            }
+                        });
+                    };
+                    const icon = (
+                        <div className={styles.icon} onClick={toggleFolder}>
+                            {item.isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </div>
+                    );
+                    const nameContent = (
+                        <div className={styles.nameContainer}>
+                            <span className={clsx(styles.labelText, styles.singleLine)} style={{ fontWeight: 'bold' }}>
+                                {item.name} <span style={{ opacity: 0.7, fontSize: '0.9em' }}>({item.count})</span>
+                            </span>
+                        </div>
+                    );
+                    return <Row onClick={toggleFolder} icons={icon}>{nameContent}</Row>;
+                }
 
                 const icon = (
                     <div
@@ -248,6 +295,9 @@ export default function SessionsPage() {
 
             case 'thumbnail':
             case 'thumbnailWidget': {
+                if (item.isGroupHeader) {
+                    return null;
+                }
                 const shouldShowImage = viewMode === "grid";
                 const altIcon = (
                     <>
@@ -298,6 +348,54 @@ export default function SessionsPage() {
 
 
 
+    const treeGroup = useCallback((sortedItems) => {
+        const groups = {};
+        const groupOrder = [];
+
+        sortedItems.forEach(itemWrapper => {
+            const { mapped } = itemWrapper;
+            const groupKey = mapped.treeGroupKey;
+            if (!groups[groupKey]) {
+                groups[groupKey] = { prefix: mapped.treePrefix, items: [] };
+                groupOrder.push(groupKey);
+            }
+            groups[groupKey].items.push(itemWrapper);
+        });
+
+        const result = [];
+        groupOrder.forEach(groupKey => {
+            const { prefix, items } = groups[groupKey];
+            if (items.length === 1) {
+                result.push(items[0]);
+            } else {
+                const isExpanded = expandedTreeGroups.includes(groupKey);
+                const firstItem = items[0];
+                const headerMapped = {
+                    ...firstItem.mapped,
+                    id: "group_" + groupKey,
+                    key: "group_" + groupKey,
+                    isGroupHeader: true,
+                    prefix: groupKey,
+                    name: prefix,
+                    isExpanded,
+                    count: items.length
+                };
+                result.push({
+                    raw: { ...firstItem.raw, isGroupHeader: true },
+                    mapped: headerMapped,
+                    searchableText: prefix.toLowerCase()
+                });
+
+                if (isExpanded) {
+                    items.forEach(wrapper => {
+                        result.push(wrapper);
+                    });
+                }
+            }
+        });
+        return result;
+    }, [expandedTreeGroups]);
+
     const getSeparator = useCallback((item, prevItem, orderBy) => {
         if (orderBy === "date") {
             return item.date !== prevItem.date;
@@ -312,6 +410,9 @@ export default function SessionsPage() {
     }, []);
 
     const viewModes = useMemo(() => ({
+        tree: {
+            className: isMobile ? styles.listPhoneItem : styles.listItem
+        },
         list: {
             className: isMobile ? styles.listPhoneItem : styles.listItem
         },
@@ -370,6 +471,7 @@ export default function SessionsPage() {
             mapper={mapper}
             viewModes={viewModes}
             depends={tableDeps}
+            treeGroup={treeGroup}
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
             renderColumn={renderColumn}

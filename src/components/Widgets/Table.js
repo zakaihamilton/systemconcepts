@@ -32,6 +32,7 @@ import DataUsageIcon from "@mui/icons-material/DataUsage";
 import InfoIcon from "@mui/icons-material/Info";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
 import IconButton from "@mui/material/IconButton";
@@ -73,6 +74,7 @@ export default function TableWidget(props) {
         showSort = true,
         viewModes = { table: null },
         resetScrollDeps = EMPTY_ARRAY,
+        treeGroup,
         getSeparator,
         renderColumn,
         rowClassName,
@@ -176,6 +178,11 @@ export default function TableWidget(props) {
             id: "grid",
             icon: <ViewComfyIcon />,
             name: translations.GRID_VIEW
+        },
+        {
+            id: "tree",
+            icon: <AccountTreeIcon />,
+            name: translations.TREE_VIEW
         },
         {
             id: "tracks",
@@ -346,9 +353,17 @@ export default function TableWidget(props) {
         return mappedData.filter((itemWrapper) => matchesQuery(itemWrapper, orGroups));
     }, [mappedData, search]);
 
-    const sortedData = useMemo(() => {
+    const purelySortedData = useMemo(() => {
         return stableSort(filteredData || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
     }, [filteredData, order, orderBy]);
+
+    const sortedData = useMemo(() => {
+        let sorted = purelySortedData;
+        if (viewMode === "tree" && treeGroup) {
+            sorted = treeGroup(purelySortedData);
+        }
+        return sorted;
+    }, [purelySortedData, viewMode, treeGroup]);
 
     const { items, rawItems } = useMemo(() => {
         return {
@@ -588,7 +603,7 @@ export default function TableWidget(props) {
     const emptyElement = <Message Icon={InfoIcon} label={emptyLabel || translations.NO_ITEMS} />;
     const loader = <div className={clsx(styles.loader, loading && styles.loading)}><LinearProgress /></div>;
 
-    if (viewMode === "list") {
+    if (viewMode === "list" || viewMode === "tree") {
         const itemCount = hideColumns ? numItems : numItems + 1;
 
         return <>

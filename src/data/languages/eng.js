@@ -1198,6 +1198,10 @@ export default {
             "value": "List View"
         },
         {
+            "id": "TREE_VIEW",
+            "value": "Tree View"
+        },
+        {
             "id": "TABLE_VIEW",
             "value": "Table View"
         },
