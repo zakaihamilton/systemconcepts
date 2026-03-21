@@ -191,15 +191,17 @@ export default function SessionsPage() {
         }
 
         const prefixMap = new Map();
+        const isBoundary = (c) => !c || /[^\p{L}\p{N}]/u.test(c);
+
         for (const bucketKey in buckets) {
             const names = buckets[bucketKey];
-            const isBoundary = (c) => !c || /[^\p{L}\p{N}]/u.test(c);
 
+            // 1. Generate all possible prefixes
             const allPrefixes = new Set();
             for (const name of names) {
                 allPrefixes.add(name);
                 for (let i = 0; i < name.length; i++) {
-                    if (isBoundary(name[i])) { // Current character acts as a separator
+                    if (isBoundary(name[i])) {
                         const extracted = name.substring(0, i);
                         const clean = extracted.replace(/[^\p{L}\p{N}]+$/u, "");
                         if (clean.length > 2) {
@@ -211,6 +213,24 @@ export default function SessionsPage() {
 
             const validPrefixes = Array.from(allPrefixes).sort((a, b) => b.length - a.length);
 
+            // 2. Pre-calculate counts for prefixes that appear more than once
+            const prefixCounts = new Map();
+            for (const p of validPrefixes) {
+                let count = 0;
+                for (const name of names) {
+                    if (name.toLowerCase().startsWith(p.toLowerCase())) {
+                        const nextChar = name[p.length];
+                        if (isBoundary(nextChar) || p.toLowerCase() === name.toLowerCase()) {
+                            count++;
+                        }
+                    }
+                }
+                if (count > 1) {
+                    prefixCounts.set(p, count);
+                }
+            }
+
+            // 3. Find the final prefix for each name using the pre-calculated counts
             for (const name of names) {
                 let finalPrefix = name;
                 const nameLower = name.toLowerCase();
@@ -218,26 +238,12 @@ export default function SessionsPage() {
                 for (const p of validPrefixes) {
                     if (nameLower.startsWith(p.toLowerCase())) {
                         const nextChar = name[p.length];
-
-                        if (isBoundary(nextChar) || p.toLowerCase() === nameLower) {
-                            let count = 0;
-                            for (const otherName of names) {
-                                if (otherName.toLowerCase().startsWith(p.toLowerCase())) {
-                                    const otherNext = otherName[p.length];
-                                    if (isBoundary(otherNext) || p.toLowerCase() === otherName.toLowerCase()) {
-                                        count++;
-                                    }
-                                }
-                            }
-
-                            if (count > 1) {
-                                finalPrefix = p;
-                                break;
-                            }
+                        if ((isBoundary(nextChar) || p.toLowerCase() === nameLower) && prefixCounts.has(p)) {
+                            finalPrefix = p;
+                            break;
                         }
                     }
                 }
-
                 prefixMap.set(`${bucketKey}||${name}`, finalPrefix);
             }
         }
@@ -475,26 +481,30 @@ export default function SessionsPage() {
             return collapsedResult;
         }
 
-        const finalResult = [...collapsedResult];
+        const finalResult = [];
+        const expandedSet = new Set(expandedTreeGroupsList);
 
-        for (const expandedKey of expandedTreeGroupsList) {
-            const expandedGroup = groups[expandedKey];
-            if (!expandedGroup) continue;
+        for (const item of collapsedResult) {
+            const isExpanded = item.mapped.isGroupHeader && expandedSet.has(item.mapped.prefix);
 
-            const targetIndex = finalResult.findIndex(item => item.mapped.isGroupHeader && item.mapped.prefix === expandedKey);
-
-            if (targetIndex !== -1) {
-                finalResult[targetIndex] = {
-                    ...finalResult[targetIndex],
-                    mapped: { ...finalResult[targetIndex].mapped, isExpanded: true }
-                };
-
-                const treeChildren = expandedGroup.items.map(child => ({
-                    raw: child.raw,
-                    mapped: { ...child.mapped, isTreeChild: true }
-                }));
-
-                finalResult.splice(targetIndex + 1, 0, ...treeChildren);
+            if (isExpanded) {
+                const expandedGroup = groups[item.mapped.prefix];
+                // Push the header with expanded state
+                finalResult.push({
+                    ...item,
+                    mapped: { ...item.mapped, isExpanded: true }
+                });
+                // Push the children if the group exists
+                if (expandedGroup) {
+                    const treeChildren = expandedGroup.items.map(child => ({
+                        raw: child.raw,
+                        mapped: { ...child.mapped, isTreeChild: true }
+                    }));
+                    finalResult.push(...treeChildren);
+                }
+            } else {
+                // Push the collapsed item or non-header item
+                finalResult.push(item);
             }
         }
 

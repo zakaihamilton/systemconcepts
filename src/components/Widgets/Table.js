@@ -382,7 +382,7 @@ export default React.memo(function TableWidget(props) {
         return id;
     }, []);
 
-    // Provide the latest items instantly without waiting for useEffect post-render cycle
+    // eslint-disable-next-line -- intentional render-time side effect: rows read this registry synchronously during their own render
     tableDataRegistry.set(registryId, { items, rawItems });
 
     useEffect(() => {
