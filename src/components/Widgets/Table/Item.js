@@ -2,7 +2,7 @@ import { memo } from "react";
 import styles from "./Item.module.scss";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
-import Tooltip from "@mui/material/Tooltip";
+
 
 // Performance optimization: Custom comparator to handle 'style' prop stability.
 // The 'style' prop from react-window often changes reference but contains the same values.
@@ -60,11 +60,11 @@ function ItemWidget({ className = "", separator, viewMode, selected: selectedIte
             key={columnId}
             {...viewModeProps}
         >
-            {!!ellipsis && <Tooltip arrow title={item[ellipsis]}>
-                <span>
+            {!!ellipsis && (
+                <span title={item[ellipsis]}>
                     <div className={styles.ellipsisText}>{value}</div>
                 </span>
-            </Tooltip>}
+            )}
             {!ellipsis && value}
         </div>);
     });

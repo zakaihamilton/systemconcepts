@@ -32,6 +32,7 @@ import DataUsageIcon from "@mui/icons-material/DataUsage";
 import InfoIcon from "@mui/icons-material/Info";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { StatusBarStore } from "@widgets/StatusBar";
 import ListColumns from "./Table/ListColumns";
 import IconButton from "@mui/material/IconButton";
@@ -45,7 +46,10 @@ const EMPTY_ARRAY = [];
 
 registerToolbar("Table", 100);
 
-export default function TableWidget(props) {
+const tableDataRegistry = new Map();
+let tableRegistryCounter = 0;
+
+export default React.memo(function TableWidget(props) {
     let {
         name,
         rowHeight = "4em",
@@ -73,7 +77,9 @@ export default function TableWidget(props) {
         showSort = true,
         viewModes = { table: null },
         resetScrollDeps = EMPTY_ARRAY,
+        treeGroup,
         getSeparator,
+        expandedTreeGroups,
         renderColumn,
         rowClassName,
         emptyLabel,
@@ -176,6 +182,11 @@ export default function TableWidget(props) {
             id: "grid",
             icon: <ViewComfyIcon />,
             name: translations.GRID_VIEW
+        },
+        {
+            id: "tree",
+            icon: <AccountTreeIcon />,
+            name: translations.TREE_VIEW
         },
         {
             id: "tracks",
@@ -346,16 +357,37 @@ export default function TableWidget(props) {
         return mappedData.filter((itemWrapper) => matchesQuery(itemWrapper, orGroups));
     }, [mappedData, search]);
 
-    const sortedData = useMemo(() => {
+    const purelySortedData = useMemo(() => {
         return stableSort(filteredData || [], (a, b) => getComparator(order, orderBy)(a.mapped, b.mapped));
     }, [filteredData, order, orderBy]);
 
+    const sortedData = useMemo(() => {
+        let sorted = purelySortedData;
+        if (viewMode === "tree" && treeGroup) {
+            sorted = treeGroup(purelySortedData, expandedTreeGroups || []);
+        }
+        return sorted;
+    }, [purelySortedData, viewMode, treeGroup, expandedTreeGroups]);
+
     const { items, rawItems } = useMemo(() => {
-        return {
+        const res = {
             items: sortedData.map(p => p.mapped),
             rawItems: sortedData.map(p => p.raw)
         };
+        return res;
     }, [sortedData]);
+
+    const registryId = useMemo(() => {
+        const id = ++tableRegistryCounter;
+        return id;
+    }, []);
+
+    // Provide the latest items instantly without waiting for useEffect post-render cycle
+    tableDataRegistry.set(registryId, { items, rawItems });
+
+    useEffect(() => {
+        return () => tableDataRegistry.delete(registryId);
+    }, [registryId]);
 
     const toolbarItems = [
         data && name && onImport && {
@@ -508,8 +540,8 @@ export default function TableWidget(props) {
     const { columnCount, rowCount, sidePadding } = gridLayout;
 
     const itemData = useMemo(() => ({
+        registryId,
         hideColumns,
-        items,
         viewModes,
         viewMode,
         selectedRow,
@@ -522,7 +554,7 @@ export default function TableWidget(props) {
         getSeparator,
         renderColumn,
         rowClassName
-    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn, rowClassName]);
+    }), [registryId, hideColumns, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn, rowClassName]);
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
@@ -588,7 +620,7 @@ export default function TableWidget(props) {
     const emptyElement = <Message Icon={InfoIcon} label={emptyLabel || translations.NO_ITEMS} />;
     const loader = <div className={clsx(styles.loader, loading && styles.loading)}><LinearProgress /></div>;
 
-    if (viewMode === "list") {
+    if (viewMode === "list" || viewMode === "tree") {
         const itemCount = hideColumns ? numItems : numItems + 1;
 
         return <>
@@ -727,10 +759,11 @@ export default function TableWidget(props) {
     else {
         return null;
     }
-}
+});
 
 const TableListRow = React.memo(({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn, rowClassName } = data;
+    const { registryId, hideColumns, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn, rowClassName } = data;
+    const { items } = tableDataRegistry.get(registryId) || {};
     const itemIndex = hideColumns ? index : index - 1;
     const item = items?.[itemIndex];
 
@@ -753,26 +786,31 @@ const TableListRow = React.memo(({ index, style, data }) => {
         }
     }
 
-    return <Item
-        key={key || id || itemIndex}
-        style={{ ...style, ...itemStyles }}
-        {...props}
-        className={clsx(props.className, className)}
-        columns={visibleColumns}
-        rowClick={rowClick}
-        item={item}
-        index={itemIndex}
-        viewMode={viewMode}
-        selected={selected}
-        separator={separator}
-        renderColumn={renderColumn}
-    />;
+    return (
+        <>
+            <Item
+                key={key || id || itemIndex}
+                style={{ ...style, ...itemStyles }}
+                {...props}
+                className={clsx(props.className, className)}
+                columns={visibleColumns}
+                rowClick={rowClick}
+                item={item}
+                index={itemIndex}
+                viewMode={viewMode}
+                selected={selected}
+                separator={separator}
+                renderColumn={renderColumn}
+            />
+        </>
+    );
 });
 
 TableListRow.displayName = "TableListRow";
 
 const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
-    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
+    const { registryId, columnCount, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
+    const { items } = tableDataRegistry.get(registryId) || {};
     const index = (rowIndex * columnCount) + columnIndex;
     const item = items?.[index];
     if (!item) {

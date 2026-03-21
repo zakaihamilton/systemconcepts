@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import { SessionsStore } from "@util/sessions";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import MovieIcon from "@mui/icons-material/Movie";
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import AudioIcon from "@icons/Audio";
@@ -14,9 +14,14 @@ import Menu from "@widgets/Menu";
 import styles from "./FilterBar.module.scss";
 import clsx from "clsx";
 
-export default function FilterBar({ hideYears = false }) {
+export default React.memo(function FilterBar({ hideYears = false }) {
     const translations = useTranslations();
-    const { typeFilter, yearFilter, groupFilter, sessions, groups, showFilterDialog } = SessionsStore.useState();
+    const typeFilter = SessionsStore.useState(s => s.typeFilter);
+    const yearFilter = SessionsStore.useState(s => s.yearFilter);
+    const groupFilter = SessionsStore.useState(s => s.groupFilter);
+    const sessions = SessionsStore.useState(s => s.sessions);
+    const groups = SessionsStore.useState(s => s.groups);
+    const showFilterDialog = SessionsStore.useState(s => s.showFilterDialog);
 
     const types = useMemo(() => [
         {
@@ -402,4 +407,4 @@ export default function FilterBar({ hideYears = false }) {
             </div>
         </div>
     );
-}
+});

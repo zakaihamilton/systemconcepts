@@ -1198,6 +1198,10 @@ export default {
             "value": "תצוגת רשימה"
         },
         {
+            "id": "TREE_VIEW",
+            "value": "תצוגת עץ"
+        },
+        {
             "id": "TABLE_VIEW",
             "value": "תצוגת טבלה"
         },
