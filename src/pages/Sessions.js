@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import Table from "@widgets/Table";
 import { useTranslations } from "@util/translations";
 import { addPath, toPath } from "@util/pages";
@@ -9,7 +9,6 @@ import styles from "./Sessions.module.scss";
 import Label from "@widgets/Label";
 import Row from "@widgets/Row";
 import MovieIcon from "@mui/icons-material/Movie";
-import Tooltip from "@mui/material/Tooltip";
 import Image from "@widgets/Image";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import clsx from "clsx";
@@ -41,7 +40,7 @@ export default function SessionsPage() {
     const expandedTreeGroups = SessionsStore.useState(s => s.expandedTreeGroups) || [];
     const { session } = PlayerStore.useState();
     const [history] = useRecentHistory();
-    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset", "showHistory", "expandedTreeGroups"]);
+    useLocalStorage("SessionsStore", SessionsStore, ["viewMode", "scrollOffset", "showHistory"]);
 
     // Memoize dependencies to prevent unnecessary resets
     const resetScrollDeps = useMemo(() => [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode, showHistory, history], [groupFilter, typeFilter, yearFilter, orderBy, order, viewMode, showHistory, history]);
@@ -180,6 +179,76 @@ export default function SessionsPage() {
         });
     }, []);
 
+    const treePrefixMap = useMemo(() => {
+        if (!sessions) return new Map();
+
+        const buckets = {};
+        for (const s of sessions) {
+            if (!s.name) continue;
+            const bucketKey = `${s.group}||${s.date}`;
+            if (!buckets[bucketKey]) buckets[bucketKey] = [];
+            buckets[bucketKey].push(s.name);
+        }
+
+        const prefixMap = new Map();
+        for (const bucketKey in buckets) {
+            const names = buckets[bucketKey];
+            const isBoundary = (c) => !c || /[^\p{L}\p{N}]/u.test(c);
+
+            const allPrefixes = new Set();
+            for (const name of names) {
+                allPrefixes.add(name);
+                for (let i = 0; i < name.length; i++) {
+                    if (isBoundary(name[i])) { // Current character acts as a separator
+                        const extracted = name.substring(0, i);
+                        const clean = extracted.replace(/[^\p{L}\p{N}]+$/u, "");
+                        if (clean.length > 2) {
+                            allPrefixes.add(clean);
+                        }
+                    }
+                }
+            }
+
+            const validPrefixes = Array.from(allPrefixes).sort((a, b) => b.length - a.length);
+
+            for (const name of names) {
+                let finalPrefix = name;
+                const nameLower = name.toLowerCase();
+
+                for (const p of validPrefixes) {
+                    if (nameLower.startsWith(p.toLowerCase())) {
+                        const nextChar = name[p.length];
+
+                        if (isBoundary(nextChar) || p.toLowerCase() === nameLower) {
+                            let count = 0;
+                            for (const otherName of names) {
+                                if (otherName.toLowerCase().startsWith(p.toLowerCase())) {
+                                    const otherNext = otherName[p.length];
+                                    if (isBoundary(otherNext) || p.toLowerCase() === otherName.toLowerCase()) {
+                                        count++;
+                                    }
+                                }
+                            }
+
+                            if (count > 1) {
+                                finalPrefix = p;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                prefixMap.set(`${bucketKey}||${name}`, finalPrefix);
+            }
+        }
+        return prefixMap;
+    }, [sessions]);
+
+    const treePrefixMapRef = useRef(new Map());
+    useEffect(() => {
+        treePrefixMapRef.current = treePrefixMap;
+    }, [treePrefixMap]);
+
     const mapper = useCallback(item => {
         if (!item) {
             return null;
@@ -188,7 +257,11 @@ export default function SessionsPage() {
         const percentage = item.duration && (item.position / item.duration * 100);
         const isPlaying = session && session.group === item.group && session.date === item.date && session.name === item.name;
 
-        let treePrefix = item.name ? item.name.split(" - ")[0].trim() : "";
+        const lookupKey = `${item.group}||${item.date}||${item.name}`;
+        let treePrefix = treePrefixMapRef.current.has(lookupKey)
+            ? treePrefixMapRef.current.get(lookupKey)
+            : (item.name ? item.name.split(/\s+-\s+/)[0].trim() : "");
+
         if (item.type === "overview") {
             treePrefix = `_overview_${item.id}`;
         }
@@ -281,11 +354,11 @@ export default function SessionsPage() {
                     </span>
                 );
 
-                const nameContent = <Tooltip enterDelay={500} enterNextDelay={500} arrow title={item.name}>
-                    <div className={styles.nameContainer}>
+                const nameContent = (
+                    <div className={styles.nameContainer} title={item.name}>
                         {nameContentInner}
                     </div>
-                </Tooltip>;
+                );
 
                 const href = target(item);
                 return viewMode === "grid"
@@ -348,53 +421,85 @@ export default function SessionsPage() {
 
 
 
-    const treeGroup = useCallback((sortedItems) => {
-        const groups = {};
-        const groupOrder = [];
+    const treeGroupCache = useRef({});
 
-        sortedItems.forEach(itemWrapper => {
-            const { mapped } = itemWrapper;
-            const groupKey = mapped.treeGroupKey;
-            if (!groups[groupKey]) {
-                groups[groupKey] = { prefix: mapped.treePrefix, items: [] };
-                groupOrder.push(groupKey);
-            }
-            groups[groupKey].items.push(itemWrapper);
-        });
+    const treeGroup = useCallback((sortedItems, expandedTreeGroupsList) => {
+        let collapsedResult;
+        let groups;
 
-        const result = [];
-        groupOrder.forEach(groupKey => {
-            const { prefix, items } = groups[groupKey];
-            if (items.length === 1) {
-                result.push(items[0]);
-            } else {
-                const isExpanded = expandedTreeGroups.includes(groupKey);
-                const firstItem = items[0];
-                const headerMapped = {
-                    ...firstItem.mapped,
-                    id: "group_" + groupKey,
-                    key: "group_" + groupKey,
-                    isGroupHeader: true,
-                    prefix: groupKey,
-                    name: prefix,
-                    isExpanded,
-                    count: items.length
-                };
-                result.push({
-                    raw: { ...firstItem.raw, isGroupHeader: true },
-                    mapped: headerMapped,
-                    searchableText: prefix.toLowerCase()
-                });
+        if (treeGroupCache.current.sortedItems === sortedItems) {
+            collapsedResult = treeGroupCache.current.result;
+            groups = treeGroupCache.current.groups;
+        } else {
+            groups = {};
+            const groupOrder = [];
 
-                if (isExpanded) {
-                    items.forEach(wrapper => {
-                        result.push(wrapper);
+            sortedItems.forEach(itemWrapper => {
+                const { mapped } = itemWrapper;
+                const groupKey = mapped.treeGroupKey;
+                if (!groups[groupKey]) {
+                    groups[groupKey] = { prefix: mapped.treePrefix, items: [] };
+                    groupOrder.push(groupKey);
+                }
+                groups[groupKey].items.push(itemWrapper);
+            });
+
+            collapsedResult = [];
+            groupOrder.forEach(groupKey => {
+                const { prefix, items } = groups[groupKey];
+                if (items.length === 1) {
+                    collapsedResult.push(items[0]);
+                } else {
+                    const firstItem = items[0];
+                    const headerMapped = {
+                        ...firstItem.mapped,
+                        id: "group_" + groupKey,
+                        key: "group_" + groupKey,
+                        isGroupHeader: true,
+                        prefix: groupKey,
+                        name: prefix,
+                        count: items.length
+                    };
+                    collapsedResult.push({
+                        raw: { ...firstItem.raw, isGroupHeader: true },
+                        mapped: headerMapped,
+                        searchableText: prefix.toLowerCase()
                     });
                 }
+            });
+
+            treeGroupCache.current = { sortedItems, result: collapsedResult, groups };
+        }
+
+        if (!expandedTreeGroupsList.length) {
+            return collapsedResult;
+        }
+
+        const finalResult = [...collapsedResult];
+
+        for (const expandedKey of expandedTreeGroupsList) {
+            const expandedGroup = groups[expandedKey];
+            if (!expandedGroup) continue;
+
+            const targetIndex = finalResult.findIndex(item => item.mapped.isGroupHeader && item.mapped.prefix === expandedKey);
+
+            if (targetIndex !== -1) {
+                finalResult[targetIndex] = {
+                    ...finalResult[targetIndex],
+                    mapped: { ...finalResult[targetIndex].mapped, isExpanded: true }
+                };
+
+                const treeChildren = expandedGroup.items.map(child => ({
+                    raw: child.raw,
+                    mapped: { ...child.mapped, isTreeChild: true }
+                }));
+
+                finalResult.splice(targetIndex + 1, 0, ...treeChildren);
             }
-        });
-        return result;
-    }, [expandedTreeGroups]);
+        }
+
+        return finalResult;
+    }, []);
 
     const getSeparator = useCallback((item, prevItem, orderBy) => {
         if (orderBy === "date") {
@@ -462,20 +567,27 @@ export default function SessionsPage() {
         <Table
             cellWidth={isMobile ? "11em" : "16em"}
             cellHeight={isMobile ? "12em" : "17em"}
-            name="sessions"
+            name={translations.SESSIONS}
             store={SessionsStore}
-            columns={columns}
             data={sessions}
             loading={loading}
-            statusBar={statusBar}
+            depends={tableDeps}
+            hover
+            columns={columns}
             mapper={mapper}
             viewModes={viewModes}
-            depends={tableDeps}
+            statusBar={statusBar}
             treeGroup={treeGroup}
+            expandedTreeGroups={expandedTreeGroups}
             resetScrollDeps={resetScrollDeps}
             getSeparator={getSeparator}
             renderColumn={renderColumn}
-            rowClassName={item => item.isPlaying ? styles.playing : null}
+            rowClassName={item => {
+                const classes = [];
+                if (item.isPlaying) classes.push(styles.playing);
+                if (item.isExpanded || item.isTreeChild) classes.push(styles.expandedGroupHighlight);
+                return classes.join(" ");
+            }}
             emptyLabel={syncBusy ? translations.SYNCING + "..." : translations.NO_ITEMS}
         />
 

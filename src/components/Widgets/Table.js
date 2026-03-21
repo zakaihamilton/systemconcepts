@@ -46,7 +46,10 @@ const EMPTY_ARRAY = [];
 
 registerToolbar("Table", 100);
 
-export default function TableWidget(props) {
+const tableDataRegistry = new Map();
+let tableRegistryCounter = 0;
+
+export default React.memo(function TableWidget(props) {
     let {
         name,
         rowHeight = "4em",
@@ -76,6 +79,7 @@ export default function TableWidget(props) {
         resetScrollDeps = EMPTY_ARRAY,
         treeGroup,
         getSeparator,
+        expandedTreeGroups,
         renderColumn,
         rowClassName,
         emptyLabel,
@@ -360,17 +364,30 @@ export default function TableWidget(props) {
     const sortedData = useMemo(() => {
         let sorted = purelySortedData;
         if (viewMode === "tree" && treeGroup) {
-            sorted = treeGroup(purelySortedData);
+            sorted = treeGroup(purelySortedData, expandedTreeGroups || []);
         }
         return sorted;
-    }, [purelySortedData, viewMode, treeGroup]);
+    }, [purelySortedData, viewMode, treeGroup, expandedTreeGroups]);
 
     const { items, rawItems } = useMemo(() => {
-        return {
+        const res = {
             items: sortedData.map(p => p.mapped),
             rawItems: sortedData.map(p => p.raw)
         };
+        return res;
     }, [sortedData]);
+
+    const registryId = useMemo(() => {
+        const id = ++tableRegistryCounter;
+        return id;
+    }, []);
+
+    // Provide the latest items instantly without waiting for useEffect post-render cycle
+    tableDataRegistry.set(registryId, { items, rawItems });
+
+    useEffect(() => {
+        return () => tableDataRegistry.delete(registryId);
+    }, [registryId]);
 
     const toolbarItems = [
         data && name && onImport && {
@@ -523,8 +540,8 @@ export default function TableWidget(props) {
     const { columnCount, rowCount, sidePadding } = gridLayout;
 
     const itemData = useMemo(() => ({
+        registryId,
         hideColumns,
-        items,
         viewModes,
         viewMode,
         selectedRow,
@@ -537,7 +554,7 @@ export default function TableWidget(props) {
         getSeparator,
         renderColumn,
         rowClassName
-    }), [hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn, rowClassName]);
+    }), [registryId, hideColumns, viewModes, viewMode, selectedRow, visibleColumns, rowClick, columnCount, sidePadding, orderBy, order, getSeparator, renderColumn, rowClassName]);
 
     const innerElementType = useMemo(() => {
         const Inner = forwardRef(({ children, ...rest }, ref) => {
@@ -742,10 +759,11 @@ export default function TableWidget(props) {
     else {
         return null;
     }
-}
+});
 
 const TableListRow = React.memo(({ index, style, data }) => {
-    const { hideColumns, items, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn, rowClassName } = data;
+    const { registryId, hideColumns, viewModes, viewMode, selectedRow, visibleColumns, rowClick, orderBy, getSeparator, renderColumn, rowClassName } = data;
+    const { items } = tableDataRegistry.get(registryId) || {};
     const itemIndex = hideColumns ? index : index - 1;
     const item = items?.[itemIndex];
 
@@ -768,26 +786,31 @@ const TableListRow = React.memo(({ index, style, data }) => {
         }
     }
 
-    return <Item
-        key={key || id || itemIndex}
-        style={{ ...style, ...itemStyles }}
-        {...props}
-        className={clsx(props.className, className)}
-        columns={visibleColumns}
-        rowClick={rowClick}
-        item={item}
-        index={itemIndex}
-        viewMode={viewMode}
-        selected={selected}
-        separator={separator}
-        renderColumn={renderColumn}
-    />;
+    return (
+        <>
+            <Item
+                key={key || id || itemIndex}
+                style={{ ...style, ...itemStyles }}
+                {...props}
+                className={clsx(props.className, className)}
+                columns={visibleColumns}
+                rowClick={rowClick}
+                item={item}
+                index={itemIndex}
+                viewMode={viewMode}
+                selected={selected}
+                separator={separator}
+                renderColumn={renderColumn}
+            />
+        </>
+    );
 });
 
 TableListRow.displayName = "TableListRow";
 
 const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
-    const { columnCount, items, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
+    const { registryId, columnCount, viewModes, viewMode, selectedRow, sidePadding, visibleColumns, rowClick, renderColumn, rowClassName } = data;
+    const { items } = tableDataRegistry.get(registryId) || {};
     const index = (rowIndex * columnCount) + columnIndex;
     const item = items?.[index];
     if (!item) {

@@ -130,6 +130,21 @@
     overflow: hidden
 }
 
+.treeChild {
+    margin-left: 1.5em;
+    padding-left: 0.5em;
+    border-left: 2px solid var(--border-color);
+}
+
+.expandedGroupHighlight {
+    background-color: color-mix(in srgb, var(--expanded-color) 15%, transparent) !important;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--expanded-color) 25%, transparent) !important;
+    }
+}
+
 .percentageContainer {
     width: 80px;
     border: 1px solid transparent;
