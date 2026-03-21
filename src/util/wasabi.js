@@ -1,5 +1,6 @@
 import { S3Client, GetObjectCommand, ListObjectsV2Command, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { lockMutex } from "@sync/mutex";
+import { validatePathAccess } from "./aws";
 
 let wasabiClient = null;
 let wasabiBucket = null;
@@ -144,6 +145,9 @@ export async function handleRequest({ req, path }) {
     };
 
     const currentPath = resolvePath();
+    if (currentPath) {
+        validatePathAccess(currentPath);
+    }
 
     if (req.method === "GET") {
         const query = req.query || {};

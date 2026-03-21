@@ -12,3 +12,8 @@
 **Vulnerability:** A Path Traversal vulnerability in `pages/api/subtitle.js` where user input for `path` was passed to S3 bucket / filesystem functions (`downloadData`) without proper directory restriction checks, unlike other APIs like `summary.js`.
 **Learning:** Even though core storage adapters (`@util/aws.js`) often perform checks during direct file manipulations (like PUT/DELETE), simple read methods (`downloadData`) might omit strict path-level sanitization because they assume the parent endpoint validates the path boundaries first. When implementing isolated download endpoints, this path validation gets missed.
 **Prevention:** Always implement an explicit perimeter validation step (`validatePathAccess()`) at the endpoint boundary *before* calling internal adapters, rather than relying on the storage abstraction to validate logic, to ensure consistent and robust access control across all entry points.
+
+## 2026-03-17 - Fix Path Traversal in Wasabi API / Player
+**Vulnerability:** Path traversal existed in `pages/api/player.js` and `src/util/wasabi.js` where user input `path` was passed to Wasabi S3 commands without proper validation against traversal sequences like `..` or restricted areas like `private/`.
+**Learning:** Even though AWS functionality had traversal protection via `validatePathAccess`, parallel implementations for alternative storage providers (like Wasabi in this case) might inadvertently miss applying the exact same shared security utilities.
+**Prevention:** Always ensure that common access validation routines (`validatePathAccess`) are extracted, generalized, and systematically applied across all storage adapters or route handlers that construct paths from user input.
