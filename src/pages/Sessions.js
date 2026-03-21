@@ -526,7 +526,7 @@ export default function SessionsPage() {
 
     const viewModes = useMemo(() => ({
         tree: {
-            className: isMobile ? styles.listPhoneItem : styles.listItem
+            className: isMobile ? styles.treePhoneItem : styles.treeItem
         },
         list: {
             className: isMobile ? styles.listPhoneItem : styles.listItem

@@ -112,7 +112,16 @@
 }
 
 .listPhoneItem {
-    grid-template-columns: auto minmax(4.5em, 10%) 8em;
+    grid-template-columns: auto minmax(5em, 10%) 8em;
+}
+
+
+.treeItem {
+    grid-template-columns: auto minmax(4em, 10%) 7em 8em;
+}
+
+.treePhoneItem {
+    grid-template-columns: auto 14vw 8em;
 }
 
 .labelName {
