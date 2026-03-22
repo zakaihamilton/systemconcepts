@@ -71,12 +71,13 @@ export async function GET(request) {
 
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
-        // Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/media
-        const getMediaProxyUrl = (path) => {
+        // Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/stream
+        const getStreamProxyUrl = (path) => {
             if (!path) return null;
             let cleanPath = path.startsWith("/") ? path.substring(1) : path;
-            cleanPath = cleanPath.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/');
-            return `${baseUrl}/api/media/${cleanPath}`;
+            const b64 = Buffer.from(cleanPath).toString('base64url');
+            const ext = path.split('.').pop() || "bin";
+            return `${baseUrl}/api/stream/${b64}.${ext}`;
         };
 
         const rssItems = await Promise.all(sessions.map(async (session) => {
@@ -84,7 +85,8 @@ export async function GET(request) {
             const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
             const link = `${baseUrl}/#sessions/${sessionQuery}`;
             
-            const date = new Date(session.date).toUTCString();
+            // RFC 2822 formatting requires strictly +0000
+            const date = new Date(session.date).toUTCString().replace('GMT', '+0000');
             // Apple recommends integer seconds
             const durationSeconds = session.duration ? Math.round(session.duration) : 0;
             const categories = (session.tags || []).map(tag => `<category>${escapeXml(tag)}</category>`).join('');
@@ -100,12 +102,12 @@ export async function GET(request) {
             const media = session.audio || session.video;
             let enclosure = "";
             if (media && media.path) {
-                const proxyUrl = getMediaProxyUrl(media.path);
+                const proxyUrl = getStreamProxyUrl(media.path);
                 const type = media.path.endsWith(".mp4") ? "video/mp4" : (media.path.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
                 enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
             }
 
-            const thumbnail = getMediaProxyUrl(session.image?.path);
+            const thumbnail = getStreamProxyUrl(session.image?.path);
             const itemImage = `<itunes:image href="${escapeXml(thumbnail || (baseUrl + "/images/rss-cover.jpg"))}" />`;
 
             // Transcript support
@@ -118,7 +120,7 @@ export async function GET(request) {
                 transcriptType = "text/plain";
             }
 
-            const transcriptUrl = getMediaProxyUrl(transcriptPath);
+            const transcriptUrl = getStreamProxyUrl(transcriptPath);
             if (transcriptUrl) {
                 transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
             }
