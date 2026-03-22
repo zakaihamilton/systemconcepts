@@ -132,7 +132,7 @@ export async function GET(request) {
         const selfUrl = request.url;
 
         const rss = `<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
 <channel>
   <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
   <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />
@@ -172,7 +172,8 @@ export async function GET(request) {
                 'Last-Modified': maxDate,
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
-                'Expires': '0'
+                'Expires': '0',
+                'Accept-Ranges': 'bytes'
             },
         });
     } catch (err) {
