@@ -24,7 +24,7 @@ async function handleRequest(request) {
         let path;
         try {
             path = Buffer.from(base64str, 'base64').toString('utf8');
-        } catch (e) {
+        } catch (_e) {
             return new NextResponse("Invalid Path", { status: 400 });
         }
 

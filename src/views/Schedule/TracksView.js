@@ -4,7 +4,7 @@ import TrackRow from "./TracksView/Row";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { useDeviceType } from "@util/styles";
 import { addPath } from "@util/views";
-import { FixedSizeList } from "react-window";
+import FixedSizeList from "@components/Virtualized/FixedSizeList";
 import { ContentSize } from "@components/Page/Content";
 import Input from "@components/Widgets/Input";
 import { useDateFormatter } from "@util/locale";

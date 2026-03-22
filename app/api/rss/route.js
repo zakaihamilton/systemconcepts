@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import { downloadData, getS3 } from "@util/aws";
+import { downloadData, } from "@util/aws";
 import { formatDuration } from "@util/string";
 import { findRecord } from "@util/mongo";
-import { getWasabi } from "@util/wasabi";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import pako from "pako";
 import crypto from "crypto";
 

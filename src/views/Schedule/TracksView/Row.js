@@ -3,7 +3,7 @@ import styles from './Row.module.css';
 import TrackCard from './Card';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
-import { FixedSizeList } from "react-window";
+import FixedSizeList from "@components/Virtualized/FixedSizeList";
 import { useDateFormatter } from "@util/locale";
 import { GroupsStore } from "@util/groups";
 import IconButton from '@mui/material/IconButton';

@@ -21,7 +21,8 @@ import TableColumn from "./Table/TableColumn";
 import clsx from "clsx";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import Message from "@widgets/Message";
-import { FixedSizeList, FixedSizeGrid } from "react-window";
+import FixedSizeList from "@components/Virtualized/FixedSizeList";
+import FixedSizeGrid from "@components/Virtualized/FixedSizeGrid";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import ViewComfyIcon from "@mui/icons-material/ViewComfy";
@@ -83,6 +84,7 @@ export default React.memo(function TableWidget(props) {
         renderColumn,
         rowClassName,
         emptyLabel,
+        hover,
         ...otherProps
     } = props;
     const translations = useTranslations();

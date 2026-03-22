@@ -32,7 +32,7 @@ import { useSessions } from "@util/sessions";
 import { ResearchStore } from "@views/ResearchStore";
 import Article from "@views/Library/Article";
 import { ContentSize } from "@components/Page/Content";
-import { VariableSizeList } from "react-window";
+import VariableSizeList from "@components/Virtualized/VariableSizeList";
 import { useDeviceType } from "@util/styles";
 import ScrollToTop from "@views/Library/Article/ScrollToTop";
 import JumpDialog from "@views/Library/Article/JumpDialog";
