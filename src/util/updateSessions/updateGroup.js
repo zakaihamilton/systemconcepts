@@ -263,6 +263,7 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                     const txtFile = files.find(f => f.name.endsWith('.txt'));
                     if (txtFile) {
                         transcription = true;
+                        item.transcriptPath = txtFile.path;
                     }
                 }
 

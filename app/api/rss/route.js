@@ -112,7 +112,22 @@ export async function GET(request) {
             }
 
             const thumbnail = await getSignedUrlForPath(session.image?.path);
-            const itemImage = thumbnail ? `<itunes:image href="${escapeXml(thumbnail)}" />` : "";
+            const itemImage = `<itunes:image href="${escapeXml(thumbnail || (baseUrl + "/images/rss-cover.jpg"))}" />`;
+
+            // Transcript support
+            let transcriptTag = "";
+            let transcriptPath = session.subtitles?.path || session.transcriptPath;
+            let transcriptType = transcriptPath?.endsWith(".vtt") ? "text/vtt" : "text/plain";
+            
+            if (!transcriptPath && session.transcription) {
+                transcriptPath = `wasabi/${session.group}/${session.year}/${session.date} ${session.name}.txt`;
+                transcriptType = "text/plain";
+            }
+            
+            const transcriptUrl = await getSignedUrlForPath(transcriptPath);
+            if (transcriptUrl) {
+                transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
+            }
 
             const author = "info@systemconcepts.app (System Concepts)";
             const itunesAuthor = "System Concepts";
@@ -130,6 +145,7 @@ export async function GET(request) {
       ${itemImage}
       ${categories}
       ${enclosure}
+      ${transcriptTag}
       <itunes:duration>${escapeXml(durationText)}</itunes:duration>
       <itunes:summary>${escapeXml(session.summaryText)}</itunes:summary>
       <itunes:explicit>no</itunes:explicit>
