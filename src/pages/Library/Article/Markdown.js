@@ -573,7 +573,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
         content = content.replace(/\n+/g, "\n\n");
 
         // Bold numbered lists (existing)
-        content = content.replace(/^\s*(\d+)([\.\)])[ \t]*/gm, (match, number, symbol) => {
+        content = content.replace(/^\s*(\d+)([\.\)])[ \t]*/gm, (_match, number, symbol) => {
             return `\n\n**${number}\\${symbol}** `;
         });
 
@@ -869,7 +869,7 @@ export default React.memo(function Markdown({ children, search, currentParagraph
 
         const getSpokenText = (text) => {
             if (!text) return text;
-            return text.replace(termPattern, (match, capture, offset, string) => {
+            return text.replace(termPattern, (match, _capture, offset, string) => {
                 // Skip lowercase 'or'
                 if (match === 'or') {
                     return match;

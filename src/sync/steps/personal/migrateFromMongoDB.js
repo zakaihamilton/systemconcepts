@@ -14,7 +14,7 @@ const MIGRATION_FILE = "migration.json";
  * Uses local migration.json to track progress and allow resumable migration
  * Files are copied to local storage immediately so user sees progress
  */
-export async function migrateFromMongoDB(userid, remoteManifest, localPath, canUpload = true) {
+export async function migrateFromMongoDB(_userid, remoteManifest, localPath, canUpload = true) {
     const start = performance.now();
     const migrationPath = makePath(localPath, MIGRATION_FILE);
     const localManifestPath = makePath(localPath, FILES_MANIFEST);

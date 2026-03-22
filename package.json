@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "biome lint .",
     "test": "node src/sync/test/integration.js",
     "full-start": "next build && next start"
   },
@@ -59,12 +59,7 @@
     "webpack": "^5.97.1"
   },
   "devDependencies": {
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.2.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "globals": "^16.5.0",
+    "@biomejs/biome": "^1.9.4",
     "typescript": "^5.9.3",
     "yarn-upgrade-all": "^0.7.4"
   },

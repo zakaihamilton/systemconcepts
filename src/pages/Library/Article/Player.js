@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from '@util/translations';
 import { useLocalStorage } from '@util/hooks';
 import Controls from './Player/Controls';

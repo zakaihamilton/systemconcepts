@@ -618,7 +618,7 @@ async function runTests() {
         },
         migrateFromMongoDB: async () => ({ migrated: false }),
         updateLocalManifest: async () => [],
-        downloadUpdates: async (l, r) => ({ manifest: [], cleanedRemoteManifest: r, hasChanges: false }),
+        downloadUpdates: async (_l, r) => ({ manifest: [], cleanedRemoteManifest: r, hasChanges: false }),
         removeDeletedFiles: async () => ({ manifest: [], hasChanges: false }),
         uploadUpdates: async () => ({ manifest: [], hasChanges: false }),
         uploadNewFiles: async () => ({ manifest: [], hasChanges: false }),

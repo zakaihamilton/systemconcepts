@@ -1,4 +1,4 @@
-import React from "react";
+
 import Box from "@mui/material/Box";
 import Markdown from "./Markdown";
 import articleStyles from "../Article.module.scss";

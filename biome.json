@@ -1,0 +1,56 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "ignore": [
+      "public/workbox-*.js",
+      "public/sw.js",
+      "**/test_gzip.js",
+      ".next/**",
+      "node_modules/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "lineEnding": "lf"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUndeclaredVariables": "off"
+      },
+      "style": {
+        "useConst": "off",
+        "useTemplate": "off",
+        "noUnusedTemplateLiteral": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noDebugger": "error",
+        "noDuplicateCase": "error",
+        "noEmptyInterface": "off",
+        "noExplicitAny": "off",
+        "noFallthroughSwitchClause": "error"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      }
+    }
+  },
+  "javascript": {
+    "globals": [
+      "screens",
+      "COMPONENT",
+      "React",
+      "workbox",
+      "importScripts"
+    ],
+    "formatter": {
+      "semicolons": "always",
+      "lineEnding": "lf"
+    }
+  }
+}

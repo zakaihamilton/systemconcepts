@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useTranslations } from "@util/translations";
 import Typography from "@mui/material/Typography";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -74,7 +74,7 @@ export default function StatusBar({ data, mapper, store }) {
         }
     };
 
-    const handleClose = (event, reason) => {
+    const handleClose = (_event, reason) => {
         if (reason === "clickaway" || busy) {
             return;
         }

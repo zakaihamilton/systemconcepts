@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { MainStore } from '@components/Main';
 import useDarkMode from 'use-dark-mode';

@@ -5,7 +5,7 @@ import styles from "./Tabs.module.scss";
 export default function TabsWidget({ state, children, ...props }) {
     const [value, setValue] = state;
 
-    const handleChange = (event, newValue) => {
+    const handleChange = (_event, newValue) => {
         setValue(newValue);
     };
 

@@ -59,7 +59,7 @@ export default function SpeedSlider() {
         return value + "x";
     };
 
-    const handleSpeedChange = (event, newValue) => {
+    const handleSpeedChange = (_event, newValue) => {
         const audio = player;
         audio.playbackRate = newValue; // eslint-disable-line react-hooks/immutability
     };

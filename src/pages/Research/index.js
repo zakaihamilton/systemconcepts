@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react";
 import Cookies from "js-cookie";
 import { createPortal } from "react-dom";
 import Box from "@mui/material/Box";
@@ -995,7 +995,7 @@ export default function Research() {
                                 className={styles.autocomplete}
                                 options={availableFilters.filter(option => !filterTags.some(tag => tag.label === option.label && tag.type === option.type))}
                                 inputValue={filterInput}
-                                onInputChange={(event, newInputValue) => {
+                                onInputChange={(_event, newInputValue) => {
                                     setFilterInput(newInputValue);
                                 }}
                                 filterOptions={(options, { inputValue }) => {
@@ -1024,7 +1024,7 @@ export default function Research() {
                                     );
                                 }}
                                 value={filterTags}
-                                onChange={(event, newValue) => {
+                                onChange={(_event, newValue) => {
                                     setFilterTags(newValue);
                                     setFilterInput("");
                                 }}

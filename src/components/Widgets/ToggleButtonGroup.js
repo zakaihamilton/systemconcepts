@@ -7,7 +7,7 @@ import styles from "./ToggleButtonGroup.module.scss";
 export default function ToggleButtonGroupWidget({ items, state, ...props }) {
     const [selected, setSelected] = state;
 
-    const handleSelected = (event, selected) => {
+    const handleSelected = (_event, selected) => {
         if (selected) {
             setSelected(selected);
         }

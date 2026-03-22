@@ -16,7 +16,7 @@ export default function ButtonSelector({ state, items, onClick, children, label,
   const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = state;
 
-  const handleMenuItemClick = (event, id) => {
+  const handleMenuItemClick = (_event, id) => {
     setSelected(id);
     setOpen(false);
   };

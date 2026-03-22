@@ -62,7 +62,7 @@ export default function JumpDialog({ open, onClose, onSubmit, maxPage = 1, maxPa
                 {maxParagraphs > 0 && maxPage > 0 && (
                     <Tabs
                         value={tab}
-                        onChange={(e, val) => setTab(val)}
+                        onChange={(_e, val) => setTab(val)}
                         variant="fullWidth"
                         textColor="primary"
                         indicatorColor="primary"
