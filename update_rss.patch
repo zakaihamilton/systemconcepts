@@ -1,0 +1,11 @@
+--- app/api/rss/route.js
++++ app/api/rss/route.js
+@@ -47,7 +47,7 @@
+         sessions = sessions.slice(0, count);
+
+         const rssItems = sessions.map(session => {
+-            const link = `https://systemconcepts.org/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
++            const link = `https://systemconcepts.org/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+             const date = new Date(session.date).toUTCString();
+             return `
+     <item>
