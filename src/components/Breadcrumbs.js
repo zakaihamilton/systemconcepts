@@ -13,7 +13,7 @@ import Toolbar from "@components/Toolbar";
 import SidebarIcon from "./AppBar/SidebarIcon";
 import clsx from "clsx";
 import NoSsr from "@mui/material/NoSsr";
-import { setHash } from "@util/pages";
+import { setHash } from "@util/views";
 
 import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";

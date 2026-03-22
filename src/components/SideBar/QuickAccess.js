@@ -4,7 +4,7 @@ import List from "@widgets/List";
 import { Divider } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import languages from "@data/languages";
-import { usePages } from "@util/pages";
+import { usePages } from "@util/views";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import ReplayIcon from "@mui/icons-material/Replay";

@@ -4,15 +4,15 @@ import List from "@widgets/List";
 import Drawer from "@mui/material/Drawer";
 import { useDeviceType } from "@util/styles";
 import { MainStore } from "./Main";
-import { useActivePages, usePages, setHash } from "@util/pages";
+import { useActivePages, usePages, setHash } from "@util/views";
 import QuickAccess from "./SideBar/QuickAccess";
 import LibraryTree from "./SideBar/LibraryTree";
 import { useBookmarks } from "@components/Bookmarks";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import { useTranslations } from "@util/translations";
-import ResearchIndexer from "@pages/ResearchIndexer";
-import { ResearchStore } from "@pages/ResearchStore";
+import ResearchIndexer from "@views/ResearchIndexer";
+import { ResearchStore } from "@views/ResearchStore";
 import LinearProgress from "@mui/material/LinearProgress";
 
 import clsx from "clsx";

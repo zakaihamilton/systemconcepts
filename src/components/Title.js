@@ -1,11 +1,11 @@
 import Breadcrumbs from "@components/Breadcrumbs";
-import { useActivePages } from "@util/pages";
+import { useActivePages } from "@util/views";
 import styles from "./Title.module.scss";
 import { useDeviceType } from "@util/styles";
-import { ScheduleStore } from "@pages/Schedule";
+import { ScheduleStore } from "@views/Schedule";
 import { SessionsStore } from "@util/sessions";
 
-import { LibraryStore } from "@pages/Library/Store";
+import { LibraryStore } from "@views/Library/Store";
 
 export default function Title() {
     const { viewMode } = ScheduleStore.useState();

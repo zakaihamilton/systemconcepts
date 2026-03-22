@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import TabsWidget from "@widgets/Tabs";
 import styles from "./Tabs.module.scss";
-import { useActivePages } from "@util/pages";
+import { useActivePages } from "@util/views";
 import { MainStore } from "@components/Main";
 
 export default function Tabs() {

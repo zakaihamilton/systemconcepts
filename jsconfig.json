@@ -17,8 +17,8 @@
             "@data/*": [
                 "src/data/*"
             ],
-            "@pages/*": [
-                "src/pages/*"
+            "@views/*": [
+                "src/views/*"
             ],
             "@storage/*": [
                 "src/storage/*"

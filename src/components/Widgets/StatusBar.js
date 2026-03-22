@@ -11,7 +11,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import clsx from "clsx";
 import ButtonSelector from "@components/Widgets/ButtonSelector";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { setPath } from "@util/pages";
+import { setPath } from "@util/views";
 import { SyncContext } from "@components/Sync";
 import Button from "@mui/material/Button";
 import { Store } from "pullstate";

@@ -1,5 +1,5 @@
 import { createContext, useMemo } from "react";
-import { setPath } from "@util/pages";
+import { setPath } from "@util/views";
 import styles from "./Sync.module.scss";
 import { useStyles } from "@util/styles";
 import { useSyncFeature } from "@sync/sync";

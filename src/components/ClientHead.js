@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useTranslations } from "@util/translations";
-import { useCurrentPageTitle } from "@util/pages";
+import { useCurrentPageTitle } from "@util/views";
 
 export default function ClientHead() {
     const translations = useTranslations();

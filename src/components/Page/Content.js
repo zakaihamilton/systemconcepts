@@ -2,8 +2,8 @@ import { useRef, createContext, useState, useEffect } from "react";
 import styles from "./Content.module.scss";
 import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
-import { useActivePages, useParentParams } from "@util/pages";
-import pages from "@data/pages";
+import { useActivePages, useParentParams } from "@util/views";
+import pages from "@data/views";
 
 export const ContentSize = createContext();
 

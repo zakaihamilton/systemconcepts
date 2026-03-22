@@ -2,7 +2,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useTranslations } from "@util/translations";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { Store } from "pullstate";
-import { useActivePages, getPagesFromHash, usePages } from "@util/pages";
+import { useActivePages, getPagesFromHash, usePages } from "@util/views";
 import { MainStore } from "@components/Main";
 import storage from "@util/storage";
 import { SYNC_CONFIG } from "@sync/config";

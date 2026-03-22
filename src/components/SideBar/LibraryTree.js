@@ -9,13 +9,13 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import ClearIcon from "@mui/icons-material/Clear";
 
 
-import TreeItem from "@pages/Library/TreeItem";
-import { LibraryIcons, LibraryTagKeys } from "@pages/Library/Icons";
-import { LibraryStore } from "@pages/Library/Store";
+import TreeItem from "@views/Library/TreeItem";
+import { LibraryIcons, LibraryTagKeys } from "@views/Library/Icons";
+import { LibraryStore } from "@views/Library/Store";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { makePath } from "@util/path";
 import storage from "@util/storage";
-import { setPath, usePathItems } from "@util/pages";
+import { setPath, usePathItems } from "@util/views";
 import { SyncActiveStore } from "@sync/syncState";
 import { useTranslations } from "@util/translations";
 import styles from "./LibraryTree.module.scss";
