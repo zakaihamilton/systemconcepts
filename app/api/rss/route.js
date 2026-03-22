@@ -4,6 +4,8 @@ import pako from "pako";
 
 export const dynamic = "force-dynamic";
 
+const BUNDLE_PATH = "sync/bundle.json";
+
 function escapeXml(unsafe) {
     if (!unsafe) return "";
     return unsafe.replace(/[<>&'"]/g, (c) => {
@@ -24,8 +26,7 @@ export async function GET(request) {
         const group = searchParams.get('group');
         const count = parseInt(searchParams.get('count') || '50', 10);
 
-        let path = "sync/bundle.json";
-        const fileData = await downloadData({ path, binary: true });
+        const fileData = await downloadData({ path: BUNDLE_PATH, binary: true });
 
         let jsonStr;
         try {
