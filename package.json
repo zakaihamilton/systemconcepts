@@ -11,7 +11,7 @@
     "full-start": "next build && next start"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.975.0",
+    "@aws-sdk/client-s3": "^3.1014.0",
     "@aws-sdk/s3-request-presigner": "^3.986.0",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/cache": "^11.14.0",
@@ -19,28 +19,28 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/dseg7": "^4.5.4",
-    "@fontsource/roboto": "^5.1.1",
+    "@fontsource/roboto": "^5.2.10",
     "@isomorphic-git/lightning-fs": "^4.6.0",
-    "@mui/icons-material": "^7.3.6",
-    "@mui/lab": "^7.0.1-beta.20",
-    "@mui/material": "^7.3.6",
-    "@simplewebauthn/browser": "^13.2.2",
-    "@simplewebauthn/server": "^13.2.2",
-    "@vercel/analytics": "^1.4.1",
-    "@vercel/speed-insights": "^1.1.0",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/lab": "^7.0.1-beta.23",
+    "@mui/material": "^7.3.9",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "base64-arraybuffer-es6": "^3.1.0",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "gmail-send": "^1.8.14",
     "js-base64": "^3.7.8",
     "js-cookie": "^3.0.5",
     "jszip": "^3.10.1",
-    "mongodb": "^6.21.0",
+    "mongodb": "^7.1.0",
     "next": "16.2.1",
-    "nodemailer": "^6.10.1",
-    "p-limit": "^7.2.0",
+    "nodemailer": "^8.0.3",
+    "p-limit": "^7.3.0",
     "pako": "^2.1.0",
-    "playwright": "^1.57.0",
+    "playwright": "^1.58.2",
     "pullstate": "^1.25.0",
     "react": "19.2.4",
     "react-color": "^2.19.3",
@@ -50,15 +50,15 @@
     "stylis": "^4.3.5",
     "stylis-plugin-rtl": "^2.1.1",
     "use-dark-mode": "^2.3.1",
-    "uuid": "^11.1.0",
-    "webpack": "^5.97.1"
+    "uuid": "^13.0.0",
+    "webpack": "^5.105.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.4.8",
     "typescript": "^5.9.3",
     "yarn-upgrade-all": "^0.7.4"
   },
   "optionalDependencies": {
-    "@next/swc-linux-x64-gnu": "^16.1.1"
+    "@next/swc-linux-x64-gnu": "^16.2.1"
   }
 }
