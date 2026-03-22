@@ -1,38 +1,35 @@
+import { NextResponse } from "next/server";
 import { handleRequest, findRecord } from "@util/mongo";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import parseCookie from "@util/cookie";
 import { getSafeError } from "@util/safeError";
 
+export const dynamic = "force-dynamic";
+
 const collectionName = "users";
 
-export default async function USERS_API(req, res) {
+async function handleUsers(request) {
     try {
-        const { headers } = req || {};
-        const { cookie, id: queryId } = headers || {};
-        const cookies = parseCookie(cookie);
+        const cookieHeader = request.headers.get("cookie") || "";
+        const cookies = parseCookie(cookieHeader);
         const { id, hash } = cookies || {};
-        if (!id || !hash) {
-            throw "ACCESS_DENIED";
-        }
+        const queryId = request.headers.get("id");
+
+        if (!id || !hash) throw "ACCESS_DENIED";
+
         const user = await login({ id, hash, api: "users" });
+
+        let body = null;
+        try { body = await request.json(); } catch { body = null; }
+
         if (!roleAuth(user && user.role, "admin")) {
-            if (!queryId) {
-                throw "ACCESS_DENIED";
-            }
+            if (!queryId) throw "ACCESS_DENIED";
             const parsedId = decodeURIComponent(queryId);
-            if (parsedId !== id) {
-                throw "ACCESS_DENIED";
-            }
-            if (req.method === "PUT") {
-                const body = req.body;
+            if (parsedId !== id) throw "ACCESS_DENIED";
+            if (request.method === "PUT") {
                 const record = await findRecord({ query: { id: parsedId }, collectionName });
-                if (record.id !== body.id || record.role !== body.role) {
-                    throw "ACCESS_DENIED";
-                }
-                // SENTINEL: Restore sensitive fields from DB record to prevent Mass Assignment
-                // This ensures a user cannot overwrite their password, role, or other critical fields
-                // by simply including them in the PUT body.
+                if (record.id !== body.id || record.role !== body.role) throw "ACCESS_DENIED";
                 body.hash = record.hash;
                 body.salt = record.salt;
                 body.role = record.role;
@@ -42,27 +39,31 @@ export default async function USERS_API(req, res) {
                 body.date = record.date;
                 body.utc = record.utc;
             }
-        }
-        else if (req.method === "PUT") {
-            const body = req.body;
+        } else if (request.method === "PUT") {
             const parsedId = queryId ? decodeURIComponent(queryId) : (body && body.id);
             const record = parsedId ? await findRecord({ query: { id: parsedId }, collectionName }) : null;
             if (record) {
                 if (body.password) {
-                    const { hash } = require("bcryptjs");
-                    body.hash = await hash(body.password, 10);
+                    const { hash: bcryptHash } = require("bcryptjs");
+                    body.hash = await bcryptHash(body.password, 10);
                     delete body.password;
-                }
-                else {
+                } else {
                     body.hash = record.hash;
                 }
                 body.salt = record.salt;
                 body.date = record.date;
                 body.utc = record.utc;
-                // Admins trigger this branch, so we DO NOT restore body.role from record.role,
-                // allowing the Admin's change to persist.
             }
         }
+
+        const url = new URL(request.url);
+        const req = {
+            method: request.method,
+            headers: Object.fromEntries(request.headers.entries()),
+            body,
+            query: Object.fromEntries(url.searchParams.entries()),
+        };
+
         const result = await handleRequest({ collectionName, req });
         const sanitizeUser = (user) => {
             if (!user) return user;
@@ -70,10 +71,13 @@ export default async function USERS_API(req, res) {
             return rest;
         };
         const sanitizedResult = Array.isArray(result) ? result.map(sanitizeUser) : sanitizeUser(result);
-        res.status(200).json(sanitizedResult);
-    }
-    catch (err) {
+        return NextResponse.json(sanitizedResult);
+    } catch (err) {
         console.error("users error: ", err);
-        res.status(403).json({ err: getSafeError(err) });
+        return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
     }
 }
+
+export async function GET(request) { return handleUsers(request); }
+export async function PUT(request) { return handleUsers(request); }
+export async function DELETE(request) { return handleUsers(request); }

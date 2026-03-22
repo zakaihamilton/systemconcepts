@@ -1,17 +1,17 @@
-import Head from "next/head";
+"use client";
+
+import { useEffect } from "react";
 import { useTranslations } from "@util/translations";
 import { useCurrentPageTitle } from "@util/pages";
 
 export default function HeadComponent() {
     const translations = useTranslations();
-    let title = translations.APP_NAME;
     const pageTitle = useCurrentPageTitle();
-    if (pageTitle) {
-        title += " - " + pageTitle;
-    }
 
-    return <Head>
-        <title>{title}</title>
-        <link rel="icon" type="image/png" href="/icon.png" />
-    </Head>;
+    useEffect(() => {
+        const appName = translations.APP_NAME || "";
+        document.title = pageTitle ? `${appName} - ${pageTitle}` : appName;
+    }, [translations.APP_NAME, pageTitle]);
+
+    return null;
 }

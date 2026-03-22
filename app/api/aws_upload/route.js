@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getS3, validatePathAccess } from "@util/aws";
@@ -6,18 +7,20 @@ import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
 
-export default async function AWS_UPLOAD_API(req, res) {
+export const dynamic = "force-dynamic";
+
+export async function GET(request) {
     try {
-        const { headers } = req || {};
-        const { cookie } = headers || {};
-        const cookies = parseCookie(cookie);
+        const cookieHeader = request.headers.get("cookie") || "";
+        const cookies = parseCookie(cookieHeader);
         const { id, hash } = cookies || {};
         if (!id || !hash) {
             console.log(`[AWS UPLOAD API] ACCESS DENIED: No cookie found`);
             throw "ACCESS_DENIED";
         }
 
-        let path = req.query.path || "";
+        const url = new URL(request.url);
+        let path = url.searchParams.get("path") || "";
 
         if (!path) {
             console.log(`[AWS UPLOAD API] INVALID_PATH: No path provided`);
@@ -40,9 +43,9 @@ export default async function AWS_UPLOAD_API(req, res) {
             allowed = true;
         } else if (isStudent) {
             const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`) || checkPath === `personal/${user.id}`;
-             if (isPersonalPath) {
+            if (isPersonalPath) {
                 allowed = true;
-             }
+            }
         }
 
         if (!allowed) {
@@ -50,22 +53,20 @@ export default async function AWS_UPLOAD_API(req, res) {
             throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
         }
 
-        // Validate path traversal
         validatePathAccess(path);
 
         const s3 = await getS3({});
-        // Key should be relative to bucket root.
-        const key = path.startsWith('/') ? path.substring(1) : path;
+        const key = path.startsWith("/") ? path.substring(1) : path;
 
         const command = new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET,
             Key: key,
         });
 
-        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        res.status(200).json({ url });
+        const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        return NextResponse.json({ url: uploadUrl });
     } catch (err) {
         console.error("aws_upload error: ", err);
-        res.status(403).json({ err: getSafeError(err) });
+        return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
     }
 }

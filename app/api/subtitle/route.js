@@ -1,36 +1,37 @@
+import { NextResponse } from "next/server";
 import { downloadData, validatePathAccess } from "@util/aws";
 import { login } from "@util/login";
 import parseCookie from "@util/cookie";
 import { roleAuth } from "@util/roles";
 import { error } from "@util/logger";
 
+export const dynamic = "force-dynamic";
+
 const component = "subtitle";
 
-export default async function SUBTITLE_API(req, res) {
+export async function GET(request) {
     try {
-        const { query, headers } = req;
-        const { path } = query;
-        const { cookie } = headers || {};
+        const url = new URL(request.url);
+        const path = url.searchParams.get("path");
+        const cookieHeader = request.headers.get("cookie") || "";
 
-        if (!cookie) throw "ACCESS_DENIED";
-        const cookies = parseCookie(cookie);
+        if (!cookieHeader) throw "ACCESS_DENIED";
+        const cookies = parseCookie(cookieHeader);
         const { id, hash } = cookies || {};
         const user = await login({ id, hash, api: "subtitle" });
         if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
         let decodedPath = decodeURIComponent(path);
-
-        // SENTINEL: Validate path to prevent path traversal vulnerability
         validatePathAccess(decodedPath);
 
-        // Ensure we are reading from DigitalOcean (no wasabi flag)
         const data = await downloadData({ path: decodedPath });
 
-        res.setHeader("Content-Type", "text/vtt");
-        res.status(200).send(data);
-
+        return new NextResponse(data, {
+            status: 200,
+            headers: { "Content-Type": "text/vtt" }
+        });
     } catch (err) {
         error({ component, error: "Subtitle fetch error", err });
-        res.status(404).end();
+        return new NextResponse(null, { status: 404 });
     }
 }
