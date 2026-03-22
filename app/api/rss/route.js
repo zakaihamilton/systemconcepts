@@ -129,7 +129,7 @@ export async function GET(request) {
         }));
 
         const maxDate = sessions.length > 0 ? new Date(Math.max(...sessions.map(s => new Date(s.date)))).toUTCString() : new Date().toUTCString();
-        const selfUrl = `${baseUrl}/api/rss?${searchParams.toString()}`;
+        const selfUrl = request.url;
 
         const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -153,20 +153,26 @@ export async function GET(request) {
   <itunes:category text="Society &amp; Culture">
     <itunes:category text="Philosophy"/>
   </itunes:category>
-  <itunes:category text="Religion &amp; Spirituality"/>
+  <itunes:category text="Religion &amp; Spirituality">
+    <itunes:category text="Spirituality"/>
+  </itunes:category>
   ${rssItems.join('')}
 </channel>
 </rss>`;
 
         const etag = crypto.createHash('md5').update(rss).digest('hex');
+        const buffer = Buffer.from(rss, 'utf-8');
 
-        return new Response(rss, {
+        return new Response(buffer, {
             status: 200,
             headers: {
                 'Content-Type': 'application/rss+xml; charset=utf-8',
-                'Content-Length': Buffer.byteLength(rss).toString(),
+                'Content-Length': buffer.length.toString(),
                 'ETag': `"${etag}"`,
-                'Last-Modified': maxDate
+                'Last-Modified': maxDate,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             },
         });
     } catch (err) {
