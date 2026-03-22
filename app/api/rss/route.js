@@ -71,6 +71,24 @@ export async function GET(request) {
 
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
+        const getSignedUrlForPath = async (path) => {
+            if (!path) return null;
+            const s3Key = path.startsWith("/") ? path.substring(1) : path;
+            let client, bucket;
+            if (s3Key.startsWith("wasabi/")) {
+                const wasabi = await getWasabi();
+                client = wasabi.client;
+                bucket = wasabi.bucket;
+            } else {
+                client = await getS3({});
+                bucket = process.env.AWS_BUCKET;
+            }
+            const key = s3Key.replace(/^wasabi\//, "");
+            const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+            let url = await getSignedUrl(client, command, { expiresIn: 86400 });
+            return url.replace(/ /g, "%20");
+        };
+
         const rssItems = await Promise.all(sessions.map(async (session) => {
             const link = `${baseUrl}/#sessions/${encodeURIComponent(`session?group=${session.group}&year=${session.year}&date=${session.date}&name=${session.name}`)}`;
             const date = new Date(session.date).toUTCString();
@@ -88,24 +106,13 @@ export async function GET(request) {
             const media = session.audio || session.video;
             let enclosure = "";
             if (media && media.path) {
-                const s3Key = media.path.startsWith("/") ? media.path.substring(1) : media.path;
-                let client, bucket;
-                if (s3Key.startsWith("wasabi/")) {
-                    const wasabi = await getWasabi();
-                    client = wasabi.client;
-                    bucket = wasabi.bucket;
-                } else {
-                    client = await getS3({});
-                    bucket = process.env.AWS_BUCKET;
-                }
-                const key = s3Key.replace(/^wasabi\//, "");
-                const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-                let signedUrl = await getSignedUrl(client, command, { expiresIn: 86400 });
-                // Fix: Encode spaces in media URLs
-                signedUrl = signedUrl.replace(/ /g, "%20");
-                const type = s3Key.endsWith(".mp4") ? "video/mp4" : (s3Key.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
+                const signedUrl = await getSignedUrlForPath(media.path);
+                const type = media.path.endsWith(".mp4") ? "video/mp4" : (media.path.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
                 enclosure = `<enclosure url="${escapeXml(signedUrl)}" length="${media.size || 0}" type="${type}" />`;
             }
+
+            const thumbnail = await getSignedUrlForPath(session.image?.path);
+            const itemImage = thumbnail ? `<itunes:image href="${escapeXml(thumbnail)}" />` : "";
 
             const author = "info@systemconcepts.app (System Concepts)";
             const itunesAuthor = "System Concepts";
@@ -120,6 +127,7 @@ export async function GET(request) {
       <guid>${escapeXml(link)}</guid>
       <author>${escapeXml(author)}</author>
       <itunes:author>${escapeXml(itunesAuthor)}</itunes:author>
+      ${itemImage}
       ${categories}
       ${enclosure}
       <itunes:duration>${escapeXml(durationText)}</itunes:duration>
