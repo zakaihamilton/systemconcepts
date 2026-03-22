@@ -129,12 +129,13 @@ export async function GET(request) {
         }));
 
         const maxDate = sessions.length > 0 ? new Date(Math.max(...sessions.map(s => new Date(s.date)))).toUTCString() : new Date().toUTCString();
+        const selfUrl = `${baseUrl}/api/rss?${searchParams.toString()}`;
 
         const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
   <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
-  <atom:link href="${escapeXml(request.url)}" rel="self" type="application/rss+xml" />
+  <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />
   <description>Latest sessions from System Concepts</description>
   <link>${escapeXml(baseUrl)}</link>
   <language>en-us</language>
@@ -149,7 +150,9 @@ export async function GET(request) {
   <itunes:category text="Education">
     <itunes:category text="Self-Improvement"/>
   </itunes:category>
-  <itunes:category text="Philosophy"/>
+  <itunes:category text="Society &amp; Culture">
+    <itunes:category text="Philosophy"/>
+  </itunes:category>
   <itunes:category text="Religion &amp; Spirituality"/>
   ${rssItems.join('')}
 </channel>
@@ -157,7 +160,7 @@ export async function GET(request) {
 
         const etag = crypto.createHash('md5').update(rss).digest('hex');
 
-        return new NextResponse(rss, {
+        return new Response(rss, {
             status: 200,
             headers: {
                 'Content-Type': 'application/rss+xml; charset=utf-8',
