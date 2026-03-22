@@ -52,5 +52,10 @@
       "semicolons": "always",
       "lineEnding": "lf"
     }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true
+    }
   }
 }
