@@ -51,11 +51,11 @@ export async function GET(request) {
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
         const rssItems = sessions.map(session => {
-            const link = `${baseUrl}/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+            const link = `${baseUrl}/#sessions/${encodeURIComponent(`session?group=${session.group}&year=${session.year}&date=${session.date}&name=${session.name}`)}`;
             const date = new Date(session.date).toUTCString();
             const durationText = session.duration > 1 ? formatDuration(session.duration * 1000, true) : "";
             const categories = (session.tags || []).map(tag => `<category>${escapeXml(tag)}</category>`).join('');
-            
+
             let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
             if (durationText) {
                 description += `\nDuration: ${escapeXml(durationText)}`;
@@ -66,7 +66,7 @@ export async function GET(request) {
 
             return `
     <item>
-      <title>[${escapeXml(session.group)}] ${escapeXml(session.name)}</title>
+      <title>[${escapeXml(session.group?.toUpperCase()[0] + session.group?.slice(1))}] ${escapeXml(session.date + " " + session.name)}</title>
       <link>${escapeXml(link)}</link>
       <description>${escapeXml(description)}</description>
       <pubDate>${date}</pubDate>
