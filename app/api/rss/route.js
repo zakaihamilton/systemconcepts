@@ -46,8 +46,10 @@ export async function GET(request) {
         sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
         sessions = sessions.slice(0, count);
 
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.org';
+
         const rssItems = sessions.map(session => {
-            const link = `https://systemconcepts.org/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+            const link = `${baseUrl}/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
             const date = new Date(session.date).toUTCString();
             return `
     <item>
@@ -63,7 +65,7 @@ export async function GET(request) {
 <channel>
   <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
   <description>Latest sessions from System Concepts</description>
-  <link>https://systemconcepts.org</link>
+  <link>${escapeXml(baseUrl)}</link>
   ${rssItems}
 </channel>
 </rss>`;
