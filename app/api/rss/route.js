@@ -76,9 +76,10 @@ export async function GET(request) {
         }).join('');
 
         const rss = `<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
+  <atom:link href="${escapeXml(request.url)}" rel="self" type="application/rss+xml" />
   <description>Latest sessions from System Concepts</description>
   <link>${escapeXml(baseUrl)}</link>
   ${rssItems}
