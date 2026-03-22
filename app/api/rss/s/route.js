@@ -45,10 +45,26 @@ async function handleRequest(request) {
                 const headCommand = new HeadObjectCommand({ Bucket: bucket, Key: s3Key });
                 const headData = await client.send(headCommand);
                 
+                // Determine the correct Content-Type, prioritizing the extension hint from 'e'
+                const extHint = (searchParams.get("e") || "").toLowerCase();
+                let contentType = headData.ContentType || "application/octet-stream";
+                
+                if (extHint.endsWith(".m4a")) {
+                    contentType = "audio/x-m4a";
+                } else if (extHint.endsWith(".mp4")) {
+                    contentType = "video/mp4";
+                } else if (extHint.endsWith(".mp3")) {
+                    contentType = "audio/mpeg";
+                } else if (extHint.endsWith(".vtt")) {
+                    contentType = "text/vtt";
+                } else if (extHint.endsWith(".txt")) {
+                    contentType = "text/plain";
+                }
+
                 return new NextResponse(null, {
                     status: 200,
                     headers: {
-                        "Content-Type": headData.ContentType || "application/octet-stream",
+                        "Content-Type": contentType,
                         "Content-Length": headData.ContentLength?.toString() || "0",
                         "Accept-Ranges": "bytes",
                         "Last-Modified": headData.LastModified?.toUTCString() || "",
