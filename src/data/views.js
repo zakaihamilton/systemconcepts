@@ -46,6 +46,9 @@ import { getImageSection } from "@views/Image/Section";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 const Account = dynamic(() => import("@views/Account"), { loading: () => <PageLoad /> });
 
+import PodcastsIcon from "@mui/icons-material/Podcasts";
+const Podcast = dynamic(() => import("@views/Podcast"), { loading: () => <PageLoad /> });
+
 import CreateIcon from "@mui/icons-material/Create";
 const SignUp = dynamic(() => import("@views/SignUp"), { loading: () => <PageLoad /> });
 
@@ -200,6 +203,14 @@ export default [
         Component: Account,
         divider: true,
         sidebar: true
+    },
+    {
+        id: "podcast",
+        name: "PODCAST",
+        Icon: PodcastsIcon,
+        Component: Podcast,
+        sidebar: true,
+        visible: () => Cookies.get("id") && Cookies.get("hash")
     },
     {
         id: "signup",

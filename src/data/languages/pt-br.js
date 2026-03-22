@@ -470,6 +470,10 @@ export default {
             "value": "Entrar"
         },
         {
+            "id": "PODCAST",
+            "value": "Podcast"
+        },
+        {
             "id": "PODCAST_FEED",
             "value": "Podcast Feed"
         },

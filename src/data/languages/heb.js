@@ -470,6 +470,10 @@ export default {
             "value": "התחברות"
         },
         {
+            "id": "PODCAST",
+            "value": "פודקאסט"
+        },
+        {
             "id": "PODCAST_FEED",
             "value": "פיד פודקאסט"
         },
