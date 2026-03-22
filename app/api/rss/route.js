@@ -71,41 +71,18 @@ export async function GET(request) {
 
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
-        // Custom encoder that preserves URL structure but strictly percent-encodes paths
-        const encodeUrlPathStr = (urlStr) => {
-            if (!urlStr) return "";
-            try {
-                const url = new URL(urlStr);
-                // Split the pathname by '/' and encode each segment individually
-                url.pathname = url.pathname.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/');
-                return url.toString();
-            } catch {
-                return urlStr;
-            }
-        };
-
-        const getSignedUrlForPath = async (path) => {
+        // Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/media
+        const getMediaProxyUrl = (path) => {
             if (!path) return null;
-            const s3Key = path.startsWith("/") ? path.substring(1) : path;
-            let client, bucket;
-            if (s3Key.startsWith("wasabi/")) {
-                const wasabi = await getWasabi();
-                client = wasabi.client;
-                bucket = wasabi.bucket;
-            } else {
-                client = await getS3({});
-                bucket = process.env.AWS_BUCKET;
-            }
-            const key = s3Key.replace(/^wasabi\//, "");
-            const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-            let signedStr = await getSignedUrl(client, command, { expiresIn: 86400 });
-            return encodeUrlPathStr(signedStr);
+            let cleanPath = path.startsWith("/") ? path.substring(1) : path;
+            cleanPath = cleanPath.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/');
+            return `${baseUrl}/api/media/${cleanPath}`;
         };
 
         const rssItems = await Promise.all(sessions.map(async (session) => {
-            // Strictly encode the query part of the app link
+            // Do not URL-encode the ?, &, and = characters in the local app link
             const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
-            const link = `${baseUrl}/#sessions/${encodeURIComponent(sessionQuery)}`;
+            const link = `${baseUrl}/#sessions/${sessionQuery}`;
             
             const date = new Date(session.date).toUTCString();
             // Apple recommends integer seconds
@@ -123,12 +100,12 @@ export async function GET(request) {
             const media = session.audio || session.video;
             let enclosure = "";
             if (media && media.path) {
-                const signedUrl = await getSignedUrlForPath(media.path);
+                const proxyUrl = getMediaProxyUrl(media.path);
                 const type = media.path.endsWith(".mp4") ? "video/mp4" : (media.path.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
-                enclosure = `<enclosure url="${escapeXml(signedUrl)}" length="${media.size || 0}" type="${type}" />`;
+                enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
             }
 
-            const thumbnail = await getSignedUrlForPath(session.image?.path);
+            const thumbnail = getMediaProxyUrl(session.image?.path);
             const itemImage = `<itunes:image href="${escapeXml(thumbnail || (baseUrl + "/images/rss-cover.jpg"))}" />`;
 
             // Transcript support
@@ -141,7 +118,7 @@ export async function GET(request) {
                 transcriptType = "text/plain";
             }
 
-            const transcriptUrl = await getSignedUrlForPath(transcriptPath);
+            const transcriptUrl = getMediaProxyUrl(transcriptPath);
             if (transcriptUrl) {
                 transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
             }
