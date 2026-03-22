@@ -71,13 +71,14 @@ export async function GET(request) {
 
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
-        // Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/stream
-        const getStreamProxyUrl = (path) => {
+        // Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/rss/s
+        const getSProxyUrl = (path) => {
             if (!path) return null;
             let cleanPath = path.startsWith("/") ? path.substring(1) : path;
             const b64 = Buffer.from(cleanPath).toString('base64url');
             const ext = path.split('.').pop() || "bin";
-            return `${baseUrl}/api/stream/${b64}.${ext}`;
+            // Use query parameters for stability, adding the extension at the end for validators
+            return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
         };
 
         const rssItems = await Promise.all(sessions.map(async (session) => {
@@ -102,12 +103,12 @@ export async function GET(request) {
             const media = session.audio || session.video;
             let enclosure = "";
             if (media && media.path) {
-                const proxyUrl = getStreamProxyUrl(media.path);
+                const proxyUrl = getSProxyUrl(media.path);
                 const type = media.path.endsWith(".mp4") ? "video/mp4" : (media.path.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
                 enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
             }
 
-            const thumbnail = getStreamProxyUrl(session.image?.path);
+            const thumbnail = getSProxyUrl(session.image?.path);
             const itemImage = `<itunes:image href="${escapeXml(thumbnail || (baseUrl + "/images/rss-cover.jpg"))}" />`;
 
             // Transcript support
@@ -120,7 +121,7 @@ export async function GET(request) {
                 transcriptType = "text/plain";
             }
 
-            const transcriptUrl = getStreamProxyUrl(transcriptPath);
+            const transcriptUrl = getSProxyUrl(transcriptPath);
             if (transcriptUrl) {
                 transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
             }
