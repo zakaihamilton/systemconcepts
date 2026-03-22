@@ -2,6 +2,7 @@ import { useMemo, useCallback } from "react";
 import { useTranslations } from "@util/translations";
 import styles from "./HistoryView.module.scss";
 import { useRecentHistory } from "@util/history";
+import { useLanguage } from "@util/language";
 import { useSessions, SessionsStore } from "@util/sessions";
 import { PlayerStore } from "@pages/Player";
 import { addPath } from "@util/pages";
@@ -14,6 +15,7 @@ import TrackCard from "@pages/Schedule/TracksView/Card";
 
 export default function HistoryView() {
     const translations = useTranslations();
+    const language = useLanguage();
     const [history, , , , removeFromHistory] = useRecentHistory();
     const { session } = PlayerStore.useState();
 
@@ -112,7 +114,7 @@ export default function HistoryView() {
 
                             return (
                                 <div
-                                    key={item.key || `${item.group}-${item.date}-${item.name}-${item.timestamp}`}
+                                    key={`${item.group}-${item.date}-${item.name}-${item.timestamp}`}
                                     className={styles.timelineEntry}
                                     style={{ "--dot-color": item.color || "var(--neutral-400)" }}
                                 >
@@ -120,7 +122,7 @@ export default function HistoryView() {
                                         <div className={styles.timelineInfo}>
                                             <div className={styles.timelineDot} />
                                             <span className={styles.timelineTime}>
-                                                {item.timestamp ? new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                                                {item.timestamp ? new Date(item.timestamp).toLocaleString(language, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : ""}
                                             </span>
                                         </div>
                                         <div className={styles.actions}>
