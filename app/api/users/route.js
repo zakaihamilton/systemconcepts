@@ -67,8 +67,9 @@ async function handleUsers(request) {
         const result = await handleRequest({ collectionName, req });
         const sanitizeUser = (user) => {
             if (!user) return user;
-            const { hash: _hash, salt: _salt, resetToken: _resetToken, resetTokenExpiry: _resetTokenExpiry, credentials: _credentials, ...rest } = user;
-            return rest;
+            const { hash, salt: _salt, resetToken: _resetToken, resetTokenExpiry: _resetTokenExpiry, credentials: _credentials, ...rest } = user;
+            const rssToken = require("crypto").createHash('sha256').update(user.id + hash + (process.env.RSS_SECRET || process.env.AWS_SECRET)).digest('hex');
+            return { ...rest, rssToken };
         };
         const sanitizedResult = Array.isArray(result) ? result.map(sanitizeUser) : sanitizeUser(result);
         return NextResponse.json(sanitizedResult);

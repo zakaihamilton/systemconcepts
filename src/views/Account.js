@@ -41,9 +41,24 @@ export default function Account({ redirect }) {
     const [inProgress, setProgress] = useState(false);
     const [passkeys, setPasskeys] = useState([]);
     const [createPasskey, setCreatePasskey] = useState(false);
+    const [user, setUser] = useState(null);
 
     const userId = Cookies.get("id");
     const isSignedIn = userId && Cookies.get("hash");
+
+    useEffect(() => {
+        if (isSignedIn) {
+            fetchJSON("/api/users", {
+                headers: {
+                    id: userId
+                }
+            })
+                .then(data => {
+                    setUser(data);
+                })
+                .catch(console.error);
+        }
+    }, [isSignedIn, userId]);
 
     const changeRemember = event => setRemember(event.target.value);
     const changeCreatePasskey = event => setCreatePasskey(event.target.checked);
@@ -367,6 +382,28 @@ export default function Account({ redirect }) {
                                 ))}
                             </List>
                         </Grid>}
+                        {isSignedIn && user && !user.err && user.role !== "visitor" && user.rssToken && (
+                            <Grid size={12}>
+                                <Typography className={styles.podcastTitle}>{translations.PODCAST_FEED}</Typography>
+                                <Typography className={styles.podcastDescription}>
+                                    {translations.PODCAST_FEED_DESCRIPTION}
+                                </Typography>
+                                <div className={styles.podcastUrlContainer}>
+                                    <div className={styles.podcastUrl}>
+                                        {window.location.origin}/api/rss?id={userId}&token={user.rssToken}
+                                    </div>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${window.location.origin}/api/rss?id=${userId}&token=${user.rssToken}`);
+                                        }}
+                                    >
+                                        {translations.COPY_URL}
+                                    </Button>
+                                </div>
+                            </Grid>
+                        )}
                         <Grid size={12}>
                             <div className={styles.links}>
                                 {!isSignedIn && (

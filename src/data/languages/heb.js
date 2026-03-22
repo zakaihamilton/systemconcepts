@@ -470,6 +470,18 @@ export default {
             "value": "התחברות"
         },
         {
+            "id": "PODCAST_FEED",
+            "value": "פיד פודקאסט"
+        },
+        {
+            "id": "PODCAST_FEED_DESCRIPTION",
+            "value": "השתמש בכתובת זו כדי להירשם לפודקאסט באפליקציה המועדפת עליך."
+        },
+        {
+            "id": "COPY_URL",
+            "value": "העתק כתובת"
+        },
+        {
             "id": "SIGN_OUT",
             "value": "ניתוק"
         },

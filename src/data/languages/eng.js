@@ -470,6 +470,18 @@ export default {
             "value": "Sign In"
         },
         {
+            "id": "PODCAST_FEED",
+            "value": "Podcast Feed"
+        },
+        {
+            "id": "PODCAST_FEED_DESCRIPTION",
+            "value": "Use this URL to subscribe to the podcast in your favorite app."
+        },
+        {
+            "id": "COPY_URL",
+            "value": "Copy URL"
+        },
+        {
             "id": "SIGN_UP",
             "value": "Sign Up"
         },
