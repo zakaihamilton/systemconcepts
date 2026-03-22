@@ -135,6 +135,12 @@ export async function GET(request) {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
 <channel>
   <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
+  <itunes:image href="${baseUrl}/images/rss-cover.jpg" />
+  <image>
+    <url>${baseUrl}/images/rss-cover.jpg</url>
+    <title>System Concepts</title>
+    <link>${baseUrl}</link>
+  </image>
   <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />
   <description>Latest sessions from System Concepts</description>
   <link>${escapeXml(baseUrl)}</link>
