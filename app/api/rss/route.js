@@ -71,6 +71,19 @@ export async function GET(request) {
 
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
+        // Custom encoder that preserves URL structure but strictly percent-encodes paths
+        const encodeUrlPathStr = (urlStr) => {
+            if (!urlStr) return "";
+            try {
+                const url = new URL(urlStr);
+                // Split the pathname by '/' and encode each segment individually
+                url.pathname = url.pathname.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/');
+                return url.toString();
+            } catch {
+                return urlStr;
+            }
+        };
+
         const getSignedUrlForPath = async (path) => {
             if (!path) return null;
             const s3Key = path.startsWith("/") ? path.substring(1) : path;
@@ -85,19 +98,23 @@ export async function GET(request) {
             }
             const key = s3Key.replace(/^wasabi\//, "");
             const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-            let url = await getSignedUrl(client, command, { expiresIn: 86400 });
-            return url.replace(/ /g, "%20");
+            let signedStr = await getSignedUrl(client, command, { expiresIn: 86400 });
+            return encodeUrlPathStr(signedStr);
         };
 
         const rssItems = await Promise.all(sessions.map(async (session) => {
-            const link = `${baseUrl}/#sessions/${encodeURIComponent(`session?group=${session.group}&year=${session.year}&date=${session.date}&name=${session.name}`)}`;
-            const date = new Date(session.date).toUTCString();
-            const durationText = session.duration > 1 ? formatDuration(session.duration * 1000, true) : "";
-            const categories = (session.tags || []).map(tag => `<category>${escapeXml(tag)}</category>`).join('');
+            // Strictly encode the query part of the app link
+            const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+            const link = `${baseUrl}/#sessions/${encodeURIComponent(sessionQuery)}`;
             
+            const date = new Date(session.date).toUTCString();
+            // Apple recommends integer seconds
+            const durationSeconds = session.duration ? Math.round(session.duration) : 0;
+            const categories = (session.tags || []).map(tag => `<category>${escapeXml(tag)}</category>`).join('');
+
             let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
-            if (durationText) {
-                description += `\nDuration: ${escapeXml(durationText)}`;
+            if (durationSeconds > 0) {
+                description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
             }
             if (session.summaryText) {
                 description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
@@ -118,12 +135,12 @@ export async function GET(request) {
             let transcriptTag = "";
             let transcriptPath = session.subtitles?.path || session.transcriptPath;
             let transcriptType = transcriptPath?.endsWith(".vtt") ? "text/vtt" : "text/plain";
-            
+
             if (!transcriptPath && session.transcription) {
                 transcriptPath = `wasabi/${session.group}/${session.year}/${session.date} ${session.name}.txt`;
                 transcriptType = "text/plain";
             }
-            
+
             const transcriptUrl = await getSignedUrlForPath(transcriptPath);
             if (transcriptUrl) {
                 transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
@@ -146,9 +163,9 @@ export async function GET(request) {
       ${categories}
       ${enclosure}
       ${transcriptTag}
-      <itunes:duration>${escapeXml(durationText)}</itunes:duration>
+      <itunes:duration>${durationSeconds}</itunes:duration>
       <itunes:summary>${escapeXml(session.summaryText)}</itunes:summary>
-      <itunes:explicit>no</itunes:explicit>
+      <itunes:explicit>true</itunes:explicit>
     </item>`;
         }));
 
@@ -168,7 +185,7 @@ export async function GET(request) {
   <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />
   <description>Latest sessions from System Concepts</description>
   <link>${escapeXml(baseUrl)}</link>
-  <language>en-us</language>
+  <language>en</language>
   <copyright>Copyright © 2026 System Concepts</copyright>
   <itunes:author>System Concepts</itunes:author>
   <itunes:owner>
@@ -176,7 +193,7 @@ export async function GET(request) {
     <itunes:email>info@systemconcepts.app</itunes:email>
   </itunes:owner>
   <itunes:type>episodic</itunes:type>
-  <itunes:explicit>no</itunes:explicit>
+  <itunes:explicit>true</itunes:explicit>
   <itunes:category text="Education">
     <itunes:category text="Self-Improvement"/>
   </itunes:category>
