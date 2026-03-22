@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { downloadData } from "@util/aws";
+import { formatDuration } from "@util/string";
 import pako from "pako";
 
 export const dynamic = "force-dynamic";
 
-const BUNDLE_PATH = "sync/bundle.json";
+const BUNDLE_PATH = "sync/bundle.json.gz";
 
 function escapeXml(unsafe) {
     if (!unsafe) return "";
@@ -52,12 +53,25 @@ export async function GET(request) {
         const rssItems = sessions.map(session => {
             const link = `${baseUrl}/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
             const date = new Date(session.date).toUTCString();
+            const durationText = session.duration > 1 ? formatDuration(session.duration * 1000, true) : "";
+            const categories = (session.tags || []).map(tag => `<category>${escapeXml(tag)}</category>`).join('');
+            
+            let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
+            if (durationText) {
+                description += `\nDuration: ${escapeXml(durationText)}`;
+            }
+            if (session.summaryText) {
+                description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
+            }
+
             return `
     <item>
-      <title>${escapeXml(session.name)}</title>
+      <title>[${escapeXml(session.group)}] ${escapeXml(session.name)}</title>
       <link>${escapeXml(link)}</link>
+      <description>${escapeXml(description)}</description>
       <pubDate>${date}</pubDate>
       <guid>${escapeXml(link)}</guid>
+      ${categories}
     </item>`;
         }).join('');
 
