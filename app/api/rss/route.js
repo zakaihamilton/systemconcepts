@@ -22,14 +22,14 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
         const group = searchParams.get('group');
-        const count = parseInt(searchParams.get('count') || '50', 10);
+        const count = Math.max(0, parseInt(searchParams.get('count') || '50', 10));
 
         let path = "sync/bundle.json";
         const fileData = await downloadData({ path, binary: true });
 
         let jsonStr;
         try {
-            const decompressed = pako.inflate(fileData, { to: "string" });
+            const decompressed = pako.ungzip(fileData, { to: "string" });
             jsonStr = decompressed;
         } catch (_e) {
             jsonStr = Buffer.from(fileData).toString('utf-8');
