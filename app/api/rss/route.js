@@ -47,7 +47,7 @@ export async function GET(request) {
         sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
         sessions = sessions.slice(0, count);
 
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.org';
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
 
         const rssItems = sessions.map(session => {
             const link = `${baseUrl}/session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
