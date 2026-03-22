@@ -13,7 +13,7 @@ import { roleAuth } from "@util/roles";
 import EditTagsDialog from "./Library/EditTagsDialog";
 import EditContentDialog from "./Library/EditContentDialog";
 import Article from "./Library/Article";
-import styles from "./Library.module.scss";
+import styles from "./Library.module.css";
 import { registerToolbar } from "@components/Toolbar";
 
 const fileCache = new Map();

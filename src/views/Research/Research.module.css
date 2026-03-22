@@ -161,13 +161,13 @@
 
 @media print {
 
-    // Aggressively hide everything in the body except our print container
-    // This ensures Sidebar, Topbar, and any other Portals are hidden
+    /*  Aggressively hide everything in the body except our print container */
+    /*  This ensures Sidebar, Topbar, and any other Portals are hidden */
     :global(body > *:not(#print-root)) {
         display: none !important;
     }
 
-    // Override Article.module.scss which sets body to visibility: hidden
+    /*  Override Article.module.css which sets body to visibility: hidden */
     :global(html),
     :global(body) {
         visibility: visible !important;
@@ -182,7 +182,7 @@
         width: 100%;
         height: auto;
 
-        // Force Article components to flow naturally instead of stacking absolutely
+        /*  Force Article components to flow naturally instead of stacking absolutely */
         :global([class*="Article_root"]) {
             position: relative !important;
             top: auto !important;

@@ -1,8 +1,8 @@
 
 import Box from "@mui/material/Box";
 import Markdown from "./Markdown";
-import articleStyles from "../Article.module.scss";
-import styles from "./Content.module.scss";
+import articleStyles from "../Article.module.css";
+import styles from "./Content.module.css";
 
 export default function Content({ showMarkdown, search, currentParagraphIndex, selectedTag, processedContent, filteredParagraphs, highlight, disableGlossary }) {
     return (

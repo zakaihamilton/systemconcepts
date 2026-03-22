@@ -1,5 +1,5 @@
 import { useCallback, cloneElement, Children } from "react";
-import styles from "./Form.module.scss";
+import styles from "./Form.module.css";
 import Progress from "./Progress";
 
 function FormItem({ child, record, setRecord, validate }) {

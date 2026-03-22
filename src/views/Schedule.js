@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import styles from "./Schedule.module.scss";
+import styles from "./Schedule.module.css";
 import MonthView from "./Schedule/MonthView";
 import WeekView from "./Schedule/WeekView";
 import HistoryView from "./Schedule/HistoryView";

@@ -5,7 +5,7 @@ import { useTranslations } from "@util/translations";
 import { GroupsStore } from "@util/groups";
 import { requestSync } from "@sync/sync";
 import ColorPicker from "./Groups/ColorPicker";
-import styles from "./Groups.module.scss";
+import styles from "./Groups.module.css";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";

@@ -1,4 +1,4 @@
-import styles from "./Row.module.scss";
+import styles from "./Row.module.css";
 import clsx from "clsx";
 import { useDirection } from "@util/direction";
 import Link from "@mui/material/Link";

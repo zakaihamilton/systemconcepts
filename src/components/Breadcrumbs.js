@@ -4,7 +4,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import { Divider } from "@mui/material";
 import { MainStore } from "@components/Main";
-import styles from "./Breadcrumbs.module.scss";
+import styles from "./Breadcrumbs.module.css";
 import { useDeviceType } from "@util/styles";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";

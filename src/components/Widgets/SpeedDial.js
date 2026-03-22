@@ -3,7 +3,7 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import { MainStore } from "@components/Main";
-import styles from "./SpeedDial.module.scss";
+import styles from "./SpeedDial.module.css";
 import { useTranslations } from "@util/translations";
 
 export default function SpeedDialWidget({ visible = true, items }) {

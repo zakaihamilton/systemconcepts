@@ -4,7 +4,7 @@ import Tooltip from "@mui/material/Tooltip";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import styles from "./Zoom.module.scss";
+import styles from "./Zoom.module.css";
 import IconButton from "@mui/material/IconButton";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useTranslations } from "@util/translations";

@@ -3,7 +3,7 @@ import { useStyles } from "@util/styles";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import styles from "./Item.module.scss";
+import styles from "./Item.module.css";
 import Menu from "@widgets/Menu";
 import { Divider } from "@mui/material";
 import clsx from "clsx";

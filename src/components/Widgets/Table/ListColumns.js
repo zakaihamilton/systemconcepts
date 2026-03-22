@@ -1,4 +1,4 @@
-import styles from "./ListColumns.module.scss";
+import styles from "./ListColumns.module.css";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
 import Tooltip from "@mui/material/Tooltip";

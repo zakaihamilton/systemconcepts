@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
-import styles from "./Transcript.module.scss";
+import styles from "./Transcript.module.css";
 import { PlayerStore } from "../Player";
 
 import { useFetch } from "@util/fetch";

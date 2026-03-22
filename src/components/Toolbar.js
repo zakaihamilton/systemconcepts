@@ -6,7 +6,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@widgets/Menu";
 import { useEffect } from "react";
-import styles from "./Toolbar.module.scss";
+import styles from "./Toolbar.module.css";
 import { Store } from "pullstate";
 import Item from "./Toolbar/Item";
 import clsx from "clsx";

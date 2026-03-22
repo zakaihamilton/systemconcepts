@@ -23,7 +23,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import styles from "./BatchDialog.module.scss";
+import styles from "./BatchDialog.module.css";
 
 export default function BatchDialog({ open, onClose, tags, loadTags }) {
     const translations = useTranslations();

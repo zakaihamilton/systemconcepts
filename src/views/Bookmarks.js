@@ -9,7 +9,7 @@ import ItemMenu from "./Bookmarks/ItemMenu";
 import { MainStore } from "@components/Main";
 import { getPagesFromHash, usePages } from "@util/views";
 import Breadcrumbs from "@components/Breadcrumbs";
-import styles from "./Bookmarks.module.scss";
+import styles from "./Bookmarks.module.css";
 import { useLocalStorage } from "@util/store";
 
 export const BookmarksStoreDefaults = {

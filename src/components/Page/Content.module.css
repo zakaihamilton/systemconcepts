@@ -20,7 +20,7 @@
     min-width: 0;
 }
 
-// Only constrain width on large screens (4K, ultra-wide, etc.)
+/*  Only constrain width on large screens (4K, ultra-wide, etc.) */
 @media (min-width: 1700px) {
     .root {
         max-width: 1700px;

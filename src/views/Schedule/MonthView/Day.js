@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import styles from "./Day.module.scss";
+import styles from "./Day.module.css";
 import { isDateToday, isDateMonth, getDateString } from "@util/date";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";

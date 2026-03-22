@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import styles from "./SideBar.module.scss";
+import styles from "./SideBar.module.css";
 import List from "@widgets/List";
 import Drawer from "@mui/material/Drawer";
 import { useDeviceType } from "@util/styles";

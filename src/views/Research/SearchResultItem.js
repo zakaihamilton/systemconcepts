@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useMemo } from "react";
-import styles from "./SearchResultItem.module.scss";
+import styles from "./SearchResultItem.module.css";
 import Article from "@views/Library/Article";
 import { normalizeContent, preprocessMarkdown } from "@util/string";
 

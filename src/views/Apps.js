@@ -1,4 +1,4 @@
-import styles from "./Apps.module.scss";
+import styles from "./Apps.module.css";
 import { usePages, setPath } from "@util/views";
 import Link from "@mui/material/Link";
 

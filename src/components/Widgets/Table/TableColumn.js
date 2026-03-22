@@ -2,7 +2,7 @@ import clsx from "clsx";
 import TableCell from "@mui/material/TableCell";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Label from "@widgets/Label";
-import styles from "./TableColumn.module.scss";
+import styles from "./TableColumn.module.css";
 
 export default function TableColumn({ item, order, orderBy, showSort, createSortHandler }) {
     const { id, title, icon, dir, align, sortable, columnProps = {}, labelProps = {} } = item;

@@ -1,4 +1,4 @@
-import styles from "./Group.module.scss";
+import styles from "./Group.module.css";
 import clsx from "clsx";
 
 export default function Group({ fill, name, color, fit }) {

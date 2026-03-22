@@ -24,7 +24,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { startRegistration, startAuthentication, browserSupportsWebAuthn } from '@simplewebauthn/browser';
 import { clearBundleCache } from '@sync/sync';
-import styles from "./Account.module.scss";
+import styles from "./Account.module.css";
 import storage from "@util/storage";
 import { UpdateSessionsStore } from "@sync/syncState";
 

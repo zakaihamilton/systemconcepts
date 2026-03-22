@@ -15,7 +15,7 @@
         box-shadow: 0 6px 32px rgba(0, 0, 0, 0.2);
     }
 
-    // Make mostly transparent when playing
+    /*  Make mostly transparent when playing */
     &.playing {
         background: rgba(255, 255, 255, 0.3);
         border-color: rgba(0, 0, 0, 0.05);
@@ -25,7 +25,7 @@
         }
     }
 
-    // Compact size when collapsed
+    /*  Compact size when collapsed */
     &.collapsed {
         .controls {
             padding: 0px;

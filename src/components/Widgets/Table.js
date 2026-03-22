@@ -5,7 +5,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { ContentSize } from "@components/Page/Content";
-import styles from "./Table.module.scss";
+import styles from "./Table.module.css";
 import { useTranslations } from "@util/translations";
 import { useDeviceType } from "@util/styles";
 import { importData, exportData } from "@util/importExport";

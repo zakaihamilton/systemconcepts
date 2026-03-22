@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
-import styles from './Row.module.scss';
+import styles from './Row.module.css';
 import TrackCard from './Card';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';

@@ -1,7 +1,7 @@
 import LinearProgress from "@mui/material/LinearProgress";
 import ReactMarkdown from "react-markdown";
 import { useFetch } from "@util/fetch";
-import styles from "./Summary.module.scss";
+import styles from "./Summary.module.css";
 import { useTranslations } from "@util/translations";
 
 import { preprocessMarkdown } from "@util/string";

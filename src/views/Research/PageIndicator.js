@@ -1,6 +1,6 @@
 import React from "react";
 import Fade from "@mui/material/Fade";
-import styles from "./PageIndicator.module.scss";
+import styles from "./PageIndicator.module.css";
 
 const PageIndicator = React.memo(({ current, total, visible, translations, label }) => {
     return (

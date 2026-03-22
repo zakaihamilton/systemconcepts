@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from "react";
 import { useTranslations } from "@util/translations";
-import styles from "./HistoryView.module.scss";
+import styles from "./HistoryView.module.css";
 import { useRecentHistory } from "@util/history";
 import { useLanguage } from "@util/language";
 import { useSessions, SessionsStore } from "@util/sessions";

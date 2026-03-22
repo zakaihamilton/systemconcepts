@@ -1,4 +1,4 @@
-import styles from "./Tab.module.scss";
+import styles from "./Tab.module.css";
 import { useDeviceType } from "@util/styles";
 import clsx from "clsx";
 import Tab from "@mui/material/Tab";

@@ -1,6 +1,6 @@
 
 import Tabs from "@mui/material/Tabs";
-import styles from "./Tabs.module.scss";
+import styles from "./Tabs.module.css";
 
 export default function TabsWidget({ state, children, ...props }) {
     const [value, setValue] = state;

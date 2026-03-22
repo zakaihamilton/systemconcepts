@@ -24,7 +24,7 @@ import { useTranslations } from "@util/translations";
 import { roleAuth } from "@util/roles";
 import { setPath, usePathItems, setHash } from "@util/views";
 import { normalizeContent } from "@util/string";
-import styles from "./Research.module.scss";
+import styles from "./Research.module.css";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { LibraryStore } from "@views/Library/Store";

@@ -10,7 +10,7 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import ClearIcon from "@mui/icons-material/Clear";
 import TreeItem from "./TreeItem";
 import { LibraryIcons, LibraryTagKeys } from "./Icons";
-import styles from "./Tags.module.scss";
+import styles from "./Tags.module.css";
 
 export default function Tags({
     tags,

@@ -1,6 +1,6 @@
 
 import Checkbox from "@mui/material/Checkbox";
-import styles from "./Select.module.scss";
+import styles from "./Select.module.css";
 
 export default function SelectWidget({ item, store, select }) {
   const { id } = item;

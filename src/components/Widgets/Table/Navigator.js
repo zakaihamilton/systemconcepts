@@ -1,4 +1,4 @@
-import styles from "./Navigator.module.scss";
+import styles from "./Navigator.module.css";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";

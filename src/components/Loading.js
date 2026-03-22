@@ -1,6 +1,6 @@
 
 import LinearProgress from "@mui/material/LinearProgress";
-import styles from "./Loading.module.scss";
+import styles from "./Loading.module.css";
 
 export default function Loading({ error }) {
     if (error) {

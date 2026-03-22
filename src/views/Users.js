@@ -14,7 +14,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import TodayIcon from "@mui/icons-material/Today";
 import { isRTL } from "@util/string";
 import { useDeviceType } from "@util/styles";
-import styles from "./Users.module.scss";
+import styles from "./Users.module.css";
 import { useLocalStorage } from "@util/store";
 
 export const UsersStoreDefaults = {

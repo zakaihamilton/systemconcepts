@@ -18,7 +18,7 @@ import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useParentPath } from "@util/views";
 import { MainStore } from "@components/Main";
-import styles from "./User.module.scss";
+import styles from "./User.module.css";
 
 export default function User({ path = "" }) {
     const { direction } = MainStore.useState();

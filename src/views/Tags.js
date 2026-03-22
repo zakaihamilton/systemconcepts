@@ -4,7 +4,7 @@ import Tab from "@mui/material/Tab";
 import Sessions from "./Tags/Sessions";
 import Library from "./Tags/Library";
 import { useTranslations } from "@util/translations";
-import styles from "./Tags.module.scss";
+import styles from "./Tags.module.css";
 
 export default function Tags() {
     const translations = useTranslations();

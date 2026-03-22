@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import styles from "./DayHeader.module.scss";
+import styles from "./DayHeader.module.css";
 import { isDayToday } from "@util/date";
 
 export default function DayHeader({ dateFormatter, date, index, count }) {

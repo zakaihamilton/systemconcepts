@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import styles from "./Footer.module.scss";
+import styles from "./Footer.module.css";
 import Toolbar, { useToolbarItems } from "./Toolbar";
 import { useDeviceType } from "@util/styles";
 

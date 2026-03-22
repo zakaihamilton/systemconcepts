@@ -6,7 +6,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import IndeterminateCheckBoxIcon from "@mui/icons-material/IndeterminateCheckBox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import styles from "./StatusBar.module.scss";
+import styles from "./StatusBar.module.css";
 import CancelIcon from "@mui/icons-material/Cancel";
 import clsx from "clsx";
 import ButtonSelector from "@components/Widgets/ButtonSelector";

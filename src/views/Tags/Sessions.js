@@ -4,7 +4,7 @@ import { useSessions } from "@util/sessions";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
 import FilterBar from "@views/Sessions/FilterBar";
-import styles from "../Tags.module.scss";
+import styles from "../Tags.module.css";
 import Chip from "@mui/material/Chip";
 
 export const TagsStore = new Store({

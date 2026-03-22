@@ -12,7 +12,7 @@
         font-size: 1rem;
     }
 
-    // Override Dialog's content padding
+    /*  Override Dialog's content padding */
     :global(.MuiDialogContent-root) {
         padding: 0;
     }

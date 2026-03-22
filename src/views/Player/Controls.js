@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./Controls.module.scss";
+import styles from "./Controls.module.css";
 import { useTranslations } from "@util/translations";
 import PlayerButton from "./Button";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";

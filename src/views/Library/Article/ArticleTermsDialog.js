@@ -15,7 +15,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { PHASE_COLORS, getStyleInfo } from "./GlossaryUtils";
-import styles from "./ArticleTermsDialog.module.scss";
+import styles from "./ArticleTermsDialog.module.css";
 
 export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
     const translations = useTranslations();

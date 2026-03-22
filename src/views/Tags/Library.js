@@ -8,7 +8,7 @@ import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { makePath } from "@util/path";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import Table from "@widgets/Table";
-import styles from "../Tags.module.scss";
+import styles from "../Tags.module.css";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";

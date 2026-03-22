@@ -1,4 +1,4 @@
-import styles from "./Label.module.scss";
+import styles from "./Label.module.css";
 import clsx from "clsx";
 
 export default function LabelWidget({ icon, onClick, noBorder, name, children, className, ...props }) {

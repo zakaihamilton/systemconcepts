@@ -1,5 +1,5 @@
 import { useDateFormatter } from "@util/locale";
-import styles from "./Month.module.scss";
+import styles from "./Month.module.css";
 import { getMonthViewStart, addDate, isDateMonth, isDateToday, getDateString } from "@util/date";
 import clsx from "clsx";
 import { useTranslations } from "@util/translations";

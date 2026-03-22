@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { useTranslations } from "@util/translations";
 import { getColorName } from "@util/color";
-import styles from "./ColorPicker.module.scss";
+import styles from "./ColorPicker.module.css";
 import clsx from "clsx";
 
 export default function ColorPicker({ name, color, pickerClassName, onChangeComplete }) {

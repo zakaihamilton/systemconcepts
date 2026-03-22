@@ -129,15 +129,15 @@
 
 .tag {
     cursor: pointer;
-    // Fallback for browsers that don't support color-mix
+    /*  Fallback for browsers that don't support color-mix */
     background-color: var(--chrome-background) !important;
     color: var(--text-color) !important;
     border: 1px solid var(--border-color) !important;
 
-    // Modern styling using group color with default fallback
-    // Use a translucent background that doesn't wash out the text
+    /*  Modern styling using group color with default fallback */
+    /*  Use a translucent background that doesn't wash out the text */
     background-color: color-mix(in srgb, var(--group-color, var(--primary-500)), transparent 85%) !important;
-    // Use theme-aware text color for guaranteed contrast
+    /*  Use theme-aware text color for guaranteed contrast */
     color: var(--text-color) !important;
     border: 1px solid color-mix(in srgb, var(--group-color, var(--primary-500)), transparent 50%) !important;
 

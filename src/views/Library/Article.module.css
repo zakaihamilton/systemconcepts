@@ -265,8 +265,8 @@ h1.title {
         display: block;
         color: black;
 
-        // Reset positioning for embedded matches (search results)
-        // so they flow naturally down the page instead of stacking
+        /*  Reset positioning for embedded matches (search results) */
+        /*  so they flow naturally down the page instead of stacking */
         &.embedded {
             position: relative;
             left: auto;

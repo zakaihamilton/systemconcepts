@@ -1,7 +1,7 @@
 import { useDateFormatter } from "@util/locale";
 import Dialog from "@widgets/Dialog";
 import Session from "./Sessions/Session";
-import styles from "./Sessions.module.scss";
+import styles from "./Sessions.module.css";
 import { useSwipe } from "@util/touch";
 import clsx from "clsx";
 import { useDeviceType } from "@util/styles";

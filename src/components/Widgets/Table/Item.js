@@ -1,5 +1,5 @@
 import { memo } from "react";
-import styles from "./Item.module.scss";
+import styles from "./Item.module.css";
 import clsx from "clsx";
 import { useStyles } from "@util/styles";
 

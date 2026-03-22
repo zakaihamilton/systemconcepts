@@ -1,4 +1,3 @@
-@use "../../../scss/mixins" as *;
 
 .root {
     display: flex;
@@ -8,7 +7,7 @@
     font: inherit;
     align-items: center;
     justify-content: center;
-    min-height: 7em;
+    min-height: 5em;
     color: var(--text-color);
     position: relative;
     overflow: hidden;
@@ -16,7 +15,11 @@
     margin: 4px;
     box-shadow: 0 1px 3px var(--box-shadow-color);
     transition: all 0.2s ease;
-    min-height: 3.5em;
+}
+
+.root.mobile {
+    margin: 0px;
+    min-height: 5em;
 }
 
 .root:hover {
@@ -37,32 +40,31 @@
 
 .group {
     font-weight: bold;
+    justify-content: center;
     display: flex;
-    align-self: flex-end;
-    font-weight: normal;
-    padding-right: 0.5em;
-    padding-bottom: 0.1em;
-    font-size: 0.8em;
 }
 
 .container {
     display: flex;
+    justify-content: center;
     align-items: center;
-    height: 2em;
-    width: 100%;
-    justify-content: stretch;
 }
 
 .name {
     min-width: 0;
+    text-align: center;
     padding-right: 1em;
     overflow: hidden;
     display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     line-height: 1.3;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    width: 100% !important;
+}
+
+.name.mobile {
+    width: auto;
+    min-width: unset;
 }
 
 .background {
@@ -92,5 +94,7 @@
 
 
 .playing {
-    @include playing;
+    box-shadow: inset 0 0 2px 2px var(--playing-color) !important;
+    border-radius: 8px !important;
+    background-color: var(--playing-bg) !important;
 }

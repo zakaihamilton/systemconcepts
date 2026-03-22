@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import InputBase from "@mui/material/InputBase";
-import styles from "./Search.module.scss";
+import styles from "./Search.module.css";
 import SearchIcon from "@mui/icons-material/Search";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";

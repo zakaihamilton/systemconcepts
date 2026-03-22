@@ -1,4 +1,4 @@
-import styles from "./Image.module.scss";
+import styles from "./Image.module.css";
 import { useState, useEffect, useRef } from "react";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";

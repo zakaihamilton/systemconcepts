@@ -1,5 +1,5 @@
 import "@fontsource/roboto";
-import "../src/scss/app.scss";
+import "../src/scss/app.css";
 import Script from "next/script";
 import EmotionRegistry from "./EmotionRegistry";
 

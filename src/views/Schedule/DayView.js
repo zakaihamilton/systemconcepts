@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import styles from "./DayView.module.scss";
+import styles from "./DayView.module.css";
 import SessionGroup from "./DayView/SessionGroup";
 import { addDate, getDateString, getDaysInMonth, getMonthNames, getYearNames } from "@util/date";
 import { useDateFormatter } from "@util/locale";

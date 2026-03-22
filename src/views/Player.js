@@ -4,7 +4,7 @@ import { useLocalStorage } from "@util/store";
 import { useTranslations } from "@util/translations";
 import { MainStore } from "../components/Main";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import styles from "./Player.module.scss";
+import styles from "./Player.module.css";
 import { makePath, fileTitle, fileName, fileFolder, isAudioFile, isVideoFile } from "@util/path";
 import Audio from "./Player/Audio";
 import Video from "./Player/Video";

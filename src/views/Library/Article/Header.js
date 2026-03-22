@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { LibraryTagKeys, LibraryIcons } from "../Icons";
 import { abbreviations } from "../../../data/abbreviations";
 import clsx from "clsx";
-import styles from "../Article.module.scss";
+import styles from "../Article.module.css";
 
 export default function Header({
     selectedTag,

@@ -38,7 +38,7 @@
     opacity: 1;
     width: 100%;
 
-    // Increase size of the clear (X) button with modern circular background
+    /*  Increase size of the clear (X) button with modern circular background */
     input[type="search"]::-webkit-search-cancel-button {
         -webkit-appearance: none;
         appearance: none;

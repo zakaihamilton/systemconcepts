@@ -1,4 +1,4 @@
-import styles from "./Session.module.scss";
+import styles from "./Session.module.css";
 import { addPath, toPath } from "@util/views";
 import { useDeviceType } from "@util/styles";
 import { useSessionTextColor } from "@util/colors";

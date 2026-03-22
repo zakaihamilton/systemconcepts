@@ -1,4 +1,4 @@
-import styles from "./Image.module.scss";
+import styles from "./Image.module.css";
 import { useEffect, useState, useCallback, useContext, useRef } from "react";
 import { useParentPath, useParentParams } from "@util/views";
 import { readBinary } from "@util/binary";

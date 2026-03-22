@@ -6,7 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import styles from "./Input.module.scss";
+import styles from "./Input.module.css";
 import clsx from "clsx";
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";

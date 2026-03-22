@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { glossary } from '@data/glossary';
 import { termPattern, PHASE_COLORS, getStyleInfo } from "./GlossaryUtils";
-import styles from './Markdown.module.scss';
+import styles from './Markdown.module.css';
 import Zoom from "./Zoom";
 import { LibraryStore } from "../Store";
 import { setPath } from "@util/views";

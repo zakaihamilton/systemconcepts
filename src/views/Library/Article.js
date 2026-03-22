@@ -19,7 +19,7 @@ import { LibraryTagKeys } from "./Icons";
 import { exportData } from "@util/importExport";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { useLocalStorage } from "@util/hooks";
-import styles from "./Article.module.scss";
+import styles from "./Article.module.css";
 
 import Player from "./Article/Player";
 import JumpDialog from "./Article/JumpDialog";

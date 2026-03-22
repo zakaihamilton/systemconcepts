@@ -3,7 +3,7 @@ import { useUpdateSessions } from "@util/updateSessions";
 import { useTranslations } from "@util/translations";
 import { useGroups } from "@util/groups";
 import { useSyncFeature } from "@sync/sync";
-import styles from "./Sync.module.scss";
+import styles from "./Sync.module.css";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
 import { useOnline } from "@util/online";

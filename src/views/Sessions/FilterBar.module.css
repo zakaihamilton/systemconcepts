@@ -11,7 +11,7 @@
     overflow: hidden;
     visibility: visible;
 
-    // Desktop: Top Stickiness
+    /*  Desktop: Top Stickiness */
     position: sticky;
     top: 0px;
     bottom: auto;
@@ -26,7 +26,7 @@
     padding: 0;
     border-width: 0;
     visibility: hidden;
-    transform: translateY(-100%); // Slide Up on Desktop
+    transform: translateY(-100%); /*  Slide Up on Desktop */
 }
 
 @media (max-width: 768px) {
@@ -39,7 +39,7 @@
     }
 
     .root.hide {
-        transform: translateY(100%); // Slide Down on Mobile
+        transform: translateY(100%); /*  Slide Down on Mobile */
     }
 }
 

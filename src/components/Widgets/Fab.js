@@ -1,7 +1,7 @@
 
 import Fab from "@mui/material/Fab";
 import Tooltip from "@mui/material/Tooltip";
-import styles from "./Fab.module.scss";
+import styles from "./Fab.module.css";
 import clsx from "clsx";
 
 export default function FloatingActionButtons({ onClick, title, icon, ...props }) {

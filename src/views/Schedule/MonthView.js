@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslations } from "@util/translations";
-import styles from "./MonthView.module.scss";
+import styles from "./MonthView.module.css";
 import Week from "./MonthView/Week";
 import DayHeader from "./MonthView/DayHeader";
 import { getMonthViewStart, addDate, getMonthNames, getYearNames, getDateString, getNumberOfWeeksInMonth } from "@util/date";

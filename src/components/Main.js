@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import SideBar from "./SideBar";
-import styles from "./Main.module.scss";
+import styles from "./Main.module.css";
 import { Store } from "pullstate";
 import { useLocalStorage } from "@util/store";
 import { useDeviceType } from "@util/styles";

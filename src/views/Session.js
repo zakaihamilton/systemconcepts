@@ -8,7 +8,7 @@ import Group from "@widgets/Group";
 import { formatDuration, copyToClipboard } from "@util/string";
 import Summary from "@widgets/Summary";
 import Image from "@widgets/Image";
-import styles from "./Session.module.scss";
+import styles from "./Session.module.css";
 import { addPath, replacePath } from "@util/views";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef, useContext } from "react";
-import styles from "./TracksView.module.scss";
+import styles from "./TracksView.module.css";
 import TrackRow from "./TracksView/Row";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
 import { useDeviceType } from "@util/styles";

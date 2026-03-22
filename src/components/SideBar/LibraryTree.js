@@ -18,7 +18,7 @@ import storage from "@util/storage";
 import { setPath, usePathItems } from "@util/views";
 import { SyncActiveStore } from "@sync/syncState";
 import { useTranslations } from "@util/translations";
-import styles from "./LibraryTree.module.scss";
+import styles from "./LibraryTree.module.css";
 
 export default function LibraryTree({ closeDrawer, isMobile }) {
     const translations = useTranslations();

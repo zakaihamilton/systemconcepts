@@ -1,4 +1,4 @@
-import styles from "./Field.module.scss";
+import styles from "./Field.module.css";
 
 export default function Field({ name, value }) {
     return <div className={styles.root}>

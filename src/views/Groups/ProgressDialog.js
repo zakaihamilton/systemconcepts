@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { UpdateSessionsStore } from "@sync/syncState";
 import { useTranslations } from "@util/translations";
-import styles from "./ProgressDialog.module.scss";
+import styles from "./ProgressDialog.module.css";
 import { formatDuration } from "@util/string";
 import "@fontsource/dseg7/classic.css";
 import Dialog from "@components/Widgets/Dialog";

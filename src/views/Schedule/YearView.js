@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import styles from "./YearView.module.scss";
+import styles from "./YearView.module.css";
 import Month from "./YearView/Month";
 import { getYearNames } from "@util/date";
 import { useDateFormatter } from "@util/locale";

@@ -1,4 +1,4 @@
-import styles from "./Session.module.scss";
+import styles from "./Session.module.css";
 import { addPath, toPath } from "@util/views";
 import { useSessionTextColor } from "@util/colors";
 import Link from "@mui/material/Link";

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import styles from "./DayHeader.module.scss";
+import styles from "./DayHeader.module.css";
 import { useDeviceType } from "@util/styles";
 import { isDateToday } from "@util/date";
 

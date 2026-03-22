@@ -1,6 +1,6 @@
 import Breadcrumbs from "@components/Breadcrumbs";
 import { useActivePages } from "@util/views";
-import styles from "./Title.module.scss";
+import styles from "./Title.module.css";
 import { useDeviceType } from "@util/styles";
 import { ScheduleStore } from "@views/Schedule";
 import { SessionsStore } from "@util/sessions";

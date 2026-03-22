@@ -1,4 +1,4 @@
-import styles from "./Day.module.scss";
+import styles from "./Day.module.css";
 import { useDeviceType } from "@util/styles";
 import { getDateString } from "@util/date";
 import Session from "./Session";

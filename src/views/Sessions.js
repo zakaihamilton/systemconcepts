@@ -5,7 +5,7 @@ import { addPath, toPath } from "@util/views";
 import { useSessions, SessionsStore } from "@util/sessions";
 import FilterBar from "@views/Sessions/FilterBar";
 import Group from "@widgets/Group";
-import styles from "./Sessions.module.scss";
+import styles from "./Sessions.module.css";
 import Label from "@widgets/Label";
 import Row from "@widgets/Row";
 import MovieIcon from "@mui/icons-material/Movie";

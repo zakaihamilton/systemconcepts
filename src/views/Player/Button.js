@@ -1,4 +1,4 @@
-import styles from "./Button.module.scss";
+import styles from "./Button.module.css";
 import clsx from "clsx";
 
 export default function Button({ name, icon, active, subHeading, onClick, label, ...props }) {

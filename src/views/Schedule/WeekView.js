@@ -1,5 +1,5 @@
 import { useTranslations } from "@util/translations";
-import styles from "./WeekView.module.scss";
+import styles from "./WeekView.module.css";
 import Week from "./WeekView/Week";
 import DayHeader from "./WeekView/DayHeader";
 import { getWeekViewStart, getMonthViewStart, addDate, getNumberOfWeeksInMonth, setWeekOfMonth, getMonthNames, getWeekOfMonth, getYearNames } from "@util/date";

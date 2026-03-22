@@ -1,4 +1,4 @@
-import styles from "./Error.module.scss";
+import styles from "./Error.module.css";
 import ErrorIcon from "@mui/icons-material/Error";
 import Label from "@widgets/Label";
 import Tooltip from "@mui/material/Tooltip";

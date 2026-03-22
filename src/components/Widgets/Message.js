@@ -1,5 +1,5 @@
 import Typography from "@mui/material/Typography";
-import styles from "./Message.module.scss";
+import styles from "./Message.module.css";
 import clsx from "clsx";
 
 export default function Message({ animated, Icon, label, show = true }) {

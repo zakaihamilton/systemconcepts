@@ -1,12 +1,11 @@
-// Utility classes for positioning (defined at root so they Same exported keys)
+/*  Utility classes for positioning (defined at root so they Same exported keys) */
 .top {
-
-    // Used for Bridge
+    /*  Used for Bridge */
     &.glossary-bridge {
         bottom: 100%;
     }
 
-    // Used for Tooltip
+    /*  Used for Tooltip */
     &.glossary-tooltip {
         bottom: 100%;
         margin-bottom: 10px;
@@ -15,12 +14,12 @@
 
 .bottom {
 
-    // Used for Bridge
+    /*  Used for Bridge */
     &.glossary-bridge {
         top: 100%;
     }
 
-    // Used for Tooltip
+    /*  Used for Tooltip */
     &.glossary-tooltip {
         top: 100%;
         margin-top: 10px;
@@ -43,7 +42,7 @@
         margin-top: 1.6em;
     }
 
-    // The transliteration sitting above the word
+    /*  The transliteration sitting above the word */
     .glossary-annotation {
         display: block;
         position: absolute;
@@ -59,7 +58,7 @@
         font-style: italic;
     }
 
-    // The main text (English Translation)
+    /*  The main text (English Translation) */
     .glossary-main-text {
         border-bottom: 1px dotted var(--text-secondary);
         font-weight: 500;
@@ -75,14 +74,14 @@
         }
     }
 
-    // Hover state
+    /*  Hover state */
     &:hover .glossary-main-text {
         background-color: #fff9c4;
         color: #000;
     }
 }
 
-// Invisible bridge
+/*  Invisible bridge */
 .glossary-bridge {
     position: absolute;
     left: 0px;
@@ -91,7 +90,7 @@
     z-index: 99;
 }
 
-// The Tooltip Popup
+/*  The Tooltip Popup */
 .glossary-tooltip {
     position: absolute;
     left: 50%;
@@ -106,7 +105,7 @@
     min-width: 150px;
     text-align: center;
     pointer-events: auto;
-    // animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); // Removed generic animation
+    /*  animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); Removed generic animation */
     transform-origin: top center;
 
     &.bottom {
@@ -172,7 +171,7 @@
     }
 }
 
-%interactive-block {
+.paragraph {
     border: 1px solid transparent;
     padding: 8px 16px;
     padding-right: 48px;
@@ -201,16 +200,36 @@
     }
 }
 
-.paragraph {
-    @extend %interactive-block;
-}
-
 .header {
-    @extend %interactive-block;
+    border: 1px solid transparent;
+    padding: 16px 16px;
+    padding-right: 48px;
+    border-radius: var(--radius-md);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    background-color: var(--background-paper);
     margin-top: 24px;
     margin-bottom: 16px;
     font-weight: bold;
-    padding: 16px 16px;
+
+    &:not(.selected) {
+        cursor: pointer;
+    }
+
+    &:hover {
+        border-color: var(--primary-main);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        background-color: var(--action-hover);
+    }
+
+    &.suppressHover:hover {
+        border-color: transparent;
+        box-shadow: none;
+        background-color: var(--background-paper);
+    }
 }
 
 .selected {
@@ -230,7 +249,7 @@
     }
 }
 
-%paragraph-label-shared {
+.paragraphNumber {
     position: absolute;
     right: 8px;
     top: 8px;
@@ -262,26 +281,46 @@
     }
 }
 
-.paragraphNumber {
-    @extend %paragraph-label-shared;
-}
-
 .paragraphBadge {
-    @extend %paragraph-label-shared;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    height: 28px;
+    z-index: 5;
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--primary-main);
+    font-size: 0.75rem;
+    padding: 4px 6px;
+    background-color: var(--action-hover);
+    border: 1px solid var(--divider);
+    border-radius: 6px;
+    text-align: center;
+    opacity: 0.7;
+    user-select: none;
+    font-family: monospace;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        opacity: 1;
+        background-color: var(--primary-main);
+        color: var(--primary-contrast-text);
+        border-color: var(--primary-main);
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
 }
 
-.paragraphBadge {
-    @extend %paragraph-label-shared;
-}
 
-
-// Search Highlight
+/*  Search Highlight */
 .search-highlight {
     background-color: #ffeb3b;
     color: #000 !important;
 }
 
-// End of Article Separator
+/*  End of Article Separator */
 .endOfArticle {
     display: flex;
     align-items: center;

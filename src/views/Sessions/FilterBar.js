@@ -11,7 +11,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@widgets/Menu";
-import styles from "./FilterBar.module.scss";
+import styles from "./FilterBar.module.css";
 import clsx from "clsx";
 
 export default React.memo(function FilterBar({ hideYears = false }) {

@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import Controls from "./Controls";
 import Toolbar from "./Toolbar";
 import { PlayerStore } from "../Player";
-import styles from "./Video.module.scss";
+import styles from "./Video.module.css";
 
 export default function Video({ show, metadataPath, metadataKey, name, path, renewUrl, color, group, children, elements, showDetails: _showDetails, isTranscript: _isTranscript, ...props }) {
     const ref = useRef();

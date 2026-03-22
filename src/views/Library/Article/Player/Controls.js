@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
-import styles from './Controls.module.scss';
+import styles from './Controls.module.css';
 
 export default function Controls({
     translations,

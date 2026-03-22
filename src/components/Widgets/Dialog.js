@@ -1,6 +1,6 @@
 import { useTranslations } from "@util/translations";
 import Typography from "@mui/material/Typography";
-import styles from "./Dialog.module.scss";
+import styles from "./Dialog.module.css";
 import Tooltip from "@mui/material/Tooltip";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { IconButton } from "@mui/material";

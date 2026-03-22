@@ -1,5 +1,5 @@
 import { useRef, createContext, useState, useEffect } from "react";
-import styles from "./Content.module.scss";
+import styles from "./Content.module.css";
 import { useSize } from "@util/size";
 import { MainStore } from "@components/Main";
 import { useActivePages, useParentParams } from "@util/views";

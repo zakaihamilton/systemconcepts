@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import styles from "./Editor.module.scss";
+import styles from "./Editor.module.css";
 
 export default function EditorWidget({ state }) {
     const [value, setValue] = state;

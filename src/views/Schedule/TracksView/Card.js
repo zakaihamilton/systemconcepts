@@ -1,5 +1,5 @@
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
-import styles from './Card.module.scss';
+import styles from './Card.module.css';
 import clsx from 'clsx';
 import Image from "@widgets/Image";
 import Typography from '@mui/material/Typography';

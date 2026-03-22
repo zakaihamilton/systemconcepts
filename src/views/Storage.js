@@ -20,7 +20,7 @@ import Destination from "./Storage/Destination";
 import { useDateFormatter } from "@util/locale";
 import { useSync } from "@sync/sync";
 import { isBinaryFile, isImageFile } from "@util/path";
-import styles from "./Storage.module.scss";
+import styles from "./Storage.module.css";
 import { useLocalStorage } from "@util/store";
 import { useDeviceType } from "@util/styles";
 

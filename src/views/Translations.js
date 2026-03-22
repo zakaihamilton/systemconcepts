@@ -2,7 +2,7 @@ import Table from "@widgets/Table";
 import languages from "@data/languages";
 import { useTranslations } from "@util/translations";
 import { Store } from "pullstate";
-import styles from "./Translations.module.scss";
+import styles from "./Translations.module.css";
 import { useLocalStorage } from "@util/store";
 
 export const TranslationsStore = new Store({

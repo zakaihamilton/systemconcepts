@@ -3,7 +3,7 @@ import Slider from "@mui/material/Slider";
 import { useTranslations } from "@util/translations";
 import { PlayerStore } from "../Player";
 import clsx from "clsx";
-import styles from "./SpeedSlider.module.scss";
+import styles from "./SpeedSlider.module.css";
 import { MainStore } from "../../components/Main";
 
 export default function SpeedSlider() {
