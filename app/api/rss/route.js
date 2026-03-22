@@ -52,8 +52,8 @@ export async function GET(request) {
 
         let jsonStr;
         try {
-            const decompressed = pako.inflate(fileData, { to: "string" });
-            jsonStr = decompressed;
+            const decompressed = pako.inflate(fileData);
+            jsonStr = new TextDecoder("utf-8").decode(decompressed);
         } catch (_e) {
             jsonStr = Buffer.from(fileData).toString('utf-8');
         }
@@ -100,18 +100,26 @@ export async function GET(request) {
                 }
                 const key = s3Key.replace(/^wasabi\//, "");
                 const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-                const signedUrl = await getSignedUrl(client, command, { expiresIn: 86400 });
+                let signedUrl = await getSignedUrl(client, command, { expiresIn: 86400 });
+                // Fix: Encode spaces in media URLs
+                signedUrl = signedUrl.replace(/ /g, "%20");
                 const type = s3Key.endsWith(".mp4") ? "video/mp4" : (s3Key.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
                 enclosure = `<enclosure url="${escapeXml(signedUrl)}" length="${media.size || 0}" type="${type}" />`;
             }
+
+            const author = "info@systemconcepts.app (System Concepts)";
+            const itunesAuthor = "System Concepts";
 
             return `
     <item>
       <title>[${escapeXml(session.group?.toUpperCase()[0] + session.group?.slice(1))}] ${escapeXml(session.date + " " + session.name)}</title>
       <link>${escapeXml(link)}</link>
       <description>${escapeXml(description)}</description>
+      <content:encoded><![CDATA[${description.replace(/\n/g, '<br/>')}]]></content:encoded>
       <pubDate>${date}</pubDate>
       <guid>${escapeXml(link)}</guid>
+      <author>${escapeXml(author)}</author>
+      <itunes:author>${escapeXml(itunesAuthor)}</itunes:author>
       ${categories}
       ${enclosure}
       <itunes:duration>${escapeXml(durationText)}</itunes:duration>
@@ -120,23 +128,42 @@ export async function GET(request) {
     </item>`;
         }));
 
+        const maxDate = sessions.length > 0 ? new Date(Math.max(...sessions.map(s => new Date(s.date)))).toUTCString() : new Date().toUTCString();
+
         const rss = `<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
   <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
   <atom:link href="${escapeXml(request.url)}" rel="self" type="application/rss+xml" />
   <description>Latest sessions from System Concepts</description>
   <link>${escapeXml(baseUrl)}</link>
   <language>en-us</language>
+  <copyright>Copyright © 2026 System Concepts</copyright>
+  <itunes:author>System Concepts</itunes:author>
+  <itunes:owner>
+    <itunes:name>System Concepts</itunes:name>
+    <itunes:email>info@systemconcepts.app</itunes:email>
+  </itunes:owner>
+  <itunes:type>episodic</itunes:type>
   <itunes:explicit>no</itunes:explicit>
+  <itunes:category text="Education">
+    <itunes:category text="Self-Improvement"/>
+  </itunes:category>
+  <itunes:category text="Philosophy"/>
+  <itunes:category text="Religion &amp; Spirituality"/>
   ${rssItems.join('')}
 </channel>
 </rss>`;
 
+        const etag = crypto.createHash('md5').update(rss).digest('hex');
+
         return new NextResponse(rss, {
             status: 200,
             headers: {
-                'Content-Type': 'application/rss+xml',
+                'Content-Type': 'application/rss+xml; charset=utf-8',
+                'Content-Length': Buffer.byteLength(rss).toString(),
+                'ETag': `"${etag}"`,
+                'Last-Modified': maxDate
             },
         });
     } catch (err) {
