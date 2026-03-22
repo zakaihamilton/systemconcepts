@@ -382,7 +382,6 @@ export default React.memo(function TableWidget(props) {
         return id;
     }, []);
 
-    // eslint-disable-next-line -- intentional render-time side effect: rows read this registry synchronously during their own render
     tableDataRegistry.set(registryId, { items, rawItems });
 
     useEffect(() => {
