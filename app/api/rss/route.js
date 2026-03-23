@@ -28,7 +28,7 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
         const group = searchParams.get('group');
-        const count = parseInt(searchParams.get('count') || '50', 10);
+        const count = parseInt(searchParams.get('count') || '250', 10);
         const id = searchParams.get('id');
         const token = searchParams.get('token');
 
@@ -57,10 +57,18 @@ export async function GET(request) {
         }
 
         const manifest = JSON.parse(manifestStr);
+
         let files = manifest.filter(f => f.path && f.path.endsWith(".json") && f.path !== "/files.json");
 
         if (group) {
-            files = files.filter(f => f.path === "/bundle.json" || f.path === `/${group}.json` || f.path.startsWith(`/${group}/`));
+            const lowerGroup = group.toLowerCase();
+            files = files.filter(f => {
+                const lowerPath = f.path.toLowerCase();
+                const isMatch = f.path === "/bundle.json" ||
+                    lowerPath === `/${lowerGroup}.json` ||
+                    lowerPath.startsWith(`/${lowerGroup}/`);
+                return isMatch;
+            });
         }
 
         const limit = pLimit(10);
@@ -76,31 +84,50 @@ export async function GET(request) {
                     jsonStr = Buffer.from(fileData).toString('utf-8');
                 }
                 const data = JSON.parse(jsonStr);
-                return data.sessions || [];
+                const fileSessions = data.sessions || [];
+                return fileSessions;
             } catch (err) {
-                console.error(`Error loading sessions from ${file.path}:`, err);
+                console.error(`[RSS] Error loading sessions from ${file.path}:`, err);
                 return [];
             }
         }));
 
         const sessionsArrays = await Promise.all(sessionPromises);
-        const allSessions = sessionsArrays.flat();
-
+        let sessionsFlat = sessionsArrays.flat();
+        
+        // Use a robust deduplication key (case-insensitive for group names)
         const sessionMap = new Map();
-        for (const session of allSessions) {
-            const key = `${session.group}_${session.id}`;
+        for (const session of sessionsFlat) {
+            const key = `${(session.group || "").toLowerCase().trim()}_${session.id}`;
             if (!sessionMap.has(key)) {
                 sessionMap.set(key, session);
             }
         }
-
         let sessions = Array.from(sessionMap.values());
 
         if (group) {
-            sessions = sessions.filter(s => s.group === group);
+            const lowerGroup = group.toLowerCase().trim();
+            sessions = sessions.filter(s => {
+                const sessionGroup = (s.group || "").toLowerCase().trim();
+                return sessionGroup === lowerGroup;
+            });
         }
 
-        sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Robust string-based sort: Date (DESC), Group (ASC), Name (ASC)
+        sessions.sort((a, b) => {
+            const dateA = String(a.date || "").substring(0, 10);
+            const dateB = String(b.date || "").substring(0, 10);
+            if (dateB > dateA) return 1;
+            if (dateB < dateA) return -1;
+            
+            const groupA = (a.group || "").toLowerCase();
+            const groupB = (b.group || "").toLowerCase();
+            const groupDiff = groupA.localeCompare(groupB);
+            if (groupDiff !== 0) return groupDiff;
+            
+            return (a.name || "").localeCompare(b.name || "");
+        });
+
         sessions = sessions.slice(0, count);
 
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
@@ -119,7 +146,7 @@ export async function GET(request) {
             // Do not URL-encode the ?, &, and = characters in the local app link
             const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
             const link = `${baseUrl}/#sessions/${sessionQuery}`;
-            
+
             // RFC 2822 formatting requires strictly +0000
             const date = new Date(session.date).toUTCString().replace('GMT', '+0000');
             // Apple recommends integer seconds
