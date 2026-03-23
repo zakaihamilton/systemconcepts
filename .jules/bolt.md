@@ -1,3 +1,7 @@
 ## 2024-05-18 - Prevent VariableSizeList Unnecessary Re-renders
 **Learning:** Using an inline object for `itemData` prop in `react-window`'s `VariableSizeList` breaks `React.memo` for the list items (e.g. `SearchResultItem`), causing them to re-render on every list update, scroll, or state change, regardless of whether their props have actually changed.
 **Action:** Always wrap `itemData` and its dependencies (like functions e.g. `gotoArticle`) using `useMemo` and `useCallback` when using `react-window` to ensure that item components are not unnecessarily re-rendered.
+
+## 2026-03-23 - Optimize Image Component Re-renders and Memory Allocation
+**Learning:** Using `FileReader.readAsDataURL` to synchronously convert a large blob into a base64 string for a `<img src>` blocks the main thread and allocates a significant amount of memory. In addition, using multiple duplicate `useEffect` hooks with different triggers on the same function causes redundant state updates and potential double-executions on mount.
+**Action:** Always use `URL.createObjectURL` for locally downloaded blobs instead of base64 conversion to save memory and main thread execution time, ensuring to return `URL.revokeObjectURL(url)` to clean up memory. When relying on a custom hook like `useSync` that updates on mount, remove independent `useEffect` hooks that just observe prop changes to prevent duplicate initial loading.
