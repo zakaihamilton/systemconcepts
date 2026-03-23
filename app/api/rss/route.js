@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { downloadData, } from "@util/aws";
+import { downloadData } from "@util/aws";
 import { formatDuration } from "@util/string";
 import { findRecord } from "@util/mongo";
+import pLimit from "@util/p-limit";
 import pako from "pako";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
-const BUNDLE_PATH = "sync/bundle.json.gz";
+const MANIFEST_PATH = "sync/files.json.gz";
 
 function escapeXml(unsafe) {
     if (!unsafe) return "";
@@ -45,19 +46,55 @@ export async function GET(request) {
             return new NextResponse("Unauthorized", { status: 403 });
         }
 
-        const fileData = await downloadData({ path: BUNDLE_PATH, binary: true });
+        const manifestData = await downloadData({ path: MANIFEST_PATH, binary: true });
 
-        let jsonStr;
+        let manifestStr;
         try {
-            const decompressed = pako.inflate(fileData);
-            jsonStr = new TextDecoder("utf-8").decode(decompressed);
+            const decompressed = pako.inflate(manifestData);
+            manifestStr = new TextDecoder("utf-8").decode(decompressed);
         } catch (_e) {
-            jsonStr = Buffer.from(fileData).toString('utf-8');
+            manifestStr = Buffer.from(manifestData).toString('utf-8');
         }
 
-        const bundle = JSON.parse(jsonStr);
+        const manifest = JSON.parse(manifestStr);
+        let files = manifest.filter(f => f.path && f.path.endsWith(".json") && f.path !== "/files.json");
 
-        let sessions = bundle.sessions || [];
+        if (group) {
+            files = files.filter(f => f.path === "/bundle.json" || f.path === `/${group}.json` || f.path.startsWith(`/${group}/`));
+        }
+
+        const limit = pLimit(10);
+        const sessionPromises = files.map(file => limit(async () => {
+            try {
+                const s3Path = `sync${file.path.startsWith("/") ? "" : "/"}${file.path}.gz`;
+                const fileData = await downloadData({ path: s3Path, binary: true });
+                let jsonStr;
+                try {
+                    const decompressed = pako.inflate(fileData);
+                    jsonStr = new TextDecoder("utf-8").decode(decompressed);
+                } catch (_e) {
+                    jsonStr = Buffer.from(fileData).toString('utf-8');
+                }
+                const data = JSON.parse(jsonStr);
+                return data.sessions || [];
+            } catch (err) {
+                console.error(`Error loading sessions from ${file.path}:`, err);
+                return [];
+            }
+        }));
+
+        const sessionsArrays = await Promise.all(sessionPromises);
+        const allSessions = sessionsArrays.flat();
+
+        const sessionMap = new Map();
+        for (const session of allSessions) {
+            const key = `${session.group}_${session.id}`;
+            if (!sessionMap.has(key)) {
+                sessionMap.set(key, session);
+            }
+        }
+
+        let sessions = Array.from(sessionMap.values());
 
         if (group) {
             sessions = sessions.filter(s => s.group === group);
