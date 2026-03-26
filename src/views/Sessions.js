@@ -191,7 +191,8 @@ export default function SessionsPage() {
         }
 
         const prefixMap = new Map();
-        const isBoundary = (c) => !c || /[^\p{L}\p{N}]/u.test(c);
+        const HYPHENS = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/u;
+        const isBoundary = (c) => !c || HYPHENS.test(c);
 
         for (const bucketKey in buckets) {
             const names = buckets[bucketKey];
