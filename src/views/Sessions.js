@@ -192,7 +192,7 @@ export default function SessionsPage() {
 
         const prefixMap = new Map();
         const HYPHENS = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/u;
-        const isBoundary = (c) => !c || HYPHENS.test(c);
+        const isBoundary = (c) => !c || /[^\p{L}\p{N}]/u.test(c);
 
         for (const bucketKey in buckets) {
             const names = buckets[bucketKey];
@@ -202,7 +202,7 @@ export default function SessionsPage() {
             for (const name of names) {
                 allPrefixes.add(name);
                 for (let i = 0; i < name.length; i++) {
-                    if (isBoundary(name[i])) {
+                    if (HYPHENS.test(name[i])) {
                         const extracted = name.substring(0, i);
                         const clean = extracted.replace(/[^\p{L}\p{N}]+$/u, "");
                         if (clean.length > 2) {
@@ -251,10 +251,7 @@ export default function SessionsPage() {
         return prefixMap;
     }, [sessions]);
 
-    const treePrefixMapRef = useRef(new Map());
-    useEffect(() => {
-        treePrefixMapRef.current = treePrefixMap;
-    }, [treePrefixMap]);
+
 
     const mapper = useCallback(item => {
         if (!item) {
@@ -265,9 +262,15 @@ export default function SessionsPage() {
         const isPlaying = session && session.group === item.group && session.date === item.date && session.name === item.name;
 
         const lookupKey = `${item.group}||${item.date}||${item.name}`;
-        let treePrefix = treePrefixMapRef.current.has(lookupKey)
-            ? treePrefixMapRef.current.get(lookupKey)
-            : (item.name ? item.name.split(/\s+-\s+/)[0].trim() : "");
+        let treePrefix = treePrefixMap.get(lookupKey);
+        
+        if (!treePrefix && item.name) {
+            const HYPHENS = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/u;
+            const parts = item.name.split(HYPHENS);
+            if (parts.length > 1) {
+                treePrefix = parts[0].trim();
+            }
+        }
 
         if (item.type === "overview") {
             treePrefix = `_overview_${item.id}`;
@@ -305,7 +308,7 @@ export default function SessionsPage() {
             treeGroupKey,
             isPlaying
         };
-    }, [translations, session]);
+    }, [translations, session, treePrefixMap]);
 
     const renderColumn = useCallback((columnId, item) => {
         switch (columnId) {
