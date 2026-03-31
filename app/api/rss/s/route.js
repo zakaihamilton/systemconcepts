@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getWasabi } from "@util/wasabi";
-import { getS3 } from "@util/aws";
+import { getS3, validatePathAccess } from "@util/aws";
 import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -26,6 +26,12 @@ async function handleRequest(request) {
             path = Buffer.from(base64str, 'base64').toString('utf8');
         } catch (_e) {
             return new NextResponse("Invalid Path", { status: 400 });
+        }
+
+        try {
+            validatePathAccess(path);
+        } catch (_err) {
+            return new NextResponse("Access Denied", { status: 403 });
         }
 
         let s3Key = path;
