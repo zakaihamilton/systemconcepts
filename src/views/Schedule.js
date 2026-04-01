@@ -158,6 +158,7 @@ export default function SchedulePage() {
                                 onClick={item.onClick}
                                 className={clsx(styles.viewGroupButton, isSelected && styles.selected)}
                                 size="small"
+                                aria-label={item.name}
                             >
                                 {item.icon}
                             </IconButton>
