@@ -1906,6 +1906,14 @@ export default {
             "value": "Show Full Terms"
         },
         {
+            "id": "HIDE_SQUARE_BRACKETS",
+            "value": "Hide Square Brackets"
+        },
+        {
+            "id": "SHOW_SQUARE_BRACKETS",
+            "value": "Show Square Brackets"
+        },
+        {
             "id": "RESEARCH",
             "value": "Research"
         },
