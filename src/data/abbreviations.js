@@ -83,6 +83,10 @@ export const abbreviations = {
         eng: "Beria, Yetzira, Assiya",
         heb: "בריאה, יצירה, עשיה"
     },
+    "ABYA": {
+        eng: "Atzilut, Beria, Yetzira, Assiya",
+        heb: "אצילות, בריאה, יצירה, עשיה"
+    },
     "HB": {
         eng: "Hochma, Bina",
         heb: "חכמה, בינה"
