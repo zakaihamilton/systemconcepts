@@ -17,3 +17,8 @@
 **Vulnerability:** Path traversal existed in `pages/api/player.js` and `src/util/wasabi.js` where user input `path` was passed to Wasabi S3 commands without proper validation against traversal sequences like `..` or restricted areas like `private/`.
 **Learning:** Even though AWS functionality had traversal protection via `validatePathAccess`, parallel implementations for alternative storage providers (like Wasabi in this case) might inadvertently miss applying the exact same shared security utilities.
 **Prevention:** Always ensure that common access validation routines (`validatePathAccess`) are extracted, generalized, and systematically applied across all storage adapters or route handlers that construct paths from user input.
+
+## 2026-03-18 - Missing Path Traversal Validation in RSS Proxy API
+**Vulnerability:** A Path Traversal vulnerability in `app/api/rss/s/route.js` where user input for `p` (base64 encoded path) was decoded and passed directly to S3 without passing through `validatePathAccess`. An attacker could potentially supply encoded sequences like `..` or `private/` to access restricted areas.
+**Learning:** Endpoints that handle paths obscurely, like through base64 encoding (in order to avoid URL issues), can easily skip path validation since the raw request URL doesn't obviously look like a path, creating a bypass to centralized security protections.
+**Prevention:** Always ensure that common access validation routines (`validatePathAccess`) are called *after* any decoding step (e.g. URI decoding, base64 decoding) and *before* using the path in any downstream S3/storage operations.
