@@ -6385,5 +6385,15 @@ export const glossary = {
         "he": "אל חי",
         "en": "God of Life",
         "trans": "El Hay"
+    },
+    "gar": {
+        "he": "ג״ר",
+        "en": "Head",
+        "trans": "GAR"
+    },
+    "zat": {
+        "he": "ז״ת",
+        "en": "Bottom",
+        "trans": "ZAT"
     }
 };
