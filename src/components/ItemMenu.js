@@ -13,7 +13,7 @@ export default function ItemMenuWidget({ item, menuItems, store }) {
         {!!select && <Select select={select} item={item} store={store} />}
         {!select && <Menu items={menuItems}>
             <Tooltip title={translations.MENU}>
-                <IconButton size="large">
+                <IconButton aria-label={translations.MENU} size="large">
                     <MoreVertIcon />
                 </IconButton>
             </Tooltip>
