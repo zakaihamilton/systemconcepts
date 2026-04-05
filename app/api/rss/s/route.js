@@ -28,10 +28,10 @@ async function handleRequest(request) {
             return new NextResponse("Invalid Path", { status: 400 });
         }
 
+        path = path.startsWith("/") ? path.substring(1) : path;
         try {
-            validatePathAccess(path);
+            validatePathAccess(path.startsWith("wasabi/") ? path.replace(/^wasabi\//, "") : path);
         } catch (_err) {
-            console.warn("[RSS S Proxy] Path traversal attempt denied for path: '" + path + "'");
             return new NextResponse("Access Denied", { status: 403 });
         }
 

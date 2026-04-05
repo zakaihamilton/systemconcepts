@@ -1914,6 +1914,14 @@ export default {
             "value": "הצג מונחים מלאים"
         },
         {
+            "id": "HIDE_SQUARE_BRACKETS",
+            "value": "הסתר סוגריים מרובעים"
+        },
+        {
+            "id": "SHOW_SQUARE_BRACKETS",
+            "value": "הצג סוגריים מרובעים"
+        },
+        {
             "id": "RESEARCH",
             "value": "מחקר"
         },
