@@ -486,14 +486,6 @@ export default {
             "value": "העתק כתובת"
         },
         {
-            "id": "COPY_SHORT_LINK",
-            "value": "העתק קישור קצר"
-        },
-        {
-            "id": "SHORT_LINK_COPIED",
-            "value": "הקישור הקצר הועתק!"
-        },
-        {
             "id": "SIGN_OUT",
             "value": "ניתוק"
         },

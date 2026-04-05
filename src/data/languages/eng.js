@@ -486,14 +486,6 @@ export default {
             "value": "Copy URL"
         },
         {
-            "id": "COPY_SHORT_LINK",
-            "value": "Copy Short Link"
-        },
-        {
-            "id": "SHORT_LINK_COPIED",
-            "value": "Short Link Copied!"
-        },
-        {
             "id": "SIGN_UP",
             "value": "Sign Up"
         },

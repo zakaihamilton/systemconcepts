@@ -429,14 +429,6 @@ function Article({
                 onClick: handleShowTerms,
                 menu: true,
                 divider: true
-            },
-            {
-                id: "copyShortLink",
-                name: shortLinkCopied ? translations.SHORT_LINK_COPIED : translations.COPY_SHORT_LINK,
-                icon: <CodeIcon />,
-                onClick: copyShortLink,
-                menu: true,
-                divider: true
             }
         ];
         if (isAdmin) {
