@@ -132,12 +132,16 @@ const TreeItem = memo(function TreeItem({ node, onSelect, onToggle, level = 0 })
     return (
         <Box sx={{ display: "flex", flexDirection: "column" }}>
             <ListItemButton
+                component={node._id ? "a" : "div"}
+                href={node._id ? `#library/id/${node._id}` : undefined}
                 ref={itemRef}
                 onClick={handleSelect}
                 selected={isSelected}
                 className={clsx(styles.itemButton, isSelected && styles.selected)}
                 sx={{
-                    pl: level === 0 ? 1 : 1.5
+                    pl: level === 0 ? 1 : 1.5,
+                    color: "inherit",
+                    textDecoration: "none"
                 }}
             >
                 <Box className={styles.contentWrapper}>

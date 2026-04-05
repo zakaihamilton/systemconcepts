@@ -393,9 +393,8 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
         LibraryStore.update(s => {
             s.selectedId = tag._id;
         });
-        const hierarchy = getTagHierarchy(tag);
-        if (hierarchy.length > 0) {
-            setPath("library", ...hierarchy);
+        if (tag?._id) {
+            setPath("library", "id", tag._id);
         }
         LibraryStore.update(s => {
             s.lastViewedArticle = tag;

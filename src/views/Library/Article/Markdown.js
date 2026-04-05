@@ -420,23 +420,8 @@ const ReferenceLink = ({ text, sectionName, chapterName, itemNumber, currentTag 
 
         const targetArticle = findArticleByReference(tags, sectionName, chapterName, currentTag);
         if (targetArticle) {
-            const hierarchy = getTagHierarchy(targetArticle);
-            if (hierarchy.length > 0) {
-                if (itemNumber) {
-                    // Update URL hash for deep linking
-                    const lastIndex = hierarchy.length - 1;
-                    const lastPart = hierarchy[lastIndex];
-                    // Remove existing : suffix (or #/! if handling legacy)
-                    const baseUrl = lastPart.split(/[:#!]/)[0];
-                    hierarchy[lastIndex] = `${baseUrl}:${itemNumber}`;
-
-                    // Also store in state for component-level handling
-                    LibraryStore.update(s => {
-                        s.scrollToParagraph = parseInt(itemNumber, 10);
-                    });
-                }
-                setPath("library", ...hierarchy);
-            }
+                const path = itemNumber ? `${targetArticle._id}:${itemNumber}` : targetArticle._id;
+                setPath("library", "id", path);
         }
     }, [tags, sectionName, chapterName, itemNumber, currentTag]);
 

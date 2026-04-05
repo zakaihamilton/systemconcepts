@@ -48,9 +48,8 @@ export default function Library() {
             setContent(null);
         }
         setSelectedTag(tag);
-        const hierarchy = getTagHierarchy(tag);
-        if (hierarchy.length > 0) {
-            setPath("library", ...hierarchy);
+        if (tag?._id) {
+            setPath("library", "id", tag._id);
         }
         // Remember the last viewed article
         LibraryStore.update(s => {

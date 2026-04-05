@@ -751,14 +751,9 @@ export default function Research() {
             }
             return;
         }
-        const hierarchy = getTagHierarchy(tag);
-        if (hierarchy.length > 0) {
-            setPath("library", ...hierarchy);
-            if (paragraphId !== undefined) {
-                LibraryStore.update(s => {
-                    s.scrollToParagraph = paragraphId;
-                });
-            }
+        if (tag?._id) {
+            const path = paragraphId !== undefined ? `${tag._id}:${paragraphId + 1}` : tag._id;
+            setPath("library", "id", path);
         }
     }, []);
 
