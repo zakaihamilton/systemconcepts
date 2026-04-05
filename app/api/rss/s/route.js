@@ -31,6 +31,7 @@ async function handleRequest(request) {
         try {
             validatePathAccess(path);
         } catch (_err) {
+            console.warn("[RSS S Proxy] Path traversal attempt denied for path: '" + path + "'");
             return new NextResponse("Access Denied", { status: 403 });
         }
 
