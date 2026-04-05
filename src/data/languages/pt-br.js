@@ -1906,6 +1906,14 @@ export default {
             "value": "Mostrar Termos Completos"
         },
         {
+            "id": "HIDE_SQUARE_BRACKETS",
+            "value": "Ocultar colchetes"
+        },
+        {
+            "id": "SHOW_SQUARE_BRACKETS",
+            "value": "Mostrar colchetes"
+        },
+        {
             "id": "SEARCH_ARTICLES",
             "value": "Pesquisar..."
         },
