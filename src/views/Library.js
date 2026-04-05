@@ -60,55 +60,70 @@ export default function Library() {
 
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
-            const urlPath = pathItems.slice(1).join("|");
-            // Try explicit match first
-            let tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
-
-            // If no match, check for paragraph suffix (e.g. :8)
+            let tag = null;
             let paragraphId = null;
-            if (!tag) {
-                const parts = urlPath.split('|');
-                const lastPart = parts[parts.length - 1];
-                const lastSepIndex = lastPart.lastIndexOf(':');
-                if (lastSepIndex !== -1) {
-                    const possibleParagraph = lastPart.slice(lastSepIndex + 1);
-                    if (!isNaN(parseInt(possibleParagraph, 10))) {
+
+            if (pathItems[1] === "id") {
+                const idPart = pathItems[2];
+                if (idPart) {
+                    const colonIndex = idPart.lastIndexOf(':');
+                    const id = colonIndex !== -1 ? idPart.substring(0, colonIndex) : idPart;
+                    const possibleParagraph = colonIndex !== -1 ? idPart.substring(colonIndex + 1) : null;
+                    if (possibleParagraph && !isNaN(parseInt(possibleParagraph, 10))) {
                         paragraphId = parseInt(possibleParagraph, 10);
-                        // Try matching removing the suffix, or treating suffix as just tag number if it was replaced
-                        // Scenario 1: Suffix REPLACED tag number. Base matches?
-                        // Scenario 2: Suffix APPENDED?
+                    }
+                    tag = tags.find(t => t._id === id);
+                }
+            } else {
+                const urlPath = pathItems.slice(1).join("|");
+                // Try explicit match first
+                tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
 
-                        // We will iterate tags and see if any hierarchy matches the URL base
-                        // But finding "base" is tricky if we don't know if original had number suffix.
+                // If no match, check for paragraph suffix (e.g. :8)
+                if (!tag) {
+                    const parts = urlPath.split('|');
+                    const lastPart = parts[parts.length - 1];
+                    const lastSepIndex = lastPart.lastIndexOf(':');
+                    if (lastSepIndex !== -1) {
+                        const possibleParagraph = lastPart.slice(lastSepIndex + 1);
+                        if (!isNaN(parseInt(possibleParagraph, 10))) {
+                            paragraphId = parseInt(possibleParagraph, 10);
+                            // Try matching removing the suffix, or treating suffix as just tag number if it was replaced
+                            // Scenario 1: Suffix REPLACED tag number. Base matches?
+                            // Scenario 2: Suffix APPENDED?
 
-                        // Let's assume URL replaces tag number with paragraph number (as per Markdown.js logic)
-                        // So we look for tag where hierarchy WITHOUT number suffix matches URL base part.
+                            // We will iterate tags and see if any hierarchy matches the URL base
+                            // But finding "base" is tricky if we don't know if original had number suffix.
 
-                        // Simpler strategy: Iterate all tags. For each, generate hierarchy.
-                        // Check if URL matches hierarchy but replacing last suffix with paragraph ID.
+                            // Let's assume URL replaces tag number with paragraph number (as per Markdown.js logic)
+                            // So we look for tag where hierarchy WITHOUT number suffix matches URL base part.
 
-                        tag = tags.find(t => {
-                            const h = getTagHierarchy(t);
-                            const hStr = h.join("|");
+                            // Simpler strategy: Iterate all tags. For each, generate hierarchy.
+                            // Check if URL matches hierarchy but replacing last suffix with paragraph ID.
 
-                            // Check if current URL matches this tag's hierarchy EXCEPT for the last number
-                            // urlPath: ...|Chapter One:33
-                            // tagPath: ...|Chapter One:9
+                            tag = tags.find(t => {
+                                const h = getTagHierarchy(t);
+                                const hStr = h.join("|");
 
-                            const urlLastSep = urlPath.lastIndexOf(':');
-                            const urlBase = urlLastSep !== -1 ? urlPath.substring(0, urlLastSep) : urlPath;
+                                // Check if current URL matches this tag's hierarchy EXCEPT for the last number
+                                // urlPath: ...|Chapter One:33
+                                // tagPath: ...|Chapter One:9
 
-                            if (hStr === urlPath) return true;
-                            // Check if the tag matches the URL base (i.e. URL has extra paragraph suffix that tag doesn't have)
-                            if (hStr === urlBase) return true;
+                                const urlLastSep = urlPath.lastIndexOf(':');
+                                const urlBase = urlLastSep !== -1 ? urlPath.substring(0, urlLastSep) : urlPath;
 
-                            const tagLastSep = hStr.lastIndexOf(':');
-                            if (tagLastSep !== -1) {
-                                const tagBase = hStr.substring(0, tagLastSep);
-                                if (tagBase === urlBase) return true;
-                            }
-                            return false;
-                        });
+                                if (hStr === urlPath) return true;
+                                // Check if the tag matches the URL base (i.e. URL has extra paragraph suffix that tag doesn't have)
+                                if (hStr === urlBase) return true;
+
+                                const tagLastSep = hStr.lastIndexOf(':');
+                                if (tagLastSep !== -1) {
+                                    const tagBase = hStr.substring(0, tagLastSep);
+                                    if (tagBase === urlBase) return true;
+                                }
+                                return false;
+                            });
+                        }
                     }
                 }
             }

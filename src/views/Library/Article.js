@@ -100,6 +100,23 @@ function Article({
     const [termsDialogOpen, setTermsDialogOpen] = useState(false);
     const [articleTerms, setArticleTerms] = useState([]);
     const [totalParagraphs, setTotalParagraphs] = useState(0);
+    const [shortLinkCopied, setShortLinkCopied] = useState(false);
+
+    const copyShortLink = useCallback(async () => {
+        if (selectedTag?._id) {
+            try {
+                let url = window.location.origin + window.location.pathname + "#library/id/" + selectedTag._id;
+                if (currentParagraphIndex !== -1) {
+                    url += ":" + currentParagraphIndex;
+                }
+                await navigator.clipboard.writeText(url);
+                setShortLinkCopied(true);
+                setTimeout(() => setShortLinkCopied(false), 2000);
+            } catch (err) {
+                console.error("Failed to copy short link:", err);
+            }
+        }
+    }, [selectedTag?._id, currentParagraphIndex]);
 
     const {
         scrollInfo,
@@ -410,6 +427,14 @@ function Article({
                 name: translations.ARTICLE_TERMS,
                 icon: <MenuBookIcon />,
                 onClick: handleShowTerms,
+                menu: true,
+                divider: true
+            },
+            {
+                id: "copyShortLink",
+                name: shortLinkCopied ? translations.SHORT_LINK_COPIED : translations.COPY_SHORT_LINK,
+                icon: <CodeIcon />,
+                onClick: copyShortLink,
                 menu: true,
                 divider: true
             }

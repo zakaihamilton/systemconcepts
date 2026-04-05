@@ -112,37 +112,54 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
         return hierarchy;
     }, []);
 
-    // Sync selectedTag with URL
     useEffect(() => {
         if (tags.length > 0 && pathItems.length > 1 && pathItems[0] === "library") {
-            const urlPath = pathItems.slice(1).join("|");
-            let tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
+            let tag = null;
             let paragraphId = null;
+            let urlPath = pathItems.slice(1).join("|");
 
-            if (!tag) {
-                const parts = urlPath.split('|');
-                const lastPart = parts[parts.length - 1];
-                const lastSepIndex = lastPart.lastIndexOf(':');
-                if (lastSepIndex !== -1) {
-                    const possibleParagraph = lastPart.slice(lastSepIndex + 1);
-                    if (!isNaN(parseInt(possibleParagraph, 10))) {
+            if (pathItems[1] === "id") {
+                const idPart = pathItems[2];
+                if (idPart) {
+                    const colonIndex = idPart.lastIndexOf(':');
+                    const id = colonIndex !== -1 ? idPart.substring(0, colonIndex) : idPart;
+                    const possibleParagraph = colonIndex !== -1 ? idPart.substring(colonIndex + 1) : null;
+                    if (possibleParagraph && !isNaN(parseInt(possibleParagraph, 10))) {
                         paragraphId = parseInt(possibleParagraph, 10);
-                        tag = tags.find(t => {
-                            const h = getTagHierarchy(t);
-                            const hStr = h.join("|");
-                            const urlLastSep = urlPath.lastIndexOf(':');
-                            const urlBase = urlLastSep !== -1 ? urlPath.substring(0, urlLastSep) : urlPath;
+                    }
+                    tag = tags.find(t => t._id === id);
+                    if (tag) {
+                        urlPath = getTagHierarchy(tag).join("|");
+                    }
+                }
+            } else {
+                tag = tags.find(t => getTagHierarchy(t).join("|") === urlPath);
 
-                            if (hStr === urlPath) return true;
-                            if (hStr === urlBase) return true;
+                if (!tag) {
+                    const parts = urlPath.split('|');
+                    const lastPart = parts[parts.length - 1];
+                    const lastSepIndex = lastPart.lastIndexOf(':');
+                    if (lastSepIndex !== -1) {
+                        const possibleParagraph = lastPart.slice(lastSepIndex + 1);
+                        if (!isNaN(parseInt(possibleParagraph, 10))) {
+                            paragraphId = parseInt(possibleParagraph, 10);
+                            tag = tags.find(t => {
+                                const h = getTagHierarchy(t);
+                                const hStr = h.join("|");
+                                const urlLastSep = urlPath.lastIndexOf(':');
+                                const urlBase = urlLastSep !== -1 ? urlPath.substring(0, urlLastSep) : urlPath;
 
-                            const tagLastSep = hStr.lastIndexOf(':');
-                            if (tagLastSep !== -1) {
-                                const tagBase = hStr.substring(0, tagLastSep);
-                                if (tagBase === urlBase) return true;
-                            }
-                            return false;
-                        });
+                                if (hStr === urlPath) return true;
+                                if (hStr === urlBase) return true;
+
+                                const tagLastSep = hStr.lastIndexOf(':');
+                                if (tagLastSep !== -1) {
+                                    const tagBase = hStr.substring(0, tagLastSep);
+                                    if (tagBase === urlBase) return true;
+                                }
+                                return false;
+                            });
+                        }
                     }
                 }
             }

@@ -26,10 +26,45 @@ export function getLibrarySection({ id, path, translations }) {
         };
     }
 
+    if (name.toLowerCase() === "id") {
+        return null;
+    }
+
     let description = "";
     let SelectedIcon = null;
 
     if (tags && tags.length > 0) {
+        // Check if name is an _id
+        const tagById = tags.find(t => t._id === name);
+        if (tagById) {
+            let label = "";
+            let fieldKey = null;
+            for (let i = LibraryTagKeys.length - 1; i >= 0; i--) {
+                const key = LibraryTagKeys[i];
+                const val = tagById[key];
+                if (val && String(val).trim()) {
+                    label = val;
+                    fieldKey = key;
+                    break;
+                }
+            }
+            if (label) {
+                if (tagById.number) {
+                    label += ":" + tagById.number;
+                }
+                const icon = fieldKey ? LibraryIcons[fieldKey] : null;
+                return {
+                    name,
+                    label,
+                    tooltip: name,
+                    description: fieldKey ? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1) : "",
+                    static: true,
+                    Icon: icon || null,
+                    icon: icon ? <icon /> : null
+                };
+            }
+        }
+
         // Find all tags that contain this name in any field
         const matchingTags = tags.filter(t =>
             LibraryTagKeys.some(key => {
