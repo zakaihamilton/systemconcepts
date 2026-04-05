@@ -598,8 +598,8 @@ export const glossary = {
         "trans": "Daagot"
     },
     "av": {
-        "he": "אב",
-        "en": "Father",
+        "he": "עב",
+        "en": "Coarse",
         "trans": "Av"
     },
     "aviut": {
