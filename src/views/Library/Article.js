@@ -178,11 +178,11 @@ function Article({
     const processedContent = useMemo(() => {
         if (!content) return content;
         let result = content;
-        if (hideSquareBrackets) {
-            result = result.replace(/\[[\s\S]*?\]/g, "");
-        }
         if (!showAbbreviations) {
             result = replaceAbbreviations(result);
+        }
+        if (hideSquareBrackets) {
+            result = result.replace(/\[([^\]]*)\](?![\(\[])/g, "");
         }
         return result;
     }, [content, showAbbreviations, hideSquareBrackets]);
