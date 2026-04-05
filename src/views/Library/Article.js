@@ -14,6 +14,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import DataArrayIcon from '@mui/icons-material/DataArray';
 import { useSwipe } from "@util/touch";
 import { LibraryTagKeys } from "./Icons";
 import { exportData } from "@util/importExport";
@@ -93,6 +94,7 @@ function Article({
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [showMarkdown, setShowMarkdown] = useState(true);
     const [showAbbreviations, setShowAbbreviations] = useLocalStorage("showAbbreviations", true);
+    const [hideSquareBrackets, setHideSquareBrackets] = useLocalStorage("hideSquareBrackets", false);
     const [currentParagraphIndex, setCurrentParagraphIndex] = useState(-1);
     const [jumpDialogOpen, setJumpDialogOpen] = useState(false);
     const [termsDialogOpen, setTermsDialogOpen] = useState(false);
@@ -174,9 +176,16 @@ function Article({
     }, [selectedTag]);
 
     const processedContent = useMemo(() => {
-        if (!content || showAbbreviations) return content;
-        return replaceAbbreviations(content);
-    }, [content, showAbbreviations]);
+        if (!content) return content;
+        let result = content;
+        if (hideSquareBrackets) {
+            result = result.replace(/\[[\s\S]*?\]/g, "");
+        }
+        if (!showAbbreviations) {
+            result = replaceAbbreviations(result);
+        }
+        return result;
+    }, [content, showAbbreviations, hideSquareBrackets]);
 
     const handleShowTerms = useCallback(() => {
         const terms = scanForTerms(processedContent);
@@ -375,6 +384,13 @@ function Article({
                 menu: true
             },
             {
+                id: "toggleSquareBrackets",
+                name: hideSquareBrackets ? translations.SHOW_SQUARE_BRACKETS : translations.HIDE_SQUARE_BRACKETS,
+                icon: <DataArrayIcon />,
+                onClick: () => setHideSquareBrackets(prev => !prev),
+                menu: true
+            },
+            {
                 id: "toggleMarkdown",
                 name: showMarkdown ? translations.VIEW_PLAIN_TEXT : translations.VIEW_MARKDOWN,
                 icon: showMarkdown ? <CodeOffIcon /> : <CodeIcon />,
@@ -481,7 +497,7 @@ function Article({
         }
 
         return items;
-    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, prevArticle, nextArticle, onPrev, onNext, isMobile, embedded]);
+    }, [translations, handleExport, handlePrint, isAdmin, openEditDialog, openEditContentDialog, search, totalMatches, matchIndex, handlePrevMatch, handleNextMatch, showMarkdown, content, selectedTag, isPhone, handleShowTerms, showAbbreviations, setShowAbbreviations, hideSquareBrackets, setHideSquareBrackets, prevArticle, nextArticle, onPrev, onNext, isMobile, embedded]);
 
     const swipeHandlers = useSwipe({
         onSwipeLeft: onNext,
