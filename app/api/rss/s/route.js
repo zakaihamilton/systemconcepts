@@ -28,8 +28,9 @@ async function handleRequest(request) {
             return new NextResponse("Invalid Path", { status: 400 });
         }
 
+        path = path.startsWith("/") ? path.substring(1) : path;
         try {
-            validatePathAccess(path);
+            validatePathAccess(path.startsWith("wasabi/") ? path.replace(/^wasabi\//, "") : path);
         } catch (_err) {
             return new NextResponse("Access Denied", { status: 403 });
         }
