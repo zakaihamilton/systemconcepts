@@ -7,7 +7,7 @@ import { useStyles } from "@util/styles";
 // Performance optimization: Custom comparator to handle 'style' prop stability.
 // The 'style' prop from react-window often changes reference but contains the same values.
 // This prevents unnecessary re-renders of table cells when selection changes or during non-layout updates.
-function arePropsEqual(prev, next) {
+export function arePropsEqual(prev, next) {
     if (prev === next) return true;
     const keysA = Object.keys(prev);
     const keysB = Object.keys(next);
