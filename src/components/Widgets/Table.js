@@ -10,7 +10,7 @@ import { useTranslations } from "@util/translations";
 import { useDeviceType } from "@util/styles";
 import { importData, exportData } from "@util/importExport";
 import Row from "./Table/Row";
-import Item from "./Table/Item";
+import Item, { arePropsEqual } from "./Table/Item";
 import Navigator from "./Table/Navigator";
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
@@ -805,7 +805,7 @@ const TableListRow = React.memo(({ index, style, data }) => {
             />
         </>
     );
-});
+}, arePropsEqual);
 
 TableListRow.displayName = "TableListRow";
 
@@ -838,6 +838,6 @@ const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
         selected={selected}
         renderColumn={renderColumn}
     />;
-});
+}, arePropsEqual);
 
 TableGridCell.displayName = "TableGridCell";

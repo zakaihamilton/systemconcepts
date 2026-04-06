@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useMemo } from "react";
 import styles from "./SearchResultItem.module.css";
 import Article from "@views/Library/Article";
 import { normalizeContent, preprocessMarkdown } from "@util/string";
+import { arePropsEqual } from "@components/Widgets/Table/Item";
 
 const SearchResultItem = ({ index, style, data }) => {
     const { results, gotoArticle, setRowHeight, highlight } = data || {};
@@ -77,4 +78,4 @@ const SearchResultItem = ({ index, style, data }) => {
     );
 };
 
-export default React.memo(SearchResultItem);
+export default React.memo(SearchResultItem, arePropsEqual);

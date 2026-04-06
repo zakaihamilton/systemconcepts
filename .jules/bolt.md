@@ -1,3 +1,5 @@
 ## 2024-05-18 - Prevent VariableSizeList Unnecessary Re-renders
 **Learning:** Using an inline object for `itemData` prop in `react-window`'s `VariableSizeList` breaks `React.memo` for the list items (e.g. `SearchResultItem`), causing them to re-render on every list update, scroll, or state change, regardless of whether their props have actually changed.
-**Action:** Always wrap `itemData` and its dependencies (like functions e.g. `gotoArticle`) using `useMemo` and `useCallback` when using `react-window` to ensure that item components are not unnecessarily re-rendered.
+**Action:** Always wrap `itemData` and its dependencies (like functions e.g. `gotoArticle`) using `useMemo` and `useCallback` when using `react-window` to ensure that item components are not unnecessarily re-rendered.## 2026-04-05 - Virtualized List Style Reference Thrashing
+**Learning:** Virtualized list components (like `react-window` or custom implementations like `FixedSizeList`) pass a new `style` object reference to child items on every scroll event, defeating `React.memo` shallow comparison and causing unnecessary deep re-renders.
+**Action:** Always wrap virtualized item components in `React.memo` and provide a custom `arePropsEqual` comparator that deep-compares the keys and values of the `style` prop while shallow-comparing everything else.

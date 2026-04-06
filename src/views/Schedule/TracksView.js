@@ -9,6 +9,8 @@ import { ContentSize } from "@components/Page/Content";
 import Input from "@components/Widgets/Input";
 import { useDateFormatter } from "@util/locale";
 import TodayIcon from '@mui/icons-material/Today';
+import { arePropsEqual } from "@components/Widgets/Table/Item";
+import React from "react";
 
 registerToolbar("TracksView");
 
@@ -359,7 +361,7 @@ export default function TracksView({ sessions = [], store, translations, playing
     );
 }
 
-const Row = ({ index, style, data }) => {
+const Row = React.memo(({ index, style, data }) => {
     const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store, translations, playingSession } = data;
     const group = groupedSessions[index];
 
@@ -379,4 +381,4 @@ const Row = ({ index, style, data }) => {
             />
         </div>
     );
-};
+}, arePropsEqual);
