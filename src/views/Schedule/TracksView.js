@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, useRef, useContext } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, useContext, memo } from "react";
 import styles from "./TracksView.module.css";
 import TrackRow from "./TracksView/Row";
 import { useToolbar, registerToolbar } from "@components/Toolbar";
@@ -359,7 +359,33 @@ export default function TracksView({ sessions = [], store, translations, playing
     );
 }
 
-const Row = ({ index, style, data }) => {
+// Performance optimization: Custom comparator to handle 'style' prop stability.
+// The 'style' prop from react-window often changes reference but contains the same values.
+function arePropsEqual(prev, next) {
+    if (prev === next) return true;
+    const keysA = Object.keys(prev);
+    const keysB = Object.keys(next);
+    if (keysA.length !== keysB.length) return false;
+
+    for (const key of keysA) {
+        if (key === "style") {
+            const styleA = prev.style || {};
+            const styleB = next.style || {};
+            if (styleA === styleB) continue;
+            const sKeysA = Object.keys(styleA);
+            const sKeysB = Object.keys(styleB);
+            if (sKeysA.length !== sKeysB.length) return false;
+            for (const sKey of sKeysA) {
+                if (styleA[sKey] !== styleB[sKey]) return false;
+            }
+        } else {
+            if (prev[key] !== next[key]) return false;
+        }
+    }
+    return true;
+}
+
+const Row = memo(({ index, style, data }) => {
     const { groupedSessions, focusedSessionId, handleSessionClick, width, itemSize, store, translations, playingSession } = data;
     const group = groupedSessions[index];
 
@@ -379,4 +405,4 @@ const Row = ({ index, style, data }) => {
             />
         </div>
     );
-};
+}, arePropsEqual);
