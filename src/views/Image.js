@@ -93,25 +93,24 @@ export default function ImagePage({ name, ext = "png" }) {
         }
         busyRef.current = false;
     }, [path, signingLoading]);
-    useEffect(() => {
-        if (path) {
-            readFile();
-        }
-    }, [path, readFile]);
 
+    // ⚡ Bolt: Removed redundant `useEffect` that depended on `[path, readFile]`
+    // because `syncCounter` updates on initial load and sync changes.
+    // Combining them avoids duplicate `readFile()` calls on component mount.
     useEffect(() => {
         if (path) {
             readFile();
         }
     }, [syncCounter, path, readFile]);
 
+    // ⚡ Bolt: Use URL.createObjectURL to create a memory-efficient local object URL pointing directly to the blob.
+    // This avoids synchronously converting the entire blob to a base64 string with FileReader,
+    // which blocks the main thread and uses significantly more memory for large images.
     useEffect(() => {
         if (content) {
-            var reader = new FileReader();
-            reader.addEventListener("load", () => {
-                setSrc(reader.result);
-            }, false);
-            reader.readAsDataURL(content);
+            const objectUrl = URL.createObjectURL(content);
+            setSrc(objectUrl);
+            return () => URL.revokeObjectURL(objectUrl); // Clean up memory to prevent leaks
         }
     }, [content]);
 
