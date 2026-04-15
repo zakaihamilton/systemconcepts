@@ -112,7 +112,7 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
                     />
                     <div className={`${styles.clearButton} ${!search ? styles.hidden : ''}`}>
                         <Tooltip title={translations.CLEAR}>
-                            <IconButton size="small" onClick={() => setSearch("")}>
+                            <IconButton size="small" onClick={() => setSearch("")} aria-label={translations.CLEAR}>
                                 <CloseIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>

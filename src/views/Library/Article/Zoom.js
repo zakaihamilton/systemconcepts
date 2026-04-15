@@ -74,7 +74,7 @@ export default function Zoom({ open, onClose, content, number, badgeClass, Rende
         >
             <DialogContent className={styles.root} {...swipeHandlers}>
                 <Tooltip title={translations.COPY} arrow>
-                    <IconButton className={styles.copyButton} onClick={handleCopy} size="small">
+                    <IconButton className={styles.copyButton} onClick={handleCopy} size="small" aria-label={translations.COPY}>
                         <ContentCopyIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
