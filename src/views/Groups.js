@@ -18,7 +18,7 @@ import Progress from "@widgets/Progress";
 import ItemMenu from "./Groups/ItemMenu";
 import Label from "@widgets/Label";
 import { useSessions } from "@util/sessions";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import ProgressDialog from "./Groups/ProgressDialog";
 import UploadIcon from "@mui/icons-material/Upload";
 
@@ -163,6 +163,16 @@ export default function Groups() {
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
+    const sessionCounts = useMemo(() => {
+        const counts = {};
+        if (sessions) {
+            for (const session of sessions) {
+                const group = session.group;
+                counts[group] = (counts[group] || 0) + 1;
+            }
+        }
+        return counts;
+    }, [sessions]);
 
     useEffect(() => {
         if (busy) {
@@ -324,6 +334,16 @@ export default function Groups() {
                 }
             }
         },
+        !isMobile && {
+            id: "sessionCount",
+            title: translations.SESSIONS,
+            sortable: "sessionCountNumber",
+            columnProps: {
+                style: {
+                    width: "6em"
+                }
+            }
+        },
         !busy && {
             id: "colorWidget",
             title: translations.COLOR,
@@ -359,6 +379,7 @@ export default function Groups() {
 
         const sizeBytes = groupSizes[item.name] || 0;
         const sizeDisplay = sizeBytes > 0 ? abbreviateSize(sizeBytes) : '-';
+        const sessionsCount = sessionCounts[item.name] || 0;
 
         return {
             ...item,
@@ -368,7 +389,9 @@ export default function Groups() {
             colorWidget: <ColorPicker name={item.name} pickerClassName={styles.picker} key={item.name} color={item.color} onChangeComplete={changeColor} />,
             storageMode: item.bundled ? translations.BUNDLED : ((item.merged ?? item.disabled) ? translations.MERGED : translations.SPLIT),
             storageSize: sizeDisplay,
-            storageSizeBytes: sizeBytes
+            storageSizeBytes: sizeBytes,
+            sessionCount: sessionsCount || '-',
+            sessionCountNumber: sessionsCount
         };
     };
 
@@ -398,7 +421,7 @@ export default function Groups() {
             }}
             mapper={mapper}
             loading={loading}
-            depends={[translations, status, updateGroup, sessions, showDisabled, groupSizes]}
+            depends={[translations, status, updateGroup, sessions, showDisabled, groupSizes, sessionCounts]}
         />
         <ProgressDialog />
     </>;
