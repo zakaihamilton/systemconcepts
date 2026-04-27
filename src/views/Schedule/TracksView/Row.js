@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import { useRef, useEffect, useMemo, forwardRef, memo } from 'react';
 import styles from './Row.module.css';
 import TrackCard from './Card';
 import Typography from '@mui/material/Typography';
@@ -100,26 +100,6 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
         playingSession
     }), [sessions, focusedSessionId, onSessionClick, playingSession]);
 
-    // Memoize RowItem component
-    const RowItem = useCallback(({ index, style, data }) => {
-        const { sessions, focusedSessionId, onSessionClick, playingSession } = data;
-        const session = sessions[index];
-        const newStyle = {
-            ...style,
-            left: (parseFloat(style.left) || 0) + 24
-        };
-        const isPlaying = playingSession && playingSession.name === session.name && playingSession.group === session.group && playingSession.date === session.date;
-        return (
-            <div style={newStyle} className={styles.cardContainer}>
-                <TrackCard
-                    session={session}
-                    isActive={session.id === focusedSessionId}
-                    onSessionClick={onSessionClick}
-                    isPlaying={isPlaying}
-                />
-            </div>
-        );
-    }, []);
 
     // Check for overflow to conditionally show indicator
     const hasOverflow = (sessions.length * itemSize + 24) > safeWidth;
@@ -174,3 +154,49 @@ export default function TrackRow({ date, sessions, focusedSessionId, onSessionCl
         </div>
     );
 }
+
+
+function arePropsEqual(prev, next) {
+    if (prev === next) return true;
+    const keysA = Object.keys(prev);
+    const keysB = Object.keys(next);
+    if (keysA.length !== keysB.length) return false;
+
+    for (const key of keysA) {
+        if (key === "style") {
+            const styleA = prev.style || {};
+            const styleB = next.style || {};
+            if (styleA === styleB) continue;
+            const sKeysA = Object.keys(styleA);
+            const sKeysB = Object.keys(styleB);
+            if (sKeysA.length !== sKeysB.length) return false;
+            for (const sKey of sKeysA) {
+                if (styleA[sKey] !== styleB[sKey]) return false;
+            }
+        } else {
+            if (prev[key] !== next[key]) return false;
+        }
+    }
+    return true;
+}
+
+
+const RowItem = memo(({ index, style, data }) => {
+    const { sessions, focusedSessionId, onSessionClick, playingSession } = data;
+    const session = sessions[index];
+    const newStyle = {
+        ...style,
+        left: (parseFloat(style.left) || 0) + 24
+    };
+    const isPlaying = playingSession && playingSession.name === session.name && playingSession.group === session.group && playingSession.date === session.date;
+    return (
+        <div style={newStyle} className={styles.cardContainer}>
+            <TrackCard
+                session={session}
+                isActive={session.id === focusedSessionId}
+                onSessionClick={onSessionClick}
+                isPlaying={isPlaying}
+            />
+        </div>
+    );
+}, arePropsEqual);
