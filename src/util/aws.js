@@ -18,7 +18,6 @@ export async function getS3(params) {
     const unlock = await lockMutex({ id: "s3" });
     try {
         if (s3Client) {
-            console.log("getS3: returning existing s3Client");
             return s3Client;
         }
         console.log("getS3: initializing s3Client");
