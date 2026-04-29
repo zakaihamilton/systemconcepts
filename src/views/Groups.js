@@ -149,17 +149,23 @@ export default function Groups() {
 
     const updateSessionsWithSync = async () => {
         await updateSessions(showDisabled);
-        sync && sync();
+        if (syncEnabled && sync) {
+            await sync();
+        }
     };
 
     const updateAllSessionsWithSync = async () => {
         await updateAllSessions(showDisabled);
-        sync && sync();
+        if (syncEnabled && sync) {
+            await sync();
+        }
     };
 
     const updateAllMetadataCurrentYearWithSync = async () => {
         await updateAllMetadataCurrentYear(showDisabled);
-        sync && sync();
+        if (syncEnabled && sync) {
+            await sync();
+        }
     };
 
     const [currentTime, setCurrentTime] = useState(new Date().getTime());

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { UpdateSessionsStore } from "@sync/syncState";
+import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 import { useTranslations } from "@util/translations";
 import styles from "./ProgressDialog.module.css";
 import { formatDuration } from "@util/string";
@@ -10,8 +10,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
 import Chip from "@mui/material/Chip";
 import clsx from "clsx";
-import SessionIcon from "@mui/icons-material/Assignment";
 import DescriptionIcon from "@mui/icons-material/Description";
+import UploadIcon from "@mui/icons-material/CloudUpload";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
@@ -64,10 +64,13 @@ function NewSessionsList({ sessions }) {
 export default function ProgressDialog() {
     const translations = useTranslations();
     const { busy, status, start, showUpdateDialog } = UpdateSessionsStore.useState();
+    const { busy: syncing, progress: syncProgress, logs: syncLogs } = SyncActiveStore.useState();
     const wasBusyRef = useRef(false);
+    const wasSyncingRef = useRef(false);
     const [currentTime, setCurrentTime] = useState(new Date().getTime());
     const [expandedItems, setExpandedItems] = useState(new Set());
     const [isListExpanded, setListExpanded] = useState(false);
+    const [isSyncExpanded, setSyncExpanded] = useState(true);
 
     useEffect(() => {
         if (busy) {
@@ -88,6 +91,16 @@ export default function ProgressDialog() {
         }
         wasBusyRef.current = busy;
     }, [busy]);
+
+    useEffect(() => {
+        if (syncing && !wasSyncingRef.current) {
+            // Keep the dialog open if sync starts
+            UpdateSessionsStore.update(s => {
+                s.showUpdateDialog = true;
+            });
+        }
+        wasSyncingRef.current = syncing;
+    }, [syncing]);
 
     const handleClose = () => {
         UpdateSessionsStore.update(s => {
@@ -148,6 +161,40 @@ export default function ProgressDialog() {
                 ))}
                 {isListExpanded && visibleItems.length === 0 && <div className={styles.empty}>{translations.NO_UPDATES}</div>}
             </div>
+
+            {(syncing || (syncLogs && syncLogs.length > 0)) && (
+                <div className={styles.syncSection}>
+                    <div className={styles.syncHeader} onClick={() => setSyncExpanded(!isSyncExpanded)} style={{ cursor: 'pointer' }}>
+                        <UploadIcon className={styles.titleIcon} />
+                        <span style={{ flex: 1 }}>{translations.CLOUD_SYNC || "Cloud Sync"}</span>
+                        {syncing && <Chip label={translations.SYNCING} color="primary" size="small" className={styles.syncChip} />}
+                        {isSyncExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    </div>
+                    {isSyncExpanded && (
+                        <div className={styles.syncContent}>
+                            {syncing && syncProgress && (
+                                <div className={styles.syncProgress}>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={syncProgress.total > 0 ? (syncProgress.processed / syncProgress.total) * 100 : 0}
+                                        className={styles.progressBar}
+                                    />
+                                    <div className={styles.progressText}>
+                                        {syncProgress.processed} / {syncProgress.total}
+                                    </div>
+                                </div>
+                            )}
+                            <div className={styles.syncLogs}>
+                                {(syncLogs || []).slice(-3).map((log, idx) => (
+                                    <div key={idx} className={clsx(styles.logEntry, styles[log.type])}>
+                                        {log.message}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </Dialog>
     );
 }

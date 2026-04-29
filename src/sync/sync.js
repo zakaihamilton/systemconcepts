@@ -50,14 +50,16 @@ async function executeSyncPipeline(config, role, userid, phaseOffset = 0, combin
     // Resolve paths (handle {userid} interpolation)
     const resolvedRemotePath = remotePath.replace("{userid}", userid);
 
-    const canUpload = roleAuth(role, uploadsRole) && !isLocked;
+    const canUpload = (config.direction === "bi" || config.direction === "push") && roleAuth(role, uploadsRole) && !isLocked;
 
-    if (!canUpload) {
-        console.log(`[Sync] Upload blocked. Role: ${role}, Admin Auth: ${roleAuth(role, "admin")}, Locked: ${isLocked}`);
+    addSyncLog(`Phase: ${label}, Role: ${role || "none"}, Uploads: ${canUpload ? "Allowed" : "Restricted"}`, "info");
+
+    if (!canUpload && (config.direction === "bi" || config.direction === "push")) {
+        console.warn(`[Sync] Upload restricted for ${label}. Role: ${role}, Allowed: ${uploadsRole}, Locked: ${isLocked}`);
         if (isLocked) {
             addSyncLog(`Uploads skipped (Sync is Locked)`, "warning");
-        } else {
-            addSyncLog(`Read-only mode: Uploads disabled for ${role}`, "info");
+        } else if (!roleAuth(role, uploadsRole)) {
+            addSyncLog(`Insufficient permissions for ${label} uploads (Role: ${role})`, "warning");
         }
     }
 

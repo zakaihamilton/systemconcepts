@@ -254,3 +254,80 @@
     padding: 2em;
     color: var(--text-color-secondary);
 }
+
+.syncSection {
+    margin-top: 0;
+    padding: 1em;
+    border-top: 1px solid var(--border-color);
+    background: rgba(33, 150, 243, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.syncHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    font-weight: 700;
+    color: #2196f3;
+    font-size: 1.1em;
+}
+
+.syncChip {
+    height: 20px;
+    font-size: 0.8em;
+}
+
+.syncContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    animation: slideDown 0.3s ease-out;
+}
+
+.syncProgress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.syncLogs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.75em;
+    border-radius: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+}
+
+.logEntry {
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logEntry.info {
+    color: var(--text-color-secondary);
+}
+
+.logEntry.success {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.logEntry.error {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.logEntry.warning {
+    color: #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+}

@@ -7,7 +7,7 @@ import pLimit from "p-limit";
 const fsEndPoint = "/api/aws";
 
 async function getListing(path, options = {}) {
-    path = makePath(path);
+    path = makePath(path).replace(/^\/aws\//, "/").replace(/^aws\//, "");
     const { useCount } = options;
     const listing = [];
     const encodedPath = encodeURIComponent(path.slice(1));
@@ -76,16 +76,16 @@ async function deleteFolder(root) {
 }
 
 async function deleteFile(path) {
-    path = makePath(path);
+    path = makePath(path).replace(/^\/aws\//, "/").replace(/^aws\//, "");
     const encodedPath = encodeURIComponent(path.slice(1));
-    await fetchJSON(`${fsEndPoint}?path=${encodedPath}`, {
+    await fetchJSON(`${fsEndPoint}?path=${encodedPath}&t=${Date.now()}`, {
         method: "DELETE",
         cache: "no-store"
     });
 }
 
 async function readFile(path) {
-    path = makePath(path);
+    path = makePath(path).replace(/^\/aws\//, "/").replace(/^aws\//, "");
     const binary = isBinaryFile(path);
     let body = null;
     if (binary) {
@@ -147,7 +147,7 @@ async function readFiles(prefix, files) {
 }
 
 async function writeFile(path, body) {
-    path = makePath(path);
+    path = makePath(path).replace(/^\/aws\//, "/").replace(/^aws\//, "");
 
     // For binary files with Uint8Array body, convert to base64 for JSON transport
     let bodyToSend = body;
@@ -158,33 +158,16 @@ async function writeFile(path, body) {
         bodyToSend = await bodyToSend;
     }
 
-    if (bodyToSend && bodyToSend.length > 4 * 1024 * 1024) {
-        const encodedPath = encodeURIComponent(path.slice(1));
-        const { url } = await fetchJSON(`/api/aws_upload?path=${encodedPath}`, {
-            method: "GET",
-            cache: "no-store"
-        });
-        let data = body;
-        if (typeof body === "string" && isBinaryFile(path)) {
-            data = stringToBinary(body);
-        } else if (body instanceof Uint8Array || ArrayBuffer.isView(body)) {
-            data = new Blob([body]);
-        }
-        await fetch(url, {
-            method: "PUT",
-            body: data
-        });
-    }
-    else {
-        await fetchJSON(fsEndPoint, {
-            method: "PUT",
-            cache: "no-store",
-            body: JSON.stringify([{
-                path,
-                body: bodyToSend
-            }])
-        });
-    }
+    // Use the server-side proxy for all uploads to avoid CORS issues with direct S3 access.
+    // The server handles the actual S3 communication.
+    await fetchJSON(fsEndPoint, {
+        method: "PUT",
+        cache: "no-store",
+        body: JSON.stringify([{
+            path,
+            body: bodyToSend
+        }])
+    });
 }
 
 async function writeFiles(prefix, files) {
@@ -285,7 +268,7 @@ async function getRecursiveList(path) {
 }
 
 async function exists(path) {
-    path = makePath(path);
+    path = makePath(path).replace(/^\/aws\//, "/").replace(/^aws\//, "");
     let exists = false;
     try {
         const item = await fetchJSON(fsEndPoint + "?path=" + encodeURIComponent(path.slice(1)) + "&exists=true&t=" + Date.now(), {
