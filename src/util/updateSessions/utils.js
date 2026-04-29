@@ -1,7 +1,9 @@
 import storage from "@util/storage";
 import { makePath } from "@util/path";
 import { writeCompressedFile } from "@sync/bundle";
-import { LOCAL_SYNC_PATH } from "@sync/constants";
+import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "@sync/constants";
+import { updateManifestEntry } from "@sync/manifest";
+import { getFileInfo } from "@sync/hash";
 
 export async function getListing(path) {
     console.log(`[getListing] Requesting listing for: ${path}`);
@@ -69,6 +71,24 @@ export async function updateYearSync(groupName, year, sessions) {
         }
 
         await writeCompressedFile(localPath, data);
+
+        // Update local manifest immediately
+        try {
+            const content = await storage.readFile(localPath);
+            const info = await getFileInfo(content);
+            const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+            const relPath = localPath.substring(makePath(LOCAL_SYNC_PATH).length);
+            const entry = {
+                path: relPath.startsWith("/") ? relPath : "/" + relPath,
+                hash: info.hash,
+                size: info.size,
+                version: Date.now().toString()
+            };
+            await updateManifestEntry(manifestPath, entry);
+        } catch (err) {
+            console.warn(`[Sync] Failed to update manifest for ${localPath}`, err);
+        }
+
         return { counter: data.counter, newCount, newSessions };
     } catch (err) {
         console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
@@ -108,5 +128,23 @@ export async function updateBundleFile(newSessions) {
         sessions: allSessions
     };
     await writeCompressedFile(bundlePath, bundleData);
+
+    // Update local manifest immediately
+    try {
+        const content = await storage.readFile(bundlePath);
+        const info = await getFileInfo(content);
+        const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+        const relPath = bundlePath.substring(makePath(LOCAL_SYNC_PATH).length);
+        const entry = {
+            path: relPath.startsWith("/") ? relPath : "/" + relPath,
+            hash: info.hash,
+            size: info.size,
+            version: Date.now().toString()
+        };
+        await updateManifestEntry(manifestPath, entry);
+    } catch (err) {
+        console.warn(`[Sync] Failed to update manifest for ${bundlePath}`, err);
+    }
+
     console.log(`[Sync] Updated bundle.json with ${newSessions.length} new sessions. Total: ${allSessions.length}`);
 }

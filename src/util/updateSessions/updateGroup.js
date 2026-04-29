@@ -6,8 +6,10 @@ import pLimit from "../p-limit";
 import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 import { addSyncLog } from "@sync/sync";
 import { writeCompressedFile } from "@sync/bundle";
-import { LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "@sync/constants";
+import { LOCAL_SYNC_PATH, SYNC_BASE_PATH, FILES_MANIFEST } from "@sync/constants";
 import { getListing, updateYearSync } from "./utils";
+import { updateManifestEntry } from "@sync/manifest";
+import { getFileInfo } from "@sync/hash";
 import { loadTags, loadDurations, loadSummaries, loadTranscriptions } from "./metadata";
 import { createSessionItem } from "./mapper";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
@@ -415,6 +417,24 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
                 sessions: uniqueSessions
             };
             await writeCompressedFile(localGroupPath, groupData);
+
+            // Update local manifest immediately so useSessions can see it
+            try {
+                const content = await storage.readFile(localGroupPath);
+                const info = await getFileInfo(content);
+                const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+                const relPath = localGroupPath.substring(makePath(LOCAL_SYNC_PATH).length);
+                const entry = {
+                    path: relPath.startsWith("/") ? relPath : "/" + relPath,
+                    hash: info.hash,
+                    size: info.size,
+                    version: Date.now().toString() // Use timestamp to ensure it's "newer"
+                };
+                await updateManifestEntry(manifestPath, entry);
+                console.log(`[Sync] Updated local manifest for ${relPath}`);
+            } catch (err) {
+                console.warn(`[Sync] Failed to update local manifest for ${localGroupPath}`, err);
+            }
 
             // 3. Cleanup
             await cleanupMergedGroup(name);

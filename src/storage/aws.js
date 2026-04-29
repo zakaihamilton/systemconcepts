@@ -90,7 +90,7 @@ async function readFile(path) {
     let body = null;
     if (binary) {
         const encodedPath = encodeURIComponent(path.slice(1));
-        body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true`, {
+        body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true&t=${Date.now()}`, {
             method: "GET",
             cache: "no-store"
         });
@@ -103,7 +103,7 @@ async function readFile(path) {
     }
     else {
         const encodedPath = encodeURIComponent(path.slice(1));
-        body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file`, {
+        body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file&t=${Date.now()}`, {
             method: "GET",
             cache: "no-store"
         });
