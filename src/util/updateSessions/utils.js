@@ -44,35 +44,35 @@ export async function updateYearSync(groupName, year, sessions) {
         };
         // Check if content changed
         let newCount = 0;
+        let newSessions = [];
         if (await storage.exists(localPath)) {
             const existingContent = await storage.readFile(localPath);
             try {
                 const existingObj = JSON.parse(existingContent);
-                const exSessions = JSON.stringify(existingObj.sessions);
-
-                // Calculate newCount even if specific content matches, just to be safe, 
-                // but usually we rely on "something changed". 
-                // However, diffing logic is needed for newCount.
                 const existingIds = new Set((existingObj.sessions || []).map(s => s.name || s.id));
-                newCount = data.sessions.filter(s => !existingIds.has(s.name || s.id)).length;
+                newSessions = data.sessions.filter(s => !existingIds.has(s.name || s.id));
+                newCount = newSessions.length;
 
-                const newSessions = JSON.stringify(data.sessions);
-                if (exSessions === newSessions && existingObj.group === data.group) {
-                    return { counter: 0, newCount: 0 };
+                const exSessions = JSON.stringify(existingObj.sessions);
+                const newSessionsStr = JSON.stringify(data.sessions);
+                if (exSessions === newSessionsStr && existingObj.group === data.group) {
+                    return { counter: 0, newCount: 0, newSessions: [] };
                 }
             } catch {
                 // if parse fails, overwrite
+                newSessions = data.sessions;
                 newCount = data.sessions.length; // Assume all are new if existing corrupt
             }
         } else {
+            newSessions = data.sessions;
             newCount = data.sessions.length; // All are new
         }
 
         await writeCompressedFile(localPath, data);
-        return { counter: data.counter, newCount };
+        return { counter: data.counter, newCount, newSessions };
     } catch (err) {
         console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
-        return { counter: 0, newCount: 0 };
+        return { counter: 0, newCount: 0, newSessions: [] };
     }
 }
 

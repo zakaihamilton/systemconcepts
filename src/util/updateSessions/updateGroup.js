@@ -3,7 +3,7 @@ import { makePath, fileTitle, isVideoFile, isSubtitleFile, isTagsFile, isDuratio
 import { shrinkImage, blobToBase64 } from "@util/image";
 import { readBinary } from "@util/binary";
 import pLimit from "../p-limit";
-import { UpdateSessionsStore } from "@sync/syncState";
+import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
 import { addSyncLog } from "@sync/sync";
 import { writeCompressedFile } from "@sync/bundle";
 import { LOCAL_SYNC_PATH, SYNC_BASE_PATH } from "@sync/constants";
@@ -308,13 +308,17 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
             if (isMerged || isBundled) {
                 allSessions.push(...yearSessions);
             } else {
-                const { counter, newCount } = await updateYearSync(name, year.name, yearSessions);
+                const { counter, newCount, newSessions } = await updateYearSync(name, year.name, yearSessions);
                 // Track sessions for total count regardless of whether file was updated
                 yearSessions.forEach(session => allSessionNames.add(session.id));
 
                 if (counter > 0) {
                     UpdateSessionsStore.update(s => {
                         s.status[itemIndex].addedCount += newCount;
+                        s.status[itemIndex].newSessions.push(...newSessions.map(s => ({
+                            name: s.id,
+                            files: s.files || []
+                        })));
                         s.status = [...s.status];
                     });
                 }
@@ -364,10 +368,15 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         await cleanupBundledGroup(name);
 
         const existingIds = new Set(existingSessions.map(s => s.id));
-        const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
+        const newSessionItems = uniqueSessions.filter(s => !existingIds.has(s.id));
+        const addedCount = newSessionItems.length;
 
         UpdateSessionsStore.update(s => {
             s.status[itemIndex].addedCount = addedCount;
+            s.status[itemIndex].newSessions.push(...newSessionItems.map(s => ({
+                name: s.id,
+                files: s.files || []
+            })));
             s.status = [...s.status];
         });
         uniqueSessions.forEach(session => allSessionNames.add(session.id));
@@ -412,10 +421,15 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
         }
 
         const existingIds = new Set(existingSessions.map(s => s.id));
-        const addedCount = uniqueSessions.filter(s => !existingIds.has(s.id)).length;
+        const newSessionItems = uniqueSessions.filter(s => !existingIds.has(s.id));
+        const addedCount = newSessionItems.length;
 
         UpdateSessionsStore.update(s => {
             s.status[itemIndex].addedCount = addedCount;
+            s.status[itemIndex].newSessions.push(...newSessionItems.map(s => ({
+                name: s.id,
+                files: s.files || []
+            })));
             s.status = [...s.status];
         });
         uniqueSessions.forEach(session => allSessionNames.add(session.id));
@@ -492,6 +506,12 @@ export async function updateGroupProcess(name, updateAll, forceUpdate = false, i
 
     const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
     const newMsg = addedCount > 0 ? `, ${addedCount} updated` : ", no updates";
+
+    if (addedCount > 0) {
+        SyncActiveStore.update(s => {
+            s.needsSessionReload = true;
+        });
+    }
 
     addSyncLog(`[${name}] ✓ Updated (${totalCount} sessions${newMsg}${lastSessionMsg}).`, "success");
 }

@@ -40,7 +40,8 @@ export function createSessionItem(id, fileList, yearName, groupName, sessionTags
         tags: (sessionTags || []).map(tag => typeof tag === "string" ? tag.trim().replace(/\.+$/, "") : tag).filter(tag => tag),
         duration: sessionDuration,
         summaryText: sessionSummaryText,
-        transcription: sessionTranscription || false
+        transcription: sessionTranscription || false,
+        files: (fileList || []).map(f => f.name)
     };
 
     if (audioFile) {
