@@ -172,20 +172,22 @@ export default function ProgressDialog() {
                     </div>
                     {isSyncExpanded && (
                         <div className={styles.syncContent}>
-                            {syncing && syncProgress && (
-                                <div className={styles.syncProgress}>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={syncProgress.total > 0 ? (syncProgress.processed / syncProgress.total) * 100 : 0}
-                                        className={styles.progressBar}
-                                    />
-                                    <div className={styles.progressText}>
-                                        {syncProgress.processed} / {syncProgress.total}
-                                    </div>
-                                </div>
-                            )}
-                            <div className={styles.syncLogs}>
-                                {(syncLogs || []).slice(-3).map((log, idx) => (
+                            <div className={styles.syncProgress}>
+                                {syncing && syncProgress && (
+                                    <>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={syncProgress.total > 0 ? (syncProgress.processed / syncProgress.total) * 100 : 0}
+                                            className={styles.progressBar}
+                                        />
+                                        <div className={styles.progressText}>
+                                            {syncProgress.processed} / {syncProgress.total}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            <div className={styles.syncLogs} ref={el => { if (el) el.scrollTop = el.scrollHeight; }}>
+                                {(syncLogs || []).map((log, idx) => (
                                     <div key={idx} className={clsx(styles.logEntry, styles[log.type])}>
                                         {log.message}
                                     </div>

@@ -1,6 +1,8 @@
 .dialog {
     display: flex;
     flex-direction: column;
+    width: 600px; /* Fixed width to prevent horizontal jitter */
+    max-width: 95vw;
 }
 
 .content {
@@ -284,42 +286,45 @@
     flex-direction: column;
     gap: 0.75em;
     animation: slideDown 0.3s ease-out;
+    min-height: 160px; /* Reserve space to prevent dialog growth during sync */
 }
 
 .syncProgress {
     display: flex;
     flex-direction: column;
     gap: 0.25em;
+    height: 32px; /* Fixed height to reserve space for the progress bar */
 }
 
 .syncLogs {
     display: flex;
     flex-direction: column;
     gap: 0.4em;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0.75em;
+    background: #1a1a1a; /* Darker, more contrasty background */
+    padding: 1em;
     border-radius: 6px;
-    max-height: 120px;
+    height: 120px; /* Increased height slightly for better view */
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal jitter from long lines */
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.85em;
+    font-size: 0.9em; /* Slightly larger font */
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .logEntry {
     padding: 0.2em 0.4em;
     border-radius: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    word-break: break-all;
+    line-height: 1.4;
 }
 
 .logEntry.info {
-    color: var(--text-color-secondary);
+    color: #e0e0e0; /* Brighter white for info */
 }
 
 .logEntry.success {
-    color: #4caf50;
-    background: rgba(76, 175, 80, 0.1);
+    color: #81c784; /* Brighter green */
+    background: rgba(76, 175, 80, 0.15);
 }
 
 .logEntry.error {
@@ -328,6 +333,6 @@
 }
 
 .logEntry.warning {
-    color: #ff9800;
-    background: rgba(255, 152, 0, 0.1);
+    color: #ffb74d; /* Brighter orange */
+    background: rgba(255, 152, 0, 0.15);
 }
