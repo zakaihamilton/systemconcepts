@@ -1,3 +1,5 @@
 ## 2024-05-18 - Prevent VariableSizeList Unnecessary Re-renders
 **Learning:** Using an inline object for `itemData` prop in `react-window`'s `VariableSizeList` breaks `React.memo` for the list items (e.g. `SearchResultItem`), causing them to re-render on every list update, scroll, or state change, regardless of whether their props have actually changed.
-**Action:** Always wrap `itemData` and its dependencies (like functions e.g. `gotoArticle`) using `useMemo` and `useCallback` when using `react-window` to ensure that item components are not unnecessarily re-rendered.
+**Action:** Always wrap `itemData` and its dependencies (like functions e.g. `gotoArticle`) using `useMemo` and `useCallback` when using `react-window` to ensure that item components are not unnecessarily re-rendered.## 2026-05-04 - [Lazy Initialization in React Components]
+**Learning:** For properties derived from expensive operations (like string concatenation on large datasets) that might not be used immediately, using a JS getter for lazy initialization within data transformation logic defers the computation cost from initial render to interaction time.
+**Action:** Use `get propertyName() { if (!this._cache) this._cache = compute(); return this._cache; }` when preparing data objects in large arrays if the property is only accessed conditionally (e.g., during a search).
