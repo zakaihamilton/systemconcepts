@@ -1,11 +1,11 @@
 import {
-    S3Client,
-    PutObjectCommand,
-    GetObjectCommand,
-    CopyObjectCommand,
-    DeleteObjectCommand,
-    HeadObjectCommand,
-    ListObjectsV2Command
+	S3Client,
+	PutObjectCommand,
+	GetObjectCommand,
+	CopyObjectCommand,
+	DeleteObjectCommand,
+	ListObjectsV2Command,
+	HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 import { lockMutex } from "@sync/mutex";
 import fs from "fs";
@@ -15,407 +15,454 @@ import { getSafeError } from "./safeError";
 let s3Client = null;
 
 export async function getS3(params) {
-    const unlock = await lockMutex({ id: "s3" });
-    try {
-        if (s3Client) {
-            return s3Client;
-        }
-        console.log("getS3: initializing s3Client");
+	const unlock = await lockMutex({ id: "s3" });
+	try {
+		if (s3Client) {
+			return s3Client;
+		}
+		console.log("getS3: initializing s3Client");
 
-        const { endpoint, region } = params || {};
-        let finalEndpoint = endpoint || process.env.AWS_ENDPOINT;
-        const finalRegion = region || "us-east-1";
+		const { endpoint, region } = params || {};
+		let finalEndpoint = endpoint || process.env.AWS_ENDPOINT;
+		const finalRegion = region || "us-east-1";
 
-        if (finalEndpoint) {
-            if (!finalEndpoint.startsWith("http")) {
-                finalEndpoint = `https://${finalEndpoint}`;
-            }
-            try {
-                new URL(finalEndpoint);
-            } catch (_err) {
-                console.error("getS3: Invalid endpoint URL:", finalEndpoint);
-                // Fallback to undefined to let AWS SDK use defaults if appropriate,
-                // or let new S3Client throw with a clear error
-            }
-        }
+		if (finalEndpoint) {
+			if (!finalEndpoint.startsWith("http")) {
+				finalEndpoint = `https://${finalEndpoint}`;
+			}
+			try {
+				new URL(finalEndpoint);
+			} catch (_err) {
+				console.error("getS3: Invalid endpoint URL:", finalEndpoint);
+				// Fallback to undefined to let AWS SDK use defaults if appropriate,
+				// or let new S3Client throw with a clear error
+			}
+		}
 
-        console.log("getS3: initializing s3Client", { finalEndpoint, finalRegion });
+		console.log("getS3: initializing s3Client", { finalEndpoint, finalRegion });
 
-        const accessKeyId = process.env.AWS_ID;
-        const secretAccessKey = process.env.AWS_SECRET;
+		const accessKeyId = process.env.AWS_ID;
+		const secretAccessKey = process.env.AWS_SECRET;
 
-        console.log("getS3: credentials check", {
-            hasAccessKey: !!accessKeyId,
-            hasSecretKey: !!secretAccessKey,
-            accessKeyLength: accessKeyId ? accessKeyId.length : 0
-        });
+		console.log("getS3: credentials check", {
+			hasAccessKey: !!accessKeyId,
+			hasSecretKey: !!secretAccessKey,
+			accessKeyLength: accessKeyId ? accessKeyId.length : 0,
+		});
 
-        if (!accessKeyId || !secretAccessKey) {
-            console.error("getS3: Missing AWS credentials! Check AWS_ID and AWS_SECRET in .env");
-        }
+		if (!accessKeyId || !secretAccessKey) {
+			console.error(
+				"getS3: Missing AWS credentials! Check AWS_ID and AWS_SECRET in .env",
+			);
+		}
 
-        s3Client = new S3Client({
-            endpoint: finalEndpoint,
-            region: finalRegion,
-            credentials: {
-                accessKeyId: accessKeyId,
-                secretAccessKey: secretAccessKey
-            }
-        });
-        console.log("getS3: created s3Client", typeof s3Client, typeof s3Client.send);
-        return s3Client;
-    } finally {
-        unlock();
-    }
+		s3Client = new S3Client({
+			endpoint: finalEndpoint,
+			region: "sfo3",
+			credentials: {
+				accessKeyId: accessKeyId,
+				secretAccessKey: secretAccessKey,
+			},
+			forcePathStyle: true,
+		});
+		console.log(
+			"getS3: created s3Client",
+			typeof s3Client,
+			typeof s3Client.send,
+		);
+		return s3Client;
+	} finally {
+		unlock();
+	}
 }
 
 /**
- * Helper to parse S3 location strings. 
+ * Helper to parse S3 location strings.
  * Supports "bucket/key" or just "key" (uses default bucket).
  */
 function parseUrl(url) {
-    if (!url) return [process.env.AWS_BUCKET, ""];
-    const parts = url.split("/");
-    // If it looks like a full path "bucket/folder/file"
-    if (parts.length > 1 && !url.startsWith("/")) {
-        return [parts[0], parts.slice(1).join("/")];
-    }
-    // Default to environment bucket if just a key is provided
-    return [process.env.AWS_BUCKET, url];
+	if (!url) return [process.env.AWS_BUCKET, ""];
+	const parts = url.split("/");
+	// If it looks like a full path "bucket/folder/file"
+	if (parts.length > 1 && !url.startsWith("/")) {
+		return [parts[0], parts.slice(1).join("/")];
+	}
+	// Default to environment bucket if just a key is provided
+	return [process.env.AWS_BUCKET, url];
 }
 
 /**
  * Normalize path by removing leading slash
  */
 function normalizePath(path) {
-    if (!path) return path;
-    return path.startsWith('/') ? path.substring(1) : path;
+	if (!path) return path;
+	return path.startsWith("/") ? path.substring(1) : path;
 }
 
 /**
  * Validate path access to prevent traversal and restricted folder access
  */
 export function validatePathAccess(path) {
-    if (!path) return; // Allow empty path (root listing) if logical, or throw if strict.
+	if (!path) return; // Allow empty path (root listing) if logical, or throw if strict.
 
-    // Decode first to ensure %2e%2e is caught as ..
-    const decoded = decodeURIComponent(path);
-    const normalized = normalizePath(decoded);
+	// Decode first to ensure %2e%2e is caught as ..
+	const decoded = decodeURIComponent(path);
+	const normalized = normalizePath(decoded);
 
-    // 3. Security: Robust traversal check
-    if (normalized.split("/").includes("..")) {
-        throw new Error("ACCESS_DENIED");
-    }
+	// 3. Security: Robust traversal check
+	if (normalized.split("/").includes("..")) {
+		throw new Error("ACCESS_DENIED");
+	}
 
-    // Block private folder access
-    if (normalized.startsWith("private/") || normalized === "private") {
-        throw new Error("ACCESS_DENIED");
-    }
+	// Block private folder access
+	if (normalized.startsWith("private/") || normalized === "private") {
+		throw new Error("ACCESS_DENIED");
+	}
 }
 
-export async function uploadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = normalizePath(to);
+export async function uploadFile({
+	from,
+	to,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(to);
 
-    // Note: In Next.js (Serverless), 'from' must be in /tmp/ or accessible via fs.
-    if (!fs.existsSync(from)) {
-        throw new Error(`Source file not found: ${from}`);
-    }
+	// Note: In Next.js (Serverless), 'from' must be in /tmp/ or accessible via fs.
+	if (!fs.existsSync(from)) {
+		throw new Error(`Source file not found: ${from}`);
+	}
 
-    const fileStream = fs.createReadStream(from);
-    const uploadParams = {
-        Bucket: bucket,
-        Key: key,
-        Body: fileStream,
-        // Note: Check if your bucket blocks public ACLs. If so, remove the line below.
-        ACL: "public-read"
-    };
-    return await s3.send(new PutObjectCommand(uploadParams));
+	const fileStream = fs.createReadStream(from);
+	const uploadParams = {
+		Bucket: bucket,
+		Key: key,
+		Body: fileStream,
+		// Note: Check if your bucket blocks public ACLs. If so, remove the line below.
+		ACL: "public-read",
+	};
+	return await s3.send(new PutObjectCommand(uploadParams));
 }
 
-export async function downloadFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = from;
+export async function downloadFile({
+	from,
+	to,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = from;
 
-    const downloadParams = {
-        Bucket: bucket,
-        Key: key
-    };
+	const downloadParams = {
+		Bucket: bucket,
+		Key: key,
+	};
 
-    const response = await s3.send(new GetObjectCommand(downloadParams));
+	const response = await s3.send(new GetObjectCommand(downloadParams));
 
-    // 4. Stability: Use pipeline or simple write for Next.js context
-    // Direct pipe can be risky if error handling isn't attached to both streams.
-    const fileStream = fs.createWriteStream(to);
+	// 4. Stability: Use pipeline or simple write for Next.js context
+	// Direct pipe can be risky if error handling isn't attached to both streams.
+	const fileStream = fs.createWriteStream(to);
 
-    // Readable.fromWeb or simple pipe for Node >= 18
-    if (response.Body.pipe) {
-        response.Body.pipe(fileStream);
-    } else {
-        // Fallback for some SDK versions or mocked streams
-        const buffer = await response.Body.transformToByteArray();
-        fs.writeFileSync(to, buffer);
-        return;
-    }
+	// Readable.fromWeb or simple pipe for Node >= 18
+	if (response.Body.pipe) {
+		response.Body.pipe(fileStream);
+	} else {
+		// Fallback for some SDK versions or mocked streams
+		const buffer = await response.Body.transformToByteArray();
+		fs.writeFileSync(to, buffer);
+		return;
+	}
 
-    await new Promise((resolve, reject) => {
-        fileStream.on("finish", resolve);
-        fileStream.on("error", reject);
-        response.Body.on("error", reject);
-    });
+	await new Promise((resolve, reject) => {
+		fileStream.on("finish", resolve);
+		fileStream.on("error", reject);
+		response.Body.on("error", reject);
+	});
 }
 
-export async function uploadData({ path, data, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = normalizePath(path);
+export async function uploadData({
+	path,
+	data,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
 
-    const uploadParams = {
-        Bucket: bucket,
-        Key: key,
-        Body: data,
-        ACL: "public-read"
-    };
-    return await s3.send(new PutObjectCommand(uploadParams));
+	const uploadParams = {
+		Bucket: bucket,
+		Key: key,
+		Body: data,
+		ACL: "public-read",
+	};
+	return await s3.send(new PutObjectCommand(uploadParams));
 }
 
-export async function downloadData({ path, binary, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = normalizePath(path);
+export async function downloadData({
+	path,
+	binary,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
 
-    const downloadParams = {
-        Bucket: bucket,
-        Key: key
-    };
+	const downloadParams = {
+		Bucket: bucket,
+		Key: key,
+	};
 
-    const response = await s3.send(new GetObjectCommand(downloadParams));
+	const response = await s3.send(new GetObjectCommand(downloadParams));
 
-    // 5. Memory Optimization: Use SDK built-in transform methods
-    if (binary) {
-        const uint8Array = await response.Body.transformToByteArray();
-        // Convert Uint8Array to Buffer for compatibility with existing code
-        return Buffer.from(uint8Array);
-    }
-    return await response.Body.transformToString();
+	// 5. Memory Optimization: Use SDK built-in transform methods
+	if (binary) {
+		const uint8Array = await response.Body.transformToByteArray();
+		// Convert Uint8Array to Buffer for compatibility with existing code
+		return Buffer.from(uint8Array);
+	}
+	return await response.Body.transformToString();
 }
 
 export async function copyFile(from, to) {
-    const [fromBucketName, fromPath] = parseUrl(from);
-    const [toBucketName, toPath] = parseUrl(to);
+	const [fromBucketName, fromPath] = parseUrl(from);
+	const [toBucketName, toPath] = parseUrl(to);
 
-    const s3 = await getS3({});
+	const s3 = await getS3({});
 
-    // CopySource must be URL encoded, but the slash between bucket and key must remain
-    const copyParams = {
-        Bucket: toBucketName,
-        CopySource: `${fromBucketName}/${encodeURIComponent(fromPath)}`,
-        Key: toPath
-    };
-    return await s3.send(new CopyObjectCommand(copyParams));
+	// CopySource must be URL encoded, but the slash between bucket and key must remain
+	const copyParams = {
+		Bucket: toBucketName,
+		CopySource: `${fromBucketName}/${encodeURIComponent(fromPath)}`,
+		Key: toPath,
+	};
+	return await s3.send(new CopyObjectCommand(copyParams));
 }
 
-export async function moveFile({ from, to, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
+export async function moveFile({
+	from,
+	to,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	const s3 = await getS3({});
 
-    // 6. Bug Fix: Don't encode the slash between Bucket and Key
-    const encodedSource = `${bucketName}/${encodeURIComponent(from)}`;
+	// 6. Bug Fix: Don't encode the slash between Bucket and Key
+	const encodedSource = `${bucketName}/${encodeURIComponent(from)}`;
 
-    const copyParams = {
-        Bucket: bucketName,
-        CopySource: encodedSource,
-        Key: to
-    };
+	const copyParams = {
+		Bucket: bucketName,
+		CopySource: encodedSource,
+		Key: to,
+	};
 
-    const copyResponse = await s3.send(new CopyObjectCommand(copyParams));
-    await deleteFile({ path: from, bucketName });
-    return copyResponse;
+	const copyResponse = await s3.send(new CopyObjectCommand(copyParams));
+	await deleteFile({ path: from, bucketName });
+	return copyResponse;
 }
 
-export async function deleteFile({ path, bucketName = process.env.AWS_BUCKET }) {
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = normalizePath(path);
+export async function deleteFile({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
 
-    const deleteParams = {
-        Bucket: bucket,
-        Key: key
-    };
-    return await s3.send(new DeleteObjectCommand(deleteParams));
+	const deleteParams = {
+		Bucket: bucket,
+		Key: key,
+	};
+	return await s3.send(new DeleteObjectCommand(deleteParams));
 }
 
-export async function metadataInfo({ path, bucketName = process.env.AWS_BUCKET }) {
-    path = normalizePath(path);
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = path;
+export async function metadataInfo({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+}) {
+	path = normalizePath(path);
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = path;
 
-    try {
-        const headParams = { Bucket: bucket, Key: key };
-        const headResponse = await s3.send(new HeadObjectCommand(headParams));
-        const name = path.split("/").pop();
-        return {
-            type: headResponse.ContentType,
-            name,
-            size: headResponse.ContentLength,
-            date: headResponse.LastModified?.valueOf()
-        };
-    } catch {
-        // If file not found, check if it is a folder (CommonPrefixes)
-        const listParams = {
-            Bucket: bucket,
-            Delimiter: "/",
-            Prefix: key ? key + "/" : "",
-            MaxKeys: 1
-        };
+	try {
+		const headParams = { Bucket: bucket, Key: key };
+		const headResponse = await s3.send(new HeadObjectCommand(headParams));
+		const name = path.split("/").pop();
+		return {
+			type: headResponse.ContentType,
+			name,
+			size: headResponse.ContentLength,
+			date: headResponse.LastModified?.valueOf(),
+		};
+	} catch {
+		// If file not found, check if it is a folder (CommonPrefixes)
+		const listParams = {
+			Bucket: bucket,
+			Delimiter: "/",
+			Prefix: key ? key + "/" : "",
+			MaxKeys: 1,
+		};
 
-        try {
-            const listResponse = await s3.send(new ListObjectsV2Command(listParams));
-            if ((listResponse.Contents && listResponse.Contents.length > 0) ||
-                (listResponse.CommonPrefixes && listResponse.CommonPrefixes.length > 0)) {
-                const name = path.split("/").pop();
-                return {
-                    type: "application/x-directory",
-                    name
-                };
-            }
-        } catch {
-            // Ignore list errors, return null
-        }
-    }
-    return null;
+		try {
+			const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+			if (
+				(listResponse.Contents && listResponse.Contents.length > 0) ||
+				(listResponse.CommonPrefixes && listResponse.CommonPrefixes.length > 0)
+			) {
+				const name = path.split("/").pop();
+				return {
+					type: "application/x-directory",
+					name,
+				};
+			}
+		} catch {
+			// Ignore list errors, return null
+		}
+	}
+	return null;
 }
 
 export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
-    path = normalizePath(path);
-    console.log(`[S3 list] Listing path: ${path}, bucket: ${bucketName}`);
+	path = normalizePath(path);
+	console.log(`[S3 list] Listing path: ${path}, bucket: ${bucketName}`);
 
-    const s3 = await getS3({});
-    const bucket = bucketName;
-    const key = path;
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = path;
 
-    const items = [];
-    let continuationToken = undefined;
+	const items = [];
+	let continuationToken = undefined;
 
-    do {
-        const listParams = {
-            Bucket: bucket,
-            Delimiter: "/",
-            Prefix: key ? key + "/" : "",
-            ContinuationToken: continuationToken
-        };
-        console.log(`[S3 list] ListParams:`, listParams);
-        const listResponse = await s3.send(new ListObjectsV2Command(listParams));
-        console.log(`[S3 list] Response - CommonPrefixes: ${listResponse.CommonPrefixes?.length || 0}, Contents: ${listResponse.Contents?.length || 0}`);
+	do {
+		const listParams = {
+			Bucket: bucket,
+			Delimiter: "/",
+			Prefix: key ? key + "/" : "",
+			ContinuationToken: continuationToken,
+		};
+		console.log(`[S3 list] ListParams:`, listParams);
+		const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+		console.log(
+			`[S3 list] Response - CommonPrefixes: ${listResponse.CommonPrefixes?.length || 0}, Contents: ${listResponse.Contents?.length || 0}`,
+		);
 
-        listResponse.CommonPrefixes?.forEach(prefix => {
-            const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1).split("/").pop();
-            // Block private folder from listing
-            if (name === "private") return;
+		listResponse.CommonPrefixes?.forEach((prefix) => {
+			const name = prefix.Prefix.substring(0, prefix.Prefix.length - 1)
+				.split("/")
+				.pop();
+			// Block private folder from listing
+			if (name === "private") return;
 
-            items.push({ type: "dir", name });
-        });
+			items.push({ type: "dir", name });
+		});
 
-        listResponse.Contents?.forEach(content => {
-            const name = content.Key.split("/").pop();
-            if (!name) return;
+		listResponse.Contents?.forEach((content) => {
+			const name = content.Key.split("/").pop();
+			if (!name) return;
 
-            const type = content.ContentType === "application/x-directory" ? "dir" : "file";
-            items.push({
-                name,
-                stat: {
-                    type,
-                    size: content.Size,
-                    mtimeMs: content.LastModified && content.LastModified.valueOf()
-                }
-            });
-        });
+			const type =
+				content.ContentType === "application/x-directory" ? "dir" : "file";
+			items.push({
+				name,
+				stat: {
+					type,
+					size: content.Size,
+					mtimeMs: content.LastModified && content.LastModified.valueOf(),
+				},
+			});
+		});
 
-        continuationToken = listResponse.NextContinuationToken;
-    } while (continuationToken);
+		continuationToken = listResponse.NextContinuationToken;
+	} while (continuationToken);
 
-    return items;
+	return items;
 }
 
 export async function handleRequest({ readOnly, req, path }) {
-    const headers = req.headers || {};
+	const headers = req.headers || {};
 
-    const resolvePath = () => {
-        if (path !== undefined) return path;
-        const headerPath = headers.path;
-        return headerPath ? decodeURIComponent(headerPath) : headerPath;
-    };
+	const resolvePath = () => {
+		if (path !== undefined) return path;
+		const headerPath = headers.path;
+		return headerPath ? decodeURIComponent(headerPath) : headerPath;
+	};
 
-    const currentPath = resolvePath();
-    console.log(`[handleRequest] Method: ${req.method}, CurrentPath: ${currentPath}, ReadOnly: ${readOnly}`);
+	const currentPath = resolvePath();
+	console.log(
+		`[handleRequest] Method: ${req.method}, CurrentPath: ${currentPath}, ReadOnly: ${readOnly}`,
+	);
 
-    // 7. Security: Always validate path traversal regardless of method
-    // (Previously only validated in GET readOnly, allowing PUT/DELETE exploits)
-    if (currentPath) {
-        validatePathAccess(currentPath);
-    }
+	// 7. Security: Always validate path traversal regardless of method
+	// (Previously only validated in GET readOnly, allowing PUT/DELETE exploits)
+	if (currentPath) {
+		validatePathAccess(currentPath);
+	}
 
-    if (req.method === "GET") {
-        const query = req.query || {};
-        let binary = query.binary || headers.binary;
-        let type = query.type || headers.type;
-        let exists = query.exists || headers.exists;
+	if (req.method === "GET") {
+		const query = req.query || {};
+		let binary = query.binary || headers.binary;
+		let type = query.type || headers.type;
+		let exists = query.exists || headers.exists;
 
-        if (exists) {
-            const metadata = await metadataInfo({ path: currentPath });
-            if (metadata) {
-                const type = metadata.type === "application/x-directory" ? "dir" : "file";
-                return { ...metadata, type };
-            }
-            return {};
-        }
+		if (exists) {
+			const metadata = await metadataInfo({ path: currentPath });
+			if (metadata) {
+				const type =
+					metadata.type === "application/x-directory" ? "dir" : "file";
+				return { ...metadata, type };
+			}
+			return {};
+		}
 
-        try {
-            if (type === "dir") {
-                console.log(`[handleRequest] Listing directory: ${currentPath}`);
-                const result = await list({ path: currentPath });
-                console.log(`[handleRequest] Directory listing returned ${result?.length || 0} items`);
-                return result;
-            } else {
-                return await downloadData({ path: currentPath, binary });
-            }
-        } catch (err) {
-            if (err?.name === 'NoSuchKey' || err?.Code === 'NoSuchKey' || err?.$metadata?.httpStatusCode === 404) {
-                return "";
-            }
-            console.error("get error: ", err);
-            return { err: getSafeError(err) };
-        }
+		try {
+			if (type === "dir") {
+				console.log(`[handleRequest] Listing directory: ${currentPath}`);
+				const result = await list({ path: currentPath });
+				console.log(
+					`[handleRequest] Directory listing returned ${result?.length || 0} items`,
+				);
+				return result;
+			} else {
+				return await downloadData({ path: currentPath, binary });
+			}
+		} catch (err) {
+			if (
+				err?.name === "NoSuchKey" ||
+				err?.Code === "NoSuchKey" ||
+				err?.$metadata?.httpStatusCode === 404
+			) {
+				return "";
+			}
+			console.error("get error: ", err);
+			return { err: getSafeError(err) };
+		}
+	} else if (req.method === "PUT") {
+		if (readOnly) {
+			throw { message: "READ_ONLY_ACCESS", status: 403 };
+		}
 
-    } else if (req.method === "PUT") {
-        if (readOnly) {
-            throw { message: "READ_ONLY_ACCESS", status: 403 };
-        }
+		// Handle batch uploads
+		const items = Array.isArray(req.body) ? req.body : [req.body]; // Handle single or array
 
-        // Handle batch uploads
-        const items = Array.isArray(req.body) ? req.body : [req.body]; // Handle single or array
+		for (const item of items) {
+			let { body, path: itemPath } = item;
 
-        for (const item of items) {
-            let { body, path: itemPath } = item;
+			// Validate specific item path
+			validatePathAccess(itemPath);
 
-            // Validate specific item path
-            validatePathAccess(itemPath);
-
-            if (typeof body === "string" && isBinaryFile(itemPath)) {
-                body = Buffer.from(body, "base64");
-            }
-            await uploadData({ path: itemPath, data: body });
-        }
-        return { success: true };
-
-    } else if (req.method === "DELETE") {
-        if (readOnly) {
-            throw { message: "READ_ONLY_ACCESS", status: 403 };
-        }
-        // validatePathAccess was already called on 'currentPath' at start of function
-        await deleteFile({ path: currentPath });
-        return { success: true };
-    }
+			if (typeof body === "string" && isBinaryFile(itemPath)) {
+				body = Buffer.from(body, "base64");
+			}
+			await uploadData({ path: itemPath, data: body });
+		}
+		return { success: true };
+	} else if (req.method === "DELETE") {
+		if (readOnly) {
+			throw { message: "READ_ONLY_ACCESS", status: 403 };
+		}
+		// validatePathAccess was already called on 'currentPath' at start of function
+		await deleteFile({ path: currentPath });
+		return { success: true };
+	}
 }

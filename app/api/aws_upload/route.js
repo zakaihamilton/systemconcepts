@@ -63,10 +63,14 @@ export async function GET(request) {
         const command = new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET,
             Key: key,
-            ContentType: contentType || undefined
+            ContentType: contentType || undefined,
+            ChecksumAlgorithm: undefined // Explicitly disable checksums for DO compatibility
         });
 
-        const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        const uploadUrl = await getSignedUrl(s3, command, { 
+            expiresIn: 3600,
+            unhoistedHeaders: new Set(["content-type"]) 
+        });
         return NextResponse.json({ url: uploadUrl });
     } catch (err) {
         console.error("aws_upload error: ", err);
