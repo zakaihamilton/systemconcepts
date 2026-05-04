@@ -6,6 +6,13 @@ import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
 
 export const dynamic = "force-dynamic";
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "50mb",
+        },
+    },
+};
 
 const NO_CACHE_HEADERS = {
     "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
