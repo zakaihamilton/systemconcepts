@@ -149,65 +149,79 @@ async function readFiles(prefix, files) {
 async function writeFile(path, body) {
     path = makePath(path).replace(/^\/aws\//, "/").replace(/^aws\//, "");
 
-    // For binary files with Uint8Array body, convert to base64 for JSON transport
-    let bodyToSend = body;
-    if (isBinaryFile(path) && (body instanceof Uint8Array || ArrayBuffer.isView(body))) {
-        // Convert Uint8Array to base64 string for JSON transport
-        bodyToSend = binaryToString(new Blob([body]));
-        // binaryToString is async, need to await it
-        bodyToSend = await bodyToSend;
-    }
+    try {
+        const isGzip = path.endsWith(".gz");
+        const contentType = isGzip ? "application/gzip" : (isBinaryFile(path) ? "application/octet-stream" : "application/json");
 
-    // Use the server-side proxy for all uploads to avoid CORS issues with direct S3 access.
-    // The server handles the actual S3 communication.
-    await fetchJSON(fsEndPoint, {
-        method: "PUT",
-        cache: "no-store",
-        body: JSON.stringify([{
-            path,
-            body: bodyToSend
-        }])
-    });
-}
+        // 1. Get Signed URL from our API
+        const { url, err } = await fetchJSON(`/api/aws_upload?path=${encodeURIComponent(path)}&contentType=${encodeURIComponent(contentType)}`);
+        if (err) throw new Error(err);
+        if (!url) throw new Error("Failed to get signed upload URL");
 
-async function writeFiles(prefix, files) {
-    const maxBytes = 4000 * 1000;
-    let batch = [];
-    for (const name in files) {
-        const path = prefix + name;
-        const body = files[name] || "";
-        if (body.length > maxBytes) {
-            if (batch.length) {
-                await fetchJSON(fsEndPoint, {
-                    method: "PUT",
-                    cache: "no-store",
-                    body: JSON.stringify(batch)
-                });
-                batch = [];
+        // 2. Prepare the body. 
+        // If it's a .gz file, it might have been base64 encoded by bundle.js for the old proxy.
+        // We decode it back to binary for direct S3 upload to be more efficient.
+        let bodyToUpload = body;
+        
+        if (typeof body === "string" && isGzip) {
+            try {
+                // Check if it's base64
+                if (!body.startsWith("{") && !body.startsWith("[")) {
+                    const binaryString = atob(body);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    bodyToUpload = bytes;
+                }
+            } catch (e) {
+                // If atob fails, it wasn't base64, use as-is
             }
-            await writeFile(path, body);
-            continue;
         }
-        if (JSON.stringify(batch).length + body.length > maxBytes) {
-            await fetchJSON(fsEndPoint, {
-                method: "PUT",
-                cache: "no-store",
-                body: JSON.stringify(batch)
-            });
-            batch = [];
-        }
-        batch.push({
-            path,
-            body
+
+        // 3. Upload directly to DigitalOcean/S3
+        const response = await fetch(url, {
+            method: "PUT",
+            body: bodyToUpload,
+            headers: {
+                "Content-Type": isGzip ? "application/gzip" : (isBinaryFile(path) ? "application/octet-stream" : "application/json")
+            }
         });
-    }
-    if (batch.length) {
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Direct upload failed (${response.status}): ${errorText}`);
+        }
+
+        console.log(`[AWS Storage] Successfully uploaded ${path} directly to S3`);
+    } catch (err) {
+        console.error(`[AWS Storage] Direct upload failed for ${path}, falling back to proxy:`, err);
+        
+        // Fallback to the old proxy method if direct upload fails (e.g., signed URL API issues)
+        let bodyToSend = body;
+        if (isBinaryFile(path) && (body instanceof Uint8Array || ArrayBuffer.isView(body))) {
+            bodyToSend = await binaryToString(new Blob([body]));
+        }
+
         await fetchJSON(fsEndPoint, {
             method: "PUT",
             cache: "no-store",
-            body: JSON.stringify(batch)
+            body: JSON.stringify([{
+                path,
+                body: bodyToSend
+            }])
         });
     }
+}
+
+async function writeFiles(prefix, files) {
+    // Read files in parallel with a concurrency limit
+    const limit = pLimit(5);
+    await Promise.all(Object.keys(files).map(name => limit(async () => {
+        const path = prefix + name;
+        const body = files[name] || "";
+        await writeFile(path, body);
+    })));
 }
 
 async function getRecursiveList(path) {

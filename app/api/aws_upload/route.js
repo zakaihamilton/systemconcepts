@@ -58,9 +58,12 @@ export async function GET(request) {
         const s3 = await getS3({});
         const key = path.startsWith("/") ? path.substring(1) : path;
 
+        const contentType = url.searchParams.get("contentType") || "";
+
         const command = new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET,
             Key: key,
+            ContentType: contentType || undefined
         });
 
         const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
