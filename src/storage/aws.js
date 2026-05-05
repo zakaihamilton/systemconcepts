@@ -1,8 +1,7 @@
-import { fetchJSON, fetchText, fetchBlob } from "@util/fetch";
-import { makePath } from "@util/path";
-import { isBinaryFile } from "@util/path";
-import { binaryToString } from "@util/binary";
 import pLimit from "p-limit";
+import { binaryToString } from "@util/binary";
+import { fetchBlob, fetchJSON, fetchText } from "@util/fetch";
+import { isBinaryFile, makePath } from "@util/path";
 
 const fsEndPoint = "/api/aws";
 

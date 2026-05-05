@@ -1,14 +1,14 @@
+import fs from "fs";
 import {
-	S3Client,
-	PutObjectCommand,
-	GetObjectCommand,
 	CopyObjectCommand,
 	DeleteObjectCommand,
-	ListObjectsV2Command,
+	GetObjectCommand,
 	HeadObjectCommand,
+	ListObjectsV2Command,
+	PutObjectCommand,
+	S3Client,
 } from "@aws-sdk/client-s3";
 import { lockMutex } from "@sync/mutex";
-import fs from "fs";
 import { isBinaryFile } from "@util/path";
 import { getSafeError } from "./safeError";
 

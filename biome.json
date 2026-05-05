@@ -10,6 +10,9 @@
 			"!**/node_modules/**"
 		]
 	},
+	"organizeImports": {
+		"enabled": true
+	},
 	"formatter": {
 		"enabled": true,
 		"lineEnding": "lf"

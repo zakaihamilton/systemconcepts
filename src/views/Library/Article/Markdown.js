@@ -1,26 +1,27 @@
 import React, {
-	useMemo,
 	useCallback,
-	useState,
-	useRef,
 	useEffect,
+	useMemo,
+	useRef,
+	useState,
 } from "react";
 import ReactDOM from "react-dom";
+import ArrowForwardIcon from "@mui-icons-material/ArrowForward";
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+
 import { glossary } from "@data/glossary";
-import { termPattern, PHASE_COLORS, getStyleInfo } from "./GlossaryUtils";
+import { useTranslations } from "@util/translations";
+import { setPath } from "@util/views";
+
+import { LibraryTagKeys } from "../Icons";
+import { LibraryStore } from "../Store";
+import { PHASE_COLORS, getStyleInfo, termPattern } from "./GlossaryUtils";
 import styles from "./Markdown.module.css";
 import Zoom from "./Zoom";
-import { LibraryStore } from "../Store";
-import { setPath } from "@util/views";
-import { LibraryTagKeys } from "../Icons";
-
-import Tooltip from "@mui/material/Tooltip";
-import { useTranslations } from "@util/translations";
-import clsx from "clsx";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const Term = ({ term, entry, search }) => {
 	const translations = useTranslations();

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { handleRequest } from "@util/aws";
-import { login } from "@util/login";
 import parseCookie from "@util/cookie";
+import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
 

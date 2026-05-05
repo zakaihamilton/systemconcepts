@@ -1,52 +1,52 @@
 import {
-	useState,
-	useEffect,
 	useCallback,
-	useRef,
-	useMemo,
 	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
 } from "react";
+import ClearIcon from "@mui/icons-material/Clear";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import PrintIcon from "@mui/icons-material/Print";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SearchIcon from "@mui/icons-material/Search";
+import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import LinearProgress from "@mui/material/LinearProgress";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import Cookies from "js-cookie";
 import { createPortal } from "react-dom";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import LinearProgress from "@mui/material/LinearProgress";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@mui/icons-material/Search";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ClearIcon from "@mui/icons-material/Clear";
-import PrintIcon from "@mui/icons-material/Print";
-import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import IconButton from "@mui/material/IconButton";
-import Autocomplete from "@mui/material/Autocomplete";
-import Chip from "@mui/material/Chip";
-import Paper from "@mui/material/Paper";
-import { makePath } from "@util/path";
-import storage from "@util/storage";
-import { SyncActiveStore } from "@sync/syncState";
-import { LIBRARY_LOCAL_PATH } from "@sync/constants";
-import { useTranslations } from "@util/translations";
-import { roleAuth } from "@util/roles";
-import { setPath, usePathItems, setHash } from "@util/views";
-import { normalizeContent } from "@util/string";
-import styles from "./Research.module.css";
-import { LibraryTagKeys } from "@views/Library/Icons";
-import { useToolbar, registerToolbar } from "@components/Toolbar";
-import { LibraryStore } from "@views/Library/Store";
-import { useSessions } from "@util/sessions";
-import { ResearchStore } from "@views/ResearchStore";
-import Article from "@views/Library/Article";
 import { ContentSize } from "@components/Page/Content";
-import VariableSizeList from "@components/Virtualized/VariableSizeList";
-import { useDeviceType } from "@util/styles";
-import ScrollToTop from "@views/Library/Article/ScrollToTop";
-import JumpDialog from "@views/Library/Article/JumpDialog";
-import PageIndicator from "./PageIndicator";
-import SearchResultItem from "./SearchResultItem";
-import { decodeBinaryIndex } from "@util/searchIndexBinary";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { SyncActiveStore } from "@sync/syncState";
 import { loadParagraphsForFile } from "@util/loadParagraphs";
+import { makePath } from "@util/path";
+import { roleAuth } from "@util/roles";
+import { decodeBinaryIndex } from "@util/searchIndexBinary";
+import { useSessions } from "@util/sessions";
+import storage from "@util/storage";
+import { normalizeContent } from "@util/string";
+import { useDeviceType } from "@util/styles";
+import { useTranslations } from "@util/translations";
+import { setHash, setPath, usePathItems } from "@util/views";
+import Article from "@views/Library/Article";
+import JumpDialog from "@views/Library/Article/JumpDialog";
+import ScrollToTop from "@views/Library/Article/ScrollToTop";
+import { LibraryTagKeys } from "@views/Library/Icons";
+import { LibraryStore } from "@views/Library/Store";
+import { ResearchStore } from "@views/ResearchStore";
+import VariableSizeList from "@components/Virtualized/VariableSizeList";
+import PageIndicator from "./PageIndicator";
+import styles from "./Research.module.css";
+import SearchResultItem from "./SearchResultItem";
 
 const INDEX_FILE = "search_index.bin";
 const LEGACY_INDEX_FILE = "search_index.json";
