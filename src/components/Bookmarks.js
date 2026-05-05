@@ -106,11 +106,10 @@ function useBookmarksStorage() {
 			},
 		);
 		return () => {
-			// We do not unsubscribe to ensure persistence continues even if component unmounts
-			// assuming useBookmarksStorage is called from a persistent component or logic.
-			// However, if we want to be clean, we should refactor this to be outside react lifecycle entirely
-			// or count references.
-			// For now, keeping the subscription active is safer for data integrity as long as the app is running.
+			if (storageSubscription) {
+				storageSubscription();
+				storageSubscription = null;
+			}
 		};
 	}, []);
 }
@@ -147,7 +146,7 @@ export default function Bookmarks() {
 
 	useBookmarksStorage();
 
-	const toogleBookmark = () => {
+	const toggleBookmark = () => {
 		BookmarksStore.update((s) => {
 			if (bookmark) {
 				s.bookmarks = s.bookmarks.filter((item) => item.id !== hash);
@@ -177,7 +176,7 @@ export default function Bookmarks() {
 			active: bookmark,
 			location: "header",
 			menu: true,
-			onClick: toogleBookmark,
+			onClick: toggleBookmark,
 		},
 	].filter(Boolean);
 

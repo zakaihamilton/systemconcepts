@@ -17,12 +17,12 @@ jest.mock("@util/views");
 jest.mock(
 	"@widgets/Input",
 	() =>
-		({ state, label, onValidate, validate, ...props }) => {
+		({ state, label, onValidate, validate, background, select, fullWidth, icon, tooltip, mapping, helperText, ...props }) => {
 			const [value, setValue] = state;
 			return (
 				<input
 					data-testid={`input-${props.name}`}
-					value={value}
+					value={value || ""}
 					onChange={(e) => setValue(e.target.value)}
 					{...props}
 				/>

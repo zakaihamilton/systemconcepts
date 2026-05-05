@@ -23,7 +23,7 @@ export default function ChangePassword() {
 	const { direction } = MainStore.useState();
 
 	const translations = useTranslations();
-	const idState = useState(Cookies.get("id"));
+	const idState = useState(Cookies.get("id") || "");
 	const oldPasswordState = useState("");
 	const newPasswordState = useState("");
 	const [remember, setRemember] = useState(true);

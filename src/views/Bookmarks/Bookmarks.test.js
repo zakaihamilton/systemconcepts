@@ -1,5 +1,5 @@
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { useTranslations } from "@util/translations";
 import BookmarksPage from "./Bookmarks";
 
@@ -41,9 +41,11 @@ describe("Bookmarks View", () => {
 		Bookmarks.useState.mockReturnValue({ bookmarks: [] });
 	});
 
-	it("renders bookmarks table and status bar", () => {
+	it("renders bookmarks table and status bar", async () => {
 		const { getByTestId } = render(<BookmarksPage />);
-		expect(getByTestId("table")).toBeInTheDocument();
-		expect(getByTestId("status-bar")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(getByTestId("table")).toBeInTheDocument();
+			expect(getByTestId("status-bar")).toBeInTheDocument();
+		});
 	});
 });

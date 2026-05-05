@@ -1,6 +1,6 @@
 import { MainStore } from "@components/Main";
 import { useToolbar } from "@components/Toolbar";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import storage from "@util/storage";
 import { useTranslations } from "@util/translations";
 import { useActivePages, usePages } from "@util/views";
@@ -46,6 +46,7 @@ describe("Bookmarks Component", () => {
 
 	it("renders nothing but registers toolbar items", async () => {
 		render(<Bookmarks />);
+		await waitFor(() => expect(BookmarksStore.getRawState()._loaded).toBe(true));
 		expect(useToolbar).toHaveBeenCalled();
 		const toolbarArgs = useToolbar.mock.calls[0][0];
 		expect(toolbarArgs.id).toBe("Bookmarks");
@@ -59,6 +60,7 @@ describe("Bookmarks Component", () => {
 		});
 
 		render(<Bookmarks />);
+		await waitFor(() => expect(BookmarksStore.getRawState()._loaded).toBe(true));
 
 		const bookmarkItem = toolbarItems.find((item) => item.id === "bookmark");
 		expect(bookmarkItem).toBeDefined();
@@ -72,7 +74,7 @@ describe("Bookmarks Component", () => {
 });
 
 describe("useBookmarks hook", () => {
-	it("returns formatted bookmark items", () => {
+	it("returns formatted bookmark items", async () => {
 		BookmarksStore.update((s) => {
 			s.bookmarks = [{ id: "#test", name: "Test", pageId: "test-page" }];
 			s._loaded = true;
@@ -85,19 +87,20 @@ describe("useBookmarks hook", () => {
 			{ id: "test-page", name: "Test Page", label: "Test Label" },
 		]);
 
-		const { result } = renderHook(() => useBookmarks());
+		const { result } = await renderHook(() => useBookmarks());
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe("Test");
 	});
 });
 
 // Helper for testing hooks if needed
-function renderHook(hook) {
+async function renderHook(hook) {
 	let result;
 	function HookWrapper() {
 		result = hook();
 		return null;
 	}
 	render(<HookWrapper />);
+	await waitFor(() => expect(BookmarksStore.getRawState()._loaded).toBe(true));
 	return { result };
 }

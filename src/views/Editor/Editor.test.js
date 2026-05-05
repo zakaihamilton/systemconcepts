@@ -32,9 +32,10 @@ describe("Editor View", () => {
 		storage.readFile.mockResolvedValue("file content");
 	});
 
-	it("renders progress while loading", () => {
-		const { getByTestId } = render(<Editor name="test.txt" />);
+	it("renders progress while loading", async () => {
+		const { getByTestId, queryByTestId } = render(<Editor name="test.txt" />);
 		expect(getByTestId("progress")).toBeInTheDocument();
+		await waitFor(() => expect(queryByTestId("progress")).not.toBeInTheDocument());
 	});
 
 	it("renders editor widget after loading", async () => {

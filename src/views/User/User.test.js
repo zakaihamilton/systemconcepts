@@ -16,7 +16,7 @@ jest.mock("@util/fetch");
 jest.mock(
 	"@widgets/Input",
 	() =>
-		({ state, label, onValidate, validate, ...props }) => {
+		({ state, label, onValidate, validate, background, select, fullWidth, icon, tooltip, mapping, helperText, ...props }) => {
 			const [value, setValue] = state || [];
 			return (
 				<input

@@ -23,7 +23,7 @@ export default function ResetPassword({ path = "" }) {
 	const { direction } = MainStore.useState();
 
 	const translations = useTranslations();
-	const idState = useState(Cookies.get("id"));
+	const idState = useState(Cookies.get("id") || "");
 	const newPasswordState = useState("");
 	const [remember, setRemember] = useState(true);
 	const [validate, setValidate] = useState(false);

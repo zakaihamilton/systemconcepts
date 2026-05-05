@@ -38,26 +38,26 @@ describe("Account View", () => {
 		useTranslations.mockReturnValue(mockTranslations);
 		MainStore.useState.mockReturnValue({ direction: "ltr" });
 		Cookies.get.mockReturnValue(null);
+		fetchJSON.mockResolvedValue([]);
 	});
 
-	it("renders sign in form when not signed in", () => {
+	it("renders sign in form when not signed in", async () => {
 		render(<Account />);
-		const signInElements = screen.getAllByText("Sign In");
-		expect(signInElements.length).toBeGreaterThan(0);
-		expect(screen.getByLabelText(/ID/)).toBeInTheDocument();
-		expect(screen.getByLabelText(/Password/)).toBeInTheDocument();
+		expect(screen.getAllByText("Sign In").length).toBeGreaterThan(0);
+		expect(await screen.findByLabelText(/ID/)).toBeInTheDocument();
+		expect(await screen.findByLabelText(/Password/)).toBeInTheDocument();
 	});
 
-	it("renders signed in state when cookies are present", () => {
+	it("renders signed in state when cookies are present", async () => {
 		Cookies.get.mockImplementation((key) => {
 			if (key === "id") return "testuser";
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue([]); // Passkeys list
+		fetchJSON.mockResolvedValue([{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() }]);
 
 		render(<Account />);
-		expect(screen.getByText("Signed In")).toBeInTheDocument();
-		expect(screen.getByText("Sign Out")).toBeInTheDocument();
+		expect(await screen.findByText("Signed In")).toBeInTheDocument();
+		expect(await screen.findByText("My Passkey")).toBeInTheDocument();
 	});
 });

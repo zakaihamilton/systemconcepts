@@ -5,9 +5,9 @@ export default React.forwardRef(function DelayInput(
 	{ children, onChange, value, delay = 250 },
 	ref,
 ) {
-	const [currentValue, setCurrentValue] = useState(value);
+	const [currentValue, setCurrentValue] = useState(value || "");
 	useEffect(() => {
-		setCurrentValue(value);
+		setCurrentValue(value || "");
 	}, [value]);
 	useTimeout(
 		() => {

@@ -1,5 +1,5 @@
 import { ContentSize } from "@components/Page/Content";
-import { render, waitFor } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { readBinary } from "@util/binary";
 import { useFetchJSON } from "@util/fetch";
 import { useTranslations } from "@util/translations";
@@ -29,13 +29,16 @@ describe("Image View", () => {
 		readBinary.mockResolvedValue(new Blob(["test"], { type: "image/png" }));
 	});
 
-	it("renders progress while loading", () => {
-		const { getByTestId } = render(
+	it("renders progress while loading", async () => {
+		const { getByTestId, queryByTestId, getByRole } = render(
 			<ContentSize.Provider value={mockSize}>
 				<ImagePage name="test" />
 			</ContentSize.Provider>,
 		);
 		expect(getByTestId("progress")).toBeInTheDocument();
+		const img = await waitFor(() => getByRole("img", { hidden: true }));
+		fireEvent.load(img);
+		await waitFor(() => expect(queryByTestId("progress")).not.toBeInTheDocument());
 	});
 
 	it("renders image after loading", async () => {
@@ -44,8 +47,8 @@ describe("Image View", () => {
 				<ImagePage name="test" />
 			</ContentSize.Provider>,
 		);
-		await waitFor(() => {
-			expect(getByRole("img", { hidden: true })).toBeInTheDocument();
-		});
+		const img = await waitFor(() => getByRole("img", { hidden: true }));
+		fireEvent.load(img);
+		expect(img).toBeInTheDocument();
 	});
 });
