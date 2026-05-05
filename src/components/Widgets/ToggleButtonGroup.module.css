@@ -1,36 +1,36 @@
 .root button {
-    text-transform: none;
+	text-transform: none;
 }
 
 .root button:not(:last-child) {
-    [dir=rtl] & {
-        border-top-left-radius: 0px !important;
-        border-top-right-radius: 4px !important;
-        border-bottom-left-radius: 0px !important;
-        border-bottom-right-radius: 4px !important;
-    }
+	[dir="rtl"] & {
+		border-top-left-radius: 0px !important;
+		border-top-right-radius: 4px !important;
+		border-bottom-left-radius: 0px !important;
+		border-bottom-right-radius: 4px !important;
+	}
 }
 
 .root button:not(:first-child):not(:last-child) {
-    [dir=rtl] & {
-        border-right: 1px solid transparent !important;
-        border-left: 1px solid var(--border-color) !important;
-        margin-left: 0px;
-        border-top-left-radius: 0px !important;
-        border-top-right-radius: 0px !important;
-        border-bottom-left-radius: 0px !important;
-        border-bottom-right-radius: 0px !important;
-    }
+	[dir="rtl"] & {
+		border-right: 1px solid transparent !important;
+		border-left: 1px solid var(--border-color) !important;
+		margin-left: 0px;
+		border-top-left-radius: 0px !important;
+		border-top-right-radius: 0px !important;
+		border-bottom-left-radius: 0px !important;
+		border-bottom-right-radius: 0px !important;
+	}
 }
 
 .root button:not(:first-child) {
-    [dir=rtl] & {
-        border-right: 1px solid transparent !important;
-        border-left: 1px solid var(--border-color) !important;
-        margin-left: 0px;
-        border-top-left-radius: 4px !important;
-        border-top-right-radius: 0px !important;
-        border-bottom-left-radius: 4px !important;
-        border-bottom-right-radius: 0px !important;
-    }
+	[dir="rtl"] & {
+		border-right: 1px solid transparent !important;
+		border-left: 1px solid var(--border-color) !important;
+		margin-left: 0px;
+		border-top-left-radius: 4px !important;
+		border-top-right-radius: 0px !important;
+		border-bottom-left-radius: 4px !important;
+		border-bottom-right-radius: 0px !important;
+	}
 }

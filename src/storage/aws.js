@@ -1,7 +1,7 @@
-import pLimit from "p-limit";
 import { binaryToString } from "@util/binary";
 import { fetchBlob, fetchJSON, fetchText } from "@util/fetch";
 import { isBinaryFile, makePath } from "@util/path";
+import pLimit from "p-limit";
 
 const fsEndPoint = "/api/aws";
 

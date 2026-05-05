@@ -1,17 +1,24 @@
-import styles from "./Error.module.css";
 import ErrorIcon from "@mui/icons-material/Error";
-import Label from "@widgets/Label";
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "@util/translations";
+import Label from "@widgets/Label";
+import styles from "./Error.module.css";
 
 export default function Error({ error }) {
-    const translations = useTranslations();
-    const message = error?.message || error;
-    const text = translations[message] || message;
-    return <Label
-        className={styles.root}
-        icon={<Tooltip title={translations.ERROR} arrow>
-            <span><ErrorIcon /></span>
-        </Tooltip>}
-        name={text} />;
+	const translations = useTranslations();
+	const message = error?.message || error;
+	const text = translations[message] || message;
+	return (
+		<Label
+			className={styles.root}
+			icon={
+				<Tooltip title={translations.ERROR} arrow>
+					<span>
+						<ErrorIcon />
+					</span>
+				</Tooltip>
+			}
+			name={text}
+		/>
+	);
 }

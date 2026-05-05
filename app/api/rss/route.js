@@ -1,201 +1,239 @@
-import { NextResponse } from "next/server";
 import { downloadData } from "@util/aws";
-import { formatDuration } from "@util/string";
 import { findRecord } from "@util/mongo";
 import pLimit from "@util/p-limit";
-import pako from "pako";
+import { formatDuration } from "@util/string";
 import crypto from "crypto";
+import { NextResponse } from "next/server";
+import pako from "pako";
 
 export const dynamic = "force-dynamic";
 
 const MANIFEST_PATH = "sync/files.json.gz";
 
 function escapeXml(unsafe) {
-    if (!unsafe) return "";
-    return unsafe.replace(/[<>&'"]/g, (c) => {
-        switch (c) {
-            case '<': return '&lt;';
-            case '>': return '&gt;';
-            case '&': return '&amp;';
-            case '\'': return '&apos;';
-            case '"': return '&quot;';
-            default: return c;
-        }
-    });
+	if (!unsafe) return "";
+	return unsafe.replace(/[<>&'"]/g, (c) => {
+		switch (c) {
+			case "<":
+				return "&lt;";
+			case ">":
+				return "&gt;";
+			case "&":
+				return "&amp;";
+			case "'":
+				return "&apos;";
+			case '"':
+				return "&quot;";
+			default:
+				return c;
+		}
+	});
 }
 
 export async function GET(request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const group = searchParams.get('group');
-        const count = parseInt(searchParams.get('count') || '250', 10);
-        const id = searchParams.get('id');
-        const token = searchParams.get('token');
+	try {
+		const { searchParams } = new URL(request.url);
+		const group = searchParams.get("group");
+		const count = parseInt(searchParams.get("count") || "250", 10);
+		const id = searchParams.get("id");
+		const token = searchParams.get("token");
 
-        if (!id || !token) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
+		if (!id || !token) {
+			return new NextResponse("Unauthorized", { status: 403 });
+		}
 
-        const user = await findRecord({ collectionName: "users", query: { id: id.toLowerCase() } });
-        if (!user || user.role === 'visitor') {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
+		const user = await findRecord({
+			collectionName: "users",
+			query: { id: id.toLowerCase() },
+		});
+		if (!user || user.role === "visitor") {
+			return new NextResponse("Unauthorized", { status: 403 });
+		}
 
-        const expectedToken = crypto.createHash('sha256').update(user.id + user.hash + (process.env.RSS_SECRET || process.env.AWS_SECRET)).digest('hex');
-        if (token !== expectedToken) {
-            return new NextResponse("Unauthorized", { status: 403 });
-        }
+		const expectedToken = crypto
+			.createHash("sha256")
+			.update(
+				user.id +
+					user.hash +
+					(process.env.RSS_SECRET || process.env.AWS_SECRET),
+			)
+			.digest("hex");
+		if (token !== expectedToken) {
+			return new NextResponse("Unauthorized", { status: 403 });
+		}
 
-        const manifestData = await downloadData({ path: MANIFEST_PATH, binary: true });
+		const manifestData = await downloadData({
+			path: MANIFEST_PATH,
+			binary: true,
+		});
 
-        let manifestStr;
-        try {
-            const decompressed = pako.inflate(manifestData);
-            manifestStr = new TextDecoder("utf-8").decode(decompressed);
-        } catch (_e) {
-            manifestStr = Buffer.from(manifestData).toString('utf-8');
-        }
+		let manifestStr;
+		try {
+			const decompressed = pako.inflate(manifestData);
+			manifestStr = new TextDecoder("utf-8").decode(decompressed);
+		} catch (_e) {
+			manifestStr = Buffer.from(manifestData).toString("utf-8");
+		}
 
-        const manifest = JSON.parse(manifestStr);
+		const manifest = JSON.parse(manifestStr);
 
-        let files = manifest.filter(f => f.path && f.path.endsWith(".json") && f.path !== "/files.json");
+		let files = manifest.filter(
+			(f) => f.path && f.path.endsWith(".json") && f.path !== "/files.json",
+		);
 
-        if (group) {
-            const lowerGroup = group.toLowerCase();
-            files = files.filter(f => {
-                const lowerPath = f.path.toLowerCase();
-                const isMatch = f.path === "/bundle.json" ||
-                    lowerPath === `/${lowerGroup}.json` ||
-                    lowerPath.startsWith(`/${lowerGroup}/`);
-                return isMatch;
-            });
-        }
+		if (group) {
+			const lowerGroup = group.toLowerCase();
+			files = files.filter((f) => {
+				const lowerPath = f.path.toLowerCase();
+				const isMatch =
+					f.path === "/bundle.json" ||
+					lowerPath === `/${lowerGroup}.json` ||
+					lowerPath.startsWith(`/${lowerGroup}/`);
+				return isMatch;
+			});
+		}
 
-        const limit = pLimit(10);
-        const sessionPromises = files.map(file => limit(async () => {
-            try {
-                const s3Path = `sync${file.path.startsWith("/") ? "" : "/"}${file.path}.gz`;
-                const fileData = await downloadData({ path: s3Path, binary: true });
-                let jsonStr;
-                try {
-                    const decompressed = pako.inflate(fileData);
-                    jsonStr = new TextDecoder("utf-8").decode(decompressed);
-                } catch (_e) {
-                    jsonStr = Buffer.from(fileData).toString('utf-8');
-                }
-                const data = JSON.parse(jsonStr);
-                const fileSessions = data.sessions || [];
-                return fileSessions;
-            } catch (err) {
-                console.error(`[RSS] Error loading sessions from ${file.path}:`, err);
-                return [];
-            }
-        }));
+		const limit = pLimit(10);
+		const sessionPromises = files.map((file) =>
+			limit(async () => {
+				try {
+					const s3Path = `sync${file.path.startsWith("/") ? "" : "/"}${file.path}.gz`;
+					const fileData = await downloadData({ path: s3Path, binary: true });
+					let jsonStr;
+					try {
+						const decompressed = pako.inflate(fileData);
+						jsonStr = new TextDecoder("utf-8").decode(decompressed);
+					} catch (_e) {
+						jsonStr = Buffer.from(fileData).toString("utf-8");
+					}
+					const data = JSON.parse(jsonStr);
+					const fileSessions = data.sessions || [];
+					return fileSessions;
+				} catch (err) {
+					console.error(`[RSS] Error loading sessions from ${file.path}:`, err);
+					return [];
+				}
+			}),
+		);
 
-        const sessionsArrays = await Promise.all(sessionPromises);
-        let sessionsFlat = sessionsArrays.flat();
-        
-        // Use a robust deduplication key (case-insensitive for group names)
-        const sessionMap = new Map();
-        for (const session of sessionsFlat) {
-            const key = `${(session.group || "").toLowerCase().trim()}_${session.id}`;
-            if (!sessionMap.has(key)) {
-                sessionMap.set(key, session);
-            }
-        }
-        let sessions = Array.from(sessionMap.values());
+		const sessionsArrays = await Promise.all(sessionPromises);
+		let sessionsFlat = sessionsArrays.flat();
 
-        if (group) {
-            const lowerGroup = group.toLowerCase().trim();
-            sessions = sessions.filter(s => {
-                const sessionGroup = (s.group || "").toLowerCase().trim();
-                return sessionGroup === lowerGroup;
-            });
-        }
+		// Use a robust deduplication key (case-insensitive for group names)
+		const sessionMap = new Map();
+		for (const session of sessionsFlat) {
+			const key = `${(session.group || "").toLowerCase().trim()}_${session.id}`;
+			if (!sessionMap.has(key)) {
+				sessionMap.set(key, session);
+			}
+		}
+		let sessions = Array.from(sessionMap.values());
 
-        // Robust string-based sort: Date (DESC), Group (ASC), Name (ASC)
-        sessions.sort((a, b) => {
-            const dateA = String(a.date || "").substring(0, 10);
-            const dateB = String(b.date || "").substring(0, 10);
-            if (dateB > dateA) return 1;
-            if (dateB < dateA) return -1;
-            
-            const groupA = (a.group || "").toLowerCase();
-            const groupB = (b.group || "").toLowerCase();
-            const groupDiff = groupA.localeCompare(groupB);
-            if (groupDiff !== 0) return groupDiff;
-            
-            return (a.name || "").localeCompare(b.name || "");
-        });
+		if (group) {
+			const lowerGroup = group.toLowerCase().trim();
+			sessions = sessions.filter((s) => {
+				const sessionGroup = (s.group || "").toLowerCase().trim();
+				return sessionGroup === lowerGroup;
+			});
+		}
 
-        sessions = sessions.slice(0, count);
+		// Robust string-based sort: Date (DESC), Group (ASC), Name (ASC)
+		sessions.sort((a, b) => {
+			const dateA = String(a.date || "").substring(0, 10);
+			const dateB = String(b.date || "").substring(0, 10);
+			if (dateB > dateA) return 1;
+			if (dateB < dateA) return -1;
 
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://systemconcepts.app';
+			const groupA = (a.group || "").toLowerCase();
+			const groupB = (b.group || "").toLowerCase();
+			const groupDiff = groupA.localeCompare(groupB);
+			if (groupDiff !== 0) return groupDiff;
 
-        // Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/rss/s
-        const getSProxyUrl = (path) => {
-            if (!path) return null;
-            let cleanPath = path.startsWith("/") ? path.substring(1) : path;
-            const b64 = Buffer.from(cleanPath).toString('base64url');
-            const ext = path.split('.').pop() || "bin";
-            // Use query parameters for stability, adding the extension at the end for validators
-            return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
-        };
+			return (a.name || "").localeCompare(b.name || "");
+		});
 
-        const rssItems = await Promise.all(sessions.map(async (session) => {
-            // Do not URL-encode the ?, &, and = characters in the local app link
-            const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
-            const link = `${baseUrl}/#sessions/${sessionQuery}`;
+		sessions = sessions.slice(0, count);
 
-            // RFC 2822 formatting requires strictly +0000
-            const date = new Date(session.date).toUTCString().replace('GMT', '+0000');
-            // Apple recommends integer seconds
-            const durationSeconds = session.duration ? Math.round(session.duration) : 0;
-            const categories = (session.tags || []).map(tag => `<category>${escapeXml(tag)}</category>`).join('');
+		const baseUrl =
+			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
 
-            let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
-            if (durationSeconds > 0) {
-                description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
-            }
-            if (session.summaryText) {
-                description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
-            }
+		// Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/rss/s
+		const getSProxyUrl = (path) => {
+			if (!path) return null;
+			let cleanPath = path.startsWith("/") ? path.substring(1) : path;
+			const b64 = Buffer.from(cleanPath).toString("base64url");
+			const ext = path.split(".").pop() || "bin";
+			// Use query parameters for stability, adding the extension at the end for validators
+			return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
+		};
 
-            const media = session.audio || session.video;
-            let enclosure = "";
-            if (media && media.path) {
-                const proxyUrl = getSProxyUrl(media.path);
-                const type = media.path.endsWith(".mp4") ? "video/mp4" : (media.path.endsWith(".m4a") ? "audio/x-m4a" : "audio/mpeg");
-                enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
-            }
+		const rssItems = await Promise.all(
+			sessions.map(async (session) => {
+				// Do not URL-encode the ?, &, and = characters in the local app link
+				const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+				const link = `${baseUrl}/#sessions/${sessionQuery}`;
 
-            const thumbnail = getSProxyUrl(session.image?.path);
-            const itemImage = `<itunes:image href="${escapeXml(thumbnail || (baseUrl + "/images/rss-cover.jpg"))}" />`;
+				// RFC 2822 formatting requires strictly +0000
+				const date = new Date(session.date)
+					.toUTCString()
+					.replace("GMT", "+0000");
+				// Apple recommends integer seconds
+				const durationSeconds = session.duration
+					? Math.round(session.duration)
+					: 0;
+				const categories = (session.tags || [])
+					.map((tag) => `<category>${escapeXml(tag)}</category>`)
+					.join("");
 
-            // Transcript support
-            let transcriptTag = "";
-            let transcriptPath = session.subtitles?.path || session.transcriptPath;
-            let transcriptType = transcriptPath?.endsWith(".vtt") ? "text/vtt" : "text/plain";
+				let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
+				if (durationSeconds > 0) {
+					description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
+				}
+				if (session.summaryText) {
+					description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
+				}
 
-            if (!transcriptPath && session.transcription) {
-                transcriptPath = `wasabi/${session.group}/${session.year}/${session.date} ${session.name}.txt`;
-                transcriptType = "text/plain";
-            }
+				const media = session.audio || session.video;
+				let enclosure = "";
+				if (media && media.path) {
+					const proxyUrl = getSProxyUrl(media.path);
+					const type = media.path.endsWith(".mp4")
+						? "video/mp4"
+						: media.path.endsWith(".m4a")
+							? "audio/x-m4a"
+							: "audio/mpeg";
+					enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
+				}
 
-            const transcriptUrl = getSProxyUrl(transcriptPath);
-            if (transcriptUrl) {
-                transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
-            }
+				const thumbnail = getSProxyUrl(session.image?.path);
+				const itemImage = `<itunes:image href="${escapeXml(thumbnail || baseUrl + "/images/rss-cover.jpg")}" />`;
 
-            const author = "info@systemconcepts.app (System Concepts)";
-            const itunesAuthor = "System Concepts";
+				// Transcript support
+				let transcriptTag = "";
+				let transcriptPath = session.subtitles?.path || session.transcriptPath;
+				let transcriptType = transcriptPath?.endsWith(".vtt")
+					? "text/vtt"
+					: "text/plain";
 
-            return `
+				if (!transcriptPath && session.transcription) {
+					transcriptPath = `wasabi/${session.group}/${session.year}/${session.date} ${session.name}.txt`;
+					transcriptType = "text/plain";
+				}
+
+				const transcriptUrl = getSProxyUrl(transcriptPath);
+				if (transcriptUrl) {
+					transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
+				}
+
+				const author = "info@systemconcepts.app (System Concepts)";
+				const itunesAuthor = "System Concepts";
+
+				return `
     <item>
       <title>[${escapeXml(session.group?.toUpperCase()[0] + session.group?.slice(1))}] ${escapeXml(session.date + " " + session.name)}</title>
       <link>${escapeXml(link)}</link>
       <description>${escapeXml(description)}</description>
-      <content:encoded><![CDATA[${description.replace(/\n/g, '<br/>')}]]></content:encoded>
+      <content:encoded><![CDATA[${description.replace(/\n/g, "<br/>")}]]></content:encoded>
       <pubDate>${date}</pubDate>
       <guid>${escapeXml(link)}</guid>
       <author>${escapeXml(author)}</author>
@@ -208,15 +246,21 @@ export async function GET(request) {
       <itunes:summary>${escapeXml(session.summaryText)}</itunes:summary>
       <itunes:explicit>true</itunes:explicit>
     </item>`;
-        }));
+			}),
+		);
 
-        const maxDate = sessions.length > 0 ? new Date(Math.max(...sessions.map(s => new Date(s.date)))).toUTCString() : new Date().toUTCString();
-        const selfUrl = request.url;
+		const maxDate =
+			sessions.length > 0
+				? new Date(
+						Math.max(...sessions.map((s) => new Date(s.date))),
+					).toUTCString()
+				: new Date().toUTCString();
+		const selfUrl = request.url;
 
-        const rss = `<?xml version="1.0" encoding="UTF-8" ?>
+		const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
 <channel>
-  <title>System Concepts - ${escapeXml(group ? group + ' ' : '')}Sessions</title>
+  <title>System Concepts - ${escapeXml(group ? group + " " : "")}Sessions</title>
   <itunes:image href="${baseUrl}/images/rss-cover.jpg" />
   <image>
     <url>${baseUrl}/images/rss-cover.jpg</url>
@@ -244,28 +288,28 @@ export async function GET(request) {
   <itunes:category text="Religion &amp; Spirituality">
     <itunes:category text="Spirituality"/>
   </itunes:category>
-  ${rssItems.join('')}
+  ${rssItems.join("")}
 </channel>
 </rss>`;
 
-        const etag = crypto.createHash('md5').update(rss).digest('hex');
-        const buffer = Buffer.from(rss, 'utf-8');
+		const etag = crypto.createHash("md5").update(rss).digest("hex");
+		const buffer = Buffer.from(rss, "utf-8");
 
-        return new Response(buffer, {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/rss+xml; charset=utf-8',
-                'Content-Length': buffer.length.toString(),
-                'ETag': `"${etag}"`,
-                'Last-Modified': maxDate,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-                'Accept-Ranges': 'bytes'
-            },
-        });
-    } catch (err) {
-        console.error("RSS Error:", err);
-        return new NextResponse("Error generating RSS feed", { status: 500 });
-    }
+		return new Response(buffer, {
+			status: 200,
+			headers: {
+				"Content-Type": "application/rss+xml; charset=utf-8",
+				"Content-Length": buffer.length.toString(),
+				ETag: `"${etag}"`,
+				"Last-Modified": maxDate,
+				"Cache-Control": "no-cache, no-store, must-revalidate",
+				Pragma: "no-cache",
+				Expires: "0",
+				"Accept-Ranges": "bytes",
+			},
+		});
+	} catch (err) {
+		console.error("RSS Error:", err);
+		return new NextResponse("Error generating RSS feed", { status: 500 });
+	}
 }

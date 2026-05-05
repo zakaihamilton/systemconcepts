@@ -1,38 +1,45 @@
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import SpeedDialWidget from './SpeedDial';
-import { MainStore } from "@components/Main";
+import { fireEvent, render } from "@testing-library/react";
 import { useTranslations } from "@util/translations";
+import SpeedDialWidget from "./SpeedDial";
 
 jest.mock("@components/Main", () => ({
-    MainStore: {
-        useState: jest.fn().mockReturnValue({ direction: 'ltr' }),
-    }
+	MainStore: {
+		useState: jest.fn().mockReturnValue({ direction: "ltr" }),
+	},
 }));
 jest.mock("@util/translations");
 
-describe('SpeedDial Widget', () => {
-  const items = [
-    { id: '1', name: 'Action 1', icon: <span data-testid="icon1" />, onClick: jest.fn() },
-  ];
+describe("SpeedDial Widget", () => {
+	const items = [
+		{
+			id: "1",
+			name: "Action 1",
+			icon: <span data-testid="icon1" />,
+			onClick: jest.fn(),
+		},
+	];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useTranslations.mockReturnValue({ MENU: 'Menu' });
-  });
+	beforeEach(() => {
+		jest.clearAllMocks();
+		useTranslations.mockReturnValue({ MENU: "Menu" });
+	});
 
-  it('renders and opens on click', () => {
-    const { getByLabelText, getByText } = render(<SpeedDialWidget items={items} />);
-    const fab = getByLabelText('Menu');
-    
-    fireEvent.click(fab);
-    expect(getByText('Action 1')).toBeInTheDocument();
-  });
+	it("renders and opens on click", () => {
+		const { getByLabelText, getByText } = render(
+			<SpeedDialWidget items={items} />,
+		);
+		const fab = getByLabelText("Menu");
 
-  it('calls item onClick when action is clicked', () => {
-    const { getByLabelText, getByText } = render(<SpeedDialWidget items={items} />);
-    fireEvent.click(getByLabelText('Menu'));
-    fireEvent.click(getByText('Action 1'));
-    expect(items[0].onClick).toHaveBeenCalled();
-  });
+		fireEvent.click(fab);
+		expect(getByText("Action 1")).toBeInTheDocument();
+	});
+
+	it("calls item onClick when action is clicked", () => {
+		const { getByLabelText, getByText } = render(
+			<SpeedDialWidget items={items} />,
+		);
+		fireEvent.click(getByLabelText("Menu"));
+		fireEvent.click(getByText("Action 1"));
+		expect(items[0].onClick).toHaveBeenCalled();
+	});
 });

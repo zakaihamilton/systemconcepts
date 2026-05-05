@@ -1,150 +1,160 @@
-import storage from "@util/storage";
-import { makePath } from "@util/path";
 import { writeCompressedFile } from "@sync/bundle";
-import { LOCAL_SYNC_PATH, FILES_MANIFEST } from "@sync/constants";
-import { updateManifestEntry } from "@sync/manifest";
+import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "@sync/constants";
 import { getFileInfo } from "@sync/hash";
+import { updateManifestEntry } from "@sync/manifest";
+import { makePath } from "@util/path";
+import storage from "@util/storage";
 
 export async function getListing(path) {
-    console.log(`[getListing] Requesting listing for: ${path}`);
-    let listing = await storage.getListing(path);
-    console.log(`[getListing] Received listing with ${listing?.length || 0} items for: ${path}`);
-    if (!listing) {
-        console.warn(`[getListing] No listing returned for: ${path}`);
-        return [];
-    }
-    return listing;
+	console.log(`[getListing] Requesting listing for: ${path}`);
+	let listing = await storage.getListing(path);
+	console.log(
+		`[getListing] Received listing with ${listing?.length || 0} items for: ${path}`,
+	);
+	if (!listing) {
+		console.warn(`[getListing] No listing returned for: ${path}`);
+		return [];
+	}
+	return listing;
 }
 
 export async function updateYearSync(groupName, year, sessions) {
-    if (!sessions || sessions.length === 0) {
-        return 0;
-    }
-    const localPath = makePath(LOCAL_SYNC_PATH, groupName, `${year}.json`);
-    try {
-        let version = 1;
+	if (!sessions || sessions.length === 0) {
+		return 0;
+	}
+	const localPath = makePath(LOCAL_SYNC_PATH, groupName, `${year}.json`);
+	try {
+		let version = 1;
 
-        // Check for existing version
-        if (await storage.exists(localPath)) {
-            const existingContent = await storage.readFile(localPath);
-            try {
-                const existingData = JSON.parse(existingContent);
-                if (existingData && existingData.version) {
-                    version = existingData.version + 1;
-                }
-            } catch {
-                // Ignore parse errors, start fresh
-            }
-        }
+		// Check for existing version
+		if (await storage.exists(localPath)) {
+			const existingContent = await storage.readFile(localPath);
+			try {
+				const existingData = JSON.parse(existingContent);
+				if (existingData && existingData.version) {
+					version = existingData.version + 1;
+				}
+			} catch {
+				// Ignore parse errors, start fresh
+			}
+		}
 
-        const data = {
-            version,
-            group: groupName,
-            year: year,
-            sessions: sessions.sort((a, b) => a.id.localeCompare(b.id)).map(s => ({ name: s.id, ...s })),
-            counter: Date.now()
-        };
-        // Check if content changed
-        let newCount = 0;
-        let newSessions = [];
-        if (await storage.exists(localPath)) {
-            const existingContent = await storage.readFile(localPath);
-            try {
-                const existingObj = JSON.parse(existingContent);
-                const existingIds = new Set((existingObj.sessions || []).map(s => s.name || s.id));
-                newSessions = data.sessions.filter(s => !existingIds.has(s.name || s.id));
-                newCount = newSessions.length;
+		const data = {
+			version,
+			group: groupName,
+			year: year,
+			sessions: sessions
+				.sort((a, b) => a.id.localeCompare(b.id))
+				.map((s) => ({ name: s.id, ...s })),
+			counter: Date.now(),
+		};
+		// Check if content changed
+		let newCount = 0;
+		let newSessions = [];
+		if (await storage.exists(localPath)) {
+			const existingContent = await storage.readFile(localPath);
+			try {
+				const existingObj = JSON.parse(existingContent);
+				const existingIds = new Set(
+					(existingObj.sessions || []).map((s) => s.name || s.id),
+				);
+				newSessions = data.sessions.filter(
+					(s) => !existingIds.has(s.name || s.id),
+				);
+				newCount = newSessions.length;
 
-                const exSessions = JSON.stringify(existingObj.sessions);
-                const newSessionsStr = JSON.stringify(data.sessions);
-                if (exSessions === newSessionsStr && existingObj.group === data.group) {
-                    return { counter: 0, newCount: 0, newSessions: [] };
-                }
-            } catch {
-                // if parse fails, overwrite
-                newSessions = data.sessions;
-                newCount = data.sessions.length; // Assume all are new if existing corrupt
-            }
-        } else {
-            newSessions = data.sessions;
-            newCount = data.sessions.length; // All are new
-        }
+				const exSessions = JSON.stringify(existingObj.sessions);
+				const newSessionsStr = JSON.stringify(data.sessions);
+				if (exSessions === newSessionsStr && existingObj.group === data.group) {
+					return { counter: 0, newCount: 0, newSessions: [] };
+				}
+			} catch {
+				// if parse fails, overwrite
+				newSessions = data.sessions;
+				newCount = data.sessions.length; // Assume all are new if existing corrupt
+			}
+		} else {
+			newSessions = data.sessions;
+			newCount = data.sessions.length; // All are new
+		}
 
-        await writeCompressedFile(localPath, data);
+		await writeCompressedFile(localPath, data);
 
-        // Update local manifest immediately
-        try {
-            const content = await storage.readFile(localPath);
-            const info = await getFileInfo(content);
-            const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
-            const relPath = localPath.substring(makePath(LOCAL_SYNC_PATH).length);
-            const entry = {
-                path: relPath.startsWith("/") ? relPath : "/" + relPath,
-                hash: info.hash,
-                size: info.size,
-                version: Date.now().toString()
-            };
-            await updateManifestEntry(manifestPath, entry);
-        } catch (err) {
-            console.warn(`[Sync] Failed to update manifest for ${localPath}`, err);
-        }
+		// Update local manifest immediately
+		try {
+			const content = await storage.readFile(localPath);
+			const info = await getFileInfo(content);
+			const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+			const relPath = localPath.substring(makePath(LOCAL_SYNC_PATH).length);
+			const entry = {
+				path: relPath.startsWith("/") ? relPath : "/" + relPath,
+				hash: info.hash,
+				size: info.size,
+				version: Date.now().toString(),
+			};
+			await updateManifestEntry(manifestPath, entry);
+		} catch (err) {
+			console.warn(`[Sync] Failed to update manifest for ${localPath}`, err);
+		}
 
-        return { counter: data.counter, newCount, newSessions };
-    } catch (err) {
-        console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
-        return { counter: 0, newCount: 0, newSessions: [] };
-    }
+		return { counter: data.counter, newCount, newSessions };
+	} catch (err) {
+		console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
+		return { counter: 0, newCount: 0, newSessions: [] };
+	}
 }
 
 export async function updateBundleFile(newSessions) {
-    const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
-    let allSessions = [];
+	const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+	let allSessions = [];
 
-    // 1. Read existing bundle
-    try {
-        if (await storage.exists(bundlePath)) {
-            const content = await storage.readFile(bundlePath);
-            const data = JSON.parse(content);
-            if (data && Array.isArray(data.sessions)) {
-                allSessions = data.sessions;
-            }
-        }
-    } catch (err) {
-        console.error("[Sync] Failed to read existing bundle for update", err);
-        throw err;
-    }
+	// 1. Read existing bundle
+	try {
+		if (await storage.exists(bundlePath)) {
+			const content = await storage.readFile(bundlePath);
+			const data = JSON.parse(content);
+			if (data && Array.isArray(data.sessions)) {
+				allSessions = data.sessions;
+			}
+		}
+	} catch (err) {
+		console.error("[Sync] Failed to read existing bundle for update", err);
+		throw err;
+	}
 
-    // 2. Remove old sessions for groups that we are updating
-    const updatedGroups = new Set(newSessions.map(s => s.group));
-    allSessions = allSessions.filter(s => !updatedGroups.has(s.group));
+	// 2. Remove old sessions for groups that we are updating
+	const updatedGroups = new Set(newSessions.map((s) => s.group));
+	allSessions = allSessions.filter((s) => !updatedGroups.has(s.group));
 
-    // 3. Add new sessions
-    allSessions.push(...newSessions);
+	// 3. Add new sessions
+	allSessions.push(...newSessions);
 
-    // 4. Write bundle
-    const bundleData = {
-        version: 1,
-        date: Date.now(),
-        sessions: allSessions
-    };
-    await writeCompressedFile(bundlePath, bundleData);
+	// 4. Write bundle
+	const bundleData = {
+		version: 1,
+		date: Date.now(),
+		sessions: allSessions,
+	};
+	await writeCompressedFile(bundlePath, bundleData);
 
-    // Update local manifest immediately
-    try {
-        const content = await storage.readFile(bundlePath);
-        const info = await getFileInfo(content);
-        const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
-        const relPath = bundlePath.substring(makePath(LOCAL_SYNC_PATH).length);
-        const entry = {
-            path: relPath.startsWith("/") ? relPath : "/" + relPath,
-            hash: info.hash,
-            size: info.size,
-            version: Date.now().toString()
-        };
-        await updateManifestEntry(manifestPath, entry);
-    } catch (err) {
-        console.warn(`[Sync] Failed to update manifest for ${bundlePath}`, err);
-    }
+	// Update local manifest immediately
+	try {
+		const content = await storage.readFile(bundlePath);
+		const info = await getFileInfo(content);
+		const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+		const relPath = bundlePath.substring(makePath(LOCAL_SYNC_PATH).length);
+		const entry = {
+			path: relPath.startsWith("/") ? relPath : "/" + relPath,
+			hash: info.hash,
+			size: info.size,
+			version: Date.now().toString(),
+		};
+		await updateManifestEntry(manifestPath, entry);
+	} catch (err) {
+		console.warn(`[Sync] Failed to update manifest for ${bundlePath}`, err);
+	}
 
-    console.log(`[Sync] Updated bundle.json with ${newSessions.length} new sessions. Total: ${allSessions.length}`);
+	console.log(
+		`[Sync] Updated bundle.json with ${newSessions.length} new sessions. Total: ${allSessions.length}`,
+	);
 }

@@ -1,51 +1,51 @@
 .root {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    background-color: transparent;
-    border: 1px solid transparent;
-    overflow: hidden;
-    position: relative;
-    color: var(--text-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	background-color: transparent;
+	border: 1px solid transparent;
+	overflow: hidden;
+	position: relative;
+	color: var(--text-color);
 }
 
 .root.clickable {
-    border: 2px solid transparent;
+	border: 2px solid transparent;
 }
 
 .root.clickable:hover {
-    border: 2px solid var(--hover-color);
+	border: 2px solid var(--hover-color);
 }
 
 .root:disabled {
-    color: var(--text-color);
+	color: var(--text-color);
 }
 
 .root:focus {
-    border: 1px solid var(--hover-fill);
-    box-shadow: 0 2px 2px 0 var(--box-shadow-color);
+	border: 1px solid var(--hover-fill);
+	box-shadow: 0 2px 2px 0 var(--box-shadow-color);
 }
 
 .root:focus:active {
-    background-color: var(--hover-fill);
-    color: var(--hover-text-color);
+	background-color: var(--hover-fill);
+	color: var(--hover-text-color);
 }
 
 .img {
-    object-fit: fill;
-    overflow: hidden;
-    transition: opacity 0.2s ease-in;
-    position: absolute;
+	object-fit: fill;
+	overflow: hidden;
+	transition: opacity 0.2s ease-in;
+	position: absolute;
 }
 
 .img.hidden {
-    opacity: 0;
+	opacity: 0;
 }
 
 .alt {
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }

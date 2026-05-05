@@ -1,11 +1,6 @@
-import {
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { ContentSize } from "@components/Page/Content";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import VariableSizeList from "@components/Virtualized/VariableSizeList";
 import ClearIcon from "@mui/icons-material/Clear";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import PrintIcon from "@mui/icons-material/Print";
@@ -21,10 +16,6 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Cookies from "js-cookie";
-import { createPortal } from "react-dom";
-import { ContentSize } from "@components/Page/Content";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
 import { loadParagraphsForFile } from "@util/loadParagraphs";
@@ -43,7 +34,16 @@ import ScrollToTop from "@views/Library/Article/ScrollToTop";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import { LibraryStore } from "@views/Library/Store";
 import { ResearchStore } from "@views/ResearchStore/ResearchStore";
-import VariableSizeList from "@components/Virtualized/VariableSizeList";
+import Cookies from "js-cookie";
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { createPortal } from "react-dom";
 import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";
 import SearchResultItem from "./SearchResultItem";

@@ -1,16 +1,16 @@
-import { useMemo, useCallback } from "react";
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import TextField from "@mui/material/TextField";
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
-import Drawer from "@mui/material/Drawer";
-import Paper from "@mui/material/Paper";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import ClearIcon from "@mui/icons-material/Clear";
-import TreeItem from "./TreeItem";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import List from "@mui/material/List";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import { useCallback, useMemo } from "react";
 import { LibraryIcons, LibraryTagKeys } from "./Icons";
 import styles from "./Tags.module.css";
+import TreeItem from "./TreeItem";
 
 export default function Tags({
 	tags,

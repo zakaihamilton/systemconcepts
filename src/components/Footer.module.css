@@ -1,58 +1,62 @@
 .root {
-    display: flex;
-    overflow: hidden;
-    box-sizing: border-box;
-    align-items: center;
-    background: linear-gradient(135deg, var(--footer-background), rgba(var(--bar-background-rgb), 0.95));
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    margin: 1rem;
-    height: 4rem;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-    position: sticky;
-    bottom: 1rem;
-    z-index: 100;
+	display: flex;
+	overflow: hidden;
+	box-sizing: border-box;
+	align-items: center;
+	background: linear-gradient(
+		135deg,
+		var(--footer-background),
+		rgba(var(--bar-background-rgb), 0.95)
+	);
+	backdrop-filter: blur(12px) saturate(180%);
+	-webkit-backdrop-filter: blur(12px) saturate(180%);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 16px;
+	margin: 1rem;
+	height: 4rem;
+	box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+	position: sticky;
+	bottom: 1rem;
+	z-index: 100;
 
-    @media (max-width: 600px) {
-        position: fixed;
-        margin: 0;
-        bottom: 0px;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
-        background: var(--footer-background);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        width: 100%;
-        max-width: 100%;
-        padding: 0 0.5rem;
-    }
+	@media (max-width: 600px) {
+		position: fixed;
+		margin: 0;
+		bottom: 0px;
+		border-radius: 0;
+		border-left: none;
+		border-right: none;
+		border-bottom: none;
+		background: var(--footer-background);
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		width: 100%;
+		max-width: 100%;
+		padding: 0 0.5rem;
+	}
 
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    [dir=rtl] & {
-        flex-direction: row-reverse;
-    }
+	[dir="rtl"] & {
+		flex-direction: row-reverse;
+	}
 }
 
 .root.relative {
-    position: relative;
+	position: relative;
 }
 
 .footer {
-    display: flex;
-    flex: 1;
-    justify-content: center;
+	display: flex;
+	flex: 1;
+	justify-content: center;
 }
 
 .footer.spaced {
-    justify-content: space-between;
+	justify-content: space-between;
 }
 
 .mobile {
-    display: flex;
-    justify-content: flex-end;
-    margin-right: 0.5rem;
+	display: flex;
+	justify-content: flex-end;
+	margin-right: 0.5rem;
 }

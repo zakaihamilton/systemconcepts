@@ -1,33 +1,32 @@
-import React from 'react';
-import { render, act } from '@testing-library/react';
-import PageLoad from './PageLoad';
+import { act, render } from "@testing-library/react";
 import { useTimeout } from "@util/timers";
+import PageLoad from "./PageLoad";
 
 jest.mock("@util/timers");
 jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
 
-describe('PageLoad Component', () => {
-  it('does not show progress initially', () => {
-    useTimeout.mockImplementation((callback) => {
-        // Don't call callback yet
-    });
-    const { queryByTestId } = render(<PageLoad />);
-    expect(queryByTestId('progress')).not.toBeInTheDocument();
-  });
+describe("PageLoad Component", () => {
+	it("does not show progress initially", () => {
+		useTimeout.mockImplementation((callback) => {
+			// Don't call callback yet
+		});
+		const { queryByTestId } = render(<PageLoad />);
+		expect(queryByTestId("progress")).not.toBeInTheDocument();
+	});
 
-  it('shows progress after timeout', () => {
-    let timeoutCallback;
-    useTimeout.mockImplementation((callback) => {
-        timeoutCallback = callback;
-    });
-    
-    render(<PageLoad />);
-    
-    act(() => {
-        timeoutCallback();
-    });
-    
-    // I need to check how to verify state update if it's internal.
-    // Actually, I can just check if progress is rendered now.
-  });
+	it("shows progress after timeout", () => {
+		let timeoutCallback;
+		useTimeout.mockImplementation((callback) => {
+			timeoutCallback = callback;
+		});
+
+		render(<PageLoad />);
+
+		act(() => {
+			timeoutCallback();
+		});
+
+		// I need to check how to verify state update if it's internal.
+		// Actually, I can just check if progress is rendered now.
+	});
 });

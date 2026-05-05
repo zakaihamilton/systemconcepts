@@ -1,81 +1,81 @@
 .root {
-    background-color: var(--main-background);
+	background-color: var(--main-background);
 }
 
 .root.even {
-    background-color: var(--main-background-alternative);
+	background-color: var(--main-background-alternative);
 }
 
 .root.separator {
-    border-top: 4px solid var(--neutral-300);
+	border-top: 4px solid var(--neutral-300);
 }
 
 .root.hover {
-    cursor: pointer;
-    user-select: none;
+	cursor: pointer;
+	user-select: none;
 }
 
 .root.selected {
-    background: var(--info-background) !important;
+	background: var(--info-background) !important;
 }
 
 .cell {
-    font-size: 16px;
-    padding: 0em !important;
-    border: none !important;
+	font-size: 16px;
+	padding: 0em !important;
+	border: none !important;
 }
 
 .cell.separator {
-    border-top: 2px solid var(--neutral-700) !important;
+	border-top: 2px solid var(--neutral-700) !important;
 }
 
 .cell.defaultAlign {
-    [dir=ltr] & {
-        text-align: left;
-    }
+	[dir="ltr"] & {
+		text-align: left;
+	}
 
-    [dir=rtl] & {
-        text-align: right;
-    }
+	[dir="rtl"] & {
+		text-align: right;
+	}
 }
 
 .cellContent.padding {
-    padding-left: 0.5em !important;
-    padding-right: 0.5em !important;
+	padding-left: 0.5em !important;
+	padding-right: 0.5em !important;
 }
 
 .cellContent {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(100% - 8px);
-    height: calc(100% - 8px);
-    margin: 4px;
-    box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: calc(100% - 8px);
+	height: calc(100% - 8px);
+	margin: 4px;
+	box-sizing: border-box;
 }
 
 .cellContent.defaultAlign {
-    [dir=ltr] & {
-        justify-content: flex-start;
-    }
+	[dir="ltr"] & {
+		justify-content: flex-start;
+	}
 
-    [dir=rtl] & {
-        justify-content: flex-end;
-    }
+	[dir="rtl"] & {
+		justify-content: flex-end;
+	}
 }
 
 .cellContent.head {
-    background: var(--main-background) !important;
+	background: var(--main-background) !important;
 }
 
 .cellContent.selected {
-    background: var(--info-background) !important;
+	background: var(--info-background) !important;
 }
 
 .cellContent.selectable {
-    cursor: pointer !important;
+	cursor: pointer !important;
 }
 
 .cellContent.selectable:hover {
-    background: var(--info-background) !important;
+	background: var(--info-background) !important;
 }

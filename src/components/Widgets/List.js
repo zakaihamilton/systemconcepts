@@ -1,131 +1,208 @@
-import { useState } from "react";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import styles from "./List.module.css";
-import Avatar from "@mui/material/Avatar";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import { useStyles } from "@util/styles";
-import Collapse from "@mui/material/Collapse";
+import { MainStore } from "@components/Main";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { MainStore } from "@components/Main";
-import Link from "@mui/material/Link";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import Avatar from "@mui/material/Avatar";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import Link from "@mui/material/Link";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import ListItemText from "@mui/material/ListItemText";
+import { useStyles } from "@util/styles";
+import { useState } from "react";
+import styles from "./List.module.css";
 
-export function ListItemWidget({ id, divider, reverse, depth, target, clickHandler, onClick, name, items, selected, setSelected, description, icon, avatar, action, onToggle, content, isOpen }) {
-    const { direction } = MainStore.useState();
-    const { icon: actionIcon, label: actionLabel, callback: actionCallback } = action || {};
-    const isSelected = typeof selected === "function" ? selected(id) : (Array.isArray(selected) ? selected.includes(id) : selected === id);
-    const itemClassName = useStyles(styles, {
-        item: true,
-        selected: isSelected
-    });
-    const iconContainerClassName = useStyles(styles, {
-        iconContainer: true
-    });
-    const [internalOpen, setInternalOpen] = useState(false);
-    const isControlled = typeof isOpen !== "undefined";
-    const open = isControlled ? isOpen : internalOpen;
+export function ListItemWidget({
+	id,
+	divider,
+	reverse,
+	depth,
+	target,
+	clickHandler,
+	onClick,
+	name,
+	items,
+	selected,
+	setSelected,
+	description,
+	icon,
+	avatar,
+	action,
+	onToggle,
+	content,
+	isOpen,
+}) {
+	const { direction } = MainStore.useState();
+	const {
+		icon: actionIcon,
+		label: actionLabel,
+		callback: actionCallback,
+	} = action || {};
+	const isSelected =
+		typeof selected === "function"
+			? selected(id)
+			: Array.isArray(selected)
+				? selected.includes(id)
+				: selected === id;
+	const itemClassName = useStyles(styles, {
+		item: true,
+		selected: isSelected,
+	});
+	const iconContainerClassName = useStyles(styles, {
+		iconContainer: true,
+	});
+	const [internalOpen, setInternalOpen] = useState(false);
+	const isControlled = typeof isOpen !== "undefined";
+	const open = isControlled ? isOpen : internalOpen;
 
-    let expandIcon = null;
-    let rootItemClick = () => {
-        if (onClick) {
-            onClick(id);
-        }
-        else if (setSelected) {
-            setSelected(id);
-        }
-        clickHandler && clickHandler(id);
-    };
+	let expandIcon = null;
+	let rootItemClick = () => {
+		if (onClick) {
+			onClick(id);
+		} else if (setSelected) {
+			setSelected(id);
+		}
+		clickHandler && clickHandler(id);
+	};
 
-    const handleToggle = () => {
-        const newOpen = !open;
-        if (!isControlled) {
-            setInternalOpen(newOpen);
-        }
-        if (onToggle) {
-            onToggle(newOpen);
-        }
-    };
+	const handleToggle = () => {
+		const newOpen = !open;
+		if (!isControlled) {
+			setInternalOpen(newOpen);
+		}
+		if (onToggle) {
+			onToggle(newOpen);
+		}
+	};
 
-    if ((items && items.length) || content) {
-        expandIcon = open ? <ExpandLess className={styles.expandIcon} /> : <ExpandMore className={styles.expandIcon} />;
-        rootItemClick = handleToggle;
-    } else {
-        expandIcon = <span className={styles.expandPlaceholder} />;
-    }
-    const elements = (items || []).map(item => {
-        const { id, ...props } = item;
-        return <ListItemWidget
-            id={id}
-            depth={depth + 1}
-            key={item.id}
-            clickHandler={clickHandler}
-            selected={selected}
-            setSelected={setSelected}
-            {...props} />;
-    });
-    const style = {};
-    if (direction === "rtl") {
-        style.paddingRight = (depth * 1.5) + "em";
-    }
-    else {
-        style.paddingLeft = (depth * 1.5) + "em";
-    }
-    if (typeof target === "string" && !target.startsWith("#")) {
-        target = "#" + target;
-    }
-    else if (!target) {
-        target = undefined;
-    }
-    return <>
-        <ListItem disablePadding className={itemClassName} divider={!!reverse && !!divider}>
-            <ListItemButton style={style} component={target ? Link : undefined} underline="none" href={target} selected={isSelected} onClick={rootItemClick}>
-                {expandIcon}
-                {!!avatar && icon && <ListItemAvatar>
-                    <Avatar className={iconContainerClassName}>
-                        {actionIcon}
-                    </Avatar>
-                </ListItemAvatar>}
-                {!avatar && icon && <ListItemIcon className={iconContainerClassName}>
-                    {icon}
-                </ListItemIcon>}
-                <ListItemText className={styles.itemLabel} primary={name} secondary={description} />
-            </ListItemButton>
-            {!!actionIcon && <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label={actionLabel} onClick={actionCallback} size="large">
-                    {actionIcon}
-                </IconButton>
-            </ListItemSecondaryAction>}
-        </ListItem>
-        {expandIcon && <Collapse in={open} timeout="auto" unmountOnExit>
-            {content ? content : <List component="div" disablePadding>
-                {elements}
-            </List>}
-        </Collapse>}
-        {!reverse && !!divider && <Divider />}
-    </>;
+	if ((items && items.length) || content) {
+		expandIcon = open ? (
+			<ExpandLess className={styles.expandIcon} />
+		) : (
+			<ExpandMore className={styles.expandIcon} />
+		);
+		rootItemClick = handleToggle;
+	} else {
+		expandIcon = <span className={styles.expandPlaceholder} />;
+	}
+	const elements = (items || []).map((item) => {
+		const { id, ...props } = item;
+		return (
+			<ListItemWidget
+				id={id}
+				depth={depth + 1}
+				key={item.id}
+				clickHandler={clickHandler}
+				selected={selected}
+				setSelected={setSelected}
+				{...props}
+			/>
+		);
+	});
+	const style = {};
+	if (direction === "rtl") {
+		style.paddingRight = depth * 1.5 + "em";
+	} else {
+		style.paddingLeft = depth * 1.5 + "em";
+	}
+	if (typeof target === "string" && !target.startsWith("#")) {
+		target = "#" + target;
+	} else if (!target) {
+		target = undefined;
+	}
+	return (
+		<>
+			<ListItem
+				disablePadding
+				className={itemClassName}
+				divider={!!reverse && !!divider}
+			>
+				<ListItemButton
+					style={style}
+					component={target ? Link : undefined}
+					underline="none"
+					href={target}
+					selected={isSelected}
+					onClick={rootItemClick}
+				>
+					{expandIcon}
+					{!!avatar && icon && (
+						<ListItemAvatar>
+							<Avatar className={iconContainerClassName}>{actionIcon}</Avatar>
+						</ListItemAvatar>
+					)}
+					{!avatar && icon && (
+						<ListItemIcon className={iconContainerClassName}>
+							{icon}
+						</ListItemIcon>
+					)}
+					<ListItemText
+						className={styles.itemLabel}
+						primary={name}
+						secondary={description}
+					/>
+				</ListItemButton>
+				{!!actionIcon && (
+					<ListItemSecondaryAction>
+						<IconButton
+							edge="end"
+							aria-label={actionLabel}
+							onClick={actionCallback}
+							size="large"
+						>
+							{actionIcon}
+						</IconButton>
+					</ListItemSecondaryAction>
+				)}
+			</ListItem>
+			{expandIcon && (
+				<Collapse in={open} timeout="auto" unmountOnExit>
+					{content ? (
+						content
+					) : (
+						<List component="div" disablePadding>
+							{elements}
+						</List>
+					)}
+				</Collapse>
+			)}
+			{!reverse && !!divider && <Divider />}
+		</>
+	);
 }
 
 export default function ListWidget({ reverse, items, onClick, state }) {
-    const [selected, setSelected] = state || [];
+	const [selected, setSelected] = state || [];
 
-    const className = useStyles(styles, {
-        root: true,
-        reverse
-    });
+	const className = useStyles(styles, {
+		root: true,
+		reverse,
+	});
 
-    const elements = (items || []).map(item => {
-        const { id, ...props } = item;
-        return <ListItemWidget id={id} key={item.id} clickHandler={onClick} depth={1} reverse={reverse} selected={selected} setSelected={setSelected} {...props} />;
-    });
+	const elements = (items || []).map((item) => {
+		const { id, ...props } = item;
+		return (
+			<ListItemWidget
+				id={id}
+				key={item.id}
+				clickHandler={onClick}
+				depth={1}
+				reverse={reverse}
+				selected={selected}
+				setSelected={setSelected}
+				{...props}
+			/>
+		);
+	});
 
-    return <List className={className} component="nav">
-        {elements}
-    </List>;
+	return (
+		<List className={className} component="nav">
+			{elements}
+		</List>
+	);
 }

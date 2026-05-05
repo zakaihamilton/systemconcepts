@@ -1,537 +1,656 @@
-import storage from "@util/storage";
-import { makePath, fileTitle, isVideoFile, isSubtitleFile, isTagsFile, isDurationFile, isSummaryFile } from "@util/path";
-import { shrinkImage, blobToBase64 } from "@util/image";
-import { readBinary } from "@util/binary";
-import pLimit from "../p-limit";
-import { UpdateSessionsStore, SyncActiveStore } from "@sync/syncState";
-import { addSyncLog } from "@sync/sync";
 import { writeCompressedFile } from "@sync/bundle";
-import { LOCAL_SYNC_PATH, SYNC_BASE_PATH, FILES_MANIFEST } from "@sync/constants";
-import { getListing, updateYearSync } from "./utils";
-import { updateManifestEntry } from "@sync/manifest";
+import {
+	FILES_MANIFEST,
+	LOCAL_SYNC_PATH,
+	SYNC_BASE_PATH,
+} from "@sync/constants";
 import { getFileInfo } from "@sync/hash";
-import { loadTags, loadDurations, loadSummaries, loadTranscriptions } from "./metadata";
-import { createSessionItem } from "./mapper";
+import { updateManifestEntry } from "@sync/manifest";
+import { addSyncLog } from "@sync/sync";
+import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { readBinary } from "@util/binary";
+import { blobToBase64, shrinkImage } from "@util/image";
+import {
+	fileTitle,
+	isDurationFile,
+	isSubtitleFile,
+	isSummaryFile,
+	isTagsFile,
+	isVideoFile,
+	makePath,
+} from "@util/path";
+import storage from "@util/storage";
+import pLimit from "../p-limit";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
+import { createSessionItem } from "./mapper";
+import {
+	loadDurations,
+	loadSummaries,
+	loadTags,
+	loadTranscriptions,
+} from "./metadata";
+import { getListing, updateYearSync } from "./utils";
 
 const prefix = "wasabi/";
 
-export async function updateGroupProcess(name, updateAll, forceUpdate = false, isMerged = false, isBundled = false) {
-    const path = prefix + name;
-    let itemIndex = 0;
+export async function updateGroupProcess(
+	name,
+	updateAll,
+	forceUpdate = false,
+	isMerged = false,
+	isBundled = false,
+) {
+	const path = prefix + name;
+	let itemIndex = 0;
 
-    UpdateSessionsStore.update(s => {
-        itemIndex = s.status.findIndex(item => item.name === name);
-        const statusItem = {
-            name: name,
-            years: [],
-            year: null,
-            addedCount: 0,
-            removedCount: 0,
-            progress: 0,
-            count: 0,
-            errors: [],
-            newSessions: []
-        };
-        if (itemIndex === -1) {
-            s.status = [...s.status, statusItem];
-            itemIndex = s.status.length - 1;
-        }
-        else {
-            s.status[itemIndex] = statusItem;
-            s.status = [...s.status];
-        }
-    });
+	UpdateSessionsStore.update((s) => {
+		itemIndex = s.status.findIndex((item) => item.name === name);
+		const statusItem = {
+			name: name,
+			years: [],
+			year: null,
+			addedCount: 0,
+			removedCount: 0,
+			progress: 0,
+			count: 0,
+			errors: [],
+			newSessions: [],
+		};
+		if (itemIndex === -1) {
+			s.status = [...s.status, statusItem];
+			itemIndex = s.status.length - 1;
+		} else {
+			s.status[itemIndex] = statusItem;
+			s.status = [...s.status];
+		}
+	});
 
-    const allSessionNames = new Set();
-    const allSessions = [];
-    let existingSessions = [];
+	const allSessionNames = new Set();
+	const allSessions = [];
+	let existingSessions = [];
 
-    // If merged/bundled and incremental update, load existing sessions first to preserve history
-    if ((isMerged || isBundled) && !updateAll) {
-        if (isBundled) {
-            const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
-            try {
-                if (await storage.exists(bundlePath)) {
-                    const content = await storage.readFile(bundlePath);
-                    const data = JSON.parse(content);
-                    if (data && Array.isArray(data.sessions)) {
-                        existingSessions = data.sessions.filter(s => s.group === name);
-                    }
-                }
-            } catch (err) {
-                console.warn(`[Sync] Failed to read existing bundle file ${bundlePath}`, err);
-            }
-        } else {
-            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-            try {
-                if (await storage.exists(localGroupPath)) {
-                    const content = await storage.readFile(localGroupPath);
-                    const data = JSON.parse(content);
-                    if (data && Array.isArray(data.sessions)) {
-                        existingSessions = data.sessions;
-                    }
-                }
-            } catch (err) {
-                console.warn(`[Sync] Failed to read existing group file ${localGroupPath}`, err);
-            }
-        }
-        if (existingSessions.length > 0) {
-            allSessions.push(...existingSessions);
-        }
-    }
+	// If merged/bundled and incremental update, load existing sessions first to preserve history
+	if ((isMerged || isBundled) && !updateAll) {
+		if (isBundled) {
+			const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+			try {
+				if (await storage.exists(bundlePath)) {
+					const content = await storage.readFile(bundlePath);
+					const data = JSON.parse(content);
+					if (data && Array.isArray(data.sessions)) {
+						existingSessions = data.sessions.filter((s) => s.group === name);
+					}
+				}
+			} catch (err) {
+				console.warn(
+					`[Sync] Failed to read existing bundle file ${bundlePath}`,
+					err,
+				);
+			}
+		} else {
+			const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+			try {
+				if (await storage.exists(localGroupPath)) {
+					const content = await storage.readFile(localGroupPath);
+					const data = JSON.parse(content);
+					if (data && Array.isArray(data.sessions)) {
+						existingSessions = data.sessions;
+					}
+				}
+			} catch (err) {
+				console.warn(
+					`[Sync] Failed to read existing group file ${localGroupPath}`,
+					err,
+				);
+			}
+		}
+		if (existingSessions.length > 0) {
+			allSessions.push(...existingSessions);
+		}
+	}
 
-    let years = [];
-    try {
-        console.log(`[UpdateGroup] Fetching listing for path: ${path}`);
-        const fullListing = await getListing(path);
-        console.log(`[UpdateGroup] Received ${fullListing?.length || 0} items from listing`);
-        if (fullListing && fullListing.length > 0) {
-            console.log(`[UpdateGroup] First item:`, JSON.stringify(fullListing[0]));
-        }
-        years = fullListing.filter(item => {
-            const isDir = item.type === "dir" || item.stat?.type === "dir";
-            const isYear = !isNaN(parseInt(item.name)) && /^\d+$/.test(item.name);
-            return isDir && isYear;
-        });
-        console.log(`[UpdateGroup] Filtered to ${years.length} year folders:`, years.map(y => y.name));
-    }
-    catch (err) {
-        console.error(err);
-        UpdateSessionsStore.update(s => {
-            s.status[itemIndex].errors.push(err.message || String(err));
-            s.status = [...s.status];
-        });
-        // Abort the process to prevent data corruption (writing empty files)
-        return;
-    }
-    if (!updateAll) {
-        const currentYear = new Date().getFullYear();
-        years = years.filter(year => {
-            const yearName = parseInt(year.name);
-            return yearName === currentYear;
-        });
-    }
+	let years = [];
+	try {
+		console.log(`[UpdateGroup] Fetching listing for path: ${path}`);
+		const fullListing = await getListing(path);
+		console.log(
+			`[UpdateGroup] Received ${fullListing?.length || 0} items from listing`,
+		);
+		if (fullListing && fullListing.length > 0) {
+			console.log(`[UpdateGroup] First item:`, JSON.stringify(fullListing[0]));
+		}
+		years = fullListing.filter((item) => {
+			const isDir = item.type === "dir" || item.stat?.type === "dir";
+			const isYear = !isNaN(parseInt(item.name)) && /^\d+$/.test(item.name);
+			return isDir && isYear;
+		});
+		console.log(
+			`[UpdateGroup] Filtered to ${years.length} year folders:`,
+			years.map((y) => y.name),
+		);
+	} catch (err) {
+		console.error(err);
+		UpdateSessionsStore.update((s) => {
+			s.status[itemIndex].errors.push(err.message || String(err));
+			s.status = [...s.status];
+		});
+		// Abort the process to prevent data corruption (writing empty files)
+		return;
+	}
+	if (!updateAll) {
+		const currentYear = new Date().getFullYear();
+		years = years.filter((year) => {
+			const yearName = parseInt(year.name);
+			return yearName === currentYear;
+		});
+	}
 
-    const limit = pLimit(4);
+	const limit = pLimit(4);
 
-    UpdateSessionsStore.update(s => {
-        s.status[itemIndex].count = years.length;
-        s.status = [...s.status];
-    });
+	UpdateSessionsStore.update((s) => {
+		s.status[itemIndex].count = years.length;
+		s.status = [...s.status];
+	});
 
-    const promises = years.map((year) => limit(async () => {
-        UpdateSessionsStore.update(s => {
-            s.status[itemIndex].years.push(year.name);
-            s.status[itemIndex].year = year.name;
-            s.status = [...s.status];
-        });
+	const promises = years.map((year) =>
+		limit(async () => {
+			UpdateSessionsStore.update((s) => {
+				s.status[itemIndex].years.push(year.name);
+				s.status[itemIndex].year = year.name;
+				s.status = [...s.status];
+			});
 
-        try {
-            console.log(`[UpdateGroup] Fetching items for year: ${year.name}, path: ${year.path}`);
-            const yearItems = await getListing(year.path);
-            console.log(`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`);
-            yearItems.sort((a, b) => a.name.localeCompare(b.name));
+			try {
+				console.log(
+					`[UpdateGroup] Fetching items for year: ${year.name}, path: ${year.path}`,
+				);
+				const yearItems = await getListing(year.path);
+				console.log(
+					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
+				);
+				yearItems.sort((a, b) => a.name.localeCompare(b.name));
 
-            // Load Metadata concurrently to improve performance
-            const awsPath = makePath("aws/sessions", name);
-            const [
-                sessionTagsMap,
-                sessionDurationMap,
-                sessionSummariesMap,
-                sessionTranscriptionMap
-            ] = await Promise.all([
-                loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled),
-                loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled),
-                loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled),
-                loadTranscriptions(year, name, awsPath, forceUpdate, isMerged, isBundled)
-            ]);
+				// Load Metadata concurrently to improve performance
+				const awsPath = makePath("aws/sessions", name);
+				const [
+					sessionTagsMap,
+					sessionDurationMap,
+					sessionSummariesMap,
+					sessionTranscriptionMap,
+				] = await Promise.all([
+					loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled),
+					loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled),
+					loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled),
+					loadTranscriptions(
+						year,
+						name,
+						awsPath,
+						forceUpdate,
+						isMerged,
+						isBundled,
+					),
+				]);
 
-            // Group files by session ID
-            const sessionFilesMap = {};
-            for (const file of yearItems) {
-                let id = fileTitle(file.name);
-                // Handle resolution suffix for video files
-                if (isVideoFile(file.name)) {
-                    const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
-                    if (resolutionMatch) {
-                        id = resolutionMatch[1];
-                    }
-                }
-                if (isSubtitleFile(file.name)) {
-                    id = id.replace(/\.[a-z]{2,3}$/, "");
-                }
-                // Ignore special metadata files, including the year.zip transcriptions file
-                if (file.name === year.name + ".tags" || file.name === year.name + ".duration" || file.name === year.name + ".md" || file.name === year.name + ".zip") {
-                    continue;
-                }
+				// Group files by session ID
+				const sessionFilesMap = {};
+				for (const file of yearItems) {
+					let id = fileTitle(file.name);
+					// Handle resolution suffix for video files
+					if (isVideoFile(file.name)) {
+						const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
+						if (resolutionMatch) {
+							id = resolutionMatch[1];
+						}
+					}
+					if (isSubtitleFile(file.name)) {
+						id = id.replace(/\.[a-z]{2,3}$/, "");
+					}
+					// Ignore special metadata files, including the year.zip transcriptions file
+					if (
+						file.name === year.name + ".tags" ||
+						file.name === year.name + ".duration" ||
+						file.name === year.name + ".md" ||
+						file.name === year.name + ".zip"
+					) {
+						continue;
+					}
 
-                if (!sessionFilesMap[id]) {
-                    sessionFilesMap[id] = [];
-                }
-                sessionFilesMap[id].push(file);
-            }
+					if (!sessionFilesMap[id]) {
+						sessionFilesMap[id] = [];
+					}
+					sessionFilesMap[id].push(file);
+				}
 
-            const sortedIds = Object.keys(sessionFilesMap).sort((a, b) => a.localeCompare(b));
+				const sortedIds = Object.keys(sessionFilesMap).sort((a, b) =>
+					a.localeCompare(b),
+				);
 
-            // Load existing sessions for the current year to preserve thumbnails
-            const existingThumbnails = {};
-            if (!isMerged && !isBundled) {
-                const existingYearPath = makePath(LOCAL_SYNC_PATH, name, year.name + ".json");
-                if (await storage.exists(existingYearPath)) {
-                    try {
-                        const content = await storage.readFile(existingYearPath);
-                        const data = JSON.parse(content);
-                        if (data && Array.isArray(data.sessions)) {
-                            data.sessions.forEach(session => {
-                                if (session.id && session.thumbnail && typeof session.thumbnail === "string" && !session.thumbnail.startsWith("http")) {
-                                    existingThumbnails[session.id] = session.thumbnail;
-                                }
-                            });
-                        }
-                    } catch (err) {
-                        console.warn(`[Sync] Failed to read existing year file for thumbnails: ${existingYearPath}`, err);
-                    }
-                }
-            } else if (existingSessions.length > 0) {
-                existingSessions.forEach(session => {
-                    if (session.id && session.thumbnail && typeof session.thumbnail === "string" && !session.thumbnail.startsWith("http")) {
-                        existingThumbnails[session.id] = session.thumbnail;
-                    }
-                });
-            }
+				// Load existing sessions for the current year to preserve thumbnails
+				const existingThumbnails = {};
+				if (!isMerged && !isBundled) {
+					const existingYearPath = makePath(
+						LOCAL_SYNC_PATH,
+						name,
+						year.name + ".json",
+					);
+					if (await storage.exists(existingYearPath)) {
+						try {
+							const content = await storage.readFile(existingYearPath);
+							const data = JSON.parse(content);
+							if (data && Array.isArray(data.sessions)) {
+								data.sessions.forEach((session) => {
+									if (
+										session.id &&
+										session.thumbnail &&
+										typeof session.thumbnail === "string" &&
+										!session.thumbnail.startsWith("http")
+									) {
+										existingThumbnails[session.id] = session.thumbnail;
+									}
+								});
+							}
+						} catch (err) {
+							console.warn(
+								`[Sync] Failed to read existing year file for thumbnails: ${existingYearPath}`,
+								err,
+							);
+						}
+					}
+				} else if (existingSessions.length > 0) {
+					existingSessions.forEach((session) => {
+						if (
+							session.id &&
+							session.thumbnail &&
+							typeof session.thumbnail === "string" &&
+							!session.thumbnail.startsWith("http")
+						) {
+							existingThumbnails[session.id] = session.thumbnail;
+						}
+					});
+				}
 
-            const yearSessionsLimit = pLimit(10);
-            const yearSessions = (await Promise.all(sortedIds.map(id => yearSessionsLimit(async () => {
-                let tags = sessionTagsMap[id] || [];
-                let duration = sessionDurationMap[id];
-                let summary = sessionSummariesMap[id];
-                let transcription = sessionTranscriptionMap[id];
-                const files = sessionFilesMap[id];
+				const yearSessionsLimit = pLimit(10);
+				const yearSessions = (
+					await Promise.all(
+						sortedIds.map((id) =>
+							yearSessionsLimit(async () => {
+								let tags = sessionTagsMap[id] || [];
+								let duration = sessionDurationMap[id];
+								let summary = sessionSummariesMap[id];
+								let transcription = sessionTranscriptionMap[id];
+								const files = sessionFilesMap[id];
 
-                if (!tags.length) {
-                    const tagsFile = files.find(f => isTagsFile(f.name));
-                    if (tagsFile) {
-                        try {
-                            const content = await storage.readFile(tagsFile.path);
-                            const parsed = JSON.parse(content);
-                            if (Array.isArray(parsed)) {
-                                tags = parsed;
-                            }
-                            else if (parsed && Array.isArray(parsed.tags)) {
-                                tags = parsed.tags;
-                            }
-                        } catch (err) {
-                            console.warn(`[Sync] Failed to read tags file ${tagsFile.path}`, err);
-                        }
-                    }
-                }
+								if (!tags.length) {
+									const tagsFile = files.find((f) => isTagsFile(f.name));
+									if (tagsFile) {
+										try {
+											const content = await storage.readFile(tagsFile.path);
+											const parsed = JSON.parse(content);
+											if (Array.isArray(parsed)) {
+												tags = parsed;
+											} else if (parsed && Array.isArray(parsed.tags)) {
+												tags = parsed.tags;
+											}
+										} catch (err) {
+											console.warn(
+												`[Sync] Failed to read tags file ${tagsFile.path}`,
+												err,
+											);
+										}
+									}
+								}
 
-                if (!duration || duration < 1) {
-                    const durationFile = files.find(f => isDurationFile(f.name));
-                    if (durationFile) {
-                        try {
-                            const content = await storage.readFile(durationFile.path);
-                            try {
-                                const parsed = JSON.parse(content);
-                                if (parsed && typeof parsed.duration === "number") {
-                                    duration = parsed.duration;
-                                } else {
-                                    duration = parseFloat(content);
-                                }
-                            } catch {
-                                duration = parseFloat(content);
-                            }
-                        } catch (err) {
-                            console.warn(`[Sync] Failed to read duration file ${durationFile.path}`, err);
-                        }
-                    }
-                }
+								if (!duration || duration < 1) {
+									const durationFile = files.find((f) =>
+										isDurationFile(f.name),
+									);
+									if (durationFile) {
+										try {
+											const content = await storage.readFile(durationFile.path);
+											try {
+												const parsed = JSON.parse(content);
+												if (parsed && typeof parsed.duration === "number") {
+													duration = parsed.duration;
+												} else {
+													duration = parseFloat(content);
+												}
+											} catch {
+												duration = parseFloat(content);
+											}
+										} catch (err) {
+											console.warn(
+												`[Sync] Failed to read duration file ${durationFile.path}`,
+												err,
+											);
+										}
+									}
+								}
 
-                if (!summary) {
-                    const summaryFile = files.find(f => isSummaryFile(f.name));
-                    if (summaryFile) {
-                        try {
-                            summary = await storage.readFile(summaryFile.path);
-                        } catch (err) {
-                            console.warn(`[Sync] Failed to read summary file ${summaryFile.path}`, err);
-                        }
-                    }
-                }
+								if (!summary) {
+									const summaryFile = files.find((f) => isSummaryFile(f.name));
+									if (summaryFile) {
+										try {
+											summary = await storage.readFile(summaryFile.path);
+										} catch (err) {
+											console.warn(
+												`[Sync] Failed to read summary file ${summaryFile.path}`,
+												err,
+											);
+										}
+									}
+								}
 
-                // If not in consolidated zip, check for individual file or .txt inside the folder.
-                // Usually it's sessionID.txt. If we didn't get it from zip, check files list.
-                if (!transcription) {
-                    const txtFile = files.find(f => f.name.endsWith('.txt'));
-                    if (txtFile) {
-                        transcription = true;
-                        item.transcriptPath = txtFile.path;
-                    }
-                }
+								// If not in consolidated zip, check for individual file or .txt inside the folder.
+								// Usually it's sessionID.txt. If we didn't get it from zip, check files list.
+								if (!transcription) {
+									const txtFile = files.find((f) => f.name.endsWith(".txt"));
+									if (txtFile) {
+										transcription = true;
+										item.transcriptPath = txtFile.path;
+									}
+								}
 
-                const item = createSessionItem(
-                    id,
-                    files,
-                    year.name,
-                    name,
-                    tags,
-                    duration,
-                    summary,
-                    transcription
-                );
+								const item = createSessionItem(
+									id,
+									files,
+									year.name,
+									name,
+									tags,
+									duration,
+									summary,
+									transcription,
+								);
 
-                return item;
-            })))).filter(Boolean);
+								return item;
+							}),
+						),
+					)
+				).filter(Boolean);
 
-            // Generate thumbnails for sessions that have images but no thumbnail data yet
-            const thumbnailLimit = pLimit(4);
-            const thumbnailPromises = yearSessions
-                .filter(session => session.thumbnail === true && session.image)
-                .map(session => thumbnailLimit(async () => {
-                    if (existingThumbnails[session.id] && !forceUpdate) {
-                        session.thumbnail = existingThumbnails[session.id];
-                    } else {
-                        try {
-                            const blob = await readBinary(session.image.path);
-                            if (blob) {
-                                const thumbnailBlob = await shrinkImage(blob);
-                                const base64String = await blobToBase64(thumbnailBlob);
-                                session.thumbnail = base64String;
-                            }
-                        } catch (err) {
-                            console.error(`[Sync] Error generating thumbnail for ${session.id}:`, err);
-                            // If we fail, remove thumbnail flag so UI doesn't try to load "true"
-                            delete session.thumbnail;
-                        }
-                    }
-                }));
-            await Promise.all(thumbnailPromises);
+				// Generate thumbnails for sessions that have images but no thumbnail data yet
+				const thumbnailLimit = pLimit(4);
+				const thumbnailPromises = yearSessions
+					.filter((session) => session.thumbnail === true && session.image)
+					.map((session) =>
+						thumbnailLimit(async () => {
+							if (existingThumbnails[session.id] && !forceUpdate) {
+								session.thumbnail = existingThumbnails[session.id];
+							} else {
+								try {
+									const blob = await readBinary(session.image.path);
+									if (blob) {
+										const thumbnailBlob = await shrinkImage(blob);
+										const base64String = await blobToBase64(thumbnailBlob);
+										session.thumbnail = base64String;
+									}
+								} catch (err) {
+									console.error(
+										`[Sync] Error generating thumbnail for ${session.id}:`,
+										err,
+									);
+									// If we fail, remove thumbnail flag so UI doesn't try to load "true"
+									delete session.thumbnail;
+								}
+							}
+						}),
+					);
+				await Promise.all(thumbnailPromises);
 
-            if (isMerged || isBundled) {
-                allSessions.push(...yearSessions);
-            } else {
-                const { counter, newCount, newSessions } = await updateYearSync(name, year.name, yearSessions);
-                // Track sessions for total count regardless of whether file was updated
-                yearSessions.forEach(session => allSessionNames.add(session.id));
+				if (isMerged || isBundled) {
+					allSessions.push(...yearSessions);
+				} else {
+					const { counter, newCount, newSessions } = await updateYearSync(
+						name,
+						year.name,
+						yearSessions,
+					);
+					// Track sessions for total count regardless of whether file was updated
+					yearSessions.forEach((session) => allSessionNames.add(session.id));
 
-                if (counter > 0) {
-                    UpdateSessionsStore.update(s => {
-                        s.status[itemIndex].addedCount += newCount;
-                        s.status[itemIndex].newSessions.push(...newSessions.map(s => ({
-                            name: s.id,
-                            files: s.files || []
-                        })));
-                        s.status = [...s.status];
-                    });
-                }
-            }
-        }
-        catch (err) {
-            console.error(err);
-            UpdateSessionsStore.update(s => {
-                s.status[itemIndex].errors.push(err.message || String(err));
-                s.status = [...s.status];
-            });
-            throw err; // Abort this year's processing and fail the group update
-        } finally {
-            UpdateSessionsStore.update(s => {
-                s.status[itemIndex].progress++;
-                s.status = [...s.status];
-            });
-        }
-    }));
-    try {
-        await Promise.all(promises);
-    } catch {
-        console.error(`[Sync] Group ${name} failed to process all years. Aborting write to prevent corruption.`);
-        return;
-    }
+					if (counter > 0) {
+						UpdateSessionsStore.update((s) => {
+							s.status[itemIndex].addedCount += newCount;
+							s.status[itemIndex].newSessions.push(
+								...newSessions.map((s) => ({
+									name: s.id,
+									files: s.files || [],
+								})),
+							);
+							s.status = [...s.status];
+						});
+					}
+				}
+			} catch (err) {
+				console.error(err);
+				UpdateSessionsStore.update((s) => {
+					s.status[itemIndex].errors.push(err.message || String(err));
+					s.status = [...s.status];
+				});
+				throw err; // Abort this year's processing and fail the group update
+			} finally {
+				UpdateSessionsStore.update((s) => {
+					s.status[itemIndex].progress++;
+					s.status = [...s.status];
+				});
+			}
+		}),
+	);
+	try {
+		await Promise.all(promises);
+	} catch {
+		console.error(
+			`[Sync] Group ${name} failed to process all years. Aborting write to prevent corruption.`,
+		);
+		return;
+	}
 
-    if (isBundled) {
-        // For bundled groups:
-        // 1. Deduplicate sessions (preferring fresh ones from this sync)
-        const sessionMap = new Map();
-        allSessions.forEach(s => sessionMap.set(s.id, s));
-        const uniqueSessions = Array.from(sessionMap.values());
-        uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
+	if (isBundled) {
+		// For bundled groups:
+		// 1. Deduplicate sessions (preferring fresh ones from this sync)
+		const sessionMap = new Map();
+		allSessions.forEach((s) => sessionMap.set(s.id, s));
+		const uniqueSessions = Array.from(sessionMap.values());
+		uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
 
-        if (existingSessions) {
-            existingSessions.sort((a, b) => a.id.localeCompare(b.id));
-            const uniqueSessionsStr = JSON.stringify(uniqueSessions);
-            const existingSessionsStr = JSON.stringify(existingSessions);
+		if (existingSessions) {
+			existingSessions.sort((a, b) => a.id.localeCompare(b.id));
+			const uniqueSessionsStr = JSON.stringify(uniqueSessions);
+			const existingSessionsStr = JSON.stringify(existingSessions);
 
-            if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
-                addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
-                return uniqueSessions;
-            }
-        }
+			if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
+				addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
+				return uniqueSessions;
+			}
+		}
 
-        // 2. Cleanup
-        await cleanupBundledGroup(name);
+		// 2. Cleanup
+		await cleanupBundledGroup(name);
 
-        const existingIds = new Set(existingSessions.map(s => s.id));
-        const newSessionItems = uniqueSessions.filter(s => !existingIds.has(s.id));
-        const addedCount = newSessionItems.length;
+		const existingIds = new Set(existingSessions.map((s) => s.id));
+		const newSessionItems = uniqueSessions.filter(
+			(s) => !existingIds.has(s.id),
+		);
+		const addedCount = newSessionItems.length;
 
-        UpdateSessionsStore.update(s => {
-            s.status[itemIndex].addedCount = addedCount;
-            s.status[itemIndex].newSessions.push(...newSessionItems.map(s => ({
-                name: s.id,
-                files: s.files || []
-            })));
-            s.status = [...s.status];
-        });
-        uniqueSessions.forEach(session => allSessionNames.add(session.id));
+		UpdateSessionsStore.update((s) => {
+			s.status[itemIndex].addedCount = addedCount;
+			s.status[itemIndex].newSessions.push(
+				...newSessionItems.map((s) => ({
+					name: s.id,
+					files: s.files || [],
+				})),
+			);
+			s.status = [...s.status];
+		});
+		uniqueSessions.forEach((session) => allSessionNames.add(session.id));
 
-        return uniqueSessions;
-    }
+		return uniqueSessions;
+	}
 
-    if (isMerged) {
-        // For merged groups:
-        // 1. Deduplicate sessions (preferring fresh ones from this sync)
-        const sessionMap = new Map();
-        allSessions.forEach(s => sessionMap.set(s.id, s));
-        const uniqueSessions = Array.from(sessionMap.values());
-        uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
+	if (isMerged) {
+		// For merged groups:
+		// 1. Deduplicate sessions (preferring fresh ones from this sync)
+		const sessionMap = new Map();
+		allSessions.forEach((s) => sessionMap.set(s.id, s));
+		const uniqueSessions = Array.from(sessionMap.values());
+		uniqueSessions.sort((a, b) => a.id.localeCompare(b.id));
 
-        let hasChanges = true;
-        if (existingSessions) {
-            existingSessions.sort((a, b) => a.id.localeCompare(b.id));
-            const uniqueSessionsStr = JSON.stringify(uniqueSessions);
-            const existingSessionsStr = JSON.stringify(existingSessions);
+		let hasChanges = true;
+		if (existingSessions) {
+			existingSessions.sort((a, b) => a.id.localeCompare(b.id));
+			const uniqueSessionsStr = JSON.stringify(uniqueSessions);
+			const existingSessionsStr = JSON.stringify(existingSessions);
 
-            if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
-                hasChanges = false;
-                addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
-                return;
-            }
-        }
+			if (uniqueSessionsStr === existingSessionsStr && !forceUpdate) {
+				hasChanges = false;
+				addSyncLog(`[${name}] ✓ Verified (no changes).`, "success");
+				return;
+			}
+		}
 
-        if (hasChanges) {
-            // 2. Write ONE merged file
-            const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-            const groupData = {
-                version: 1,
-                group: name,
-                date: Date.now(),
-                sessions: uniqueSessions
-            };
-            await writeCompressedFile(localGroupPath, groupData);
+		if (hasChanges) {
+			// 2. Write ONE merged file
+			const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+			const groupData = {
+				version: 1,
+				group: name,
+				date: Date.now(),
+				sessions: uniqueSessions,
+			};
+			await writeCompressedFile(localGroupPath, groupData);
 
-            // Update local manifest immediately so useSessions can see it
-            try {
-                const content = await storage.readFile(localGroupPath);
-                const info = await getFileInfo(content);
-                const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
-                const relPath = localGroupPath.substring(makePath(LOCAL_SYNC_PATH).length);
-                const entry = {
-                    path: relPath.startsWith("/") ? relPath : "/" + relPath,
-                    hash: info.hash,
-                    size: info.size,
-                    version: Date.now().toString() // Use timestamp to ensure it's "newer"
-                };
-                await updateManifestEntry(manifestPath, entry);
-                console.log(`[Sync] Updated local manifest for ${relPath}`);
-            } catch (err) {
-                console.warn(`[Sync] Failed to update local manifest for ${localGroupPath}`, err);
-            }
+			// Update local manifest immediately so useSessions can see it
+			try {
+				const content = await storage.readFile(localGroupPath);
+				const info = await getFileInfo(content);
+				const manifestPath = makePath(LOCAL_SYNC_PATH, FILES_MANIFEST);
+				const relPath = localGroupPath.substring(
+					makePath(LOCAL_SYNC_PATH).length,
+				);
+				const entry = {
+					path: relPath.startsWith("/") ? relPath : "/" + relPath,
+					hash: info.hash,
+					size: info.size,
+					version: Date.now().toString(), // Use timestamp to ensure it's "newer"
+				};
+				await updateManifestEntry(manifestPath, entry);
+				console.log(`[Sync] Updated local manifest for ${relPath}`);
+			} catch (err) {
+				console.warn(
+					`[Sync] Failed to update local manifest for ${localGroupPath}`,
+					err,
+				);
+			}
 
-            // 3. Cleanup
-            await cleanupMergedGroup(name);
-        }
+			// 3. Cleanup
+			await cleanupMergedGroup(name);
+		}
 
-        const existingIds = new Set(existingSessions.map(s => s.id));
-        const newSessionItems = uniqueSessions.filter(s => !existingIds.has(s.id));
-        const addedCount = newSessionItems.length;
+		const existingIds = new Set(existingSessions.map((s) => s.id));
+		const newSessionItems = uniqueSessions.filter(
+			(s) => !existingIds.has(s.id),
+		);
+		const addedCount = newSessionItems.length;
 
-        UpdateSessionsStore.update(s => {
-            s.status[itemIndex].addedCount = addedCount;
-            s.status[itemIndex].newSessions.push(...newSessionItems.map(s => ({
-                name: s.id,
-                files: s.files || []
-            })));
-            s.status = [...s.status];
-        });
-        uniqueSessions.forEach(session => allSessionNames.add(session.id));
-    } else {
-        // For split (enabled) groups:
-        // 1. Check if we need to migrate from a merged file (e.g. settings changed or first sync after migration)
-        const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
-        if (await storage.exists(localGroupPath)) {
-            try {
-                const content = await storage.readFile(localGroupPath);
-                const data = JSON.parse(content);
-                if (data && data.sessions) {
-                    // Group by year
-                    const byYear = {};
-                    data.sessions.forEach(s => {
-                        if (!byYear[s.year]) byYear[s.year] = [];
-                        byYear[s.year].push(s);
-                    });
+		UpdateSessionsStore.update((s) => {
+			s.status[itemIndex].addedCount = addedCount;
+			s.status[itemIndex].newSessions.push(
+				...newSessionItems.map((s) => ({
+					name: s.id,
+					files: s.files || [],
+				})),
+			);
+			s.status = [...s.status];
+		});
+		uniqueSessions.forEach((session) => allSessionNames.add(session.id));
+	} else {
+		// For split (enabled) groups:
+		// 1. Check if we need to migrate from a merged file (e.g. settings changed or first sync after migration)
+		const localGroupPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+		if (await storage.exists(localGroupPath)) {
+			try {
+				const content = await storage.readFile(localGroupPath);
+				const data = JSON.parse(content);
+				if (data && data.sessions) {
+					// Group by year
+					const byYear = {};
+					data.sessions.forEach((s) => {
+						if (!byYear[s.year]) byYear[s.year] = [];
+						byYear[s.year].push(s);
+					});
 
-                    // Write year files for years NOT processed in this sync
-                    // (Processed years are already written by updateYearSync above)
-                    const processedYears = new Set(years.map(y => y.name));
-                    for (const [year, sessions] of Object.entries(byYear)) {
-                        if (!processedYears.has(year)) {
-                            await updateYearSync(name, year, sessions);
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Error migrating from merged file", err);
-            }
-            // 2. Delete local merged file
-            await storage.deleteFile(localGroupPath);
+					// Write year files for years NOT processed in this sync
+					// (Processed years are already written by updateYearSync above)
+					const processedYears = new Set(years.map((y) => y.name));
+					for (const [year, sessions] of Object.entries(byYear)) {
+						if (!processedYears.has(year)) {
+							await updateYearSync(name, year, sessions);
+						}
+					}
+				}
+			} catch (err) {
+				console.error("Error migrating from merged file", err);
+			}
+			// 2. Delete local merged file
+			await storage.deleteFile(localGroupPath);
 
-            // 3. Delete remote merged file from AWS
-            const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
-            try {
-                if (await storage.exists(remoteGroupPath)) {
-                    console.log(`[Sync] Deleting remote merged file: ${remoteGroupPath}`);
-                    await storage.deleteFile(remoteGroupPath);
-                    console.log(`[Sync] Successfully deleted remote merged file`);
-                }
-            } catch (err) {
-                console.error(`[Sync] Error deleting remote merged file for ${name}:`, err);
-            }
-        }
-    }
+			// 3. Delete remote merged file from AWS
+			const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
+			try {
+				if (await storage.exists(remoteGroupPath)) {
+					console.log(`[Sync] Deleting remote merged file: ${remoteGroupPath}`);
+					await storage.deleteFile(remoteGroupPath);
+					console.log(`[Sync] Successfully deleted remote merged file`);
+				}
+			} catch (err) {
+				console.error(
+					`[Sync] Error deleting remote merged file for ${name}:`,
+					err,
+				);
+			}
+		}
+	}
 
-    // Retrieve the final status for this group to avoid stale index issues
-    const finalStatus = (UpdateSessionsStore.getRawState().status || []).find(s => s.name === name) || {};
-    const addedCount = finalStatus.addedCount || 0;
-    const newSessions = finalStatus.newSessions || [];
+	// Retrieve the final status for this group to avoid stale index issues
+	const finalStatus =
+		(UpdateSessionsStore.getRawState().status || []).find(
+			(s) => s.name === name,
+		) || {};
+	const addedCount = finalStatus.addedCount || 0;
+	const newSessions = finalStatus.newSessions || [];
 
-    UpdateSessionsStore.update(s => {
-        const idx = s.status.findIndex(item => item.name === name);
-        if (idx !== -1) {
-            s.status[idx].progress = years.length;
-            s.status[idx].year = null;
-            s.status = [...s.status];
-        }
-    });
+	UpdateSessionsStore.update((s) => {
+		const idx = s.status.findIndex((item) => item.name === name);
+		if (idx !== -1) {
+			s.status[idx].progress = years.length;
+			s.status[idx].year = null;
+			s.status = [...s.status];
+		}
+	});
 
-    const sortedSessions = [...allSessionNames].sort();
-    const totalCount = sortedSessions.length;
+	const sortedSessions = [...allSessionNames].sort();
+	const totalCount = sortedSessions.length;
 
-    // Use the last newly added session if available, otherwise fallback to last overall
-    let lastSession = "";
-    if (newSessions.length > 0) {
-        const sortedNew = newSessions.map(s => s.name).sort();
-        lastSession = sortedNew[sortedNew.length - 1];
-    } else if (totalCount > 0) {
-        lastSession = sortedSessions[totalCount - 1];
-    }
+	// Use the last newly added session if available, otherwise fallback to last overall
+	let lastSession = "";
+	if (newSessions.length > 0) {
+		const sortedNew = newSessions.map((s) => s.name).sort();
+		lastSession = sortedNew[sortedNew.length - 1];
+	} else if (totalCount > 0) {
+		lastSession = sortedSessions[totalCount - 1];
+	}
 
-    const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
-    const newMsg = addedCount > 0 ? `, ${addedCount} updated` : ", no updates";
+	const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
+	const newMsg = addedCount > 0 ? `, ${addedCount} updated` : ", no updates";
 
-    if (addedCount > 0) {
-        SyncActiveStore.update(s => {
-            s.needsSessionReload = true;
-        });
-    }
+	if (addedCount > 0) {
+		SyncActiveStore.update((s) => {
+			s.needsSessionReload = true;
+		});
+	}
 
-    addSyncLog(`[${name}] ✓ Updated (${totalCount} sessions${newMsg}${lastSessionMsg}).`, "success");
+	addSyncLog(
+		`[${name}] ✓ Updated (${totalCount} sessions${newMsg}${lastSessionMsg}).`,
+		"success",
+	);
 }

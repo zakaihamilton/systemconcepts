@@ -1,40 +1,40 @@
 .root {
-    display: flex;
-    align-items: center;
-    border: 1px solid transparent;
+	display: flex;
+	align-items: center;
+	border: 1px solid transparent;
 }
 
 .root.button:not(.noBorder) {
-    border: 1px solid var(--border-color);
-    font: inherit;
-    color: var(--text-color);
-    background-color: transparent;
-    cursor: pointer;
+	border: 1px solid var(--border-color);
+	font: inherit;
+	color: var(--text-color);
+	background-color: transparent;
+	cursor: pointer;
 }
 
 .root.button:not(.noBorder):hover {
-    border: 1px solid var(--border-highlight);
+	border: 1px solid var(--border-highlight);
 }
 
 .root.noBorder {
-    font: inherit;
-    color: var(--text-color);
-    background-color: transparent;
-    cursor: pointer;
-    height: 100%;
+	font: inherit;
+	color: var(--text-color);
+	background-color: transparent;
+	cursor: pointer;
+	height: 100%;
 }
 
 .root.noBorder:hover:active {
-    background-color: var(--hover-fill);
-    color: var(--hover-text-color);
+	background-color: var(--hover-fill);
+	color: var(--hover-text-color);
 }
 
-.root>* {
-    [dir=rtl] & {
-        margin-left: 0.5em;
-    }
+.root > * {
+	[dir="rtl"] & {
+		margin-left: 0.5em;
+	}
 
-    [dir=ltr] & {
-        margin-right: 0.5em;
-    }
+	[dir="ltr"] & {
+		margin-right: 0.5em;
+	}
 }

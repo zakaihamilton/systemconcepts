@@ -1,51 +1,51 @@
 .root {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
 }
 
 .form {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    flex: 1;
-    align-items: flex-start;
-    align-content: flex-start;
-    margin: 1em;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	flex: 1;
+	align-items: flex-start;
+	align-content: flex-start;
+	margin: 1em;
 }
 
 .group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    align-content: flex-start;
-    margin: -0.5em -0.5em;
-    width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	align-content: flex-start;
+	margin: -0.5em -0.5em;
+	width: 100%;
 }
 
 .item {
-    display: flex;
-    min-width: 350px;
-    margin: 0.5em;
-    flex: 1;
+	display: flex;
+	min-width: 350px;
+	margin: 0.5em;
+	flex: 1;
 }
 
-.form>*:not(:last-child) {
-    margin-bottom: 1em;
+.form > *:not(:last-child) {
+	margin-bottom: 1em;
 }
 
-.group>*:not(:last-child) {
-    [dir=rtl] & {
-        margin-left: 1em;
-    }
+.group > *:not(:last-child) {
+	[dir="rtl"] & {
+		margin-left: 1em;
+	}
 
-    [dir=ltr] & {
-        margin-right: 1em;
-    }
+	[dir="ltr"] & {
+		margin-right: 1em;
+	}
 }
 
 .actions {
-    display: flex;
-    margin: 2em;
-    justify-content: space-around;
+	display: flex;
+	margin: 2em;
+	justify-content: space-around;
 }

@@ -1,118 +1,124 @@
 .background {
-    position: absolute;
-    inset: 0;
-    opacity: 0.1;
-    pointer-events: none;
-    z-index: 0;
+	position: absolute;
+	inset: 0;
+	opacity: 0.1;
+	pointer-events: none;
+	z-index: 0;
 }
 
 .backgroundBorder {
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    height: 3px;
-    opacity: 0.6;
-    z-index: 1;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	height: 3px;
+	opacity: 0.6;
+	z-index: 1;
 }
 
 .selector,
 .icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
 }
 
 .itemIcon {
-    min-width: unset !important;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.25rem;
-    color: var(--text-color) !important;
+	min-width: unset !important;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.25rem;
+	color: var(--text-color) !important;
 
-    svg {
-        font-size: 1.25rem;
-    }
+	svg {
+		font-size: 1.25rem;
+	}
 }
 
 .itemText {
-    flex: 1;
-    min-width: 0;
-    padding: 0 0.5rem;
+	flex: 1;
+	min-width: 0;
+	padding: 0 0.5rem;
 }
 
 .primaryText {
-    font-size: 0.9rem !important;
-    font-weight: 500 !important;
-    color: var(--text-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	font-size: 0.9rem !important;
+	font-weight: 500 !important;
+	color: var(--text-color);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .secondaryText {
-    font-size: 0.75rem !important;
-    opacity: 0.6;
-    margin-top: 2px;
+	font-size: 0.75rem !important;
+	opacity: 0.6;
+	margin-top: 2px;
 }
 
 .menuItem {
-    position: relative;
-    padding: 0.6rem 1rem !important;
-    margin: 0.2rem 0.5rem !important;
-    border-radius: 8px !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	position: relative;
+	padding: 0.6rem 1rem !important;
+	margin: 0.2rem 0.5rem !important;
+	border-radius: 8px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 
-    &:hover {
-        background-color: var(--hover-background) !important;
-    }
+	&:hover {
+		background-color: var(--hover-background) !important;
+	}
 
-    &.selected {
-        background-color: rgba(var(--primary-color-rgb, 63, 81, 181), 0.08) !important;
-        color: var(--primary-color) !important;
+	&.selected {
+		background-color: rgba(
+			var(--primary-color-rgb, 63, 81, 181),
+			0.08
+		) !important;
+		color: var(--primary-color) !important;
 
-        &:hover {
-            background-color: rgba(var(--primary-color-rgb, 63, 81, 181), 0.12) !important;
-        }
-    }
+		&:hover {
+			background-color: rgba(
+				var(--primary-color-rgb, 63, 81, 181),
+				0.12
+			) !important;
+		}
+	}
 }
 
 .divider {
-    margin: 0.4rem 0 !important;
-    opacity: 0.4;
+	margin: 0.4rem 0 !important;
+	opacity: 0.4;
 }
 
 .headerText {
-    margin-top: 0.5rem;
-    cursor: inherit;
+	margin-top: 0.5rem;
+	cursor: inherit;
 }
 
 .headerPrimary {
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--primary-color) !important;
+	font-size: 0.75rem !important;
+	font-weight: 700 !important;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--primary-color) !important;
 }
 
 .headerIcon {
-    min-width: unset !important;
-    margin-left: 0.5rem;
-    color: var(--primary-color);
+	min-width: unset !important;
+	margin-left: 0.5rem;
+	color: var(--primary-color);
 
-    svg {
-        font-size: 1.1rem;
-    }
+	svg {
+		font-size: 1.1rem;
+	}
 }
 
 .headerItem {
-    cursor: pointer !important;
-    user-select: none !important;
+	cursor: pointer !important;
+	user-select: none !important;
 
-    &:hover {
-        background-color: transparent !important;
-    }
+	&:hover {
+		background-color: transparent !important;
+	}
 }

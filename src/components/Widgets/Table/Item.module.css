@@ -1,80 +1,80 @@
 .root {
-    display: flex;
-    flex: 1;
+	display: flex;
+	flex: 1;
 }
 
 .item {
-    display: grid;
-    color: var(--text-color);
-    box-sizing: border-box;
-    min-width: 0;
-    overflow: hidden;
-    flex: 1;
-    padding: 4px;
+	display: grid;
+	color: var(--text-color);
+	box-sizing: border-box;
+	min-width: 0;
+	overflow: hidden;
+	flex: 1;
+	padding: 4px;
 }
 
 .item {
-    background-color: var(--main-background);
+	background-color: var(--main-background);
 }
 
 .item.separator {
-    border-top: 2px solid var(--neutral-700);
+	border-top: 2px solid var(--neutral-700);
 }
 
 .item.selected {
-    background: var(--selected-color) !important;
+	background: var(--selected-color) !important;
 }
 
 .item.even {
-    background-color: var(--main-background-alternative);
+	background-color: var(--main-background-alternative);
 }
 
 .cell {
-    display: flex;
-    align-items: center;
-    overflow: hidden;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
 }
 
 .cell.grid {
-    white-space: nowrap;
+	white-space: nowrap;
 }
 
 .cell.list.padding {
-    padding-left: 1em;
-    padding-right: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
 }
 
 .cell.defaultAlign {
-    [dir=ltr] & {
-        text-align: left;
-    }
+	[dir="ltr"] & {
+		text-align: left;
+	}
 
-    [dir=rtl] & {
-        text-align: right;
-    }
+	[dir="rtl"] & {
+		text-align: right;
+	}
 }
 
 .ellipsisText {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 .cell.head {
-    background: var(--main-background) !important;
-    font-weight: 600;
-    color: var(--neutral-500);
+	background: var(--main-background) !important;
+	font-weight: 600;
+	color: var(--neutral-500);
 }
 
 .selectable {
-    cursor: pointer !important;
-    user-select: none;
+	cursor: pointer !important;
+	user-select: none;
 }
 
 .selectable:hover {
-    background: var(--hover-color) !important;
+	background: var(--hover-color) !important;
 }
 
 .cell.selected {
-    background: var(--selected-color) !important;
+	background: var(--selected-color) !important;
 }

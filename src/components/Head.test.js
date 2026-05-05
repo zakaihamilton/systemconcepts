@@ -1,8 +1,7 @@
-import React from "react";
 import { render } from "@testing-library/react";
-import HeadComponent from "./Head";
 import { useTranslations } from "@util/translations";
 import { useCurrentPageTitle } from "@util/views";
+import HeadComponent from "./Head";
 
 jest.mock("@util/translations");
 jest.mock("@util/views");

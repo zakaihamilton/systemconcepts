@@ -1,45 +1,51 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import SpeedSlider from './SpeedSlider';
+import { render } from "@testing-library/react";
 import { useTranslations } from "@util/translations";
 import { PlayerStore } from "./Player";
-import { MainStore } from "@components/Main";
+import SpeedSlider from "./SpeedSlider";
 
 jest.mock("@util/translations");
 jest.mock("./Player", () => ({
-    PlayerStore: {
-        useState: jest.fn(),
-    }
+	PlayerStore: {
+		useState: jest.fn(),
+	},
 }));
 jest.mock("@components/Main", () => ({
-    MainStore: {
-        useState: jest.fn().mockReturnValue({ speedToolbar: 'bottom' }),
-    }
+	MainStore: {
+		useState: jest.fn().mockReturnValue({ speedToolbar: "bottom" }),
+	},
 }));
-jest.mock("@mui/material/Slider", () => (props) => <div data-testid="slider" {...props} />);
+jest.mock("@mui/material/Slider", () => (props) => (
+	<div data-testid="slider" {...props} />
+));
 
-describe('SpeedSlider Component', () => {
-  let mockPlayer;
+describe("SpeedSlider Component", () => {
+	let mockPlayer;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useTranslations.mockReturnValue({ SPEED: 'Speed' });
-    mockPlayer = {
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      playbackRate: 1.0
-    };
-    PlayerStore.useState.mockReturnValue({ player: mockPlayer, showSpeed: true });
-  });
+	beforeEach(() => {
+		jest.clearAllMocks();
+		useTranslations.mockReturnValue({ SPEED: "Speed" });
+		mockPlayer = {
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn(),
+			playbackRate: 1.0,
+		};
+		PlayerStore.useState.mockReturnValue({
+			player: mockPlayer,
+			showSpeed: true,
+		});
+	});
 
-  it('renders slider when showSpeed is true and player exists', () => {
-    const { getByTestId } = render(<SpeedSlider />);
-    expect(getByTestId('slider')).toBeInTheDocument();
-  });
+	it("renders slider when showSpeed is true and player exists", () => {
+		const { getByTestId } = render(<SpeedSlider />);
+		expect(getByTestId("slider")).toBeInTheDocument();
+	});
 
-  it('renders nothing when showSpeed is false', () => {
-    PlayerStore.useState.mockReturnValue({ player: mockPlayer, showSpeed: false });
-    const { queryByTestId } = render(<SpeedSlider />);
-    expect(queryByTestId('slider')).not.toBeInTheDocument();
-  });
+	it("renders nothing when showSpeed is false", () => {
+		PlayerStore.useState.mockReturnValue({
+			player: mockPlayer,
+			showSpeed: false,
+		});
+		const { queryByTestId } = render(<SpeedSlider />);
+		expect(queryByTestId("slider")).not.toBeInTheDocument();
+	});
 });

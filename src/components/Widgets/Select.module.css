@@ -1,12 +1,12 @@
 .root {
-    width: 1em;
-    height: 1em;
+	width: 1em;
+	height: 1em;
 
-    [dir=rtl] & {
-        margin-left: 0.73em;
-    }
+	[dir="rtl"] & {
+		margin-left: 0.73em;
+	}
 
-    [dir=ltr] & {
-        margin-right: 0.73em;
-    }
+	[dir="ltr"] & {
+		margin-right: 0.73em;
+	}
 }

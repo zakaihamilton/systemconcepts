@@ -1,84 +1,84 @@
 .root {
-    display: grid;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.5);
+	display: grid;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	z-index: 1000;
+	background: rgba(0, 0, 0, 0.5);
 }
 
 .background {
-    margin: 1em;
-    box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
-    border-radius: 8px;
-    position: relative;
-    z-index: 1;
-    background: inherit;
-    overflow: hidden;
-    min-width: 20em;
-    max-width: 90%;
-    max-height: 80%;
-    display: flex;
-    min-height: 0;
+	margin: 1em;
+	box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	position: relative;
+	z-index: 1;
+	background: inherit;
+	overflow: hidden;
+	min-width: 20em;
+	max-width: 90%;
+	max-height: 80%;
+	display: flex;
+	min-height: 0;
 }
 
 .background:before {
-    content: "";
-    position: absolute;
-    background: inherit;
-    z-index: -1;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    box-shadow: var(--blur-shadow);
-    filter: blur(10px);
-    margin: -20px;
+	content: "";
+	position: absolute;
+	background: inherit;
+	z-index: -1;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	box-shadow: var(--blur-shadow);
+	filter: blur(10px);
+	margin: -20px;
 }
 
 .dialog {
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    color: var(--text-color);
-    border: var(--dialog-border);
-    background: var(--main-background);
-    flex: 1;
-    width: 100%;
-    max-height: 100%;
-    min-height: 0;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	color: var(--text-color);
+	border: var(--dialog-border);
+	background: var(--main-background);
+	flex: 1;
+	width: 100%;
+	max-height: 100%;
+	min-height: 0;
 }
 
 .content {
-    display: flex;
-    flex: 1;
-    padding: 1em;
-    align-items: stretch;
-    flex-direction: column;
-    justify-content: flex-start;
-    color: var(--text-color);
-    overflow-y: auto;
-    min-height: 0;
+	display: flex;
+	flex: 1;
+	padding: 1em;
+	align-items: stretch;
+	flex-direction: column;
+	justify-content: flex-start;
+	color: var(--text-color);
+	overflow-y: auto;
+	min-height: 0;
 }
 
 .actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 2em;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	padding: 2em;
 }
 
 .title {
-    padding-top: 0.3em;
-    padding-bottom: 0.3em;
-    padding-left: 1em;
-    padding-right: 1em;
-    display: flex;
-    align-items: center;
-    background: var(--app-bar-background);
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	padding-left: 1em;
+	padding-right: 1em;
+	display: flex;
+	align-items: center;
+	background: var(--app-bar-background);
 }

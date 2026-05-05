@@ -1,3 +1,10 @@
+import { glossary } from "@data/glossary";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import { useTranslations } from "@util/translations";
+import { setPath } from "@util/views";
+import clsx from "clsx";
 import React, {
 	useCallback,
 	useEffect,
@@ -6,20 +13,12 @@ import React, {
 	useState,
 } from "react";
 import ReactDOM from "react-dom";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 
-import { glossary } from "@data/glossary";
-import { useTranslations } from "@util/translations";
-import { setPath } from "@util/views";
-
 import { LibraryTagKeys } from "../Icons";
 import { LibraryStore } from "../Store";
-import { PHASE_COLORS, getStyleInfo, termPattern } from "./GlossaryUtils";
+import { getStyleInfo, PHASE_COLORS, termPattern } from "./GlossaryUtils";
 import styles from "./Markdown.module.css";
 import Zoom from "./Zoom";
 

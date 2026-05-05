@@ -1,13 +1,15 @@
 import Typography from "@mui/material/Typography";
-import styles from "./Message.module.css";
 import clsx from "clsx";
+import styles from "./Message.module.css";
 
 export default function Message({ animated, Icon, label, show = true }) {
-    if (!show) {
-        return null;
-    }
-    return <div className={styles.root}>
-        {Icon && <Icon className={clsx(animated && styles.animated)} />}
-        {label && <Typography variant="h6">{label}</Typography>}
-    </div>;
+	if (!show) {
+		return null;
+	}
+	return (
+		<div className={styles.root}>
+			{Icon && <Icon className={clsx(animated && styles.animated)} />}
+			{label && <Typography variant="h6">{label}</Typography>}
+		</div>
+	);
 }

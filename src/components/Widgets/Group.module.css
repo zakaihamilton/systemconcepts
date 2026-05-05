@@ -1,35 +1,35 @@
 .groupContainer {
-    display: flex;
-    position: relative;
-    overflow: hidden;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5em;
-    border-radius: 0.5em;
+	display: flex;
+	position: relative;
+	overflow: hidden;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5em;
+	border-radius: 0.5em;
 }
 
 .groupContainer.fill {
-    padding: 0em;
-    border-radius: 0em;
-    width: 100%;
-    height: 100%;
+	padding: 0em;
+	border-radius: 0em;
+	width: 100%;
+	height: 100%;
 }
 
 .groupContainer.fit {
-    width: fit-content;
+	width: fit-content;
 }
 
 .background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0.3;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	opacity: 0.3;
 }
 
 .backgroundBorder {
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    height: 2px;
-    opacity: 0.3;
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	height: 2px;
+	opacity: 0.3;
 }

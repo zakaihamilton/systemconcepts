@@ -1,70 +1,70 @@
 .root {
-    box-sizing: border-box;
-    display: flex;
-    position: relative;
+	box-sizing: border-box;
+	display: flex;
+	position: relative;
 
-    [dir=ltr] & {
-        direction: ltr !important;
-    }
+	[dir="ltr"] & {
+		direction: ltr !important;
+	}
 
-    [dir=rtl] & {
-        direction: rtl !important;
-    }
+	[dir="rtl"] & {
+		direction: rtl !important;
+	}
 }
 
 .root.fill {
-    width: 100%;
-    height: 100%;
+	width: 100%;
+	height: 100%;
 }
 
 .background {
-    position: absolute;
+	position: absolute;
 
-    [dir=ltr] & {
-        left: 0px;
-        padding-right: 0.5em;
-    }
+	[dir="ltr"] & {
+		left: 0px;
+		padding-right: 0.5em;
+	}
 
-    [dir=rtl] & {
-        right: 0px;
-        padding-left: 0.5em;
-    }
+	[dir="rtl"] & {
+		right: 0px;
+		padding-left: 0.5em;
+	}
 
-    display: flex;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    flex: 1;
-    overflow: hidden;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	flex: 1;
+	overflow: hidden;
 }
 
 .background.clickable {
-    user-select: none;
+	user-select: none;
 }
 
 .background.clickable:hover {
-    background: var(--info-background) !important;
+	background: var(--info-background) !important;
 }
 
 .icons {
-    position: relative;
+	position: relative;
 
-    [dir=ltr] & {
-        left: 0px;
-    }
+	[dir="ltr"] & {
+		left: 0px;
+	}
 
-    [dir=rtl] & {
-        right: 0px;
-    }
+	[dir="rtl"] & {
+		right: 0px;
+	}
 
-    display: flex;
-    align-items: center;
-    height: 100%;
-    position: absolute;
-    background: transparent;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	position: absolute;
+	background: transparent;
 }
 
-.icons>* {
-    margin-left: 0.3em;
-    margin-right: 0.3em;
+.icons > * {
+	margin-left: 0.3em;
+	margin-right: 0.3em;
 }

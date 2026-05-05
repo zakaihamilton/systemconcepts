@@ -6,18 +6,22 @@ import Progress from "@widgets/Progress";
 registerToolbar("Save");
 
 export default function Save({ onClick, visible, saving }) {
-    const translations = useTranslations();
+	const translations = useTranslations();
 
-    const toolbarItems = [
-        visible && {
-            id: "save",
-            name: saving ? translations.SAVING : translations.SAVE,
-            icon: saving ? <Progress size={24} /> : <SaveIcon />,
-            location: "header",
-            onClick: !saving && onClick
-        }
-    ].filter(Boolean);
+	const toolbarItems = [
+		visible && {
+			id: "save",
+			name: saving ? translations.SAVING : translations.SAVE,
+			icon: saving ? <Progress size={24} /> : <SaveIcon />,
+			location: "header",
+			onClick: !saving && onClick,
+		},
+	].filter(Boolean);
 
-    useToolbar({ id: "Save", items: toolbarItems, depends: [visible, translations, saving, onClick] });
-    return null;
+	useToolbar({
+		id: "Save",
+		items: toolbarItems,
+		depends: [visible, translations, saving, onClick],
+	});
+	return null;
 }
