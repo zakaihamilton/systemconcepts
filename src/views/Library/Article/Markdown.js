@@ -6,7 +6,7 @@ import React, {
 	useState,
 } from "react";
 import ReactDOM from "react-dom";
-import ArrowForwardIcon from "@mui-icons-material/ArrowForward";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import clsx from "clsx";
