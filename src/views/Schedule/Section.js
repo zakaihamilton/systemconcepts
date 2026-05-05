@@ -1,4 +1,4 @@
-import { ScheduleStore } from "@views/Schedule";
+import { ScheduleStore } from "@views/Schedule/Schedule";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";

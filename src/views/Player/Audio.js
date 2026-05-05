@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import Controls from "./Controls";
 import Toolbar from "./Toolbar";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "./Player";
 import styles from "./Audio.module.css";
 import Group from "@components/Widgets/Group";
 import { useDateFormatter } from "@util/locale";

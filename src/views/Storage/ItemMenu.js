@@ -1,4 +1,4 @@
-import { StorageStore } from "../Storage";
+import { StorageStore } from "./Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import { exportData } from "@util/importExport";

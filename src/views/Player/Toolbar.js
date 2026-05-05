@@ -4,7 +4,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import SpeedIcon from "@mui/icons-material/Speed";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@util/styles";
-import { PlayerStore } from "../Player";
+import { PlayerStore } from "./Player";
 
 registerToolbar("PlayerToolbar");
 

@@ -4,7 +4,7 @@ import styles from "./HistoryView.module.css";
 import { useRecentHistory } from "@util/history";
 import { useLanguage } from "@util/language";
 import { useSessions, SessionsStore } from "@util/sessions";
-import { PlayerStore } from "@views/Player";
+import { PlayerStore } from "@views/Player/Player";
 import { addPath } from "@util/views";
 import { isDateToday, diffDays } from "@util/date";
 import IconButton from "@mui/material/IconButton";

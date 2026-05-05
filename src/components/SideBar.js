@@ -11,8 +11,8 @@ import { useBookmarks } from "@components/Bookmarks";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import { useTranslations } from "@util/translations";
-import ResearchIndexer from "@views/ResearchIndexer";
-import { ResearchStore } from "@views/ResearchStore";
+import ResearchIndexer from "@views/ResearchIndexer/ResearchIndexer";
+import { ResearchStore } from "@views/ResearchStore/ResearchStore";
 import LinearProgress from "@mui/material/LinearProgress";
 
 import clsx from "clsx";

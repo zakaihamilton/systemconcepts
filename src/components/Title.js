@@ -2,7 +2,7 @@ import Breadcrumbs from "@components/Breadcrumbs";
 import { useActivePages } from "@util/views";
 import styles from "./Title.module.css";
 import { useDeviceType } from "@util/styles";
-import { ScheduleStore } from "@views/Schedule";
+import { ScheduleStore } from "@views/Schedule/Schedule";
 import { SessionsStore } from "@util/sessions";
 
 import { LibraryStore } from "@views/Library/Store";

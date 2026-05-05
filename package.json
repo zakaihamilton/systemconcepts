@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome lint .",
-    "test": "node src/sync/test/integration.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "full-start": "next build && next start"
   },
   "dependencies": {
@@ -55,6 +56,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "typescript": "^5.9.3",
     "yarn-upgrade-all": "^0.7.4"
   },

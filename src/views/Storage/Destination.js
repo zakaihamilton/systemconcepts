@@ -10,7 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import { StorageStore } from "../Storage";
+import { StorageStore } from "./Storage";
 import { useTranslations } from "@util/translations";
 import storage from "@util/storage";
 import StorageList from "./StorageList";

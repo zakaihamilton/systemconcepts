@@ -42,7 +42,7 @@ import JumpDialog from "@views/Library/Article/JumpDialog";
 import ScrollToTop from "@views/Library/Article/ScrollToTop";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import { LibraryStore } from "@views/Library/Store";
-import { ResearchStore } from "@views/ResearchStore";
+import { ResearchStore } from "@views/ResearchStore/ResearchStore";
 import VariableSizeList from "@components/Virtualized/VariableSizeList";
 import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";

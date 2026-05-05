@@ -1,6 +1,6 @@
 import { useStoreState } from "@util/store";
 import Input from "@widgets/Input";
-import { StorageStore } from "../Storage";
+import { StorageStore } from "./Storage";
 import { useCallback } from "react";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 
