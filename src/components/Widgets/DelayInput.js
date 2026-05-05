@@ -14,14 +14,13 @@ export default React.forwardRef(function DelayInput(
 			onChange && onChange({ target: { value: currentValue } });
 		},
 		delay,
-		[currentValue],
+		[currentValue, delay, onChange],
 	);
 	const onCurrentChange = (event) => {
 		const value = event.target.value;
 		setCurrentValue(value);
 	};
 
-	// eslint-disable-next-line react-hooks/refs
 	return React.Children.map(children, (child) => {
 		return React.cloneElement(child, {
 			ref,
