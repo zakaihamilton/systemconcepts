@@ -266,16 +266,20 @@ export default React.memo(function TableWidget(props) {
 
         return raw.map(item => {
             const mapped = mapper ? mapper(item) : item;
-            // Pre-compute searchable text
-            const searchableText = searchKeys.map(key => {
-                const val = mapped[key];
-                return (typeof val === "string") ? val.toLowerCase() : "";
-            }).join("\0"); // Use null character as separator to prevent boundary matches
 
             return {
                 raw: item,
                 mapped,
-                searchableText
+                // Lazy-evaluate searchable text to avoid expensive string concatenation during initial render
+                get searchableText() {
+                    if (this._searchableText === undefined) {
+                        this._searchableText = searchKeys.map(key => {
+                            const val = mapped[key];
+                            return (typeof val === "string") ? val.toLowerCase() : "";
+                        }).join("\0"); // Use null character as separator to prevent boundary matches
+                    }
+                    return this._searchableText;
+                }
             };
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
