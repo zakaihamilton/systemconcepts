@@ -110,18 +110,49 @@ export default function API() {
 				setActiveSectionId(activeSection.id);
 			}
 
-			setSectionNavFrame(
-				shouldPin
-					? {
-							height: navRect.height,
-							left: slotRect.left,
-							width: slotRect.width,
-						}
-					: null,
-			);
+			const nextFrame = shouldPin
+				? {
+						height: navRect.height,
+						left: slotRect.left,
+						width: slotRect.width,
+					}
+				: null;
+
+			setSectionNavFrame((previousFrame) => {
+				if (!previousFrame && !nextFrame) {
+					return previousFrame;
+				}
+				if (
+					previousFrame &&
+					nextFrame &&
+					previousFrame.height === nextFrame.height &&
+					previousFrame.left === nextFrame.left &&
+					previousFrame.width === nextFrame.width
+				) {
+					return previousFrame;
+				}
+				return nextFrame;
+			});
 		};
 
 		const scrollParent = document.querySelector('[class*="pageContainer"]');
+		let transitionFrame = null;
+		let resizeObserver = null;
+		const trackLayoutTransition = () => {
+			const startTime = performance.now();
+			const tick = () => {
+				updateSectionNav();
+				if (performance.now() - startTime < 350) {
+					transitionFrame = requestAnimationFrame(tick);
+				}
+			};
+
+			if (transitionFrame) {
+				cancelAnimationFrame(transitionFrame);
+			}
+			transitionFrame = requestAnimationFrame(tick);
+		};
+
 		updateSectionNav();
 		scrollParent?.addEventListener("scroll", updateSectionNav, {
 			passive: true,
@@ -130,10 +161,29 @@ export default function API() {
 			passive: true,
 		});
 		window.addEventListener("resize", updateSectionNav);
+		window.addEventListener("transitionrun", trackLayoutTransition, true);
+		window.addEventListener("transitionstart", trackLayoutTransition, true);
+
+		if (window.ResizeObserver) {
+			resizeObserver = new ResizeObserver(updateSectionNav);
+			if (sectionNavSlotRef.current) {
+				resizeObserver.observe(sectionNavSlotRef.current);
+			}
+			if (scrollParent) {
+				resizeObserver.observe(scrollParent);
+			}
+		}
+
 		return () => {
+			if (transitionFrame) {
+				cancelAnimationFrame(transitionFrame);
+			}
+			resizeObserver?.disconnect();
 			scrollParent?.removeEventListener("scroll", updateSectionNav);
 			window.removeEventListener("scroll", updateSectionNav);
 			window.removeEventListener("resize", updateSectionNav);
+			window.removeEventListener("transitionrun", trackLayoutTransition, true);
+			window.removeEventListener("transitionstart", trackLayoutTransition, true);
 		};
 	}, [selectedApi, sessionSections]);
 
