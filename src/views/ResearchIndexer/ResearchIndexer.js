@@ -251,9 +251,8 @@ export default function ResearchIndexer() {
 						: [];
 
 					for (const group of groups) {
-						const mergedPath = makePath(
-							`local/sync/${group.name.replace(/\.\.\//g, "")}.json`,
-						);
+						const safeGroupName = String(group.name).replace(/[./\\]/g, "_");
+						const mergedPath = makePath(`local/sync/${safeGroupName}.json`);
 						if (await storage.exists(mergedPath)) {
 							const content = await storage.readFile(mergedPath);
 							const data = JSON.parse(content);
