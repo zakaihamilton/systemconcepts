@@ -5,14 +5,21 @@
 	"short_name": "System Concepts",
 	"scope": "/",
 	"display": "standalone",
-	"start_url": "https://systemconcepts.app/",
+	"start_url": "/",
 	"background_color": "#013459",
 	"theme_color": "#013459",
 	"description": "System Concepts",
 	"orientation": "any",
 	"related_applications": [],
 	"prefer_related_applications": false,
-	"icons": [],
-	"url": "https://systemconcepts.app/",
+	"icons": [
+		{
+			"src": "/icon.png",
+			"sizes": "2048x2048",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	],
+	"url": "/",
 	"screenshots": []
 }

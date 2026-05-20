@@ -4,12 +4,12 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build",
+		"build": "next build --webpack",
 		"start": "next start",
 		"lint": "biome lint .",
 		"test": "jest",
 		"test:watch": "jest --watch",
-		"full-start": "next build && next start"
+		"full-start": "next build --webpack && next start"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1050.0",

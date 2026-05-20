@@ -159,20 +159,6 @@
 }
 
 @media print {
-	/*  Aggressively hide everything in the body except our print container */
-	/*  This ensures Sidebar, Topbar, and any other Portals are hidden */
-	:global(body > *:not(#print-root)) {
-		display: none !important;
-	}
-
-	/*  Override Article.module.css which sets body to visibility: hidden */
-	:global(html),
-	:global(body) {
-		visibility: visible !important;
-		height: auto !important;
-		overflow: visible !important;
-	}
-
 	.printContainer {
 		display: block !important;
 		background: white;

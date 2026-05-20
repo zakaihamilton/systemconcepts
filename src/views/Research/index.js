@@ -128,10 +128,12 @@ export default function Research() {
 	}, []);
 
 	const handlePrint = useCallback(() => {
+		document.body.classList.add("research-printing");
 		setPrinting(true);
 		setTimeout(() => {
 			window.print();
 			setPrinting(false);
+			document.body.classList.remove("research-printing");
 		}, 500);
 	}, []);
 

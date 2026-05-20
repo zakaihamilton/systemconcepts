@@ -237,14 +237,6 @@ h1.title {
 }
 
 @media print {
-	:global(html),
-	:global(body) {
-		visibility: hidden;
-		background-color: white;
-		height: auto !important;
-		overflow: visible !important;
-	}
-
 	.root {
 		visibility: visible;
 		position: absolute;

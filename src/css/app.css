@@ -30,3 +30,16 @@ html {
 	font-family: system-ui, sans-serif;
 	overflow: hidden;
 }
+
+@media print {
+	body.research-printing > *:not(#print-root) {
+		display: none !important;
+	}
+
+	html:has(body.research-printing),
+	body.research-printing {
+		visibility: visible !important;
+		height: auto !important;
+		overflow: visible !important;
+	}
+}
