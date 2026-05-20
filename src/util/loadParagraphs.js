@@ -3,6 +3,16 @@ import { makePath } from "@util/path";
 import storage from "@util/storage";
 import { normalizeContent } from "@util/string";
 
+const sanitizeRelativePath = (input = "") => {
+	let path = String(input).replace(/\\/g, "/");
+	let prev;
+	do {
+		prev = path;
+		path = path.replace(/\.\.\//g, "");
+	} while (path !== prev);
+	return path.replace(/^\/+/, "");
+};
+
 // Split by double newlines, but preserve code blocks
 const splitSmart = (txt) => {
 	const chunks = [];
@@ -104,7 +114,7 @@ export async function loadParagraphsForFile(fileId, sessionsById) {
 			} else if (session.summary?.path) {
 				const summaryPath = makePath(
 					"local/sync",
-					session.summary.path.replace(/\.\.\//g, ""),
+					sanitizeRelativePath(session.summary.path),
 				);
 				if (await storage.exists(summaryPath)) {
 					const content = await storage.readFile(summaryPath);
