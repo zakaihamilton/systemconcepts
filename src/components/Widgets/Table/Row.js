@@ -16,6 +16,8 @@ export default function Row({
 	item,
 	style = {},
 	renderColumn,
+	alignItems,
+	justifyContent,
 	...props
 }) {
 	const cells = (columns || []).filter(Boolean).map((column) => {
@@ -87,6 +89,8 @@ export default function Row({
 				minHeight: rowHeight,
 				height: rowHeight,
 				maxHeight: rowHeight,
+				...(alignItems && { alignItems }),
+				...(justifyContent && { justifyContent }),
 				...style,
 			}}
 			{...(rowClick && { hover: true, onClick })}

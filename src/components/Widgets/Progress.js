@@ -11,13 +11,22 @@ export default function Progress({
 	tooltip = "",
 	fullscreen,
 	variant,
+	alignItems,
+	justifyContent,
+	style,
 	...props
 }) {
 	const text = typeof value !== "undefined" && `${Math.round(value)}%`;
+	const rootStyle = {
+		...(alignItems && { alignItems }),
+		...(justifyContent && { justifyContent }),
+		...style,
+	};
 
 	return (
 		<div
 			className={clsx(styles.root, fullscreen && styles.fullscreen)}
+			style={rootStyle}
 			{...props}
 		>
 			<Box sx={{ position: "relative", display: "flex" }}>

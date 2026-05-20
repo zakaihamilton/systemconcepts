@@ -41,6 +41,8 @@ function ItemWidget({
 	index,
 	style,
 	renderColumn,
+	alignItems,
+	justifyContent,
 	...props
 }) {
 	const cells = (columns || []).filter(Boolean).map((column) => {
@@ -105,6 +107,10 @@ function ItemWidget({
 		selected: selectedItem,
 		even: index % 2 === 0,
 	});
+	const layoutStyle = {
+		...(alignItems && { alignItems }),
+		...(justifyContent && { justifyContent }),
+	};
 	return (
 		<div
 			className={styles.root}
@@ -112,6 +118,7 @@ function ItemWidget({
 		>
 			<div
 				className={classes + " " + className}
+				style={layoutStyle}
 				{...(rowClick && { onClick })}
 				{...props}
 			>

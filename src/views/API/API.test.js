@@ -27,8 +27,6 @@ describe("API View", () => {
 		jest.clearAllMocks();
 		useTranslations.mockReturnValue(mockTranslations);
 		Cookies.get.mockReturnValue(null);
-		delete window.location;
-		window.location = { origin: "http://localhost" };
 	});
 
 	it("renders nothing if not signed in", () => {
