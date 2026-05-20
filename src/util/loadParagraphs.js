@@ -4,13 +4,10 @@ import storage from "@util/storage";
 import { normalizeContent } from "@util/string";
 
 const sanitizeRelativePath = (input = "") => {
-	let path = String(input).replace(/\\/g, "/");
-	let prev;
-	do {
-		prev = path;
-		path = path.replace(/\.\.\//g, "");
-	} while (path !== prev);
-	return path.replace(/^\/+/, "");
+	return String(input)
+		.split(/[/\\]/)
+		.filter((segment) => segment !== ".." && segment !== ".")
+		.join("/");
 };
 
 // Split by double newlines, but preserve code blocks
