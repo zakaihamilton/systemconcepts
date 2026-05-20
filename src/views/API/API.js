@@ -5,7 +5,8 @@ import PageLoad from "@components/PageLoad";
 import { fetchJSON } from "@util/fetch";
 import { useTranslations } from "@util/translations";
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./API.module.css";
 
 export default function API() {
@@ -15,9 +16,40 @@ export default function API() {
 	const [copiedUrl, setCopiedUrl] = useState(false);
 	const [copiedCode, setCopiedCode] = useState(false);
 	const [selectedApi, setSelectedApi] = useState("sessions");
+	const [mounted, setMounted] = useState(false);
+	const sectionNavSlotRef = useRef(null);
+	const sectionNavMeasureRef = useRef(null);
+	const [sectionNavFrame, setSectionNavFrame] = useState(null);
+	const [activeSectionId, setActiveSectionId] = useState("api-sessions-endpoint");
 
 	const userId = Cookies.get("id");
 	const isSignedIn = userId && Cookies.get("hash");
+	const sessionSections = useMemo(
+		() => [
+			{
+				id: "api-sessions-endpoint",
+				label: translations.API_SECTION_ENDPOINT || "Endpoint",
+			},
+			{
+				id: "api-sessions-parameters",
+				label: translations.API_QUERY_PARAMETERS || "Query Parameters",
+			},
+			{
+				id: "api-sessions-examples",
+				label: translations.API_SECTION_EXAMPLES || "Examples",
+			},
+			{
+				id: "api-sessions-schema",
+				label: translations.API_JSON_RESPONSE_SCHEMA || "JSON Response Schema",
+			},
+		],
+		[
+			translations.API_JSON_RESPONSE_SCHEMA,
+			translations.API_QUERY_PARAMETERS,
+			translations.API_SECTION_ENDPOINT,
+			translations.API_SECTION_EXAMPLES,
+		],
+	);
 
 	useEffect(() => {
 		if (isSignedIn) {
@@ -32,6 +64,78 @@ export default function API() {
 				.catch(console.error);
 		}
 	}, [isSignedIn, userId]);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	useEffect(() => {
+		if (selectedApi !== "sessions") {
+			setSectionNavFrame(null);
+			return;
+		}
+
+		const updateSectionNav = () => {
+			const slot = sectionNavSlotRef.current;
+			const nav = sectionNavMeasureRef.current;
+			if (!slot || !nav) {
+				return;
+			}
+
+			const topOffset = 76;
+			const slotRect = slot.getBoundingClientRect();
+			const navRect = nav.getBoundingClientRect();
+			const shouldPin = slotRect.top <= topOffset;
+			const sectionTopOffset = topOffset + navRect.height + 24;
+			const activeSection = sessionSections
+				.map((section) => {
+					const element = document.getElementById(section.id);
+					const rect = element?.getBoundingClientRect();
+					return rect
+						? {
+								id: section.id,
+								top: rect.top,
+								bottom: rect.bottom,
+							}
+						: null;
+				})
+				.filter(Boolean)
+				.find(
+					(section) =>
+						section.top <= sectionTopOffset &&
+						section.bottom > sectionTopOffset,
+				);
+
+			if (activeSection) {
+				setActiveSectionId(activeSection.id);
+			}
+
+			setSectionNavFrame(
+				shouldPin
+					? {
+							height: navRect.height,
+							left: slotRect.left,
+							width: slotRect.width,
+						}
+					: null,
+			);
+		};
+
+		const scrollParent = document.querySelector('[class*="pageContainer"]');
+		updateSectionNav();
+		scrollParent?.addEventListener("scroll", updateSectionNav, {
+			passive: true,
+		});
+		window.addEventListener("scroll", updateSectionNav, {
+			passive: true,
+		});
+		window.addEventListener("resize", updateSectionNav);
+		return () => {
+			scrollParent?.removeEventListener("scroll", updateSectionNav);
+			window.removeEventListener("scroll", updateSectionNav);
+			window.removeEventListener("resize", updateSectionNav);
+		};
+	}, [selectedApi, sessionSections]);
 
 	if (!isSignedIn) {
 		return null;
@@ -58,7 +162,7 @@ export default function API() {
 
 	const apiEndpoints = {
 		sessions: {
-			name: translations.API_SESSIONS_API || "Sessions API",
+			name: translations.API_SESSIONS || "Sessions API",
 			url: `${window.location.origin}/api/sessions?id=${userId}&token=${user.rssToken}`,
 			description: translations.API_INSTRUCTIONS || "Use the following personal endpoint to integrate session data into your external services, scripts, or platforms.",
 		}
@@ -102,6 +206,43 @@ else:
 		setTimeout(() => setCopiedCode(false), 2000);
 	};
 
+	const handleSectionJump = (sectionId) => {
+		setActiveSectionId(sectionId);
+		document.getElementById(sectionId)?.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+		});
+	};
+
+	const renderSectionNav = ({ fixed = false, hidden = false, measure = false } = {}) => (
+		<nav
+			ref={measure ? sectionNavMeasureRef : undefined}
+			className={`${styles.sectionNav} ${fixed ? styles.sectionNavFixed : ""} ${hidden ? styles.sectionNavPlaceholder : ""}`}
+			style={
+				fixed && sectionNavFrame
+					? {
+							left: sectionNavFrame.left,
+							width: sectionNavFrame.width,
+						}
+					: undefined
+			}
+			aria-label={translations.API_SECTION_NAVIGATION || "API sections"}
+			aria-hidden={hidden ? "true" : undefined}
+		>
+			{sessionSections.map((section) => (
+				<button
+					type="button"
+					key={section.id}
+					className={`${styles.sectionNavLink} ${activeSectionId === section.id ? styles.sectionNavLinkActive : ""}`}
+					onClick={() => handleSectionJump(section.id)}
+					aria-current={activeSectionId === section.id ? "true" : undefined}
+				>
+					{section.label}
+				</button>
+			))}
+		</nav>
+	);
+
 	return (
 		<div className={styles.root}>
 			<div className={styles.card}>
@@ -115,36 +256,51 @@ else:
 						className={`${styles.apiSelectorTab} ${selectedApi === "sessions" ? styles.apiSelectorTabActive : ""}`}
 						onClick={() => setSelectedApi("sessions")}
 					>
-						{translations.API_SESSIONS_API || "Sessions API"}
+						{apiEndpoints.sessions.name}
 					</button>
 				</div>
 
 				{selectedApi === "sessions" && (
-					<Grid container spacing={3} className={styles.form}>
-						{/* Main API Info & Copy Section */}
-						<Grid size={12}>
-							<Typography className={styles.sectionDescription}>
-								{translations.API_INSTRUCTIONS ||
-									"Use the following personal endpoint to integrate session data into your external services, scripts, or platforms."}
-							</Typography>
+					<>
+						{mounted && sectionNavFrame &&
+							createPortal(renderSectionNav({ fixed: true }), document.body)}
+						<div
+							ref={sectionNavSlotRef}
+							className={styles.sectionNavSlot}
+							style={
+								sectionNavFrame
+									? { minHeight: sectionNavFrame.height }
+									: undefined
+							}
+						>
+							{renderSectionNav({ hidden: Boolean(sectionNavFrame), measure: true })}
+						</div>
 
-							<div className={styles.urlContainer}>
-								<div className={styles.urlText} title={apiUrl}>
-									{apiUrl}
+						<Grid container spacing={3} className={styles.form}>
+							{/* Main API Info & Copy Section */}
+							<Grid size={12} id="api-sessions-endpoint" className={styles.jumpSection}>
+								<Typography className={styles.sectionDescription}>
+									{translations.API_INSTRUCTIONS ||
+										"Use the following personal endpoint to integrate session data into your external services, scripts, or platforms."}
+								</Typography>
+
+								<div className={styles.urlContainer}>
+									<div className={styles.urlText} title={apiUrl}>
+										{apiUrl}
+									</div>
+									<Button
+										variant="contained"
+										size="small"
+										onClick={handleCopyUrl}
+										className={styles.copyButton}
+									>
+										{copiedUrl ? (translations.API_COPIED || "Copied!") : (translations.COPY_URL || "Copy URL")}
+									</Button>
 								</div>
-								<Button
-									variant="contained"
-									size="small"
-									onClick={handleCopyUrl}
-									className={styles.copyButton}
-								>
-									{copiedUrl ? (translations.API_COPIED || "Copied!") : (translations.COPY_URL || "Copy URL")}
-								</Button>
-							</div>
-						</Grid>
+							</Grid>
 
 						{/* Parameters Documentation Section */}
-						<Grid size={12}>
+						<Grid size={12} id="api-sessions-parameters" className={styles.jumpSection}>
 							<Typography className={styles.subSectionTitle}>
 								{translations.API_QUERY_PARAMETERS || "Query Parameters"}
 							</Typography>
@@ -199,7 +355,7 @@ else:
 						</Grid>
 
 						{/* Code Examples Section */}
-						<Grid size={12}>
+						<Grid size={12} id="api-sessions-examples" className={styles.jumpSection}>
 							<div className={styles.docHeader}>
 								<Typography className={styles.subSectionTitle}>
 									{translations.API_DOCUMENTATION || "API Documentation & Examples"}
@@ -248,7 +404,7 @@ else:
 						</Grid>
 
 						{/* Example JSON Response */}
-						<Grid size={12}>
+							<Grid size={12} id="api-sessions-schema" className={styles.jumpSection}>
 							<Typography className={styles.subSectionTitle}>
 								{translations.API_JSON_RESPONSE_SCHEMA || "JSON Response Schema"}
 							</Typography>
@@ -325,8 +481,9 @@ else:
 }`}</code>
 								</pre>
 							</div>
+							</Grid>
 						</Grid>
-					</Grid>
+					</>
 				)}
 			</div>
 		</div>

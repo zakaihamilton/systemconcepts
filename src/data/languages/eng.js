@@ -513,8 +513,8 @@ export default {
 			value: "The JSON API features are only available to registered users. Visitor accounts do not have access to the API.",
 		},
 		{
-			id: "API_SESSIONS_API",
-			value: "Sessions API",
+			id: "API_SESSIONS",
+			value: "Sessions",
 		},
 		{
 			id: "API_QUERY_PARAMETERS",

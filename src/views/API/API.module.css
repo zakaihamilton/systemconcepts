@@ -4,7 +4,6 @@
 	align-items: center;
 	min-height: 85vh;
 	padding: 2.5rem 1rem;
-	overflow-y: auto;
 }
 
 .card {
@@ -39,6 +38,95 @@
 
 .form {
 	width: 100%;
+}
+
+.sectionNavSlot {
+	margin-bottom: 0.25rem;
+}
+
+.sectionNav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	padding: 0.65rem;
+	background: rgba(var(--bar-background-rgb), 0.92);
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+	border: 1px solid var(--border-color);
+	border-radius: 14px;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.sectionNavFixed {
+	position: fixed;
+	top: 4.75rem;
+	z-index: 1300;
+}
+
+.sectionNavPlaceholder {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.sectionNavLink {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.25rem;
+	padding: 0.45rem 0.85rem;
+	border: none;
+	border-radius: 9px;
+	background: transparent;
+	color: var(--primary-700);
+	cursor: pointer;
+	font-size: 0.85rem;
+	font-weight: 700;
+	font-family: inherit;
+	text-decoration: none;
+	transition:
+		background 0.2s ease,
+		color 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.sectionNavLink:hover,
+.sectionNavLink:focus-visible {
+	background: rgba(var(--primary-color-rgb), 0.08);
+	color: var(--primary-600);
+	outline: none;
+}
+
+.sectionNavLinkActive {
+	background: rgba(var(--primary-color-rgb), 0.12);
+	color: var(--primary-700);
+	box-shadow: inset 0 0 0 1px rgba(var(--primary-color-rgb), 0.16);
+}
+
+.jumpSection {
+	scroll-margin-top: 5rem;
+}
+
+:global([data-theme="dark"]) .sectionNav {
+	background: rgba(var(--bar-background-rgb), 0.9);
+	border-color: rgba(255, 255, 255, 0.06);
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+}
+
+:global([data-theme="dark"]) .sectionNavLink {
+	color: var(--primary-300);
+}
+
+:global([data-theme="dark"]) .sectionNavLink:hover,
+:global([data-theme="dark"]) .sectionNavLink:focus-visible {
+	background: rgba(var(--primary-color-rgb), 0.15);
+	color: var(--primary-200);
+}
+
+:global([data-theme="dark"]) .sectionNavLinkActive {
+	background: rgba(var(--primary-color-rgb), 0.22);
+	color: var(--primary-200);
+	box-shadow: inset 0 0 0 1px rgba(var(--primary-color-rgb), 0.24);
 }
 
 .sectionTitle {
@@ -323,6 +411,15 @@
 	}
 
 	.copyCodeBtn {
+		width: 100%;
+	}
+
+	.sectionNav {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.sectionNavLink {
 		width: 100%;
 	}
 }

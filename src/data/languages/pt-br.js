@@ -513,8 +513,8 @@ export default {
 			value: "Os recursos da API JSON estão disponíveis apenas para usuários registrados. Contas de visitantes não têm acesso à API.",
 		},
 		{
-			id: "API_SESSIONS_API",
-			value: "API de Sessões",
+			id: "API_SESSIONS",
+			value: "Sessões",
 		},
 		{
 			id: "API_QUERY_PARAMETERS",

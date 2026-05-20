@@ -512,8 +512,8 @@ export default {
 			value: "תכונות ה-JSON API זמינות למשתמשים רשומים בלבד. לחשבונות אורחים (visitors) אין גישה ל-API.",
 		},
 		{
-			id: "API_SESSIONS_API",
-			value: "API שיעורים",
+			id: "API_SESSIONS",
+			value: "שיעורים",
 		},
 		{
 			id: "API_QUERY_PARAMETERS",

@@ -141,4 +141,38 @@ describe("API View", () => {
 			expect(getByText(/requests\.get\(url/)).toBeInTheDocument();
 		});
 	});
+
+	it("jumps to sessions API sections without changing the route hash", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+
+		const scrollIntoView = jest.fn();
+		window.location.hash = "#api";
+		HTMLElement.prototype.scrollIntoView = scrollIntoView;
+		const { getByRole } = render(<API />);
+
+		await waitFor(() => {
+			expect(getByRole("button", { name: "Endpoint" })).toBeInTheDocument();
+		});
+
+		fireEvent.click(getByRole("button", { name: "Query Parameters" }));
+
+		expect(scrollIntoView).toHaveBeenCalledWith({
+			behavior: "smooth",
+			block: "start",
+		});
+		expect(getByRole("button", { name: "Query Parameters" })).toHaveAttribute(
+			"aria-current",
+			"true",
+		);
+		expect(window.location.hash).toBe("#api");
+	});
 });
