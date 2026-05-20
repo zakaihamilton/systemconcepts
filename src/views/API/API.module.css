@@ -1,0 +1,391 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 85vh;
+	padding: 2.5rem 1rem;
+	overflow-y: auto;
+}
+
+.card {
+	margin: auto;
+	background: rgba(var(--bar-background-rgb), 0.7);
+	backdrop-filter: blur(25px);
+	-webkit-backdrop-filter: blur(25px);
+	border-radius: 28px;
+	padding: 3rem;
+	width: 100%;
+	max-width: 1200px;
+	border: 1px solid var(--border-color);
+	box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+	transition:
+		transform 0.3s ease,
+		box-shadow 0.3s ease;
+	position: relative;
+	overflow: visible;
+}
+
+.title {
+	font-size: 2.2rem;
+	font-weight: 800;
+	margin-bottom: 2.5rem !important;
+	text-align: center;
+	letter-spacing: -0.025em;
+	background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.form {
+	width: 100%;
+}
+
+.sectionTitle {
+	font-weight: 700 !important;
+	margin: 1.5rem 0 0.5rem !important;
+	font-size: 1.3rem !important;
+	color: var(--primary-500);
+	opacity: 0.95;
+}
+
+.sectionDescription {
+	margin-bottom: 1.5rem !important;
+	opacity: 0.8;
+	font-size: 0.95rem !important;
+	line-height: 1.5 !important;
+}
+
+.subSectionTitle {
+	font-weight: 700 !important;
+	margin: 2rem 0 0.75rem !important;
+	font-size: 1.15rem !important;
+	opacity: 0.9;
+	letter-spacing: -0.01em;
+}
+
+/* Endpoint / URL Box */
+.urlContainer {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+	background: rgba(var(--primary-color-rgb), 0.05);
+	padding: 0.85rem;
+	border-radius: 14px;
+	border: 1px solid rgba(var(--primary-color-rgb), 0.15);
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+	transition: border-color 0.2s ease;
+}
+
+.urlContainer:hover {
+	border-color: rgba(var(--primary-color-rgb), 0.3);
+}
+
+.urlText {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+	font-size: 0.9rem;
+	padding: 0.75rem 1rem;
+	background: rgba(var(--primary-color-rgb), 0.06);
+	border-radius: 10px;
+	color: var(--primary-700);
+	border: 1px solid rgba(var(--primary-color-rgb), 0.15);
+	transition: all 0.2s ease;
+	direction: ltr;
+	text-align: left;
+}
+
+:global([data-theme="dark"]) .urlText {
+	background: rgba(0, 0, 0, 0.25);
+	color: var(--primary-400);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.copyButton {
+	background: linear-gradient(135deg, var(--primary-600), var(--primary-500)) !important;
+	color: #fff !important;
+	font-weight: 600 !important;
+	text-transform: none !important;
+	border-radius: 10px !important;
+	padding: 0.65rem 1.25rem !important;
+	box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.3) !important;
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease,
+		opacity 0.2s ease !important;
+}
+
+.copyButton:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 15px rgba(var(--primary-color-rgb), 0.4) !important;
+}
+
+.copyButton:active {
+	transform: translateY(1px);
+}
+
+/* Parameters Table */
+.tableContainer {
+	width: 100%;
+	overflow-x: auto;
+	border-radius: 14px;
+	border: 1px solid var(--border-color);
+	background: rgba(var(--primary-color-rgb), 0.02);
+}
+
+:global([data-theme="dark"]) .tableContainer {
+	background: rgba(0, 0, 0, 0.2);
+}
+
+.paramsTable {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+	font-size: 0.9rem;
+}
+
+.paramsTable th {
+	background: rgba(var(--primary-color-rgb), 0.08);
+	padding: 0.85rem 1rem;
+	font-weight: 600;
+	color: var(--primary-700);
+	border-bottom: 1px solid var(--border-color);
+}
+
+:global([data-theme="dark"]) .paramsTable th {
+	color: var(--primary-400);
+}
+
+.paramsTable td {
+	padding: 0.85rem 1rem;
+	border-bottom: 1px solid rgba(var(--border-color-rgb), 0.5);
+	line-height: 1.4;
+}
+
+.paramsTable tr:last-child td {
+	border-bottom: none;
+}
+
+.inlineCode {
+	font-family: Consolas, Monaco, "Andale Mono", monospace;
+	background: rgba(var(--primary-color-rgb), 0.08);
+	color: var(--primary-700);
+	padding: 0.2rem 0.4rem;
+	border-radius: 6px;
+	font-size: 0.85rem;
+}
+
+:global([data-theme="dark"]) .inlineCode {
+	background: rgba(var(--primary-color-rgb), 0.12);
+	color: var(--primary-400);
+}
+
+/* Interactive Tabs & Snippets */
+.docHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 1.5rem;
+}
+
+.copyCodeBtn {
+	border-radius: 8px !important;
+	text-transform: none !important;
+	font-weight: 500 !important;
+	border-color: rgba(var(--primary-color-rgb), 0.3) !important;
+	color: var(--primary-600) !important;
+	transition: all 0.2s ease !important;
+}
+
+:global([data-theme="dark"]) .copyCodeBtn {
+	color: var(--primary-400) !important;
+}
+
+.copyCodeBtn:hover {
+	background: rgba(var(--primary-color-rgb), 0.05) !important;
+	border-color: var(--primary-500) !important;
+}
+
+.tabBar {
+	display: flex;
+	gap: 0.5rem;
+	background: rgba(var(--primary-color-rgb), 0.04);
+	padding: 0.4rem;
+	border-radius: 12px;
+	margin-bottom: 0.75rem;
+	border: 1px solid var(--border-color);
+}
+
+:global([data-theme="dark"]) .tabBar {
+	background: rgba(0, 0, 0, 0.25);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tabBtn {
+	flex: 1;
+	background: transparent;
+	border: none;
+	padding: 0.6rem 1rem;
+	color: var(--neutral-500);
+	font-weight: 600;
+	font-size: 0.85rem;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-transform: none;
+}
+
+.tabBtn:hover {
+	color: var(--text-color);
+	background: rgba(var(--primary-color-rgb), 0.04);
+}
+
+:global([data-theme="dark"]) .tabBtn {
+	color: rgba(255, 255, 255, 0.6);
+}
+
+:global([data-theme="dark"]) .tabBtn:hover {
+	color: rgba(255, 255, 255, 0.9);
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.activeTab {
+	background: #ffffff !important;
+	color: var(--primary-700) !important;
+	border: 1px solid var(--border-color);
+	box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .activeTab {
+	background: rgba(var(--primary-color-rgb), 0.15) !important;
+	color: var(--primary-300) !important;
+	border: 1px solid rgba(var(--primary-color-rgb), 0.15);
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.codeBlockContainer {
+	background: #0d0f12;
+	border-radius: 14px;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	padding: 1.25rem;
+	overflow: auto;
+	box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+	direction: ltr;
+}
+
+.codeBlock {
+	margin: 0;
+	font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+	font-size: 0.85rem;
+	color: #e5e9ef;
+	line-height: 1.5;
+	text-align: left;
+	white-space: pre-wrap;
+	word-break: break-all;
+	direction: ltr;
+}
+
+/* Animations and Responsive Styles */
+@media (max-width: 600px) {
+	.card {
+		padding: 1.5rem;
+		border-radius: 20px;
+	}
+
+	.title {
+		font-size: 1.8rem;
+		margin-bottom: 1.5rem !important;
+	}
+
+	.urlContainer {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.5rem;
+	}
+
+	.copyButton {
+		width: 100% !important;
+	}
+
+	.tabBar {
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.docHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.copyCodeBtn {
+		width: 100%;
+	}
+}
+
+/* API Selector Tabs */
+.apiSelector {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 2rem;
+	border-bottom: 2px solid var(--border-color);
+	padding-bottom: 0.5rem;
+	width: 100%;
+}
+
+.apiSelectorTab {
+	background: none;
+	border: none;
+	padding: 0.75rem 1.25rem;
+	font-weight: 700;
+	font-size: 1rem;
+	color: var(--neutral-500);
+	cursor: pointer;
+	position: relative;
+	transition: all 0.2s ease;
+	text-transform: none;
+}
+
+.apiSelectorTab:hover {
+	color: var(--text-color);
+}
+
+.apiSelectorTabActive {
+	color: var(--primary-600) !important;
+}
+
+:global([data-theme="dark"]) .apiSelectorTabActive {
+	color: var(--primary-400) !important;
+}
+
+.apiSelectorTabActive::after {
+	content: "";
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: var(--primary-500);
+	border-radius: 2px;
+	box-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5);
+}
+
+.apiSelectorTabDisabled {
+	background: none;
+	border: none;
+	padding: 0.75rem 1.25rem;
+	font-weight: 600;
+	font-size: 1rem;
+	color: var(--neutral-400);
+	cursor: not-allowed;
+	opacity: 0.5;
+	text-transform: none;
+}
+
+:global([data-theme="dark"]) .apiSelectorTabDisabled {
+	color: rgba(255, 255, 255, 0.3);
+}

@@ -17,7 +17,7 @@ import Input from "@widgets/Input";
 import clsx from "clsx";
 import Cookies from "js-cookie";
 import { useState } from "react";
-import styles from "./Account.module.css";
+import styles from "../Account/Account.module.css";
 
 export default function ResetPassword({ path = "" }) {
 	const { direction } = MainStore.useState();

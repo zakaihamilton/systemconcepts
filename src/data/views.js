@@ -81,8 +81,13 @@ const Account = dynamic(() => import("@views/Account/Account"), {
 });
 
 import PodcastsIcon from "@mui/icons-material/Podcasts";
+import ApiIcon from "@mui/icons-material/Api";
 
 const Podcast = dynamic(() => import("@views/Podcast/Podcast"), {
+	loading: () => <PageLoad />,
+});
+
+const API = dynamic(() => import("@views/API/API"), {
 	loading: () => <PageLoad />,
 });
 
@@ -288,6 +293,14 @@ export default [
 		name: "PODCAST",
 		Icon: PodcastsIcon,
 		Component: Podcast,
+		sidebar: true,
+		visible: () => Cookies.get("id") && Cookies.get("hash"),
+	},
+	{
+		id: "api",
+		name: "API",
+		Icon: ApiIcon,
+		Component: API,
 		sidebar: true,
 		visible: () => Cookies.get("id") && Cookies.get("hash"),
 	},

@@ -5,7 +5,7 @@ import FilterBar from "@views/Sessions/FilterBar";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
 import { useMemo } from "react";
-import styles from "../Tags.module.css";
+import styles from "./Tags.module.css";
 
 export const TagsStore = new Store({
 	order: "asc",

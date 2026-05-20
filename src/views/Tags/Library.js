@@ -29,7 +29,7 @@ import Table from "@widgets/Table";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "../Tags.module.css";
+import styles from "./Tags.module.css";
 import BatchDialog from "./BatchDialog";
 import SyncDialog from "./SyncDialog";
 
