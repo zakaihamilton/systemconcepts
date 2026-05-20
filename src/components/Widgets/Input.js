@@ -164,8 +164,10 @@ export default forwardRef(function InputWidget(
 								vertical: "top",
 								horizontal: "left",
 							},
-							PaperProps: {
-								className: styles.menuPaper,
+							slotProps: {
+								paper: {
+									className: styles.menuPaper,
+								},
 							},
 						},
 					},

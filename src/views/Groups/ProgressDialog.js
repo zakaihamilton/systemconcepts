@@ -160,12 +160,12 @@ export default function ProgressDialog() {
 	};
 
 	return (
-		<Dialog
-			onClose={handleClose}
-			title={translations.UPDATE_SESSIONS}
-			className={styles.dialog}
-		>
-			{!!duration && (
+        (<Dialog
+                                                                                                                                                                                                                                    onClose={handleClose}
+                                                                                                                                                                                                                                    title={translations.UPDATE_SESSIONS}
+                                                                                                                                                                                                                                    className={styles.dialog}
+                                                                                                                                                                                                                                >
+            {!!duration && (
 				<div className={clsx(styles.timer, busy ? styles.busy : styles.idle)}>
 					<div className={styles.timerText}>{formattedDuration}</div>
 					<div className={styles.timerGhost}>
@@ -173,7 +173,7 @@ export default function ProgressDialog() {
 					</div>
 				</div>
 			)}
-			<div className={styles.content}>
+            <div className={styles.content}>
 				<div
 					className={styles.totalAdded}
 					onClick={toggleList}
@@ -198,8 +198,7 @@ export default function ProgressDialog() {
 					<div className={styles.empty}>{translations.NO_UPDATES}</div>
 				)}
 			</div>
-
-			{(syncing || (syncLogs && syncLogs.length > 0)) && (
+            {(syncing || (syncLogs && syncLogs.length > 0)) && (
 				<div className={styles.syncSection}>
 					<div
 						className={styles.syncHeader}
@@ -259,8 +258,8 @@ export default function ProgressDialog() {
 					)}
 				</div>
 			)}
-		</Dialog>
-	);
+        </Dialog>)
+    );
 }
 
 function ProgressItem({ item, translations, expanded, onToggle }) {

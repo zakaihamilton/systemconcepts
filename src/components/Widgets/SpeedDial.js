@@ -31,13 +31,19 @@ export default function SpeedDialWidget({ visible = true, items }) {
 			<SpeedDialAction
 				key={item.id}
 				icon={item.icon}
-				tooltipTitle={item.name}
-				tooltipOpen
-				tooltipPlacement={direction === "rtl" ? "right" : "left"}
+				slotProps={{
+					tooltip: {
+						title: item.name,
+						open: true,
+						placement: direction === "rtl" ? "right" : "left",
+						classes: {
+							tooltip: styles.tooltip,
+						},
+					},
+				}}
 				onClick={itemHandler}
 				classes={{
 					fab: styles.icon,
-					staticTooltipLabel: styles.tooltip,
 				}}
 			/>
 		);

@@ -72,22 +72,24 @@ export default function EditContentDialog({
 	};
 
 	return (
-		<Dialog
-			open={open}
-			onClose={handleClose}
-			maxWidth="md"
-			fullWidth
-			PaperProps={{
-				sx: {
-					height: "80vh",
-					maxHeight: "80vh",
-				},
-			}}
-		>
-			<DialogTitle sx={{ fontWeight: 700 }}>
+        (<Dialog
+                open={open}
+                onClose={handleClose}
+                maxWidth="md"
+                fullWidth
+                slotProps={{
+                    paper: {
+                        sx: {
+                            height: "80vh",
+                            maxHeight: "80vh",
+                        },
+                    }
+                }}
+            >
+            <DialogTitle sx={{ fontWeight: 700 }}>
 				{translations.EDIT_ARTICLE || "Edit Article"}
 			</DialogTitle>
-			<DialogContent sx={{ display: "flex", flexDirection: "column", p: 0 }}>
+            <DialogContent sx={{ display: "flex", flexDirection: "column", p: 0 }}>
 				<Box
 					sx={{
 						flex: 1,
@@ -121,15 +123,17 @@ export default function EditContentDialog({
 								overflow: "auto !important",
 							},
 						}}
-						InputProps={{
-							sx: {
-								height: "100%",
-							},
-						}}
+						slotProps={{
+                            input: {
+                                sx: {
+                                    height: "100%",
+                                },
+                            }
+                        }}
 					/>
 				</Box>
 			</DialogContent>
-			<DialogActions sx={{ p: 2, pt: 0 }}>
+            <DialogActions sx={{ p: 2, pt: 0 }}>
 				<Button onClick={handleClose} disabled={saving}>
 					{translations.CANCEL || "Cancel"}
 				</Button>
@@ -139,6 +143,6 @@ export default function EditContentDialog({
 						: translations.SAVE || "Save"}
 				</Button>
 			</DialogActions>
-		</Dialog>
-	);
+        </Dialog>)
+    );
 }

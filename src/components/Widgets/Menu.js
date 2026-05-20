@@ -294,12 +294,13 @@ export default function MenuWidget({
 				keepMounted
 				open={!!open}
 				onClose={handleClose}
-				{...(hoverEnabled &&
-					hoverRef && { MenuListProps: { onMouseLeave: handleClose } })}
-				PaperProps={{
-					style: {
-						transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important",
-						minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
+				slotProps={{
+					list: hoverEnabled && hoverRef ? { onMouseLeave: handleClose } : undefined,
+					paper: {
+						style: {
+							transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important",
+							minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
+						},
 					},
 				}}
 				{...props}

@@ -331,25 +331,27 @@ export default function Tags({
 					fullWidth
 					size="small"
 					className={styles.filterInput}
-					InputProps={{
-						startAdornment: (
-							<InputAdornment position="start">
-								<FilterAltIcon color="action" />
-							</InputAdornment>
-						),
-						endAdornment: filterText ? (
-							<InputAdornment position="end">
-								<IconButton
-									size="small"
-									onClick={() => setFilterText("")}
-									edge="end"
-									sx={{ mr: -0.5 }}
-								>
-									<ClearIcon fontSize="small" />
-								</IconButton>
-							</InputAdornment>
-						) : null,
-					}}
+					slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <FilterAltIcon color="action" />
+                                </InputAdornment>
+                            ),
+                            endAdornment: filterText ? (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => setFilterText("")}
+                                        edge="end"
+                                        sx={{ mr: -0.5 }}
+                                    >
+                                        <ClearIcon fontSize="small" />
+                                    </IconButton>
+                                </InputAdornment>
+                            ) : null,
+                        }
+                    }}
 				/>
 			</Box>
 			<Box className={styles.treeContainer}>
@@ -372,18 +374,20 @@ export default function Tags({
 
 	if (isMobile) {
 		return (
-			<Drawer
+            (<Drawer
 				anchor="left"
 				open={showLibrarySideBar}
 				onClose={closeDrawer}
 				ModalProps={{ keepMounted: true }}
-				PaperProps={{
-					sx: { width: "85vw", maxWidth: "350px", height: "100%" },
-				}}
+				slotProps={{
+                    paper: {
+                        sx: { width: "85vw", maxWidth: "350px", height: "100%" },
+                    }
+                }}
 			>
-				{sideBarContent}
-			</Drawer>
-		);
+                {sideBarContent}
+            </Drawer>)
+        );
 	}
 
 	return (

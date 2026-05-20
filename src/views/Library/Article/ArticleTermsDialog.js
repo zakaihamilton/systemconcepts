@@ -95,15 +95,17 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 	};
 
 	return (
-		<Dialog
+        (<Dialog
 			open={open}
 			onClose={onClose}
 			maxWidth="sm"
 			fullWidth
 			scroll="paper"
-			PaperProps={{ style: { height: "80vh" } }}
+			slotProps={{
+                paper: { style: { height: "80vh" } }
+            }}
 		>
-			<DialogTitle disableTypography className={styles.titleContainer}>
+            <DialogTitle disableTypography className={styles.titleContainer}>
 				<Typography variant="h6">
 					{translations.ARTICLE_TERMS} ({filteredTerms.length})
 				</Typography>
@@ -130,7 +132,7 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 					</div>
 				</div>
 			</DialogTitle>
-			<div className={styles.dialogBody}>
+            <div className={styles.dialogBody}>
 				{uniqueLetters.length > 0 && (
 					<div className={styles.sidebar}>
 						{uniqueLetters.map((letter) => (
@@ -180,7 +182,7 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 							return (
 								<React.Fragment key={index}>
 									<ListItem
-										alignItems="flex-start"
+										sx={{ alignItems: "flex-start" }}
 										id={isNewLetter ? `term-letter-${firstChar}` : undefined}
 									>
 										<ListItemText
@@ -273,9 +275,9 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 					</List>
 				</DialogContent>
 			</div>
-			<DialogActions>
+            <DialogActions>
 				<Button onClick={onClose}>{translations.CLOSE}</Button>
 			</DialogActions>
-		</Dialog>
-	);
+        </Dialog>)
+    );
 }

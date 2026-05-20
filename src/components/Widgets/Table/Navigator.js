@@ -83,12 +83,14 @@ export default function Navigator({
 								<TextField
 									className={styles.pageIndex}
 									variant="standard"
-									inputProps={{
-										"aria-label": translations.PAGE_INDEX,
-										type: "number",
-										min: 1,
-										max: pageCount,
-									}}
+									slotProps={{
+                                        htmlInput: {
+                                            "aria-label": translations.PAGE_INDEX,
+                                            type: "number",
+                                            min: 1,
+                                            max: pageCount,
+                                        }
+                                    }}
 								/>
 							</DelayInput>
 						</span>

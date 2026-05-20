@@ -528,8 +528,8 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 	}
 
 	return (
-		<Box className={styles.root}>
-			<Box className={styles.searchContainer}>
+        (<Box className={styles.root}>
+            <Box className={styles.searchContainer}>
 				<TextField
 					placeholder={translations.FILTER_TAGS || "Filter tags..."}
 					value={filterText}
@@ -537,31 +537,33 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 					fullWidth
 					size="small"
 					className={styles.filterInput}
-					InputProps={{
-						startAdornment: (
-							<InputAdornment position="start">
-								<FilterAltIcon color="action" fontSize="small" />
-							</InputAdornment>
-						),
-						endAdornment: filterText ? (
-							<InputAdornment position="end">
-								<Tooltip title={translations.CLEAR_FILTER}>
-									<IconButton
-										size="small"
-										onClick={() => setFilterText("")}
-										edge="end"
-										sx={{ mr: -0.5 }}
-										aria-label={translations.CLEAR_FILTER}
-									>
-										<ClearIcon fontSize="small" />
-									</IconButton>
-								</Tooltip>
-							</InputAdornment>
-						) : null,
-					}}
+					slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <FilterAltIcon color="action" fontSize="small" />
+                                </InputAdornment>
+                            ),
+                            endAdornment: filterText ? (
+                                <InputAdornment position="end">
+                                    <Tooltip title={translations.CLEAR_FILTER}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => setFilterText("")}
+                                            edge="end"
+                                            sx={{ mr: -0.5 }}
+                                            aria-label={translations.CLEAR_FILTER}
+                                        >
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </InputAdornment>
+                            ) : null,
+                        }
+                    }}
 				/>
 			</Box>
-			<Box className={styles.treeContainer} ref={treeContainerRef}>
+            <Box className={styles.treeContainer} ref={treeContainerRef}>
 				<List component="nav" sx={{ py: 0.5, pl: 3 }}>
 					{tree.map((node) => (
 						<TreeItem
@@ -574,6 +576,6 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 					))}
 				</List>
 			</Box>
-		</Box>
-	);
+        </Box>)
+    );
 }

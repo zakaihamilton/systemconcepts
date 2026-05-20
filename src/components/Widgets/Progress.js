@@ -20,17 +20,19 @@ export default function Progress({
 			className={clsx(styles.root, fullscreen && styles.fullscreen)}
 			{...props}
 		>
-			<Box position="relative" display="flex">
+			<Box sx={{ position: "relative", display: "flex" }}>
 				<CircularProgress size={size} value={value} variant={variant} />
 				<Box
-					top={0}
-					left={0}
-					bottom={0}
-					right={0}
-					position="absolute"
-					display="flex"
-					alignItems="center"
-					justifyContent="center"
+					sx={{
+						top: 0,
+						left: 0,
+						bottom: 0,
+						right: 0,
+						position: "absolute",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+					}}
 				>
 					{text && (
 						<Tooltip title={tooltip}>
