@@ -1,3 +1,5 @@
+import crypto from "crypto";
+import { hash as bcryptHash } from "bcryptjs";
 import parseCookie from "@util/cookie";
 import { login } from "@util/login";
 import { findRecord, handleRequest } from "@util/mongo";
@@ -54,7 +56,6 @@ async function handleUsers(request) {
 				: null;
 			if (record) {
 				if (body.password) {
-					const { hash: bcryptHash } = require("bcryptjs");
 					body.hash = await bcryptHash(body.password, 10);
 					delete body.password;
 				} else {
@@ -85,7 +86,7 @@ async function handleUsers(request) {
 				credentials: _credentials,
 				...rest
 			} = user;
-			const rssToken = require("crypto")
+			const rssToken = crypto
 				.createHash("sha256")
 				.update(
 					user.id + hash + (process.env.RSS_SECRET || process.env.AWS_SECRET),
