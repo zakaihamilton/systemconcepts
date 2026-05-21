@@ -67,5 +67,8 @@
 	},
 	"optionalDependencies": {
 		"@next/swc-linux-x64-gnu": "^16.2.6"
+	},
+	"overrides": {
+		"glob": "^13.0.0"
 	}
 }
