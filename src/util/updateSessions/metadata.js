@@ -4,6 +4,13 @@ import { makePath } from "@util/path";
 import storage from "@util/storage";
 import JSZip from "jszip";
 
+function getZipTextEntryId(relativePath) {
+	const fileName = relativePath.split("/").pop();
+	if (!fileName || fileName.startsWith("._")) return null;
+	if (!fileName.toLowerCase().endsWith(".txt")) return null;
+	return fileName.slice(0, -4);
+}
+
 async function loadFromCache(
 	property,
 	name,
@@ -334,10 +341,10 @@ export async function loadTranscriptions(
 					await zip.loadAsync(blob);
 
 					zip.forEach((relativePath, zipEntry) => {
-						if (!zipEntry.dir && relativePath.endsWith(".txt")) {
+						const id = !zipEntry.dir && getZipTextEntryId(relativePath);
+						if (id) {
 							// Extract the session ID from the filename
 							// Format is usually: "YYYY-MM-DD Title.txt" or just the session ID
-							const id = relativePath.replace(/\.txt$/, "");
 							sessionMetadataMap[id] = true;
 						}
 					});

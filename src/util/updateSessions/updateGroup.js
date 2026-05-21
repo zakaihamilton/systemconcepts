@@ -12,7 +12,9 @@ import { readBinary } from "@util/binary";
 import { blobToBase64, shrinkImage } from "@util/image";
 import {
 	fileTitle,
+	isAudioFile,
 	isDurationFile,
+	isImageFile,
 	isSubtitleFile,
 	isSummaryFile,
 	isTagsFile,
@@ -32,6 +34,79 @@ import {
 import { getListing, updateYearSync } from "./utils";
 
 const prefix = "wasabi/";
+
+function isYearMetadataFile(file, yearName) {
+	return (
+		file.name === yearName + ".tags" ||
+		file.name === yearName + ".duration" ||
+		file.name === yearName + ".md" ||
+		file.name === yearName + ".zip"
+	);
+}
+
+function getSessionFileId(file) {
+	let id = fileTitle(file.name);
+	if (isVideoFile(file.name)) {
+		const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
+		if (resolutionMatch) {
+			id = resolutionMatch[1];
+		}
+	}
+	if (isSubtitleFile(file.name)) {
+		id = id.replace(/\.[a-z]{2,3}$/, "");
+	}
+	return id;
+}
+
+function groupFilesBySessionId(files, yearName) {
+	const map = {};
+	for (const file of files || []) {
+		if (isYearMetadataFile(file, yearName)) {
+			continue;
+		}
+		const id = getSessionFileId(file);
+		if (!map[id]) {
+			map[id] = [];
+		}
+		map[id].push(file);
+	}
+	return map;
+}
+
+function hasImageFile(files) {
+	return (files || []).some((file) => isImageFile(file.name));
+}
+
+function getWasabiSessionFiles(wasabiFiles, digitalOceanFiles) {
+	if (!hasImageFile(digitalOceanFiles)) {
+		return wasabiFiles || [];
+	}
+	return (wasabiFiles || []).filter((file) => !isImageFile(file.name));
+}
+
+function getDigitalOceanSessionFiles(files) {
+	return (files || []).filter(
+		(file) => !isAudioFile(file.name) && !isVideoFile(file.name),
+	);
+}
+
+async function getMetadataYearItems(groupName, yearName) {
+	const metadataYearPath = makePath("aws/sessions", groupName, yearName);
+	try {
+		const items = await getListing(metadataYearPath);
+		items.sort((a, b) => a.name.localeCompare(b.name));
+		console.log(
+			`[UpdateGroup] Metadata year ${yearName} has ${items.length} items`,
+		);
+		return items;
+	} catch (err) {
+		console.warn(
+			`[UpdateGroup] Failed to list metadata folder ${metadataYearPath}`,
+			err,
+		);
+		return [];
+	}
+}
 
 export async function updateGroupProcess(
 	name,
@@ -169,6 +244,7 @@ export async function updateGroupProcess(
 					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 				);
 				yearItems.sort((a, b) => a.name.localeCompare(b.name));
+				const metadataYearItems = await getMetadataYearItems(name, year.name);
 
 				// Load Metadata concurrently to improve performance
 				const awsPath = makePath("aws/sessions", name);
@@ -191,39 +267,19 @@ export async function updateGroupProcess(
 					),
 				]);
 
-				// Group files by session ID
-				const sessionFilesMap = {};
-				for (const file of yearItems) {
-					let id = fileTitle(file.name);
-					// Handle resolution suffix for video files
-					if (isVideoFile(file.name)) {
-						const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
-						if (resolutionMatch) {
-							id = resolutionMatch[1];
-						}
-					}
-					if (isSubtitleFile(file.name)) {
-						id = id.replace(/\.[a-z]{2,3}$/, "");
-					}
-					// Ignore special metadata files, including the year.zip transcriptions file
-					if (
-						file.name === year.name + ".tags" ||
-						file.name === year.name + ".duration" ||
-						file.name === year.name + ".md" ||
-						file.name === year.name + ".zip"
-					) {
-						continue;
-					}
-
-					if (!sessionFilesMap[id]) {
-						sessionFilesMap[id] = [];
-					}
-					sessionFilesMap[id].push(file);
-				}
-
-				const sortedIds = Object.keys(sessionFilesMap).sort((a, b) =>
-					a.localeCompare(b),
+				const wasabiFilesMap = groupFilesBySessionId(yearItems, year.name);
+				const digitalOceanFilesMap = groupFilesBySessionId(
+					metadataYearItems,
+					year.name,
 				);
+				const sortedIds = Array.from(
+					new Set([
+						...Object.keys(wasabiFilesMap),
+						...Object.keys(digitalOceanFilesMap).filter((id) =>
+							hasImageFile(digitalOceanFilesMap[id]),
+						),
+					]),
+				).sort((a, b) => a.localeCompare(b));
 
 				// Load existing sessions for the current year to preserve thumbnails
 				const existingThumbnails = {};
@@ -279,10 +335,23 @@ export async function updateGroupProcess(
 								let summary = sessionSummariesMap[id];
 								let transcription = sessionTranscriptionMap[id];
 								let transcriptPath = null;
-								const files = sessionFilesMap[id];
+								const wasabiFiles = wasabiFilesMap[id] || [];
+								const digitalOceanFiles = getDigitalOceanSessionFiles(
+									digitalOceanFilesMap[id],
+								);
+								const files = [
+									...getWasabiSessionFiles(wasabiFiles, digitalOceanFiles),
+									...digitalOceanFiles,
+								];
+								const metadataFallbackFiles = [
+									...digitalOceanFiles,
+									...wasabiFiles,
+								];
 
 								if (!tags.length) {
-									const tagsFile = files.find((f) => isTagsFile(f.name));
+									const tagsFile = metadataFallbackFiles.find((f) =>
+										isTagsFile(f.name),
+									);
 									if (tagsFile) {
 										try {
 											const content = await storage.readFile(tagsFile.path);
@@ -302,7 +371,7 @@ export async function updateGroupProcess(
 								}
 
 								if (!duration || duration < 1) {
-									const durationFile = files.find((f) =>
+									const durationFile = metadataFallbackFiles.find((f) =>
 										isDurationFile(f.name),
 									);
 									if (durationFile) {
@@ -328,7 +397,9 @@ export async function updateGroupProcess(
 								}
 
 								if (!summary) {
-									const summaryFile = files.find((f) => isSummaryFile(f.name));
+									const summaryFile = metadataFallbackFiles.find((f) =>
+										isSummaryFile(f.name),
+									);
 									if (summaryFile) {
 										try {
 											summary = await storage.readFile(summaryFile.path);
@@ -344,7 +415,9 @@ export async function updateGroupProcess(
 								// If not in consolidated zip, check for individual file or .txt inside the folder.
 								// Usually it's sessionID.txt. If we didn't get it from zip, check files list.
 								if (!transcription) {
-									const txtFile = files.find((f) => f.name.endsWith(".txt"));
+									const txtFile = metadataFallbackFiles.find((f) =>
+										f.name.toLowerCase().endsWith(".txt"),
+									);
 									if (txtFile) {
 										transcription = true;
 										transcriptPath = txtFile.path;

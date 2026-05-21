@@ -21,7 +21,6 @@ import { useLocalStorage } from "@util/store";
 import { useTranslations } from "@util/translations";
 import { useParentParams } from "@util/views";
 import Download from "@widgets/Download";
-import Progress from "@widgets/Progress";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
@@ -119,7 +118,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 
 	const mediaPath = data?.path || storeMediaPath;
 	const subtitles = data?.subtitles || storeSubtitles;
-	const isSessionLoading = !!loading && !data?.path;
 	const isRecoveringMedia = !!loading && !!mediaPath;
 	const shouldShowAccessError = !!error && !loading && !mediaPath;
 
@@ -186,42 +184,42 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 
 	const toolbarItems = [
 		hash &&
-			!show && {
-				id: "player",
-				name: playingSessionName,
-				icon: <VideoLabelIcon />,
-				menu: false,
-				target: hash,
-				onClick: gotoPlayer,
-				className: styles.playerIcon,
-			},
+		!show && {
+			id: "player",
+			name: playingSessionName,
+			icon: <VideoLabelIcon />,
+			menu: false,
+			target: hash,
+			onClick: gotoPlayer,
+			className: styles.playerIcon,
+		},
 		subtitles &&
-			show && {
-				id: "subtitles",
-				location: "header",
-				name: showSubtitles
-					? translations.SUBTITLES
-					: translations.SUBTITLES_OFF,
-				icon: showSubtitles ? <ClosedCaptionIcon /> : <ClosedCaptionOffIcon />,
-				onClick: () => {
-					PlayerStore.update((s) => {
-						s.showSubtitles = !s.showSubtitles;
-					});
-				},
+		show && {
+			id: "subtitles",
+			location: "header",
+			name: showSubtitles
+				? translations.SUBTITLES
+				: translations.SUBTITLES_OFF,
+			icon: showSubtitles ? <ClosedCaptionIcon /> : <ClosedCaptionOffIcon />,
+			onClick: () => {
+				PlayerStore.update((s) => {
+					s.showSubtitles = !s.showSubtitles;
+				});
 			},
+		},
 		show &&
-			!isVideo && {
-				id: "details",
-				location: "header",
-				name: translations.DETAILS,
-				icon: <InfoIcon />,
-				active: showDetails,
-				onClick: () => {
-					PlayerStore.update((s) => {
-						s.showDetails = !s.showDetails;
-					});
-				},
+		!isVideo && {
+			id: "details",
+			location: "header",
+			name: translations.DETAILS,
+			icon: <InfoIcon />,
+			active: showDetails,
+			onClick: () => {
+				PlayerStore.update((s) => {
+					s.showDetails = !s.showDetails;
+				});
 			},
+		},
 	].filter(Boolean);
 
 	useToolbar({
@@ -321,10 +319,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 	}, [isSignedIn, translations, shouldShowAccessError]);
 
 	const elements = isTranscript ? <Transcript show={show} /> : null;
-	const loadingTitle = translations.LOADING || "Loading";
-	const loadingMessage = mediaPath
-		? translations.RELOAD || "Reloading"
-		: "Loading session";
 
 	return (
 		<div className={styles.root} style={style}>

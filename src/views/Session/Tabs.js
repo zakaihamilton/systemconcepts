@@ -38,10 +38,11 @@ export default function Tabs({ Container }) {
 		session.subtitles ||
 		session.transcription ||
 		session.transcriptPath ||
-		hasMedia ||
 		(session.files || []).some(
 			(file) => file.endsWith(".txt") || file.endsWith(".vtt"),
 		);
+
+	console.log("session", session);
 
 	const tabs = [
 		{
@@ -72,8 +73,8 @@ export default function Tabs({ Container }) {
 				"/" +
 				encodeURIComponent(
 					"player?suffix=" +
-						(session.audio ? ".m4a" : ".mp4") +
-						"&mode=transcript",
+					(session.audio ? ".m4a" : ".mp4") +
+					"&mode=transcript",
 				),
 		},
 	]
