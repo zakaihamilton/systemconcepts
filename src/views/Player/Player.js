@@ -119,6 +119,9 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 
 	const mediaPath = data?.path || storeMediaPath;
 	const subtitles = data?.subtitles || storeSubtitles;
+	const isSessionLoading = !!loading && !data?.path;
+	const isRecoveringMedia = !!loading && !!mediaPath;
+	const shouldShowAccessError = !!error && !loading && !mediaPath;
 
 	const isAudio = isAudioFile(path);
 	const isVideo = isVideoFile(path);
@@ -275,6 +278,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		metadataKey: activeMetadataKey,
 		path: mediaPath,
 		renewUrl: reload,
+		renewing: isRecoveringMedia,
 		date,
 		year,
 		show,
@@ -306,7 +310,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 			if (!isSignedIn) {
 				s.mode = "signin";
 				s.message = translations.REQUIRE_SIGNIN;
-			} else if (error) {
+			} else if (shouldShowAccessError) {
 				s.mode = "player";
 				s.message = translations.PLAY_NOT_ALLOWED;
 			} else {
@@ -314,9 +318,13 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 				s.message = "";
 			}
 		});
-	}, [isSignedIn, translations, error]);
+	}, [isSignedIn, translations, shouldShowAccessError]);
 
 	const elements = isTranscript ? <Transcript show={show} /> : null;
+	const loadingTitle = translations.LOADING || "Loading";
+	const loadingMessage = mediaPath
+		? translations.RELOAD || "Reloading"
+		: "Loading session";
 
 	return (
 		<div className={styles.root} style={style}>
@@ -349,8 +357,16 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 			) : isTranscript ? (
 				elements
 			) : null}
+			{show && (isSessionLoading || isRecoveringMedia) && (
+				<div className={styles.loadingPanel} role="status" aria-live="polite">
+					<Progress />
+					<div className={styles.loadingText}>
+						<strong>{loadingTitle}</strong>
+						<span>{loadingMessage}</span>
+					</div>
+				</div>
+			)}
 			{speedToolbar === "bottom" && <SpeedSlider />}
-			{!!loading && !mediaPath && <Progress />}
 		</div>
 	);
 }

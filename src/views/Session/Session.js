@@ -152,11 +152,19 @@ export default function SessionPage({ group, year, date, name }) {
 	});
 
 	if (loading && !session) {
-		return <div className={styles.root}>{translations.LOADING}...</div>;
+		return (
+			<div className={styles.root}>
+				<div className={styles.state}>{translations.LOADING}...</div>
+			</div>
+		);
 	}
 
 	if (!session) {
-		return <div className={styles.root}>{translations.NOT_FOUND}</div>;
+		return (
+			<div className={styles.root}>
+				<div className={styles.state}>{translations.NOT_FOUND}</div>
+			</div>
+		);
 	}
 
 	const { duration, thumbnail } = session;
@@ -231,7 +239,7 @@ export default function SessionPage({ group, year, date, name }) {
 						</div>
 					)}
 				</div>
-				<div className={styles.content}>
+				<div className={imagePath ? styles.content : styles.contentNoMedia}>
 					{!!imagePath && (
 						<div className={styles.media}>
 							<Image

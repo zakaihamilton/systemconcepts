@@ -8,6 +8,7 @@ export default function Button({
 	subHeading,
 	onClick,
 	label,
+	variant,
 	...props
 }) {
 	// Remove active from props to prevent it from being passed to DOM
@@ -15,7 +16,11 @@ export default function Button({
 
 	return (
 		<button
-			className={clsx(styles.root, active && styles.active)}
+			className={clsx(
+				styles.root,
+				variant === "video" && styles.video,
+				active && styles.active,
+			)}
 			onClick={onClick}
 			aria-label={label}
 			{...buttonProps}

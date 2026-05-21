@@ -16,6 +16,7 @@ export default function Audio({
 	name,
 	path,
 	renewUrl,
+	renewing,
 	date,
 	group,
 	color,
@@ -30,13 +31,20 @@ export default function Audio({
 	const [playerRef, setPlayerRef] = useState(null);
 	const [duration, setDuration] = useState(0);
 	const [errorCount, setErrorCount] = useState(0);
+	const [recovering, setRecovering] = useState(false);
 
 	const onError = () => {
 		if (errorCount < 3) {
 			console.log("Audio error, renewing URL...");
+			setRecovering(true);
 			renewUrl();
 			setErrorCount((count) => count + 1);
 		}
+	};
+
+	const clearRecovery = () => {
+		setRecovering(false);
+		setErrorCount(0);
 	};
 
 	useEffect(() => {
@@ -122,6 +130,8 @@ export default function Audio({
 				{...rest}
 				playsInline
 				onError={onError}
+				onLoadedMetadata={clearRecovery}
+				onPlaying={clearRecovery}
 			>
 				{children}
 			</video>
@@ -138,6 +148,7 @@ export default function Audio({
 					sessionName={name}
 					groupName={group}
 					sessionDate={date}
+					renewing={renewing || recovering}
 				/>
 			)}
 			{playerRef && (

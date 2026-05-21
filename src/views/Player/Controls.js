@@ -12,6 +12,7 @@ import { useMediaSession } from "@util/mediaSession";
 import { useFile } from "@util/storage";
 import { formatDuration } from "@util/string";
 import { useTranslations } from "@util/translations";
+import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerButton from "./Button";
 import styles from "./Controls.module.css";
@@ -30,6 +31,8 @@ export default function Controls({
 	sessionName,
 	groupName,
 	sessionDate,
+	renewing,
+	variant,
 }) {
 	const progressRef = useRef(null);
 	const { direction } = MainStore.useState();
@@ -39,6 +42,7 @@ export default function Controls({
 	const [, setCounter] = useState(0);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [error, setError] = useState(null);
+	const errorTimeoutRef = useRef(null);
 	const visible = usePageVisibility();
 
 	// MediaSession API integration for iOS Bluetooth headset controls
@@ -75,12 +79,38 @@ export default function Controls({
 	const lastUpdateTimeRef = useRef(0);
 
 	useEffect(() => {
+		const clearPendingError = () => {
+			if (errorTimeoutRef.current) {
+				clearTimeout(errorTimeoutRef.current);
+				errorTimeoutRef.current = null;
+			}
+			setError(null);
+		};
 		const update = (name) => {
 			if (name === "error") {
-				setError("PLAYING_ERROR");
+				if (renewing) {
+					clearPendingError();
+					return;
+				}
+				if (errorTimeoutRef.current) {
+					clearTimeout(errorTimeoutRef.current);
+				}
+				errorTimeoutRef.current = setTimeout(() => {
+					errorTimeoutRef.current = null;
+					setError("PLAYING_ERROR");
+				}, 2000);
 			} else if (name === "loadstart") {
-				setError(null);
-			} else if (name === "loadedmetadata") {
+				if (renewing) {
+					clearPendingError();
+				}
+			} else if (
+				name === "loadedmetadata" ||
+				name === "playing" ||
+				name === "play"
+			) {
+				clearPendingError();
+			}
+			if (name === "loadedmetadata") {
 				if (!metadataKey) return; // Skip if metadataKey not ready
 				const currentMetadata = metadataKey
 					? stateRef.current.metadata?.[metadataKey] || {}
@@ -125,11 +155,23 @@ export default function Controls({
 		});
 		update("timeupdate");
 		return () => {
+			if (errorTimeoutRef.current) {
+				clearTimeout(errorTimeoutRef.current);
+				errorTimeoutRef.current = null;
+			}
 			listeners.map(({ name, callback }) =>
 				playerRef.removeEventListener(name, callback),
 			);
 		};
-	}, [playerRef, metadataKey]);
+	}, [playerRef, metadataKey, renewing]);
+
+	useEffect(() => {
+		if (renewing && errorTimeoutRef.current) {
+			clearTimeout(errorTimeoutRef.current);
+			errorTimeoutRef.current = null;
+			setError(null);
+		}
+	}, [renewing]);
 
 	useEffect(() => {
 		console.log("[Controls] Metadata effect triggered", {
@@ -377,7 +419,10 @@ export default function Controls({
 					{translations[error]}
 				</MuiAlert>
 			)}
-			<div className={styles.root} style={{ zIndex }}>
+			<div
+				className={clsx(styles.root, variant === "video" && styles.video)}
+				style={{ zIndex }}
+			>
 				<div className={styles.progress}>
 					<div className={styles.progressLine}>
 						<div
@@ -407,15 +452,17 @@ export default function Controls({
 					{direction === "ltr" && (
 						<PlayerButton
 							icon={<Replay10Icon />}
-							name={translations.REPLAY + " 10"}
+							name={translations.REPLAY}
 							onClick={replay}
+							variant={variant}
 						/>
 					)}
 					{direction === "rtl" && (
 						<PlayerButton
 							icon={<Forward10Icon />}
-							name={translations.FORWARD + " 10"}
+							name={translations.FORWARD}
 							onClick={forward}
+							variant={variant}
 						/>
 					)}
 					{!!error && (
@@ -423,6 +470,7 @@ export default function Controls({
 							icon={<ReplayIcon />}
 							name={translations.RELOAD}
 							onClick={() => playerRef.load()}
+							variant={variant}
 						/>
 					)}
 					{playerRef.paused && !error && (
@@ -430,6 +478,7 @@ export default function Controls({
 							icon={<PlayArrowIcon />}
 							name={translations.PLAY}
 							onClick={play}
+							variant={variant}
 						/>
 					)}
 					{!playerRef.paused && !error && (
@@ -437,6 +486,7 @@ export default function Controls({
 							icon={<PauseIcon />}
 							name={translations.PAUSE}
 							onClick={() => playerRef.pause()}
+							variant={variant}
 						/>
 					)}
 					{!error && (
@@ -444,20 +494,23 @@ export default function Controls({
 							icon={<StopIcon />}
 							name={translations.STOP}
 							onClick={stop}
+							variant={variant}
 						/>
 					)}
 					{direction === "ltr" && (
 						<PlayerButton
 							icon={<Forward10Icon />}
-							name={translations.FORWARD + " 10"}
+							name={translations.FORWARD}
 							onClick={forward}
+							variant={variant}
 						/>
 					)}
 					{direction === "rtl" && (
 						<PlayerButton
 							icon={<Replay10Icon />}
-							name={translations.REPLAY + " 10"}
+							name={translations.REPLAY}
 							onClick={replay}
+							variant={variant}
 						/>
 					)}
 				</div>

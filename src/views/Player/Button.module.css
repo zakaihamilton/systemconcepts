@@ -34,6 +34,48 @@
 	background: var(--selected-color);
 }
 
+.video {
+	border-color: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.1);
+	color: #f8fafc;
+	box-shadow: none;
+	border-radius: 8px;
+	height: 4.75em;
+	width: 4.75em;
+	backdrop-filter: blur(10px);
+}
+
+.video.active {
+	border-color: rgba(255, 255, 255, 0.38);
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.video:focus-visible {
+	outline-color: #f8fafc;
+}
+
+.video:hover {
+	border-color: rgba(255, 255, 255, 0.32);
+	background: rgba(255, 255, 255, 0.18);
+	transform: translateY(-1px);
+}
+
+.video:hover:active {
+	background: rgba(255, 255, 255, 0.24);
+	transform: translateY(0);
+}
+
+.video .icon {
+	margin-top: 3px;
+}
+
+.video .label {
+	margin-top: 4px;
+	font-size: 68%;
+	font-weight: 700;
+	color: rgba(248, 250, 252, 0.92);
+}
+
 .icon {
 	display: flex;
 	align-items: center;

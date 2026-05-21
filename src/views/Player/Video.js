@@ -11,6 +11,7 @@ export default function Video({
 	name,
 	path,
 	renewUrl,
+	renewing,
 	color,
 	group,
 	children,
@@ -20,15 +21,23 @@ export default function Video({
 	...props
 }) {
 	const ref = useRef();
+	const { style, className, ...videoProps } = props;
 	const [playerRef, setPlayerRef] = useState(null);
 	const [errorCount, setErrorCount] = useState(0);
+	const [recovering, setRecovering] = useState(false);
 
 	const onError = () => {
 		if (errorCount < 3) {
 			console.log("Video error, renewing URL...");
+			setRecovering(true);
 			renewUrl();
 			setErrorCount((count) => count + 1);
 		}
+	};
+
+	const clearRecovery = () => {
+		setRecovering(false);
+		setErrorCount(0);
 	};
 
 	useEffect(() => {
@@ -43,12 +52,20 @@ export default function Video({
 		});
 	}, [playerRef]);
 	return (
-		<>
-			<video ref={ref} {...props} playsInline onError={onError}>
+		<div className={styles.root} style={style}>
+			<video
+				ref={ref}
+				className={className ? `${styles.video} ${className}` : styles.video}
+				{...videoProps}
+				playsInline
+				onError={onError}
+				onLoadedMetadata={clearRecovery}
+				onPlaying={clearRecovery}
+			>
 				{children}
 			</video>
 			{elements}
-			<div className={styles.root}>
+			<div className={styles.controls}>
 				{playerRef && (
 					<Controls
 						playerRef={playerRef}
@@ -59,6 +76,8 @@ export default function Video({
 						show={show}
 						sessionName={name}
 						groupName={group}
+						renewing={renewing || recovering}
+						variant="video"
 					/>
 				)}
 				{playerRef && (
@@ -70,6 +89,6 @@ export default function Video({
 					/>
 				)}
 			</div>
-		</>
+		</div>
 	);
 }
