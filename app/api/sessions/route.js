@@ -6,7 +6,12 @@ import {
 	JSON_HEADERS,
 	NO_CACHE_HEADERS,
 } from "@util/api";
-import { getSProxyUrl, getSessions, sortSessions } from "@util/sessionFeed";
+import {
+	getSProxyUrl,
+	getSessions,
+	getTranscriptProxyUrl,
+	sortSessions,
+} from "@util/sessionFeed";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -64,13 +69,30 @@ export async function GET(request) {
 		sessions = sortSessions(sessions).slice(index, index + count);
 		const baseUrl =
 			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
+		console.log("[Sessions API] Building response", {
+			group: group || null,
+			tag: tag || null,
+			date: date || null,
+			year: year || null,
+			query: query || null,
+			count,
+			index,
+			sessionCount: sessions.length,
+			baseUrl,
+		});
 
-		const formattedSessions = sessions.map((session) => {
-			let transcriptPath = session.subtitles?.path || session.transcriptPath;
-			if (!transcriptPath && session.transcription) {
-				transcriptPath = `wasabi/${session.group}/${session.year}/${session.date} ${session.name}.txt`;
-			}
-
+		const formattedSessions = await Promise.all(sessions.map(async (session) => {
+			const transcriptionUrl = await getTranscriptProxyUrl(session, baseUrl);
+			console.log("[Sessions API] Formatted session transcript", {
+				id: session.id,
+				group: session.group,
+				year: session.year,
+				name: session.name,
+				transcription: !!session.transcription,
+				hasTranscriptPath: !!session.transcriptPath,
+				hasSubtitlesPath: !!session.subtitles?.path,
+				hasTranscriptionUrl: !!transcriptionUrl,
+			});
 			return {
 				id: session.id,
 				group: session.group,
@@ -84,11 +106,9 @@ export async function GET(request) {
 					session.image && session.image.path
 						? getSProxyUrl(session.image.path, baseUrl)
 						: null,
-				transcriptionUrl: transcriptPath
-					? getSProxyUrl(transcriptPath, baseUrl)
-					: null,
+				transcriptionUrl,
 			};
-		});
+		}));
 
 		return new Response(JSON.stringify(formattedSessions), {
 			status: 200,

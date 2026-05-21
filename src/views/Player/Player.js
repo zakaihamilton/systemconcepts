@@ -357,15 +357,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 			) : isTranscript ? (
 				elements
 			) : null}
-			{show && (isSessionLoading || isRecoveringMedia) && (
-				<div className={styles.loadingPanel} role="status" aria-live="polite">
-					<Progress />
-					<div className={styles.loadingText}>
-						<strong>{loadingTitle}</strong>
-						<span>{loadingMessage}</span>
-					</div>
-				</div>
-			)}
 			{speedToolbar === "bottom" && <SpeedSlider />}
 		</div>
 	);

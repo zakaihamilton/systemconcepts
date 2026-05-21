@@ -45,10 +45,6 @@ async function getSessionTranscriptPath(s3Key) {
 		if (!session) return null;
 		return {
 			path: session.transcriptPath || session.subtitles?.path || null,
-			hasTranscription: !!session.transcription,
-			group,
-			year,
-			id,
 		};
 	} catch (err) {
 		console.warn("[Player] Failed to load transcript metadata:", err);
@@ -119,18 +115,6 @@ export async function GET(request) {
 				transcriptionUrl = await getSignedUrl(wasabiClient, txtCommand, {
 					expiresIn: 10800,
 				});
-			} else if (sessionTranscript?.hasTranscription) {
-				const zipPath = `${sessionTranscript.group}/${sessionTranscript.year}.zip`;
-				const zipExists = await awsMetadataInfo({
-					path: "sessions/" + zipPath,
-				});
-				if (zipExists) {
-					transcriptionUrl =
-						"/api/subtitle?path=" +
-						encodeURIComponent("sessions/" + zipPath) +
-						"&file=" +
-						encodeURIComponent(sessionTranscript.id + ".txt");
-				}
 			}
 		}
 

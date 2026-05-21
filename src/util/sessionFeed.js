@@ -1,4 +1,4 @@
-import { downloadData } from "@util/aws";
+import { downloadData, metadataInfo as awsMetadataInfo } from "@util/aws";
 import pLimit from "@util/p-limit";
 import pako from "pako";
 
@@ -108,4 +108,114 @@ export function getSProxyUrl(path, baseUrl) {
 	const b64 = Buffer.from(cleanPath).toString("base64url");
 	const ext = path.split(".").pop() || "bin";
 	return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
+}
+
+function getMediaPath(session) {
+	if (session.audio?.path) return session.audio.path;
+	if (session.video?.path) return session.video.path;
+
+	const resolutions = session.resolutions || {};
+	for (const resolution of Object.keys(resolutions)) {
+		if (resolutions[resolution]?.path) {
+			return resolutions[resolution].path;
+		}
+	}
+
+	return null;
+}
+
+function getStandaloneTranscriptPath(session) {
+	const expectedName = `${session.id}.txt`;
+	const transcriptName = (session.files || []).find(
+		(file) => file === expectedName,
+	);
+	if (!transcriptName) return null;
+
+	const mediaPath = getMediaPath(session);
+	if (mediaPath?.includes("/")) {
+		const folder = mediaPath.substring(0, mediaPath.lastIndexOf("/"));
+		return `${folder}/${transcriptName}`;
+	}
+
+	return `wasabi/${session.group}/${session.year}/${transcriptName}`;
+}
+
+function getInferredTranscriptPath(session) {
+	const mediaPath = getMediaPath(session);
+	if (!mediaPath) return null;
+
+	const dotIndex = mediaPath.lastIndexOf(".");
+	if (dotIndex === -1) return null;
+
+	return `${mediaPath.substring(0, dotIndex)}.txt`;
+}
+
+async function getExistingInferredTranscriptPath(session) {
+	const logContext = {
+		id: session?.id,
+		group: session?.group,
+		year: session?.year,
+		transcription: !!session?.transcription,
+	};
+	if (!session.transcription) {
+		console.log("[Sessions API] Skipping inferred transcript lookup", {
+			...logContext,
+			reason: "session.transcription is false",
+		});
+		return null;
+	}
+
+	const transcriptPath = getInferredTranscriptPath(session);
+	if (!transcriptPath) {
+		console.log("[Sessions API] Skipping inferred transcript lookup", {
+			...logContext,
+			reason: "no media path",
+			audioPath: session.audio?.path || null,
+			videoPath: session.video?.path || null,
+			resolutionKeys: Object.keys(session.resolutions || {}),
+			files: session.files || [],
+		});
+		return null;
+	}
+
+	const cleanPath = transcriptPath
+		.replace(/^\//, "")
+		.replace(/^sessions\//, "")
+		.replace(/^wasabi\//, "");
+	const metadataPath = "sessions/" + cleanPath;
+	const exists = await awsMetadataInfo({ path: metadataPath });
+	console.log("[Sessions API] Checked inferred transcript", {
+		...logContext,
+		mediaPath: getMediaPath(session),
+		transcriptPath,
+		wasabiKey: cleanPath,
+		metadataPath,
+		exists: !!exists,
+	});
+	return exists ? metadataPath : null;
+}
+
+export async function getTranscriptProxyUrl(session, baseUrl) {
+	if (!session) return null;
+
+	const explicitTranscriptPath = session.subtitles?.path || session.transcriptPath;
+	const listedTranscriptPath = getStandaloneTranscriptPath(session);
+	const transcriptPath =
+		explicitTranscriptPath ||
+		listedTranscriptPath ||
+		(await getExistingInferredTranscriptPath(session));
+	console.log("[Sessions API] Resolved transcript URL", {
+		id: session.id,
+		group: session.group,
+		year: session.year,
+		explicitTranscriptPath: explicitTranscriptPath || null,
+		listedTranscriptPath: listedTranscriptPath || null,
+		resolvedTranscriptPath: transcriptPath || null,
+		hasUrl: !!transcriptPath,
+	});
+	if (transcriptPath) {
+		return getSProxyUrl(transcriptPath, baseUrl);
+	}
+
+	return null;
 }

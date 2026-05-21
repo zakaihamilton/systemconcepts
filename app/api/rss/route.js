@@ -1,5 +1,10 @@
 import { authenticateTokenRequest, getPositiveInt } from "@util/api";
-import { getSProxyUrl, getSessions, sortSessions } from "@util/sessionFeed";
+import {
+	getSProxyUrl,
+	getSessions,
+	getTranscriptProxyUrl,
+	sortSessions,
+} from "@util/sessionFeed";
 import { formatDuration } from "@util/string";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -88,13 +93,7 @@ export async function GET(request) {
 				let transcriptType = transcriptPath?.endsWith(".vtt")
 					? "text/vtt"
 					: "text/plain";
-
-				if (!transcriptPath && session.transcription) {
-					transcriptPath = `wasabi/${session.group}/${session.year}/${session.date} ${session.name}.txt`;
-					transcriptType = "text/plain";
-				}
-
-				const transcriptUrl = getSProxyUrl(transcriptPath);
+				const transcriptUrl = await getTranscriptProxyUrl(session, baseUrl);
 				if (transcriptUrl) {
 					transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
 				}
