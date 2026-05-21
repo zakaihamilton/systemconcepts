@@ -32,40 +32,40 @@ export default function Theme({ children }) {
 			createTheme({
 				typography: {
 					fontFamily:
-						'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+						'"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
 					fontSize: parseInt(fontSize, 10),
 					button: {
 						textTransform: "none", // Modern look: no uppercase buttons
 						fontWeight: 600,
 					},
-					h1: { fontWeight: 700 },
-					h2: { fontWeight: 700 },
-					h3: { fontWeight: 600 },
-					h4: { fontWeight: 600 },
-					h5: { fontWeight: 600 },
+					h1: { fontWeight: 700, letterSpacing: "-0.02em" },
+					h2: { fontWeight: 700, letterSpacing: "-0.015em" },
+					h3: { fontWeight: 600, letterSpacing: "-0.01em" },
+					h4: { fontWeight: 600, letterSpacing: "-0.01em" },
+					h5: { fontWeight: 600, letterSpacing: "-0.005em" },
 					h6: { fontWeight: 600 },
 				},
 				palette: {
 					mode: darkMode.value ? "dark" : "light",
 					primary: {
-						main: "#3b82f6", // Blue 500
-						light: "#60a5fa", // Blue 400
-						dark: "#2563eb", // Blue 600
+						main: "#4f46e5", // Indigo 600
+						light: "#6366f1", // Indigo 500
+						dark: "#3730a3", // Indigo 800
 						contrastText: "#ffffff",
 					},
 					secondary: {
-						main: "#64748b", // Slate 500
-						light: "#94a3b8", // Slate 400
-						dark: "#475569", // Slate 600
+						main: "#71717a", // Zinc 500
+						light: "#a1a1aa", // Zinc 400
+						dark: "#52525b", // Zinc 600
 						contrastText: "#ffffff",
 					},
 					background: {
-						default: darkMode.value ? "#0f172a" : "#f8fafc",
-						paper: darkMode.value ? "#1e293b" : "#ffffff",
+						default: darkMode.value ? "#09090b" : "#fafafa",
+						paper: darkMode.value ? "#18181b" : "#ffffff",
 					},
 					text: {
-						primary: darkMode.value ? "#f1f5f9" : "#1e293b",
-						secondary: darkMode.value ? "#94a3b8" : "#64748b",
+						primary: darkMode.value ? "#f4f4f5" : "#18181b",
+						secondary: darkMode.value ? "#a1a1aa" : "#71717a",
 					},
 				},
 				components: {
@@ -74,14 +74,19 @@ export default function Theme({ children }) {
 							root: {
 								borderRadius: "var(--radius-md)",
 								boxShadow: "none",
+								transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
 								"&:hover": {
-									boxShadow: "none",
+									boxShadow: "var(--shadow-sm)",
+									transform: "translateY(-1px)",
+								},
+								"&:active": {
+									transform: "translateY(0px) scale(0.98)",
 								},
 							},
 							contained: {
 								boxShadow: "none",
 								"&:hover": {
-									boxShadow: "none",
+									boxShadow: "var(--shadow-md)",
 								},
 							},
 						},
@@ -93,9 +98,11 @@ export default function Theme({ children }) {
 							},
 							elevation1: {
 								boxShadow: "var(--shadow-sm)",
+								border: "1px solid var(--border-color)",
 							},
 							elevation2: {
 								boxShadow: "var(--shadow-md)",
+								border: "1px solid var(--border-color)",
 							},
 						},
 					},
@@ -104,8 +111,10 @@ export default function Theme({ children }) {
 							root: {
 								backgroundColor: "var(--app-bar-background)",
 								color: "var(--text-primary)",
-								boxShadow: "var(--shadow-sm)",
+								boxShadow: "none",
 								backgroundImage: "none",
+								backdropFilter: "blur(12px)",
+								borderBottom: "1px solid var(--border-color)",
 							},
 						},
 					},

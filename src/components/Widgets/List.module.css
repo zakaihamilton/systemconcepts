@@ -8,30 +8,55 @@
 .item {
 	cursor: pointer;
 	user-select: none;
-	border-radius: 8px;
+	border-radius: var(--radius-sm);
 	overflow: hidden;
 	margin: 0 !important;
 
 	:global(.MuiListItemButton-root) {
-		border-radius: 8px;
-		padding: 0.6rem 1rem;
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		border-radius: var(--radius-sm);
+		padding: 0.65rem 1rem;
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		color: var(--text-color);
 		opacity: 0.8;
+		position: relative;
 
 		&:hover {
 			background-color: var(--hover-color);
 			opacity: 1;
+			transform: translateX(4px);
+		}
+
+		:global([dir="rtl"]) &:hover {
+			transform: translateX(-4px);
 		}
 
 		&.Mui-selected {
-			background-color: rgba(var(--primary-color-rgb), 0.12) !important;
+			background-color: rgba(var(--primary-color-rgb), 0.08) !important;
 			color: var(--primary-color);
 			opacity: 1;
 			font-weight: 600;
 
+			&::before {
+				content: "";
+				position: absolute;
+				left: 0;
+				top: 20%;
+				height: 60%;
+				width: 3px;
+				background-color: var(--primary-color);
+				border-radius: 0 4px 4px 0;
+				transition: all 0.25s ease;
+			}
+
+			:global([dir="rtl"]) &::before {
+				left: auto;
+				right: 0;
+				border-radius: 4px 0 0 4px;
+			}
+
 			&:hover {
-				background-color: rgba(var(--primary-color-rgb), 0.18) !important;
+				background-color: rgba(var(--primary-color-rgb), 0.12) !important;
+				transform: translateX(0px); /* don't shift when already selected */
 			}
 
 			.iconContainer {
@@ -43,14 +68,15 @@
 }
 
 .iconContainer {
-	min-width: 40px !important;
+	min-width: 36px !important;
 	color: var(--text-color);
 	opacity: 0.7;
 	display: flex;
 	align-items: center;
+	transition: color 0.25s ease, opacity 0.25s ease;
 
 	svg {
-		font-size: 1.25rem;
+		font-size: 1.2rem;
 	}
 }
 
@@ -58,14 +84,15 @@
 	margin: 0 !important;
 
 	:global(.MuiListItemText-primary) {
-		font-size: 0.95rem;
+		font-size: 0.92rem;
 		font-weight: 500;
 		letter-spacing: -0.01em;
 	}
 
 	:global(.MuiListItemText-secondary) {
-		font-size: 0.8rem;
+		font-size: 0.78rem;
 		opacity: 0.6;
+		margin-top: 2px;
 	}
 
 	[dir="rtl"] & {
@@ -76,14 +103,25 @@
 .expandIcon {
 	color: var(--text-color);
 	opacity: 0.5;
-	font-size: 1.25rem !important;
-	margin-right: 0.5rem;
+	font-size: 1.15rem !important;
+	margin-right: 0.4rem;
+	transition: transform 0.25s ease;
+
+	[dir="rtl"] & {
+		margin-right: 0;
+		margin-left: 0.4rem;
+	}
 }
 
 .expandPlaceholder {
 	display: inline-block;
-	width: 1.25rem;
-	margin-right: 0.5rem;
+	width: 1.15rem;
+	margin-right: 0.4rem;
+
+	[dir="rtl"] & {
+		margin-right: 0;
+		margin-left: 0.4rem;
+	}
 }
 
 .reverse {
