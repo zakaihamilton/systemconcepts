@@ -1,20 +1,20 @@
 .root {
-    position: absolute !important;
-    padding: 0.5em;
+	position: absolute !important;
+	padding: 0.5em;
 
-    [dir=rtl] & {
-        left: 2.5em;
-        bottom: 2.5em;
-    }
+	[dir="rtl"] & {
+		left: 2.5em;
+		bottom: 2.5em;
+	}
 
-    [dir=ltr] & {
-        right: 2.5em;
-        bottom: 2.5em;
-    }
+	[dir="ltr"] & {
+		right: 2.5em;
+		bottom: 2.5em;
+	}
 
-    display: none !important;
+	display: none !important;
 }
 
 .visible {
-    display: flex !important;
+	display: flex !important;
 }

@@ -1,16 +1,16 @@
-import storage from "@util/storage";
-import { makePath, isBinaryFile } from "@util/path";
 import { stringToBinary } from "@util/binary";
+import { isBinaryFile, makePath } from "@util/path";
+import storage from "@util/storage";
+import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import {
-	SYNC_BATCH_SIZE,
 	FILES_MANIFEST,
 	FILES_MANIFEST_GZ,
 	LOCAL_SYNC_PATH,
 	SYNC_BASE_PATH,
+	SYNC_BATCH_SIZE,
 } from "../constants";
-import { addSyncLog } from "../logs";
-import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import { getFileInfo } from "../hash";
+import { addSyncLog } from "../logs";
 import { applyManifestUpdates } from "../manifest";
 import { lockMutex } from "../mutex";
 import { SyncActiveStore } from "../syncState";

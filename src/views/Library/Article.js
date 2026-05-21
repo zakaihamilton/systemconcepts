@@ -1,51 +1,49 @@
-import React, {
-	useState,
-	useMemo,
-	useCallback,
-	useEffect,
-	useRef,
-} from "react";
-import { useDeviceType } from "@util/styles";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress";
-import DownloadIcon from "@mui/icons-material/Download";
-import EditIcon from "@mui/icons-material/Edit";
-import CodeIcon from "@mui/icons-material/Code";
-import CodeOffIcon from "@mui/icons-material/CodeOff";
-import ArticleIcon from "@mui/icons-material/Article";
-import PrintIcon from "@mui/icons-material/Print";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useSearch } from "@components/Search";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArticleIcon from "@mui/icons-material/Article";
+import CodeIcon from "@mui/icons-material/Code";
+import CodeOffIcon from "@mui/icons-material/CodeOff";
 import DataArrayIcon from "@mui/icons-material/DataArray";
-import { useSwipe } from "@util/touch";
-import { LibraryTagKeys } from "./Icons";
-import { exportData } from "@util/importExport";
-import { useToolbar, registerToolbar } from "@components/Toolbar";
-import { useLocalStorage } from "@util/hooks";
-import styles from "./Article.module.css";
-
-import Player from "./Article/Player";
-import JumpDialog from "./Article/JumpDialog";
-import ArticleTermsDialog from "./Article/ArticleTermsDialog";
-import { scanForTerms, replaceAbbreviations } from "./Article/GlossaryUtils";
+import DownloadIcon from "@mui/icons-material/Download";
+import EditIcon from "@mui/icons-material/Edit";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { LibraryStore } from "./Store";
-
+import PrintIcon from "@mui/icons-material/Print";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import { useLocalStorage } from "@util/hooks";
+import { exportData } from "@util/importExport";
+import { roleAuth } from "@util/roles";
+import { useDeviceType } from "@util/styles";
+import { useSwipe } from "@util/touch";
+import { useTranslations } from "@util/translations";
+import Cookies from "js-cookie";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import ArticleTermsDialog from "./Article/ArticleTermsDialog";
+import Content from "./Article/Content";
+import { replaceAbbreviations, scanForTerms } from "./Article/GlossaryUtils";
+import Header from "./Article/Header";
+import JumpDialog from "./Article/JumpDialog";
+import PageIndicator from "./Article/PageIndicator";
+import Player from "./Article/Player";
+import ScrollToTop from "./Article/ScrollToTop";
 import { useArticleScroll } from "./Article/useArticleScroll";
 import { useArticleSearch } from "./Article/useArticleSearch";
-import Header from "./Article/Header";
-import PageIndicator from "./Article/PageIndicator";
-import ScrollToTop from "./Article/ScrollToTop";
-import Content from "./Article/Content";
-import { useTranslations } from "@util/translations";
-import { useSearch } from "@components/Search";
-import Cookies from "js-cookie";
-import { roleAuth } from "@util/roles";
+import styles from "./Article.module.css";
+import { LibraryTagKeys } from "./Icons";
+import { LibraryStore } from "./Store";
 
 registerToolbar("Article");
 

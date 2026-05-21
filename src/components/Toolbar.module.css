@@ -1,42 +1,42 @@
 .toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    height: 100%;
-    user-select: none;
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	height: 100%;
+	user-select: none;
 }
 
 .menuButton {
-    border-radius: 8px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--text-color);
-    opacity: 0.75;
+	border-radius: 8px;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-color);
+	opacity: 0.75;
 
-    &:hover {
-        background-color: var(--hover-background);
-        opacity: 1;
-    }
+	&:hover {
+		background-color: var(--hover-background);
+		opacity: 1;
+	}
 
-    &:active {
-        transform: scale(0.95);
-    }
+	&:active {
+		transform: scale(0.95);
+	}
 
-    svg {
-        font-size: 1.25rem;
-    }
+	svg {
+		font-size: 1.25rem;
+	}
 }
 
 .divider {
-    height: 1.5rem !important;
-    align-self: center;
-    margin: 0 0.5rem !important;
-    opacity: 0.2;
+	height: 1.5rem !important;
+	align-self: center;
+	margin: 0 0.5rem !important;
+	opacity: 0.2;
 
-    @media (max-width: 768px) {
-        display: none;
-    }
+	@media (max-width: 768px) {
+		display: none;
+	}
 }
 
 .hidden {
-    display: none;
+	display: none;
 }

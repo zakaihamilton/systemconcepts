@@ -1,0 +1,19 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	color: var(--text-color);
+}
+
+.playerIcon {
+	box-shadow: inset 0 0 2px 2px var(--playing-color) !important;
+	border-radius: 8px !important;
+	background-color: var(--playing-bg) !important;
+}
+
+.playingSessionName {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}

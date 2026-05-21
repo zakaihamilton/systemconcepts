@@ -1,69 +1,68 @@
 .root {
-    background-color: var(--side-bar-background);
-    grid-column: 1 / 2;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--border-color);
-
+	background-color: var(--side-bar-background);
+	grid-column: 1 / 2;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	border-right: 1px solid var(--border-color);
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    background-color: transparent;
-    padding: 0.5rem 0;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	background-color: transparent;
+	padding: 0.5rem 0;
 }
 
 .popupDrawer {
-    :global(.MuiPaper-root) {
-        width: 35rem;
-        background-color: var(--side-bar-background);
-        border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
-        box-shadow: var(--shadow-lg);
-    }
+	:global(.MuiPaper-root) {
+		width: 35rem;
+		background-color: var(--side-bar-background);
+		border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+		box-shadow: var(--shadow-lg);
+	}
 }
 
 .mobileDrawer {
-    :global(.MuiPaper-root) {
-        width: 80vw;
-        max-width: 300px;
-        background-color: var(--side-bar-background);
-    }
+	:global(.MuiPaper-root) {
+		width: 80vw;
+		max-width: 300px;
+		background-color: var(--side-bar-background);
+	}
 }
 
 .rtl {
-    border-right: none;
-    border-left: 1px solid var(--border-color);
+	border-right: none;
+	border-left: 1px solid var(--border-color);
 
-    :global(.MuiPaper-root) {
-        border-radius: 16px 0 0 16px;
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
-    }
+	:global(.MuiPaper-root) {
+		border-radius: 16px 0 0 16px;
+		box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+	}
 }
 
 .librarySection {
-    padding: 0 0.5rem;
+	padding: 0 0.5rem;
 }
 
 .iconContainer {
-    min-width: 40px !important;
-    color: var(--text-color);
-    opacity: 0.7;
-    display: flex;
-    align-items: center;
+	min-width: 40px !important;
+	color: var(--text-color);
+	opacity: 0.7;
+	display: flex;
+	align-items: center;
 
-    svg {
-        font-size: 1.25rem;
-    }
+	svg {
+		font-size: 1.25rem;
+	}
 }
 
 .expandIcon {
-    color: var(--text-color);
-    opacity: 0.5;
-    font-size: 1.25rem !important;
-    margin-right: 0.5rem;
+	color: var(--text-color);
+	opacity: 0.5;
+	font-size: 1.25rem !important;
+	margin-right: 0.5rem;
 }

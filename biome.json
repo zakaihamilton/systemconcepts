@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
 	"files": {
 		"includes": [
 			"**",
@@ -9,9 +9,6 @@
 			"!**/.next/**",
 			"!**/node_modules/**"
 		]
-	},
-	"organizeImports": {
-		"enabled": true
 	},
 	"formatter": {
 		"enabled": true,

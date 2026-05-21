@@ -1,17 +1,27 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import styles from "./Editor.module.css";
 
 export default function EditorWidget({ state }) {
-    const [value, setValue] = state;
-    const ref = useRef();
-    useEffect(() => {
-        ref.current.focus();
-    }, []);
+	const [value, setValue] = state;
+	const ref = useRef();
+	useEffect(() => {
+		ref.current.focus();
+	}, []);
 
-    const onChange = useCallback(event => {
-        const { value } = event.target;
-        setValue(value);
-    }, [setValue]);
+	const onChange = useCallback(
+		(event) => {
+			const { value } = event.target;
+			setValue(value);
+		},
+		[setValue],
+	);
 
-    return <textarea ref={ref} className={styles.root} value={value} onChange={onChange} />;
+	return (
+		<textarea
+			ref={ref}
+			className={styles.root}
+			value={value}
+			onChange={onChange}
+		/>
+	);
 }

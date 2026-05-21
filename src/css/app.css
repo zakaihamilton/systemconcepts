@@ -1,32 +1,73 @@
 @import "./colors.css";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 ::cue,
 video::cue,
 video::-webkit-media-text-track-display,
 video::-webkit-media-text-track-container {
-  background-color: var(--cue-background) !important;
-  background: var(--cue-background) !important;
-  background-image: none !important;
-  color: var(--cue-color) !important;
-  opacity: 1 !important;
-  text-shadow: none !important;
-  box-shadow: none !important;
-  font-size: 1em;
-  line-height: 1.3;
+	background-color: var(--cue-background) !important;
+	background: var(--cue-background) !important;
+	background-image: none !important;
+	color: var(--cue-color) !important;
+	opacity: 1 !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+	font-size: 1em;
+	line-height: 1.3;
 }
 
 body {
-  padding: 0px;
-  margin: 0px;
-  height: 100%;
-  font-family: system-ui, sans-serif;
-  overflow: hidden;
+	padding: 0px;
+	margin: 0px;
+	height: 100%;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	overflow: hidden;
+	color: var(--text-color);
+	background-color: var(--main-background);
 }
 
 html {
-  padding: 0px;
-  margin: 0px;
-  height: 100%;
-  font-family: system-ui, sans-serif;
-  overflow: hidden;
+	padding: 0px;
+	margin: 0px;
+	height: 100%;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	overflow: hidden;
+}
+
+/* Sleek modern custom scrollbars */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(var(--primary-color-rgb), 0.15) transparent;
+}
+
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba(var(--primary-color-rgb), 0.15);
+	border-radius: 9999px;
+	transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(var(--primary-color-rgb), 0.35);
+}
+
+@media print {
+	body.research-printing > *:not(#print-root) {
+		display: none !important;
+	}
+
+	html:has(body.research-printing),
+	body.research-printing {
+		visibility: visible !important;
+		height: auto !important;
+		overflow: visible !important;
+	}
 }

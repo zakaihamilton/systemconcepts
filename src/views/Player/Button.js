@@ -1,24 +1,30 @@
-import styles from "./Button.module.css";
 import clsx from "clsx";
+import styles from "./Button.module.css";
 
-export default function Button({ name, icon, active, subHeading, onClick, label, ...props }) {
-    // Remove active from props to prevent it from being passed to DOM
-    const { active: _unused, ...buttonProps } = { active, ...props };  
+export default function Button({
+	name,
+	icon,
+	active,
+	subHeading,
+	onClick,
+	label,
+	...props
+}) {
+	// Remove active from props to prevent it from being passed to DOM
+	const { active: _unused, ...buttonProps } = { active, ...props };
 
-    return <button
-        className={clsx(styles.root, active && styles.active)}
-        onClick={onClick}
-        aria-label={label}
-        {...buttonProps}
-    >
-        <div className={styles.icon} aria-hidden="true">
-            {icon}
-        </div>
-        <div className={styles.label}>
-            {name}
-        </div>
-        {subHeading && <div className={styles.subHeading}>
-            {subHeading}
-        </div>}
-    </button>;
+	return (
+		<button
+			className={clsx(styles.root, active && styles.active)}
+			onClick={onClick}
+			aria-label={label}
+			{...buttonProps}
+		>
+			<div className={styles.icon} aria-hidden="true">
+				{icon}
+			</div>
+			<div className={styles.label}>{name}</div>
+			{subHeading && <div className={styles.subHeading}>{subHeading}</div>}
+		</button>
+	);
 }

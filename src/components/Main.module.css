@@ -1,42 +1,44 @@
 .root {
-    display: grid;
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
-    height: 100dvh;
-    grid-template-rows: 4em auto;
-    grid-template-columns: 0em 1fr;
-    transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	display: grid;
+	height: 100vh;
+	height: calc(var(--vh, 1vh) * 100);
+	height: 100dvh;
+	grid-template-rows: 4em auto;
+	grid-template-columns: 0em 1fr;
+	transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: var(--text-color);
-    background-color: var(--main-background);
+	font-family:
+		system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		"Helvetica Neue", Arial, sans-serif;
+	color: var(--text-color);
+	background-color: var(--main-background);
 }
 
 .rtl {
-    direction: rtl;
+	direction: rtl;
 }
 
 .root.sidebar {
-    grid-template-columns: 18rem 1fr;
+	grid-template-columns: 18rem 1fr;
 }
 
 .root.sidebar.libraryExpanded {
-    grid-template-columns: 25rem 1fr;
+	grid-template-columns: 25rem 1fr;
 }
 
 .root.mobile {
-    grid-template-columns: auto;
+	grid-template-columns: auto;
 }
 
 .main {
-    background: var(--main-background);
-    grid-column: 2 / 3;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    flex: 1;
+	background: var(--main-background);
+	grid-column: 2 / 3;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	flex: 1;
 }
 
 .main.mobile {
-    grid-column: 1 / 3;
+	grid-column: 1 / 3;
 }

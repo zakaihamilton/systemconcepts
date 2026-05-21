@@ -1,4 +1,3 @@
-import fs from "fs";
 import {
 	CopyObjectCommand,
 	DeleteObjectCommand,
@@ -10,6 +9,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { lockMutex } from "@sync/mutex";
 import { isBinaryFile } from "@util/path";
+import fs from "fs";
 import { getSafeError } from "./safeError";
 
 let s3Client = null;

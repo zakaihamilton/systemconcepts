@@ -1,183 +1,183 @@
 .root {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: sticky;
-    top: 0px;
-    z-index: 100;
-    user-select: none;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	position: sticky;
+	top: 0px;
+	z-index: 100;
+	user-select: none;
 }
 
 .root.bar {
-    background: var(--app-bar-background);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
-    padding: 0 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	background: var(--app-bar-background-gradient);
+	backdrop-filter: blur(16px);
+	border-bottom: 1px solid var(--border-color);
+	padding: 0 0.75rem;
+	box-shadow: var(--shadow-sm);
 }
 
 .root.border {
-    border-bottom: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .row {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    height: 3.5rem;
+	display: flex;
+	align-items: center;
+	flex: 1;
+	height: 3.5rem;
 }
 
 .headerInfo {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	flex: 1;
+	min-width: 0;
 
-    @media (min-width: 601px) {
-        justify-content: center;
-        text-align: center;
-    }
+	@media (min-width: 601px) {
+		justify-content: center;
+		text-align: center;
+	}
 }
 
 .breadcrumbs {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    color: var(--text-color);
-    overflow: hidden;
-    gap: 0.25rem;
-    padding: 0 0.5rem;
-    min-width: 0;
+	display: flex;
+	align-items: center;
+	flex: 1;
+	color: var(--text-color);
+	overflow: hidden;
+	gap: 0.25rem;
+	padding: 0 0.5rem;
+	min-width: 0;
 }
 
 .itemWrapper {
-    min-width: 2em;
-    display: flex;
-    overflow: hidden;
-    flex: 0 1 auto;
-    max-width: fit-content;
+	min-width: 2em;
+	display: flex;
+	overflow: hidden;
+	flex: 0 1 auto;
+	max-width: fit-content;
 
-    &.hasLabel {
-        @media (min-width: 601px) {
-            min-width: 5rem;
-        }
-    }
+	&.hasLabel {
+		@media (min-width: 601px) {
+			min-width: 5rem;
+		}
+	}
 }
 
 .item {
-    display: flex;
-    align-items: center;
-    height: 2.25rem;
-    padding: 0 0.5rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-color);
-    text-decoration: none !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    white-space: nowrap;
-    cursor: pointer;
-    opacity: 0.75;
-    min-width: 0;
+	display: flex;
+	align-items: center;
+	height: 2.25rem;
+	padding: 0 0.5rem;
+	border-radius: 6px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: var(--text-color);
+	text-decoration: none !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	white-space: nowrap;
+	cursor: pointer;
+	opacity: 0.75;
+	min-width: 0;
 
-    @media (min-width: 601px) {
-        justify-content: flex-start;
-    }
+	@media (min-width: 601px) {
+		justify-content: flex-start;
+	}
 
-    &:hover {
-        background-color: var(--hover-background);
-        opacity: 1;
-    }
+	&:hover {
+		background-color: var(--hover-background);
+		opacity: 1;
+	}
 
-    &:active {
-        transform: scale(0.98);
-    }
+	&:active {
+		transform: scale(0.98);
+	}
 }
 
 .itemContent {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100%;
-    min-width: 0;
-    width: 100%;
-    flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	height: 100%;
+	min-width: 0;
+	width: 100%;
+	flex: 1;
 }
 
 .item:last-child {
-    opacity: 1;
-    font-weight: 600;
+	opacity: 1;
+	font-weight: 600;
 
-    &:hover {
-        background-color: transparent;
-    }
+	&:hover {
+		background-color: transparent;
+	}
 }
 
 .static {
-    cursor: default;
+	cursor: default;
 }
 
 .name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
 }
 
 .column {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-    flex: 1;
-    overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-width: 0;
+	flex: 1;
+	overflow: hidden;
 
-    @media (min-width: 601px) {
-        align-items: flex-start;
-        min-width: 4rem;
-    }
+	@media (min-width: 601px) {
+		align-items: flex-start;
+		min-width: 4rem;
+	}
 }
 
 .description {
-    font-size: 0.75rem;
-    opacity: 0.7;
-    line-height: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	font-size: 0.75rem;
+	opacity: 0.7;
+	line-height: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.35rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 0.35rem;
 
-    [dir=rtl] & {
-        margin-right: 0;
-        margin-left: 0.35rem;
-    }
+	[dir="rtl"] & {
+		margin-right: 0;
+		margin-left: 0.35rem;
+	}
 
-    svg {
-        font-size: 1.25rem;
-    }
+	svg {
+		font-size: 1.25rem;
+	}
 }
 
 .iconButton {
-    padding: 6px !important;
-    color: inherit !important;
+	padding: 6px !important;
+	color: inherit !important;
 }
 
 .separator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-color);
-    opacity: 0.3;
-    pointer-events: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-color);
+	opacity: 0.3;
+	pointer-events: none;
 
-    svg {
-        font-size: 1.1rem;
-    }
+	svg {
+		font-size: 1.1rem;
+	}
 }

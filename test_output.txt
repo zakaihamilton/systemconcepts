@@ -1,0 +1,9 @@
+PASS src/views/FontSizes/FontSizes.test.js
+  FontSizes View
+    ✓ renders font sizes table (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        0.706 s
+Ran all test suites matching /src\/views\/FontSizes\/FontSizes.test.js/i.

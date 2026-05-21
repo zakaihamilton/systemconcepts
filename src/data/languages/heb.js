@@ -1,2005 +1,2105 @@
 export default {
-    "id": "heb",
-    "name": "עברית",
-    "direction": "rtl",
-    "code": "he",
-    "locale": "he-IL",
-    "translations": [
-        {
-            "id": "NO_TAGS_FOUND",
-            "value": "לא נמצאו תגיות."
-        },
-        {
-            "id": "INDEXING_FAILED",
-            "value": "יצירת אינדקס נכשל"
-        },
-        {
-            "id": "LOADING_TAGS",
-            "value": "טוען תגיות..."
-        },
-        {
-            "id": "APP_NAME",
-            "value": "עקרונות המערכת"
-        },
-        {
-            "id": "APPS",
-            "value": "אפליקציות"
-        },
-        {
-            "id": "ALL",
-            "value": "הכל"
-        },
-        {
-            "id": "USERS",
-            "value": "משתמשים"
-        },
-        {
-            "id": "DAY",
-            "value": "יום"
-        },
-        {
-            "id": "ROLES",
-            "value": "תפקידים"
-        },
-        {
-            "id": "LANGUAGES",
-            "value": "שפות"
-        },
-        {
-            "id": "FONTSIZES",
-            "value": "גודל גופנים"
-        },
-        {
-            "id": "OK",
-            "value": "אישור"
-        },
-        {
-            "id": "NONE",
-            "value": "ללא"
-        },
-        {
-            "id": "SETTINGS",
-            "value": "הגדרות"
-        },
-        {
-            "id": "TRANSLATIONS",
-            "value": "תרגומים"
-        },
-        {
-            "id": "NAME",
-            "value": "שם"
-        },
-        {
-            "id": "SETTING",
-            "value": "הגדרה"
-        },
-        {
-            "id": "COMPLETE",
-            "value": "הושלם"
-        },
-        {
-            "id": "BUNDLE",
-            "value": "חבילה"
-        },
-        {
-            "id": "SEPARATE",
-            "value": "נפרד"
-        },
-        {
-            "id": "BUNDLED",
-            "value": "מאוגד"
-        },
-        {
-            "id": "LANGUAGE",
-            "value": "שפה"
-        },
-        {
-            "id": "LANGUAGE_DESCRIPTION",
-            "value": "שנה את שפת האפליקציה."
-        },
-        {
-            "id": "DARK_MODE",
-            "value": "מצב חשוך"
-        },
-        {
-            "id": "DARK_MODE_DESCRIPTION",
-            "value": "עבור בין מצב מואר וחשוך."
-        },
-        {
-            "id": "LIGHT_MODE",
-            "value": "מצב מואר"
-        },
-        {
-            "id": "DIRECTION",
-            "value": "כיוון"
-        },
-        {
-            "id": "LEFT_TO_RIGHT",
-            "value": "משמאל לימין"
-        },
-        {
-            "id": "RIGHT_TO_LEFT",
-            "value": "מימין לשמאל"
-        },
-        {
-            "id": "ID",
-            "value": "מזהה"
-        },
-        {
-            "id": "AUTO",
-            "value": "אוטומטי"
-        },
-        {
-            "id": "OFF",
-            "value": "כבוי"
-        },
-        {
-            "id": "ON",
-            "value": "דלוק"
-        },
-        {
-            "id": "FONT_SIZE",
-            "value": "גודל גופן"
-        },
-        {
-            "id": "FONT_SIZE_DESCRIPTION",
-            "value": "התאם את גודל הטקסט."
-        },
-        {
-            "id": "DEVICES",
-            "value": "מכשירים"
-        },
-        {
-            "id": "MOBILE",
-            "value": "טלפון"
-        },
-        {
-            "id": "TABLET",
-            "value": "טבלט"
-        },
-        {
-            "id": "DESKTOP",
-            "value": "מחשב"
-        },
-        {
-            "id": "SEARCH",
-            "value": "חיפוש"
-        },
-        {
-            "id": "JUMP_TO_ARTICLE",
-            "value": "קפוץ למאמר"
-        },
-        {
-            "id": "ARTICLE_NUMBER",
-            "value": "מספר מאמר"
-        },
-        {
-            "id": "SHOW_SEARCH",
-            "value": "הצג חיפוש"
-        },
-        {
-            "id": "HIDE_SEARCH",
-            "value": "הסתר חיפוש"
-        },
-        {
-            "id": "MATCH",
-            "value": "התאמה"
-        },
-        {
-            "id": "MATCH_NUMBER",
-            "value": "מספר התאמה"
-        },
-        {
-            "id": "RESET",
-            "value": "איפוס"
-        },
-        {
-            "id": "ENGLISH",
-            "value": "אנגלית"
-        },
-        {
-            "id": "BOTH",
-            "value": "שניהם"
-        },
-        {
-            "id": "RESET_SETTINGS",
-            "value": "איפוס הגדרות"
-        },
-        {
-            "id": "RESET_SETTINGS_DESCRIPTION",
-            "value": "משחזר את הגדרות ברירת המחדל."
-        },
-        {
-            "id": "CANCEL",
-            "value": "ביטול"
-        },
-        {
-            "id": "CLOSE",
-            "value": "סגור"
-        },
-        {
-            "id": "RESET_MESSAGE",
-            "value": "האם לאפס את ההגדרות לנתונים הראשוניים?"
-        },
-        {
-            "id": "FULL_SYNC",
-            "value": "סנכרון מלא"
-        },
-        {
-            "id": "FULL_SYNC_DESCRIPTION",
-            "value": "מנקה את מטמון האפליקציה וטוען מחדש."
-        },
-        {
-            "id": "FULL_SYNC_MESSAGE",
-            "value": "האם ברצונך לבצע סינכרון מלא? פעולה זו תוריד מחדש את כל נתוני השיעורים מהשרת."
-        },
-        {
-            "id": "CLEAR_STORAGE",
-            "value": "נקה אחסון"
-        },
-        {
-            "id": "CLEAR_STORAGE_DESCRIPTION",
-            "value": "מוחק את כל הנתונים המקומיים."
-        },
-        {
-            "id": "CONFIRM_CLEAR_STORAGE",
-            "value": "האם אתה בטוח שברצונך לנקות את כל האחסון? זה ימחוק את כל הנתונים המקומיים וייטען מחדש את הדף."
-        },
-        {
-            "id": "VERY_SMALL",
-            "value": "קטן מאוד"
-        },
-        {
-            "id": "SMALL",
-            "value": "קטן"
-        },
-        {
-            "id": "NORMAL",
-            "value": "רגיל"
-        },
-        {
-            "id": "LARGE",
-            "value": "גדול"
-        },
-        {
-            "id": "VERY_LARGE",
-            "value": "גדול מאוד"
-        },
-        {
-            "id": "STORAGE",
-            "value": "אחסון"
-        },
-        {
-            "id": "LOCAL",
-            "value": "מקומי"
-        },
-        {
-            "id": "REMOTE",
-            "value": "מרחוק"
-        },
-        {
-            "id": "SHARED",
-            "value": "משותף"
-        },
-        {
-            "id": "PERSONAL",
-            "value": "אישי",
-        },
-        {
-            "id": "NEW_FILE",
-            "value": "קובץ חדש"
-        },
-        {
-            "id": "NEW_FOLDER",
-            "value": "תיקייה חדש"
-        },
-        {
-            "id": "FILE_NAME_PLACEHOLDER",
-            "value": "כתוב שם לקובץ..."
-        },
-        {
-            "id": "FOLDER_NAME_PLACEHOLDER",
-            "value": "כתוב שם לתיקייה..."
-        },
-        {
-            "id": "RENAME",
-            "value": "שינוי שם"
-        },
-        {
-            "id": "DELETE",
-            "value": "מחיקה"
-        },
-        {
-            "id": "DELETE_FOLDER",
-            "value": "מחיקת תיקייה"
-        },
-        {
-            "id": "DELETE_FILE",
-            "value": "מחיקת קובץ"
-        },
-        {
-            "id": "DELETE_ARTICLE",
-            "value": "מחיקת מאמר"
-        },
-        {
-            "id": "DELETE_ARTICLE_CONFIRM",
-            "value": "האם אתה בטוח שברצונך למחוק את המאמר הזה? לא ניתן לבטל פעולה זו."
-        },
-        {
-            "id": "DELETING",
-            "value": "מוחק..."
-        },
-        {
-            "id": "ITEMS_NONE_SELECTED",
-            "value": "לא נבחר פריטים"
-        },
-        {
-            "id": "SELECTED_ITEM",
-            "value": "פריט אחד שנבחר"
-        },
-        {
-            "id": "SELECTED_ITEMS",
-            "value": "${count} פריטים שנבחרו"
-        },
-        {
-            "id": "EDITOR",
-            "value": "עורך"
-        },
-        {
-            "id": "FILE",
-            "value": "קובץ"
-        },
-        {
-            "id": "FOLDER",
-            "value": "תיקייה"
-        },
-        {
-            "id": "STORAGE",
-            "value": "אחסון"
-        },
-        {
-            "id": "SIZE",
-            "value": "גודל"
-        },
-        {
-            "id": "DATE",
-            "value": "תאריך"
-        },
-        {
-            "id": "BYTES",
-            "value": "בתים"
-        },
-        {
-            "id": "ALREADY_EXISTS",
-            "value": "${name} כבר קיים!"
-        },
-        {
-            "id": "EXPORT",
-            "value": "יצוא"
-        },
-        {
-            "id": "IMPORT",
-            "value": "ייבוא"
-        },
-        {
-            "id": "IMPORT_FOLDER",
-            "value": "יבוא תיקייה"
-        },
-        {
-            "id": "IMPORT_FILE",
-            "value": "יבוא קובץ"
-        },
-        {
-            "id": "MOVE",
-            "value": "העבר"
-        },
-        {
-            "id": "COPY",
-            "value": "העתק"
-        },
-        {
-            "id": "SELECT_NONE",
-            "value": "בטל בחירה"
-        },
-        {
-            "id": "SELECT_ALL",
-            "value": "בחר הכל"
-        },
-        {
-            "id": "FIRST_PAGE",
-            "value": "עמוד ראשון"
-        },
-        {
-            "id": "LAST_PAGE",
-            "value": "עמוד אחרון"
-        },
-        {
-            "id": "PREVIOUS_PAGE",
-            "value": "עמוד קודם"
-        },
-        {
-            "id": "NEXT_PAGE",
-            "value": "עמוד הבא"
-        },
-        {
-            "id": "PREVIOUS",
-            "value": "הקודם"
-        },
-        {
-            "id": "NEXT",
-            "value": "הבא"
-        },
-        {
-            "id": "NO_SUMMARY",
-            "value": "אין סיכום זמין"
-        },
-        {
-            "id": "PAGE_INDEX",
-            "value": "מספר עמוד"
-        },
-        {
-            "id": "PAGE_COUNT",
-            "value": "כמות עמודים"
-        },
-        {
-            "id": "DESTINATION",
-            "value": "יעד"
-        },
-        {
-            "id": "TO",
-            "value": "אל"
-        },
-        {
-            "id": "SELECT_DESTINATION",
-            "value": "בחר יעד"
-        },
-        {
-            "id": "MENU",
-            "value": "תפריט"
-        },
-        {
-            "id": "SIDEBAR",
-            "value": "סרגל צד"
-        },
-        {
-            "id": "ACCOUNT",
-            "value": "חשבון"
-        },
-        {
-            "id": "SIGN_IN",
-            "value": "התחברות"
-        },
-        {
-            "id": "PODCAST",
-            "value": "פודקאסט"
-        },
-        {
-            "id": "PODCAST_FEED",
-            "value": "פיד פודקאסט"
-        },
-        {
-            "id": "PODCAST_FEED_DESCRIPTION",
-            "value": "השתמש בכתובת זו כדי להירשם לפודקאסט באפליקציה המועדפת עליך."
-        },
-        {
-            "id": "COPY_URL",
-            "value": "העתק כתובת"
-        },
-        {
-            "id": "SIGN_OUT",
-            "value": "ניתוק"
-        },
-        {
-            "id": "SIGN_UP",
-            "value": "הרשם"
-        },
-        {
-            "id": "EMAIL_ADDRESS",
-            "value": "כתובת אימייל"
-        },
-        {
-            "id": "PASSWORD",
-            "value": "סיסמה"
-        },
-        {
-            "id": "OLD_PASSWORD",
-            "value": "סיסמה ישנה"
-        },
-        {
-            "id": "NEW_PASSWORD",
-            "value": "סיסמה חדשה"
-        },
-        {
-            "id": "REMEMBER_ME",
-            "value": "תזכור אותי"
-        },
-        {
-            "id": "FORGET_PASSWORD",
-            "value": "שכחת סיסמה?"
-        },
-        {
-            "id": "RESET_PASSWORD",
-            "value": "איפוס סיסמה"
-        },
-        {
-            "id": "SIGN_UP_TEXT",
-            "value": "הרשם"
-        },
-        {
-            "id": "FIRST_NAME",
-            "value": "שם פרטי"
-        },
-        {
-            "id": "LAST_NAME",
-            "value": "שם משפחה"
-        },
-        {
-            "id": "HAVE_ACCOUNT",
-            "value": "כבר יש לך חשבון? התחבר"
-        },
-        {
-            "id": "EMPTY_EMAIL",
-            "value": "שדה האימייל הוא ריק!"
-        },
-        {
-            "id": "BAD_EMAIL",
-            "value": "כתובת האימייל אינה תקינה!"
-        },
-        {
-            "id": "EMPTY_PASSWORD",
-            "value": "שדה הסיסמה הוא ריק!"
-        },
-        {
-            "id": "EMPTY_FIELD",
-            "value": "השדה הזה הוא ריק!"
-        },
-        {
-            "id": "SIGNED_IN",
-            "value": "רשום"
-        },
-        {
-            "id": "NOT_SIGNED_IN",
-            "value": "לא רשום"
-        },
-        {
-            "id": "USER_NOT_FOUND",
-            "value": "לא ניתן למצוא משתמש!"
-        },
-        {
-            "id": "WRONG_PASSWORD",
-            "value": "סיסמה שגויה!"
-        },
-        {
-            "id": "USER_ALREADY_EXISTS",
-            "value": "משתמש כבר קיים!"
-        },
-        {
-            "id": "NO_RESET_TOKEN",
-            "value": "לא נמצא קוד איפוס!"
-        },
-        {
-            "id": "INVALID_TOKEN",
-            "value": "קוד איפוס לא תקין!"
-        },
-        {
-            "id": "TOKEN_EXPIRED",
-            "value": "פג תוקפו של קוד האיפוס!"
-        },
-        {
-            "id": "EMAIL_SERVICE_ERROR",
-            "value": "שגיאה בשירות האימייל!"
-        },
-        {
-            "id": "MISSING_ID",
-            "value": "מזהה חסר!"
-        },
-        {
-            "id": "CHALLENGE_NOT_FOUND",
-            "value": "אתגר לא נמצא!"
-        },
-        {
-            "id": "VERIFICATION_FAILED",
-            "value": "אימות נכשל!"
-        },
-        {
-            "id": "CREDENTIAL_NOT_FOUND",
-            "value": "קרדנציאל לא נמצא!"
-        },
-        {
-            "id": "RATE_LIMIT_EXCEEDED",
-            "value": "יותר מדי ניסיונות, אנא נסה שוב מאוחר יותר."
-        },
-        {
-            "id": "PASSKEY_REGISTERED",
-            "value": "מפתח גישה נרשם בהצלחה!"
-        },
-        {
-            "id": "PASSKEY_REGISTRATION_FAILED",
-            "value": "רישום מפתח גישה נכשל!"
-        },
-        {
-            "id": "PASSKEY_LOGIN_FAILED",
-            "value": "התחברות עם מפתח גישה נכשלה!"
-        },
-        {
-            "id": "ENTER_PASSKEY_NAME",
-            "value": "הכנס שם עבור מפתח גישה זה"
-        },
-        {
-            "id": "CONFIRM_DELETE_PASSKEY",
-            "value": "האם אתה בטוח שברצונך להסיר את מפתח הגישה הזה?"
-        },
-        {
-            "id": "PASSWORD_TOO_SHORT",
-            "value": "הסיסמה חייבת להיות באורך של 8 תווים לפחות."
-        },
-        {
-            "id": "PASSWORD_TOO_LONG",
-            "value": "הסיסמה אינה יכולה לעלות על 72 תווים."
-        },
-        {
-            "id": "ACCOUNT",
-            "value": "חשבון"
-        },
-        {
-            "id": "ROLE",
-            "value": "תפקיד"
-        },
-        {
-            "id": "TYPE",
-            "value": "סוג"
-        },
-        {
-            "id": "TYPES",
-            "value": "סוגים"
-        },
-        {
-            "id": "WITH_THUMBNAIL",
-            "value": "עם תמונה"
-        },
-        {
-            "id": "WITHOUT_THUMBNAIL",
-            "value": "ללא תמונה"
-        },
-        {
-            "id": "EXCLUDE",
-            "value": "החרגה"
-        },
-        {
-            "id": "EXCLUDE_IMAGE_ONLY",
-            "value": "תמונה בלבד"
-        },
-        {
-            "id": "ALL",
-            "value": "הכל"
-        },
-        {
-            "id": "WITH_SUMMARY",
-            "value": "עם סיכום"
-        },
-        {
-            "id": "WITHOUT_SUMMARY",
-            "value": "ללא סיכום"
-        },
-        {
-            "id": "SUMMARIES",
-            "value": "סיכומים"
-        },
-        {
-            "id": "TRANSCRIPTIONS",
-            "value": "תמלולים"
-        },
-        {
-            "id": "WITH_TAGS",
-            "value": "עם תגיות"
-        },
-        {
-            "id": "WITHOUT_TAGS",
-            "value": "ללא תגיות"
-        },
-        {
-            "id": "ADD_ROLE",
-            "value": "הוסף תפקיד"
-        },
-        {
-            "id": "NEW_ROLE",
-            "value": "תפקיד חדש"
-        },
-        {
-            "id": "ADMIN",
-            "value": "מנהל"
-        },
-        {
-            "id": "STUDENT",
-            "value": "תלמיד"
-        },
-        {
-            "id": "UPPER",
-            "value": "עליון"
-        },
-        {
-            "id": "TEACHER",
-            "value": "מורה"
-        },
-        {
-            "id": "SAVE",
-            "value": "שמור"
-        },
-        {
-            "id": "SAVING",
-            "value": "שומר..."
-        },
-        {
-            "id": "CANCEL",
-            "value": "ביטול"
-        },
-        {
-            "id": "VISITOR",
-            "value": "אורח"
-        },
-        {
-            "id": "CHANGE_PASSWORD",
-            "value": "שינוי סיסמה"
-        },
-        {
-            "id": "RESET_EMAIL_SENT",
-            "value": "אימייל נשלח לחשבון שלך כדי שתוכל לאפס את הסיסמה."
-        },
-        {
-            "id": "ACCESS_DENIED",
-            "value": "גישה חסום"
-        },
-        {
-            "id": "BAD_ID",
-            "value": "המזהה יכול להכיל תווים אלפא-נומריים בלבד"
-        },
-        {
-            "id": "DIAGRAMS",
-            "value": "תרשימים"
-        },
-        {
-            "id": "DIAGRAM",
-            "value": "תרשים"
-        },
-        {
-            "id": "FULLSCREEN",
-            "value": "מסך מלא"
-        },
-        {
-            "id": "EXIT_FULLSCREEN",
-            "value": "יציאה ממסך מלא"
-        },
-        {
-            "id": "TERMS",
-            "value": "מושגים"
-        },
-        {
-            "id": "TRANSLATION",
-            "value": "תרגום"
-        },
-        {
-            "id": "TRANSLITERATION",
-            "value": "תַעתִיק"
-        },
-        {
-            "id": "HEBREW",
-            "value": "עִברִית"
-        },
-        {
-            "id": "PHASE",
-            "value": "בחינה"
-        },
-        {
-            "id": "TOOLS",
-            "value": "כלים"
-        },
-        {
-            "id": "SHOW_CONCEPTS",
-            "value": "הראה מושגים"
-        },
-        {
-            "id": "HIDE_CONCEPTS",
-            "value": "הסתר מושגים"
-        },
-        {
-            "id": "SYNC",
-            "value": "סינכרון"
-        },
-        {
-            "id": "FULL_SYNC",
-            "value": "סנכרון כל השיעורים",
-        },
-        {
-            "id": "SYNC_FAILED",
-            "value": "סינכרון נכשל"
-        },
-        {
-            "id": "SYNCING",
-            "value": "מסנכרן"
-        },
-        {
-            "id": "SYNCING_MAIN",
-            "value": "מסנכרן ראשי"
-        },
-        {
-            "id": "SYNCING_LIBRARY",
-            "value": "מסנכרן ספריה"
-        },
-        {
-            "id": "SYNCING_PERSONAL",
-            "value": "מסנכרן אישי"
-        },
-        {
-            "id": "SYNC_SESSIONS",
-            "value": "סנכרון שיעורים"
-        },
-        {
-            "id": "SYNC_ARTICLE_TAGS",
-            "value": "סנכרון תגיות מאמרים"
-        },
-        {
-            "id": "SYNC_ARTICLE_TAGS_CONFIRM",
-            "value": "האם אתה בטוח שברצונך לסנכרן תגיות מהספרייה לכל קובצי המאמרים? פעולה זו תדרוס תגיות בודדות של קבצים."
-        },
-        {
-            "id": "SYNCING_ARTICLE_TAGS",
-            "value": "מסנכרן תגיות מאמרים..."
-        },
-        {
-            "id": "SYNC_ALL_SESSIONS",
-            "value": "סנכרון כל השיעורים"
-        },
-        {
-            "id": "IMAGE",
-            "value": "תמונה"
-        },
-        {
-            "id": "ERROR",
-            "value": "שגיאה"
-        },
-        {
-            "id": "FOLDER",
-            "value": "תיקייה"
-        },
-        {
-            "id": "STATUS",
-            "value": "מצב"
-        },
-        {
-            "id": "SESSIONS",
-            "value": "שיעורים"
-        },
-        {
-            "id": "SESSION",
-            "value": "שיעור"
-        },
-        {
-            "id": "UPDATE_SESSIONS",
-            "value": "עדכון שיעורים"
-        },
-        {
-            "id": "YEARS",
-            "value": "שנים"
-        },
-        {
-            "id": "PROGRESS",
-            "value": "התקדמות"
-        },
-        {
-            "id": "ERRORS",
-            "value": "שגיאות"
-        },
-        {
-            "id": "POSITION",
-            "value": "מיקום"
-        },
-        {
-            "id": "WITH_POSITION",
-            "value": "עם מיקום"
-        },
-        {
-            "id": "WITHOUT_POSITION",
-            "value": "ללא מיקום"
-        },
-        {
-            "id": "WITH_DURATION",
-            "value": "ידוע"
-        },
-        {
-            "id": "WITHOUT_DURATION",
-            "value": "לא ידוע"
-        },
-        {
-            "id": "VIDEO",
-            "value": "וידאו"
-        },
-        {
-            "id": "AUDIO",
-            "value": "שמע"
-        },
-        {
-            "id": "AUDIO_PLAYER",
-            "value": "נגן שמע"
-        },
-        {
-            "id": "REWIND",
-            "value": "אחורה"
-        },
-        {
-            "id": "FAST_FORWARD",
-            "value": "קדימה"
-        },
-        {
-            "id": "PLAY",
-            "value": "נגן"
-        },
-        {
-            "id": "PAUSE",
-            "value": "השהה"
-        },
-        {
-            "id": "STOP",
-            "value": "עצור"
-        },
-        {
-            "id": "SPEED",
-            "value": "מהירות"
-        },
-        {
-            "id": "SPEED_TOOLBAR",
-            "value": "סרגל מהירות"
-        },
-        {
-            "id": "SPEED_TOOLBAR_DESCRIPTION",
-            "value": "מיקום סרגל כלי המהירות."
-        },
-        {
-            "id": "TOP",
-            "value": "למעלה"
-        },
-        {
-            "id": "BOTTOM",
-            "value": "למטה"
-        },
-        {
-            "id": "SPEED_SLOW",
-            "value": "הכי לאט"
-        },
-        {
-            "id": "SPEED_SLOWER",
-            "value": "לאט"
-        },
-        {
-            "id": "SPEED_NORMAL",
-            "value": "רגיל"
-        },
-        {
-            "id": "SPEED_FASTER",
-            "value": "מהר"
-        },
-        {
-            "id": "SPEED_FAST",
-            "value": "יותר מהר"
-        },
-        {
-            "id": "SPEED_VERY_FAST",
-            "value": "מהר מאוד"
-        },
-        {
-            "id": "SPEED_SUPER_FAST",
-            "value": "סופר מהיר"
-        },
-        {
-            "id": "SPEED_DOUBLE",
-            "value": "x2"
-        },
-        {
-            "id": "SPEED_TRIPLE",
-            "value": "x3"
-        },
-        {
-            "id": "GROUP",
-            "value": "קבוצה"
-        },
-        {
-            "id": "LIBRARY",
-            "value": "ספרייה"
-        },
-        {
-            "id": "GROUPS",
-            "value": "קבוצות"
-        },
-        {
-            "id": "YEAR",
-            "value": "שנה"
-        },
-        {
-            "id": "VOLUME",
-            "value": "עוצמה"
-        },
-        {
-            "id": "LOW_VOLUME",
-            "value": "נמוכה"
-        },
-        {
-            "id": "MEDIUM_VOLUME",
-            "value": "בינונית"
-        },
-        {
-            "id": "HIGH_VOLUME",
-            "value": "גבוהה"
-        },
-        {
-            "id": "MEDIA",
-            "value": "מדיה"
-        },
-        {
-            "id": "DOWNLOAD",
-            "value": "הורדה"
-        },
-        {
-            "id": "EXPAND",
-            "value": "הרחב"
-        },
-        {
-            "id": "COLLAPSE",
-            "value": "כווץ"
-        },
-        {
-            "id": "SHOW_GROUP_COUNTERS",
-            "value": "הצג מונים קבוצתיים"
-        },
-        {
-            "id": "HIDE_GROUP_COUNTERS",
-            "value": "הסתר מונים קבוצתיים"
-        },
-        {
-            "id": "ID_DESCRIPTION",
-            "value": "זה המזהה היחודי שלך שמורכב באותיות באנגלית (A-Z) ומספרים (0-9)"
-        },
-        {
-            "id": "PLAYER",
-            "value": "נגן"
-        },
-        {
-            "id": "PLAYING",
-            "value": "מנגן"
-        },
-        {
-            "id": "SCHEDULE",
-            "value": "יומן"
-        },
-        {
-            "id": "PREVIOUS_MONTH",
-            "value": "חודש שעבר"
-        },
-        {
-            "id": "NEXT_MONTH",
-            "value": "חודש הבא"
-        },
-        {
-            "id": "PREVIOUS_WEEK",
-            "value": "שבוע שעבר"
-        },
-        {
-            "id": "NEXT_WEEK",
-            "value": "שבוע הבא"
-        },
-        {
-            "id": "TODAY",
-            "value": "היום"
-        },
-        {
-            "id": "WEEK_VIEW",
-            "value": "מבט שבועי"
-        },
-        {
-            "id": "MONTH_VIEW",
-            "value": "מבט חודשי"
-        },
-        {
-            "id": "TRACKS_VIEW",
-            "value": "תצוגת מסלולים"
-        },
-        {
-            "id": "YEAR_VIEW",
-            "value": "תצוגה שנתית"
-        },
-        {
-            "id": "DAY_VIEW",
-            "value": "תצוגה יומית"
-        },
-        {
-            "id": "BACK",
-            "value": "חזור"
-        },
-        {
-            "id": "PREVIOUS_DAY",
-            "value": "יום קודם"
-        },
-        {
-            "id": "NEXT_DAY",
-            "value": "יום הבא"
-        },
-        {
-            "id": "WEEK",
-            "value": "שבוע"
-        },
-        {
-            "id": "MONTH",
-            "value": "חודש"
-        },
-        {
-            "id": "TIME_LEFT",
-            "value": "נשאר"
-        },
-        {
-            "id": "NUM_ITEMS",
-            "value": "מספר פריטים"
-        },
-        {
-            "id": "REFRESH",
-            "value": "רענן"
-        },
-        {
-            "id": "ZOOM",
-            "value": "תקריב"
-        },
-        {
-            "id": "ZOOM_IN",
-            "value": "מיקוד תצוגה"
-        },
-        {
-            "id": "ZOOM_OUT",
-            "value": "הקטן תצוגה"
-        },
-        {
-            "id": "PLAYER",
-            "value": "נגן"
-        },
-        {
-            "id": "PREVIOUS_PARAGRAPH",
-            "value": "פסקה קודמת"
-        },
-        {
-            "id": "NEXT_PARAGRAPH",
-            "value": "פסקה הבאה"
-        },
-        {
-            "id": "SELECT_VOICE",
-            "value": "בחר קול"
-        },
-        {
-            "id": "COLLAPSE",
-            "value": "צמצם"
-        },
-        {
-            "id": "EDIT_ACCOUNT",
-            "value": "שינוי חשבון"
-        },
-        {
-            "id": "PLAYING_ERROR",
-            "value": "יש שגיאה בניגון המדיה"
-        },
-        {
-            "id": "RELOAD",
-            "value": "טעינה מחדש"
-        },
-        {
-            "id": "COLOR",
-            "value": "צבע"
-        },
-        {
-            "id": "USER",
-            "value": "משתמש"
-        },
-        {
-            "id": "THUMBNAIL",
-            "value": "תמונה ממוזערת"
-        },
-        {
-            "id": "IMAGE",
-            "value": "תמונה"
-        },
-        {
-            "id": "NO_ITEMS",
-            "value": "אין פריטים"
-        },
-        {
-            "id": "ADVANCED",
-            "value": "מתקדם"
-        },
-        {
-            "id": "LIST_VIEW",
-            "value": "תצוגת רשימה"
-        },
-        {
-            "id": "TREE_VIEW",
-            "value": "תצוגת עץ"
-        },
-        {
-            "id": "TABLE_VIEW",
-            "value": "תצוגת טבלה"
-        },
-        {
-            "id": "SORT",
-            "value": "מיון"
-        },
-        {
-            "id": "GRID_VIEW",
-            "value": "תצוגת רשת"
-        },
-        {
-            "id": "LOADING",
-            "value": "טוען"
-        },
-        {
-            "id": "ADD_BOOKMARK",
-            "value": "הוסף סימניה"
-        },
-        {
-            "id": "REMOVE_BOOKMARK",
-            "value": "הסר סימניה"
-        },
-        {
-            "id": "LOCATION",
-            "value": "מקום"
-        },
-        {
-            "id": "BOOKMARKS",
-            "value": "סימניות"
-        },
-        {
-            "id": "MANAGE",
-            "value": "ניהול"
-        },
-        {
-            "id": "REPLAY",
-            "value": "חזור"
-        },
-        {
-            "id": "FORWARD",
-            "value": "קדימה"
-        },
-        {
-            "id": "UNNAMED",
-            "value": "ללא שם"
-        },
-        {
-            "id": "DURATION",
-            "value": "אורך"
-        },
-        {
-            "id": "UNKNOWN",
-            "value": "לא ידוע"
-        },
-        {
-            "id": "VERSION",
-            "value": "גירסה"
-        },
-        {
-            "id": "ROWS_PER_PAGE",
-            "value": "מספר שורות לעמוד"
-        },
-        {
-            "id": "REQUIRE_SIGNIN",
-            "value": "תיכנס לחשבון שלך"
-        },
-        {
-            "id": "REQUIRE_FULL_SYNC",
-            "value": "תעשה סנכרון מלא"
-        },
-        {
-            "id": "WAIT_FOR_APPROVAL",
-            "value": "צריך אישור, נסה שוב מאוחר יותר"
-        },
-        {
-            "id": "PLAY_NOT_ALLOWED",
-            "value": "אינך מורשה לנגן את שיעור"
-        },
-        {
-            "id": "TAGS",
-            "value": "תגים"
-        },
-        {
-            "id": "TAG",
-            "value": "תג"
-        },
-        {
-            "id": "NEW_TAG",
-            "value": "תג חדש"
-        },
-        {
-            "id": "CONTENT",
-            "value": "תוכן"
-        },
-        {
-            "id": "NEW_CONTENT",
-            "value": "תוכן חדש"
-        },
-        {
-            "id": "LIBRARIAN",
-            "value": "ספרן"
-        },
-        {
-            "id": "SCAN_CONTENT",
-            "value": "סרוק תוכן"
-        },
-        {
-            "id": "RESTART",
-            "value": "אתחול"
-        },
-        {
-            "id": "DETAILS",
-            "value": "פרטים"
-        },
-        {
-            "id": "SUBTITLES",
-            "value": "כתוביות"
-        },
-        {
-            "id": "SUBTITLES_OFF",
-            "value": "הסר כתיביות"
-        },
-        {
-            "id": "TRANSCRIPT",
-            "value": "תמליל"
-        },
-        {
-            "id": "MATCHES",
-            "value": "{current} מתוך {total} התאמות"
-        },
-        {
-            "id": "SUMMARY",
-            "value": "סיכום"
-        },
-        {
-            "id": "CANNOT_LOAD_IMAGE",
-            "value": "תמונה לא נטענת"
-        },
-        {
-            "id": "VALUE",
-            "value": "ערך"
-        },
-        {
-            "id": "FULL_NAME",
-            "value": "שם מלא"
-        },
-        {
-            "id": "NEW_TYPE",
-            "value": "סוג חדש"
-        },
-        {
-            "id": "PARENT_TYPES",
-            "value": "סוגי הורים"
-        },
-        {
-            "id": "ARTICLES",
-            "value": "מאמרים"
-        },
-        {
-            "id": "ARTICLE",
-            "value": "מאמר"
-        },
-        {
-            "id": "NEW_ARTICLE",
-            "value": "מאמר חדש"
-        },
-        {
-            "id": "NUMBER",
-            "value": "מספר"
-        },
-        {
-            "id": "FIELD_TYPE",
-            "value": "סוג שדה"
-        },
-        {
-            "id": "TEXT",
-            "value": "טֶקסט"
-        },
-        {
-            "id": "ENABLED",
-            "value": "מופעל"
-        },
-        {
-            "id": "DISABLED",
-            "value": "מנוטרל"
-        },
-        {
-            "id": "ENABLE",
-            "value": "אפשר"
-        },
-        {
-            "id": "DISABLE",
-            "value": "השבת"
-        },
-        {
-            "id": "MERGE",
-            "value": "מזג"
-        },
-        {
-            "id": "SPLIT",
-            "value": "פצל"
-        },
-        {
-            "id": "STORAGE",
-            "value": "אחסון"
-        },
-        {
-            "id": "MERGED",
-            "value": "ממוזג"
-        },
-        {
-            "id": "SIZE",
-            "value": "גודל"
-        },
-        {
-            "id": "STATISTICS",
-            "value": "סטטיסטיקות"
-        },
-        {
-            "id": "AI",
-            "value": "AI"
-        },
-        {
-            "id": "OVERVIEW",
-            "value": "סקירה כללית"
-        },
-        {
-            "id": "FILTER",
-            "value": "סינון"
-        },
-        {
-            "id": "ATTRIBUTE",
-            "value": "מאפיין"
-        },
-        {
-            "id": "ATTRIBUTES",
-            "value": "מאפיינים"
-        },
-        {
-            "id": "CLEAR_FILTER",
-            "value": "נקה סינון"
-        },
-        {
-            "id": "CLEAR_FILTERS",
-            "value": "נקה סינונים"
-        },
-        {
-            "id": "CLEAR_GROUPS",
-            "value": "נקה קבוצות"
-        },
-        {
-            "id": "SELECTED",
-            "value": "נבחר"
-        },
-        {
-            "id": "SHOW_DISABLED_GROUPS",
-            "value": "הראה קבוצות מנוטרלות"
-        },
-        {
-            "id": "HIDE_DISABLED_GROUPS",
-            "value": "הסתר קבוצות מנוטרלות"
-        },
-        {
-            "id": "OPTIONS",
-            "value": "אפשרויות"
-        },
-        {
-            "id": "SIGN_IN_WITH_PASSKEY",
-            "value": "התחברות עם מפתח גישה"
-        },
-        {
-            "id": "REGISTER_PASSKEY",
-            "value": "רישום מפתח גישה"
-        },
-        {
-            "id": "CREATE_PASSKEY",
-            "value": "צור מפתח גישה למכשיר זה"
-        },
-        {
-            "id": "PASSKEYS",
-            "value": "מפתחות גישה"
-        },
-        {
-            "id": "SEEK",
-            "value": "חיפוש"
-        },
-        {
-            "id": "NEW_SESSIONS",
-            "value": "שיעורים חדשים"
-        },
-        {
-            "id": "UPDATE_METADATA",
-            "value": "עדכון מידע"
-        },
-        {
-            "id": "UPDATE_METADATA_CURRENT_YEAR",
-            "value": "עדכון מידע (שנה נוכחית)"
-        },
-        {
-            "id": "PERSONAL_SYNC",
-            "value": "הסנכרון האישי"
-        },
-        {
-            "id": "PERSONAL_SYNC_ERROR",
-            "value": "שגיאה בהסנכרון האישי"
-        },
-        {
-            "id": "PERSONAL_SYNC_BUSY",
-            "value": "הסנכרון האישי בוצע"
-        },
-        {
-            "id": 404,
-            "value": "לא ניתן לגשת לשרת!"
-        },
-        {
-            "id": "SYNC_STATUS",
-            "value": "מצב סנכרון"
-        },
-        {
-            "id": "LAST_SYNCED",
-            "value": "סנכרון אחרון"
-        },
-        {
-            "id": "GROUPS_SYNCED",
-            "value": "קבוצות שסונכרנו"
-        },
-        {
-            "id": "ADDED_SESSIONS",
-            "value": "שיעורים שנוספו"
-        },
-        {
-            "id": "REMOVED_SESSIONS",
-            "value": "שיעורים שהוסרו"
-        },
-        {
-            "id": "TAGS_SYNCED",
-            "value": "תגים שסונכרנו"
-        },
-        {
-            "id": "IDLE",
-            "value": "ממתין"
-        },
-        {
-            "id": "NEVER",
-            "value": "אף פעם"
-        },
-        {
-            "id": "COPY_LOG",
-            "value": "העתק יומן"
-        },
-        {
-            "id": "LOG_COPIED",
-            "value": "היומן הועתק ללוח"
-        },
-        {
-            "id": "COPIED",
-            "value": "הועתק!"
-        },
-        {
-            "id": "SHOW_PASSWORD",
-            "value": "הצג סיסמה"
-        },
-        {
-            "id": "HIDE_PASSWORD",
-            "value": "הסתר סיסמה"
-        },
-        {
-            "id": "TOTAL_SESSIONS_ADDED",
-            "value": "סה״כ שיעורים שנוספו"
-        },
-        {
-            "id": "EXPAND_ALL",
-            "value": "הרחב הכל"
-        },
-        {
-            "id": "COLLAPSE_ALL",
-            "value": "צמצם הכל"
-        },
-        {
-            "id": "AUTHOR",
-            "value": "מחבר"
-        },
-        {
-            "id": "BOOK",
-            "value": "ספר"
-        },
-        {
-            "id": "VOLUME",
-            "value": "כרך"
-        },
-        {
-            "id": "PART",
-            "value": "חלק"
-        },
-        {
-            "id": "SECTION",
-            "value": "סעיף"
-        },
-        {
-            "id": "YEAR",
-            "value": "שנה"
-        },
-        {
-            "id": "PORTION",
-            "value": "פרשה"
-        },
-        {
-            "id": "ARTICLE",
-            "value": "מאמר"
-        },
-        {
-            "id": "CHAPTER",
-            "value": "פרק"
-        },
-        {
-            "id": "TITLE",
-            "value": "כותרת"
-        },
-        {
-            "id": "SELECT_ITEM",
-            "value": "בחר מאמר לצפייה בתוכן"
-        },
-        {
-            "id": "EDIT_TAGS",
-            "value": "עריכת תגיות מאמר"
-        },
-        {
-            "id": "VIEW_PLAIN_TEXT",
-            "value": "הצג טקסט רגיל"
-        },
-        {
-            "id": "VIEW_MARKDOWN",
-            "value": "הצג Markdown"
-        },
-        {
-            "id": "EDIT_ARTICLE",
-            "value": "עריכת מאמר"
-        },
-        {
-            "id": "EXPORT_TO_TXT",
-            "value": "ייצוא ל-.txt"
-        },
-        {
-            "id": "EXPORT_TO_MD",
-            "value": "ייצוא ל-.md"
-        },
-        {
-            "id": "EXPORT_TO_PDF",
-            "value": "ייצוא ל-PDF"
-        },
-        {
-            "id": "PRINT",
-            "value": "הדפסה"
-        },
-        {
-            "id": "COPY_TO_CLIPBOARD",
-            "value": "העתק ללוח"
-        },
-        {
-            "id": "PREVIOUS_MATCH",
-            "value": "התאמה קודמת"
-        },
-        {
-            "id": "NEXT_MATCH",
-            "value": "התאמה הבאה"
-        },
-        {
-            "id": "BATCH_UPDATE_TAGS",
-            "value": "Batch Update Tags"
-        },
-        {
-            "id": "FILTER_CONDITION",
-            "value": "Filter Condition"
-        },
-        {
-            "id": "KEY",
-            "value": "תג"
-        },
-        {
-            "id": "VALUE",
-            "value": "ערך"
-        },
-        {
-            "id": "CHANGE_FROM",
-            "value": "שנה מ"
-        },
-        {
-            "id": "CHANGE_TO",
-            "value": "שנה ל"
-        },
-        {
-            "id": "SOURCE_KEY",
-            "value": "תג מקור"
-        },
-        {
-            "id": "SOURCE_VALUE",
-            "value": "ערך מקור"
-        },
-        {
-            "id": "DESTINATION_KEY",
-            "value": "תג יעד"
-        },
-        {
-            "id": "DESTINATION_VALUE",
-            "value": "ערך יעד"
-        },
-        {
-            "id": "PREVIEW",
-            "value": "Preview"
-        },
-        {
-            "id": "NO_MATCHING_ITEMS",
-            "value": "No matching items found."
-        },
-        {
-            "id": "MATCHING_ITEMS",
-            "value": "Matching items"
-        },
-        {
-            "id": "TOTAL_FILES",
-            "value": "Total Files"
-        },
-        {
-            "id": "TOTAL_ITEMS",
-            "value": "Total Items"
-        },
-        {
-            "id": "UPDATING",
-            "value": "Updating..."
-        },
-        {
-            "id": "UPDATE",
-            "value": "Update"
-        },
-        {
-            "id": "JUMP_TO",
-            "value": "קפוץ ל"
-        },
-        {
-            "id": "JUMP_TO_ARTICLE",
-            "value": "קפוץ למאמר"
-        },
-        {
-            "id": "PAGE",
-            "value": "עמוד"
-        },
-        {
-            "id": "PARAGRAPH",
-            "value": "פסקה"
-        },
-        {
-            "id": "PAGE_NUMBER",
-            "value": "מספר עמוד"
-        },
-        {
-            "id": "ARTICLE_NUMBER",
-            "value": "מספר מאמר"
-        },
-        {
-            "id": "PARAGRAPH_NUMBER",
-            "value": "מספר פסקה"
-        },
-        {
-            "id": "GO",
-            "value": "עבור"
-        },
-        {
-            "id": "SCROLL_TO_TOP",
-            "value": "גלילה למעלה"
-        },
-        {
-            "id": "ZOOM",
-            "value": "הגדל פסקה"
-        },
-        {
-            "id": "ARTICLE_TERMS",
-            "value": "מונחי המאמר"
-        },
-        {
-            "id": "NO_TERMS_FOUND",
-            "value": "לא נמצאו מונחים"
-        },
-        {
-            "id": "REVIEW_UPDATE",
-            "value": "סקירת עדכון"
-        },
-        {
-            "id": "NEW_SESSIONS",
-            "value": "שיעורים חדשים"
-        },
-        {
-            "id": "UPDATED_SESSIONS",
-            "value": "שיעורים מעודכנים"
-        },
-        {
-            "id": "REMOVED_SESSIONS",
-            "value": "שיעורים שהוסרו"
-        },
-        {
-            "id": "TOTAL_SESSIONS",
-            "value": 'סה"כ שיעורים'
-        },
-        {
-            "id": "NO_UPDATES",
-            "value": "אין עדכונים"
-        },
-        {
-            "id": "NEW",
-            "value": "חדש"
-        },
-        {
-            "id": "UPDATED",
-            "value": "מעודכן"
-        },
-        {
-            "id": "REMOVED",
-            "value": "הוסר"
-        },
-        {
-            "id": "APPROVE_UPDATE",
-            "value": "עדכן"
-        },
-        {
-            "id": "VERSION",
-            "value": "גרסה"
-        },
-        {
-            "id": "VERSION_DESCRIPTION",
-            "value": "גרסת האפליקציה הנוכחית."
-        },
-        {
-            "id": "UPLOAD_DESCRIPTION",
-            "value": "הפעל או השבת העלאת קבצים."
-        },
-        {
-            "id": "UPLOAD",
-            "value": "העלאה"
-        },
-        {
-            "id": "AUTO_SYNC",
-            "value": "סנכרון אוטומטי"
-        },
-        {
-            "id": "AUTO_SYNC_DESCRIPTION",
-            "value": "הפעל סנכרון רקע אוטומטי"
-        },
-        {
-            "id": "CATEGORY",
-            "value": "קטגוריה"
-        },
-        {
-            "id": "COUNT",
-            "value": "מספר"
-        },
-        {
-            "id": "DELETE_TAG",
-            "value": "מחק תג"
-        },
-        {
-            "id": "DELETE_ARTICLES",
-            "value": "מחיקת מאמרים"
-        },
-        {
-            "id": "RENAME_TAG",
-            "value": "שנה שם תג"
-        },
-        {
-            "id": "DELETE_TAG_CONFIRM",
-            "value": "האם אתה בטוח שברצונך להסיר תג זה מכל המאמרים?"
-        },
-        {
-            "id": "AFFECTED_ITEMS",
-            "value": "פריטים מושפעים"
-        },
-        {
-            "id": "DELETE_ARTICLES_CONFIRM",
-            "value": "האם אתה בטוח שברצונך למחוק לצמיתות את כל המאמרים עם תג זה? לא ניתן לבטל פעולה זו."
-        },
-        {
-            "id": "ARTICLES_TO_DELETE",
-            "value": "מאמרים למחיקה"
-        },
-        {
-            "id": "DELETE_FOREVER",
-            "value": "מחק לצמיתות"
-        },
-        {
-            "id": "SHOW_ABBREVIATIONS",
-            "value": "הצג ראשי תיבות"
-        },
-        {
-            "id": "SHOW_FULL_TERMS",
-            "value": "הצג מונחים מלאים"
-        },
-        {
-            "id": "HIDE_SQUARE_BRACKETS",
-            "value": "הסתר סוגריים מרובעים"
-        },
-        {
-            "id": "SHOW_SQUARE_BRACKETS",
-            "value": "הצג סוגריים מרובעים"
-        },
-        {
-            "id": "RESEARCH",
-            "value": "מחקר"
-        },
-        {
-            "id": "SEARCH_ARTICLES",
-            "value": "חפש..."
-        },
-        {
-            "id": "REBUILD_INDEX",
-            "value": "בנה אינדקס מחדש"
-        },
-        {
-            "id": "DONE",
-            "value": "בוצע"
-        },
-        {
-            "id": "SEARCHING",
-            "value": "מחפש..."
-        },
-        {
-            "id": "NO_RESULTS",
-            "value": "לא נמצאו תוצאות."
-        },
-        {
-            "id": "RESULT",
-            "value": "תוצאה"
-        },
-        {
-            "id": "RESULTS",
-            "value": "תוצאות"
-        },
-        {
-            "id": "DOWNLOAD_TRANSCRIPT",
-            "value": "הורדת תמליל"
-        },
-        {
-            "id": "LOG_LEVEL",
-            "value": "רמת רישום"
-        },
-        {
-            "id": "OPTIMIZING_INDEX",
-            "value": "מייעל אינדקס..."
-        },
-        {
-            "id": "NO_CHANGES_DETECTED",
-            "value": "לא נמצאו שינויים."
-        },
-        {
-            "id": "FILTER_TAGS",
-            "value": "סנן תגיות"
-        },
-        {
-            "id": "IMPORT_GROUPS",
-            "value": "ייבא קבוצות"
-        },
-        {
-            "id": "HISTORY_VIEW",
-            "value": "תצוגת היסטוריה"
-        },
-        {
-            "id": "TODAY",
-            "value": "היום"
-        },
-        {
-            "id": "YESTERDAY",
-            "value": "אתמול"
-        },
-        {
-            "id": "THIS_WEEK",
-            "value": "השבוע"
-        },
-        {
-            "id": "LAST_WEEK",
-            "value": "שבוע שעבר"
-        },
-        {
-            "id": "OLDER",
-            "value": "ישן יותר"
-        }
-    ]
+	id: "heb",
+	name: "עברית",
+	direction: "rtl",
+	code: "he",
+	locale: "he-IL",
+	translations: [
+		{
+			id: "NO_TAGS_FOUND",
+			value: "לא נמצאו תגיות.",
+		},
+		{
+			id: "INDEXING_FAILED",
+			value: "יצירת אינדקס נכשל",
+		},
+		{
+			id: "LOADING_TAGS",
+			value: "טוען תגיות...",
+		},
+		{
+			id: "APP_NAME",
+			value: "עקרונות המערכת",
+		},
+		{
+			id: "APPS",
+			value: "אפליקציות",
+		},
+		{
+			id: "ALL",
+			value: "הכל",
+		},
+		{
+			id: "USERS",
+			value: "משתמשים",
+		},
+		{
+			id: "DAY",
+			value: "יום",
+		},
+		{
+			id: "ROLES",
+			value: "תפקידים",
+		},
+		{
+			id: "LANGUAGES",
+			value: "שפות",
+		},
+		{
+			id: "FONTSIZES",
+			value: "גודל גופנים",
+		},
+		{
+			id: "OK",
+			value: "אישור",
+		},
+		{
+			id: "NONE",
+			value: "ללא",
+		},
+		{
+			id: "SETTINGS",
+			value: "הגדרות",
+		},
+		{
+			id: "TRANSLATIONS",
+			value: "תרגומים",
+		},
+		{
+			id: "NAME",
+			value: "שם",
+		},
+		{
+			id: "SETTING",
+			value: "הגדרה",
+		},
+		{
+			id: "COMPLETE",
+			value: "הושלם",
+		},
+		{
+			id: "BUNDLE",
+			value: "חבילה",
+		},
+		{
+			id: "SEPARATE",
+			value: "נפרד",
+		},
+		{
+			id: "BUNDLED",
+			value: "מאוגד",
+		},
+		{
+			id: "LANGUAGE",
+			value: "שפה",
+		},
+		{
+			id: "LANGUAGE_DESCRIPTION",
+			value: "שנה את שפת האפליקציה.",
+		},
+		{
+			id: "DARK_MODE",
+			value: "מצב חשוך",
+		},
+		{
+			id: "DARK_MODE_DESCRIPTION",
+			value: "עבור בין מצב מואר וחשוך.",
+		},
+		{
+			id: "LIGHT_MODE",
+			value: "מצב מואר",
+		},
+		{
+			id: "DIRECTION",
+			value: "כיוון",
+		},
+		{
+			id: "LEFT_TO_RIGHT",
+			value: "משמאל לימין",
+		},
+		{
+			id: "RIGHT_TO_LEFT",
+			value: "מימין לשמאל",
+		},
+		{
+			id: "ID",
+			value: "מזהה",
+		},
+		{
+			id: "AUTO",
+			value: "אוטומטי",
+		},
+		{
+			id: "OFF",
+			value: "כבוי",
+		},
+		{
+			id: "ON",
+			value: "דלוק",
+		},
+		{
+			id: "FONT_SIZE",
+			value: "גודל גופן",
+		},
+		{
+			id: "FONT_SIZE_DESCRIPTION",
+			value: "התאם את גודל הטקסט.",
+		},
+		{
+			id: "DEVICES",
+			value: "מכשירים",
+		},
+		{
+			id: "MOBILE",
+			value: "טלפון",
+		},
+		{
+			id: "TABLET",
+			value: "טבלט",
+		},
+		{
+			id: "DESKTOP",
+			value: "מחשב",
+		},
+		{
+			id: "SEARCH",
+			value: "חיפוש",
+		},
+		{
+			id: "JUMP_TO_ARTICLE",
+			value: "קפוץ למאמר",
+		},
+		{
+			id: "ARTICLE_NUMBER",
+			value: "מספר מאמר",
+		},
+		{
+			id: "SHOW_SEARCH",
+			value: "הצג חיפוש",
+		},
+		{
+			id: "HIDE_SEARCH",
+			value: "הסתר חיפוש",
+		},
+		{
+			id: "MATCH",
+			value: "התאמה",
+		},
+		{
+			id: "MATCH_NUMBER",
+			value: "מספר התאמה",
+		},
+		{
+			id: "RESET",
+			value: "איפוס",
+		},
+		{
+			id: "ENGLISH",
+			value: "אנגלית",
+		},
+		{
+			id: "BOTH",
+			value: "שניהם",
+		},
+		{
+			id: "RESET_SETTINGS",
+			value: "איפוס הגדרות",
+		},
+		{
+			id: "RESET_SETTINGS_DESCRIPTION",
+			value: "משחזר את הגדרות ברירת המחדל.",
+		},
+		{
+			id: "CANCEL",
+			value: "ביטול",
+		},
+		{
+			id: "CLOSE",
+			value: "סגור",
+		},
+		{
+			id: "RESET_MESSAGE",
+			value: "האם לאפס את ההגדרות לנתונים הראשוניים?",
+		},
+		{
+			id: "FULL_SYNC",
+			value: "סנכרון מלא",
+		},
+		{
+			id: "FULL_SYNC_DESCRIPTION",
+			value: "מנקה את מטמון האפליקציה וטוען מחדש.",
+		},
+		{
+			id: "FULL_SYNC_MESSAGE",
+			value:
+				"האם ברצונך לבצע סינכרון מלא? פעולה זו תוריד מחדש את כל נתוני השיעורים מהשרת.",
+		},
+		{
+			id: "CLEAR_STORAGE",
+			value: "נקה אחסון",
+		},
+		{
+			id: "CLEAR_STORAGE_DESCRIPTION",
+			value: "מוחק את כל הנתונים המקומיים.",
+		},
+		{
+			id: "CONFIRM_CLEAR_STORAGE",
+			value:
+				"האם אתה בטוח שברצונך לנקות את כל האחסון? זה ימחוק את כל הנתונים המקומיים וייטען מחדש את הדף.",
+		},
+		{
+			id: "VERY_SMALL",
+			value: "קטן מאוד",
+		},
+		{
+			id: "SMALL",
+			value: "קטן",
+		},
+		{
+			id: "NORMAL",
+			value: "רגיל",
+		},
+		{
+			id: "LARGE",
+			value: "גדול",
+		},
+		{
+			id: "VERY_LARGE",
+			value: "גדול מאוד",
+		},
+		{
+			id: "STORAGE",
+			value: "אחסון",
+		},
+		{
+			id: "LOCAL",
+			value: "מקומי",
+		},
+		{
+			id: "REMOTE",
+			value: "מרחוק",
+		},
+		{
+			id: "SHARED",
+			value: "משותף",
+		},
+		{
+			id: "PERSONAL",
+			value: "אישי",
+		},
+		{
+			id: "NEW_FILE",
+			value: "קובץ חדש",
+		},
+		{
+			id: "NEW_FOLDER",
+			value: "תיקייה חדש",
+		},
+		{
+			id: "FILE_NAME_PLACEHOLDER",
+			value: "כתוב שם לקובץ...",
+		},
+		{
+			id: "FOLDER_NAME_PLACEHOLDER",
+			value: "כתוב שם לתיקייה...",
+		},
+		{
+			id: "RENAME",
+			value: "שינוי שם",
+		},
+		{
+			id: "DELETE",
+			value: "מחיקה",
+		},
+		{
+			id: "DELETE_FOLDER",
+			value: "מחיקת תיקייה",
+		},
+		{
+			id: "DELETE_FILE",
+			value: "מחיקת קובץ",
+		},
+		{
+			id: "DELETE_ARTICLE",
+			value: "מחיקת מאמר",
+		},
+		{
+			id: "DELETE_ARTICLE_CONFIRM",
+			value: "האם אתה בטוח שברצונך למחוק את המאמר הזה? לא ניתן לבטל פעולה זו.",
+		},
+		{
+			id: "DELETING",
+			value: "מוחק...",
+		},
+		{
+			id: "ITEMS_NONE_SELECTED",
+			value: "לא נבחר פריטים",
+		},
+		{
+			id: "SELECTED_ITEM",
+			value: "פריט אחד שנבחר",
+		},
+		{
+			id: "SELECTED_ITEMS",
+			value: "${count} פריטים שנבחרו",
+		},
+		{
+			id: "EDITOR",
+			value: "עורך",
+		},
+		{
+			id: "FILE",
+			value: "קובץ",
+		},
+		{
+			id: "FOLDER",
+			value: "תיקייה",
+		},
+		{
+			id: "STORAGE",
+			value: "אחסון",
+		},
+		{
+			id: "SIZE",
+			value: "גודל",
+		},
+		{
+			id: "DATE",
+			value: "תאריך",
+		},
+		{
+			id: "BYTES",
+			value: "בתים",
+		},
+		{
+			id: "ALREADY_EXISTS",
+			value: "${name} כבר קיים!",
+		},
+		{
+			id: "EXPORT",
+			value: "יצוא",
+		},
+		{
+			id: "IMPORT",
+			value: "ייבוא",
+		},
+		{
+			id: "IMPORT_FOLDER",
+			value: "יבוא תיקייה",
+		},
+		{
+			id: "IMPORT_FILE",
+			value: "יבוא קובץ",
+		},
+		{
+			id: "MOVE",
+			value: "העבר",
+		},
+		{
+			id: "COPY",
+			value: "העתק",
+		},
+		{
+			id: "SELECT_NONE",
+			value: "בטל בחירה",
+		},
+		{
+			id: "SELECT_ALL",
+			value: "בחר הכל",
+		},
+		{
+			id: "FIRST_PAGE",
+			value: "עמוד ראשון",
+		},
+		{
+			id: "LAST_PAGE",
+			value: "עמוד אחרון",
+		},
+		{
+			id: "PREVIOUS_PAGE",
+			value: "עמוד קודם",
+		},
+		{
+			id: "NEXT_PAGE",
+			value: "עמוד הבא",
+		},
+		{
+			id: "PREVIOUS",
+			value: "הקודם",
+		},
+		{
+			id: "NEXT",
+			value: "הבא",
+		},
+		{
+			id: "NO_SUMMARY",
+			value: "אין סיכום זמין",
+		},
+		{
+			id: "PAGE_INDEX",
+			value: "מספר עמוד",
+		},
+		{
+			id: "PAGE_COUNT",
+			value: "כמות עמודים",
+		},
+		{
+			id: "DESTINATION",
+			value: "יעד",
+		},
+		{
+			id: "TO",
+			value: "אל",
+		},
+		{
+			id: "SELECT_DESTINATION",
+			value: "בחר יעד",
+		},
+		{
+			id: "MENU",
+			value: "תפריט",
+		},
+		{
+			id: "SIDEBAR",
+			value: "סרגל צד",
+		},
+		{
+			id: "ACCOUNT",
+			value: "חשבון",
+		},
+		{
+			id: "SIGN_IN",
+			value: "התחברות",
+		},
+		{
+			id: "PODCAST",
+			value: "פודקאסט",
+		},
+		{
+			id: "PODCAST_FEED",
+			value: "פיד פודקאסט",
+		},
+		{
+			id: "PODCAST_FEED_DESCRIPTION",
+			value: "השתמש בכתובת זו כדי להירשם לפודקאסט באפליקציה המועדפת עליך.",
+		},
+		{
+			id: "COPY_URL",
+			value: "העתק כתובת",
+		},
+		{
+			id: "API",
+			value: "API",
+		},
+		{
+			id: "API_FEED",
+			value: "פיד JSON API",
+		},
+		{
+			id: "API_FEED_DESCRIPTION",
+			value: "אחזר את כל השיעורים, המטא-דאטה, התגיות, הסיכומים וכתובות האודיו/וידאו והתמלולים במבנה JSON נקי.",
+		},
+		{
+			id: "API_DOCUMENTATION",
+			value: "תיעוד ודוגמאות API",
+		},
+		{
+			id: "API_INSTRUCTIONS",
+			value: "השתמש בנקודת הקצה האישית הבאה כדי לשלב את נתוני השיעורים בשירותים חיצוניים, סקריפטים או פלטפורמות. ה-API מאובטח באמצעות הטוקן הפרטי שלך ומוגבל ל-60 בקשות בדקה.",
+		},
+		{
+			id: "API_ACCESS_DENIED_DESC",
+			value: "תכונות ה-JSON API זמינות למשתמשים רשומים בלבד. לחשבונות אורחים (visitors) אין גישה ל-API.",
+		},
+		{
+			id: "API_SESSIONS",
+			value: "שיעורים",
+		},
+		{
+			id: "API_QUERY_PARAMETERS",
+			value: "פרמטרים של שאילתה",
+		},
+		{
+			id: "API_PARAMETER",
+			value: "פרמטר",
+		},
+		{
+			id: "API_TYPE",
+			value: "סוג",
+		},
+		{
+			id: "API_DESCRIPTION",
+			value: "תיאור",
+		},
+		{
+			id: "API_COPY_CODE",
+			value: "העתק קוד",
+		},
+		{
+			id: "API_COPIED_CODE",
+			value: "הקוד הועתק!",
+		},
+		{
+			id: "API_JSON_RESPONSE_SCHEMA",
+			value: "סכמת תגובת JSON",
+		},
+		{
+			id: "API_COPIED",
+			value: "הועתק!",
+		},
+		{
+			id: "API_PARAM_GROUP_DESC",
+			value: "סנן שיעורים לפי שם קבוצה ספציפי.",
+		},
+		{
+			id: "API_PARAM_TAG_DESC",
+			value: "סנן שיעורים המכילים תגית ספציפית.",
+		},
+		{
+			id: "API_PARAM_DATE_DESC",
+			value: "סנן לפי תאריך מדויק (פורמט: YYYY-MM-DD).",
+		},
+		{
+			id: "API_PARAM_YEAR_DESC",
+			value: "סנן שיעורים לפי שנה.",
+		},
+		{
+			id: "API_PARAM_QUERY_DESC",
+			value: "חיפוש טקסט חופשי בכותרת, תקציר ותגיות.",
+		},
+		{
+			id: "API_PARAM_INDEX_DESC",
+			value: "אינדקס התחלה עבור חלוקה לעמודים / חלון הזזה (ברירת מחדל: 0).",
+		},
+		{
+			id: "API_PARAM_COUNT_DESC",
+			value: "הגבלת מספר התוצאות (ברירת מחדל: 100, מקסימום: 500).",
+		},
+		{
+			id: "API_TYPE_STRING",
+			value: "String",
+		},
+		{
+			id: "API_TYPE_INTEGER",
+			value: "Integer",
+		},
+		{
+			id: "SIGN_OUT",
+			value: "ניתוק",
+		},
+		{
+			id: "SIGN_UP",
+			value: "הרשם",
+		},
+		{
+			id: "EMAIL_ADDRESS",
+			value: "כתובת אימייל",
+		},
+		{
+			id: "PASSWORD",
+			value: "סיסמה",
+		},
+		{
+			id: "OLD_PASSWORD",
+			value: "סיסמה ישנה",
+		},
+		{
+			id: "NEW_PASSWORD",
+			value: "סיסמה חדשה",
+		},
+		{
+			id: "REMEMBER_ME",
+			value: "תזכור אותי",
+		},
+		{
+			id: "FORGET_PASSWORD",
+			value: "שכחת סיסמה?",
+		},
+		{
+			id: "RESET_PASSWORD",
+			value: "איפוס סיסמה",
+		},
+		{
+			id: "SIGN_UP_TEXT",
+			value: "הרשם",
+		},
+		{
+			id: "FIRST_NAME",
+			value: "שם פרטי",
+		},
+		{
+			id: "LAST_NAME",
+			value: "שם משפחה",
+		},
+		{
+			id: "HAVE_ACCOUNT",
+			value: "כבר יש לך חשבון? התחבר",
+		},
+		{
+			id: "EMPTY_EMAIL",
+			value: "שדה האימייל הוא ריק!",
+		},
+		{
+			id: "BAD_EMAIL",
+			value: "כתובת האימייל אינה תקינה!",
+		},
+		{
+			id: "EMPTY_PASSWORD",
+			value: "שדה הסיסמה הוא ריק!",
+		},
+		{
+			id: "EMPTY_FIELD",
+			value: "השדה הזה הוא ריק!",
+		},
+		{
+			id: "SIGNED_IN",
+			value: "רשום",
+		},
+		{
+			id: "NOT_SIGNED_IN",
+			value: "לא רשום",
+		},
+		{
+			id: "USER_NOT_FOUND",
+			value: "לא ניתן למצוא משתמש!",
+		},
+		{
+			id: "WRONG_PASSWORD",
+			value: "סיסמה שגויה!",
+		},
+		{
+			id: "USER_ALREADY_EXISTS",
+			value: "משתמש כבר קיים!",
+		},
+		{
+			id: "NO_RESET_TOKEN",
+			value: "לא נמצא קוד איפוס!",
+		},
+		{
+			id: "INVALID_TOKEN",
+			value: "קוד איפוס לא תקין!",
+		},
+		{
+			id: "TOKEN_EXPIRED",
+			value: "פג תוקפו של קוד האיפוס!",
+		},
+		{
+			id: "EMAIL_SERVICE_ERROR",
+			value: "שגיאה בשירות האימייל!",
+		},
+		{
+			id: "MISSING_ID",
+			value: "מזהה חסר!",
+		},
+		{
+			id: "CHALLENGE_NOT_FOUND",
+			value: "אתגר לא נמצא!",
+		},
+		{
+			id: "VERIFICATION_FAILED",
+			value: "אימות נכשל!",
+		},
+		{
+			id: "CREDENTIAL_NOT_FOUND",
+			value: "קרדנציאל לא נמצא!",
+		},
+		{
+			id: "RATE_LIMIT_EXCEEDED",
+			value: "יותר מדי ניסיונות, אנא נסה שוב מאוחר יותר.",
+		},
+		{
+			id: "PASSKEY_REGISTERED",
+			value: "מפתח גישה נרשם בהצלחה!",
+		},
+		{
+			id: "PASSKEY_REGISTRATION_FAILED",
+			value: "רישום מפתח גישה נכשל!",
+		},
+		{
+			id: "PASSKEY_LOGIN_FAILED",
+			value: "התחברות עם מפתח גישה נכשלה!",
+		},
+		{
+			id: "ENTER_PASSKEY_NAME",
+			value: "הכנס שם עבור מפתח גישה זה",
+		},
+		{
+			id: "CONFIRM_DELETE_PASSKEY",
+			value: "האם אתה בטוח שברצונך להסיר את מפתח הגישה הזה?",
+		},
+		{
+			id: "PASSWORD_TOO_SHORT",
+			value: "הסיסמה חייבת להיות באורך של 8 תווים לפחות.",
+		},
+		{
+			id: "PASSWORD_TOO_LONG",
+			value: "הסיסמה אינה יכולה לעלות על 72 תווים.",
+		},
+		{
+			id: "ACCOUNT",
+			value: "חשבון",
+		},
+		{
+			id: "ROLE",
+			value: "תפקיד",
+		},
+		{
+			id: "TYPE",
+			value: "סוג",
+		},
+		{
+			id: "TYPES",
+			value: "סוגים",
+		},
+		{
+			id: "WITH_THUMBNAIL",
+			value: "עם תמונה",
+		},
+		{
+			id: "WITHOUT_THUMBNAIL",
+			value: "ללא תמונה",
+		},
+		{
+			id: "EXCLUDE",
+			value: "החרגה",
+		},
+		{
+			id: "EXCLUDE_IMAGE_ONLY",
+			value: "תמונה בלבד",
+		},
+		{
+			id: "ALL",
+			value: "הכל",
+		},
+		{
+			id: "WITH_SUMMARY",
+			value: "עם סיכום",
+		},
+		{
+			id: "WITHOUT_SUMMARY",
+			value: "ללא סיכום",
+		},
+		{
+			id: "SUMMARIES",
+			value: "סיכומים",
+		},
+		{
+			id: "TRANSCRIPTIONS",
+			value: "תמלולים",
+		},
+		{
+			id: "WITH_TAGS",
+			value: "עם תגיות",
+		},
+		{
+			id: "WITHOUT_TAGS",
+			value: "ללא תגיות",
+		},
+		{
+			id: "ADD_ROLE",
+			value: "הוסף תפקיד",
+		},
+		{
+			id: "NEW_ROLE",
+			value: "תפקיד חדש",
+		},
+		{
+			id: "ADMIN",
+			value: "מנהל",
+		},
+		{
+			id: "STUDENT",
+			value: "תלמיד",
+		},
+		{
+			id: "UPPER",
+			value: "עליון",
+		},
+		{
+			id: "TEACHER",
+			value: "מורה",
+		},
+		{
+			id: "SAVE",
+			value: "שמור",
+		},
+		{
+			id: "SAVING",
+			value: "שומר...",
+		},
+		{
+			id: "CANCEL",
+			value: "ביטול",
+		},
+		{
+			id: "VISITOR",
+			value: "אורח",
+		},
+		{
+			id: "CHANGE_PASSWORD",
+			value: "שינוי סיסמה",
+		},
+		{
+			id: "RESET_EMAIL_SENT",
+			value: "אימייל נשלח לחשבון שלך כדי שתוכל לאפס את הסיסמה.",
+		},
+		{
+			id: "ACCESS_DENIED",
+			value: "גישה חסום",
+		},
+		{
+			id: "BAD_ID",
+			value: "המזהה יכול להכיל תווים אלפא-נומריים בלבד",
+		},
+		{
+			id: "DIAGRAMS",
+			value: "תרשימים",
+		},
+		{
+			id: "DIAGRAM",
+			value: "תרשים",
+		},
+		{
+			id: "FULLSCREEN",
+			value: "מסך מלא",
+		},
+		{
+			id: "EXIT_FULLSCREEN",
+			value: "יציאה ממסך מלא",
+		},
+		{
+			id: "TERMS",
+			value: "מושגים",
+		},
+		{
+			id: "TRANSLATION",
+			value: "תרגום",
+		},
+		{
+			id: "TRANSLITERATION",
+			value: "תַעתִיק",
+		},
+		{
+			id: "HEBREW",
+			value: "עִברִית",
+		},
+		{
+			id: "PHASE",
+			value: "בחינה",
+		},
+		{
+			id: "TOOLS",
+			value: "כלים",
+		},
+		{
+			id: "SHOW_CONCEPTS",
+			value: "הראה מושגים",
+		},
+		{
+			id: "HIDE_CONCEPTS",
+			value: "הסתר מושגים",
+		},
+		{
+			id: "SYNC",
+			value: "סינכרון",
+		},
+		{
+			id: "FULL_SYNC",
+			value: "סנכרון כל השיעורים",
+		},
+		{
+			id: "SYNC_FAILED",
+			value: "סינכרון נכשל",
+		},
+		{
+			id: "SYNCING",
+			value: "מסנכרן",
+		},
+		{
+			id: "SYNCING_MAIN",
+			value: "מסנכרן ראשי",
+		},
+		{
+			id: "SYNCING_LIBRARY",
+			value: "מסנכרן ספריה",
+		},
+		{
+			id: "SYNCING_PERSONAL",
+			value: "מסנכרן אישי",
+		},
+		{
+			id: "SYNC_SESSIONS",
+			value: "סנכרון שיעורים",
+		},
+		{
+			id: "SYNC_ARTICLE_TAGS",
+			value: "סנכרון תגיות מאמרים",
+		},
+		{
+			id: "SYNC_ARTICLE_TAGS_CONFIRM",
+			value:
+				"האם אתה בטוח שברצונך לסנכרן תגיות מהספרייה לכל קובצי המאמרים? פעולה זו תדרוס תגיות בודדות של קבצים.",
+		},
+		{
+			id: "SYNCING_ARTICLE_TAGS",
+			value: "מסנכרן תגיות מאמרים...",
+		},
+		{
+			id: "SYNC_ALL_SESSIONS",
+			value: "סנכרון כל השיעורים",
+		},
+		{
+			id: "IMAGE",
+			value: "תמונה",
+		},
+		{
+			id: "ERROR",
+			value: "שגיאה",
+		},
+		{
+			id: "FOLDER",
+			value: "תיקייה",
+		},
+		{
+			id: "STATUS",
+			value: "מצב",
+		},
+		{
+			id: "SESSIONS",
+			value: "שיעורים",
+		},
+		{
+			id: "SESSION",
+			value: "שיעור",
+		},
+		{
+			id: "UPDATE_SESSIONS",
+			value: "עדכון שיעורים",
+		},
+		{
+			id: "YEARS",
+			value: "שנים",
+		},
+		{
+			id: "PROGRESS",
+			value: "התקדמות",
+		},
+		{
+			id: "ERRORS",
+			value: "שגיאות",
+		},
+		{
+			id: "POSITION",
+			value: "מיקום",
+		},
+		{
+			id: "WITH_POSITION",
+			value: "עם מיקום",
+		},
+		{
+			id: "WITHOUT_POSITION",
+			value: "ללא מיקום",
+		},
+		{
+			id: "WITH_DURATION",
+			value: "ידוע",
+		},
+		{
+			id: "WITHOUT_DURATION",
+			value: "לא ידוע",
+		},
+		{
+			id: "VIDEO",
+			value: "וידאו",
+		},
+		{
+			id: "AUDIO",
+			value: "שמע",
+		},
+		{
+			id: "AUDIO_PLAYER",
+			value: "נגן שמע",
+		},
+		{
+			id: "REWIND",
+			value: "אחורה",
+		},
+		{
+			id: "FAST_FORWARD",
+			value: "קדימה",
+		},
+		{
+			id: "PLAY",
+			value: "נגן",
+		},
+		{
+			id: "PAUSE",
+			value: "השהה",
+		},
+		{
+			id: "STOP",
+			value: "עצור",
+		},
+		{
+			id: "SPEED",
+			value: "מהירות",
+		},
+		{
+			id: "SPEED_TOOLBAR",
+			value: "סרגל מהירות",
+		},
+		{
+			id: "SPEED_TOOLBAR_DESCRIPTION",
+			value: "מיקום סרגל כלי המהירות.",
+		},
+		{
+			id: "TOP",
+			value: "למעלה",
+		},
+		{
+			id: "BOTTOM",
+			value: "למטה",
+		},
+		{
+			id: "SPEED_SLOW",
+			value: "הכי לאט",
+		},
+		{
+			id: "SPEED_SLOWER",
+			value: "לאט",
+		},
+		{
+			id: "SPEED_NORMAL",
+			value: "רגיל",
+		},
+		{
+			id: "SPEED_FASTER",
+			value: "מהר",
+		},
+		{
+			id: "SPEED_FAST",
+			value: "יותר מהר",
+		},
+		{
+			id: "SPEED_VERY_FAST",
+			value: "מהר מאוד",
+		},
+		{
+			id: "SPEED_SUPER_FAST",
+			value: "סופר מהיר",
+		},
+		{
+			id: "SPEED_DOUBLE",
+			value: "x2",
+		},
+		{
+			id: "SPEED_TRIPLE",
+			value: "x3",
+		},
+		{
+			id: "GROUP",
+			value: "קבוצה",
+		},
+		{
+			id: "LIBRARY",
+			value: "ספרייה",
+		},
+		{
+			id: "GROUPS",
+			value: "קבוצות",
+		},
+		{
+			id: "YEAR",
+			value: "שנה",
+		},
+		{
+			id: "VOLUME",
+			value: "עוצמה",
+		},
+		{
+			id: "LOW_VOLUME",
+			value: "נמוכה",
+		},
+		{
+			id: "MEDIUM_VOLUME",
+			value: "בינונית",
+		},
+		{
+			id: "HIGH_VOLUME",
+			value: "גבוהה",
+		},
+		{
+			id: "MEDIA",
+			value: "מדיה",
+		},
+		{
+			id: "DOWNLOAD",
+			value: "הורדה",
+		},
+		{
+			id: "EXPAND",
+			value: "הרחב",
+		},
+		{
+			id: "COLLAPSE",
+			value: "כווץ",
+		},
+		{
+			id: "SHOW_GROUP_COUNTERS",
+			value: "הצג מונים קבוצתיים",
+		},
+		{
+			id: "HIDE_GROUP_COUNTERS",
+			value: "הסתר מונים קבוצתיים",
+		},
+		{
+			id: "ID_DESCRIPTION",
+			value: "זה המזהה היחודי שלך שמורכב באותיות באנגלית (A-Z) ומספרים (0-9)",
+		},
+		{
+			id: "PLAYER",
+			value: "נגן",
+		},
+		{
+			id: "PLAYING",
+			value: "מנגן",
+		},
+		{
+			id: "SCHEDULE",
+			value: "יומן",
+		},
+		{
+			id: "PREVIOUS_MONTH",
+			value: "חודש שעבר",
+		},
+		{
+			id: "NEXT_MONTH",
+			value: "חודש הבא",
+		},
+		{
+			id: "PREVIOUS_WEEK",
+			value: "שבוע שעבר",
+		},
+		{
+			id: "NEXT_WEEK",
+			value: "שבוע הבא",
+		},
+		{
+			id: "TODAY",
+			value: "היום",
+		},
+		{
+			id: "WEEK_VIEW",
+			value: "מבט שבועי",
+		},
+		{
+			id: "MONTH_VIEW",
+			value: "מבט חודשי",
+		},
+		{
+			id: "TRACKS_VIEW",
+			value: "תצוגת מסלולים",
+		},
+		{
+			id: "YEAR_VIEW",
+			value: "תצוגה שנתית",
+		},
+		{
+			id: "DAY_VIEW",
+			value: "תצוגה יומית",
+		},
+		{
+			id: "BACK",
+			value: "חזור",
+		},
+		{
+			id: "PREVIOUS_DAY",
+			value: "יום קודם",
+		},
+		{
+			id: "NEXT_DAY",
+			value: "יום הבא",
+		},
+		{
+			id: "WEEK",
+			value: "שבוע",
+		},
+		{
+			id: "MONTH",
+			value: "חודש",
+		},
+		{
+			id: "TIME_LEFT",
+			value: "נשאר",
+		},
+		{
+			id: "NUM_ITEMS",
+			value: "מספר פריטים",
+		},
+		{
+			id: "REFRESH",
+			value: "רענן",
+		},
+		{
+			id: "ZOOM",
+			value: "תקריב",
+		},
+		{
+			id: "ZOOM_IN",
+			value: "מיקוד תצוגה",
+		},
+		{
+			id: "ZOOM_OUT",
+			value: "הקטן תצוגה",
+		},
+		{
+			id: "PLAYER",
+			value: "נגן",
+		},
+		{
+			id: "PREVIOUS_PARAGRAPH",
+			value: "פסקה קודמת",
+		},
+		{
+			id: "NEXT_PARAGRAPH",
+			value: "פסקה הבאה",
+		},
+		{
+			id: "SELECT_VOICE",
+			value: "בחר קול",
+		},
+		{
+			id: "COLLAPSE",
+			value: "צמצם",
+		},
+		{
+			id: "EDIT_ACCOUNT",
+			value: "שינוי חשבון",
+		},
+		{
+			id: "PLAYING_ERROR",
+			value: "יש שגיאה בניגון המדיה",
+		},
+		{
+			id: "RELOAD",
+			value: "טעינה מחדש",
+		},
+		{
+			id: "COLOR",
+			value: "צבע",
+		},
+		{
+			id: "USER",
+			value: "משתמש",
+		},
+		{
+			id: "THUMBNAIL",
+			value: "תמונה ממוזערת",
+		},
+		{
+			id: "IMAGE",
+			value: "תמונה",
+		},
+		{
+			id: "NO_ITEMS",
+			value: "אין פריטים",
+		},
+		{
+			id: "ADVANCED",
+			value: "מתקדם",
+		},
+		{
+			id: "LIST_VIEW",
+			value: "תצוגת רשימה",
+		},
+		{
+			id: "TREE_VIEW",
+			value: "תצוגת עץ",
+		},
+		{
+			id: "TABLE_VIEW",
+			value: "תצוגת טבלה",
+		},
+		{
+			id: "SORT",
+			value: "מיון",
+		},
+		{
+			id: "GRID_VIEW",
+			value: "תצוגת רשת",
+		},
+		{
+			id: "LOADING",
+			value: "טוען",
+		},
+		{
+			id: "ADD_BOOKMARK",
+			value: "הוסף סימניה",
+		},
+		{
+			id: "REMOVE_BOOKMARK",
+			value: "הסר סימניה",
+		},
+		{
+			id: "LOCATION",
+			value: "מקום",
+		},
+		{
+			id: "BOOKMARKS",
+			value: "סימניות",
+		},
+		{
+			id: "MANAGE",
+			value: "ניהול",
+		},
+		{
+			id: "REPLAY",
+			value: "חזור",
+		},
+		{
+			id: "FORWARD",
+			value: "קדימה",
+		},
+		{
+			id: "UNNAMED",
+			value: "ללא שם",
+		},
+		{
+			id: "DURATION",
+			value: "אורך",
+		},
+		{
+			id: "UNKNOWN",
+			value: "לא ידוע",
+		},
+		{
+			id: "VERSION",
+			value: "גירסה",
+		},
+		{
+			id: "ROWS_PER_PAGE",
+			value: "מספר שורות לעמוד",
+		},
+		{
+			id: "REQUIRE_SIGNIN",
+			value: "תיכנס לחשבון שלך",
+		},
+		{
+			id: "REQUIRE_FULL_SYNC",
+			value: "תעשה סנכרון מלא",
+		},
+		{
+			id: "WAIT_FOR_APPROVAL",
+			value: "צריך אישור, נסה שוב מאוחר יותר",
+		},
+		{
+			id: "PLAY_NOT_ALLOWED",
+			value: "אינך מורשה לנגן את שיעור",
+		},
+		{
+			id: "TAGS",
+			value: "תגים",
+		},
+		{
+			id: "TAG",
+			value: "תג",
+		},
+		{
+			id: "NEW_TAG",
+			value: "תג חדש",
+		},
+		{
+			id: "CONTENT",
+			value: "תוכן",
+		},
+		{
+			id: "NEW_CONTENT",
+			value: "תוכן חדש",
+		},
+		{
+			id: "LIBRARIAN",
+			value: "ספרן",
+		},
+		{
+			id: "SCAN_CONTENT",
+			value: "סרוק תוכן",
+		},
+		{
+			id: "RESTART",
+			value: "אתחול",
+		},
+		{
+			id: "DETAILS",
+			value: "פרטים",
+		},
+		{
+			id: "SUBTITLES",
+			value: "כתוביות",
+		},
+		{
+			id: "SUBTITLES_OFF",
+			value: "הסר כתיביות",
+		},
+		{
+			id: "TRANSCRIPT",
+			value: "תמליל",
+		},
+		{
+			id: "MATCHES",
+			value: "{current} מתוך {total} התאמות",
+		},
+		{
+			id: "SUMMARY",
+			value: "סיכום",
+		},
+		{
+			id: "CANNOT_LOAD_IMAGE",
+			value: "תמונה לא נטענת",
+		},
+		{
+			id: "VALUE",
+			value: "ערך",
+		},
+		{
+			id: "FULL_NAME",
+			value: "שם מלא",
+		},
+		{
+			id: "NEW_TYPE",
+			value: "סוג חדש",
+		},
+		{
+			id: "PARENT_TYPES",
+			value: "סוגי הורים",
+		},
+		{
+			id: "ARTICLES",
+			value: "מאמרים",
+		},
+		{
+			id: "ARTICLE",
+			value: "מאמר",
+		},
+		{
+			id: "NEW_ARTICLE",
+			value: "מאמר חדש",
+		},
+		{
+			id: "NUMBER",
+			value: "מספר",
+		},
+		{
+			id: "FIELD_TYPE",
+			value: "סוג שדה",
+		},
+		{
+			id: "TEXT",
+			value: "טֶקסט",
+		},
+		{
+			id: "ENABLED",
+			value: "מופעל",
+		},
+		{
+			id: "DISABLED",
+			value: "מנוטרל",
+		},
+		{
+			id: "ENABLE",
+			value: "אפשר",
+		},
+		{
+			id: "DISABLE",
+			value: "השבת",
+		},
+		{
+			id: "MERGE",
+			value: "מזג",
+		},
+		{
+			id: "SPLIT",
+			value: "פצל",
+		},
+		{
+			id: "STORAGE",
+			value: "אחסון",
+		},
+		{
+			id: "MERGED",
+			value: "ממוזג",
+		},
+		{
+			id: "SIZE",
+			value: "גודל",
+		},
+		{
+			id: "STATISTICS",
+			value: "סטטיסטיקות",
+		},
+		{
+			id: "AI",
+			value: "AI",
+		},
+		{
+			id: "OVERVIEW",
+			value: "סקירה כללית",
+		},
+		{
+			id: "FILTER",
+			value: "סינון",
+		},
+		{
+			id: "ATTRIBUTE",
+			value: "מאפיין",
+		},
+		{
+			id: "ATTRIBUTES",
+			value: "מאפיינים",
+		},
+		{
+			id: "CLEAR_FILTER",
+			value: "נקה סינון",
+		},
+		{
+			id: "CLEAR_FILTERS",
+			value: "נקה סינונים",
+		},
+		{
+			id: "CLEAR_GROUPS",
+			value: "נקה קבוצות",
+		},
+		{
+			id: "SELECTED",
+			value: "נבחר",
+		},
+		{
+			id: "SHOW_DISABLED_GROUPS",
+			value: "הראה קבוצות מנוטרלות",
+		},
+		{
+			id: "HIDE_DISABLED_GROUPS",
+			value: "הסתר קבוצות מנוטרלות",
+		},
+		{
+			id: "OPTIONS",
+			value: "אפשרויות",
+		},
+		{
+			id: "SIGN_IN_WITH_PASSKEY",
+			value: "התחברות עם מפתח גישה",
+		},
+		{
+			id: "REGISTER_PASSKEY",
+			value: "רישום מפתח גישה",
+		},
+		{
+			id: "CREATE_PASSKEY",
+			value: "צור מפתח גישה למכשיר זה",
+		},
+		{
+			id: "PASSKEYS",
+			value: "מפתחות גישה",
+		},
+		{
+			id: "SEEK",
+			value: "חיפוש",
+		},
+		{
+			id: "NEW_SESSIONS",
+			value: "שיעורים חדשים",
+		},
+		{
+			id: "UPDATE_METADATA",
+			value: "עדכון מידע",
+		},
+		{
+			id: "UPDATE_METADATA_CURRENT_YEAR",
+			value: "עדכון מידע (שנה נוכחית)",
+		},
+		{
+			id: "PERSONAL_SYNC",
+			value: "הסנכרון האישי",
+		},
+		{
+			id: "PERSONAL_SYNC_ERROR",
+			value: "שגיאה בהסנכרון האישי",
+		},
+		{
+			id: "PERSONAL_SYNC_BUSY",
+			value: "הסנכרון האישי בוצע",
+		},
+		{
+			id: 404,
+			value: "לא ניתן לגשת לשרת!",
+		},
+		{
+			id: "SYNC_STATUS",
+			value: "מצב סנכרון",
+		},
+		{
+			id: "LAST_SYNCED",
+			value: "סנכרון אחרון",
+		},
+		{
+			id: "GROUPS_SYNCED",
+			value: "קבוצות שסונכרנו",
+		},
+		{
+			id: "ADDED_SESSIONS",
+			value: "שיעורים שנוספו",
+		},
+		{
+			id: "REMOVED_SESSIONS",
+			value: "שיעורים שהוסרו",
+		},
+		{
+			id: "TAGS_SYNCED",
+			value: "תגים שסונכרנו",
+		},
+		{
+			id: "IDLE",
+			value: "ממתין",
+		},
+		{
+			id: "NEVER",
+			value: "אף פעם",
+		},
+		{
+			id: "COPY_LOG",
+			value: "העתק יומן",
+		},
+		{
+			id: "LOG_COPIED",
+			value: "היומן הועתק ללוח",
+		},
+		{
+			id: "COPIED",
+			value: "הועתק!",
+		},
+		{
+			id: "SHOW_PASSWORD",
+			value: "הצג סיסמה",
+		},
+		{
+			id: "HIDE_PASSWORD",
+			value: "הסתר סיסמה",
+		},
+		{
+			id: "TOTAL_SESSIONS_ADDED",
+			value: "סה״כ שיעורים שנוספו",
+		},
+		{
+			id: "EXPAND_ALL",
+			value: "הרחב הכל",
+		},
+		{
+			id: "COLLAPSE_ALL",
+			value: "צמצם הכל",
+		},
+		{
+			id: "AUTHOR",
+			value: "מחבר",
+		},
+		{
+			id: "BOOK",
+			value: "ספר",
+		},
+		{
+			id: "VOLUME",
+			value: "כרך",
+		},
+		{
+			id: "PART",
+			value: "חלק",
+		},
+		{
+			id: "SECTION",
+			value: "סעיף",
+		},
+		{
+			id: "YEAR",
+			value: "שנה",
+		},
+		{
+			id: "PORTION",
+			value: "פרשה",
+		},
+		{
+			id: "ARTICLE",
+			value: "מאמר",
+		},
+		{
+			id: "CHAPTER",
+			value: "פרק",
+		},
+		{
+			id: "TITLE",
+			value: "כותרת",
+		},
+		{
+			id: "SELECT_ITEM",
+			value: "בחר מאמר לצפייה בתוכן",
+		},
+		{
+			id: "EDIT_TAGS",
+			value: "עריכת תגיות מאמר",
+		},
+		{
+			id: "VIEW_PLAIN_TEXT",
+			value: "הצג טקסט רגיל",
+		},
+		{
+			id: "VIEW_MARKDOWN",
+			value: "הצג Markdown",
+		},
+		{
+			id: "EDIT_ARTICLE",
+			value: "עריכת מאמר",
+		},
+		{
+			id: "EXPORT_TO_TXT",
+			value: "ייצוא ל-.txt",
+		},
+		{
+			id: "EXPORT_TO_MD",
+			value: "ייצוא ל-.md",
+		},
+		{
+			id: "EXPORT_TO_PDF",
+			value: "ייצוא ל-PDF",
+		},
+		{
+			id: "PRINT",
+			value: "הדפסה",
+		},
+		{
+			id: "COPY_TO_CLIPBOARD",
+			value: "העתק ללוח",
+		},
+		{
+			id: "PREVIOUS_MATCH",
+			value: "התאמה קודמת",
+		},
+		{
+			id: "NEXT_MATCH",
+			value: "התאמה הבאה",
+		},
+		{
+			id: "BATCH_UPDATE_TAGS",
+			value: "Batch Update Tags",
+		},
+		{
+			id: "FILTER_CONDITION",
+			value: "Filter Condition",
+		},
+		{
+			id: "KEY",
+			value: "תג",
+		},
+		{
+			id: "VALUE",
+			value: "ערך",
+		},
+		{
+			id: "CHANGE_FROM",
+			value: "שנה מ",
+		},
+		{
+			id: "CHANGE_TO",
+			value: "שנה ל",
+		},
+		{
+			id: "SOURCE_KEY",
+			value: "תג מקור",
+		},
+		{
+			id: "SOURCE_VALUE",
+			value: "ערך מקור",
+		},
+		{
+			id: "DESTINATION_KEY",
+			value: "תג יעד",
+		},
+		{
+			id: "DESTINATION_VALUE",
+			value: "ערך יעד",
+		},
+		{
+			id: "PREVIEW",
+			value: "Preview",
+		},
+		{
+			id: "NO_MATCHING_ITEMS",
+			value: "No matching items found.",
+		},
+		{
+			id: "MATCHING_ITEMS",
+			value: "Matching items",
+		},
+		{
+			id: "TOTAL_FILES",
+			value: "Total Files",
+		},
+		{
+			id: "TOTAL_ITEMS",
+			value: "Total Items",
+		},
+		{
+			id: "UPDATING",
+			value: "Updating...",
+		},
+		{
+			id: "UPDATE",
+			value: "Update",
+		},
+		{
+			id: "JUMP_TO",
+			value: "קפוץ ל",
+		},
+		{
+			id: "JUMP_TO_ARTICLE",
+			value: "קפוץ למאמר",
+		},
+		{
+			id: "PAGE",
+			value: "עמוד",
+		},
+		{
+			id: "PARAGRAPH",
+			value: "פסקה",
+		},
+		{
+			id: "PAGE_NUMBER",
+			value: "מספר עמוד",
+		},
+		{
+			id: "ARTICLE_NUMBER",
+			value: "מספר מאמר",
+		},
+		{
+			id: "PARAGRAPH_NUMBER",
+			value: "מספר פסקה",
+		},
+		{
+			id: "GO",
+			value: "עבור",
+		},
+		{
+			id: "SCROLL_TO_TOP",
+			value: "גלילה למעלה",
+		},
+		{
+			id: "ZOOM",
+			value: "הגדל פסקה",
+		},
+		{
+			id: "ARTICLE_TERMS",
+			value: "מונחי המאמר",
+		},
+		{
+			id: "NO_TERMS_FOUND",
+			value: "לא נמצאו מונחים",
+		},
+		{
+			id: "REVIEW_UPDATE",
+			value: "סקירת עדכון",
+		},
+		{
+			id: "NEW_SESSIONS",
+			value: "שיעורים חדשים",
+		},
+		{
+			id: "UPDATED_SESSIONS",
+			value: "שיעורים מעודכנים",
+		},
+		{
+			id: "REMOVED_SESSIONS",
+			value: "שיעורים שהוסרו",
+		},
+		{
+			id: "TOTAL_SESSIONS",
+			value: 'סה"כ שיעורים',
+		},
+		{
+			id: "NO_UPDATES",
+			value: "אין עדכונים",
+		},
+		{
+			id: "NEW",
+			value: "חדש",
+		},
+		{
+			id: "UPDATED",
+			value: "מעודכן",
+		},
+		{
+			id: "REMOVED",
+			value: "הוסר",
+		},
+		{
+			id: "APPROVE_UPDATE",
+			value: "עדכן",
+		},
+		{
+			id: "VERSION",
+			value: "גרסה",
+		},
+		{
+			id: "VERSION_DESCRIPTION",
+			value: "גרסת האפליקציה הנוכחית.",
+		},
+		{
+			id: "UPLOAD_DESCRIPTION",
+			value: "הפעל או השבת העלאת קבצים.",
+		},
+		{
+			id: "UPLOAD",
+			value: "העלאה",
+		},
+		{
+			id: "AUTO_SYNC",
+			value: "סנכרון אוטומטי",
+		},
+		{
+			id: "AUTO_SYNC_DESCRIPTION",
+			value: "הפעל סנכרון רקע אוטומטי",
+		},
+		{
+			id: "CATEGORY",
+			value: "קטגוריה",
+		},
+		{
+			id: "COUNT",
+			value: "מספר",
+		},
+		{
+			id: "DELETE_TAG",
+			value: "מחק תג",
+		},
+		{
+			id: "DELETE_ARTICLES",
+			value: "מחיקת מאמרים",
+		},
+		{
+			id: "RENAME_TAG",
+			value: "שנה שם תג",
+		},
+		{
+			id: "DELETE_TAG_CONFIRM",
+			value: "האם אתה בטוח שברצונך להסיר תג זה מכל המאמרים?",
+		},
+		{
+			id: "AFFECTED_ITEMS",
+			value: "פריטים מושפעים",
+		},
+		{
+			id: "DELETE_ARTICLES_CONFIRM",
+			value:
+				"האם אתה בטוח שברצונך למחוק לצמיתות את כל המאמרים עם תג זה? לא ניתן לבטל פעולה זו.",
+		},
+		{
+			id: "ARTICLES_TO_DELETE",
+			value: "מאמרים למחיקה",
+		},
+		{
+			id: "DELETE_FOREVER",
+			value: "מחק לצמיתות",
+		},
+		{
+			id: "SHOW_ABBREVIATIONS",
+			value: "הצג ראשי תיבות",
+		},
+		{
+			id: "SHOW_FULL_TERMS",
+			value: "הצג מונחים מלאים",
+		},
+		{
+			id: "HIDE_SQUARE_BRACKETS",
+			value: "הסתר סוגריים מרובעים",
+		},
+		{
+			id: "SHOW_SQUARE_BRACKETS",
+			value: "הצג סוגריים מרובעים",
+		},
+		{
+			id: "RESEARCH",
+			value: "מחקר",
+		},
+		{
+			id: "SEARCH_ARTICLES",
+			value: "חפש...",
+		},
+		{
+			id: "REBUILD_INDEX",
+			value: "בנה אינדקס מחדש",
+		},
+		{
+			id: "DONE",
+			value: "בוצע",
+		},
+		{
+			id: "SEARCHING",
+			value: "מחפש...",
+		},
+		{
+			id: "NO_RESULTS",
+			value: "לא נמצאו תוצאות.",
+		},
+		{
+			id: "RESULT",
+			value: "תוצאה",
+		},
+		{
+			id: "RESULTS",
+			value: "תוצאות",
+		},
+		{
+			id: "DOWNLOAD_TRANSCRIPT",
+			value: "הורדת תמליל",
+		},
+		{
+			id: "LOG_LEVEL",
+			value: "רמת רישום",
+		},
+		{
+			id: "OPTIMIZING_INDEX",
+			value: "מייעל אינדקס...",
+		},
+		{
+			id: "NO_CHANGES_DETECTED",
+			value: "לא נמצאו שינויים.",
+		},
+		{
+			id: "FILTER_TAGS",
+			value: "סנן תגיות",
+		},
+		{
+			id: "IMPORT_GROUPS",
+			value: "ייבא קבוצות",
+		},
+		{
+			id: "HISTORY_VIEW",
+			value: "תצוגת היסטוריה",
+		},
+		{
+			id: "TODAY",
+			value: "היום",
+		},
+		{
+			id: "YESTERDAY",
+			value: "אתמול",
+		},
+		{
+			id: "THIS_WEEK",
+			value: "השבוע",
+		},
+		{
+			id: "LAST_WEEK",
+			value: "שבוע שעבר",
+		},
+		{
+			id: "OLDER",
+			value: "ישן יותר",
+		},
+	],
 };

@@ -1,79 +1,85 @@
-import { NextResponse } from "next/server";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getS3, validatePathAccess } from "@util/aws";
-import { login } from "@util/login";
 import parseCookie from "@util/cookie";
+import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request) {
-    try {
-        const cookieHeader = request.headers.get("cookie") || "";
-        const cookies = parseCookie(cookieHeader);
-        const { id, hash } = cookies || {};
-        if (!id || !hash) {
-            console.log(`[AWS UPLOAD API] ACCESS DENIED: No cookie found`);
-            throw "ACCESS_DENIED";
-        }
+	try {
+		const cookieHeader = request.headers.get("cookie") || "";
+		const cookies = parseCookie(cookieHeader);
+		const { id, hash } = cookies || {};
+		if (!id || !hash) {
+			console.log(`[AWS UPLOAD API] ACCESS DENIED: No cookie found`);
+			throw "ACCESS_DENIED";
+		}
 
-        const url = new URL(request.url);
-        let path = url.searchParams.get("path") || "";
+		const url = new URL(request.url);
+		let path = url.searchParams.get("path") || "";
 
-        if (!path) {
-            console.log(`[AWS UPLOAD API] INVALID_PATH: No path provided`);
-            throw "INVALID_PATH";
-        }
+		if (!path) {
+			console.log(`[AWS UPLOAD API] INVALID_PATH: No path provided`);
+			throw "INVALID_PATH";
+		}
 
-        const user = await login({ id, hash, api: "aws_upload", path });
-        if (!user) {
-            console.log(`[AWS UPLOAD API] ACCESS DENIED: User ${id} is not authorized`);
-            throw "ACCESS_DENIED";
-        }
+		const user = await login({ id, hash, api: "aws_upload", path });
+		if (!user) {
+			console.log(
+				`[AWS UPLOAD API] ACCESS DENIED: User ${id} is not authorized`,
+			);
+			throw "ACCESS_DENIED";
+		}
 
-        const isAdmin = roleAuth(user.role, "admin");
-        const isStudent = roleAuth(user.role, "student");
-        let allowed = false;
+		const isAdmin = roleAuth(user.role, "admin");
+		const isStudent = roleAuth(user.role, "student");
+		let allowed = false;
 
-        const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
+		const checkPath = path.replace(/^\//, "").replace(/^aws\//, "");
 
-        if (isAdmin) {
-            allowed = true;
-        } else if (isStudent) {
-            const isPersonalPath = checkPath.startsWith(`personal/${user.id}/`) || checkPath === `personal/${user.id}`;
-            if (isPersonalPath) {
-                allowed = true;
-            }
-        }
+		if (isAdmin) {
+			allowed = true;
+		} else if (isStudent) {
+			const isPersonalPath =
+				checkPath.startsWith(`personal/${user.id}/`) ||
+				checkPath === `personal/${user.id}`;
+			if (isPersonalPath) {
+				allowed = true;
+			}
+		}
 
-        if (!allowed) {
-            console.log(`[AWS UPLOAD API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`);
-            throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
-        }
+		if (!allowed) {
+			console.log(
+				`[AWS UPLOAD API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`,
+			);
+			throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
+		}
 
-        validatePathAccess(path);
+		validatePathAccess(path);
 
-        const s3 = await getS3({});
-        const key = path.startsWith("/") ? path.substring(1) : path;
+		const s3 = await getS3({});
+		const key = path.startsWith("/") ? path.substring(1) : path;
 
-        const contentType = url.searchParams.get("contentType") || "";
+		const contentType = url.searchParams.get("contentType") || "";
 
-        const command = new PutObjectCommand({
-            Bucket: process.env.AWS_BUCKET,
-            Key: key,
-            ContentType: contentType || undefined,
-            ChecksumAlgorithm: undefined // Explicitly disable checksums for DO compatibility
-        });
+		const command = new PutObjectCommand({
+			Bucket: process.env.AWS_BUCKET,
+			Key: key,
+			ContentType: contentType || undefined,
+			ChecksumAlgorithm: undefined, // Explicitly disable checksums for DO compatibility
+		});
 
-        const uploadUrl = await getSignedUrl(s3, command, { 
-            expiresIn: 3600,
-            unhoistedHeaders: new Set(["content-type"]) 
-        });
-        return NextResponse.json({ url: uploadUrl });
-    } catch (err) {
-        console.error("aws_upload error: ", err);
-        return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
-    }
+		const uploadUrl = await getSignedUrl(s3, command, {
+			expiresIn: 3600,
+			unhoistedHeaders: new Set(["content-type"]),
+		});
+		return NextResponse.json({ url: uploadUrl });
+	} catch (err) {
+		console.error("aws_upload error: ", err);
+		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+	}
 }

@@ -1,29 +1,32 @@
-import { useTranslations } from "@util/translations";
+import ItemMenu from "@components/ItemMenu";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { fetchJSON } from "@util/fetch";
-import ItemMenu from "@components/ItemMenu";
+import { useTranslations } from "@util/translations";
 
 export default function ItemMenuWidget({ item, store }) {
-    const translations = useTranslations();
+	const translations = useTranslations();
 
-    const menuItems = [
-        {
-            id: "delete",
-            name: translations.DELETE,
-            icon: <DeleteIcon />,
-            onClick: () => {
-                store.update(s => {
-                    s.select = [item];
-                    s.mode = "delete";
-                    s.severity = "error";
-                    s.onDone = async select => {
-                        const records = select.map(item => ({ id: item.id }));
-                        await fetchJSON("/api/users", { body: JSON.stringify(records), method: "DELETE" });
-                    };
-                });
-            }
-        }
-    ];
+	const menuItems = [
+		{
+			id: "delete",
+			name: translations.DELETE,
+			icon: <DeleteIcon />,
+			onClick: () => {
+				store.update((s) => {
+					s.select = [item];
+					s.mode = "delete";
+					s.severity = "error";
+					s.onDone = async (select) => {
+						const records = select.map((item) => ({ id: item.id }));
+						await fetchJSON("/api/users", {
+							body: JSON.stringify(records),
+							method: "DELETE",
+						});
+					};
+				});
+			},
+		},
+	];
 
-    return <ItemMenu item={item} menuItems={menuItems} store={store} />;
+	return <ItemMenu item={item} menuItems={menuItems} store={store} />;
 }

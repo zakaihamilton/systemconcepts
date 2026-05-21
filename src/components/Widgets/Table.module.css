@@ -1,91 +1,91 @@
 .table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: separate;
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: separate;
 
-    :global(.MuiTableCell-stickyHeader) {
-        top: var(--filter-height, 0);
-    }
+	:global(.MuiTableCell-stickyHeader) {
+		top: var(--filter-height, 0);
+	}
 }
 
 .tableContainer {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    transition: opacity 0.2s ease;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	transition: opacity 0.2s ease;
 
-    &.loading {
-        opacity: 0.6;
-    }
+	&.loading {
+		opacity: 0.6;
+	}
 }
 
 .tableList {
-    display: flex;
-    position: relative;
+	display: flex;
+	position: relative;
 
-    [dir=ltr] & {
-        direction: ltr !important;
-    }
+	[dir="ltr"] & {
+		direction: ltr !important;
+	}
 
-    [dir=rtl] & {
-        direction: rtl !important;
-    }
+	[dir="rtl"] & {
+		direction: rtl !important;
+	}
 }
 
 .grid {
-    display: flex;
-    position: relative;
+	display: flex;
+	position: relative;
 
-    [dir=ltr] & {
-        direction: ltr !important;
-    }
+	[dir="ltr"] & {
+		direction: ltr !important;
+	}
 
-    [dir=rtl] & {
-        direction: rtl !important;
-    }
+	[dir="rtl"] & {
+		direction: rtl !important;
+	}
 }
 
 .viewGroup {
-    display: flex;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 2px;
-    gap: 2px;
-    align-items: center;
+	display: flex;
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	padding: 2px;
+	gap: 2px;
+	align-items: center;
 }
 
 .viewGroupButton {
-    border-radius: 8px !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--text-color);
-    opacity: 0.75;
+	border-radius: 8px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-color);
+	opacity: 0.75;
 
-    &:hover {
-        background-color: var(--hover-background);
-        opacity: 1;
-    }
+	&:hover {
+		background-color: var(--hover-background);
+		opacity: 1;
+	}
 }
 
 .selected {
-    background-color: rgba(var(--primary-rgb), 0.15) !important;
-    color: var(--primary-main) !important;
-    opacity: 1;
-    font-weight: 600;
+	background-color: rgba(var(--primary-rgb), 0.15) !important;
+	color: var(--primary-main) !important;
+	opacity: 1;
+	font-weight: 600;
 }
 
 .loader {
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    height: 0;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	height: 0;
 }
 
 .loader.loading {
-    opacity: 1;
+	opacity: 1;
 }

@@ -1,42 +1,42 @@
 .root {
-    display: flex;
+	display: flex;
 }
 
 .cell {
-    font-size: 16px;
-    border: 1px solid transparent !important;
-    padding: 0.4em !important;
+	font-size: 16px;
+	border: 1px solid transparent !important;
+	padding: 0.4em !important;
 }
 
 .cell.head {
-    background: var(--main-background) !important;
+	background: var(--main-background) !important;
 }
 
 .cell.defaultAlign {
-    [dir=ltr] & {
-        text-align: left;
-    }
+	[dir="ltr"] & {
+		text-align: left;
+	}
 
-    [dir=rtl] & {
-        text-align: right;
-    }
+	[dir="rtl"] & {
+		text-align: right;
+	}
 }
 
 .selectable {
-    cursor: pointer !important;
+	cursor: pointer !important;
 }
 
 .selectable:hover {
-    background: var(--info-background) !important;
-    border: 1px solid var(--border-highlight);
+	background: var(--info-background) !important;
+	border: 1px solid var(--border-highlight);
 }
 
 .sortLabel {
-    [dir=rtl] & {
-        justify-content: flex-end;
-    }
+	[dir="rtl"] & {
+		justify-content: flex-end;
+	}
 
-    [dir=ltr] & {
-        justify-content: flex-start;
-    }
+	[dir="ltr"] & {
+		justify-content: flex-start;
+	}
 }

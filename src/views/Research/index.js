@@ -1,11 +1,6 @@
-import {
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { ContentSize } from "@components/Page/Content";
+import { registerToolbar, useToolbar } from "@components/Toolbar";
+import VariableSizeList from "@components/Virtualized/VariableSizeList";
 import ClearIcon from "@mui/icons-material/Clear";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import PrintIcon from "@mui/icons-material/Print";
@@ -21,10 +16,6 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Cookies from "js-cookie";
-import { createPortal } from "react-dom";
-import { ContentSize } from "@components/Page/Content";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
 import { loadParagraphsForFile } from "@util/loadParagraphs";
@@ -42,8 +33,17 @@ import JumpDialog from "@views/Library/Article/JumpDialog";
 import ScrollToTop from "@views/Library/Article/ScrollToTop";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import { LibraryStore } from "@views/Library/Store";
-import { ResearchStore } from "@views/ResearchStore";
-import VariableSizeList from "@components/Virtualized/VariableSizeList";
+import { ResearchStore } from "@views/ResearchStore/ResearchStore";
+import Cookies from "js-cookie";
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { createPortal } from "react-dom";
 import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";
 import SearchResultItem from "./SearchResultItem";
@@ -128,10 +128,12 @@ export default function Research() {
 	}, []);
 
 	const handlePrint = useCallback(() => {
+		document.body.classList.add("research-printing");
 		setPrinting(true);
 		setTimeout(() => {
 			window.print();
 			setPrinting(false);
+			document.body.classList.remove("research-printing");
 		}, 500);
 	}, []);
 
@@ -1146,8 +1148,8 @@ export default function Research() {
 	useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
 	return (
-		<Box className={styles.root}>
-			{!searchCollapsed && (
+        (<Box className={styles.root}>
+            {!searchCollapsed && (
 				<Paper
 					className={[
 						styles.searchPaper,
@@ -1162,21 +1164,23 @@ export default function Research() {
 							onChange={(e) => setQuery(e.target.value)}
 							onKeyDown={onKeyDown}
 							variant="outlined"
-							InputProps={{
-								startAdornment: (
-									<InputAdornment position="start">
-										<SearchIcon />
-									</InputAdornment>
-								),
-								endAdornment: query && (
-									<InputAdornment position="end">
-										<IconButton onClick={handleClear} size="small">
-											<ClearIcon fontSize="small" />
-										</IconButton>
-									</InputAdornment>
-								),
-							}}
 							className={styles.queryField}
+							slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: query && (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={handleClear} size="small">
+                                                <ClearIcon fontSize="small" />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }
+                            }}
 						/>
 						<Button
 							variant="contained"
@@ -1255,9 +1259,9 @@ export default function Research() {
 									setFilterTags(newValue);
 									setFilterInput("");
 								}}
-								renderTags={(value, getTagProps) =>
+								renderValue={(value, getItemProps) =>
 									value.map((option, index) => {
-										const { key, ...tagProps } = getTagProps({ index });
+										const { key, ...tagProps } = getItemProps({ index });
 										const label =
 											typeof option === "string" ? option : option.label;
 										const type =
@@ -1313,15 +1317,13 @@ export default function Research() {
 					)}
 				</Paper>
 			)}
-
-			{showProgress && (
+            {showProgress && (
 				<Box className={styles.progressContainer}>
 					<Typography variant="caption">{translations.SEARCHING}</Typography>
 					<LinearProgress variant="determinate" value={searchProgress} />
 				</Box>
 			)}
-
-			{indexing && (
+            {indexing && (
 				<Box className={styles.overlay}>
 					<Paper className={styles.overlayContent}>
 						<Typography variant="h6" gutterBottom>
@@ -1341,14 +1343,12 @@ export default function Research() {
 					</Paper>
 				</Box>
 			)}
-
-			{hasSearched && filteredResults.length === 0 && !indexing && (
+            {hasSearched && filteredResults.length === 0 && !indexing && (
 				<Box className={styles.noResults}>
 					<Typography>{translations.NO_RESULTS}</Typography>
 				</Box>
 			)}
-
-			{hasSearched && filteredResults.length > 0 && (
+            {hasSearched && filteredResults.length > 0 && (
 				<Box className={styles.resultsWrapper}>
 					<VariableSizeList
 						height={
@@ -1420,8 +1420,7 @@ export default function Research() {
 					/>
 				</Box>
 			)}
-
-			{useEffect(() => {
+            {useEffect(() => {
 				if (hasSearched && filteredResults.length > 0) {
 					setScrollPages((prev) => ({ ...prev, visible: true }));
 					if (scrollTimeoutRef.current) {
@@ -1432,8 +1431,7 @@ export default function Research() {
 					}, 1500);
 				}
 			}, [hasSearched, filteredResults]) || null}
-
-			<JumpDialog
+            <JumpDialog
 				open={jumpOpen}
 				onClose={() => setJumpOpen(false)}
 				onSubmit={handleJumpSubmit}
@@ -1445,8 +1443,7 @@ export default function Research() {
 				paragraphNumberLabel={translations.MATCH_NUMBER}
 				title={translations.JUMP_TO_ARTICLE}
 			/>
-
-			{printRoot &&
+            {printRoot &&
 				createPortal(
 					<div className={styles.printContainer}>
 						{printing &&
@@ -1473,6 +1470,6 @@ export default function Research() {
 					</div>,
 					printRoot,
 				)}
-		</Box>
-	);
+        </Box>)
+    );
 }

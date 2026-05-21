@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { handleRequest } from "@util/aws";
 import parseCookie from "@util/cookie";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 

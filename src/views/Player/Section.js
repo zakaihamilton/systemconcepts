@@ -1,5 +1,5 @@
-export function getPlayerSection({ }) {
-    return {
-        breadcrumbs: false
-    };
+export function getPlayerSection({}) {
+	return {
+		breadcrumbs: false,
+	};
 }

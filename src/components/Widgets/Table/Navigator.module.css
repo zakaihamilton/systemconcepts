@@ -1,19 +1,19 @@
 .pageIndex {
-    font-weight: bold !important;
-    width: 2em;
-    color: var(--text-color);
+	font-weight: bold !important;
+	width: 2em;
+	color: var(--text-color);
 }
 
 .pageSeparator {
-    font-weight: bold !important;
-    pointer-events: none;
-    cursor: default;
-    user-select: none;
-    color: var(--text-color);
+	font-weight: bold !important;
+	pointer-events: none;
+	cursor: default;
+	user-select: none;
+	color: var(--text-color);
 }
 
 .pageCount {
-    cursor: default;
-    user-select: none;
-    color: var(--text-color);
+	cursor: default;
+	user-select: none;
+	color: var(--text-color);
 }
