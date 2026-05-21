@@ -278,6 +278,7 @@ export async function updateGroupProcess(
 								let duration = sessionDurationMap[id];
 								let summary = sessionSummariesMap[id];
 								let transcription = sessionTranscriptionMap[id];
+								let transcriptPath = null;
 								const files = sessionFilesMap[id];
 
 								if (!tags.length) {
@@ -346,7 +347,7 @@ export async function updateGroupProcess(
 									const txtFile = files.find((f) => f.name.endsWith(".txt"));
 									if (txtFile) {
 										transcription = true;
-										item.transcriptPath = txtFile.path;
+										transcriptPath = txtFile.path;
 									}
 								}
 
@@ -359,6 +360,7 @@ export async function updateGroupProcess(
 									duration,
 									summary,
 									transcription,
+									transcriptPath,
 								);
 
 								return item;

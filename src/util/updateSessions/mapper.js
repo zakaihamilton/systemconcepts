@@ -16,6 +16,7 @@ export function createSessionItem(
 	sessionDuration,
 	sessionSummaryText,
 	sessionTranscription,
+	sessionTranscriptPath,
 ) {
 	const [, date, sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
 	if (!date || !sessionName) {
@@ -69,6 +70,7 @@ export function createSessionItem(
 		duration: sessionDuration,
 		summaryText: sessionSummaryText,
 		transcription: sessionTranscription || false,
+		transcriptPath: sessionTranscriptPath || null,
 		files: (fileList || []).map((f) => f.name),
 	};
 

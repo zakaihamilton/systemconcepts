@@ -33,6 +33,15 @@ export default function Tabs({ Container }) {
 		{};
 
 	const basePath = "#" + toPath(...items.slice(0, baseIndex + 1));
+	const hasMedia = session.audio || session.video || session.resolutions;
+	const hasTranscript =
+		session.subtitles ||
+		session.transcription ||
+		session.transcriptPath ||
+		hasMedia ||
+		(session.files || []).some(
+			(file) => file.endsWith(".txt") || file.endsWith(".vtt"),
+		);
 
 	const tabs = [
 		{
@@ -55,7 +64,7 @@ export default function Tabs({ Container }) {
 			icon: <ImageIcon />,
 			value: basePath + "/" + encodeURIComponent("image"),
 		},
-		(session.subtitles || session.transcription) && {
+		hasTranscript && {
 			label: translations.TRANSCRIPT,
 			icon: <DescriptionIcon />,
 			value:

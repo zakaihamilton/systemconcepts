@@ -71,4 +71,19 @@ describe("Transcript Component", () => {
 			expect(mockPlayer.play).toHaveBeenCalled();
 		});
 	});
+
+	it("renders plain text transcripts without timestamps", async () => {
+		PlayerStore.useState.mockReturnValue({
+			subtitles: "",
+			transcriptionUrl: "test.txt",
+			player: mockPlayer,
+		});
+		useFetch.mockReturnValue(["A transcript without timecodes", false, false]);
+
+		const { getByText } = render(<Transcript show={true} />);
+		await waitFor(() => {
+			expect(getByText("A transcript without timecodes")).toBeInTheDocument();
+			expect(getByText("0:00")).toBeInTheDocument();
+		});
+	});
 });

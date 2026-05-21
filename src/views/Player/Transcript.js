@@ -157,6 +157,17 @@ export default function Transcript({ show }) {
 				}
 			}
 
+			if (!segments.length) {
+				const text = data.replace(/\s+/g, " ").trim();
+				if (text) {
+					segments.push({
+						start: 0,
+						end: 5,
+						text,
+					});
+				}
+			}
+
 			// Estimate end times for TXT format since they aren't provided
 			for (let i = 0; i < segments.length; i++) {
 				if (i < segments.length - 1) {

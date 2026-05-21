@@ -4,14 +4,57 @@ import { metadataInfo as awsMetadataInfo, validatePathAccess } from "@util/aws";
 import parseCookie from "@util/cookie";
 import { error, log } from "@util/logger";
 import { login } from "@util/login";
+import { fileTitle } from "@util/path";
 import { roleAuth } from "@util/roles";
 import { getSafeError } from "@util/safeError";
+import { getSessions } from "@util/sessionFeed";
 import { getWasabi } from "@util/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 const component = "player";
+
+function getWasabiKey(path) {
+	let key = path.startsWith("/") ? path.substring(1) : path;
+	if (key.startsWith("sessions/")) {
+		key = key.substring("sessions/".length);
+	} else if (key.startsWith("wasabi/")) {
+		key = key.substring("wasabi/".length);
+	}
+	return key;
+}
+
+async function getSessionTranscriptPath(s3Key) {
+	try {
+		const parts = s3Key.split("/");
+		if (parts.length < 3) return null;
+
+		const [group, year] = parts;
+		let id = fileTitle(parts[parts.length - 1]);
+		const resolutionMatch = id.match(/(.*)_(\d+x\d+)/);
+		if (resolutionMatch) {
+			id = resolutionMatch[1];
+		}
+
+		const sessions = await getSessions({ group });
+		const session = sessions.find(
+			(s) => s.group === group && s.year === year && s.id === id,
+		);
+
+		if (!session) return null;
+		return {
+			path: session.transcriptPath || session.subtitles?.path || null,
+			hasTranscription: !!session.transcription,
+			group,
+			year,
+			id,
+		};
+	} catch (err) {
+		console.warn("[Player] Failed to load transcript metadata:", err);
+		return null;
+	}
+}
 
 export async function GET(request) {
 	try {
@@ -27,16 +70,7 @@ export async function GET(request) {
 
 		let decodedPath = decodeURIComponent(path);
 		validatePathAccess(decodedPath);
-		let s3Key = decodedPath.startsWith("/")
-			? decodedPath.substring(1)
-			: decodedPath;
-
-		const prefix = "sessions/";
-		if (s3Key.startsWith(prefix)) {
-			s3Key = s3Key.substring(prefix.length);
-		} else if (s3Key.startsWith("wasabi/")) {
-			s3Key = s3Key.substring("wasabi/".length);
-		}
+		let s3Key = getWasabiKey(decodedPath);
 
 		const fileName = s3Key.split("/").pop();
 
@@ -60,23 +94,44 @@ export async function GET(request) {
 
 		let subtitles = null;
 		let transcriptionUrl = null;
+		const sessionTranscript = await getSessionTranscriptPath(s3Key);
+		const sessionTranscriptPath = sessionTranscript?.path;
 		const dotIndex = s3Key.lastIndexOf(".");
 		if (dotIndex !== -1) {
-			const vttPath = s3Key.substring(0, dotIndex) + ".vtt";
+			const vttPath = sessionTranscriptPath?.endsWith(".vtt")
+				? getWasabiKey(sessionTranscriptPath)
+				: s3Key.substring(0, dotIndex) + ".vtt";
 			const exists = await awsMetadataInfo({ path: "sessions/" + vttPath });
 			if (exists) {
 				subtitles =
 					"/api/subtitle?path=" + encodeURIComponent("sessions/" + vttPath);
 			}
-			const txtPath = s3Key.substring(0, dotIndex) + ".txt";
-			const txtCommand = new GetObjectCommand({
-				Bucket: BUCKET_NAME,
-				Key: txtPath,
-				ResponseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`,
-			});
-			transcriptionUrl = await getSignedUrl(wasabiClient, txtCommand, {
-				expiresIn: 10800,
-			});
+			const txtPath = sessionTranscriptPath?.endsWith(".txt")
+				? getWasabiKey(sessionTranscriptPath)
+				: s3Key.substring(0, dotIndex) + ".txt";
+			const txtExists = await awsMetadataInfo({ path: "sessions/" + txtPath });
+			if (txtExists) {
+				const txtCommand = new GetObjectCommand({
+					Bucket: BUCKET_NAME,
+					Key: txtPath,
+					ResponseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`,
+				});
+				transcriptionUrl = await getSignedUrl(wasabiClient, txtCommand, {
+					expiresIn: 10800,
+				});
+			} else if (sessionTranscript?.hasTranscription) {
+				const zipPath = `${sessionTranscript.group}/${sessionTranscript.year}.zip`;
+				const zipExists = await awsMetadataInfo({
+					path: "sessions/" + zipPath,
+				});
+				if (zipExists) {
+					transcriptionUrl =
+						"/api/subtitle?path=" +
+						encodeURIComponent("sessions/" + zipPath) +
+						"&file=" +
+						encodeURIComponent(sessionTranscript.id + ".txt");
+				}
+			}
 		}
 
 		log({

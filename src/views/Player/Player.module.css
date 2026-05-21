@@ -51,7 +51,6 @@
 	border-radius: 8px;
 	background: color-mix(in srgb, var(--paper-background) 88%, transparent);
 	box-shadow: 0 10px 30px var(--box-shadow-color);
-	backdrop-filter: blur(8px);
 	pointer-events: none;
 }
 

@@ -3,6 +3,7 @@ import parseCookie from "@util/cookie";
 import { error } from "@util/logger";
 import { login } from "@util/login";
 import { roleAuth } from "@util/roles";
+import JSZip from "jszip";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ export async function GET(request) {
 	try {
 		const url = new URL(request.url);
 		const path = url.searchParams.get("path");
+		const file = url.searchParams.get("file");
 		const cookieHeader = request.headers.get("cookie") || "";
 
 		if (!cookieHeader) throw "ACCESS_DENIED";
@@ -24,11 +26,24 @@ export async function GET(request) {
 		let decodedPath = decodeURIComponent(path);
 		validatePathAccess(decodedPath);
 
-		const data = await downloadData({ path: decodedPath });
+		let data;
+		let contentType = "text/vtt";
+		if (file) {
+			validatePathAccess(file);
+			const blob = await downloadData({ path: decodedPath, binary: true });
+			const zip = await JSZip.loadAsync(blob);
+			const entry = zip.file(file);
+			if (!entry) throw "NOT_FOUND";
+			data = await entry.async("string");
+			contentType = file.endsWith(".txt") ? "text/plain" : "text/vtt";
+		} else {
+			data = await downloadData({ path: decodedPath });
+			contentType = decodedPath.endsWith(".txt") ? "text/plain" : "text/vtt";
+		}
 
 		return new NextResponse(data, {
 			status: 200,
-			headers: { "Content-Type": "text/vtt" },
+			headers: { "Content-Type": contentType },
 		});
 	} catch (err) {
 		error({ component, error: "Subtitle fetch error", err });
