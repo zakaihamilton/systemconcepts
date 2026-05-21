@@ -1,14 +1,10 @@
-import { downloadData } from "@util/aws";
-import { findRecord } from "@util/mongo";
-import pLimit from "@util/p-limit";
+import { authenticateTokenRequest, getPositiveInt } from "@util/api";
+import { getSProxyUrl, getSessions, sortSessions } from "@util/sessionFeed";
 import { formatDuration } from "@util/string";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import pako from "pako";
 
 export const dynamic = "force-dynamic";
-
-const MANIFEST_PATH = "sync/files.json.gz";
 
 function escapeXml(unsafe) {
 	if (!unsafe) return "";
@@ -34,138 +30,16 @@ export async function GET(request) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const group = searchParams.get("group");
-		const count = parseInt(searchParams.get("count") || "250", 10);
-		const id = searchParams.get("id");
-		const token = searchParams.get("token");
-
-		if (!id || !token) {
+		const count = getPositiveInt(searchParams.get("count"), 250, 500);
+		const user = await authenticateTokenRequest(searchParams);
+		if (!user) {
 			return new NextResponse("Unauthorized", { status: 403 });
 		}
 
-		const user = await findRecord({
-			collectionName: "users",
-			query: { id: id.toLowerCase() },
-		});
-		if (!user || user.role === "visitor") {
-			return new NextResponse("Unauthorized", { status: 403 });
-		}
-
-		const expectedToken = crypto
-			.createHash("sha256")
-			.update(
-				user.id +
-					user.hash +
-					(process.env.RSS_SECRET || process.env.AWS_SECRET),
-			)
-			.digest("hex");
-		if (token !== expectedToken) {
-			return new NextResponse("Unauthorized", { status: 403 });
-		}
-
-		const manifestData = await downloadData({
-			path: MANIFEST_PATH,
-			binary: true,
-		});
-
-		let manifestStr;
-		try {
-			const decompressed = pako.inflate(manifestData);
-			manifestStr = new TextDecoder("utf-8").decode(decompressed);
-		} catch (_e) {
-			manifestStr = Buffer.from(manifestData).toString("utf-8");
-		}
-
-		const manifest = JSON.parse(manifestStr);
-
-		let files = manifest.filter(
-			(f) => f.path && f.path.endsWith(".json") && f.path !== "/files.json",
-		);
-
-		if (group) {
-			const lowerGroup = group.toLowerCase();
-			files = files.filter((f) => {
-				const lowerPath = f.path.toLowerCase();
-				const isMatch =
-					f.path === "/bundle.json" ||
-					lowerPath === `/${lowerGroup}.json` ||
-					lowerPath.startsWith(`/${lowerGroup}/`);
-				return isMatch;
-			});
-		}
-
-		const limit = pLimit(10);
-		const sessionPromises = files.map((file) =>
-			limit(async () => {
-				try {
-					const s3Path = `sync${file.path.startsWith("/") ? "" : "/"}${file.path}.gz`;
-					const fileData = await downloadData({ path: s3Path, binary: true });
-					let jsonStr;
-					try {
-						const decompressed = pako.inflate(fileData);
-						jsonStr = new TextDecoder("utf-8").decode(decompressed);
-					} catch (_e) {
-						jsonStr = Buffer.from(fileData).toString("utf-8");
-					}
-					const data = JSON.parse(jsonStr);
-					const fileSessions = data.sessions || [];
-					return fileSessions;
-				} catch (err) {
-					console.error(`[RSS] Error loading sessions from ${file.path}:`, err);
-					return [];
-				}
-			}),
-		);
-
-		const sessionsArrays = await Promise.all(sessionPromises);
-		let sessionsFlat = sessionsArrays.flat();
-
-		// Use a robust deduplication key (case-insensitive for group names)
-		const sessionMap = new Map();
-		for (const session of sessionsFlat) {
-			const key = `${(session.group || "").toLowerCase().trim()}_${session.id}`;
-			if (!sessionMap.has(key)) {
-				sessionMap.set(key, session);
-			}
-		}
-		let sessions = Array.from(sessionMap.values());
-
-		if (group) {
-			const lowerGroup = group.toLowerCase().trim();
-			sessions = sessions.filter((s) => {
-				const sessionGroup = (s.group || "").toLowerCase().trim();
-				return sessionGroup === lowerGroup;
-			});
-		}
-
-		// Robust string-based sort: Date (DESC), Group (ASC), Name (ASC)
-		sessions.sort((a, b) => {
-			const dateA = String(a.date || "").substring(0, 10);
-			const dateB = String(b.date || "").substring(0, 10);
-			if (dateB > dateA) return 1;
-			if (dateB < dateA) return -1;
-
-			const groupA = (a.group || "").toLowerCase();
-			const groupB = (b.group || "").toLowerCase();
-			const groupDiff = groupA.localeCompare(groupB);
-			if (groupDiff !== 0) return groupDiff;
-
-			return (a.name || "").localeCompare(b.name || "");
-		});
-
-		sessions = sessions.slice(0, count);
+		const sessions = sortSessions(await getSessions({ group })).slice(0, count);
 
 		const baseUrl =
 			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
-
-		// Custom proxy encoder that builds clean URLs, shifting complex presigned logic to /api/rss/s
-		const getSProxyUrl = (path) => {
-			if (!path) return null;
-			let cleanPath = path.startsWith("/") ? path.substring(1) : path;
-			const b64 = Buffer.from(cleanPath).toString("base64url");
-			const ext = path.split(".").pop() || "bin";
-			// Use query parameters for stability, adding the extension at the end for validators
-			return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
-		};
 
 		const rssItems = await Promise.all(
 			sessions.map(async (session) => {

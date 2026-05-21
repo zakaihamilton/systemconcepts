@@ -5,23 +5,32 @@ import { sanitizeQuery } from "./mongoSanitize";
 import { getSafeError } from "./safeError";
 
 const _clusters = [];
+const MAX_QUERY_LIMIT = 500;
+const DEFAULT_QUERY_LIMIT = 500;
+const MAX_BULK_RECORDS = 1000;
+const MAX_RESPONSE_BYTES = 4000 * 1000;
 
 export async function getCluster({ url = process.env.MONGO_URL }) {
 	if (!url) {
 		throw "Empty URI";
 	}
 	const unlock = await lockMutex({ id: "mongo" });
-	let cluster = _clusters[url];
-	if (!cluster) {
-		console.log("connecting to database");
-		cluster = _clusters[url] = await MongoClient.connect(url);
+	try {
+		let cluster = _clusters[url];
 		if (!cluster) {
-			throw "Cannot connect to database";
+			console.log("connecting to database");
+			cluster = _clusters[url] = await MongoClient.connect(url, {
+				maxPoolSize: 10,
+			});
+			if (!cluster) {
+				throw "Cannot connect to database";
+			}
+			console.log("connected to database");
 		}
-		console.log("connected to database");
+		return cluster;
+	} finally {
+		unlock();
 	}
-	unlock();
-	return cluster;
 }
 
 export async function getDatabase({
@@ -98,20 +107,35 @@ export async function bulkWrite({ operations, ordered, ...params }) {
 
 export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 	const headers = req.headers || {};
+	const getHeader = (name) => headers[name] || headers[name.toLowerCase()];
+	const parseLimit = (value, fallback) => {
+		const parsed = Number.parseInt(value || "", 10);
+		const safe = Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+		return Math.min(safe, MAX_QUERY_LIMIT);
+	};
+	const parseSkip = (value) => {
+		const parsed = Number.parseInt(value || "", 10);
+		return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+	};
+
 	if (req.method === "GET" || req.method === "POST") {
 		try {
 			const body = req.body;
-			const { id, query, fields } = headers;
+			const id = getHeader("id");
+			const query = getHeader("query");
+			const fields = getHeader("fields");
 			const parsedId = id && decodeURIComponent(id);
 			const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
 			if (Array.isArray(body)) {
-				const maxBytes = 4000 * 1000;
+				const ids = body
+					.filter((item) => typeof item === "string")
+					.slice(0, MAX_QUERY_LIMIT);
 				let records = await listCollection({
 					dbName,
 					collectionName,
 					query: {
 						id: {
-							$in: body,
+							$in: ids,
 						},
 					},
 					fields: parsedFields,
@@ -120,11 +144,14 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					records = [];
 				}
 				const results = [];
+				let bytes = 2;
 				for (const record of records) {
-					if (JSON.stringify(results).length > maxBytes) {
+					const recordBytes = Buffer.byteLength(JSON.stringify(record)) + 1;
+					if (bytes + recordBytes > MAX_RESPONSE_BYTES) {
 						break;
 					}
 					results.push(record);
+					bytes += recordBytes;
 				}
 				console.log(
 					"found",
@@ -149,10 +176,9 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					parsedId,
 				);
 				return result;
-			} else if (headers.prefix) {
-				const prefix = decodeURIComponent(headers.prefix);
-				const parsedFields =
-					headers.fields && JSON.parse(decodeURIComponent(headers.fields));
+			} else if (getHeader("prefix")) {
+				const prefix = decodeURIComponent(getHeader("prefix"));
+				const parsedFields = fields && JSON.parse(decodeURIComponent(fields));
 				const escapeRegex = (string) =>
 					string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 				const safePrefix = escapeRegex(prefix);
@@ -162,6 +188,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					collectionName,
 					query,
 					fields: parsedFields,
+					limit: parseLimit(getHeader("limit"), DEFAULT_QUERY_LIMIT),
 				});
 				console.log(
 					"found",
@@ -175,8 +202,8 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 			} else {
 				const parsedQuery = query && JSON.parse(decodeURIComponent(query));
 				sanitizeQuery(parsedQuery);
-				const skip = headers.skip ? parseInt(headers.skip) : undefined;
-				const limit = headers.limit ? parseInt(headers.limit) : undefined;
+				const skip = parseSkip(getHeader("skip"));
+				const limit = parseLimit(getHeader("limit"), DEFAULT_QUERY_LIMIT);
 				let result = await listCollection({
 					dbName,
 					collectionName,
@@ -210,6 +237,9 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 				} else {
 					records = [result];
 				}
+			}
+			if (records.length > MAX_BULK_RECORDS) {
+				throw "TOO_MANY_RECORDS";
 			}
 			console.log("pushing " + records.length + " records");
 			const operations = [];

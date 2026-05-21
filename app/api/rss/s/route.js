@@ -13,10 +13,15 @@ async function handleRequest(request) {
 		if (!base64str) {
 			return new NextResponse("Not Found", { status: 404 });
 		}
+		if (base64str.length > 2048) {
+			return new NextResponse("Invalid Path", { status: 400 });
+		}
 
-		// Convert base64url characters back to standard base64 for Buffer.from
+		if (!/^[A-Za-z0-9_-]+$/.test(base64str)) {
+			return new NextResponse("Invalid Path", { status: 400 });
+		}
+
 		base64str = base64str.replace(/-/g, "+").replace(/_/g, "/");
-		// Add padding if necessary
 		while (base64str.length % 4 !== 0) {
 			base64str += "=";
 		}
@@ -29,6 +34,9 @@ async function handleRequest(request) {
 		}
 
 		path = path.startsWith("/") ? path.substring(1) : path;
+		if (!path || path.includes("\0")) {
+			return new NextResponse("Invalid Path", { status: 400 });
+		}
 		try {
 			validatePathAccess(
 				path.startsWith("wasabi/") ? path.replace(/^wasabi\//, "") : path,

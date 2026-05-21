@@ -38,6 +38,7 @@ async function handleUsers(request) {
 					query: { id: parsedId },
 					collectionName,
 				});
+				if (!record || !body) throw "ACCESS_DENIED";
 				if (record.id !== body.id || record.role !== body.role)
 					throw "ACCESS_DENIED";
 				body.hash = record.hash;
