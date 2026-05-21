@@ -28,7 +28,9 @@ const StyledMenuRoot = styled(Menu)(({ theme: _theme }) => ({
 		boxShadow:
 			"0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
 		border: `1px solid var(--border-color)`,
-		backgroundColor: "var(--bar-background)",
+		backgroundColor: "rgba(var(--bar-background-rgb), 0.82)",
+		backdropFilter: "blur(18px) saturate(1.25)",
+		WebkitBackdropFilter: "blur(18px) saturate(1.25)",
 		maxHeight: "50vh",
 		overflow: "auto",
 		"& .MuiList-root": {
@@ -295,7 +297,10 @@ export default function MenuWidget({
 				open={!!open}
 				onClose={handleClose}
 				slotProps={{
-					list: hoverEnabled && hoverRef ? { onMouseLeave: handleClose } : undefined,
+					list:
+						hoverEnabled && hoverRef
+							? { onMouseLeave: handleClose }
+							: undefined,
 					paper: {
 						style: {
 							transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important",
