@@ -31,6 +31,7 @@ import {
 	loadTags,
 	loadTranscriptions,
 } from "./metadata";
+import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { getListing, updateYearSync } from "./utils";
 
 const prefix = "wasabi/";
@@ -90,13 +91,42 @@ function getDigitalOceanSessionFiles(files) {
 	);
 }
 
-async function getMetadataYearItems(groupName, yearName) {
-	const metadataYearPath = makePath("aws/sessions", groupName, yearName);
+async function getLegacyMetadata(
+	year,
+	name,
+	awsPath,
+	forceUpdate,
+	isMerged,
+	isBundled,
+) {
+	const metadataYearPath = makePath("aws/sessions", name, year.name);
+	const metadataYearItems = await getMetadataYearItems(metadataYearPath);
+	const [
+		sessionTagsMap,
+		sessionDurationMap,
+		sessionSummariesMap,
+		sessionTranscriptionMap,
+	] = await Promise.all([
+		loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled),
+		loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled),
+		loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled),
+		loadTranscriptions(year, name, awsPath, forceUpdate, isMerged, isBundled),
+	]);
+	return {
+		items: metadataYearItems,
+		tags: sessionTagsMap,
+		durations: sessionDurationMap,
+		summaries: sessionSummariesMap,
+		transcriptions: sessionTranscriptionMap,
+	};
+}
+
+async function getMetadataYearItems(metadataYearPath) {
 	try {
 		const items = await getListing(metadataYearPath);
 		items.sort((a, b) => a.name.localeCompare(b.name));
 		console.log(
-			`[UpdateGroup] Metadata year ${yearName} has ${items.length} items`,
+			`[UpdateGroup] Metadata folder ${metadataYearPath} has ${items.length} items`,
 		);
 		return items;
 	} catch (err) {
@@ -105,6 +135,112 @@ async function getMetadataYearItems(groupName, yearName) {
 			err,
 		);
 		return [];
+	}
+}
+
+async function readSessionsFile(path) {
+	try {
+		if (!(await storage.exists(path))) {
+			return [];
+		}
+		const content = await storage.readFile(path);
+		const data = JSON.parse(content);
+		return Array.isArray(data?.sessions) ? data.sessions : [];
+	} catch (err) {
+		console.warn(`[UpdateGroup] Failed to read cached metadata ${path}`, err);
+		return [];
+	}
+}
+
+async function loadCachedYearMetadata(name, yearName, isMerged, isBundled) {
+	let sessions = [];
+
+	if (isBundled) {
+		const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
+		sessions = (await readSessionsFile(bundlePath)).filter(
+			(session) => session.group === name,
+		);
+	} else if (isMerged) {
+		const mergedPath = makePath(LOCAL_SYNC_PATH, `${name}.json`);
+		sessions = await readSessionsFile(mergedPath);
+	} else {
+		const localYearPath = makePath(LOCAL_SYNC_PATH, name, `${yearName}.json`);
+		sessions = await readSessionsFile(localYearPath);
+	}
+
+	const yearSessions = sessions.filter((session) => {
+		const id = session.id || session.name || "";
+		return id.startsWith(yearName);
+	});
+	if (yearSessions.length === 0) {
+		return null;
+	}
+
+	const metadata = {
+		items: [],
+		tags: Object.create(null),
+		durations: Object.create(null),
+		summaries: Object.create(null),
+		transcriptions: Object.create(null),
+	};
+
+	for (const session of yearSessions) {
+		const keys = [session.id, session.name].filter(Boolean);
+		for (const key of keys) {
+			if (Array.isArray(session.tags) && session.tags.length > 0) {
+				metadata.tags[key] = session.tags;
+			}
+			if (session.duration) {
+				metadata.durations[key] = session.duration;
+			}
+			if (session.summaryText) {
+				metadata.summaries[key] = session.summaryText;
+			}
+			if (session.transcription) {
+				metadata.transcriptions[key] = session.transcription;
+			}
+		}
+	}
+
+	return metadata;
+}
+
+async function getYearMetadata(year, name, forceUpdate, isMerged, isBundled) {
+	const awsPath = makePath("aws/sessions", name);
+	if (!forceUpdate) {
+		const cached = await loadCachedYearMetadata(
+			name,
+			year.name,
+			isMerged,
+			isBundled,
+		);
+		if (cached) {
+			return cached;
+		}
+	}
+
+	try {
+		const metadata = await fetchSessionMetadata(name, year.name);
+		return {
+			items: metadata?.items || [],
+			tags: metadata?.tags || {},
+			durations: metadata?.durations || {},
+			summaries: metadata?.summaries || {},
+			transcriptions: metadata?.transcriptions || {},
+		};
+	} catch (err) {
+		console.warn(
+			`[UpdateGroup] Aggregated metadata fetch failed for ${name}/${year.name}; falling back to legacy metadata reads`,
+			err,
+		);
+		return await getLegacyMetadata(
+			year,
+			name,
+			awsPath,
+			forceUpdate,
+			isMerged,
+			isBundled,
+		);
 	}
 }
 
@@ -244,28 +380,18 @@ export async function updateGroupProcess(
 					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 				);
 				yearItems.sort((a, b) => a.name.localeCompare(b.name));
-				const metadataYearItems = await getMetadataYearItems(name, year.name);
-
-				// Load Metadata concurrently to improve performance
-				const awsPath = makePath("aws/sessions", name);
-				const [
-					sessionTagsMap,
-					sessionDurationMap,
-					sessionSummariesMap,
-					sessionTranscriptionMap,
-				] = await Promise.all([
-					loadTags(year, name, awsPath, forceUpdate, isMerged, isBundled),
-					loadDurations(year, name, awsPath, forceUpdate, isMerged, isBundled),
-					loadSummaries(year, name, awsPath, forceUpdate, isMerged, isBundled),
-					loadTranscriptions(
-						year,
-						name,
-						awsPath,
-						forceUpdate,
-						isMerged,
-						isBundled,
-					),
-				]);
+				const metadata = await getYearMetadata(
+					year,
+					name,
+					forceUpdate,
+					isMerged,
+					isBundled,
+				);
+				const metadataYearItems = metadata.items;
+				const sessionTagsMap = metadata.tags;
+				const sessionDurationMap = metadata.durations;
+				const sessionSummariesMap = metadata.summaries;
+				const sessionTranscriptionMap = metadata.transcriptions;
 
 				const wasabiFilesMap = groupFilesBySessionId(yearItems, year.name);
 				const digitalOceanFilesMap = groupFilesBySessionId(

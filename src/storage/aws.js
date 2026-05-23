@@ -12,17 +12,11 @@ async function getListing(path, options = {}) {
 	const { useCount } = options;
 	const listing = [];
 	const encodedPath = encodeURIComponent(path.slice(1));
-	console.log(
-		`[AWS Storage] getListing - Original path: ${path}, Encoded: ${encodedPath}`,
-	);
 	const url = `${fsEndPoint}?path=${encodedPath}&type=dir&t=${Date.now()}`;
 	const items = await fetchJSON(url, {
 		method: "GET",
 		cache: "no-store",
 	});
-	console.log(
-		`[AWS Storage] getListing - Received ${items?.length || 0} items for path: ${path}`,
-	);
 	for (const item of items) {
 		const { name, stat = {} } = item;
 		const itemPath = makePath(path, name);
@@ -45,9 +39,6 @@ async function getListing(path, options = {}) {
 		item.name = name;
 		listing.push(item);
 	}
-	console.log(
-		`[AWS Storage] getListing - Returning ${listing.length} items for path: ${path}`,
-	);
 	return listing;
 }
 

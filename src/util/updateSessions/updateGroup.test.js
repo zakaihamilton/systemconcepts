@@ -7,6 +7,7 @@ import {
 	loadTags,
 	loadTranscriptions,
 } from "./metadata";
+import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateYearSync } from "./utils";
 
@@ -44,6 +45,9 @@ jest.mock("./metadata", () => ({
 	loadTags: jest.fn(),
 	loadTranscriptions: jest.fn(),
 }));
+jest.mock("./sessionMetadataClient", () => ({
+	fetchSessionMetadata: jest.fn(),
+}));
 jest.mock("./utils", () => ({
 	getListing: jest.fn(),
 	updateBundleFile: jest.fn(),
@@ -73,6 +77,38 @@ describe("updateGroupProcess", () => {
 		loadDurations.mockResolvedValue({});
 		loadSummaries.mockResolvedValue({});
 		loadTranscriptions.mockResolvedValue({});
+		fetchSessionMetadata.mockResolvedValue({
+			items: [
+				file(
+					"2024-05-05 Test Session.duration",
+					"/aws/sessions/test/2024/2024-05-05 Test Session.duration",
+				),
+				file(
+					"2024-05-05 Test Session.md",
+					"/aws/sessions/test/2024/2024-05-05 Test Session.md",
+				),
+				file(
+					"2024-05-05 Test Session.txt",
+					"/aws/sessions/test/2024/2024-05-05 Test Session.txt",
+				),
+				file(
+					"2024-05-05 Test Session.en.vtt",
+					"/aws/sessions/test/2024/2024-05-05 Test Session.en.vtt",
+				),
+				file(
+					"2024-05-05 Test Session.png",
+					"/aws/sessions/test/2024/2024-05-05 Test Session.png",
+				),
+				file(
+					"2024-05-06 Metadata Only.txt",
+					"/aws/sessions/test/2024/2024-05-06 Metadata Only.txt",
+				),
+			],
+			tags: {},
+			durations: {},
+			summaries: {},
+			transcriptions: {},
+		});
 
 		getListing.mockImplementation(async (path) => {
 			if (path === "wasabi/test") {
@@ -131,6 +167,8 @@ describe("updateGroupProcess", () => {
 	it("combines Wasabi media with DigitalOcean metadata and preferred images", async () => {
 		await updateGroupProcess("test", true);
 
+		expect(fetchSessionMetadata).toHaveBeenCalledTimes(1);
+		expect(fetchSessionMetadata).toHaveBeenCalledWith("test", "2024");
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
 		const [, year, sessions] = updateYearSync.mock.calls[0];
 		expect(year).toBe("2024");
@@ -154,5 +192,89 @@ describe("updateGroupProcess", () => {
 			"/aws/sessions/test/2024/2024-05-05 Test Session.en.vtt",
 		);
 		expect(session.thumbnail).toBe("thumbnail");
+	});
+
+	it("falls back to legacy metadata loaders when aggregated metadata fails", async () => {
+		fetchSessionMetadata.mockRejectedValueOnce(new Error("backend busy"));
+		loadTags.mockResolvedValue({ "2024-05-05 Test Session": ["legacy"] });
+		loadDurations.mockResolvedValue({ "2024-05-05 Test Session": 456 });
+		loadSummaries.mockResolvedValue({
+			"2024-05-05 Test Session": "Legacy summary",
+		});
+		loadTranscriptions.mockResolvedValue({
+			"2024-05-05 Test Session": true,
+		});
+
+		await updateGroupProcess("test", true);
+
+		expect(loadTags).toHaveBeenCalledTimes(1);
+		expect(loadDurations).toHaveBeenCalledTimes(1);
+		expect(loadSummaries).toHaveBeenCalledTimes(1);
+		expect(loadTranscriptions).toHaveBeenCalledTimes(1);
+		const [, , sessions] = updateYearSync.mock.calls[0];
+		expect(sessions[0].tags).toEqual(["legacy"]);
+		expect(sessions[0].duration).toBe(456);
+		expect(sessions[0].summaryText).toBe("Legacy summary");
+		expect(sessions[0].transcription).toBe(true);
+	});
+
+	it("uses cached metadata for non-forced updates without calling the aggregated endpoint", async () => {
+		const currentYear = String(new Date().getFullYear());
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [
+					{
+						name: currentYear,
+						type: "dir",
+						path: `wasabi/test/${currentYear}`,
+					},
+				];
+			}
+			if (path === `wasabi/test/${currentYear}`) {
+				return [
+					file(
+						`${currentYear}-05-05 Cached Session.mp4`,
+						`wasabi/test/${currentYear}/${currentYear}-05-05 Cached Session.mp4`,
+					),
+				];
+			}
+			return [];
+		});
+		storage.exists.mockImplementation(async (path) =>
+			path.endsWith(`test/${currentYear}.json`),
+		);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.endsWith(`test/${currentYear}.json`)) {
+				return JSON.stringify({
+					sessions: [
+						{
+							id: `${currentYear}-05-05 Cached Session`,
+							name: `${currentYear}-05-05 Cached Session`,
+							group: "test",
+							tags: ["cached"],
+							duration: 321,
+							summaryText: "Cached summary",
+							transcription: true,
+						},
+					],
+				});
+			}
+			return "";
+		});
+
+		await updateGroupProcess("test", false, false);
+
+		expect(fetchSessionMetadata).not.toHaveBeenCalled();
+		expect(loadTags).not.toHaveBeenCalled();
+		expect(loadDurations).not.toHaveBeenCalled();
+		expect(loadSummaries).not.toHaveBeenCalled();
+		expect(loadTranscriptions).not.toHaveBeenCalled();
+
+		const [, year, sessions] = updateYearSync.mock.calls[0];
+		expect(year).toBe(currentYear);
+		expect(sessions[0].tags).toEqual(["cached"]);
+		expect(sessions[0].duration).toBe(321);
+		expect(sessions[0].summaryText).toBe("Cached summary");
+		expect(sessions[0].transcription).toBe(true);
 	});
 });
