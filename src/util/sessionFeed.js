@@ -1,5 +1,6 @@
-import { downloadData, metadataInfo as awsMetadataInfo } from "@util/aws";
+import { metadataInfo as awsMetadataInfo, downloadData } from "@util/aws";
 import pLimit from "@util/p-limit";
+import { metadataInfo as wasabiMetadataInfo } from "@util/wasabi";
 import pako from "pako";
 
 const MANIFEST_PATH = "sync/files.json.gz";
@@ -104,10 +105,14 @@ export function sortSessions(sessions) {
 
 export function getSProxyUrl(path, baseUrl) {
 	if (!path) return null;
-	const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+	const cleanPath = normalizeProxyPath(path);
 	const b64 = Buffer.from(cleanPath).toString("base64url");
 	const ext = path.split(".").pop() || "bin";
 	return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
+}
+
+function normalizeProxyPath(path) {
+	return path.replace(/^\//, "").replace(/^aws\//, "");
 }
 
 function getMediaPath(session) {
@@ -150,6 +155,18 @@ function getInferredTranscriptPath(session) {
 	return `${mediaPath.substring(0, dotIndex)}.txt`;
 }
 
+async function getExistingTranscriptPath(path) {
+	if (!path) return null;
+
+	const cleanPath = normalizeProxyPath(path);
+	const wasabiKey = cleanPath.replace(/^wasabi\//, "");
+	const exists = cleanPath.startsWith("wasabi/")
+		? await wasabiMetadataInfo({ path: wasabiKey })
+		: await awsMetadataInfo({ path: cleanPath });
+
+	return exists ? cleanPath : null;
+}
+
 async function getExistingInferredTranscriptPath(session) {
 	const logContext = {
 		id: session?.id,
@@ -178,38 +195,38 @@ async function getExistingInferredTranscriptPath(session) {
 		return null;
 	}
 
-	const cleanPath = transcriptPath
-		.replace(/^\//, "")
-		.replace(/^sessions\//, "")
-		.replace(/^wasabi\//, "");
-	const metadataPath = "sessions/" + cleanPath;
-	const exists = await awsMetadataInfo({ path: metadataPath });
+	const resolvedPath = await getExistingTranscriptPath(transcriptPath);
 	console.log("[Sessions API] Checked inferred transcript", {
 		...logContext,
 		mediaPath: getMediaPath(session),
 		transcriptPath,
-		wasabiKey: cleanPath,
-		metadataPath,
-		exists: !!exists,
+		resolvedPath,
+		exists: !!resolvedPath,
 	});
-	return exists ? metadataPath : null;
+	return resolvedPath;
 }
 
 export async function getTranscriptProxyUrl(session, baseUrl) {
 	if (!session) return null;
 
-	const explicitTranscriptPath = session.subtitles?.path || session.transcriptPath;
-	const listedTranscriptPath = getStandaloneTranscriptPath(session);
-	const transcriptPath =
-		explicitTranscriptPath ||
-		listedTranscriptPath ||
-		(await getExistingInferredTranscriptPath(session));
+	const candidatePaths = [
+		session.subtitles?.path,
+		session.transcriptPath,
+		getStandaloneTranscriptPath(session),
+	];
+	let transcriptPath = null;
+	for (const candidatePath of candidatePaths) {
+		transcriptPath = await getExistingTranscriptPath(candidatePath);
+		if (transcriptPath) break;
+	}
+	if (!transcriptPath) {
+		transcriptPath = await getExistingInferredTranscriptPath(session);
+	}
 	console.log("[Sessions API] Resolved transcript URL", {
 		id: session.id,
 		group: session.group,
 		year: session.year,
-		explicitTranscriptPath: explicitTranscriptPath || null,
-		listedTranscriptPath: listedTranscriptPath || null,
+		candidatePaths: candidatePaths.filter(Boolean),
 		resolvedTranscriptPath: transcriptPath || null,
 		hasUrl: !!transcriptPath,
 	});
