@@ -64,4 +64,31 @@ describe("sessionFeed transcript URLs", () => {
 			"wasabi/american/2025/2025-09-12 Numb.txt",
 		);
 	});
+
+	it("returns a yearly zip transcript URL when metadata says a transcription exists", async () => {
+		awsMetadataInfo.mockResolvedValue(null);
+		wasabiMetadataInfo.mockResolvedValue(null);
+
+		const url = await getTranscriptProxyUrl(
+			{
+				id: "2025-09-12 Numb",
+				group: "american",
+				year: "2025",
+				transcription: true,
+				audio: {
+					path: "/aws/sessions/american/2025/2025-09-12 Numb.m4a",
+				},
+			},
+			"https://systemconcepts.app",
+		);
+
+		const parsed = new URL(url);
+		expect(parsed.pathname).toBe("/api/rss/transcription");
+		expect(
+			Buffer.from(parsed.searchParams.get("p"), "base64url").toString("utf8"),
+		).toBe("sessions/american/2025.zip");
+		expect(
+			Buffer.from(parsed.searchParams.get("f"), "base64url").toString("utf8"),
+		).toBe("2025-09-12 Numb.txt");
+	});
 });

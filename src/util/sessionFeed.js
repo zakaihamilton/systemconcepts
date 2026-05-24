@@ -111,6 +111,17 @@ export function getSProxyUrl(path, baseUrl) {
 	return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
 }
 
+function getZipTranscriptProxyUrl(session, baseUrl) {
+	if (!session.transcription || !session.group || !session.year || !session.id) {
+		return null;
+	}
+
+	const zipPath = `sessions/${session.group}/${session.year}.zip`;
+	const pathParam = Buffer.from(zipPath).toString("base64url");
+	const fileParam = Buffer.from(`${session.id}.txt`).toString("base64url");
+	return `${baseUrl}/api/rss/transcription?p=${pathParam}&f=${fileParam}&e=.txt`;
+}
+
 function normalizeProxyPath(path) {
 	return path.replace(/^\//, "").replace(/^aws\//, "");
 }
@@ -234,5 +245,5 @@ export async function getTranscriptProxyUrl(session, baseUrl) {
 		return getSProxyUrl(transcriptPath, baseUrl);
 	}
 
-	return null;
+	return getZipTranscriptProxyUrl(session, baseUrl);
 }
