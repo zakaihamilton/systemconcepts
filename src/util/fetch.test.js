@@ -35,6 +35,18 @@ describe("fetch cache", () => {
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 
+	it("reuses cached null JSON responses within the TTL", async () => {
+		global.fetch.mockResolvedValue(mockResponse(""));
+
+		const options = getStableFetchCacheOptions(1000);
+		const first = await fetchJSON("/api/empty", options);
+		const second = await fetchJSON("/api/empty", options);
+
+		expect(first).toBeNull();
+		expect(second).toBeNull();
+		expect(global.fetch).toHaveBeenCalledTimes(1);
+	});
+
 	it("does not cache responses unless explicitly requested", async () => {
 		global.fetch
 			.mockResolvedValueOnce(mockResponse("first"))

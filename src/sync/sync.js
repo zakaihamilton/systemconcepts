@@ -68,24 +68,33 @@ function getManifestSignature(manifest) {
 	);
 }
 
-async function hasFreshReadOnlyManifest(config, userid) {
-	if (typeof window === "undefined" || config.migration) return false;
+async function getReadOnlyManifestFreshness(config, userid) {
+	if (typeof window === "undefined" || config.migration) return null;
 	const resolvedRemotePath = config.remotePath.replace("{userid}", userid);
 	const manifestPath = makePath(resolvedRemotePath, FILES_MANIFEST_GZ);
 	const storageKey = `sync_manifest_signature:${resolvedRemotePath}`;
 	try {
 		const manifest = await readCompressedFile(manifestPath);
-		if (!manifest || !manifest.length) return false;
+		if (!manifest || !manifest.length) return null;
 		const signature = getManifestSignature(manifest);
 		const previousSignature = localStorage.getItem(storageKey);
-		localStorage.setItem(storageKey, signature);
-		return previousSignature === signature;
+		return {
+			fresh: previousSignature === signature,
+			signature,
+			storageKey,
+		};
 	} catch (err) {
 		console.warn(
 			`[Sync] Manifest freshness check failed for ${resolvedRemotePath}:`,
 			err.message || err,
 		);
-		return false;
+		return null;
+	}
+}
+
+function persistManifestSignature(freshness) {
+	if (typeof window !== "undefined" && freshness?.storageKey) {
+		localStorage.setItem(freshness.storageKey, freshness.signature);
 	}
 }
 
@@ -450,10 +459,14 @@ export async function performSync(forceReload) {
 				(config.direction === "bi" || config.direction === "push") &&
 				roleAuth(role, config.uploadsRole) &&
 				!SyncActiveStore.getRawState().locked;
+			const readOnlyFreshness =
+				!forceReload && !canUploadForConfig
+					? await getReadOnlyManifestFreshness(config, id)
+					: null;
 			if (
 				!forceReload &&
 				!canUploadForConfig &&
-				(await hasFreshReadOnlyManifest(config, id))
+				readOnlyFreshness?.fresh
 			) {
 				addSyncLog(`${config.name} manifest unchanged; skipping sync`, "info");
 				continue;
@@ -470,6 +483,7 @@ export async function performSync(forceReload) {
 			);
 			currentOffset = result.newOffset;
 			hasAnyChanges = hasAnyChanges || result.hasChanges;
+			persistManifestSignature(readOnlyFreshness);
 
 			if (config.name === "Library" && result.hasChanges) {
 				SyncActiveStore.update((s) => {

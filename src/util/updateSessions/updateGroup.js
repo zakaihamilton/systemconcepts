@@ -93,16 +93,14 @@ function getDigitalOceanSessionFiles(files) {
 }
 
 function getYearFingerprint(items) {
-	return JSON.stringify(
-		(items || [])
-			.map((item) => ({
-				name: item.name,
-				type: item.type || item.stat?.type || "",
-				size: item.size || item.stat?.size || 0,
-				mtimeMs: item.mtimeMs || item.stat?.mtimeMs || 0,
-			}))
-			.sort((a, b) => a.name.localeCompare(b.name)),
-	);
+	return (items || [])
+		.map((item) => ({
+			name: item.name,
+			type: item.type || item.stat?.type || "",
+			size: item.size || item.stat?.size || 0,
+			mtimeMs: item.mtimeMs || item.stat?.mtimeMs || 0,
+		}))
+		.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function getMetadataFileFingerprint(file) {
@@ -115,7 +113,7 @@ function getMetadataFileFingerprint(file) {
 	};
 }
 
-async function getMetadataFingerprint(groupName, yearName) {
+async function getGroupMetadataFiles(groupName) {
 	const metadataPath = makePath("aws/sessions", groupName);
 	const metadataFiles = new Map();
 	try {
@@ -124,22 +122,20 @@ async function getMetadataFingerprint(groupName, yearName) {
 			metadataFiles.set(item.name, item);
 		}
 	} catch (err) {
-		console.warn(
-			`[UpdateGroup] Failed to list metadata for ${groupName}/${yearName}`,
-			err,
-		);
+		console.warn(`[UpdateGroup] Failed to list metadata for ${groupName}`, err);
 	}
+	return metadataFiles;
+}
 
-	return JSON.stringify(
-		[".tags", ".duration", ".md", ".zip"].map((extension) =>
-			getMetadataFileFingerprint(metadataFiles.get(`${yearName}${extension}`)),
-		),
+function getMetadataFingerprint(metadataFiles, yearName) {
+	return [".tags", ".duration", ".md", ".zip"].map((extension) =>
+		getMetadataFileFingerprint(metadataFiles.get(`${yearName}${extension}`)),
 	);
 }
 
 function getCombinedYearFingerprint(yearItems, metadataFingerprint) {
 	return JSON.stringify({
-		media: JSON.parse(getYearFingerprint(yearItems)),
+		media: getYearFingerprint(yearItems),
 		metadata: metadataFingerprint,
 	});
 }
@@ -471,6 +467,7 @@ export async function updateGroupProcess(
 		});
 	}
 
+	const groupMetadataFiles = await getGroupMetadataFiles(name);
 	const limit = pLimit(4);
 
 	UpdateSessionsStore.update((s) => {
@@ -495,7 +492,10 @@ export async function updateGroupProcess(
 					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 				);
 				yearItems.sort((a, b) => a.name.localeCompare(b.name));
-				const metadataFingerprint = await getMetadataFingerprint(name, year.name);
+				const metadataFingerprint = getMetadataFingerprint(
+					groupMetadataFiles,
+					year.name,
+				);
 				const yearFingerprint = getCombinedYearFingerprint(
 					yearItems,
 					metadataFingerprint,

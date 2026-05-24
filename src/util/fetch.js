@@ -18,7 +18,7 @@ function getCachedResponse(cacheKey) {
 	const cached = responseCache.get(cacheKey);
 	if (!cached || cached.expiresAt <= Date.now()) {
 		responseCache.delete(cacheKey);
-		return null;
+		return undefined;
 	}
 	return cached.value;
 }
@@ -90,7 +90,7 @@ export function fetchText(url, options) {
 	const cacheKey = cacheResponse ? getCacheKey(url, fetchOptions) : null;
 	if (cacheKey) {
 		const cached = getCachedResponse(cacheKey);
-		if (cached !== null) return Promise.resolve(cached);
+		if (cached !== undefined) return Promise.resolve(cached);
 	}
 	return new Promise((resolve, reject) => {
 		window
@@ -130,7 +130,7 @@ export function fetchJSON(url, options) {
 	const cacheKey = cacheResponse ? getCacheKey(url, fetchOptions) : null;
 	if (cacheKey) {
 		const cached = getCachedResponse(cacheKey);
-		if (cached !== null) return Promise.resolve(cached);
+		if (cached !== undefined) return Promise.resolve(cached);
 	}
 	return new Promise((resolve, reject) => {
 		window
