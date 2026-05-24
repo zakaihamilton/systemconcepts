@@ -65,7 +65,7 @@ describe("sessionFeed transcript URLs", () => {
 		);
 	});
 
-	it("returns a yearly zip transcript URL when metadata says a transcription exists", async () => {
+	it("does not return a yearly zip transcript URL from the sessions API", async () => {
 		awsMetadataInfo.mockResolvedValue(null);
 		wasabiMetadataInfo.mockResolvedValue(null);
 
@@ -82,13 +82,57 @@ describe("sessionFeed transcript URLs", () => {
 			"https://systemconcepts.app",
 		);
 
+		expect(url).toBeNull();
+	});
+
+	it("returns a signed-redirect URL for an AWS transcript when a summary exists without transcription metadata", async () => {
+		awsMetadataInfo.mockImplementation(({ path }) =>
+			path ===
+			"sessions/american/2026/2026-04-28 Overview - Effort vs Finding Favor.txt"
+				? Promise.resolve({ type: "text/plain" })
+				: Promise.resolve(null),
+		);
+		wasabiMetadataInfo.mockResolvedValue(null);
+
+		const url = await getTranscriptProxyUrl(
+			{
+				id: "2026-04-28 Overview - Effort vs Finding Favor",
+				group: "american",
+				year: "2026",
+				summaryText: "Summary created from the transcription.",
+				audio: {
+					path: "/aws/sessions/american/2026/2026-04-28 Overview - Effort vs Finding Favor.m4a",
+				},
+			},
+			"https://systemconcepts.app",
+		);
+
 		const parsed = new URL(url);
-		expect(parsed.pathname).toBe("/api/rss/transcription");
+		expect(parsed.pathname).toBe("/api/rss/s");
 		expect(
 			Buffer.from(parsed.searchParams.get("p"), "base64url").toString("utf8"),
-		).toBe("sessions/american/2025.zip");
-		expect(
-			Buffer.from(parsed.searchParams.get("f"), "base64url").toString("utf8"),
-		).toBe("2025-09-12 Numb.txt");
+		).toBe(
+			"sessions/american/2026/2026-04-28 Overview - Effort vs Finding Favor.txt",
+		);
+	});
+
+	it("does not fall back to a yearly zip transcript URL when no standalone transcript exists", async () => {
+		awsMetadataInfo.mockResolvedValue(null);
+		wasabiMetadataInfo.mockResolvedValue(null);
+
+		const url = await getTranscriptProxyUrl(
+			{
+				id: "2026-04-28 Overview - Effort vs Finding Favor",
+				group: "american",
+				year: "2026",
+				summaryText: "Summary created from the transcription.",
+				audio: {
+					path: "/aws/sessions/american/2026/2026-04-28 Overview - Effort vs Finding Favor.m4a",
+				},
+			},
+			"https://systemconcepts.app",
+		);
+
+		expect(url).toBeNull();
 	});
 });
