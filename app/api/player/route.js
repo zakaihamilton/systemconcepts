@@ -14,7 +14,6 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const component = "player";
-
 function getWasabiKey(path) {
 	let key = path.startsWith("/") ? path.substring(1) : path;
 	if (key.startsWith("sessions/")) {
@@ -123,12 +122,19 @@ export async function GET(request) {
 			message: `User ${id} generated player & download URLs for: ${s3Key}`,
 		});
 
-		return NextResponse.json({
-			path: playerUrl,
-			downloadUrl,
-			subtitles,
-			transcriptionUrl,
-		});
+		return NextResponse.json(
+			{
+				path: playerUrl,
+				downloadUrl,
+				subtitles,
+				transcriptionUrl,
+			},
+			{
+				headers: {
+					"Cache-Control": "no-store",
+				},
+			},
+		);
 	} catch (err) {
 		error({ component, error: "Access Error", err });
 		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });

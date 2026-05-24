@@ -1,10 +1,13 @@
 const withPWA = require("@ducanh2912/next-pwa").default({
 	dest: "public",
 	disable: process.env.NODE_ENV === "development",
+	extendDefaultRuntimeCaching: true,
 	fallbacks: {
 		document: "/~offline",
 	},
-	runtimeCaching: require("./runtimeCaching"),
+	workboxOptions: {
+		runtimeCaching: require("./runtimeCaching"),
+	},
 });
 
 const version = require("./package.json").version;

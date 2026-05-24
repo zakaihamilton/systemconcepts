@@ -44,6 +44,16 @@ if (typeof window !== "undefined") {
 		});
 	}
 
+	const lastSyncTime = Number.parseInt(
+		localStorage.getItem("sync_lastSyncTime") || "0",
+		10,
+	);
+	if (Number.isFinite(lastSyncTime) && lastSyncTime > 0) {
+		SyncActiveStore.update((s) => {
+			s.lastSyncTime = lastSyncTime;
+		});
+	}
+
 	const debugLevel = localStorage.getItem("sync_debugLevel");
 	if (debugLevel !== null) {
 		SyncActiveStore.update((s) => {
@@ -62,6 +72,13 @@ if (typeof window !== "undefined") {
 		(s) => s.autoSync,
 		(autoSync) => {
 			localStorage.setItem("sync_autoSync", autoSync);
+		},
+	);
+
+	SyncActiveStore.subscribe(
+		(s) => s.lastSyncTime,
+		(lastSyncTime) => {
+			localStorage.setItem("sync_lastSyncTime", lastSyncTime);
 		},
 	);
 

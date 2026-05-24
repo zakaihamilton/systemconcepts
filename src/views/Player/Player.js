@@ -5,7 +5,11 @@ import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
 import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 import InfoIcon from "@mui/icons-material/Info";
 import VideoLabelIcon from "@mui/icons-material/VideoLabel";
-import { useFetchJSON } from "@util/fetch";
+import {
+	SIGNED_URL_CACHE_TTL_MS,
+	getStableFetchCacheOptions,
+	useFetchJSON,
+} from "@util/fetch";
 import { useRecentHistory } from "@util/history";
 import { exportFile } from "@util/importExport";
 import {
@@ -84,7 +88,10 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 	const path = makePath(components).split("/").join("/");
 	const [data, , loading, error, reload] = useFetchJSON(
 		"/api/player",
-		{ headers: { path: encodeURIComponent(path) } },
+		{
+			headers: { path: encodeURIComponent(path) },
+			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
+		},
 		[path],
 		path && group,
 	);

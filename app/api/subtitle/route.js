@@ -43,7 +43,10 @@ export async function GET(request) {
 
 		return new NextResponse(data, {
 			status: 200,
-			headers: { "Content-Type": contentType },
+			headers: {
+				"Content-Type": contentType,
+				"Cache-Control": "private, max-age=86400, stale-while-revalidate=604800",
+			},
 		});
 	} catch (err) {
 		error({ component, error: "Subtitle fetch error", err });

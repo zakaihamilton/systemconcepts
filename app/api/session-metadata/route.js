@@ -7,10 +7,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const NO_CACHE_HEADERS = {
-	"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-	Pragma: "no-cache",
-	Expires: "0",
+const SESSION_METADATA_HEADERS = {
+	"Cache-Control": "no-store",
 };
 
 export async function GET(request) {
@@ -31,7 +29,7 @@ export async function GET(request) {
 		const result = await aggregateSessionMetadata({ group, year });
 		return NextResponse.json(result, {
 			status: 200,
-			headers: new Headers(NO_CACHE_HEADERS),
+			headers: new Headers(SESSION_METADATA_HEADERS),
 		});
 	} catch (err) {
 		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });

@@ -1,8 +1,14 @@
 import { binaryToString } from "@util/binary";
-import { fetchBlob, fetchJSON, fetchText } from "@util/fetch";
+import {
+	fetchBlob,
+	fetchJSON,
+	fetchText,
+	getStableFetchCacheOptions,
+} from "@util/fetch";
 import { isBinaryFile, makePath } from "@util/path";
 
 const fsEndPoint = "/api/wasabi";
+const STABLE_READ_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 async function getListing(path) {
 	path = makePath(path);
@@ -39,17 +45,19 @@ async function readFile(path) {
 	const binary = isBinaryFile(path);
 	let body = null;
 	const encodedPath = encodeURIComponent(path);
+	const cacheOptions = getStableFetchCacheOptions(STABLE_READ_CACHE_TTL_MS);
 	if (binary) {
 		body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true`, {
 			method: "GET",
-			cache: "no-store",
+			cache: "default",
 		});
 		body = binaryToString(body);
 		return body;
 	} else {
 		body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file`, {
 			method: "GET",
-			cache: "no-store",
+			cache: "default",
+			...cacheOptions,
 		});
 	}
 	return body;

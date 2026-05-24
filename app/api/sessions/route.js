@@ -4,7 +4,6 @@ import {
 	getNonNegativeInt,
 	getPositiveInt,
 	JSON_HEADERS,
-	NO_CACHE_HEADERS,
 } from "@util/api";
 import {
 	getSProxyUrl,
@@ -69,30 +68,9 @@ export async function GET(request) {
 		sessions = sortSessions(sessions).slice(index, index + count);
 		const baseUrl =
 			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
-		console.log("[Sessions API] Building response", {
-			group: group || null,
-			tag: tag || null,
-			date: date || null,
-			year: year || null,
-			query: query || null,
-			count,
-			index,
-			sessionCount: sessions.length,
-			baseUrl,
-		});
 
 		const formattedSessions = await Promise.all(sessions.map(async (session) => {
 			const transcriptionUrl = await getTranscriptProxyUrl(session, baseUrl);
-			console.log("[Sessions API] Formatted session transcript", {
-				id: session.id,
-				group: session.group,
-				year: session.year,
-				name: session.name,
-				transcription: !!session.transcription,
-				hasTranscriptPath: !!session.transcriptPath,
-				hasSubtitlesPath: !!session.subtitles?.path,
-				hasTranscriptionUrl: !!transcriptionUrl,
-			});
 			return {
 				id: session.id,
 				group: session.group,
@@ -114,7 +92,7 @@ export async function GET(request) {
 			status: 200,
 			headers: {
 				...JSON_HEADERS,
-				...NO_CACHE_HEADERS,
+				"Cache-Control": "private, max-age=300, stale-while-revalidate=3600",
 			},
 		});
 	} catch (err) {

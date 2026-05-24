@@ -8,8 +8,9 @@ import { roleAuth } from "@util/roles";
 import storage from "@util/storage";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
+import { readCompressedFile } from "./bundle";
 import { SYNC_CONFIG } from "./config";
-import { FILES_MANIFEST } from "./constants";
+import { FILES_MANIFEST, FILES_MANIFEST_GZ } from "./constants";
 import { addSyncLog } from "./logs";
 import { SyncProgressTracker, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
@@ -24,7 +25,78 @@ import { uploadManifest } from "./steps/uploadManifest";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { uploadUpdates } from "./steps/uploadUpdates";
 
-const SYNC_INTERVAL = 60; // seconds
+export const AUTO_SYNC_INTERVAL_MS = 12 * 60 * 1000;
+export const AUTO_SYNC_JITTER_MS = 60 * 1000;
+
+function getCurrentVersion() {
+	return process.env.NEXT_PUBLIC_VERSION || "dev";
+}
+
+function getAutoSyncJitter() {
+	if (typeof window === "undefined") return 0;
+	const storageKey = "sync_autoSyncJitter";
+	const stored = Number.parseInt(localStorage.getItem(storageKey) || "", 10);
+	if (Number.isFinite(stored) && stored >= 0) return stored;
+	const jitter = Math.floor(Math.random() * AUTO_SYNC_JITTER_MS);
+	localStorage.setItem(storageKey, String(jitter));
+	return jitter;
+}
+
+function shouldRunInitialAutoSync() {
+	if (typeof window === "undefined") return false;
+	const version = getCurrentVersion();
+	const lastVersion = localStorage.getItem("sync_lastVersion");
+	const lastSyncTime = SyncActiveStore.getRawState().lastSyncTime;
+	return lastSyncTime === 0 || lastVersion !== version;
+}
+
+function persistAutoSyncVersion() {
+	if (typeof window !== "undefined") {
+		localStorage.setItem("sync_lastVersion", getCurrentVersion());
+	}
+}
+
+function getManifestSignature(manifest) {
+	if (!Array.isArray(manifest)) return "";
+	return JSON.stringify(
+		manifest.map(({ path, modified, version, hash }) => [
+			path,
+			modified,
+			version,
+			hash,
+		]),
+	);
+}
+
+async function getReadOnlyManifestFreshness(config, userid) {
+	if (typeof window === "undefined" || config.migration) return null;
+	const resolvedRemotePath = config.remotePath.replace("{userid}", userid);
+	const manifestPath = makePath(resolvedRemotePath, FILES_MANIFEST_GZ);
+	const storageKey = `sync_manifest_signature:${resolvedRemotePath}`;
+	try {
+		const manifest = await readCompressedFile(manifestPath);
+		if (!manifest || !manifest.length) return null;
+		const signature = getManifestSignature(manifest);
+		const previousSignature = localStorage.getItem(storageKey);
+		return {
+			fresh: previousSignature === signature,
+			signature,
+			storageKey,
+		};
+	} catch (err) {
+		console.warn(
+			`[Sync] Manifest freshness check failed for ${resolvedRemotePath}:`,
+			err.message || err,
+		);
+		return null;
+	}
+}
+
+function persistManifestSignature(freshness) {
+	if (typeof window !== "undefined" && freshness?.storageKey) {
+		localStorage.setItem(freshness.storageKey, freshness.signature);
+	}
+}
 
 /**
  * Execute a single sync pipeline for a given configuration
@@ -383,6 +455,22 @@ export async function performSync(forceReload) {
 				addSyncLog("Sync stopped by user", "warning");
 				break;
 			}
+			const canUploadForConfig =
+				(config.direction === "bi" || config.direction === "push") &&
+				roleAuth(role, config.uploadsRole) &&
+				!SyncActiveStore.getRawState().locked;
+			const readOnlyFreshness =
+				!forceReload && !canUploadForConfig
+					? await getReadOnlyManifestFreshness(config, id)
+					: null;
+			if (
+				!forceReload &&
+				!canUploadForConfig &&
+				readOnlyFreshness?.fresh
+			) {
+				addSyncLog(`${config.name} manifest unchanged; skipping sync`, "info");
+				continue;
+			}
 			SyncActiveStore.update((s) => {
 				s.phase = config.name.toLowerCase();
 			});
@@ -395,6 +483,7 @@ export async function performSync(forceReload) {
 			);
 			currentOffset = result.newOffset;
 			hasAnyChanges = hasAnyChanges || result.hasChanges;
+			persistManifestSignature(readOnlyFreshness);
 
 			if (config.name === "Library" && result.hasChanges) {
 				SyncActiveStore.update((s) => {
@@ -487,6 +576,7 @@ export async function requestSync(forceReload) {
 
 		const endTime = Date.now();
 		const syncDuration = endTime - SyncActiveStore.getRawState().startTime;
+		persistAutoSyncVersion();
 		SyncActiveStore.update((s) => {
 			s.busy = false;
 			s.lastSynced = endTime;
@@ -569,24 +659,24 @@ export function useSync(options = {}) {
 		const checkSync = () => {
 			const now = Date.now();
 			const lastSyncTime = SyncActiveStore.getRawState().lastSyncTime;
-			const timeSinceLastSync = (now - lastSyncTime) / 1000;
+			const timeSinceLastSync = now - lastSyncTime;
 			const sessionsBusy = UpdateSessionsStore.getRawState().busy;
+			const autoSyncInterval = AUTO_SYNC_INTERVAL_MS + getAutoSyncJitter();
 
-			if (timeSinceLastSync >= SYNC_INTERVAL && !busy && !sessionsBusy) {
+			if (timeSinceLastSync >= autoSyncInterval && !busy && !sessionsBusy) {
 				requestSync(false);
 			}
 		};
 
-		// Only sync immediately if we've NEVER synced before (fresh session)
-		const lastSyncTime = SyncActiveStore.getRawState().lastSyncTime;
-		if (lastSyncTime === 0) {
+		// Sync immediately only on a fresh session or after an app version change.
+		if (shouldRunInitialAutoSync()) {
 			const sessionsBusy = UpdateSessionsStore.getRawState().busy;
 			if (!sessionsBusy) {
 				requestSync(false);
 			}
 		}
 
-		timerRef.current = setInterval(checkSync, (SYNC_INTERVAL * 1000) / 2);
+		timerRef.current = setInterval(checkSync, Math.max(60 * 1000, AUTO_SYNC_INTERVAL_MS / 2));
 
 		return () => {
 			if (timerRef.current) {

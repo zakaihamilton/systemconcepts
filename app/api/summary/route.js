@@ -8,6 +8,10 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const component = "summary";
+const STABLE_CONTENT_HEADERS = {
+	"Content-Type": "text/markdown",
+	"Cache-Control": "private, max-age=86400, stale-while-revalidate=604800",
+};
 
 export async function GET(request) {
 	try {
@@ -30,7 +34,7 @@ export async function GET(request) {
 
 		return new NextResponse(data, {
 			status: 200,
-			headers: { "Content-Type": "text/markdown" },
+			headers: STABLE_CONTENT_HEADERS,
 		});
 	} catch (err) {
 		error({ component, error: "error", err });

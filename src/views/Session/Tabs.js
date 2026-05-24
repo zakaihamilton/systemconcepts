@@ -33,7 +33,6 @@ export default function Tabs({ Container }) {
 		{};
 
 	const basePath = "#" + toPath(...items.slice(0, baseIndex + 1));
-	const hasMedia = session.audio || session.video || session.resolutions;
 	const hasTranscript =
 		session.subtitles ||
 		session.transcription ||
@@ -41,8 +40,6 @@ export default function Tabs({ Container }) {
 		(session.files || []).some(
 			(file) => file.endsWith(".txt") || file.endsWith(".vtt"),
 		);
-
-	console.log("session", session);
 
 	const tabs = [
 		{

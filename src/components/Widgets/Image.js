@@ -1,5 +1,9 @@
 import Link from "@mui/material/Link";
-import { useFetchJSON } from "@util/fetch";
+import {
+	SIGNED_URL_CACHE_TTL_MS,
+	getStableFetchCacheOptions,
+	useFetchJSON,
+} from "@util/fetch";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
@@ -21,7 +25,10 @@ export default function ImageWidget({
 	const isWasabi = path && path.startsWith("wasabi/");
 	const [data] = useFetchJSON(
 		isWasabi && "/api/player",
-		{ headers: { path: encodeURIComponent(path) } },
+		{
+			headers: { path: encodeURIComponent(path) },
+			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
+		},
 		[path],
 		isWasabi,
 	);
