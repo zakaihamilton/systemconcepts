@@ -1,9 +1,19 @@
 import { binaryToString } from "@util/binary";
-import { fetchBlob, fetchJSON, fetchText } from "@util/fetch";
+import {
+	fetchBlob,
+	fetchJSON,
+	fetchText,
+	getStableFetchCacheOptions,
+} from "@util/fetch";
 import { isBinaryFile, makePath } from "@util/path";
 import pLimit from "p-limit";
 
 const fsEndPoint = "/api/aws";
+const STABLE_READ_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+function isStableReadPath(path) {
+	return path.replace(/^\//, "").startsWith("sessions/");
+}
 
 async function getListing(path, options = {}) {
 	path = makePath(path)
@@ -89,15 +99,15 @@ async function readFile(path) {
 		.replace(/^aws\//, "");
 	const binary = isBinaryFile(path);
 	let body = null;
+	const cacheOptions = isStableReadPath(path)
+		? getStableFetchCacheOptions(STABLE_READ_CACHE_TTL_MS)
+		: {};
 	if (binary) {
 		const encodedPath = encodeURIComponent(path.slice(1));
-		body = await fetchBlob(
-			`${fsEndPoint}?path=${encodedPath}&binary=true&t=${Date.now()}`,
-			{
-				method: "GET",
-				cache: "no-store",
-			},
-		);
+		body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true`, {
+			method: "GET",
+			cache: isStableReadPath(path) ? "default" : "no-store",
+		});
 		// Check if we accidentally received a directory listing
 		if (Array.isArray(body)) {
 			throw new Error(`Cannot read directory as file: ${path}`);
@@ -106,13 +116,11 @@ async function readFile(path) {
 		return body;
 	} else {
 		const encodedPath = encodeURIComponent(path.slice(1));
-		body = await fetchText(
-			`${fsEndPoint}?path=${encodedPath}&type=file&t=${Date.now()}`,
-			{
-				method: "GET",
-				cache: "no-store",
-			},
-		);
+		body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file`, {
+			method: "GET",
+			cache: isStableReadPath(path) ? "default" : "no-store",
+			...cacheOptions,
+		});
 		// Check if we accidentally received a directory listing (JSON array)
 		try {
 			const _parsed = JSON.parse(body);

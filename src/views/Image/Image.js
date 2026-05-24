@@ -2,7 +2,11 @@ import { ContentSize } from "@components/Page/Content";
 import ErrorIcon from "@mui/icons-material/Error";
 import { useSync } from "@sync/sync";
 import { readBinary } from "@util/binary";
-import { useFetchJSON } from "@util/fetch";
+import {
+	SIGNED_URL_CACHE_TTL_MS,
+	getStableFetchCacheOptions,
+	useFetchJSON,
+} from "@util/fetch";
 import { exportData, exportFile } from "@util/importExport";
 import { makePath } from "@util/path";
 import { useTranslations } from "@util/translations";
@@ -40,7 +44,10 @@ function useImagePath(imageName = "", extension) {
 	}
 	const [data, , loading] = useFetchJSON(
 		"/api/player",
-		{ headers: { path: encodeURIComponent(path) } },
+		{
+			headers: { path: encodeURIComponent(path) },
+			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
+		},
 		[path],
 		path && group,
 	);

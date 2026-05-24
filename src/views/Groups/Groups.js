@@ -3,7 +3,6 @@ import UpdateIcon from "@mui/icons-material/Update";
 import UploadIcon from "@mui/icons-material/Upload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { requestSync } from "@sync/sync";
 import { GroupsStore } from "@util/groups";
 import { useOnline } from "@util/online";
 import { useSessions } from "@util/sessions";
@@ -41,10 +40,8 @@ export default function Groups() {
 		updateAllMetadataCurrentYear,
 		updateGroup,
 	} = useUpdateSessions(groups);
-	const sync = requestSync;
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
 	const syncEnabled = online && isSignedIn;
-	const syncTimerRef = useRef(null);
 	const fileInputRef = useRef(null);
 	const [groupSizes, setGroupSizes] = useState({});
 	const [sizeRefreshTrigger, setSizeRefreshTrigger] = useState(0);
@@ -134,48 +131,16 @@ export default function Groups() {
 		animated: busy,
 	});
 
-	// Auto-sync after group updates (debounced)
-	useEffect(() => {
-		if (!syncEnabled || counter === 0) {
-			return;
-		}
-
-		// Clear any existing timer
-		if (syncTimerRef.current) {
-			clearTimeout(syncTimerRef.current);
-		}
-
-		// Debounce sync by 2 seconds to avoid excessive syncing
-		syncTimerRef.current = setTimeout(() => {
-			sync && sync();
-		}, 2000);
-
-		return () => {
-			if (syncTimerRef.current) {
-				clearTimeout(syncTimerRef.current);
-			}
-		};
-	}, [counter, syncEnabled, sync]);
-
 	const updateSessionsWithSync = async () => {
 		await updateSessions(showDisabled);
-		if (syncEnabled && sync) {
-			await sync();
-		}
 	};
 
 	const updateAllSessionsWithSync = async () => {
 		await updateAllSessions(showDisabled);
-		if (syncEnabled && sync) {
-			await sync();
-		}
 	};
 
 	const updateAllMetadataCurrentYearWithSync = async () => {
 		await updateAllMetadataCurrentYear(showDisabled);
-		if (syncEnabled && sync) {
-			await sync();
-		}
 	};
 
 	const [currentTime, setCurrentTime] = useState(new Date().getTime());

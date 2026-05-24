@@ -35,6 +35,7 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { getListing, updateYearSync } from "./utils";
 
 const prefix = "wasabi/";
+const GROUP_UPDATE_CACHE_PATH = makePath(LOCAL_SYNC_PATH, ".group-update-cache");
 
 function isYearMetadataFile(file, yearName) {
 	return (
@@ -89,6 +90,109 @@ function getDigitalOceanSessionFiles(files) {
 	return (files || []).filter(
 		(file) => !isAudioFile(file.name) && !isVideoFile(file.name),
 	);
+}
+
+function getYearFingerprint(items) {
+	return JSON.stringify(
+		(items || [])
+			.map((item) => ({
+				name: item.name,
+				type: item.type || item.stat?.type || "",
+				size: item.size || item.stat?.size || 0,
+				mtimeMs: item.mtimeMs || item.stat?.mtimeMs || 0,
+			}))
+			.sort((a, b) => a.name.localeCompare(b.name)),
+	);
+}
+
+function getMetadataFileFingerprint(file) {
+	if (!file) return null;
+	return {
+		name: file.name,
+		type: file.type || file.stat?.type || "",
+		size: file.size || file.stat?.size || 0,
+		mtimeMs: file.mtimeMs || file.stat?.mtimeMs || 0,
+	};
+}
+
+async function getMetadataFingerprint(groupName, yearName) {
+	const metadataPath = makePath("aws/sessions", groupName);
+	const metadataFiles = new Map();
+	try {
+		const metadataItems = await getListing(metadataPath);
+		for (const item of metadataItems || []) {
+			metadataFiles.set(item.name, item);
+		}
+	} catch (err) {
+		console.warn(
+			`[UpdateGroup] Failed to list metadata for ${groupName}/${yearName}`,
+			err,
+		);
+	}
+
+	return JSON.stringify(
+		[".tags", ".duration", ".md", ".zip"].map((extension) =>
+			getMetadataFileFingerprint(metadataFiles.get(`${yearName}${extension}`)),
+		),
+	);
+}
+
+function getCombinedYearFingerprint(yearItems, metadataFingerprint) {
+	return JSON.stringify({
+		media: JSON.parse(getYearFingerprint(yearItems)),
+		metadata: metadataFingerprint,
+	});
+}
+
+function getYearCachePath(groupName, yearName) {
+	return makePath(GROUP_UPDATE_CACHE_PATH, groupName, `${yearName}.json`);
+}
+
+async function readYearCache(groupName, yearName) {
+	try {
+		const path = getYearCachePath(groupName, yearName);
+		const content = await storage.readFile(path);
+		return content ? JSON.parse(content) : null;
+	} catch (err) {
+		console.warn(
+			`[UpdateGroup] Failed to read year cache for ${groupName}/${yearName}`,
+			err,
+		);
+		return null;
+	}
+}
+
+async function writeYearCache(groupName, yearName, fingerprint) {
+	try {
+		const path = getYearCachePath(groupName, yearName);
+		await storage.createFolderPath(path);
+		await storage.writeFile(
+			path,
+			JSON.stringify({
+				fingerprint,
+				updatedAt: Date.now(),
+			}),
+		);
+	} catch (err) {
+		console.warn(
+			`[UpdateGroup] Failed to write year cache for ${groupName}/${yearName}`,
+			err,
+		);
+	}
+}
+
+function getCachedSessionsForYear(existingSessions, yearName) {
+	return (existingSessions || []).filter((session) => {
+		const id = session.id || session.name || "";
+		return String(session.year || "").trim() === String(yearName) ||
+			id.startsWith(yearName);
+	});
+}
+
+async function loadCachedYearSessions(groupName, yearName, isMerged, isBundled) {
+	if (isMerged || isBundled) return [];
+	const localYearPath = makePath(LOCAL_SYNC_PATH, groupName, `${yearName}.json`);
+	return readSessionsFile(localYearPath);
 }
 
 async function getLegacyMetadata(
@@ -205,7 +309,14 @@ async function loadCachedYearMetadata(name, yearName, isMerged, isBundled) {
 	return metadata;
 }
 
-async function getYearMetadata(year, name, forceUpdate, isMerged, isBundled) {
+async function getYearMetadata(
+	year,
+	name,
+	forceUpdate,
+	isMerged,
+	isBundled,
+	metadataFingerprint,
+) {
 	const awsPath = makePath("aws/sessions", name);
 	if (!forceUpdate) {
 		const cached = await loadCachedYearMetadata(
@@ -220,7 +331,11 @@ async function getYearMetadata(year, name, forceUpdate, isMerged, isBundled) {
 	}
 
 	try {
-		const metadata = await fetchSessionMetadata(name, year.name);
+		const metadata = await fetchSessionMetadata(
+			name,
+			year.name,
+			metadataFingerprint,
+		);
 		return {
 			items: metadata?.items || [],
 			tags: metadata?.tags || {},
@@ -380,12 +495,45 @@ export async function updateGroupProcess(
 					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 				);
 				yearItems.sort((a, b) => a.name.localeCompare(b.name));
+				const metadataFingerprint = await getMetadataFingerprint(name, year.name);
+				const yearFingerprint = getCombinedYearFingerprint(
+					yearItems,
+					metadataFingerprint,
+				);
+				const cachedYear = await readYearCache(name, year.name);
+				if (!forceUpdate && cachedYear?.fingerprint === yearFingerprint) {
+					const cachedYearSessions =
+						isMerged || isBundled
+							? getCachedSessionsForYear(existingSessions, year.name)
+							: await loadCachedYearSessions(
+									name,
+									year.name,
+									isMerged,
+									isBundled,
+								);
+
+					if (cachedYearSessions.length > 0) {
+						if (isMerged || isBundled) {
+							allSessions.push(...cachedYearSessions);
+						}
+						for (const session of cachedYearSessions) {
+							allSessionNames.add(session.id || session.name);
+						}
+						addSyncLog(
+							`[${name}/${year.name}] ✓ Skipped unchanged year.`,
+							"info",
+						);
+						return;
+					}
+				}
+
 				const metadata = await getYearMetadata(
 					year,
 					name,
 					forceUpdate,
 					isMerged,
 					isBundled,
+					metadataFingerprint,
 				);
 				const metadataYearItems = metadata.items;
 				const sessionTagsMap = metadata.tags;
@@ -621,6 +769,7 @@ export async function updateGroupProcess(
 						});
 					}
 				}
+				await writeYearCache(name, year.name, yearFingerprint);
 			} catch (err) {
 				console.error(err);
 				UpdateSessionsStore.update((s) => {

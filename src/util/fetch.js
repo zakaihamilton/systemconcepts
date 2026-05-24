@@ -1,6 +1,55 @@
 import { useOnline } from "@util/online";
 import { useEffect, useRef, useState } from "react";
 
+const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
+export const SIGNED_URL_CACHE_TTL_MS = 2 * 60 * 60 * 1000;
+const responseCache = new Map();
+
+function getCacheKey(url, options = {}) {
+	return JSON.stringify({
+		url,
+		method: options.method || "GET",
+		headers: options.headers || {},
+		body: options.body || null,
+	});
+}
+
+function getCachedResponse(cacheKey) {
+	const cached = responseCache.get(cacheKey);
+	if (!cached || cached.expiresAt <= Date.now()) {
+		responseCache.delete(cacheKey);
+		return null;
+	}
+	return cached.value;
+}
+
+function setCachedResponse(cacheKey, value, ttl) {
+	responseCache.set(cacheKey, {
+		value,
+		expiresAt: Date.now() + ttl,
+	});
+}
+
+export function clearFetchCache() {
+	responseCache.clear();
+}
+
+export function getStableFetchCacheOptions(ttl = DEFAULT_CACHE_TTL_MS) {
+	return {
+		cacheResponse: true,
+		cacheTtl: ttl,
+	};
+}
+
+function extractCacheOptions(options) {
+	const { cacheResponse, cacheTtl, ...fetchOptions } = options;
+	return {
+		cacheResponse: !!cacheResponse,
+		cacheTtl: cacheTtl || DEFAULT_CACHE_TTL_MS,
+		fetchOptions,
+	};
+}
+
 export function fetchBlob(url, options) {
 	options = Object.assign({}, options);
 	options.headers = Object.assign({}, options.headers);
@@ -37,9 +86,15 @@ export function fetchText(url, options) {
 		{ "Content-Type": "text/plain", charset: "UTF-8" },
 		options.headers,
 	);
+	const { cacheResponse, cacheTtl, fetchOptions } = extractCacheOptions(options);
+	const cacheKey = cacheResponse ? getCacheKey(url, fetchOptions) : null;
+	if (cacheKey) {
+		const cached = getCachedResponse(cacheKey);
+		if (cached !== null) return Promise.resolve(cached);
+	}
 	return new Promise((resolve, reject) => {
 		window
-			.fetch(url, options)
+			.fetch(url, fetchOptions)
 			.then((response) => {
 				if (response.status !== 200) {
 					console.log("Status Code: " + response.status);
@@ -49,6 +104,7 @@ export function fetchText(url, options) {
 				response
 					.text()
 					.then(function (data) {
+						if (cacheKey) setCachedResponse(cacheKey, data, cacheTtl);
 						resolve(data);
 					})
 					.catch((err) => {
@@ -70,9 +126,15 @@ export function fetchJSON(url, options) {
 		{ "Content-Type": "application/json" },
 		options.headers,
 	);
+	const { cacheResponse, cacheTtl, fetchOptions } = extractCacheOptions(options);
+	const cacheKey = cacheResponse ? getCacheKey(url, fetchOptions) : null;
+	if (cacheKey) {
+		const cached = getCachedResponse(cacheKey);
+		if (cached !== null) return Promise.resolve(cached);
+	}
 	return new Promise((resolve, reject) => {
 		window
-			.fetch(url, options)
+			.fetch(url, fetchOptions)
 			.then((response) => {
 				if (response.status !== 200) {
 					console.log("Status Code: " + response.status);
@@ -87,6 +149,7 @@ export function fetchJSON(url, options) {
 						} else {
 							data = null;
 						}
+						if (cacheKey) setCachedResponse(cacheKey, data, cacheTtl);
 						resolve(data);
 					})
 					.catch((err) => {

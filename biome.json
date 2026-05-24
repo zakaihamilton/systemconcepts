@@ -3,6 +3,7 @@
 	"files": {
 		"includes": [
 			"**",
+			"!**/public/fallback-*.js",
 			"!**/public/workbox-*.js",
 			"!**/public/sw.js",
 			"!**/test_gzip.js",
