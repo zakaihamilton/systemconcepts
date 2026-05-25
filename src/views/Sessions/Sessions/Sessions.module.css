@@ -623,7 +623,7 @@
 }
 
 /* Premium Table view upgrades */
-:global(.MuiTableHead-root) :global(.MuiTableCell-root) {
+.sessionsTable :global(.MuiTableHead-root) :global(.MuiTableCell-root) {
 	font-size: 0.72rem !important;
 	font-weight: 700 !important;
 	text-transform: uppercase !important;
@@ -633,7 +633,7 @@
 	background-color: var(--main-background) !important;
 }
 
-:global(.MuiTableBody-root) :global(.MuiTableRow-root) {
+.sessionsTable :global(.MuiTableBody-root) :global(.MuiTableRow-root) {
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	border-bottom: 1px solid var(--border-color) !important;
 
@@ -647,6 +647,6 @@
 	}
 }
 
-:global(.MuiTableBody-root) :global(.MuiTableRow-root.Mui-selected) {
+.sessionsTable :global(.MuiTableBody-root) :global(.MuiTableRow-root.Mui-selected) {
 	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 8%, var(--main-background-alternative)) !important;
 }

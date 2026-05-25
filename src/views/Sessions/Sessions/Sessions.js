@@ -772,6 +772,7 @@ export default function SessionsPage() {
 			<Table
 				cellWidth={isMobile ? "11em" : "16em"}
 				cellHeight={isMobile ? "11.5em" : "15.8em"}
+				className={styles.sessionsTable}
 				name={translations.SESSIONS}
 				store={SessionsStore}
 				data={sessions}
