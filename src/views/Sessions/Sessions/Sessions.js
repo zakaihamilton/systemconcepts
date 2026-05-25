@@ -442,21 +442,24 @@ export default function SessionsPage() {
 						<span
 							className={clsx(
 								styles.labelText,
-								viewMode !== "table" && styles.singleLine,
+								viewMode !== "table" && viewMode !== "grid" && styles.singleLine,
+								viewMode === "grid" && styles.gridLineClamp,
 							)}
 						>
 							{item.name}
-							<div
-								className={clsx(
-									styles.percentageContainer,
-									item.percentage && styles.visible,
-								)}
-							>
+							{viewMode !== "grid" && (
 								<div
-									className={styles.percentage}
-									style={{ width: item.percentage + "%" }}
-								/>
-							</div>
+									className={clsx(
+										styles.percentageContainer,
+										item.percentage && styles.visible,
+									)}
+								>
+									<div
+										className={styles.percentage}
+										style={{ width: item.percentage + "%" }}
+									/>
+								</div>
+							)}
 						</span>
 					);
 
@@ -493,30 +496,39 @@ export default function SessionsPage() {
 							) : (
 								<GraphicEqIcon fontSize="large" />
 							)}
-							{item.ai && (
-								<div
-									className={clsx(
-										styles.altIcon,
-										styles.ai,
-										item.video && styles.video,
-									)}
-								>
-									<AutoAwesomeIcon />
-								</div>
-							)}
 						</>
 					);
 
+					const aiBadge = item.ai && viewMode === "grid" && (
+						<div className={styles.aiBadge} title="AI Summary Available">
+							<AutoAwesomeIcon />
+							<span className={styles.aiText}>AI</span>
+						</div>
+					);
+
+					const progressBar = typeof item.percentage === "number" && !isNaN(item.percentage) && item.percentage > 0 && viewMode === "grid" && (
+						<div className={clsx(styles.gridProgressBar, styles.visible)}>
+							<div
+								className={styles.gridProgressFill}
+								style={{ width: item.percentage + "%" }}
+							/>
+						</div>
+					);
+
 					return (
-						<Image
-							href={target(item)}
-							onClick={() => gotoItem(item)}
-							path={shouldShowImage ? item.thumbnail : null}
-							width={viewMode === "grid" ? null : "12em"}
-							height={viewMode === "grid" ? null : "9em"}
-							alt={altIcon}
-							loading="lazy"
-						/>
+						<div className={styles.thumbnailContainer}>
+							<Image
+								href={target(item)}
+								onClick={() => gotoItem(item)}
+								path={shouldShowImage ? item.thumbnail : null}
+								width={viewMode === "grid" ? null : "12em"}
+								height={viewMode === "grid" ? null : "9em"}
+								alt={altIcon}
+								loading="lazy"
+							/>
+							{aiBadge}
+							{progressBar}
+						</div>
 					);
 				}
 
@@ -527,6 +539,7 @@ export default function SessionsPage() {
 							fill={viewMode === "grid"}
 							name={item.group}
 							color={item.color}
+							className={viewMode === "grid" ? styles.gridGroupContainer : undefined}
 						/>
 					);
 
@@ -710,7 +723,7 @@ export default function SessionsPage() {
 			{!isMobile && <FilterBar />}
 			<Table
 				cellWidth={isMobile ? "11em" : "16em"}
-				cellHeight={isMobile ? "12em" : "17em"}
+				cellHeight={isMobile ? "11.5em" : "15.8em"}
 				name={translations.SESSIONS}
 				store={SessionsStore}
 				data={sessions}
@@ -731,6 +744,8 @@ export default function SessionsPage() {
 					if (item.isPlaying) classes.push(styles.playing);
 					if (item.isExpanded || item.isTreeChild)
 						classes.push(styles.expandedGroupHighlight);
+					if (item.isTreeChild)
+						classes.push(styles.treeChild);
 					return classes.join(" ");
 				}}
 				emptyLabel={

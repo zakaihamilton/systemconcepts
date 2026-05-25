@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import styles from "./Group.module.css";
 
-export default function Group({ fill, name, color, fit }) {
+export default function Group({ fill, name, color, fit, className }) {
 	const groupName = name && name[0].toUpperCase() + name.slice(1);
 	const style = { backgroundColor: color };
 	return (
@@ -10,6 +10,7 @@ export default function Group({ fill, name, color, fit }) {
 				styles.groupContainer,
 				fill && styles.fill,
 				fit && styles.fit,
+				className,
 			)}
 		>
 			<div
