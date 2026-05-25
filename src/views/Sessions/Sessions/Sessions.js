@@ -3,7 +3,6 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import MovieIcon from "@mui/icons-material/Movie";
-import EventIcon from "@mui/icons-material/Event";
 import Chip from "@mui/material/Chip";
 import { SyncActiveStore } from "@sync/syncState";
 import { useRecentHistory } from "@util/domain/history";
@@ -28,15 +27,24 @@ import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import styles from "./Sessions.module.css";
 
+function getSessionDateLocale() {
+	if (typeof navigator === "undefined") {
+		return undefined;
+	}
+	return navigator.languages?.[0] || navigator.language;
+}
+
 export default function SessionsPage() {
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
 	const isMobile = useDeviceType() === "phone";
 	const translations = useTranslations();
-	const dateFormatter = useDateFormatter({
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
+	const sessionDateLocale = useMemo(() => getSessionDateLocale(), []);
+	const shortDateFormatter = useDateFormatter({
+		year: "2-digit",
+		month: "2-digit",
+		day: "2-digit",
+	}, sessionDateLocale);
+	const monthFormatter = useDateFormatter({ month: "short" }, sessionDateLocale);
 
 	const formatDate = useCallback((dateStr) => {
 		if (!dateStr) return "";
@@ -47,11 +55,27 @@ export default function SessionsPage() {
 			const day = parseInt(parts[2], 10);
 			const d = new Date(year, month, day);
 			if (!isNaN(d.getTime())) {
-				return dateFormatter.format(d);
+				if (isMobile) {
+					return shortDateFormatter.formatToParts(d).map((part, index) =>
+						part.type === "day" ? (
+							<strong key={`${part.type}-${index}`} className={styles.dateDay}>
+								{part.value}
+							</strong>
+						) : (
+							<span key={`${part.type}-${index}`}>{part.value}</span>
+						),
+					);
+				}
+				return (
+					<>
+						<strong className={styles.dateDay}>{day}</strong>{" "}
+						{monthFormatter.format(d)} {year}
+					</>
+				);
 			}
 		}
 		return dateStr;
-	}, [dateFormatter]);
+	}, [isMobile, monthFormatter, shortDateFormatter]);
 
 	const [sessions, loading] = useSessions();
 	const viewMode = SessionsStore.useState((s) => s.viewMode);
@@ -146,8 +170,12 @@ export default function SessionsPage() {
 					sortable: "name",
 					padding: false,
 					viewModes: {
-						tree: null,
-						list: null,
+						tree: {
+							className: styles.compactNameCell,
+						},
+						list: {
+							className: styles.compactNameCell,
+						},
 						table: null,
 						grid: {
 							className: styles.gridName,
@@ -163,13 +191,17 @@ export default function SessionsPage() {
 					},
 					columnProps: {
 						style: {
-							width: "12em",
+							width: isMobile ? "7em" : "12em",
 						},
 					},
 					viewModes: {
 						...((!isMobile || orderBy !== "duration") && {
-							tree: null,
-							list: null,
+							tree: {
+								className: styles.compactDateCell,
+							},
+							list: {
+								className: styles.compactDateCell,
+							},
 							table: null,
 						}),
 						grid: {
@@ -230,8 +262,12 @@ export default function SessionsPage() {
 						justifyContent: "center",
 					},
 					viewModes: {
-						tree: null,
-						list: null,
+						tree: {
+							className: styles.compactGroupCell,
+						},
+						list: {
+							className: styles.compactGroupCell,
+						},
 						table: null,
 						grid: {
 							className: styles.gridGroup,
@@ -466,7 +502,7 @@ export default function SessionsPage() {
 						<span
 							className={clsx(
 								styles.labelText,
-								viewMode !== "table" && viewMode !== "grid" && styles.singleLine,
+								viewMode !== "grid" && styles.singleLine,
 								viewMode === "grid" && styles.gridLineClamp,
 							)}
 						>
@@ -581,14 +617,12 @@ export default function SessionsPage() {
 					if (viewMode === "grid") {
 						return (
 							<div className={styles.gridDateBadge}>
-								<EventIcon className={styles.gridDateIcon} />
 								<span className={styles.gridDateText}>{formatted}</span>
 							</div>
 						);
 					}
 					return (
 						<div className={styles.dateBadge}>
-							<EventIcon className={styles.dateIcon} />
 							<span className={styles.dateText}>{formatted}</span>
 						</div>
 					);

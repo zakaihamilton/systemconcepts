@@ -15,6 +15,7 @@ import Button from "@mui/material/Button";
 import { SyncActiveStore } from "@sync/syncState";
 import { useStoreState } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
+import { getPreferredLanguage } from "@util/domain/language";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import Dynamic from "@widgets/Dynamic";
@@ -32,10 +33,7 @@ export const SettingsStore = new Store({
 });
 
 export default function Settings() {
-	const prefferedLanguage =
-		(typeof navigator !== "undefined" &&
-			languages.find((item) => navigator.language.includes(item.code))) ||
-		languages[0];
+	const prefferedLanguage = getPreferredLanguage();
 	const darkMode = useDarkMode(false);
 	const translations = useTranslations();
 	const states = useStoreState(MainStore);

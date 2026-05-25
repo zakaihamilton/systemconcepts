@@ -1,11 +1,8 @@
-import languages from "@data/languages";
-import { useLanguage } from "@util/domain/language";
+import { useRegionalLocale } from "@util/domain/language";
 import { useMemo } from "react";
 
 export function useLocale() {
-	const language = useLanguage();
-	const { locale } = languages.find((item) => item.id === language) || {};
-	return locale;
+	return useRegionalLocale();
 }
 
 // 1. Separate ordinal logic
@@ -34,6 +31,13 @@ export function useDateFormatter(options, locale) {
 				return formatter.format(date);
 			} catch (_e) {
 				return "";
+			}
+		},
+		formatToParts: (date) => {
+			try {
+				return formatter.formatToParts(date);
+			} catch (_e) {
+				return [];
 			}
 		},
 		formatWithOrdinal: (date) => {

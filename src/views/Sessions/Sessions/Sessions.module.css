@@ -178,19 +178,15 @@
 .gridDateBadge {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	justify-content: center;
 	min-width: 0;
-	font-size: 0.95em;
-	font-weight: 550;
-	color: var(--text-color);
-	opacity: 0.85;
-}
-
-.gridDateIcon {
-	flex-shrink: 0;
-	font-size: 0.85rem !important;
-	color: var(--text-color);
-	opacity: 0.8;
+	padding: 3px 8px;
+	border-radius: var(--radius-sm, 4px);
+	font-size: 0.82em;
+	font-weight: 650;
+	background-color: var(--main-background-alternative);
+	color: var(--neutral-700);
+	border: 1px solid var(--border-color);
 }
 
 .gridDateText {
@@ -202,35 +198,46 @@
 .dateBadge {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	padding: 4px 10px;
-	border-radius: var(--radius-full, 9999px);
+	justify-content: center;
+	padding: 4px 9px;
+	border-radius: var(--radius-sm, 4px);
 	font-size: 0.76rem;
-	font-weight: 600;
-	letter-spacing: 0.01em;
+	font-weight: 650;
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	white-space: nowrap;
 	width: max-content;
-	background-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 8%, var(--main-background-alternative));
-	color: color-mix(in srgb, var(--group-color, var(--primary-color)) 35%, var(--text-color));
-	border: 1px solid color-mix(in srgb, var(--group-color, var(--primary-color)) 25%, var(--border-color));
+	background-color: var(--main-background-alternative);
+	color: var(--neutral-700);
+	border: 1px solid var(--border-color);
+
+	@media (max-width: 768px) {
+		align-items: center;
+		justify-content: center;
+		padding: 5px 7px;
+		min-width: 4.25rem;
+		max-width: 5.75rem;
+		white-space: nowrap;
+		text-align: center;
+	}
 }
 
 .dateBadge:hover {
-	background-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 12%, var(--main-background-alternative));
-	border-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 35%, var(--border-color));
+	background-color: var(--chrome-background);
+	border-color: var(--neutral-400);
 	transform: translateY(-1px);
-}
-
-.dateIcon {
-	font-size: 0.85rem !important;
-	opacity: 0.95;
-	color: color-mix(in srgb, var(--group-color, var(--primary-color)) 45%, var(--text-color));
 }
 
 .dateText {
 	font-family: inherit;
 	line-height: 1;
+
+	@media (max-width: 768px) {
+		line-height: 1;
+	}
+}
+
+.dateDay {
+	font-weight: 800;
 }
 
 .gridDuration {
@@ -365,7 +372,7 @@
 }
 
 .listItem {
-	grid-template-columns: auto minmax(11em, 15%) 8em 9em;
+	grid-template-columns: auto minmax(7.25em, 9%) 8em 6.25em;
 	border-bottom: 1px solid var(--border-color) !important;
 	background-color: var(--main-background) !important;
 	padding: 4px 12px !important;
@@ -381,7 +388,7 @@
 }
 
 .listPhoneItem {
-	grid-template-columns: auto minmax(7.5em, 18%) 8em;
+	grid-template-columns: auto minmax(4.85em, 10%) 6em;
 	border-bottom: 1px solid var(--border-color) !important;
 	background-color: var(--main-background) !important;
 	padding: 4px 10px !important;
@@ -393,7 +400,7 @@
 }
 
 .treeItem {
-	grid-template-columns: auto minmax(11em, 15%) 8em 9em;
+	grid-template-columns: auto minmax(7.25em, 9%) 8em 6.25em;
 	border-bottom: 1px solid var(--border-color) !important;
 	background-color: var(--main-background) !important;
 	padding: 4px 12px !important;
@@ -409,7 +416,7 @@
 }
 
 .treePhoneItem {
-	grid-template-columns: auto minmax(7.5em, 18%) 8em;
+	grid-template-columns: auto minmax(4.85em, 10%) 6em;
 	border-bottom: 1px solid var(--border-color) !important;
 	background-color: var(--main-background) !important;
 	padding: 4px 10px !important;
@@ -429,7 +436,25 @@
 	flex: 1;
 }
 
+.compactDateCell {
+	justify-content: flex-start !important;
+	padding-left: 0.2em !important;
+	padding-right: 0.35em !important;
+}
+
+.compactGroupCell {
+	justify-content: center !important;
+	padding-left: 0.35em !important;
+	padding-right: 0.35em !important;
+}
+
+.compactNameCell {
+	padding-right: 0.1em !important;
+}
+
 .labelText.singleLine {
+	display: block;
+	max-width: 100%;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
@@ -557,6 +582,8 @@
 	display: flex;
 	align-items: center;
 	overflow: hidden;
+	min-width: 0;
+	width: 100%;
 }
 
 .playing {
