@@ -106,7 +106,7 @@ export default function Audio({
 	return (
 		<div className={styles.root} style={style}>
 			<div className={clsx(styles.container, !showDetails && styles.collapsed)}>
-				<div className={styles.card} style={{ "--group-color": color }}>
+				<div className={clsx(styles.card, (renewing || !duration) && styles.loading)} style={{ "--group-color": color }}>
 					<div className={styles.header}>
 						<div className={styles.headerRow}>
 							<div className={styles.title}>{name}</div>

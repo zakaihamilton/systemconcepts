@@ -7,6 +7,7 @@ import Replay10Icon from "@mui/icons-material/Replay10";
 import StopIcon from "@mui/icons-material/Stop";
 import MuiAlert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import { usePageVisibility } from "@util/browser/hooks";
 import { useMediaSession } from "@util/browser/mediaSession";
 import { useFile } from "@util/storage/storage";
@@ -44,6 +45,9 @@ export default function Controls({
 	const [error, setError] = useState(null);
 	const errorTimeoutRef = useRef(null);
 	const visible = usePageVisibility();
+	const [loading, setLoading] = useState(false);
+	const hasDuration = playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0;
+	const showLoading = !error && (loading || renewing || !hasDuration);
 
 	// MediaSession API integration for iOS Bluetooth headset controls
 	// Capitalize first letter of artist name
@@ -110,6 +114,18 @@ export default function Controls({
 			) {
 				clearPendingError();
 			}
+			if (name === "loadstart" || name === "waiting" || name === "seeking") {
+				setLoading(true);
+			} else if (
+				name === "playing" ||
+				name === "pause" ||
+				name === "canplay" ||
+				name === "seeked" ||
+				name === "error" ||
+				name === "loadedmetadata"
+			) {
+				setLoading(false);
+			}
 			if (name === "loadedmetadata") {
 				if (!metadataKey) return; // Skip if metadataKey not ready
 				const currentMetadata = metadataKey
@@ -147,6 +163,11 @@ export default function Controls({
 			"playing",
 			"timeupdate",
 			"ratechange",
+			"waiting",
+			"seeking",
+			"seeked",
+			"canplay",
+			"durationchange",
 		];
 		const listeners = events.map((name) => {
 			const callback = () => update(name);
@@ -424,7 +445,7 @@ export default function Controls({
 				style={{ zIndex }}
 			>
 				<div className={styles.progress}>
-					<div className={styles.progressLine}>
+					<div className={clsx(styles.progressLine, showLoading && styles.loading)}>
 						<div
 							className={styles.progressBack}
 							ref={progressRef}
@@ -475,16 +496,36 @@ export default function Controls({
 					)}
 					{playerRef.paused && !error && (
 						<PlayerButton
-							icon={<PlayArrowIcon />}
-							name={translations.PLAY}
+							icon={
+								showLoading ? (
+									<CircularProgress
+										size={24}
+										color="inherit"
+										style={{ display: "block" }}
+									/>
+								) : (
+									<PlayArrowIcon />
+								)
+							}
+							name={showLoading ? translations.LOADING : translations.PLAY}
 							onClick={play}
 							variant={variant}
 						/>
 					)}
 					{!playerRef.paused && !error && (
 						<PlayerButton
-							icon={<PauseIcon />}
-							name={translations.PAUSE}
+							icon={
+								showLoading ? (
+									<CircularProgress
+										size={24}
+										color="inherit"
+										style={{ display: "block" }}
+									/>
+								) : (
+									<PauseIcon />
+								)
+							}
+							name={showLoading ? translations.LOADING : translations.PAUSE}
 							onClick={() => playerRef.pause()}
 							variant={variant}
 						/>

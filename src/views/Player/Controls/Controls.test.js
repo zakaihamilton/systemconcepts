@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, act } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import Controls from "./index.js";
 
@@ -75,5 +75,63 @@ describe("Controls Component", () => {
 		);
 		fireEvent.click(getByTestId("button-Pause"));
 		expect(mockPlayer.pause).toHaveBeenCalled();
+	});
+
+	it("renders loading button when renewing is true", () => {
+		useTranslations.mockReturnValue({
+			LOADING: "Loading",
+			PLAY: "Play",
+			STOP: "Stop",
+		});
+		const { getByTestId } = render(
+			<Controls show={true} playerRef={mockPlayer} renewing={true} />,
+		);
+		expect(getByTestId("button-Loading")).toBeInTheDocument();
+	});
+
+	it("renders loading button when duration is NaN", () => {
+		useTranslations.mockReturnValue({
+			LOADING: "Loading",
+			PLAY: "Play",
+			STOP: "Stop",
+		});
+		mockPlayer.duration = NaN;
+		const { getByTestId } = render(
+			<Controls show={true} playerRef={mockPlayer} />,
+		);
+		expect(getByTestId("button-Loading")).toBeInTheDocument();
+	});
+
+	it("renders loading button when loadstart event is triggered and switches back on playing", () => {
+		useTranslations.mockReturnValue({
+			LOADING: "Loading",
+			PLAY: "Play",
+			PAUSE: "Pause",
+			STOP: "Stop",
+		});
+		const eventListeners = {};
+		mockPlayer.addEventListener.mockImplementation((event, cb) => {
+			eventListeners[event] = cb;
+		});
+
+		const { getByTestId } = render(
+			<Controls show={true} playerRef={mockPlayer} />,
+		);
+
+		// Trigger loadstart
+		act(() => {
+			eventListeners["loadstart"]();
+		});
+
+		// Now it should show Loading button
+		expect(getByTestId("button-Loading")).toBeInTheDocument();
+
+		// Trigger playing
+		act(() => {
+			eventListeners["playing"]();
+		});
+
+		// Now it should show Play button again since player.paused is true
+		expect(getByTestId("button-Play")).toBeInTheDocument();
 	});
 });

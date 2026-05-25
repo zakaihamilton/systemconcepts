@@ -38,4 +38,19 @@ describe("Audio Component", () => {
 		expect(getByTestId("controls")).toBeInTheDocument();
 		expect(getByTestId("toolbar")).toBeInTheDocument();
 	});
+
+	it("applies loading class when renewing is true", () => {
+		const { container } = render(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				renewing={true}
+			/>,
+		);
+		const card = container.querySelector(".card");
+		expect(card).toHaveClass("loading");
+	});
 });

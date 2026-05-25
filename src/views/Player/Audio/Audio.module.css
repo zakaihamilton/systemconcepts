@@ -170,3 +170,19 @@
 		font-size: 1.2em;
 	}
 }
+
+.card.loading {
+	animation: card-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes card-pulse {
+	0% {
+		opacity: 0.65;
+	}
+	50% {
+		opacity: 0.85;
+	}
+	100% {
+		opacity: 0.65;
+	}
+}

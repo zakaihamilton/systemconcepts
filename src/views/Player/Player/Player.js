@@ -283,7 +283,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		metadataKey: activeMetadataKey,
 		path: mediaPath,
 		renewUrl: reload,
-		renewing: isRecoveringMedia,
+		renewing: loading,
 		date,
 		year,
 		show,
