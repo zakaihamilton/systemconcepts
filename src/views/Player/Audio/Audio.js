@@ -32,6 +32,7 @@ export default function Audio({
 	const [duration, setDuration] = useState(0);
 	const [errorCount, setErrorCount] = useState(0);
 	const [recovering, setRecovering] = useState(false);
+	const [loadedPath, setLoadedPath] = useState(null);
 
 	const onError = () => {
 		if (errorCount < 3) {
@@ -61,15 +62,25 @@ export default function Audio({
 	}, [playerRef]);
 
 	useEffect(() => {
+		setLoadedPath(null);
+	}, [path]);
+
+	useEffect(() => {
 		if (!playerRef) return;
 
 		const handleDurationChange = () => {
 			setDuration(playerRef.duration || 0);
+			if (playerRef.duration) {
+				setLoadedPath(path);
+			}
 		};
 
 		// Set initial duration if already loaded
 		if (playerRef.duration) {
-			setTimeout(() => setDuration(playerRef.duration), 0);
+			setTimeout(() => {
+				setDuration(playerRef.duration);
+				setLoadedPath(path);
+			}, 0);
 		}
 
 		playerRef.addEventListener("durationchange", handleDurationChange);
@@ -77,7 +88,7 @@ export default function Audio({
 		return () => {
 			playerRef.removeEventListener("durationchange", handleDurationChange);
 		};
-	}, [playerRef]);
+	}, [playerRef, path]);
 
 	useEffect(() => {
 		if (ref.current) {
@@ -106,7 +117,7 @@ export default function Audio({
 	return (
 		<div className={styles.root} style={style}>
 			<div className={clsx(styles.container, !showDetails && styles.collapsed)}>
-				<div className={clsx(styles.card, (renewing || !duration) && styles.loading)} style={{ "--group-color": color }}>
+				<div className={clsx(styles.card, (renewing || !duration || loadedPath !== path) && styles.loading)} style={{ "--group-color": color }}>
 					<div className={styles.header}>
 						<div className={styles.headerRow}>
 							<div className={styles.title}>{name}</div>

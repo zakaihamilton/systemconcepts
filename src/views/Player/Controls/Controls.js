@@ -46,8 +46,14 @@ export default function Controls({
 	const errorTimeoutRef = useRef(null);
 	const visible = usePageVisibility();
 	const [loading, setLoading] = useState(false);
+	const [loadedPath, setLoadedPath] = useState(() => {
+		if (playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0) {
+			return path;
+		}
+		return null;
+	});
 	const hasDuration = playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0;
-	const showLoading = !error && (loading || renewing || !hasDuration);
+	const showLoading = !error && (loading || renewing || !hasDuration || loadedPath !== path);
 
 	// MediaSession API integration for iOS Bluetooth headset controls
 	// Capitalize first letter of artist name
@@ -75,10 +81,10 @@ export default function Controls({
 		},
 	);
 
-	const stateRef = useRef({ visible, show, metadata });
+	const stateRef = useRef({ visible, show, metadata, path });
 	useEffect(() => {
-		stateRef.current = { visible, show, metadata };
-	}, [visible, show, metadata]);
+		stateRef.current = { visible, show, metadata, path };
+	}, [visible, show, metadata, path]);
 
 	const lastUpdateTimeRef = useRef(0);
 
@@ -125,6 +131,9 @@ export default function Controls({
 				name === "loadedmetadata"
 			) {
 				setLoading(false);
+				if (name === "playing" || name === "canplay" || name === "loadedmetadata") {
+					setLoadedPath(stateRef.current.path);
+				}
 			}
 			if (name === "loadedmetadata") {
 				if (!metadataKey) return; // Skip if metadataKey not ready
@@ -417,6 +426,7 @@ export default function Controls({
 		prevPath.current = path;
 		stop();
 		playerRef.load();
+		setLoadedPath(null);
 	}, [path, playerRef, stop]);
 
 	return (
