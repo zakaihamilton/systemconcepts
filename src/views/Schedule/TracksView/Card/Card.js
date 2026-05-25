@@ -1,7 +1,9 @@
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import EventIcon from "@mui/icons-material/Event";
 import { getContrastColor } from "@util/data/color";
 import { formatDuration } from "@util/data/string";
+import { useDateFormatter } from "@util/data/locale";
 import Image from "@widgets/Image";
 import SessionIcon from "@widgets/SessionIcon";
 import clsx from "clsx";
@@ -15,6 +17,27 @@ const TrackCard = memo(function TrackCard({
 	isPlaying,
 }) {
 	const rootRef = useRef(null);
+	const dateFormatter = useDateFormatter({
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+
+	const formatDate = useCallback((dateStr) => {
+		if (!dateStr) return "";
+		const parts = dateStr.split("-");
+		if (parts.length === 3) {
+			const year = parseInt(parts[0], 10);
+			const month = parseInt(parts[1], 10) - 1;
+			const day = parseInt(parts[2], 10);
+			const d = new Date(year, month, day);
+			if (!isNaN(d.getTime())) {
+				return dateFormatter.format(d);
+			}
+		}
+		return dateStr;
+	}, [dateFormatter]);
+
 	const { thumbnail, name, duration, color, group, id } = session;
 
 	const [showThumbnail, setShowThumbnail] = useState(
@@ -89,9 +112,12 @@ const TrackCard = memo(function TrackCard({
 							</Typography>
 						</Tooltip>
 						<div className={styles.details}>
-							<Typography variant="caption" className={styles.date}>
-								{session.date}
-							</Typography>
+							<div className={styles.dateContainer}>
+								<EventIcon className={styles.dateIcon} />
+								<Typography variant="caption" className={styles.date}>
+									{formatDate(session.date)}
+								</Typography>
+							</div>
 							<Typography variant="caption" className={styles.duration}>
 								{duration && session.type !== "image"
 									? formatDuration(duration * 1000, true)

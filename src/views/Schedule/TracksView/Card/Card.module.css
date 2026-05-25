@@ -81,11 +81,24 @@
 	margin-top: 2px;
 }
 
+.dateContainer {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.dateIcon {
+	font-size: 0.85rem !important;
+	opacity: 0.85;
+	color: #ffffff;
+}
+
 .date {
-	opacity: 0.9;
+	opacity: 0.95;
 	font-size: 0.75rem !important;
 	font-weight: 500 !important;
 	letter-spacing: 0.02em;
+	line-height: 1 !important;
 }
 
 .duration {

@@ -3,6 +3,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import MovieIcon from "@mui/icons-material/Movie";
+import EventIcon from "@mui/icons-material/Event";
 import Chip from "@mui/material/Chip";
 import { SyncActiveStore } from "@sync/syncState";
 import { useRecentHistory } from "@util/domain/history";
@@ -10,6 +11,7 @@ import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
+import { useDateFormatter } from "@util/data/locale";
 import { addPath, toPath } from "@util/domain/views";
 import { PlayerStore } from "@views/Player/Player";
 import FilterBar from "@views/Sessions/FilterBar";
@@ -29,6 +31,27 @@ export default function SessionsPage() {
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
 	const isMobile = useDeviceType() === "phone";
 	const translations = useTranslations();
+	const dateFormatter = useDateFormatter({
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+
+	const formatDate = useCallback((dateStr) => {
+		if (!dateStr) return "";
+		const parts = dateStr.split("-");
+		if (parts.length === 3) {
+			const year = parseInt(parts[0], 10);
+			const month = parseInt(parts[1], 10) - 1;
+			const day = parseInt(parts[2], 10);
+			const d = new Date(year, month, day);
+			if (!isNaN(d.getTime())) {
+				return dateFormatter.format(d);
+			}
+		}
+		return dateStr;
+	}, [dateFormatter]);
+
 	const [sessions, loading] = useSessions();
 	const viewMode = SessionsStore.useState((s) => s.viewMode);
 	const groupFilter = SessionsStore.useState((s) => s.groupFilter);
@@ -547,6 +570,27 @@ export default function SessionsPage() {
 						/>
 					);
 
+				case "date": {
+					if (item.isGroupHeader) {
+						return null;
+					}
+					const formatted = formatDate(item.date);
+					if (viewMode === "grid") {
+						return (
+							<div className={styles.gridDateBadge}>
+								<EventIcon className={styles.gridDateIcon} />
+								<span className={styles.gridDateText}>{formatted}</span>
+							</div>
+						);
+					}
+					return (
+						<div className={styles.dateBadge}>
+							<EventIcon className={styles.dateIcon} />
+							<span className={styles.dateText}>{formatted}</span>
+						</div>
+					);
+				}
+
 				case "duration":
 				case "durationWidget":
 					return item.formattedDuration;
@@ -570,7 +614,7 @@ export default function SessionsPage() {
 					return item[columnId];
 			}
 		},
-		[viewMode, target, gotoItem, handleIconClick],
+		[viewMode, target, gotoItem, handleIconClick, formatDate],
 	);
 
 	const treeGroupCache = useRef({});

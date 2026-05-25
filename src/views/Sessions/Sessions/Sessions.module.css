@@ -159,12 +159,9 @@
 
 .gridDate {
 	grid-row: 4 / 5;
-	grid-column: 1 / 3;
+	grid-column: 1 / 4;
 	background-color: transparent;
 	z-index: 1;
-	font-weight: 500;
-	color: var(--neutral-500);
-	font-size: 0.75em;
 	margin: 0;
 	padding-left: 12px;
 	display: flex;
@@ -172,30 +169,73 @@
 	justify-content: flex-start;
 	white-space: nowrap;
 
-	&::before {
-		content: "";
-		display: inline-block;
-		width: 11px;
-		height: 11px;
-		margin-right: 4px;
-		background-color: var(--neutral-500);
-		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E") no-repeat center;
-		-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E") no-repeat center;
-		mask-size: contain;
-		-webkit-mask-size: contain;
-		opacity: 0.8;
-	}
-
 	@media (max-width: 768px) {
 		grid-row: 4 / 5;
-		font-weight: normal;
 		padding-left: 8px;
 	}
 }
 
+.gridDateBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	font-size: 0.95em;
+	font-weight: 550;
+	color: var(--text-color);
+	opacity: 0.85;
+}
+
+.gridDateIcon {
+	flex-shrink: 0;
+	font-size: 0.85rem !important;
+	color: var(--text-color);
+	opacity: 0.8;
+}
+
+.gridDateText {
+	color: var(--text-color);
+	line-height: 1.2;
+	overflow: visible;
+}
+
+.dateBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: var(--radius-full, 9999px);
+	font-size: 0.76rem;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	white-space: nowrap;
+	width: max-content;
+	background-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 8%, var(--main-background-alternative));
+	color: color-mix(in srgb, var(--group-color, var(--primary-color)) 35%, var(--text-color));
+	border: 1px solid color-mix(in srgb, var(--group-color, var(--primary-color)) 25%, var(--border-color));
+}
+
+.dateBadge:hover {
+	background-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 12%, var(--main-background-alternative));
+	border-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 35%, var(--border-color));
+	transform: translateY(-1px);
+}
+
+.dateIcon {
+	font-size: 0.85rem !important;
+	opacity: 0.95;
+	color: color-mix(in srgb, var(--group-color, var(--primary-color)) 45%, var(--text-color));
+}
+
+.dateText {
+	font-family: inherit;
+	line-height: 1;
+}
+
 .gridDuration {
 	grid-row: 4 / 5;
-	grid-column: 3 / 6;
+	grid-column: 4 / 6;
 	background-color: transparent;
 	z-index: 1;
 	font-weight: 500;
