@@ -1,4 +1,4 @@
-import { useStyles } from "@util/styles";
+import { useStyles } from "@util/browser/styles";
 import clsx from "clsx";
 import { memo } from "react";
 import styles from "./Item.module.css";

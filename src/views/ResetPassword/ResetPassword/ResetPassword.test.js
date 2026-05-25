@@ -1,19 +1,19 @@
 import { MainStore } from "@components/Main";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { fetchJSON } from "@util/fetch";
-import { useTranslations } from "@util/translations";
+import { fetchJSON } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import ResetPassword from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn(),
 	},
 }));
 jest.mock("js-cookie");
-jest.mock("@util/fetch");
-jest.mock("@util/views");
+jest.mock("@util/api/fetch");
+jest.mock("@util/domain/views");
 jest.mock(
 	"@widgets/Input",
 	() =>

@@ -1,14 +1,14 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { metadataInfo as awsMetadataInfo, validatePathAccess } from "@util/aws";
-import parseCookie from "@util/cookie";
-import { error, log } from "@util/logger";
-import { login } from "@util/login";
-import { fileTitle } from "@util/path";
-import { roleAuth } from "@util/roles";
-import { getSafeError } from "@util/safeError";
-import { getSessions } from "@util/sessionFeed";
-import { getWasabi } from "@util/wasabi";
+import { metadataInfo as awsMetadataInfo, validatePathAccess } from "@util/storage/aws";
+import parseCookie from "@util/api/cookie";
+import { error, log } from "@util/api/logger";
+import { login } from "@util/auth/login";
+import { fileTitle } from "@util/data/path";
+import { roleAuth } from "@util/auth/roles";
+import { getSafeError } from "@util/api/safeError";
+import { getSessions } from "@util/domain/sessionFeed";
+import { getWasabi } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

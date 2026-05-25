@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import Footer from "./index.js";
 import { useToolbarItems } from "../Toolbar/index.js";
 
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 jest.mock("../Toolbar", () => {
 	const ActualToolbar = ({ location }) => (
 		<div data-testid={`toolbar-${location}`} />

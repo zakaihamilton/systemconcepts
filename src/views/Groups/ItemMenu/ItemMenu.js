@@ -5,7 +5,7 @@ import DataUsageIcon from "@mui/icons-material/DataUsage";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderIcon from "@mui/icons-material/Folder";
 import UpdateIcon from "@mui/icons-material/Update";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 import Statistics from "../Statistics";
 

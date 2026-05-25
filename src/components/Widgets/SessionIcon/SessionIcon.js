@@ -4,7 +4,7 @@ import InsertPhotoOutlinedIcon from "@mui/icons-material/InsertPhotoOutlined";
 import MovieIcon from "@mui/icons-material/Movie";
 import MovieFilterIcon from "@mui/icons-material/MovieFilter";
 
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 
 export default function SessionIcon({ type }) {
 	const translations = useTranslations();

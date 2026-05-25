@@ -1,8 +1,8 @@
 import { act, render } from "@testing-library/react";
-import { useTimeout } from "@util/timers";
+import { useTimeout } from "@util/browser/timers";
 import PageLoad from "./index.js";
 
-jest.mock("@util/timers");
+jest.mock("@util/browser/timers");
 jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
 
 describe("PageLoad Component", () => {

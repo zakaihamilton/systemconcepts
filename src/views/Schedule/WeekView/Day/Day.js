@@ -1,5 +1,5 @@
-import { getDateString } from "@util/date";
-import { useDeviceType } from "@util/styles";
+import { getDateString } from "@util/data/date";
+import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
 import styles from "./Day.module.css";
 import Session from "../Session";

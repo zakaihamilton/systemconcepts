@@ -1,8 +1,8 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import { useLanguage } from "@util/language";
-import { useResize } from "@util/size";
-import { useLocalStorage } from "@util/store";
-import { useDeviceType } from "@util/styles";
+import { useLanguage } from "@util/domain/language";
+import { useResize } from "@util/browser/size";
+import { useLocalStorage } from "@util/browser/store";
+import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
 import { Store } from "pullstate";
 import { useEffect } from "react";

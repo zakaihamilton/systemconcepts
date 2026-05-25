@@ -1,6 +1,6 @@
-import { useDateFormatter } from "@util/locale";
-import { useDeviceType } from "@util/styles";
-import { useSwipe } from "@util/touch";
+import { useDateFormatter } from "@util/data/locale";
+import { useDeviceType } from "@util/browser/styles";
+import { useSwipe } from "@util/browser/touch";
 import Dialog from "@widgets/Dialog";
 import clsx from "clsx";
 import Session from "./Session";

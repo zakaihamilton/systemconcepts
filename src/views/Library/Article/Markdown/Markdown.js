@@ -2,8 +2,8 @@ import { glossary } from "@data/glossary";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { useTranslations } from "@util/translations";
-import { setPath } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { setPath } from "@util/domain/views";
 import clsx from "clsx";
 import React, {
 	useCallback,

@@ -1,20 +1,20 @@
 import { MainStore } from "@components/Main";
 import { render, screen } from "@testing-library/react";
-import { fetchJSON } from "@util/fetch";
-import { useTranslations } from "@util/translations";
+import { fetchJSON } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Account from "./index.js";
 
 jest.mock("js-cookie");
-jest.mock("@util/fetch");
-jest.mock("@util/translations");
-jest.mock("@util/views");
+jest.mock("@util/api/fetch");
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn(),
 	},
 }));
-jest.mock("@util/storage");
+jest.mock("@util/storage/storage");
 jest.mock("@sync/syncState", () => ({
 	UpdateSessionsStore: {
 		update: jest.fn(),

@@ -9,9 +9,9 @@ import {
 	SIGNED_URL_CACHE_TTL_MS,
 	getStableFetchCacheOptions,
 	useFetchJSON,
-} from "@util/fetch";
-import { useRecentHistory } from "@util/history";
-import { exportFile } from "@util/importExport";
+} from "@util/api/fetch";
+import { useRecentHistory } from "@util/domain/history";
+import { exportFile } from "@util/storage/importExport";
 import {
 	fileFolder,
 	fileName,
@@ -19,11 +19,11 @@ import {
 	isAudioFile,
 	isVideoFile,
 	makePath,
-} from "@util/path";
-import { useSessions } from "@util/sessions";
-import { useLocalStorage } from "@util/store";
-import { useTranslations } from "@util/translations";
-import { useParentParams } from "@util/views";
+} from "@util/data/path";
+import { useSessions } from "@util/domain/sessions";
+import { useLocalStorage } from "@util/browser/store";
+import { useTranslations } from "@util/domain/translations";
+import { useParentParams } from "@util/domain/views";
 import Download from "@widgets/Download";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";

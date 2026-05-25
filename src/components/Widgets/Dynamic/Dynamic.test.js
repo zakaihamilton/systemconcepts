@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import DynamicWidget from "./index.js";
 
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 jest.mock("../ToggleButtonGroup", () => () => (
 	<div data-testid="toggle-button-group" />
 ));

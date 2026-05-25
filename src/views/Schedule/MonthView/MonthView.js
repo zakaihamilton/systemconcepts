@@ -5,7 +5,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
 import { useTheme } from "@mui/material/styles";
-import { getSessionTextColor } from "@util/colors";
+import { getSessionTextColor } from "@util/data/colors";
 import {
 	addDate,
 	getDateString,
@@ -13,13 +13,13 @@ import {
 	getMonthViewStart,
 	getNumberOfWeeksInMonth,
 	getYearNames,
-} from "@util/date";
-import { useDirection } from "@util/direction";
-import { useDateFormatter } from "@util/locale";
-import { useDeviceType } from "@util/styles";
-import { useSwipe } from "@util/touch";
-import { useTranslations } from "@util/translations";
-import { addPath, toPath } from "@util/views";
+} from "@util/data/date";
+import { useDirection } from "@util/data/direction";
+import { useDateFormatter } from "@util/data/locale";
+import { useDeviceType } from "@util/browser/styles";
+import { useSwipe } from "@util/browser/touch";
+import { useTranslations } from "@util/domain/translations";
+import { addPath, toPath } from "@util/domain/views";
 import Input from "@widgets/Input";
 import SessionIcon from "@widgets/SessionIcon";
 import { useState } from "react";

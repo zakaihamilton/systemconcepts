@@ -1,9 +1,9 @@
 import { useToolbar } from "@components/Toolbar";
 import { render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Save from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
 	useToolbar: jest.fn(),

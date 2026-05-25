@@ -1,4 +1,4 @@
-import { makePath } from "@util/path";
+import { makePath } from "@util/data/path";
 import Cookies from "js-cookie";
 import { writeCompressedFile } from "../bundle";
 import { FILES_MANIFEST_GZ, SYNC_BASE_PATH } from "../constants";

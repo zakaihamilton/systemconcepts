@@ -1,5 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import SpeedDialWidget from "./index.js";
 
 jest.mock("@components/Main", () => ({
@@ -7,7 +7,7 @@ jest.mock("@components/Main", () => ({
 		useState: jest.fn().mockReturnValue({ direction: "ltr" }),
 	},
 }));
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 
 describe("SpeedDial Widget", () => {
 	const items = [

@@ -1,20 +1,20 @@
-import parseCookie from "@util/cookie";
-import { login } from "@util/login";
-import { roleAuth } from "@util/roles";
-import { aggregateSessionMetadata } from "@util/updateSessions/sessionMetadataServer";
+import parseCookie from "@util/api/cookie";
+import { login } from "@util/auth/login";
+import { roleAuth } from "@util/auth/roles";
+import { aggregateSessionMetadata } from "@util/domain/updateSessions/sessionMetadataServer";
 import { GET } from "./route";
 
-jest.mock("@util/cookie", () => jest.fn());
-jest.mock("@util/login", () => ({
+jest.mock("@util/api/cookie", () => jest.fn());
+jest.mock("@util/auth/login", () => ({
 	login: jest.fn(),
 }));
-jest.mock("@util/roles", () => ({
+jest.mock("@util/auth/roles", () => ({
 	roleAuth: jest.fn(),
 }));
-jest.mock("@util/safeError", () => ({
+jest.mock("@util/api/safeError", () => ({
 	getSafeError: jest.fn((err) => String(err?.message || err)),
 }));
-jest.mock("@util/updateSessions/sessionMetadataServer", () => ({
+jest.mock("@util/domain/updateSessions/sessionMetadataServer", () => ({
 	aggregateSessionMetadata: jest.fn(),
 }));
 jest.mock("next/server", () => ({

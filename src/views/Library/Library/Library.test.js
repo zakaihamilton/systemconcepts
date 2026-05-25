@@ -1,11 +1,11 @@
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage";
-import { usePathItems } from "@util/views";
+import storage from "@util/storage/storage";
+import { usePathItems } from "@util/domain/views";
 import Cookies from "js-cookie";
 import Library from "./index.js";
 
-jest.mock("@util/storage");
-jest.mock("@util/views");
+jest.mock("@util/storage/storage");
+jest.mock("@util/domain/views");
 jest.mock("@sync/syncState", () => ({
 	SyncActiveStore: {
 		useState: jest.fn().mockReturnValue(0),

@@ -1,6 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import GetAppIcon from "@mui/icons-material/GetApp";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 
 registerToolbar("Download");
 

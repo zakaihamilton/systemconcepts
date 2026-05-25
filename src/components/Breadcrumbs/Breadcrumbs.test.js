@@ -1,7 +1,7 @@
 import { MainStore } from "@components/Main";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
-import { setHash } from "@util/views";
+import { useDeviceType } from "@util/browser/styles";
+import { setHash } from "@util/domain/views";
 import BreadcrumbsWidget, { BreadcrumbItem } from "./index.js";
 
 jest.mock("@components/Main", () => ({
@@ -9,8 +9,8 @@ jest.mock("@components/Main", () => ({
 		useState: jest.fn(),
 	},
 }));
-jest.mock("@util/styles");
-jest.mock("@util/views");
+jest.mock("@util/browser/styles");
+jest.mock("@util/domain/views");
 jest.mock("../AppBar/SidebarIcon", () => () => (
 	<div data-testid="sidebar-icon" />
 ));

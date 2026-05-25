@@ -13,7 +13,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import ListItemText from "@mui/material/ListItemText";
-import { useStyles } from "@util/styles";
+import { useStyles } from "@util/browser/styles";
 import { useState } from "react";
 import styles from "./List.module.css";
 

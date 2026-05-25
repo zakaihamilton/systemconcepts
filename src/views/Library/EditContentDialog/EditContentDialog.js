@@ -6,9 +6,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
-import { makePath } from "@util/path";
-import storage from "@util/storage";
-import { useTranslations } from "@util/translations";
+import { makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
+import { useTranslations } from "@util/domain/translations";
 import { useEffect, useState } from "react";
 
 export default function EditContentDialog({

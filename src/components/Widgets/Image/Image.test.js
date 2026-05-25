@@ -1,8 +1,8 @@
 import { render, waitFor } from "@testing-library/react";
-import { useFetchJSON } from "@util/fetch";
+import { useFetchJSON } from "@util/api/fetch";
 import ImageWidget from "./index.js";
 
-jest.mock("@util/fetch");
+jest.mock("@util/api/fetch");
 jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
 
 describe("Image Widget", () => {

@@ -1,10 +1,10 @@
 import { render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
-import { useCurrentPageTitle } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { useCurrentPageTitle } from "@util/domain/views";
 import HeadComponent from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/views");
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views");
 
 describe("HeadComponent", () => {
 	beforeEach(() => {

@@ -1,18 +1,18 @@
 import { ContentSize } from "@components/Page/Content";
 import { useSearch } from "@components/Search";
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import TableWidget from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/styles");
+jest.mock("@util/domain/translations");
+jest.mock("@util/browser/styles");
 jest.mock("@components/Search", () => ({ useSearch: jest.fn() }));
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
 	useToolbar: jest.fn(),
 }));
-jest.mock("@util/importExport");
+jest.mock("@util/storage/importExport");
 jest.mock("@widgets/StatusBar", () => ({
 	StatusBarStore: {
 		useState: jest.fn().mockReturnValue(0),

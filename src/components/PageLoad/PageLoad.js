@@ -1,4 +1,4 @@
-import { useTimeout } from "@util/timers";
+import { useTimeout } from "@util/browser/timers";
 import Progress from "@widgets/Progress";
 import { useState } from "react";
 

@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import Page from "./index.js";
 
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 jest.mock("../Footer", () => () => <div data-testid="footer" />);
 jest.mock("../Tabs", () => () => <div data-testid="tabs" />);
 jest.mock("./Content", () => () => <div data-testid="content" />);

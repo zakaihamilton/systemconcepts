@@ -1,5 +1,5 @@
-import { downloadData, validatePathAccess } from "@util/aws";
-import { getZipTextEntryId } from "@util/updateSessions/metadataParser";
+import { downloadData, validatePathAccess } from "@util/storage/aws";
+import { getZipTextEntryId } from "@util/domain/updateSessions/metadataParser";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 

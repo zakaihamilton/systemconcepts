@@ -1,15 +1,15 @@
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import { PlayerStore } from "../Player/index.js";
 import Toolbar from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
 	useToolbar: jest.fn(),
 }));
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 jest.mock("../Player", () => ({
 	PlayerStore: {
 		useState: jest.fn(),

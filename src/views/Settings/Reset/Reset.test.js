@@ -1,17 +1,17 @@
 import { MainStore } from "@components/Main";
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
-import { goBackPage } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { goBackPage } from "@util/domain/views";
 import Reset from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		update: jest.fn(),
 	},
 	MainStoreDefaults: {},
 }));
-jest.mock("@util/views");
+jest.mock("@util/domain/views");
 jest.mock("@widgets/Dialog", () => ({ title, children, actions }) => (
 	<div data-testid="dialog">
 		<h1>{title}</h1>

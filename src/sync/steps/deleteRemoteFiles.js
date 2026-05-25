@@ -1,5 +1,5 @@
-import { makePath } from "@util/path";
-import storage from "@util/storage";
+import { makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
 import { addSyncLog } from "../logs";
 
 /**

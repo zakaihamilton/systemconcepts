@@ -1,11 +1,11 @@
 import { render } from "@testing-library/react";
-import { useSessions } from "@util/sessions";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useSessions } from "@util/domain/sessions";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import SessionsPage from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/sessions", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/sessions", () => ({
 	useSessions: jest.fn(),
 	SessionsStore: {
 		useState: jest.fn().mockImplementation((selector) =>
@@ -23,10 +23,10 @@ jest.mock("@util/sessions", () => ({
 		update: jest.fn(),
 	},
 }));
-jest.mock("@util/store", () => ({
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 jest.mock("@sync/syncState", () => ({
 	SyncActiveStore: {
 		useState: jest.fn().mockReturnValue(false),
@@ -38,7 +38,7 @@ jest.mock("@views/Player/Player", () => ({
 		useState: jest.fn().mockReturnValue({ session: null }),
 	},
 }));
-jest.mock("@util/history", () => ({
+jest.mock("@util/domain/history", () => ({
 	useRecentHistory: jest.fn().mockReturnValue([[]]),
 }));
 jest.mock("@widgets/Table", () => ({ statusBar }) => (

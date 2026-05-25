@@ -1,18 +1,18 @@
 import { MainStore } from "@components/Main";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { fetchJSON, useFetchJSON } from "@util/fetch";
-import { useTranslations } from "@util/translations";
-import { goBackPage, useParentPath } from "@util/views";
+import { fetchJSON, useFetchJSON } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
+import { goBackPage, useParentPath } from "@util/domain/views";
 import User from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn(),
 	},
 }));
-jest.mock("@util/views");
-jest.mock("@util/fetch");
+jest.mock("@util/domain/views");
+jest.mock("@util/api/fetch");
 jest.mock(
 	"@widgets/Input",
 	() =>

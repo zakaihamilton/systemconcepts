@@ -1,4 +1,4 @@
-import { useSessionTextColor } from "@util/colors";
+import { useSessionTextColor } from "@util/data/colors";
 import Session from "../Session";
 import styles from "./SessionGroup.module.css";
 

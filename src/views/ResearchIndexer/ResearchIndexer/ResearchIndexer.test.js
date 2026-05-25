@@ -1,21 +1,21 @@
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage";
-import { useTranslations } from "@util/translations";
+import storage from "@util/storage/storage";
+import { useTranslations } from "@util/domain/translations";
 import { ResearchStore } from "../../ResearchStore/ResearchStore";
 import ResearchIndexer from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("../../ResearchStore/ResearchStore", () => ({
 	ResearchStore: {
 		useState: jest.fn().mockReturnValue({ indexing: false }),
 		update: jest.fn(),
 	},
 }));
-jest.mock("@util/store", () => ({
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
-jest.mock("@util/storage");
-jest.mock("@util/searchIndexBinary");
+jest.mock("@util/storage/storage");
+jest.mock("@util/data/searchIndexBinary");
 
 describe("ResearchIndexer Component", () => {
 	beforeEach(() => {

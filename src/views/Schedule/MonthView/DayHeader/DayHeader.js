@@ -1,4 +1,4 @@
-import { isDayToday } from "@util/date";
+import { isDayToday } from "@util/data/date";
 import clsx from "clsx";
 import styles from "./DayHeader.module.css";
 

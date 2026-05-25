@@ -1,8 +1,8 @@
 import { Tooltip } from "@mui/material";
 import Link from "@mui/material/Link";
-import { useSessionTextColor } from "@util/colors";
-import { useDeviceType } from "@util/styles";
-import { addPath, toPath } from "@util/views";
+import { useSessionTextColor } from "@util/data/colors";
+import { useDeviceType } from "@util/browser/styles";
+import { addPath, toPath } from "@util/domain/views";
 import SessionIcon from "@widgets/SessionIcon";
 import clsx from "clsx";
 import styles from "./Session.module.css";

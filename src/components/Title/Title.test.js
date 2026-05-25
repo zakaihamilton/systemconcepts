@@ -1,17 +1,17 @@
 import { render } from "@testing-library/react";
-import { SessionsStore } from "@util/sessions";
-import { useDeviceType } from "@util/styles";
-import { useActivePages } from "@util/views";
+import { SessionsStore } from "@util/domain/sessions";
+import { useDeviceType } from "@util/browser/styles";
+import { useActivePages } from "@util/domain/views";
 import { LibraryStore } from "@views/Library/Store";
 import { ScheduleStore } from "@views/Schedule/Schedule";
 import Title from "./index.js";
 
-jest.mock("@util/views");
-jest.mock("@util/styles");
+jest.mock("@util/domain/views");
+jest.mock("@util/browser/styles");
 jest.mock("@views/Schedule/Schedule", () => ({
 	ScheduleStore: { useState: jest.fn() },
 }));
-jest.mock("@util/sessions", () => ({ SessionsStore: { useState: jest.fn() } }));
+jest.mock("@util/domain/sessions", () => ({ SessionsStore: { useState: jest.fn() } }));
 jest.mock("@views/Library/Store", () => ({
 	LibraryStore: { useState: jest.fn() },
 }));

@@ -1,4 +1,4 @@
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import Input from "../Input";
 import ToggleButtonGroup from "../ToggleButtonGroup";
 

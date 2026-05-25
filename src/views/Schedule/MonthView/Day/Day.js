@@ -1,10 +1,10 @@
 import Avatar from "@mui/material/Avatar";
 import { useTheme } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
-import { getSessionTextColor } from "@util/colors";
-import { getDateString, isDateMonth, isDateToday } from "@util/date";
-import { useTranslations } from "@util/translations";
-import { addPath, toPath } from "@util/views";
+import { getSessionTextColor } from "@util/data/colors";
+import { getDateString, isDateMonth, isDateToday } from "@util/data/date";
+import { useTranslations } from "@util/domain/translations";
+import { addPath, toPath } from "@util/domain/views";
 import SessionIcon from "@widgets/SessionIcon";
 import clsx from "clsx";
 import styles from "./Day.module.css";

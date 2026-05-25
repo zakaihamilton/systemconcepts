@@ -22,10 +22,10 @@ import {
 } from "@simplewebauthn/browser";
 import { clearBundleCache } from "@sync/sync";
 import { UpdateSessionsStore } from "@sync/syncState";
-import { fetchJSON } from "@util/fetch";
-import storage from "@util/storage";
-import { useTranslations } from "@util/translations";
-import { setHash, setPath } from "@util/views";
+import { fetchJSON } from "@util/api/fetch";
+import storage from "@util/storage/storage";
+import { useTranslations } from "@util/domain/translations";
+import { setHash, setPath } from "@util/domain/views";
 import Input from "@widgets/Input";
 import clsx from "clsx";
 import Cookies from "js-cookie";

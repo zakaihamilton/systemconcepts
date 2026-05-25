@@ -1,11 +1,11 @@
-import { binaryToString } from "@util/binary";
+import { binaryToString } from "@util/data/binary";
 import {
 	fetchBlob,
 	fetchJSON,
 	fetchText,
 	getStableFetchCacheOptions,
-} from "@util/fetch";
-import { isBinaryFile, makePath } from "@util/path";
+} from "@util/api/fetch";
+import { isBinaryFile, makePath } from "@util/data/path";
 
 const fsEndPoint = "/api/wasabi";
 const STABLE_READ_CACHE_TTL_MS = 24 * 60 * 60 * 1000;

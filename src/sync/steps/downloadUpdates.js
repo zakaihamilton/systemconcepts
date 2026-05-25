@@ -1,6 +1,6 @@
-import { stringToBinary } from "@util/binary";
-import { isBinaryFile, makePath } from "@util/path";
-import storage from "@util/storage";
+import { stringToBinary } from "@util/data/binary";
+import { isBinaryFile, makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
 import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
 import {
 	FILES_MANIFEST,

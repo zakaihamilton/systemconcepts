@@ -1,6 +1,6 @@
 import Chip from "@mui/material/Chip";
-import { useSessions } from "@util/sessions";
-import { useTranslations } from "@util/translations";
+import { useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
 import FilterBar from "@views/Sessions/FilterBar";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";

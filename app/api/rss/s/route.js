@@ -1,7 +1,7 @@
 import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getS3, validatePathAccess } from "@util/aws";
-import { getWasabi } from "@util/wasabi";
+import { getS3, validatePathAccess } from "@util/storage/aws";
+import { getWasabi } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

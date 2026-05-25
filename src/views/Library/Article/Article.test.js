@@ -1,14 +1,14 @@
 import { useSearch } from "@components/Search";
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Article from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Search", () => ({ useSearch: jest.fn() }));
-jest.mock("@util/styles");
-jest.mock("@util/hooks", () => ({
+jest.mock("@util/browser/styles");
+jest.mock("@util/browser/hooks", () => ({
 	useLocalStorage: jest.fn().mockReturnValue([true, jest.fn()]),
 }));
 jest.mock("./useArticleScroll", () => ({
@@ -35,7 +35,7 @@ jest.mock("./useArticleSearch", () => ({
 	}),
 }));
 jest.mock("js-cookie");
-jest.mock("@util/roles", () => ({
+jest.mock("@util/auth/roles", () => ({
 	roleAuth: jest.fn().mockReturnValue(false),
 }));
 jest.mock("@components/Toolbar", () => ({

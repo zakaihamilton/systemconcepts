@@ -12,12 +12,12 @@ import {
 	getDaysInMonth,
 	getMonthNames,
 	getYearNames,
-} from "@util/date";
-import { useDirection } from "@util/direction";
-import { useDateFormatter } from "@util/locale";
-import { useDeviceType } from "@util/styles";
-import { useSwipe } from "@util/touch";
-import { useTranslations } from "@util/translations";
+} from "@util/data/date";
+import { useDirection } from "@util/data/direction";
+import { useDateFormatter } from "@util/data/locale";
+import { useDeviceType } from "@util/browser/styles";
+import { useSwipe } from "@util/browser/touch";
+import { useTranslations } from "@util/domain/translations";
 import SessionGroup from "./SessionGroup";
 import styles from "./DayView.module.css";
 

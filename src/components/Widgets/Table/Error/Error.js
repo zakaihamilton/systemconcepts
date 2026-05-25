@@ -1,6 +1,6 @@
 import ErrorIcon from "@mui/icons-material/Error";
 import Tooltip from "@mui/material/Tooltip";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Label from "@widgets/Label";
 import styles from "./Error.module.css";
 

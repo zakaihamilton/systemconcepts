@@ -1,10 +1,10 @@
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Toolbar, { registerToolbar, ToolbarStore, useToolbar } from "./index.js";
 
-jest.mock("@util/styles");
-jest.mock("@util/translations");
+jest.mock("@util/browser/styles");
+jest.mock("@util/domain/translations");
 jest.mock("./Item", () => ({ item }) => (
 	<div data-testid={`item-${item.id}`}>{item.name}</div>
 ));

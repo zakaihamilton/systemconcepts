@@ -1,4 +1,4 @@
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
 import styles from "./Footer.module.css";
 import Toolbar, { useToolbarItems } from "../Toolbar";

@@ -3,9 +3,9 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
 import Input from "@components/Widgets/Input";
 import TodayIcon from "@mui/icons-material/Today";
-import { useDateFormatter } from "@util/locale";
-import { useDeviceType } from "@util/styles";
-import { addPath } from "@util/views";
+import { useDateFormatter } from "@util/data/locale";
+import { useDeviceType } from "@util/browser/styles";
+import { addPath } from "@util/domain/views";
 import {
 	useCallback,
 	useContext,

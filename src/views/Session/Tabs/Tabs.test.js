@@ -1,18 +1,18 @@
 import { render } from "@testing-library/react";
-import { useSessions } from "@util/sessions";
-import { useTranslations } from "@util/translations";
-import { useParentParams, usePathItems } from "@util/views";
+import { useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
+import { useParentParams, usePathItems } from "@util/domain/views";
 import Tabs from "./index.js";
 
 jest.mock("@components/Widgets/Tabs/Tab", () => ({ label, value }) => (
 	<div data-value={value}>{label}</div>
 ));
 jest.mock("@icons/Audio", () => () => <span />);
-jest.mock("@util/sessions", () => ({
+jest.mock("@util/domain/sessions", () => ({
 	useSessions: jest.fn(),
 }));
-jest.mock("@util/translations");
-jest.mock("@util/views", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views", () => ({
 	toPath: (...items) => items.map(encodeURIComponent).join("/"),
 	useParentParams: jest.fn(),
 	usePathItems: jest.fn(),

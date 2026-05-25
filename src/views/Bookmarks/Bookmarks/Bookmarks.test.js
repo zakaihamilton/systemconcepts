@@ -1,9 +1,9 @@
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
 import { render, waitFor } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import BookmarksPage from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Bookmarks", () => ({
 	BookmarksStore: {
 		useState: jest.fn().mockReturnValue({ bookmarks: [] }),
@@ -15,11 +15,11 @@ jest.mock("@components/Main", () => ({
 		update: jest.fn(),
 	},
 }));
-jest.mock("@util/views", () => ({
+jest.mock("@util/domain/views", () => ({
 	usePages: jest.fn().mockReturnValue([]),
 	getPagesFromHash: jest.fn().mockReturnValue([]),
 }));
-jest.mock("@util/store", () => ({
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@widgets/Table", () => ({ statusBar }) => (

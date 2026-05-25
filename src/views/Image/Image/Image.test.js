@@ -1,18 +1,18 @@
 import { ContentSize } from "@components/Page/Content";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { readBinary } from "@util/binary";
-import { useFetchJSON } from "@util/fetch";
-import { useTranslations } from "@util/translations";
-import { useParentParams, useParentPath } from "@util/views";
+import { readBinary } from "@util/data/binary";
+import { useFetchJSON } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
+import { useParentParams, useParentPath } from "@util/domain/views";
 import ImagePage from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/views");
-jest.mock("@util/binary");
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views");
+jest.mock("@util/data/binary");
 jest.mock("@sync/sync", () => ({
 	useSync: jest.fn().mockReturnValue([0]),
 }));
-jest.mock("@util/fetch");
+jest.mock("@util/api/fetch");
 jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
 jest.mock("@widgets/Download", () => () => <div data-testid="download" />);
 jest.mock("@widgets/Message", () => () => <div data-testid="message" />);

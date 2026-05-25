@@ -1,14 +1,14 @@
 import { MainStore } from "@components/Main";
 import { useToolbar } from "@components/Toolbar";
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage";
-import { useTranslations } from "@util/translations";
-import { useActivePages, usePages } from "@util/views";
+import storage from "@util/storage/storage";
+import { useTranslations } from "@util/domain/translations";
+import { useActivePages, usePages } from "@util/domain/views";
 import React from "react";
 import Bookmarks, { BookmarksStore, useBookmarks } from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/views", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views", () => ({
 	useActivePages: jest.fn(),
 	usePages: jest.fn(),
 	getPagesFromHash: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock("@components/Main", () => ({
 		useState: jest.fn(),
 	},
 }));
-jest.mock("@util/storage");
+jest.mock("@util/storage/storage");
 
 describe("Bookmarks Component", () => {
 	const mockTranslations = {
@@ -82,7 +82,7 @@ describe("useBookmarks hook", () => {
 		usePages.mockReturnValue([
 			{ id: "test-page", name: "Test Page", label: "Test Label" },
 		]);
-		const { getPagesFromHash } = require("@util/views");
+		const { getPagesFromHash } = require("@util/domain/views");
 		getPagesFromHash.mockReturnValue([
 			{ id: "test-page", name: "Test Page", label: "Test Label" },
 		]);

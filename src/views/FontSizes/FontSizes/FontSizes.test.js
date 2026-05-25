@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import FontSizes from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@widgets/Table", () => () => <div data-testid="table" />);
 jest.mock("@widgets/Label", () => ({ name }) => (
 	<div data-testid="label">{name}</div>

@@ -7,7 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 
 export default function ButtonSelector({

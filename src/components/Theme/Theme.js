@@ -2,7 +2,7 @@ import { MainStore } from "@components/Main";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useDirection } from "@util/direction";
+import { useDirection } from "@util/data/direction";
 import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";

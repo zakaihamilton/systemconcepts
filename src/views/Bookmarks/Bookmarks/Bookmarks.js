@@ -1,9 +1,9 @@
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
 import Breadcrumbs from "@components/Breadcrumbs";
 import { MainStore } from "@components/Main";
-import { useLocalStorage } from "@util/store";
-import { useTranslations } from "@util/translations";
-import { getPagesFromHash, usePages } from "@util/views";
+import { useLocalStorage } from "@util/browser/store";
+import { useTranslations } from "@util/domain/translations";
+import { getPagesFromHash, usePages } from "@util/domain/views";
 import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import Table from "@widgets/Table";

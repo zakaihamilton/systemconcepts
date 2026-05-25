@@ -1,5 +1,5 @@
 import Typography from "@mui/material/Typography";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import styles from "./AppTitle.module.css";
 
 export default function AppTitle() {

@@ -3,7 +3,7 @@ import {
 	SIGNED_URL_CACHE_TTL_MS,
 	getStableFetchCacheOptions,
 	useFetchJSON,
-} from "@util/fetch";
+} from "@util/api/fetch";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";

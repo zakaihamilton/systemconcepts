@@ -1,6 +1,6 @@
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
-import { useStyles } from "@util/styles";
+import { useStyles } from "@util/browser/styles";
 import clsx from "clsx";
 import styles from "./Row.module.css";
 

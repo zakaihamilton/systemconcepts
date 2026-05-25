@@ -1,5 +1,5 @@
-import { useLocalStorage } from "@util/hooks";
-import { useTranslations } from "@util/translations";
+import { useLocalStorage } from "@util/browser/hooks";
+import { useTranslations } from "@util/domain/translations";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LibraryTagKeys } from "../../Icons";
 import Controls from "./Controls";

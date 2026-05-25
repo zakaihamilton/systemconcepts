@@ -1,7 +1,7 @@
 import { MainStore } from "@components/Main";
 import pages from "@data/views";
-import { useSize } from "@util/size";
-import { useActivePages, useParentParams } from "@util/views";
+import { useSize } from "@util/browser/size";
+import { useActivePages, useParentParams } from "@util/domain/views";
 import { createContext, useEffect, useRef, useState } from "react";
 import styles from "./Content.module.css";
 

@@ -1,5 +1,5 @@
 import Link from "@mui/material/Link";
-import { setPath, usePages } from "@util/views";
+import { setPath, usePages } from "@util/domain/views";
 import styles from "./Apps.module.css";
 
 export default function Apps() {

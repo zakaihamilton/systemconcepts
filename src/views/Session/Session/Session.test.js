@@ -1,19 +1,19 @@
 import { render } from "@testing-library/react";
-import { useFetch } from "@util/fetch";
-import { useSessions } from "@util/sessions";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useFetch } from "@util/api/fetch";
+import { useSessions } from "@util/domain/sessions";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import SessionPage from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/sessions", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/sessions", () => ({
 	useSessions: jest.fn(),
 	SessionsStore: {
 		useState: jest.fn().mockReturnValue({ order: "desc", orderBy: "date" }),
 	},
 }));
-jest.mock("@util/fetch");
-jest.mock("@util/styles");
+jest.mock("@util/api/fetch");
+jest.mock("@util/browser/styles");
 jest.mock("@widgets/Group", () => () => <div data-testid="group" />);
 jest.mock("@widgets/Summary", () => () => <div data-testid="summary" />);
 jest.mock("@widgets/Image", () => () => <div data-testid="image" />);

@@ -1,8 +1,8 @@
 import { act, fireEvent, render } from "@testing-library/react";
-import { useTimeout } from "@util/timers";
+import { useTimeout } from "@util/browser/timers";
 import DelayInput from "./index.js";
 
-jest.mock("@util/timers");
+jest.mock("@util/browser/timers");
 
 describe("DelayInput Widget", () => {
 	beforeEach(() => {

@@ -1,17 +1,17 @@
 import { useSearch } from "@components/Search";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { useFetch } from "@util/fetch";
-import { useTranslations } from "@util/translations";
+import { useFetch } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
 import { PlayerStore } from "../Player/index.js";
 import Transcript from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("../Player", () => ({
 	PlayerStore: {
 		useState: jest.fn(),
 	},
 }));
-jest.mock("@util/fetch");
+jest.mock("@util/api/fetch");
 jest.mock("@components/Search");
 jest.mock("@widgets/Progress", () => () => <div data-testid="progress" />);
 jest.mock("@widgets/Download", () => () => <div data-testid="download" />);

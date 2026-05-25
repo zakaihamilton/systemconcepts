@@ -1,8 +1,8 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import { MainStore } from "../../Main";
 
 export default function SidebarIcon() {

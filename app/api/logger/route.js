@@ -1,4 +1,4 @@
-import { handle } from "@util/logger";
+import { handle } from "@util/api/logger";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

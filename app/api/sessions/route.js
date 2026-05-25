@@ -4,13 +4,13 @@ import {
 	getNonNegativeInt,
 	getPositiveInt,
 	JSON_HEADERS,
-} from "@util/api";
+} from "@util/api/api";
 import {
 	getSProxyUrl,
 	getSessions,
 	getTranscriptProxyUrl,
 	sortSessions,
-} from "@util/sessionFeed";
+} from "@util/domain/sessionFeed";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

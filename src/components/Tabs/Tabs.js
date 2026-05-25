@@ -1,5 +1,5 @@
 import { MainStore } from "@components/Main";
-import { useActivePages } from "@util/views";
+import { useActivePages } from "@util/domain/views";
 import TabsWidget from "@widgets/Tabs";
 import { useCallback } from "react";
 import styles from "./Tabs.module.css";

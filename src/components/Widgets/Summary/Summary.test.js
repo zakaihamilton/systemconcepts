@@ -1,11 +1,11 @@
 import { render } from "@testing-library/react";
-import { useFetch } from "@util/fetch";
-import { useTranslations } from "@util/translations";
+import { useFetch } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
 import Summary from "./index.js";
 
-jest.mock("@util/fetch");
-jest.mock("@util/translations");
-jest.mock("@util/string", () => ({ preprocessMarkdown: jest.fn((s) => s) }));
+jest.mock("@util/api/fetch");
+jest.mock("@util/domain/translations");
+jest.mock("@util/data/string", () => ({ preprocessMarkdown: jest.fn((s) => s) }));
 jest.mock("react-markdown", () => ({ children }) => (
 	<div data-testid="markdown">{children}</div>
 ));

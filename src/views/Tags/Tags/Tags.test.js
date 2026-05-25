@@ -1,9 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import React from "react";
 import Tags from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@widgets/Tabs", () => ({ state, children, ...props }) => {
 	const [_tab, setTab] = state;
 	return (

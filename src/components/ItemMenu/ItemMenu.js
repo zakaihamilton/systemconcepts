@@ -2,7 +2,7 @@ import Select from "@components/Widgets/Select";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Menu from "@widgets/Menu";
 
 export default function ItemMenuWidget({ item, menuItems, store }) {

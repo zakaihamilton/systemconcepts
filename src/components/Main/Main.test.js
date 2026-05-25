@@ -1,13 +1,13 @@
 import { render } from "@testing-library/react";
-import { useLanguage } from "@util/language";
-import { useResize } from "@util/size";
-import { useDeviceType } from "@util/styles";
+import { useLanguage } from "@util/domain/language";
+import { useResize } from "@util/browser/size";
+import { useDeviceType } from "@util/browser/styles";
 import Main, { MainStore } from "./index.js";
 
-jest.mock("@util/size");
-jest.mock("@util/language");
-jest.mock("@util/styles");
-jest.mock("@util/store");
+jest.mock("@util/browser/size");
+jest.mock("@util/domain/language");
+jest.mock("@util/browser/styles");
+jest.mock("@util/browser/store");
 jest.mock("../SideBar", () => () => <div data-testid="sidebar" />);
 jest.mock("../Page", () => () => <div data-testid="page" />);
 jest.mock("../Sync", () => ({ children }) => (

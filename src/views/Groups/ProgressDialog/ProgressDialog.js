@@ -1,6 +1,6 @@
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { formatDuration } from "@util/string";
-import { useTranslations } from "@util/translations";
+import { formatDuration } from "@util/data/string";
+import { useTranslations } from "@util/domain/translations";
 import { useEffect, useRef, useState } from "react";
 import styles from "./ProgressDialog.module.css";
 import "@fontsource/dseg7/classic.css";

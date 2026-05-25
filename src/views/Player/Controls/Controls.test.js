@@ -1,20 +1,20 @@
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Controls from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn().mockReturnValue({ direction: "ltr" }),
 	},
 }));
-jest.mock("@util/hooks", () => ({
+jest.mock("@util/browser/hooks", () => ({
 	usePageVisibility: jest.fn().mockReturnValue(true),
 }));
-jest.mock("@util/storage", () => ({
+jest.mock("@util/storage/storage", () => ({
 	useFile: jest.fn().mockReturnValue([{}, false, false, jest.fn()]),
 }));
-jest.mock("@util/mediaSession", () => ({
+jest.mock("@util/browser/mediaSession", () => ({
 	useMediaSession: jest.fn(),
 }));
 jest.mock("../Button", () => ({ name, onClick, icon }) => (

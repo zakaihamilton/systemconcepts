@@ -1,6 +1,6 @@
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
 
-import { isBinaryFile, makePath } from "@util/path";
+import { isBinaryFile, makePath } from "@util/data/path";
 
 const fs = process.browser && new FS("systemconcepts-fs");
 

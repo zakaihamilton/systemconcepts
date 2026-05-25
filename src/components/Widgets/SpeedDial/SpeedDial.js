@@ -2,7 +2,7 @@ import { MainStore } from "@components/Main";
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 import styles from "./SpeedDial.module.css";
 

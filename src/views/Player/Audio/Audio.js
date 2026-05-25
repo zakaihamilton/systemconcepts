@@ -1,7 +1,7 @@
 import Group from "@components/Widgets/Group";
-import { useDateFormatter } from "@util/locale";
-import { formatDuration } from "@util/string";
-import { useDeviceType } from "@util/styles";
+import { useDateFormatter } from "@util/data/locale";
+import { formatDuration } from "@util/data/string";
+import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import styles from "./Audio.module.css";

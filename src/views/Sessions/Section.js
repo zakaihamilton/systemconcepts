@@ -2,7 +2,7 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import ViewComfyIcon from "@mui/icons-material/ViewComfy";
 import ViewListIcon from "@mui/icons-material/ViewList";
-import { SessionsStore } from "@util/sessions";
+import { SessionsStore } from "@util/domain/sessions";
 
 export function getSessionsSection({ translations }) {
 	const { viewMode } = SessionsStore.getRawState();

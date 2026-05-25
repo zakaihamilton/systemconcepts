@@ -1,14 +1,14 @@
 import { SyncContext } from "@components/Sync";
 import { clearBundleCache } from "@sync/sync";
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
-import { setPath } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { setPath } from "@util/domain/views";
 import React from "react";
 import FullSync from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@sync/sync");
-jest.mock("@util/views");
+jest.mock("@util/domain/views");
 jest.mock("@widgets/Dialog", () => ({ title, children, actions }) => (
 	<div data-testid="dialog">
 		<h1>{title}</h1>

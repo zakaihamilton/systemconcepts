@@ -1,5 +1,5 @@
-import { isBinaryFile, makePath } from "@util/path";
-import storage from "@util/storage";
+import { isBinaryFile, makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
 import { writeCompressedFile } from "../bundle";
 import { LOCAL_SYNC_PATH, SYNC_BASE_PATH, SYNC_BATCH_SIZE } from "../constants";

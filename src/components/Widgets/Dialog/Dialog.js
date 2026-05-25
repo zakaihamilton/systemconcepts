@@ -2,7 +2,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
 import styles from "./Dialog.module.css";
 

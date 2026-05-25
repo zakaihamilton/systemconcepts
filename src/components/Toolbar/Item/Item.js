@@ -2,7 +2,7 @@ import { Divider } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Tooltip from "@mui/material/Tooltip";
-import { useStyles } from "@util/styles";
+import { useStyles } from "@util/browser/styles";
 import Label from "@widgets/Label";
 import Menu from "@widgets/Menu";
 import clsx from "clsx";

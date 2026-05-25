@@ -1,23 +1,23 @@
 import { render } from "@testing-library/react";
-import { useOnline } from "@util/online";
-import { useSessions } from "@util/sessions";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
-import { useUpdateSessions } from "@util/updateSessions";
+import { useOnline } from "@util/browser/online";
+import { useSessions } from "@util/domain/sessions";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
+import { useUpdateSessions } from "@util/domain/updateSessions";
 import Groups from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/sessions");
-jest.mock("@util/groups", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/sessions");
+jest.mock("@util/domain/groups", () => ({
 	GroupsStore: {
 		useState: jest.fn().mockReturnValue({ counter: 1, showDisabled: false }),
 		update: jest.fn(),
 	},
 }));
-jest.mock("@util/updateSessions");
-jest.mock("@util/online");
-jest.mock("@util/styles");
-jest.mock("@util/storage", () => ({
+jest.mock("@util/domain/updateSessions");
+jest.mock("@util/browser/online");
+jest.mock("@util/browser/styles");
+jest.mock("@util/storage/storage", () => ({
 	exists: jest.fn(),
 	readFile: jest.fn(),
 }));

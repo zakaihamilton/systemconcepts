@@ -1,11 +1,11 @@
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
-import pLimit from "@util/p-limit";
-import { makePath } from "@util/path";
-import { encodeBinaryIndex } from "@util/searchIndexBinary";
-import storage from "@util/storage";
-import { useLocalStorage } from "@util/store";
-import { normalizeContent } from "@util/string";
-import { useTranslations } from "@util/translations";
+import pLimit from "@util/data/p-limit";
+import { makePath } from "@util/data/path";
+import { encodeBinaryIndex } from "@util/data/searchIndexBinary";
+import storage from "@util/storage/storage";
+import { useLocalStorage } from "@util/browser/store";
+import { normalizeContent } from "@util/data/string";
+import { useTranslations } from "@util/domain/translations";
 import { useCallback, useEffect, useRef } from "react";
 import { ResearchStore } from "../../ResearchStore/ResearchStore";
 

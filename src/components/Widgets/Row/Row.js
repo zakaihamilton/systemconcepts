@@ -1,5 +1,5 @@
 import Link from "@mui/material/Link";
-import { useDirection } from "@util/direction";
+import { useDirection } from "@util/data/direction";
 import clsx from "clsx";
 import styles from "./Row.module.css";
 

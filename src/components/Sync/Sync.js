@@ -3,10 +3,10 @@ import SyncIcon from "@mui/icons-material/Sync";
 import SyncProblemIcon from "@mui/icons-material/SyncProblem";
 import Badge from "@mui/material/Badge";
 import { useSyncFeature } from "@sync/sync";
-import { formatDuration } from "@util/string";
-import { useStyles } from "@util/styles";
-import { useTranslations } from "@util/translations";
-import { setPath } from "@util/views";
+import { formatDuration } from "@util/data/string";
+import { useStyles } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
+import { setPath } from "@util/domain/views";
 import { createContext, useMemo } from "react";
 import styles from "./Sync.module.css";
 

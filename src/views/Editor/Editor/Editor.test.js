@@ -1,15 +1,15 @@
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage";
-import { useStoreState } from "@util/store";
-import { useParentPath } from "@util/views";
+import storage from "@util/storage/storage";
+import { useStoreState } from "@util/browser/store";
+import { useParentPath } from "@util/domain/views";
 import Editor from "./index.js";
 
-jest.mock("@util/store", () => ({
+jest.mock("@util/browser/store", () => ({
 	useStoreState: jest.fn(),
 }));
 jest.mock("@widgets/Editor", () => () => <div data-testid="editor-widget" />);
-jest.mock("@util/views");
-jest.mock("@util/storage", () => ({
+jest.mock("@util/domain/views");
+jest.mock("@util/storage/storage", () => ({
 	readFile: jest.fn().mockResolvedValue(""),
 	writeFile: jest.fn().mockResolvedValue({}),
 	createFolderPath: jest.fn().mockResolvedValue({}),
@@ -20,9 +20,9 @@ jest.mock("@sync/sync", () => ({
 }));
 jest.mock("@widgets/Download", () => () => <div data-testid="download" />);
 jest.mock("@widgets/Save", () => () => <div data-testid="save" />);
-jest.mock("@util/importExport");
+jest.mock("@util/storage/importExport");
 jest.mock("pako");
-jest.mock("@util/path");
+jest.mock("@util/data/path");
 
 describe("Editor View", () => {
 	beforeEach(() => {

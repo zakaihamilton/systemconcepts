@@ -1,13 +1,13 @@
 import { render } from "@testing-library/react";
-import { useFetchJSON } from "@util/fetch";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useFetchJSON } from "@util/api/fetch";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Users from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/fetch");
-jest.mock("@util/styles");
-jest.mock("@util/store", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/api/fetch");
+jest.mock("@util/browser/styles");
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@widgets/Table", () => ({ statusBar }) => (

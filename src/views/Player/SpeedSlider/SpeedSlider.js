@@ -1,5 +1,5 @@
 import Slider from "@mui/material/Slider";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
 import React, { useEffect } from "react";
 import { MainStore } from "../../../components/Main";

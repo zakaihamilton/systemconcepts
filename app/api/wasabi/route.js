@@ -1,8 +1,8 @@
-import parseCookie from "@util/cookie";
-import { login } from "@util/login";
-import { roleAuth } from "@util/roles";
-import { getSafeError } from "@util/safeError";
-import { handleRequest } from "@util/wasabi";
+import parseCookie from "@util/api/cookie";
+import { login } from "@util/auth/login";
+import { roleAuth } from "@util/auth/roles";
+import { getSafeError } from "@util/api/safeError";
+import { handleRequest } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

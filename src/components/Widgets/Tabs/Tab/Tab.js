@@ -1,5 +1,5 @@
 import Tab from "@mui/material/Tab";
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
 import styles from "./Tab.module.css";
 

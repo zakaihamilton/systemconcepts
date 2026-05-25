@@ -1,7 +1,7 @@
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { getContrastColor } from "@util/color";
-import { formatDuration } from "@util/string";
+import { getContrastColor } from "@util/data/color";
+import { formatDuration } from "@util/data/string";
 import Image from "@widgets/Image";
 import SessionIcon from "@widgets/SessionIcon";
 import clsx from "clsx";

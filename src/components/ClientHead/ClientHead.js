@@ -1,6 +1,6 @@
 "use client";
-import { useTranslations } from "@util/translations";
-import { useCurrentPageTitle } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { useCurrentPageTitle } from "@util/domain/views";
 import { useEffect } from "react";
 
 export default function ClientHead() {

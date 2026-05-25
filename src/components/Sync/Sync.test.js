@@ -2,11 +2,11 @@ import { useToolbar } from "@components/Toolbar";
 import { useSyncFeature } from "@sync/sync";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Sync from "./index.js";
 
 jest.mock("@sync/sync");
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Toolbar");
 jest.mock("@sync/syncState", () => ({
 	UpdateSessionsStore: {

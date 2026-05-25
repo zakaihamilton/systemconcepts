@@ -1,4 +1,4 @@
-import { login } from "@util/login";
+import { login } from "@util/auth/login";
 import {
 	deletePasskey,
 	getPasskeyAuthOptions,
@@ -6,8 +6,8 @@ import {
 	getPasskeys,
 	verifyPasskeyAuth,
 	verifyPasskeyRegistration,
-} from "@util/passkey";
-import { getSafeError } from "@util/safeError";
+} from "@util/auth/passkey";
+import { getSafeError } from "@util/api/safeError";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

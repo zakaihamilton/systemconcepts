@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import { hash as bcryptHash } from "bcryptjs";
-import parseCookie from "@util/cookie";
-import { login } from "@util/login";
-import { findRecord, handleRequest } from "@util/mongo";
-import { roleAuth } from "@util/roles";
-import { getSafeError } from "@util/safeError";
+import parseCookie from "@util/api/cookie";
+import { login } from "@util/auth/login";
+import { findRecord, handleRequest } from "@util/storage/mongo";
+import { roleAuth } from "@util/auth/roles";
+import { getSafeError } from "@util/api/safeError";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

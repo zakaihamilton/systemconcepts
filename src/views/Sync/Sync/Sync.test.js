@@ -1,24 +1,24 @@
 import { useSyncFeature } from "@sync/sync";
 import { render, screen } from "@testing-library/react";
-import { useOnline } from "@util/online";
-import { useTranslations } from "@util/translations";
+import { useOnline } from "@util/browser/online";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Sync from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@sync/sync", () => ({
 	useSyncFeature: jest.fn(),
 	clearBundleCache: jest.fn(),
 }));
-jest.mock("@util/online");
+jest.mock("@util/browser/online");
 jest.mock("js-cookie");
-jest.mock("@util/updateSessions", () => ({
+jest.mock("@util/domain/updateSessions", () => ({
 	useUpdateSessions: jest.fn().mockReturnValue({ busy: false }),
 }));
-jest.mock("@util/groups", () => ({
+jest.mock("@util/domain/groups", () => ({
 	useGroups: jest.fn().mockReturnValue([[]]),
 }));
-jest.mock("@util/locale", () => ({
+jest.mock("@util/data/locale", () => ({
 	useDateFormatter: jest
 		.fn()
 		.mockReturnValue({ format: jest.fn((date) => date.toString()) }),

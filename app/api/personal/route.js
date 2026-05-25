@@ -1,7 +1,7 @@
-import parseCookie from "@util/cookie";
-import { login } from "@util/login";
-import { handleRequest } from "@util/mongo";
-import { getSafeError } from "@util/safeError";
+import parseCookie from "@util/api/cookie";
+import { login } from "@util/auth/login";
+import { handleRequest } from "@util/storage/mongo";
+import { getSafeError } from "@util/api/safeError";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

@@ -1,8 +1,8 @@
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { clear } from "@storage/local";
-import { useTranslations } from "@util/translations";
-import { goBackPage, replacePath } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { goBackPage, replacePath } from "@util/domain/views";
 import Dialog from "@widgets/Dialog";
 
 export default function ClearStorage() {

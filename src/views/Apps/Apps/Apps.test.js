@@ -1,8 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
-import { setPath, usePages } from "@util/views";
+import { setPath, usePages } from "@util/domain/views";
 import Apps from "./index.js";
 
-jest.mock("@util/views");
+jest.mock("@util/domain/views");
 
 describe("Apps View", () => {
 	const mockPages = [

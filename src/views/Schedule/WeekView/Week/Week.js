@@ -1,4 +1,4 @@
-import { addDate } from "@util/date";
+import { addDate } from "@util/data/date";
 import Day from "../Day";
 
 export default function Week({

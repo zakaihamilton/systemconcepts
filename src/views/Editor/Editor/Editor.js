@@ -1,9 +1,9 @@
 import { useSync } from "@sync/sync";
-import { exportData } from "@util/importExport";
-import { isCompressedJSONFile } from "@util/path";
-import storage from "@util/storage";
-import { useStoreState } from "@util/store";
-import { useParentPath } from "@util/views";
+import { exportData } from "@util/storage/importExport";
+import { isCompressedJSONFile } from "@util/data/path";
+import storage from "@util/storage/storage";
+import { useStoreState } from "@util/browser/store";
+import { useParentPath } from "@util/domain/views";
 import Download from "@widgets/Download";
 import EditorWidget from "@widgets/Editor";
 import Progress from "@widgets/Progress";

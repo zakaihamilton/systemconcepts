@@ -1,10 +1,10 @@
 import { SyncContext } from "@components/Sync";
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import StatusBar from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/views", () => ({ setPath: jest.fn() }));
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views", () => ({ setPath: jest.fn() }));
 
 describe("StatusBar Widget", () => {
 	const mockStore = {

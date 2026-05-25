@@ -1,4 +1,4 @@
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import Footer from "../Footer";
 import Content from "./Content";
 import Tabs from "../Tabs";

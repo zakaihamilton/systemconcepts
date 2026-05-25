@@ -2,10 +2,10 @@ import AddIcon from "@mui/icons-material/Add";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { importData } from "@util/importExport";
-import { makePath } from "@util/path";
-import storage from "@util/storage";
-import { useTranslations } from "@util/translations";
+import { importData } from "@util/storage/importExport";
+import { makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
+import { useTranslations } from "@util/domain/translations";
 import SpeedDial from "@widgets/SpeedDial";
 import { StorageStore } from "../Storage";
 

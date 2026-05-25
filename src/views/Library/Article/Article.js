@@ -17,12 +17,12 @@ import PrintIcon from "@mui/icons-material/Print";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import { useLocalStorage } from "@util/hooks";
-import { exportData } from "@util/importExport";
-import { roleAuth } from "@util/roles";
-import { useDeviceType } from "@util/styles";
-import { useSwipe } from "@util/touch";
-import { useTranslations } from "@util/translations";
+import { useLocalStorage } from "@util/browser/hooks";
+import { exportData } from "@util/storage/importExport";
+import { roleAuth } from "@util/auth/roles";
+import { useDeviceType } from "@util/browser/styles";
+import { useSwipe } from "@util/browser/touch";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import React, {
 	useCallback,

@@ -2,8 +2,8 @@ import { SyncContext } from "@components/Sync";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { clearBundleCache } from "@sync/sync";
-import { useTranslations } from "@util/translations";
-import { goBackPage, setPath } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { goBackPage, setPath } from "@util/domain/views";
 import Dialog from "@widgets/Dialog";
 import { useContext } from "react";
 

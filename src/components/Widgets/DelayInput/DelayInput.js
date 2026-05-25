@@ -1,4 +1,4 @@
-import { useTimeout } from "@util/timers";
+import { useTimeout } from "@util/browser/timers";
 import React, { useEffect, useState } from "react";
 
 export default React.forwardRef(function DelayInput(

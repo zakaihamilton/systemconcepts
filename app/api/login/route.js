@@ -4,9 +4,9 @@ import {
 	register,
 	resetPassword,
 	sendResetEmail,
-} from "@util/login";
-import { checkRateLimit } from "@util/rateLimit";
-import { getSafeError } from "@util/safeError";
+} from "@util/auth/login";
+import { checkRateLimit } from "@util/auth/rateLimit";
+import { getSafeError } from "@util/api/safeError";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

@@ -1,11 +1,11 @@
 import { render } from "@testing-library/react";
-import { useListing } from "@util/storage";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useListing } from "@util/storage/storage";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Storage from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/storage", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/storage/storage", () => ({
 	useListing: jest.fn(),
 	__esModule: true,
 	default: {
@@ -13,8 +13,8 @@ jest.mock("@util/storage", () => ({
 		exportFolderAsZip: jest.fn(),
 	},
 }));
-jest.mock("@util/styles");
-jest.mock("@util/locale", () => ({
+jest.mock("@util/browser/styles");
+jest.mock("@util/data/locale", () => ({
 	useDateFormatter: jest.fn().mockReturnValue({ format: jest.fn() }),
 }));
 jest.mock("@sync/sync", () => ({

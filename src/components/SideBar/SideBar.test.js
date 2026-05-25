@@ -1,16 +1,16 @@
 import { useBookmarks } from "@components/Bookmarks";
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
-import { useActivePages, usePages } from "@util/views";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
+import { useActivePages, usePages } from "@util/domain/views";
 import { ResearchStore } from "@views/ResearchStore/ResearchStore";
 import { MainStore } from "../Main/index.js";
 import SideBar from "./index.js";
 
-jest.mock("@util/styles");
-jest.mock("@util/views");
+jest.mock("@util/browser/styles");
+jest.mock("@util/domain/views");
 jest.mock("@components/Bookmarks");
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("../Main", () => ({
 	MainStore: {
 		useState: jest.fn(),

@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { useDeviceType } from "@util/styles";
+import { useDeviceType } from "@util/browser/styles";
 import Audio from "./index.js";
 
 jest.mock("../Controls", () => () => <div data-testid="controls" />);
@@ -10,12 +10,12 @@ jest.mock("../Player", () => ({
 	},
 }));
 jest.mock("@components/Widgets/Group", () => () => <div data-testid="group" />);
-jest.mock("@util/locale", () => ({
+jest.mock("@util/data/locale", () => ({
 	useDateFormatter: jest
 		.fn()
 		.mockReturnValue({ format: jest.fn().mockReturnValue("Formatted Date") }),
 }));
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 
 describe("Audio Component", () => {
 	beforeEach(() => {

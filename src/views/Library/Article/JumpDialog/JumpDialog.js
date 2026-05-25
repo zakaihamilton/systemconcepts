@@ -7,7 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import React, { useEffect, useState } from "react";
 
 export default function JumpDialog({

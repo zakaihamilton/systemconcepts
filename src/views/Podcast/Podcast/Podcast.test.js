@@ -1,11 +1,11 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { fetchJSON } from "@util/fetch";
-import { useTranslations } from "@util/translations";
+import { fetchJSON } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Podcast from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/fetch");
+jest.mock("@util/domain/translations");
+jest.mock("@util/api/fetch");
 jest.mock("js-cookie");
 
 describe("Podcast View", () => {

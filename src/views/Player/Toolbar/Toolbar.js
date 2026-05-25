@@ -1,8 +1,8 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import SpeedIcon from "@mui/icons-material/Speed";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import { useEffect, useState } from "react";
 import { PlayerStore } from "../Player";
 

@@ -1,16 +1,16 @@
 import { ContentSize } from "@components/Page/Content";
 import ErrorIcon from "@mui/icons-material/Error";
 import { useSync } from "@sync/sync";
-import { readBinary } from "@util/binary";
+import { readBinary } from "@util/data/binary";
 import {
 	SIGNED_URL_CACHE_TTL_MS,
 	getStableFetchCacheOptions,
 	useFetchJSON,
-} from "@util/fetch";
-import { exportData, exportFile } from "@util/importExport";
-import { makePath } from "@util/path";
-import { useTranslations } from "@util/translations";
-import { useParentParams, useParentPath } from "@util/views";
+} from "@util/api/fetch";
+import { exportData, exportFile } from "@util/storage/importExport";
+import { makePath } from "@util/data/path";
+import { useTranslations } from "@util/domain/translations";
+import { useParentParams, useParentPath } from "@util/domain/views";
 import Download from "@widgets/Download";
 import Message from "@widgets/Message";
 import Progress from "@widgets/Progress";

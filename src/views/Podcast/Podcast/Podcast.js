@@ -1,8 +1,8 @@
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { fetchJSON } from "@util/fetch";
-import { useTranslations } from "@util/translations";
+import { fetchJSON } from "@util/api/fetch";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import styles from "./Podcast.module.css";

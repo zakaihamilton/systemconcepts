@@ -1,11 +1,11 @@
-import { authenticateTokenRequest, getPositiveInt } from "@util/api";
+import { authenticateTokenRequest, getPositiveInt } from "@util/api/api";
 import {
 	getSProxyUrl,
 	getSessions,
 	getTranscriptProxyUrl,
 	sortSessions,
-} from "@util/sessionFeed";
-import { formatDuration } from "@util/string";
+} from "@util/domain/sessionFeed";
+import { formatDuration } from "@util/data/string";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 

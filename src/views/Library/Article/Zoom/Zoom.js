@@ -5,8 +5,8 @@ import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useSwipe } from "@util/touch";
-import { useTranslations } from "@util/translations";
+import { useSwipe } from "@util/browser/touch";
+import { useTranslations } from "@util/domain/translations";
 import { useCallback, useEffect, useRef } from "react";
 import styles from "./Zoom.module.css";
 

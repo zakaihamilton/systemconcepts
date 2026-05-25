@@ -2,10 +2,10 @@ import { MainStore } from "@components/Main";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { SYNC_CONFIG } from "@sync/config";
-import { makePath } from "@util/path";
-import storage from "@util/storage";
-import { useTranslations } from "@util/translations";
-import { getPagesFromHash, useActivePages, usePages } from "@util/views";
+import { makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
+import { useTranslations } from "@util/domain/translations";
+import { getPagesFromHash, useActivePages, usePages } from "@util/domain/views";
 import { Store } from "pullstate";
 import { useEffect } from "react";
 

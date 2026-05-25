@@ -1,11 +1,11 @@
 import { ContentSize } from "@components/Page/Content";
 import { useToolbar } from "@components/Toolbar";
 import { render, waitFor } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import React from "react";
 import Zoom, { ZoomStore } from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Toolbar");
 
 describe("Zoom Component", () => {

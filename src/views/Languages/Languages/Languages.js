@@ -1,8 +1,8 @@
 import data from "@data/languages";
 import FormatTextdirectionLToRIcon from "@mui/icons-material/FormatTextdirectionLToR";
 import FormatTextdirectionRToLIcon from "@mui/icons-material/FormatTextdirectionRToL";
-import { useTranslations } from "@util/translations";
-import { addPath, toPath } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { addPath, toPath } from "@util/domain/views";
 import Label from "@widgets/Label";
 import Row from "@widgets/Row";
 import Table from "@widgets/Table";

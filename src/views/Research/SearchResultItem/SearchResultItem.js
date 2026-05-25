@@ -1,4 +1,4 @@
-import { normalizeContent, preprocessMarkdown } from "@util/string";
+import { normalizeContent, preprocessMarkdown } from "@util/data/string";
 import Article from "@views/Library/Article";
 import React, { useEffect, useMemo, useRef } from "react";
 import styles from "./SearchResultItem.module.css";

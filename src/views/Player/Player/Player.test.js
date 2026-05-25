@@ -1,26 +1,26 @@
 import { ContentSize } from "@components/Page/Content";
 import { render } from "@testing-library/react";
-import { useFetchJSON } from "@util/fetch";
-import { useSessions } from "@util/sessions";
-import { useTranslations } from "@util/translations";
-import { useParentParams } from "@util/views";
+import { useFetchJSON } from "@util/api/fetch";
+import { useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
+import { useParentParams } from "@util/domain/views";
 import Cookies from "js-cookie";
 import PlayerPage from "./index.js";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn().mockReturnValue({ speedToolbar: "bottom" }),
 		update: jest.fn(),
 	},
 }));
-jest.mock("@util/store", () => ({
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
-jest.mock("@util/fetch");
-jest.mock("@util/sessions");
-jest.mock("@util/views");
-jest.mock("@util/history", () => ({
+jest.mock("@util/api/fetch");
+jest.mock("@util/domain/sessions");
+jest.mock("@util/domain/views");
+jest.mock("@util/domain/history", () => ({
 	useRecentHistory: jest.fn().mockReturnValue([[], jest.fn(), false]),
 }));
 jest.mock("../Audio", () => () => <div data-testid="audio" />);

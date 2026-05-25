@@ -1,9 +1,9 @@
 import { MainStore } from "@components/Main";
 import { render } from "@testing-library/react";
-import { useActivePages } from "@util/views";
+import { useActivePages } from "@util/domain/views";
 import Tabs from "./index.js";
 
-jest.mock("@util/views");
+jest.mock("@util/domain/views");
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn(),

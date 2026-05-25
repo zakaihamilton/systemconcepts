@@ -12,7 +12,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import React, { useMemo, useState } from "react";
 import styles from "./ArticleTermsDialog.module.css";
 import { getStyleInfo, PHASE_COLORS } from "../GlossaryUtils";

@@ -1,6 +1,6 @@
 import languages from "@data/languages";
-import { useLocalStorage } from "@util/store";
-import { useTranslations } from "@util/translations";
+import { useLocalStorage } from "@util/browser/store";
+import { useTranslations } from "@util/domain/translations";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
 import styles from "./Translations.module.css";

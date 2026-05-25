@@ -1,16 +1,16 @@
 import { SyncActiveStore } from "@sync/syncState";
 import { render } from "@testing-library/react";
-import { useStoreState } from "@util/store";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useStoreState } from "@util/browser/store";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import useDarkMode from "use-dark-mode";
 import Settings from "./index.js";
 
 jest.mock("use-dark-mode");
-jest.mock("@util/translations");
-jest.mock("@util/store");
-jest.mock("@util/styles");
+jest.mock("@util/domain/translations");
+jest.mock("@util/browser/store");
+jest.mock("@util/browser/styles");
 jest.mock("js-cookie");
 jest.mock("@sync/syncState", () => ({
 	SyncActiveStore: {

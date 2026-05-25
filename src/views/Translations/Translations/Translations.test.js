@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Translations from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/store", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@widgets/Table", () => () => <div data-testid="table" />);

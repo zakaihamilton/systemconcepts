@@ -2,8 +2,8 @@ import { readGroups } from "@sync/groups";
 import { calculateHash } from "@sync/hash";
 import { addSyncLog } from "@sync/logs";
 import { SyncActiveStore } from "@sync/syncState";
-import { makePath } from "@util/path";
-import storage from "@util/storage";
+import { makePath } from "@util/data/path";
+import storage from "@util/storage/storage";
 import { FILES_MANIFEST } from "../../constants";
 
 const MIGRATION_FILE = "migration.json";

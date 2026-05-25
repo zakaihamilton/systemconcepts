@@ -1,8 +1,8 @@
-import { downloadData, validatePathAccess } from "@util/aws";
-import parseCookie from "@util/cookie";
-import { error } from "@util/logger";
-import { login } from "@util/login";
-import { roleAuth } from "@util/roles";
+import { downloadData, validatePathAccess } from "@util/storage/aws";
+import parseCookie from "@util/api/cookie";
+import { error } from "@util/api/logger";
+import { login } from "@util/auth/login";
+import { roleAuth } from "@util/auth/roles";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 

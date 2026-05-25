@@ -1,12 +1,12 @@
 import { clear } from "@storage/local";
 import { fireEvent, render } from "@testing-library/react";
-import { useTranslations } from "@util/translations";
-import { goBackPage, replacePath } from "@util/views";
+import { useTranslations } from "@util/domain/translations";
+import { goBackPage, replacePath } from "@util/domain/views";
 import React from "react";
 import ClearStorage from "./index.js";
 
-jest.mock("@util/translations");
-jest.mock("@util/views");
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/views");
 jest.mock("@storage/local");
 jest.mock("@widgets/Dialog", () => ({ title, children, actions }) => (
 	<div data-testid="dialog">

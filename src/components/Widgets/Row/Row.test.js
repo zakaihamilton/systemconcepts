@@ -1,8 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
-import { useDirection } from "@util/direction";
+import { useDirection } from "@util/data/direction";
 import RowWidget from "./index.js";
 
-jest.mock("@util/direction");
+jest.mock("@util/data/direction");
 
 describe("Row Widget", () => {
 	beforeEach(() => {

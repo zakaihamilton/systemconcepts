@@ -1,11 +1,11 @@
 import { getMutex, isMutexLocked, lockMutex } from "@sync/mutex";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { fetchJSON } from "@util/fetch";
-import { usePageVisibility } from "@util/hooks";
-import { useOnline } from "@util/online";
-import { makePath } from "@util/path";
-import { roleAuth } from "@util/roles";
-import storage from "@util/storage";
+import { fetchJSON } from "@util/api/fetch";
+import { usePageVisibility } from "@util/browser/hooks";
+import { useOnline } from "@util/browser/online";
+import { makePath } from "@util/data/path";
+import { roleAuth } from "@util/auth/roles";
+import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { readCompressedFile } from "./bundle";

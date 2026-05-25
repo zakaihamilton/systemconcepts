@@ -1,6 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import SaveIcon from "@mui/icons-material/Save";
-import { useTranslations } from "@util/translations";
+import { useTranslations } from "@util/domain/translations";
 import Progress from "@widgets/Progress";
 
 registerToolbar("Save");

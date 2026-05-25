@@ -1,4 +1,4 @@
-import storage from "@util/storage";
+import storage from "@util/storage/storage";
 import { readCompressedFile, writeCompressedFile } from "./bundle";
 
 /**

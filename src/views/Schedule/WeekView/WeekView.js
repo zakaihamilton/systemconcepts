@@ -13,11 +13,11 @@ import {
 	getWeekViewStart,
 	getYearNames,
 	setWeekOfMonth,
-} from "@util/date";
-import { useDirection } from "@util/direction";
-import { useDateFormatter } from "@util/locale";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+} from "@util/data/date";
+import { useDirection } from "@util/data/direction";
+import { useDateFormatter } from "@util/data/locale";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Input from "@widgets/Input";
 import clsx from "clsx";
 import DayHeader from "./DayHeader";

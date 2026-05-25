@@ -1,12 +1,12 @@
 import { ContentSize } from "@components/Page/Content";
 import { render } from "@testing-library/react";
-import { useSessions } from "@util/sessions";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useSessions } from "@util/domain/sessions";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";
 
-jest.mock("@util/translations");
+jest.mock("@util/domain/translations");
 jest.mock("@views/ResearchStore/ResearchStore", () => ({
 	ResearchStore: {
 		useState: jest.fn().mockReturnValue({
@@ -24,18 +24,18 @@ jest.mock("@views/ResearchStore/ResearchStore", () => ({
 		update: jest.fn(),
 	},
 }));
-jest.mock("@util/sessions");
+jest.mock("@util/domain/sessions");
 jest.mock("@sync/syncState", () => ({
 	SyncActiveStore: {
 		useState: jest.fn().mockReturnValue(0),
 	},
 }));
-jest.mock("@util/styles");
-jest.mock("@util/storage", () => ({
+jest.mock("@util/browser/styles");
+jest.mock("@util/storage/storage", () => ({
 	exists: jest.fn().mockResolvedValue(false),
 	readFile: jest.fn().mockResolvedValue(""),
 }));
-jest.mock("@util/views", () => ({
+jest.mock("@util/domain/views", () => ({
 	setHash: jest.fn(),
 	setPath: jest.fn(),
 	usePathItems: jest.fn().mockReturnValue([]),

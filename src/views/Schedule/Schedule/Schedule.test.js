@@ -1,15 +1,15 @@
 import { useSearch } from "@components/Search";
 import { render } from "@testing-library/react";
-import { useSessions } from "@util/sessions";
-import { useDeviceType } from "@util/styles";
-import { useTranslations } from "@util/translations";
+import { useSessions } from "@util/domain/sessions";
+import { useDeviceType } from "@util/browser/styles";
+import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import SchedulePage from "./index.js";
 
-jest.mock("@util/styles");
+jest.mock("@util/browser/styles");
 jest.mock("js-cookie");
-jest.mock("@util/translations");
-jest.mock("@util/sessions", () => ({
+jest.mock("@util/domain/translations");
+jest.mock("@util/domain/sessions", () => ({
 	useSessions: jest.fn(),
 	SessionsStore: {
 		useState: jest.fn().mockReturnValue({ showFilterDialog: false }),
@@ -17,7 +17,7 @@ jest.mock("@util/sessions", () => ({
 	},
 }));
 jest.mock("@components/Search");
-jest.mock("@util/store", () => ({
+jest.mock("@util/browser/store", () => ({
 	useLocalStorage: jest.fn(),
 }));
 jest.mock("@sync/syncState", () => ({

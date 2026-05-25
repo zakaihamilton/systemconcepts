@@ -4,9 +4,9 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import ImageIcon from "@mui/icons-material/Image";
 import InfoIcon from "@mui/icons-material/Info";
 import MovieIcon from "@mui/icons-material/Movie";
-import { useSessions } from "@util/sessions";
-import { useTranslations } from "@util/translations";
-import { toPath, useParentParams, usePathItems } from "@util/views";
+import { useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
+import { toPath, useParentParams, usePathItems } from "@util/domain/views";
 
 export default function Tabs({ Container }) {
 	const translations = useTranslations();
