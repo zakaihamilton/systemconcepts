@@ -34,8 +34,6 @@ export default function Tabs({ Container }) {
 
 	const basePath = "#" + toPath(...items.slice(0, baseIndex + 1));
 	const hasTranscript =
-		session.audio ||
-		session.video ||
 		session.subtitles ||
 		session.transcription ||
 		session.transcriptPath ||

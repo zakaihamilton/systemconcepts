@@ -82,7 +82,7 @@ describe("Session Tabs", () => {
 		expect(getByText("Transcript")).toBeInTheDocument();
 	});
 
-	it("shows transcript tab for media sessions so the player can resolve inferred transcripts", () => {
+	it("does not show transcript tab for media sessions without transcript metadata", () => {
 		useSessions.mockReturnValue([
 			[
 				{
@@ -95,10 +95,10 @@ describe("Session Tabs", () => {
 			],
 		]);
 
-		const { getByText } = render(
+		const { queryByText } = render(
 			<Tabs Container={({ children }) => children} />,
 		);
 
-		expect(getByText("Transcript")).toBeInTheDocument();
+		expect(queryByText("Transcript")).not.toBeInTheDocument();
 	});
 });
