@@ -168,7 +168,11 @@ describe("updateGroupProcess", () => {
 		await updateGroupProcess("test", true);
 
 		expect(fetchSessionMetadata).toHaveBeenCalledTimes(1);
-		expect(fetchSessionMetadata).toHaveBeenCalledWith("test", "2024");
+		expect(fetchSessionMetadata).toHaveBeenCalledWith(
+			"test",
+			"2024",
+			expect.any(Array),
+		);
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
 		const [, year, sessions] = updateYearSync.mock.calls[0];
 		expect(year).toBe("2024");

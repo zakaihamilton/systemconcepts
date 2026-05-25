@@ -1,0 +1,58 @@
+import { getDateString } from "@util/date";
+import { useDeviceType } from "@util/styles";
+import clsx from "clsx";
+import styles from "./Day.module.css";
+import Session from "../Session";
+
+export default function Day({
+	sessions,
+	column,
+	row,
+	count,
+	date,
+	playingSession,
+}) {
+	const isPhone = useDeviceType() === "phone";
+	const style = {
+		gridColumn: column,
+		gridRow: row,
+	};
+	const sessionDate = getDateString(date);
+	const sessionItems = (sessions || [])
+		.filter((session) => session.date === sessionDate)
+		.sort((a, b) => {
+			const groupCompare = (a.group || "").localeCompare(b.group || "");
+			if (groupCompare !== 0) return groupCompare;
+			return (a.typeOrder || 0) - (b.typeOrder || 0);
+		})
+		.map((session) => {
+			const { name, key, ...sessionProps } = session;
+			return (
+				<Session
+					key={key}
+					name={name}
+					{...sessionProps}
+					isPlaying={
+						playingSession &&
+						playingSession.name === name &&
+						playingSession.group === session.group &&
+						playingSession.date === session.date
+					}
+				/>
+			);
+		});
+	return (
+		<div
+			className={clsx(
+				styles.root,
+				column === count && styles.last,
+				isPhone && styles.mobile,
+			)}
+			style={style}
+		>
+			<div className={clsx(styles.sessions, isPhone && styles.mobile)}>
+				{sessionItems}
+			</div>
+		</div>
+	);
+}

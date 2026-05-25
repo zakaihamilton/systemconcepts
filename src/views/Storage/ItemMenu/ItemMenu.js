@@ -1,0 +1,157 @@
+import ItemMenu from "@components/ItemMenu";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
+import { exportData } from "@util/importExport";
+import { fileFolder, isBinaryFile, makePath } from "@util/path";
+import storage from "@util/storage";
+import { useTranslations } from "@util/translations";
+import { StorageStore } from "../Storage";
+
+export default function ItemMenuWidget({ item, readOnly }) {
+	const translations = useTranslations();
+
+	const menuItems = [
+		!readOnly && {
+			id: "rename",
+			name: translations.RENAME,
+			onClick: () => {
+				const placeholder =
+					item.type === "dir"
+						? "FOLDER_NAME_PLACEHOLDER"
+						: "FILE_NAME_PLACEHOLDER";
+				StorageStore.update((s) => {
+					s.mode = "rename";
+					s.type = item.type;
+					s.name = item.name;
+					s.item = item;
+					s.icon = item.icon;
+					s.tooltip = item.tooltip;
+					s.placeholder = translations[placeholder];
+					s.editing = true;
+					s.onValidate = async (name) => {
+						if (!name) {
+							return false;
+						}
+						name = name.replace(/\//, " ");
+						const target = makePath(fileFolder(item.path), name);
+						if (makePath(item.path) === makePath(target)) {
+							return false;
+						}
+						return true;
+					};
+					s.onDone = async (name) => {
+						name = name.replace(/\//, " ");
+						const target = makePath(fileFolder(item.path), name);
+						try {
+							if (await storage.exists(target)) {
+								throw translations.ALREADY_EXISTS.replace("${name}", name);
+							}
+							if (item.type === "dir") {
+								await storage.moveFolder(item.path, target);
+							} else {
+								await storage.moveFile(item.path, target);
+							}
+						} catch (err) {
+							StorageStore.update((s) => {
+								s.message = err;
+								s.severity = "error";
+							});
+						}
+					};
+				});
+			},
+		},
+		!readOnly && {
+			id: "move",
+			name: translations.MOVE,
+			icon: <TrendingFlatIcon />,
+			onClick: () => {
+				StorageStore.update((s) => {
+					s.select = [item];
+					s.mode = "move";
+					s.severity = "info";
+					s.onDone = () => {
+						StorageStore.update((s) => {
+							s.destination = fileFolder(item.path);
+						});
+						return true;
+					};
+				});
+			},
+		},
+		!readOnly && {
+			id: "copy",
+			name: translations.COPY,
+			icon: <FileCopyIcon />,
+			onClick: () => {
+				StorageStore.update((s) => {
+					s.select = [item];
+					s.mode = "copy";
+					s.severity = "info";
+					s.onDone = () => {
+						StorageStore.update((s) => {
+							s.destination = fileFolder(item.path);
+						});
+						return true;
+					};
+				});
+			},
+		},
+		!readOnly && {
+			id: "delete",
+			name: translations.DELETE,
+			icon: <DeleteIcon />,
+			onClick: () => {
+				StorageStore.update((s) => {
+					s.select = [item];
+					s.mode = "delete";
+					s.severity = "error";
+					s.onDone = async (select) => {
+						for (const item of select) {
+							if (!item) {
+								continue;
+							}
+							try {
+								if (item.type === "dir") {
+									await storage.deleteFolder(item.path);
+								} else {
+									await storage.deleteFile(item.path);
+								}
+							} catch (err) {
+								StorageStore.update((s) => {
+									s.message = err;
+									s.severity = "error";
+								});
+							}
+						}
+					};
+				});
+			},
+		},
+		{
+			id: "export",
+			name: translations.EXPORT,
+			icon: <GetAppIcon />,
+			onClick: async () => {
+				let data = null;
+				let type = "application/json";
+				let name = item.name;
+				if (item.type === "dir") {
+					data = await storage.exportFolderAsZip(item.path);
+					type = "application/zip";
+					name = item.name + ".zip";
+				} else {
+					data = await storage.readFile(item.path);
+					if (isBinaryFile(item.name)) {
+						type = "application/octet-stream";
+					}
+				}
+				exportData(data, name, type);
+			},
+		},
+	].filter(Boolean);
+
+	return <ItemMenu item={item} menuItems={menuItems} store={StorageStore} />;
+}

@@ -4,7 +4,7 @@ import { useSessions } from "@util/sessions";
 import { useDeviceType } from "@util/styles";
 import { useTranslations } from "@util/translations";
 import Cookies from "js-cookie";
-import Research from "./index";
+import Research from "./";
 
 jest.mock("@util/translations");
 jest.mock("@views/ResearchStore/ResearchStore", () => ({
