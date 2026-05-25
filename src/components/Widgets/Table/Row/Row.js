@@ -30,6 +30,7 @@ export default function Row({
 			onSelectable,
 			onClick,
 			selected,
+			columnProps = {},
 		} = column;
 		const {
 			className: viewModeClassName = "",
@@ -37,6 +38,7 @@ export default function Row({
 			style: viewModeStyle = {},
 			...viewModeProps
 		} = viewModes[viewMode] || {};
+		const { style: columnStyle = {}, ...otherColumnProps } = columnProps;
 		const value = renderColumn ? renderColumn(columnId, item) : item[columnId];
 		const isSelected = selected && selected(item);
 		return (
@@ -52,9 +54,10 @@ export default function Row({
 						!align && styles.defaultAlign,
 					),
 				}}
-				style={{ height: rowHeight, ...viewModeStyle }}
+				style={{ height: rowHeight, ...viewModeStyle, ...columnStyle, "--group-color": item.color }}
 				key={columnId}
 				{...viewModeProps}
+				{...otherColumnProps}
 			>
 				<div
 					className={clsx(
@@ -91,6 +94,7 @@ export default function Row({
 				maxHeight: rowHeight,
 				...(alignItems && { alignItems }),
 				...(justifyContent && { justifyContent }),
+				"--group-color": item.color,
 				...style,
 			}}
 			{...(rowClick && { hover: true, onClick })}

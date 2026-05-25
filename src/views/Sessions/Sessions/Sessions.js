@@ -139,7 +139,7 @@ export default function SessionsPage() {
 					},
 					columnProps: {
 						style: {
-							width: "9em",
+							width: "12em",
 						},
 					},
 					viewModes: {
@@ -168,7 +168,7 @@ export default function SessionsPage() {
 					},
 					columnProps: {
 						style: {
-							width: "6em",
+							width: "8em",
 						},
 					},
 					viewModes: {
@@ -199,7 +199,7 @@ export default function SessionsPage() {
 						}),
 					columnProps: {
 						style: {
-							width: "7em",
+							width: "8em",
 						},
 					},
 					style: {
@@ -539,7 +539,11 @@ export default function SessionsPage() {
 							fill={viewMode === "grid"}
 							name={item.group}
 							color={item.color}
-							className={viewMode === "grid" ? styles.gridGroupContainer : undefined}
+							className={
+								viewMode === "grid"
+									? styles.gridGroupContainer
+									: styles.listGroupContainer
+							}
 						/>
 					);
 

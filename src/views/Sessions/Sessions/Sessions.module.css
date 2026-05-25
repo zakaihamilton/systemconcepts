@@ -35,7 +35,7 @@
 		}
 
 		:global(.MuiSvgIcon-root) {
-			color: color-mix(in srgb, var(--group-color, var(--primary-color)) 75%, var(--text-color)) !important;
+			color: color-mix(in srgb, var(--group-color, var(--primary-color)) 45%, var(--text-color)) !important;
 			filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--group-color, var(--primary-color)) 25%, transparent)) !important;
 			transform: scale(1.1);
 			transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -64,7 +64,7 @@
 }
 
 .gridProgressFill {
-	background-color: var(--playing-color, #8b5cf6);
+	background-color: var(--group-color, var(--playing-color, #8b5cf6));
 	height: 100%;
 	transition: width 0.3s ease;
 }
@@ -73,7 +73,7 @@
 	position: absolute;
 	top: 8px;
 	right: 8px;
-	background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(99, 102, 241, 0.8)) !important;
+	background: linear-gradient(135deg, color-mix(in srgb, var(--group-color, #8b5cf6) 85%, #ffffff) 80%, color-mix(in srgb, var(--group-color, #6366f1) 85%, #000000)) !important;
 	color: #ffffff !important;
 	border: 1px solid rgba(255, 255, 255, 0.25) !important;
 	backdrop-filter: blur(8px) !important;
@@ -275,7 +275,7 @@
 		font-size: 0.75em !important;
 		white-space: nowrap !important;
 		letter-spacing: 0.02em !important;
-		color: color-mix(in srgb, var(--group-color, var(--primary-500)) 80%, var(--text-color)) !important;
+		color: var(--text-color) !important;
 	}
 
 	div:nth-child(3) {
@@ -325,27 +325,59 @@
 }
 
 .listItem {
-	grid-template-columns: auto minmax(4em, 10%) 7em 8em;
-	border-bottom: 1px solid var(--border-color);
-	transition: background-color 0.2s ease;
+	grid-template-columns: auto minmax(11em, 15%) 8em 9em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 12px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.listItem:hover {
+	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+
+	.icon :global(.MuiSvgIcon-root) {
+		transform: scale(1.15);
+	}
 }
 
 .listPhoneItem {
-	grid-template-columns: auto minmax(5em, 10%) 8em;
-	border-bottom: 1px solid var(--border-color);
-	transition: background-color 0.2s ease;
+	grid-template-columns: auto minmax(7.5em, 18%) 8em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 10px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.listPhoneItem:hover {
+	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
 }
 
 .treeItem {
-	grid-template-columns: auto minmax(4em, 10%) 7em 8em;
-	border-bottom: 1px solid var(--border-color);
-	transition: background-color 0.2s ease;
+	grid-template-columns: auto minmax(11em, 15%) 8em 9em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 12px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.treeItem:hover {
+	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+
+	.icon :global(.MuiSvgIcon-root) {
+		transform: scale(1.15);
+	}
 }
 
 .treePhoneItem {
-	grid-template-columns: auto 16vw 8em;
-	border-bottom: 1px solid var(--border-color);
-	transition: background-color 0.2s ease;
+	grid-template-columns: auto minmax(7.5em, 18%) 8em;
+	border-bottom: 1px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+	padding: 4px 10px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.treePhoneItem:hover {
+	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
 }
 
 .labelName {
@@ -366,14 +398,14 @@
 .treeChild {
 	margin-left: 1.5em !important;
 	padding-left: 0.75em !important;
-	border-left: 2px solid var(--border-color) !important;
-	background-color: color-mix(in srgb, var(--main-background-alternative) 40%, transparent) !important;
+	border-left: 2px solid var(--group-color, var(--border-color)) !important;
+	background-color: color-mix(in srgb, var(--group-color, var(--main-background-alternative)) 6%, transparent) !important;
 }
 
 .expandedGroupHighlight {
 	background-color: color-mix(
 		in srgb,
-		var(--expanded-color) 8%,
+		var(--group-color, var(--expanded-color)) 6%,
 		transparent
 	) !important;
 	transition: background-color 0.2s ease;
@@ -381,7 +413,7 @@
 	&:hover {
 		background-color: color-mix(
 			in srgb,
-			var(--expanded-color) 15%,
+			var(--group-color, var(--expanded-color)) 12%,
 			transparent
 		) !important;
 	}
@@ -413,6 +445,11 @@
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+
+	:global(.MuiSvgIcon-root) {
+		color: color-mix(in srgb, var(--group-color, var(--primary-color)) 45%, var(--text-color)) !important;
+		transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+	}
 }
 
 .icon.active {
@@ -470,8 +507,8 @@
 	) !important;
 	color: color-mix(
 		in srgb,
-		var(--group-color, var(--primary-500)) 60%,
-		black
+		var(--group-color, var(--primary-500)) 45%,
+		var(--text-color)
 	) !important;
 	border: 1px solid var(--group-color, var(--primary-500)) !important;
 }
@@ -483,14 +520,93 @@
 }
 
 .playing {
-	border-left: 3px solid var(--playing-color) !important;
-	background-color: color-mix(in srgb, var(--playing-color) 8%, var(--main-background)) !important;
-	color: var(--playing-color) !important;
+	border-left: 3px solid var(--group-color, var(--playing-color)) !important;
+	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 8%, var(--main-background-alternative)) !important;
+	color: var(--group-color, var(--playing-color)) !important;
+
+	.labelText {
+		color: var(--group-color, var(--playing-color)) !important;
+		font-weight: 600 !important;
+	}
+
+	.icon :global(.MuiSvgIcon-root) {
+		color: var(--group-color, var(--playing-color)) !important;
+		animation: pulse 1.5s infinite ease-in-out !important;
+	}
 }
 
 .playing.gridItem {
 	border-left: none !important;
-	box-shadow: 0 0 0 2px var(--playing-color), var(--shadow-md) !important;
-	border-color: var(--playing-color) !important;
-	background-color: color-mix(in srgb, var(--playing-color) 4%, var(--main-background-alternative)) !important;
+	box-shadow: 0 0 0 2px var(--group-color, var(--playing-color)), var(--shadow-md) !important;
+	border-color: var(--group-color, var(--playing-color)) !important;
+	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 4%, var(--main-background-alternative)) !important;
+
+	.labelText {
+		color: var(--group-color, var(--playing-color)) !important;
+	}
+}
+
+@keyframes pulse {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.15); }
+	100% { transform: scale(1); }
+}
+
+.listGroupContainer {
+	padding: 2px 10px !important;
+	border-radius: var(--radius-full) !important;
+	background-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 15%, var(--main-background-alternative)) !important;
+	color: var(--text-color) !important;
+	border: 1px solid color-mix(in srgb, var(--group-color, var(--primary-color)) 30%, var(--border-color)) !important;
+	font-size: 0.72em !important;
+	font-weight: 600 !important;
+	width: max-content !important;
+	height: fit-content !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	letter-spacing: 0.02em !important;
+
+	div:nth-child(1) {
+		display: none !important;
+	}
+
+	div:nth-child(2) {
+		color: inherit !important;
+		font-weight: inherit !important;
+		font-size: inherit !important;
+	}
+
+	div:nth-child(3) {
+		display: none !important;
+	}
+}
+
+/* Premium Table view upgrades */
+:global(.MuiTableHead-root) :global(.MuiTableCell-root) {
+	font-size: 0.72rem !important;
+	font-weight: 700 !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.06em !important;
+	color: var(--neutral-500) !important;
+	border-bottom: 2px solid var(--border-color) !important;
+	background-color: var(--main-background) !important;
+}
+
+:global(.MuiTableBody-root) :global(.MuiTableRow-root) {
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	border-bottom: 1px solid var(--border-color) !important;
+
+	&:hover {
+		background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+	}
+
+	& :global(.MuiTableCell-root) {
+		color: var(--text-color) !important;
+		border-bottom: 1px solid var(--border-color) !important;
+	}
+}
+
+:global(.MuiTableBody-root) :global(.MuiTableRow-root.Mui-selected) {
+	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 8%, var(--main-background-alternative)) !important;
 }
