@@ -8,6 +8,8 @@ export default function Week({
 	row,
 	dateFormatter,
 	playingSession,
+	collapsedGroups,
+	onToggleGroup,
 }) {
 	const numDays = 7;
 	const days = new Array(numDays).fill(0).map((_, index) => {
@@ -23,6 +25,8 @@ export default function Week({
 				date={day}
 				dateFormatter={dateFormatter}
 				playingSession={playingSession}
+				collapsedGroups={collapsedGroups}
+				onToggleGroup={onToggleGroup}
 			/>
 		);
 	});

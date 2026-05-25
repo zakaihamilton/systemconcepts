@@ -15,6 +15,7 @@ export default function Session({
 	color,
 	type,
 	isPlaying,
+	showGroup = true,
 }) {
 	const isPhone = useDeviceType() === "phone";
 	const textColor = useSessionTextColor(color);
@@ -46,12 +47,14 @@ export default function Session({
 				onClick={onClick}
 			>
 				<div className={styles.background} style={style} />
-				<div
-					className={clsx(styles.group, isPhone && styles.mobile)}
-					dir="auto"
-				>
-					{groupName}
-				</div>
+				{showGroup && (
+					<div
+						className={clsx(styles.group, isPhone && styles.mobile)}
+						dir="auto"
+					>
+						{groupName}
+					</div>
+				)}
 				<div className={styles.container}>
 					<div className={styles.icons}>
 						<SessionIcon type={type} />

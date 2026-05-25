@@ -20,6 +20,7 @@ import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import Input from "@widgets/Input";
 import clsx from "clsx";
+import { useState } from "react";
 import DayHeader from "./DayHeader";
 import Week from "./Week";
 import styles from "./WeekView.module.css";
@@ -28,6 +29,7 @@ registerToolbar("WeekView");
 
 export default function WeekView({ sessions, date, store, playingSession }) {
 	const { lastViewMode } = store.useState();
+	const [collapsedGroups, setCollapsedGroups] = useState([]);
 	const isPhone = useDeviceType() === "phone";
 	const direction = useDirection();
 	const translations = useTranslations();
@@ -213,6 +215,15 @@ export default function WeekView({ sessions, date, store, playingSession }) {
 		}
 	};
 
+	const toggleGroup = (group) => {
+		setCollapsedGroups((groups) => {
+			if (groups.includes(group)) {
+				return groups.filter((item) => item !== group);
+			}
+			return [...groups, group];
+		});
+	};
+
 	const toolbarItems = [
 		{
 			id: "back",
@@ -282,6 +293,8 @@ export default function WeekView({ sessions, date, store, playingSession }) {
 					row={2}
 					dateFormatter={dayFormatter}
 					playingSession={playingSession}
+					collapsedGroups={collapsedGroups}
+					onToggleGroup={toggleGroup}
 				/>
 			</div>
 		</div>
