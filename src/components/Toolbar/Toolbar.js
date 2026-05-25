@@ -18,7 +18,7 @@ export function registerToolbar(id, sortKey) {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Divider } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { useDeviceType } from "@util/browser/styles";
 // useTranslations is imported via require to break circular dependency
 const useTranslations = () => {

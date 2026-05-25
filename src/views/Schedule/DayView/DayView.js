@@ -5,7 +5,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import {
 	addDate,
 	getDateString,

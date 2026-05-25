@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import clsx from "clsx";
 import { memo, useCallback, useEffect, useRef, useState } from "react";

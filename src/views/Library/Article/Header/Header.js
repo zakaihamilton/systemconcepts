@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import clsx from "clsx";
 import { abbreviations } from "../../../../data/abbreviations";

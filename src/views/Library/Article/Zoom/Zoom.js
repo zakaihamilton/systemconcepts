@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";

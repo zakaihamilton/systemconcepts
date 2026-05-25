@@ -10,7 +10,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { useTranslations } from "@util/domain/translations";
 import Message from "@widgets/Message";
 import { useEffect, useState } from "react";

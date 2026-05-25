@@ -10,7 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "@util/domain/translations";
 import React, { useMemo, useState } from "react";

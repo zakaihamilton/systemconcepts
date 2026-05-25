@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import IndeterminateCheckBoxIcon from "@mui/icons-material/IndeterminateCheckBox";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "@util/domain/translations";
 import { setPath } from "@util/domain/views";

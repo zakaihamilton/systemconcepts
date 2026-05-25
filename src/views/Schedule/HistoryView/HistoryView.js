@@ -1,7 +1,7 @@
 import { useSearch } from "@components/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { diffDays, isDateToday } from "@util/data/date";
 import { useRecentHistory } from "@util/domain/history";
 import { useLanguage } from "@util/domain/language";

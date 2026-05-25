@@ -1,6 +1,6 @@
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import styles from "./ToggleButtonGroup.module.css";
 
 export default function ToggleButtonGroupWidget({ items, state, ...props }) {

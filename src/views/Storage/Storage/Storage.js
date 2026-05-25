@@ -2,7 +2,7 @@ import devices from "@data/storage";
 import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import StorageIcon from "@mui/icons-material/Storage";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useSync } from "@sync/sync";
 import { useDateFormatter } from "@util/data/locale";

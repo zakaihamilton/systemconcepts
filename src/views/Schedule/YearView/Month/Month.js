@@ -1,5 +1,5 @@
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import {
 	addDate,
 	getDateString,

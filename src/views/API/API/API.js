@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import PageLoad from "@components/PageLoad";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
+import Tooltip from "@widgets/Tooltip";
 import Cookies from "js-cookie";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -335,9 +336,9 @@ else:
 								</Typography>
 
 								<div className={styles.urlContainer}>
-									<div className={styles.urlText} title={apiUrl}>
-										{apiUrl}
-									</div>
+									<Tooltip title={apiUrl}>
+										<div className={styles.urlText}>{apiUrl}</div>
+									</Tooltip>
 									<Button
 										variant="contained"
 										size="small"

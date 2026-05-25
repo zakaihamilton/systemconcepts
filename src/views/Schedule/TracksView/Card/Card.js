@@ -1,4 +1,4 @@
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import EventIcon from "@mui/icons-material/Event";
 import { getContrastColor } from "@util/data/color";

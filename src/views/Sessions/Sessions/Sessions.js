@@ -22,6 +22,7 @@ import Row from "@widgets/Row";
 import SessionIcon from "@widgets/SessionIcon";
 import StatusBar from "@widgets/StatusBar";
 import Table from "@widgets/Table";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -487,9 +488,9 @@ export default function SessionsPage() {
 					);
 
 					const nameContent = (
-						<div className={styles.nameContainer} title={item.name}>
-							{nameContentInner}
-						</div>
+						<Tooltip title={item.name}>
+							<div className={styles.nameContainer}>{nameContentInner}</div>
+						</Tooltip>
 					);
 
 					const href = target(item);
@@ -523,10 +524,12 @@ export default function SessionsPage() {
 					);
 
 					const aiBadge = item.ai && viewMode === "grid" && (
-						<div className={styles.aiBadge} title="AI Summary Available">
-							<AutoAwesomeIcon />
-							<span className={styles.aiText}>AI</span>
-						</div>
+						<Tooltip title="AI Summary Available">
+							<div className={styles.aiBadge}>
+								<AutoAwesomeIcon />
+								<span className={styles.aiText}>AI</span>
+							</div>
+						</Tooltip>
 					);
 
 					const progressBar = typeof item.percentage === "number" && !isNaN(item.percentage) && item.percentage > 0 && viewMode === "grid" && (

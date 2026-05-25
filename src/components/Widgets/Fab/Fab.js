@@ -1,5 +1,5 @@
 import Fab from "@mui/material/Fab";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./Fab.module.css";
 

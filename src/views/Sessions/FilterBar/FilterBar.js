@@ -5,7 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import InsertPhotoOutlinedIcon from "@mui/icons-material/InsertPhotoOutlined";
 import MovieIcon from "@mui/icons-material/Movie";
 import MovieFilterIcon from "@mui/icons-material/MovieFilter";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { SessionsStore } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Menu from "@widgets/Menu";

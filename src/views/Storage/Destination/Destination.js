@@ -8,7 +8,7 @@ import InputBase from "@mui/material/InputBase";
 import Slide from "@mui/material/Slide";
 import { alpha, styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";

@@ -1,4 +1,5 @@
 import { useStyles } from "@util/browser/styles";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { memo } from "react";
 import styles from "./Item.module.css";
@@ -89,9 +90,9 @@ function ItemWidget({
 				{...viewModeProps}
 			>
 				{!!ellipsis && (
-					<span title={item[ellipsis]}>
+					<Tooltip title={item[ellipsis]}>
 						<div className={styles.ellipsisText}>{value}</div>
-					</span>
+					</Tooltip>
 				)}
 				{!ellipsis && value}
 			</div>

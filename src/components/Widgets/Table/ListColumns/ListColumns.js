@@ -1,5 +1,5 @@
 import TableSortLabel from "@mui/material/TableSortLabel";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { useStyles } from "@util/browser/styles";
 import Label from "@widgets/Label";
 import clsx from "clsx";

@@ -7,7 +7,7 @@ import { Divider, Menu, MenuItem } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import NoSsr from "@mui/material/NoSsr";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { useDeviceType } from "@util/browser/styles";
 import { setHash } from "@util/domain/views";
 import clsx from "clsx";

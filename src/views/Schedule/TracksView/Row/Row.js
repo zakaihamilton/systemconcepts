@@ -2,7 +2,7 @@ import FixedSizeList from "@components/Virtualized/FixedSizeList";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { GroupsStore } from "@util/domain/groups";
 import { useDateFormatter } from "@util/data/locale";

@@ -1,6 +1,6 @@
 import Avatar from "@mui/material/Avatar";
 import { useTheme } from "@mui/material/styles";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { getSessionTextColor } from "@util/data/colors";
 import { getDateString, isDateMonth, isDateToday } from "@util/data/date";
 import { useTranslations } from "@util/domain/translations";

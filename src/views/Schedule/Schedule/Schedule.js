@@ -9,7 +9,7 @@ import ViewDayIcon from "@mui/icons-material/ViewDay";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@widgets/Tooltip";
 import { SyncActiveStore } from "@sync/syncState";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useLocalStorage } from "@util/browser/store";
