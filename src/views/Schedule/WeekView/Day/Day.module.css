@@ -109,12 +109,35 @@
 .groupToggle svg {
 	width: 1rem;
 	height: 1rem;
+	transition: transform 0.18s ease;
+}
+
+.group.collapsed .groupToggle svg {
+	transform: rotate(180deg);
+}
+
+.groupSessionsFrame {
+	display: grid;
+	grid-template-rows: 1fr;
+	opacity: 1;
+	transition:
+		grid-template-rows 0.22s ease,
+		opacity 0.18s ease,
+		margin-top 0.22s ease;
+}
+
+.groupSessionsFrame.collapsed {
+	grid-template-rows: 0fr;
+	opacity: 0;
+	margin-top: -0.35rem;
 }
 
 .groupSessions {
 	display: flex;
 	flex-direction: column;
 	gap: 0.35rem;
+	min-height: 0;
+	overflow: hidden;
 }
 
 .group.collapsed {

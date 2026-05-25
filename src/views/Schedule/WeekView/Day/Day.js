@@ -70,7 +70,12 @@ export default function Day({
 							{isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
 						</span>
 					</button>
-					{!isCollapsed && (
+					<div
+						className={clsx(
+							styles.groupSessionsFrame,
+							isCollapsed && styles.collapsed,
+						)}
+					>
 						<div className={styles.groupSessions}>
 							{groupSessions.map((session) => {
 								const { name, key, ...sessionProps } = session;
@@ -90,7 +95,7 @@ export default function Day({
 								);
 							})}
 						</div>
-					)}
+					</div>
 				</section>
 			);
 		});
