@@ -1,6 +1,6 @@
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
-import { FILES_MANIFEST, SYNC_BATCH_SIZE } from "../constants";
+import { FILES_MANIFEST, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
 import { getFileInfo } from "../hash";
 import { addSyncLog } from "../logs";
 import { lockMutex } from "../mutex";
@@ -38,6 +38,7 @@ export async function updateLocalManifest(
 	localFiles,
 	localPath = LOCAL_SYNC_PATH,
 	remoteManifest = [],
+	options = {},
 ) {
 	const start = performance.now();
 	addSyncLog("Step 2: Updating local manifest...", "info");
@@ -72,6 +73,14 @@ export async function updateLocalManifest(
 			}));
 		}
 		const manifestMap = new Map((manifest || []).map((f) => [f.path, f]));
+
+		if (options.skipHashing) {
+			addSyncLog(
+				`✓ Reused local manifest (${manifest.length} files; hashes skipped)`,
+				"info",
+			);
+			return manifest;
+		}
 
 		// Compute file info in parallel batches
 		addSyncLog(`Computing hashes for ${localFiles.length} file(s)...`, "info");
