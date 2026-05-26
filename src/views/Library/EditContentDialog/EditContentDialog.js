@@ -43,16 +43,20 @@ export default function EditContentDialog({
 				if (Array.isArray(data)) {
 					const updatedData = data.map((item) => {
 						if (item._id === selectedTag._id) {
-							changed = true;
+							if (item.text !== editContent) {
+								changed = true;
+							}
 							return { ...item, text: editContent };
 						}
 						return item;
 					});
-					await storage.writeFile(
-						filePath,
-						JSON.stringify(updatedData, null, 2),
-					);
-				} else if (data._id === selectedTag._id) {
+					if (changed) {
+						await storage.writeFile(
+							filePath,
+							JSON.stringify(updatedData, null, 2),
+						);
+					}
+				} else if (data._id === selectedTag._id && data.text !== editContent) {
 					data.text = editContent;
 					changed = true;
 					await storage.writeFile(filePath, JSON.stringify(data, null, 2));

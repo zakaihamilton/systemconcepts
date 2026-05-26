@@ -1,6 +1,10 @@
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
-import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "../constants";
+import {
+	FILES_MANIFEST,
+	LIBRARY_COUNTER_FILE,
+	LOCAL_SYNC_PATH,
+} from "../constants";
 import { addSyncLog } from "../logs";
 
 /**
@@ -18,6 +22,7 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH, config = {}) {
 				(item) =>
 					item.type !== "dir" &&
 					item.name !== FILES_MANIFEST &&
+					item.name !== LIBRARY_COUNTER_FILE &&
 					!(config.excludeNames || []).includes(item.name) &&
 					!item.name.endsWith(".DS_Store") &&
 					// Only allow year-based tag files e.g. "2021.tags" if tags filter is enabled
