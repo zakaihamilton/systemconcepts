@@ -18,6 +18,7 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { bumpLibraryCounter } from "@sync/libraryCounter";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
@@ -190,6 +191,7 @@ export default function BatchDialog({ open, onClose, tags, loadTags }) {
 				return tag;
 			});
 			await storage.writeFile(tagsPath, JSON.stringify(updatedTags, null, 2));
+			await bumpLibraryCounter();
 
 			if (loadTags) {
 				await loadTags();

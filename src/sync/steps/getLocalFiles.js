@@ -18,6 +18,7 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH, config = {}) {
 				(item) =>
 					item.type !== "dir" &&
 					item.name !== FILES_MANIFEST &&
+					!(config.excludeNames || []).includes(item.name) &&
 					!item.name.endsWith(".DS_Store") &&
 					// Only allow year-based tag files e.g. "2021.tags" if tags filter is enabled
 					(!item.name.endsWith(".tags") ||
