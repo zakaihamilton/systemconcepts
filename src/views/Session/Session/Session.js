@@ -217,25 +217,28 @@ export default function SessionPage({ group, year, date, name }) {
 					</div>
 					{session.tags && session.tags.length > 0 && (
 						<div className={styles.tags}>
-							{session.tags.map((tag) => (
-								<Chip
-									key={tag}
-									label={tag}
-									onClick={() => {
-										const success = copyToClipboard(tag);
-										if (success) {
-											setCopiedTag(tag);
-											setShowClipboard(true);
-										}
-									}}
-									className={styles.tag}
-									style={{
-										"--tag-contrast": getContrastColor(
-											session.color || "#3b82f6",
-										),
-									}}
-								/>
-							))}
+							{session.tags.map((tag) => {
+								const cleanTag = tag.replace(/^['"]|['"]$/g, '');
+								return (
+									<Chip
+										key={tag}
+										label={cleanTag}
+										onClick={() => {
+											const success = copyToClipboard(cleanTag);
+											if (success) {
+												setCopiedTag(cleanTag);
+												setShowClipboard(true);
+											}
+										}}
+										className={styles.tag}
+										style={{
+											"--tag-contrast": getContrastColor(
+												session.color || "#3b82f6",
+											),
+										}}
+									/>
+								);
+							})}
 						</div>
 					)}
 				</div>
