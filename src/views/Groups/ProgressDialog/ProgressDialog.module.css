@@ -419,7 +419,7 @@
 	background: var(--main-background-alternative);
 	border-bottom: 2px solid var(--border-color);
 	color: var(--text-color-secondary);
-	font-size: 0.8rem;
+	font-size: 0.52rem; /* Nano header font */
 	font-weight: 700;
 	position: sticky;
 	top: 0;
@@ -461,15 +461,48 @@
 
 .sessionTableTitle {
 	font-weight: 600;
-	font-size: 0.85rem;
+	font-size: 0.58rem; /* Nano title font */
 	color: var(--text-color);
 }
 
 .sessionTableSub {
-	font-size: 0.75rem;
+	font-size: 0.48rem; /* Nano subtitle font */
 	color: var(--text-color-secondary);
 	margin-top: 0.15rem;
 	font-weight: 500;
+}
+
+.tableActionBtn {
+	color: var(--primary-color, #40c4ff) !important;
+	padding: 4px !important;
+	background: transparent !important;
+	transition: all 0.2s ease !important;
+}
+
+.tableActionBtn:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--primary-color) 12%, transparent) !important;
+	transform: scale(1.1);
+}
+
+.tableActionBtn:disabled {
+	color: var(--text-color-secondary) !important;
+	opacity: 0.4;
+}
+
+.tableActionIcon {
+	font-size: 1.1rem !important;
+}
+
+.slimCol {
+	width: 80px !important;
+	max-width: 80px !important;
+	white-space: nowrap;
+}
+
+.actionCol {
+	width: 60px !important;
+	max-width: 60px !important;
+	white-space: nowrap;
 }
 
 .sessionFiles {

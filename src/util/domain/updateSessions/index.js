@@ -169,7 +169,7 @@ export function useUpdateSessions(groups) {
 	);
 
 	const updateSpecificGroup = useCallback(
-		async (name, updateAll, forceUpdate) => {
+		async (name, updateAll, forceUpdate, targetSessionId = null) => {
 			UpdateSessionsStore.update((s) => {
 				s.busy = true;
 				s.start = new Date().getTime();
@@ -184,6 +184,7 @@ export function useUpdateSessions(groups) {
 					forceUpdate,
 					isMerged,
 					isBundled,
+					targetSessionId,
 				);
 				if (isBundled && Array.isArray(result) && result.length > 0) {
 					await updateBundleFile(result);

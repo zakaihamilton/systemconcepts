@@ -361,6 +361,7 @@ export async function updateGroupProcess(
 	forceUpdate = false,
 	isMerged = false,
 	isBundled = false,
+	targetSessionId = null,
 ) {
 	const path = prefix + name;
 	let itemIndex = 0;
@@ -501,18 +502,20 @@ export async function updateGroupProcess(
 					metadataFingerprint,
 				);
 				const cachedYear = await readYearCache(name, year.name);
-				if (!forceUpdate && cachedYear?.fingerprint === yearFingerprint) {
-					const cachedYearSessions =
-						isMerged || isBundled
-							? getCachedSessionsForYear(existingSessions, year.name)
-							: await loadCachedYearSessions(
-									name,
-									year.name,
-									isMerged,
-									isBundled,
-								);
+				const cachedYearSessions =
+					isMerged || isBundled
+						? getCachedSessionsForYear(existingSessions, year.name)
+						: await loadCachedYearSessions(
+								name,
+								year.name,
+								isMerged,
+								isBundled,
+							);
 
-					if (cachedYearSessions.length > 0) {
+				const isTargetInThisYear = targetSessionId && (cachedYearSessions || []).some(s => s.id === targetSessionId || s.name === targetSessionId);
+
+				if (!forceUpdate && !isTargetInThisYear && cachedYear?.fingerprint === yearFingerprint) {
+					if (cachedYearSessions && cachedYearSessions.length > 0) {
 						if (isMerged || isBundled) {
 							allSessions.push(...cachedYearSessions);
 						}
@@ -604,6 +607,13 @@ export async function updateGroupProcess(
 					await Promise.all(
 						sortedIds.map((id) =>
 							yearSessionsLimit(async () => {
+								if (targetSessionId && id !== targetSessionId) {
+									const cachedSession = (cachedYearSessions || []).find((s) => s.id === id || s.name === id);
+									if (cachedSession) {
+										return cachedSession;
+									}
+								}
+
 								let tags = sessionTagsMap[id] || [];
 								let duration = sessionDurationMap[id];
 								let summary = sessionSummariesMap[id];
