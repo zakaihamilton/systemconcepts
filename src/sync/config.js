@@ -13,6 +13,7 @@ export const SYNC_CONFIG = [
 		remotePath: "aws/library",
 		direction: "bi",
 		uploadsRole: "admin",
+		useChangeCounter: true,
 	},
 	{
 		name: "Personal",

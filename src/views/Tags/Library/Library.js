@@ -19,6 +19,7 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { bumpLibraryCounter } from "@sync/libraryCounter";
 import { makePath } from "@util/data/path";
 import { roleAuth } from "@util/auth/roles";
 import storage from "@util/storage/storage";
@@ -206,6 +207,7 @@ export default function LibraryTags() {
 			LibraryStore.update((s) => {
 				s.tags = updatedTags;
 			});
+			await bumpLibraryCounter();
 		} catch (err) {
 			console.error("Rename failed:", err);
 		} finally {
@@ -281,6 +283,7 @@ export default function LibraryTags() {
 			LibraryStore.update((s) => {
 				s.tags = updatedTags;
 			});
+			await bumpLibraryCounter();
 		} catch (err) {
 			console.error("Delete failed:", err);
 		} finally {
@@ -354,6 +357,7 @@ export default function LibraryTags() {
 			LibraryStore.update((s) => {
 				s.tags = updatedTags;
 			});
+			await bumpLibraryCounter();
 		} catch (err) {
 			console.error("Delete articles failed:", err);
 		} finally {

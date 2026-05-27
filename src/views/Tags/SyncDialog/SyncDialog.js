@@ -11,6 +11,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { bumpLibraryCounter } from "@sync/libraryCounter";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
@@ -169,6 +170,9 @@ export default function SyncDialog({ open, onClose, tags }) {
 						await storage.writeFile(filePath, JSON.stringify(data, null, 2));
 					}
 				}
+			}
+			if (changes.length > 0) {
+				await bumpLibraryCounter();
 			}
 
 			onClose();

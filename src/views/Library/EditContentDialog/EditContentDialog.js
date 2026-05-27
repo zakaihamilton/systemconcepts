@@ -6,6 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { bumpLibraryCounter } from "@sync/libraryCounter";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
@@ -38,20 +39,30 @@ export default function EditContentDialog({
 			if (await storage.exists(filePath)) {
 				const fileContent = await storage.readFile(filePath);
 				const data = JSON.parse(fileContent);
+				let changed = false;
 				if (Array.isArray(data)) {
 					const updatedData = data.map((item) => {
 						if (item._id === selectedTag._id) {
+							if (item.text !== editContent) {
+								changed = true;
+							}
 							return { ...item, text: editContent };
 						}
 						return item;
 					});
-					await storage.writeFile(
-						filePath,
-						JSON.stringify(updatedData, null, 2),
-					);
-				} else if (data._id === selectedTag._id) {
+					if (changed) {
+						await storage.writeFile(
+							filePath,
+							JSON.stringify(updatedData, null, 2),
+						);
+					}
+				} else if (data._id === selectedTag._id && data.text !== editContent) {
 					data.text = editContent;
+					changed = true;
 					await storage.writeFile(filePath, JSON.stringify(data, null, 2));
+				}
+				if (changed) {
+					await bumpLibraryCounter();
 				}
 			}
 

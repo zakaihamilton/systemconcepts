@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { bumpLibraryCounter } from "@sync/libraryCounter";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
@@ -150,6 +151,7 @@ export default function EditTagsDialog({
 			LibraryStore.update((s) => {
 				s.tags = updatedTags;
 			});
+			await bumpLibraryCounter();
 
 			onClose();
 		} catch (err) {
@@ -201,6 +203,7 @@ export default function EditTagsDialog({
 			LibraryStore.update((s) => {
 				s.tags = updatedTags;
 			});
+			await bumpLibraryCounter();
 
 			onClose();
 		} catch (err) {

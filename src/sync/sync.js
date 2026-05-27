@@ -11,6 +11,11 @@ import { useEffect, useRef, useState } from "react";
 import { readCompressedFile } from "./bundle";
 import { SYNC_CONFIG } from "./config";
 import { FILES_MANIFEST, FILES_MANIFEST_GZ } from "./constants";
+import {
+	getSavedLibraryCounter,
+	readLibraryCounter,
+	saveLibraryCounter,
+} from "./libraryCounter";
 import { addSyncLog } from "./logs";
 import { SyncProgressTracker, TOTAL_COMBINED_WEIGHT } from "./progressTracker";
 import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
@@ -98,6 +103,65 @@ function persistManifestSignature(freshness) {
 	}
 }
 
+async function getCachedLocalManifest(localPath) {
+	const localManifestPath = makePath(localPath, FILES_MANIFEST);
+	if (!(await storage.exists(localManifestPath))) {
+		return null;
+	}
+
+	try {
+		const content = await storage.readFile(localManifestPath);
+		const manifest = content ? JSON.parse(content) : [];
+		return Array.isArray(manifest) ? manifest : null;
+	} catch (err) {
+		console.warn("[Sync] Failed to read cached local manifest:", err);
+		return null;
+	}
+}
+
+async function getLibraryLocalFiles(localPath, config) {
+	if (!config.useChangeCounter) {
+		return {
+			localFiles: await getLocalFiles(localPath, config),
+			skipHashing: false,
+		};
+	}
+
+	const counter = await readLibraryCounter();
+	const savedCounter = getSavedLibraryCounter();
+	const cachedManifest = await getCachedLocalManifest(localPath);
+
+	if (cachedManifest && savedCounter === counter) {
+		addSyncLog(
+			`Library counter unchanged (${counter}); skipping local library scan`,
+			"info",
+		);
+		return {
+			localFiles: cachedManifest
+				.filter((entry) => !entry.deleted)
+				.map((entry) => ({
+					path: entry.path,
+					fullPath: makePath(localPath, entry.path),
+				})),
+			libraryCounter: counter,
+			skipHashing: true,
+		};
+	}
+
+	if (savedCounter !== null) {
+		addSyncLog(
+			`Library counter changed (${savedCounter} -> ${counter}); checking library files`,
+			"info",
+		);
+	}
+
+	return {
+		localFiles: await getLocalFiles(localPath, config),
+		libraryCounter: counter,
+		skipHashing: false,
+	};
+}
+
 /**
  * Execute a single sync pipeline for a given configuration
  * @param {object} config - Sync configuration object
@@ -165,7 +229,11 @@ async function executeSyncPipeline(
 
 	// Step 1
 	progress.updateProgress("getLocalFiles", { processed: 0, total: 1 });
-	let localFiles = await getLocalFiles(localPath, config);
+	let {
+		localFiles,
+		libraryCounter: initialLibraryCounter,
+		skipHashing,
+	} = await getLibraryLocalFiles(localPath, config);
 	progress.completeStep("getLocalFiles");
 
 	// Step 2 & 3: Sync manifests
@@ -227,6 +295,7 @@ async function executeSyncPipeline(
 				}
 
 				localFiles = await getLocalFiles(localPath, config);
+				skipHashing = false;
 			}
 		} catch (err) {
 			console.error(`[${label}] Migration failed:`, err);
@@ -240,6 +309,7 @@ async function executeSyncPipeline(
 		localFiles,
 		localPath,
 		remoteManifest,
+		{ skipHashing },
 	);
 	progress.completeStep("updateLocalManifest");
 
@@ -355,6 +425,16 @@ async function executeSyncPipeline(
 		`✓ ${label} sync complete (${remoteManifest.length} files) in ${duration}s`,
 		"success",
 	);
+
+	if (config.useChangeCounter) {
+		const finalLibraryCounter = await readLibraryCounter();
+		saveLibraryCounter(finalLibraryCounter);
+		if (finalLibraryCounter !== initialLibraryCounter) {
+			SyncActiveStore.update((s) => {
+				s.libraryUpdateCounter = (s.libraryUpdateCounter || 0) + 1;
+			});
+		}
+	}
 
 	// Return the new offset for the next phase
 	return { hasChanges, newOffset: progress.getCurrentOffset() };
