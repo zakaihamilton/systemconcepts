@@ -621,10 +621,11 @@ export async function updateGroupProcess(
 									addSyncLog(`[${name}] Force re-fetching metadata for targeted session: ${id}`, "info");
 								}
 
-								let tags = sessionTagsMap[id] || [];
-								let duration = sessionDurationMap[id];
-								let summary = sessionSummariesMap[id];
-								let transcription = sessionTranscriptionMap[id];
+								const [, , sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
+								let tags = sessionTagsMap[id] || (sessionName && sessionTagsMap[sessionName]) || [];
+								let duration = sessionDurationMap[id] || (sessionName && sessionDurationMap[sessionName]);
+								let summary = sessionSummariesMap[id] || (sessionName && sessionSummariesMap[sessionName]);
+								let transcription = sessionTranscriptionMap[id] || (sessionName && sessionTranscriptionMap[sessionName]);
 								let transcriptPath = null;
 								const wasabiFiles = wasabiFilesMap[id] || [];
 								const digitalOceanFiles = getDigitalOceanSessionFiles(
