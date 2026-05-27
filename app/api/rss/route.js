@@ -75,7 +75,7 @@ export async function GET(request) {
 				const media = session.audio || session.video;
 				let enclosure = "";
 				if (media && media.path) {
-					const proxyUrl = getSProxyUrl(media.path);
+					const proxyUrl = getSProxyUrl(media.path, baseUrl);
 					const type = media.path.endsWith(".mp4")
 						? "video/mp4"
 						: media.path.endsWith(".m4a")
@@ -84,7 +84,7 @@ export async function GET(request) {
 					enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
 				}
 
-				const thumbnail = getSProxyUrl(session.image?.path);
+				const thumbnail = getSProxyUrl(session.image?.path, baseUrl);
 				const itemImage = `<itunes:image href="${escapeXml(thumbnail || baseUrl + "/images/rss-cover.jpg")}" />`;
 
 				// Transcript support
