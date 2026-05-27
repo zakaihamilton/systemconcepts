@@ -21,7 +21,7 @@ async function getListing(path, options = {}) {
 		.replace(/^aws\//, "");
 	const { useCount } = options;
 	const listing = [];
-	const encodedPath = encodeURIComponent(path.slice(1));
+	const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
 	const url = `${fsEndPoint}?path=${encodedPath}&type=dir&t=${Date.now()}`;
 	const items = await fetchJSON(url, {
 		method: "GET",
@@ -31,7 +31,7 @@ async function getListing(path, options = {}) {
 		const { name, stat = {} } = item;
 		const itemPath = makePath(path, name);
 		if (useCount && stat.type === "dir") {
-			const url = `${fsEndPoint}?path=${encodeURIComponent(path.slice(1))}&type=dir&t=${Date.now()}`;
+			const url = `${fsEndPoint}?path=${encodeURIComponent(path.replace(/^\//, ""))}&type=dir&t=${Date.now()}`;
 			const children = await fetchJSON(url, {
 				method: "GET",
 				cache: "no-store",
@@ -75,7 +75,7 @@ async function deleteFolder(root) {
 			await deleteFile(path);
 		}
 	}
-	const encodedPath = encodeURIComponent(root.slice(1));
+	const encodedPath = encodeURIComponent(root.replace(/^\//, ""));
 	await fetchJSON(`${fsEndPoint}?path=${encodedPath}`, {
 		method: "DELETE",
 		cache: "no-store",
@@ -86,7 +86,7 @@ async function deleteFile(path) {
 	path = makePath(path)
 		.replace(/^\/aws\//, "/")
 		.replace(/^aws\//, "");
-	const encodedPath = encodeURIComponent(path.slice(1));
+	const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
 	await fetchJSON(`${fsEndPoint}?path=${encodedPath}&t=${Date.now()}`, {
 		method: "DELETE",
 		cache: "no-store",
@@ -103,7 +103,7 @@ async function readFile(path) {
 		? getStableFetchCacheOptions(STABLE_READ_CACHE_TTL_MS)
 		: {};
 	if (binary) {
-		const encodedPath = encodeURIComponent(path.slice(1));
+		const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
 		body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true`, {
 			method: "GET",
 			cache: isStableReadPath(path) ? "default" : "no-store",
@@ -115,7 +115,7 @@ async function readFile(path) {
 		body = binaryToString(body);
 		return body;
 	} else {
-		const encodedPath = encodeURIComponent(path.slice(1));
+		const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
 		body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file`, {
 			method: "GET",
 			cache: isStableReadPath(path) ? "default" : "no-store",
@@ -351,7 +351,7 @@ async function exists(path) {
 		const item = await fetchJSON(
 			fsEndPoint +
 				"?path=" +
-				encodeURIComponent(path.slice(1)) +
+				encodeURIComponent(path.replace(/^\//, "")) +
 				"&exists=true&t=" +
 				Date.now(),
 			{

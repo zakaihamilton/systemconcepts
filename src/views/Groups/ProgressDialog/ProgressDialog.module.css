@@ -1,233 +1,408 @@
 .dialog {
 	display: flex;
 	flex-direction: column;
-	width: 600px; /* Fixed width to prevent horizontal jitter */
+	width: 620px;
 	max-width: 95vw;
+	max-height: 85vh;
+}
+
+.dialogContainer {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	color: var(--text-color);
+	background: var(--main-background);
 }
 
 .content {
 	display: flex;
 	flex-direction: column;
-	padding: 1em;
-	max-height: 60vh;
+	padding: 1.2rem;
+	max-height: 55vh;
 	overflow-y: auto;
 }
 
+/* Timer styles - theme aware */
 .timer {
-	display: grid;
+	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: 0.5em 1em;
-	background: #000000;
-	border: 4px solid #333;
-	border-radius: 8px;
-	box-shadow:
-		inset 0 0 20px rgba(0, 0, 0, 0.9),
-		0 2px 4px rgba(255, 255, 255, 0.1);
-	margin-bottom: 0.5em;
-	position: relative;
-	overflow: hidden;
-	height: 5em;
-	flex-shrink: 0;
-	color: white;
+	gap: 0.6rem;
+	padding: 0.6rem 1.4rem;
+	background: var(--main-background-alternative);
+	border: 1px solid var(--border-color);
+	border-radius: 9999px;
+	margin: 1.2rem auto 0.5rem auto;
+	width: fit-content;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	backdrop-filter: blur(8px);
+	transition: all 0.3s ease;
 }
 
 .timer.busy {
-	color: red;
+	border-color: var(--primary-color, #4caf50);
 }
 
-.timerText,
-.timerGhost {
-	grid-area: 1 / 1;
-	font-size: 3em;
-	font-weight: bold;
-	font-family: "DSEG7", monospace;
-	letter-spacing: 0.1em;
-	line-height: 1;
+.timerIcon {
+	font-size: 1.2rem;
+	color: var(--primary-color, #4caf50);
 }
 
 .timerText {
-	z-index: 2;
+	font-size: 1.2rem;
+	font-weight: 700;
+	font-family: "Inter", "JetBrains Mono", monospace;
+	letter-spacing: 0.05em;
+	color: var(--text-color);
 }
 
-.timerGhost {
-	color: #2a0000;
-	/* Darker faint red for inactive segments */
-	z-index: 1;
-	user-select: none;
+.rotating {
+	animation: spin 2s linear infinite;
 }
 
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Tabs styles */
+.tabsWrapper {
+	border-bottom: 1px solid var(--border-color);
+	background: var(--main-background-alternative);
+}
+
+.tabs {
+	min-height: 48px;
+}
+
+.tabLabel {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: none;
+	position: relative;
+}
+
+.tabIcon {
+	font-size: 1.1rem !important;
+}
+
+.logBadge {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: var(--primary-color, #40c4ff);
+	position: absolute;
+	top: -2px;
+	right: -10px;
+	box-shadow: 0 0 8px var(--primary-color, #40c4ff);
+	animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.9);
+		opacity: 0.6;
+	}
+	50% {
+		transform: scale(1.2);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(0.9);
+		opacity: 0.6;
+	}
+}
+
+.totalAdded {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem 1rem;
+	background: var(--main-background-alternative);
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+	margin-bottom: 1rem;
+	transition: all 0.2s ease;
+}
+
+.totalAdded:hover {
+	background: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative));
+}
+
+.totalAddedText {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--text-color);
+}
+
+.countGlow {
+	color: var(--primary-color, #78ffd6);
+	font-weight: 700;
+}
+
+.itemsContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+/* Beautiful Group Item Card - theme aware */
 .item {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5em;
-	padding: 1em;
-	border-bottom: 1px solid var(--border-color);
-	background: var(--paper-background);
-	transition: transform 0.2s ease-in-out;
+	padding: 1.2rem;
+	background: var(--main-background-alternative);
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.item:hover {
+	border-color: color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.itemExpanded {
+	border-color: var(--primary-color);
 }
 
 .header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	gap: 0.5em;
+	gap: 0.75rem;
+}
+
+.statusIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.errorIconColor {
+	color: var(--error-color, #ff5252);
+}
+
+.successIconColor {
+	color: var(--success-color, #69f0ae);
+}
+
+.syncIconColor {
+	color: var(--primary-color, #40c4ff);
 }
 
 .name {
-	font-weight: bold;
-	font-size: 1.1em;
+	font-size: 1.05rem;
+	font-weight: 600;
+	color: var(--text-color);
 	text-transform: capitalize;
+}
+
+.headerSummary {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.addedCountChip {
+	background: var(--success-color, #4caf50) !important;
+	color: #ffffff !important;
+	font-weight: 700 !important;
+}
+
+.removedCountChip {
+	background: var(--error-color, #f44336) !important;
+	color: #ffffff !important;
+	font-weight: 700 !important;
+}
+
+.expandIcon {
+	color: var(--text-color-secondary);
+	transition: color 0.2s;
+}
+
+.itemExpandedContent {
+	margin-top: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .progressContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25em;
+	gap: 0.5rem;
 }
 
-.progressBar {
-	height: 8px;
-	border-radius: 4px;
+.itemProgressBar {
+	height: 6px !important;
+	border-radius: 99px;
+	background-color: var(--border-color) !important;
+}
+
+.progressBarNormal {
+	background: var(--primary-color, #00b0ff) !important;
+	border-radius: 99px;
+}
+
+.progressBarError {
+	background: var(--error-color, #ff1744) !important;
+	border-radius: 99px;
 }
 
 .progressText {
-	font-size: 0.85em;
-	text-align: right;
-	color: var(--text-color-secondary);
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
-	gap: 0.5em;
+	font-size: 0.85rem;
+	color: var(--text-color-secondary);
 }
 
-.countChip {
-	height: 20px;
-	font-size: 0.9em;
+.progressDetails {
+	font-weight: 500;
 }
 
-.errors {
-	margin-top: 0.5em;
-	padding: 0.5em;
-	background: rgba(255, 0, 0, 0.1);
-	border-radius: 4px;
+/* Beautiful Metadata badges */
+.metadataBadges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin-top: 0.6rem;
+	padding-left: 2.2rem;
 }
 
-.error {
-	color: #d32f2f;
-	font-size: 0.9em;
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 0.25rem 0.5rem;
+	border-radius: 6px;
+	user-select: none;
+	transition: all 0.2s ease;
 }
 
+.badgeActive {
+	background: rgba(105, 240, 174, 0.08);
+	color: var(--success-color, #69f0ae);
+	border: 1px solid rgba(105, 240, 174, 0.2);
+}
+
+.badgeInactive {
+	background: var(--main-background);
+	color: var(--text-color-secondary);
+	border: 1px solid var(--border-color);
+	opacity: 0.5;
+}
+
+/* New Sessions Card section */
 .newSessions {
-	margin-top: 0.75em;
-	padding: 0.75em;
-	background: rgba(76, 175, 80, 0.05);
-	border-radius: 8px;
-	border: 1px solid rgba(76, 175, 80, 0.2);
+	background: rgba(105, 240, 174, 0.02);
+	border: 1px solid rgba(105, 240, 174, 0.08);
+	border-radius: 12px;
+	padding: 1rem;
 	display: flex;
 	flex-direction: column;
-	gap: 0.5em;
+	gap: 0.75rem;
 }
 
 .newSessionsTitle {
-	font-weight: 700;
-	color: #4caf50;
-	font-size: 0.95em;
 	display: flex;
 	align-items: center;
-	gap: 0.5em;
-	margin-bottom: 0.25em;
-
-	.titleIcon {
-		font-size: 1.2em;
-	}
+	gap: 0.5rem;
+	font-weight: 700;
+	font-size: 0.9rem;
+	color: var(--success-color, #69f0ae);
 }
 
 .sessionsList {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5em;
-	max-height: 250px;
+	gap: 0.6rem;
+	max-height: 280px;
 	overflow-y: auto;
-	padding-right: 0.5em;
-
-	&::-webkit-scrollbar {
-		width: 4px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: rgba(76, 175, 80, 0.2);
-		border-radius: 2px;
-	}
+	padding-right: 0.4rem;
 }
 
+.sessionsList::-webkit-scrollbar {
+	width: 6px;
+}
+
+.sessionsList::-webkit-scrollbar-thumb {
+	background: var(--border-color);
+	border-radius: 99px;
+}
+
+/* New session card item */
 .sessionItem {
 	display: flex;
 	flex-direction: column;
-	gap: 0.4em;
-	padding: 0.6em;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 6px;
+	padding: 0.8rem;
+	background: var(--main-background);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
 	transition: all 0.2s ease;
-
-	&:hover {
-		background: rgba(255, 255, 255, 0.08);
-		border-color: rgba(76, 175, 80, 0.3);
-	}
 }
 
-.sessionName {
-	font-size: 0.9em;
-	color: var(--text-color);
-	display: flex;
-	align-items: center;
-	gap: 0.5em;
-	font-family: "Inter", system-ui, sans-serif;
-	font-weight: 600;
-	user-select: none;
-	padding: 0.25em;
-	border-radius: 4px;
-
-	&:hover {
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.sessionIcon {
-		font-size: 1.1em;
-		opacity: 0.7;
-	}
-
-	.expandIcon {
-		font-size: 1.2em;
-		opacity: 0.5;
-		transition: opacity 0.2s;
-
-		&:hover {
-			opacity: 1;
-		}
-	}
+.sessionItem:hover {
+	border-color: color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
 }
 
 .sessionItem.expanded {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--main-background-alternative);
+}
+
+.sessionIcon {
+	color: var(--success-color, #69f0ae);
+	opacity: 0.85;
+	font-size: 1.1rem;
+}
+
+.sessionTitle {
+	flex: 1;
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: var(--text-color);
 }
 
 .sessionFiles {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25em;
-	padding-left: 1.8em;
-	margin-top: 0.25em;
-	animation: slideDown 0.2s ease-out;
+	gap: 0.3rem;
+	padding-left: 2rem;
+	margin-top: 0.5rem;
+	animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideDown {
 	from {
 		opacity: 0;
-		transform: translateY(-5px);
+		transform: translateY(-4px);
 	}
-
 	to {
 		opacity: 1;
 		transform: translateY(0);
@@ -235,104 +410,146 @@
 }
 
 .fileName {
-	font-size: 0.8em;
-	font-family: "JetBrains Mono", "Fira Code", monospace;
-	color: var(--text-color-secondary);
 	display: flex;
 	align-items: center;
-	gap: 0.4em;
-	padding: 0.2em 0.4em;
+	gap: 0.4rem;
+	font-family: "JetBrains Mono", "Fira Code", monospace;
+	font-size: 0.75rem;
+	color: var(--text-color-secondary);
 	background: rgba(0, 0, 0, 0.1);
+	padding: 0.25rem 0.5rem;
 	border-radius: 4px;
+}
 
-	.fileIcon {
-		font-size: 1.1em;
-		opacity: 0.5;
-	}
+.fileIcon {
+	font-size: 0.9rem !important;
+	color: var(--text-color-secondary);
 }
 
 .empty {
-	text-align: center;
-	padding: 2em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 3rem;
 	color: var(--text-color-secondary);
 }
 
-.syncSection {
-	margin-top: 0;
-	padding: 1em;
-	border-top: 1px solid var(--border-color);
-	background: rgba(33, 150, 243, 0.05);
+.emptyIcon {
+	font-size: 2rem !important;
+	opacity: 0.5;
+}
+
+/* Cloud Sync Tab specific styles */
+.syncTabContent {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5em;
+	width: 100%;
+}
+
+.syncSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1.2rem;
 }
 
 .syncHeader {
 	display: flex;
 	align-items: center;
-	gap: 0.75em;
+	gap: 0.75rem;
 	font-weight: 700;
-	color: #2196f3;
-	font-size: 1.1em;
+	font-size: 1rem;
+	color: var(--primary-color, #40c4ff);
 }
 
 .syncChip {
-	height: 20px;
-	font-size: 0.8em;
+	background: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+	color: var(--primary-color, #40c4ff) !important;
+	font-weight: 600 !important;
+	border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
 }
 
 .syncContent {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75em;
-	animation: slideDown 0.3s ease-out;
-	min-height: 160px; /* Reserve space to prevent dialog growth during sync */
+	gap: 0.75rem;
 }
 
 .syncProgress {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25em;
-	height: 32px; /* Fixed height to reserve space for the progress bar */
+	gap: 0.4rem;
+}
+
+.progressBar {
+	height: 6px !important;
+	border-radius: 99px;
+	background-color: var(--border-color) !important;
 }
 
 .syncLogs {
 	display: flex;
 	flex-direction: column;
-	gap: 0.4em;
-	background: #1a1a1a; /* Darker, more contrasty background */
-	padding: 1em;
-	border-radius: 6px;
-	height: 120px; /* Increased height slightly for better view */
+	gap: 0.4rem;
+	background: #0d0e12; /* Solid high-contrast dark background for console */
+	border: 1px solid var(--border-color);
+	padding: 1rem;
+	border-radius: 10px;
+	height: 260px;
 	overflow-y: auto;
-	overflow-x: hidden; /* Prevent horizontal jitter from long lines */
 	font-family: "JetBrains Mono", "Fira Code", monospace;
-	font-size: 0.9em; /* Slightly larger font */
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	font-size: 0.8rem;
+	box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .logEntry {
-	padding: 0.2em 0.4em;
+	padding: 0.25rem 0.5rem;
 	border-radius: 4px;
 	word-break: break-all;
 	line-height: 1.4;
 }
 
 .logEntry.info {
-	color: #e0e0e0; /* Brighter white for info */
+	color: #e2e8f0; /* Crisp light slate */
 }
 
 .logEntry.success {
-	color: #81c784; /* Brighter green */
-	background: rgba(76, 175, 80, 0.15);
+	color: #4ade80; /* Vibrant high-contrast green */
+	background: rgba(74, 222, 128, 0.1);
 }
 
 .logEntry.error {
-	color: #f44336;
-	background: rgba(244, 67, 54, 0.1);
+	color: #f87171; /* Vibrant high-contrast red */
+	background: rgba(248, 113, 113, 0.1);
 }
 
 .logEntry.warning {
-	color: #ffb74d; /* Brighter orange */
-	background: rgba(255, 152, 0, 0.15);
+	color: #fbbf24; /* Vibrant high-contrast yellow */
+	background: rgba(251, 191, 36, 0.1);
+}
+
+.errors {
+	margin-top: 0.5rem;
+	padding: 0.75rem;
+	background: rgba(255, 82, 82, 0.05);
+	border: 1px solid rgba(255, 82, 82, 0.1);
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.error {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--error-color, #ff5252);
+	font-size: 0.8rem;
+	font-weight: 500;
+}
+
+.inlineErrorIcon {
+	font-size: 1rem !important;
 }

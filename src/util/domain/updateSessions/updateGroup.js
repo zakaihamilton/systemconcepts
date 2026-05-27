@@ -763,6 +763,13 @@ export async function updateGroupProcess(
 								...newSessions.map((s) => ({
 									name: s.id,
 									files: s.files || [],
+									metadata: {
+										hasTags: Array.isArray(s.tags) && s.tags.length > 0,
+										hasDuration: typeof s.duration === "number" && s.duration > 0.5,
+										hasSummary: !!s.summaryText || !!s.summary,
+										hasTranscription: !!s.transcription,
+										hasThumbnail: !!s.thumbnail || !!s.image,
+									},
 								})),
 							);
 							s.status = [...s.status];
@@ -828,6 +835,13 @@ export async function updateGroupProcess(
 				...newSessionItems.map((s) => ({
 					name: s.id,
 					files: s.files || [],
+					metadata: {
+						hasTags: Array.isArray(s.tags) && s.tags.length > 0,
+						hasDuration: typeof s.duration === "number" && s.duration > 0.5,
+						hasSummary: !!s.summaryText || !!s.summary,
+						hasTranscription: !!s.transcription,
+						hasThumbnail: !!s.thumbnail || !!s.image,
+					},
 				})),
 			);
 			s.status = [...s.status];
@@ -908,6 +922,13 @@ export async function updateGroupProcess(
 				...newSessionItems.map((s) => ({
 					name: s.id,
 					files: s.files || [],
+					metadata: {
+						hasTags: Array.isArray(s.tags) && s.tags.length > 0,
+						hasDuration: typeof s.duration === "number" && s.duration > 0.5,
+						hasSummary: !!s.summaryText || !!s.summary,
+						hasTranscription: !!s.transcription,
+						hasThumbnail: !!s.thumbnail || !!s.image,
+					},
 				})),
 			);
 			s.status = [...s.status];
