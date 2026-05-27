@@ -60,6 +60,24 @@ function getSessionFileId(file) {
 	return id;
 }
 
+function getMetadataValue(map, id, sessionName) {
+	if (!map) return undefined;
+	if (map[id] !== undefined) return map[id];
+	if (sessionName && map[sessionName] !== undefined) return map[sessionName];
+
+	const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, "");
+	const normId = normalize(id);
+	const normName = sessionName ? normalize(sessionName) : "";
+
+	for (const key of Object.keys(map)) {
+		const normKey = normalize(key);
+		if (normKey === normId || (normName && normKey === normName)) {
+			return map[key];
+		}
+	}
+	return undefined;
+}
+
 function groupFilesBySessionId(files, yearName) {
 	const map = {};
 	for (const file of files || []) {
@@ -622,10 +640,17 @@ export async function updateGroupProcess(
 								}
 
 								const [, , sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
-								let tags = sessionTagsMap[id] || (sessionName && sessionTagsMap[sessionName]) || [];
-								let duration = sessionDurationMap[id] || (sessionName && sessionDurationMap[sessionName]);
-								let summary = sessionSummariesMap[id] || (sessionName && sessionSummariesMap[sessionName]);
-								let transcription = sessionTranscriptionMap[id] || (sessionName && sessionTranscriptionMap[sessionName]);
+								let tags = getMetadataValue(sessionTagsMap, id, sessionName) || [];
+								let duration = getMetadataValue(sessionDurationMap, id, sessionName);
+								let summary = getMetadataValue(sessionSummariesMap, id, sessionName);
+								let transcription = getMetadataValue(sessionTranscriptionMap, id, sessionName);
+								if (targetSessionId && id === targetSessionId) {
+									addSyncLog(`[${name}] Resolved metadata keys - id: "${id}", sessionName: "${sessionName || 'none'}"`, "info");
+									addSyncLog(`[${name}] Resolved tags from S3: ${JSON.stringify(tags)}`, "info");
+									addSyncLog(`[${name}] Resolved duration from S3: ${duration || 'none'}`, "info");
+									addSyncLog(`[${name}] Resolved summary from S3: ${summary ? (summary.substring(0, 80) + '...') : 'none'}`, "info");
+									addSyncLog(`[${name}] Resolved transcription from S3: ${transcription || 'none'}`, "info");
+								}
 								let transcriptPath = null;
 								const wasabiFiles = wasabiFilesMap[id] || [];
 								const digitalOceanFiles = getDigitalOceanSessionFiles(

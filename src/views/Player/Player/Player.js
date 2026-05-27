@@ -36,6 +36,7 @@ import Transcript from "../Transcript";
 import Video from "../Video";
 
 export const PlayerStore = new Store({
+	path: "",
 	mediaPath: "",
 	downloadUrl: "",
 	subtitles: "",
@@ -54,6 +55,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
 	const translations = useTranslations();
 	const {
+		path: storePath,
 		hash,
 		mediaPath: storeMediaPath,
 		downloadUrl,
@@ -86,6 +88,18 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		.filter(Boolean)
 		.join("/");
 	const path = makePath(components).split("/").join("/");
+
+	// Clear stale player store data immediately during render if the path has changed
+	if (path && storePath !== path) {
+		PlayerStore.update((s) => {
+			s.path = path;
+			s.mediaPath = "";
+			s.downloadUrl = "";
+			s.subtitles = "";
+			s.transcriptionUrl = "";
+		});
+	}
+
 	const [data, , loading, error, reload] = useFetchJSON(
 		"/api/player",
 		{
@@ -148,24 +162,16 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 	}, [show, path]);
 
 	useEffect(() => {
-		PlayerStore.update((s) => {
-			s.mediaPath = "";
-			s.downloadUrl = "";
-			s.subtitles = "";
-			s.transcriptionUrl = "";
-		});
-	}, [path]);
-
-	useEffect(() => {
 		if (data && data.path) {
 			PlayerStore.update((s) => {
+				s.path = path;
 				s.mediaPath = data.path;
 				s.downloadUrl = data.downloadUrl;
 				s.subtitles = data.subtitles;
 				s.transcriptionUrl = data.transcriptionUrl;
 			});
 		}
-	}, [data]);
+	}, [data, path]);
 
 	const [, addToHistory, loadingHistory] = useRecentHistory();
 
