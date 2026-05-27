@@ -1,7 +1,7 @@
 .dialog {
 	display: flex;
 	flex-direction: column;
-	width: 620px;
+	width: 850px; /* Wider desktop layout to provide breathing room for the tabular data */
 	max-width: 95vw;
 	max-height: 85vh;
 }
@@ -387,6 +387,93 @@
 	font-weight: 600;
 	font-size: 0.85rem;
 	color: var(--text-color);
+}
+
+.sessionSub {
+	font-size: 0.75rem;
+	color: var(--text-color-secondary);
+	margin-top: 0.15rem;
+	font-weight: 500;
+}
+
+.recentTabContent {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.tableContainer {
+	width: 100%;
+	max-height: 480px;
+	overflow-y: auto;
+	overflow-x: auto;
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	background: var(--main-background-alternative);
+}
+
+.recentTable {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+}
+
+.recentTable th {
+	padding: 0.75rem 1rem;
+	background: var(--main-background-alternative);
+	border-bottom: 2px solid var(--border-color);
+	color: var(--text-color-secondary);
+	font-size: 0.8rem;
+	font-weight: 700;
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.recentTable td {
+	padding: 0.6rem 1rem;
+	border-bottom: 1px solid var(--border-color);
+	vertical-align: middle;
+}
+
+.recentTable tr:hover {
+	background: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative));
+}
+
+.centerAlign {
+	text-align: center;
+}
+
+.tableIndicator {
+	font-size: 0.95rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+}
+
+.indActive {
+	opacity: 1;
+}
+
+.indInactive {
+	opacity: 0.15;
+	filter: grayscale(1);
+}
+
+.sessionTableTitle {
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: var(--text-color);
+}
+
+.sessionTableSub {
+	font-size: 0.75rem;
+	color: var(--text-color-secondary);
+	margin-top: 0.15rem;
+	font-weight: 500;
 }
 
 .sessionFiles {
