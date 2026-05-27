@@ -172,6 +172,7 @@ describe("updateGroupProcess", () => {
 			"test",
 			"2024",
 			expect.any(Array),
+			expect.any(Boolean),
 		);
 		expect(updateYearSync).toHaveBeenCalledTimes(1);
 		const [, year, sessions] = updateYearSync.mock.calls[0];

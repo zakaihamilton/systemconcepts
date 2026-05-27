@@ -17,7 +17,7 @@ import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tab from "@mui/material/Tab";
 import Tabs from "@widgets/Tabs";
-import { useSessions } from "@util/domain/sessions";
+import { useSessions, SessionsStore } from "@util/domain/sessions";
 import { useUpdateSessions } from "@util/domain/updateSessions";
 import { IconButton } from "@mui/material";
 import clsx from "clsx";
@@ -139,6 +139,7 @@ export default function ProgressDialog() {
 		busy: syncing,
 		progress: syncProgress,
 		logs: syncLogs,
+		needsSessionReload,
 	} = SyncActiveStore.useState();
 
 	// Fetch all sessions using useSessions hook
@@ -163,6 +164,17 @@ export default function ProgressDialog() {
 			.sort((a, b) => b.id.localeCompare(a.id))
 			.slice(0, 50);
 	}, [allSessions]);
+
+	useEffect(() => {
+		if (needsSessionReload && !busy) {
+			SessionsStore.update((s) => {
+				s.counter++;
+			});
+			SyncActiveStore.update((s) => {
+				s.needsSessionReload = false;
+			});
+		}
+	}, [needsSessionReload, busy]);
 
 	useEffect(() => {
 		if (!busy) {
@@ -210,6 +222,19 @@ export default function ProgressDialog() {
 
 	const handleUpdateSession = (session) => {
 		if (updateGroup) {
+			console.log(`[ProgressDialog] Requested targeted metadata update for session:`, {
+				id: session.id,
+				name: session.name,
+				group: session.group,
+				date: session.date,
+				metadata: {
+					hasTags: Array.isArray(session.tags) && session.tags.length > 0,
+					hasDuration: typeof session.duration === "number" && session.duration > 0.5,
+					hasSummary: !!session.summaryText || !!session.summary,
+					hasTranscription: !!session.transcription,
+					hasThumbnail: !!session.thumbnail,
+				}
+			});
 			setActiveSyncingSessionId(session.id);
 			updateGroup(session.group, false, true, session.id); // updateAll = false, forceUpdate = true, targetSessionId = session.id
 		}

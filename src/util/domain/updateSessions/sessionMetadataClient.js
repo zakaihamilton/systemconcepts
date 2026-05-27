@@ -11,11 +11,13 @@ export function clearSessionMetadataCache() {
 	metadataCache.clear();
 }
 
-export async function fetchSessionMetadata(group, year, metadataFingerprint) {
+export async function fetchSessionMetadata(group, year, metadataFingerprint, forceUpdate = false) {
 	const cacheKey = getCacheKey(group, year, metadataFingerprint);
-	const cached = metadataCache.get(cacheKey);
-	if (cached && cached.expiresAt > Date.now()) {
-		return cached.value;
+	if (!forceUpdate) {
+		const cached = metadataCache.get(cacheKey);
+		if (cached && cached.expiresAt > Date.now()) {
+			return cached.value;
+		}
 	}
 
 	const params = new URLSearchParams({

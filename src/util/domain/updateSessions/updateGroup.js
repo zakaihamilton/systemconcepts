@@ -331,6 +331,7 @@ async function getYearMetadata(
 			name,
 			year.name,
 			metadataFingerprint,
+			forceUpdate,
 		);
 		return {
 			items: metadata?.items || [],
@@ -365,6 +366,10 @@ export async function updateGroupProcess(
 ) {
 	const path = prefix + name;
 	let itemIndex = 0;
+
+	if (targetSessionId) {
+		addSyncLog(`[${name}] Targeted sync requested for session: ${targetSessionId}`, "info");
+	}
 
 	UpdateSessionsStore.update((s) => {
 		itemIndex = s.status.findIndex((item) => item.name === name);
@@ -612,6 +617,8 @@ export async function updateGroupProcess(
 									if (cachedSession) {
 										return cachedSession;
 									}
+								} else if (targetSessionId && id === targetSessionId) {
+									addSyncLog(`[${name}] Force re-fetching metadata for targeted session: ${id}`, "info");
 								}
 
 								let tags = sessionTagsMap[id] || [];
@@ -719,6 +726,10 @@ export async function updateGroupProcess(
 									transcription,
 									transcriptPath,
 								);
+
+								if (targetSessionId && id === targetSessionId) {
+									addSyncLog(`[${name}] Targeted session metadata updated successfully: ${id}`, "success");
+								}
 
 								return item;
 							}),
@@ -1024,7 +1035,7 @@ export async function updateGroupProcess(
 	const lastSessionMsg = lastSession ? `, last: ${lastSession}` : "";
 	const newMsg = addedCount > 0 ? `, ${addedCount} updated` : ", no updates";
 
-	if (addedCount > 0) {
+	if (addedCount > 0 || targetSessionId) {
 		SyncActiveStore.update((s) => {
 			s.needsSessionReload = true;
 		});
