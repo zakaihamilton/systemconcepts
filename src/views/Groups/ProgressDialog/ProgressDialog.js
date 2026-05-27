@@ -211,6 +211,11 @@ export default function ProgressDialog() {
 			// Switch to log tab automatically when active background cloud sync starts
 			setActiveTab("logs");
 		}
+		if (!syncing && wasSyncingRef.current) {
+			SessionsStore.update((s) => {
+				s.counter++;
+			});
+		}
 		wasSyncingRef.current = syncing;
 	}, [syncing]);
 
@@ -388,7 +393,7 @@ export default function ProgressDialog() {
 														className={styles.progressBar}
 													/>
 													<div className={styles.progressText}>
-														{syncProgress.processed} / {syncProgress.total}
+														{Math.round(syncProgress.processed)} / {Math.round(syncProgress.total)}
 													</div>
 												</>
 											)}
