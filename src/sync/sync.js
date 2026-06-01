@@ -250,6 +250,7 @@ async function executeSyncPipeline(
 	progress.completeStep("syncManifest");
 
 	// Step 3.5: Migrate from MongoDB if needed
+	let migrationOccurred = false;
 	if (migration) {
 		progress.updateProgress("migrateFromMongoDB", { processed: 0, total: 1 });
 		try {
@@ -262,6 +263,7 @@ async function executeSyncPipeline(
 			);
 
 			if (migrationResult.migrated) {
+				migrationOccurred = true;
 				addSyncLog(
 					`[${label}] Migration complete: ${migrationResult.fileCount} files`,
 					"success",
@@ -401,8 +403,8 @@ async function executeSyncPipeline(
 		// Only upload manifest if:
 		// 1. We have changes to sync
 		// 2. OR The manifest was generated from listing (loadedFromManifest=false) and needs saving
-		// 3. OR Migration occurred (which means we might have new files not yet in manifest)
-		if (hasChanges || !loadedFromManifest || migration) {
+		// 3. OR Migration actually occurred (which means we might have new files not yet in manifest)
+		if (hasChanges || !loadedFromManifest || migrationOccurred) {
 			await uploadManifest(remoteManifest, resolvedRemotePath);
 		} else {
 			console.log(
