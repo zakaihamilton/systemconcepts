@@ -253,6 +253,7 @@ export async function downloadUpdates(
 		const toDownload = [];
 		const createdFolders = new Set();
 		const missingOnRemote = [];
+		const updates = [];
 
 		// Collect files that need downloading
 		for (const remoteFile of remoteManifest) {
@@ -265,7 +266,21 @@ export async function downloadUpdates(
 			);
 
 			if (remoteVer > localVer || !localFile) {
-				toDownload.push(remoteFile);
+				if (localFile && localFile.hash === remoteFile.hash) {
+					console.log(
+						`[Sync] Hash matches for ${remoteFile.path} (${localFile.hash}). Updating local manifest version to ${remoteFile.version} without downloading.`,
+					);
+					addSyncLog(
+						`Hash matches for ${remoteFile.path}. Version updated to ${remoteFile.version}.`,
+						"info",
+					);
+					updates.push({
+						...localFile,
+						version: remoteFile.version,
+					});
+				} else {
+					toDownload.push(remoteFile);
+				}
 			} else if (localFile.deleted) {
 				if (canUpload && !restoreMissingFiles) {
 					// Admin: Keep it deleted locally, skip download
@@ -295,8 +310,21 @@ export async function downloadUpdates(
 				"[Sync] Comparison complete, nothing to download. Remote Manifest:",
 				JSON.stringify(remoteManifest),
 			);
+			const updatedManifest = await applyManifestUpdates(localManifest, updates);
+			if (updates.length > 0) {
+				const manifestPath = makePath(localPath, FILES_MANIFEST);
+				const unlock = await lockMutex({ id: manifestPath });
+				try {
+					await storage.writeFile(
+						manifestPath,
+						JSON.stringify(updatedManifest, null, 4),
+					);
+				} finally {
+					unlock();
+				}
+			}
 			return {
-				manifest: localManifest,
+				manifest: updatedManifest,
 				hasChanges: false,
 				cleanedRemoteManifest: remoteManifest,
 			};
@@ -312,7 +340,6 @@ export async function downloadUpdates(
 		}
 
 		// Download in parallel batches
-		const updates = [];
 		for (let i = 0; i < toDownload.length; i += SYNC_BATCH_SIZE) {
 			// Check for cancellation
 			if (SyncActiveStore.getRawState().stopping) {

@@ -116,16 +116,9 @@ export async function uploadNewFiles(
 			updates.push(...results.filter(Boolean));
 		}
 
-		// Add all new files to remote manifest with version timestamp
-		const timestamp = Date.now().toString();
-		const updatesWithVersion = updates
-			.filter((f) => f && f.path)
-			.map((f) => ({
-				...f,
-				version: timestamp,
-			}));
-
-		const updatedManifest = [...remoteManifest, ...updatesWithVersion];
+		// Keep the version that was already generated locally
+		const validUpdates = updates.filter((f) => f && f.path);
+		const updatedManifest = [...remoteManifest, ...validUpdates];
 
 		const duration = ((performance.now() - start) / 1000).toFixed(1);
 		addSyncLog(
