@@ -23,6 +23,7 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH, config = {}) {
 					item.type !== "dir" &&
 					item.name !== FILES_MANIFEST &&
 					item.name !== LIBRARY_COUNTER_FILE &&
+					!item.path.includes(".group-update-cache") &&
 					!(config.excludeNames || []).includes(item.name) &&
 					!item.name.endsWith(".DS_Store") &&
 					// Only allow year-based tag files e.g. "2021.tags" if tags filter is enabled

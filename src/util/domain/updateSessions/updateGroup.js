@@ -11,6 +11,7 @@ import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { readBinary } from "@util/data/binary";
 import { blobToBase64, shrinkImage } from "@util/data/image";
 import {
+	fileFolder,
 	fileTitle,
 	isAudioFile,
 	isDurationFile,
@@ -35,7 +36,7 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { getListing, updateYearSync } from "./utils";
 
 const prefix = "wasabi/";
-const GROUP_UPDATE_CACHE_PATH = makePath(LOCAL_SYNC_PATH, ".group-update-cache");
+const GROUP_UPDATE_CACHE_PATH = makePath(fileFolder(LOCAL_SYNC_PATH), ".group-update-cache");
 
 function isYearMetadataFile(file, yearName) {
 	return (
