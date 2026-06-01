@@ -89,6 +89,7 @@ async function handleRequest(request) {
 						"Accept-Ranges": "bytes",
 						"Last-Modified": headData.LastModified?.toUTCString() || "",
 						ETag: headData.ETag || "",
+						"Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
 					},
 				});
 			} catch (err) {
@@ -101,7 +102,13 @@ async function handleRequest(request) {
 			expiresIn: 86400,
 		});
 
-		return NextResponse.redirect(signedStr, 302);
+		return new NextResponse(null, {
+			status: 302,
+			headers: {
+				Location: signedStr,
+				"Cache-Control": "public, max-age=72000, s-maxage=72000",
+			},
+		});
 	} catch (err) {
 		console.error("[RSS S Proxy] Unexpected error:", err);
 		return new NextResponse("Error generating media URL", { status: 500 });
