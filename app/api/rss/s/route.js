@@ -1,10 +1,120 @@
-import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getS3, validatePathAccess } from "@util/storage/aws";
-import { getWasabi } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
+
+function normalizePath(path) {
+	if (!path) return path;
+	return path.startsWith("/") ? path.substring(1) : path;
+}
+
+function validatePathAccess(path) {
+	if (!path) return;
+	const decoded = decodeURIComponent(path);
+	const normalized = normalizePath(decoded);
+	if (normalized.split("/").includes("..")) {
+		throw new Error("ACCESS_DENIED");
+	}
+	if (normalized.startsWith("private/") || normalized === "private") {
+		throw new Error("ACCESS_DENIED");
+	}
+}
+
+async function hmacSha256(key, data) {
+	const cryptoKey = await crypto.subtle.importKey(
+		"raw",
+		typeof key === "string" ? new TextEncoder().encode(key) : key,
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"],
+	);
+	const signature = await crypto.subtle.sign(
+		"HMAC",
+		cryptoKey,
+		typeof data === "string" ? new TextEncoder().encode(data) : data,
+	);
+	return new Uint8Array(signature);
+}
+
+async function sha256Hex(data) {
+	const hashBuffer = await crypto.subtle.digest(
+		"SHA-256",
+		typeof data === "string" ? new TextEncoder().encode(data) : data,
+	);
+	return Array.from(new Uint8Array(hashBuffer))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+// Ultra-lightweight Web Crypto-based AWS Signature V4 presigned URL generator
+async function getPresignedUrl({
+	endpoint,
+	region,
+	bucket,
+	key,
+	accessKeyId,
+	secretAccessKey,
+	expiresIn = 86400,
+	method = "GET",
+}) {
+	const now = new Date();
+	const amzDate = now.toISOString().replace(/[:-]/g, "").replace(/\.\d{3}/, "");
+	const dateStamp = amzDate.substring(0, 8);
+
+	let host = endpoint.replace(/^https?:\/\//, "");
+	const protocol = endpoint.startsWith("http") ? endpoint.match(/^https?:\/\//)[0] : "https://";
+
+	// Uri-encode path segments (preserving slashes)
+	const canonicalUri = `/${bucket}/${key.split("/").map((segment) => encodeURIComponent(segment).replace(/%7E/g, "~")).join("/")}`;
+
+	const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
+	const queryParams = {
+		"X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+		"X-Amz-Credential": `${accessKeyId}/${credentialScope}`,
+		"X-Amz-Date": amzDate,
+		"X-Amz-Expires": expiresIn.toString(),
+		"X-Amz-SignedHeaders": "host",
+	};
+
+	const canonicalQueryString = Object.keys(queryParams)
+		.sort()
+		.map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`)
+		.join("&");
+
+	const canonicalHeaders = `host:${host}\n`;
+	const signedHeaders = "host";
+	const payloadHash = "UNSIGNED-PAYLOAD";
+
+	const canonicalRequest = [
+		method,
+		canonicalUri,
+		canonicalQueryString,
+		canonicalHeaders,
+		signedHeaders,
+		payloadHash,
+	].join("\n");
+
+	const canonicalRequestHash = await sha256Hex(canonicalRequest);
+
+	const stringToSign = [
+		"AWS4-HMAC-SHA256",
+		amzDate,
+		credentialScope,
+		canonicalRequestHash,
+	].join("\n");
+
+	const kDate = await hmacSha256("AWS4" + secretAccessKey, dateStamp);
+	const kRegion = await hmacSha256(kDate, region);
+	const kService = await hmacSha256(kRegion, "s3");
+	const kSigning = await hmacSha256(kService, "aws4_request");
+	
+	const signatureBuffer = await hmacSha256(kSigning, stringToSign);
+	const signature = Array.from(signatureBuffer)
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+
+	return `${protocol}${host}${canonicalUri}?${canonicalQueryString}&X-Amz-Signature=${signature}`;
+}
 
 async function handleRequest(request) {
 	try {
@@ -28,7 +138,7 @@ async function handleRequest(request) {
 
 		let path;
 		try {
-			path = Buffer.from(base64str, "base64").toString("utf8");
+			path = atob(base64str);
 		} catch (_e) {
 			return new NextResponse("Invalid Path", { status: 400 });
 		}
@@ -46,28 +156,51 @@ async function handleRequest(request) {
 		}
 
 		let s3Key = path;
-		let client, bucket;
+		let endpoint, region, bucket, accessKeyId, secretAccessKey;
+
 		if (s3Key.startsWith("wasabi/")) {
-			const wasabi = await getWasabi();
-			client = wasabi.client;
-			bucket = wasabi.bucket;
+			if (!process.env.WASABI_URL) {
+				throw new Error("WASABI_URL not defined");
+			}
+			const wasabiUri = new URL(process.env.WASABI_URL);
+			bucket = wasabiUri.pathname.replace("/", "");
+			endpoint = `https://${wasabiUri.host}`;
+			region = wasabiUri.searchParams.get("region") || "us-east-1";
+			accessKeyId = decodeURIComponent(wasabiUri.username);
+			secretAccessKey = decodeURIComponent(wasabiUri.password);
 			s3Key = s3Key.replace(/^wasabi\//, "");
 		} else {
-			client = await getS3({});
+			endpoint = process.env.AWS_ENDPOINT || "sfo3.digitaloceanspaces.com";
+			if (!endpoint.startsWith("http")) {
+				endpoint = `https://${endpoint}`;
+			}
+			region = "sfo3";
 			bucket = process.env.AWS_BUCKET;
+			accessKeyId = process.env.AWS_ID;
+			secretAccessKey = process.env.AWS_SECRET;
 		}
 
 		if (request.method === "HEAD") {
 			try {
-				const headCommand = new HeadObjectCommand({
-					Bucket: bucket,
-					Key: s3Key,
+				const signedHeadUrl = await getPresignedUrl({
+					endpoint,
+					region,
+					bucket,
+					key: s3Key,
+					accessKeyId,
+					secretAccessKey,
+					expiresIn: 86400,
+					method: "HEAD",
 				});
-				const headData = await client.send(headCommand);
+
+				const headRes = await fetch(signedHeadUrl, { method: "HEAD" });
+				if (!headRes.ok) {
+					throw new Error(`S3 HEAD returned status ${headRes.status}`);
+				}
 
 				// Determine the correct Content-Type, prioritizing the extension hint from 'e'
 				const extHint = (searchParams.get("e") || "").toLowerCase();
-				let contentType = headData.ContentType || "application/octet-stream";
+				let contentType = headRes.headers.get("Content-Type") || "application/octet-stream";
 
 				if (extHint.endsWith(".m4a")) {
 					contentType = "audio/x-m4a";
@@ -85,10 +218,10 @@ async function handleRequest(request) {
 					status: 200,
 					headers: {
 						"Content-Type": contentType,
-						"Content-Length": headData.ContentLength?.toString() || "0",
+						"Content-Length": headRes.headers.get("Content-Length") || "0",
 						"Accept-Ranges": "bytes",
-						"Last-Modified": headData.LastModified?.toUTCString() || "",
-						ETag: headData.ETag || "",
+						"Last-Modified": headRes.headers.get("Last-Modified") || "",
+						ETag: headRes.headers.get("ETag") || "",
 						"Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
 					},
 				});
@@ -97,9 +230,15 @@ async function handleRequest(request) {
 			}
 		}
 
-		const getCommand = new GetObjectCommand({ Bucket: bucket, Key: s3Key });
-		const signedStr = await getSignedUrl(client, getCommand, {
+		const signedStr = await getPresignedUrl({
+			endpoint,
+			region,
+			bucket,
+			key: s3Key,
+			accessKeyId,
+			secretAccessKey,
 			expiresIn: 86400,
+			method: "GET",
 		});
 
 		return new NextResponse(null, {
