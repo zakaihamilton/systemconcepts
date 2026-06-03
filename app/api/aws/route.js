@@ -1,4 +1,4 @@
-import { handleRequest } from "@util/storage/aws";
+import { handleRequest, getDownloadUrl } from "@util/storage/aws";
 import parseCookie from "@util/api/cookie";
 import { login } from "@util/auth/login";
 import { roleAuth } from "@util/auth/roles";
@@ -95,6 +95,20 @@ async function handleAWS(request) {
 					console.log(`[AWS API] ACCESS DENIED: Batch item path: ${itemPath}`);
 					throw "ACCESS_DENIED: Batch item unauthorized for path: " + itemPath;
 				}
+			}
+		}
+
+		if (request.method === "GET") {
+			const query = Object.fromEntries(url.searchParams.entries());
+			const exists = query.exists || request.headers.get("exists");
+			const type = query.type || request.headers.get("type");
+
+			if (!exists && type !== "dir") {
+				const downloadUrl = await getDownloadUrl({ path });
+				return NextResponse.redirect(downloadUrl, {
+					status: 307,
+					headers: NO_CACHE_HEADERS,
+				});
 			}
 		}
 

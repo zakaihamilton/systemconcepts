@@ -139,7 +139,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 
 	const mediaPath = data?.path || storeMediaPath;
 	const subtitles = data?.subtitles || storeSubtitles;
-	const isRecoveringMedia = !!loading && !!mediaPath;
 	const shouldShowAccessError = !!error && !loading && !mediaPath;
 
 	const isAudio = isAudioFile(path);

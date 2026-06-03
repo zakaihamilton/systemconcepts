@@ -7,12 +7,28 @@ import {
 	PutObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { lockMutex } from "@sync/mutex";
 import { isBinaryFile } from "@util/data/path";
 import fs from "fs";
 import { getSafeError } from "@util/api/safeError";
 
 let s3Client = null;
+
+export async function getDownloadUrl({ path, bucketName = process.env.AWS_BUCKET }) {
+	const s3 = await getS3({});
+	const bucket = bucketName;
+	const key = normalizePath(path);
+
+	const command = new GetObjectCommand({
+		Bucket: bucket,
+		Key: key,
+	});
+
+	return await getSignedUrl(s3, command, {
+		expiresIn: 3600,
+	});
+}
 
 export async function getS3(params) {
 	const unlock = await lockMutex({ id: "s3" });
