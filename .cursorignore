@@ -1,0 +1,141 @@
+# =============================================================================
+# .cursorignore — reduce Composer indexing noise and token usage
+# Patterns follow .gitignore syntax (paths are relative to repo root).
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# Installed packages; never useful for code understanding or edits.
+# -----------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+
+
+# -----------------------------------------------------------------------------
+# Build & compile output
+# Generated artifacts — source of truth lives in app/, src/, and config files.
+# -----------------------------------------------------------------------------
+.next/
+out/
+build/
+dist/
+
+
+# -----------------------------------------------------------------------------
+# Tool & framework caches
+# SWC (Next.js), webpack, and other incremental compile caches.
+# -----------------------------------------------------------------------------
+.swc/
+.turbo/
+.cache/
+**/.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+
+# -----------------------------------------------------------------------------
+# Package manager lockfiles
+# Large, auto-generated resolution graphs; package.json is the human-readable
+# source for dependency intent.
+# -----------------------------------------------------------------------------
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lock
+bun.lockb
+
+
+# -----------------------------------------------------------------------------
+# Environment & secrets
+# Local credentials and env-specific config — never index for safety or tokens.
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+
+# -----------------------------------------------------------------------------
+# System & editor junk
+# OS metadata and local editor state.
+# -----------------------------------------------------------------------------
+.DS_Store
+**/.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+
+# -----------------------------------------------------------------------------
+# Version control internals
+# Git object database and refs — not application source.
+# -----------------------------------------------------------------------------
+.git/
+
+
+# -----------------------------------------------------------------------------
+# Test, coverage & CI artifacts
+# Generated reports and scratch output from test runs.
+# -----------------------------------------------------------------------------
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+test_output.txt
+*.lcov
+
+
+# -----------------------------------------------------------------------------
+# Logs & debug output
+# Runtime and package-manager log files.
+# -----------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# -----------------------------------------------------------------------------
+# Public assets & PWA build output (project-specific)
+# Static media and files emitted by @ducanh2912/next-pwa into public/.
+# Keep small config sources (manifest.json, noflash.js) indexable.
+# -----------------------------------------------------------------------------
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.gif
+public/**/*.webp
+public/**/*.ico
+public/**/workbox-*.js
+public/sw.js
+public/fallback-*.js
+
+
+# -----------------------------------------------------------------------------
+# Source maps & minified bundles
+# Derived from source; duplicates information already in src/ and app/.
+# -----------------------------------------------------------------------------
+*.map
+*.min.js
+*.min.css
+
+
+# -----------------------------------------------------------------------------
+# Local scratch & agent tooling
+# Ephemeral workspace and third-party agent metadata — not app code.
+# -----------------------------------------------------------------------------
+scratch/
+.jules/
+
+
+# -----------------------------------------------------------------------------
+# Deployment platform metadata
+# Vercel and similar local link/cache directories.
+# -----------------------------------------------------------------------------
+.vercel/
