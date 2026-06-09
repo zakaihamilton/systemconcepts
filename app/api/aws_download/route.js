@@ -30,7 +30,7 @@ async function presignIfExists(s3, key) {
 		);
 		return url;
 	} catch (err) {
-		console.warn(`[AWS DOWNLOAD API] Failed to presign ${key}`, err);
+		console.warn("[AWS DOWNLOAD API] Failed to presign key:", key, err);
 		return null;
 	}
 }

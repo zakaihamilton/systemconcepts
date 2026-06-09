@@ -3,6 +3,7 @@ import { aggregateSessionMetadataFromSources } from "./metadataAggregator";
 
 const SESSION_METADATA_CACHE_TTL_MS = 5 * 60 * 1000;
 const metadataCache = new Map();
+const pendingRequests = new Map();
 
 function getCacheKey(group, year, metadataFingerprint) {
 	return `${group}/${year}/${metadataFingerprint || "unknown"}`;
@@ -10,6 +11,7 @@ function getCacheKey(group, year, metadataFingerprint) {
 
 export function clearSessionMetadataCache() {
 	metadataCache.clear();
+	pendingRequests.clear();
 }
 
 export function seedSessionMetadataCache(group, year, metadataFingerprint, value) {
@@ -84,6 +86,18 @@ async function fetchSessionMetadataViaProxy(group, year) {
 	});
 }
 
+async function loadSessionMetadata(group, year) {
+	try {
+		return await fetchSessionMetadataViaPresign(group, year);
+	} catch (presignErr) {
+		console.warn(
+			`[SessionMetadata] Presigned fetch failed for ${group}/${year}; falling back to session-metadata API`,
+			presignErr,
+		);
+		return await fetchSessionMetadataViaProxy(group, year);
+	}
+}
+
 export async function fetchSessionMetadata(
 	group,
 	year,
@@ -96,22 +110,31 @@ export async function fetchSessionMetadata(
 		if (cached && cached.expiresAt > Date.now()) {
 			return cached.value;
 		}
+		if (pendingRequests.has(cacheKey)) {
+			return pendingRequests.get(cacheKey);
+		}
 	}
 
-	let value;
+	const promise = loadSessionMetadata(group, year);
+	if (!forceUpdate) {
+		pendingRequests.set(cacheKey, promise);
+	}
+
 	try {
-		value = await fetchSessionMetadataViaPresign(group, year);
-	} catch (presignErr) {
-		console.warn(
-			`[SessionMetadata] Presigned fetch failed for ${group}/${year}; falling back to session-metadata API`,
-			presignErr,
-		);
-		value = await fetchSessionMetadataViaProxy(group, year);
+		const value = await promise;
+		metadataCache.set(cacheKey, {
+			value,
+			expiresAt: Date.now() + SESSION_METADATA_CACHE_TTL_MS,
+		});
+		return value;
+	} catch (err) {
+		if (!forceUpdate) {
+			pendingRequests.delete(cacheKey);
+		}
+		throw err;
+	} finally {
+		if (!forceUpdate && pendingRequests.get(cacheKey) === promise) {
+			pendingRequests.delete(cacheKey);
+		}
 	}
-
-	metadataCache.set(cacheKey, {
-		value,
-		expiresAt: Date.now() + SESSION_METADATA_CACHE_TTL_MS,
-	});
-	return value;
 }

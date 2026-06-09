@@ -1,5 +1,8 @@
 import { fetchJSON } from "@util/api/fetch";
-import { fetchSessionMetadata } from "./sessionMetadataClient";
+import {
+	clearSessionMetadataCache,
+	fetchSessionMetadata,
+} from "./sessionMetadataClient";
 
 jest.mock("@util/api/fetch", () => ({
 	fetchJSON: jest.fn(),
@@ -10,6 +13,7 @@ const originalFetch = global.fetch;
 describe("fetchSessionMetadata", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		clearSessionMetadataCache();
 		global.fetch = jest.fn();
 	});
 
@@ -105,5 +109,54 @@ describe("fetchSessionMetadata", () => {
 			expect.any(Object),
 		);
 		expect(result.tags["2024-05-05 Test Session"]).toEqual(["fallback"]);
+	});
+
+	it("dedupes concurrent requests for the same metadata key", async () => {
+		let resolveFetch;
+		const fetchGate = new Promise((resolve) => {
+			resolveFetch = resolve;
+		});
+		fetchJSON.mockImplementation(async () => {
+			await fetchGate;
+			return {
+				group: "test",
+				year: "2024",
+				items: [],
+				urls: { tags: null, duration: null, md: null, zip: null },
+			};
+		});
+
+		const first = fetchSessionMetadata("test", "2024", "fp-1", false);
+		const second = fetchSessionMetadata("test", "2024", "fp-1", false);
+
+		resolveFetch();
+		const [resultA, resultB] = await Promise.all([first, second]);
+
+		expect(fetchJSON).toHaveBeenCalledTimes(1);
+		expect(resultA).toBe(resultB);
+	});
+
+	it("does not dedupe concurrent requests when forceUpdate is true", async () => {
+		let resolveFetch;
+		const fetchGate = new Promise((resolve) => {
+			resolveFetch = resolve;
+		});
+		fetchJSON.mockImplementation(async () => {
+			await fetchGate;
+			return {
+				group: "test",
+				year: "2024",
+				items: [],
+				urls: { tags: null, duration: null, md: null, zip: null },
+			};
+		});
+
+		const first = fetchSessionMetadata("test", "2024", "fp-1", true);
+		const second = fetchSessionMetadata("test", "2024", "fp-1", true);
+
+		resolveFetch();
+		await Promise.all([first, second]);
+
+		expect(fetchJSON).toHaveBeenCalledTimes(2);
 	});
 });
