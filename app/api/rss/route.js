@@ -1,15 +1,32 @@
-import { authenticateTokenRequest, getPositiveInt } from "@util/api/api";
+/**
+ * RSS feed endpoint — runs on Vercel Edge Runtime.
+ * - No Node.js APIs (no `crypto`, no `Buffer`)
+ * - Auth delegated to /api/rss/verify (Node.js runtime, MongoDB access)
+ * - S3 fetches via sessionFeedEdge (fetch + Web Crypto presigner)
+ * - ETags via crypto.subtle SHA-256 (MD5 not available in Web Crypto)
+ */
+
 import {
 	getSProxyUrl,
 	getSessions,
-	getTranscriptProxyUrl,
+	getTranscriptProxyUrlFast,
 	sortSessions,
-} from "@util/domain/sessionFeed";
+} from "@util/domain/sessionFeedEdge";
 import { formatDuration } from "@util/data/string";
-import crypto from "crypto";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function getPositiveInt(value, fallback, max) {
+	const parsed = Number.parseInt(value || "", 10);
+	const safe = Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+	return Math.min(safe, max);
+}
 
 function escapeXml(unsafe) {
 	if (!unsafe) return "";
@@ -31,77 +48,129 @@ function escapeXml(unsafe) {
 	});
 }
 
+// ---------------------------------------------------------------------------
+// Edge auth — delegates to /api/rss/verify (Node.js runtime with MongoDB)
+// ---------------------------------------------------------------------------
+
+/** Short-lived in-memory cache to avoid repeated verify round-trips */
+const authCache = new Map();
+const AUTH_CACHE_TTL_MS = 60 * 1000;
+
+async function authenticateEdge(searchParams) {
+	const id = searchParams.get("id");
+	const token = searchParams.get("token");
+	if (!id || !token) return false;
+
+	// Check in-memory cache first
+	const cacheKey = `${id}:${token}`;
+	const now = Date.now();
+	const cached = authCache.get(cacheKey);
+	if (cached && cached.expiresAt > now) return cached.ok;
+
+	const siteUrl = process.env.SITE_URL;
+	if (!siteUrl) {
+		console.error("[RSS Edge] SITE_URL env var not set — cannot verify token");
+		return false;
+	}
+
+	try {
+		const res = await fetch(`${siteUrl}/api/rss/verify`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				// Shared secret: only the same deployment can call this endpoint
+				"x-internal-key": process.env.AWS_SECRET || "",
+			},
+			body: JSON.stringify({ id, token }),
+		});
+		if (!res.ok) {
+			console.warn("[RSS Edge] Verify endpoint returned", res.status);
+			return false;
+		}
+		const { ok } = await res.json();
+		// Cache result for 60s to avoid repeated Mongo lookups on podcast polls
+		authCache.set(cacheKey, { ok: ok === true, expiresAt: now + AUTH_CACHE_TTL_MS });
+		return ok === true;
+	} catch (err) {
+		console.error("[RSS Edge] Auth fetch failed:", err);
+		return false;
+	}
+}
+
+// ---------------------------------------------------------------------------
+// GET handler
+// ---------------------------------------------------------------------------
+
 export async function GET(request) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const group = searchParams.get("group");
 		const count = getPositiveInt(searchParams.get("count"), 250, 500);
-		const user = await authenticateTokenRequest(searchParams);
-		if (!user) {
+
+		const authenticated = await authenticateEdge(searchParams);
+		if (!authenticated) {
 			return new NextResponse("Unauthorized", { status: 403 });
 		}
 
 		const sessions = sortSessions(await getSessions({ group })).slice(0, count);
 
-		const baseUrl =
-			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
+		const baseUrl = process.env.SITE_URL || "https://systemconcepts.app";
 
-		const rssItems = await Promise.all(
-			sessions.map(async (session) => {
-				// Do not URL-encode the ?, &, and = characters in the local app link
-				const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
-				const link = `${baseUrl}/#sessions/${sessionQuery}`;
+		const rssItems = sessions.map((session) => {
+			// Do not URL-encode the ?, &, and = characters in the local app link
+			const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+			const link = `${baseUrl}/#sessions/${sessionQuery}`;
 
-				// RFC 2822 formatting requires strictly +0000
-				const date = new Date(session.date)
-					.toUTCString()
-					.replace("GMT", "+0000");
-				// Apple recommends integer seconds
-				const durationSeconds = session.duration
-					? Math.round(session.duration)
-					: 0;
-				const categories = (session.tags || [])
-					.map((tag) => `<category>${escapeXml(tag)}</category>`)
-					.join("");
+			// RFC 2822 formatting requires strictly +0000
+			const date = new Date(session.date)
+				.toUTCString()
+				.replace("GMT", "+0000");
+			// Apple recommends integer seconds
+			const durationSeconds = session.duration
+				? Math.round(session.duration)
+				: 0;
+			const categories = (session.tags || [])
+				.map((tag) => `<category>${escapeXml(tag)}</category>`)
+				.join("");
 
-				let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
-				if (durationSeconds > 0) {
-					description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
-				}
-				if (session.summaryText) {
-					description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
-				}
+			let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
+			if (durationSeconds > 0) {
+				description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
+			}
+			if (session.summaryText) {
+				description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
+			}
 
-				const media = session.audio || session.video;
-				let enclosure = "";
-				if (media && media.path) {
-					const proxyUrl = getSProxyUrl(media.path, baseUrl);
-					const type = media.path.endsWith(".mp4")
-						? "video/mp4"
-						: media.path.endsWith(".m4a")
-							? "audio/x-m4a"
-							: "audio/mpeg";
-					enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
-				}
+			const media = session.audio || session.video;
+			let enclosure = "";
+			if (media && media.path) {
+				const proxyUrl = getSProxyUrl(media.path, baseUrl);
+				const type = media.path.endsWith(".mp4")
+					? "video/mp4"
+					: media.path.endsWith(".m4a")
+						? "audio/x-m4a"
+						: "audio/mpeg";
+				enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
+			}
 
-				const thumbnail = getSProxyUrl(session.image?.path, baseUrl);
-				const itemImage = `<itunes:image href="${escapeXml(thumbnail || baseUrl + "/images/rss-cover.jpg")}" />`;
+			const thumbnail = getSProxyUrl(session.image?.path, baseUrl);
+			const itemImage = `<itunes:image href="${escapeXml(thumbnail || baseUrl + "/images/rss-cover.jpg")}" />`;
 
-				// Transcript support
-				let transcriptTag = "";
-				let transcriptPath = session.subtitles?.path || session.transcriptPath;
-				let transcriptType = transcriptPath?.endsWith(".vtt")
-					? "text/vtt"
-					: "text/plain";
-				const transcriptUrl = await getTranscriptProxyUrl(session, baseUrl);
-				if (transcriptUrl) {
-					transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
-				}
+			// Transcript support — fast path, no S3 HEAD calls
+			let transcriptTag = "";
+			const transcriptPath = session.subtitles?.path || session.transcriptPath;
+			const transcriptType = transcriptPath?.endsWith(".vtt")
+				? "text/vtt"
+				: "text/plain";
+			const transcriptUrl = getTranscriptProxyUrlFast(session, baseUrl);
+			if (transcriptUrl) {
+				transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
+			}
 
-				const author = "info@systemconcepts.app (System Concepts)";
-				const itunesAuthor = "System Concepts";
+			const author = "info@systemconcepts.app (System Concepts)";
+			const itunesAuthor = "System Concepts";
 
-				return `
+			return `
     <item>
       <title>[${escapeXml(session.group?.toUpperCase()[0] + session.group?.slice(1))}] ${escapeXml(session.date + " " + session.name)}</title>
       <link>${escapeXml(link)}</link>
@@ -119,8 +188,7 @@ export async function GET(request) {
       <itunes:summary>${escapeXml(session.summaryText)}</itunes:summary>
       <itunes:explicit>true</itunes:explicit>
     </item>`;
-			}),
-		);
+		});
 
 		const maxDate =
 			sessions.length > 0
@@ -165,19 +233,38 @@ export async function GET(request) {
 </channel>
 </rss>`;
 
-		const etag = crypto.createHash("md5").update(rss).digest("hex");
-		const buffer = Buffer.from(rss, "utf-8");
+		// ETag via Web Crypto SHA-256 (MD5 not available in Edge runtime)
+		const hashBuffer = await crypto.subtle.digest(
+			"SHA-256",
+			new TextEncoder().encode(rss),
+		);
+		const etag = Array.from(new Uint8Array(hashBuffer))
+			.map((b) => b.toString(16).padStart(2, "0"))
+			.join("");
 
-		return new Response(buffer, {
+		// Return 304 Not Modified if the client already has this version
+		const ifNoneMatch = request.headers.get("if-none-match");
+		if (ifNoneMatch && ifNoneMatch === `"${etag}"`) {
+			return new Response(null, {
+				status: 304,
+				headers: {
+					ETag: `"${etag}"`,
+					"Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
+				},
+			});
+		}
+
+		// Use TextEncoder for byte-accurate Content-Length (handles non-ASCII like ©)
+		const encoded = new TextEncoder().encode(rss);
+
+		return new Response(encoded, {
 			status: 200,
 			headers: {
 				"Content-Type": "application/rss+xml; charset=utf-8",
-				"Content-Length": buffer.length.toString(),
+				"Content-Length": encoded.byteLength.toString(),
 				ETag: `"${etag}"`,
 				"Last-Modified": maxDate,
-				"Cache-Control": "no-cache, no-store, must-revalidate",
-				Pragma: "no-cache",
-				Expires: "0",
+				"Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
 				"Accept-Ranges": "bytes",
 			},
 		});
