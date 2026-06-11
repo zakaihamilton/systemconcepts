@@ -55,7 +55,7 @@ export async function getSessions({ group } = {}) {
 			matchesGroup(file.path, group),
 	);
 
-	const limit = pLimit(10);
+	const limit = pLimit(25);
 	const sessionLists = await Promise.all(
 		files.map((file) =>
 			limit(async () => {
@@ -241,6 +241,35 @@ export async function getTranscriptProxyUrl(session, baseUrl) {
 	});
 	if (transcriptPath) {
 		return getSProxyUrl(transcriptPath, baseUrl);
+	}
+
+	return null;
+}
+
+/**
+ * Fast, synchronous transcript URL resolver for the RSS feed.
+ * Resolves the best available transcript path from session metadata
+ * WITHOUT issuing any S3 HeadObject calls. Podcast clients silently
+ * ignore broken transcript URLs, so skipping existence checks is safe
+ * at feed-generation time.
+ */
+export function getTranscriptProxyUrlFast(session, baseUrl) {
+	if (!session) return null;
+
+	// Prefer explicitly declared paths (highest confidence)
+	const explicit =
+		session.subtitles?.path ||
+		session.transcriptPath ||
+		getStandaloneTranscriptPath(session);
+	if (explicit) {
+		return getSProxyUrl(normalizeProxyPath(explicit), baseUrl);
+	}
+
+	// Fall back to the well-known AWS path only when there is evidence a
+	// transcript actually exists (transcription flag, summary, etc.)
+	if (session.transcription || session.summaryText || session.summary) {
+		const awsPath = getAwsTranscriptPath(session);
+		if (awsPath) return getSProxyUrl(awsPath, baseUrl);
 	}
 
 	return null;
