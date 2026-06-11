@@ -28,7 +28,10 @@ export async function POST(request) {
 			return NextResponse.json({ ok: false });
 		}
 
-		const params = new URLSearchParams({ id: String(id), token: String(token) });
+		const params = new URLSearchParams({
+			id: String(id),
+			token: String(token),
+		});
 		const user = await authenticateTokenRequest(params);
 		return NextResponse.json({ ok: !!user });
 	} catch (err) {

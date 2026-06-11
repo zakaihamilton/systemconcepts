@@ -41,7 +41,10 @@ async function getPresignedUrl({
 	method = "GET",
 }) {
 	const now = new Date();
-	const amzDate = now.toISOString().replace(/[:-]/g, "").replace(/\.\d{3}/, "");
+	const amzDate = now
+		.toISOString()
+		.replace(/[:-]/g, "")
+		.replace(/\.\d{3}/, "");
 	const dateStamp = amzDate.substring(0, 8);
 
 	const host = endpoint.replace(/^https?:\/\//, "");
@@ -64,7 +67,9 @@ async function getPresignedUrl({
 
 	const canonicalQueryString = Object.keys(queryParams)
 		.sort()
-		.map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`)
+		.map(
+			(k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`,
+		)
 		.join("&");
 
 	const canonicalRequest = [
@@ -107,11 +112,7 @@ function normalizePath(path) {
  * Download an S3 object using a presigned GET URL.
  * Returns Uint8Array when binary=true (default), string otherwise.
  */
-export async function downloadDataEdge({
-	path,
-	binary = true,
-	bucketName,
-}) {
+export async function downloadDataEdge({ path, binary = true, bucketName }) {
 	let endpoint = process.env.AWS_ENDPOINT || "sfo3.digitaloceanspaces.com";
 	if (!endpoint.startsWith("http")) {
 		endpoint = `https://${endpoint}`;

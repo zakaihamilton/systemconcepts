@@ -9,8 +9,8 @@
  * All other callers should continue to use sessionFeed.js.
  */
 
-import { downloadDataEdge } from "@util/storage/awsFetch";
 import pLimit from "@util/data/p-limit";
+import { downloadDataEdge } from "@util/storage/awsFetch";
 import pako from "pako";
 
 const MANIFEST_PATH = "sync/files.json.gz";
@@ -27,7 +27,9 @@ function decodeData(data) {
 		return decoder.decode(pako.inflate(data));
 	} catch (_err) {
 		// Not gzip-compressed — decode raw bytes as UTF-8
-		return decoder.decode(data instanceof Uint8Array ? data : new Uint8Array(data));
+		return decoder.decode(
+			data instanceof Uint8Array ? data : new Uint8Array(data),
+		);
 	}
 }
 
@@ -71,10 +73,7 @@ function normalizeProxyPath(path) {
 function encodeBase64Url(str) {
 	const bytes = new TextEncoder().encode(str);
 	const binStr = Array.from(bytes, (b) => String.fromCharCode(b)).join("");
-	return btoa(binStr)
-		.replace(/\+/g, "-")
-		.replace(/\//g, "_")
-		.replace(/=/g, "");
+	return btoa(binStr).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 function getMediaPath(session) {
@@ -92,7 +91,9 @@ function getMediaPath(session) {
 
 function getStandaloneTranscriptPath(session) {
 	const expectedName = `${session.id}.txt`;
-	const transcriptName = (session.files || []).find((file) => file === expectedName);
+	const transcriptName = (session.files || []).find(
+		(file) => file === expectedName,
+	);
 	if (!transcriptName) return null;
 
 	const mediaPath = getMediaPath(session);

@@ -6,13 +6,13 @@
  * - ETags via crypto.subtle SHA-256 (MD5 not available in Web Crypto)
  */
 
+import { formatDuration } from "@util/data/string";
 import {
-	getSProxyUrl,
 	getSessions,
+	getSProxyUrl,
 	getTranscriptProxyUrlFast,
 	sortSessions,
 } from "@util/domain/sessionFeedEdge";
-import { formatDuration } from "@util/data/string";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -89,7 +89,10 @@ async function authenticateEdge(searchParams) {
 		}
 		const { ok } = await res.json();
 		// Cache result for 60s to avoid repeated Mongo lookups on podcast polls
-		authCache.set(cacheKey, { ok: ok === true, expiresAt: now + AUTH_CACHE_TTL_MS });
+		authCache.set(cacheKey, {
+			ok: ok === true,
+			expiresAt: now + AUTH_CACHE_TTL_MS,
+		});
 		return ok === true;
 	} catch (err) {
 		console.error("[RSS Edge] Auth fetch failed:", err);
@@ -122,9 +125,7 @@ export async function GET(request) {
 			const link = `${baseUrl}/#sessions/${sessionQuery}`;
 
 			// RFC 2822 formatting requires strictly +0000
-			const date = new Date(session.date)
-				.toUTCString()
-				.replace("GMT", "+0000");
+			const date = new Date(session.date).toUTCString().replace("GMT", "+0000");
 			// Apple recommends integer seconds
 			const durationSeconds = session.duration
 				? Math.round(session.duration)
@@ -249,7 +250,8 @@ export async function GET(request) {
 				status: 304,
 				headers: {
 					ETag: `"${etag}"`,
-					"Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
+					"Cache-Control":
+						"public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
 				},
 			});
 		}
@@ -264,7 +266,8 @@ export async function GET(request) {
 				"Content-Length": encoded.byteLength.toString(),
 				ETag: `"${etag}"`,
 				"Last-Modified": maxDate,
-				"Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
+				"Cache-Control":
+					"public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
 				"Accept-Ranges": "bytes",
 			},
 		});
