@@ -31,9 +31,11 @@ jest.mock("@util/data/image", () => ({
 	shrinkImage: jest.fn(),
 }));
 jest.mock("@util/storage/storage", () => ({
+	createFolderPath: jest.fn(),
 	deleteFile: jest.fn(),
 	exists: jest.fn(),
 	readFile: jest.fn(),
+	writeFile: jest.fn(),
 }));
 jest.mock("./cleanup", () => ({
 	cleanupBundledGroup: jest.fn(),
@@ -245,11 +247,13 @@ describe("updateGroupProcess", () => {
 			}
 			return [];
 		});
-		storage.exists.mockImplementation(async (path) =>
-			path.endsWith(`test/${currentYear}.json`),
-		);
+		const localYearPath = `/local/sync/test/${currentYear}.json`;
+		storage.exists.mockImplementation(async (path) => path === localYearPath);
 		storage.readFile.mockImplementation(async (path) => {
-			if (path.endsWith(`test/${currentYear}.json`)) {
+			if (path.includes(".group-update-cache")) {
+				return "";
+			}
+			if (path === localYearPath) {
 				return JSON.stringify({
 					sessions: [
 						{
@@ -281,5 +285,171 @@ describe("updateGroupProcess", () => {
 		expect(sessions[0].duration).toBe(321);
 		expect(sessions[0].summaryText).toBe("Cached summary");
 		expect(sessions[0].transcription).toBe(true);
+	});
+
+	it("skips remote metadata fetch when year cache metadata fingerprint is unchanged", async () => {
+		const metadataFiles = [
+			{ name: "2024.tags", size: 100, mtimeMs: 1 },
+			{ name: "2024.duration", size: 100, mtimeMs: 1 },
+			{ name: "2024.md", size: 100, mtimeMs: 1 },
+			{ name: "2024.zip", size: 100, mtimeMs: 1 },
+		];
+		const metadataFingerprint = [
+			{ name: "2024.tags", type: "", size: 100, mtimeMs: 1 },
+			{ name: "2024.duration", type: "", size: 100, mtimeMs: 1 },
+			{ name: "2024.md", type: "", size: 100, mtimeMs: 1 },
+			{ name: "2024.zip", type: "", size: 100, mtimeMs: 1 },
+		];
+
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
+			}
+			if (path === "wasabi/test/2024") {
+				return [
+					file(
+						"2024-05-05 Test Session.mp4",
+						"wasabi/test/2024/2024-05-05 Test Session.mp4",
+					),
+					file(
+						"2024-05-06 New Session.mp4",
+						"wasabi/test/2024/2024-05-06 New Session.mp4",
+					),
+				];
+			}
+			if (path === "/aws/sessions/test") {
+				return metadataFiles;
+			}
+			return [];
+		});
+
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.includes(".group-update-cache/test/2024.json")) {
+				return JSON.stringify({
+					fingerprint: "stale-combined-fingerprint",
+					metadataFingerprint: JSON.stringify(metadataFingerprint),
+					metadata: {
+						items: [
+							file(
+								"2024-05-05 Test Session.png",
+								"/aws/sessions/test/2024/2024-05-05 Test Session.png",
+							),
+						],
+						tags: { "2024-05-05 Test Session": ["cached-tag"] },
+						durations: { "2024-05-05 Test Session": 999 },
+						summaries: { "2024-05-05 Test Session": "Cached summary" },
+						transcriptions: { "2024-05-05 Test Session": true },
+					},
+				});
+			}
+			return "";
+		});
+
+		await updateGroupProcess("test", true, false);
+
+		expect(fetchSessionMetadata).not.toHaveBeenCalled();
+		const [, , sessions] = updateYearSync.mock.calls[0];
+		expect(sessions[0].tags).toEqual(["cached-tag"]);
+		expect(sessions[0].duration).toBe(999);
+		expect(sessions[0].summaryText).toBe("Cached summary");
+	});
+
+	it("skips remote metadata fetch on forceUpdate when metadata fingerprint is unchanged", async () => {
+		const metadataFingerprint = [
+			{ name: "2024.tags", type: "", size: 100, mtimeMs: 1 },
+			{ name: "2024.duration", type: "", size: 100, mtimeMs: 1 },
+			{ name: "2024.md", type: "", size: 100, mtimeMs: 1 },
+			{ name: "2024.zip", type: "", size: 100, mtimeMs: 1 },
+		];
+
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
+			}
+			if (path === "wasabi/test/2024") {
+				return [
+					file(
+						"2024-05-05 Test Session.mp4",
+						"wasabi/test/2024/2024-05-05 Test Session.mp4",
+					),
+				];
+			}
+			if (path === "/aws/sessions/test") {
+				return [
+					{ name: "2024.tags", size: 100, mtimeMs: 1 },
+					{ name: "2024.duration", size: 100, mtimeMs: 1 },
+					{ name: "2024.md", size: 100, mtimeMs: 1 },
+					{ name: "2024.zip", size: 100, mtimeMs: 1 },
+				];
+			}
+			return [];
+		});
+
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.includes(".group-update-cache/test/2024.json")) {
+				return JSON.stringify({
+					fingerprint: "stale-combined-fingerprint",
+					metadataFingerprint: JSON.stringify(metadataFingerprint),
+					metadata: {
+						items: [],
+						tags: { "2024-05-05 Test Session": ["forced-cache"] },
+						durations: { "2024-05-05 Test Session": 555 },
+						summaries: {},
+						transcriptions: {},
+					},
+				});
+			}
+			return "";
+		});
+
+		await updateGroupProcess("test", true, true);
+
+		expect(fetchSessionMetadata).not.toHaveBeenCalled();
+		const [, , sessions] = updateYearSync.mock.calls[0];
+		expect(sessions[0].tags).toEqual(["forced-cache"]);
+		expect(sessions[0].duration).toBe(555);
+	});
+
+	it("fetches remote metadata when metadata fingerprint changes", async () => {
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
+			}
+			if (path === "wasabi/test/2024") {
+				return [
+					file(
+						"2024-05-05 Test Session.mp4",
+						"wasabi/test/2024/2024-05-05 Test Session.mp4",
+					),
+				];
+			}
+			if (path === "/aws/sessions/test") {
+				return [{ name: "2024.tags", size: 200, mtimeMs: 2 }];
+			}
+			return [];
+		});
+
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.includes(".group-update-cache/test/2024.json")) {
+				return JSON.stringify({
+					fingerprint: "old",
+					metadataFingerprint: JSON.stringify([
+						{ name: "2024.tags", type: "", size: 100, mtimeMs: 1 },
+					]),
+					metadata: {
+						items: [],
+						tags: { "2024-05-05 Test Session": ["stale"] },
+						durations: {},
+						summaries: {},
+						transcriptions: {},
+					},
+				});
+			}
+			return "";
+		});
+
+		await updateGroupProcess("test", true, false);
+
+		expect(fetchSessionMetadata).toHaveBeenCalledTimes(1);
 	});
 });

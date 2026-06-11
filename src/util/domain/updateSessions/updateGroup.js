@@ -159,6 +159,31 @@ function getCombinedYearFingerprint(yearItems, metadataFingerprint) {
 	});
 }
 
+function serializeMetadataFingerprint(metadataFingerprint) {
+	return JSON.stringify(metadataFingerprint);
+}
+
+function normalizeMetadataPayload(metadata) {
+	return {
+		items: metadata?.items || [],
+		tags: metadata?.tags || {},
+		durations: metadata?.durations || {},
+		summaries: metadata?.summaries || {},
+		transcriptions: metadata?.transcriptions || {},
+	};
+}
+
+function getMetadataFromYearCache(yearCache, metadataFingerprint) {
+	if (!yearCache?.metadata) {
+		return null;
+	}
+	const fingerprintKey = serializeMetadataFingerprint(metadataFingerprint);
+	if (yearCache.metadataFingerprint !== fingerprintKey) {
+		return null;
+	}
+	return normalizeMetadataPayload(yearCache.metadata);
+}
+
 function getYearCachePath(groupName, yearName) {
 	return makePath(GROUP_UPDATE_CACHE_PATH, groupName, `${yearName}.json`);
 }
@@ -177,7 +202,13 @@ async function readYearCache(groupName, yearName) {
 	}
 }
 
-async function writeYearCache(groupName, yearName, fingerprint) {
+async function writeYearCache(
+	groupName,
+	yearName,
+	fingerprint,
+	metadataFingerprint,
+	metadata,
+) {
 	try {
 		const path = getYearCachePath(groupName, yearName);
 		await storage.createFolderPath(path);
@@ -185,6 +216,8 @@ async function writeYearCache(groupName, yearName, fingerprint) {
 			path,
 			JSON.stringify({
 				fingerprint,
+				metadataFingerprint: serializeMetadataFingerprint(metadataFingerprint),
+				metadata: normalizeMetadataPayload(metadata),
 				updatedAt: Date.now(),
 			}),
 		);
@@ -333,15 +366,30 @@ async function getYearMetadata(
 	metadataFingerprint,
 ) {
 	const awsPath = makePath("aws/sessions", name);
+	const yearCache = await readYearCache(name, year.name);
+	const cachedFromYearCache = getMetadataFromYearCache(
+		yearCache,
+		metadataFingerprint,
+	);
+	if (cachedFromYearCache) {
+		return cachedFromYearCache;
+	}
+
+	const fingerprintKey = serializeMetadataFingerprint(metadataFingerprint);
+	const yearCacheFingerprintMatches =
+		yearCache?.metadataFingerprint === fingerprintKey;
+
 	if (!forceUpdate) {
-		const cached = await loadCachedYearMetadata(
-			name,
-			year.name,
-			isMerged,
-			isBundled,
-		);
-		if (cached) {
-			return cached;
+		if (!yearCache || yearCacheFingerprintMatches) {
+			const cached = await loadCachedYearMetadata(
+				name,
+				year.name,
+				isMerged,
+				isBundled,
+			);
+			if (cached) {
+				return cached;
+			}
 		}
 	}
 
@@ -352,13 +400,7 @@ async function getYearMetadata(
 			metadataFingerprint,
 			forceUpdate,
 		);
-		return {
-			items: metadata?.items || [],
-			tags: metadata?.tags || {},
-			durations: metadata?.durations || {},
-			summaries: metadata?.summaries || {},
-			transcriptions: metadata?.transcriptions || {},
-		};
+		return normalizeMetadataPayload(metadata);
 	} catch (err) {
 		console.warn(
 			`[UpdateGroup] Aggregated metadata fetch failed for ${name}/${year.name}; falling back to legacy metadata reads`,
@@ -824,7 +866,19 @@ export async function updateGroupProcess(
 						});
 					}
 				}
-				await writeYearCache(name, year.name, yearFingerprint);
+				await writeYearCache(
+					name,
+					year.name,
+					yearFingerprint,
+					metadataFingerprint,
+					{
+						items: metadataYearItems,
+						tags: sessionTagsMap,
+						durations: sessionDurationMap,
+						summaries: sessionSummariesMap,
+						transcriptions: sessionTranscriptionMap,
+					},
+				);
 			} catch (err) {
 				console.error(err);
 				UpdateSessionsStore.update((s) => {
