@@ -1,19 +1,9 @@
 import { binaryToString } from "@util/data/binary";
-import {
-	fetchBlob,
-	fetchJSON,
-	fetchText,
-	getStableFetchCacheOptions,
-} from "@util/api/fetch";
+import { fetchJSON } from "@util/api/fetch";
 import { isBinaryFile, makePath } from "@util/data/path";
 import pLimit from "p-limit";
 
 const fsEndPoint = "/api/aws";
-const STABLE_READ_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-
-function isStableReadPath(path) {
-	return path.replace(/^\//, "").startsWith("sessions/");
-}
 
 async function getListing(path, options = {}) {
 	path = makePath(path)
@@ -98,39 +88,44 @@ async function readFile(path) {
 		.replace(/^\/aws\//, "/")
 		.replace(/^aws\//, "");
 	const binary = isBinaryFile(path);
-	let body = null;
-	const cacheOptions = isStableReadPath(path)
-		? getStableFetchCacheOptions(STABLE_READ_CACHE_TTL_MS)
-		: {};
-	if (binary) {
-		const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
-		body = await fetchBlob(`${fsEndPoint}?path=${encodedPath}&binary=true`, {
-			method: "GET",
-			cache: isStableReadPath(path) ? "default" : "no-store",
-		});
-		// Check if we accidentally received a directory listing
-		if (Array.isArray(body)) {
-			throw new Error(`Cannot read directory as file: ${path}`);
-		}
-		body = binaryToString(body);
-		return body;
-	} else {
-		const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
-		body = await fetchText(`${fsEndPoint}?path=${encodedPath}&type=file`, {
-			method: "GET",
-			cache: isStableReadPath(path) ? "default" : "no-store",
-			...cacheOptions,
-		});
-		// Check if we accidentally received a directory listing (JSON array)
+	const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
+	const url = `${fsEndPoint}?path=${encodedPath}`;
+
+	const res = await fetch(url, { method: "GET", cache: "no-store" });
+
+	if (!res.ok) {
+		throw new Error(`Failed to fetch file: ${res.status}`);
+	}
+
+	const contentType = res.headers.get("content-type") || "";
+	if (contentType.includes("application/json")) {
+		const text = await res.text();
 		try {
-			const _parsed = JSON.parse(body);
-			// Relaxed check: valid text files can be arrays (e.g. .tags), so we don't throw here.
-			// rely on exists() to filter directories.
-		} catch {
-			// Not JSON or not an array, which is expected for normal files
+			const parsed = JSON.parse(text);
+			if (parsed?.signedUrl) {
+				const signedRes = await fetch(parsed.signedUrl);
+				if (!signedRes.ok) {
+					throw new Error(`Failed to fetch from signed URL: ${signedRes.status}`);
+				}
+				if (binary) {
+					const blob = await signedRes.blob();
+					return binaryToString(blob);
+				}
+				return await signedRes.text();
+			}
+			if (Array.isArray(parsed)) {
+				throw new Error(`Cannot read directory as file: ${path}`);
+			}
+		} catch (e) {
+			if (e.message?.startsWith("Cannot read directory")) throw e;
 		}
 	}
-	return body;
+
+	if (binary) {
+		const blob = await res.blob();
+		return binaryToString(blob);
+	}
+	return await res.text();
 }
 
 async function readFiles(prefix, files) {

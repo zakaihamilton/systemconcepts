@@ -98,17 +98,12 @@ async function handleAWS(request) {
 			}
 		}
 
-		// For file GET requests, choose proxy vs. redirect based on CORS context:
-		// - "cors" mode = fetch() call from JS → must proxy (S3 won't send CORS headers)
-		// - "no-cors" / "navigate" / absent = media element or direct nav → safe to redirect
 		if (request.method === "GET") {
 			const query = Object.fromEntries(url.searchParams.entries());
 			const exists = query.exists || request.headers.get("exists");
 			const type = query.type || request.headers.get("type");
-			const fetchMode = request.headers.get("sec-fetch-mode");
-			const isCORSFetch = fetchMode === "cors";
 
-			if (!exists && type !== "dir" && !isCORSFetch) {
+			if (!exists && type !== "dir") {
 				const downloadUrl = await getDownloadUrl({ path });
 				return NextResponse.redirect(downloadUrl, {
 					status: 307,
@@ -116,7 +111,6 @@ async function handleAWS(request) {
 				});
 			}
 		}
-
 
 		const req = {
 			method: request.method,

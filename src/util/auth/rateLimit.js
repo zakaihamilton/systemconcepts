@@ -2,20 +2,27 @@ import { getCollection } from "@util/storage/mongo";
 
 export async function checkRateLimit(
 	req = {},
-	{ limit = 5, windowMs = 60 * 1000 } = {},
+	{ limit = 5, windowMs = 60 * 1000, key } = {},
 ) {
-	const headers = req.headers || {};
-	const forwarded =
-		req.ip ||
-		(typeof headers.get === "function"
-			? headers.get("x-forwarded-for")
-			: headers["x-forwarded-for"]);
-	const remoteAddress = req.socket?.remoteAddress || "unknown";
-	const ip = forwarded ? String(forwarded).split(",")[0].trim() : remoteAddress;
+	let identifier;
+	if (key) {
+		identifier = String(key);
+	} else {
+		const headers = req.headers || {};
+		const forwarded =
+			req.ip ||
+			(typeof headers.get === "function"
+				? headers.get("x-forwarded-for")
+				: headers["x-forwarded-for"]);
+		const remoteAddress = req.socket?.remoteAddress || "unknown";
+		identifier = forwarded
+			? String(forwarded).split(",")[0].trim()
+			: remoteAddress;
 
-	if (!ip) {
-		console.warn("Could not determine IP for rate limiting");
-		return;
+		if (!identifier) {
+			console.warn("Could not determine IP for rate limiting");
+			return;
+		}
 	}
 
 	const collectionName = "rate_limits";
@@ -23,11 +30,11 @@ export async function checkRateLimit(
 	const collection = await getCollection({ collectionName });
 
 	const record = await collection.findOneAndUpdate(
-		{ ip },
+		{ ip: identifier },
 		[
 			{
 				$set: {
-					ip,
+					ip: identifier,
 					resetTime: {
 						$cond: [
 							{ $gt: ["$resetTime", now] },
@@ -50,9 +57,13 @@ export async function checkRateLimit(
 
 	if (!record) {
 		try {
-			await collection.insertOne({ ip, count: 1, resetTime: now + windowMs });
+			await collection.insertOne({
+				ip: identifier,
+				count: 1,
+				resetTime: now + windowMs,
+			});
 		} catch (_err) {
-			await checkRateLimit(req, { limit, windowMs });
+			await checkRateLimit(req, { limit, windowMs, key });
 		}
 		return;
 	}

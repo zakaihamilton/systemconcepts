@@ -26,6 +26,12 @@ export async function GET(request) {
 				request.headers.get("x-real-ip") ||
 				"";
 			await checkRateLimit({ headers: { "x-forwarded-for": ip } });
+		} else if (hash) {
+			// Limit session refreshes to once per minute per user
+			await checkRateLimit(
+				{ headers: { "x-forwarded-for": id } },
+				{ limit: 1, windowMs: 60 * 1000, key: `refresh:${id}` },
+			);
 		}
 		params = await login({
 			id,
