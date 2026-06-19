@@ -4,6 +4,7 @@ import {
 	getNonNegativeInt,
 	getPositiveInt,
 	JSON_HEADERS,
+	NO_CACHE_HEADERS,
 } from "@util/api/api";
 import {
 	getSProxyUrl,
@@ -15,20 +16,36 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const SESSION_CACHE_HEADERS = {
+	"Cache-Control": "private, max-age=300",
+	"Vercel-CDN-Cache-Control":
+		"public, max-age=300, stale-while-revalidate=3600",
+};
+
+function preventCaching(response) {
+	for (const [name, value] of Object.entries(NO_CACHE_HEADERS)) {
+		response.headers.set(name, value);
+	}
+	return response;
+}
+
 export async function GET(request) {
 	try {
 		const rateLimitResponse = await enforceRateLimit(request, {
 			limit: 60,
 			windowMs: 60 * 1000,
 		});
-		if (rateLimitResponse) return rateLimitResponse;
+		if (rateLimitResponse) return preventCaching(rateLimitResponse);
 
 		const { searchParams } = new URL(request.url);
 		const user = await authenticateTokenRequest(searchParams);
 		if (!user) {
 			return NextResponse.json(
 				{ err: "Unauthorized. Access denied." },
-				{ status: 403, headers: JSON_HEADERS },
+				{
+					status: 403,
+					headers: { ...JSON_HEADERS, ...NO_CACHE_HEADERS },
+				},
 			);
 		}
 
@@ -92,7 +109,7 @@ export async function GET(request) {
 			status: 200,
 			headers: {
 				...JSON_HEADERS,
-				"Cache-Control": "private, max-age=300, stale-while-revalidate=3600",
+				...SESSION_CACHE_HEADERS,
 			},
 		});
 	} catch (err) {
@@ -101,7 +118,10 @@ export async function GET(request) {
 			JSON.stringify({ err: "Error generating sessions JSON API" }),
 			{
 				status: 500,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					...NO_CACHE_HEADERS,
+				},
 			},
 		);
 	}
