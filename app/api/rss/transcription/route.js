@@ -2,6 +2,7 @@ import { downloadData, validatePathAccess } from "@util/storage/aws";
 import { getZipTextEntryId } from "@util/domain/updateSessions/metadataParser";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
+import { NO_STORE_HEADERS, TRANSCRIPT_CACHE_HEADERS } from "../cache";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,10 @@ export async function GET(request) {
 		validatePathAccess(zipPath);
 		validatePathAccess(fileName);
 		if (!zipPath.endsWith(".zip") || fileName.includes("/")) {
-			return new NextResponse("Invalid Path", { status: 400 });
+			return new NextResponse("Invalid Path", {
+				status: 400,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 
 		const blob = await downloadData({ path: zipPath, binary: true });
@@ -51,11 +55,14 @@ export async function GET(request) {
 			status: 200,
 			headers: {
 				"Content-Type": "text/plain",
-				"Cache-Control": "private, max-age=86400, stale-while-revalidate=604800",
+				...TRANSCRIPT_CACHE_HEADERS,
 			},
 		});
 	} catch (err) {
 		console.error("[RSS Transcription Proxy] Unexpected error:", err);
-		return new NextResponse("Not Found", { status: 404 });
+		return new NextResponse("Not Found", {
+			status: 404,
+			headers: NO_STORE_HEADERS,
+		});
 	}
 }

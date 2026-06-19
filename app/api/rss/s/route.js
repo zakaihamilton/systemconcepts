@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MEDIA_CACHE_HEADERS, NO_STORE_HEADERS } from "../cache";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -121,14 +122,23 @@ async function handleRequest(request) {
 		const { searchParams } = new URL(request.url);
 		let base64str = searchParams.get("p") || "";
 		if (!base64str) {
-			return new NextResponse("Not Found", { status: 404 });
+			return new NextResponse("Not Found", {
+				status: 404,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 		if (base64str.length > 2048) {
-			return new NextResponse("Invalid Path", { status: 400 });
+			return new NextResponse("Invalid Path", {
+				status: 400,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 
 		if (!/^[A-Za-z0-9_-]+$/.test(base64str)) {
-			return new NextResponse("Invalid Path", { status: 400 });
+			return new NextResponse("Invalid Path", {
+				status: 400,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 
 		base64str = base64str.replace(/-/g, "+").replace(/_/g, "/");
@@ -140,19 +150,28 @@ async function handleRequest(request) {
 		try {
 			path = atob(base64str);
 		} catch (_e) {
-			return new NextResponse("Invalid Path", { status: 400 });
+			return new NextResponse("Invalid Path", {
+				status: 400,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 
 		path = path.startsWith("/") ? path.substring(1) : path;
 		if (!path || path.includes("\0")) {
-			return new NextResponse("Invalid Path", { status: 400 });
+			return new NextResponse("Invalid Path", {
+				status: 400,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 		try {
 			validatePathAccess(
 				path.startsWith("wasabi/") ? path.replace(/^wasabi\//, "") : path,
 			);
 		} catch (_err) {
-			return new NextResponse("Access Denied", { status: 403 });
+			return new NextResponse("Access Denied", {
+				status: 403,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 
 		let s3Key = path;
@@ -222,7 +241,7 @@ async function handleRequest(request) {
 						"Accept-Ranges": "bytes",
 						"Last-Modified": headRes.headers.get("Last-Modified") || "",
 						ETag: headRes.headers.get("ETag") || "",
-						"Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
+						...MEDIA_CACHE_HEADERS,
 					},
 				});
 			} catch (err) {
@@ -245,12 +264,15 @@ async function handleRequest(request) {
 			status: 302,
 			headers: {
 				Location: signedStr,
-				"Cache-Control": "public, max-age=72000, s-maxage=72000",
+				...MEDIA_CACHE_HEADERS,
 			},
 		});
 	} catch (err) {
 		console.error("[RSS S Proxy] Unexpected error:", err);
-		return new NextResponse("Error generating media URL", { status: 500 });
+		return new NextResponse("Error generating media URL", {
+			status: 500,
+			headers: NO_STORE_HEADERS,
+		});
 	}
 }
 

@@ -10,6 +10,7 @@
 
 import { authenticateTokenRequest } from "@util/api/api";
 import { NextResponse } from "next/server";
+import { NO_STORE_HEADERS } from "../cache";
 
 export const dynamic = "force-dynamic";
 
@@ -18,14 +19,17 @@ export async function POST(request) {
 	const expectedKey = process.env.AWS_SECRET;
 
 	if (!internalKey || !expectedKey || internalKey !== expectedKey) {
-		return new NextResponse(null, { status: 403 });
+		return new NextResponse(null, {
+			status: 403,
+			headers: NO_STORE_HEADERS,
+		});
 	}
 
 	try {
 		const body = await request.json();
 		const { id, token } = body || {};
 		if (!id || !token) {
-			return NextResponse.json({ ok: false });
+			return NextResponse.json({ ok: false }, { headers: NO_STORE_HEADERS });
 		}
 
 		const params = new URLSearchParams({
@@ -33,9 +37,15 @@ export async function POST(request) {
 			token: String(token),
 		});
 		const user = await authenticateTokenRequest(params);
-		return NextResponse.json({ ok: !!user });
+		return NextResponse.json(
+			{ ok: !!user },
+			{ headers: NO_STORE_HEADERS },
+		);
 	} catch (err) {
 		console.error("[RSS Verify] Unexpected error:", err);
-		return NextResponse.json({ ok: false });
+		return NextResponse.json(
+			{ ok: false },
+			{ headers: NO_STORE_HEADERS },
+		);
 	}
 }

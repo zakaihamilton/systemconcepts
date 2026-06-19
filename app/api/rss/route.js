@@ -14,6 +14,7 @@ import {
 	sortSessions,
 } from "@util/domain/sessionFeedEdge";
 import { NextResponse } from "next/server";
+import { FEED_CACHE_HEADERS, NO_STORE_HEADERS } from "./cache";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -112,7 +113,10 @@ export async function GET(request) {
 
 		const authenticated = await authenticateEdge(searchParams);
 		if (!authenticated) {
-			return new NextResponse("Unauthorized", { status: 403 });
+			return new NextResponse("Unauthorized", {
+				status: 403,
+				headers: NO_STORE_HEADERS,
+			});
 		}
 
 		const sessions = sortSessions(await getSessions({ group })).slice(0, count);
@@ -250,8 +254,8 @@ export async function GET(request) {
 				status: 304,
 				headers: {
 					ETag: `"${etag}"`,
-					"Cache-Control":
-						"public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
+					"Last-Modified": maxDate,
+					...FEED_CACHE_HEADERS,
 				},
 			});
 		}
@@ -266,13 +270,15 @@ export async function GET(request) {
 				"Content-Length": encoded.byteLength.toString(),
 				ETag: `"${etag}"`,
 				"Last-Modified": maxDate,
-				"Cache-Control":
-					"public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
+				...FEED_CACHE_HEADERS,
 				"Accept-Ranges": "bytes",
 			},
 		});
 	} catch (err) {
 		console.error("RSS Error:", err);
-		return new NextResponse("Error generating RSS feed", { status: 500 });
+		return new NextResponse("Error generating RSS feed", {
+			status: 500,
+			headers: NO_STORE_HEADERS,
+		});
 	}
 }
