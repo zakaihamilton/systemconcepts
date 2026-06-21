@@ -4,6 +4,7 @@ import {
 	ListObjectsV2Command,
 	S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { lockMutex } from "@sync/mutex";
 import { validatePathAccess } from "@util/storage/aws";
 
@@ -38,6 +39,20 @@ export async function getWasabi() {
 function normalizePath(path) {
 	if (!path) return path;
 	return path.startsWith("/") ? path.substring(1) : path;
+}
+
+export async function getDownloadUrl({ path }) {
+	validatePathAccess(path);
+	const { client, bucket } = await getWasabi();
+	const key = normalizePath(path);
+	const command = new GetObjectCommand({
+		Bucket: bucket,
+		Key: key,
+	});
+
+	return await getSignedUrl(client, command, {
+		expiresIn: 3600,
+	});
 }
 
 export async function downloadData({ path, binary }) {

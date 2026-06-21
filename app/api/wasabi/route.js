@@ -1,11 +1,17 @@
 import parseCookie from "@util/api/cookie";
+import { getSafeError } from "@util/api/safeError";
 import { login } from "@util/auth/login";
 import { roleAuth } from "@util/auth/roles";
-import { getSafeError } from "@util/api/safeError";
-import { handleRequest } from "@util/storage/wasabi";
+import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+const NO_CACHE_HEADERS = {
+	"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+	Pragma: "no-cache",
+	Expires: "0",
+};
 
 export async function GET(request) {
 	try {
@@ -22,6 +28,20 @@ export async function GET(request) {
 		const user = await login({ id, hash, api: "wasabi", path });
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
+		const isDir =
+			url.searchParams.get("type") === "dir" ||
+			request.headers.get("type") === "dir";
+		const isExists =
+			url.searchParams.get("exists") || request.headers.get("exists");
+
+		if (!isDir && !isExists) {
+			const downloadUrl = await getDownloadUrl({ path });
+			return NextResponse.redirect(downloadUrl, {
+				status: 307,
+				headers: NO_CACHE_HEADERS,
+			});
+		}
+
 		const req = {
 			method: "GET",
 			headers: Object.fromEntries(request.headers.entries()),
@@ -29,24 +49,7 @@ export async function GET(request) {
 		};
 
 		const result = await handleRequest({ req, path });
-
-		const isDir =
-			url.searchParams.get("type") === "dir" ||
-			request.headers.get("type") === "dir";
-		const isExists =
-			url.searchParams.get("exists") || request.headers.get("exists");
-
-		const cacheHeader =
-			path.startsWith("sessions/") && !isDir && !isExists
-				? { "Cache-Control": "public, max-age=31536000, immutable" }
-				: {
-						"Cache-Control":
-							"no-store, no-cache, must-revalidate, proxy-revalidate",
-						Pragma: "no-cache",
-						Expires: "0",
-					};
-
-		const headers = new Headers(cacheHeader);
+		const headers = new Headers(NO_CACHE_HEADERS);
 
 		if (Buffer.isBuffer(result)) {
 			return new NextResponse(result, { status: 200, headers });
@@ -56,6 +59,9 @@ export async function GET(request) {
 			return new NextResponse(result, { status: 200, headers });
 		}
 	} catch (err) {
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: 403, headers: NO_CACHE_HEADERS },
+		);
 	}
 }
