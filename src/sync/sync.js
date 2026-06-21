@@ -30,6 +30,12 @@ import { updateLocalManifest } from "./steps/updateLocalManifest";
 import { uploadManifest } from "./steps/uploadManifest";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { uploadUpdates } from "./steps/uploadUpdates";
+import {
+	clearLegacySyncStorage,
+	clearUserSyncStorage,
+	getUserSyncStorageKey,
+	normalizeSyncUserId,
+} from "./userStorage";
 
 export const AUTO_SYNC_INTERVAL_MS = 12 * 60 * 1000;
 export const AUTO_SYNC_JITTER_MS = 60 * 1000;
@@ -40,7 +46,8 @@ function getCurrentVersion() {
 
 function getAutoSyncJitter() {
 	if (typeof window === "undefined") return 0;
-	const storageKey = "sync_autoSyncJitter";
+	const storageKey = getUserSyncStorageKey("sync_autoSyncJitter");
+	if (!storageKey) return 0;
 	const stored = Number.parseInt(localStorage.getItem(storageKey) || "", 10);
 	if (Number.isFinite(stored) && stored >= 0) return stored;
 	const jitter = Math.floor(Math.random() * AUTO_SYNC_JITTER_MS);
@@ -51,14 +58,16 @@ function getAutoSyncJitter() {
 function shouldRunInitialAutoSync() {
 	if (typeof window === "undefined") return false;
 	const version = getCurrentVersion();
-	const lastVersion = localStorage.getItem("sync_lastVersion");
+	const storageKey = getUserSyncStorageKey("sync_lastVersion");
+	const lastVersion = storageKey ? localStorage.getItem(storageKey) : null;
 	const lastSyncTime = SyncActiveStore.getRawState().lastSyncTime;
 	return lastSyncTime === 0 || lastVersion !== version;
 }
 
 function persistAutoSyncVersion() {
 	if (typeof window !== "undefined") {
-		localStorage.setItem("sync_lastVersion", getCurrentVersion());
+		const storageKey = getUserSyncStorageKey("sync_lastVersion");
+		if (storageKey) localStorage.setItem(storageKey, getCurrentVersion());
 	}
 }
 
@@ -78,7 +87,11 @@ export async function getReadOnlyManifestFreshness(config, userid) {
 	if (typeof window === "undefined" || config.migration) return null;
 	const resolvedRemotePath = config.remotePath.replace("{userid}", userid);
 	const manifestPath = makePath(resolvedRemotePath, FILES_MANIFEST_GZ);
-	const storageKey = `sync_manifest_signature:${resolvedRemotePath}`;
+	const storageKey = getUserSyncStorageKey(
+		`sync_manifest_signature:${resolvedRemotePath}`,
+		userid,
+	);
+	if (!storageKey) return null;
 	try {
 		const manifest = await readCompressedFile(manifestPath);
 		if (!manifest || !manifest.length) return null;
@@ -476,7 +489,7 @@ export async function performSync(forceReload) {
 	try {
 		console.log(`[Sync] Version: ${process.env.NEXT_PUBLIC_VERSION}`);
 		let role = Cookies.get("role");
-		const id = Cookies.get("id");
+		const id = normalizeSyncUserId(Cookies.get("id"));
 		const hash = Cookies.get("hash");
 
 		if (!role && id && hash) {
@@ -541,7 +554,7 @@ export async function performSync(forceReload) {
 				SyncActiveStore.update((s) => {
 					s.busy = false; // FIX: Reset busy state
 				});
-				return;
+				return { completed: false, reason: "unauthorized" };
 			}
 		}
 
@@ -619,6 +632,7 @@ export async function performSync(forceReload) {
 				s.busy = false;
 			});
 		}
+		return { completed: true };
 	} catch (err) {
 		console.error("[Sync] Sync failed:", err);
 		let errorMessage = err.message || String(err);
@@ -678,12 +692,18 @@ export async function requestSync(forceReload) {
 		s.busy = true;
 		s.stopping = false; // Reset stopping state
 		s.startTime = Date.now();
-		s.lastSyncTime = Date.now(); // Track when we started this sync
 		s.logs = [];
 	});
 
 	try {
-		await performSync(forceReload);
+		const result = await performSync(forceReload);
+		if (!result?.completed) {
+			SyncActiveStore.update((s) => {
+				s.busy = false;
+				s.phase = null;
+			});
+			return result;
+		}
 
 		const endTime = Date.now();
 		const syncDuration = endTime - SyncActiveStore.getRawState().startTime;
@@ -691,6 +711,7 @@ export async function requestSync(forceReload) {
 		SyncActiveStore.update((s) => {
 			s.busy = false;
 			s.lastSynced = endTime;
+			s.lastSyncTime = endTime;
 			s.lastDuration = syncDuration;
 			s.counter++;
 		});
@@ -810,16 +831,25 @@ export function useSync(options = {}) {
 	return [counter, busy];
 }
 
-export async function clearBundleCache() {
+export async function clearBundleCache({
+	clearPersistedState = true,
+	userId,
+} = {}) {
 	try {
 		addSyncLog("Clearing all sync data...", "warning");
 
 		for (const config of SYNC_CONFIG) {
 			await storage.deleteFolder(config.localPath);
 		}
+		if (clearPersistedState) {
+			clearUserSyncStorage(userId);
+			clearLegacySyncStorage();
+		}
 
 		SyncActiveStore.update((s) => {
 			s.lastSynced = 0;
+			s.lastSyncTime = 0;
+			s.lastDuration = 0;
 			s.counter = 0;
 			s.busy = false; // Reset busy state
 			s.phase = null; // Reset phase

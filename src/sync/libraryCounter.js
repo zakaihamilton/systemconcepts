@@ -3,6 +3,7 @@ import storage from "@util/storage/storage";
 import { LIBRARY_COUNTER_FILE, LIBRARY_LOCAL_PATH } from "./constants";
 import { lockMutex } from "./mutex";
 import { SyncActiveStore } from "./syncState";
+import { getUserSyncStorageKey } from "./userStorage";
 
 export const LIBRARY_COUNTER_STORAGE_KEY = "sync_libraryCounter";
 
@@ -28,16 +29,16 @@ export function getSavedLibraryCounter() {
 		return null;
 	}
 
-	const saved = Number.parseInt(
-		localStorage.getItem(LIBRARY_COUNTER_STORAGE_KEY) || "",
-		10,
-	);
+	const storageKey = getUserSyncStorageKey(LIBRARY_COUNTER_STORAGE_KEY);
+	if (!storageKey) return null;
+	const saved = Number.parseInt(localStorage.getItem(storageKey) || "", 10);
 	return Number.isFinite(saved) ? saved : null;
 }
 
 export function saveLibraryCounter(counter) {
-	if (typeof window !== "undefined" && Number.isFinite(counter)) {
-		localStorage.setItem(LIBRARY_COUNTER_STORAGE_KEY, String(counter));
+	const storageKey = getUserSyncStorageKey(LIBRARY_COUNTER_STORAGE_KEY);
+	if (typeof window !== "undefined" && storageKey && Number.isFinite(counter)) {
+		localStorage.setItem(storageKey, String(counter));
 	}
 }
 
