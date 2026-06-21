@@ -1,16 +1,17 @@
 import { getMutex, isMutexLocked, lockMutex } from "@sync/mutex";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { fetchJSON } from "@util/api/fetch";
+import { roleAuth } from "@util/auth/roles";
 import { usePageVisibility } from "@util/browser/hooks";
 import { useOnline } from "@util/browser/online";
 import { makePath } from "@util/data/path";
-import { roleAuth } from "@util/auth/roles";
 import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { readCompressedFile } from "./bundle";
 import { SYNC_CONFIG } from "./config";
 import { FILES_MANIFEST, FILES_MANIFEST_GZ } from "./constants";
+import { findMissingManifestFiles } from "./freshness";
 import {
 	getSavedLibraryCounter,
 	readLibraryCounter,
@@ -73,7 +74,7 @@ function getManifestSignature(manifest) {
 	);
 }
 
-async function getReadOnlyManifestFreshness(config, userid) {
+export async function getReadOnlyManifestFreshness(config, userid) {
 	if (typeof window === "undefined" || config.migration) return null;
 	const resolvedRemotePath = config.remotePath.replace("{userid}", userid);
 	const manifestPath = makePath(resolvedRemotePath, FILES_MANIFEST_GZ);
@@ -83,10 +84,31 @@ async function getReadOnlyManifestFreshness(config, userid) {
 		if (!manifest || !manifest.length) return null;
 		const signature = getManifestSignature(manifest);
 		const previousSignature = localStorage.getItem(storageKey);
+		const missingLocalFiles = [];
+		if (previousSignature === signature) {
+			missingLocalFiles.push(
+				...(await findMissingManifestFiles(manifest, config.localPath, (path) =>
+					storage.exists(path),
+				)),
+			);
+		}
+		const fresh =
+			previousSignature === signature && missingLocalFiles.length === 0;
+		if (missingLocalFiles.length > 0) {
+			addSyncLog(
+				`${config.name} manifest is unchanged but ${missingLocalFiles.length} local file(s) are missing; repairing`,
+				"warning",
+			);
+			console.warn(
+				`[Sync] ${config.name} local integrity check found missing files:`,
+				missingLocalFiles,
+			);
+		}
 		return {
-			fresh: previousSignature === signature,
+			fresh,
 			signature,
 			storageKey,
+			missingLocalFiles,
 		};
 	} catch (err) {
 		console.warn(
@@ -439,7 +461,11 @@ async function executeSyncPipeline(
 	}
 
 	// Return the new offset for the next phase
-	return { hasChanges, newOffset: progress.getCurrentOffset() };
+	return {
+		hasChanges,
+		complete: downloadResult.complete,
+		newOffset: progress.getCurrentOffset(),
+	};
 }
 
 /**
@@ -545,11 +571,7 @@ export async function performSync(forceReload) {
 				!forceReload && !canUploadForConfig
 					? await getReadOnlyManifestFreshness(config, id)
 					: null;
-			if (
-				!forceReload &&
-				!canUploadForConfig &&
-				readOnlyFreshness?.fresh
-			) {
+			if (!forceReload && !canUploadForConfig && readOnlyFreshness?.fresh) {
 				addSyncLog(`${config.name} manifest unchanged; skipping sync`, "info");
 				continue;
 			}
@@ -565,7 +587,14 @@ export async function performSync(forceReload) {
 			);
 			currentOffset = result.newOffset;
 			hasAnyChanges = hasAnyChanges || result.hasChanges;
-			persistManifestSignature(readOnlyFreshness);
+			if (result.complete) {
+				persistManifestSignature(readOnlyFreshness);
+			} else {
+				addSyncLog(
+					`${config.name} sync incomplete; pending files will be retried`,
+					"warning",
+				);
+			}
 
 			if (config.name === "Library" && result.hasChanges) {
 				SyncActiveStore.update((s) => {
@@ -758,7 +787,10 @@ export function useSync(options = {}) {
 			}
 		}
 
-		timerRef.current = setInterval(checkSync, Math.max(60 * 1000, AUTO_SYNC_INTERVAL_MS / 2));
+		timerRef.current = setInterval(
+			checkSync,
+			Math.max(60 * 1000, AUTO_SYNC_INTERVAL_MS / 2),
+		);
 
 		return () => {
 			if (timerRef.current) {
