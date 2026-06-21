@@ -228,7 +228,7 @@ async function downloadFile(
 	} catch (err) {
 		console.error(`[Sync] Failed to download ${fileBasename}:`, err);
 		addSyncLog(`Failed to download: ${fileBasename}`, "error");
-		return null;
+		return { failed: true, path: remoteFile.path };
 	}
 }
 
@@ -253,6 +253,7 @@ export async function downloadUpdates(
 		const toDownload = [];
 		const createdFolders = new Set();
 		const missingOnRemote = [];
+		const failedDownloads = [];
 		const updates = [];
 
 		// Collect files that need downloading
@@ -310,7 +311,10 @@ export async function downloadUpdates(
 				"[Sync] Comparison complete, nothing to download. Remote Manifest:",
 				JSON.stringify(remoteManifest),
 			);
-			const updatedManifest = await applyManifestUpdates(localManifest, updates);
+			const updatedManifest = await applyManifestUpdates(
+				localManifest,
+				updates,
+			);
 			if (updates.length > 0) {
 				const manifestPath = makePath(localPath, FILES_MANIFEST);
 				const unlock = await lockMutex({ id: manifestPath });
@@ -326,6 +330,7 @@ export async function downloadUpdates(
 			return {
 				manifest: updatedManifest,
 				hasChanges: false,
+				complete: true,
 				cleanedRemoteManifest: remoteManifest,
 			};
 		}
@@ -375,12 +380,14 @@ export async function downloadUpdates(
 					// If download returned null, the file doesn't exist on remote (or read failed)
 					if (result === null) {
 						missingOnRemote.push(remoteFile);
+					} else if (result.failed) {
+						failedDownloads.push(remoteFile);
 					}
 					return result;
 				}),
 			);
 
-			updates.push(...results.filter(Boolean));
+			updates.push(...results.filter((result) => result && !result.failed));
 		}
 
 		// Clean remote manifest if we found missing files
@@ -422,6 +429,7 @@ export async function downloadUpdates(
 
 		// Apply all updates in a single operation
 		const updatedManifest = await applyManifestUpdates(localManifest, updates);
+		const failedCount = missingOnRemote.length + failedDownloads.length;
 
 		// Write updated manifest to disk
 		const manifestPath = makePath(localPath, FILES_MANIFEST);
@@ -440,10 +448,17 @@ export async function downloadUpdates(
 			`✓ Downloaded ${updates.length} file(s) in ${duration}s`,
 			updates.length > 0 ? "success" : "info",
 		);
+		if (failedCount > 0) {
+			addSyncLog(
+				`${failedCount} file(s) were not downloaded and will be retried`,
+				"warning",
+			);
+		}
 
 		return {
 			manifest: updatedManifest,
 			hasChanges: updates.length > 0,
+			complete: failedCount === 0,
 			cleanedRemoteManifest,
 		};
 	} catch (err) {
