@@ -10,6 +10,7 @@ import { addSyncLog } from "@sync/sync";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { readBinary } from "@util/data/binary";
 import { blobToBase64, shrinkImage } from "@util/data/image";
+import pLimit from "@util/data/p-limit";
 import {
 	fileFolder,
 	fileTitle,
@@ -23,7 +24,6 @@ import {
 	makePath,
 } from "@util/data/path";
 import storage from "@util/storage/storage";
-import pLimit from "@util/data/p-limit";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
 import { createSessionItem } from "./mapper";
 import {
@@ -36,7 +36,10 @@ import { fetchSessionMetadata } from "./sessionMetadataClient";
 import { getListing, updateYearSync } from "./utils";
 
 const prefix = "wasabi/";
-const GROUP_UPDATE_CACHE_PATH = makePath(fileFolder(LOCAL_SYNC_PATH), ".group-update-cache");
+const GROUP_UPDATE_CACHE_PATH = makePath(
+	fileFolder(LOCAL_SYNC_PATH),
+	".group-update-cache",
+);
 
 function isYearMetadataFile(file, yearName) {
 	return (
@@ -232,14 +235,35 @@ async function writeYearCache(
 function getCachedSessionsForYear(existingSessions, yearName) {
 	return (existingSessions || []).filter((session) => {
 		const id = session.id || session.name || "";
-		return String(session.year || "").trim() === String(yearName) ||
-			id.startsWith(yearName);
+		return (
+			String(session.year || "").trim() === String(yearName) ||
+			id.startsWith(yearName)
+		);
 	});
 }
 
-async function loadCachedYearSessions(groupName, yearName, isMerged, isBundled) {
+function getSessionYear(session) {
+	const explicitYear = String(session?.year || "").trim();
+	if (/^\d{4}$/.test(explicitYear)) {
+		return explicitYear;
+	}
+	const id = String(session?.id || session?.name || "");
+	const match = id.match(/^(\d{4})/);
+	return match?.[1] || null;
+}
+
+async function loadCachedYearSessions(
+	groupName,
+	yearName,
+	isMerged,
+	isBundled,
+) {
 	if (isMerged || isBundled) return [];
-	const localYearPath = makePath(LOCAL_SYNC_PATH, groupName, `${yearName}.json`);
+	const localYearPath = makePath(
+		LOCAL_SYNC_PATH,
+		groupName,
+		`${yearName}.json`,
+	);
 	return readSessionsFile(localYearPath);
 }
 
@@ -429,7 +453,10 @@ export async function updateGroupProcess(
 	let itemIndex = 0;
 
 	if (targetSessionId) {
-		addSyncLog(`[${name}] Targeted sync requested for session: ${targetSessionId}`, "info");
+		addSyncLog(
+			`[${name}] Targeted sync requested for session: ${targetSessionId}`,
+			"info",
+		);
 	}
 
 	UpdateSessionsStore.update((s) => {
@@ -458,8 +485,10 @@ export async function updateGroupProcess(
 	const allSessions = [];
 	let existingSessions = [];
 
-	// If merged/bundled and incremental update, load existing sessions first to preserve history
-	if ((isMerged || isBundled) && !updateAll) {
+	// Merged and bundled updates always begin with the persisted group. Freshly
+	// processed years are overlaid later, so a partial remote year listing cannot
+	// silently erase historical sessions.
+	if (isMerged || isBundled) {
 		if (isBundled) {
 			const bundlePath = makePath(LOCAL_SYNC_PATH, "bundle.json");
 			try {
@@ -526,6 +555,24 @@ export async function updateGroupProcess(
 		// Abort the process to prevent data corruption (writing empty files)
 		return;
 	}
+
+	if (updateAll && (isMerged || isBundled) && existingSessions.length > 0) {
+		const listedYears = new Set(years.map((year) => String(year.name)));
+		const existingYears = new Set(
+			existingSessions.map(getSessionYear).filter(Boolean),
+		);
+		const missingYears = [...existingYears]
+			.filter((year) => !listedYears.has(year))
+			.sort();
+		if (missingYears.length > 0) {
+			const message =
+				`[${name}] Remote year listing omitted locally stored years ` +
+				`(${missingYears.join(", ")}). Preserving those sessions; retry the full update.`;
+			console.warn(`[UpdateGroup] ${message}`);
+			addSyncLog(message, "warning");
+		}
+	}
+
 	if (!updateAll) {
 		const currentYear = new Date().getFullYear();
 		years = years.filter((year) => {
@@ -578,9 +625,17 @@ export async function updateGroupProcess(
 								isBundled,
 							);
 
-				const isTargetInThisYear = targetSessionId && (cachedYearSessions || []).some(s => s.id === targetSessionId || s.name === targetSessionId);
+				const isTargetInThisYear =
+					targetSessionId &&
+					(cachedYearSessions || []).some(
+						(s) => s.id === targetSessionId || s.name === targetSessionId,
+					);
 
-				if (!forceUpdate && !isTargetInThisYear && cachedYear?.fingerprint === yearFingerprint) {
+				if (
+					!forceUpdate &&
+					!isTargetInThisYear &&
+					cachedYear?.fingerprint === yearFingerprint
+				) {
 					if (cachedYearSessions && cachedYearSessions.length > 0) {
 						if (isMerged || isBundled) {
 							allSessions.push(...cachedYearSessions);
@@ -674,25 +729,59 @@ export async function updateGroupProcess(
 						sortedIds.map((id) =>
 							yearSessionsLimit(async () => {
 								if (targetSessionId && id !== targetSessionId) {
-									const cachedSession = (cachedYearSessions || []).find((s) => s.id === id || s.name === id);
+									const cachedSession = (cachedYearSessions || []).find(
+										(s) => s.id === id || s.name === id,
+									);
 									if (cachedSession) {
 										return cachedSession;
 									}
 								} else if (targetSessionId && id === targetSessionId) {
-									addSyncLog(`[${name}] Force re-fetching metadata for targeted session: ${id}`, "info");
+									addSyncLog(
+										`[${name}] Force re-fetching metadata for targeted session: ${id}`,
+										"info",
+									);
 								}
 
-								const [, , sessionName] = id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
-								let tags = getMetadataValue(sessionTagsMap, id, sessionName) || [];
-								let duration = getMetadataValue(sessionDurationMap, id, sessionName);
-								let summary = getMetadataValue(sessionSummariesMap, id, sessionName);
-								let transcription = getMetadataValue(sessionTranscriptionMap, id, sessionName);
+								const [, , sessionName] =
+									id.trim().match(/(\d+-\d+-\d+) (.*)/) || [];
+								let tags =
+									getMetadataValue(sessionTagsMap, id, sessionName) || [];
+								let duration = getMetadataValue(
+									sessionDurationMap,
+									id,
+									sessionName,
+								);
+								let summary = getMetadataValue(
+									sessionSummariesMap,
+									id,
+									sessionName,
+								);
+								let transcription = getMetadataValue(
+									sessionTranscriptionMap,
+									id,
+									sessionName,
+								);
 								if (targetSessionId && id === targetSessionId) {
-									addSyncLog(`[${name}] Resolved metadata keys - id: "${id}", sessionName: "${sessionName || 'none'}"`, "info");
-									addSyncLog(`[${name}] Resolved tags from S3: ${JSON.stringify(tags)}`, "info");
-									addSyncLog(`[${name}] Resolved duration from S3: ${duration || 'none'}`, "info");
-									addSyncLog(`[${name}] Resolved summary from S3: ${summary ? (summary.substring(0, 80) + '...') : 'none'}`, "info");
-									addSyncLog(`[${name}] Resolved transcription from S3: ${transcription || 'none'}`, "info");
+									addSyncLog(
+										`[${name}] Resolved metadata keys - id: "${id}", sessionName: "${sessionName || "none"}"`,
+										"info",
+									);
+									addSyncLog(
+										`[${name}] Resolved tags from S3: ${JSON.stringify(tags)}`,
+										"info",
+									);
+									addSyncLog(
+										`[${name}] Resolved duration from S3: ${duration || "none"}`,
+										"info",
+									);
+									addSyncLog(
+										`[${name}] Resolved summary from S3: ${summary ? summary.substring(0, 80) + "..." : "none"}`,
+										"info",
+									);
+									addSyncLog(
+										`[${name}] Resolved transcription from S3: ${transcription || "none"}`,
+										"info",
+									);
 								}
 								let transcriptPath = null;
 								const wasabiFiles = wasabiFilesMap[id] || [];
@@ -797,7 +886,10 @@ export async function updateGroupProcess(
 								);
 
 								if (targetSessionId && id === targetSessionId) {
-									addSyncLog(`[${name}] Targeted session metadata updated successfully: ${id}`, "success");
+									addSyncLog(
+										`[${name}] Targeted session metadata updated successfully: ${id}`,
+										"success",
+									);
 								}
 
 								return item;
@@ -855,7 +947,8 @@ export async function updateGroupProcess(
 									files: s.files || [],
 									metadata: {
 										hasTags: Array.isArray(s.tags) && s.tags.length > 0,
-										hasDuration: typeof s.duration === "number" && s.duration > 0.5,
+										hasDuration:
+											typeof s.duration === "number" && s.duration > 0.5,
 										hasSummary: !!s.summaryText || !!s.summary,
 										hasTranscription: !!s.transcription,
 										hasThumbnail: !!s.thumbnail || !!s.image,

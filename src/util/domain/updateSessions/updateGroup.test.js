@@ -1,3 +1,5 @@
+import { writeCompressedFile } from "@sync/bundle";
+import { addSyncLog } from "@sync/sync";
 import { readBinary } from "@util/data/binary";
 import { blobToBase64, shrinkImage } from "@util/data/image";
 import storage from "@util/storage/storage";
@@ -451,5 +453,102 @@ describe("updateGroupProcess", () => {
 		await updateGroupProcess("test", true, false);
 
 		expect(fetchSessionMetadata).toHaveBeenCalledTimes(1);
+	});
+
+	it("preserves older bundled sessions when a full update omits their year", async () => {
+		const oldSession = {
+			id: "2022-01-01 Historical Session",
+			name: "2022-01-01 Historical Session",
+			group: "test",
+			year: "2022",
+		};
+		storage.exists.mockImplementation(async (path) =>
+			path.endsWith("/local/sync/bundle.json"),
+		);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.endsWith("/local/sync/bundle.json")) {
+				return JSON.stringify({ sessions: [oldSession] });
+			}
+			return "";
+		});
+
+		const sessions = await updateGroupProcess("test", true, false, false, true);
+
+		expect(sessions).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: oldSession.id }),
+				expect.objectContaining({ id: "2024-05-05 Test Session" }),
+			]),
+		);
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("omitted locally stored years (2022)"),
+			"warning",
+		);
+	});
+
+	it("preserves older merged sessions when a full update omits their year", async () => {
+		const oldSession = {
+			id: "2022-01-01 Historical Session",
+			name: "2022-01-01 Historical Session",
+			group: "test",
+			year: "2022",
+		};
+		storage.exists.mockImplementation(async (path) =>
+			path.endsWith("/local/sync/test.json"),
+		);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.endsWith("/local/sync/test.json")) {
+				return JSON.stringify({ sessions: [oldSession] });
+			}
+			return "";
+		});
+
+		await updateGroupProcess("test", true, false, true, false);
+
+		expect(writeCompressedFile).toHaveBeenCalledWith(
+			expect.stringMatching(/\/local\/sync\/test\.json$/),
+			expect.objectContaining({
+				sessions: expect.arrayContaining([
+					expect.objectContaining({ id: oldSession.id }),
+					expect.objectContaining({ id: "2024-05-05 Test Session" }),
+				]),
+			}),
+		);
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("omitted locally stored years (2022)"),
+			"warning",
+		);
+	});
+
+	it("does not replace a bundled group when a year fetch fails", async () => {
+		const oldSession = {
+			id: "2022-01-01 Historical Session",
+			name: "2022-01-01 Historical Session",
+			group: "test",
+			year: "2022",
+		};
+		storage.exists.mockImplementation(async (path) =>
+			path.endsWith("/local/sync/bundle.json"),
+		);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.endsWith("/local/sync/bundle.json")) {
+				return JSON.stringify({ sessions: [oldSession] });
+			}
+			return "";
+		});
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [{ name: "2024", type: "dir", path: "wasabi/test/2024" }];
+			}
+			if (path === "wasabi/test/2024") {
+				throw new Error("temporary listing failure");
+			}
+			return [];
+		});
+
+		const sessions = await updateGroupProcess("test", true, false, false, true);
+
+		expect(sessions).toBeUndefined();
+		expect(writeCompressedFile).not.toHaveBeenCalled();
 	});
 });
