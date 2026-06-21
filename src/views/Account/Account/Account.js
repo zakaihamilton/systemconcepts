@@ -21,11 +21,11 @@ import {
 	startRegistration,
 } from "@simplewebauthn/browser";
 import { clearBundleCache } from "@sync/sync";
-import { UpdateSessionsStore } from "@sync/syncState";
+import { loadUserSyncState, UpdateSessionsStore } from "@sync/syncState";
 import { fetchJSON } from "@util/api/fetch";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import Input from "@widgets/Input";
 import clsx from "clsx";
 import Cookies from "js-cookie";
@@ -172,6 +172,7 @@ export default function Account({ redirect }) {
 				if (verification.role) {
 					Cookies.set("role", verification.role, remember && { expires: 60 });
 				}
+				loadUserSyncState(id);
 				if (redirect) {
 					setHash(decodeURIComponent(redirect));
 				} else {
@@ -200,7 +201,7 @@ export default function Account({ redirect }) {
 			idState[1]("");
 
 			// Clear bundle cache on logout
-			await clearBundleCache();
+			await clearBundleCache({ userId });
 			await storage.deleteFolder("local");
 
 			UpdateSessionsStore.update((s) => {
@@ -234,6 +235,7 @@ export default function Account({ redirect }) {
 							data.role || "visitor",
 							remember && { expires: 60 },
 						);
+						loadUserSyncState(id);
 
 						if (createPasskey) {
 							try {

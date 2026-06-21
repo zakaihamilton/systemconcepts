@@ -1,4 +1,6 @@
+import Cookies from "js-cookie";
 import { Store } from "pullstate";
+import { clearLegacySyncStorage, getUserSyncStorageKey } from "./userStorage";
 
 export const SyncActiveStore = new Store({
 	active: 0,
@@ -29,7 +31,28 @@ export const UpdateSessionsStore = new Store({
 	showUpdateDialog: false,
 });
 
+export function loadUserSyncState(userId = Cookies.get("id")) {
+	if (typeof window === "undefined") return;
+	clearLegacySyncStorage();
+	const storageKey = getUserSyncStorageKey("sync_lastSyncTime", userId);
+	const lastSyncTime = Number.parseInt(
+		(storageKey && localStorage.getItem(storageKey)) || "0",
+		10,
+	);
+	SyncActiveStore.update((s) => {
+		s.lastSyncTime =
+			Number.isFinite(lastSyncTime) && lastSyncTime > 0 ? lastSyncTime : 0;
+		s.lastSynced = 0;
+		s.lastDuration = 0;
+		s.counter = 0;
+		s.busy = false;
+		s.phase = null;
+		s.logs = [];
+	});
+}
+
 if (typeof window !== "undefined") {
+	clearLegacySyncStorage();
 	const locked = localStorage.getItem("sync_locked");
 	if (locked) {
 		SyncActiveStore.update((s) => {
@@ -44,15 +67,7 @@ if (typeof window !== "undefined") {
 		});
 	}
 
-	const lastSyncTime = Number.parseInt(
-		localStorage.getItem("sync_lastSyncTime") || "0",
-		10,
-	);
-	if (Number.isFinite(lastSyncTime) && lastSyncTime > 0) {
-		SyncActiveStore.update((s) => {
-			s.lastSyncTime = lastSyncTime;
-		});
-	}
+	loadUserSyncState();
 
 	const debugLevel = localStorage.getItem("sync_debugLevel");
 	if (debugLevel !== null) {
@@ -78,7 +93,8 @@ if (typeof window !== "undefined") {
 	SyncActiveStore.subscribe(
 		(s) => s.lastSyncTime,
 		(lastSyncTime) => {
-			localStorage.setItem("sync_lastSyncTime", lastSyncTime);
+			const storageKey = getUserSyncStorageKey("sync_lastSyncTime");
+			if (storageKey) localStorage.setItem(storageKey, lastSyncTime);
 		},
 	);
 
