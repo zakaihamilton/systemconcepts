@@ -23,6 +23,7 @@ import {
 import { clearBundleCache } from "@sync/sync";
 import { loadUserSyncState, UpdateSessionsStore } from "@sync/syncState";
 import { fetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import storage from "@util/storage/storage";
@@ -60,7 +61,7 @@ export default function Account({ redirect }) {
 						setPasskeys(data);
 					}
 				})
-				.catch(console.error);
+				.catch(structuredLogger.error);
 		}
 	}, [isSignedIn, userId, counter]); // Reload when counter changes (e.g. login/logout/register)
 
@@ -106,7 +107,7 @@ export default function Account({ redirect }) {
 				throw "PASSKEY_REGISTRATION_FAILED";
 			}
 		} catch (err) {
-			console.error(err);
+			structuredLogger.error(err);
 			setError(translations[err] || String(err));
 		} finally {
 			setProgress(false);
@@ -132,7 +133,7 @@ export default function Account({ redirect }) {
 			);
 			setCounter((c) => c + 1);
 		} catch (err) {
-			console.error(err);
+			structuredLogger.error(err);
 			setError(translations[err] || String(err));
 		} finally {
 			setProgress(false);
@@ -180,7 +181,7 @@ export default function Account({ redirect }) {
 				throw "PASSKEY_LOGIN_FAILED";
 			}
 		} catch (err) {
-			console.error(err);
+			structuredLogger.error(err);
 			setError(translations[err] || String(err));
 		} finally {
 			setProgress(false);
@@ -192,7 +193,9 @@ export default function Account({ redirect }) {
 			event.preventDefault();
 		}
 		if (isSignedIn) {
-			await fetchJSON("/api/login", { method: "DELETE" }).catch(console.error);
+			await fetchJSON("/api/login", { method: "DELETE" }).catch(
+				structuredLogger.error,
+			);
 			// Clear cookies
 			Cookies.set("id", "");
 			Cookies.set("hash", "");
@@ -224,7 +227,7 @@ export default function Account({ redirect }) {
 					.then(async (data) => {
 						const { err } = data;
 						if (err) {
-							console.error(err);
+							structuredLogger.error(err);
 							throw err;
 						}
 						Cookies.set(
@@ -238,7 +241,10 @@ export default function Account({ redirect }) {
 							try {
 								await onRegisterPasskey(id);
 							} catch (e) {
-								console.error("Failed to create passkey after login", e);
+								structuredLogger.error(
+									"Failed to create passkey after login",
+									e,
+								);
 							}
 						}
 

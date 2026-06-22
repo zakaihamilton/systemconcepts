@@ -1,26 +1,27 @@
-import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
-import { formatDuration } from "@util/data/string";
-import { useTranslations } from "@util/domain/translations";
-import { useEffect, useRef, useState, useMemo } from "react";
-import styles from "./ProgressDialog.module.css";
 import Dialog from "@components/Widgets/Dialog";
-import SessionIcon from "@widgets/SessionIcon";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CheckIcon from "@mui/icons-material/Check";
 import UploadIcon from "@mui/icons-material/CloudUpload";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ErrorIcon from "@mui/icons-material/Error";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
 import InfoIcon from "@mui/icons-material/Info";
+import { IconButton } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tab from "@mui/material/Tab";
-import Tabs from "@widgets/Tabs";
-import { useSessions, SessionsStore } from "@util/domain/sessions";
+import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
+import { formatDuration } from "@util/data/string";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
 import { useUpdateSessions } from "@util/domain/updateSessions";
-import { IconButton } from "@mui/material";
+import SessionIcon from "@widgets/SessionIcon";
+import Tabs from "@widgets/Tabs";
 import clsx from "clsx";
+import { useEffect, useMemo, useRef, useState } from "react";
+import styles from "./ProgressDialog.module.css";
 
 function NewSessionItem({ session }) {
 	const [expanded, setExpanded] = useState(false);
@@ -70,7 +71,9 @@ function NewSessionItem({ session }) {
 				<span
 					className={clsx(
 						styles.badge,
-						metadata.hasTranscription ? styles.badgeActive : styles.badgeInactive,
+						metadata.hasTranscription
+							? styles.badgeActive
+							: styles.badgeInactive,
 					)}
 				>
 					{metadata.hasTranscription ? "🟢" : "⚫"} Transcript
@@ -227,19 +230,23 @@ export default function ProgressDialog() {
 
 	const handleUpdateSession = (session) => {
 		if (updateGroup) {
-			console.log(`[ProgressDialog] Requested targeted metadata update for session:`, {
-				id: session.id,
-				name: session.name,
-				group: session.group,
-				date: session.date,
-				metadata: {
-					hasTags: Array.isArray(session.tags) && session.tags.length > 0,
-					hasDuration: typeof session.duration === "number" && session.duration > 0.5,
-					hasSummary: !!session.summaryText || !!session.summary,
-					hasTranscription: !!session.transcription,
-					hasThumbnail: !!session.thumbnail,
-				}
-			});
+			structuredLogger.debug(
+				`[ProgressDialog] Requested targeted metadata update for session:`,
+				{
+					id: session.id,
+					name: session.name,
+					group: session.group,
+					date: session.date,
+					metadata: {
+						hasTags: Array.isArray(session.tags) && session.tags.length > 0,
+						hasDuration:
+							typeof session.duration === "number" && session.duration > 0.5,
+						hasSummary: !!session.summaryText || !!session.summary,
+						hasTranscription: !!session.transcription,
+						hasThumbnail: !!session.thumbnail,
+					},
+				},
+			);
 			setActiveSyncingSessionId(session.id);
 			updateGroup(session.group, false, true, session.id); // updateAll = false, forceUpdate = true, targetSessionId = session.id
 		}
@@ -282,10 +289,10 @@ export default function ProgressDialog() {
 		>
 			<div className={styles.dialogContainer}>
 				{!!duration && (
-					<div
-						className={clsx(styles.timer, busy ? styles.busy : styles.idle)}
-					>
-						<AutorenewIcon className={clsx(styles.timerIcon, busy && styles.rotating)} />
+					<div className={clsx(styles.timer, busy ? styles.busy : styles.idle)}>
+						<AutorenewIcon
+							className={clsx(styles.timerIcon, busy && styles.rotating)}
+						/>
 						<div className={styles.timerText}>{formattedDuration}</div>
 					</div>
 				)}
@@ -306,9 +313,7 @@ export default function ProgressDialog() {
 								<span className={styles.tabLabel}>
 									<UploadIcon className={styles.tabIcon} />
 									{translations.SYNC_LOG || "Sync Log"}
-									{syncing && (
-										<span className={styles.logBadge} />
-									)}
+									{syncing && <span className={styles.logBadge} />}
 								</span>
 							}
 							value="logs"
@@ -331,12 +336,21 @@ export default function ProgressDialog() {
 							<div
 								className={styles.totalAdded}
 								onClick={toggleList}
-								style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
+								style={{
+									cursor: "pointer",
+									display: "flex",
+									alignItems: "center",
+								}}
 							>
 								<span className={styles.totalAddedText} style={{ flex: 1 }}>
-									{translations.TOTAL_SESSIONS_ADDED}: <strong className={styles.countGlow}>{totalAdded}</strong>
+									{translations.TOTAL_SESSIONS_ADDED}:{" "}
+									<strong className={styles.countGlow}>{totalAdded}</strong>
 								</span>
-								{isListExpanded ? <ExpandLessIcon className={styles.expandIcon} /> : <ExpandMoreIcon className={styles.expandIcon} />}
+								{isListExpanded ? (
+									<ExpandLessIcon className={styles.expandIcon} />
+								) : (
+									<ExpandMoreIcon className={styles.expandIcon} />
+								)}
 							</div>
 
 							{isListExpanded && (
@@ -363,7 +377,7 @@ export default function ProgressDialog() {
 
 					{activeTab === "logs" && (
 						<div className={styles.syncTabContent}>
-							{(syncing || (syncLogs && syncLogs.length > 0)) ? (
+							{syncing || (syncLogs && syncLogs.length > 0) ? (
 								<div className={styles.syncSection}>
 									<div className={styles.syncHeader}>
 										<UploadIcon className={styles.titleIcon} />
@@ -387,13 +401,16 @@ export default function ProgressDialog() {
 														variant="determinate"
 														value={
 															syncProgress.total > 0
-																? (syncProgress.processed / syncProgress.total) * 100
+																? (syncProgress.processed /
+																		syncProgress.total) *
+																	100
 																: 0
 														}
 														className={styles.progressBar}
 													/>
 													<div className={styles.progressText}>
-														{Math.round(syncProgress.processed)} / {Math.round(syncProgress.total)}
+														{Math.round(syncProgress.processed)} /{" "}
+														{Math.round(syncProgress.total)}
 													</div>
 												</>
 											)}
@@ -429,7 +446,9 @@ export default function ProgressDialog() {
 						<div className={styles.recentTabContent}>
 							{loadingSessions && last50.length === 0 ? (
 								<div className={styles.empty}>
-									<AutorenewIcon className={clsx(styles.emptyIcon, styles.rotating)} />
+									<AutorenewIcon
+										className={clsx(styles.emptyIcon, styles.rotating)}
+									/>
 									<div>Loading recent sessions...</div>
 								</div>
 							) : last50.length > 0 ? (
@@ -438,23 +457,53 @@ export default function ProgressDialog() {
 										<thead>
 											<tr>
 												<th>Session</th>
-												<th className={clsx(styles.centerAlign, styles.slimCol)}>Tags</th>
-												<th className={clsx(styles.centerAlign, styles.slimCol)}>Duration</th>
-												<th className={clsx(styles.centerAlign, styles.slimCol)}>Summary</th>
-												<th className={clsx(styles.centerAlign, styles.slimCol)}>Transcript</th>
-												<th className={clsx(styles.centerAlign, styles.slimCol)}>Thumbnail</th>
-												<th className={clsx(styles.centerAlign, styles.actionCol)}>Action</th>
+												<th
+													className={clsx(styles.centerAlign, styles.slimCol)}
+												>
+													Tags
+												</th>
+												<th
+													className={clsx(styles.centerAlign, styles.slimCol)}
+												>
+													Duration
+												</th>
+												<th
+													className={clsx(styles.centerAlign, styles.slimCol)}
+												>
+													Summary
+												</th>
+												<th
+													className={clsx(styles.centerAlign, styles.slimCol)}
+												>
+													Transcript
+												</th>
+												<th
+													className={clsx(styles.centerAlign, styles.slimCol)}
+												>
+													Thumbnail
+												</th>
+												<th
+													className={clsx(styles.centerAlign, styles.actionCol)}
+												>
+													Action
+												</th>
 											</tr>
 										</thead>
 										<tbody>
 											{last50.map((session, idx) => {
-												const hasTags = Array.isArray(session.tags) && session.tags.length > 0;
-												const hasDuration = typeof session.duration === "number" && session.duration > 0.5;
-												const hasSummary = !!session.summaryText || !!session.summary;
+												const hasTags =
+													Array.isArray(session.tags) &&
+													session.tags.length > 0;
+												const hasDuration =
+													typeof session.duration === "number" &&
+													session.duration > 0.5;
+												const hasSummary =
+													!!session.summaryText || !!session.summary;
 												const hasTranscription = !!session.transcription;
 												const hasThumbnail = !!session.thumbnail;
 
-												const isSessionSyncing = busy && activeSyncingSessionId === session.id;
+												const isSessionSyncing =
+													busy && activeSyncingSessionId === session.id;
 
 												return (
 													<tr key={idx}>
@@ -466,39 +515,109 @@ export default function ProgressDialog() {
 																{session.group} • {session.date}
 															</div>
 														</td>
-														<td className={clsx(styles.centerAlign, styles.slimCol)}>
-															<span className={clsx(styles.tableIndicator, hasTags ? styles.indActive : styles.indInactive)}>
+														<td
+															className={clsx(
+																styles.centerAlign,
+																styles.slimCol,
+															)}
+														>
+															<span
+																className={clsx(
+																	styles.tableIndicator,
+																	hasTags
+																		? styles.indActive
+																		: styles.indInactive,
+																)}
+															>
 																{hasTags ? "🟢" : "⚫"}
 															</span>
 														</td>
-														<td className={clsx(styles.centerAlign, styles.slimCol)}>
-															<span className={clsx(styles.tableIndicator, hasDuration ? styles.indActive : styles.indInactive)}>
+														<td
+															className={clsx(
+																styles.centerAlign,
+																styles.slimCol,
+															)}
+														>
+															<span
+																className={clsx(
+																	styles.tableIndicator,
+																	hasDuration
+																		? styles.indActive
+																		: styles.indInactive,
+																)}
+															>
 																{hasDuration ? "🟢" : "⚫"}
 															</span>
 														</td>
-														<td className={clsx(styles.centerAlign, styles.slimCol)}>
-															<span className={clsx(styles.tableIndicator, hasSummary ? styles.indActive : styles.indInactive)}>
+														<td
+															className={clsx(
+																styles.centerAlign,
+																styles.slimCol,
+															)}
+														>
+															<span
+																className={clsx(
+																	styles.tableIndicator,
+																	hasSummary
+																		? styles.indActive
+																		: styles.indInactive,
+																)}
+															>
 																{hasSummary ? "🟢" : "⚫"}
 															</span>
 														</td>
-														<td className={clsx(styles.centerAlign, styles.slimCol)}>
-															<span className={clsx(styles.tableIndicator, hasTranscription ? styles.indActive : styles.indInactive)}>
+														<td
+															className={clsx(
+																styles.centerAlign,
+																styles.slimCol,
+															)}
+														>
+															<span
+																className={clsx(
+																	styles.tableIndicator,
+																	hasTranscription
+																		? styles.indActive
+																		: styles.indInactive,
+																)}
+															>
 																{hasTranscription ? "🟢" : "⚫"}
 															</span>
 														</td>
-														<td className={clsx(styles.centerAlign, styles.slimCol)}>
-															<span className={clsx(styles.tableIndicator, hasThumbnail ? styles.indActive : styles.indInactive)}>
+														<td
+															className={clsx(
+																styles.centerAlign,
+																styles.slimCol,
+															)}
+														>
+															<span
+																className={clsx(
+																	styles.tableIndicator,
+																	hasThumbnail
+																		? styles.indActive
+																		: styles.indInactive,
+																)}
+															>
 																{hasThumbnail ? "🟢" : "⚫"}
 															</span>
 														</td>
-														<td className={clsx(styles.centerAlign, styles.actionCol)}>
+														<td
+															className={clsx(
+																styles.centerAlign,
+																styles.actionCol,
+															)}
+														>
 															<IconButton
 																onClick={() => handleUpdateSession(session)}
 																disabled={busy}
 																size="small"
 																className={styles.tableActionBtn}
 															>
-																<AutorenewIcon className={clsx(styles.tableActionIcon, isSessionSyncing && styles.rotating)} />
+																<AutorenewIcon
+																	className={clsx(
+																		styles.tableActionIcon,
+																		isSessionSyncing && styles.rotating,
+																	)}
+																/>
 															</IconButton>
 														</td>
 													</tr>
@@ -528,7 +647,10 @@ function ProgressItem({ item, translations, expanded, onToggle }) {
 	const hasNewSessions = item.newSessions && item.newSessions.length > 0;
 
 	return (
-		<div key={item.name} className={clsx(styles.item, expanded && styles.itemExpanded)}>
+		<div
+			key={item.name}
+			className={clsx(styles.item, expanded && styles.itemExpanded)}
+		>
 			<div
 				className={styles.header}
 				onClick={onToggle}
@@ -540,7 +662,9 @@ function ProgressItem({ item, translations, expanded, onToggle }) {
 					) : isDone ? (
 						<CheckIcon className={styles.successIconColor} />
 					) : (
-						<AutorenewIcon className={clsx(styles.syncIconColor, styles.rotating)} />
+						<AutorenewIcon
+							className={clsx(styles.syncIconColor, styles.rotating)}
+						/>
 					)}
 				</div>
 				<div className={styles.name}>{item.name}</div>
@@ -553,7 +677,11 @@ function ProgressItem({ item, translations, expanded, onToggle }) {
 							className={styles.addedCountChip}
 						/>
 					)}
-					{expanded ? <ExpandLessIcon className={styles.expandIcon} /> : <ExpandMoreIcon className={styles.expandIcon} />}
+					{expanded ? (
+						<ExpandLessIcon className={styles.expandIcon} />
+					) : (
+						<ExpandMoreIcon className={styles.expandIcon} />
+					)}
 				</div>
 			</div>
 			{expanded && (
@@ -563,7 +691,11 @@ function ProgressItem({ item, translations, expanded, onToggle }) {
 							variant="determinate"
 							value={progress}
 							className={styles.itemProgressBar}
-							classes={{ bar: hasErrors ? styles.progressBarError : styles.progressBarNormal }}
+							classes={{
+								bar: hasErrors
+									? styles.progressBarError
+									: styles.progressBarNormal,
+							}}
 						/>
 						<div className={styles.progressText}>
 							{item.removedCount > 0 && (

@@ -25,7 +25,12 @@ describe("fetchSessionMetadata", () => {
 		fetchJSON.mockResolvedValue({
 			group: "test",
 			year: "2024",
-			items: [{ name: "2024-05-05 Test Session.txt", path: "/aws/sessions/test/2024/2024-05-05 Test Session.txt" }],
+			items: [
+				{
+					name: "2024-05-05 Test Session.txt",
+					path: "/aws/sessions/test/2024/2024-05-05 Test Session.txt",
+				},
+			],
 			urls: {
 				tags: "https://signed/tags",
 				duration: "https://signed/duration",

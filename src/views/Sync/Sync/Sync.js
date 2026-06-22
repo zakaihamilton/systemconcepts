@@ -13,19 +13,20 @@ import InputLabel from "@mui/material/InputLabel";
 import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { clearBundleCache, useSyncFeature } from "@sync/sync";
 import { SyncActiveStore } from "@sync/syncState";
-import { useGroups } from "@util/domain/groups";
-import { useDateFormatter } from "@util/data/locale";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useOnline } from "@util/browser/online";
+import { useStyles } from "@util/browser/styles";
+import { useDateFormatter } from "@util/data/locale";
 import { fileTitle } from "@util/data/path";
 import { formatDuration } from "@util/data/string";
-import { useStyles } from "@util/browser/styles";
+import { useGroups } from "@util/domain/groups";
 import { useTranslations } from "@util/domain/translations";
 import { useUpdateSessions } from "@util/domain/updateSessions";
 import Dialog from "@widgets/Dialog";
+import Tooltip from "@widgets/Tooltip";
 import Cookies from "js-cookie";
 import React, { useContext, useMemo } from "react";
 import styles from "./Sync.module.css";
@@ -132,7 +133,7 @@ export default function Sync() {
 			setConfirmFullSync(false);
 			await sync();
 		} catch (err) {
-			console.error("Failed to full sync", err);
+			structuredLogger.error("Failed to full sync", err);
 		}
 	};
 

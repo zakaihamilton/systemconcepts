@@ -5,7 +5,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
-import Tooltip from "@widgets/Tooltip";
+import { useDeviceType } from "@util/browser/styles";
+import { useSwipe } from "@util/browser/touch";
 import {
 	addDate,
 	getDateString,
@@ -15,11 +16,10 @@ import {
 } from "@util/data/date";
 import { useDirection } from "@util/data/direction";
 import { useDateFormatter } from "@util/data/locale";
-import { useDeviceType } from "@util/browser/styles";
-import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";
-import SessionGroup from "./SessionGroup";
+import Tooltip from "@widgets/Tooltip";
 import styles from "./DayView.module.css";
+import SessionGroup from "./SessionGroup";
 
 registerToolbar("DayView");
 

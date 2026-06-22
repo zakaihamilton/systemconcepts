@@ -24,13 +24,14 @@ import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Tooltip from "@widgets/Tooltip";
-import { exportData, importData } from "@util/storage/importExport";
-import { getComparator, stableSort } from "@util/data/sort";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
+import { getComparator, stableSort } from "@util/data/sort";
 import { useTranslations } from "@util/domain/translations";
+import { exportData, importData } from "@util/storage/importExport";
 import Message from "@widgets/Message";
 import { StatusBarStore } from "@widgets/StatusBar";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import React, {
 	forwardRef,
@@ -45,8 +46,8 @@ import Item from "./Item";
 import ListColumns from "./ListColumns";
 import Navigator from "./Navigator";
 import Row from "./Row";
-import TableColumn from "./TableColumn";
 import styles from "./Table.module.css";
+import TableColumn from "./TableColumn";
 
 // Stable empty array to prevent unnecessary re-renders
 const EMPTY_ARRAY = [];
@@ -454,14 +455,14 @@ export default React.memo(function TableWidget(props) {
 						({ body } = await importData());
 					} catch (err) {
 						if (err) {
-							console.error(err);
+							structuredLogger.error(err);
 						}
 						return;
 					}
 					try {
 						await onImport(JSON.parse(body));
 					} catch (err) {
-						console.error(err);
+						structuredLogger.error(err);
 					}
 				},
 				location: "header",

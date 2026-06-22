@@ -1,2 +1,2 @@
-export { default } from "./SyncDialog";
 export * from "./SyncDialog";
+export { default } from "./SyncDialog";

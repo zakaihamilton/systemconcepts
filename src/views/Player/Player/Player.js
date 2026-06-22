@@ -6,12 +6,12 @@ import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
 import InfoIcon from "@mui/icons-material/Info";
 import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import {
-	SIGNED_URL_CACHE_TTL_MS,
 	getStableFetchCacheOptions,
+	SIGNED_URL_CACHE_TTL_MS,
 	useFetchJSON,
 } from "@util/api/fetch";
-import { useRecentHistory } from "@util/domain/history";
-import { exportFile } from "@util/storage/importExport";
+import { logger as structuredLogger } from "@util/api/logger";
+import { useLocalStorage } from "@util/browser/store";
 import {
 	fileFolder,
 	fileName,
@@ -20,20 +20,21 @@ import {
 	isVideoFile,
 	makePath,
 } from "@util/data/path";
+import { useRecentHistory } from "@util/domain/history";
 import { useSessions } from "@util/domain/sessions";
-import { useLocalStorage } from "@util/browser/store";
 import { useTranslations } from "@util/domain/translations";
 import { useParentParams } from "@util/domain/views";
+import { exportFile } from "@util/storage/importExport";
 import Download from "@widgets/Download";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
 import { useContext, useEffect } from "react";
 import Audio from "../Audio";
-import styles from "./Player.module.css";
 import SpeedSlider from "../SpeedSlider";
 import Transcript from "../Transcript";
 import Video from "../Video";
+import styles from "./Player.module.css";
 
 export const PlayerStore = new Store({
 	path: "",
@@ -178,7 +179,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		if (group && date && name && !loadingHistory) {
 			PlayerStore.update((s) => {
 				const session = { group, date, name };
-				console.log("sesion playing", session);
+				structuredLogger.debug("sesion playing", session);
 				s.session = session;
 				addToHistory(session);
 			});
@@ -196,42 +197,42 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 
 	const toolbarItems = [
 		hash &&
-		!show && {
-			id: "player",
-			name: playingSessionName,
-			icon: <VideoLabelIcon />,
-			menu: false,
-			target: hash,
-			onClick: gotoPlayer,
-			className: styles.playerIcon,
-		},
+			!show && {
+				id: "player",
+				name: playingSessionName,
+				icon: <VideoLabelIcon />,
+				menu: false,
+				target: hash,
+				onClick: gotoPlayer,
+				className: styles.playerIcon,
+			},
 		subtitles &&
-		show && {
-			id: "subtitles",
-			location: "header",
-			name: showSubtitles
-				? translations.SUBTITLES
-				: translations.SUBTITLES_OFF,
-			icon: showSubtitles ? <ClosedCaptionIcon /> : <ClosedCaptionOffIcon />,
-			onClick: () => {
-				PlayerStore.update((s) => {
-					s.showSubtitles = !s.showSubtitles;
-				});
+			show && {
+				id: "subtitles",
+				location: "header",
+				name: showSubtitles
+					? translations.SUBTITLES
+					: translations.SUBTITLES_OFF,
+				icon: showSubtitles ? <ClosedCaptionIcon /> : <ClosedCaptionOffIcon />,
+				onClick: () => {
+					PlayerStore.update((s) => {
+						s.showSubtitles = !s.showSubtitles;
+					});
+				},
 			},
-		},
 		show &&
-		!isVideo && {
-			id: "details",
-			location: "header",
-			name: translations.DETAILS,
-			icon: <InfoIcon />,
-			active: showDetails,
-			onClick: () => {
-				PlayerStore.update((s) => {
-					s.showDetails = !s.showDetails;
-				});
+			!isVideo && {
+				id: "details",
+				location: "header",
+				name: translations.DETAILS,
+				icon: <InfoIcon />,
+				active: showDetails,
+				onClick: () => {
+					PlayerStore.update((s) => {
+						s.showDetails = !s.showDetails;
+					});
+				},
 			},
-		},
 	].filter(Boolean);
 
 	useToolbar({

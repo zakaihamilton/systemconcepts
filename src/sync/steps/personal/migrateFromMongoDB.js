@@ -2,6 +2,7 @@ import { readGroups } from "@sync/groups";
 import { calculateHash } from "@sync/hash";
 import { addSyncLog } from "@sync/logs";
 import { SyncActiveStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { FILES_MANIFEST } from "../../constants";
@@ -38,7 +39,9 @@ export async function migrateFromMongoDB(
 		remotePathSet.has("/migration.json") || remotePathSet.has("migration.json");
 
 	if (hasMigrationFile) {
-		console.log("[Personal] Remote migration.json exists, skipping migration.");
+		structuredLogger.debug(
+			"[Personal] Remote migration.json exists, skipping migration.",
+		);
 		return { migrated: false, fileCount: 0, manifest: null, deletedKeys: [] };
 	}
 
@@ -48,7 +51,7 @@ export async function migrateFromMongoDB(
 	);
 
 	if (hasRemoteFiles) {
-		console.log(
+		structuredLogger.debug(
 			"[Personal] Remote personal files exist (but no migration.json), proceeding to scan in case of broken migration",
 		);
 		// We continue here because the absence of migration.json might imply an incomplete migration
@@ -69,7 +72,7 @@ export async function migrateFromMongoDB(
 		if (await storage.exists(migrationPath)) {
 			try {
 				const content = await storage.readFile(migrationPath);
-				console.log(
+				structuredLogger.debug(
 					`[Personal] Migration file exists, size: ${content?.length || 0} bytes`,
 				);
 				if (!content || !content.trim()) {
@@ -97,14 +100,14 @@ export async function migrateFromMongoDB(
 						);
 
 						if (!localHasJson) {
-							console.log(
+							structuredLogger.debug(
 								"[Personal] Migration marked complete but local and remote are empty. Forcing re-migration.",
 							);
 							migrationState.complete = false;
 							migrationState.migrated = {};
 							// Fall through to normal logic
 						} else {
-							console.log(
+							structuredLogger.debug(
 								"[Personal] Migration already complete locally, waiting for upload.",
 							);
 							return {
@@ -115,7 +118,7 @@ export async function migrateFromMongoDB(
 							};
 						}
 					} else if (!remoteHasJson && !canUpload) {
-						console.log(
+						structuredLogger.debug(
 							"[Personal] Migration marked complete locally. Skipping remote check (read-only mode)",
 						);
 						return {
@@ -125,7 +128,7 @@ export async function migrateFromMongoDB(
 							deletedKeys: [],
 						};
 					} else {
-						console.log(
+						structuredLogger.debug(
 							"[Personal] Migration already complete (verified by remote), skipping",
 						);
 						return {
@@ -142,7 +145,10 @@ export async function migrateFromMongoDB(
 					"info",
 				);
 			} catch (err) {
-				console.error("[Personal] Error loading migration state:", err);
+				structuredLogger.error(
+					"[Personal] Error loading migration state:",
+					err,
+				);
 				addSyncLog(
 					`[Personal] Migration state file corrupted or empty, starting fresh: ${err.message}`,
 					"info",
@@ -232,7 +238,10 @@ export async function migrateFromMongoDB(
 				});
 			}
 		} catch (err) {
-			console.error("[Personal] Error loading groups for bundling check:", err);
+			structuredLogger.error(
+				"[Personal] Error loading groups for bundling check:",
+				err,
+			);
 		}
 
 		// Find files that haven't been migrated yet, checking remoteManifest first
@@ -492,7 +501,7 @@ export async function migrateFromMongoDB(
 				});
 				batchContents = await storage.readFiles("personal", batchPaths);
 			} catch (err) {
-				console.error("[Personal] Error batch reading files:", err);
+				structuredLogger.error("[Personal] Error batch reading files:", err);
 			}
 
 			await Promise.all(
@@ -535,7 +544,9 @@ export async function migrateFromMongoDB(
 						const content = batchContents[lookupKey];
 
 						if (!content || !content.trim()) {
-							console.warn(`[Personal] Skipping empty file: ${file.path}`);
+							structuredLogger.warn(
+								`[Personal] Skipping empty file: ${file.path}`,
+							);
 							migrationState.migrated[file.path] = true;
 							return;
 						}
@@ -566,7 +577,7 @@ export async function migrateFromMongoDB(
 								bundleCache[cacheKey].dirty = true;
 								markAsDeleted(makePath(`metadata/sessions/${relativePath}`));
 							} catch {
-								console.warn(
+								structuredLogger.warn(
 									`[Personal] Skipping corrupted JSON file: ${file.path}`,
 								);
 								// Intentionally continue to mark as migrated so we don't loop forever
@@ -576,7 +587,7 @@ export async function migrateFromMongoDB(
 							const year = parts[1];
 
 							if (!year) {
-								console.warn(
+								structuredLogger.warn(
 									`[Personal] Skipping file without year: ${file.path}`,
 								);
 								migrationState.migrated[file.path] = true;
@@ -595,7 +606,7 @@ export async function migrateFromMongoDB(
 								bundleCache[yearBundleKey].dirty = true;
 								markAsDeleted(makePath(`metadata/sessions/${relativePath}`));
 							} catch {
-								console.warn(
+								structuredLogger.warn(
 									`[Personal] Skipping corrupted JSON for year bundle: ${file.path}`,
 								);
 							}
@@ -605,7 +616,10 @@ export async function migrateFromMongoDB(
 						migrationState.migrated[file.path] = true;
 						migratedCount++;
 					} catch (err) {
-						console.error(`[Personal] Error migrating ${file.path}:`, err);
+						structuredLogger.error(
+							`[Personal] Error migrating ${file.path}:`,
+							err,
+						);
 						addSyncLog(`[Personal] Failed: ${file.path}`, "error");
 					}
 				}),
@@ -668,7 +682,7 @@ export async function migrateFromMongoDB(
 			deletedKeys,
 		};
 	} catch (err) {
-		console.error("[Personal] Migration error:", err);
+		structuredLogger.error("[Personal] Migration error:", err);
 		addSyncLog(`[Personal] Migration failed: ${err.message}`, "error");
 		return { migrated: false, fileCount: 0, error: err };
 	}

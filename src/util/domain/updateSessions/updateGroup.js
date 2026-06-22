@@ -8,6 +8,7 @@ import { getFileInfo } from "@sync/hash";
 import { updateManifestEntry } from "@sync/manifest";
 import { addSyncLog } from "@sync/sync";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
 import { readBinary } from "@util/data/binary";
 import { blobToBase64, shrinkImage } from "@util/data/image";
 import pLimit from "@util/data/p-limit";
@@ -25,6 +26,12 @@ import {
 } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { cleanupBundledGroup, cleanupMergedGroup } from "./cleanup";
+import {
+	getCombinedYearFingerprint,
+	getMetadataFileFingerprint,
+	normalizeMetadataPayload,
+	serializeMetadataFingerprint,
+} from "./fingerprints";
 import { createSessionItem } from "./mapper";
 import {
 	loadDurations,
@@ -114,27 +121,6 @@ function getDigitalOceanSessionFiles(files) {
 	);
 }
 
-function getYearFingerprint(items) {
-	return (items || [])
-		.map((item) => ({
-			name: item.name,
-			type: item.type || item.stat?.type || "",
-			size: item.size || item.stat?.size || 0,
-			mtimeMs: item.mtimeMs || item.stat?.mtimeMs || 0,
-		}))
-		.sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function getMetadataFileFingerprint(file) {
-	if (!file) return null;
-	return {
-		name: file.name,
-		type: file.type || file.stat?.type || "",
-		size: file.size || file.stat?.size || 0,
-		mtimeMs: file.mtimeMs || file.stat?.mtimeMs || 0,
-	};
-}
-
 async function getGroupMetadataFiles(groupName) {
 	const metadataPath = makePath("aws/sessions", groupName);
 	const metadataFiles = new Map();
@@ -144,7 +130,10 @@ async function getGroupMetadataFiles(groupName) {
 			metadataFiles.set(item.name, item);
 		}
 	} catch (err) {
-		console.warn(`[UpdateGroup] Failed to list metadata for ${groupName}`, err);
+		structuredLogger.warn(
+			`[UpdateGroup] Failed to list metadata for ${groupName}`,
+			err,
+		);
 	}
 	return metadataFiles;
 }
@@ -153,27 +142,6 @@ function getMetadataFingerprint(metadataFiles, yearName) {
 	return [".tags", ".duration", ".md", ".zip"].map((extension) =>
 		getMetadataFileFingerprint(metadataFiles.get(`${yearName}${extension}`)),
 	);
-}
-
-function getCombinedYearFingerprint(yearItems, metadataFingerprint) {
-	return JSON.stringify({
-		media: getYearFingerprint(yearItems),
-		metadata: metadataFingerprint,
-	});
-}
-
-function serializeMetadataFingerprint(metadataFingerprint) {
-	return JSON.stringify(metadataFingerprint);
-}
-
-function normalizeMetadataPayload(metadata) {
-	return {
-		items: metadata?.items || [],
-		tags: metadata?.tags || {},
-		durations: metadata?.durations || {},
-		summaries: metadata?.summaries || {},
-		transcriptions: metadata?.transcriptions || {},
-	};
 }
 
 function getMetadataFromYearCache(yearCache, metadataFingerprint) {
@@ -197,7 +165,7 @@ async function readYearCache(groupName, yearName) {
 		const content = await storage.readFile(path);
 		return content ? JSON.parse(content) : null;
 	} catch (err) {
-		console.warn(
+		structuredLogger.warn(
 			`[UpdateGroup] Failed to read year cache for ${groupName}/${yearName}`,
 			err,
 		);
@@ -225,7 +193,7 @@ async function writeYearCache(
 			}),
 		);
 	} catch (err) {
-		console.warn(
+		structuredLogger.warn(
 			`[UpdateGroup] Failed to write year cache for ${groupName}/${yearName}`,
 			err,
 		);
@@ -301,12 +269,12 @@ async function getMetadataYearItems(metadataYearPath) {
 	try {
 		const items = await getListing(metadataYearPath);
 		items.sort((a, b) => a.name.localeCompare(b.name));
-		console.log(
+		structuredLogger.debug(
 			`[UpdateGroup] Metadata folder ${metadataYearPath} has ${items.length} items`,
 		);
 		return items;
 	} catch (err) {
-		console.warn(
+		structuredLogger.warn(
 			`[UpdateGroup] Failed to list metadata folder ${metadataYearPath}`,
 			err,
 		);
@@ -323,7 +291,10 @@ async function readSessionsFile(path) {
 		const data = JSON.parse(content);
 		return Array.isArray(data?.sessions) ? data.sessions : [];
 	} catch (err) {
-		console.warn(`[UpdateGroup] Failed to read cached metadata ${path}`, err);
+		structuredLogger.warn(
+			`[UpdateGroup] Failed to read cached metadata ${path}`,
+			err,
+		);
 		return [];
 	}
 }
@@ -426,7 +397,7 @@ async function getYearMetadata(
 		);
 		return normalizeMetadataPayload(metadata);
 	} catch (err) {
-		console.warn(
+		structuredLogger.warn(
 			`[UpdateGroup] Aggregated metadata fetch failed for ${name}/${year.name}; falling back to legacy metadata reads`,
 			err,
 		);
@@ -500,7 +471,7 @@ export async function updateGroupProcess(
 					}
 				}
 			} catch (err) {
-				console.warn(
+				structuredLogger.warn(
 					`[Sync] Failed to read existing bundle file ${bundlePath}`,
 					err,
 				);
@@ -516,7 +487,7 @@ export async function updateGroupProcess(
 					}
 				}
 			} catch (err) {
-				console.warn(
+				structuredLogger.warn(
 					`[Sync] Failed to read existing group file ${localGroupPath}`,
 					err,
 				);
@@ -529,25 +500,28 @@ export async function updateGroupProcess(
 
 	let years = [];
 	try {
-		console.log(`[UpdateGroup] Fetching listing for path: ${path}`);
+		structuredLogger.debug(`[UpdateGroup] Fetching listing for path: ${path}`);
 		const fullListing = await getListing(path);
-		console.log(
+		structuredLogger.debug(
 			`[UpdateGroup] Received ${fullListing?.length || 0} items from listing`,
 		);
 		if (fullListing && fullListing.length > 0) {
-			console.log(`[UpdateGroup] First item:`, JSON.stringify(fullListing[0]));
+			structuredLogger.debug(
+				`[UpdateGroup] First item:`,
+				JSON.stringify(fullListing[0]),
+			);
 		}
 		years = fullListing.filter((item) => {
 			const isDir = item.type === "dir" || item.stat?.type === "dir";
 			const isYear = !isNaN(parseInt(item.name)) && /^\d+$/.test(item.name);
 			return isDir && isYear;
 		});
-		console.log(
+		structuredLogger.debug(
 			`[UpdateGroup] Filtered to ${years.length} year folders:`,
 			years.map((y) => y.name),
 		);
 	} catch (err) {
-		console.error(err);
+		structuredLogger.error(err);
 		UpdateSessionsStore.update((s) => {
 			s.status[itemIndex].errors.push(err.message || String(err));
 			s.status = [...s.status];
@@ -568,7 +542,7 @@ export async function updateGroupProcess(
 			const message =
 				`[${name}] Remote year listing omitted locally stored years ` +
 				`(${missingYears.join(", ")}). Preserving those sessions; retry the full update.`;
-			console.warn(`[UpdateGroup] ${message}`);
+			structuredLogger.warn(`[UpdateGroup] ${message}`);
 			addSyncLog(message, "warning");
 		}
 	}
@@ -598,11 +572,11 @@ export async function updateGroupProcess(
 			});
 
 			try {
-				console.log(
+				structuredLogger.debug(
 					`[UpdateGroup] Fetching items for year: ${year.name}, path: ${year.path}`,
 				);
 				const yearItems = await getListing(year.path);
-				console.log(
+				structuredLogger.debug(
 					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
 				);
 				yearItems.sort((a, b) => a.name.localeCompare(b.name));
@@ -704,7 +678,7 @@ export async function updateGroupProcess(
 								});
 							}
 						} catch (err) {
-							console.warn(
+							structuredLogger.warn(
 								`[Sync] Failed to read existing year file for thumbnails: ${existingYearPath}`,
 								err,
 							);
@@ -811,7 +785,7 @@ export async function updateGroupProcess(
 												tags = parsed.tags;
 											}
 										} catch (err) {
-											console.warn(
+											structuredLogger.warn(
 												`[Sync] Failed to read tags file ${tagsFile.path}`,
 												err,
 											);
@@ -837,7 +811,7 @@ export async function updateGroupProcess(
 												duration = parseFloat(content);
 											}
 										} catch (err) {
-											console.warn(
+											structuredLogger.warn(
 												`[Sync] Failed to read duration file ${durationFile.path}`,
 												err,
 											);
@@ -853,7 +827,7 @@ export async function updateGroupProcess(
 										try {
 											summary = await storage.readFile(summaryFile.path);
 										} catch (err) {
-											console.warn(
+											structuredLogger.warn(
 												`[Sync] Failed to read summary file ${summaryFile.path}`,
 												err,
 											);
@@ -915,7 +889,7 @@ export async function updateGroupProcess(
 										session.thumbnail = base64String;
 									}
 								} catch (err) {
-									console.error(
+									structuredLogger.error(
 										`[Sync] Error generating thumbnail for ${session.id}:`,
 										err,
 									);
@@ -973,7 +947,7 @@ export async function updateGroupProcess(
 					},
 				);
 			} catch (err) {
-				console.error(err);
+				structuredLogger.error(err);
 				UpdateSessionsStore.update((s) => {
 					s.status[itemIndex].errors.push(err.message || String(err));
 					s.status = [...s.status];
@@ -990,7 +964,7 @@ export async function updateGroupProcess(
 	try {
 		await Promise.all(promises);
 	} catch {
-		console.error(
+		structuredLogger.error(
 			`[Sync] Group ${name} failed to process all years. Aborting write to prevent corruption.`,
 		);
 		return;
@@ -1093,9 +1067,9 @@ export async function updateGroupProcess(
 					version: Date.now().toString(), // Use timestamp to ensure it's "newer"
 				};
 				await updateManifestEntry(manifestPath, entry);
-				console.log(`[Sync] Updated local manifest for ${relPath}`);
+				structuredLogger.debug(`[Sync] Updated local manifest for ${relPath}`);
 			} catch (err) {
-				console.warn(
+				structuredLogger.warn(
 					`[Sync] Failed to update local manifest for ${localGroupPath}`,
 					err,
 				);
@@ -1155,7 +1129,7 @@ export async function updateGroupProcess(
 					}
 				}
 			} catch (err) {
-				console.error("Error migrating from merged file", err);
+				structuredLogger.error("Error migrating from merged file", err);
 			}
 			// 2. Delete local merged file
 			await storage.deleteFile(localGroupPath);
@@ -1164,12 +1138,16 @@ export async function updateGroupProcess(
 			const remoteGroupPath = makePath(SYNC_BASE_PATH, `${name}.json.gz`);
 			try {
 				if (await storage.exists(remoteGroupPath)) {
-					console.log(`[Sync] Deleting remote merged file: ${remoteGroupPath}`);
+					structuredLogger.debug(
+						`[Sync] Deleting remote merged file: ${remoteGroupPath}`,
+					);
 					await storage.deleteFile(remoteGroupPath);
-					console.log(`[Sync] Successfully deleted remote merged file`);
+					structuredLogger.debug(
+						`[Sync] Successfully deleted remote merged file`,
+					);
 				}
 			} catch (err) {
-				console.error(
+				structuredLogger.error(
 					`[Sync] Error deleting remote merged file for ${name}:`,
 					err,
 				);

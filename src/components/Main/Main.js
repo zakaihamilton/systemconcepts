@@ -1,18 +1,18 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import { useLanguage } from "@util/domain/language";
 import { useResize } from "@util/browser/size";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
+import { useLanguage } from "@util/domain/language";
 import clsx from "clsx";
 import { Store } from "pullstate";
 import { useEffect } from "react";
 import Bookmarks from "../Bookmarks";
 import Head from "../Head";
-import styles from "./Main.module.css";
 import Page from "../Page";
 import SideBar from "../SideBar";
 import Sync from "../Sync";
 import Title from "../Title";
+import styles from "./Main.module.css";
 
 export const MainStoreDefaults = {
 	fontSize: "16",

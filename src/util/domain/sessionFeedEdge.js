@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 /**
  * Edge-compatible session feed utilities.
  * Mirrors the API of sessionFeed.js but uses only Web Platform APIs:
@@ -132,7 +133,10 @@ export async function getSessions({ group } = {}) {
 					const data = await getJsonFile(s3Path);
 					return data.sessions || [];
 				} catch (err) {
-					console.error(`[SessionsEdge] Error loading ${file.path}:`, err);
+					structuredLogger.error(
+						`[SessionsEdge] Error loading ${file.path}:`,
+						err,
+					);
 					return [];
 				}
 			}),

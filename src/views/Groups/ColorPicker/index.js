@@ -1,2 +1,2 @@
-export { default } from "./ColorPicker";
 export * from "./ColorPicker";
+export { default } from "./ColorPicker";

@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function useCounter(defaultValue = 0) {
@@ -60,7 +61,7 @@ export function useLocalStorage(key, initialValue) {
 			const item = window.localStorage.getItem(key);
 			return item ? JSON.parse(item) : initialValue;
 		} catch (error) {
-			console.log(error);
+			structuredLogger.debug(error);
 			return initialValue;
 		}
 	});
@@ -75,7 +76,7 @@ export function useLocalStorage(key, initialValue) {
 					window.localStorage.setItem(key, JSON.stringify(valueToStore));
 				}
 			} catch (error) {
-				console.log(error);
+				structuredLogger.debug(error);
 			}
 		},
 		[key, storedValue],

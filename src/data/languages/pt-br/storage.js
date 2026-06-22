@@ -57,7 +57,8 @@ export default [
 	},
 	{
 		id: "DELETE_ARTICLE_CONFIRM",
-		value: "Tem certeza de que deseja excluir este artigo? Esta ação não pode ser desfeita.",
+		value:
+			"Tem certeza de que deseja excluir este artigo? Esta ação não pode ser desfeita.",
 	},
 	{
 		id: "DELETING",

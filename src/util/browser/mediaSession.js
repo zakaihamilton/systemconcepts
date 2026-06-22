@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { useCallback, useEffect, useRef } from "react";
 
 /**
@@ -38,7 +39,7 @@ export function useMediaSession({
 			}
 			await playerRef.play();
 		} catch (err) {
-			console.error("[MediaSession] Play failed:", err);
+			structuredLogger.error("[MediaSession] Play failed:", err);
 			// If play fails due to not allowed, the user needs to interact
 			// If it fails due to network, try reloading
 			if (err.name === "NotSupportedError" || err.name === "AbortError") {
@@ -46,7 +47,7 @@ export function useMediaSession({
 					playerRef.load();
 					await playerRef.play();
 				} catch (retryErr) {
-					console.error("[MediaSession] Retry play failed:", retryErr);
+					structuredLogger.error("[MediaSession] Retry play failed:", retryErr);
 				}
 			}
 		}
@@ -60,17 +61,17 @@ export function useMediaSession({
 
 		const handlers = {
 			play: async () => {
-				console.log("[MediaSession] play action received");
+				structuredLogger.debug("[MediaSession] play action received");
 				await safePlay();
 			},
 			pause: () => {
-				console.log("[MediaSession] pause action received");
+				structuredLogger.debug("[MediaSession] pause action received");
 				if (playerRef) {
 					playerRef.pause();
 				}
 			},
 			seekforward: (details) => {
-				console.log("[MediaSession] seekforward action received");
+				structuredLogger.debug("[MediaSession] seekforward action received");
 				if (playerRef) {
 					const skipTime = details?.seekOffset || 10;
 					playerRef.currentTime = Math.min(
@@ -80,20 +81,23 @@ export function useMediaSession({
 				}
 			},
 			seekbackward: (details) => {
-				console.log("[MediaSession] seekbackward action received");
+				structuredLogger.debug("[MediaSession] seekbackward action received");
 				if (playerRef) {
 					const skipTime = details?.seekOffset || 10;
 					playerRef.currentTime = Math.max(0, playerRef.currentTime - skipTime);
 				}
 			},
 			seekto: (details) => {
-				console.log("[MediaSession] seekto action received", details);
+				structuredLogger.debug(
+					"[MediaSession] seekto action received",
+					details,
+				);
 				if (playerRef && details?.seekTime !== undefined) {
 					playerRef.currentTime = details.seekTime;
 				}
 			},
 			stop: () => {
-				console.log("[MediaSession] stop action received");
+				structuredLogger.debug("[MediaSession] stop action received");
 				if (playerRef) {
 					playerRef.pause();
 					playerRef.currentTime = 0;
@@ -106,7 +110,10 @@ export function useMediaSession({
 			try {
 				navigator.mediaSession.setActionHandler(action, handler);
 			} catch (err) {
-				console.warn(`[MediaSession] Handler '${action}' not supported:`, err);
+				structuredLogger.warn(
+					`[MediaSession] Handler '${action}' not supported:`,
+					err,
+				);
 			}
 		}
 
@@ -143,7 +150,7 @@ export function useMediaSession({
 
 			navigator.mediaSession.metadata = new MediaMetadata(metadata);
 		} catch (err) {
-			console.warn("[MediaSession] Failed to set metadata:", err);
+			structuredLogger.warn("[MediaSession] Failed to set metadata:", err);
 		}
 	}, [enabled, title, artist, artworkUrl]);
 
@@ -169,7 +176,10 @@ export function useMediaSession({
 				});
 			} catch (err) {
 				// setPositionState may throw if duration is 0 or invalid
-				console.warn("[MediaSession] Failed to update position state:", err);
+				structuredLogger.warn(
+					"[MediaSession] Failed to update position state:",
+					err,
+				);
 			}
 		};
 
@@ -243,7 +253,7 @@ export function useMediaSession({
 				// If we were playing and now we're paused, try to resume
 				// This handles iOS suspending audio when tab was hidden
 				if (wasPlayingRef.current && playerRef.paused) {
-					console.log(
+					structuredLogger.debug(
 						"[MediaSession] Attempting to resume after visibility change",
 					);
 					// Small delay to let iOS settle
@@ -293,11 +303,13 @@ export function useMediaSession({
 
 		// Handle stalled/waiting events - may indicate connection timeout
 		const handleStalled = () => {
-			console.log("[MediaSession] Stalled event - possible connection timeout");
+			structuredLogger.debug(
+				"[MediaSession] Stalled event - possible connection timeout",
+			);
 		};
 
 		const handleWaiting = () => {
-			console.log("[MediaSession] Waiting for data");
+			structuredLogger.debug("[MediaSession] Waiting for data");
 		};
 
 		playerRef.addEventListener("pause", handlePause);

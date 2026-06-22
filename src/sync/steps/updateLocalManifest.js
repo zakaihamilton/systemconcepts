@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { FILES_MANIFEST, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
@@ -25,7 +26,7 @@ async function computeFileInfo(file) {
 		const info = await getFileInfo(content);
 		return { file, info };
 	} catch (err) {
-		console.error(`[Sync] Error reading ${file.path}:`, err);
+		structuredLogger.error(`[Sync] Error reading ${file.path}:`, err);
 		return null;
 	}
 }
@@ -56,7 +57,10 @@ export async function updateLocalManifest(
 				try {
 					manifest = JSON.parse(content);
 				} catch (err) {
-					console.error("[Sync] Failed to parse manifest, starting fresh", err);
+					structuredLogger.error(
+						"[Sync] Failed to parse manifest, starting fresh",
+						err,
+					);
 				}
 			}
 		}
@@ -64,7 +68,7 @@ export async function updateLocalManifest(
 		// Create a map for faster lookup
 		// Handle old dictionary-style manifest or corruption
 		if (manifest && !Array.isArray(manifest)) {
-			console.log(
+			structuredLogger.debug(
 				"[Sync] Converting legacy dictionary manifest to array format",
 			);
 			manifest = Object.entries(manifest).map(([path, info]) => ({
@@ -135,7 +139,9 @@ export async function updateLocalManifest(
 				manifest.push(newEntry);
 				manifestMap.set(file.path, newEntry);
 				changed = true;
-				console.log(`[Sync] Added new file to manifest: ${file.path}`);
+				structuredLogger.debug(
+					`[Sync] Added new file to manifest: ${file.path}`,
+				);
 			} else {
 				// Existing file - check if modified
 				const existingEntry = manifestMap.get(file.path);
@@ -151,7 +157,7 @@ export async function updateLocalManifest(
 					existingEntry.size = info.size;
 					existingEntry.version = newVer.toString();
 					changed = true;
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Updated file in manifest (version incremented to ${newVer}): ${file.path}`,
 					);
 				}
@@ -163,14 +169,14 @@ export async function updateLocalManifest(
 		manifest.forEach((f) => {
 			if (!localFilePaths.has(f.path)) {
 				if (!f.deleted) {
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Marking missing file as deleted in manifest: ${f.path}`,
 					);
 					f.deleted = true;
 					changed = true;
 				}
 			} else if (f.deleted) {
-				console.log(
+				structuredLogger.debug(
 					`[Sync] File restored locally, unmarking deleted: ${f.path}`,
 				);
 				delete f.deleted;
@@ -197,7 +203,7 @@ export async function updateLocalManifest(
 		);
 		return manifest;
 	} catch (err) {
-		console.error("[Sync] Step 2 error:", err);
+		structuredLogger.error("[Sync] Step 2 error:", err);
 		addSyncLog(`Step 2 failed: ${err.message}`, "error");
 		throw err;
 	}

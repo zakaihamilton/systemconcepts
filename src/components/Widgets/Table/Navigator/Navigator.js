@@ -4,11 +4,11 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import TextField from "@mui/material/TextField";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useDirection } from "@util/data/direction";
 import { useTranslations } from "@util/domain/translations";
 import DelayInput from "@widgets/DelayInput";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./Navigator.module.css";
 
@@ -84,13 +84,13 @@ export default function Navigator({
 									className={styles.pageIndex}
 									variant="standard"
 									slotProps={{
-                                        htmlInput: {
-                                            "aria-label": translations.PAGE_INDEX,
-                                            type: "number",
-                                            min: 1,
-                                            max: pageCount,
-                                        }
-                                    }}
+										htmlInput: {
+											"aria-label": translations.PAGE_INDEX,
+											type: "number",
+											min: 1,
+											max: pageCount,
+										},
+									}}
 								/>
 							</DelayInput>
 						</span>

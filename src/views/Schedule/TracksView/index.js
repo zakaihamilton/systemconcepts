@@ -1,2 +1,2 @@
-export { default } from "./TracksView";
 export * from "./TracksView";
+export { default } from "./TracksView";

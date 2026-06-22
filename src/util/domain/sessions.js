@@ -3,15 +3,16 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import { FILES_MANIFEST } from "@sync/constants";
 import { useSync } from "@sync/sync";
-import { GroupsStore, useGroups } from "@util/domain/groups";
-import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";
+import { useDeviceType } from "@util/browser/styles";
+import { makePath } from "@util/data/path";
 import { formatDuration } from "@util/data/string";
+import { GroupsStore, useGroups } from "@util/domain/groups";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useDeviceType } from "@util/browser/styles";
 
 registerToolbar("Sessions");
 
@@ -75,7 +76,7 @@ export function useSessions(depends = [], options = {}) {
 			}
 
 			const startTime = performance.now();
-			console.log("[Sessions] Loading sessions...");
+			structuredLogger.debug("[Sessions] Loading sessions...");
 
 			// Helper to yield to the event loop
 			const yieldToEventLoop = () =>
@@ -118,7 +119,10 @@ export function useSessions(depends = [], options = {}) {
 							bundledSessions = data.sessions;
 						}
 					} catch (err) {
-						console.error("[Sessions] Error reading bundle.json:", err);
+						structuredLogger.error(
+							"[Sessions] Error reading bundle.json:",
+							err,
+						);
 					}
 				}
 
@@ -136,7 +140,7 @@ export function useSessions(depends = [], options = {}) {
 								!item.path.includes("metadata/sessions"), // Exclude any legacy folder if it still exists
 						);
 
-						console.log(
+						structuredLogger.debug(
 							`[Sessions] Found ${metadataFiles.length} personal metadata files`,
 						);
 
@@ -194,24 +198,27 @@ export function useSessions(depends = [], options = {}) {
 									}
 								}
 							} catch {
-								console.error(
+								structuredLogger.error(
 									`[Sessions] Error parsing personal file ${file.path}:`,
 								);
 							}
 						}
 
 						if (Object.keys(personalMetadata).length > 0) {
-							console.log(
+							structuredLogger.debug(
 								`[Sessions] Loaded ${Object.keys(personalMetadata).length} personal metadata entries`,
 							);
 						}
 					} catch (err) {
-						console.error("[Sessions] Error loading personal metadata:", err);
+						structuredLogger.error(
+							"[Sessions] Error loading personal metadata:",
+							err,
+						);
 					}
 				}
 
 				const timeAfterManifests = performance.now();
-				console.log(
+				structuredLogger.debug(
 					`[Sessions] Loaded manifests in ${(timeAfterManifests - startTime).toFixed(1)}ms`,
 				);
 
@@ -297,7 +304,7 @@ export function useSessions(depends = [], options = {}) {
 				}
 
 				const timeAfterGroups = performance.now();
-				console.log(
+				structuredLogger.debug(
 					`[Sessions] Processed ${groups.length} groups (${bundledGroups.size} bundled) in ${(timeAfterGroups - timeAfterManifests).toFixed(1)}ms`,
 				);
 
@@ -443,7 +450,11 @@ export function useSessions(depends = [], options = {}) {
 
 								return dataSessions;
 							} catch (err) {
-								console.error("Error reading sessions file", _path, err);
+								structuredLogger.error(
+									"Error reading sessions file",
+									_path,
+									err,
+								);
 								return [];
 							}
 						}),
@@ -459,10 +470,10 @@ export function useSessions(depends = [], options = {}) {
 				}
 
 				const timeAfterSessions = performance.now();
-				console.log(
+				structuredLogger.debug(
 					`[Sessions] Loaded ${allSessions.length} sessions in ${(timeAfterSessions - timeAfterGroups).toFixed(1)}ms`,
 				);
-				console.log(
+				structuredLogger.debug(
 					`[Sessions] Total load time: ${(timeAfterSessions - startTime).toFixed(1)}ms`,
 				);
 
@@ -477,7 +488,7 @@ export function useSessions(depends = [], options = {}) {
 					});
 				});
 			} catch (err) {
-				console.error(err);
+				structuredLogger.error(err);
 				SessionsStore.update((s) => {
 					// Set to empty array instead of leaving undefined
 					if (!s.sessions) {

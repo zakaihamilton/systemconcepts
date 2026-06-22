@@ -1,6 +1,7 @@
 import { getMutex, isMutexLocked, lockMutex } from "@sync/mutex";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { fetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { usePageVisibility } from "@util/browser/hooks";
 import { useOnline } from "@util/browser/online";
@@ -112,7 +113,7 @@ export async function getReadOnlyManifestFreshness(config, userid) {
 				`${config.name} manifest is unchanged but ${missingLocalFiles.length} local file(s) are missing; repairing`,
 				"warning",
 			);
-			console.warn(
+			structuredLogger.warn(
 				`[Sync] ${config.name} local integrity check found missing files:`,
 				missingLocalFiles,
 			);
@@ -124,7 +125,7 @@ export async function getReadOnlyManifestFreshness(config, userid) {
 			missingLocalFiles,
 		};
 	} catch (err) {
-		console.warn(
+		structuredLogger.warn(
 			`[Sync] Manifest freshness check failed for ${resolvedRemotePath}:`,
 			err.message || err,
 		);
@@ -149,7 +150,7 @@ async function getCachedLocalManifest(localPath) {
 		const manifest = content ? JSON.parse(content) : [];
 		return Array.isArray(manifest) ? manifest : null;
 	} catch (err) {
-		console.warn("[Sync] Failed to read cached local manifest:", err);
+		structuredLogger.warn("[Sync] Failed to read cached local manifest:", err);
 		return null;
 	}
 }
@@ -246,7 +247,7 @@ async function executeSyncPipeline(
 		!canUpload &&
 		(config.direction === "bi" || config.direction === "push")
 	) {
-		console.warn(
+		structuredLogger.warn(
 			`[Sync] Upload restricted for ${label}. Role: ${role}, Allowed: ${uploadsRole}, Locked: ${isLocked}`,
 		);
 		if (isLocked) {
@@ -335,7 +336,7 @@ async function executeSyncPipeline(
 				skipHashing = false;
 			}
 		} catch (err) {
-			console.error(`[${label}] Migration failed:`, err);
+			structuredLogger.error(`[${label}] Migration failed:`, err);
 			addSyncLog(`Migration failed: ${err.message}`, "error");
 		}
 		progress.completeStep("migrateFromMongoDB");
@@ -442,7 +443,7 @@ async function executeSyncPipeline(
 		if (hasChanges || !loadedFromManifest || migrationOccurred) {
 			await uploadManifest(remoteManifest, resolvedRemotePath);
 		} else {
-			console.log(
+			structuredLogger.debug(
 				`[Sync] Skipping manifest upload (no changes and manifest unchanged)`,
 			);
 		}
@@ -487,44 +488,48 @@ async function executeSyncPipeline(
 export async function performSync(forceReload) {
 	const unlock = await lockMutex({ id: "sync_process" });
 	try {
-		console.log(`[Sync] Version: ${process.env.NEXT_PUBLIC_VERSION}`);
+		structuredLogger.debug(
+			`[Sync] Version: ${process.env.NEXT_PUBLIC_VERSION}`,
+		);
 		let role = Cookies.get("role");
 		const id = normalizeSyncUserId(Cookies.get("id"));
 		const hash = Cookies.get("hash");
 
 		if (!role && id && hash) {
-			console.log("[Sync] Role undefined but logged in, fetching...");
+			structuredLogger.debug(
+				"[Sync] Role undefined but logged in, fetching...",
+			);
 			try {
 				const user = await fetchJSON("/api/login");
 				if (user && user.role) {
 					role = user.role;
 					Cookies.set("role", role, { expires: 60 });
-					console.log("[Sync] Role fetched:", role);
+					structuredLogger.debug("[Sync] Role fetched:", role);
 				}
 			} catch (err) {
-				console.error("[Sync] Failed to fetch role:", err);
+				structuredLogger.error("[Sync] Failed to fetch role:", err);
 			}
 		}
 
-		console.log("[Sync] Initial role check:", role);
+		structuredLogger.debug("[Sync] Initial role check:", role);
 
 		if (!roleAuth(role, "student")) {
 			// Role is restricted, check server for updates
-			console.log("[Sync] Role restricted, attempting refresh...");
+			structuredLogger.debug("[Sync] Role restricted, attempting refresh...");
 			try {
 				const id = Cookies.get("id");
 				const hash = Cookies.get("hash");
 				if (id && hash) {
 					const user = await fetchJSON("/api/login");
-					console.log("[Sync] Refresh result:", user);
+					structuredLogger.debug("[Sync] Refresh result:", user);
 					if (user && user.role) {
 						role = user.role;
 						Cookies.set("role", role, { expires: 60 });
-						console.log("[Sync] Role updated to:", role);
+						structuredLogger.debug("[Sync] Role updated to:", role);
 					}
 				}
 			} catch (err) {
-				console.error("[Sync] Failed to refresh role", err);
+				structuredLogger.error("[Sync] Failed to refresh role", err);
 				addSyncLog(
 					`Role refresh failed: ${err.message || String(err)}`,
 					"error",
@@ -532,11 +537,11 @@ export async function performSync(forceReload) {
 			}
 
 			if (roleAuth(role, "student")) {
-				console.log(
+				structuredLogger.debug(
 					"[Sync] Role refreshed and authorized. Proceeding with sync.",
 				);
 			} else {
-				console.warn(
+				structuredLogger.warn(
 					"[Sync] Access still restricted after refresh. Role:",
 					role,
 				);
@@ -630,7 +635,7 @@ export async function performSync(forceReload) {
 		}
 		return { completed: true };
 	} catch (err) {
-		console.error("[Sync] Sync failed:", err);
+		structuredLogger.error("[Sync] Sync failed:", err);
 		let errorMessage = err.message || String(err);
 		if (err === 401 || err === 403) {
 			errorMessage = "Please login to sync";
@@ -853,7 +858,7 @@ export async function clearBundleCache({
 		});
 		addSyncLog("✓ All sync data cleared", "success");
 	} catch (err) {
-		console.error("[Sync] Error clearing cache:", err);
+		structuredLogger.error("[Sync] Error clearing cache:", err);
 	}
 }
 

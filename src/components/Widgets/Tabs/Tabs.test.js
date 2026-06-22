@@ -1,6 +1,6 @@
-import { render, fireEvent } from "@testing-library/react";
-import TabsWidget from "./Tabs.js";
 import Tab from "@mui/material/Tab";
+import { fireEvent, render } from "@testing-library/react";
+import TabsWidget from "./Tabs.js";
 
 describe("TabsWidget Component", () => {
 	it("renders children and calls setValue when tab is clicked", () => {
@@ -11,7 +11,7 @@ describe("TabsWidget Component", () => {
 			<TabsWidget state={mockState}>
 				<Tab value="tab1" label="Tab 1" />
 				<Tab value="tab2" label="Tab 2" />
-			</TabsWidget>
+			</TabsWidget>,
 		);
 
 		const tab1Button = getByRole("tab", { name: "Tab 1" });
@@ -30,7 +30,7 @@ describe("TabsWidget Component", () => {
 			<TabsWidget state={mockState}>
 				<Tab value="tab1" label="Tab 1" />
 				<Tab value="tab2" label="Tab 2" />
-			</TabsWidget>
+			</TabsWidget>,
 		);
 		const tab1Button = getByRole("tab", { name: "Tab 1" });
 		expect(tab1Button).toHaveAttribute("aria-selected", "false");

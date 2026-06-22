@@ -1,2 +1,2 @@
-export { default } from "./EditContentDialog";
 export * from "./EditContentDialog";
+export { default } from "./EditContentDialog";

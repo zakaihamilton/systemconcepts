@@ -1,2 +1,2 @@
-export { default } from "./AppTitle";
 export * from "./AppTitle";
+export { default } from "./AppTitle";

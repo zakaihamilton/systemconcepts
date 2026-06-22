@@ -1,2 +1,2 @@
-export { default } from "./SessionIcon";
 export * from "./SessionIcon";
+export { default } from "./SessionIcon";

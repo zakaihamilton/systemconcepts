@@ -589,7 +589,8 @@ export default [
 	},
 	{
 		id: "DELETE_ARTICLES_CONFIRM",
-		value: "Are you sure you want to PERMANENTLY DELETE all articles with this tag? This action cannot be undone.",
+		value:
+			"Are you sure you want to PERMANENTLY DELETE all articles with this tag? This action cannot be undone.",
 	},
 	{
 		id: "ARTICLES_TO_DELETE",

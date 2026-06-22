@@ -20,14 +20,10 @@ jest.mock("@widgets/StatusBar", () => ({
 }));
 jest.mock("./Row", () => () => <tr data-testid="table-row" />);
 jest.mock("./Item", () => () => <div data-testid="table-item" />);
-jest.mock("./Navigator", () => () => (
-	<div data-testid="table-navigator" />
-));
+jest.mock("./Navigator", () => () => <div data-testid="table-navigator" />);
 jest.mock("./Error", () => () => <div data-testid="table-error" />);
 jest.mock("./TableColumn", () => () => <th data-testid="table-column" />);
-jest.mock("./ListColumns", () => () => (
-	<div data-testid="list-columns" />
-));
+jest.mock("./ListColumns", () => () => <div data-testid="list-columns" />);
 jest.mock(
 	"@components/Virtualized/FixedSizeList",
 	() =>

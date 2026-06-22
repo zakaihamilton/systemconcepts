@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import pako from "pako";
@@ -31,7 +32,7 @@ export function decompressJSON(buffer) {
 export async function readCompressedFileRaw(path) {
 	path = makePath(path);
 	try {
-		// console.log("Reading file", path);
+		// structuredLogger.debug("Reading file", path);
 		const data = await storage.readFile(path).catch((err) => {
 			// treat missing file as null without logging error
 			const errorStr = (err.message || String(err)).toLowerCase();
@@ -66,12 +67,15 @@ export async function readCompressedFileRaw(path) {
 
 				// Debug logging for invalid data
 				if (!data || data.length === 0) {
-					console.error(`[Bundle] Empty data string for ${path}`);
+					structuredLogger.error(`[Bundle] Empty data string for ${path}`);
 					return null;
 				}
 				buffer = Buffer.from(data, "base64");
 			} catch (e) {
-				console.error(`[Bundle] Failed to decode base64 for ${path}`, e);
+				structuredLogger.error(
+					`[Bundle] Failed to decode base64 for ${path}`,
+					e,
+				);
 				return null;
 			}
 		} else if (Buffer.isBuffer(data)) {
@@ -79,7 +83,7 @@ export async function readCompressedFileRaw(path) {
 		} else if (data instanceof Uint8Array) {
 			buffer = Buffer.from(data);
 		} else {
-			console.error(
+			structuredLogger.error(
 				`[Bundle] Unexpected data type for ${path}:`,
 				typeof data,
 				data,
@@ -94,7 +98,7 @@ export async function readCompressedFileRaw(path) {
 				const text = new TextDecoder("utf-8").decode(buffer);
 				return text;
 			} catch {
-				console.error(
+				structuredLogger.error(
 					`[Bundle] Failed to decompress ${path}: ${e.message || e}`,
 				);
 				return null;
@@ -102,7 +106,7 @@ export async function readCompressedFileRaw(path) {
 		}
 	} catch (err) {
 		// Only log errors that aren't "Not Found"
-		console.error(`[Bundle] Error reading file ${path}:`, err);
+		structuredLogger.error(`[Bundle] Error reading file ${path}:`, err);
 		return null;
 	}
 }
@@ -118,7 +122,10 @@ export async function readCompressedFile(path) {
 	try {
 		return JSON.parse(content);
 	} catch (e) {
-		console.error(`[Bundle] Failed to parse JSON for ${path}:`, e.message);
+		structuredLogger.error(
+			`[Bundle] Failed to parse JSON for ${path}:`,
+			e.message,
+		);
 		return null;
 	}
 }
@@ -140,7 +147,7 @@ export async function writeCompressedFile(path, data, folderCache = null) {
 		}
 
 		if (data === undefined || data === null) {
-			console.error(`[Bundle] Attempted to write ${data} to ${path}`);
+			structuredLogger.error(`[Bundle] Attempted to write ${data} to ${path}`);
 			throw new Error(`Attempted to write ${data} to ${path}`);
 		}
 
@@ -164,7 +171,7 @@ export async function writeCompressedFile(path, data, folderCache = null) {
 			await storage.writeFile(path, base64);
 		}
 	} catch (err) {
-		console.error(`[Bundle] Error writing file ${path}:`, err);
+		structuredLogger.error(`[Bundle] Error writing file ${path}:`, err);
 		throw err;
 	}
 }

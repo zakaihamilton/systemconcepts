@@ -70,8 +70,8 @@ export default function Tabs({ Container }) {
 				"/" +
 				encodeURIComponent(
 					"player?suffix=" +
-					(session.audio ? ".m4a" : ".mp4") +
-					"&mode=transcript",
+						(session.audio ? ".m4a" : ".mp4") +
+						"&mode=transcript",
 				),
 		},
 	]

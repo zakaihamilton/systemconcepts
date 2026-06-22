@@ -1,4 +1,5 @@
 import { SyncActiveStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
 
 export function addSyncLog(message, type = "info") {
 	// Check global debug level from store
@@ -6,17 +7,17 @@ export function addSyncLog(message, type = "info") {
 
 	// If type is verbose and we are not in verbose mode, skip logging to UI (console only)
 	if (type === "verbose" && currentDebugLevel !== "verbose") {
-		console.log(`[Sync-Verbose] ${message}`);
+		structuredLogger.debug(`[Sync-Verbose] ${message}`);
 		return;
 	}
 
 	// Also log to console for debugging
 	const logMethod =
 		type === "error"
-			? console.error
+			? structuredLogger.error
 			: type === "warning"
-				? console.warn
-				: console.log;
+				? structuredLogger.warn
+				: structuredLogger.debug;
 	logMethod(`[Sync] ${message}`);
 
 	SyncActiveStore.update((s) => {

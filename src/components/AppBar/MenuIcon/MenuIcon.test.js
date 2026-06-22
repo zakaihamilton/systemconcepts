@@ -1,8 +1,8 @@
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
-import Menu from "./MenuIcon.js";
 import { MainStore } from "../../Main";
+import Menu from "./MenuIcon.js";
 
 jest.mock("@util/browser/styles");
 jest.mock("@util/domain/translations");

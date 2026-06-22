@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { readCompressedFile, writeCompressedFile } from "./bundle";
 
@@ -15,7 +16,7 @@ export async function updateManifestEntry(manifestPath, entry) {
 				try {
 					manifest = JSON.parse(content);
 				} catch (e) {
-					console.error("[Sync] Failed to parse manifest:", e);
+					structuredLogger.error("[Sync] Failed to parse manifest:", e);
 					manifest = [];
 				}
 			}
@@ -24,7 +25,9 @@ export async function updateManifestEntry(manifestPath, entry) {
 
 	// Handle legacy dictionary-style manifest
 	if (manifest && !Array.isArray(manifest)) {
-		console.log("[Sync] Converting legacy dictionary manifest to array format");
+		structuredLogger.debug(
+			"[Sync] Converting legacy dictionary manifest to array format",
+		);
 		manifest = Object.entries(manifest).map(([path, info]) => ({
 			path,
 			...info,

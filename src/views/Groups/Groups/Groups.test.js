@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { useOnline } from "@util/browser/online";
-import { useSessions } from "@util/domain/sessions";
 import { useDeviceType } from "@util/browser/styles";
+import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { useUpdateSessions } from "@util/domain/updateSessions";
 import Groups from "./index.js";

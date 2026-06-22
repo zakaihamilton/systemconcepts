@@ -1,2 +1,2 @@
-export { default } from "./SessionGroup";
 export * from "./SessionGroup";
+export { default } from "./SessionGroup";

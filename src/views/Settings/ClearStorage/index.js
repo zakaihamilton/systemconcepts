@@ -1,2 +1,2 @@
-export { default } from "./ClearStorage";
 export * from "./ClearStorage";
+export { default } from "./ClearStorage";

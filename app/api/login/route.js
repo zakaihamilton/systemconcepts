@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import {
 	changePassword,
@@ -48,7 +49,7 @@ export async function GET(request) {
 	}
 
 	if (error) {
-		console.error("login error: ", error);
+		structuredLogger.error("login error: ", error);
 		return NextResponse.json(
 			{ err: getSafeError(error) },
 			{ status: getAuthErrorStatus(error, 200) },
@@ -109,7 +110,7 @@ export async function PUT(request) {
 			await sendResetEmail({ id });
 			return NextResponse.json({ message: "RESET_REQUEST_ACCEPTED" });
 		} catch (err) {
-			console.error("login error: ", err);
+			structuredLogger.error("login error: ", err);
 			if (err === "RATE_LIMIT_EXCEEDED") {
 				return NextResponse.json({ err: getSafeError(err) }, { status: 429 });
 			}
@@ -134,7 +135,7 @@ export async function PUT(request) {
 			setSessionCookies(response, session, user);
 			return response;
 		} catch (err) {
-			console.error("login error: ", err);
+			structuredLogger.error("login error: ", err);
 			return NextResponse.json({ err: getSafeError(err) });
 		}
 	} else if (oldpassword && newpassword) {
@@ -156,7 +157,7 @@ export async function PUT(request) {
 			setSessionCookies(response, session, user);
 			return response;
 		} catch (err) {
-			console.error("login error: ", err);
+			structuredLogger.error("login error: ", err);
 			return NextResponse.json({ err: getSafeError(err) });
 		}
 	} else {
@@ -183,7 +184,7 @@ export async function PUT(request) {
 			setSessionCookies(response, session, user);
 			return response;
 		} catch (err) {
-			console.error("login error: ", err);
+			structuredLogger.error("login error: ", err);
 			return NextResponse.json({ err: getSafeError(err) });
 		}
 	}

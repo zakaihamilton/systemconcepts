@@ -1,2 +1,2 @@
-export { default } from "./Translations";
 export * from "./Translations";
+export { default } from "./Translations";

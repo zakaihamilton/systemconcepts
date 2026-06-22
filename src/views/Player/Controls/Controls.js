@@ -8,11 +8,12 @@ import StopIcon from "@mui/icons-material/Stop";
 import MuiAlert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import { logger as structuredLogger } from "@util/api/logger";
 import { usePageVisibility } from "@util/browser/hooks";
 import { useMediaSession } from "@util/browser/mediaSession";
-import { useFile } from "@util/storage/storage";
 import { formatDuration } from "@util/data/string";
 import { useTranslations } from "@util/domain/translations";
+import { useFile } from "@util/storage/storage";
 import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerButton from "../Button";
@@ -52,8 +53,10 @@ export default function Controls({
 		}
 		return null;
 	});
-	const hasDuration = playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0;
-	const showLoading = !error && (loading || renewing || !hasDuration || loadedPath !== path);
+	const hasDuration =
+		playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0;
+	const showLoading =
+		!error && (loading || renewing || !hasDuration || loadedPath !== path);
 
 	// MediaSession API integration for iOS Bluetooth headset controls
 	// Capitalize first letter of artist name
@@ -131,7 +134,11 @@ export default function Controls({
 				name === "loadedmetadata"
 			) {
 				setLoading(false);
-				if (name === "playing" || name === "canplay" || name === "loadedmetadata") {
+				if (
+					name === "playing" ||
+					name === "canplay" ||
+					name === "loadedmetadata"
+				) {
 					setLoadedPath(stateRef.current.path);
 				}
 			}
@@ -204,7 +211,7 @@ export default function Controls({
 	}, [renewing]);
 
 	useEffect(() => {
-		console.log("[Controls] Metadata effect triggered", {
+		structuredLogger.debug("[Controls] Metadata effect triggered", {
 			hasMetadata: !!metadata,
 			metadataKey,
 			readyState: playerRef?.readyState,
@@ -216,7 +223,7 @@ export default function Controls({
 			const currentMetadata = metadataKey
 				? metadata?.[metadataKey] || {}
 				: metadata || {};
-			console.log("[Controls] Current metadata:", {
+			structuredLogger.debug("[Controls] Current metadata:", {
 				metadataKey,
 				currentMetadata,
 				position: currentMetadata.position,
@@ -228,7 +235,7 @@ export default function Controls({
 				playerRef.currentTime = currentMetadata.position; // eslint-disable-line react-hooks/immutability
 				setCurrentTime(currentMetadata.position);
 			} else {
-				console.log("[Controls] Not setting position:", {
+				structuredLogger.debug("[Controls] Not setting position:", {
 					hasPosition: !!currentMetadata.position,
 					currentTime: playerRef.currentTime,
 				});
@@ -409,7 +416,7 @@ export default function Controls({
 	};
 	const play = () => {
 		playerRef.play().catch((err) => {
-			console.error(err);
+			structuredLogger.error(err);
 		});
 	};
 	const stop = useCallback(() => {
@@ -455,7 +462,9 @@ export default function Controls({
 				style={{ zIndex }}
 			>
 				<div className={styles.progress}>
-					<div className={clsx(styles.progressLine, showLoading && styles.loading)}>
+					<div
+						className={clsx(styles.progressLine, showLoading && styles.loading)}
+					>
 						<div
 							className={styles.progressBack}
 							ref={progressRef}

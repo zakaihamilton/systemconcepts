@@ -1,8 +1,8 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@widgets/Tooltip";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
+import Tooltip from "@widgets/Tooltip";
 import { MainStore } from "../../Main";
 
 export default function Menu() {

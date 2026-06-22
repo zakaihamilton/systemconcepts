@@ -1,2 +1,2 @@
-export { default } from "./ToggleButtonGroup";
 export * from "./ToggleButtonGroup";
+export { default } from "./ToggleButtonGroup";

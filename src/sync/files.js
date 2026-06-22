@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { readCompressedFile, writeCompressedFile } from "./bundle";
@@ -22,7 +23,7 @@ export async function readFile(fileName, defaultValue = {}) {
 		const data = await readCompressedFile(filePath);
 		return data || defaultValue;
 	} catch (err) {
-		console.error(`[Files] Error reading ${fileName}:`, err);
+		structuredLogger.error(`[Files] Error reading ${fileName}:`, err);
 		return defaultValue;
 	} finally {
 		unlock();
@@ -40,7 +41,7 @@ export async function writeFile(fileName, data) {
 	try {
 		await writeCompressedFile(filePath, data);
 	} catch (err) {
-		console.error(`[Files] Error writing ${fileName}:`, err);
+		structuredLogger.error(`[Files] Error writing ${fileName}:`, err);
 		throw err;
 	} finally {
 		unlock();

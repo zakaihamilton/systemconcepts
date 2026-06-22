@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
-import { useListing } from "@util/storage/storage";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
+import { useListing } from "@util/storage/storage";
 import Storage from "./index.js";
 
 jest.mock("@util/domain/translations");

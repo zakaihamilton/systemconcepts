@@ -12,9 +12,10 @@ import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -111,7 +112,7 @@ export default function SyncDialog({ open, onClose, tags }) {
 			}
 			setChanges(calculatedChanges);
 		} catch (err) {
-			console.error("Failed to calculate changes:", err);
+			structuredLogger.error("Failed to calculate changes:", err);
 		} finally {
 			setCalculating(false);
 		}
@@ -177,7 +178,7 @@ export default function SyncDialog({ open, onClose, tags }) {
 
 			onClose();
 		} catch (err) {
-			console.error("Sync failed:", err);
+			structuredLogger.error("Sync failed:", err);
 		} finally {
 			setProcessing(false);
 		}

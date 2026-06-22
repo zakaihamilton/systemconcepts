@@ -1,2 +1,2 @@
-export { default } from "./SidebarIcon";
 export * from "./SidebarIcon";
+export { default } from "./SidebarIcon";

@@ -2,20 +2,21 @@ import devices from "@data/storage";
 import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import StorageIcon from "@mui/icons-material/Storage";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useSync } from "@sync/sync";
+import { logger as structuredLogger } from "@util/api/logger";
+import { useLocalStorage } from "@util/browser/store";
+import { useDeviceType } from "@util/browser/styles";
 import { useDateFormatter } from "@util/data/locale";
 import { isBinaryFile, isImageFile } from "@util/data/path";
-import storage, { useListing } from "@util/storage/storage";
-import { useLocalStorage } from "@util/browser/store";
 import { abbreviateSize } from "@util/data/string";
-import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, setPath } from "@util/domain/views";
+import storage, { useListing } from "@util/storage/storage";
 import Row from "@widgets/Row";
 import StatusBar from "@widgets/StatusBar";
 import Table from "@widgets/Table";
+import Tooltip from "@widgets/Tooltip";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo } from "react";
 import Actions, { useActions } from "../Actions";
@@ -164,7 +165,7 @@ export default function Storage({ path = "" }) {
 				}
 			} else {
 				name = translations[item.name] || name;
-				console.log(
+				structuredLogger.debug(
 					`[Storage Mapper] Root item: ${name}, size: ${item.size}, type: ${typeof item.size}`,
 				);
 			}
@@ -248,7 +249,7 @@ export default function Storage({ path = "" }) {
 					s.counter++;
 				});
 			} catch (err) {
-				console.error(err);
+				structuredLogger.error(err);
 				StorageStore.update((s) => {
 					s.message = err;
 					s.severity = "error";

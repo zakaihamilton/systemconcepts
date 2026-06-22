@@ -1,16 +1,17 @@
 import { ContentSize } from "@components/Page/Content";
 import ErrorIcon from "@mui/icons-material/Error";
 import { useSync } from "@sync/sync";
-import { readBinary } from "@util/data/binary";
 import {
-	SIGNED_URL_CACHE_TTL_MS,
 	getStableFetchCacheOptions,
+	SIGNED_URL_CACHE_TTL_MS,
 	useFetchJSON,
 } from "@util/api/fetch";
-import { exportData, exportFile } from "@util/storage/importExport";
+import { logger as structuredLogger } from "@util/api/logger";
+import { readBinary } from "@util/data/binary";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import { useParentParams, useParentPath } from "@util/domain/views";
+import { exportData, exportFile } from "@util/storage/importExport";
 import Download from "@widgets/Download";
 import Message from "@widgets/Message";
 import Progress from "@widgets/Progress";
@@ -81,7 +82,7 @@ export default function ImagePage({ name, ext = "png" }) {
 		setImageLoading(false);
 	};
 	const onError = (event) => {
-		console.warn("Failed to load image", event);
+		structuredLogger.warn("Failed to load image", event);
 		setError(true);
 		setImageLoading(false);
 	};
@@ -105,10 +106,12 @@ export default function ImagePage({ name, ext = "png" }) {
 			const errorString = String(err);
 			if (errorString.includes("FILE_NOT_FOUND") && signingLoading) {
 				// Ignore local file not found if we are still fetching signed URL
-				console.log("Local image not found, waiting for signed URL...");
+				structuredLogger.debug(
+					"Local image not found, waiting for signed URL...",
+				);
 				setLoading(false);
 			} else {
-				console.warn("Failed to read image", err);
+				structuredLogger.warn("Failed to read image", err);
 				setError(err);
 				setContent(null);
 				setLoading(false);

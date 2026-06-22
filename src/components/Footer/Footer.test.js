@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
-import Footer from "./index.js";
 import { useToolbarItems } from "../Toolbar/index.js";
+import Footer from "./index.js";
 
 jest.mock("@util/browser/styles");
 jest.mock("../Toolbar", () => {

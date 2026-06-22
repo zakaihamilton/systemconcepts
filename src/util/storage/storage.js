@@ -1,12 +1,20 @@
 import storage from "@data/storage";
-import { isBinaryFile, makePath } from "@util/data/path";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useGlobalState } from "@util/browser/store";
+import pLimit from "@util/data/p-limit";
+import { isBinaryFile, makePath } from "@util/data/path";
 import JSZip from "jszip";
 import { useCallback, useEffect, useRef, useState } from "react";
-import pLimit from "@util/data/p-limit";
 
 const limit = pLimit(20);
 
+/**
+ * Dispatch a storage operation to the adapter encoded in the device-prefixed URL.
+ * @param {{name: string, types?: string[]}} item
+ * @param {string} url
+ * @param {...unknown} params
+ * @returns {Promise<unknown>}
+ */
 export async function callMethod(item, url = "", ...params) {
 	if (!url) {
 		url = "";
@@ -42,14 +50,14 @@ export async function callMethod(item, url = "", ...params) {
 								0,
 							);
 						} catch (err) {
-							console.error(err);
+							structuredLogger.error(err);
 							result.size = 0;
 						}
 					} else {
 						const method = device.getSize;
 						if (method) {
 							result.size = await method.call(device);
-							console.log(
+							structuredLogger.debug(
 								`[Storage] Device: ${device.id}, fetched size: ${result.size}`,
 							);
 						}
@@ -84,7 +92,7 @@ export async function callMethod(item, url = "", ...params) {
 							0,
 						);
 					} catch (err) {
-						console.error(err);
+						structuredLogger.error(err);
 						item.size = 0;
 					}
 				}
@@ -118,7 +126,7 @@ export async function callMethod(item, url = "", ...params) {
 			errorStr.includes("enoent");
 
 		if (!isCommonFsError) {
-			console.error(err);
+			structuredLogger.error(err);
 		}
 
 		// Re-throw so callers can handle the error
@@ -369,12 +377,12 @@ async function getRecursiveList(path) {
 		if (result) {
 			return result;
 		}
-		console.log(
+		structuredLogger.debug(
 			`[Storage] Device method returned null/undefined for: ${path}, using fallback`,
 		);
 	} catch (err) {
 		// Fallback to manual recursion if method not supported or fails
-		console.warn(
+		structuredLogger.warn(
 			`[Storage] Device method failed for ${path}:`,
 			err.message || err,
 		);
@@ -388,7 +396,7 @@ async function getRecursiveList(path) {
 	const addListing = async (dirPath, depth = 0) => {
 		// Prevent runaway recursion
 		if (depth > MAX_DEPTH) {
-			console.warn(`[Storage] Max depth exceeded for: ${dirPath}`);
+			structuredLogger.warn(`[Storage] Max depth exceeded for: ${dirPath}`);
 			return;
 		}
 
@@ -416,7 +424,7 @@ async function getRecursiveList(path) {
 		});
 
 		if (validItems.length === 0 && items.length > 0) {
-			console.warn(
+			structuredLogger.warn(
 				`[Storage] Skipping ${dirPath} - ${items.length} items don't match expected path prefix`,
 			);
 			return;
@@ -461,7 +469,7 @@ async function exportFolder(path) {
 					data[name] = await storageMethods.readFile(path);
 				}
 			} catch (err) {
-				console.error(err);
+				structuredLogger.error(err);
 			}
 		}
 		return data;
@@ -494,7 +502,7 @@ async function exportFolderAsZip(path) {
 					}
 				}
 			} catch (err) {
-				console.error(err);
+				structuredLogger.error(err);
 			}
 		}
 	};

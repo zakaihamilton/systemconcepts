@@ -1,5 +1,9 @@
-import { metadataInfo as awsMetadataInfo, downloadData } from "@util/storage/aws";
+import { logger as structuredLogger } from "@util/api/logger";
 import pLimit from "@util/data/p-limit";
+import {
+	metadataInfo as awsMetadataInfo,
+	downloadData,
+} from "@util/storage/aws";
 import { metadataInfo as wasabiMetadataInfo } from "@util/storage/wasabi";
 import pako from "pako";
 
@@ -64,7 +68,7 @@ export async function getSessions({ group } = {}) {
 					const data = await getJsonFile(s3Path);
 					return data.sessions || [];
 				} catch (err) {
-					console.error(`[Sessions] Error loading ${file.path}:`, err);
+					structuredLogger.error(`[Sessions] Error loading ${file.path}:`, err);
 					return [];
 				}
 			}),
@@ -183,28 +187,34 @@ async function getExistingInferredTranscriptPath(session) {
 		hasSummary: !!(session?.summaryText || session?.summary),
 	};
 	if (!hasTranscriptEvidence) {
-		console.log("[Sessions API] Skipping inferred transcript lookup", {
-			...logContext,
-			reason: "no transcript evidence",
-		});
+		structuredLogger.debug(
+			"[Sessions API] Skipping inferred transcript lookup",
+			{
+				...logContext,
+				reason: "no transcript evidence",
+			},
+		);
 		return null;
 	}
 
 	const transcriptPath = getInferredTranscriptPath(session);
 	if (!transcriptPath) {
-		console.log("[Sessions API] Skipping inferred transcript lookup", {
-			...logContext,
-			reason: "no media path",
-			audioPath: session.audio?.path || null,
-			videoPath: session.video?.path || null,
-			resolutionKeys: Object.keys(session.resolutions || {}),
-			files: session.files || [],
-		});
+		structuredLogger.debug(
+			"[Sessions API] Skipping inferred transcript lookup",
+			{
+				...logContext,
+				reason: "no media path",
+				audioPath: session.audio?.path || null,
+				videoPath: session.video?.path || null,
+				resolutionKeys: Object.keys(session.resolutions || {}),
+				files: session.files || [],
+			},
+		);
 		return null;
 	}
 
 	const resolvedPath = await getExistingTranscriptPath(transcriptPath);
-	console.log("[Sessions API] Checked inferred transcript", {
+	structuredLogger.debug("[Sessions API] Checked inferred transcript", {
 		...logContext,
 		mediaPath: getMediaPath(session),
 		transcriptPath,
@@ -231,7 +241,7 @@ export async function getTranscriptProxyUrl(session, baseUrl) {
 	if (!transcriptPath) {
 		transcriptPath = await getExistingInferredTranscriptPath(session);
 	}
-	console.log("[Sessions API] Resolved transcript URL", {
+	structuredLogger.debug("[Sessions API] Resolved transcript URL", {
 		id: session.id,
 		group: session.group,
 		year: session.year,

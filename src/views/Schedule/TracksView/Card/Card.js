@@ -1,11 +1,11 @@
-import Tooltip from "@widgets/Tooltip";
-import Typography from "@mui/material/Typography";
 import EventIcon from "@mui/icons-material/Event";
+import Typography from "@mui/material/Typography";
 import { getContrastColor } from "@util/data/color";
-import { formatDuration } from "@util/data/string";
 import { useDateFormatter } from "@util/data/locale";
+import { formatDuration } from "@util/data/string";
 import Image from "@widgets/Image";
 import SessionIcon from "@widgets/SessionIcon";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import styles from "./Card.module.css";
@@ -23,20 +23,23 @@ const TrackCard = memo(function TrackCard({
 		day: "numeric",
 	});
 
-	const formatDate = useCallback((dateStr) => {
-		if (!dateStr) return "";
-		const parts = dateStr.split("-");
-		if (parts.length === 3) {
-			const year = parseInt(parts[0], 10);
-			const month = parseInt(parts[1], 10) - 1;
-			const day = parseInt(parts[2], 10);
-			const d = new Date(year, month, day);
-			if (!isNaN(d.getTime())) {
-				return dateFormatter.format(d);
+	const formatDate = useCallback(
+		(dateStr) => {
+			if (!dateStr) return "";
+			const parts = dateStr.split("-");
+			if (parts.length === 3) {
+				const year = parseInt(parts[0], 10);
+				const month = parseInt(parts[1], 10) - 1;
+				const day = parseInt(parts[2], 10);
+				const d = new Date(year, month, day);
+				if (!isNaN(d.getTime())) {
+					return dateFormatter.format(d);
+				}
 			}
-		}
-		return dateStr;
-	}, [dateFormatter]);
+			return dateStr;
+		},
+		[dateFormatter],
+	);
 
 	const { thumbnail, name, duration, color, group, id } = session;
 

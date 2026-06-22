@@ -1,2 +1,2 @@
-export { default } from "./SearchResultItem";
 export * from "./SearchResultItem";
+export { default } from "./SearchResultItem";

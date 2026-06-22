@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
@@ -36,10 +37,10 @@ async function handleAWS(request) {
 
 		const user = await getSessionUser(request);
 		if (!user) {
-			console.log("[AWS API] ACCESS DENIED");
+			structuredLogger.debug("[AWS API] ACCESS DENIED");
 			throw "ACCESS_DENIED";
 		}
-		console.log(
+		structuredLogger.debug(
 			`[AWS API] User: ${user.id}, Role: ${user.role}, Method: ${request.method}, Path: ${path}`,
 		);
 
@@ -65,7 +66,7 @@ async function handleAWS(request) {
 		};
 
 		if (!validateUserAccess(user, path, request.method)) {
-			console.log(
+			structuredLogger.debug(
 				`[AWS API] ACCESS DENIED: User ${user.id} cannot ${request.method} path: ${path}`,
 			);
 			throw (
@@ -83,7 +84,9 @@ async function handleAWS(request) {
 				let itemPath = item.path || "";
 				if (itemPath) itemPath = decodeURIComponent(itemPath);
 				if (!validateUserAccess(user, itemPath, request.method)) {
-					console.log(`[AWS API] ACCESS DENIED: Batch item path: ${itemPath}`);
+					structuredLogger.debug(
+						`[AWS API] ACCESS DENIED: Batch item path: ${itemPath}`,
+					);
 					throw "ACCESS_DENIED: Batch item unauthorized for path: " + itemPath;
 				}
 			}
@@ -126,7 +129,7 @@ async function handleAWS(request) {
 			return new NextResponse(result, { status: 200, headers });
 		}
 	} catch (err) {
-		console.error("aws error: ", err);
+		structuredLogger.error("aws error: ", err);
 		return NextResponse.json(
 			{ err: getSafeError(err) },
 			{ status: getAuthErrorStatus(err) },

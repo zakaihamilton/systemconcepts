@@ -1,6 +1,6 @@
 import Link from "@mui/material/Link";
-import { useSessionTextColor } from "@util/data/colors";
 import { useDeviceType } from "@util/browser/styles";
+import { useSessionTextColor } from "@util/data/colors";
 import { addPath, toPath } from "@util/domain/views";
 import SessionIcon from "@widgets/SessionIcon";
 import Tooltip from "@widgets/Tooltip";

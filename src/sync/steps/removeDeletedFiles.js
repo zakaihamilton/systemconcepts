@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "../constants";
@@ -73,7 +74,7 @@ export async function removeDeletedFiles(
 					deletedPaths.add(file.path);
 				}
 			} catch (err) {
-				console.error(`[Sync] Failed to delete ${file.path}:`, err);
+				structuredLogger.error(`[Sync] Failed to delete ${file.path}:`, err);
 				addSyncLog(`Failed to remove: ${file.path}`, "error");
 			}
 		}
@@ -98,7 +99,7 @@ export async function removeDeletedFiles(
 
 		return { manifest: updatedManifest, hasChanges: toDelete.length > 0 };
 	} catch (err) {
-		console.error("[Sync] Remove deleted files failed:", err);
+		structuredLogger.error("[Sync] Remove deleted files failed:", err);
 		addSyncLog(`Remove deleted files failed: ${err.message}`, "error");
 		throw err;
 	}

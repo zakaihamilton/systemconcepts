@@ -1,4 +1,5 @@
 import { LOCAL_SYNC_PATH } from "@sync/constants";
+import { logger as structuredLogger } from "@util/api/logger";
 import { readBinary } from "@util/data/binary";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
@@ -51,7 +52,7 @@ async function loadFromCache(
 			}
 		}
 	} catch (err) {
-		console.warn(`[Sync] Failed to read cache for ${property}`, err);
+		structuredLogger.warn(`[Sync] Failed to read cache for ${property}`, err);
 	}
 }
 
@@ -123,7 +124,7 @@ async function loadMetadata(
 					parseSessionMetadataJSON(content, property),
 				);
 			} catch (err) {
-				console.error(
+				structuredLogger.error(
 					`[Sync] Error reading ${property} file ${metadataRemotePath}:`,
 					err,
 				);
@@ -230,7 +231,7 @@ export async function loadSummaries(
 				const content = await storage.readFile(metadataRemotePath);
 				Object.assign(sessionMetadataMap, parseSummariesMarkdown(content));
 			} catch (err) {
-				console.error(
+				structuredLogger.error(
 					`[Sync] Error reading ${property} file ${metadataRemotePath}:`,
 					err,
 				);
@@ -309,7 +310,7 @@ export async function loadTranscriptions(
 					});
 				}
 			} catch (err) {
-				console.error(
+				structuredLogger.error(
 					`[Sync Transcription] Error reading ${property} file ${metadataRemotePath}:`,
 					err,
 				);

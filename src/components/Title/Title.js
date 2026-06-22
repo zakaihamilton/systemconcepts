@@ -1,6 +1,6 @@
 import Breadcrumbs from "@components/Breadcrumbs";
-import { SessionsStore } from "@util/domain/sessions";
 import { useDeviceType } from "@util/browser/styles";
+import { SessionsStore } from "@util/domain/sessions";
 import { useActivePages } from "@util/domain/views";
 import { LibraryStore } from "@views/Library/Store";
 import { ScheduleStore } from "@views/Schedule/Schedule";

@@ -1,8 +1,8 @@
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
-import Tooltip from "@widgets/Tooltip";
 import Zoom from "@mui/material/Zoom";
+import Tooltip from "@widgets/Tooltip";
 
 export default function ScrollToTop({ show, translations, onClick }) {
 	return (

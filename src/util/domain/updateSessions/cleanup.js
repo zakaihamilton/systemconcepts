@@ -1,5 +1,6 @@
 import { LOCAL_SYNC_PATH } from "@sync/constants";
 import { addSyncLog } from "@sync/sync";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 
@@ -10,7 +11,7 @@ export async function cleanupBundledGroup(name) {
 	try {
 		// Delete local year files
 		if (await storage.exists(localYearsPath)) {
-			console.log(
+			structuredLogger.debug(
 				`[Sync] Deleting local split files for bundled group: ${name}`,
 			);
 			const yearFiles = await storage.getListing(localYearsPath);
@@ -18,7 +19,9 @@ export async function cleanupBundledGroup(name) {
 				for (const yearFile of yearFiles) {
 					if (yearFile.name.endsWith(".json")) {
 						const yearFilePath = makePath(localYearsPath, yearFile.name);
-						console.log(`[Sync] Deleting local year file: ${yearFilePath}`);
+						structuredLogger.debug(
+							`[Sync] Deleting local year file: ${yearFilePath}`,
+						);
 						await storage.deleteFile(yearFilePath);
 					}
 				}
@@ -27,7 +30,10 @@ export async function cleanupBundledGroup(name) {
 			await storage.deleteFolder(localYearsPath);
 		}
 	} catch (err) {
-		console.error(`[Sync] Error deleting split files for ${name}:`, err);
+		structuredLogger.error(
+			`[Sync] Error deleting split files for ${name}:`,
+			err,
+		);
 		addSyncLog(
 			`[${name}] Warning: Could not delete old split files`,
 			"warning",
@@ -49,13 +55,13 @@ export async function cleanupBundledGroup(name) {
 					localManifestPath,
 					JSON.stringify(updatedManifest, null, 4),
 				);
-				console.log(
+				structuredLogger.debug(
 					`[Sync] Removed ${manifest.length - updatedManifest.length} year files from local manifest`,
 				);
 			}
 		}
 	} catch (err) {
-		console.error(`[Sync] Error updating manifest for ${name}:`, err);
+		structuredLogger.error(`[Sync] Error updating manifest for ${name}:`, err);
 	}
 
 	// Cleanup: Delete merged file if exists (migration)
@@ -72,7 +78,7 @@ export async function cleanupMergedGroup(name) {
 	try {
 		// Delete local year files
 		if (await storage.exists(localYearsPath)) {
-			console.log(
+			structuredLogger.debug(
 				`[Sync] Deleting local split files for merged group: ${name}`,
 			);
 			const yearFiles = await storage.getListing(localYearsPath);
@@ -80,19 +86,24 @@ export async function cleanupMergedGroup(name) {
 				for (const yearFile of yearFiles) {
 					if (yearFile.name.endsWith(".json")) {
 						const yearFilePath = makePath(localYearsPath, yearFile.name);
-						console.log(`[Sync] Deleting local year file: ${yearFilePath}`);
+						structuredLogger.debug(
+							`[Sync] Deleting local year file: ${yearFilePath}`,
+						);
 						await storage.deleteFile(yearFilePath);
 					}
 				}
 			}
 			// Delete the empty local folder
 			await storage.deleteFolder(localYearsPath);
-			console.log(
+			structuredLogger.debug(
 				`[Sync] Successfully deleted local split folder: ${localYearsPath}`,
 			);
 		}
 	} catch (err) {
-		console.error(`[Sync] Error deleting split files for ${name}:`, err);
+		structuredLogger.error(
+			`[Sync] Error deleting split files for ${name}:`,
+			err,
+		);
 		addSyncLog(
 			`[${name}] Warning: Could not delete old split files`,
 			"warning",

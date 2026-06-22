@@ -1,2 +1,2 @@
-export { default } from "./EditTagsDialog";
 export * from "./EditTagsDialog";
+export { default } from "./EditTagsDialog";

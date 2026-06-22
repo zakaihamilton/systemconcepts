@@ -521,7 +521,7 @@ export default [
 	},
 	{
 		id: "TOTAL_SESSIONS",
-		value: "סה\"כ שיעורים",
+		value: 'סה"כ שיעורים',
 	},
 	{
 		id: "NO_UPDATES",
@@ -597,7 +597,8 @@ export default [
 	},
 	{
 		id: "DELETE_ARTICLES_CONFIRM",
-		value: "האם אתה בטוח שברצונך למחוק לצמיתות את כל המאמרים עם תג זה? לא ניתן לבטל פעולה זו.",
+		value:
+			"האם אתה בטוח שברצונך למחוק לצמיתות את כל המאמרים עם תג זה? לא ניתן לבטל פעולה זו.",
 	},
 	{
 		id: "ARTICLES_TO_DELETE",

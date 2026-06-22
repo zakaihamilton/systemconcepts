@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
@@ -94,7 +95,7 @@ async function handleUsers(request) {
 			: sanitizeUser(result);
 		return NextResponse.json(sanitizedResult);
 	} catch (err) {
-		console.error("users error: ", err);
+		structuredLogger.error("users error: ", err);
 		return NextResponse.json(
 			{ err: getSafeError(err) },
 			{ status: getAuthErrorStatus(err) },

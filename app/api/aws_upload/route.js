@@ -1,5 +1,6 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
@@ -14,13 +15,13 @@ export async function GET(request) {
 		let path = url.searchParams.get("path") || "";
 
 		if (!path) {
-			console.log(`[AWS UPLOAD API] INVALID_PATH: No path provided`);
+			structuredLogger.debug(`[AWS UPLOAD API] INVALID_PATH: No path provided`);
 			throw "INVALID_PATH";
 		}
 
 		const user = await getSessionUser(request);
 		if (!user) {
-			console.log("[AWS UPLOAD API] ACCESS DENIED");
+			structuredLogger.debug("[AWS UPLOAD API] ACCESS DENIED");
 			throw "ACCESS_DENIED";
 		}
 
@@ -42,7 +43,7 @@ export async function GET(request) {
 		}
 
 		if (!allowed) {
-			console.log(
+			structuredLogger.debug(
 				`[AWS UPLOAD API] ACCESS DENIED: User ${user.id} cannot write to path: ${path}`,
 			);
 			throw "ACCESS_DENIED: " + user.id + " cannot write to this path: " + path;
@@ -68,7 +69,7 @@ export async function GET(request) {
 		});
 		return NextResponse.json({ url: uploadUrl });
 	} catch (err) {
-		console.error("aws_upload error: ", err);
+		structuredLogger.error("aws_upload error: ", err);
 		return NextResponse.json(
 			{ err: getSafeError(err) },
 			{ status: getAuthErrorStatus(err) },

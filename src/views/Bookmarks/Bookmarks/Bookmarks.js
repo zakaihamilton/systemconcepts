@@ -9,8 +9,8 @@ import StatusBar from "@widgets/StatusBar";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
 import { useCallback, useEffect } from "react";
-import styles from "./Bookmarks.module.css";
 import ItemMenu from "../ItemMenu";
+import styles from "./Bookmarks.module.css";
 
 export const BookmarksStoreDefaults = {
 	mode: "",

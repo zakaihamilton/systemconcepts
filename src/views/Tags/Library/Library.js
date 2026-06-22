@@ -20,19 +20,20 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
-import { makePath } from "@util/data/path";
+import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
-import storage from "@util/storage/storage";
+import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import { LibraryStore } from "@views/Library/Store";
 import Table from "@widgets/Table";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "../Tags/Tags.module.css";
 import BatchDialog from "../BatchDialog";
 import SyncDialog from "../SyncDialog";
+import styles from "../Tags/Tags.module.css";
 
 registerToolbar("LibraryTags", 110);
 
@@ -97,7 +98,7 @@ export default function LibraryTags() {
 				setTags(data);
 			}
 		} catch (err) {
-			console.error("Failed to load tags:", err);
+			structuredLogger.error("Failed to load tags:", err);
 		}
 	};
 
@@ -209,7 +210,7 @@ export default function LibraryTags() {
 			});
 			await bumpLibraryCounter();
 		} catch (err) {
-			console.error("Rename failed:", err);
+			structuredLogger.error("Rename failed:", err);
 		} finally {
 			setProcessing(false);
 			setRenameDialog(null);
@@ -285,7 +286,7 @@ export default function LibraryTags() {
 			});
 			await bumpLibraryCounter();
 		} catch (err) {
-			console.error("Delete failed:", err);
+			structuredLogger.error("Delete failed:", err);
 		} finally {
 			setProcessing(false);
 			setDeleteDialog(null);
@@ -359,7 +360,7 @@ export default function LibraryTags() {
 			});
 			await bumpLibraryCounter();
 		} catch (err) {
-			console.error("Delete articles failed:", err);
+			structuredLogger.error("Delete articles failed:", err);
 		} finally {
 			setProcessing(false);
 			setDeleteArticlesDialog(null);

@@ -1,2 +1,2 @@
-export { default } from "./Video";
 export * from "./Video";
+export { default } from "./Video";

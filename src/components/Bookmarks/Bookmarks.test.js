@@ -1,9 +1,9 @@
 import { MainStore } from "@components/Main";
 import { useToolbar } from "@components/Toolbar";
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
 import { useActivePages, usePages } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import React from "react";
 import Bookmarks, { BookmarksStore, useBookmarks } from "./index.js";
 
@@ -46,7 +46,9 @@ describe("Bookmarks Component", () => {
 
 	it("renders nothing but registers toolbar items", async () => {
 		render(<Bookmarks />);
-		await waitFor(() => expect(BookmarksStore.getRawState()._loaded).toBe(true));
+		await waitFor(() =>
+			expect(BookmarksStore.getRawState()._loaded).toBe(true),
+		);
 		expect(useToolbar).toHaveBeenCalled();
 		const toolbarArgs = useToolbar.mock.calls[0][0];
 		expect(toolbarArgs.id).toBe("Bookmarks");
@@ -60,7 +62,9 @@ describe("Bookmarks Component", () => {
 		});
 
 		render(<Bookmarks />);
-		await waitFor(() => expect(BookmarksStore.getRawState()._loaded).toBe(true));
+		await waitFor(() =>
+			expect(BookmarksStore.getRawState()._loaded).toBe(true),
+		);
 
 		const bookmarkItem = toolbarItems.find((item) => item.id === "bookmark");
 		expect(bookmarkItem).toBeDefined();

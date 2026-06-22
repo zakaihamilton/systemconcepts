@@ -14,9 +14,13 @@ jest.mock("@components/Main", () => ({
 		useState: jest.fn().mockReturnValue({ speedToolbar: "bottom" }),
 	},
 }));
-jest.mock("@mui/material/Slider", () => ({ valueLabelFormat, valueLabelDisplay, step, marks, ...props }) => (
-	<div data-testid="slider" {...props} />
-));
+jest.mock(
+	"@mui/material/Slider",
+	() =>
+		({ valueLabelFormat, valueLabelDisplay, step, marks, ...props }) => (
+			<div data-testid="slider" {...props} />
+		),
+);
 
 describe("SpeedSlider Component", () => {
 	let mockPlayer;

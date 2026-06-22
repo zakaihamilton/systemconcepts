@@ -54,7 +54,9 @@ describe("Account View", () => {
 			if (key === "hash") return "testhash";
 			return null;
 		});
-		fetchJSON.mockResolvedValue([{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() }]);
+		fetchJSON.mockResolvedValue([
+			{ id: "pk1", name: "My Passkey", createdAt: new Date().toISOString() },
+		]);
 
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();

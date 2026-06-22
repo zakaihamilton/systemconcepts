@@ -1,10 +1,10 @@
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { getDateString } from "@util/data/date";
 import { useDeviceType } from "@util/browser/styles";
+import { getDateString } from "@util/data/date";
 import clsx from "clsx";
-import styles from "./Day.module.css";
 import Session from "../Session";
+import styles from "./Day.module.css";
 
 function groupSessionsByGroup(sessions) {
 	return sessions.reduce((groups, session) => {

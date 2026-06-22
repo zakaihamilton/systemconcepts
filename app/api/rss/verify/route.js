@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 /**
  * Internal-only auth verification endpoint for the Edge RSS route.
  * Runs on Node.js runtime so it can access the MongoDB driver.
@@ -37,15 +38,9 @@ export async function POST(request) {
 			token: String(token),
 		});
 		const user = await authenticateTokenRequest(params);
-		return NextResponse.json(
-			{ ok: !!user },
-			{ headers: NO_STORE_HEADERS },
-		);
+		return NextResponse.json({ ok: !!user }, { headers: NO_STORE_HEADERS });
 	} catch (err) {
-		console.error("[RSS Verify] Unexpected error:", err);
-		return NextResponse.json(
-			{ ok: false },
-			{ headers: NO_STORE_HEADERS },
-		);
+		structuredLogger.error("[RSS Verify] Unexpected error:", err);
+		return NextResponse.json({ ok: false }, { headers: NO_STORE_HEADERS });
 	}
 }

@@ -1,2 +1,2 @@
-export { default } from "./Month";
 export * from "./Month";
+export { default } from "./Month";

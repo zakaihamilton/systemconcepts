@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { readFile, writeFile } from "./files";
 
 const GROUPS_FILE = "groups.json";
@@ -15,7 +16,7 @@ export async function readGroups() {
 			version: data?.version || 1,
 		};
 	} catch (err) {
-		console.error("[Groups] Error reading groups:", err);
+		structuredLogger.error("[Groups] Error reading groups:", err);
 		return { groups: [], settings: {}, version: 1 };
 	}
 }
@@ -33,7 +34,7 @@ export async function writeGroups(data) {
 		};
 		await writeFile(GROUPS_FILE, content);
 	} catch (err) {
-		console.error("[Groups] Error writing groups:", err);
+		structuredLogger.error("[Groups] Error writing groups:", err);
 		throw err;
 	}
 }

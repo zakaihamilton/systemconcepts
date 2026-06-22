@@ -3,8 +3,8 @@ import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
 import Input from "@components/Widgets/Input";
 import TodayIcon from "@mui/icons-material/Today";
-import { useDateFormatter } from "@util/data/locale";
 import { useDeviceType } from "@util/browser/styles";
+import { useDateFormatter } from "@util/data/locale";
 import { addPath } from "@util/domain/views";
 import {
 	useCallback,

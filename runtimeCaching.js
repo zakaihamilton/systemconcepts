@@ -13,7 +13,8 @@ module.exports = [
 		},
 	},
 	{
-		urlPattern: /\/api\/(?:aws|wasabi)\?.*(?:path=sessions%2F|path=%2Fsessions%2F)/i,
+		urlPattern:
+			/\/api\/(?:aws|wasabi)\?.*(?:path=sessions%2F|path=%2Fsessions%2F)/i,
 		handler: "StaleWhileRevalidate",
 		options: {
 			cacheName: "stable-session-files",

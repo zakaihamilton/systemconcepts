@@ -1,2 +1,2 @@
-export { default } from "./ArticleTermsDialog";
 export * from "./ArticleTermsDialog";
+export { default } from "./ArticleTermsDialog";

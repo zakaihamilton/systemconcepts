@@ -6,6 +6,7 @@
  * - ETags via crypto.subtle SHA-256 (MD5 not available in Web Crypto)
  */
 
+import { logger as structuredLogger } from "@util/api/logger";
 import { formatDuration } from "@util/data/string";
 import {
 	getSessions,
@@ -70,7 +71,9 @@ async function authenticateEdge(searchParams) {
 
 	const siteUrl = process.env.SITE_URL;
 	if (!siteUrl) {
-		console.error("[RSS Edge] SITE_URL env var not set — cannot verify token");
+		structuredLogger.error(
+			"[RSS Edge] SITE_URL env var not set — cannot verify token",
+		);
 		return false;
 	}
 
@@ -85,7 +88,7 @@ async function authenticateEdge(searchParams) {
 			body: JSON.stringify({ id, token }),
 		});
 		if (!res.ok) {
-			console.warn("[RSS Edge] Verify endpoint returned", res.status);
+			structuredLogger.warn("[RSS Edge] Verify endpoint returned", res.status);
 			return false;
 		}
 		const { ok } = await res.json();
@@ -96,7 +99,7 @@ async function authenticateEdge(searchParams) {
 		});
 		return ok === true;
 	} catch (err) {
-		console.error("[RSS Edge] Auth fetch failed:", err);
+		structuredLogger.error("[RSS Edge] Auth fetch failed:", err);
 		return false;
 	}
 }
@@ -275,7 +278,7 @@ export async function GET(request) {
 			},
 		});
 	} catch (err) {
-		console.error("RSS Error:", err);
+		structuredLogger.error("RSS Error:", err);
 		return new NextResponse("Error generating RSS feed", {
 			status: 500,
 			headers: NO_STORE_HEADERS,

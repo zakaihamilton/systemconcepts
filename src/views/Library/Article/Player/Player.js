@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/hooks";
 import { useTranslations } from "@util/domain/translations";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -246,7 +247,7 @@ export default function Player({
 
 			utterance.onerror = (event) => {
 				if (event.error === "interrupted" || event.error === "canceled") return;
-				console.error("Speech synthesis error:", event);
+				structuredLogger.error("Speech synthesis error:", event);
 				if (utteranceRef.current === utterance) {
 					setIsPlaying(false);
 				}
@@ -383,7 +384,7 @@ export default function Player({
 			hasVoiceChanged &&
 			!isStoppingRef.current
 		) {
-			console.log("Voice changed, restarting playback...");
+			structuredLogger.debug("Voice changed, restarting playback...");
 			setTimeout(() => speakParagraph(currentParagraphIndex, true), 0);
 		}
 

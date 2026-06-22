@@ -1,7 +1,7 @@
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage/storage";
 import { useStoreState } from "@util/browser/store";
 import { useParentPath } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import Editor from "./index.js";
 
 jest.mock("@util/browser/store", () => ({
@@ -35,7 +35,9 @@ describe("Editor View", () => {
 	it("renders progress while loading", async () => {
 		const { getByTestId, queryByTestId } = render(<Editor name="test.txt" />);
 		expect(getByTestId("progress")).toBeInTheDocument();
-		await waitFor(() => expect(queryByTestId("progress")).not.toBeInTheDocument());
+		await waitFor(() =>
+			expect(queryByTestId("progress")).not.toBeInTheDocument(),
+		);
 	});
 
 	it("renders editor widget after loading", async () => {

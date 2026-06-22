@@ -1,2 +1,2 @@
-export { default } from "./Sync";
 export * from "./Sync";
+export { default } from "./Sync";

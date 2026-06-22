@@ -1,2 +1,2 @@
-export { default } from "./Languages";
 export * from "./Languages";
+export { default } from "./Languages";

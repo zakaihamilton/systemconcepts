@@ -1,9 +1,9 @@
 import Select from "@components/Widgets/Select";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@widgets/Tooltip";
 import { useTranslations } from "@util/domain/translations";
 import Menu from "@widgets/Menu";
+import Tooltip from "@widgets/Tooltip";
 
 export default function ItemMenuWidget({ item, menuItems, store }) {
 	const translations = useTranslations();

@@ -1,13 +1,14 @@
 import Group from "@components/Widgets/Group";
+import { logger as structuredLogger } from "@util/api/logger";
+import { useDeviceType } from "@util/browser/styles";
 import { useDateFormatter } from "@util/data/locale";
 import { formatDuration } from "@util/data/string";
-import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
-import styles from "./Audio.module.css";
 import Controls from "../Controls";
 import { PlayerStore } from "../Player";
 import Toolbar from "../Toolbar";
+import styles from "./Audio.module.css";
 
 export default function Audio({
 	show,
@@ -36,7 +37,7 @@ export default function Audio({
 
 	const onError = () => {
 		if (errorCount < 3) {
-			console.log("Audio error, renewing URL...");
+			structuredLogger.debug("Audio error, renewing URL...");
 			setRecovering(true);
 			renewUrl();
 			setErrorCount((count) => count + 1);
@@ -110,14 +111,20 @@ export default function Audio({
 	try {
 		dateWidget = date && dateFormatter.format(new Date(date));
 	} catch (err) {
-		console.error("err", err);
+		structuredLogger.error("err", err);
 	}
 
 	const { style, ...rest } = props;
 	return (
 		<div className={styles.root} style={style}>
 			<div className={clsx(styles.container, !showDetails && styles.collapsed)}>
-				<div className={clsx(styles.card, (renewing || !duration || loadedPath !== path) && styles.loading)} style={{ "--group-color": color }}>
+				<div
+					className={clsx(
+						styles.card,
+						(renewing || !duration || loadedPath !== path) && styles.loading,
+					)}
+					style={{ "--group-color": color }}
+				>
 					<div className={styles.header}>
 						<div className={styles.headerRow}>
 							<div className={styles.title}>{name}</div>

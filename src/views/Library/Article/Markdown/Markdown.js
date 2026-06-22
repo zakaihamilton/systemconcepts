@@ -1,9 +1,9 @@
 import { glossary } from "@data/glossary";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Box from "@mui/material/Box";
-import Tooltip from "@widgets/Tooltip";
 import { useTranslations } from "@util/domain/translations";
 import { setPath } from "@util/domain/views";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import React, {
 	useCallback,
@@ -19,8 +19,9 @@ import remarkBreaks from "remark-breaks";
 import { LibraryTagKeys } from "../../Icons";
 import { LibraryStore } from "../../Store";
 import { getStyleInfo, PHASE_COLORS, termPattern } from "../GlossaryUtils";
-import styles from "./Markdown.module.css";
 import Zoom from "../Zoom";
+import { normalizeMarkdownContent } from "./content";
+import styles from "./Markdown.module.css";
 
 const Term = ({ term, entry, search }) => {
 	const translations = useTranslations();
@@ -656,69 +657,7 @@ export default React.memo(function Markdown({
 	const paragraphsRef = useRef({});
 
 	const processedChildren = useMemo(() => {
-		let content = children;
-		if (Array.isArray(content)) {
-			content = content.join("");
-		}
-		if (typeof content !== "string") return content;
-
-		// Convert Windows line endings
-		content = content.replace(/\r\n/g, "\n");
-
-		// Convert single newlines to double newlines (paragraph breaks)
-		content = content.replace(/\n+/g, "\n\n");
-
-		// Bold numbered lists (existing)
-		content = content.replace(
-			/^\s*(\d+)([\.\)])[ \t]*/gm,
-			(_match, number, symbol) => {
-				return `\n\n**${number}\\${symbol}** `;
-			},
-		);
-
-		// Detect headings
-		// Heuristic: Start of line, Uppercase, No period/semicolon/comma at end, < 80 chars
-		// Also check: if next line starts with lowercase, this line is a continuation, not a header
-		// Negative lookahead to ensure not already a header or list item, or number
-		content = content.replace(
-			/^[ \t]*(?!#|-|\*|\d)([A-Z].*?)[ \t]*(\r?\n)/gm,
-			(match, line, newline) => {
-				// Check if it really looks like a header
-				const trimmed = line.trim();
-				if (!trimmed) return match;
-				if (trimmed.endsWith(".")) return match; // Sentence ending with period
-				if (trimmed.endsWith(";")) return match; // Sentence ending with semicolon
-				if (trimmed.endsWith(",")) return match; // Sentence ending with comma
-				if (trimmed.length > 120) return match; // Too long
-
-				// Check what follows this line - look ahead in original content
-				const matchEnd = match.length;
-				const afterMatch = content.slice(content.indexOf(match) + matchEnd);
-				const nextLineMatch = afterMatch.match(/^[ \t]*(\S)/);
-				if (nextLineMatch) {
-					const firstChar = nextLineMatch[1];
-					// If next non-empty line starts with lowercase, this is a continuation
-					if (/[a-z]/.test(firstChar)) return match;
-				}
-
-				// It passes heuristic, make it a header
-				return `### ${trimmed}${newline}`;
-			},
-		);
-
-		// Cleanup double commas (handles ", ," and ",," and ",   ," and " ,")
-		// Aggressive: Replace any sequence starting and ending with comma, containing only commas/spaces, with single comma
-		content = content.replace(/\u00A0/g, " "); // Replace NBSP with space
-		content = content.replace(/\u200B/g, ""); // Remove Zero Width Space
-		content = content.replace(/ ,/g, ",");
-		content = content.replace(/,[\s,]+,/g, ",");
-
-		// Fallback for tricky overlaps
-		if (content.match(/,[\s,]+,/)) {
-			content = content.replace(/,[\s,]+,/g, ",");
-		}
-
-		return content;
+		return normalizeMarkdownContent(children);
 	}, [children]);
 
 	const Highlight = useCallback(

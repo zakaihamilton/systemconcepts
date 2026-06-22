@@ -1,5 +1,6 @@
-import { downloadData, validatePathAccess } from "@util/storage/aws";
+import { logger as structuredLogger } from "@util/api/logger";
 import { getZipTextEntryId } from "@util/domain/updateSessions/metadataParser";
+import { downloadData, validatePathAccess } from "@util/storage/aws";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 import { NO_STORE_HEADERS, TRANSCRIPT_CACHE_HEADERS } from "../cache";
@@ -59,7 +60,7 @@ export async function GET(request) {
 			},
 		});
 	} catch (err) {
-		console.error("[RSS Transcription Proxy] Unexpected error:", err);
+		structuredLogger.error("[RSS Transcription Proxy] Unexpected error:", err);
 		return new NextResponse("Not Found", {
 			status: 404,
 			headers: NO_STORE_HEADERS,

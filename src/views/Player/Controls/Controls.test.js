@@ -1,4 +1,4 @@
-import { fireEvent, render, act } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
 import Controls from "./index.js";
 

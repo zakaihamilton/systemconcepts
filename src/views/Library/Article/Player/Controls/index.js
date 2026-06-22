@@ -1,2 +1,2 @@
-export { default } from "./Controls";
 export * from "./Controls";
+export { default } from "./Controls";

@@ -6,12 +6,11 @@
 	padding: 1em;
 	box-sizing: border-box;
 	overflow: auto;
-	background:
-		linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--paper-background) 60%, transparent),
-			var(--main-background) 16rem
-		);
+	background: linear-gradient(
+		180deg,
+		color-mix(in srgb, var(--paper-background) 60%, transparent),
+		var(--main-background) 16rem
+	);
 	color: var(--text-color);
 }
 
@@ -36,12 +35,11 @@
 	flex-direction: column;
 	padding: 1.5em;
 	border-bottom: 1px solid var(--border-color);
-	background:
-		linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--group-color, var(--primary-500)) 12%, transparent),
-			var(--app-bar-background) 60%
-		);
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--group-color, var(--primary-500)) 12%, transparent),
+		var(--app-bar-background) 60%
+	);
 }
 
 .title {

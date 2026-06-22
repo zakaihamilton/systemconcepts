@@ -1,2 +1,2 @@
-export { default } from "./PageLoad";
 export * from "./PageLoad";
+export { default } from "./PageLoad";

@@ -1,7 +1,7 @@
 import TableSortLabel from "@mui/material/TableSortLabel";
-import Tooltip from "@widgets/Tooltip";
 import { useStyles } from "@util/browser/styles";
 import Label from "@widgets/Label";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./ListColumns.module.css";
 

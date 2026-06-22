@@ -1,2 +1,2 @@
-export { default } from "./Dynamic";
 export * from "./Dynamic";
+export { default } from "./Dynamic";

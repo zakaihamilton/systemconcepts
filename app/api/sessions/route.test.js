@@ -1,7 +1,4 @@
-import {
-	authenticateTokenRequest,
-	enforceRateLimit,
-} from "@util/api/api";
+import { authenticateTokenRequest, enforceRateLimit } from "@util/api/api";
 import {
 	getSessions,
 	getTranscriptProxyUrl,
@@ -108,9 +105,7 @@ describe("/api/sessions", () => {
 		const response = await GET(makeRequest("?id=user&token=token"));
 
 		expect(response.status).toBe(200);
-		expect(response.headers.get("Cache-Control")).toBe(
-			"private, max-age=300",
-		);
+		expect(response.headers.get("Cache-Control")).toBe("private, max-age=300");
 		expect(response.headers.get("Vercel-CDN-Cache-Control")).toBe(
 			"public, max-age=300, stale-while-revalidate=3600",
 		);
@@ -125,9 +120,7 @@ describe("/api/sessions", () => {
 		getSessions.mockResolvedValue(sessions.slice(0, 2));
 
 		const response = await GET(
-			makeRequest(
-				"?id=user&token=token&group=alpha&tag=two&index=0&count=1",
-			),
+			makeRequest("?id=user&token=token&group=alpha&tag=two&index=0&count=1"),
 		);
 
 		expect(getSessions).toHaveBeenCalledWith({ group: "alpha" });

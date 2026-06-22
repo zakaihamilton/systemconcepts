@@ -1,7 +1,7 @@
 import { ContentSize } from "@components/Page/Content";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { readBinary } from "@util/data/binary";
 import { useFetchJSON } from "@util/api/fetch";
+import { readBinary } from "@util/data/binary";
 import { useTranslations } from "@util/domain/translations";
 import { useParentParams, useParentPath } from "@util/domain/views";
 import ImagePage from "./index.js";
@@ -38,7 +38,9 @@ describe("Image View", () => {
 		expect(getByTestId("progress")).toBeInTheDocument();
 		const img = await waitFor(() => getByRole("img", { hidden: true }));
 		fireEvent.load(img);
-		await waitFor(() => expect(queryByTestId("progress")).not.toBeInTheDocument());
+		await waitFor(() =>
+			expect(queryByTestId("progress")).not.toBeInTheDocument(),
+		);
 	});
 
 	it("renders image after loading", async () => {

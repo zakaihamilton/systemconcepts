@@ -23,12 +23,8 @@ jest.mock("@views/ResearchStore/ResearchStore", () => ({
 	},
 }));
 jest.mock("@widgets/List", () => () => <div data-testid="list" />);
-jest.mock("./QuickAccess", () => () => (
-	<div data-testid="quick-access" />
-));
-jest.mock("./LibraryTree", () => () => (
-	<div data-testid="library-tree" />
-));
+jest.mock("./QuickAccess", () => () => <div data-testid="quick-access" />);
+jest.mock("./LibraryTree", () => () => <div data-testid="library-tree" />);
 jest.mock("@views/ResearchIndexer/ResearchIndexer", () => () => (
 	<div data-testid="research-indexer" />
 ));

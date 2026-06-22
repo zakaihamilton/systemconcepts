@@ -1,7 +1,7 @@
 import { ContentSize } from "@components/Page/Content";
 import { render } from "@testing-library/react";
-import { useSessions } from "@util/domain/sessions";
 import { useDeviceType } from "@util/browser/styles";
+import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
 import Research from "./";

@@ -18,16 +18,17 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
-import { loadParagraphsForFile } from "@util/domain/loadParagraphs";
-import { makePath } from "@util/data/path";
+import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
-import { decodeBinaryIndex } from "@util/data/searchIndexBinary";
-import { useSessions } from "@util/domain/sessions";
-import storage from "@util/storage/storage";
-import { normalizeContent } from "@util/data/string";
 import { useDeviceType } from "@util/browser/styles";
+import { makePath } from "@util/data/path";
+import { decodeBinaryIndex } from "@util/data/searchIndexBinary";
+import { normalizeContent } from "@util/data/string";
+import { loadParagraphsForFile } from "@util/domain/loadParagraphs";
+import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import Article from "@views/Library/Article";
 import JumpDialog from "@views/Library/Article/JumpDialog";
 import ScrollToTop from "@views/Library/Article/ScrollToTop";
@@ -47,6 +48,7 @@ import { createPortal } from "react-dom";
 import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";
 import SearchResultItem from "./SearchResultItem";
+import { filterResearchResults } from "./searchFilters";
 
 const INDEX_FILE = "search_index.bin";
 const LEGACY_INDEX_FILE = "search_index.json";
@@ -264,7 +266,7 @@ export default function Research() {
 				}
 			}
 		} catch (err) {
-			console.error("Failed to load tags for filters:", err);
+			structuredLogger.error("Failed to load tags for filters:", err);
 		}
 	}, [sessions, translations]);
 
@@ -298,17 +300,19 @@ export default function Research() {
 				}
 			}
 		} catch (err) {
-			console.error("Failed to load search index:", err);
+			structuredLogger.error("Failed to load search index:", err);
 			// If the index is corrupted, delete it and rebuild
 			try {
 				const indexPath = makePath(LIBRARY_LOCAL_PATH, INDEX_FILE);
 				if (await storage.exists(indexPath)) {
 					await storage.deleteFile(indexPath);
-					console.log("Deleted corrupted search index, rebuilding...");
+					structuredLogger.debug(
+						"Deleted corrupted search index, rebuilding...",
+					);
 					buildIndex();
 				}
 			} catch (deleteErr) {
-				console.error("Failed to delete corrupted index:", deleteErr);
+				structuredLogger.error("Failed to delete corrupted index:", deleteErr);
 			}
 		}
 	}, [buildIndex]);
@@ -816,7 +820,7 @@ export default function Research() {
 					}
 				}
 			} catch (err) {
-				console.error("Search failed:", err);
+				structuredLogger.error("Search failed:", err);
 			} finally {
 				if (isMounted.current) {
 					setSearching(false);
@@ -920,69 +924,7 @@ export default function Research() {
 	}, []);
 
 	const filteredResults = useMemo(() => {
-		let res;
-		if (!appliedFilterTags.length) {
-			res = results;
-		} else {
-			res = results.filter((doc) => {
-				return appliedFilterTags.every((filter) => {
-					const filterLabel =
-						typeof filter === "string" ? filter : filter.label;
-					const filterType = typeof filter === "string" ? null : filter.type;
-
-					if (filterType === "source") {
-						if (filterLabel === translations.SESSIONS) return doc.isSession;
-						if (filterLabel === translations.ARTICLES) return !doc.isSession;
-						if (filterLabel === translations.SUMMARIES)
-							return doc.isSession && (!!doc.summaryText || !!doc.summary);
-						if (filterLabel === translations.TRANSCRIPTIONS)
-							return doc.isSession && !!doc.transcription;
-					}
-
-					if (doc.isSession) {
-						const filterLabelStr = String(filterLabel).toLowerCase();
-						if (
-							filterType === "group" &&
-							String(doc.group).toLowerCase() === filterLabelStr
-						)
-							return true;
-						if (filterType === "year" && String(doc.year) === filterLabel)
-							return true;
-						if (filterType === "date" && doc.date === filterLabel) return true;
-						if (
-							filterType === "type" &&
-							String(doc.type).toLowerCase() === filterLabelStr
-						)
-							return true;
-						return false;
-					} else {
-						// For non-session docs, we might want to check exact match or similar logic?
-						// But original logic was:
-						// return doc.group === filterLabel || ...
-						// We should probably safeguard this too if tags are capitalized in UI but not in doc.
-						// But library tags usually match ID or Label directly.
-						if (filterType && doc.tag?.[filterType]) {
-							return (
-								String(doc.tag[filterType]).toLowerCase() ===
-								String(filterLabel).toLowerCase()
-							);
-						}
-						// This handles the case where filter is a string (no filterType) or filterType is not a direct tag property
-						return LibraryTagKeys.some((key) => {
-							const val = doc.tag?.[key];
-							return (
-								val &&
-								String(val).trim().toLowerCase() ===
-									String(filterLabel).toLowerCase()
-							);
-						});
-					}
-					const val = doc.tag?.[filterType];
-					return val && String(val).trim() === filterLabel;
-				});
-			});
-		}
-		return res;
+		return filterResearchResults(results, appliedFilterTags, translations);
 	}, [results, appliedFilterTags, translations]);
 
 	const pathItems = usePathItems();
@@ -1148,8 +1090,8 @@ export default function Research() {
 	useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
 	return (
-        (<Box className={styles.root}>
-            {!searchCollapsed && (
+		<Box className={styles.root}>
+			{!searchCollapsed && (
 				<Paper
 					className={[
 						styles.searchPaper,
@@ -1166,21 +1108,21 @@ export default function Research() {
 							variant="outlined"
 							className={styles.queryField}
 							slotProps={{
-                                input: {
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: query && (
-                                        <InputAdornment position="end">
-                                            <IconButton onClick={handleClear} size="small">
-                                                <ClearIcon fontSize="small" />
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }
-                            }}
+								input: {
+									startAdornment: (
+										<InputAdornment position="start">
+											<SearchIcon />
+										</InputAdornment>
+									),
+									endAdornment: query && (
+										<InputAdornment position="end">
+											<IconButton onClick={handleClear} size="small">
+												<ClearIcon fontSize="small" />
+											</IconButton>
+										</InputAdornment>
+									),
+								},
+							}}
 						/>
 						<Button
 							variant="contained"
@@ -1317,13 +1259,13 @@ export default function Research() {
 					)}
 				</Paper>
 			)}
-            {showProgress && (
+			{showProgress && (
 				<Box className={styles.progressContainer}>
 					<Typography variant="caption">{translations.SEARCHING}</Typography>
 					<LinearProgress variant="determinate" value={searchProgress} />
 				</Box>
 			)}
-            {indexing && (
+			{indexing && (
 				<Box className={styles.overlay}>
 					<Paper className={styles.overlayContent}>
 						<Typography variant="h6" gutterBottom>
@@ -1343,12 +1285,12 @@ export default function Research() {
 					</Paper>
 				</Box>
 			)}
-            {hasSearched && filteredResults.length === 0 && !indexing && (
+			{hasSearched && filteredResults.length === 0 && !indexing && (
 				<Box className={styles.noResults}>
 					<Typography>{translations.NO_RESULTS}</Typography>
 				</Box>
 			)}
-            {hasSearched && filteredResults.length > 0 && (
+			{hasSearched && filteredResults.length > 0 && (
 				<Box className={styles.resultsWrapper}>
 					<VariableSizeList
 						height={
@@ -1420,7 +1362,7 @@ export default function Research() {
 					/>
 				</Box>
 			)}
-            {useEffect(() => {
+			{useEffect(() => {
 				if (hasSearched && filteredResults.length > 0) {
 					setScrollPages((prev) => ({ ...prev, visible: true }));
 					if (scrollTimeoutRef.current) {
@@ -1431,7 +1373,7 @@ export default function Research() {
 					}, 1500);
 				}
 			}, [hasSearched, filteredResults]) || null}
-            <JumpDialog
+			<JumpDialog
 				open={jumpOpen}
 				onClose={() => setJumpOpen(false)}
 				onSubmit={handleJumpSubmit}
@@ -1443,7 +1385,7 @@ export default function Research() {
 				paragraphNumberLabel={translations.MATCH_NUMBER}
 				title={translations.JUMP_TO_ARTICLE}
 			/>
-            {printRoot &&
+			{printRoot &&
 				createPortal(
 					<div className={styles.printContainer}>
 						{printing &&
@@ -1470,6 +1412,6 @@ export default function Research() {
 					</div>,
 					printRoot,
 				)}
-        </Box>)
-    );
+		</Box>
+	);
 }

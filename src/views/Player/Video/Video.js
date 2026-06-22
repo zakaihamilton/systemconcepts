@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { useEffect, useRef, useState } from "react";
 import Controls from "../Controls";
 import { PlayerStore } from "../Player";
@@ -28,7 +29,7 @@ export default function Video({
 
 	const onError = () => {
 		if (errorCount < 3) {
-			console.log("Video error, renewing URL...");
+			structuredLogger.debug("Video error, renewing URL...");
 			setRecovering(true);
 			renewUrl();
 			setErrorCount((count) => count + 1);

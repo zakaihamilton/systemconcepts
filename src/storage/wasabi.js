@@ -1,10 +1,11 @@
-import { binaryToString } from "@util/data/binary";
 import {
 	fetchBlob,
 	fetchJSON,
 	fetchText,
 	getStableFetchCacheOptions,
 } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
+import { binaryToString } from "@util/data/binary";
 import { isBinaryFile, makePath } from "@util/data/path";
 
 const fsEndPoint = "/api/wasabi";
@@ -90,7 +91,7 @@ async function getRecursiveList(path) {
 				}
 			}
 		} catch (err) {
-			console.warn(
+			structuredLogger.warn(
 				`[Wasabi Storage] Failed to list ${dirPath}:`,
 				err.message || err,
 			);
@@ -128,7 +129,10 @@ async function exists(path) {
 			}
 		}
 	} catch (err) {
-		console.error(`[Wasabi Storage] Path check error for ${path}:`, err);
+		structuredLogger.error(
+			`[Wasabi Storage] Path check error for ${path}:`,
+			err,
+		);
 	}
 	return exists;
 }

@@ -9,12 +9,13 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { fetchJSON, useFetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import { goBackPage, useParentPath } from "@util/domain/views";
 import Input from "@widgets/Input";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { useState } from "react";
 import styles from "./User.module.css";
@@ -99,7 +100,7 @@ export default function User({ path = "" }) {
 			})
 				.then(({ err }) => {
 					if (err) {
-						console.error(err);
+						structuredLogger.error(err);
 						throw err;
 					}
 					goBackPage();

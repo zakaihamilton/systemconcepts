@@ -6,9 +6,10 @@ import {
 	JSON_HEADERS,
 	NO_CACHE_HEADERS,
 } from "@util/api/api";
+import { logger as structuredLogger } from "@util/api/logger";
 import {
-	getSProxyUrl,
 	getSessions,
+	getSProxyUrl,
 	getTranscriptProxyUrl,
 	sortSessions,
 } from "@util/domain/sessionFeed";
@@ -86,24 +87,26 @@ export async function GET(request) {
 		const baseUrl =
 			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
 
-		const formattedSessions = await Promise.all(sessions.map(async (session) => {
-			const transcriptionUrl = await getTranscriptProxyUrl(session, baseUrl);
-			return {
-				id: session.id,
-				group: session.group,
-				year: session.year,
-				date: session.date,
-				name: session.name,
-				duration: session.duration ? Math.round(session.duration) : 0,
-				tags: session.tags || [],
-				summaryText: session.summaryText || session.summary || null,
-				imageUrl:
-					session.image && session.image.path
-						? getSProxyUrl(session.image.path, baseUrl)
-						: null,
-				transcriptionUrl,
-			};
-		}));
+		const formattedSessions = await Promise.all(
+			sessions.map(async (session) => {
+				const transcriptionUrl = await getTranscriptProxyUrl(session, baseUrl);
+				return {
+					id: session.id,
+					group: session.group,
+					year: session.year,
+					date: session.date,
+					name: session.name,
+					duration: session.duration ? Math.round(session.duration) : 0,
+					tags: session.tags || [],
+					summaryText: session.summaryText || session.summary || null,
+					imageUrl:
+						session.image && session.image.path
+							? getSProxyUrl(session.image.path, baseUrl)
+							: null,
+					transcriptionUrl,
+				};
+			}),
+		);
 
 		return new Response(JSON.stringify(formattedSessions), {
 			status: 200,
@@ -113,7 +116,7 @@ export async function GET(request) {
 			},
 		});
 	} catch (err) {
-		console.error("[API] Error generating session list:", err);
+		structuredLogger.error("[API] Error generating session list:", err);
 		return new NextResponse(
 			JSON.stringify({ err: "Error generating sessions JSON API" }),
 			{

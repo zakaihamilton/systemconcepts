@@ -9,16 +9,16 @@ import ViewDayIcon from "@mui/icons-material/ViewDay";
 import ViewStreamIcon from "@mui/icons-material/ViewStream";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@widgets/Tooltip";
 import { SyncActiveStore } from "@sync/syncState";
-import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { PlayerStore } from "@views/Player/Player";
 import FilterBar from "@views/Sessions/FilterBar";
 import Message from "@widgets/Message";
 import StatusBar from "@widgets/StatusBar";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
@@ -26,10 +26,10 @@ import { useEffect, useMemo } from "react";
 import DayView from "../DayView";
 import HistoryView from "../HistoryView";
 import MonthView from "../MonthView";
-import styles from "./Schedule.module.css";
 import TracksView from "../TracksView";
 import WeekView from "../WeekView";
 import YearView from "../YearView";
+import styles from "./Schedule.module.css";
 
 export const ScheduleStore = new Store({
 	date: null,

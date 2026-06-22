@@ -1,7 +1,7 @@
 import { useDeviceType } from "@util/browser/styles";
 import clsx from "clsx";
-import styles from "./Footer.module.css";
 import Toolbar, { useToolbarItems } from "../Toolbar";
+import styles from "./Footer.module.css";
 
 export default function Footer() {
 	const isMobile = useDeviceType() === "phone";

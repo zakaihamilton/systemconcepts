@@ -1,4 +1,4 @@
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { createRef } from "react";
 import VariableSizeList from "./VariableSizeList.js";
 
@@ -25,7 +25,7 @@ describe("VariableSizeList Component", () => {
 				onScroll={onScroll}
 			>
 				{Row}
-			</VariableSizeList>
+			</VariableSizeList>,
 		);
 
 		expect(getByTestId("item-0")).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe("VariableSizeList Component", () => {
 				overscanCount={1}
 			>
 				{Row}
-			</VariableSizeList>
+			</VariableSizeList>,
 		);
 
 		expect(ref.current).toBeDefined();

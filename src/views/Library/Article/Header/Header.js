@@ -1,11 +1,11 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { abbreviations } from "../../../../data/abbreviations";
-import styles from "../Article.module.css";
 import { LibraryIcons, LibraryTagKeys } from "../../Icons";
+import styles from "../Article.module.css";
 
 export default function Header({
 	selectedTag,

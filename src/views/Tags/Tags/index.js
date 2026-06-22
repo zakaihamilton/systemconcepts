@@ -1,2 +1,2 @@
-export { default } from "./Tags";
 export * from "./Tags";
+export { default } from "./Tags";

@@ -57,7 +57,8 @@ export default [
 	},
 	{
 		id: "DELETE_ARTICLE_CONFIRM",
-		value: "Are you sure you want to delete this article? This action cannot be undone.",
+		value:
+			"Are you sure you want to delete this article? This action cannot be undone.",
 	},
 	{
 		id: "DELETING",

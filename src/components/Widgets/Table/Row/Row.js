@@ -54,7 +54,12 @@ export default function Row({
 						!align && styles.defaultAlign,
 					),
 				}}
-				style={{ height: rowHeight, ...viewModeStyle, ...columnStyle, "--group-color": item.color }}
+				style={{
+					height: rowHeight,
+					...viewModeStyle,
+					...columnStyle,
+					"--group-color": item.color,
+				}}
 				key={columnId}
 				{...viewModeProps}
 				{...otherColumnProps}

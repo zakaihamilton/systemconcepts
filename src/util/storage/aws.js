@@ -9,13 +9,17 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { lockMutex } from "@sync/mutex";
+import { logger as structuredLogger } from "@util/api/logger";
+import { getSafeError } from "@util/api/safeError";
 import { isBinaryFile } from "@util/data/path";
 import fs from "fs";
-import { getSafeError } from "@util/api/safeError";
 
 let s3Client = null;
 
-export async function getDownloadUrl({ path, bucketName = process.env.AWS_BUCKET }) {
+export async function getDownloadUrl({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+}) {
 	const s3 = await getS3({});
 	const bucket = bucketName;
 	const key = normalizePath(path);
@@ -36,7 +40,7 @@ export async function getS3(params) {
 		if (s3Client) {
 			return s3Client;
 		}
-		console.log("getS3: initializing s3Client");
+		structuredLogger.debug("getS3: initializing s3Client");
 
 		const { endpoint, region } = params || {};
 		let finalEndpoint = endpoint || process.env.AWS_ENDPOINT;
@@ -49,25 +53,28 @@ export async function getS3(params) {
 			try {
 				new URL(finalEndpoint);
 			} catch (_err) {
-				console.error("getS3: Invalid endpoint URL:", finalEndpoint);
+				structuredLogger.error("getS3: Invalid endpoint URL:", finalEndpoint);
 				// Fallback to undefined to let AWS SDK use defaults if appropriate,
 				// or let new S3Client throw with a clear error
 			}
 		}
 
-		console.log("getS3: initializing s3Client", { finalEndpoint, finalRegion });
+		structuredLogger.debug("getS3: initializing s3Client", {
+			finalEndpoint,
+			finalRegion,
+		});
 
 		const accessKeyId = process.env.AWS_ID;
 		const secretAccessKey = process.env.AWS_SECRET;
 
-		console.log("getS3: credentials check", {
+		structuredLogger.debug("getS3: credentials check", {
 			hasAccessKey: !!accessKeyId,
 			hasSecretKey: !!secretAccessKey,
 			accessKeyLength: accessKeyId ? accessKeyId.length : 0,
 		});
 
 		if (!accessKeyId || !secretAccessKey) {
-			console.error(
+			structuredLogger.error(
 				"getS3: Missing AWS credentials! Check AWS_ID and AWS_SECRET in .env",
 			);
 		}
@@ -81,7 +88,7 @@ export async function getS3(params) {
 			},
 			forcePathStyle: true,
 		});
-		console.log(
+		structuredLogger.debug(
 			"getS3: created s3Client",
 			typeof s3Client,
 			typeof s3Client.send,
@@ -437,7 +444,7 @@ export async function handleRequest({ readOnly, req, path }) {
 			) {
 				return "";
 			}
-			console.error("get error: ", err);
+			structuredLogger.error("get error: ", err);
 			return { err: getSafeError(err) };
 		}
 	} else if (req.method === "PUT") {

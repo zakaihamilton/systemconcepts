@@ -22,7 +22,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: linear-gradient(135deg, color-mix(in srgb, var(--group-color, var(--primary-color)) 12%, var(--main-background-alternative)), color-mix(in srgb, var(--group-color, var(--playing-color)) 4%, var(--main-background-alternative))) !important;
+		background: linear-gradient(
+			135deg,
+			color-mix(
+				in srgb,
+				var(--group-color, var(--primary-color)) 12%,
+				var(--main-background-alternative)
+			),
+			color-mix(
+				in srgb,
+				var(--group-color, var(--playing-color)) 4%,
+				var(--main-background-alternative)
+			)
+		) !important;
 
 		img {
 			object-fit: cover !important;
@@ -35,8 +47,19 @@
 		}
 
 		:global(.MuiSvgIcon-root) {
-			color: color-mix(in srgb, var(--group-color, var(--primary-color)) 45%, var(--text-color)) !important;
-			filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--group-color, var(--primary-color)) 25%, transparent)) !important;
+			color: color-mix(
+				in srgb,
+				var(--group-color, var(--primary-color)) 45%,
+				var(--text-color)
+			) !important;
+			filter: drop-shadow(
+				0 4px 10px
+					color-mix(
+						in srgb,
+						var(--group-color, var(--primary-color)) 25%,
+						transparent
+					)
+			) !important;
 			transform: scale(1.1);
 			transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 		}
@@ -73,7 +96,11 @@
 	position: absolute;
 	top: 8px;
 	right: 8px;
-	background: linear-gradient(135deg, color-mix(in srgb, var(--group-color, #8b5cf6) 85%, #ffffff) 80%, color-mix(in srgb, var(--group-color, #6366f1) 85%, #000000)) !important;
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--group-color, #8b5cf6) 85%, #ffffff) 80%,
+		color-mix(in srgb, var(--group-color, #6366f1) 85%, #000000)
+	) !important;
 	color: #ffffff !important;
 	border: 1px solid rgba(255, 255, 255, 0.25) !important;
 	backdrop-filter: blur(8px) !important;
@@ -84,7 +111,9 @@
 	align-items: center !important;
 	justify-content: center !important;
 	z-index: 5 !important;
-	box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+	box-shadow:
+		0 2px 8px rgba(139, 92, 246, 0.3),
+		inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	height: 1.8em !important;
 
@@ -97,8 +126,14 @@
 
 .aiBadge:hover {
 	transform: translateY(-1px) scale(1.05) !important;
-	box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-	background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9)) !important;
+	box-shadow:
+		0 4px 12px rgba(139, 92, 246, 0.5),
+		inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+	background: linear-gradient(
+		135deg,
+		rgba(139, 92, 246, 0.9),
+		rgba(99, 102, 241, 0.9)
+	) !important;
 }
 
 .aiText {
@@ -262,8 +297,10 @@
 		height: 11px;
 		margin-right: 4px;
 		background-color: var(--neutral-500);
-		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z'/%3E%3C/svg%3E") no-repeat center;
-		-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z'/%3E%3C/svg%3E") no-repeat center;
+		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z'/%3E%3C/svg%3E")
+			no-repeat center;
+		-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z'/%3E%3C/svg%3E")
+			no-repeat center;
 		mask-size: contain;
 		-webkit-mask-size: contain;
 		opacity: 0.8;
@@ -356,7 +393,11 @@
 .gridItem:hover {
 	transform: translateY(-4px);
 	box-shadow: var(--shadow-lg);
-	border-color: color-mix(in srgb, var(--primary-color) 40%, var(--border-color));
+	border-color: color-mix(
+		in srgb,
+		var(--primary-color) 40%,
+		var(--border-color)
+	);
 
 	.gridThumbnail {
 		:global(.MuiLink-root) {
@@ -380,7 +421,11 @@
 }
 
 .listItem:hover {
-	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
 
 	.icon :global(.MuiSvgIcon-root) {
 		transform: scale(1.15);
@@ -396,7 +441,11 @@
 }
 
 .listPhoneItem:hover {
-	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
 }
 
 .treeItem {
@@ -408,7 +457,11 @@
 }
 
 .treeItem:hover {
-	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
 
 	.icon :global(.MuiSvgIcon-root) {
 		transform: scale(1.15);
@@ -424,7 +477,11 @@
 }
 
 .treePhoneItem:hover {
-	background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--primary-color) 4%,
+		var(--main-background-alternative)
+	) !important;
 }
 
 .labelName {
@@ -464,7 +521,11 @@
 	margin-left: 1.5em !important;
 	padding-left: 0.75em !important;
 	border-left: 2px solid var(--group-color, var(--border-color)) !important;
-	background-color: color-mix(in srgb, var(--group-color, var(--main-background-alternative)) 6%, transparent) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--main-background-alternative)) 6%,
+		transparent
+	) !important;
 }
 
 .expandedGroupHighlight {
@@ -512,7 +573,11 @@
 	flex-direction: column;
 
 	:global(.MuiSvgIcon-root) {
-		color: color-mix(in srgb, var(--group-color, var(--primary-color)) 45%, var(--text-color)) !important;
+		color: color-mix(
+			in srgb,
+			var(--group-color, var(--primary-color)) 45%,
+			var(--text-color)
+		) !important;
 		transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 	}
 }
@@ -588,7 +653,11 @@
 
 .playing {
 	border-left: 3px solid var(--group-color, var(--playing-color)) !important;
-	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 8%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--playing-color)) 8%,
+		var(--main-background-alternative)
+	) !important;
 	color: var(--group-color, var(--playing-color)) !important;
 
 	.labelText {
@@ -604,9 +673,15 @@
 
 .playing.gridItem {
 	border-left: none !important;
-	box-shadow: 0 0 0 2px var(--group-color, var(--playing-color)), var(--shadow-md) !important;
+	box-shadow:
+		0 0 0 2px var(--group-color, var(--playing-color)),
+		var(--shadow-md) !important;
 	border-color: var(--group-color, var(--playing-color)) !important;
-	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 4%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--playing-color)) 4%,
+		var(--main-background-alternative)
+	) !important;
 
 	.labelText {
 		color: var(--group-color, var(--playing-color)) !important;
@@ -614,17 +689,32 @@
 }
 
 @keyframes pulse {
-	0% { transform: scale(1); }
-	50% { transform: scale(1.15); }
-	100% { transform: scale(1); }
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.15);
+	}
+	100% {
+		transform: scale(1);
+	}
 }
 
 .listGroupContainer {
 	padding: 2px 10px !important;
 	border-radius: var(--radius-full) !important;
-	background-color: color-mix(in srgb, var(--group-color, var(--primary-color)) 15%, var(--main-background-alternative)) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--primary-color)) 15%,
+		var(--main-background-alternative)
+	) !important;
 	color: var(--text-color) !important;
-	border: 1px solid color-mix(in srgb, var(--group-color, var(--primary-color)) 30%, var(--border-color)) !important;
+	border: 1px solid
+		color-mix(
+			in srgb,
+			var(--group-color, var(--primary-color)) 30%,
+			var(--border-color)
+		) !important;
 	font-size: 0.72em !important;
 	font-weight: 600 !important;
 	width: max-content !important;
@@ -665,7 +755,11 @@
 	border-bottom: 1px solid var(--border-color) !important;
 
 	&:hover {
-		background-color: color-mix(in srgb, var(--primary-color) 4%, var(--main-background-alternative)) !important;
+		background-color: color-mix(
+			in srgb,
+			var(--primary-color) 4%,
+			var(--main-background-alternative)
+		) !important;
 	}
 
 	& :global(.MuiTableCell-root) {
@@ -674,6 +768,12 @@
 	}
 }
 
-.sessionsTable :global(.MuiTableBody-root) :global(.MuiTableRow-root.Mui-selected) {
-	background-color: color-mix(in srgb, var(--group-color, var(--playing-color)) 8%, var(--main-background-alternative)) !important;
+.sessionsTable
+	:global(.MuiTableBody-root)
+	:global(.MuiTableRow-root.Mui-selected) {
+	background-color: color-mix(
+		in srgb,
+		var(--group-color, var(--playing-color)) 8%,
+		var(--main-background-alternative)
+	) !important;
 }

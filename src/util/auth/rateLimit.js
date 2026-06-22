@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { getCollection } from "@util/storage/mongo";
 
 export async function checkRateLimit(
@@ -20,7 +21,7 @@ export async function checkRateLimit(
 			: remoteAddress;
 
 		if (!identifier) {
-			console.warn("Could not determine IP for rate limiting");
+			structuredLogger.warn("Could not determine IP for rate limiting");
 			return;
 		}
 	}
@@ -36,11 +37,7 @@ export async function checkRateLimit(
 				$set: {
 					ip: identifier,
 					resetTime: {
-						$cond: [
-							{ $gt: ["$resetTime", now] },
-							"$resetTime",
-							now + windowMs,
-						],
+						$cond: [{ $gt: ["$resetTime", now] }, "$resetTime", now + windowMs],
 					},
 					count: {
 						$cond: [

@@ -132,7 +132,9 @@ describe("API View", () => {
 		// Switch to JavaScript Tab
 		fireEvent.click(getByText("JavaScript (Fetch)"));
 		await waitFor(() => {
-			expect(getByText(/fetch\("http:\/\/localhost\/api\/sessions/)).toBeInTheDocument();
+			expect(
+				getByText(/fetch\("http:\/\/localhost\/api\/sessions/),
+			).toBeInTheDocument();
 		});
 
 		// Switch to Python Tab

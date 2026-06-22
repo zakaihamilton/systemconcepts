@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { NextResponse } from "next/server";
 import { MEDIA_CACHE_HEADERS, NO_STORE_HEADERS } from "../cache";
 
@@ -59,14 +60,22 @@ async function getPresignedUrl({
 	method = "GET",
 }) {
 	const now = new Date();
-	const amzDate = now.toISOString().replace(/[:-]/g, "").replace(/\.\d{3}/, "");
+	const amzDate = now
+		.toISOString()
+		.replace(/[:-]/g, "")
+		.replace(/\.\d{3}/, "");
 	const dateStamp = amzDate.substring(0, 8);
 
 	let host = endpoint.replace(/^https?:\/\//, "");
-	const protocol = endpoint.startsWith("http") ? endpoint.match(/^https?:\/\//)[0] : "https://";
+	const protocol = endpoint.startsWith("http")
+		? endpoint.match(/^https?:\/\//)[0]
+		: "https://";
 
 	// Uri-encode path segments (preserving slashes)
-	const canonicalUri = `/${bucket}/${key.split("/").map((segment) => encodeURIComponent(segment).replace(/%7E/g, "~")).join("/")}`;
+	const canonicalUri = `/${bucket}/${key
+		.split("/")
+		.map((segment) => encodeURIComponent(segment).replace(/%7E/g, "~"))
+		.join("/")}`;
 
 	const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
 	const queryParams = {
@@ -79,7 +88,9 @@ async function getPresignedUrl({
 
 	const canonicalQueryString = Object.keys(queryParams)
 		.sort()
-		.map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`)
+		.map(
+			(k) => `${encodeURIComponent(k)}=${encodeURIComponent(queryParams[k])}`,
+		)
 		.join("&");
 
 	const canonicalHeaders = `host:${host}\n`;
@@ -108,7 +119,7 @@ async function getPresignedUrl({
 	const kRegion = await hmacSha256(kDate, region);
 	const kService = await hmacSha256(kRegion, "s3");
 	const kSigning = await hmacSha256(kService, "aws4_request");
-	
+
 	const signatureBuffer = await hmacSha256(kSigning, stringToSign);
 	const signature = Array.from(signatureBuffer)
 		.map((b) => b.toString(16).padStart(2, "0"))
@@ -219,7 +230,8 @@ async function handleRequest(request) {
 
 				// Determine the correct Content-Type, prioritizing the extension hint from 'e'
 				const extHint = (searchParams.get("e") || "").toLowerCase();
-				let contentType = headRes.headers.get("Content-Type") || "application/octet-stream";
+				let contentType =
+					headRes.headers.get("Content-Type") || "application/octet-stream";
 
 				if (extHint.endsWith(".m4a")) {
 					contentType = "audio/x-m4a";
@@ -245,7 +257,7 @@ async function handleRequest(request) {
 					},
 				});
 			} catch (err) {
-				console.warn("[RSS S Proxy] HEAD failed:", s3Key, err.message);
+				structuredLogger.warn("[RSS S Proxy] HEAD failed:", s3Key, err.message);
 			}
 		}
 
@@ -268,7 +280,7 @@ async function handleRequest(request) {
 			},
 		});
 	} catch (err) {
-		console.error("[RSS S Proxy] Unexpected error:", err);
+		structuredLogger.error("[RSS S Proxy] Unexpected error:", err);
 		return new NextResponse("Error generating media URL", {
 			status: 500,
 			headers: NO_STORE_HEADERS,

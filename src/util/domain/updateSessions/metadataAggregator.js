@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import JSZip from "jszip";
 import {
 	getZipTextEntryId,
@@ -62,7 +63,7 @@ export async function aggregateSessionMetadataFromSources({
 	try {
 		transcriptions = await parseTranscriptionZip(transcriptionsBuffer);
 	} catch (err) {
-		console.warn(
+		structuredLogger.warn(
 			`[SessionMetadata] Failed to parse transcription zip for ${group}/${year}`,
 			err,
 		);

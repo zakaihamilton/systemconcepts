@@ -1,2 +1,2 @@
-export { default } from "./BatchDialog";
 export * from "./BatchDialog";
+export { default } from "./BatchDialog";

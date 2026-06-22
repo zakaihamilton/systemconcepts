@@ -193,7 +193,11 @@
 }
 
 .copyButton {
-	background: linear-gradient(135deg, var(--primary-600), var(--primary-500)) !important;
+	background: linear-gradient(
+		135deg,
+		var(--primary-600),
+		var(--primary-500)
+	) !important;
 	color: #fff !important;
 	font-weight: 600 !important;
 	text-transform: none !important;

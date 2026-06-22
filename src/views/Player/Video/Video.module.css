@@ -1,40 +1,43 @@
 .root {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    padding: 8px;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	overflow: hidden;
+	padding: 8px;
 }
 
 .root::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 1;
 }
 
-.root>* {
-    position: relative;
-    z-index: 2;
+.root > * {
+	position: relative;
+	z-index: 2;
 }
 
 .video {
-    display: block;
-    width: 100%;
-    min-height: 0;
-    flex: 1;
-    object-fit: contain;
-    background: #050505;
+	display: block;
+	width: 100%;
+	min-height: 0;
+	flex: 1;
+	object-fit: contain;
+	background: #050505;
 }
 
 .controls {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    flex: 0 0 auto;
-    background:
-        linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.98));
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.24);
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	flex: 0 0 auto;
+	background: linear-gradient(
+		180deg,
+		rgba(15, 23, 42, 0.94),
+		rgba(2, 6, 23, 0.98)
+	);
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.24);
 }

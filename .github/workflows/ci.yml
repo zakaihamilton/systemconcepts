@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      SITE_URL: http://127.0.0.1:3107
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3107
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+      - run: yarn typecheck
+      - run: yarn test --runInBand
+      - run: yarn build
+      - run: npx playwright install --with-deps chromium
+      - run: yarn test:e2e

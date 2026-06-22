@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import {
 	deletePasskey,
@@ -57,7 +58,7 @@ export async function GET(request) {
 			return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 		}
 	} catch (err) {
-		console.error("passkey error: ", err);
+		structuredLogger.error("passkey error: ", err);
 		return NextResponse.json({ err: getSafeError(err) }, { status: 500 });
 	}
 }
@@ -74,7 +75,7 @@ export async function DELETE(request) {
 		await deletePasskey({ id, credentialId });
 		return NextResponse.json({ success: true });
 	} catch (err) {
-		console.error("passkey error: ", err);
+		structuredLogger.error("passkey error: ", err);
 		return NextResponse.json({ err: getSafeError(err) }, { status: 500 });
 	}
 }
@@ -118,7 +119,7 @@ export async function POST(request) {
 			return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 		}
 	} catch (err) {
-		console.error("passkey error: ", err);
+		structuredLogger.error("passkey error: ", err);
 		return NextResponse.json({ err: getSafeError(err) }, { status: 500 });
 	}
 }

@@ -18,19 +18,22 @@ export function registerToolbar(id, sortKey) {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Divider } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@widgets/Tooltip";
 import { useDeviceType } from "@util/browser/styles";
+import Tooltip from "@widgets/Tooltip";
+
 // useTranslations is imported via require to break circular dependency
 const useTranslations = () => {
-	const { useTranslations: useTranslationsHook } = require("@util/domain/translations");
+	const {
+		useTranslations: useTranslationsHook,
+	} = require("@util/domain/translations");
 	return useTranslationsHook();
 };
+
 import Menu from "@widgets/Menu";
 import clsx from "clsx";
 import { useEffect } from "react";
 import Item from "./Item";
 import styles from "./Toolbar.module.css";
-
 
 export function useToolbar({ id, items, visible = true, depends = [] }) {
 	useEffect(() => {

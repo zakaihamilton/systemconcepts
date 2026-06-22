@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
-import { useLanguage } from "@util/domain/language";
 import { useResize } from "@util/browser/size";
 import { useDeviceType } from "@util/browser/styles";
+import { useLanguage } from "@util/domain/language";
 import Main, { MainStore } from "./index.js";
 
 jest.mock("@util/browser/size");

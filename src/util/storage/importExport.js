@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 export function exportData(data, filename, type) {
 	// Detect and decode base64-encoded binary data
 	// Gzip files start with magic bytes 1f 8b which is "H4sI" in base64
@@ -12,7 +13,7 @@ export function exportData(data, filename, type) {
 			}
 			data = bytes;
 		} catch (err) {
-			console.error("Failed to decode base64 data:", err);
+			structuredLogger.error("Failed to decode base64 data:", err);
 			// Fall through to use original data
 		}
 	}

@@ -1,2 +1,2 @@
-export { default } from "./PageIndicator";
 export * from "./PageIndicator";
+export { default } from "./PageIndicator";

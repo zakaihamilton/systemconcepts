@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import articleStyles from "../Article.module.css";
-import styles from "./Content.module.css";
 import Markdown from "../Markdown";
+import styles from "./Content.module.css";
 
 export default function Content({
 	showMarkdown,

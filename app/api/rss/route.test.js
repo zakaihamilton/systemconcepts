@@ -39,8 +39,8 @@ jest.mock("@util/data/string", () => ({
 
 jest.mock("@util/domain/sessionFeedEdge", () => ({
 	getSessions: jest.fn(),
-	getSProxyUrl: jest.fn(
-		(path, baseUrl) => (path ? `${baseUrl}/api/rss/s?p=encoded` : null),
+	getSProxyUrl: jest.fn((path, baseUrl) =>
+		path ? `${baseUrl}/api/rss/s?p=encoded` : null,
 	),
 	getTranscriptProxyUrlFast: jest.fn(() => null),
 	sortSessions: jest.fn((sessions) => sessions),
@@ -108,9 +108,7 @@ describe("/api/rss", () => {
 
 	it("returns matching validators and cache policy for 304 responses", async () => {
 		const first = await GET(
-			makeRequest(
-				"https://systemconcepts.app/api/rss?id=user-b&token=token-b",
-			),
+			makeRequest("https://systemconcepts.app/api/rss?id=user-b&token=token-b"),
 		);
 		const response = await GET(
 			makeRequest(
@@ -165,9 +163,7 @@ describe("/api/rss", () => {
 		getSessions.mockRejectedValueOnce(new Error("storage unavailable"));
 
 		const response = await GET(
-			makeRequest(
-				"https://systemconcepts.app/api/rss?id=user-f&token=token-f",
-			),
+			makeRequest("https://systemconcepts.app/api/rss?id=user-f&token=token-f"),
 		);
 
 		expect(response.status).toBe(500);

@@ -17,12 +17,12 @@ import PrintIcon from "@mui/icons-material/Print";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import { useLocalStorage } from "@util/browser/hooks";
-import { exportData } from "@util/storage/importExport";
 import { roleAuth } from "@util/auth/roles";
+import { useLocalStorage } from "@util/browser/hooks";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";
+import { exportData } from "@util/storage/importExport";
 import Cookies from "js-cookie";
 import React, {
 	useCallback,
@@ -31,6 +31,9 @@ import React, {
 	useRef,
 	useState,
 } from "react";
+import { LibraryTagKeys } from "../Icons";
+import { LibraryStore } from "../Store";
+import styles from "./Article.module.css";
 import ArticleTermsDialog from "./ArticleTermsDialog";
 import Content from "./Content";
 import { replaceAbbreviations, scanForTerms } from "./GlossaryUtils";
@@ -41,9 +44,6 @@ import Player from "./Player";
 import ScrollToTop from "./ScrollToTop";
 import { useArticleScroll } from "./useArticleScroll";
 import { useArticleSearch } from "./useArticleSearch";
-import styles from "./Article.module.css";
-import { LibraryTagKeys } from "../Icons";
-import { LibraryStore } from "../Store";
 
 registerToolbar("Article");
 

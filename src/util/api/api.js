@@ -1,7 +1,7 @@
+import { checkRateLimit } from "@util/auth/rateLimit";
+import { findRecord } from "@util/storage/mongo";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { findRecord } from "@util/storage/mongo";
-import { checkRateLimit } from "@util/auth/rateLimit";
 
 export const JSON_HEADERS = {
 	"Content-Type": "application/json; charset=utf-8",
@@ -18,6 +18,13 @@ export function jsonError(message, status = 500, headers = {}) {
 		{ err: message },
 		{ status, headers: { ...JSON_HEADERS, ...headers } },
 	);
+}
+
+export function jsonSuccess(data, status = 200, headers = {}) {
+	return NextResponse.json(data, {
+		status,
+		headers: { ...JSON_HEADERS, ...headers },
+	});
 }
 
 export function getClientIp(request) {
@@ -49,7 +56,9 @@ export function timingSafeEqual(a, b) {
 export function getApiToken(user) {
 	return crypto
 		.createHash("sha256")
-		.update(user.id + user.hash + (process.env.RSS_SECRET || process.env.AWS_SECRET))
+		.update(
+			user.id + user.hash + (process.env.RSS_SECRET || process.env.AWS_SECRET),
+		)
 		.digest("hex");
 }
 

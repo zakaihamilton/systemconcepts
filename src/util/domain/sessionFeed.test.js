@@ -18,7 +18,10 @@ describe("sessionFeed transcript URLs", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		global.TextDecoder = TextDecoder;
-		({ getSProxyUrl, getTranscriptProxyUrl } = require("@util/domain/sessionFeed"));
+		({
+			getSProxyUrl,
+			getTranscriptProxyUrl,
+		} = require("@util/domain/sessionFeed"));
 	});
 
 	it("normalizes legacy aws paths before building proxy URLs", () => {

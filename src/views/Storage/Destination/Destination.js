@@ -8,10 +8,11 @@ import InputBase from "@mui/material/InputBase";
 import Slide from "@mui/material/Slide";
 import { alpha, styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
-import storage from "@util/storage/storage";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
+import Tooltip from "@widgets/Tooltip";
 import { forwardRef } from "react";
 import { StorageStore } from "../Storage";
 import StorageList from "../StorageList";
@@ -109,7 +110,7 @@ export default function Destination({ path }) {
 						s.message = err;
 						s.severity = "error";
 					});
-					console.error(err);
+					structuredLogger.error(err);
 				}
 			} else if (mode === "copy") {
 				const target = [destination, item.name].filter(Boolean).join("/");
@@ -127,7 +128,7 @@ export default function Destination({ path }) {
 						s.message = err;
 						s.severity = "error";
 					});
-					console.error(err);
+					structuredLogger.error(err);
 				}
 			}
 		}

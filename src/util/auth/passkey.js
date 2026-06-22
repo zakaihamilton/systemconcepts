@@ -4,9 +4,14 @@ import {
 	verifyAuthenticationResponse,
 	verifyRegistrationResponse,
 } from "@simplewebauthn/server";
+import {
+	deleteRecord,
+	findRecord,
+	insertRecord,
+	replaceRecord,
+} from "@util/storage/mongo";
 import { hash } from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import { deleteRecord, findRecord, insertRecord, replaceRecord } from "@util/storage/mongo";
 
 const rpName = "App"; // Should be configurable
 

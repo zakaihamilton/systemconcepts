@@ -19,9 +19,10 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./BatchDialog.module.css";
@@ -98,7 +99,7 @@ export default function BatchDialog({ open, onClose, tags, loadTags }) {
 
 			setPreviewData(changes);
 		} catch (err) {
-			console.error(err);
+			structuredLogger.error(err);
 		} finally {
 			setCalculating(false);
 		}
@@ -199,7 +200,7 @@ export default function BatchDialog({ open, onClose, tags, loadTags }) {
 
 			onClose();
 		} catch (err) {
-			console.error(err);
+			structuredLogger.error(err);
 		} finally {
 			setProcessing(false);
 		}

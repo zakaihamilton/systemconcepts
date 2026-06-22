@@ -1,5 +1,6 @@
 import { readGroups, writeGroups } from "@sync/groups";
 import { SyncActiveStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useState } from "react";
 
@@ -29,7 +30,7 @@ export function useGroups(depends = []) {
 		GroupsStore.update((s) => {
 			s.busy = true;
 		});
-		console.log("[Groups] Loading groups...");
+		structuredLogger.debug("[Groups] Loading groups...");
 
 		try {
 			const {
@@ -38,7 +39,7 @@ export function useGroups(depends = []) {
 				version: _version,
 			} = await readGroups();
 
-			console.log(
+			structuredLogger.debug(
 				`[Groups] loadGroups complete. Found ${metadata.length} groups.`,
 			);
 			GroupsStore.update((s) => {
@@ -48,7 +49,7 @@ export function useGroups(depends = []) {
 				s.busy = false;
 			});
 		} catch (err) {
-			console.error("[Groups] Error loading groups:", err);
+			structuredLogger.error("[Groups] Error loading groups:", err);
 			GroupsStore.update((s) => {
 				s.busy = false;
 			});
@@ -110,7 +111,7 @@ export function useGroups(depends = []) {
 				s.counter++; // Increment counter to trigger sync
 			});
 		} catch (err) {
-			console.error("[Groups] Error updating groups:", err);
+			structuredLogger.error("[Groups] Error updating groups:", err);
 			GroupsStore.update((s) => {
 				s.busy = false;
 			});

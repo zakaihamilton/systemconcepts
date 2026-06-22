@@ -1,11 +1,11 @@
 import Avatar from "@mui/material/Avatar";
 import { useTheme } from "@mui/material/styles";
-import Tooltip from "@widgets/Tooltip";
 import { getSessionTextColor } from "@util/data/colors";
 import { getDateString, isDateMonth, isDateToday } from "@util/data/date";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import SessionIcon from "@widgets/SessionIcon";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./Day.module.css";
 export default function Day({

@@ -5,10 +5,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import InsertPhotoOutlinedIcon from "@mui/icons-material/InsertPhotoOutlined";
 import MovieIcon from "@mui/icons-material/Movie";
 import MovieFilterIcon from "@mui/icons-material/MovieFilter";
-import Tooltip from "@widgets/Tooltip";
+import { logger as structuredLogger } from "@util/api/logger";
 import { SessionsStore } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import Menu from "@widgets/Menu";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import React, { useMemo } from "react";
 import styles from "./FilterBar.module.css";
@@ -261,8 +262,8 @@ export default React.memo(function FilterBar({ hideYears = false }) {
 				selected: typeFilter,
 				items: mapItems(type.items, type.header || insideHeader),
 				onClick: (event) => {
-					console.log(`[FilterBar] Trace: Clicked on ${type.id}`);
-					console.log(
+					structuredLogger.debug(`[FilterBar] Trace: Clicked on ${type.id}`);
+					structuredLogger.debug(
 						`[FilterBar] Click on type:`,
 						type.id,
 						`radio:`,

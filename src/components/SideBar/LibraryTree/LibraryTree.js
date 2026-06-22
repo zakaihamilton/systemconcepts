@@ -5,16 +5,17 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import List from "@mui/material/List";
 import TextField from "@mui/material/TextField";
-import Tooltip from "@widgets/Tooltip";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
 import { setPath, usePathItems } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import { LibraryIcons, LibraryTagKeys } from "@views/Library/Icons";
 import { LibraryStore } from "@views/Library/Store";
 import TreeItem from "@views/Library/TreeItem";
+import Tooltip from "@widgets/Tooltip";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./LibraryTree.module.css";
 
@@ -71,7 +72,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 				});
 			}
 		} catch (err) {
-			console.error("Failed to load library tags:", err);
+			structuredLogger.error("Failed to load library tags:", err);
 		}
 	}, []);
 
@@ -84,7 +85,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 				setCustomOrder(data);
 			}
 		} catch (err) {
-			console.error("Failed to load library order:", err);
+			structuredLogger.error("Failed to load library order:", err);
 		}
 	}, []);
 
@@ -528,8 +529,8 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 	}
 
 	return (
-        (<Box className={styles.root}>
-            <Box className={styles.searchContainer}>
+		<Box className={styles.root}>
+			<Box className={styles.searchContainer}>
 				<TextField
 					placeholder={translations.FILTER_TAGS || "Filter tags..."}
 					value={filterText}
@@ -538,32 +539,32 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 					size="small"
 					className={styles.filterInput}
 					slotProps={{
-                        input: {
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <FilterAltIcon color="action" fontSize="small" />
-                                </InputAdornment>
-                            ),
-                            endAdornment: filterText ? (
-                                <InputAdornment position="end">
-                                    <Tooltip title={translations.CLEAR_FILTER}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => setFilterText("")}
-                                            edge="end"
-                                            sx={{ mr: -0.5 }}
-                                            aria-label={translations.CLEAR_FILTER}
-                                        >
-                                            <ClearIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </InputAdornment>
-                            ) : null,
-                        }
-                    }}
+						input: {
+							startAdornment: (
+								<InputAdornment position="start">
+									<FilterAltIcon color="action" fontSize="small" />
+								</InputAdornment>
+							),
+							endAdornment: filterText ? (
+								<InputAdornment position="end">
+									<Tooltip title={translations.CLEAR_FILTER}>
+										<IconButton
+											size="small"
+											onClick={() => setFilterText("")}
+											edge="end"
+											sx={{ mr: -0.5 }}
+											aria-label={translations.CLEAR_FILTER}
+										>
+											<ClearIcon fontSize="small" />
+										</IconButton>
+									</Tooltip>
+								</InputAdornment>
+							) : null,
+						},
+					}}
 				/>
 			</Box>
-            <Box className={styles.treeContainer} ref={treeContainerRef}>
+			<Box className={styles.treeContainer} ref={treeContainerRef}>
 				<List component="nav" sx={{ py: 0.5, pl: 3 }}>
 					{tree.map((node) => (
 						<TreeItem
@@ -576,6 +577,6 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 					))}
 				</List>
 			</Box>
-        </Box>)
-    );
+		</Box>
+	);
 }

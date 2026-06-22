@@ -5,6 +5,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
 import { useTheme } from "@mui/material/styles";
+import { useDeviceType } from "@util/browser/styles";
+import { useSwipe } from "@util/browser/touch";
 import { getSessionTextColor } from "@util/data/colors";
 import {
 	addDate,
@@ -16,17 +18,15 @@ import {
 } from "@util/data/date";
 import { useDirection } from "@util/data/direction";
 import { useDateFormatter } from "@util/data/locale";
-import { useDeviceType } from "@util/browser/styles";
-import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import Input from "@widgets/Input";
 import SessionIcon from "@widgets/SessionIcon";
 import { useState } from "react";
 import DayHeader from "./DayHeader";
+import styles from "./MonthView.module.css";
 import Sessions from "./Sessions";
 import Week from "./Week";
-import styles from "./MonthView.module.css";
 
 registerToolbar("MonthView");
 

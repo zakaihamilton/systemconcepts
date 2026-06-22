@@ -1,2 +1,2 @@
-export { default } from "./VariableSizeList";
 export * from "./VariableSizeList";
+export { default } from "./VariableSizeList";

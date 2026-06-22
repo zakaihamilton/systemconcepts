@@ -33,7 +33,8 @@ export default [
 	},
 	{
 		id: "SYNC_ARTICLE_TAGS_CONFIRM",
-		value: "Are you sure you want to sync tags from the library to all article files? This will overwrite individual file tags.",
+		value:
+			"Are you sure you want to sync tags from the library to all article files? This will overwrite individual file tags.",
 	},
 	{
 		id: "SYNCING_ARTICLE_TAGS",

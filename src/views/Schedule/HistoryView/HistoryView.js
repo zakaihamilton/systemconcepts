@@ -1,7 +1,6 @@
 import { useSearch } from "@components/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@widgets/Tooltip";
 import { diffDays, isDateToday } from "@util/data/date";
 import { useRecentHistory } from "@util/domain/history";
 import { useLanguage } from "@util/domain/language";
@@ -10,6 +9,7 @@ import { useTranslations } from "@util/domain/translations";
 import { addPath } from "@util/domain/views";
 import { PlayerStore } from "@views/Player/Player";
 import TrackCard from "@views/Schedule/TracksView/Card";
+import Tooltip from "@widgets/Tooltip";
 import { useCallback, useMemo } from "react";
 import styles from "./HistoryView.module.css";
 

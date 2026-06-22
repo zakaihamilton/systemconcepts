@@ -1,2 +1,2 @@
-export { default } from "./ResetPassword";
 export * from "./ResetPassword";
+export { default } from "./ResetPassword";

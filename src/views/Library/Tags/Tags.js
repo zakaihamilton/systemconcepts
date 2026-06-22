@@ -9,8 +9,8 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import { useCallback, useMemo } from "react";
 import { LibraryIcons, LibraryTagKeys } from "../Icons";
-import styles from "./Tags.module.css";
 import TreeItem from "../TreeItem";
+import styles from "./Tags.module.css";
 
 export default function Tags({
 	tags,
@@ -332,26 +332,26 @@ export default function Tags({
 					size="small"
 					className={styles.filterInput}
 					slotProps={{
-                        input: {
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <FilterAltIcon color="action" />
-                                </InputAdornment>
-                            ),
-                            endAdornment: filterText ? (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => setFilterText("")}
-                                        edge="end"
-                                        sx={{ mr: -0.5 }}
-                                    >
-                                        <ClearIcon fontSize="small" />
-                                    </IconButton>
-                                </InputAdornment>
-                            ) : null,
-                        }
-                    }}
+						input: {
+							startAdornment: (
+								<InputAdornment position="start">
+									<FilterAltIcon color="action" />
+								</InputAdornment>
+							),
+							endAdornment: filterText ? (
+								<InputAdornment position="end">
+									<IconButton
+										size="small"
+										onClick={() => setFilterText("")}
+										edge="end"
+										sx={{ mr: -0.5 }}
+									>
+										<ClearIcon fontSize="small" />
+									</IconButton>
+								</InputAdornment>
+							) : null,
+						},
+					}}
 				/>
 			</Box>
 			<Box className={styles.treeContainer}>
@@ -374,20 +374,20 @@ export default function Tags({
 
 	if (isMobile) {
 		return (
-            (<Drawer
+			<Drawer
 				anchor="left"
 				open={showLibrarySideBar}
 				onClose={closeDrawer}
 				ModalProps={{ keepMounted: true }}
 				slotProps={{
-                    paper: {
-                        sx: { width: "85vw", maxWidth: "350px", height: "100%" },
-                    }
-                }}
+					paper: {
+						sx: { width: "85vw", maxWidth: "350px", height: "100%" },
+					},
+				}}
 			>
-                {sideBarContent}
-            </Drawer>)
-        );
+				{sideBarContent}
+			</Drawer>
+		);
 	}
 
 	return (

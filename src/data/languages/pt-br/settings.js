@@ -141,7 +141,8 @@ export default [
 	},
 	{
 		id: "FULL_SYNC_MESSAGE",
-		value: "Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor.",
+		value:
+			"Deseja realizar uma sincronização completa? Isso baixará novamente todos os dados da sessão do servidor.",
 	},
 	{
 		id: "CLEAR_STORAGE",
@@ -153,7 +154,8 @@ export default [
 	},
 	{
 		id: "CONFIRM_CLEAR_STORAGE",
-		value: "Tem certeza de que deseja limpar todo o armazenamento? Isso excluirá todos os dados locais e recarregará a página.",
+		value:
+			"Tem certeza de que deseja limpar todo o armazenamento? Isso excluirá todos os dados locais e recarregará a página.",
 	},
 	{
 		id: "VERY_SMALL",

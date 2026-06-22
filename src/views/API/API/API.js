@@ -1,8 +1,9 @@
+import PageLoad from "@components/PageLoad";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import PageLoad from "@components/PageLoad";
 import { fetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import Tooltip from "@widgets/Tooltip";
 import Cookies from "js-cookie";
@@ -21,7 +22,9 @@ export default function API() {
 	const sectionNavSlotRef = useRef(null);
 	const sectionNavMeasureRef = useRef(null);
 	const [sectionNavFrame, setSectionNavFrame] = useState(null);
-	const [activeSectionId, setActiveSectionId] = useState("api-sessions-endpoint");
+	const [activeSectionId, setActiveSectionId] = useState(
+		"api-sessions-endpoint",
+	);
 
 	const userId = Cookies.get("id");
 	const isSignedIn = userId && Cookies.get("hash");
@@ -62,7 +65,7 @@ export default function API() {
 				.then((data) => {
 					setUser(data);
 				})
-				.catch(console.error);
+				.catch(structuredLogger.error);
 		}
 	}, [isSignedIn, userId]);
 
@@ -184,7 +187,11 @@ export default function API() {
 			window.removeEventListener("scroll", updateSectionNav);
 			window.removeEventListener("resize", updateSectionNav);
 			window.removeEventListener("transitionrun", trackLayoutTransition, true);
-			window.removeEventListener("transitionstart", trackLayoutTransition, true);
+			window.removeEventListener(
+				"transitionstart",
+				trackLayoutTransition,
+				true,
+			);
 		};
 	}, [selectedApi, sessionSections]);
 
@@ -200,11 +207,23 @@ export default function API() {
 		return (
 			<div className={styles.root}>
 				<div className={styles.card}>
-					<Typography variant="h4" className={styles.title} style={{ color: "var(--error-color)", background: "none", WebkitTextFillColor: "initial" }}>
+					<Typography
+						variant="h4"
+						className={styles.title}
+						style={{
+							color: "var(--error-color)",
+							background: "none",
+							WebkitTextFillColor: "initial",
+						}}
+					>
 						{translations.ACCESS_DENIED || "Access Denied"}
 					</Typography>
-					<Typography className={styles.sectionDescription} style={{ textAlign: "center", fontSize: "1.1rem" }}>
-						{translations.API_ACCESS_DENIED_DESC || "The JSON API features are only available to registered users. Visitor accounts do not have access to the API."}
+					<Typography
+						className={styles.sectionDescription}
+						style={{ textAlign: "center", fontSize: "1.1rem" }}
+					>
+						{translations.API_ACCESS_DENIED_DESC ||
+							"The JSON API features are only available to registered users. Visitor accounts do not have access to the API."}
 					</Typography>
 				</div>
 			</div>
@@ -215,8 +234,10 @@ export default function API() {
 		sessions: {
 			name: translations.API_SESSIONS || "Sessions API",
 			url: `${window.location.origin}/api/sessions?id=${userId}&token=${user.rssToken}`,
-			description: translations.API_INSTRUCTIONS || "Use the following personal endpoint to integrate session data into your external services, scripts, or platforms.",
-		}
+			description:
+				translations.API_INSTRUCTIONS ||
+				"Use the following personal endpoint to integrate session data into your external services, scripts, or platforms.",
+		},
 	};
 
 	const apiUrl = apiEndpoints[selectedApi]?.url || "";
@@ -231,8 +252,8 @@ export default function API() {
 		curl: `curl -X GET "${apiUrl}&group=american&index=0&count=5"`,
 		fetch: `fetch("${apiUrl}&group=american&index=0&count=5")
   .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error(error));`,
+  .then(data => structuredLogger.debug(data))
+  .catch(error => structuredLogger.error(error));`,
 		python: `import requests
 
 url = "${apiUrl}"
@@ -265,7 +286,11 @@ else:
 		});
 	};
 
-	const renderSectionNav = ({ fixed = false, hidden = false, measure = false } = {}) => (
+	const renderSectionNav = ({
+		fixed = false,
+		hidden = false,
+		measure = false,
+	} = {}) => (
 		<nav
 			ref={measure ? sectionNavMeasureRef : undefined}
 			className={`${styles.sectionNav} ${fixed ? styles.sectionNavFixed : ""} ${hidden ? styles.sectionNavPlaceholder : ""}`}
@@ -313,7 +338,8 @@ else:
 
 				{selectedApi === "sessions" && (
 					<>
-						{mounted && sectionNavFrame &&
+						{mounted &&
+							sectionNavFrame &&
 							createPortal(renderSectionNav({ fixed: true }), document.body)}
 						<div
 							ref={sectionNavSlotRef}
@@ -324,12 +350,19 @@ else:
 									: undefined
 							}
 						>
-							{renderSectionNav({ hidden: Boolean(sectionNavFrame), measure: true })}
+							{renderSectionNav({
+								hidden: Boolean(sectionNavFrame),
+								measure: true,
+							})}
 						</div>
 
 						<Grid container spacing={3} className={styles.form}>
 							{/* Main API Info & Copy Section */}
-							<Grid size={12} id="api-sessions-endpoint" className={styles.jumpSection}>
+							<Grid
+								size={12}
+								id="api-sessions-endpoint"
+								className={styles.jumpSection}
+							>
 								<Typography className={styles.sectionDescription}>
 									{translations.API_INSTRUCTIONS ||
 										"Use the following personal endpoint to integrate session data into your external services, scripts, or platforms."}
@@ -345,123 +378,176 @@ else:
 										onClick={handleCopyUrl}
 										className={styles.copyButton}
 									>
-										{copiedUrl ? (translations.API_COPIED || "Copied!") : (translations.COPY_URL || "Copy URL")}
+										{copiedUrl
+											? translations.API_COPIED || "Copied!"
+											: translations.COPY_URL || "Copy URL"}
 									</Button>
 								</div>
 							</Grid>
 
-						{/* Parameters Documentation Section */}
-						<Grid size={12} id="api-sessions-parameters" className={styles.jumpSection}>
-							<Typography className={styles.subSectionTitle}>
-								{translations.API_QUERY_PARAMETERS || "Query Parameters"}
-							</Typography>
-							<div className={styles.tableContainer}>
-								<table className={styles.paramsTable}>
-									<thead>
-										<tr>
-											<th>{translations.API_PARAMETER || "Parameter"}</th>
-											<th>{translations.API_TYPE || "Type"}</th>
-											<th>{translations.API_DESCRIPTION || "Description"}</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td><code className={styles.inlineCode}>group</code></td>
-											<td>{translations.API_TYPE_STRING || "String"}</td>
-											<td>{translations.API_PARAM_GROUP_DESC || "Filter sessions by their specific group name."}</td>
-										</tr>
-										<tr>
-											<td><code className={styles.inlineCode}>tag</code></td>
-											<td>{translations.API_TYPE_STRING || "String"}</td>
-											<td>{translations.API_PARAM_TAG_DESC || "Filter sessions containing a specific tag."}</td>
-										</tr>
-										<tr>
-											<td><code className={styles.inlineCode}>date</code></td>
-											<td>{translations.API_TYPE_STRING || "String"}</td>
-											<td>{translations.API_PARAM_DATE_DESC || "Filter by exact date (format: YYYY-MM-DD)."}</td>
-										</tr>
-										<tr>
-											<td><code className={styles.inlineCode}>year</code></td>
-											<td>{translations.API_TYPE_STRING || "String"}</td>
-											<td>{translations.API_PARAM_YEAR_DESC || "Filter sessions by year."}</td>
-										</tr>
-										<tr>
-											<td><code className={styles.inlineCode}>query</code></td>
-											<td>{translations.API_TYPE_STRING || "String"}</td>
-											<td>{translations.API_PARAM_QUERY_DESC || "Text search across title, synopsis, and tags."}</td>
-										</tr>
-										<tr>
-											<td><code className={styles.inlineCode}>index</code></td>
-											<td>{translations.API_TYPE_INTEGER || "Integer"}</td>
-											<td>{translations.API_PARAM_INDEX_DESC || "Start index for pagination / sliding window (default: 0)."}</td>
-										</tr>
-										<tr>
-											<td><code className={styles.inlineCode}>count</code></td>
-											<td>{translations.API_TYPE_INTEGER || "Integer"}</td>
-											<td>{translations.API_PARAM_COUNT_DESC || "Limit results count (default: 100, max: 500)."}</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</Grid>
-
-						{/* Code Examples Section */}
-						<Grid size={12} id="api-sessions-examples" className={styles.jumpSection}>
-							<div className={styles.docHeader}>
+							{/* Parameters Documentation Section */}
+							<Grid
+								size={12}
+								id="api-sessions-parameters"
+								className={styles.jumpSection}
+							>
 								<Typography className={styles.subSectionTitle}>
-									{translations.API_DOCUMENTATION || "API Documentation & Examples"}
+									{translations.API_QUERY_PARAMETERS || "Query Parameters"}
 								</Typography>
-								<Button
-									variant="outlined"
-									size="small"
-									onClick={handleCopyCode}
-									className={styles.copyCodeBtn}
-								>
-									{copiedCode ? (translations.API_COPIED_CODE || "Copied Code!") : (translations.API_COPY_CODE || "Copy Code")}
-								</Button>
-							</div>
+								<div className={styles.tableContainer}>
+									<table className={styles.paramsTable}>
+										<thead>
+											<tr>
+												<th>{translations.API_PARAMETER || "Parameter"}</th>
+												<th>{translations.API_TYPE || "Type"}</th>
+												<th>{translations.API_DESCRIPTION || "Description"}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>group</code>
+												</td>
+												<td>{translations.API_TYPE_STRING || "String"}</td>
+												<td>
+													{translations.API_PARAM_GROUP_DESC ||
+														"Filter sessions by their specific group name."}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>tag</code>
+												</td>
+												<td>{translations.API_TYPE_STRING || "String"}</td>
+												<td>
+													{translations.API_PARAM_TAG_DESC ||
+														"Filter sessions containing a specific tag."}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>date</code>
+												</td>
+												<td>{translations.API_TYPE_STRING || "String"}</td>
+												<td>
+													{translations.API_PARAM_DATE_DESC ||
+														"Filter by exact date (format: YYYY-MM-DD)."}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>year</code>
+												</td>
+												<td>{translations.API_TYPE_STRING || "String"}</td>
+												<td>
+													{translations.API_PARAM_YEAR_DESC ||
+														"Filter sessions by year."}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>query</code>
+												</td>
+												<td>{translations.API_TYPE_STRING || "String"}</td>
+												<td>
+													{translations.API_PARAM_QUERY_DESC ||
+														"Text search across title, synopsis, and tags."}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>index</code>
+												</td>
+												<td>{translations.API_TYPE_INTEGER || "Integer"}</td>
+												<td>
+													{translations.API_PARAM_INDEX_DESC ||
+														"Start index for pagination / sliding window (default: 0)."}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<code className={styles.inlineCode}>count</code>
+												</td>
+												<td>{translations.API_TYPE_INTEGER || "Integer"}</td>
+												<td>
+													{translations.API_PARAM_COUNT_DESC ||
+														"Limit results count (default: 100, max: 500)."}
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</Grid>
 
-							{/* Code Tabs Switcher */}
-							<div className={styles.tabBar}>
-								<button
-									type="button"
-									className={`${styles.tabBtn} ${activeTab === "curl" ? styles.activeTab : ""}`}
-									onClick={() => setActiveTab("curl")}
-								>
-									cURL
-								</button>
-								<button
-									type="button"
-									className={`${styles.tabBtn} ${activeTab === "fetch" ? styles.activeTab : ""}`}
-									onClick={() => setActiveTab("fetch")}
-								>
-									JavaScript (Fetch)
-								</button>
-								<button
-									type="button"
-									className={`${styles.tabBtn} ${activeTab === "python" ? styles.activeTab : ""}`}
-									onClick={() => setActiveTab("python")}
-								>
-									Python
-								</button>
-							</div>
+							{/* Code Examples Section */}
+							<Grid
+								size={12}
+								id="api-sessions-examples"
+								className={styles.jumpSection}
+							>
+								<div className={styles.docHeader}>
+									<Typography className={styles.subSectionTitle}>
+										{translations.API_DOCUMENTATION ||
+											"API Documentation & Examples"}
+									</Typography>
+									<Button
+										variant="outlined"
+										size="small"
+										onClick={handleCopyCode}
+										className={styles.copyCodeBtn}
+									>
+										{copiedCode
+											? translations.API_COPIED_CODE || "Copied Code!"
+											: translations.API_COPY_CODE || "Copy Code"}
+									</Button>
+								</div>
 
-							{/* Dynamic Code Viewer */}
-							<div className={styles.codeBlockContainer}>
-								<pre className={styles.codeBlock}>
-									<code>{codeExamples[activeTab]}</code>
-								</pre>
-							</div>
-						</Grid>
+								{/* Code Tabs Switcher */}
+								<div className={styles.tabBar}>
+									<button
+										type="button"
+										className={`${styles.tabBtn} ${activeTab === "curl" ? styles.activeTab : ""}`}
+										onClick={() => setActiveTab("curl")}
+									>
+										cURL
+									</button>
+									<button
+										type="button"
+										className={`${styles.tabBtn} ${activeTab === "fetch" ? styles.activeTab : ""}`}
+										onClick={() => setActiveTab("fetch")}
+									>
+										JavaScript (Fetch)
+									</button>
+									<button
+										type="button"
+										className={`${styles.tabBtn} ${activeTab === "python" ? styles.activeTab : ""}`}
+										onClick={() => setActiveTab("python")}
+									>
+										Python
+									</button>
+								</div>
 
-						{/* Example JSON Response */}
-							<Grid size={12} id="api-sessions-schema" className={styles.jumpSection}>
-							<Typography className={styles.subSectionTitle}>
-								{translations.API_JSON_RESPONSE_SCHEMA || "JSON Response Schema"}
-							</Typography>
-							<div className={styles.codeBlockContainer}>
-								<pre className={styles.codeBlock}>
-									<code>{`{
+								{/* Dynamic Code Viewer */}
+								<div className={styles.codeBlockContainer}>
+									<pre className={styles.codeBlock}>
+										<code>{codeExamples[activeTab]}</code>
+									</pre>
+								</div>
+							</Grid>
+
+							{/* Example JSON Response */}
+							<Grid
+								size={12}
+								id="api-sessions-schema"
+								className={styles.jumpSection}
+							>
+								<Typography className={styles.subSectionTitle}>
+									{translations.API_JSON_RESPONSE_SCHEMA ||
+										"JSON Response Schema"}
+								</Typography>
+								<div className={styles.codeBlockContainer}>
+									<pre className={styles.codeBlock}>
+										<code>{`{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SessionsResponse",
   "type": "array",
@@ -530,8 +616,8 @@ else:
     ]
   }
 }`}</code>
-								</pre>
-							</div>
+									</pre>
+								</div>
 							</Grid>
 						</Grid>
 					</>

@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { stringToBinary } from "@util/data/binary";
 import { isBinaryFile, makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
@@ -139,7 +140,7 @@ async function downloadFile(
 			} else {
 				// Neither matches (rare corruption or different hashing?)
 				// Default to pretty if available for readability, otherwise raw
-				console.warn(
+				structuredLogger.warn(
 					`[Sync] Hash mismatch for ${fileBasename}. Remote: ${remoteFile.hash}, Raw: ${rawInfo.hash}, Pretty: ${prettyInfo?.hash}`,
 				);
 				if (prettyInfo) {
@@ -173,9 +174,11 @@ async function downloadFile(
 					// Only treat as conflict if file is in manifest AND hash differs
 					// If file is not in manifest, just download it normally
 					if (localEntry && info.hash !== localEntry.hash) {
-						console.warn(`[Sync] Conflict detected for ${fileBasename}:`);
-						console.warn(`  - File exists locally and in manifest`);
-						console.warn(
+						structuredLogger.warn(
+							`[Sync] Conflict detected for ${fileBasename}:`,
+						);
+						structuredLogger.warn(`  - File exists locally and in manifest`);
+						structuredLogger.warn(
 							`  - Hash mismatch: manifest=${localEntry.hash}, current=${info.hash}`,
 						);
 
@@ -203,7 +206,7 @@ async function downloadFile(
 			} catch (err) {
 				const errorStr = (err.message || String(err)).toLowerCase();
 				if (errorStr.includes("eisdir")) {
-					console.warn(
+					structuredLogger.warn(
 						`[Sync] Path ${localFilePath} is a directory, removing to write file.`,
 					);
 					await storage.deleteFolder(localFilePath);
@@ -226,7 +229,7 @@ async function downloadFile(
 			size: finalSize,
 		};
 	} catch (err) {
-		console.error(`[Sync] Failed to download ${fileBasename}:`, err);
+		structuredLogger.error(`[Sync] Failed to download ${fileBasename}:`, err);
 		addSyncLog(`Failed to download: ${fileBasename}`, "error");
 		return { failed: true, path: remoteFile.path };
 	}
@@ -262,13 +265,13 @@ export async function downloadUpdates(
 			const remoteVer = parseInt(remoteFile.version) || 0;
 			const localVer = localFile ? parseInt(localFile.version) || 0 : 0;
 
-			console.log(
+			structuredLogger.debug(
 				`[Sync] Check ${remoteFile.path}: remoteVer=${remoteVer}, localVer=${localVer}`,
 			);
 
 			if (remoteVer > localVer || !localFile) {
 				if (localFile && localFile.hash === remoteFile.hash) {
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Hash matches for ${remoteFile.path} (${localFile.hash}). Updating local manifest version to ${remoteFile.version} without downloading.`,
 					);
 					addSyncLog(
@@ -285,20 +288,20 @@ export async function downloadUpdates(
 			} else if (localFile.deleted) {
 				if (canUpload && !restoreMissingFiles) {
 					// Admin: Keep it deleted locally, skip download
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Skipping download for locally deleted file: ${remoteFile.path}`,
 					);
 				} else if (restoreMissingFiles) {
 					// Restore Missing Files Safety:
 					// If file is missing/deleted locally, we force restore it to avoid data loss on remote
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Restoring missing/deleted file (Safety Policy): ${remoteFile.path}`,
 					);
 					addSyncLog(`Safety Restore: ${remoteFile.path}`, "warning");
 					toDownload.push(remoteFile);
 				} else {
 					// Student/Visitor: Re-download to restore from remote
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Restoring locally deleted file from remote: ${remoteFile.path}`,
 					);
 					toDownload.push(remoteFile);
@@ -307,7 +310,7 @@ export async function downloadUpdates(
 		}
 
 		if (toDownload.length === 0) {
-			console.log(
+			structuredLogger.debug(
 				"[Sync] Comparison complete, nothing to download. Remote Manifest:",
 				JSON.stringify(remoteManifest),
 			);
@@ -462,7 +465,7 @@ export async function downloadUpdates(
 			cleanedRemoteManifest,
 		};
 	} catch (err) {
-		console.error("[Sync] Download failed:", err);
+		structuredLogger.error("[Sync] Download failed:", err);
 		addSyncLog(`Download failed: ${err.message}`, "error");
 		throw err;
 	}

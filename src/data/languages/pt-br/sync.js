@@ -37,7 +37,8 @@ export default [
 	},
 	{
 		id: "SYNC_ARTICLE_TAGS_CONFIRM",
-		value: "Tem certeza de que deseja sincronizar as tags da biblioteca para todos os arquivos de artigo? Esta ação substituirá tags individuais de arquivos.",
+		value:
+			"Tem certeza de que deseja sincronizar as tags da biblioteca para todos os arquivos de artigo? Esta ação substituirá tags individuais de arquivos.",
 	},
 	{
 		id: "SYNCING_ARTICLE_TAGS",

@@ -7,9 +7,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { useEffect, useState } from "react";
 
 export default function EditContentDialog({
@@ -70,7 +71,7 @@ export default function EditContentDialog({
 			setContent(editContent);
 			onClose();
 		} catch (err) {
-			console.error("Failed to save article content:", err);
+			structuredLogger.error("Failed to save article content:", err);
 		} finally {
 			setSaving(false);
 		}
@@ -83,24 +84,24 @@ export default function EditContentDialog({
 	};
 
 	return (
-        (<Dialog
-                open={open}
-                onClose={handleClose}
-                maxWidth="md"
-                fullWidth
-                slotProps={{
-                    paper: {
-                        sx: {
-                            height: "80vh",
-                            maxHeight: "80vh",
-                        },
-                    }
-                }}
-            >
-            <DialogTitle sx={{ fontWeight: 700 }}>
+		<Dialog
+			open={open}
+			onClose={handleClose}
+			maxWidth="md"
+			fullWidth
+			slotProps={{
+				paper: {
+					sx: {
+						height: "80vh",
+						maxHeight: "80vh",
+					},
+				},
+			}}
+		>
+			<DialogTitle sx={{ fontWeight: 700 }}>
 				{translations.EDIT_ARTICLE || "Edit Article"}
 			</DialogTitle>
-            <DialogContent sx={{ display: "flex", flexDirection: "column", p: 0 }}>
+			<DialogContent sx={{ display: "flex", flexDirection: "column", p: 0 }}>
 				<Box
 					sx={{
 						flex: 1,
@@ -135,16 +136,16 @@ export default function EditContentDialog({
 							},
 						}}
 						slotProps={{
-                            input: {
-                                sx: {
-                                    height: "100%",
-                                },
-                            }
-                        }}
+							input: {
+								sx: {
+									height: "100%",
+								},
+							},
+						}}
 					/>
 				</Box>
 			</DialogContent>
-            <DialogActions sx={{ p: 2, pt: 0 }}>
+			<DialogActions sx={{ p: 2, pt: 0 }}>
 				<Button onClick={handleClose} disabled={saving}>
 					{translations.CANCEL || "Cancel"}
 				</Button>
@@ -154,6 +155,6 @@ export default function EditContentDialog({
 						: translations.SAVE || "Save"}
 				</Button>
 			</DialogActions>
-        </Dialog>)
-    );
+		</Dialog>
+	);
 }

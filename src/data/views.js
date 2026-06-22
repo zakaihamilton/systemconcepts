@@ -80,8 +80,8 @@ const Account = dynamic(() => import("@views/Account/Account"), {
 	loading: () => <PageLoad />,
 });
 
-import PodcastsIcon from "@mui/icons-material/Podcasts";
 import ApiIcon from "@mui/icons-material/Api";
+import PodcastsIcon from "@mui/icons-material/Podcasts";
 
 const Podcast = dynamic(() => import("@views/Podcast/Podcast"), {
 	loading: () => <PageLoad />,

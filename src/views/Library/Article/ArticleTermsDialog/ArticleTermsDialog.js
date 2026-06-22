@@ -10,12 +10,12 @@ import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "@util/domain/translations";
+import Tooltip from "@widgets/Tooltip";
 import React, { useMemo, useState } from "react";
-import styles from "./ArticleTermsDialog.module.css";
 import { getStyleInfo, PHASE_COLORS } from "../GlossaryUtils";
+import styles from "./ArticleTermsDialog.module.css";
 
 export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 	const translations = useTranslations();
@@ -95,17 +95,17 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 	};
 
 	return (
-        (<Dialog
+		<Dialog
 			open={open}
 			onClose={onClose}
 			maxWidth="sm"
 			fullWidth
 			scroll="paper"
 			slotProps={{
-                paper: { style: { height: "80vh" } }
-            }}
+				paper: { style: { height: "80vh" } },
+			}}
 		>
-            <DialogTitle disableTypography className={styles.titleContainer}>
+			<DialogTitle disableTypography className={styles.titleContainer}>
 				<Typography variant="h6">
 					{translations.ARTICLE_TERMS} ({filteredTerms.length})
 				</Typography>
@@ -132,7 +132,7 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 					</div>
 				</div>
 			</DialogTitle>
-            <div className={styles.dialogBody}>
+			<div className={styles.dialogBody}>
 				{uniqueLetters.length > 0 && (
 					<div className={styles.sidebar}>
 						{uniqueLetters.map((letter) => (
@@ -275,9 +275,9 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 					</List>
 				</DialogContent>
 			</div>
-            <DialogActions>
+			<DialogActions>
 				<Button onClick={onClose}>{translations.CLOSE}</Button>
 			</DialogActions>
-        </Dialog>)
-    );
+		</Dialog>
+	);
 }

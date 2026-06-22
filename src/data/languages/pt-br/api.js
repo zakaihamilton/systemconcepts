@@ -25,7 +25,8 @@ export default [
 	},
 	{
 		id: "API_FEED_DESCRIPTION",
-		value: "Recupere todas as sessões, metadados, tags, resumos e URLs de mídia/transcrição em um formato JSON limpo.",
+		value:
+			"Recupere todas as sessões, metadados, tags, resumos e URLs de mídia/transcrição em um formato JSON limpo.",
 	},
 	{
 		id: "API_DOCUMENTATION",
@@ -33,11 +34,13 @@ export default [
 	},
 	{
 		id: "API_INSTRUCTIONS",
-		value: "Use o seguinte endpoint pessoal para integrar dados de sessão em seus serviços externos, scripts ou plataformas. Esta API é protegida com seu token privado e limitada a 60 solicitações por minuto.",
+		value:
+			"Use o seguinte endpoint pessoal para integrar dados de sessão em seus serviços externos, scripts ou plataformas. Esta API é protegida com seu token privado e limitada a 60 solicitações por minuto.",
 	},
 	{
 		id: "API_ACCESS_DENIED_DESC",
-		value: "Os recursos da API JSON estão disponíveis apenas para usuários registrados. Contas de visitantes não têm acesso à API.",
+		value:
+			"Os recursos da API JSON estão disponíveis apenas para usuários registrados. Contas de visitantes não têm acesso à API.",
 	},
 	{
 		id: "API_SESSIONS",

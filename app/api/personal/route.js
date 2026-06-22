@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { handleRequest } from "@util/storage/mongo";
@@ -31,7 +32,10 @@ async function handlePersonal(request) {
 						const query = JSON.parse(decodeURIComponent(queryHeader));
 						path = query.folder || query.id || "";
 					} catch (e) {
-						console.error("[Personal API] Failed to parse query header:", e);
+						structuredLogger.error(
+							"[Personal API] Failed to parse query header:",
+							e,
+						);
 					}
 				}
 			}
@@ -52,7 +56,7 @@ async function handlePersonal(request) {
 		});
 		return NextResponse.json(result);
 	} catch (err) {
-		console.error("personal error: ", err);
+		structuredLogger.error("personal error: ", err);
 		return NextResponse.json(
 			{ err: getSafeError(err) },
 			{ status: getAuthErrorStatus(err) },

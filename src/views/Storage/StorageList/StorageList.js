@@ -9,10 +9,10 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { styled } from "@mui/material/styles";
-import Tooltip from "@widgets/Tooltip";
-import { useListing } from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
+import { useListing } from "@util/storage/storage";
 import Progress from "@widgets/Progress";
+import Tooltip from "@widgets/Tooltip";
 import { Fragment } from "react";
 
 const PREFIX = "StorageList";

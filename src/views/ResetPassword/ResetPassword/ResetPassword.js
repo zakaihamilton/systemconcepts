@@ -10,6 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import { fetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Input from "@widgets/Input";
@@ -79,7 +80,7 @@ export default function ResetPassword({ path = "" }) {
 			})
 				.then(({ err }) => {
 					if (err) {
-						console.error(err);
+						structuredLogger.error(err);
 						throw err;
 					}
 					if (hasCode) {

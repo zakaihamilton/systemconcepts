@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import {
@@ -46,7 +47,7 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH, config = {}) {
 		addSyncLog(`✓ Found ${files.length} local file(s) in ${duration}s`, "info");
 		return files;
 	} catch (err) {
-		console.error("[Sync] Step 1 error:", err);
+		structuredLogger.error("[Sync] Step 1 error:", err);
 		throw err;
 	}
 }

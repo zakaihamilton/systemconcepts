@@ -141,7 +141,8 @@ export default [
 	},
 	{
 		id: "FULL_SYNC_MESSAGE",
-		value: "Do you want to perform a full synchronization? This will re-download all session data from the server.",
+		value:
+			"Do you want to perform a full synchronization? This will re-download all session data from the server.",
 	},
 	{
 		id: "CLEAR_STORAGE",
@@ -153,7 +154,8 @@ export default [
 	},
 	{
 		id: "CONFIRM_CLEAR_STORAGE",
-		value: "Are you sure you want to clear all storage? This will delete all local data and reload the page.",
+		value:
+			"Are you sure you want to clear all storage? This will delete all local data and reload the page.",
 	},
 	{
 		id: "VERY_SMALL",

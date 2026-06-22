@@ -1,6 +1,6 @@
 import { render, waitFor } from "@testing-library/react";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { ResearchStore } from "../../ResearchStore/ResearchStore";
 import ResearchIndexer from "./index.js";
 

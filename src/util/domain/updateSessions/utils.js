@@ -2,17 +2,18 @@ import { writeCompressedFile } from "@sync/bundle";
 import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "@sync/constants";
 import { getFileInfo } from "@sync/hash";
 import { updateManifestEntry } from "@sync/manifest";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 
 export async function getListing(path) {
-	console.log(`[getListing] Requesting listing for: ${path}`);
+	structuredLogger.debug(`[getListing] Requesting listing for: ${path}`);
 	let listing = await storage.getListing(path);
-	console.log(
+	structuredLogger.debug(
 		`[getListing] Received listing with ${listing?.length || 0} items for: ${path}`,
 	);
 	if (!listing) {
-		console.warn(`[getListing] No listing returned for: ${path}`);
+		structuredLogger.warn(`[getListing] No listing returned for: ${path}`);
 		return [];
 	}
 	return listing;
@@ -94,12 +95,18 @@ export async function updateYearSync(groupName, year, sessions) {
 			};
 			await updateManifestEntry(manifestPath, entry);
 		} catch (err) {
-			console.warn(`[Sync] Failed to update manifest for ${localPath}`, err);
+			structuredLogger.warn(
+				`[Sync] Failed to update manifest for ${localPath}`,
+				err,
+			);
 		}
 
 		return { counter: data.counter, newCount, newSessions };
 	} catch (err) {
-		console.error(`[Sync] Error updating year sync ${groupName}/${year}:`, err);
+		structuredLogger.error(
+			`[Sync] Error updating year sync ${groupName}/${year}:`,
+			err,
+		);
 		return { counter: 0, newCount: 0, newSessions: [] };
 	}
 }
@@ -118,7 +125,10 @@ export async function updateBundleFile(newSessions) {
 			}
 		}
 	} catch (err) {
-		console.error("[Sync] Failed to read existing bundle for update", err);
+		structuredLogger.error(
+			"[Sync] Failed to read existing bundle for update",
+			err,
+		);
 		throw err;
 	}
 
@@ -151,10 +161,13 @@ export async function updateBundleFile(newSessions) {
 		};
 		await updateManifestEntry(manifestPath, entry);
 	} catch (err) {
-		console.warn(`[Sync] Failed to update manifest for ${bundlePath}`, err);
+		structuredLogger.warn(
+			`[Sync] Failed to update manifest for ${bundlePath}`,
+			err,
+		);
 	}
 
-	console.log(
+	structuredLogger.debug(
 		`[Sync] Updated bundle.json with ${newSessions.length} new sessions. Total: ${allSessions.length}`,
 	);
 }

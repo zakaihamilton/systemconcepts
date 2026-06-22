@@ -1,4 +1,4 @@
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { createRef } from "react";
 import FixedSizeGrid from "./FixedSizeGrid.js";
 
@@ -30,7 +30,7 @@ describe("FixedSizeGrid Component", () => {
 				onScroll={onScroll}
 			>
 				{Cell}
-			</FixedSizeGrid>
+			</FixedSizeGrid>,
 		);
 
 		expect(getByTestId("cell-0-0")).toBeInTheDocument();
@@ -53,11 +53,13 @@ describe("FixedSizeGrid Component", () => {
 				onScroll={onScroll}
 			>
 				{Cell}
-			</FixedSizeGrid>
+			</FixedSizeGrid>,
 		);
 
 		const scrollContainer = container.firstChild;
-		fireEvent.scroll(scrollContainer, { target: { scrollTop: 50, scrollLeft: 50 } });
+		fireEvent.scroll(scrollContainer, {
+			target: { scrollTop: 50, scrollLeft: 50 },
+		});
 
 		expect(onScroll).toHaveBeenCalledWith({
 			scrollTop: 50,
@@ -80,7 +82,7 @@ describe("FixedSizeGrid Component", () => {
 				itemData={itemData}
 			>
 				{Cell}
-			</FixedSizeGrid>
+			</FixedSizeGrid>,
 		);
 
 		expect(ref.current).toBeDefined();

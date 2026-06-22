@@ -1,14 +1,14 @@
+import api from "./api";
+import articles from "./articles";
+import auth from "./auth";
 import common from "./common";
+import content from "./content";
+import media from "./media";
+import search from "./search";
+import sessions from "./sessions";
 import settings from "./settings";
 import storage from "./storage";
-import api from "./api";
-import auth from "./auth";
-import content from "./content";
 import sync from "./sync";
-import sessions from "./sessions";
-import media from "./media";
-import articles from "./articles";
-import search from "./search";
 
 export default {
 	id: "pt-br",

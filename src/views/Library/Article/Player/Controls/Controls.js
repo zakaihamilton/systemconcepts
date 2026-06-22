@@ -11,8 +11,8 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@widgets/Tooltip";
 import styles from "./Controls.module.css";
 
 export default function Controls({

@@ -1,9 +1,10 @@
 import { useSync } from "@sync/sync";
-import { exportData } from "@util/storage/importExport";
-import { isCompressedJSONFile } from "@util/data/path";
-import storage from "@util/storage/storage";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useStoreState } from "@util/browser/store";
+import { isCompressedJSONFile } from "@util/data/path";
 import { useParentPath } from "@util/domain/views";
+import { exportData } from "@util/storage/importExport";
+import storage from "@util/storage/storage";
 import Download from "@widgets/Download";
 import EditorWidget from "@widgets/Editor";
 import Progress from "@widgets/Progress";
@@ -46,7 +47,7 @@ export default function Editor({ name, path }) {
 					const decompressed = pako.ungzip(content, { to: "string" });
 					content = decompressed;
 				} catch (err) {
-					console.error("Failed to decompress .json.gz file:", err);
+					structuredLogger.error("Failed to decompress .json.gz file:", err);
 					content = content || "";
 				}
 			}
@@ -86,7 +87,7 @@ export default function Editor({ name, path }) {
 				}
 				contentToSave = btoa(binary);
 			} catch (err) {
-				console.error("Failed to compress .json.gz file:", err);
+				structuredLogger.error("Failed to compress .json.gz file:", err);
 				// Fall back to saving uncompressed
 			}
 		}

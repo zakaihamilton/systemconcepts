@@ -1,2 +1,2 @@
-export { default } from "./DayHeader";
 export * from "./DayHeader";
+export { default } from "./DayHeader";

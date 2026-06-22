@@ -1,30 +1,75 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# System Concepts
 
-## Getting Started
+System Concepts is a Next.js application for browsing, researching, playing, editing, and synchronizing a multilingual library of articles and recorded sessions. It is installable as a PWA and can continue serving cached content while offline.
 
-First, run the development server:
+## Requirements
+
+- Node.js 24 (see `.nvmrc`)
+- Yarn 1.x via Corepack
 
 ```bash
-npm run dev
-# or
+corepack enable
+yarn install --frozen-lockfile
+cp .env.example .env.local
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The public shell and local/offline features do not require production credentials.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Architecture
 
-## Learn More
+- `app/` contains the Next.js App Router entrypoints, API routes, and offline fallback.
+- `src/components/` contains shared application and widget components.
+- `src/views/` contains route-level product views.
+- `src/storage/` contains concrete local, AWS, and Wasabi storage adapters.
+- `src/sync/` contains manifest-based synchronization and migration orchestration.
+- `src/util/` contains browser, API, domain, data, authentication, and storage utilities.
+- `src/data/languages/` contains per-language copy and content metadata.
 
-To learn more about Next.js, take a look at the following resources:
+Client navigation uses hash routes for compatibility with installed/offline deployments. Do not change route names, storage paths, or manifest shapes without a migration plan.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Copy `.env.example` to `.env.local` and fill only the services needed for the workflow you are testing.
 
-## Deploy on Vercel
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL`, `SITE_URL` | Absolute application URL and internal API verification | Production/RSS |
+| `NEXT_PUBLIC_LOG_LEVEL`, `LOG_LEVEL` | Browser and server log thresholds | No |
+| `MONGO_URL`, `MONGO_DB` | Accounts and MongoDB-backed personal data | Authentication/personal data |
+| `AWS_ENDPOINT`, `AWS_BUCKET`, `AWS_ID`, `AWS_SECRET` | S3-compatible storage | AWS storage |
+| `WASABI_URL` | Wasabi media/proxy URL | Wasabi storage |
+| `GMAIL_USER`, `GMAIL_PASSWORD`, `GMAIL_FROM` | Password-reset email | Email delivery |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Never commit real credentials. Logging redacts common credential and token fields, but secrets should still not be passed as diagnostic context.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Storage and synchronization
+
+The storage facade dispatches operations to enabled adapters while preserving device-prefixed paths such as `local/...`, `aws/...`, and `wasabi/...`. Synchronization compares local and remote manifests, downloads remote changes, uploads local changes, resolves supported conflicts, and persists manifests and caches locally.
+
+AWS, Wasabi, MongoDB, and email integrations are optional in local development. Features backed by an unconfigured service will be unavailable, while public and cached local content can still run.
+
+## PWA and offline behavior
+
+`next-pwa` builds the service worker during production builds. Runtime caching rules live in `runtimeCaching.js`, and `/~offline` is the document fallback. Service workers are disabled during `yarn dev`; use a production build to test offline behavior.
+
+```bash
+yarn build
+yarn start
+```
+
+## Verification
+
+```bash
+yarn lint
+yarn typecheck
+yarn test --runInBand
+yarn build
+yarn test:e2e
+```
+
+`yarn verify` runs the complete sequence. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
+
+## Deployment
+
+Deploy the production build to a Node-compatible platform such as Vercel. Configure only the environment variables required by enabled services. CI uses Node from `.nvmrc`, installs from `yarn.lock`, and runs lint, type checking, Jest, the production build, and deterministic Chromium smoke tests.

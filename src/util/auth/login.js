@@ -1,4 +1,5 @@
 import resetPasswordTemplate from "@data/resetPasswordTemplate";
+import { logger as structuredLogger } from "@util/api/logger";
 import { findRecord, insertRecord, replaceRecord } from "@util/storage/mongo";
 import { compare, hash } from "bcryptjs";
 import nodemailer from "nodemailer";
@@ -14,26 +15,26 @@ const resetMailTransport = nodemailer.createTransport({
 
 export async function login({ id, password, api, path }) {
 	if (!id) {
-		console.error("empty user id");
+		structuredLogger.error("empty user id");
 		throw "USER_NOT_FOUND";
 	}
-	console.log("user:", id, "api:", api, "path", path);
+	structuredLogger.debug("user:", id, "api:", api, "path", path);
 	id = id.toLowerCase();
 	let user = null;
 	try {
 		user = await findRecord({ collectionName: "users", query: { id } });
 	} catch (err) {
-		console.error("Error finding record for user", id, err);
+		structuredLogger.error("Error finding record for user", id, err);
 		throw "USER_NOT_FOUND";
 	}
 	if (!user) {
-		console.error("cannot find user for: ", id);
+		structuredLogger.error("cannot find user for: ", id);
 		throw "USER_NOT_FOUND";
 	}
 	if (password) {
 		const result = await compare(password, user.hash);
 		if (!result) {
-			console.error("wrong password for user", id);
+			structuredLogger.error("wrong password for user", id);
 			throw "WRONG_PASSWORD";
 		}
 	} else throw "PASSWORD_REQUIRED";
@@ -74,7 +75,7 @@ export async function register({
 	try {
 		result = await hash(password, salt);
 	} catch (err) {
-		console.error(err);
+		structuredLogger.error(err);
 		throw err;
 	}
 	const dateObj = new Date();
@@ -110,7 +111,7 @@ export async function changePassword({
 	try {
 		result = await hash(newPassword, salt);
 	} catch (err) {
-		console.error(err);
+		structuredLogger.error(err);
 		throw err;
 	}
 	await replaceRecord({
@@ -130,7 +131,7 @@ export async function resetPassword({ id, code, newPassword, salt = 10 }) {
 	try {
 		user = await findRecord({ collectionName: "users", query: { id } });
 	} catch (err) {
-		console.error("Error finding record for user", id, err);
+		structuredLogger.error("Error finding record for user", id, err);
 		throw "USER_NOT_FOUND";
 	}
 
@@ -140,18 +141,18 @@ export async function resetPassword({ id, code, newPassword, salt = 10 }) {
 
 	// Verify reset token
 	if (!user.resetToken) {
-		console.error("No reset token for user", id);
+		structuredLogger.error("No reset token for user", id);
 		throw "NO_RESET_TOKEN";
 	}
 
 	const match = await compare(code, user.resetToken);
 	if (!match) {
-		console.error("Invalid reset token for user", id);
+		structuredLogger.error("Invalid reset token for user", id);
 		throw "INVALID_TOKEN";
 	}
 
 	if (!user.resetTokenExpiry || Date.now() > user.resetTokenExpiry) {
-		console.error("Expired reset token for user", id);
+		structuredLogger.error("Expired reset token for user", id);
 		throw "TOKEN_EXPIRED";
 	}
 
@@ -159,7 +160,7 @@ export async function resetPassword({ id, code, newPassword, salt = 10 }) {
 	try {
 		result = await hash(newPassword, salt);
 	} catch (err) {
-		console.error(err);
+		structuredLogger.error(err);
 		throw err;
 	}
 
@@ -182,7 +183,7 @@ export async function sendResetEmail({ id }) {
 	try {
 		user = await findRecord({ collectionName: "users", query: { id } });
 	} catch (err) {
-		console.error(err);
+		structuredLogger.error(err);
 		throw "USER_NOT_FOUND";
 	}
 	if (!user) {
@@ -216,7 +217,7 @@ export async function sendResetEmail({ id }) {
 	);
 
 	if (!resetMailTransport) {
-		console.error("Email service not configured properly");
+		structuredLogger.error("Email service not configured properly");
 		throw "EMAIL_SERVICE_ERROR";
 	}
 

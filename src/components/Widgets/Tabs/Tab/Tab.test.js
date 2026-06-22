@@ -1,6 +1,6 @@
+import Tabs from "@mui/material/Tabs";
 import { render } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
-import Tabs from "@mui/material/Tabs";
 import TabWidget from "./Tab.js";
 
 jest.mock("@util/browser/styles");
@@ -15,8 +15,12 @@ describe("TabWidget Component", () => {
 
 		const { getByText } = render(
 			<Tabs value="tab">
-				<TabWidget icon={<span data-testid="icon" />} label="My Tab" value="tab" />
-			</Tabs>
+				<TabWidget
+					icon={<span data-testid="icon" />}
+					label="My Tab"
+					value="tab"
+				/>
+			</Tabs>,
 		);
 
 		const labelEl = getByText("My Tab");
@@ -29,8 +33,12 @@ describe("TabWidget Component", () => {
 
 		const { getByText } = render(
 			<Tabs value="tab">
-				<TabWidget icon={<span data-testid="icon" />} label="My Tab" value="tab" />
-			</Tabs>
+				<TabWidget
+					icon={<span data-testid="icon" />}
+					label="My Tab"
+					value="tab"
+				/>
+			</Tabs>,
 		);
 
 		const labelEl = getByText("My Tab");

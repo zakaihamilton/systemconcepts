@@ -1,2 +1,2 @@
-export { default } from "./StorageList";
 export * from "./StorageList";
+export { default } from "./StorageList";

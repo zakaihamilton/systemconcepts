@@ -18,7 +18,20 @@ jest.mock("@util/domain/views");
 jest.mock(
 	"@widgets/Input",
 	() =>
-		({ state, label, onValidate, validate, background, select, fullWidth, icon, tooltip, mapping, helperText, ...props }) => {
+		({
+			state,
+			label,
+			onValidate,
+			validate,
+			background,
+			select,
+			fullWidth,
+			icon,
+			tooltip,
+			mapping,
+			helperText,
+			...props
+		}) => {
 			const [value, setValue] = state;
 			return (
 				<input

@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { isBinaryFile, makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
@@ -37,7 +38,10 @@ async function uploadNewFile(localFile, createdFolders, localPath, remotePath) {
 		// Hash verification is already done locally, skip re-download
 		return localFile;
 	} catch (err) {
-		console.error(`[Sync] Failed to upload new file ${fileBasename}:`, err);
+		structuredLogger.error(
+			`[Sync] Failed to upload new file ${fileBasename}:`,
+			err,
+		);
 		addSyncLog(`Failed to upload new: ${fileBasename}`, "error");
 		return null;
 	}
@@ -144,7 +148,7 @@ export async function uploadNewFiles(
 			}
 			return { manifest: remoteManifest, hasChanges: false };
 		}
-		console.error("[Sync] Upload new files failed:", err);
+		structuredLogger.error("[Sync] Upload new files failed:", err);
 		addSyncLog(`Upload new files failed: ${err.message}`, "error");
 		throw err;
 	}

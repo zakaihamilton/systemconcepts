@@ -1,0 +1,47 @@
+{
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": false,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"incremental": true,
+		"ignoreDeprecations": "6.0",
+		"isolatedModules": true,
+		"jsx": "react-jsx",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"noEmit": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2022",
+		"baseUrl": ".",
+		"paths": {
+			"@components/*": ["src/components/*"],
+			"@widgets/*": ["src/components/Widgets/*"],
+			"@icons/*": ["src/components/Icons/*"],
+			"@util/*": ["src/util/*"],
+			"@data/*": ["src/data/*"],
+			"@views/*": ["src/views/*"],
+			"@storage/*": ["src/storage/*"],
+			"@diagrams/*": ["src/diagrams/*"],
+			"@sync/*": ["src/sync/*"]
+		}
+	},
+	"include": [
+		"next-env.d.ts",
+		".next/types/**/*.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.js",
+		"**/*.jsx",
+		".next/dev/types/**/*.ts"
+	],
+	"exclude": ["node_modules", "public/sw.js", "public/workbox-*.js"]
+}

@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { addSyncLog } from "../logs";
@@ -39,7 +40,10 @@ export async function deleteRemoteFiles(localManifest, remotePath) {
 			addSyncLog(`Deleted from remote: ${file.path}`, "info");
 			deletedPaths.push(file.path);
 		} catch (err) {
-			console.error(`[Sync] Failed to delete remote file ${file.path}:`, err);
+			structuredLogger.error(
+				`[Sync] Failed to delete remote file ${file.path}:`,
+				err,
+			);
 			addSyncLog(`Failed to delete from remote: ${file.path}`, "error");
 		}
 	}

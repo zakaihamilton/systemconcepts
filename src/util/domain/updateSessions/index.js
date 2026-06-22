@@ -1,7 +1,8 @@
 import { UpdateSessionsStore } from "@sync/syncState";
+import { logger as structuredLogger } from "@util/api/logger";
+import pLimit from "@util/data/p-limit";
 import { makePath } from "@util/data/path";
 import { useCallback, useMemo } from "react";
-import pLimit from "@util/data/p-limit";
 import { updateGroupProcess } from "./updateGroup";
 import { getListing, updateBundleFile } from "./utils";
 
@@ -25,7 +26,7 @@ export function useUpdateSessions(groups) {
 				try {
 					items = await getListing(prefix);
 				} catch (err) {
-					console.error(err);
+					structuredLogger.error(err);
 				}
 				if (!items) {
 					return;
@@ -76,7 +77,7 @@ export function useUpdateSessions(groups) {
 				try {
 					items = await getListing(prefix);
 				} catch (err) {
-					console.error(err);
+					structuredLogger.error(err);
 				}
 				if (!items) {
 					return;
@@ -127,7 +128,7 @@ export function useUpdateSessions(groups) {
 				try {
 					items = await getListing(prefix);
 				} catch (err) {
-					console.error(err);
+					structuredLogger.error(err);
 				}
 				if (!items) {
 					return;

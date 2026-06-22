@@ -1,3 +1,5 @@
+import { logger as structuredLogger } from "@util/api/logger";
+
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
 
 import { isBinaryFile, makePath } from "@util/data/path";
@@ -48,7 +50,7 @@ async function getListing(path, options = {}) {
 			item.name = name;
 			listing.push(item);
 		} catch (err) {
-			console.error(err);
+			structuredLogger.error(err);
 		}
 	}
 	return listing;
@@ -118,7 +120,7 @@ async function deleteFolder(root) {
 					}
 				} catch (err) {
 					if (err.code !== "ENOENT") {
-						console.error(err);
+						structuredLogger.error(err);
 					}
 				}
 			}
@@ -254,12 +256,12 @@ export default {
 			navigator.storage.estimate
 		) {
 			const estimate = await navigator.storage.estimate();
-			console.log(
+			structuredLogger.debug(
 				`[Local Storage] getSize - estimate usage: ${estimate.usage}, quota: ${estimate.quota}`,
 			);
 			return estimate.usage;
 		}
-		console.log(
+		structuredLogger.debug(
 			`[Local Storage] getSize - navigator.storage.estimate not available`,
 		);
 		return 0;

@@ -14,7 +14,12 @@ describe("Loading Component", () => {
 			.spyOn(console, "error")
 			.mockImplementation(() => {});
 		render(<Loading error="Test Error" />);
-		expect(consoleSpy).toHaveBeenCalledWith("Test Error");
+		expect(consoleSpy).toHaveBeenCalledWith(
+			expect.objectContaining({
+				level: "error",
+				message: "Test Error",
+			}),
+		);
 		consoleSpy.mockRestore();
 	});
 });

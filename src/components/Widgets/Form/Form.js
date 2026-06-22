@@ -1,6 +1,6 @@
 import { Children, cloneElement, useCallback } from "react";
-import styles from "./Form.module.css";
 import Progress from "../Progress";
+import styles from "./Form.module.css";
 
 function FormItem({ child, record, setRecord, validate }) {
 	const { props } = child;

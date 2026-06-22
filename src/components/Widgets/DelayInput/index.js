@@ -1,2 +1,2 @@
-export { default } from "./DelayInput";
 export * from "./DelayInput";
+export { default } from "./DelayInput";

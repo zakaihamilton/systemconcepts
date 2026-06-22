@@ -5,14 +5,15 @@ import DownloadIcon from "@mui/icons-material/Download";
 import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
-import { getContrastColor } from "@util/data/color";
 import { useFetch } from "@util/api/fetch";
-import { useDateFormatter } from "@util/data/locale";
-import { SessionsStore, useSessions } from "@util/domain/sessions";
-import { getComparator, stableSort } from "@util/data/sort";
-import { copyToClipboard, formatDuration } from "@util/data/string";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
+import { getContrastColor } from "@util/data/color";
+import { useDateFormatter } from "@util/data/locale";
+import { getComparator, stableSort } from "@util/data/sort";
+import { copyToClipboard, formatDuration } from "@util/data/string";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, replacePath } from "@util/domain/views";
 import Group from "@widgets/Group";
@@ -114,7 +115,7 @@ export default function SessionPage({ group, year, date, name }) {
 	try {
 		dateWidget = date && dateFormatter.format(new Date(date));
 	} catch (err) {
-		console.error("err", err);
+		structuredLogger.error("err", err);
 	}
 
 	const toolbarItems = [
@@ -218,7 +219,7 @@ export default function SessionPage({ group, year, date, name }) {
 					{session.tags && session.tags.length > 0 && (
 						<div className={styles.tags}>
 							{session.tags.map((tag) => {
-								const cleanTag = tag.replace(/^['"]|['"]$/g, '');
+								const cleanTag = tag.replace(/^['"]|['"]$/g, "");
 								return (
 									<Chip
 										key={tag}

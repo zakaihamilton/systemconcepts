@@ -1,2 +1,2 @@
-export { default } from "./DayView";
 export * from "./DayView";
+export { default } from "./DayView";

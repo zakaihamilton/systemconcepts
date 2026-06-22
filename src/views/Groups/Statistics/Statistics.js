@@ -10,9 +10,10 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
-import Tooltip from "@widgets/Tooltip";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import Message from "@widgets/Message";
+import Tooltip from "@widgets/Tooltip";
 import { useEffect, useState } from "react";
 
 export default function Statistics({ group, open, onClose, sessions }) {
@@ -57,7 +58,7 @@ export default function Statistics({ group, open, onClose, sessions }) {
 					overviews,
 				});
 			} catch (err) {
-				console.error(err);
+				structuredLogger.error(err);
 			} finally {
 				setLoading(false);
 			}

@@ -15,6 +15,7 @@ const version = require("./package.json").version;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
+	outputFileTracingRoot: __dirname,
 	env: {
 		NEXT_PUBLIC_VERSION: version,
 	},

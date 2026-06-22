@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { LIBRARY_COUNTER_FILE, LIBRARY_LOCAL_PATH } from "./constants";
@@ -19,7 +20,7 @@ export async function readLibraryCounter() {
 		const counter = Number.parseInt(parsed?.counter, 10);
 		return Number.isFinite(counter) ? counter : 0;
 	} catch (err) {
-		console.warn("[Sync] Failed to read library counter:", err);
+		structuredLogger.warn("[Sync] Failed to read library counter:", err);
 		return 0;
 	}
 }

@@ -4,6 +4,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
+import { useDeviceType } from "@util/browser/styles";
 import {
 	addDate,
 	getMonthNames,
@@ -16,7 +17,6 @@ import {
 } from "@util/data/date";
 import { useDirection } from "@util/data/direction";
 import { useDateFormatter } from "@util/data/locale";
-import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import Input from "@widgets/Input";
 import clsx from "clsx";

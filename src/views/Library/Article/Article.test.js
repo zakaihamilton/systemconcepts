@@ -44,19 +44,11 @@ jest.mock("@components/Toolbar", () => ({
 }));
 
 jest.mock("./Header", () => () => <div data-testid="article-header" />);
-jest.mock("./PageIndicator", () => () => (
-	<div data-testid="page-indicator" />
-));
-jest.mock("./ScrollToTop", () => () => (
-	<div data-testid="scroll-to-top" />
-));
-jest.mock("./Content", () => () => (
-	<div data-testid="article-content" />
-));
+jest.mock("./PageIndicator", () => () => <div data-testid="page-indicator" />);
+jest.mock("./ScrollToTop", () => () => <div data-testid="scroll-to-top" />);
+jest.mock("./Content", () => () => <div data-testid="article-content" />);
 jest.mock("./Player", () => () => <div data-testid="article-player" />);
-jest.mock("./JumpDialog", () => () => (
-	<div data-testid="jump-dialog" />
-));
+jest.mock("./JumpDialog", () => () => <div data-testid="jump-dialog" />);
 jest.mock("./ArticleTermsDialog", () => () => (
 	<div data-testid="terms-dialog" />
 ));

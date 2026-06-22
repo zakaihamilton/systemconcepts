@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { useFetch } from "@util/api/fetch";
-import { useSessions } from "@util/domain/sessions";
 import { useDeviceType } from "@util/browser/styles";
+import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import SessionPage from "./index.js";
 

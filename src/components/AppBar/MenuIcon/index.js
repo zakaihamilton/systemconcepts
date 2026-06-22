@@ -1,2 +1,2 @@
-export { default } from "./MenuIcon";
 export * from "./MenuIcon";
+export { default } from "./MenuIcon";

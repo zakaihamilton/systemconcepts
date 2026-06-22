@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { readCompressedFile, writeCompressedFile } from "../bundle";
@@ -28,9 +29,11 @@ function normalizeManifest(manifest) {
 	for (const entry of manifest) {
 		if (!entry.path || entry.path === "loadedFromManifest") {
 			if (entry.path === "loadedFromManifest") {
-				console.log("[Sync] Filtering internal flag from manifest entries");
+				structuredLogger.debug(
+					"[Sync] Filtering internal flag from manifest entries",
+				);
 			} else {
-				console.warn(
+				structuredLogger.warn(
 					"[Sync] Skipping invalid manifest entry (missing path):",
 					JSON.stringify(entry),
 				);
@@ -79,14 +82,14 @@ export async function syncManifest(
 			const rawManifest =
 				(await readCompressedFile(remoteManifestPathGz)) || [];
 			if (rawManifest && rawManifest.length > 0) {
-				// console.log(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
+				// structuredLogger.debug(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
 				remoteManifest = normalizeManifest(rawManifest);
 				const deduped = rawManifest.length - remoteManifest.length;
-				console.log(
+				structuredLogger.debug(
 					`[Sync] Found ${remoteManifestPathGz}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ""}`,
 				);
 				if (deduped === rawManifest.length && rawManifest.length > 0) {
-					console.error(
+					structuredLogger.error(
 						"[Sync] CRITICAL: All items removed during normalization!",
 					);
 				}
@@ -96,23 +99,25 @@ export async function syncManifest(
 					if (!isLocked) {
 						try {
 							await writeCompressedFile(remoteManifestPathGz, remoteManifest);
-							console.log(
+							structuredLogger.debug(
 								`[Sync] Saved cleaned manifest to ${remoteManifestPathGz}`,
 							);
 						} catch (e) {
-							console.warn(
+							structuredLogger.warn(
 								`[Sync] Failed to save cleaned manifest: ${e.message}`,
 							);
 						}
 					} else {
-						console.log(`[Sync] Skipping manifest cleanup save (locked)`);
+						structuredLogger.debug(
+							`[Sync] Skipping manifest cleanup save (locked)`,
+						);
 					}
 				}
 
 				loadedFromManifest = true;
 			}
 		} catch (err) {
-			console.warn(
+			structuredLogger.warn(
 				`[Sync] Failed to read compressed manifest ${remoteManifestPathGz}:`,
 				err.message || err,
 			);
@@ -127,12 +132,12 @@ export async function syncManifest(
 					const rawManifest = JSON.parse(content);
 					remoteManifest = normalizeManifest(rawManifest);
 					const deduped = rawManifest.length - remoteManifest.length;
-					console.log(
+					structuredLogger.debug(
 						`[Sync] Found ${remoteManifestPathJson}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ""}`,
 					);
 					loadedFromManifest = true;
 				} catch (e) {
-					console.error("[Sync] Error parsing remote manifest", e);
+					structuredLogger.error("[Sync] Error parsing remote manifest", e);
 				}
 			}
 		}
@@ -140,20 +145,20 @@ export async function syncManifest(
 		// 3. Fallback: Generate from listing if still empty
 		if (remoteManifest.length === 0) {
 			if (skipScan) {
-				console.log(
+				structuredLogger.debug(
 					`[Sync] Manifest empty or missing, skipping scan for ${remotePath} (skipScan: true)`,
 				);
 			} else {
-				console.log(
+				structuredLogger.debug(
 					`[Sync] Manifest empty or missing, checking ${remotePath} for files...`,
 				);
 				const listing = await storage.getRecursiveList(remotePath);
-				console.log(
+				structuredLogger.debug(
 					`[Sync] Recursive listing found ${listing.length} items in ${remotePath}`,
 				);
 
 				if (listing.length > 0) {
-					console.log(
+					structuredLogger.debug(
 						"[Sync] Listing Sample:",
 						JSON.stringify(listing.slice(0, 5)),
 					);
@@ -170,7 +175,7 @@ export async function syncManifest(
 						const isDSStore = item.name.endsWith(".DS_Store");
 						const include = !isDir && !isManifest && !isDSStore;
 						if (!include && !isManifest && !isDSStore) {
-							console.log(
+							structuredLogger.debug(
 								`[Sync] Filtering out: ${item.name} (isDir=${isDir})`,
 							);
 						}
@@ -195,7 +200,7 @@ export async function syncManifest(
 							version: Math.max(2, item.mtimeMs || 1).toString(),
 						};
 					});
-				console.log(
+				structuredLogger.debug(
 					`[Sync] After filtering, remoteManifest has ${remoteManifest.length} files`,
 				);
 			}
@@ -221,7 +226,7 @@ export async function syncManifest(
 						"info",
 					);
 				} catch (e) {
-					console.warn(
+					structuredLogger.warn(
 						`[Sync] Failed to save generated manifest: ${e.message}`,
 					);
 				}
@@ -232,7 +237,7 @@ export async function syncManifest(
 
 		return remoteManifest;
 	} catch (err) {
-		console.error("[Sync] Step 3 error:", err);
+		structuredLogger.error("[Sync] Step 3 error:", err);
 		throw err;
 	}
 }

@@ -1,11 +1,12 @@
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { logger as structuredLogger } from "@util/api/logger";
+import { useLocalStorage } from "@util/browser/store";
 import pLimit from "@util/data/p-limit";
 import { makePath } from "@util/data/path";
 import { encodeBinaryIndex } from "@util/data/searchIndexBinary";
-import storage from "@util/storage/storage";
-import { useLocalStorage } from "@util/browser/store";
 import { normalizeContent } from "@util/data/string";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
 import { useCallback, useEffect, useRef } from "react";
 import { ResearchStore } from "../../ResearchStore/ResearchStore";
 
@@ -289,7 +290,7 @@ export default function ResearchIndexer() {
 					}
 				}
 			} catch (err) {
-				console.error("Failed to load sessions for indexing:", err);
+				structuredLogger.error("Failed to load sessions for indexing:", err);
 			}
 
 			const newIndex = {
@@ -370,7 +371,7 @@ export default function ResearchIndexer() {
 						}
 					}
 				} catch (err) {
-					console.warn(`Failed to index file at ${path}:`, err);
+					structuredLogger.warn(`Failed to index file at ${path}:`, err);
 				}
 				updateProgress();
 			};
@@ -475,7 +476,7 @@ export default function ResearchIndexer() {
 				});
 			}
 		} catch (err) {
-			console.error("Indexing failed:", err);
+			structuredLogger.error("Indexing failed:", err);
 			if (isMounted.current) {
 				ResearchStore.update((s) => {
 					s.status = translations.INDEXING_FAILED;

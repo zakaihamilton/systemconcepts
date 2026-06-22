@@ -1,8 +1,10 @@
+import { logger as structuredLogger } from "@util/api/logger";
+
 const MongoClient = require("mongodb").MongoClient;
 const { lockMutex } = require("@sync/mutex");
 
-import { sanitizeQuery } from "@util/storage/mongoSanitize";
 import { getSafeError } from "@util/api/safeError";
+import { sanitizeQuery } from "@util/storage/mongoSanitize";
 
 const _clusters = [];
 const MAX_QUERY_LIMIT = 500;
@@ -18,14 +20,14 @@ export async function getCluster({ url = process.env.MONGO_URL }) {
 	try {
 		let cluster = _clusters[url];
 		if (!cluster) {
-			console.log("connecting to database");
+			structuredLogger.debug("connecting to database");
 			cluster = _clusters[url] = await MongoClient.connect(url, {
 				maxPoolSize: 10,
 			});
 			if (!cluster) {
 				throw "Cannot connect to database";
 			}
-			console.log("connected to database");
+			structuredLogger.debug("connected to database");
 		}
 		return cluster;
 	} finally {
@@ -153,7 +155,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					results.push(record);
 					bytes += recordBytes;
 				}
-				console.log(
+				structuredLogger.debug(
 					"found",
 					results.length,
 					"items for collection",
@@ -169,7 +171,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					dbName,
 					collectionName,
 				});
-				console.log(
+				structuredLogger.debug(
 					"found an item for collection",
 					collectionName,
 					"id",
@@ -190,7 +192,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					fields: parsedFields,
 					limit: parseLimit(getHeader("limit"), DEFAULT_QUERY_LIMIT),
 				});
-				console.log(
+				structuredLogger.debug(
 					"found",
 					result.length,
 					"items with prefix",
@@ -215,7 +217,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 				if (!result) {
 					result = [];
 				}
-				console.log(
+				structuredLogger.debug(
 					"found",
 					result.length,
 					"items for collection",
@@ -224,7 +226,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 				return result;
 			}
 		} catch (err) {
-			console.error("get error: ", err);
+			structuredLogger.error("get error: ", err);
 			return { err: getSafeError(err) };
 		}
 	} else if (!readOnly && (req.method === "PUT" || req.method === "DELETE")) {
@@ -241,7 +243,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 			if (records.length > MAX_BULK_RECORDS) {
 				throw "TOO_MANY_RECORDS";
 			}
-			console.log("pushing " + records.length + " records");
+			structuredLogger.debug("pushing " + records.length + " records");
 			const operations = [];
 			for (const record of records) {
 				const { id } = record;
@@ -249,7 +251,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 					continue;
 				}
 				delete record._id;
-				console.log(id);
+				structuredLogger.debug(id);
 				if (req.method === "DELETE") {
 					operations.push({ deleteOne: { filter: { id } } });
 				} else {
@@ -261,7 +263,7 @@ export async function handleRequest({ dbName, collectionName, readOnly, req }) {
 			await bulkWrite({ dbName, collectionName, operations, ordered: false });
 			return {};
 		} catch (err) {
-			console.error("put error: ", err);
+			structuredLogger.error("put error: ", err);
 			return { err: getSafeError(err) };
 		}
 	}

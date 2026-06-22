@@ -1,7 +1,7 @@
 import { useDeviceType } from "@util/browser/styles";
 import Footer from "../Footer";
-import Content from "./Content";
 import Tabs from "../Tabs";
+import Content from "./Content";
 
 export default function Page() {
 	const isPhone = useDeviceType() === "phone";

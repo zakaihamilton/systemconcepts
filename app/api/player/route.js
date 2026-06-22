@@ -1,6 +1,6 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { error, log } from "@util/api/logger";
+import { error, log, logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
@@ -48,7 +48,7 @@ async function getSessionTranscriptPath(s3Key) {
 			path: session.transcriptPath || session.subtitles?.path || null,
 		};
 	} catch (err) {
-		console.warn("[Player] Failed to load transcript metadata:", err);
+		structuredLogger.warn("[Player] Failed to load transcript metadata:", err);
 		return null;
 	}
 }

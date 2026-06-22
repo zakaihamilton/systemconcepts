@@ -1,2 +1,2 @@
-export { default } from "./FixedSizeList";
 export * from "./FixedSizeList";
+export { default } from "./FixedSizeList";

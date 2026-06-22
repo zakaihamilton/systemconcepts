@@ -2,18 +2,19 @@ import { registerToolbar } from "@components/Toolbar";
 import Box from "@mui/material/Box";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
-import { makePath } from "@util/data/path";
+import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
-import storage from "@util/storage/storage";
+import { makePath } from "@util/data/path";
 import { setPath, usePathItems } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import Cookies from "js-cookie";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Article from "../Article";
 import EditContentDialog from "../EditContentDialog";
 import EditTagsDialog from "../EditTagsDialog";
 import { LibraryTagKeys } from "../Icons";
-import styles from "./Library.module.css";
 import { LibraryStore } from "../Store";
+import styles from "./Library.module.css";
 
 const fileCache = new Map();
 
@@ -185,7 +186,7 @@ export default function Library() {
 				});
 			}
 		} catch (err) {
-			console.error("Failed to load library tags:", err);
+			structuredLogger.error("Failed to load library tags:", err);
 		}
 	}, []);
 
@@ -198,7 +199,7 @@ export default function Library() {
 				setCustomOrder(data);
 			}
 		} catch (err) {
-			console.error("Failed to load library order:", err);
+			structuredLogger.error("Failed to load library order:", err);
 		}
 	}, []);
 
@@ -244,7 +245,7 @@ export default function Library() {
 			const contentText = item ? item.text : "Content not found in file.";
 			setContent(contentText);
 		} catch (err) {
-			console.error("Failed to load content:", err);
+			structuredLogger.error("Failed to load content:", err);
 			setContent("Error loading content.");
 		} finally {
 			setLoading(false);

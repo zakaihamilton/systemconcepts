@@ -4,9 +4,10 @@ import EmailIcon from "@mui/icons-material/Email";
 import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import TodayIcon from "@mui/icons-material/Today";
 import { fetchJSON, useFetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";
-import { isRTL } from "@util/data/string";
 import { useDeviceType } from "@util/browser/styles";
+import { isRTL } from "@util/data/string";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import Row from "@widgets/Row";
@@ -168,7 +169,7 @@ export default function Users() {
 		})
 			.then(({ err }) => {
 				if (err) {
-					console.error(err);
+					structuredLogger.error(err);
 					throw err;
 				}
 				setProgress(false);
@@ -177,7 +178,7 @@ export default function Users() {
 				});
 			})
 			.catch((err) => {
-				console.error(err);
+				structuredLogger.error(err);
 				setProgress(false);
 			});
 	};

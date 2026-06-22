@@ -1,7 +1,8 @@
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { normalizeContent } from "@util/data/string";
+import storage from "@util/storage/storage";
 
 const sanitizeRelativePath = (input = "") => {
 	return String(input)
@@ -100,7 +101,7 @@ export async function loadParagraphsForFile(fileId, sessionsById) {
 		if (fileId.startsWith("session|")) {
 			const session = sessionsById?.get(fileId);
 			if (!session) {
-				console.warn(`Session not found: ${fileId}`);
+				structuredLogger.warn(`Session not found: ${fileId}`);
 				return [];
 			}
 
@@ -131,13 +132,13 @@ export async function loadParagraphsForFile(fileId, sessionsById) {
 		const tag = tags.find((t) => t._id === fileId);
 
 		if (!tag || !tag.path) {
-			console.warn(`Article tag not found or has no path: ${fileId}`);
+			structuredLogger.warn(`Article tag not found or has no path: ${fileId}`);
 			return [];
 		}
 
 		const filePath = makePath(LIBRARY_LOCAL_PATH, tag.path);
 		if (!(await storage.exists(filePath))) {
-			console.warn(`Article file not found: ${filePath}`);
+			structuredLogger.warn(`Article file not found: ${filePath}`);
 			return [];
 		}
 
@@ -161,7 +162,7 @@ export async function loadParagraphsForFile(fileId, sessionsById) {
 		paragraphCache.set(fileId, paragraphs);
 		return paragraphs;
 	} catch (err) {
-		console.error(`Failed to load paragraphs for ${fileId}:`, err);
+		structuredLogger.error(`Failed to load paragraphs for ${fileId}:`, err);
 		return [];
 	}
 }
@@ -186,7 +187,7 @@ async function loadLibraryTags() {
 			return tagsCache;
 		}
 	} catch (err) {
-		console.error("Failed to load library tags:", err);
+		structuredLogger.error("Failed to load library tags:", err);
 	}
 
 	return [];

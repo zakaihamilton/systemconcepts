@@ -1,4 +1,5 @@
 import { fetchJSON } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { aggregateSessionMetadataFromSources } from "./metadataAggregator";
 
 const SESSION_METADATA_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -14,7 +15,12 @@ export function clearSessionMetadataCache() {
 	pendingRequests.clear();
 }
 
-export function seedSessionMetadataCache(group, year, metadataFingerprint, value) {
+export function seedSessionMetadataCache(
+	group,
+	year,
+	metadataFingerprint,
+	value,
+) {
 	const cacheKey = getCacheKey(group, year, metadataFingerprint);
 	metadataCache.set(cacheKey, {
 		value,
@@ -56,13 +62,17 @@ async function fetchSessionMetadataViaPresign(group, year) {
 	}
 
 	const urls = payload?.urls || {};
-	const [tagsContent, durationsContent, summariesContent, transcriptionsBuffer] =
-		await Promise.all([
-			fetchTextFromUrl(urls.tags),
-			fetchTextFromUrl(urls.duration),
-			fetchTextFromUrl(urls.md),
-			fetchBinaryFromUrl(urls.zip),
-		]);
+	const [
+		tagsContent,
+		durationsContent,
+		summariesContent,
+		transcriptionsBuffer,
+	] = await Promise.all([
+		fetchTextFromUrl(urls.tags),
+		fetchTextFromUrl(urls.duration),
+		fetchTextFromUrl(urls.md),
+		fetchBinaryFromUrl(urls.zip),
+	]);
 
 	return aggregateSessionMetadataFromSources({
 		group,
@@ -90,7 +100,7 @@ async function loadSessionMetadata(group, year) {
 	try {
 		return await fetchSessionMetadataViaPresign(group, year);
 	} catch (presignErr) {
-		console.warn(
+		structuredLogger.warn(
 			`[SessionMetadata] Presigned fetch failed for ${group}/${year}; falling back to session-metadata API`,
 			presignErr,
 		);

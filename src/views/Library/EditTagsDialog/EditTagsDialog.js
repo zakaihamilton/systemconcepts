@@ -7,13 +7,14 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
+import storage from "@util/storage/storage";
+import Tooltip from "@widgets/Tooltip";
 import { useState } from "react";
 import { LibraryTagKeys } from "../Icons";
 import { LibraryStore } from "../Store";
@@ -57,7 +58,7 @@ export default function EditTagsDialog({
 				setIdCopied(true);
 				setTimeout(() => setIdCopied(false), 2000);
 			} catch (err) {
-				console.error("Failed to copy ID:", err);
+				structuredLogger.error("Failed to copy ID:", err);
 			}
 		}
 	};
@@ -155,7 +156,7 @@ export default function EditTagsDialog({
 
 			onClose();
 		} catch (err) {
-			console.error("Failed to save tag edits:", err);
+			structuredLogger.error("Failed to save tag edits:", err);
 		} finally {
 			setSaving(false);
 		}
@@ -207,7 +208,7 @@ export default function EditTagsDialog({
 
 			onClose();
 		} catch (err) {
-			console.error("Failed to delete article:", err);
+			structuredLogger.error("Failed to delete article:", err);
 		} finally {
 			setDeleting(false);
 			setShowDeleteConfirm(false);
@@ -221,187 +222,189 @@ export default function EditTagsDialog({
 		}
 	};
 
-	return (<>
-        <Dialog
-            open={open}
-            onClose={handleClose}
-            maxWidth="sm"
-            fullWidth
-            slotProps={{
-                transition: {
-					onEnter: initializeForm,
-				}
-            }}
-        >
-            <DialogTitle sx={{ fontWeight: 700 }}>
-                {translations.EDIT_TAGS}
-            </DialogTitle>
-            <DialogContent>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-                    {/* Article ID with copy button */}
-                    <Box
-                        onClick={copyIdToClipboard}
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                            p: 1.5,
-                            bgcolor: "action.hover",
-                            borderRadius: 2,
-                            cursor: "pointer",
-                            transition: "all 0.2s",
-                            "&:hover": {
-                                bgcolor: "action.selected",
-                            },
-                        }}
-                    >
-                        <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary", fontWeight: 600 }}
-                        >
-                            ID:
-                        </Typography>
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                fontFamily: "monospace",
-                                flex: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {selectedTag?._id}
-                        </Typography>
-                        <Tooltip
-                            title={
-                                idCopied
-                                    ? translations.COPIED || "Copied!"
-                                    : translations.COPY || "Copy"
-                            }
-                        >
-                            <ContentCopyIcon
-                                sx={{
-                                    fontSize: 18,
-                                    color: idCopied ? "success.main" : "text.secondary",
-                                    transition: "color 0.2s",
-                                }}
-                            />
-                        </Tooltip>
-                    </Box>
-                    <TextField
-                        label={translations.NUMBER}
-                        value={editFormValues.number || ""}
-                        onChange={handleEditChange("number")}
-                        fullWidth
-                        size="small"
-                    />
-                    <TextField
-                        label={translations.SUB_NUMBER || "Sub-Number"}
-                        value={editFormValues.subNumber || ""}
-                        onChange={handleEditChange("subNumber")}
-                        fullWidth
-                        size="small"
-                        type="number"
-                        helperText={
-                            translations.SUB_NUMBER_HELPER ||
-                            "For articles with same number"
-                        }
-                    />
-                    <TextField
-                        label={translations.ORDER || "Order"}
-                        value={editFormValues.order || ""}
-                        onChange={handleEditChange("order")}
-                        fullWidth
-                        size="small"
-                        type="number"
-                        helperText={
-                            translations.ORDER_HELPER || "Lower numbers appear first"
-                        }
-                    />
-                    {LibraryTagKeys.map((key) => (
-                        <TextField
-                            key={key}
-                            label={
-                                translations[key.toUpperCase()] ||
-                                key.charAt(0).toUpperCase() + key.slice(1)
-                            }
-                            value={editFormValues[key] || ""}
-                            onChange={handleEditChange(key)}
-                            fullWidth
-                            size="small"
-                        />
-                    ))}
-                </Box>
-            </DialogContent>
-            <DialogActions sx={{ p: 2, pt: 2, justifyContent: "space-between" }}>
-                <Button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    disabled={saving || deleting}
-                >
-                    {translations.DELETE || "Delete"}
-                </Button>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                    <Button onClick={handleClose} disabled={saving || deleting}>
-                        {translations.CANCEL || "Cancel"}
-                    </Button>
-                    <Button
-                        onClick={handleSaveEdit}
-                        variant="contained"
-                        disabled={saving || deleting}
-                    >
-                        {saving
-                            ? translations.SAVING || "Saving..."
-                            : translations.SAVE || "Save"}
-                    </Button>
-                </Box>
-            </DialogActions>
-        </Dialog>
-        {/* Delete Confirmation Dialog */}
-        <Dialog
-            open={showDeleteConfirm}
-            onClose={() => !deleting && setShowDeleteConfirm(false)}
-            maxWidth="xs"
-            fullWidth
-        >
-            <DialogTitle sx={{ fontWeight: 700, color: "error.main" }}>
-                {translations.DELETE_ARTICLE || "Delete Article"}
-            </DialogTitle>
-            <DialogContent>
-                <Typography>
-                    {translations.DELETE_ARTICLE_CONFIRM ||
-                        "Are you sure you want to delete this article? This action cannot be undone."}
-                </Typography>
-                {selectedTag && (
-                    <Box sx={{ mt: 2, p: 2, bgcolor: "action.hover", borderRadius: 2 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {[selectedTag.article, selectedTag.title]
-                                .filter(Boolean)
-                                .join(" - ")}
-                        </Typography>
-                    </Box>
-                )}
-            </DialogContent>
-            <DialogActions sx={{ p: 2, pt: 0 }}>
-                <Button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    disabled={deleting}
-                >
-                    {translations.CANCEL || "Cancel"}
-                </Button>
-                <Button
-                    onClick={handleDelete}
-                    variant="contained"
-                    color="error"
-                    disabled={deleting}
-                >
-                    {deleting
-                        ? translations.DELETING || "Deleting..."
-                        : translations.DELETE || "Delete"}
-                </Button>
-            </DialogActions>
-        </Dialog>
-    </>);
+	return (
+		<>
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				maxWidth="sm"
+				fullWidth
+				slotProps={{
+					transition: {
+						onEnter: initializeForm,
+					},
+				}}
+			>
+				<DialogTitle sx={{ fontWeight: 700 }}>
+					{translations.EDIT_TAGS}
+				</DialogTitle>
+				<DialogContent>
+					<Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+						{/* Article ID with copy button */}
+						<Box
+							onClick={copyIdToClipboard}
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+								p: 1.5,
+								bgcolor: "action.hover",
+								borderRadius: 2,
+								cursor: "pointer",
+								transition: "all 0.2s",
+								"&:hover": {
+									bgcolor: "action.selected",
+								},
+							}}
+						>
+							<Typography
+								variant="caption"
+								sx={{ color: "text.secondary", fontWeight: 600 }}
+							>
+								ID:
+							</Typography>
+							<Typography
+								variant="body2"
+								sx={{
+									fontFamily: "monospace",
+									flex: 1,
+									overflow: "hidden",
+									textOverflow: "ellipsis",
+									whiteSpace: "nowrap",
+								}}
+							>
+								{selectedTag?._id}
+							</Typography>
+							<Tooltip
+								title={
+									idCopied
+										? translations.COPIED || "Copied!"
+										: translations.COPY || "Copy"
+								}
+							>
+								<ContentCopyIcon
+									sx={{
+										fontSize: 18,
+										color: idCopied ? "success.main" : "text.secondary",
+										transition: "color 0.2s",
+									}}
+								/>
+							</Tooltip>
+						</Box>
+						<TextField
+							label={translations.NUMBER}
+							value={editFormValues.number || ""}
+							onChange={handleEditChange("number")}
+							fullWidth
+							size="small"
+						/>
+						<TextField
+							label={translations.SUB_NUMBER || "Sub-Number"}
+							value={editFormValues.subNumber || ""}
+							onChange={handleEditChange("subNumber")}
+							fullWidth
+							size="small"
+							type="number"
+							helperText={
+								translations.SUB_NUMBER_HELPER ||
+								"For articles with same number"
+							}
+						/>
+						<TextField
+							label={translations.ORDER || "Order"}
+							value={editFormValues.order || ""}
+							onChange={handleEditChange("order")}
+							fullWidth
+							size="small"
+							type="number"
+							helperText={
+								translations.ORDER_HELPER || "Lower numbers appear first"
+							}
+						/>
+						{LibraryTagKeys.map((key) => (
+							<TextField
+								key={key}
+								label={
+									translations[key.toUpperCase()] ||
+									key.charAt(0).toUpperCase() + key.slice(1)
+								}
+								value={editFormValues[key] || ""}
+								onChange={handleEditChange(key)}
+								fullWidth
+								size="small"
+							/>
+						))}
+					</Box>
+				</DialogContent>
+				<DialogActions sx={{ p: 2, pt: 2, justifyContent: "space-between" }}>
+					<Button
+						onClick={() => setShowDeleteConfirm(true)}
+						color="error"
+						startIcon={<DeleteIcon />}
+						disabled={saving || deleting}
+					>
+						{translations.DELETE || "Delete"}
+					</Button>
+					<Box sx={{ display: "flex", gap: 1 }}>
+						<Button onClick={handleClose} disabled={saving || deleting}>
+							{translations.CANCEL || "Cancel"}
+						</Button>
+						<Button
+							onClick={handleSaveEdit}
+							variant="contained"
+							disabled={saving || deleting}
+						>
+							{saving
+								? translations.SAVING || "Saving..."
+								: translations.SAVE || "Save"}
+						</Button>
+					</Box>
+				</DialogActions>
+			</Dialog>
+			{/* Delete Confirmation Dialog */}
+			<Dialog
+				open={showDeleteConfirm}
+				onClose={() => !deleting && setShowDeleteConfirm(false)}
+				maxWidth="xs"
+				fullWidth
+			>
+				<DialogTitle sx={{ fontWeight: 700, color: "error.main" }}>
+					{translations.DELETE_ARTICLE || "Delete Article"}
+				</DialogTitle>
+				<DialogContent>
+					<Typography>
+						{translations.DELETE_ARTICLE_CONFIRM ||
+							"Are you sure you want to delete this article? This action cannot be undone."}
+					</Typography>
+					{selectedTag && (
+						<Box sx={{ mt: 2, p: 2, bgcolor: "action.hover", borderRadius: 2 }}>
+							<Typography variant="body2" sx={{ fontWeight: 600 }}>
+								{[selectedTag.article, selectedTag.title]
+									.filter(Boolean)
+									.join(" - ")}
+							</Typography>
+						</Box>
+					)}
+				</DialogContent>
+				<DialogActions sx={{ p: 2, pt: 0 }}>
+					<Button
+						onClick={() => setShowDeleteConfirm(false)}
+						disabled={deleting}
+					>
+						{translations.CANCEL || "Cancel"}
+					</Button>
+					<Button
+						onClick={handleDelete}
+						variant="contained"
+						color="error"
+						disabled={deleting}
+					>
+						{deleting
+							? translations.DELETING || "Deleting..."
+							: translations.DELETE || "Delete"}
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</>
+	);
 }

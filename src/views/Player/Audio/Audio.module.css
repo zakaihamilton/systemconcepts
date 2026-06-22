@@ -8,7 +8,11 @@
 	background:
 		radial-gradient(
 			circle at top,
-			color-mix(in srgb, var(--group-color, var(--primary-500)) 10%, transparent),
+			color-mix(
+				in srgb,
+				var(--group-color, var(--primary-500)) 10%,
+				transparent
+			),
 			transparent 24rem
 		),
 		var(--main-background);
@@ -94,12 +98,11 @@
 	flex-direction: column;
 	padding: 1.5em;
 	border-bottom: 1px solid var(--border-color);
-	background:
-		linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--group-color, var(--primary-500)) 12%, transparent),
-			var(--app-bar-background) 55%
-		);
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--group-color, var(--primary-500)) 12%, transparent),
+		var(--app-bar-background) 55%
+	);
 }
 
 .headerRow {

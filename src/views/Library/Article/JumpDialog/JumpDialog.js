@@ -62,9 +62,9 @@ export default function JumpDialog({
 	};
 
 	return (
-        (<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-            <DialogTitle>{title || translations.JUMP_TO}</DialogTitle>
-            <DialogContent>
+		<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+			<DialogTitle>{title || translations.JUMP_TO}</DialogTitle>
+			<DialogContent>
 				{maxParagraphs > 0 && maxPage > 0 && (
 					<Tabs
 						value={tab}
@@ -93,8 +93,8 @@ export default function JumpDialog({
 						onKeyDown={handleKeyDown}
 						inputRef={inputRef}
 						slotProps={{
-                            input: { inputProps: { min: 1, max: maxParagraphs } }
-                        }}
+							input: { inputProps: { min: 1, max: maxParagraphs } },
+						}}
 					/>
 				)}
 
@@ -112,16 +112,16 @@ export default function JumpDialog({
 							onChange={(e) => setPageNumber(e.target.value)}
 							onKeyDown={handleKeyDown}
 							slotProps={{
-                                input: { inputProps: { min: 1, max: maxPage } }
-                            }}
+								input: { inputProps: { min: 1, max: maxPage } },
+							}}
 						/>
 					</Box>
 				)}
 			</DialogContent>
-            <DialogActions>
+			<DialogActions>
 				<Button onClick={onClose}>{translations.CANCEL}</Button>
 				<Button onClick={handleSubmit}>{translations.GO}</Button>
 			</DialogActions>
-        </Dialog>)
-    );
+		</Dialog>
+	);
 }

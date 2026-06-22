@@ -2,10 +2,11 @@ import { MainStore } from "@components/Main";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { SYNC_CONFIG } from "@sync/config";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { useTranslations } from "@util/domain/translations";
 import { getPagesFromHash, useActivePages, usePages } from "@util/domain/views";
+import storage from "@util/storage/storage";
 import { Store } from "pullstate";
 import { useEffect } from "react";
 
@@ -39,7 +40,7 @@ function useBookmarksStorage() {
 						s._loaded = true;
 					});
 				} catch (err) {
-					console.error("Failed to parse bookmarks file", err);
+					structuredLogger.error("Failed to parse bookmarks file", err);
 					BookmarksStore.update((s) => {
 						s._loaded = true;
 					});
@@ -63,7 +64,7 @@ function useBookmarksStorage() {
 							s._loaded = true;
 						});
 					} catch (err) {
-						console.error("Failed to migrate bookmarks", err);
+						structuredLogger.error("Failed to migrate bookmarks", err);
 						BookmarksStore.update((s) => {
 							s._loaded = true;
 						});
@@ -100,7 +101,7 @@ function useBookmarksStorage() {
 						await storage.createFolderPath(BOOKMARKS_PATH);
 						await storage.writeFile(BOOKMARKS_PATH, content);
 					} catch (err) {
-						console.error("Failed to save bookmarks", err);
+						structuredLogger.error("Failed to save bookmarks", err);
 					}
 				}
 			},

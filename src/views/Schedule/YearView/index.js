@@ -1,2 +1,2 @@
-export { default } from "./YearView";
 export * from "./YearView";
+export { default } from "./YearView";

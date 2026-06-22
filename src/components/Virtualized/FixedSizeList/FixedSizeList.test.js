@@ -1,4 +1,4 @@
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { createRef } from "react";
 import FixedSizeList from "./FixedSizeList.js";
 
@@ -24,7 +24,7 @@ describe("FixedSizeList Component", () => {
 				onItemsRendered={onItemsRendered}
 			>
 				{Row}
-			</FixedSizeList>
+			</FixedSizeList>,
 		);
 
 		expect(getByTestId("item-0")).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("FixedSizeList Component", () => {
 				onScroll={onScroll}
 			>
 				{Row}
-			</FixedSizeList>
+			</FixedSizeList>,
 		);
 
 		const scrollContainer = container.firstChild;
@@ -79,7 +79,7 @@ describe("FixedSizeList Component", () => {
 				overscanCount={1}
 			>
 				{Row}
-			</FixedSizeList>
+			</FixedSizeList>,
 		);
 
 		expect(ref.current).toBeDefined();

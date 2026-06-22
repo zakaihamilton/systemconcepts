@@ -1,2 +1,2 @@
-export { default } from "./FullSync";
 export * from "./FullSync";
+export { default } from "./FullSync";

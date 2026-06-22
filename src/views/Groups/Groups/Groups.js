@@ -3,23 +3,24 @@ import UpdateIcon from "@mui/icons-material/Update";
 import UploadIcon from "@mui/icons-material/Upload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { GroupsStore } from "@util/domain/groups";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useOnline } from "@util/browser/online";
-import { useSessions } from "@util/domain/sessions";
-import storage from "@util/storage/storage";
-import { abbreviateSize, formatDuration } from "@util/data/string";
 import { useDeviceType, useStyles } from "@util/browser/styles";
+import { abbreviateSize, formatDuration } from "@util/data/string";
+import { GroupsStore } from "@util/domain/groups";
+import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { useUpdateSessions } from "@util/domain/updateSessions";
+import storage from "@util/storage/storage";
 import Label from "@widgets/Label";
 import Progress from "@widgets/Progress";
 import Table from "@widgets/Table";
 import Cookies from "js-cookie";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ColorPicker from "../ColorPicker";
-import styles from "./Groups.module.css";
 import ItemMenu from "../ItemMenu";
 import ProgressDialog from "../ProgressDialog";
+import styles from "./Groups.module.css";
 
 registerToolbar("Groups");
 
@@ -62,7 +63,7 @@ export default function Groups() {
 						bundleData = JSON.parse(content);
 					}
 				} catch (err) {
-					console.error("Error reading bundle for size check:", err);
+					structuredLogger.error("Error reading bundle for size check:", err);
 				}
 			}
 
@@ -107,7 +108,10 @@ export default function Groups() {
 
 					sizes[group.name] = totalSize;
 				} catch (err) {
-					console.error(`Error calculating size for ${group.name}:`, err);
+					structuredLogger.error(
+						`Error calculating size for ${group.name}:`,
+						err,
+					);
 					sizes[group.name] = 0;
 				}
 			}
@@ -227,7 +231,7 @@ export default function Groups() {
 				return updated;
 			});
 		} catch (err) {
-			console.error("Error importing groups:", err);
+			structuredLogger.error("Error importing groups:", err);
 			alert("Failed to import groups.json: " + err.message);
 		}
 

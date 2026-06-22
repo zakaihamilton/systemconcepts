@@ -597,7 +597,8 @@ export default [
 	},
 	{
 		id: "DELETE_ARTICLES_CONFIRM",
-		value: "Tem certeza de que deseja EXCLUIR PERMANENTEMENTE todos os artigos com esta tag? Esta ação não pode ser desfeita.",
+		value:
+			"Tem certeza de que deseja EXCLUIR PERMANENTEMENTE todos os artigos com esta tag? Esta ação não pode ser desfeita.",
 	},
 	{
 		id: "ARTICLES_TO_DELETE",

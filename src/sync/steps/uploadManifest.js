@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import Cookies from "js-cookie";
 import { writeCompressedFile } from "../bundle";
@@ -56,7 +57,7 @@ export async function uploadManifest(
 	const normalizedManifest = normalizeManifest(remoteManifest);
 	const deduped = (remoteManifest?.length || 0) - normalizedManifest.length;
 	if (deduped > 0) {
-		console.log(
+		structuredLogger.debug(
 			`[Sync] Removed ${deduped} duplicate entries from manifest before upload`,
 		);
 	}
@@ -94,7 +95,7 @@ export async function uploadManifest(
 			}
 			return;
 		}
-		console.error("[Sync] Step 7 error:", err);
+		structuredLogger.error("[Sync] Step 7 error:", err);
 		throw err;
 	}
 }

@@ -1,4 +1,5 @@
 import { fetchJSON, requireRelogin } from "@util/api/fetch";
+import { logger as structuredLogger } from "@util/api/logger";
 import { binaryToString } from "@util/data/binary";
 import { isBinaryFile, makePath } from "@util/data/path";
 import pLimit from "p-limit";
@@ -162,7 +163,7 @@ async function readFiles(prefix, files) {
 						!err.message?.includes("NoSuchKey") &&
 						!err.message?.includes("404")
 					) {
-						console.warn(
+						structuredLogger.warn(
 							`Failed to read file ${prefix}${name}:`,
 							err.message || err,
 						);
@@ -235,9 +236,11 @@ async function writeFile(path, body) {
 			);
 		}
 
-		console.log(`[AWS Storage] Successfully uploaded ${path} directly to S3`);
+		structuredLogger.debug(
+			`[AWS Storage] Successfully uploaded ${path} directly to S3`,
+		);
 	} catch (err) {
-		console.error(
+		structuredLogger.error(
 			`[AWS Storage] Direct upload failed for ${path}, falling back to proxy:`,
 			err,
 		);
@@ -288,7 +291,7 @@ async function getRecursiveList(path) {
 
 	const addListing = async (dirPath, depth = 0) => {
 		if (depth > MAX_DEPTH) {
-			console.warn(`[AWS Storage] Max depth exceeded for: ${dirPath}`);
+			structuredLogger.warn(`[AWS Storage] Max depth exceeded for: ${dirPath}`);
 			return;
 		}
 
@@ -313,7 +316,7 @@ async function getRecursiveList(path) {
 			for (const item of items) {
 				// Validate item path belongs to this directory
 				if (!item.path || !item.path.startsWith(expectedPrefix)) {
-					console.warn(
+					structuredLogger.warn(
 						`[AWS Storage] Skipping invalid item: ${item.path} (expected prefix: ${expectedPrefix})`,
 					);
 					continue;
@@ -334,7 +337,7 @@ async function getRecursiveList(path) {
 				}
 			}
 		} catch (err) {
-			console.warn(
+			structuredLogger.warn(
 				`[AWS Storage] Failed to list ${dirPath}:`,
 				err.message || err,
 			);
@@ -365,7 +368,7 @@ async function exists(path) {
 		// If we receive an array, it means we got a directory listing instead of file metadata
 		// This happens when the file doesn't exist but a similarly-named directory does
 		if (Array.isArray(item)) {
-			console.log(
+			structuredLogger.debug(
 				`[AWS Storage] Path check returned directory listing for ${path}, treating as non-existent file`,
 			);
 			exists = false;
@@ -381,10 +384,13 @@ async function exists(path) {
 			}
 		}
 		if (!exists) {
-			console.log(`[AWS Storage] Path check returned false for ${path}`, item);
+			structuredLogger.debug(
+				`[AWS Storage] Path check returned false for ${path}`,
+				item,
+			);
 		}
 	} catch (err) {
-		console.error(`[AWS Storage] Path check error for ${path}:`, err);
+		structuredLogger.error(`[AWS Storage] Path check error for ${path}:`, err);
 	}
 	return exists;
 }

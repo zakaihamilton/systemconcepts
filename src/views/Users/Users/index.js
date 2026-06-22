@@ -1,2 +1,2 @@
-export { default } from "./Users";
 export * from "./Users";
+export { default } from "./Users";

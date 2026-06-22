@@ -1,3 +1,4 @@
+import { logger as structuredLogger } from "@util/api/logger";
 import { useOnline } from "@util/browser/online";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
@@ -85,7 +86,7 @@ export function fetchBlob(url, options) {
 					return;
 				}
 				if (response.status !== 200) {
-					console.log("Status Code: " + response.status);
+					structuredLogger.debug("Status Code: " + response.status);
 					reject(response.status);
 					return;
 				}
@@ -95,12 +96,12 @@ export function fetchBlob(url, options) {
 						resolve(data);
 					})
 					.catch((err) => {
-						console.log("Fetch parse error :", err);
+						structuredLogger.debug("Fetch parse error :", err);
 						reject(err);
 					});
 			})
 			.catch((err) => {
-				console.log("Fetch error :", err);
+				structuredLogger.debug("Fetch error :", err);
 				reject(err);
 			});
 	});
@@ -129,7 +130,7 @@ export function fetchText(url, options) {
 					return;
 				}
 				if (response.status !== 200) {
-					console.log("Status Code: " + response.status);
+					structuredLogger.debug("Status Code: " + response.status);
 					reject(response.status);
 					return;
 				}
@@ -140,12 +141,12 @@ export function fetchText(url, options) {
 						resolve(data);
 					})
 					.catch((err) => {
-						console.log("Fetch parse error :", err);
+						structuredLogger.debug("Fetch parse error :", err);
 						reject(err);
 					});
 			})
 			.catch((err) => {
-				console.log("Fetch error :", err);
+				structuredLogger.debug("Fetch error :", err);
 				reject(err);
 			});
 	});
@@ -174,7 +175,7 @@ export function fetchJSON(url, options) {
 					return;
 				}
 				if (response.status !== 200) {
-					console.log("Status Code: " + response.status);
+					structuredLogger.debug("Status Code: " + response.status);
 					reject(response.status);
 					return;
 				}
@@ -190,12 +191,12 @@ export function fetchJSON(url, options) {
 						resolve(data);
 					})
 					.catch((err) => {
-						console.log("Fetch parse error :", err);
+						structuredLogger.debug("Fetch parse error :", err);
 						reject(err);
 					});
 			})
 			.catch((err) => {
-				console.log("Fetch error :", err);
+				structuredLogger.debug("Fetch error :", err);
 				reject(err);
 			});
 	});

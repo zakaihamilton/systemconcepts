@@ -1,2 +1,2 @@
-export { default } from "./HistoryView";
 export * from "./HistoryView";
+export { default } from "./HistoryView";

@@ -2,6 +2,7 @@ import { SyncContext } from "@components/Sync";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { clearBundleCache } from "@sync/sync";
+import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import { goBackPage, setPath } from "@util/domain/views";
 import Dialog from "@widgets/Dialog";
@@ -15,7 +16,7 @@ export default function FullSync() {
 		try {
 			const success = await clearBundleCache();
 			if (!success) {
-				console.error("Failed to clear cache completely");
+				structuredLogger.error("Failed to clear cache completely");
 				// Still try to sync even if clear had issues
 			}
 
@@ -23,7 +24,7 @@ export default function FullSync() {
 			// Force a fresh sync after clearing
 			await updateSync(false); // Force full sync (not poll)
 		} catch (err) {
-			console.error("Failed to reset cache and sync", err);
+			structuredLogger.error("Failed to reset cache and sync", err);
 			// Still go back even on error so user isn't stuck
 			goBackPage();
 		}

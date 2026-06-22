@@ -1,2 +1,2 @@
-export { default } from "./ResearchIndexer";
 export * from "./ResearchIndexer";
+export { default } from "./ResearchIndexer";

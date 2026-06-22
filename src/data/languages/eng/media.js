@@ -145,7 +145,8 @@ export default [
 	},
 	{
 		id: "ID_DESCRIPTION",
-		value: "This is your unique identifier that should consist of only letters (A-Z) and numbers (0-9)",
+		value:
+			"This is your unique identifier that should consist of only letters (A-Z) and numbers (0-9)",
 	},
 	{
 		id: "PLAYER",

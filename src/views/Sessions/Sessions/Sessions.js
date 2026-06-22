@@ -5,12 +5,12 @@ import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import MovieIcon from "@mui/icons-material/Movie";
 import Chip from "@mui/material/Chip";
 import { SyncActiveStore } from "@sync/syncState";
-import { useRecentHistory } from "@util/domain/history";
-import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
-import { useTranslations } from "@util/domain/translations";
 import { useDateFormatter } from "@util/data/locale";
+import { useRecentHistory } from "@util/domain/history";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
+import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import { PlayerStore } from "@views/Player/Player";
 import FilterBar from "@views/Sessions/FilterBar";
@@ -39,43 +39,55 @@ export default function SessionsPage() {
 	const isMobile = useDeviceType() === "phone";
 	const translations = useTranslations();
 	const sessionDateLocale = useMemo(() => getSessionDateLocale(), []);
-	const shortDateFormatter = useDateFormatter({
-		year: "2-digit",
-		month: "2-digit",
-		day: "2-digit",
-	}, sessionDateLocale);
-	const monthFormatter = useDateFormatter({ month: "short" }, sessionDateLocale);
+	const shortDateFormatter = useDateFormatter(
+		{
+			year: "2-digit",
+			month: "2-digit",
+			day: "2-digit",
+		},
+		sessionDateLocale,
+	);
+	const monthFormatter = useDateFormatter(
+		{ month: "short" },
+		sessionDateLocale,
+	);
 
-	const formatDate = useCallback((dateStr) => {
-		if (!dateStr) return "";
-		const parts = dateStr.split("-");
-		if (parts.length === 3) {
-			const year = parseInt(parts[0], 10);
-			const month = parseInt(parts[1], 10) - 1;
-			const day = parseInt(parts[2], 10);
-			const d = new Date(year, month, day);
-			if (!isNaN(d.getTime())) {
-				if (isMobile) {
-					return shortDateFormatter.formatToParts(d).map((part, index) =>
-						part.type === "day" ? (
-							<strong key={`${part.type}-${index}`} className={styles.dateDay}>
-								{part.value}
-							</strong>
-						) : (
-							<span key={`${part.type}-${index}`}>{part.value}</span>
-						),
+	const formatDate = useCallback(
+		(dateStr) => {
+			if (!dateStr) return "";
+			const parts = dateStr.split("-");
+			if (parts.length === 3) {
+				const year = parseInt(parts[0], 10);
+				const month = parseInt(parts[1], 10) - 1;
+				const day = parseInt(parts[2], 10);
+				const d = new Date(year, month, day);
+				if (!isNaN(d.getTime())) {
+					if (isMobile) {
+						return shortDateFormatter.formatToParts(d).map((part, index) =>
+							part.type === "day" ? (
+								<strong
+									key={`${part.type}-${index}`}
+									className={styles.dateDay}
+								>
+									{part.value}
+								</strong>
+							) : (
+								<span key={`${part.type}-${index}`}>{part.value}</span>
+							),
+						);
+					}
+					return (
+						<>
+							<strong className={styles.dateDay}>{day}</strong>{" "}
+							{monthFormatter.format(d)} {year}
+						</>
 					);
 				}
-				return (
-					<>
-						<strong className={styles.dateDay}>{day}</strong>{" "}
-						{monthFormatter.format(d)} {year}
-					</>
-				);
 			}
-		}
-		return dateStr;
-	}, [isMobile, monthFormatter, shortDateFormatter]);
+			return dateStr;
+		},
+		[isMobile, monthFormatter, shortDateFormatter],
+	);
 
 	const [sessions, loading] = useSessions();
 	const viewMode = SessionsStore.useState((s) => s.viewMode);
@@ -568,14 +580,17 @@ export default function SessionsPage() {
 						</Tooltip>
 					);
 
-					const progressBar = typeof item.percentage === "number" && !isNaN(item.percentage) && item.percentage > 0 && viewMode === "grid" && (
-						<div className={clsx(styles.gridProgressBar, styles.visible)}>
-							<div
-								className={styles.gridProgressFill}
-								style={{ width: item.percentage + "%" }}
-							/>
-						</div>
-					);
+					const progressBar = typeof item.percentage === "number" &&
+						!isNaN(item.percentage) &&
+						item.percentage > 0 &&
+						viewMode === "grid" && (
+							<div className={clsx(styles.gridProgressBar, styles.visible)}>
+								<div
+									className={styles.gridProgressFill}
+									style={{ width: item.percentage + "%" }}
+								/>
+							</div>
+						);
 
 					return (
 						<div className={styles.thumbnailContainer}>
@@ -830,8 +845,7 @@ export default function SessionsPage() {
 					if (item.isPlaying) classes.push(styles.playing);
 					if (item.isExpanded || item.isTreeChild)
 						classes.push(styles.expandedGroupHighlight);
-					if (item.isTreeChild)
-						classes.push(styles.treeChild);
+					if (item.isTreeChild) classes.push(styles.treeChild);
 					return classes.join(" ");
 				}}
 				emptyLabel={
