@@ -1,7 +1,6 @@
-import parseCookie from "@util/api/cookie";
 import { getSafeError } from "@util/api/safeError";
-import { login } from "@util/auth/login";
 import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
 import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
@@ -15,17 +14,12 @@ const NO_CACHE_HEADERS = {
 
 export async function GET(request) {
 	try {
-		const cookieHeader = request.headers.get("cookie") || "";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
-		if (!id || !hash) throw "ACCESS_DENIED";
-
 		const url = new URL(request.url);
 		let path =
 			request.headers.get("path") || url.searchParams.get("path") || "";
 		if (path) path = decodeURIComponent(path);
 
-		const user = await login({ id, hash, api: "wasabi", path });
+		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
 		const isDir =

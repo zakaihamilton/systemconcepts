@@ -1,4 +1,4 @@
-import { login } from "@util/auth/login";
+import { getSafeError } from "@util/api/safeError";
 import {
 	deletePasskey,
 	getPasskeyAuthOptions,
@@ -7,7 +7,11 @@ import {
 	verifyPasskeyAuth,
 	verifyPasskeyRegistration,
 } from "@util/auth/passkey";
-import { getSafeError } from "@util/api/safeError";
+import {
+	createSession,
+	getSessionUser,
+	setSessionCookies,
+} from "@util/auth/session";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -27,16 +31,10 @@ export async function GET(request) {
 	try {
 		if (action === "register-options") {
 			let authenticated = false;
-			const hash =
-				request.headers.get("hash") || request.cookies.get("hash")?.value;
-			if (hash) {
-				try {
-					await login({ id, hash, api: "passkey-register-options" });
-					authenticated = true;
-				} catch {
-					// ignore
-				}
-			}
+			try {
+				const user = await getSessionUser(request);
+				authenticated = user.id === id?.toLowerCase();
+			} catch {}
 			const options = await getPasskeyRegistrationOptions({
 				id,
 				email,
@@ -50,11 +48,9 @@ export async function GET(request) {
 			const options = await getPasskeyAuthOptions({ id, rpID });
 			return NextResponse.json(options);
 		} else if (action === "list") {
-			const hash =
-				request.headers.get("hash") || request.cookies.get("hash")?.value;
-			if (!hash)
+			const user = await getSessionUser(request);
+			if (user.id !== id?.toLowerCase())
 				return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-			await login({ id, hash, api: "passkey-list" });
 			const passkeys = await getPasskeys({ id });
 			return NextResponse.json(passkeys);
 		} else {
@@ -72,11 +68,9 @@ export async function DELETE(request) {
 	const credentialId = url.searchParams.get("credentialId");
 
 	try {
-		const hash =
-			request.headers.get("hash") || request.cookies.get("hash")?.value;
-		if (!hash)
+		const user = await getSessionUser(request);
+		if (user.id !== id?.toLowerCase())
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		await login({ id, hash, api: "passkey-delete" });
 		await deletePasskey({ id, credentialId });
 		return NextResponse.json({ success: true });
 	} catch (err) {
@@ -100,16 +94,10 @@ export async function POST(request) {
 	try {
 		if (action === "register-verify") {
 			let authenticated = false;
-			const hash =
-				request.headers.get("hash") || request.cookies.get("hash")?.value;
-			if (hash) {
-				try {
-					await login({ id, hash, api: "passkey-register-verify" });
-					authenticated = true;
-				} catch {
-					// ignore
-				}
-			}
+			try {
+				const user = await getSessionUser(request);
+				authenticated = user.id === id?.toLowerCase();
+			} catch {}
 			const { name, ...attResp } = response;
 			const result = await verifyPasskeyRegistration({
 				id,
@@ -122,7 +110,10 @@ export async function POST(request) {
 			return NextResponse.json(result);
 		} else if (action === "auth-verify") {
 			const user = await verifyPasskeyAuth({ id, response, origin, rpID });
-			return NextResponse.json({ hash: user.hash });
+			const session = await createSession(user.id);
+			const result = NextResponse.json({ role: user.role || "visitor" });
+			setSessionCookies(result, session, user);
+			return result;
 		} else {
 			return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 		}

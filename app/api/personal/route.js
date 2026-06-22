@@ -1,16 +1,14 @@
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
-import { handleRequest } from "@util/storage/mongo";
 import { getSafeError } from "@util/api/safeError";
+import { getSessionUser } from "@util/auth/session";
+import { handleRequest } from "@util/storage/mongo";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 async function handlePersonal(request) {
 	try {
-		const cookieHeader = request.headers.get("cookie") || "";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
+		const user = await getSessionUser(request);
+		const id = user.id;
 
 		let body = null;
 		try {
@@ -38,8 +36,6 @@ async function handlePersonal(request) {
 				}
 			}
 		}
-
-		await login({ id, hash, api: "personal", path });
 
 		const url = new URL(request.url);
 		const req = {

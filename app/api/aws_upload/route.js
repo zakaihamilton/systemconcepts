@@ -1,24 +1,15 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getS3, validatePathAccess } from "@util/storage/aws";
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
-import { roleAuth } from "@util/auth/roles";
 import { getSafeError } from "@util/api/safeError";
+import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
+import { getS3, validatePathAccess } from "@util/storage/aws";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request) {
 	try {
-		const cookieHeader = request.headers.get("cookie") || "";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
-		if (!id || !hash) {
-			console.log(`[AWS UPLOAD API] ACCESS DENIED: No cookie found`);
-			throw "ACCESS_DENIED";
-		}
-
 		const url = new URL(request.url);
 		let path = url.searchParams.get("path") || "";
 
@@ -27,11 +18,9 @@ export async function GET(request) {
 			throw "INVALID_PATH";
 		}
 
-		const user = await login({ id, hash, api: "aws_upload", path });
+		const user = await getSessionUser(request);
 		if (!user) {
-			console.log(
-				`[AWS UPLOAD API] ACCESS DENIED: User ${id} is not authorized`,
-			);
+			console.log("[AWS UPLOAD API] ACCESS DENIED");
 			throw "ACCESS_DENIED";
 		}
 

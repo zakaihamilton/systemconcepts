@@ -10,12 +10,12 @@ import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Link from "@mui/material/Link";
-import Tooltip from "@widgets/Tooltip";
 import Typography from "@mui/material/Typography";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath } from "@util/domain/views";
 import Input from "@widgets/Input";
+import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import Cookies from "js-cookie";
 import { useState } from "react";
@@ -109,13 +109,11 @@ export default function SignUp() {
 					password: encodeURIComponent(password),
 				},
 			})
-				.then(({ err, hash }) => {
+				.then(({ err }) => {
 					if (err) {
 						console.error(err);
 						throw err;
 					}
-					Cookies.set("id", id, remember && { expires: 60 });
-					Cookies.set("hash", hash, remember && { expires: 60 });
 					setProgress(false);
 					setError("");
 					setPath("");

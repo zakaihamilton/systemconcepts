@@ -1,7 +1,6 @@
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
-import { roleAuth } from "@util/auth/roles";
 import { getSafeError } from "@util/api/safeError";
+import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
 import { aggregateSessionMetadata } from "@util/domain/updateSessions/sessionMetadataServer";
 import { NextResponse } from "next/server";
 
@@ -13,17 +12,10 @@ const SESSION_METADATA_HEADERS = {
 
 export async function GET(request) {
 	try {
-		const cookieHeader = request.headers.get("cookie") || "";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
-		if (!id || !hash) throw "ACCESS_DENIED";
-
 		const url = new URL(request.url);
 		const group = url.searchParams.get("group");
 		const year = url.searchParams.get("year");
-		const path = `sessions/${group || ""}/${year || ""}`;
-
-		const user = await login({ id, hash, api: "aws", path });
+		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
 		const result = await aggregateSessionMetadata({ group, year });

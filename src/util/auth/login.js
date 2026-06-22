@@ -1,17 +1,18 @@
 import resetPasswordTemplate from "@data/resetPasswordTemplate";
-import { compare, hash } from "bcryptjs";
-import gmailSend from "gmail-send";
-import { v4 as uuidv4 } from "uuid";
 import { findRecord, insertRecord, replaceRecord } from "@util/storage/mongo";
+import { compare, hash } from "bcryptjs";
+import nodemailer from "nodemailer";
+import { v4 as uuidv4 } from "uuid";
 
-const sendResetMail = gmailSend({
-	user: process.env.GMAIL_USER,
-	pass: process.env.GMAIL_PASSWORD,
-	from: process.env.GMAIL_FROM,
-	subject: "Reset Password",
+const resetMailTransport = nodemailer.createTransport({
+	service: "gmail",
+	auth: {
+		user: process.env.GMAIL_USER,
+		pass: process.env.GMAIL_PASSWORD,
+	},
 });
 
-export async function login({ id, password, hash, api, path }) {
+export async function login({ id, password, api, path }) {
 	if (!id) {
 		console.error("empty user id");
 		throw "USER_NOT_FOUND";
@@ -35,10 +36,7 @@ export async function login({ id, password, hash, api, path }) {
 			console.error("wrong password for user", id);
 			throw "WRONG_PASSWORD";
 		}
-	} else if (hash !== user.hash) {
-		console.error("wrong password for user", id);
-		throw "WRONG_PASSWORD";
-	}
+	} else throw "PASSWORD_REQUIRED";
 	const dateObj = new Date();
 	const date = dateObj.toString();
 	const utc = dateObj.getTime();
@@ -217,10 +215,15 @@ export async function sendResetEmail({ id }) {
 			encodeURIComponent("resetpassword/" + resetToken),
 	);
 
-	if (!sendResetMail || typeof sendResetMail !== "function") {
+	if (!resetMailTransport) {
 		console.error("Email service not configured properly");
 		throw "EMAIL_SERVICE_ERROR";
 	}
 
-	await sendResetMail({ to: user.email, text: emailText });
+	await resetMailTransport.sendMail({
+		from: process.env.GMAIL_FROM,
+		to: user.email,
+		subject: "Reset Password",
+		text: emailText,
+	});
 }

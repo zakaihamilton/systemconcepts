@@ -166,9 +166,7 @@ export default function Account({ redirect }) {
 				},
 			);
 
-			if (verification.hash) {
-				Cookies.set("id", id, remember && { expires: 60 });
-				Cookies.set("hash", verification.hash, remember && { expires: 60 });
+			if (!verification.err) {
 				if (verification.role) {
 					Cookies.set("role", verification.role, remember && { expires: 60 });
 				}
@@ -194,6 +192,7 @@ export default function Account({ redirect }) {
 			event.preventDefault();
 		}
 		if (isSignedIn) {
+			await fetchJSON("/api/login", { method: "DELETE" }).catch(console.error);
 			// Clear cookies
 			Cookies.set("id", "");
 			Cookies.set("hash", "");
@@ -223,13 +222,11 @@ export default function Account({ redirect }) {
 					},
 				})
 					.then(async (data) => {
-						const { err, hash } = data;
+						const { err } = data;
 						if (err) {
 							console.error(err);
 							throw err;
 						}
-						Cookies.set("id", id, remember && { expires: 60 });
-						Cookies.set("hash", hash, remember && { expires: 60 });
 						Cookies.set(
 							"role",
 							data.role || "visitor",
