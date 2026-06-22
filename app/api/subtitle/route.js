@@ -1,8 +1,7 @@
-import { downloadData, validatePathAccess } from "@util/storage/aws";
-import parseCookie from "@util/api/cookie";
 import { error } from "@util/api/logger";
-import { login } from "@util/auth/login";
 import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
+import { downloadData, validatePathAccess } from "@util/storage/aws";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 
@@ -15,12 +14,7 @@ export async function GET(request) {
 		const url = new URL(request.url);
 		const path = url.searchParams.get("path");
 		const file = url.searchParams.get("file");
-		const cookieHeader = request.headers.get("cookie") || "";
-
-		if (!cookieHeader) throw "ACCESS_DENIED";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
-		const user = await login({ id, hash, api: "subtitle" });
+		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
 		let decodedPath = decodeURIComponent(path);
@@ -45,7 +39,8 @@ export async function GET(request) {
 			status: 200,
 			headers: {
 				"Content-Type": contentType,
-				"Cache-Control": "private, max-age=86400, stale-while-revalidate=604800",
+				"Cache-Control":
+					"private, max-age=86400, stale-while-revalidate=604800",
 			},
 		});
 	} catch (err) {

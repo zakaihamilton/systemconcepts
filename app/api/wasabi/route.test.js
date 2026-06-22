@@ -1,12 +1,10 @@
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
 import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
 import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
 import { GET } from "./route";
 
-jest.mock("@util/api/cookie", () => jest.fn());
-jest.mock("@util/auth/login", () => ({
-	login: jest.fn(),
+jest.mock("@util/auth/session", () => ({
+	getSessionUser: jest.fn(),
 }));
 jest.mock("@util/auth/roles", () => ({
 	roleAuth: jest.fn(),
@@ -74,8 +72,7 @@ function request(query = "", cookie = "id=user; hash=secret") {
 describe("/api/wasabi", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		parseCookie.mockReturnValue({ id: "user", hash: "secret" });
-		login.mockResolvedValue({ id: "user", role: "student" });
+		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
 		roleAuth.mockReturnValue(true);
 		getDownloadUrl.mockResolvedValue(
 			"https://s3.wasabisys.com/bucket/sessions/test/file.txt?signature=test",
@@ -126,7 +123,7 @@ describe("/api/wasabi", () => {
 	});
 
 	it("does not sign a URL when credentials are missing", async () => {
-		parseCookie.mockReturnValue({});
+		getSessionUser.mockRejectedValue("ACCESS_DENIED");
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt", ""));
 

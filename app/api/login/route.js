@@ -1,3 +1,4 @@
+import { getSafeError } from "@util/api/safeError";
 import {
 	changePassword,
 	login,
@@ -6,7 +7,13 @@ import {
 	sendResetEmail,
 } from "@util/auth/login";
 import { checkRateLimit } from "@util/auth/rateLimit";
-import { getSafeError } from "@util/api/safeError";
+import {
+	clearSessionCookies,
+	createSession,
+	getSessionUser,
+	revokeSession,
+	setSessionCookies,
+} from "@util/auth/session";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +24,7 @@ export async function GET(request) {
 	try {
 		const id = request.headers.get("id");
 		const password = request.headers.get("password");
-		const hash = request.headers.get("hash");
+		const remember = request.headers.get("remember") !== "false";
 
 		if (password) {
 			// Build req-like object for rate limiter
@@ -26,19 +33,15 @@ export async function GET(request) {
 				request.headers.get("x-real-ip") ||
 				"";
 			await checkRateLimit({ headers: { "x-forwarded-for": ip } });
-		} else if (hash) {
-			// Limit session refreshes to once per minute per user
-			await checkRateLimit(
-				{ headers: { "x-forwarded-for": id } },
-				{ limit: 1, windowMs: 60 * 1000, key: `refresh:${id}` },
-			);
+			params = await login({
+				id,
+				password: decodeURIComponent(password),
+				api: "login",
+			});
+			params.session = await createSession(params.id, remember);
+		} else {
+			params = await getSessionUser(request);
 		}
-		params = await login({
-			id,
-			password: password ? decodeURIComponent(password) : undefined,
-			hash,
-			api: "login",
-		});
 	} catch (err) {
 		error = err;
 	}
@@ -55,14 +58,13 @@ export async function GET(request) {
 	const safeParams = {};
 	if (params && params.id) {
 		safeParams.id = params.id;
-		safeParams.hash = params.hash;
 		safeParams.role = params.role;
 		safeParams.firstName = params.firstName;
 		safeParams.lastName = params.lastName;
 		safeParams.email = params.email;
 	}
 
-	return NextResponse.json(
+	const response = NextResponse.json(
 		{ ...(error && { err: getSafeError(error) }), ...safeParams },
 		{
 			status: 200,
@@ -74,6 +76,8 @@ export async function GET(request) {
 			},
 		},
 	);
+	if (params.session) setSessionCookies(response, params.session, params);
+	return response;
 }
 
 export async function PUT(request) {
@@ -86,22 +90,45 @@ export async function PUT(request) {
 	if (reset) {
 		try {
 			const id = headers.get("id");
+			const ip =
+				request.headers.get("x-forwarded-for") ||
+				request.headers.get("x-real-ip") ||
+				"unknown";
+			await checkRateLimit(
+				{ headers: { "x-forwarded-for": ip } },
+				{ limit: 3, windowMs: 15 * 60 * 1000, key: `reset-ip:${ip}` },
+			);
+			await checkRateLimit(
+				{},
+				{ limit: 3, windowMs: 60 * 60 * 1000, key: `reset-user:${id}` },
+			);
 			await sendResetEmail({ id });
-			return NextResponse.json({});
+			return NextResponse.json({ message: "RESET_REQUEST_ACCEPTED" });
 		} catch (err) {
 			console.error("login error: ", err);
-			return NextResponse.json({ err: getSafeError(err) });
+			if (err === "RATE_LIMIT_EXCEEDED") {
+				return NextResponse.json({ err: getSafeError(err) }, { status: 429 });
+			}
+			return NextResponse.json({ message: "RESET_REQUEST_ACCEPTED" });
 		}
 	} else if (newpassword && code) {
 		try {
 			const id = headers.get("id");
-			const hash = await resetPassword({
+			await resetPassword({
 				id,
 				code,
 				newPassword: decodeURIComponent(newpassword),
 				api: "login",
 			});
-			return NextResponse.json({ hash });
+			const user = await login({
+				id,
+				password: decodeURIComponent(newpassword),
+				api: "password-reset",
+			});
+			const session = await createSession(user.id);
+			const response = NextResponse.json({ role: user.role || "visitor" });
+			setSessionCookies(response, session, user);
+			return response;
 		} catch (err) {
 			console.error("login error: ", err);
 			return NextResponse.json({ err: getSafeError(err) });
@@ -109,13 +136,21 @@ export async function PUT(request) {
 	} else if (oldpassword && newpassword) {
 		try {
 			const id = headers.get("id");
-			const hash = await changePassword({
+			await changePassword({
 				id,
 				oldPassword: decodeURIComponent(oldpassword),
 				newPassword: decodeURIComponent(newpassword),
 				api: "login",
 			});
-			return NextResponse.json({ hash });
+			const user = await login({
+				id,
+				password: decodeURIComponent(newpassword),
+				api: "password-change",
+			});
+			const session = await createSession(user.id);
+			const response = NextResponse.json({ role: user.role || "visitor" });
+			setSessionCookies(response, session, user);
+			return response;
 		} catch (err) {
 			console.error("login error: ", err);
 			return NextResponse.json({ err: getSafeError(err) });
@@ -127,17 +162,32 @@ export async function PUT(request) {
 			const first_name = headers.get("first_name");
 			const last_name = headers.get("last_name");
 			const password = headers.get("password");
-			const hash = await register({
+			await register({
 				id,
 				email,
 				firstName: decodeURIComponent(first_name),
 				lastName: decodeURIComponent(last_name),
 				password: decodeURIComponent(password),
 			});
-			return NextResponse.json({ hash, role: "visitor" });
+			const user = await login({
+				id,
+				password: decodeURIComponent(password),
+				api: "register",
+			});
+			const session = await createSession(user.id);
+			const response = NextResponse.json({ role: "visitor" });
+			setSessionCookies(response, session, user);
+			return response;
 		} catch (err) {
 			console.error("login error: ", err);
 			return NextResponse.json({ err: getSafeError(err) });
 		}
 	}
+}
+
+export async function DELETE(request) {
+	await revokeSession(request);
+	const response = NextResponse.json({});
+	clearSessionCookies(response);
+	return response;
 }

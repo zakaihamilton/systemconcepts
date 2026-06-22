@@ -1,12 +1,10 @@
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
 import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
 import { aggregateSessionMetadata } from "@util/domain/updateSessions/sessionMetadataServer";
 import { GET } from "./route";
 
-jest.mock("@util/api/cookie", () => jest.fn());
-jest.mock("@util/auth/login", () => ({
-	login: jest.fn(),
+jest.mock("@util/auth/session", () => ({
+	getSessionUser: jest.fn(),
 }));
 jest.mock("@util/auth/roles", () => ({
 	roleAuth: jest.fn(),
@@ -41,8 +39,7 @@ function request(url, cookie = "id=user; hash=secret") {
 describe("/api/session-metadata", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		parseCookie.mockReturnValue({ id: "user", hash: "secret" });
-		login.mockResolvedValue({ id: "user", role: "student" });
+		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
 		roleAuth.mockReturnValue(true);
 		aggregateSessionMetadata.mockResolvedValue({
 			group: "test",
@@ -62,12 +59,7 @@ describe("/api/session-metadata", () => {
 		const body = await response.json();
 
 		expect(response.status).toBe(200);
-		expect(login).toHaveBeenCalledWith({
-			id: "user",
-			hash: "secret",
-			api: "aws",
-			path: "sessions/test/2024",
-		});
+		expect(getSessionUser).toHaveBeenCalled();
 		expect(roleAuth).toHaveBeenCalledWith("student", "student");
 		expect(aggregateSessionMetadata).toHaveBeenCalledWith({
 			group: "test",
@@ -78,7 +70,7 @@ describe("/api/session-metadata", () => {
 	});
 
 	it("rejects requests without credentials before reading metadata", async () => {
-		parseCookie.mockReturnValue({});
+		getSessionUser.mockRejectedValue("ACCESS_DENIED");
 
 		const response = await GET(
 			request("http://localhost/api/session-metadata?group=test&year=2024", ""),
@@ -87,7 +79,7 @@ describe("/api/session-metadata", () => {
 
 		expect(response.status).toBe(403);
 		expect(body.err).toBe("ACCESS_DENIED");
-		expect(login).not.toHaveBeenCalled();
+		expect(getSessionUser).toHaveBeenCalled();
 		expect(aggregateSessionMetadata).not.toHaveBeenCalled();
 	});
 

@@ -1,13 +1,11 @@
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
-import { roleAuth } from "@util/auth/roles";
-import { getS3, list } from "@util/storage/aws";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
+import { getS3, list } from "@util/storage/aws";
 import { GET } from "./route";
 
-jest.mock("@util/api/cookie", () => jest.fn());
-jest.mock("@util/auth/login", () => ({
-	login: jest.fn(),
+jest.mock("@util/auth/session", () => ({
+	getSessionUser: jest.fn(),
 }));
 jest.mock("@util/auth/roles", () => ({
 	roleAuth: jest.fn(),
@@ -50,8 +48,7 @@ function request(url, cookie = "id=user; hash=secret") {
 describe("/api/aws_download", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		parseCookie.mockReturnValue({ id: "user", hash: "secret" });
-		login.mockResolvedValue({ id: "user", role: "student" });
+		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
 		roleAuth.mockReturnValue(true);
 		getS3.mockResolvedValue({});
 		list.mockResolvedValue([
@@ -73,12 +70,7 @@ describe("/api/aws_download", () => {
 		const body = await response.json();
 
 		expect(response.status).toBe(200);
-		expect(login).toHaveBeenCalledWith({
-			id: "user",
-			hash: "secret",
-			api: "aws",
-			path: "sessions/test/2024",
-		});
+		expect(getSessionUser).toHaveBeenCalled();
 		expect(list).toHaveBeenCalledWith({ path: "sessions/test/2024" });
 		expect(body.items).toHaveLength(1);
 		expect(body.urls.tags).toContain("sessions/test/2024.tags");
@@ -88,7 +80,7 @@ describe("/api/aws_download", () => {
 	});
 
 	it("rejects requests without credentials", async () => {
-		parseCookie.mockReturnValue({});
+		getSessionUser.mockRejectedValue("ACCESS_DENIED");
 
 		const response = await GET(
 			request("http://localhost/api/aws_download?group=test&year=2024", ""),

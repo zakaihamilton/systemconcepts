@@ -1,10 +1,9 @@
-import crypto from "crypto";
-import { hash as bcryptHash } from "bcryptjs";
-import parseCookie from "@util/api/cookie";
-import { login } from "@util/auth/login";
-import { findRecord, handleRequest } from "@util/storage/mongo";
-import { roleAuth } from "@util/auth/roles";
 import { getSafeError } from "@util/api/safeError";
+import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
+import { findRecord, handleRequest } from "@util/storage/mongo";
+import { hash as bcryptHash } from "bcryptjs";
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -13,14 +12,9 @@ const collectionName = "users";
 
 async function handleUsers(request) {
 	try {
-		const cookieHeader = request.headers.get("cookie") || "";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
+		const user = await getSessionUser(request);
+		const id = user.id;
 		const queryId = request.headers.get("id");
-
-		if (!id || !hash) throw "ACCESS_DENIED";
-
-		const user = await login({ id, hash, api: "users" });
 
 		let body = null;
 		try {

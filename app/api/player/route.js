@@ -1,13 +1,15 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { metadataInfo as awsMetadataInfo, validatePathAccess } from "@util/storage/aws";
-import parseCookie from "@util/api/cookie";
 import { error, log } from "@util/api/logger";
-import { login } from "@util/auth/login";
-import { fileTitle } from "@util/data/path";
-import { roleAuth } from "@util/auth/roles";
 import { getSafeError } from "@util/api/safeError";
+import { roleAuth } from "@util/auth/roles";
+import { getSessionUser } from "@util/auth/session";
+import { fileTitle } from "@util/data/path";
 import { getSessions } from "@util/domain/sessionFeed";
+import {
+	metadataInfo as awsMetadataInfo,
+	validatePathAccess,
+} from "@util/storage/aws";
 import { getWasabi } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
@@ -54,13 +56,8 @@ async function getSessionTranscriptPath(s3Key) {
 export async function GET(request) {
 	try {
 		const { client: wasabiClient, bucket: BUCKET_NAME } = await getWasabi();
-		const cookieHeader = request.headers.get("cookie") || "";
 		const path = request.headers.get("path") || "";
-
-		if (!cookieHeader) throw "ACCESS_DENIED";
-		const cookies = parseCookie(cookieHeader);
-		const { id, hash } = cookies || {};
-		const user = await login({ id, hash, api: "player" });
+		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
 		let decodedPath = decodeURIComponent(path);
@@ -119,7 +116,7 @@ export async function GET(request) {
 
 		log({
 			component,
-			message: `User ${id} generated player & download URLs for: ${s3Key}`,
+			message: `User ${user.id} generated player & download URLs for: ${s3Key}`,
 		});
 
 		return NextResponse.json(
