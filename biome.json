@@ -8,7 +8,8 @@
 			"!**/public/sw.js",
 			"!**/test_gzip.js",
 			"!**/.next/**",
-			"!**/node_modules/**"
+			"!**/node_modules/**",
+			"!**/test-results/**"
 		]
 	},
 	"formatter": {

@@ -15,7 +15,9 @@ describe("Error Component", () => {
 
 	it("renders string error message and uses translation if available", () => {
 		render(<ErrorComponent error="MOCK_TRANSLATED_ERROR" />);
-		expect(screen.getByText("This is a translated error message")).toBeInTheDocument();
+		expect(
+			screen.getByText("This is a translated error message"),
+		).toBeInTheDocument();
 	});
 
 	it("falls back to raw error message if no translation is available", () => {
@@ -26,6 +28,8 @@ describe("Error Component", () => {
 	it("renders error object message", () => {
 		const errorObj = { message: "MOCK_TRANSLATED_ERROR" };
 		render(<ErrorComponent error={errorObj} />);
-		expect(screen.getByText("This is a translated error message")).toBeInTheDocument();
+		expect(
+			screen.getByText("This is a translated error message"),
+		).toBeInTheDocument();
 	});
 });
