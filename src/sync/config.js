@@ -1,3 +1,4 @@
+/** @type {import("./types").SyncConfig[]} */
 export const SYNC_CONFIG = [
 	{
 		name: "Main",
