@@ -7,7 +7,7 @@ export const SIGNED_URL_CACHE_TTL_MS = 2 * 60 * 60 * 1000;
 const responseCache = new Map();
 let reloginRedirectStarted = false;
 
-function requireRelogin(response) {
+export function requireRelogin(response) {
 	if (response.status !== 401 || reloginRedirectStarted) return false;
 	reloginRedirectStarted = true;
 	clearFetchCache();

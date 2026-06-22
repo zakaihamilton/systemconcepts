@@ -1,5 +1,5 @@
+import { fetchJSON, requireRelogin } from "@util/api/fetch";
 import { binaryToString } from "@util/data/binary";
-import { fetchJSON } from "@util/api/fetch";
 import { isBinaryFile, makePath } from "@util/data/path";
 import pLimit from "p-limit";
 
@@ -93,6 +93,9 @@ async function readFile(path) {
 
 	const res = await fetch(url, { method: "GET", cache: "no-store" });
 
+	if (requireRelogin(res)) {
+		throw new Error("AUTHENTICATION_REQUIRED");
+	}
 	if (!res.ok) {
 		throw new Error(`Failed to fetch file: ${res.status}`);
 	}
@@ -105,7 +108,9 @@ async function readFile(path) {
 			if (parsed?.signedUrl) {
 				const signedRes = await fetch(parsed.signedUrl);
 				if (!signedRes.ok) {
-					throw new Error(`Failed to fetch from signed URL: ${signedRes.status}`);
+					throw new Error(
+						`Failed to fetch from signed URL: ${signedRes.status}`,
+					);
 				}
 				if (binary) {
 					const blob = await signedRes.blob();
@@ -147,6 +152,9 @@ async function readFiles(prefix, files) {
 						results[name] = content;
 					}
 				} catch (err) {
+					if (err?.message === "AUTHENTICATION_REQUIRED") {
+						throw err;
+					}
 					// Silently skip files that don't exist (NoSuchKey is expected for .tags files)
 					// Only log unexpected errors
 					if (
