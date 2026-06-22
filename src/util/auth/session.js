@@ -3,6 +3,7 @@ import crypto from "crypto";
 
 export const SESSION_COOKIE = "session";
 export const SESSION_MARKER_COOKIE = "hash";
+export const AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED";
 const SESSION_TTL_MS = 60 * 24 * 60 * 60 * 1000;
 
 function digest(token) {
@@ -26,20 +27,24 @@ export async function createSession(userId, remember = true) {
 
 export async function getSessionUser(request) {
 	const token = request.cookies.get(SESSION_COOKIE)?.value;
-	if (!token) throw "ACCESS_DENIED";
+	if (!token) throw AUTHENTICATION_REQUIRED;
 	const session = await findRecord({
 		collectionName: "auth_sessions",
 		query: { id: digest(token) },
 	});
 	if (!session || new Date(session.expiresAt).getTime() <= Date.now()) {
-		throw "ACCESS_DENIED";
+		throw AUTHENTICATION_REQUIRED;
 	}
 	const user = await findRecord({
 		collectionName: "users",
 		query: { id: session.userId },
 	});
-	if (!user) throw "ACCESS_DENIED";
+	if (!user) throw AUTHENTICATION_REQUIRED;
 	return user;
+}
+
+export function getAuthErrorStatus(err, fallback = 403) {
+	return err === AUTHENTICATION_REQUIRED ? 401 : fallback;
 }
 
 export async function revokeSession(request) {

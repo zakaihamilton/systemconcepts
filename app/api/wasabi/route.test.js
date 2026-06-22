@@ -5,6 +5,9 @@ import { GET } from "./route";
 
 jest.mock("@util/auth/session", () => ({
 	getSessionUser: jest.fn(),
+	getAuthErrorStatus: jest.fn((err, fallback = 403) =>
+		err === "AUTHENTICATION_REQUIRED" ? 401 : fallback,
+	),
 }));
 jest.mock("@util/auth/roles", () => ({
 	roleAuth: jest.fn(),
@@ -123,11 +126,11 @@ describe("/api/wasabi", () => {
 	});
 
 	it("does not sign a URL when credentials are missing", async () => {
-		getSessionUser.mockRejectedValue("ACCESS_DENIED");
+		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt", ""));
 
-		expect(response.status).toBe(403);
+		expect(response.status).toBe(401);
 		expect(response.headers.get("Cache-Control")).toContain("no-store");
 		expect(getDownloadUrl).not.toHaveBeenCalled();
 	});

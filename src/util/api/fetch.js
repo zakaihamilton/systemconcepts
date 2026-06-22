@@ -1,9 +1,32 @@
 import { useOnline } from "@util/browser/online";
+import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 export const SIGNED_URL_CACHE_TTL_MS = 2 * 60 * 60 * 1000;
 const responseCache = new Map();
+let reloginRedirectStarted = false;
+
+function requireRelogin(response) {
+	if (response.status !== 401 || reloginRedirectStarted) return false;
+	reloginRedirectStarted = true;
+	clearFetchCache();
+	for (const name of ["id", "hash", "role"]) {
+		Cookies.remove(name, { path: "/" });
+		Cookies.remove(name);
+	}
+	const currentPath = window.location.hash.replace(/^#/, "");
+	const isAuthPath = /^(account|signup|resetpassword)(?:[/?]|$)/.test(
+		currentPath,
+	);
+	window.location.hash = isAuthPath
+		? "account"
+		: `account?redirect=${encodeURIComponent(currentPath)}`;
+	window.setTimeout(() => {
+		reloginRedirectStarted = false;
+	}, 0);
+	return true;
+}
 
 function getCacheKey(url, options = {}) {
 	return JSON.stringify({
@@ -57,6 +80,10 @@ export function fetchBlob(url, options) {
 		window
 			.fetch(url, options)
 			.then((response) => {
+				if (requireRelogin(response)) {
+					reject("AUTHENTICATION_REQUIRED");
+					return;
+				}
 				if (response.status !== 200) {
 					console.log("Status Code: " + response.status);
 					reject(response.status);
@@ -86,7 +113,8 @@ export function fetchText(url, options) {
 		{ "Content-Type": "text/plain", charset: "UTF-8" },
 		options.headers,
 	);
-	const { cacheResponse, cacheTtl, fetchOptions } = extractCacheOptions(options);
+	const { cacheResponse, cacheTtl, fetchOptions } =
+		extractCacheOptions(options);
 	const cacheKey = cacheResponse ? getCacheKey(url, fetchOptions) : null;
 	if (cacheKey) {
 		const cached = getCachedResponse(cacheKey);
@@ -96,6 +124,10 @@ export function fetchText(url, options) {
 		window
 			.fetch(url, fetchOptions)
 			.then((response) => {
+				if (requireRelogin(response)) {
+					reject("AUTHENTICATION_REQUIRED");
+					return;
+				}
 				if (response.status !== 200) {
 					console.log("Status Code: " + response.status);
 					reject(response.status);
@@ -126,7 +158,8 @@ export function fetchJSON(url, options) {
 		{ "Content-Type": "application/json" },
 		options.headers,
 	);
-	const { cacheResponse, cacheTtl, fetchOptions } = extractCacheOptions(options);
+	const { cacheResponse, cacheTtl, fetchOptions } =
+		extractCacheOptions(options);
 	const cacheKey = cacheResponse ? getCacheKey(url, fetchOptions) : null;
 	if (cacheKey) {
 		const cached = getCachedResponse(cacheKey);
@@ -136,6 +169,10 @@ export function fetchJSON(url, options) {
 		window
 			.fetch(url, fetchOptions)
 			.then((response) => {
+				if (requireRelogin(response)) {
+					reject("AUTHENTICATION_REQUIRED");
+					return;
+				}
 				if (response.status !== 200) {
 					console.log("Status Code: " + response.status);
 					reject(response.status);

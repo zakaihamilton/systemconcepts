@@ -1,6 +1,6 @@
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { getDownloadUrl, handleRequest } from "@util/storage/aws";
 import { NextResponse } from "next/server";
 
@@ -127,7 +127,10 @@ async function handleAWS(request) {
 		}
 	} catch (err) {
 		console.error("aws error: ", err);
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err) },
+		);
 	}
 }
 

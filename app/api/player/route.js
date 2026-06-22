@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { error, log } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { fileTitle } from "@util/data/path";
 import { getSessions } from "@util/domain/sessionFeed";
 import {
@@ -134,6 +134,9 @@ export async function GET(request) {
 		);
 	} catch (err) {
 		error({ component, error: "Access Error", err });
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err) },
+		);
 	}
 }

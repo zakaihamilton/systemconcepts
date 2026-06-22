@@ -1,6 +1,6 @@
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
@@ -55,7 +55,7 @@ export async function GET(request) {
 	} catch (err) {
 		return NextResponse.json(
 			{ err: getSafeError(err) },
-			{ status: 403, headers: NO_CACHE_HEADERS },
+			{ status: getAuthErrorStatus(err), headers: NO_CACHE_HEADERS },
 		);
 	}
 }

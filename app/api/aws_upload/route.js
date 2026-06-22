@@ -2,7 +2,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { getS3, validatePathAccess } from "@util/storage/aws";
 import { NextResponse } from "next/server";
 
@@ -69,6 +69,9 @@ export async function GET(request) {
 		return NextResponse.json({ url: uploadUrl });
 	} catch (err) {
 		console.error("aws_upload error: ", err);
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err) },
+		);
 	}
 }

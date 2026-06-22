@@ -1,6 +1,6 @@
 import { error } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { downloadData, validatePathAccess } from "@util/storage/aws";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
@@ -45,6 +45,6 @@ export async function GET(request) {
 		});
 	} catch (err) {
 		error({ component, error: "Subtitle fetch error", err });
-		return new NextResponse(null, { status: 404 });
+		return new NextResponse(null, { status: getAuthErrorStatus(err, 404) });
 	}
 }

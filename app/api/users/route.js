@@ -1,6 +1,6 @@
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { findRecord, handleRequest } from "@util/storage/mongo";
 import { hash as bcryptHash } from "bcryptjs";
 import crypto from "crypto";
@@ -95,7 +95,10 @@ async function handleUsers(request) {
 		return NextResponse.json(sanitizedResult);
 	} catch (err) {
 		console.error("users error: ", err);
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err) },
+		);
 	}
 }
 

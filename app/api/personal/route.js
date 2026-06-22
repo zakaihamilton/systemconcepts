@@ -1,5 +1,5 @@
 import { getSafeError } from "@util/api/safeError";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { handleRequest } from "@util/storage/mongo";
 import { NextResponse } from "next/server";
 
@@ -53,7 +53,10 @@ async function handlePersonal(request) {
 		return NextResponse.json(result);
 	} catch (err) {
 		console.error("personal error: ", err);
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err) },
+		);
 	}
 }
 

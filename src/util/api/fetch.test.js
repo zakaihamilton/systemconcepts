@@ -4,6 +4,9 @@ import {
 	fetchText,
 	getStableFetchCacheOptions,
 } from "@util/api/fetch";
+import Cookies from "js-cookie";
+
+jest.mock("js-cookie");
 
 function mockResponse(body) {
 	return Promise.resolve({
@@ -56,5 +59,21 @@ describe("fetch cache", () => {
 		await expect(fetchText("/api/login")).resolves.toBe("second");
 
 		expect(global.fetch).toHaveBeenCalledTimes(2);
+	});
+
+	it("routes expired sessions through login and preserves the return path", async () => {
+		window.location.hash = "#sessions/test";
+		global.fetch.mockResolvedValue({
+			status: 401,
+			text: () => Promise.resolve('{"err":"Please sign in again"}'),
+		});
+
+		await expect(fetchJSON("/api/personal")).rejects.toBe(
+			"AUTHENTICATION_REQUIRED",
+		);
+
+		expect(Cookies.remove).toHaveBeenCalledWith("id", { path: "/" });
+		expect(Cookies.remove).toHaveBeenCalledWith("hash", { path: "/" });
+		expect(window.location.hash).toBe("#account?redirect=sessions%2Ftest");
 	});
 });

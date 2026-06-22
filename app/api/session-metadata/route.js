@@ -1,6 +1,6 @@
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
-import { getSessionUser } from "@util/auth/session";
+import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { aggregateSessionMetadata } from "@util/domain/updateSessions/sessionMetadataServer";
 import { NextResponse } from "next/server";
 
@@ -24,6 +24,9 @@ export async function GET(request) {
 			headers: new Headers(SESSION_METADATA_HEADERS),
 		});
 	} catch (err) {
-		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err) },
+		);
 	}
 }

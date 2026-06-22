@@ -10,6 +10,7 @@ import { checkRateLimit } from "@util/auth/rateLimit";
 import {
 	clearSessionCookies,
 	createSession,
+	getAuthErrorStatus,
 	getSessionUser,
 	revokeSession,
 	setSessionCookies,
@@ -48,7 +49,10 @@ export async function GET(request) {
 
 	if (error) {
 		console.error("login error: ", error);
-		return NextResponse.json({ err: getSafeError(error) });
+		return NextResponse.json(
+			{ err: getSafeError(error) },
+			{ status: getAuthErrorStatus(error, 200) },
+		);
 	}
 
 	if (params && !params.role) {
