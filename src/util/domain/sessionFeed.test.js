@@ -129,7 +129,8 @@ describe("sessionFeed transcript URLs", () => {
 			id: "2026-06-24 Cached Transcript",
 			group: "compute",
 			year: "2026",
-			transcriptPath: "/aws/sessions/compute/2026/2026-06-24 Cached Transcript.txt",
+			transcriptPath:
+				"/aws/sessions/compute/2026/2026-06-24 Cached Transcript.txt",
 		};
 
 		const firstUrl = await getTranscriptProxyUrl(

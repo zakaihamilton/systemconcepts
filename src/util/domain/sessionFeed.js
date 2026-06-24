@@ -180,9 +180,10 @@ async function getExistingTranscriptPath(path) {
 	if (cached && cached.expiresAt > now) return cached.promise;
 
 	const wasabiKey = cleanPath.replace(/^wasabi\//, "");
-	const promise = (cleanPath.startsWith("wasabi/")
-		? wasabiMetadataInfo({ path: wasabiKey })
-		: awsMetadataInfo({ path: cleanPath })
+	const promise = (
+		cleanPath.startsWith("wasabi/")
+			? wasabiMetadataInfo({ path: wasabiKey })
+			: awsMetadataInfo({ path: cleanPath })
 	).then((exists) => (exists ? cleanPath : null));
 	transcriptMetadataCache.set(cleanPath, {
 		expiresAt: now + TRANSCRIPT_METADATA_CACHE_TTL_MS,
