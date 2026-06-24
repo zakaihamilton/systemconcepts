@@ -9,8 +9,15 @@ import pako from "pako";
 
 const MANIFEST_PATH = "sync/files.json.gz";
 const CACHE_TTL_MS = 60 * 1000;
+const TRANSCRIPT_METADATA_CACHE_TTL_MS = 5 * 60 * 1000;
 const decoder = new TextDecoder("utf-8");
 const cache = new Map();
+const transcriptMetadataCache = new Map();
+
+export function __clearSessionFeedCachesForTests() {
+	cache.clear();
+	transcriptMetadataCache.clear();
+}
 
 function decodeData(data) {
 	try {
@@ -168,12 +175,26 @@ async function getExistingTranscriptPath(path) {
 	if (!path) return null;
 
 	const cleanPath = normalizeProxyPath(path);
-	const wasabiKey = cleanPath.replace(/^wasabi\//, "");
-	const exists = cleanPath.startsWith("wasabi/")
-		? await wasabiMetadataInfo({ path: wasabiKey })
-		: await awsMetadataInfo({ path: cleanPath });
+	const now = Date.now();
+	const cached = transcriptMetadataCache.get(cleanPath);
+	if (cached && cached.expiresAt > now) return cached.promise;
 
-	return exists ? cleanPath : null;
+	const wasabiKey = cleanPath.replace(/^wasabi\//, "");
+	const promise = (cleanPath.startsWith("wasabi/")
+		? wasabiMetadataInfo({ path: wasabiKey })
+		: awsMetadataInfo({ path: cleanPath })
+	).then((exists) => (exists ? cleanPath : null));
+	transcriptMetadataCache.set(cleanPath, {
+		expiresAt: now + TRANSCRIPT_METADATA_CACHE_TTL_MS,
+		promise,
+	});
+
+	try {
+		return await promise;
+	} catch (err) {
+		transcriptMetadataCache.delete(cleanPath);
+		throw err;
+	}
 }
 
 async function getExistingInferredTranscriptPath(session) {

@@ -14,14 +14,17 @@ jest.mock("@util/storage/wasabi", () => ({
 describe("sessionFeed transcript URLs", () => {
 	let getSProxyUrl;
 	let getTranscriptProxyUrl;
+	let clearSessionFeedCaches;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 		global.TextDecoder = TextDecoder;
 		({
+			__clearSessionFeedCachesForTests: clearSessionFeedCaches,
 			getSProxyUrl,
 			getTranscriptProxyUrl,
 		} = require("@util/domain/sessionFeed"));
+		clearSessionFeedCaches();
 	});
 
 	it("normalizes legacy aws paths before building proxy URLs", () => {
@@ -117,6 +120,32 @@ describe("sessionFeed transcript URLs", () => {
 		).toBe(
 			"sessions/american/2026/2026-04-28 Overview - Effort vs Finding Favor.txt",
 		);
+	});
+
+	it("reuses transcript metadata lookups for repeated AWS transcript checks", async () => {
+		awsMetadataInfo.mockResolvedValue({ type: "text/plain" });
+		wasabiMetadataInfo.mockResolvedValue(null);
+		const session = {
+			id: "2026-06-24 Cached Transcript",
+			group: "compute",
+			year: "2026",
+			transcriptPath: "/aws/sessions/compute/2026/2026-06-24 Cached Transcript.txt",
+		};
+
+		const firstUrl = await getTranscriptProxyUrl(
+			session,
+			"https://systemconcepts.app",
+		);
+		const secondUrl = await getTranscriptProxyUrl(
+			session,
+			"https://systemconcepts.app",
+		);
+
+		expect(firstUrl).toBe(secondUrl);
+		expect(awsMetadataInfo).toHaveBeenCalledTimes(1);
+		expect(awsMetadataInfo).toHaveBeenCalledWith({
+			path: "sessions/compute/2026/2026-06-24 Cached Transcript.txt",
+		});
 	});
 
 	it("does not fall back to a yearly zip transcript URL when no standalone transcript exists", async () => {
