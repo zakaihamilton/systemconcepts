@@ -1,7 +1,7 @@
 import { authenticateTokenRequest, enforceRateLimit } from "@util/api/api";
 import {
 	getSessions,
-	getTranscriptProxyUrl,
+	getTranscriptProxyUrlFast,
 	sortSessions,
 } from "@util/domain/sessionFeed";
 import { GET } from "./route";
@@ -78,7 +78,7 @@ jest.mock("@util/api/api", () => ({
 jest.mock("@util/domain/sessionFeed", () => ({
 	getSessions: jest.fn(),
 	getSProxyUrl: jest.fn((path, baseUrl) => `${baseUrl}/proxy/${path}`),
-	getTranscriptProxyUrl: jest.fn(),
+	getTranscriptProxyUrlFast: jest.fn(() => null),
 	sortSessions: jest.fn((sessions) => sessions),
 }));
 
@@ -98,7 +98,7 @@ describe("/api/sessions", () => {
 			role: "student",
 		});
 		getSessions.mockResolvedValue([]);
-		getTranscriptProxyUrl.mockResolvedValue(null);
+		getTranscriptProxyUrlFast.mockReturnValue(null);
 	});
 
 	it("caches successful responses in the browser and Vercel CDN", async () => {

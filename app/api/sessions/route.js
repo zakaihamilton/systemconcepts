@@ -10,7 +10,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import {
 	getSessions,
 	getSProxyUrl,
-	getTranscriptProxyUrl,
+	getTranscriptProxyUrlFast,
 	sortSessions,
 } from "@util/domain/sessionFeed";
 import { NextResponse } from "next/server";
@@ -87,26 +87,21 @@ export async function GET(request) {
 		const baseUrl =
 			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
 
-		const formattedSessions = await Promise.all(
-			sessions.map(async (session) => {
-				const transcriptionUrl = await getTranscriptProxyUrl(session, baseUrl);
-				return {
-					id: session.id,
-					group: session.group,
-					year: session.year,
-					date: session.date,
-					name: session.name,
-					duration: session.duration ? Math.round(session.duration) : 0,
-					tags: session.tags || [],
-					summaryText: session.summaryText || session.summary || null,
-					imageUrl:
-						session.image && session.image.path
-							? getSProxyUrl(session.image.path, baseUrl)
-							: null,
-					transcriptionUrl,
-				};
-			}),
-		);
+		const formattedSessions = sessions.map((session) => ({
+			id: session.id,
+			group: session.group,
+			year: session.year,
+			date: session.date,
+			name: session.name,
+			duration: session.duration ? Math.round(session.duration) : 0,
+			tags: session.tags || [],
+			summaryText: session.summaryText || session.summary || null,
+			imageUrl:
+				session.image && session.image.path
+					? getSProxyUrl(session.image.path, baseUrl)
+					: null,
+			transcriptionUrl: getTranscriptProxyUrlFast(session, baseUrl),
+		}));
 
 		return new Response(JSON.stringify(formattedSessions), {
 			status: 200,
