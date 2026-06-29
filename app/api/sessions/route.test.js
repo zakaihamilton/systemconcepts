@@ -12,7 +12,7 @@ import {
 import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import { GET } from "./route";
 
-jest.mock("@util/api/api", () => ({
+jest.mock("@util/api/httpHeaders", () => ({
 	JSON_HEADERS: {
 		"Content-Type": "application/json; charset=utf-8",
 	},

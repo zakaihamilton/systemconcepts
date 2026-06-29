@@ -2,16 +2,9 @@ import { checkRateLimit } from "@util/auth/rateLimit";
 import { findRecord } from "@util/storage/mongo";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { JSON_HEADERS, NO_CACHE_HEADERS } from "./httpHeaders";
 
-export const JSON_HEADERS = {
-	"Content-Type": "application/json; charset=utf-8",
-};
-
-export const NO_CACHE_HEADERS = {
-	"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-	Pragma: "no-cache",
-	Expires: "0",
-};
+export { JSON_HEADERS, NO_CACHE_HEADERS } from "./httpHeaders";
 
 export function jsonError(message, status = 500, headers = {}) {
 	return NextResponse.json(

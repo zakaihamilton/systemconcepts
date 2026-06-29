@@ -1,4 +1,4 @@
-import { JSON_HEADERS, NO_CACHE_HEADERS } from "@util/api/api";
+import { JSON_HEADERS, NO_CACHE_HEADERS } from "@util/api/httpHeaders";
 import { readApiCacheEdge } from "@util/api/apiCacheEdge";
 import {
 	buildApiCacheKey,
