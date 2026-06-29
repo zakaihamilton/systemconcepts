@@ -62,18 +62,40 @@ export function getApiToken(user) {
 		.digest("hex");
 }
 
+const authCache = new Map();
+const AUTH_CACHE_TTL_MS = 60 * 1000;
+
+export function __clearAuthCacheForTests() {
+	authCache.clear();
+}
+
 export async function authenticateTokenRequest(searchParams) {
 	const id = searchParams.get("id");
 	const token = searchParams.get("token");
 	if (!id || !token) return null;
+
+	const cacheKey = `${id.toLowerCase()}:${token}`;
+	const now = Date.now();
+	const cached = authCache.get(cacheKey);
+	if (cached && cached.expiresAt > now) return cached.user;
 
 	const user = await findRecord({
 		collectionName: "users",
 		query: { id: id.toLowerCase() },
 		fields: { id: 1, hash: 1, role: 1 },
 	});
-	if (!user || user.role === "visitor") return null;
-	return timingSafeEqual(token, getApiToken(user)) ? user : null;
+	const authenticated =
+		user &&
+		user.role !== "visitor" &&
+		timingSafeEqual(token, getApiToken(user))
+			? user
+			: null;
+
+	authCache.set(cacheKey, {
+		user: authenticated,
+		expiresAt: now + AUTH_CACHE_TTL_MS,
+	});
+	return authenticated;
 }
 
 export function getPositiveInt(value, fallback, max) {

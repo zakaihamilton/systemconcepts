@@ -23,6 +23,31 @@ const SESSION_CACHE_HEADERS = {
 		"public, max-age=300, stale-while-revalidate=3600",
 };
 
+const responseCache = new Map();
+const RESPONSE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+export function __clearSessionsResponseCacheForTests() {
+	responseCache.clear();
+}
+
+function getCachedResponseBody(requestUrl) {
+	const now = Date.now();
+	const cached = responseCache.get(requestUrl);
+	if (!cached) return null;
+	if (cached.expiresAt <= now) {
+		responseCache.delete(requestUrl);
+		return null;
+	}
+	return cached.body;
+}
+
+function setCachedResponseBody(requestUrl, body) {
+	responseCache.set(requestUrl, {
+		body,
+		expiresAt: Date.now() + RESPONSE_CACHE_TTL_MS,
+	});
+}
+
 function preventCaching(response) {
 	for (const [name, value] of Object.entries(NO_CACHE_HEADERS)) {
 		response.headers.set(name, value);
@@ -48,6 +73,17 @@ export async function GET(request) {
 					headers: { ...JSON_HEADERS, ...NO_CACHE_HEADERS },
 				},
 			);
+		}
+
+		const cachedBody = getCachedResponseBody(request.url);
+		if (cachedBody) {
+			return new Response(cachedBody, {
+				status: 200,
+				headers: {
+					...JSON_HEADERS,
+					...SESSION_CACHE_HEADERS,
+				},
+			});
 		}
 
 		const group = searchParams.get("group");
@@ -103,7 +139,10 @@ export async function GET(request) {
 			transcriptionUrl: getTranscriptProxyUrlFast(session, baseUrl),
 		}));
 
-		return new Response(JSON.stringify(formattedSessions), {
+		const body = JSON.stringify(formattedSessions);
+		setCachedResponseBody(request.url, body);
+
+		return new Response(body, {
 			status: 200,
 			headers: {
 				...JSON_HEADERS,

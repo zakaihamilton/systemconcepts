@@ -4,7 +4,7 @@ import {
 	getTranscriptProxyUrlFast,
 	sortSessions,
 } from "@util/domain/sessionFeed";
-import { GET } from "./route";
+import { GET, __clearSessionsResponseCacheForTests } from "./route";
 
 jest.mock("next/server", () => {
 	class TestHeaders {
@@ -92,6 +92,7 @@ function makeRequest(query = "") {
 describe("/api/sessions", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		__clearSessionsResponseCacheForTests();
 		enforceRateLimit.mockResolvedValue(null);
 		authenticateTokenRequest.mockResolvedValue({
 			id: "user",
@@ -128,6 +129,16 @@ describe("/api/sessions", () => {
 		await expect(response.json()).resolves.toEqual([
 			expect.objectContaining({ id: "two", group: "alpha" }),
 		]);
+	});
+
+	it("reuses an in-process cache for identical authenticated requests", async () => {
+		getSessions.mockResolvedValue([{ id: "one", group: "alpha" }]);
+		const request = makeRequest("?id=user&token=token");
+
+		await GET(request);
+		await GET(request);
+
+		expect(getSessions).toHaveBeenCalledTimes(1);
 	});
 
 	it("does not cache unauthorized responses", async () => {
