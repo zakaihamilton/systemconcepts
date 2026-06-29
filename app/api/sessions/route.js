@@ -1,52 +1,32 @@
+import { JSON_HEADERS, NO_CACHE_HEADERS } from "@util/api/api";
+import { readApiCacheEdge } from "@util/api/apiCacheEdge";
 import {
-	authenticateTokenRequest,
-	enforceRateLimit,
-	getNonNegativeInt,
-	getPositiveInt,
-	JSON_HEADERS,
-	NO_CACHE_HEADERS,
-} from "@util/api/api";
+	buildApiCacheKey,
+	getContentParams,
+	getManifestFingerprint,
+} from "@util/api/apiCacheKeys";
+import {
+	authenticateEdge,
+	enforceRateLimitEdge,
+	getClientIp,
+	scheduleApiCacheWrite,
+} from "@util/api/edgeApi";
 import { logger as structuredLogger } from "@util/api/logger";
 import {
-	getSessions,
-	getSProxyUrl,
-	getTranscriptProxyUrlFast,
-	sortSessions,
-} from "@util/domain/sessionFeed";
+	buildSessionsJson,
+	filterSessions,
+} from "@util/domain/sessionsApiResponse";
+import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const SESSION_CACHE_HEADERS = {
-	"Cache-Control": "private, max-age=300",
+	"Cache-Control": "public, max-age=300",
 	"Vercel-CDN-Cache-Control":
 		"public, max-age=300, stale-while-revalidate=3600",
 };
-
-const responseCache = new Map();
-const RESPONSE_CACHE_TTL_MS = 5 * 60 * 1000;
-
-export function __clearSessionsResponseCacheForTests() {
-	responseCache.clear();
-}
-
-function getCachedResponseBody(requestUrl) {
-	const now = Date.now();
-	const cached = responseCache.get(requestUrl);
-	if (!cached) return null;
-	if (cached.expiresAt <= now) {
-		responseCache.delete(requestUrl);
-		return null;
-	}
-	return cached.body;
-}
-
-function setCachedResponseBody(requestUrl, body) {
-	responseCache.set(requestUrl, {
-		body,
-		expiresAt: Date.now() + RESPONSE_CACHE_TTL_MS,
-	});
-}
 
 function preventCaching(response) {
 	for (const [name, value] of Object.entries(NO_CACHE_HEADERS)) {
@@ -57,15 +37,22 @@ function preventCaching(response) {
 
 export async function GET(request) {
 	try {
-		const rateLimitResponse = await enforceRateLimit(request, {
+		const rateLimited = await enforceRateLimitEdge(getClientIp(request), {
 			limit: 60,
 			windowMs: 60 * 1000,
 		});
-		if (rateLimitResponse) return preventCaching(rateLimitResponse);
+		if (!rateLimited) {
+			return preventCaching(
+				NextResponse.json(
+					{ err: "Too many requests. Please try again later." },
+					{ status: 429, headers: { ...JSON_HEADERS, ...NO_CACHE_HEADERS } },
+				),
+			);
+		}
 
 		const { searchParams } = new URL(request.url);
-		const user = await authenticateTokenRequest(searchParams);
-		if (!user) {
+		const authenticated = await authenticateEdge(searchParams);
+		if (!authenticated) {
 			return NextResponse.json(
 				{ err: "Unauthorized. Access denied." },
 				{
@@ -75,7 +62,16 @@ export async function GET(request) {
 			);
 		}
 
-		const cachedBody = getCachedResponseBody(request.url);
+		const baseUrl =
+			process.env.SITE_URL ||
+			process.env.NEXT_PUBLIC_SITE_URL ||
+			"https://systemconcepts.app";
+		const group = searchParams.get("group");
+		const manifest = await loadManifest();
+		const fingerprint = getManifestFingerprint(manifest, { group });
+		const contentParams = getContentParams("sessions", searchParams);
+		const cacheKey = await buildApiCacheKey("sessions", contentParams, fingerprint);
+		const cachedBody = await readApiCacheEdge("sessions", cacheKey);
 		if (cachedBody) {
 			return new Response(cachedBody, {
 				status: 200,
@@ -86,61 +82,12 @@ export async function GET(request) {
 			});
 		}
 
-		const group = searchParams.get("group");
-		const tag = searchParams.get("tag");
-		const date = searchParams.get("date");
-		const year = searchParams.get("year");
-		const query = searchParams.get("query");
-		const count = getPositiveInt(searchParams.get("count"), 100, 500);
-		const index = getNonNegativeInt(searchParams.get("index"));
-
-		let sessions = await getSessions({ group });
-		if (tag) {
-			const lowerTag = tag.toLowerCase().trim();
-			sessions = sessions.filter((s) =>
-				(s.tags || []).some((t) => t.toLowerCase().trim() === lowerTag),
-			);
-		}
-		if (date) {
-			const dateStr = date.trim();
-			sessions = sessions.filter((s) => s.date === dateStr);
-		}
-		if (year) {
-			const yearStr = year.trim();
-			sessions = sessions.filter((s) => s.year === yearStr);
-		}
-		if (query) {
-			const lowerQuery = query.toLowerCase().trim();
-			sessions = sessions.filter(
-				(s) =>
-					(s.name || "").toLowerCase().includes(lowerQuery) ||
-					(s.summaryText || "").toLowerCase().includes(lowerQuery) ||
-					(s.tags || []).some((t) => t.toLowerCase().includes(lowerQuery)),
-			);
-		}
-
-		sessions = sortSessions(sessions).slice(index, index + count);
-		const baseUrl =
-			process.env.NEXT_PUBLIC_SITE_URL || "https://systemconcepts.app";
-
-		const formattedSessions = sessions.map((session) => ({
-			id: session.id,
-			group: session.group,
-			year: session.year,
-			date: session.date,
-			name: session.name,
-			duration: session.duration ? Math.round(session.duration) : 0,
-			tags: session.tags || [],
-			summaryText: session.summaryText || session.summary || null,
-			imageUrl:
-				session.image && session.image.path
-					? getSProxyUrl(session.image.path, baseUrl)
-					: null,
-			transcriptionUrl: getTranscriptProxyUrlFast(session, baseUrl),
-		}));
-
-		const body = JSON.stringify(formattedSessions);
-		setCachedResponseBody(request.url, body);
+		const sessions = filterSessions(
+			await getSessions({ group }),
+			searchParams,
+		);
+		const body = buildSessionsJson({ sessions, baseUrl });
+		scheduleApiCacheWrite("sessions", cacheKey, body);
 
 		return new Response(body, {
 			status: 200,

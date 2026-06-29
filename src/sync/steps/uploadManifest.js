@@ -1,4 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
+import { purgeApiCacheFromStorage } from "@util/api/apiCachePurgeClient";
 import { makePath } from "@util/data/path";
 import Cookies from "js-cookie";
 import { writeCompressedFile } from "../bundle";
@@ -75,6 +76,9 @@ export async function uploadManifest(
 	try {
 		const remoteManifestPath = makePath(remotePath, FILES_MANIFEST_GZ);
 		await writeCompressedFile(remoteManifestPath, normalizedManifest);
+		void purgeApiCacheFromStorage().catch((err) => {
+			structuredLogger.error("[Sync] Failed to purge api-cache:", err);
+		});
 
 		const duration = ((performance.now() - start) / 1000).toFixed(1);
 		addSyncLog(`✓ Uploaded manifest in ${duration}s`, "info");

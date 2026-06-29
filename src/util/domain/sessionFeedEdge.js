@@ -114,8 +114,12 @@ function getAwsTranscriptPath(session) {
 // Public exports
 // ---------------------------------------------------------------------------
 
+export async function loadManifest() {
+	return getJsonFile(MANIFEST_PATH);
+}
+
 export async function getSessions({ group } = {}) {
-	const manifest = await getJsonFile(MANIFEST_PATH);
+	const manifest = await loadManifest();
 	const files = manifest.filter(
 		(file) =>
 			file.path &&

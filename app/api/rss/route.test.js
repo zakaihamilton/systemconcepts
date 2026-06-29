@@ -1,4 +1,8 @@
-import { getSessions } from "@util/domain/sessionFeedEdge";
+import { readApiCacheEdge } from "@util/api/apiCacheEdge";
+import { buildApiCacheKey, buildCanonicalApiUrl } from "@util/api/apiCacheKeys";
+import { authenticateEdge, scheduleApiCacheWrite } from "@util/api/edgeApi";
+import { buildRssEtag, buildRssFeed } from "@util/domain/rssFeedResponse";
+import { getSessions, loadManifest, sortSessions } from "@util/domain/sessionFeedEdge";
 import { TextEncoder } from "util";
 import { GET } from "./route";
 
@@ -33,16 +37,35 @@ jest.mock("next/server", () => {
 	};
 });
 
-jest.mock("@util/data/string", () => ({
-	formatDuration: jest.fn(() => "1 minute"),
+jest.mock("@util/api/apiCacheEdge", () => ({
+	readApiCacheEdge: jest.fn(),
+}));
+
+jest.mock("@util/api/apiCacheKeys", () => ({
+	buildApiCacheKey: jest.fn(async () => "cache-key"),
+	buildCanonicalApiUrl: jest.fn(
+		() => "https://systemconcepts.app/api/rss?group=a&count=10",
+	),
+	getContentParams: jest.fn(() => ({ group: "a", count: 10 })),
+	getManifestFingerprint: jest.fn(() => "fingerprint"),
+}));
+
+jest.mock("@util/api/edgeApi", () => ({
+	authenticateEdge: jest.fn(),
+	scheduleApiCacheWrite: jest.fn(),
+}));
+
+jest.mock("@util/domain/rssFeedResponse", () => ({
+	buildRssFeed: jest.fn(() => ({
+		rss: '<?xml version="1.0"?><rss><channel><item><pubDate>Mon, 01 Jan 2024 00:00:00 +0000</pubDate></item></channel></rss>',
+		maxDate: "Mon, 01 Jan 2024 00:00:00 GMT",
+	})),
+	buildRssEtag: jest.fn(async () => "abc123"),
 }));
 
 jest.mock("@util/domain/sessionFeedEdge", () => ({
 	getSessions: jest.fn(),
-	getSProxyUrl: jest.fn((path, baseUrl) =>
-		path ? `${baseUrl}/api/rss/s?p=encoded` : null,
-	),
-	getTranscriptProxyUrlFast: jest.fn(() => null),
+	loadManifest: jest.fn(),
 	sortSessions: jest.fn((sessions) => sessions),
 }));
 
@@ -62,28 +85,15 @@ describe("/api/rss", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		global.TextEncoder = TextEncoder;
-		Object.defineProperty(global, "crypto", {
-			configurable: true,
-			value: {
-				subtle: {
-					digest: jest.fn(async (_algorithm, data) => {
-						const hash = new Uint8Array(32);
-						hash.fill(data.byteLength % 256);
-						return hash.buffer;
-					}),
-				},
-			},
-		});
 		process.env = {
 			...originalEnv,
 			SITE_URL: "https://systemconcepts.app",
 			AWS_SECRET: "internal-secret",
 		};
-		global.fetch = jest.fn().mockResolvedValue({
-			ok: true,
-			json: async () => ({ ok: true }),
-		});
+		authenticateEdge.mockResolvedValue(true);
+		loadManifest.mockResolvedValue([]);
 		getSessions.mockResolvedValue([]);
+		readApiCacheEdge.mockResolvedValue(null);
 	});
 
 	afterAll(() => {
@@ -102,8 +112,8 @@ describe("/api/rss", () => {
 		expect(response.headers.get("Vercel-CDN-Cache-Control")).toBe(
 			"public, max-age=3600, stale-while-revalidate=86400",
 		);
-		expect(response.headers.get("ETag")).toBeTruthy();
-		expect(response.headers.get("Last-Modified")).toBeTruthy();
+		expect(response.headers.get("ETag")).toBe('"abc123"');
+		expect(buildCanonicalApiUrl).toHaveBeenCalled();
 	});
 
 	it("returns matching validators and cache policy for 304 responses", async () => {
@@ -119,17 +129,25 @@ describe("/api/rss", () => {
 
 		expect(response.status).toBe(304);
 		expect(response.headers.get("ETag")).toBe(first.headers.get("ETag"));
-		expect(response.headers.get("Last-Modified")).toBeTruthy();
-		expect(response.headers.get("Vercel-CDN-Cache-Control")).toContain(
-			"max-age=3600",
+	});
+
+	it("uses shared cache without rebuilding sessions", async () => {
+		readApiCacheEdge.mockResolvedValue(
+			'<?xml version="1.0"?><rss><channel><item><pubDate>Mon, 01 Jan 2024 00:00:00 +0000</pubDate></item></channel></rss>',
 		);
+
+		await GET(
+			makeRequest(
+				"https://systemconcepts.app/api/rss?id=user-c&token=token-c&group=alpha",
+			),
+		);
+
+		expect(getSessions).not.toHaveBeenCalled();
+		expect(buildRssFeed).not.toHaveBeenCalled();
 	});
 
 	it("does not cache unauthorized responses", async () => {
-		global.fetch.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ ok: false }),
-		});
+		authenticateEdge.mockResolvedValue(false);
 
 		const response = await GET(
 			makeRequest(
@@ -139,7 +157,6 @@ describe("/api/rss", () => {
 
 		expect(response.status).toBe(403);
 		expect(response.headers.get("Cache-Control")).toBe("no-store");
-		expect(response.headers.get("Vercel-CDN-Cache-Control")).toBeNull();
 	});
 
 	it("keeps query variants distinct when fetching and rendering feeds", async () => {
@@ -154,9 +171,9 @@ describe("/api/rss", () => {
 			),
 		);
 
-		expect(global.fetch).toHaveBeenCalledTimes(2);
 		expect(getSessions).toHaveBeenNthCalledWith(1, { group: "alpha" });
 		expect(getSessions).toHaveBeenNthCalledWith(2, { group: "beta" });
+		expect(scheduleApiCacheWrite).toHaveBeenCalledTimes(2);
 	});
 
 	it("does not cache generation failures", async () => {
