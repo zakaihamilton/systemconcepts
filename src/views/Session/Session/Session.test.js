@@ -16,7 +16,9 @@ jest.mock("@util/api/fetch");
 jest.mock("@util/browser/styles");
 jest.mock("@widgets/Group", () => () => <div data-testid="group" />);
 jest.mock("@widgets/Summary", () => () => <div data-testid="summary" />);
-jest.mock("@widgets/Image", () => () => <div data-testid="image" />);
+jest.mock("@widgets/Image", () => ({ path }) => (
+	<div data-testid="image" data-path={path} />
+));
 jest.mock("@components/Toolbar", () => ({
 	registerToolbar: jest.fn(),
 	useToolbar: jest.fn(),
@@ -67,5 +69,27 @@ describe("Session View", () => {
 		expect(getByText("Test Session")).toBeInTheDocument();
 		expect(getByTestId("group")).toBeInTheDocument();
 		expect(getByTestId("summary")).toBeInTheDocument();
+	});
+
+	it("replaces stale DigitalOcean image URLs with the equivalent Wasabi path", () => {
+		const mockSession = {
+			id: "2026-06-30 Beastly",
+			group: "will",
+			year: "2026",
+			date: "2026-06-30",
+			name: "Beastly",
+			imagePath:
+				"https://screens.sfo2.digitaloceanspaces.com/sessions/will/2026/2026-06-30%20Beastly.png",
+		};
+		useSessions.mockReturnValue([[mockSession], false]);
+
+		const { getByTestId } = render(
+			<SessionPage group="will" year="2026" date="2026-06-30" name="Beastly" />,
+		);
+
+		expect(getByTestId("image")).toHaveAttribute(
+			"data-path",
+			"wasabi/will/2026/2026-06-30 Beastly.png",
+		);
 	});
 });

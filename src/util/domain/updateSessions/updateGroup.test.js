@@ -168,7 +168,7 @@ describe("updateGroupProcess", () => {
 		});
 	});
 
-	it("combines Wasabi media with DigitalOcean metadata and preferred images", async () => {
+	it("combines Wasabi media with DigitalOcean metadata and prefers Wasabi images", async () => {
 		await updateGroupProcess("test", true);
 
 		expect(fetchSessionMetadata).toHaveBeenCalledTimes(1);
@@ -189,7 +189,7 @@ describe("updateGroupProcess", () => {
 			"wasabi/test/2024/2024-05-05 Test Session.mp4",
 		);
 		expect(session.image.path).toBe(
-			"/aws/sessions/test/2024/2024-05-05 Test Session.png",
+			"wasabi/test/2024/2024-05-05 Test Session.jpg",
 		);
 		expect(session.duration).toBe(123);
 		expect(session.summaryText).toBe("Summary from DigitalOcean");

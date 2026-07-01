@@ -108,16 +108,17 @@ function hasImageFile(files) {
 	return (files || []).some((file) => isImageFile(file.name));
 }
 
-function getWasabiSessionFiles(wasabiFiles, digitalOceanFiles) {
-	if (!hasImageFile(digitalOceanFiles)) {
-		return wasabiFiles || [];
-	}
-	return (wasabiFiles || []).filter((file) => !isImageFile(file.name));
+function getWasabiSessionFiles(wasabiFiles) {
+	return wasabiFiles || [];
 }
 
-function getDigitalOceanSessionFiles(files) {
+function getDigitalOceanSessionFiles(files, wasabiFiles = []) {
+	const hasWasabiImage = hasImageFile(wasabiFiles);
 	return (files || []).filter(
-		(file) => !isAudioFile(file.name) && !isVideoFile(file.name),
+		(file) =>
+			!isAudioFile(file.name) &&
+			!isVideoFile(file.name) &&
+			(!hasWasabiImage || !isImageFile(file.name)),
 	);
 }
 
@@ -761,9 +762,10 @@ export async function updateGroupProcess(
 								const wasabiFiles = wasabiFilesMap[id] || [];
 								const digitalOceanFiles = getDigitalOceanSessionFiles(
 									digitalOceanFilesMap[id],
+									wasabiFiles,
 								);
 								const files = [
-									...getWasabiSessionFiles(wasabiFiles, digitalOceanFiles),
+									...getWasabiSessionFiles(wasabiFiles),
 									...digitalOceanFiles,
 								];
 								const metadataFallbackFiles = [

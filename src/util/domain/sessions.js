@@ -332,7 +332,9 @@ export function useSessions(depends = [], options = {}) {
 						// Skip if group is not actually bundled
 						if (!bundledGroups.has(session.group)) continue;
 
-						if (session.image && cdn.url) {
+						if (session.image?.path?.startsWith("wasabi/")) {
+							session.imagePath = session.image.path;
+						} else if (session.image && cdn.url) {
 							session.imagePath =
 								cdn.url + encodeURI(session.image.path.replace("/aws", ""));
 
@@ -410,7 +412,9 @@ export function useSessions(depends = [], options = {}) {
 									const session = dataSessions[i];
 
 									// Update thumbnail if CDN URL exists
-									if (session.image && cdn.url) {
+									if (session.image?.path?.startsWith("wasabi/")) {
+										session.imagePath = session.image.path;
+									} else if (session.image && cdn.url) {
 										session.imagePath =
 											cdn.url +
 											encodeURI(session.image.path.replace("/aws", ""));

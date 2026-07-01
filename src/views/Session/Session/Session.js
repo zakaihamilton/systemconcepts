@@ -24,6 +24,27 @@ import styles from "./Session.module.css";
 
 registerToolbar("Session");
 
+function getSessionImagePath(session) {
+	if (session.image?.path?.startsWith("wasabi/")) {
+		return session.image.path;
+	}
+
+	const imagePath =
+		session.imagePath ||
+		(typeof session.thumbnail === "string"
+			? session.thumbnail
+			: session.image?.path);
+	if (!imagePath?.startsWith("https://screens.sfo2.digitaloceanspaces.com/")) {
+		return imagePath;
+	}
+
+	const extension = imagePath.split("?")[0].split(".").pop();
+	const id = session.id || `${session.date} ${session.name}`;
+	if (!session.group || !session.year || !id || !extension) return imagePath;
+
+	return `wasabi/${session.group}/${session.year}/${id}.${extension}`;
+}
+
 export default function SessionPage({ group, year, date, name }) {
 	const isMobile = useDeviceType() !== "desktop";
 	const translations = useTranslations();
@@ -182,11 +203,7 @@ export default function SessionPage({ group, year, date, name }) {
 		}
 	};
 
-	const imagePath =
-		session.imagePath ||
-		(typeof thumbnail === "string"
-			? thumbnail
-			: session.image && session.image.path);
+	const imagePath = getSessionImagePath(session);
 
 	return (
 		<div className={styles.root} {...swipeHandlers}>
