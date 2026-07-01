@@ -23,14 +23,16 @@ export default function ImageWidget({
 	onLoad: onLoadCallback,
 }) {
 	const isWasabi = path && path.startsWith("wasabi/");
+	const isAws = path && (path.startsWith("/aws/") || path.startsWith("aws/"));
+	const needsSignedUrl = isWasabi || isAws;
 	const [data] = useFetchJSON(
-		isWasabi && "/api/player",
+		needsSignedUrl && "/api/player",
 		{
 			headers: { path: encodeURIComponent(path) },
 			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
 		},
 		[path],
-		isWasabi,
+		needsSignedUrl,
 	);
 	const [imageLoading, setImageLoading] = useState(false);
 	const [loaded, setLoaded] = useState(false);
@@ -38,7 +40,7 @@ export default function ImageWidget({
 	const imgRef = useRef(null);
 	const currentPathRef = useRef("INITIAL_SENTINEL");
 
-	const effectivePath = isWasabi ? data && data.path : path;
+	const effectivePath = needsSignedUrl ? data && data.path : path;
 	const loadingAttribute = typeof loading === "string" ? loading : undefined;
 
 	const onLoad = () => {
@@ -91,7 +93,7 @@ export default function ImageWidget({
 	}, [effectivePath, hasPath, onLoadCallback]);
 
 	const isExternalLoading =
-		(typeof loading === "boolean" && loading) || (isWasabi && !data);
+		(typeof loading === "boolean" && loading) || (needsSignedUrl && !data);
 
 	const showAlt = (!hasPath || !!error) && !isExternalLoading && !imageLoading;
 	const clickable = !!onClick;

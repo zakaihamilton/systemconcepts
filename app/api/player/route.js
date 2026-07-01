@@ -58,34 +58,50 @@ async function getSessionTranscriptPath(s3Key) {
 
 export async function GET(request) {
 	try {
-		const { client: wasabiClient, bucket: BUCKET_NAME } = await getWasabi();
 		const path = request.headers.get("path") || "";
 		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
 		let decodedPath = decodeURIComponent(path);
 		validatePathAccess(decodedPath);
+		const isAwsPath = decodedPath.replace(/^\//, "").startsWith("aws/");
 		let s3Key = getWasabiKey(decodedPath);
 
 		const fileName = s3Key.split("/").pop();
+		let playerUrl;
+		let downloadUrl;
+		if (isAwsPath) {
+			const awsPath = `sessions/${s3Key}`;
+			playerUrl = await getAwsDownloadUrl({
+				path: awsPath,
+				expiresIn: 10800,
+				responseContentDisposition: "inline",
+			});
+			downloadUrl = await getAwsDownloadUrl({
+				path: awsPath,
+				expiresIn: 10800,
+				responseContentDisposition: `attachment; filename="${fileName}"`,
+			});
+		} else {
+			const { client: wasabiClient, bucket: BUCKET_NAME } = await getWasabi();
+			const playerCommand = new GetObjectCommand({
+				Bucket: BUCKET_NAME,
+				Key: s3Key,
+				ResponseContentDisposition: "inline",
+			});
+			playerUrl = await getSignedUrl(wasabiClient, playerCommand, {
+				expiresIn: 10800,
+			});
 
-		const playerCommand = new GetObjectCommand({
-			Bucket: BUCKET_NAME,
-			Key: s3Key,
-			ResponseContentDisposition: "inline",
-		});
-		const playerUrl = await getSignedUrl(wasabiClient, playerCommand, {
-			expiresIn: 10800,
-		});
-
-		const downloadCommand = new GetObjectCommand({
-			Bucket: BUCKET_NAME,
-			Key: s3Key,
-			ResponseContentDisposition: `attachment; filename="${fileName}"`,
-		});
-		const downloadUrl = await getSignedUrl(wasabiClient, downloadCommand, {
-			expiresIn: 10800,
-		});
+			const downloadCommand = new GetObjectCommand({
+				Bucket: BUCKET_NAME,
+				Key: s3Key,
+				ResponseContentDisposition: `attachment; filename="${fileName}"`,
+			});
+			downloadUrl = await getSignedUrl(wasabiClient, downloadCommand, {
+				expiresIn: 10800,
+			});
+		}
 
 		let subtitles = null;
 		let transcriptionUrl = null;

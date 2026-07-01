@@ -130,4 +130,33 @@ describe("/api/player transcript URLs", () => {
 		expect(awsMetadataInfo).not.toHaveBeenCalled();
 		expect(getAwsDownloadUrl).not.toHaveBeenCalled();
 	});
+
+	it("signs AWS images against AWS without using Wasabi", async () => {
+		getAwsDownloadUrl
+			.mockResolvedValueOnce("https://aws.example/image")
+			.mockResolvedValueOnce("https://aws.example/download");
+
+		const response = await GET(
+			request("/aws/sessions/will/2026/2026-06-30 Beastly.png"),
+		);
+
+		expect(await response.json()).toMatchObject({
+			path: "https://aws.example/image",
+			downloadUrl: "https://aws.example/download",
+			transcriptionUrl: null,
+		});
+		expect(getWasabi).not.toHaveBeenCalled();
+		expect(getSignedUrl).not.toHaveBeenCalled();
+		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(1, {
+			path: "sessions/will/2026/2026-06-30 Beastly.png",
+			expiresIn: 10800,
+			responseContentDisposition: "inline",
+		});
+		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(2, {
+			path: "sessions/will/2026/2026-06-30 Beastly.png",
+			expiresIn: 10800,
+			responseContentDisposition:
+				'attachment; filename="2026-06-30 Beastly.png"',
+		});
+	});
 });

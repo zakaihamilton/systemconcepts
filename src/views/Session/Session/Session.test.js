@@ -71,7 +71,7 @@ describe("Session View", () => {
 		expect(getByTestId("summary")).toBeInTheDocument();
 	});
 
-	it("replaces stale DigitalOcean image URLs with the equivalent Wasabi path", () => {
+	it("uses the authenticated AWS image path instead of a stale public CDN URL", () => {
 		const mockSession = {
 			id: "2026-06-30 Beastly",
 			group: "will",
@@ -80,6 +80,9 @@ describe("Session View", () => {
 			name: "Beastly",
 			imagePath:
 				"https://screens.sfo2.digitaloceanspaces.com/sessions/will/2026/2026-06-30%20Beastly.png",
+			image: {
+				path: "/aws/sessions/will/2026/2026-06-30 Beastly.png",
+			},
 		};
 		useSessions.mockReturnValue([[mockSession], false]);
 
@@ -89,7 +92,7 @@ describe("Session View", () => {
 
 		expect(getByTestId("image")).toHaveAttribute(
 			"data-path",
-			"wasabi/will/2026/2026-06-30 Beastly.png",
+			"/aws/sessions/will/2026/2026-06-30 Beastly.png",
 		);
 	});
 });

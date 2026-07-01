@@ -35,6 +35,30 @@ describe("Image Widget", () => {
 		});
 	});
 
+	it("requests a signed player URL for AWS images", () => {
+		useFetchJSON.mockReturnValue([null, false, false]);
+
+		render(
+			<ImageWidget
+				path="/aws/sessions/will/2026/2026-06-30 Beastly.png"
+				alt="Beastly"
+			/>,
+		);
+
+		expect(useFetchJSON).toHaveBeenCalledWith(
+			"/api/player",
+			expect.objectContaining({
+				headers: {
+					path: encodeURIComponent(
+						"/aws/sessions/will/2026/2026-06-30 Beastly.png",
+					),
+				},
+			}),
+			["/aws/sessions/will/2026/2026-06-30 Beastly.png"],
+			true,
+		);
+	});
+
 	it("renders alt text when path is missing", () => {
 		const { getByText } = render(<ImageWidget alt="Alt Text" />);
 		expect(getByText("Alt Text")).toBeInTheDocument();
