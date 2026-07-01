@@ -48,7 +48,7 @@ export async function GET(request) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const group = searchParams.get("group");
-		const count = getPositiveInt(searchParams.get("count"), 250, 500);
+		const count = getPositiveInt(searchParams.get("count"), 50, 500);
 
 		const authenticated = await authenticateEdge(searchParams);
 		if (!authenticated) {

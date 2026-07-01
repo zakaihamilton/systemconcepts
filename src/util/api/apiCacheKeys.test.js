@@ -40,6 +40,15 @@ describe("apiCacheKeys", () => {
 		});
 	});
 
+	it("uses 50 as the default RSS count", () => {
+		const params = new URLSearchParams("id=user&token=secret");
+
+		expect(getContentParams("rss", params)).toEqual({
+			group: "",
+			count: 50,
+		});
+	});
+
 	it("changes fingerprint when manifest versions change", () => {
 		const first = getManifestFingerprint(manifest, { group: "alpha" });
 		const updated = getManifestFingerprint(

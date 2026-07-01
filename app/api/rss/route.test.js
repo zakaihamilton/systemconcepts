@@ -100,7 +100,7 @@ describe("/api/rss", () => {
 		process.env = originalEnv;
 	});
 
-	it("returns the feed with one-hour Vercel caching", async () => {
+	it("returns the feed with six-hour Vercel caching", async () => {
 		const response = await GET(
 			makeRequest(
 				"https://systemconcepts.app/api/rss?id=user-a&token=token-a&group=a&count=10",
@@ -114,6 +114,21 @@ describe("/api/rss", () => {
 		);
 		expect(response.headers.get("ETag")).toBe('"abc123"');
 		expect(buildCanonicalApiUrl).toHaveBeenCalled();
+	});
+
+	it("publishes 50 sessions by default", async () => {
+		getSessions.mockResolvedValue(
+			Array.from({ length: 60 }, (_, index) => ({ id: index })),
+		);
+
+		await GET(
+			makeRequest("https://systemconcepts.app/api/rss?id=user-a&token=token-a"),
+		);
+
+		expect(buildRssFeed).toHaveBeenCalledWith(
+			expect.objectContaining({ sessions: expect.any(Array) }),
+		);
+		expect(buildRssFeed.mock.calls[0][0].sessions).toHaveLength(50);
 	});
 
 	it("returns matching validators and cache policy for 304 responses", async () => {

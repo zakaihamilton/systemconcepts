@@ -71,7 +71,7 @@ export function getContentParams(type, searchParams) {
 	if (type === "rss") {
 		return {
 			group: searchParams.get("group") || "",
-			count: getPositiveInt(searchParams.get("count"), 250, 500),
+			count: getPositiveInt(searchParams.get("count"), 50, 500),
 		};
 	}
 
