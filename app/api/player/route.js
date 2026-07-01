@@ -4,14 +4,22 @@ import { error, log, logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { fileTitle, isAudioFile, isVideoFile } from "@util/data/path";
+import {
+	fileTitle,
+	isAudioFile,
+	isImageFile,
+	isVideoFile,
+} from "@util/data/path";
 import { getSessions } from "@util/domain/sessionFeed";
 import {
 	metadataInfo as awsMetadataInfo,
 	getDownloadUrl as getAwsDownloadUrl,
 	validatePathAccess,
 } from "@util/storage/aws";
-import { getWasabi } from "@util/storage/wasabi";
+import {
+	getWasabi,
+	metadataInfo as wasabiMetadataInfo,
+} from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -66,11 +74,19 @@ export async function GET(request) {
 		validatePathAccess(decodedPath);
 		const isAwsPath = decodedPath.replace(/^\//, "").startsWith("aws/");
 		let s3Key = getWasabiKey(decodedPath);
+		let useAwsPrimary = isAwsPath;
+		if (!isAwsPath && isImageFile(s3Key)) {
+			const wasabiImage = await wasabiMetadataInfo({ path: s3Key });
+			if (!wasabiImage) {
+				const awsImage = await awsMetadataInfo({ path: `sessions/${s3Key}` });
+				useAwsPrimary = !!awsImage;
+			}
+		}
 
 		const fileName = s3Key.split("/").pop();
 		let playerUrl;
 		let downloadUrl;
-		if (isAwsPath) {
+		if (useAwsPrimary) {
 			const awsPath = `sessions/${s3Key}`;
 			playerUrl = await getAwsDownloadUrl({
 				path: awsPath,

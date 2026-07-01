@@ -6,7 +6,10 @@ import {
 	metadataInfo as awsMetadataInfo,
 	getDownloadUrl as getAwsDownloadUrl,
 } from "@util/storage/aws";
-import { getWasabi } from "@util/storage/wasabi";
+import {
+	getWasabi,
+	metadataInfo as wasabiMetadataInfo,
+} from "@util/storage/wasabi";
 import { GET } from "./route";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({ getSignedUrl: jest.fn() }));
@@ -29,7 +32,10 @@ jest.mock("@util/storage/aws", () => ({
 	metadataInfo: jest.fn(),
 	validatePathAccess: jest.fn(),
 }));
-jest.mock("@util/storage/wasabi", () => ({ getWasabi: jest.fn() }));
+jest.mock("@util/storage/wasabi", () => ({
+	getWasabi: jest.fn(),
+	metadataInfo: jest.fn(),
+}));
 jest.mock("next/server", () => ({
 	NextResponse: {
 		json: (body, init = {}) => ({
@@ -56,6 +62,7 @@ describe("/api/player transcript URLs", () => {
 			.mockResolvedValueOnce("https://wasabi.example/download");
 		getAwsDownloadUrl.mockResolvedValue("https://aws.example/transcript");
 		awsMetadataInfo.mockResolvedValue(null);
+		wasabiMetadataInfo.mockResolvedValue({ type: "image/jpeg" });
 		getSessions.mockResolvedValue([]);
 	});
 
@@ -128,7 +135,38 @@ describe("/api/player transcript URLs", () => {
 		expect(getSignedUrl).toHaveBeenCalledTimes(2);
 		expect(getSessions).not.toHaveBeenCalled();
 		expect(awsMetadataInfo).not.toHaveBeenCalled();
+		expect(wasabiMetadataInfo).toHaveBeenCalledWith({
+			path: "american/2024/2024-08-26 The Serpents.jpg",
+		});
 		expect(getAwsDownloadUrl).not.toHaveBeenCalled();
+	});
+
+	it("falls back to AWS when stale metadata points an image at Wasabi", async () => {
+		wasabiMetadataInfo.mockResolvedValue(null);
+		awsMetadataInfo.mockResolvedValue({ type: "image/png" });
+		getAwsDownloadUrl
+			.mockResolvedValueOnce("https://aws.example/image")
+			.mockResolvedValueOnce("https://aws.example/download");
+
+		const response = await GET(
+			request("wasabi/will/2026/2026-06-30 Beastly.png"),
+		);
+
+		expect(await response.json()).toMatchObject({
+			path: "https://aws.example/image",
+			downloadUrl: "https://aws.example/download",
+			transcriptionUrl: null,
+		});
+		expect(getWasabi).not.toHaveBeenCalled();
+		expect(getSignedUrl).not.toHaveBeenCalled();
+		expect(awsMetadataInfo).toHaveBeenCalledWith({
+			path: "sessions/will/2026/2026-06-30 Beastly.png",
+		});
+		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(1, {
+			path: "sessions/will/2026/2026-06-30 Beastly.png",
+			expiresIn: 10800,
+			responseContentDisposition: "inline",
+		});
 	});
 
 	it("signs AWS images against AWS without using Wasabi", async () => {
