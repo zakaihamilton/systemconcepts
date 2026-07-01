@@ -110,7 +110,7 @@ describe("/api/rss", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
 		expect(response.headers.get("Vercel-CDN-Cache-Control")).toBe(
-			"public, max-age=3600, stale-while-revalidate=86400",
+			"public, max-age=21600, stale-while-revalidate=86400",
 		);
 		expect(response.headers.get("ETag")).toBe('"abc123"');
 		expect(buildCanonicalApiUrl).toHaveBeenCalled();

@@ -10,7 +10,7 @@ describe("RSS cache policy", () => {
 		expect(FEED_CACHE_HEADERS).toEqual({
 			"Cache-Control": "public, max-age=300",
 			"Vercel-CDN-Cache-Control":
-				"public, max-age=3600, stale-while-revalidate=86400",
+				"public, max-age=21600, stale-while-revalidate=86400",
 		});
 	});
 
