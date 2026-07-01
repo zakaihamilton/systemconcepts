@@ -4,10 +4,11 @@ import { error, log, logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { fileTitle } from "@util/data/path";
+import { fileTitle, isAudioFile, isVideoFile } from "@util/data/path";
 import { getSessions } from "@util/domain/sessionFeed";
 import {
 	metadataInfo as awsMetadataInfo,
+	getDownloadUrl as getAwsDownloadUrl,
 	validatePathAccess,
 } from "@util/storage/aws";
 import { getWasabi } from "@util/storage/wasabi";
@@ -18,7 +19,9 @@ export const dynamic = "force-dynamic";
 const component = "player";
 function getWasabiKey(path) {
 	let key = path.startsWith("/") ? path.substring(1) : path;
-	if (key.startsWith("sessions/")) {
+	if (key.startsWith("aws/sessions/")) {
+		key = key.substring("aws/sessions/".length);
+	} else if (key.startsWith("sessions/")) {
 		key = key.substring("sessions/".length);
 	} else if (key.startsWith("wasabi/")) {
 		key = key.substring("wasabi/".length);
@@ -86,10 +89,11 @@ export async function GET(request) {
 
 		let subtitles = null;
 		let transcriptionUrl = null;
-		const sessionTranscript = await getSessionTranscriptPath(s3Key);
-		const sessionTranscriptPath = sessionTranscript?.path;
-		const dotIndex = s3Key.lastIndexOf(".");
-		if (dotIndex !== -1) {
+		const supportsTranscript = isAudioFile(s3Key) || isVideoFile(s3Key);
+		if (supportsTranscript) {
+			const sessionTranscript = await getSessionTranscriptPath(s3Key);
+			const sessionTranscriptPath = sessionTranscript?.path;
+			const dotIndex = s3Key.lastIndexOf(".");
 			const vttPath = sessionTranscriptPath?.endsWith(".vtt")
 				? getWasabiKey(sessionTranscriptPath)
 				: s3Key.substring(0, dotIndex) + ".vtt";
@@ -103,13 +107,10 @@ export async function GET(request) {
 				: s3Key.substring(0, dotIndex) + ".txt";
 			const txtExists = await awsMetadataInfo({ path: "sessions/" + txtPath });
 			if (txtExists) {
-				const txtCommand = new GetObjectCommand({
-					Bucket: BUCKET_NAME,
-					Key: txtPath,
-					ResponseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`,
-				});
-				transcriptionUrl = await getSignedUrl(wasabiClient, txtCommand, {
+				transcriptionUrl = await getAwsDownloadUrl({
+					path: "sessions/" + txtPath,
 					expiresIn: 10800,
+					responseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`,
 				});
 			}
 		}

@@ -19,6 +19,8 @@ let s3Client = null;
 export async function getDownloadUrl({
 	path,
 	bucketName = process.env.AWS_BUCKET,
+	expiresIn = 3600,
+	responseContentDisposition,
 }) {
 	const s3 = await getS3({});
 	const bucket = bucketName;
@@ -27,10 +29,13 @@ export async function getDownloadUrl({
 	const command = new GetObjectCommand({
 		Bucket: bucket,
 		Key: key,
+		...(responseContentDisposition && {
+			ResponseContentDisposition: responseContentDisposition,
+		}),
 	});
 
 	return await getSignedUrl(s3, command, {
-		expiresIn: 3600,
+		expiresIn,
 	});
 }
 
