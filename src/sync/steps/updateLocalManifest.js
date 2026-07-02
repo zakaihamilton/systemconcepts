@@ -5,6 +5,7 @@ import { FILES_MANIFEST, LOCAL_SYNC_PATH, SYNC_BATCH_SIZE } from "../constants";
 import { getFileInfo } from "../hash";
 import { addSyncLog } from "../logs";
 import { lockMutex } from "../mutex";
+import { readFileIfExists } from "../storageReads";
 import { SyncActiveStore } from "../syncState";
 
 /**
@@ -51,17 +52,18 @@ export async function updateLocalManifest(
 
 	try {
 		let manifest = [];
-		if (await storage.exists(localManifestPath)) {
-			const content = await storage.readFile(localManifestPath);
-			if (content) {
-				try {
-					manifest = JSON.parse(content);
-				} catch (err) {
-					structuredLogger.error(
-						"[Sync] Failed to parse manifest, starting fresh",
-						err,
-					);
-				}
+		const existingManifestContent = await readFileIfExists(
+			storage,
+			localManifestPath,
+		);
+		if (existingManifestContent) {
+			try {
+				manifest = JSON.parse(existingManifestContent);
+			} catch (err) {
+				structuredLogger.error(
+					"[Sync] Failed to parse manifest, starting fresh",
+					err,
+				);
 			}
 		}
 
@@ -184,7 +186,7 @@ export async function updateLocalManifest(
 			}
 		});
 
-		if (changed || !(await storage.exists(localManifestPath))) {
+		if (changed || existingManifestContent === null) {
 			const unlock = await lockMutex({ id: localManifestPath });
 			try {
 				await storage.writeFile(

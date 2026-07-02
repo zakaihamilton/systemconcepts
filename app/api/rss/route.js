@@ -12,16 +12,14 @@ import {
 	getContentParams,
 	getManifestFingerprint,
 } from "@util/api/apiCacheKeys";
-import {
-	authenticateEdge,
-	scheduleApiCacheWrite,
-} from "@util/api/edgeApi";
+import { authenticateEdge, scheduleApiCacheWrite } from "@util/api/edgeApi";
 import { logger as structuredLogger } from "@util/api/logger";
+import { buildRssEtag, buildRssFeed } from "@util/domain/rssFeedResponse";
 import {
-	buildRssEtag,
-	buildRssFeed,
-} from "@util/domain/rssFeedResponse";
-import { getSessions, loadManifest, sortSessions } from "@util/domain/sessionFeedEdge";
+	getSessions,
+	loadManifest,
+	sortSessions,
+} from "@util/domain/sessionFeedEdge";
 import { NextResponse } from "next/server";
 import { FEED_CACHE_HEADERS, NO_STORE_HEADERS } from "./cache";
 

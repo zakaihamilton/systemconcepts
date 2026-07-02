@@ -1,5 +1,5 @@
-import { logger as structuredLogger } from "@util/api/logger";
 import { purgeApiCacheFromStorage } from "@util/api/apiCachePurgeClient";
+import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import Cookies from "js-cookie";
 import { writeCompressedFile } from "../bundle";

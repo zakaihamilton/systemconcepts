@@ -1,4 +1,3 @@
-import { JSON_HEADERS, NO_CACHE_HEADERS } from "@util/api/httpHeaders";
 import { readApiCacheEdge } from "@util/api/apiCacheEdge";
 import {
 	buildApiCacheKey,
@@ -11,12 +10,13 @@ import {
 	getClientIp,
 	scheduleApiCacheWrite,
 } from "@util/api/edgeApi";
+import { JSON_HEADERS, NO_CACHE_HEADERS } from "@util/api/httpHeaders";
 import { logger as structuredLogger } from "@util/api/logger";
+import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import {
 	buildSessionsJson,
 	filterSessions,
 } from "@util/domain/sessionsApiResponse";
-import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";

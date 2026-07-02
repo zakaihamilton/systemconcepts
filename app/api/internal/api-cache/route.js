@@ -1,5 +1,5 @@
-import { logger as structuredLogger } from "@util/api/logger";
 import { writeApiCache } from "@util/api/apiCache";
+import { logger as structuredLogger } from "@util/api/logger";
 import { NextResponse } from "next/server";
 import { NO_STORE_HEADERS } from "../../rss/cache";
 

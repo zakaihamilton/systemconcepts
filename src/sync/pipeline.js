@@ -22,6 +22,7 @@ import { updateLocalManifest } from "./steps/updateLocalManifest";
 import { uploadManifest } from "./steps/uploadManifest";
 import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { uploadUpdates } from "./steps/uploadUpdates";
+import { readFileIfExists } from "./storageReads";
 import { SyncActiveStore } from "./syncState";
 
 const defaultDependencies = {
@@ -82,17 +83,17 @@ async function getLibraryLocalFiles(localPath, config, dependencies) {
 	const savedCounter = dependencies.getSavedLibraryCounter();
 	const manifestPath = makePath(localPath, FILES_MANIFEST);
 	let cachedManifest = null;
-	if (await dependencies.storage.exists(manifestPath)) {
-		try {
-			const content = await dependencies.storage.readFile(manifestPath);
+	try {
+		const content = await readFileIfExists(dependencies.storage, manifestPath);
+		if (content !== null) {
 			const parsed = content ? JSON.parse(content) : [];
 			cachedManifest = Array.isArray(parsed) ? parsed : null;
-		} catch (error) {
-			dependencies.logger.warn(
-				"[Sync] Failed to read cached local manifest:",
-				error,
-			);
 		}
+	} catch (error) {
+		dependencies.logger.warn(
+			"[Sync] Failed to read cached local manifest:",
+			error,
+		);
 	}
 	if (cachedManifest && savedCounter === counter) {
 		dependencies.addSyncLog(

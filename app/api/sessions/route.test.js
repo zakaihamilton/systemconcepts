@@ -1,15 +1,16 @@
 import { readApiCacheEdge } from "@util/api/apiCacheEdge";
-import { buildApiCacheKey, getContentParams, getManifestFingerprint } from "@util/api/apiCacheKeys";
+import {
+	buildApiCacheKey,
+	getContentParams,
+	getManifestFingerprint,
+} from "@util/api/apiCacheKeys";
 import {
 	authenticateEdge,
 	enforceRateLimitEdge,
 	scheduleApiCacheWrite,
 } from "@util/api/edgeApi";
-import {
-	buildSessionsJson,
-	filterSessions,
-} from "@util/domain/sessionsApiResponse";
 import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
+import { filterSessions } from "@util/domain/sessionsApiResponse";
 import { GET } from "./route";
 
 jest.mock("@util/api/httpHeaders", () => ({
@@ -138,15 +139,22 @@ describe("/api/sessions", () => {
 		const response = await GET(request);
 
 		expect(getSessions).toHaveBeenCalledWith({ group: "alpha" });
-		expect(filterSessions).toHaveBeenCalledWith(sessions, expect.any(URLSearchParams));
+		expect(filterSessions).toHaveBeenCalledWith(
+			sessions,
+			expect.any(URLSearchParams),
+		);
 		await expect(response.json()).resolves.toEqual([]);
 	});
 
 	it("reuses shared S3 cache for different authenticated users", async () => {
 		readApiCacheEdge.mockResolvedValue('[{"id":"cached"}]');
 
-		const first = await GET(makeRequest("?id=user-a&token=token-a&group=alpha"));
-		const second = await GET(makeRequest("?id=user-b&token=token-b&group=alpha"));
+		const first = await GET(
+			makeRequest("?id=user-a&token=token-a&group=alpha"),
+		);
+		const second = await GET(
+			makeRequest("?id=user-b&token=token-b&group=alpha"),
+		);
 
 		expect(first.status).toBe(200);
 		expect(second.status).toBe(200);

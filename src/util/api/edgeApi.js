@@ -69,7 +69,10 @@ export async function enforceRateLimitEdge(ip, options = {}) {
 			body: JSON.stringify({ ip, limit, windowMs }),
 		});
 		if (!res.ok) {
-			structuredLogger.warn("[Edge API] Rate limit endpoint returned", res.status);
+			structuredLogger.warn(
+				"[Edge API] Rate limit endpoint returned",
+				res.status,
+			);
 			return false;
 		}
 		const { ok } = await res.json();
@@ -94,7 +97,10 @@ export function scheduleApiCacheWrite(type, key, body) {
 		},
 		body: JSON.stringify({ type, key, body }),
 	}).catch((err) => {
-		structuredLogger.error("[Edge API] Failed to schedule api-cache write:", err);
+		structuredLogger.error(
+			"[Edge API] Failed to schedule api-cache write:",
+			err,
+		);
 	});
 }
 

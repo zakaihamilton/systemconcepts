@@ -1,8 +1,8 @@
 import { readApiCacheEdge } from "@util/api/apiCacheEdge";
-import { buildApiCacheKey, buildCanonicalApiUrl } from "@util/api/apiCacheKeys";
+import { buildCanonicalApiUrl } from "@util/api/apiCacheKeys";
 import { authenticateEdge, scheduleApiCacheWrite } from "@util/api/edgeApi";
-import { buildRssEtag, buildRssFeed } from "@util/domain/rssFeedResponse";
-import { getSessions, loadManifest, sortSessions } from "@util/domain/sessionFeedEdge";
+import { buildRssFeed } from "@util/domain/rssFeedResponse";
+import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import { TextEncoder } from "util";
 import { GET } from "./route";
 

@@ -2,7 +2,7 @@ import { checkRateLimit } from "@util/auth/rateLimit";
 import { findRecord } from "@util/storage/mongo";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { JSON_HEADERS, NO_CACHE_HEADERS } from "./httpHeaders";
+import { JSON_HEADERS } from "./httpHeaders";
 
 export { JSON_HEADERS, NO_CACHE_HEADERS } from "./httpHeaders";
 
@@ -78,9 +78,7 @@ export async function authenticateTokenRequest(searchParams) {
 		fields: { id: 1, hash: 1, role: 1 },
 	});
 	const authenticated =
-		user &&
-		user.role !== "visitor" &&
-		timingSafeEqual(token, getApiToken(user))
+		user && user.role !== "visitor" && timingSafeEqual(token, getApiToken(user))
 			? user
 			: null;
 

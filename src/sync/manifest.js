@@ -1,24 +1,23 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import storage from "@util/storage/storage";
 import { readCompressedFile, writeCompressedFile } from "./bundle";
+import { readFileIfExists } from "./storageReads";
 
 /**
  * Helper to update manifest after file transfer
  */
 export async function updateManifestEntry(manifestPath, entry) {
 	let manifest = [];
-	if (await storage.exists(manifestPath)) {
-		if (manifestPath.endsWith(".gz")) {
-			manifest = (await readCompressedFile(manifestPath)) || [];
-		} else {
-			const content = await storage.readFile(manifestPath);
-			if (content) {
-				try {
-					manifest = JSON.parse(content);
-				} catch (e) {
-					structuredLogger.error("[Sync] Failed to parse manifest:", e);
-					manifest = [];
-				}
+	if (manifestPath.endsWith(".gz")) {
+		manifest = (await readCompressedFile(manifestPath)) || [];
+	} else {
+		const content = await readFileIfExists(storage, manifestPath);
+		if (content) {
+			try {
+				manifest = JSON.parse(content);
+			} catch (e) {
+				structuredLogger.error("[Sync] Failed to parse manifest:", e);
+				manifest = [];
 			}
 		}
 	}

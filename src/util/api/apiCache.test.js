@@ -1,5 +1,5 @@
 import { downloadData, getS3, uploadData } from "@util/storage/aws";
-import { TextDecoder, TextEncoder } from "util";
+import { TextDecoder } from "util";
 import { purgeApiCache, readApiCache, writeApiCache } from "./apiCache";
 
 jest.mock("@util/storage/aws", () => ({

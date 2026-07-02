@@ -29,9 +29,7 @@ function buildRssItems(sessions, baseUrl) {
 		const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
 		const link = `${baseUrl}/#sessions/${sessionQuery}`;
 		const date = new Date(session.date).toUTCString().replace("GMT", "+0000");
-		const durationSeconds = session.duration
-			? Math.round(session.duration)
-			: 0;
+		const durationSeconds = session.duration ? Math.round(session.duration) : 0;
 		const categories = (session.tags || [])
 			.map((tag) => `<category>${escapeXml(tag)}</category>`)
 			.join("");

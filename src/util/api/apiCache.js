@@ -1,19 +1,9 @@
-import { logger as structuredLogger } from "@util/api/logger";
-import {
-	downloadData,
-	getS3,
-	uploadData,
-} from "@util/storage/aws";
 import { DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { logger as structuredLogger } from "@util/api/logger";
+import { downloadData, getS3, uploadData } from "@util/storage/aws";
 import pako from "pako";
 import { TextDecoder } from "util";
-import {
-	API_CACHE_PREFIX,
-	buildApiCacheKey,
-	getCacheObjectPath,
-	getContentParams,
-	getManifestFingerprint,
-} from "./apiCacheKeys";
+import { API_CACHE_PREFIX, getCacheObjectPath } from "./apiCacheKeys";
 
 export {
 	API_CACHE_PREFIX,

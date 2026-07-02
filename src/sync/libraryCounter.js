@@ -3,6 +3,7 @@ import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import { LIBRARY_COUNTER_FILE, LIBRARY_LOCAL_PATH } from "./constants";
 import { lockMutex } from "./mutex";
+import { readFileIfExists } from "./storageReads";
 import { SyncActiveStore } from "./syncState";
 import { getUserSyncStorageKey } from "./userStorage";
 
@@ -10,12 +11,9 @@ export const LIBRARY_COUNTER_STORAGE_KEY = "sync_libraryCounter";
 
 export async function readLibraryCounter() {
 	const counterPath = makePath(LIBRARY_LOCAL_PATH, LIBRARY_COUNTER_FILE);
-	if (!(await storage.exists(counterPath))) {
-		return 0;
-	}
-
 	try {
-		const content = await storage.readFile(counterPath);
+		const content = await readFileIfExists(storage, counterPath);
+		if (content === null) return 0;
 		const parsed = JSON.parse(content);
 		const counter = Number.parseInt(parsed?.counter, 10);
 		return Number.isFinite(counter) ? counter : 0;

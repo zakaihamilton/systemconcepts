@@ -1,10 +1,10 @@
+import { TextEncoder } from "util";
 import {
 	buildApiCacheKey,
 	buildCanonicalApiUrl,
 	getContentParams,
 	getManifestFingerprint,
 } from "./apiCacheKeys";
-import { TextEncoder } from "util";
 
 describe("apiCacheKeys", () => {
 	const manifest = [
@@ -72,8 +72,8 @@ describe("apiCacheKeys", () => {
 		const params = new URLSearchParams(
 			"id=user&token=secret&group=alpha&count=10",
 		);
-		expect(buildCanonicalApiUrl("https://systemconcepts.app", "/api/rss", params)).toBe(
-			"https://systemconcepts.app/api/rss?group=alpha&count=10",
-		);
+		expect(
+			buildCanonicalApiUrl("https://systemconcepts.app", "/api/rss", params),
+		).toBe("https://systemconcepts.app/api/rss?group=alpha&count=10");
 	});
 });
