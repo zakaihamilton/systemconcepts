@@ -70,7 +70,11 @@ export async function GET(request) {
 		const manifest = await loadManifest();
 		const fingerprint = getManifestFingerprint(manifest, { group });
 		const contentParams = getContentParams("sessions", searchParams);
-		const cacheKey = await buildApiCacheKey("sessions", contentParams, fingerprint);
+		const cacheKey = await buildApiCacheKey(
+			"sessions",
+			contentParams,
+			fingerprint,
+		);
 		const cachedBody = await readApiCacheEdge("sessions", cacheKey);
 		if (cachedBody) {
 			return new Response(cachedBody, {
@@ -82,10 +86,7 @@ export async function GET(request) {
 			});
 		}
 
-		const sessions = filterSessions(
-			await getSessions({ group }),
-			searchParams,
-		);
+		const sessions = filterSessions(await getSessions({ group }), searchParams);
 		const body = buildSessionsJson({ sessions, baseUrl });
 		scheduleApiCacheWrite("sessions", cacheKey, body);
 

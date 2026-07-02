@@ -5,6 +5,37 @@ import { isBinaryFile, makePath } from "@util/data/path";
 import pLimit from "p-limit";
 
 const fsEndPoint = "/api/aws";
+const READ_CACHE_TTL_MS = 5 * 60 * 1000;
+const readCache = new Map();
+
+async function cachedRead(key, loader) {
+	const now = Date.now();
+	const cached = readCache.get(key);
+	if (cached && cached.expiresAt > now) return cached.promise;
+	const promise = loader();
+	readCache.set(key, { expiresAt: now + READ_CACHE_TTL_MS, promise });
+	try {
+		return await promise;
+	} catch (err) {
+		readCache.delete(key);
+		throw err;
+	}
+}
+
+function invalidateReadCache(path) {
+	const normalized = makePath(path)
+		.replace(/^\/aws\//, "/")
+		.replace(/^aws\//, "");
+	for (const key of readCache.keys()) {
+		const cachedPath = key.substring(key.indexOf(":") + 1);
+		if (
+			cachedPath === normalized ||
+			normalized.startsWith(`${cachedPath.replace(/\/$/, "")}/`) ||
+			cachedPath.startsWith(`${normalized.replace(/\/$/, "")}/`)
+		)
+			readCache.delete(key);
+	}
+}
 
 async function getListing(path, options = {}) {
 	path = makePath(path)
@@ -13,16 +44,15 @@ async function getListing(path, options = {}) {
 	const { useCount } = options;
 	const listing = [];
 	const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
-	const url = `${fsEndPoint}?path=${encodedPath}&type=dir&t=${Date.now()}`;
-	const items = await fetchJSON(url, {
-		method: "GET",
-		cache: "no-store",
-	});
+	const url = `${fsEndPoint}?path=${encodedPath}&type=dir`;
+	const items = await cachedRead(`list:${path}`, () =>
+		fetchJSON(url, { method: "GET", cache: "no-store" }),
+	);
 	for (const item of items) {
 		const { name, stat = {} } = item;
 		const itemPath = makePath(path, name);
 		if (useCount && stat.type === "dir") {
-			const url = `${fsEndPoint}?path=${encodeURIComponent(path.replace(/^\//, ""))}&type=dir&t=${Date.now()}`;
+			const url = `${fsEndPoint}?path=${encodeURIComponent(path.replace(/^\//, ""))}&type=dir`;
 			const children = await fetchJSON(url, {
 				method: "GET",
 				cache: "no-store",
@@ -82,6 +112,7 @@ async function deleteFile(path) {
 		method: "DELETE",
 		cache: "no-store",
 	});
+	invalidateReadCache(path);
 }
 
 async function readFile(path) {
@@ -239,6 +270,7 @@ async function writeFile(path, body) {
 		structuredLogger.debug(
 			`[AWS Storage] Successfully uploaded ${path} directly to S3`,
 		);
+		invalidateReadCache(path);
 	} catch (err) {
 		structuredLogger.error(
 			`[AWS Storage] Direct upload failed for ${path}, falling back to proxy:`,
@@ -264,6 +296,7 @@ async function writeFile(path, body) {
 				},
 			]),
 		});
+		invalidateReadCache(path);
 	}
 }
 
@@ -354,16 +387,17 @@ async function exists(path) {
 		.replace(/^aws\//, "");
 	let exists = false;
 	try {
-		const item = await fetchJSON(
-			fsEndPoint +
-				"?path=" +
-				encodeURIComponent(path.replace(/^\//, "")) +
-				"&exists=true&t=" +
-				Date.now(),
-			{
-				method: "GET",
-				cache: "no-store",
-			},
+		const item = await cachedRead(`exists:${path}`, () =>
+			fetchJSON(
+				fsEndPoint +
+					"?path=" +
+					encodeURIComponent(path.replace(/^\//, "")) +
+					"&exists=true",
+				{
+					method: "GET",
+					cache: "no-store",
+				},
+			),
 		);
 		// If we receive an array, it means we got a directory listing instead of file metadata
 		// This happens when the file doesn't exist but a similarly-named directory does

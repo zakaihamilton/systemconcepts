@@ -5,6 +5,10 @@ import { MEDIA_CACHE_HEADERS, NO_STORE_HEADERS } from "../cache";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
+const SIGNED_URL_TTL_MS = 23 * 60 * 60 * 1000;
+const importedHmacKeys = new Map();
+const signedUrlCache = new Map();
+
 function normalizePath(path) {
 	if (!path) return path;
 	return path.startsWith("/") ? path.substring(1) : path;
@@ -23,13 +27,29 @@ function validatePathAccess(path) {
 }
 
 async function hmacSha256(key, data) {
-	const cryptoKey = await crypto.subtle.importKey(
-		"raw",
-		typeof key === "string" ? new TextEncoder().encode(key) : key,
-		{ name: "HMAC", hash: "SHA-256" },
-		false,
-		["sign"],
-	);
+	let cryptoKey;
+	if (typeof key === "string") {
+		cryptoKey = importedHmacKeys.get(key);
+		if (!cryptoKey) {
+			cryptoKey = crypto.subtle.importKey(
+				"raw",
+				new TextEncoder().encode(key),
+				{ name: "HMAC", hash: "SHA-256" },
+				false,
+				["sign"],
+			);
+			importedHmacKeys.set(key, cryptoKey);
+		}
+		cryptoKey = await cryptoKey;
+	} else {
+		cryptoKey = await crypto.subtle.importKey(
+			"raw",
+			key,
+			{ name: "HMAC", hash: "SHA-256" },
+			false,
+			["sign"],
+		);
+	}
 	const signature = await crypto.subtle.sign(
 		"HMAC",
 		cryptoKey,
@@ -50,6 +70,45 @@ async function sha256Hex(data) {
 
 // Ultra-lightweight Web Crypto-based AWS Signature V4 presigned URL generator
 async function getPresignedUrl({
+	endpoint,
+	region,
+	bucket,
+	key,
+	accessKeyId,
+	secretAccessKey,
+	expiresIn = 86400,
+	method = "GET",
+}) {
+	const cacheKey = [endpoint, region, bucket, key, accessKeyId, method].join(
+		"\0",
+	);
+	const nowMs = Date.now();
+	const cached = signedUrlCache.get(cacheKey);
+	if (cached && cached.expiresAt > nowMs) return cached.promise;
+
+	const promise = createPresignedUrl({
+		endpoint,
+		region,
+		bucket,
+		key,
+		accessKeyId,
+		secretAccessKey,
+		expiresIn,
+		method,
+	});
+	signedUrlCache.set(cacheKey, {
+		expiresAt: nowMs + SIGNED_URL_TTL_MS,
+		promise,
+	});
+	try {
+		return await promise;
+	} catch (err) {
+		signedUrlCache.delete(cacheKey);
+		throw err;
+	}
+}
+
+async function createPresignedUrl({
 	endpoint,
 	region,
 	bucket,

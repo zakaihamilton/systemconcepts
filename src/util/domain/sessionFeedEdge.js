@@ -15,7 +15,7 @@ import { downloadDataEdge } from "@util/storage/awsFetch";
 import pako from "pako";
 
 const MANIFEST_PATH = "sync/files.json.gz";
-const CACHE_TTL_MS = 60 * 1000;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 const decoder = new TextDecoder("utf-8");
 const cache = new Map();
 
