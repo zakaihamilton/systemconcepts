@@ -1,8 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
 
-const AUTH_CACHE_TTL_MS = 60 * 1000;
-const authCache = new Map();
-
 function getSiteUrl() {
 	return (
 		process.env.SITE_URL ||
@@ -15,11 +12,6 @@ export async function authenticateEdge(searchParams) {
 	const id = searchParams.get("id");
 	const token = searchParams.get("token");
 	if (!id || !token) return false;
-
-	const cacheKey = `${id}:${token}`;
-	const now = Date.now();
-	const cached = authCache.get(cacheKey);
-	if (cached && cached.expiresAt > now) return cached.ok;
 
 	const siteUrl = getSiteUrl();
 	try {
@@ -36,10 +28,6 @@ export async function authenticateEdge(searchParams) {
 			return false;
 		}
 		const { ok } = await res.json();
-		authCache.set(cacheKey, {
-			ok: ok === true,
-			expiresAt: now + AUTH_CACHE_TTL_MS,
-		});
 		return ok === true;
 	} catch (err) {
 		structuredLogger.error("[Edge API] Auth fetch failed:", err);
@@ -105,7 +93,6 @@ export function scheduleApiCacheWrite(type, key, body) {
 }
 
 export function __clearEdgeApiCachesForTests() {
-	authCache.clear();
 	rateLimitCache.clear();
 }
 
