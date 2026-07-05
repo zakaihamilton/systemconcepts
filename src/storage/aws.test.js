@@ -1,5 +1,5 @@
 import storage from "@storage/aws";
-import { requireRelogin } from "@util/api/fetch";
+import { fetchJSON, requireRelogin } from "@util/api/fetch";
 
 jest.mock("@util/data/binary", () => ({
 	binaryToString: jest.fn(),
@@ -29,5 +29,24 @@ describe("AWS storage authentication", () => {
 		).rejects.toThrow("AUTHENTICATION_REQUIRED");
 
 		expect(requireRelogin).toHaveBeenCalledWith(response);
+	});
+
+	it("requests directory counts in the original listing call", async () => {
+		fetchJSON.mockResolvedValue([
+			{ type: "dir", name: "2025", count: 12 },
+			{ type: "dir", name: "2026", count: 4 },
+		]);
+
+		const listing = await storage.getListing("sessions", { useCount: true });
+
+		expect(fetchJSON).toHaveBeenCalledTimes(1);
+		expect(fetchJSON).toHaveBeenCalledWith(
+			"/api/aws?path=sessions&type=dir&counts=1",
+			{ method: "GET", cache: "no-store" },
+		);
+		expect(listing.map(({ name, count }) => ({ name, count }))).toEqual([
+			{ name: "2025", count: 12 },
+			{ name: "2026", count: 4 },
+		]);
 	});
 });

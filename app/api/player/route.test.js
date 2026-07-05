@@ -13,6 +13,9 @@ import {
 import { GET } from "./route";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({ getSignedUrl: jest.fn() }));
+jest.mock("next/cache", () => ({
+	unstable_cache: jest.fn((callback) => callback),
+}));
 jest.mock("@util/auth/session", () => ({
 	getSessionUser: jest.fn(),
 	getAuthErrorStatus: jest.fn(() => 403),

@@ -13,6 +13,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { isBinaryFile } from "@util/data/path";
 import fs from "fs";
+import pLimit from "p-limit";
 
 let s3Client = null;
 
@@ -351,7 +352,11 @@ export async function metadataInfo({
 	return null;
 }
 
-export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
+export async function list({
+	path,
+	bucketName = process.env.AWS_BUCKET,
+	includeCounts = false,
+}) {
 	path = normalizePath(path);
 
 	const s3 = await getS3({});
@@ -399,6 +404,31 @@ export async function list({ path, bucketName = process.env.AWS_BUCKET }) {
 		continuationToken = listResponse.NextContinuationToken;
 	} while (continuationToken);
 
+	if (includeCounts) {
+		const limit = pLimit(10);
+		await Promise.all(
+			items
+				.filter((item) => item.type === "dir")
+				.map((item) =>
+					limit(async () => {
+						const childPrefix = `${key ? `${key}/` : ""}${item.name}/`;
+						const response = await s3.send(
+							new ListObjectsV2Command({
+								Bucket: bucket,
+								Delimiter: "/",
+								Prefix: childPrefix,
+							}),
+						);
+						item.count =
+							(response.CommonPrefixes?.length || 0) +
+							(response.Contents || []).filter(
+								(content) => content.Key !== childPrefix,
+							).length;
+					}),
+				),
+		);
+	}
+
 	return items;
 }
 
@@ -437,7 +467,10 @@ export async function handleRequest({ readOnly, req, path }) {
 
 		try {
 			if (type === "dir") {
-				return await list({ path: currentPath });
+				return await list({
+					path: currentPath,
+					includeCounts: query.counts === "1" || headers.counts === "1",
+				});
 			} else {
 				return await downloadData({ path: currentPath, binary });
 			}

@@ -44,27 +44,13 @@ async function getListing(path, options = {}) {
 	const { useCount } = options;
 	const listing = [];
 	const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
-	const url = `${fsEndPoint}?path=${encodedPath}&type=dir`;
+	const url = `${fsEndPoint}?path=${encodedPath}&type=dir${useCount ? "&counts=1" : ""}`;
 	const items = await cachedRead(`list:${path}`, () =>
 		fetchJSON(url, { method: "GET", cache: "no-store" }),
 	);
 	for (const item of items) {
 		const { name, stat = {} } = item;
 		const itemPath = makePath(path, name);
-		if (useCount && stat.type === "dir") {
-			const url = `${fsEndPoint}?path=${encodeURIComponent(path.replace(/^\//, ""))}&type=dir`;
-			const children = await fetchJSON(url, {
-				method: "GET",
-				cache: "no-store",
-			});
-			let count = 0;
-			for (const item of children) {
-				if (item.stat.type === "dir") {
-					count++;
-				}
-			}
-			item.count = count;
-		}
 		Object.assign(item, stat);
 		item.id = item.path = makePath("aws", itemPath);
 		item.name = name;

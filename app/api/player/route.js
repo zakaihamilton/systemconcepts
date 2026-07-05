@@ -20,31 +20,13 @@ import {
 	getWasabi,
 	metadataInfo as wasabiMetadataInfo,
 } from "@util/storage/wasabi";
+import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 const component = "player";
-const PLAYER_CACHE_TTL_MS = 5 * 60 * 1000;
-const playerMetadataCache = new Map();
-
-async function getCachedPlayerMetadata(key, loader) {
-	if (process.env.NODE_ENV === "test") return loader();
-	const now = Date.now();
-	const cached = playerMetadataCache.get(key);
-	if (cached && cached.expiresAt > now) return cached.promise;
-	const promise = loader();
-	playerMetadataCache.set(key, {
-		expiresAt: now + PLAYER_CACHE_TTL_MS,
-		promise,
-	});
-	try {
-		return await promise;
-	} catch (err) {
-		playerMetadataCache.delete(key);
-		throw err;
-	}
-}
+const PLAYER_CACHE_TTL_SECONDS = 2 * 60 * 60;
 function getWasabiKey(path) {
 	let key = path.startsWith("/") ? path.substring(1) : path;
 	if (key.startsWith("aws/sessions/")) {
@@ -93,84 +75,94 @@ export async function GET(request) {
 		const decodedPath = decodeURIComponent(path);
 		validatePathAccess(decodedPath);
 		const isAwsPath = decodedPath.replace(/^\//, "").startsWith("aws/");
-		const result = await getCachedPlayerMetadata(decodedPath, async () => {
-			let s3Key = getWasabiKey(decodedPath);
-			let useAwsPrimary = isAwsPath;
-			if (!isAwsPath && isImageFile(s3Key)) {
-				const wasabiImage = await wasabiMetadataInfo({ path: s3Key });
-				if (!wasabiImage) {
-					const awsImage = await awsMetadataInfo({ path: `sessions/${s3Key}` });
-					useAwsPrimary = !!awsImage;
-				}
-			}
-
-			const fileName = s3Key.split("/").pop();
-			let playerUrl;
-			let downloadUrl;
-			if (useAwsPrimary) {
-				const awsPath = `sessions/${s3Key}`;
-				[playerUrl, downloadUrl] = await Promise.all([
-					getAwsDownloadUrl({
-						path: awsPath,
-						expiresIn: 10800,
-						responseContentDisposition: "inline",
-					}),
-					getAwsDownloadUrl({
-						path: awsPath,
-						expiresIn: 10800,
-						responseContentDisposition: `attachment; filename="${fileName}"`,
-					}),
-				]);
-			} else {
-				const { client: wasabiClient, bucket: BUCKET_NAME } = await getWasabi();
-				const playerCommand = new GetObjectCommand({
-					Bucket: BUCKET_NAME,
-					Key: s3Key,
-					ResponseContentDisposition: "inline",
-				});
-				const downloadCommand = new GetObjectCommand({
-					Bucket: BUCKET_NAME,
-					Key: s3Key,
-					ResponseContentDisposition: `attachment; filename="${fileName}"`,
-				});
-				[playerUrl, downloadUrl] = await Promise.all([
-					getSignedUrl(wasabiClient, playerCommand, { expiresIn: 10800 }),
-					getSignedUrl(wasabiClient, downloadCommand, { expiresIn: 10800 }),
-				]);
-			}
-
-			let subtitles = null;
-			let transcriptionUrl = null;
-			const supportsTranscript = isAudioFile(s3Key) || isVideoFile(s3Key);
-			if (supportsTranscript) {
-				const sessionTranscript = await getSessionTranscriptPath(s3Key);
-				const sessionTranscriptPath = sessionTranscript?.path;
-				const dotIndex = s3Key.lastIndexOf(".");
-				const vttPath = sessionTranscriptPath?.endsWith(".vtt")
-					? getWasabiKey(sessionTranscriptPath)
-					: s3Key.substring(0, dotIndex) + ".vtt";
-				const txtPath = sessionTranscriptPath?.endsWith(".txt")
-					? getWasabiKey(sessionTranscriptPath)
-					: s3Key.substring(0, dotIndex) + ".txt";
-				const [exists, txtExists] = await Promise.all([
-					awsMetadataInfo({ path: "sessions/" + vttPath }),
-					awsMetadataInfo({ path: "sessions/" + txtPath }),
-				]);
-				if (exists) {
-					subtitles =
-						"/api/subtitle?path=" + encodeURIComponent("sessions/" + vttPath);
+		const loadPlayerMetadata = unstable_cache(
+			async () => {
+				let s3Key = getWasabiKey(decodedPath);
+				let useAwsPrimary = isAwsPath;
+				if (!isAwsPath && isImageFile(s3Key)) {
+					const wasabiImage = await wasabiMetadataInfo({ path: s3Key });
+					if (!wasabiImage) {
+						const awsImage = await awsMetadataInfo({
+							path: `sessions/${s3Key}`,
+						});
+						useAwsPrimary = !!awsImage;
+					}
 				}
 
-				if (txtExists) {
-					transcriptionUrl = await getAwsDownloadUrl({
-						path: "sessions/" + txtPath,
-						expiresIn: 10800,
-						responseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`,
+				const fileName = s3Key.split("/").pop();
+				let playerUrl;
+				let downloadUrl;
+				if (useAwsPrimary) {
+					const awsPath = `sessions/${s3Key}`;
+					[playerUrl, downloadUrl] = await Promise.all([
+						getAwsDownloadUrl({
+							path: awsPath,
+							expiresIn: 10800,
+							responseContentDisposition: "inline",
+						}),
+						getAwsDownloadUrl({
+							path: awsPath,
+							expiresIn: 10800,
+							responseContentDisposition: `attachment; filename="${fileName}"`,
+						}),
+					]);
+				} else {
+					const { client: wasabiClient, bucket: BUCKET_NAME } =
+						await getWasabi();
+					const playerCommand = new GetObjectCommand({
+						Bucket: BUCKET_NAME,
+						Key: s3Key,
+						ResponseContentDisposition: "inline",
 					});
+					const downloadCommand = new GetObjectCommand({
+						Bucket: BUCKET_NAME,
+						Key: s3Key,
+						ResponseContentDisposition: `attachment; filename="${fileName}"`,
+					});
+					[playerUrl, downloadUrl] = await Promise.all([
+						getSignedUrl(wasabiClient, playerCommand, { expiresIn: 10800 }),
+						getSignedUrl(wasabiClient, downloadCommand, { expiresIn: 10800 }),
+					]);
 				}
-			}
-			return { path: playerUrl, downloadUrl, subtitles, transcriptionUrl };
-		});
+
+				let subtitles = null;
+				let transcriptionUrl = null;
+				const supportsTranscript = isAudioFile(s3Key) || isVideoFile(s3Key);
+				if (supportsTranscript) {
+					const sessionTranscript = await getSessionTranscriptPath(s3Key);
+					const sessionTranscriptPath = sessionTranscript?.path;
+					const dotIndex = s3Key.lastIndexOf(".");
+					const vttPath = sessionTranscriptPath?.endsWith(".vtt")
+						? getWasabiKey(sessionTranscriptPath)
+						: s3Key.substring(0, dotIndex) + ".vtt";
+					const txtPath = sessionTranscriptPath?.endsWith(".txt")
+						? getWasabiKey(sessionTranscriptPath)
+						: s3Key.substring(0, dotIndex) + ".txt";
+					const [exists, txtExists] = await Promise.all([
+						awsMetadataInfo({ path: "sessions/" + vttPath }),
+						awsMetadataInfo({ path: "sessions/" + txtPath }),
+					]);
+					if (exists) {
+						subtitles =
+							"/api/subtitle?path=" + encodeURIComponent("sessions/" + vttPath);
+					}
+
+					if (txtExists) {
+						transcriptionUrl = await getAwsDownloadUrl({
+							path: "sessions/" + txtPath,
+							expiresIn: 10800,
+							responseContentDisposition: `attachment; filename="${fileName.substring(0, fileName.lastIndexOf("."))}.txt"`,
+						});
+					}
+				}
+				return { path: playerUrl, downloadUrl, subtitles, transcriptionUrl };
+			},
+			["player-metadata", decodedPath],
+			{
+				revalidate: PLAYER_CACHE_TTL_SECONDS,
+			},
+		);
+		const result = await loadPlayerMetadata();
 
 		log({
 			component,
