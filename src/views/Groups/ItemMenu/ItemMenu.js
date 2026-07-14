@@ -65,9 +65,11 @@ export default function ItemMenuWidget({
 				setGroups((groups) => {
 					groups = [...groups];
 					const index = groups.findIndex((group) => group.name === item.name);
-					const group = groups[index];
-					group.disabled = !group.disabled;
-					groups[index] = { ...groups[index] };
+					if (index === -1) return groups;
+					groups[index] = {
+						...groups[index],
+						disabled: !groups[index].disabled,
+					};
 					return groups;
 				});
 			},

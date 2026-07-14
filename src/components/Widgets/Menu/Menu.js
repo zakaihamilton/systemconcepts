@@ -11,7 +11,7 @@ import ListItemText from "@ui/ListItemText";
 import Menu from "@ui/Menu";
 import MenuItem from "@ui/MenuItem";
 import clsx from "clsx";
-import { Children, cloneElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./Menu.module.css";
 
 export default function MenuWidget({
@@ -240,25 +240,29 @@ export default function MenuWidget({
 
 	const menuItems = open && renderItems(items);
 
-	const trigger = Children.map(children, (child) => {
-		if (!child) {
-			return null;
-		}
-		const childProps = {};
-		if (clickEnabled) {
-			childProps.onClick = (event) => {
-				event.stopPropagation();
-				openMenu(event);
-			};
-		}
-		if (hoverEnabled) {
-			childProps.onMouseEnter = (event) => {
-				setHoverRef(event.currentTarget);
-				openMenu(event);
-			};
-		}
-		return cloneElement(child, childProps);
-	});
+	const trigger = children && (
+		<span
+			className={styles.trigger}
+			onClick={
+				clickEnabled
+					? (event) => {
+							event.stopPropagation();
+							openMenu(event);
+						}
+					: undefined
+			}
+			onMouseEnter={
+				hoverEnabled
+					? (event) => {
+							setHoverRef(event.currentTarget);
+							openMenu(event);
+						}
+					: undefined
+			}
+		>
+			{children}
+		</span>
+	);
 
 	return (
 		<>
