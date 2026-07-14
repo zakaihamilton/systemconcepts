@@ -19,7 +19,7 @@ async function main() {
 	);
 	const { code } = babel.transformSync(jsxCode, {
 		filename: sourcePath.replace(/\.svg$/, ".js"),
-		presets: ["next/babel"],
+		presets: [["next/babel", { "preset-react": { runtime: "automatic" } }]],
 	});
 
 	process.stdout.write(code);

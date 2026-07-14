@@ -1,4 +1,5 @@
 import { fetchJSON } from "@util/api/fetch";
+import { logger } from "@util/api/logger";
 import {
 	clearSessionMetadataCache,
 	fetchSessionMetadata,
@@ -6,6 +7,14 @@ import {
 
 jest.mock("@util/api/fetch", () => ({
 	fetchJSON: jest.fn(),
+}));
+jest.mock("@util/api/logger", () => ({
+	logger: {
+		debug: jest.fn(),
+		error: jest.fn(),
+		info: jest.fn(),
+		warn: jest.fn(),
+	},
 }));
 
 const originalFetch = global.fetch;
@@ -114,6 +123,10 @@ describe("fetchSessionMetadata", () => {
 			expect.any(Object),
 		);
 		expect(result.tags["2024-05-05 Test Session"]).toEqual(["fallback"]);
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("Presigned fetch failed"),
+			expect.any(Error),
+		);
 	});
 
 	it("dedupes concurrent requests for the same metadata key", async () => {

@@ -1,6 +1,7 @@
 import { readApiCacheEdge } from "@util/api/apiCacheEdge";
 import { buildCanonicalApiUrl } from "@util/api/apiCacheKeys";
 import { authenticateEdge, scheduleApiCacheWrite } from "@util/api/edgeApi";
+import { logger } from "@util/api/logger";
 import { buildRssFeed } from "@util/domain/rssFeedResponse";
 import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import { TextEncoder } from "util";
@@ -53,6 +54,14 @@ jest.mock("@util/api/apiCacheKeys", () => ({
 jest.mock("@util/api/edgeApi", () => ({
 	authenticateEdge: jest.fn(),
 	scheduleApiCacheWrite: jest.fn(),
+}));
+jest.mock("@util/api/logger", () => ({
+	logger: {
+		debug: jest.fn(),
+		error: jest.fn(),
+		info: jest.fn(),
+		warn: jest.fn(),
+	},
 }));
 
 jest.mock("@util/domain/rssFeedResponse", () => ({
@@ -200,5 +209,6 @@ describe("/api/rss", () => {
 
 		expect(response.status).toBe(500);
 		expect(response.headers.get("Cache-Control")).toBe("no-store");
+		expect(logger.error).toHaveBeenCalledWith("RSS Error:", expect.any(Error));
 	});
 });
