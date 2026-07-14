@@ -1,15 +1,14 @@
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import Box from "@mui/material/Box";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import ContentCopyIcon from "@icons/ContentCopy";
+import Box from "@ui/Box";
+import Dialog from "@ui/Dialog";
+import DialogContent from "@ui/DialogContent";
+import IconButton from "@ui/IconButton";
+import Typography from "@ui/Typography";
 import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";
 import Tooltip from "@widgets/Tooltip";
 import { useCallback, useEffect, useRef } from "react";
 import styles from "./Zoom.module.css";
-
 export default function Zoom({
 	open,
 	onClose,

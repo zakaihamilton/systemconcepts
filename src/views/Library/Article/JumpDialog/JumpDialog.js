@@ -1,14 +1,15 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import TextField from "@mui/material/TextField";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import Tab from "@ui/Tab";
+import Tabs from "@ui/Tabs";
+import TextField from "@ui/TextField";
 import { useTranslations } from "@util/domain/translations";
 import React, { useEffect, useState } from "react";
+import styles from "./JumpDialog.module.css";
 
 export default function JumpDialog({
 	open,
@@ -72,7 +73,7 @@ export default function JumpDialog({
 						variant="fullWidth"
 						textColor="primary"
 						indicatorColor="primary"
-						sx={{ marginBottom: 2 }}
+						className={styles.tabs}
 					>
 						<Tab label={translations.PARAGRAPH} />
 						<Tab label={pageLabel || translations.PAGE} />
@@ -92,9 +93,7 @@ export default function JumpDialog({
 						onChange={(e) => setParagraphNumber(e.target.value)}
 						onKeyDown={handleKeyDown}
 						inputRef={inputRef}
-						slotProps={{
-							input: { inputProps: { min: 1, max: maxParagraphs } },
-						}}
+						inputProps={{ min: 1, max: maxParagraphs }}
 					/>
 				)}
 
@@ -111,9 +110,7 @@ export default function JumpDialog({
 							value={pageNumber}
 							onChange={(e) => setPageNumber(e.target.value)}
 							onKeyDown={handleKeyDown}
-							slotProps={{
-								input: { inputProps: { min: 1, max: maxPage } },
-							}}
+							inputProps={{ min: 1, max: maxPage }}
 						/>
 					</Box>
 				)}

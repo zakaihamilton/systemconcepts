@@ -1,6 +1,6 @@
-import { Divider } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import Link from "@mui/material/Link";
+import { Divider } from "@ui";
+import IconButton from "@ui/IconButton";
+import Link from "@ui/Link";
 import { useStyles } from "@util/browser/styles";
 import Label from "@widgets/Label";
 import Menu from "@widgets/Menu";

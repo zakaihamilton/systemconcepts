@@ -1,4 +1,4 @@
-import Slider from "@mui/material/Slider";
+import Slider from "@ui/Slider";
 import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
 import React, { useEffect } from "react";
@@ -81,28 +81,7 @@ export default function SpeedSlider() {
 					min={0.5}
 					max={max}
 					onChange={handleSpeedChange}
-					sx={{
-						"& .MuiSlider-rail": {
-							height: 8,
-						},
-						"& .MuiSlider-track": {
-							height: 8,
-						},
-						"& .MuiSlider-thumb": {
-							width: 24,
-							height: 24,
-						},
-						"& .MuiSlider-mark": {
-							width: 10,
-							height: 10,
-							borderRadius: "50%",
-							backgroundColor: "currentColor",
-						},
-						"& .MuiSlider-markActive": {
-							backgroundColor: "currentColor",
-							opacity: 1,
-						},
-					}}
+					className={styles.speedSlider}
 				/>
 			</div>
 		</div>

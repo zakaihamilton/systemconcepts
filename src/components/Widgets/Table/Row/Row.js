@@ -1,5 +1,5 @@
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
+import TableCell from "@ui/TableCell";
+import TableRow from "@ui/TableRow";
 import { useStyles } from "@util/browser/styles";
 import clsx from "clsx";
 import styles from "./Row.module.css";
@@ -92,6 +92,7 @@ export default function Row({
 	});
 	return (
 		<TableRow
+			selected={selectedRow}
 			className={classes + " " + className}
 			style={{
 				minHeight: rowHeight,

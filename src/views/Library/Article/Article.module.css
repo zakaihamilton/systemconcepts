@@ -135,9 +135,18 @@ h1.title {
 	}
 }
 
+.titleClickable {
+	cursor: pointer;
+}
+
+.titleClickable:hover {
+	text-decoration: underline;
+}
+
 .metadataTag.metadataTag {
 	display: flex;
 	align-items: center;
+	cursor: pointer;
 	gap: 6px;
 	padding: 4px 12px;
 	background-color: var(--action-hover) !important;
@@ -167,7 +176,73 @@ h1.title {
 
 	svg {
 		color: var(--primary-main);
+		font-size: 1rem;
 	}
+}
+
+.matchCount {
+	align-self: center;
+	margin-left: 0.25rem;
+	margin-right: 0.25rem;
+	color: var(--text-secondary);
+	font-weight: bold;
+}
+
+.centeredState {
+	margin-left: 0;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+@media (min-width: 600px) {
+	.centeredState {
+		margin-left: 1rem;
+	}
+}
+
+.articleMain {
+	margin-left: 0;
+	position: relative;
+	height: 100%;
+}
+
+.articleMain.embedded {
+	height: auto;
+	min-height: unset;
+}
+
+@media (min-width: 600px) {
+	.articleMain {
+		margin-left: 1rem;
+	}
+}
+
+.contentArea {
+	position: relative;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	outline: none;
+	display: flex;
+	flex-direction: column;
+}
+
+.contentAreaEmbedded {
+	height: auto;
+	overflow-y: visible;
+	display: block;
+}
+
+.pageSeparator {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 1px;
+	border-top: 2px dashed var(--divider);
+	opacity: 1;
+	pointer-events: none;
 }
 
 .contentScrollArea {

@@ -1,0 +1,126 @@
+.root {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.fullWidth {
+	width: 100%;
+}
+
+.filled {
+	background-color: rgba(var(--text-color-rgb), 0.05);
+	border-radius: 12px;
+	border: 1px solid var(--border-color);
+	padding-top: 18px;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filled:hover {
+	background-color: rgba(var(--text-color-rgb), 0.08);
+}
+
+.focused {
+	background-color: rgba(var(--primary-color-rgb), 0.05);
+	box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
+	border-color: var(--primary-color);
+}
+
+.error {
+	border-color: var(--error-color);
+	background-color: rgba(var(--error-color-rgb), 0.05);
+}
+
+.error.focused {
+	box-shadow: 0 0 0 4px rgba(var(--error-color-rgb), 0.1);
+}
+
+.transparent .filled {
+	background-color: transparent;
+}
+
+.label {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	font-size: 0.7rem;
+	color: rgba(var(--text-color-rgb), 0.6);
+	font-weight: 500;
+	pointer-events: none;
+	transition: all 0.2s ease;
+	transform-origin: top left;
+}
+
+.labelFloating {
+	transform: translateY(-14px) scale(0.7);
+	color: var(--primary-color);
+}
+
+.labelError {
+	color: var(--error-color);
+}
+
+.inputWrapper {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	min-height: 1.5rem;
+}
+
+.input {
+	flex: 1;
+	border: none;
+	background: transparent;
+	font-size: 0.95rem;
+	font-weight: 500;
+	color: var(--text-color);
+	font-family: inherit;
+	outline: none;
+	width: 100%;
+	padding: 0;
+}
+
+.select {
+	appearance: none;
+	cursor: pointer;
+	padding-right: 32px;
+}
+
+[dir="rtl"] .select {
+	padding-right: 0;
+	padding-left: 32px;
+}
+
+.helperText {
+	margin: 4px 12px 0;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--secondary-color);
+}
+
+.helperError {
+	color: var(--error-color);
+}
+
+.adornmentStart {
+	margin-right: 4px;
+	display: flex;
+	align-items: center;
+}
+
+.adornmentEnd {
+	margin-left: 4px;
+	display: flex;
+	align-items: center;
+}
+
+[dir="rtl"] .adornmentStart {
+	margin-right: 0;
+	margin-left: 4px;
+}
+
+[dir="rtl"] .adornmentEnd {
+	margin-left: 0;
+	margin-right: 4px;
+}

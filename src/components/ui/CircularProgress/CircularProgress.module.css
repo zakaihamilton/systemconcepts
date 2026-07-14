@@ -1,0 +1,26 @@
+.root {
+	display: inline-block;
+	animation: spin 1.4s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.svg {
+	display: block;
+	color: var(--primary-color);
+}
+
+.track {
+	opacity: 0.2;
+}
+
+.circle {
+	stroke: currentColor;
+	stroke-dasharray: 80px, 200px;
+	stroke-dashoffset: 0;
+	stroke-linecap: round;
+}

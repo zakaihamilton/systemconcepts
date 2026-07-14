@@ -1,17 +1,17 @@
-import ClearIcon from "@mui/icons-material/Clear";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import List from "@mui/material/List";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
+import ClearIcon from "@icons/Clear";
+import FilterAltIcon from "@icons/FilterAlt";
+import Box from "@ui/Box";
+import Drawer from "@ui/Drawer";
+import IconButton from "@ui/IconButton";
+import InputAdornment from "@ui/InputAdornment";
+import List from "@ui/List";
+import Paper from "@ui/Paper";
+import TextField from "@ui/TextField";
+import clsx from "clsx";
 import { useCallback, useMemo } from "react";
 import { LibraryIcons, LibraryTagKeys } from "../Icons";
 import TreeItem from "../TreeItem";
 import styles from "./Tags.module.css";
-
 export default function Tags({
 	tags,
 	filterText,
@@ -331,31 +331,29 @@ export default function Tags({
 					fullWidth
 					size="small"
 					className={styles.filterInput}
-					slotProps={{
-						input: {
-							startAdornment: (
-								<InputAdornment position="start">
-									<FilterAltIcon color="action" />
-								</InputAdornment>
-							),
-							endAdornment: filterText ? (
-								<InputAdornment position="end">
-									<IconButton
-										size="small"
-										onClick={() => setFilterText("")}
-										edge="end"
-										sx={{ mr: -0.5 }}
-									>
-										<ClearIcon fontSize="small" />
-									</IconButton>
-								</InputAdornment>
-							) : null,
-						},
-					}}
+					startAdornment={
+						<InputAdornment position="start">
+							<FilterAltIcon color="action" />
+						</InputAdornment>
+					}
+					endAdornment={
+						filterText ? (
+							<InputAdornment position="end">
+								<IconButton
+									size="small"
+									onClick={() => setFilterText("")}
+									edge="end"
+									className={styles.clearButton}
+								>
+									<ClearIcon fontSize="small" />
+								</IconButton>
+							</InputAdornment>
+						) : null
+					}
 				/>
 			</Box>
 			<Box className={styles.treeContainer}>
-				<List component="nav" sx={{ py: 1 }}>
+				<List component="nav" className={styles.treeList}>
 					{tree.map((node) => (
 						<TreeItem
 							key={node.id}
@@ -378,12 +376,7 @@ export default function Tags({
 				anchor="left"
 				open={showLibrarySideBar}
 				onClose={closeDrawer}
-				ModalProps={{ keepMounted: true }}
-				slotProps={{
-					paper: {
-						sx: { width: "85vw", maxWidth: "350px", height: "100%" },
-					},
-				}}
+				className={styles.mobileDrawer}
 			>
 				{sideBarContent}
 			</Drawer>
@@ -393,13 +386,10 @@ export default function Tags({
 	return (
 		<Paper
 			elevation={3}
-			className={styles.sidebar}
-			sx={{
-				width: showLibrarySideBar ? 450 : 0,
-				opacity: showLibrarySideBar ? 1 : 0,
-				ml: showLibrarySideBar ? 0 : -2,
-				display: { xs: "none", sm: "flex" },
-			}}
+			className={clsx(
+				styles.sidebar,
+				showLibrarySideBar ? styles.sidebarOpen : styles.sidebarClosed,
+			)}
 		>
 			{sideBarContent}
 		</Paper>

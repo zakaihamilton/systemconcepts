@@ -1,5 +1,5 @@
+import MoreVertIcon from "@icons/MoreVert";
 import { Store } from "pullstate";
-
 export const ToolbarStore = new Store({
 	sections: [],
 });
@@ -15,9 +15,8 @@ export function registerToolbar(id, sortKey) {
 	});
 }
 
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { Divider } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
+import { Divider } from "@ui";
+import IconButton from "@ui/IconButton";
 import { useDeviceType } from "@util/browser/styles";
 import Tooltip from "@widgets/Tooltip";
 

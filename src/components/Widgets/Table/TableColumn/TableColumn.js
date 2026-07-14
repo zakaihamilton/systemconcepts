@@ -1,5 +1,5 @@
-import TableCell from "@mui/material/TableCell";
-import TableSortLabel from "@mui/material/TableSortLabel";
+import TableCell from "@ui/TableCell";
+import TableSortLabel from "@ui/TableSortLabel";
 import Label from "@widgets/Label";
 import clsx from "clsx";
 import styles from "./TableColumn.module.css";
@@ -10,6 +10,7 @@ export default function TableColumn({
 	orderBy,
 	showSort,
 	createSortHandler,
+	stickyHeader = false,
 }) {
 	const {
 		id,
@@ -26,6 +27,7 @@ export default function TableColumn({
 	return (
 		<TableCell
 			align={align}
+			stickyHeader={stickyHeader}
 			classes={{
 				root: clsx(styles.cell, !align && styles.defaultAlign, styles.head),
 			}}

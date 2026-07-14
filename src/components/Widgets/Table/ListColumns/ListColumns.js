@@ -1,4 +1,4 @@
-import TableSortLabel from "@mui/material/TableSortLabel";
+import TableSortLabel from "@ui/TableSortLabel";
 import { useStyles } from "@util/browser/styles";
 import Label from "@widgets/Label";
 import Tooltip from "@widgets/Tooltip";

@@ -1,12 +1,11 @@
 import data from "@data/fontSizes";
-import DesktopMacIcon from "@mui/icons-material/DesktopMac";
-import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import TabletIcon from "@mui/icons-material/Tablet";
+import DesktopMacIcon from "@icons/DesktopMac";
+import SmartphoneIcon from "@icons/Smartphone";
+import TabletIcon from "@icons/Tablet";
 import { useTranslations } from "@util/domain/translations";
 import Label from "@widgets/Label";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
-
 export const FontSizesStore = new Store({
 	order: "desc",
 	offset: 0,

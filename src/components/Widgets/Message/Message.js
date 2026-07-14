@@ -1,4 +1,4 @@
-import Typography from "@mui/material/Typography";
+import Typography from "@ui/Typography";
 import clsx from "clsx";
 import styles from "./Message.module.css";
 

@@ -4,9 +4,7 @@ import Progress from "./index.js";
 describe("Progress Widget", () => {
 	it("renders circular progress", () => {
 		const { container } = render(<Progress />);
-		expect(
-			container.querySelector(".MuiCircularProgress-root"),
-		).toBeInTheDocument();
+		expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
 	});
 
 	it("renders percentage when value is provided", () => {

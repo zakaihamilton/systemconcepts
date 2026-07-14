@@ -1,0 +1,153 @@
+.titleBold {
+	font-weight: 700;
+}
+
+.titleError {
+	font-weight: 700;
+	color: var(--error-color);
+}
+
+.titleErrorColor {
+	color: var(--error-color);
+}
+
+.contentColumn {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+}
+
+.contentFlex {
+	flex: 1;
+	padding: 16px;
+	padding-top: 8px;
+	display: flex;
+	flex-direction: column;
+}
+
+.actionsPadded {
+	padding: 16px;
+}
+
+.actionsPaddedTight {
+	padding: 16px;
+	padding-top: 0;
+}
+
+.actionsSpaced {
+	padding: 16px;
+	padding-top: 16px;
+	justify-content: space-between;
+}
+
+.flexColumnGap2 {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding-top: 8px;
+}
+
+.flexRowGap1 {
+	display: flex;
+	gap: 8px;
+}
+
+.flexCenter {
+	display: flex;
+	justify-content: center;
+}
+
+.flexCenterMy2 {
+	display: flex;
+	justify-content: center;
+	margin-top: 16px;
+	margin-bottom: 16px;
+}
+
+.flexCenterP4 {
+	display: flex;
+	justify-content: center;
+	padding: 32px;
+}
+
+.flexCenterP2 {
+	display: flex;
+	justify-content: center;
+	padding: 16px;
+}
+
+.highlightBox {
+	margin-top: 16px;
+	padding: 16px;
+	background-color: var(--hover-background);
+	border-radius: 8px;
+}
+
+.highlightBoxSm {
+	margin-top: 16px;
+	padding: 16px;
+	background-color: var(--hover-background);
+	border-radius: 8px;
+}
+
+.renameContent {
+	padding-top: 8px;
+	min-width: 300px;
+}
+
+.errorHighlightBox {
+	margin-top: 16px;
+	padding: 16px;
+	background-color: rgba(var(--error-color-rgb), 0.12);
+	color: var(--error-color);
+	border-radius: 8px;
+}
+
+.dialogTall {
+	height: 80vh;
+	max-height: 80vh;
+}
+
+.contentField {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.contentTextarea {
+	flex: 1;
+	height: 100%;
+}
+
+.listFlush {
+	padding-top: 0;
+}
+
+.listItemBlock {
+	display: block;
+	margin-bottom: 8px;
+}
+
+.nestedList {
+	padding-left: 16px;
+}
+
+.dividerMy1 {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.pathLabel {
+	background-color: var(--hover-background);
+	padding: 8px;
+	border-radius: 4px;
+}
+
+.diffIndent {
+	margin-left: 8px;
+}
+
+.noChanges {
+	padding: 16px;
+	text-align: center;
+}

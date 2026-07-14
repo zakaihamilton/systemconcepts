@@ -1,13 +1,11 @@
 import { MainStore } from "@components/Main";
-import SpeedDial from "@mui/material/SpeedDial";
-import SpeedDialAction from "@mui/material/SpeedDialAction";
-import SpeedDialIcon from "@mui/material/SpeedDialIcon";
+import SpeedDial, { SpeedDialAction, SpeedDialIcon } from "@ui/SpeedDial";
 import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 import styles from "./SpeedDial.module.css";
 
 export default function SpeedDialWidget({ visible = true, items }) {
-	const { direction } = MainStore.useState();
+	const { direction: _direction } = MainStore.useState();
 	const translations = useTranslations();
 	const [open, setOpen] = useState(false);
 
@@ -31,33 +29,21 @@ export default function SpeedDialWidget({ visible = true, items }) {
 			<SpeedDialAction
 				key={item.id}
 				icon={item.icon}
-				slotProps={{
-					tooltip: {
-						title: item.name,
-						open: true,
-						placement: direction === "rtl" ? "right" : "left",
-						classes: {
-							tooltip: styles.tooltip,
-						},
-					},
-				}}
+				tooltipTitle={item.name}
+				tooltipOpen
+				className={styles.icon}
 				onClick={itemHandler}
-				classes={{
-					fab: styles.icon,
-				}}
 			/>
 		);
 	});
 
+	if (!visible) return null;
+
 	return (
 		<SpeedDial
 			ariaLabel={translations.MENU}
-			classes={{
-				root: direction === "rtl" ? styles.speedDialRtl : styles.speedDial,
-				fab: styles.fab,
-			}}
-			hidden={!visible}
-			icon={<SpeedDialIcon classes={{ root: styles.fab }} />}
+			className={styles.speedDial}
+			icon={<SpeedDialIcon />}
 			onClose={handleClose}
 			onOpen={handleOpen}
 			open={open}

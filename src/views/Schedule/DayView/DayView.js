@@ -1,10 +1,10 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import Input from "@components/Widgets/Input";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import TodayIcon from "@mui/icons-material/Today";
+import ArrowBackIcon from "@icons/ArrowBack";
+import ArrowForwardIcon from "@icons/ArrowForward";
+import ChevronLeftIcon from "@icons/ChevronLeft";
+import ChevronRightIcon from "@icons/ChevronRight";
+import TodayIcon from "@icons/Today";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
 import {

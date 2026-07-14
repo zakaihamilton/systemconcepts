@@ -1,0 +1,44 @@
+.root {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--icon-color);
+	cursor: pointer;
+	padding: 8px;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.root:hover:not(:disabled) {
+	background-color: var(--hover-background);
+	color: var(--icon-focus-color);
+}
+
+.root:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.small {
+	padding: 4px;
+}
+
+.medium {
+	padding: 8px;
+}
+
+.large {
+	padding: 12px;
+}
+
+.edgeEnd {
+	margin-inline-end: -8px;
+}
+
+.edgeStart {
+	margin-inline-start: -8px;
+}

@@ -1,4 +1,4 @@
-import Fade from "@mui/material/Fade";
+import Fade from "@ui/Fade";
 import React from "react";
 import styles from "./PageIndicator.module.css";
 

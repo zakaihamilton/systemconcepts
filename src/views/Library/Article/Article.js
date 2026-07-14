@@ -1,28 +1,29 @@
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArticleIcon from "@mui/icons-material/Article";
-import CodeIcon from "@mui/icons-material/Code";
-import CodeOffIcon from "@mui/icons-material/CodeOff";
-import DataArrayIcon from "@mui/icons-material/DataArray";
-import DownloadIcon from "@mui/icons-material/Download";
-import EditIcon from "@mui/icons-material/Edit";
-import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PrintIcon from "@mui/icons-material/Print";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
+import ArrowBackIcon from "@icons/ArrowBack";
+import ArrowForwardIcon from "@icons/ArrowForward";
+import ArticleIcon from "@icons/Article";
+import CodeIcon from "@icons/Code";
+import CodeOffIcon from "@icons/CodeOff";
+import DataArrayIcon from "@icons/DataArray";
+import DownloadIcon from "@icons/Download";
+import EditIcon from "@icons/Edit";
+import FormatListNumberedIcon from "@icons/FormatListNumbered";
+import KeyboardArrowDownIcon from "@icons/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@icons/KeyboardArrowUp";
+import LibraryBooksIcon from "@icons/LibraryBooks";
+import MenuBookIcon from "@icons/MenuBook";
+import PrintIcon from "@icons/Print";
+import Box from "@ui/Box";
+import CircularProgress from "@ui/CircularProgress";
+import Typography from "@ui/Typography";
 import { roleAuth } from "@util/auth/roles";
 import { useLocalStorage } from "@util/browser/hooks";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
 import { useTranslations } from "@util/domain/translations";
 import { exportData } from "@util/storage/importExport";
+import clsx from "clsx";
 import Cookies from "js-cookie";
 import React, {
 	useCallback,
@@ -507,12 +508,7 @@ function Article({
 						<Typography
 							key="matchCount"
 							variant="caption"
-							sx={{
-								alignSelf: "center",
-								mx: 1,
-								color: "var(--text-secondary)",
-								fontWeight: "bold",
-							}}
+							className={styles.matchCount}
 						>
 							{totalMatches > 0
 								? `${matchIndex + 1} / ${totalMatches}`
@@ -602,17 +598,7 @@ function Article({
 
 	if (loading) {
 		return (
-			<Box
-				component="main"
-				className={styles.root}
-				sx={{
-					ml: { sm: 2 },
-					height: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-				}}
-			>
+			<Box component="main" className={clsx(styles.root, styles.centeredState)}>
 				<CircularProgress />
 			</Box>
 		);
@@ -620,17 +606,7 @@ function Article({
 
 	if (!content && showPlaceholder) {
 		return (
-			<Box
-				component="main"
-				className={styles.root}
-				sx={{
-					ml: { sm: 2 },
-					height: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-				}}
-			>
+			<Box component="main" className={clsx(styles.root, styles.centeredState)}>
 				<Box className={styles.placeholder}>
 					<LibraryBooksIcon />
 					<Typography component="p">{translations.SELECT_ITEM}</Typography>
@@ -644,16 +620,12 @@ function Article({
 	return (
 		<Box
 			component="main"
-			className={[styles.root, embedded && styles.embedded]
-				.filter(Boolean)
-				.join(" ")}
+			className={clsx(
+				styles.root,
+				styles.articleMain,
+				embedded && styles.embedded,
+			)}
 			minWidth={0}
-			sx={{
-				ml: { sm: 2 },
-				position: "relative",
-				height: embedded ? "auto" : "100%",
-				minHeight: embedded ? "unset" : undefined,
-			}}
 			{...swipeHandlers}
 		>
 			{!embedded && (
@@ -674,15 +646,10 @@ function Article({
 				tabIndex={-1}
 				onScroll={handleScrollUpdate}
 				onClick={handleClick}
-				sx={{
-					position: "relative",
-					height: embedded ? "auto" : "100%",
-					overflowY: embedded ? "visible" : "auto",
-					overflowX: "hidden",
-					outline: "none",
-					display: embedded ? "block" : "flex",
-					flexDirection: "column",
-				}}
+				className={clsx(
+					styles.contentArea,
+					embedded && styles.contentAreaEmbedded,
+				)}
 			>
 				<PageIndicator scrollInfo={scrollInfo} />
 				{!hideHeader && (
@@ -703,16 +670,7 @@ function Article({
 							<Box
 								key={i}
 								className={styles.pageSeparator}
-								sx={{
-									position: "absolute",
-									top: (i + 1) * scrollInfo.clientHeight,
-									left: 0,
-									right: 0,
-									height: "1px",
-									borderTop: "2px dashed var(--divider)",
-									opacity: 1.0,
-									pointerEvents: "none",
-								}}
+								style={{ top: (i + 1) * scrollInfo.clientHeight }}
 							/>
 						),
 					)}

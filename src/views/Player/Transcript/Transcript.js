@@ -1,8 +1,8 @@
 import { useSearch } from "@components/Search";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import CloseIcon from "@mui/icons-material/Close";
-import { IconButton } from "@mui/material";
+import ArrowDownwardIcon from "@icons/ArrowDownward";
+import ArrowUpwardIcon from "@icons/ArrowUpward";
+import CloseIcon from "@icons/Close";
+import { IconButton } from "@ui";
 import { useFetch } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import Download from "@widgets/Download";
@@ -12,7 +12,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PlayerStore } from "../Player";
 import styles from "./Transcript.module.css";
-
 export default function Transcript({ show }) {
 	const translations = useTranslations();
 	const { subtitles, transcriptionUrl, player } = PlayerStore.useState();

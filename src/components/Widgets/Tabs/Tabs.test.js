@@ -1,5 +1,5 @@
-import Tab from "@mui/material/Tab";
 import { fireEvent, render } from "@testing-library/react";
+import Tab from "@ui/Tab";
 import TabsWidget from "./Tabs.js";
 
 describe("TabsWidget Component", () => {

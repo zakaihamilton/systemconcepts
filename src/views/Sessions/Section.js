@@ -1,9 +1,8 @@
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import ViewComfyIcon from "@mui/icons-material/ViewComfy";
-import ViewListIcon from "@mui/icons-material/ViewList";
+import AccountTreeIcon from "@icons/AccountTree";
+import TableChartIcon from "@icons/TableChart";
+import ViewComfyIcon from "@icons/ViewComfy";
+import ViewListIcon from "@icons/ViewList";
 import { SessionsStore } from "@util/domain/sessions";
-
 export function getSessionsSection({ translations }) {
 	const { viewMode } = SessionsStore.getRawState();
 	let description = "";

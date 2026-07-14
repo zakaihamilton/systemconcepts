@@ -1,10 +1,10 @@
 import { MainStore } from "@components/Main";
 import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ClosedCaptionIcon from "@mui/icons-material/ClosedCaption";
-import ClosedCaptionOffIcon from "@mui/icons-material/ClosedCaptionOff";
-import InfoIcon from "@mui/icons-material/Info";
-import VideoLabelIcon from "@mui/icons-material/VideoLabel";
+import ClosedCaptionIcon from "@icons/ClosedCaption";
+import ClosedCaptionOffIcon from "@icons/ClosedCaptionOff";
+import InfoIcon from "@icons/Info";
+import VideoLabelIcon from "@icons/VideoLabel";
 import {
 	getStableFetchCacheOptions,
 	SIGNED_URL_CACHE_TTL_MS,

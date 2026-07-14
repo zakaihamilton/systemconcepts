@@ -1,6 +1,7 @@
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@ui/ToggleButton";
+import ToggleButtonGroup from "@ui/ToggleButtonGroup";
 import Tooltip from "@widgets/Tooltip";
+import { cloneElement } from "react";
 import styles from "./ToggleButtonGroup.module.css";
 
 export default function ToggleButtonGroupWidget({ items, state, ...props }) {
@@ -14,16 +15,24 @@ export default function ToggleButtonGroupWidget({ items, state, ...props }) {
 
 	const buttonItems = items.map((button) => {
 		const { icon, id, name, tooltip = "", ...props } = button;
+		const toggleButton = (
+			<ToggleButton
+				selected={selected === id}
+				value={id}
+				aria-label={name || tooltip || id}
+				{...props}
+			>
+				{icon || name}
+			</ToggleButton>
+		);
+
+		if (!tooltip) {
+			return cloneElement(toggleButton, { key: id });
+		}
+
 		return (
 			<Tooltip key={id} title={tooltip} arrow>
-				<ToggleButton
-					selected={selected === id}
-					value={id}
-					aria-label={name || tooltip || id}
-					{...props}
-				>
-					{icon || name}
-				</ToggleButton>
+				{toggleButton}
 			</Tooltip>
 		);
 	});

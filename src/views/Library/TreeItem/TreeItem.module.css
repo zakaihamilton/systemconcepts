@@ -3,6 +3,31 @@
 	flex-direction: column;
 }
 
+.itemButtonLink {
+	color: inherit;
+	text-decoration: none;
+}
+
+.itemButtonLevel0 {
+	padding-left: 8px;
+}
+
+.itemButtonLevel {
+	padding-left: 12px;
+}
+
+.toggleHidden {
+	visibility: hidden;
+}
+
+.typeIcon {
+	font-size: inherit;
+}
+
+.listItemText {
+	min-width: 0;
+}
+
 .itemButton {
 	padding-left: 12px;
 	padding-top: 8px;

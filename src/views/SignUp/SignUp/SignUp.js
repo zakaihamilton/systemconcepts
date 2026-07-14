@@ -1,16 +1,16 @@
 import { MainStore } from "@components/Main";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EmailIcon from "@mui/icons-material/Email";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
+import AccountCircleIcon from "@icons/AccountCircle";
+import ArrowBackIcon from "@icons/ArrowBack";
+import EmailIcon from "@icons/Email";
+import VpnKeyIcon from "@icons/VpnKey";
+import Button from "@ui/Button";
+import Checkbox from "@ui/Checkbox";
+import FormControlLabel from "@ui/FormControlLabel";
+import Grid from "@ui/Grid";
+import IconButton from "@ui/IconButton";
+import LinearProgress from "@ui/LinearProgress";
+import Link from "@ui/Link";
+import Typography from "@ui/Typography";
 import { fetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
@@ -21,7 +21,6 @@ import clsx from "clsx";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import styles from "../../Account/Account/Account.module.css";
-
 export default function SignUp() {
 	const { direction } = MainStore.useState();
 

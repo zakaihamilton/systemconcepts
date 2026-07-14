@@ -1,8 +1,8 @@
 import roles from "@data/roles";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import EmailIcon from "@mui/icons-material/Email";
-import RecentActorsIcon from "@mui/icons-material/RecentActors";
-import TodayIcon from "@mui/icons-material/Today";
+import AccountCircleIcon from "@icons/AccountCircle";
+import EmailIcon from "@icons/Email";
+import RecentActorsIcon from "@icons/RecentActors";
+import TodayIcon from "@icons/Today";
 import { fetchJSON, useFetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";
@@ -17,7 +17,6 @@ import { Store } from "pullstate";
 import { useCallback, useEffect, useState } from "react";
 import ItemMenu from "../ItemMenu";
 import styles from "./Users.module.css";
-
 export const UsersStoreDefaults = {
 	mode: "",
 	name: "",

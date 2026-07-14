@@ -1,8 +1,8 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import SyncIcon from "@mui/icons-material/Sync";
-import SyncProblemIcon from "@mui/icons-material/SyncProblem";
-import Badge from "@mui/material/Badge";
+import SyncIcon from "@icons/Sync";
+import SyncProblemIcon from "@icons/SyncProblem";
 import { useSyncFeature } from "@sync/sync";
+import Badge from "@ui/Badge";
 import { useStyles } from "@util/browser/styles";
 import { formatDuration } from "@util/data/string";
 import { useTranslations } from "@util/domain/translations";

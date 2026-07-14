@@ -1,17 +1,17 @@
 import { MainStore } from "@components/Main";
 import languages from "@data/languages";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
-import BuildIcon from "@mui/icons-material/Build";
-import LanguageIcon from "@mui/icons-material/Language";
-import ReplayIcon from "@mui/icons-material/Replay";
-import { Divider } from "@mui/material";
+import Brightness4Icon from "@icons/Brightness4";
+import Brightness7Icon from "@icons/Brightness7";
+import BuildIcon from "@icons/Build";
+import LanguageIcon from "@icons/Language";
+import ReplayIcon from "@icons/Replay";
+import { Divider } from "@ui";
 import { useLanguage } from "@util/domain/language";
 import { useTranslations } from "@util/domain/translations";
 import { usePages } from "@util/domain/views";
 import List from "@widgets/List";
 import useDarkMode from "use-dark-mode";
-
+import styles from "./QuickAccess.module.css";
 export default function QuickAccess({ closeDrawer, state, onScrollToBottom }) {
 	const language = useLanguage();
 	const translations = useTranslations();
@@ -84,7 +84,7 @@ export default function QuickAccess({ closeDrawer, state, onScrollToBottom }) {
 	return (
 		<>
 			<div style={{ flex: "1" }} />
-			<Divider sx={{ my: 1, opacity: 0.1 }} />
+			<Divider className={styles.divider} />
 			<List items={quickAccessItems} onClick={closeDrawer} state={state} />
 		</>
 	);

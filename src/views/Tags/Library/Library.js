@@ -1,25 +1,25 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import CloudSyncIcon from "@mui/icons-material/CloudSync";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import EditIcon from "@mui/icons-material/Edit";
-import EditAttributesIcon from "@mui/icons-material/EditAttributes";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import CloudSyncIcon from "@icons/CloudSync";
+import DeleteIcon from "@icons/Delete";
+import DeleteForeverIcon from "@icons/DeleteForever";
+import EditIcon from "@icons/Edit";
+import EditAttributesIcon from "@icons/EditAttributes";
+import MoreVertIcon from "@icons/MoreVert";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import IconButton from "@ui/IconButton";
+import ListItemIcon from "@ui/ListItemIcon";
+import ListItemText from "@ui/ListItemText";
+import Menu from "@ui/Menu";
+import MenuItem from "@ui/MenuItem";
+import TextField from "@ui/TextField";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { makePath } from "@util/data/path";
@@ -31,9 +31,10 @@ import Table from "@widgets/Table";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import dialog from "../../../css/dialog-patterns.module.css";
 import BatchDialog from "../BatchDialog";
 import SyncDialog from "../SyncDialog";
-import styles from "../Tags/Tags.module.css";
+import styles from "./Library.module.css";
 
 registerToolbar("LibraryTags", 110);
 
@@ -489,7 +490,7 @@ export default function LibraryTags() {
 			>
 				<DialogTitle>{translations.RENAME_TAG}</DialogTitle>
 				<DialogContent>
-					<Box sx={{ pt: 1, minWidth: 300 }}>
+					<Box className={dialog.renameContent}>
 						<Typography
 							variant="caption"
 							color="text.secondary"
@@ -533,14 +534,18 @@ export default function LibraryTags() {
 				<DialogContent>
 					<Typography>{translations.DELETE_TAG_CONFIRM}</Typography>
 					{deleteDialog && (
-						<Box sx={{ mt: 2, p: 2, bgcolor: "action.hover", borderRadius: 1 }}>
+						<Box className={dialog.highlightBoxSm}>
 							<Typography variant="body2" color="text.secondary">
 								{deleteDialog.category}:
 							</Typography>
 							<Typography variant="body1" fontWeight="bold">
 								{deleteDialog.value}
 							</Typography>
-							<Typography variant="caption" display="block" sx={{ mt: 1 }}>
+							<Typography
+								variant="caption"
+								display="block"
+								className={styles.affectedCaption}
+							>
 								{translations.AFFECTED_ITEMS}: {deleteDialog.count}
 							</Typography>
 						</Box>
@@ -566,22 +571,14 @@ export default function LibraryTags() {
 				open={!!deleteArticlesDialog}
 				onClose={() => !processing && setDeleteArticlesDialog(null)}
 			>
-				<DialogTitle sx={{ color: "error.main" }}>
+				<DialogTitle className={dialog.titleErrorColor}>
 					{translations.DELETE_ARTICLES}
 				</DialogTitle>
 				<DialogContent>
 					<Typography>{translations.DELETE_ARTICLES_CONFIRM}</Typography>
 					{deleteArticlesDialog && (
-						<Box
-							sx={{
-								mt: 2,
-								p: 2,
-								bgcolor: "error.light",
-								color: "error.contrastText",
-								borderRadius: 1,
-							}}
-						>
-							<Typography variant="body2" sx={{ opacity: 0.9 }}>
+						<Box className={styles.deleteArticlesHighlight}>
+							<Typography variant="body2" className={styles.errorBoxText}>
 								{deleteArticlesDialog.category}:
 							</Typography>
 							<Typography variant="body1" fontWeight="bold">
@@ -590,7 +587,7 @@ export default function LibraryTags() {
 							<Typography
 								variant="caption"
 								display="block"
-								sx={{ mt: 1, opacity: 0.9 }}
+								className={styles.deleteArticlesCaption}
 							>
 								{translations.ARTICLES_TO_DELETE}: {deleteArticlesDialog.count}
 							</Typography>

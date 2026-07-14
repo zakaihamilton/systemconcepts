@@ -1,5 +1,5 @@
-import EventIcon from "@mui/icons-material/Event";
-import Typography from "@mui/material/Typography";
+import EventIcon from "@icons/Event";
+import Typography from "@ui/Typography";
 import { getContrastColor } from "@util/data/color";
 import { useDateFormatter } from "@util/data/locale";
 import { formatDuration } from "@util/data/string";

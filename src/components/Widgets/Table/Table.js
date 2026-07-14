@@ -3,27 +3,27 @@ import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FixedSizeGrid from "@components/Virtualized/FixedSizeGrid";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import GetAppIcon from "@mui/icons-material/GetApp";
-import InfoIcon from "@mui/icons-material/Info";
-import PublishIcon from "@mui/icons-material/Publish";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import SortIcon from "@mui/icons-material/Sort";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import ViewComfyIcon from "@mui/icons-material/ViewComfy";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewStreamIcon from "@mui/icons-material/ViewStream";
-import ViewWeekIcon from "@mui/icons-material/ViewWeek";
-import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import AccountTreeIcon from "@icons/AccountTree";
+import ArrowDownwardIcon from "@icons/ArrowDownward";
+import ArrowUpwardIcon from "@icons/ArrowUpward";
+import DataUsageIcon from "@icons/DataUsage";
+import GetAppIcon from "@icons/GetApp";
+import InfoIcon from "@icons/Info";
+import PublishIcon from "@icons/Publish";
+import RefreshIcon from "@icons/Refresh";
+import SortIcon from "@icons/Sort";
+import TableChartIcon from "@icons/TableChart";
+import ViewComfyIcon from "@icons/ViewComfy";
+import ViewListIcon from "@icons/ViewList";
+import ViewStreamIcon from "@icons/ViewStream";
+import ViewWeekIcon from "@icons/ViewWeek";
+import IconButton from "@ui/IconButton";
+import LinearProgress from "@ui/LinearProgress";
+import Table from "@ui/Table";
+import TableBody from "@ui/TableBody";
+import TableContainer from "@ui/TableContainer";
+import TableHead from "@ui/TableHead";
+import TableRow from "@ui/TableRow";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
 import { getComparator, stableSort } from "@util/data/sort";
@@ -791,6 +791,7 @@ export default React.memo(function TableWidget(props) {
 						order={order}
 						orderBy={orderBy}
 						createSortHandler={createSortHandler}
+						stickyHeader
 					/>
 				);
 			});

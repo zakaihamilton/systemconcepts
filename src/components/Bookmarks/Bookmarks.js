@@ -1,6 +1,6 @@
 import { MainStore } from "@components/Main";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkIcon from "@icons/Bookmark";
 import { SYNC_CONFIG } from "@sync/config";
 import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";

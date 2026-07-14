@@ -1,4 +1,4 @@
-import Link from "@mui/material/Link";
+import Link from "@ui/Link";
 import { useSessionTextColor } from "@util/data/colors";
 import { addPath, toPath } from "@util/domain/views";
 import SessionIcon from "@widgets/SessionIcon";

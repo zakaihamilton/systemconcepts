@@ -1,33 +1,19 @@
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import FolderIcon from "@mui/icons-material/Folder";
-import StorageIcon from "@mui/icons-material/Storage";
-import Collapse from "@mui/material/Collapse";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import { styled } from "@mui/material/styles";
+import ExpandLessIcon from "@icons/ExpandLess";
+import ExpandMoreIcon from "@icons/ExpandMore";
+import FolderIcon from "@icons/Folder";
+import StorageIcon from "@icons/Storage";
+import Collapse from "@ui/Collapse";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemButton from "@ui/ListItemButton";
+import ListItemIcon from "@ui/ListItemIcon";
+import ListItemText from "@ui/ListItemText";
 import { useTranslations } from "@util/domain/translations";
 import { useListing } from "@util/storage/storage";
 import Progress from "@widgets/Progress";
 import Tooltip from "@widgets/Tooltip";
 import { Fragment } from "react";
-
-const PREFIX = "StorageList";
-
-const classes = {
-	list: `${PREFIX}-list`,
-};
-
-const StyledList = styled(List)(({ theme }) => ({
-	[`& .${classes.list}`]: {
-		width: "100%",
-		backgroundColor: theme.palette.background.paper,
-	},
-}));
-
+import styles from "./StorageList.module.css";
 export default function StorageList({ path = "", state }) {
 	const translations = useTranslations();
 	const [data, loading] = useListing(path, [], { useCount: true });
@@ -51,7 +37,7 @@ export default function StorageList({ path = "", state }) {
 					icon = <FolderIcon />;
 					tooltip = translations.FOLDER;
 					if (item.count) {
-						expandIcon = open ? <ExpandLess /> : <ExpandMore />;
+						expandIcon = open ? <ExpandLessIcon /> : <ExpandMoreIcon />;
 					}
 					onClick = () => setDestination(id);
 				} else {
@@ -60,7 +46,7 @@ export default function StorageList({ path = "", state }) {
 			} else {
 				name = translations[item.name];
 				if (item.count) {
-					expandIcon = open ? <ExpandLess /> : <ExpandMore />;
+					expandIcon = open ? <ExpandLessIcon /> : <ExpandMoreIcon />;
 				}
 				onClick = () => setDestination(id);
 			}
@@ -83,10 +69,10 @@ export default function StorageList({ path = "", state }) {
 						</ListItemButton>
 					</ListItem>
 					{expandIcon && (
-						<Collapse in={open} timeout="auto" unmountOnExit>
-							<StyledList component="div" disablePadding>
+						<Collapse in={open}>
+							<List className={styles.list}>
 								{open && <StorageList path={id} state={state} />}
-							</StyledList>
+							</List>
 						</Collapse>
 					)}
 				</Fragment>
@@ -95,7 +81,7 @@ export default function StorageList({ path = "", state }) {
 		.filter(Boolean);
 
 	return (
-		<List component="nav" className={classes.list}>
+		<List className={styles.list}>
 			{!!loading && <Progress />}
 			{!loading && items}
 		</List>

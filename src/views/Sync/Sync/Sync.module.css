@@ -100,17 +100,124 @@
 	user-select: none;
 }
 
-:global(.rtl) {
-	.headerCard {
-		background: linear-gradient(
-			-135deg,
-			rgba(255, 255, 255, 0.03) 0%,
-			transparent 100%
-		);
-	}
+.headerLayout {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
 
-	.logTimestamp {
-		margin-right: 0;
-		margin-left: 8px;
-	}
+.headerRow {
+	display: flex;
+	align-items: center;
+	gap: 32px;
+	flex-wrap: wrap;
+}
+
+.statBoxWide {
+	min-width: 150px;
+}
+
+.statBoxNarrow {
+	min-width: 80px;
+}
+
+.statBoxMedium {
+	min-width: 120px;
+}
+
+.statusRow {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.syncIcon {
+	font-size: 20px;
+}
+
+.actionsRow {
+	margin-left: auto;
+	display: flex;
+	gap: 16px;
+	align-items: center;
+}
+
+.nowrapButton {
+	white-space: nowrap;
+}
+
+.debugSelect {
+	min-width: 120px;
+}
+
+.fullSyncButton {
+	white-space: nowrap;
+}
+
+.fullSyncButtonDisabled {
+	opacity: 0.5;
+	white-space: nowrap;
+}
+
+.progressSection {
+	width: 100%;
+	margin-top: 8px;
+}
+
+.progressHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+	gap: 16px;
+}
+
+.progressLabel {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	flex: 1;
+}
+
+.progressPercent {
+	min-width: 3.5em;
+	text-align: right;
+	font-weight: 700;
+}
+
+.progressBar {
+	height: 8px;
+	border-radius: 4px;
+}
+
+.terminalWrapper {
+	position: relative;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.copyButtonWrapper {
+	position: absolute;
+	top: 8px;
+	right: 16px;
+}
+
+.copyButton {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.copyButton:hover {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.1);
+}
+
+:global(.rtl) .actionsRow {
+	margin-left: 0;
+	margin-right: auto;
+}
+
+:global(.rtl) .logTimestamp {
+	margin-right: 0;
+	margin-left: 8px;
 }

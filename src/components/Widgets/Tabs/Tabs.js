@@ -1,4 +1,4 @@
-import Tabs from "@mui/material/Tabs";
+import Tabs from "@ui/Tabs";
 import styles from "./Tabs.module.css";
 
 export default function TabsWidget({ state, children, ...props }) {
@@ -17,11 +17,7 @@ export default function TabsWidget({ state, children, ...props }) {
 	return (
 		<Tabs
 			value={foundValue ? value : false}
-			classes={{ root: styles.root }}
-			centered={true}
-			indicatorColor="primary"
-			textColor="primary"
-			variant="fullWidth"
+			className={styles.root}
 			onChange={handleChange}
 			{...props}
 		>

@@ -14,7 +14,7 @@ jest.mock("@widgets/Tabs", () => ({ state, children, ...props }) => {
 		</div>
 	);
 });
-jest.mock("@mui/material/Tab", () => ({ label, value, onClick }) => (
+jest.mock("@ui/Tab", () => ({ label, value, onClick }) => (
 	<button data-testid={`tab-${value}`} onClick={onClick}>
 		{label}
 	</button>

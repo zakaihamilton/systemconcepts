@@ -1,6 +1,6 @@
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import Box from "@ui/Box";
+import Paper from "@ui/Paper";
+import Typography from "@ui/Typography";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { abbreviations } from "../../../../data/abbreviations";
@@ -54,17 +54,12 @@ export default function Header({
 							)}{" "}
 							<Typography
 								variant="h4"
-								className={styles.title}
+								className={clsx(
+									styles.title,
+									onTitleClick && styles.titleClickable,
+								)}
 								component="h1"
 								onClick={onTitleClick}
-								sx={
-									onTitleClick
-										? {
-												cursor: "pointer",
-												"&:hover": { textDecoration: "underline" },
-											}
-										: undefined
-								}
 							>
 								{(() => {
 									const expansion = abbreviations[title.name];
@@ -94,11 +89,6 @@ export default function Header({
 											aria-label={`${tag.label}: ${tag.value}`}
 											onClick={() => navigator.clipboard.writeText(tag.value)}
 											onKeyDown={(e) => handleTagKeyPress(e, tag.value)}
-											sx={{
-												cursor: "pointer",
-												display: "flex",
-												alignItems: "center",
-											}}
 										>
 											<Typography variant="caption">{tag.value}</Typography>
 										</Paper>
@@ -138,15 +128,8 @@ export default function Header({
 													navigator.clipboard.writeText(displayValue)
 												}
 												onKeyDown={(e) => handleTagKeyPress(e, displayValue)}
-												sx={{
-													cursor: "pointer",
-													display: "flex",
-													alignItems: "center",
-												}}
 											>
-												{Icon && (
-													<Icon sx={{ fontSize: "1rem" }} aria-hidden="true" />
-												)}
+												{Icon && <Icon aria-hidden="true" />}
 												<Typography variant="caption">
 													{displayValue}
 												</Typography>

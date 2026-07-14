@@ -1,11 +1,10 @@
-import CalendarViewDayIcon from "@mui/icons-material/CalendarViewDay";
-import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import RestoreIcon from "@mui/icons-material/Restore";
-import ViewStreamIcon from "@mui/icons-material/ViewStream";
-import ViewWeekIcon from "@mui/icons-material/ViewWeek";
+import CalendarViewDayIcon from "@icons/CalendarViewDay";
+import CalendarViewMonthIcon from "@icons/CalendarViewMonth";
+import DateRangeIcon from "@icons/DateRange";
+import RestoreIcon from "@icons/Restore";
+import ViewStreamIcon from "@icons/ViewStream";
+import ViewWeekIcon from "@icons/ViewWeek";
 import { ScheduleStore } from "@views/Schedule/Schedule";
-
 export function getScheduleSection({ translations }) {
 	const { viewMode } = ScheduleStore.getRawState();
 	let description = "";

@@ -12,7 +12,10 @@ const customJestConfig = {
 	testPathIgnorePatterns: ["/node_modules/", "/tests/e2e/"],
 	moduleNameMapper: {
 		"^@components/(.*)$": "<rootDir>/src/components/$1",
+		"^@ui$": "<rootDir>/src/components/ui/index.js",
+		"^@ui/(.*)$": "<rootDir>/src/components/ui/$1",
 		"^@widgets/(.*)$": "<rootDir>/src/components/Widgets/$1",
+		"^@icons$": "<rootDir>/src/components/Icons/index.js",
 		"^@icons/(.*)$": "<rootDir>/src/components/Icons/$1",
 		"^@util/(.*)$": "<rootDir>/src/util/$1",
 		"^@data/(.*)$": "<rootDir>/src/data/$1",

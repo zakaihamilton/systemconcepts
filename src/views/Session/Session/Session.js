@@ -1,10 +1,10 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import DownloadIcon from "@mui/icons-material/Download";
-import Alert from "@mui/material/Alert";
-import Chip from "@mui/material/Chip";
-import Snackbar from "@mui/material/Snackbar";
+import ArrowBackIcon from "@icons/ArrowBack";
+import ArrowForwardIcon from "@icons/ArrowForward";
+import DownloadIcon from "@icons/Download";
+import Alert from "@ui/Alert";
+import Chip from "@ui/Chip";
+import Snackbar from "@ui/Snackbar";
 import { useFetch } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
@@ -293,7 +293,7 @@ export default function SessionPage({ group, year, date, name }) {
 				<Alert
 					onClose={() => setShowClipboard(false)}
 					severity="success"
-					sx={{ width: "100%" }}
+					className={styles.alertFullWidth}
 				>
 					{(translations.COPIED_TO_CLIPBOARD || "Copied to clipboard") +
 						": " +

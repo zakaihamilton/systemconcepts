@@ -1,7 +1,7 @@
 import devices from "@data/storage";
-import FolderIcon from "@mui/icons-material/Folder";
-import StorageIcon from "@mui/icons-material/Storage";
 
+import FolderIcon from "@icons/Folder";
+import StorageIcon from "@icons/Storage";
 export function getStorageSection({ id, translations, path }) {
 	let icon = <FolderIcon />;
 	let tooltip = translations.FOLDER;

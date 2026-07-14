@@ -12,7 +12,7 @@ jest.mock("@vercel/speed-insights/next", () => ({
 jest.mock("@vercel/analytics/react", () => ({
 	Analytics: () => <div data-testid="analytics" />,
 }));
-jest.mock("@mui/material", () => ({
+jest.mock("@ui", () => ({
 	NoSsr: ({ children }) => <div data-testid="no-ssr">{children}</div>,
 }));
 

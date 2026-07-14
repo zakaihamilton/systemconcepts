@@ -1,4 +1,3 @@
-import CssBaseline from "@mui/material/CssBaseline";
 import { useResize } from "@util/browser/size";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
@@ -68,7 +67,6 @@ export default function Main() {
 	return (
 		<>
 			<Head />
-			<CssBaseline />
 			<div className={className}>
 				<Title />
 				<Sync>

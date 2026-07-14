@@ -24,3 +24,26 @@
 .sliderContainer {
 	width: 100%;
 }
+
+.speedSlider input[type="range"] {
+	height: 24px;
+	accent-color: var(--primary-color);
+}
+
+.speedSlider input[type="range"]::-webkit-slider-runnable-track {
+	height: 8px;
+}
+
+.speedSlider input[type="range"]::-moz-range-track {
+	height: 8px;
+}
+
+.speedSlider input[type="range"]::-webkit-slider-thumb {
+	width: 24px;
+	height: 24px;
+}
+
+.speedSlider input[type="range"]::-moz-range-thumb {
+	width: 24px;
+	height: 24px;
+}

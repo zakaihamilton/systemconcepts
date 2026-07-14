@@ -1,4 +1,4 @@
-import Checkbox from "@mui/material/Checkbox";
+import Checkbox from "@ui/Checkbox";
 import styles from "./Select.module.css";
 
 export default function SelectWidget({ item, store, select }) {

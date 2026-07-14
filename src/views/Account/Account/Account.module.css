@@ -180,12 +180,10 @@
 	opacity: 0.8;
 }
 
-.checkboxLabel {
-	:global(.MuiTypography-root) {
-		font-size: 0.9rem;
-		font-weight: 500;
-		color: var(--neutral-600);
-	}
+.checkboxLabel span {
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: var(--neutral-600);
 }
 
 .notification {

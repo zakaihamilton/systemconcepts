@@ -1,8 +1,8 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import SearchIcon from "@mui/icons-material/Search";
-import InputBase from "@mui/material/InputBase";
+import ArrowDownwardIcon from "@icons/ArrowDownward";
+import ArrowUpwardIcon from "@icons/ArrowUpward";
+import SearchIcon from "@icons/Search";
+import InputBase from "@ui/InputBase";
 import { useDeviceType } from "@util/browser/styles";
 import { useTimeout } from "@util/browser/timers";
 import { useTranslations } from "@util/domain/translations";

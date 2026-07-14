@@ -1,20 +1,20 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import PauseIcon from "@mui/icons-material/Pause";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
-import SkipNextIcon from "@mui/icons-material/SkipNext";
-import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import StopIcon from "@mui/icons-material/Stop";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import ExpandMoreIcon from "@icons/ExpandMore";
+import PauseIcon from "@icons/Pause";
+import PlayArrowIcon from "@icons/PlayArrow";
+import RecordVoiceOverIcon from "@icons/RecordVoiceOver";
+import SkipNextIcon from "@icons/SkipNext";
+import SkipPreviousIcon from "@icons/SkipPrevious";
+import StopIcon from "@icons/Stop";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import IconButton from "@ui/IconButton";
+import Menu from "@ui/Menu";
+import MenuItem from "@ui/MenuItem";
+import Paper from "@ui/Paper";
+import Typography from "@ui/Typography";
 import Tooltip from "@widgets/Tooltip";
+import clsx from "clsx";
 import styles from "./Controls.module.css";
-
 export default function Controls({
 	translations,
 	isPlaying,
@@ -128,24 +128,7 @@ export default function Controls({
 								anchorEl={voiceMenuAnchor}
 								open={Boolean(voiceMenuAnchor)}
 								onClose={handleVoiceMenuClose}
-								slotProps={{
-									paper: {
-										style: {
-											maxHeight: 300,
-											width: "300px",
-										},
-									},
-								}}
-								sx={{
-									"& .MuiPaper-root": {
-										borderRadius: 3,
-										boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
-										"@media (prefers-color-scheme: dark)": {
-											backgroundColor: "rgba(40, 40, 45, 0.98)",
-											boxShadow: "0 8px 32px rgba(0, 0, 0, 0.6)",
-										},
-									},
-								}}
+								className={styles.voiceMenu}
 								aria-label="Available voices"
 							>
 								{voices
@@ -156,34 +139,19 @@ export default function Controls({
 											onClick={() => handleVoiceSelect(voice)}
 											selected={selectedVoice?.name === voice.name}
 											aria-label={`Select ${voice.name}`}
-											sx={{
-												py: 1.5,
-												"&.Mui-selected": {
-													backgroundColor: "rgba(25, 118, 210, 0.12)",
-													"&:hover": {
-														backgroundColor: "rgba(25, 118, 210, 0.2)",
-													},
-													"@media (prefers-color-scheme: dark)": {
-														backgroundColor: "rgba(255, 255, 255, 0.15)",
-														"&:hover": {
-															backgroundColor: "rgba(255, 255, 255, 0.22)",
-														},
-													},
-												},
-												"@media (prefers-color-scheme: dark)": {
-													color: "rgba(255, 255, 255, 0.95)",
-													"&:hover": {
-														backgroundColor: "rgba(255, 255, 255, 0.08)",
-													},
-												},
-											}}
+											className={clsx(
+												styles.voiceMenuItem,
+												selectedVoice?.name === voice.name &&
+													styles.voiceMenuItemSelected,
+											)}
 										>
 											<Typography
 												variant="body2"
-												sx={{
-													fontWeight:
-														selectedVoice?.name === voice.name ? 600 : 400,
-												}}
+												className={
+													selectedVoice?.name === voice.name
+														? styles.voiceNameSelected
+														: styles.voiceName
+												}
 											>
 												{voice.name}
 											</Typography>

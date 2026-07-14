@@ -1,8 +1,8 @@
 import { useBookmarks } from "@components/Bookmarks";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import Drawer from "@mui/material/Drawer";
-import LinearProgress from "@mui/material/LinearProgress";
+import BookmarkIcon from "@icons/Bookmark";
+import LibraryBooksIcon from "@icons/LibraryBooks";
+import Drawer from "@ui/Drawer";
+import LinearProgress from "@ui/LinearProgress";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, useActivePages, usePages } from "@util/domain/views";
@@ -15,7 +15,6 @@ import { MainStore } from "../Main";
 import LibraryTree from "./LibraryTree";
 import QuickAccess from "./QuickAccess";
 import styles from "./SideBar.module.css";
-
 export default function SideBar() {
 	const translations = useTranslations();
 	const isMobile = useDeviceType() !== "desktop";

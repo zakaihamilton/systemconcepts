@@ -1,4 +1,4 @@
-import MuiTooltip from "@mui/material/Tooltip";
+import MuiTooltip from "@ui/Tooltip";
 
 export default function Tooltip({ arrow = true, title, children, ...props }) {
 	if (!title) {

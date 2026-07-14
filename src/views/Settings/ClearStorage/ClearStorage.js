@@ -1,6 +1,6 @@
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import { clear } from "@storage/local";
+import Button from "@ui/Button";
+import Typography from "@ui/Typography";
 import { useTranslations } from "@util/domain/translations";
 import { goBackPage, replacePath } from "@util/domain/views";
 import Dialog from "@widgets/Dialog";

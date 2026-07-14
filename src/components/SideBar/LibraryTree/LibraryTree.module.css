@@ -8,12 +8,20 @@
 	flex-shrink: 0;
 }
 
-.filterInput {
-	:global(.MuiInputBase-root) {
-		font-size: 0.85rem;
-	}
+.filterInput input {
+	font-size: 0.85rem;
 }
 
 .treeContainer {
 	flex: 1;
+}
+
+.treeList {
+	padding-top: 4px;
+	padding-bottom: 4px;
+	padding-left: 24px;
+}
+
+.clearButton {
+	margin-right: -4px;
 }

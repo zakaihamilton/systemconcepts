@@ -12,7 +12,7 @@ describe("Tooltip Widget", () => {
 		expect(container.textContent).toBe("Child Content");
 	});
 
-	it("renders MuiTooltip when title is provided", async () => {
+	it("renders tooltip when title is provided", async () => {
 		render(
 			<Tooltip title="Test Tooltip">
 				<span data-testid="child">Hover Me</span>

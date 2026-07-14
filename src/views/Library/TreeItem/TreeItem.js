@@ -1,11 +1,11 @@
 import { abbreviations } from "@data/abbreviations";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import ExpandLessIcon from "@icons/ExpandLess";
+import ExpandMoreIcon from "@icons/ExpandMore";
+import Box from "@ui/Box";
+import List from "@ui/List";
+import ListItemButton from "@ui/ListItemButton";
+import ListItemText from "@ui/ListItemText";
+import Typography from "@ui/Typography";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -156,25 +156,27 @@ const TreeItem = memo(function TreeItem({
 	const Icon = node.Icon;
 
 	return (
-		<Box sx={{ display: "flex", flexDirection: "column" }}>
+		<Box className={styles.treeItem}>
 			<ListItemButton
 				component={node._id ? "a" : "div"}
 				href={node._id ? `#library/id/${node._id}` : undefined}
 				ref={itemRef}
 				onClick={handleSelect}
 				selected={isSelected}
-				className={clsx(styles.itemButton, isSelected && styles.selected)}
-				sx={{
-					pl: level === 0 ? 1 : 1.5,
-					color: "inherit",
-					textDecoration: "none",
-				}}
+				className={clsx(
+					styles.itemButton,
+					styles.itemButtonLink,
+					level === 0 ? styles.itemButtonLevel0 : styles.itemButtonLevel,
+					isSelected && styles.selected,
+				)}
 			>
 				<Box className={styles.contentWrapper}>
 					<Box
 						onClick={hasChildren ? (e) => handleToggle(e) : undefined}
-						className={styles.toggleIcon}
-						sx={{ visibility: hasChildren ? "visible" : "hidden" }}
+						className={clsx(
+							styles.toggleIcon,
+							!hasChildren && styles.toggleHidden,
+						)}
 					>
 						{open ? (
 							<ExpandLessIcon className={styles.expandIcon} />
@@ -192,7 +194,7 @@ const TreeItem = memo(function TreeItem({
 							enterDelay={500}
 						>
 							<Box className={styles.iconWrapper}>
-								<Icon sx={{ fontSize: "inherit" }} />
+								<Icon className={styles.typeIcon} />
 							</Box>
 						</Tooltip>
 					)}
@@ -203,30 +205,9 @@ const TreeItem = memo(function TreeItem({
 						enterDelay={0}
 						disableHoverListener={!isTruncated}
 						placement="bottom-start"
-						slotProps={{
-							popper: {
-								sx: {
-									pointerEvents: "none",
-								},
-								modifiers: [
-									{
-										name: "offset",
-										options: {
-											offset: [-9, -38],
-										},
-									},
-								],
-							},
-							tooltip: {
-								sx: {
-									maxWidth: 500,
-									fontSize: "0.85rem",
-									pointerEvents: "none",
-								},
-							},
-						}}
 					>
 						<ListItemText
+							className={styles.listItemText}
 							primary={
 								<Typography
 									ref={textRef}
@@ -240,7 +221,6 @@ const TreeItem = memo(function TreeItem({
 									{name}
 								</Typography>
 							}
-							sx={{ minWidth: 0 }}
 						/>
 					</Tooltip>
 				</Box>
@@ -250,9 +230,7 @@ const TreeItem = memo(function TreeItem({
 					component="div"
 					disablePadding
 					className={styles.childList}
-					sx={{
-						ml: (level === 0 ? 1 : 1.5) + 1,
-					}}
+					style={{ marginLeft: `${(level === 0 ? 1 : 1.5) + 1}rem` }}
 				>
 					{node.children.map((child) => (
 						<TreeItem

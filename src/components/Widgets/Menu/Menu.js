@@ -1,60 +1,18 @@
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import Divider from "@mui/material/Divider";
-import Link from "@mui/material/Link";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { styled } from "@mui/material/styles";
+import CheckBoxIcon from "@icons/CheckBox";
+import CheckBoxOutlineBlankIcon from "@icons/CheckBoxOutlineBlank";
+import ChevronRightIcon from "@icons/ChevronRight";
+import ExpandMoreIcon from "@icons/ExpandMore";
+import RadioButtonCheckedIcon from "@icons/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@icons/RadioButtonUnchecked";
+import Divider from "@ui/Divider";
+import Link from "@ui/Link";
+import ListItemIcon from "@ui/ListItemIcon";
+import ListItemText from "@ui/ListItemText";
+import Menu from "@ui/Menu";
+import MenuItem from "@ui/MenuItem";
 import clsx from "clsx";
 import { Children, cloneElement, useEffect, useRef, useState } from "react";
 import styles from "./Menu.module.css";
-
-const PREFIX = "Menu";
-
-const classes = {
-	paper: `${PREFIX}-paper`,
-};
-
-const StyledMenuRoot = styled(Menu)(({ theme: _theme }) => ({
-	[`& .${classes.paper}`]: {
-		borderRadius: 12,
-		marginTop: 8,
-		boxShadow:
-			"0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-		border: `1px solid var(--border-color)`,
-		backgroundColor: "rgba(var(--bar-background-rgb), 0.82)",
-		backdropFilter: "blur(18px) saturate(1.25)",
-		WebkitBackdropFilter: "blur(18px) saturate(1.25)",
-		maxHeight: "50vh",
-		overflow: "auto",
-		"& .MuiList-root": {
-			padding: "4px 0",
-		},
-	},
-}));
-
-const StyledMenu = (props) => (
-	<StyledMenuRoot
-		transitionDuration={150}
-		elevation={0}
-		anchorOrigin={{
-			vertical: "bottom",
-			horizontal: "left",
-		}}
-		transformOrigin={{
-			vertical: "top",
-			horizontal: "left",
-		}}
-		{...props}
-	/>
-);
-
 export default function MenuWidget({
 	hover,
 	items,
@@ -68,7 +26,7 @@ export default function MenuWidget({
 	const open = Boolean(anchorEl);
 	const clickEnabled = (items && items.length) || onClick;
 	const hoverEnabled = clickEnabled && hover;
-	const [hoverRef, setHoverRef] = useState(null);
+	const [_hoverRef, setHoverRef] = useState(null);
 	const [expanded, setExpanded] = useState({});
 	const prevExpandedRef = useRef({});
 
@@ -290,31 +248,19 @@ export default function MenuWidget({
 	return (
 		<>
 			{children}
-			<StyledMenu
+			<Menu
 				id="menu"
 				anchorEl={anchorEl}
-				keepMounted
 				open={!!open}
 				onClose={handleClose}
-				slotProps={{
-					list:
-						hoverEnabled && hoverRef
-							? { onMouseLeave: handleClose }
-							: undefined,
-					paper: {
-						style: {
-							transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important",
-							minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
-						},
-					},
+				className={styles.menuPaper}
+				style={{
+					minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
 				}}
 				{...props}
-				classes={{
-					paper: classes.paper,
-				}}
 			>
 				{menuItems}
-			</StyledMenu>
+			</Menu>
 		</>
 	);
 }

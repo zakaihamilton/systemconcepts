@@ -1,18 +1,18 @@
 import { MainStore } from "@components/Main";
 import fontSizes from "@data/fontSizes";
 import languages from "@data/languages";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import BuildIcon from "@mui/icons-material/Build";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import FormatSizeIcon from "@mui/icons-material/FormatSize";
-import ImportExportIcon from "@mui/icons-material/ImportExport";
-import InvertColorsIcon from "@mui/icons-material/InvertColors";
-import LanguageIcon from "@mui/icons-material/Language";
-import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
-import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
-import StorageIcon from "@mui/icons-material/Storage";
-import Button from "@mui/material/Button";
+import AutorenewIcon from "@icons/Autorenew";
+import BuildIcon from "@icons/Build";
+import DeleteForeverIcon from "@icons/DeleteForever";
+import FormatSizeIcon from "@icons/FormatSize";
+import ImportExportIcon from "@icons/ImportExport";
+import InvertColorsIcon from "@icons/InvertColors";
+import LanguageIcon from "@icons/Language";
+import SettingsBackupRestoreIcon from "@icons/SettingsBackupRestore";
+import SlowMotionVideoIcon from "@icons/SlowMotionVideo";
+import StorageIcon from "@icons/Storage";
 import { SyncActiveStore } from "@sync/syncState";
+import Button from "@ui/Button";
 import { useStoreState } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { getPreferredLanguage } from "@util/domain/language";
@@ -25,7 +25,6 @@ import Cookies from "js-cookie";
 import { Store } from "pullstate";
 import { useCallback, useMemo } from "react";
 import useDarkMode from "use-dark-mode";
-
 export const SettingsStore = new Store({
 	order: "desc",
 	offset: 0,

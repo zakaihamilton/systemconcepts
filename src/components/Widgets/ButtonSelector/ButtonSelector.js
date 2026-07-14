@@ -1,14 +1,11 @@
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import Grow from "@mui/material/Grow";
-import MenuItem from "@mui/material/MenuItem";
-import MenuList from "@mui/material/MenuList";
-import Paper from "@mui/material/Paper";
-import Popper from "@mui/material/Popper";
+import ArrowDropDownIcon from "@icons/ArrowDropDown";
+import Button from "@ui/Button";
+import ButtonGroup from "@ui/ButtonGroup";
+import ClickAwayListener from "@ui/ClickAwayListener";
+import Menu from "@ui/Menu";
+import MenuItem from "@ui/MenuItem";
 import { useTranslations } from "@util/domain/translations";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function ButtonSelector({
 	state,
@@ -20,7 +17,7 @@ export default function ButtonSelector({
 }) {
 	const translations = useTranslations();
 	const [open, setOpen] = useState(false);
-	const [anchorEl, setAnchorEl] = useState(null);
+	const anchorRef = useRef(null);
 	const [selected, setSelected] = state;
 
 	const handleMenuItemClick = (_event, id) => {
@@ -32,17 +29,13 @@ export default function ButtonSelector({
 		setOpen((prevOpen) => !prevOpen);
 	};
 
-	const handleClose = (event) => {
-		if (anchorEl && anchorEl.contains(event.target)) {
-			return;
-		}
-
+	const handleClose = () => {
 		setOpen(false);
 	};
 
 	return (
 		<>
-			<ButtonGroup ref={setAnchorEl} {...props}>
+			<ButtonGroup ref={anchorRef} {...props}>
 				<Button disabled={!onClick} onClick={onClick}>
 					{children}
 				</Button>
@@ -55,33 +48,19 @@ export default function ButtonSelector({
 					</Button>
 				)}
 			</ButtonGroup>
-			<Popper open={open} anchorEl={anchorEl} role={undefined} transition>
-				{({ TransitionProps, placement }) => (
-					<Grow
-						{...TransitionProps}
-						style={{
-							transformOrigin:
-								placement === "bottom" ? "center top" : "center bottom",
-						}}
-					>
-						<Paper>
-							<ClickAwayListener onClickAway={handleClose}>
-								<MenuList>
-									{items.map((item) => (
-										<MenuItem
-											key={item.id}
-											selected={item.id === selected}
-											onClick={(event) => handleMenuItemClick(event, item.id)}
-										>
-											{item.name}
-										</MenuItem>
-									))}
-								</MenuList>
-							</ClickAwayListener>
-						</Paper>
-					</Grow>
-				)}
-			</Popper>
+			<ClickAwayListener onClickAway={handleClose}>
+				<Menu open={open} anchorEl={anchorRef.current} onClose={handleClose}>
+					{items?.map((item) => (
+						<MenuItem
+							key={item.id}
+							selected={item.id === selected}
+							onClick={(event) => handleMenuItemClick(event, item.id)}
+						>
+							{item.name}
+						</MenuItem>
+					))}
+				</Menu>
+			</ClickAwayListener>
 		</>
 	);
 }

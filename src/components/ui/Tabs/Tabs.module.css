@@ -1,0 +1,35 @@
+.root {
+	display: flex;
+	border-bottom: 1px solid var(--border-color);
+	overflow-x: auto;
+}
+
+.tab {
+	padding: 12px 16px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--secondary-color);
+	text-transform: none;
+	white-space: nowrap;
+	transition: color 0.2s ease;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+}
+
+.tab:hover {
+	color: var(--primary-color);
+}
+
+.selected {
+	color: var(--primary-color);
+	border-bottom-color: var(--primary-color);
+}
+
+.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}

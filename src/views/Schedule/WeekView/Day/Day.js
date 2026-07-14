@@ -1,5 +1,5 @@
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@icons/ExpandLess";
+import ExpandMoreIcon from "@icons/ExpandMore";
 import { useDeviceType } from "@util/browser/styles";
 import { getDateString } from "@util/data/date";
 import clsx from "clsx";

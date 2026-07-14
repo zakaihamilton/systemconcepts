@@ -1,8 +1,8 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import UpdateIcon from "@mui/icons-material/Update";
-import UploadIcon from "@mui/icons-material/Upload";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import UpdateIcon from "@icons/Update";
+import UploadIcon from "@icons/Upload";
+import VisibilityIcon from "@icons/Visibility";
+import VisibilityOffIcon from "@icons/VisibilityOff";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useOnline } from "@util/browser/online";
 import { useDeviceType, useStyles } from "@util/browser/styles";

@@ -1,6 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import GroupWorkIcon from "@mui/icons-material/GroupWork";
+import FilterAltIcon from "@icons/FilterAlt";
+import GroupWorkIcon from "@icons/GroupWork";
 import { FILES_MANIFEST } from "@sync/constants";
 import { useSync } from "@sync/sync";
 import { logger as structuredLogger } from "@util/api/logger";

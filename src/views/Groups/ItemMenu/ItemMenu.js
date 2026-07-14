@@ -1,14 +1,13 @@
 import ItemMenu from "@components/ItemMenu";
-import CloudOffIcon from "@mui/icons-material/CloudOff";
-import CloudQueueIcon from "@mui/icons-material/CloudQueue";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import DescriptionIcon from "@mui/icons-material/Description";
-import FolderIcon from "@mui/icons-material/Folder";
-import UpdateIcon from "@mui/icons-material/Update";
+import CloudOffIcon from "@icons/CloudOff";
+import CloudQueueIcon from "@icons/CloudQueue";
+import DataUsageIcon from "@icons/DataUsage";
+import DescriptionIcon from "@icons/Description";
+import FolderIcon from "@icons/Folder";
+import UpdateIcon from "@icons/Update";
 import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 import Statistics from "../Statistics";
-
 export default function ItemMenuWidget({
 	item,
 	updateGroup,

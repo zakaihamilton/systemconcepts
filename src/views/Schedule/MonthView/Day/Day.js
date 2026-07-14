@@ -1,5 +1,4 @@
-import Avatar from "@mui/material/Avatar";
-import { useTheme } from "@mui/material/styles";
+import Avatar from "@ui/Avatar";
 import { getSessionTextColor } from "@util/data/colors";
 import { getDateString, isDateMonth, isDateToday } from "@util/data/date";
 import { useTranslations } from "@util/domain/translations";
@@ -21,7 +20,6 @@ export default function Day({
 	playingSession,
 }) {
 	const translations = useTranslations();
-	const theme = useTheme();
 
 	const style = {
 		gridColumn: column,
@@ -49,7 +47,7 @@ export default function Day({
 			date: item.date,
 			description: groupName,
 			backgroundColor: item.color,
-			style: { color: getSessionTextColor(item.color, theme) },
+			style: { color: getSessionTextColor(item.color) },
 			icon,
 			target: "#schedule/" + toPath(path),
 			onClick: () => addPath(path),

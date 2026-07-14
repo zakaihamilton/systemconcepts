@@ -1,4 +1,4 @@
-import Tab from "@mui/material/Tab";
+import Tab from "@ui/Tab";
 import { useTranslations } from "@util/domain/translations";
 import Tabs from "@widgets/Tabs";
 import { useEffect, useState } from "react";

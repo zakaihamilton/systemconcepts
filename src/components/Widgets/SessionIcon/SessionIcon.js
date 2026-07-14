@@ -1,12 +1,10 @@
 import AudioIcon from "@components/Icons/Audio";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import InsertPhotoOutlinedIcon from "@mui/icons-material/InsertPhotoOutlined";
-import MovieIcon from "@mui/icons-material/Movie";
-import MovieFilterIcon from "@mui/icons-material/MovieFilter";
-
+import AutoAwesomeIcon from "@icons/AutoAwesome";
+import InsertPhotoOutlinedIcon from "@icons/InsertPhotoOutlined";
+import MovieIcon from "@icons/Movie";
+import MovieFilterIcon from "@icons/MovieFilter";
 import { useTranslations } from "@util/domain/translations";
 import Tooltip from "@widgets/Tooltip";
-
 export default function SessionIcon({ type }) {
 	const translations = useTranslations();
 	const title = translations[type?.toUpperCase()] || "";

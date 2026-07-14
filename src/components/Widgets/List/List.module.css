@@ -11,60 +11,61 @@
 	border-radius: var(--radius-sm);
 	overflow: hidden;
 	margin: 0 !important;
+}
 
-	:global(.MuiListItemButton-root) {
-		border-radius: var(--radius-sm);
-		padding: 0.65rem 1rem;
-		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-		color: var(--text-color);
-		opacity: 0.8;
-		position: relative;
+.itemButton {
+	border-radius: var(--radius-sm);
+	padding: 0.65rem 1rem;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-color);
+	opacity: 0.8;
+	position: relative;
+	width: 100%;
+}
 
-		&:hover {
-			background-color: var(--hover-color);
-			opacity: 1;
-			transform: translateX(4px);
-		}
+.itemButton:hover {
+	background-color: var(--hover-color);
+	opacity: 1;
+	transform: translateX(4px);
+}
 
-		:global([dir="rtl"]) &:hover {
-			transform: translateX(-4px);
-		}
+:global([dir="rtl"]) .itemButton:hover {
+	transform: translateX(-4px);
+}
 
-		&.Mui-selected {
-			background-color: rgba(var(--primary-color-rgb), 0.08) !important;
-			color: var(--primary-color);
-			opacity: 1;
-			font-weight: 600;
+.item.selected .itemButton {
+	background-color: rgba(var(--primary-color-rgb), 0.08) !important;
+	color: var(--primary-color);
+	opacity: 1;
+	font-weight: 600;
+}
 
-			&::before {
-				content: "";
-				position: absolute;
-				left: 0;
-				top: 20%;
-				height: 60%;
-				width: 3px;
-				background-color: var(--primary-color);
-				border-radius: 0 4px 4px 0;
-				transition: all 0.25s ease;
-			}
+.item.selected .itemButton::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 20%;
+	height: 60%;
+	width: 3px;
+	background-color: var(--primary-color);
+	border-radius: 0 4px 4px 0;
+	transition: all 0.25s ease;
+}
 
-			:global([dir="rtl"]) &::before {
-				left: auto;
-				right: 0;
-				border-radius: 4px 0 0 4px;
-			}
+:global([dir="rtl"]) .item.selected .itemButton::before {
+	left: auto;
+	right: 0;
+	border-radius: 4px 0 0 4px;
+}
 
-			&:hover {
-				background-color: rgba(var(--primary-color-rgb), 0.12) !important;
-				transform: translateX(0px); /* don't shift when already selected */
-			}
+.item.selected .itemButton:hover {
+	background-color: rgba(var(--primary-color-rgb), 0.12) !important;
+	transform: translateX(0px);
+}
 
-			.iconContainer {
-				color: var(--primary-color);
-				opacity: 1;
-			}
-		}
-	}
+.item.selected .iconContainer {
+	color: var(--primary-color);
+	opacity: 1;
 }
 
 .iconContainer {
@@ -85,21 +86,21 @@
 .itemLabel {
 	margin: 0 !important;
 
-	:global(.MuiListItemText-primary) {
-		font-size: 0.92rem;
-		font-weight: 500;
-		letter-spacing: -0.01em;
-	}
-
-	:global(.MuiListItemText-secondary) {
-		font-size: 0.78rem;
-		opacity: 0.6;
-		margin-top: 2px;
-	}
-
 	[dir="rtl"] & {
 		text-align: right;
 	}
+}
+
+.primary {
+	font-size: 0.92rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+}
+
+.secondary {
+	font-size: 0.78rem;
+	opacity: 0.6;
+	margin-top: 2px;
 }
 
 .expandIcon {

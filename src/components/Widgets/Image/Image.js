@@ -1,4 +1,4 @@
-import Link from "@mui/material/Link";
+import Link from "@ui/Link";
 import {
 	getStableFetchCacheOptions,
 	SIGNED_URL_CACHE_TTL_MS,

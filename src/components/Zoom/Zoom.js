@@ -1,7 +1,7 @@
 import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
+import ZoomInIcon from "@icons/ZoomIn";
+import ZoomOutIcon from "@icons/ZoomOut";
 import { useTranslations } from "@util/domain/translations";
 import { Store } from "pullstate";
 import { useContext, useEffect } from "react";

@@ -1,21 +1,21 @@
 import { SyncContext } from "@components/Sync";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import CachedIcon from "@mui/icons-material/Cached";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import UpdateIcon from "@mui/icons-material/Update";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import FormControl from "@mui/material/FormControl";
-import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
-import LinearProgress from "@mui/material/LinearProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Typography from "@mui/material/Typography";
+import CachedIcon from "@icons/Cached";
+import ContentCopyIcon from "@icons/ContentCopy";
+import UpdateIcon from "@icons/Update";
 import { clearBundleCache, useSyncFeature } from "@sync/sync";
 import { SyncActiveStore } from "@sync/syncState";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import Card from "@ui/Card";
+import CardContent from "@ui/CardContent";
+import FormControl from "@ui/FormControl";
+import IconButton from "@ui/IconButton";
+import InputLabel from "@ui/InputLabel";
+import LinearProgress from "@ui/LinearProgress";
+import MenuItem from "@ui/MenuItem";
+import Select from "@ui/Select";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useOnline } from "@util/browser/online";
 import { useStyles } from "@util/browser/styles";
@@ -191,16 +191,9 @@ export default function Sync() {
 		<Box className={styles.root}>
 			<Card className={styles.headerCard}>
 				<CardContent>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-						<Box
-							sx={{
-								display: "flex",
-								alignItems: "center",
-								gap: 4,
-								flexWrap: "wrap",
-							}}
-						>
-							<Box sx={{ minWidth: "150px" }}>
+					<Box className={styles.headerLayout}>
+						<Box className={styles.headerRow}>
+							<Box className={styles.statBoxWide}>
 								<Typography
 									variant="subtitle2"
 									color="text.secondary"
@@ -215,7 +208,7 @@ export default function Sync() {
 								</Typography>
 							</Box>
 
-							<Box sx={{ minWidth: "80px" }}>
+							<Box className={styles.statBoxNarrow}>
 								<Typography
 									variant="subtitle2"
 									color="text.secondary"
@@ -230,7 +223,7 @@ export default function Sync() {
 								</Typography>
 							</Box>
 
-							<Box sx={{ minWidth: "120px" }}>
+							<Box className={styles.statBoxMedium}>
 								<Typography
 									variant="subtitle2"
 									color="text.secondary"
@@ -238,7 +231,7 @@ export default function Sync() {
 								>
 									{translations.SYNC_STATUS}
 								</Typography>
-								<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+								<Box className={styles.statusRow}>
 									<Typography variant="h6" noWrap>
 										{syncBusy
 											? translations.SYNCING
@@ -248,33 +241,25 @@ export default function Sync() {
 									</Typography>
 									{syncBusy && (
 										<UpdateIcon
-											className={animatedClassName}
-											sx={{ fontSize: 20 }}
+											className={`${animatedClassName} ${styles.syncIcon}`}
 										/>
 									)}
 								</Box>
 							</Box>
 
-							<Box
-								sx={{
-									ml: "auto",
-									display: "flex",
-									gap: 2,
-									alignItems: "center",
-								}}
-							>
+							<Box className={styles.actionsRow}>
 								{syncBusy && (
 									<Button
 										variant="outlined"
 										color="error"
 										onClick={stop}
-										sx={{ whiteSpace: "nowrap" }}
+										className={styles.nowrapButton}
 									>
 										{translations.STOP || "Stop"}
 									</Button>
 								)}
 								{isAdmin && (
-									<FormControl size="small" sx={{ minWidth: 120 }}>
+									<FormControl size="small" className={styles.debugSelect}>
 										<InputLabel id="debug-level-label">
 											{translations.LOG_LEVEL || "Log Level"}
 										</InputLabel>
@@ -296,31 +281,24 @@ export default function Sync() {
 									startIcon={<CachedIcon />}
 									onClick={() => setConfirmFullSync(true)}
 									disabled={isBusy}
-									sx={{
-										opacity: isBusy ? 0.5 : 1,
-										whiteSpace: "nowrap",
-									}}
+									className={
+										isBusy
+											? styles.fullSyncButtonDisabled
+											: styles.fullSyncButton
+									}
 								>
 									{translations.FULL_SYNC}
 								</Button>
 							</Box>
 						</Box>
 
-						<Box sx={{ width: "100%", mt: 1 }}>
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-between",
-									alignItems: "center",
-									mb: 1,
-									gap: 2,
-								}}
-							>
+						<Box className={styles.progressSection}>
+							<Box className={styles.progressHeader}>
 								<Typography
 									variant="body2"
 									color="text.secondary"
 									noWrap
-									sx={{ textOverflow: "ellipsis", overflow: "hidden", flex: 1 }}
+									className={styles.progressLabel}
 								>
 									{syncBusy
 										? bundleName
@@ -331,11 +309,7 @@ export default function Sync() {
 								<Typography
 									variant="body2"
 									color="text.secondary"
-									sx={{
-										minWidth: "3.5em",
-										textAlign: "right",
-										fontWeight: "bold",
-									}}
+									className={styles.progressPercent}
 								>
 									{syncPercentage}%
 								</Typography>
@@ -343,22 +317,14 @@ export default function Sync() {
 							<LinearProgress
 								variant="determinate"
 								value={syncPercentage}
-								sx={{ height: 8, borderRadius: 4 }}
+								className={styles.progressBar}
 							/>
 						</Box>
 					</Box>
 				</CardContent>
 			</Card>
 
-			<Box
-				sx={{
-					position: "relative",
-					flex: 1,
-					display: "flex",
-					flexDirection: "column",
-					minHeight: 0,
-				}}
-			>
+			<Box className={styles.terminalWrapper}>
 				<Box className={styles.terminal} ref={logRef}>
 					<Box className={styles.terminalContent}>
 						{logs?.length === 0 && (
@@ -383,22 +349,13 @@ export default function Sync() {
 						))}
 					</Box>
 				</Box>
-				<Box sx={{ position: "absolute", top: 8, right: 16 }}>
+				<Box className={styles.copyButtonWrapper}>
 					<Tooltip
 						title={copied ? translations.LOG_COPIED : translations.COPY_LOG}
 						arrow
 						placement="left"
 					>
-						<IconButton
-							onClick={copyToClipboard}
-							sx={{
-								color: "rgba(255, 255, 255, 0.5)",
-								"&:hover": {
-									color: "#fff",
-									background: "rgba(255, 255, 255, 0.1)",
-								},
-							}}
-						>
+						<IconButton onClick={copyToClipboard} className={styles.copyButton}>
 							<ContentCopyIcon fontSize="small" />
 						</IconButton>
 					</Tooltip>

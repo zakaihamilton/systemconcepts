@@ -26,9 +26,7 @@ describe("Form Widget", () => {
 	it("renders progress when loading", () => {
 		render(<Form loading={true} />);
 		// Form uses Progress widget which we can mock or just check for presence
-		expect(
-			document.querySelector(".MuiCircularProgress-root") || true,
-		).toBeTruthy();
+		expect(document.querySelector('[role="progressbar"]')).toBeInTheDocument();
 	});
 
 	it("FormGroup passes state to children", () => {

@@ -1,12 +1,12 @@
 import { MainStore } from "@components/Main";
 import Toolbar from "@components/Toolbar";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Divider, Menu, MenuItem } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import Link from "@mui/material/Link";
-import NoSsr from "@mui/material/NoSsr";
+import MoreHorizIcon from "@icons/MoreHoriz";
+import NavigateBeforeIcon from "@icons/NavigateBefore";
+import NavigateNextIcon from "@icons/NavigateNext";
+import { Divider, Menu, MenuItem } from "@ui";
+import IconButton from "@ui/IconButton";
+import Link from "@ui/Link";
+import NoSsr from "@ui/NoSsr";
 import { useDeviceType } from "@util/browser/styles";
 import { setHash } from "@util/domain/views";
 import Tooltip from "@widgets/Tooltip";
@@ -14,7 +14,6 @@ import clsx from "clsx";
 import { useState } from "react";
 import SidebarIcon from "../AppBar/SidebarIcon";
 import styles from "./Breadcrumbs.module.css";
-
 export function BreadcrumbItem({
 	index,
 	count,

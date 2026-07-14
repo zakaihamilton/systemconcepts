@@ -1,73 +1,19 @@
-import CloseIcon from "@mui/icons-material/Close";
-import AppBar from "@mui/material/AppBar";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
-import InputBase from "@mui/material/InputBase";
-import Slide from "@mui/material/Slide";
-import { alpha, styled } from "@mui/material/styles";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
+import CloseIcon from "@icons/Close";
+import AppBar from "@ui/AppBar";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogContent from "@ui/DialogContent";
+import IconButton from "@ui/IconButton";
+import InputBase from "@ui/InputBase";
+import Toolbar from "@ui/Toolbar";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
 import Tooltip from "@widgets/Tooltip";
-import { forwardRef } from "react";
 import { StorageStore } from "../Storage";
 import StorageList from "../StorageList";
-
-const PREFIX = "Destination";
-
-const classes = {
-	appBar: `${PREFIX}-appBar`,
-	title: `${PREFIX}-title`,
-	path: `${PREFIX}-path`,
-	inputRoot: `${PREFIX}-inputRoot`,
-	inputInput: `${PREFIX}-inputInput`,
-};
-
-const StyledDialog = styled(Dialog)(({ theme }) => ({
-	[`& .${classes.appBar}`]: {
-		position: "relative",
-	},
-
-	[`& .${classes.title}`]: {
-		marginLeft: theme.spacing(2),
-		marginRight: theme.spacing(4),
-	},
-
-	[`& .${classes.path}`]: {
-		position: "relative",
-		borderRadius: theme.shape.borderRadius,
-		backgroundColor: alpha(theme.palette.common.white, 0.15),
-		"&:hover": {
-			backgroundColor: alpha(theme.palette.common.white, 0.25),
-		},
-		marginLeft: 0,
-		flex: "1",
-		display: "none",
-		[theme.breakpoints.up("sm")]: {
-			display: "flex",
-		},
-	},
-
-	[`& .${classes.inputRoot}`]: {
-		color: "inherit",
-		width: "100%",
-	},
-
-	[`& .${classes.inputInput}`]: {
-		padding: theme.spacing(1, 1, 1, 0),
-		paddingLeft: "0.5em",
-		paddingRight: "0.5em",
-	},
-}));
-
-const Transition = forwardRef(function Transition(props, ref) {
-	return <Slide direction="up" ref={ref} {...props} />;
-});
-
+import styles from "./Destination.module.css";
 export default function Destination({ path }) {
 	const translations = useTranslations();
 
@@ -150,13 +96,8 @@ export default function Destination({ path }) {
 	const disableAction = destination === path;
 
 	return (
-		<StyledDialog
-			fullScreen
-			open={destination !== ""}
-			onClose={handleClose}
-			slots={{ transition: Transition }}
-		>
-			<AppBar className={classes.appBar}>
+		<Dialog fullScreen open={destination !== ""} onClose={handleClose}>
+			<AppBar className={styles.appBar}>
 				<Toolbar>
 					<Tooltip arrow title={translations.CLOSE}>
 						<IconButton
@@ -168,16 +109,16 @@ export default function Destination({ path }) {
 							<CloseIcon />
 						</IconButton>
 					</Tooltip>
-					<Typography variant="h6" className={classes.title}>
+					<Typography variant="h6" className={styles.title}>
 						{translations.SELECT_DESTINATION}
 					</Typography>
-					<div className={classes.path}>
+					<div className={styles.path}>
 						<InputBase
 							readOnly={true}
 							value={destination}
 							classes={{
-								root: classes.inputRoot,
-								input: classes.inputInput,
+								root: styles.inputRoot,
+								input: styles.inputInput,
 							}}
 						/>
 					</div>
@@ -195,6 +136,6 @@ export default function Destination({ path }) {
 			<DialogContent dividers={true}>
 				{destination && <StorageList state={destinationState} />}
 			</DialogContent>
-		</StyledDialog>
+		</Dialog>
 	);
 }

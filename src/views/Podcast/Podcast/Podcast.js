@@ -1,6 +1,6 @@
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
+import Button from "@ui/Button";
+import Grid from "@ui/Grid";
+import Typography from "@ui/Typography";
 import { fetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";

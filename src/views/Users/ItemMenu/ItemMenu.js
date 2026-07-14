@@ -1,8 +1,7 @@
 import ItemMenu from "@components/ItemMenu";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteIcon from "@icons/Delete";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
-
 export default function ItemMenuWidget({ item, store }) {
 	const translations = useTranslations();
 

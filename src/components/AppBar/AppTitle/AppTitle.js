@@ -1,4 +1,4 @@
-import Typography from "@mui/material/Typography";
+import Typography from "@ui/Typography";
 import { useTranslations } from "@util/domain/translations";
 import styles from "./AppTitle.module.css";
 

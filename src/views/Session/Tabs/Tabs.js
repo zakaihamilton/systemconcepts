@@ -1,13 +1,12 @@
 import Tab from "@components/Widgets/Tabs/Tab";
 import AudioIcon from "@icons/Audio";
-import DescriptionIcon from "@mui/icons-material/Description";
-import ImageIcon from "@mui/icons-material/Image";
-import InfoIcon from "@mui/icons-material/Info";
-import MovieIcon from "@mui/icons-material/Movie";
+import DescriptionIcon from "@icons/Description";
+import ImageIcon from "@icons/Image";
+import InfoIcon from "@icons/Info";
+import MovieIcon from "@icons/Movie";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { toPath, useParentParams, usePathItems } from "@util/domain/views";
-
 export default function Tabs({ Container }) {
 	const translations = useTranslations();
 	const items = usePathItems();
