@@ -112,6 +112,13 @@ export function useToolbarItems({ location }) {
 	return sectionItems;
 }
 
+function getTooltipPlacement(location) {
+	if (location === "footer" || location === "mobile") {
+		return "top";
+	}
+	return "bottom";
+}
+
 export default function Toolbar({
 	className,
 	location,
@@ -138,6 +145,7 @@ export default function Toolbar({
 	});
 
 	const toolbarVisible = !!toolbarItems.length || !!menuItems.length;
+	const tooltipPlacement = getTooltipPlacement(location);
 
 	return (
 		<div
@@ -155,7 +163,13 @@ export default function Toolbar({
 				/>
 			)}
 			{toolbarItems.map((item, idx) => (
-				<Item key={item.id} item={item} idx={idx} count={toolbarItems.length} />
+				<Item
+					key={item.id}
+					item={item}
+					idx={idx}
+					count={toolbarItems.length}
+					tooltipPlacement={tooltipPlacement}
+				/>
 			))}
 			{!!menuItems.length && (
 				<>
@@ -167,10 +181,20 @@ export default function Toolbar({
 						/>
 					)}
 					{menuItems.length === 1 ? (
-						<Item key={menuItems[0].id} item={menuItems[0]} idx={0} count={1} />
+						<Item
+							key={menuItems[0].id}
+							item={menuItems[0]}
+							idx={0}
+							count={1}
+							tooltipPlacement={tooltipPlacement}
+						/>
 					) : (
 						<Menu items={menuItems}>
-							<Tooltip arrow title={translations.MENU}>
+							<Tooltip
+								arrow
+								title={translations.MENU}
+								placement={tooltipPlacement}
+							>
 								<IconButton
 									className={styles.menuButton}
 									size="small"

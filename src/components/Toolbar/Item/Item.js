@@ -8,7 +8,12 @@ import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./Item.module.css";
 
-export default function ToolbarItem({ item, idx, count }) {
+export default function ToolbarItem({
+	item,
+	idx,
+	count,
+	tooltipPlacement = "bottom",
+}) {
 	const classes = useStyles(styles, {
 		item: true,
 		selected: item.selected === item.id || item.selected === true,
@@ -34,7 +39,11 @@ export default function ToolbarItem({ item, idx, count }) {
 						/>
 					) : (
 						<span>
-							<Tooltip arrow title={item.name}>
+							<Tooltip
+								arrow
+								title={item.name}
+								placement={tooltipPlacement}
+							>
 								<span>
 									<IconButton
 										component={item.target ? Link : "button"}
