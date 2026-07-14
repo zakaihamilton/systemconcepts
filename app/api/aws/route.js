@@ -2,7 +2,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { getDownloadUrl, handleRequest } from "@util/storage/aws";
+import { handleRequest } from "@util/storage/aws";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -89,20 +89,6 @@ async function handleAWS(request) {
 					);
 					throw "ACCESS_DENIED: Batch item unauthorized for path: " + itemPath;
 				}
-			}
-		}
-
-		if (request.method === "GET") {
-			const query = Object.fromEntries(url.searchParams.entries());
-			const exists = query.exists || request.headers.get("exists");
-			const type = query.type || request.headers.get("type");
-
-			if (!exists && type !== "dir") {
-				const downloadUrl = await getDownloadUrl({ path });
-				return NextResponse.redirect(downloadUrl, {
-					status: 307,
-					headers: NO_CACHE_HEADERS,
-				});
 			}
 		}
 

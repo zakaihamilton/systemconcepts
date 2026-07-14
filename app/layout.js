@@ -13,7 +13,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="en" suppressHydrationWarning data-theme="light">
 			<head>
 				<link rel="manifest" href="/manifest.json" />
 				<link rel="icon" type="image/png" href="/icon.png" />

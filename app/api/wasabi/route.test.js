@@ -1,6 +1,6 @@
 import { roleAuth } from "@util/auth/roles";
 import { getSessionUser } from "@util/auth/session";
-import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
+import { handleRequest } from "@util/storage/wasabi";
 import { GET } from "./route";
 
 jest.mock("@util/auth/session", () => ({
@@ -16,7 +16,6 @@ jest.mock("@util/api/safeError", () => ({
 	getSafeError: jest.fn((err) => String(err?.message || err)),
 }));
 jest.mock("@util/storage/wasabi", () => ({
-	getDownloadUrl: jest.fn(),
 	handleRequest: jest.fn(),
 }));
 jest.mock("next/server", () => {
@@ -77,24 +76,20 @@ describe("/api/wasabi", () => {
 		jest.clearAllMocks();
 		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
 		roleAuth.mockReturnValue(true);
-		getDownloadUrl.mockResolvedValue(
-			"https://s3.wasabisys.com/bucket/sessions/test/file.txt?signature=test",
-		);
+		handleRequest.mockResolvedValue(Buffer.from("file-data"));
 	});
 
 	it.each([
 		["text", "?path=sessions%2Ftest%2Ffile.txt&type=file"],
 		["binary", "?path=sessions%2Ftest%2Ffile.mp4&binary=true"],
-	])("redirects authenticated %s file reads to Wasabi", async (_, query) => {
+	])("proxies authenticated %s file reads through the API", async (_, query) => {
 		const response = await GET(request(query));
 
-		expect(response.status).toBe(307);
-		expect(response.headers.get("Location")).toContain("s3.wasabisys.com");
-		expect(response.headers.get("Cache-Control")).toContain("no-store");
-		expect(getDownloadUrl).toHaveBeenCalledWith({
+		expect(response.status).toBe(200);
+		expect(handleRequest).toHaveBeenCalledWith({
+			req: expect.objectContaining({ method: "GET" }),
 			path: expect.stringMatching(/^sessions\/test\/file\./),
 		});
-		expect(handleRequest).not.toHaveBeenCalled();
 	});
 
 	it("keeps directory listings in the API route", async () => {
@@ -107,7 +102,6 @@ describe("/api/wasabi", () => {
 			{ name: "file.txt", type: "file" },
 		]);
 		expect(handleRequest).toHaveBeenCalled();
-		expect(getDownloadUrl).not.toHaveBeenCalled();
 	});
 
 	it("keeps existence checks in the API route", async () => {
@@ -122,25 +116,25 @@ describe("/api/wasabi", () => {
 			name: "file.txt",
 			type: "file",
 		});
-		expect(getDownloadUrl).not.toHaveBeenCalled();
+		expect(handleRequest).toHaveBeenCalled();
 	});
 
-	it("does not sign a URL when credentials are missing", async () => {
+	it("does not proxy a file when credentials are missing", async () => {
 		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt", ""));
 
 		expect(response.status).toBe(401);
 		expect(response.headers.get("Cache-Control")).toContain("no-store");
-		expect(getDownloadUrl).not.toHaveBeenCalled();
+		expect(handleRequest).not.toHaveBeenCalled();
 	});
 
-	it("does not sign a URL for unauthorized users", async () => {
+	it("does not proxy a file for unauthorized users", async () => {
 		roleAuth.mockReturnValue(false);
 
 		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt"));
 
 		expect(response.status).toBe(403);
-		expect(getDownloadUrl).not.toHaveBeenCalled();
+		expect(handleRequest).not.toHaveBeenCalled();
 	});
 });

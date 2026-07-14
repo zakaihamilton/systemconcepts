@@ -1,7 +1,7 @@
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
+import { handleRequest } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -21,20 +21,6 @@ export async function GET(request) {
 
 		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
-
-		const isDir =
-			url.searchParams.get("type") === "dir" ||
-			request.headers.get("type") === "dir";
-		const isExists =
-			url.searchParams.get("exists") || request.headers.get("exists");
-
-		if (!isDir && !isExists) {
-			const downloadUrl = await getDownloadUrl({ path });
-			return NextResponse.redirect(downloadUrl, {
-				status: 307,
-				headers: NO_CACHE_HEADERS,
-			});
-		}
 
 		const req = {
 			method: "GET",
