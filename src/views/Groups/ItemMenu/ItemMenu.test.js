@@ -4,7 +4,9 @@ import GroupItemMenu from "./ItemMenu";
 jest.mock("@components/ItemMenu", () => ({ menuItems }) => (
 	<button
 		type="button"
-		onClick={() => menuItems.find((menuItem) => menuItem.id === "enable_disable").onClick()}
+		onClick={() =>
+			menuItems.find((menuItem) => menuItem.id === "enable_disable").onClick()
+		}
 	>
 		Toggle group
 	</button>

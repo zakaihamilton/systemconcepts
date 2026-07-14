@@ -1,12 +1,14 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
+import { getOrigin } from "@util/domain/views";
 import Cookies from "js-cookie";
 import Podcast from "./index.js";
 
 jest.mock("@util/domain/translations");
 jest.mock("@util/api/fetch");
 jest.mock("js-cookie");
+jest.mock("@util/domain/views");
 
 describe("Podcast View", () => {
 	const mockTranslations = {
@@ -20,9 +22,7 @@ describe("Podcast View", () => {
 		jest.clearAllMocks();
 		useTranslations.mockReturnValue(mockTranslations);
 		Cookies.get.mockReturnValue(null);
-		// Mock window.location.origin
-		delete window.location;
-		window.location = { origin: "http://localhost" };
+		getOrigin.mockReturnValue("http://localhost");
 	});
 
 	it("renders nothing if not signed in", () => {

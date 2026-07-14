@@ -4,6 +4,7 @@ import Typography from "@ui/Typography";
 import { fetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
+import { getOrigin } from "@util/domain/views";
 import Tooltip from "@widgets/Tooltip";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
@@ -54,7 +55,7 @@ export default function Podcast() {
 		);
 	}
 
-	const podcastUrl = `${window.location.origin}/api/rss?id=${userId}&token=${user.rssToken}`;
+	const podcastUrl = `${getOrigin()}/api/rss?id=${userId}&token=${user.rssToken}`;
 
 	const handleCopyUrl = () => {
 		navigator.clipboard.writeText(podcastUrl);

@@ -1,7 +1,7 @@
 import { clear } from "@storage/local";
 import { fireEvent, render } from "@testing-library/react";
 import { useTranslations } from "@util/domain/translations";
-import { goBackPage, replacePath } from "@util/domain/views";
+import { goBackPage, reloadPage, replacePath } from "@util/domain/views";
 import React from "react";
 import ClearStorage from "./index.js";
 
@@ -38,13 +38,12 @@ describe("ClearStorage Component", () => {
 	});
 
 	it("calls clear and replacePath when reset is clicked", async () => {
-		delete window.location;
-		window.location = { reload: jest.fn() };
 		const { getByRole } = render(<ClearStorage />);
 		fireEvent.click(getByRole("button", { name: "Clear Storage" }));
 		expect(clear).toHaveBeenCalled();
 		// replacePath is called in async reset
 		await React.act(async () => {});
 		expect(replacePath).toHaveBeenCalledWith("");
+		expect(reloadPage).toHaveBeenCalled();
 	});
 });

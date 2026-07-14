@@ -277,3 +277,11 @@ export function useCurrentPageTitle() {
 	}
 	return "";
 }
+
+export function reloadPage() {
+	window.location.reload();
+}
+
+export function getOrigin() {
+	return window.location.origin;
+}

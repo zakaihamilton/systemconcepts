@@ -24,6 +24,7 @@ const TextField = forwardRef(function TextField(
 		multiple = false,
 		renderValue,
 		disabled = false,
+		InputProps,
 		...props
 	},
 	ref,
@@ -47,11 +48,13 @@ const TextField = forwardRef(function TextField(
 	const handleFocus = (e) => {
 		setFocused(true);
 		inputProps.onFocus?.(e);
+		InputProps?.onFocus?.(e);
 	};
 
 	const handleBlur = (e) => {
 		setFocused(false);
 		inputProps.onBlur?.(e);
+		InputProps?.onBlur?.(e);
 	};
 
 	const fieldInputClassName = clsx(

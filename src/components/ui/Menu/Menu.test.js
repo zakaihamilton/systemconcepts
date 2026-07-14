@@ -15,7 +15,12 @@ describe("Menu", () => {
 		document.body.appendChild(anchor);
 
 		render(
-			<Menu open anchorEl={anchor} onClose={jest.fn()} style={{ minWidth: 120 }}>
+			<Menu
+				open
+				anchorEl={anchor}
+				onClose={jest.fn()}
+				style={{ minWidth: 120 }}
+			>
 				<div>Menu content</div>
 			</Menu>,
 		);

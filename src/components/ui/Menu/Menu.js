@@ -72,12 +72,7 @@ export default function Menu({
 			window.removeEventListener("scroll", updatePosition, true);
 			observer?.disconnect();
 		};
-	}, [
-		open,
-		anchorEl,
-		anchorOrigin.horizontal,
-		anchorOrigin.vertical,
-	]);
+	}, [open, anchorEl, anchorOrigin.horizontal, anchorOrigin.vertical]);
 
 	useEffect(() => {
 		if (!open) return;
