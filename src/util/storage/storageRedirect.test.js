@@ -64,10 +64,7 @@ describe("storageRedirect", () => {
 		process.env.VERCEL_ENV = "production";
 
 		expect(
-			shouldRedirectStorageFileRead(
-				request(),
-				{ path: "sync/files.json.gz" },
-			),
+			shouldRedirectStorageFileRead(request(), { path: "sync/files.json.gz" }),
 		).toBe(true);
 		expect(
 			shouldRedirectStorageFileRead(request(), {

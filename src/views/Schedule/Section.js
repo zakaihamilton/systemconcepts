@@ -1,9 +1,9 @@
-import CalendarViewDayIcon from "@icons/CalendarViewDay";
-import CalendarViewMonthIcon from "@icons/CalendarViewMonth";
-import DateRangeIcon from "@icons/DateRange";
-import RestoreIcon from "@icons/Restore";
-import ViewStreamIcon from "@icons/ViewStream";
-import ViewWeekIcon from "@icons/ViewWeek";
+import CalendarViewDayIcon from "@icons/svg/CalendarViewDay.svg";
+import CalendarViewMonthIcon from "@icons/svg/CalendarViewMonth.svg";
+import DateRangeIcon from "@icons/svg/DateRange.svg";
+import RestoreIcon from "@icons/svg/Restore.svg";
+import ViewStreamIcon from "@icons/svg/ViewStream.svg";
+import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
 import { ScheduleStore } from "@views/Schedule/Schedule";
 export function getScheduleSection({ translations }) {
 	const { viewMode } = ScheduleStore.getRawState();

@@ -45,7 +45,7 @@ describe("Podcast View", () => {
 		const { getByText } = render(<Podcast />);
 
 		await waitFor(() => {
-			expect(getByText("Podcast")).toBeInTheDocument();
+			expect(getByText("Podcast Feed")).toBeInTheDocument();
 			expect(
 				getByText("http://localhost/api/rss?id=testuser&token=token123"),
 			).toBeInTheDocument();

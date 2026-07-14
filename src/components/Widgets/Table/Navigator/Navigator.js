@@ -1,8 +1,8 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ChevronLeftIcon from "@icons/ChevronLeft";
-import ChevronRightIcon from "@icons/ChevronRight";
-import FirstPageIcon from "@icons/FirstPage";
-import LastPageIcon from "@icons/LastPage";
+import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import FirstPageIcon from "@icons/svg/FirstPage.svg";
+import LastPageIcon from "@icons/svg/LastPage.svg";
 import TextField from "@ui/TextField";
 import Typography from "@ui/Typography";
 import { useDirection } from "@util/data/direction";

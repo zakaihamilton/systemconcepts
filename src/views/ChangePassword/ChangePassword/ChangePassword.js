@@ -1,7 +1,7 @@
 import { MainStore } from "@components/Main";
-import AccountCircleIcon from "@icons/AccountCircle";
-import ArrowBackIcon from "@icons/ArrowBack";
-import VpnKeyIcon from "@icons/VpnKey";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import VpnKeyIcon from "@icons/svg/VpnKey.svg";
 import Button from "@ui/Button";
 import Checkbox from "@ui/Checkbox";
 import FormControlLabel from "@ui/FormControlLabel";

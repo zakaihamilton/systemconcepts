@@ -1,5 +1,5 @@
 import { glossary } from "@data/glossary";
-import ArrowForwardIcon from "@icons/ArrowForward";
+import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
 import Box from "@ui/Box";
 import { useTranslations } from "@util/domain/translations";
 import { setPath } from "@util/domain/views";

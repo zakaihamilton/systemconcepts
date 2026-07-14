@@ -1,9 +1,9 @@
-import CheckBoxIcon from "@icons/CheckBox";
-import CheckBoxOutlineBlankIcon from "@icons/CheckBoxOutlineBlank";
-import ChevronRightIcon from "@icons/ChevronRight";
-import ExpandMoreIcon from "@icons/ExpandMore";
-import RadioButtonCheckedIcon from "@icons/RadioButtonChecked";
-import RadioButtonUncheckedIcon from "@icons/RadioButtonUnchecked";
+import CheckBoxIcon from "@icons/svg/CheckBox.svg";
+import CheckBoxOutlineBlankIcon from "@icons/svg/CheckBoxOutlineBlank.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
+import RadioButtonCheckedIcon from "@icons/svg/RadioButtonChecked.svg";
+import RadioButtonUncheckedIcon from "@icons/svg/RadioButtonUnchecked.svg";
 import Divider from "@ui/Divider";
 import Link from "@ui/Link";
 import ListItemIcon from "@ui/ListItemIcon";
@@ -13,6 +13,7 @@ import MenuItem from "@ui/MenuItem";
 import clsx from "clsx";
 import { Children, cloneElement, useEffect, useRef, useState } from "react";
 import styles from "./Menu.module.css";
+
 export default function MenuWidget({
 	hover,
 	items,
@@ -20,11 +21,16 @@ export default function MenuWidget({
 	onClick,
 	selected: menuSelected,
 	onVisible,
+	open: openProp,
+	anchorEl: anchorElProp,
+	onClose: onCloseProp,
 	...props
 }) {
-	const [anchorEl, setAnchorEl] = useState(null);
-	const open = Boolean(anchorEl);
-	const clickEnabled = (items && items.length) || onClick;
+	const [anchorElInternal, setAnchorElInternal] = useState(null);
+	const isControlled = openProp !== undefined;
+	const anchorEl = isControlled ? anchorElProp : anchorElInternal;
+	const open = isControlled ? Boolean(openProp) : Boolean(anchorElInternal);
+	const clickEnabled = !isControlled && ((items && items.length) || onClick);
 	const hoverEnabled = clickEnabled && hover;
 	const [_hoverRef, setHoverRef] = useState(null);
 	const [expanded, setExpanded] = useState({});
@@ -56,21 +62,24 @@ export default function MenuWidget({
 		});
 	};
 
-	const handleClick = (event) => {
-		event && event.stopPropagation && event.stopPropagation();
+	const handleClose = () => {
+		onVisible && onVisible(false);
+		if (isControlled) {
+			onCloseProp?.();
+		} else {
+			setAnchorElInternal(null);
+		}
+		setHoverRef(null);
+		setExpanded({});
+	};
+
+	const openMenu = (event) => {
 		if (items && items.length) {
 			onVisible && onVisible(true);
-			setAnchorEl(event.currentTarget);
+			setAnchorElInternal(event.currentTarget);
 		} else if (onClick) {
 			onClick(event);
 		}
-	};
-
-	const handleClose = () => {
-		onVisible && onVisible(false);
-		setAnchorEl(null);
-		setHoverRef(null);
-		setExpanded({});
 	};
 
 	const checkListFeatures = (list) => {
@@ -110,7 +119,7 @@ export default function MenuWidget({
 				selected,
 				expanded: itemExpanded,
 				highlight,
-				...props
+				...itemProps
 			} = item;
 			const selectedItem =
 				typeof selected !== "undefined" ? selected : menuSelected;
@@ -129,6 +138,10 @@ export default function MenuWidget({
 
 			const handleClickItem = (event) => {
 				if (header && hasSubItems) {
+					handleToggleExpand(id);
+					return;
+				}
+				if (hasSubItems && !itemOnClick) {
 					handleToggleExpand(id);
 					return;
 				}
@@ -168,7 +181,7 @@ export default function MenuWidget({
 					underline="none"
 					href={target}
 					onClick={handleClickItem}
-					{...props}
+					{...itemProps}
 				>
 					<div className={styles.background} style={style} />
 					{!header && hasAnyIcon && (
@@ -217,7 +230,7 @@ export default function MenuWidget({
 				),
 			];
 
-			if (header && hasSubItems && isExpanded) {
+			if ((header || hasSubItems) && isExpanded) {
 				result.push(...renderItems(subItems));
 			}
 
@@ -227,29 +240,30 @@ export default function MenuWidget({
 
 	const menuItems = open && renderItems(items);
 
-	children = Children.map(children, (child) => {
+	const trigger = Children.map(children, (child) => {
 		if (!child) {
 			return null;
 		}
 		const childProps = {};
 		if (clickEnabled) {
-			childProps.onClick = handleClick;
+			childProps.onClick = (event) => {
+				event.stopPropagation();
+				openMenu(event);
+			};
 		}
 		if (hoverEnabled) {
 			childProps.onMouseEnter = (event) => {
 				setHoverRef(event.currentTarget);
-				handleClick(event);
+				openMenu(event);
 			};
 		}
-		const element = cloneElement(child, childProps);
-		return element;
+		return cloneElement(child, childProps);
 	});
 
 	return (
 		<>
-			{children}
+			{!isControlled && trigger}
 			<Menu
-				id="menu"
 				anchorEl={anchorEl}
 				open={!!open}
 				onClose={handleClose}

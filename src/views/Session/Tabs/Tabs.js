@@ -1,9 +1,9 @@
 import Tab from "@components/Widgets/Tabs/Tab";
 import AudioIcon from "@icons/Audio";
-import DescriptionIcon from "@icons/Description";
-import ImageIcon from "@icons/Image";
-import InfoIcon from "@icons/Info";
-import MovieIcon from "@icons/Movie";
+import DescriptionIcon from "@icons/svg/Description.svg";
+import ImageIcon from "@icons/svg/Image.svg";
+import InfoIcon from "@icons/svg/Info.svg";
+import MovieIcon from "@icons/svg/Movie.svg";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { toPath, useParentParams, usePathItems } from "@util/domain/views";

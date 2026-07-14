@@ -2,7 +2,7 @@ import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
 import Input from "@components/Widgets/Input";
-import TodayIcon from "@icons/Today";
+import TodayIcon from "@icons/svg/Today.svg";
 import { useDeviceType } from "@util/browser/styles";
 import { useDateFormatter } from "@util/data/locale";
 import { addPath } from "@util/domain/views";

@@ -1,6 +1,6 @@
 import { useBookmarks } from "@components/Bookmarks";
-import BookmarkIcon from "@icons/Bookmark";
-import LibraryBooksIcon from "@icons/LibraryBooks";
+import BookmarkIcon from "@icons/svg/Bookmark.svg";
+import LibraryBooksIcon from "@icons/svg/LibraryBooks.svg";
 import Drawer from "@ui/Drawer";
 import LinearProgress from "@ui/LinearProgress";
 import { useDeviceType } from "@util/browser/styles";
@@ -173,11 +173,6 @@ export default function SideBar() {
 				anchor="left"
 				open={showSlider}
 				className={styles.mobileDrawer}
-				ModalProps={
-					{
-						// keepMounted: true // Removed to fix aria-hidden focus issue
-					}
-				}
 				onClose={closeDrawer}
 			>
 				<List onClick={closeDrawer} items={mergedItems} state={state} />

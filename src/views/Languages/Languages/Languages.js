@@ -1,6 +1,6 @@
 import data from "@data/languages";
-import FormatTextdirectionLToRIcon from "@icons/FormatTextdirectionLToR";
-import FormatTextdirectionRToLIcon from "@icons/FormatTextdirectionRToL";
+import FormatTextdirectionLToRIcon from "@icons/svg/FormatTextdirectionLToR.svg";
+import FormatTextdirectionRToLIcon from "@icons/svg/FormatTextdirectionRToL.svg";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import Label from "@widgets/Label";

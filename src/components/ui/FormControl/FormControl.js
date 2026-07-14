@@ -5,6 +5,7 @@ export default function FormControl({
 	children,
 	className,
 	fullWidth,
+	size: _size,
 	style,
 	...props
 }) {
@@ -35,11 +36,15 @@ export function Select({
 	value,
 	onChange,
 	className,
-	label,
+	label: _label,
+	labelId,
+	id,
 	...props
 }) {
 	return (
 		<select
+			id={id}
+			aria-labelledby={labelId}
 			className={clsx(styles.select, className)}
 			value={value}
 			onChange={onChange}

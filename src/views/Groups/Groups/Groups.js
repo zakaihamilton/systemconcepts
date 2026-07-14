@@ -1,8 +1,8 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import UpdateIcon from "@icons/Update";
-import UploadIcon from "@icons/Upload";
-import VisibilityIcon from "@icons/Visibility";
-import VisibilityOffIcon from "@icons/VisibilityOff";
+import UpdateIcon from "@icons/svg/Update.svg";
+import UploadIcon from "@icons/svg/Upload.svg";
+import VisibilityIcon from "@icons/svg/Visibility.svg";
+import VisibilityOffIcon from "@icons/svg/VisibilityOff.svg";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useOnline } from "@util/browser/online";
 import { useDeviceType, useStyles } from "@util/browser/styles";

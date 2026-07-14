@@ -1,4 +1,4 @@
-import ContentCopyIcon from "@icons/ContentCopy";
+import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
 import Box from "@ui/Box";
 import Dialog from "@ui/Dialog";
 import DialogContent from "@ui/DialogContent";

@@ -1,7 +1,7 @@
 import { useSearch } from "@components/Search";
-import ArrowDownwardIcon from "@icons/ArrowDownward";
-import ArrowUpwardIcon from "@icons/ArrowUpward";
-import CloseIcon from "@icons/Close";
+import ArrowDownwardIcon from "@icons/svg/ArrowDownward.svg";
+import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
+import CloseIcon from "@icons/svg/Close.svg";
 import { IconButton } from "@ui";
 import { useFetch } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";

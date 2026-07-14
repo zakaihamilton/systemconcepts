@@ -1,8 +1,9 @@
 import { MainStore } from "@components/Main";
 import Toolbar from "@components/Toolbar";
-import MoreHorizIcon from "@icons/MoreHoriz";
-import NavigateBeforeIcon from "@icons/NavigateBefore";
-import NavigateNextIcon from "@icons/NavigateNext";
+import { ToolbarTooltipContext } from "@components/Toolbar/ToolbarContext";
+import MoreHorizIcon from "@icons/svg/MoreHoriz.svg";
+import NavigateBeforeIcon from "@icons/svg/NavigateBefore.svg";
+import NavigateNextIcon from "@icons/svg/NavigateNext.svg";
 import { Divider, Menu, MenuItem } from "@ui";
 import IconButton from "@ui/IconButton";
 import Link from "@ui/Link";
@@ -248,41 +249,43 @@ export default function BreadcrumbsWidget({
 				className,
 			)}
 		>
-			<div className={styles.row}>
-				<NoSsr>
-					{!!bar && (
-						<span>
-							<SidebarIcon />
-						</span>
-					)}
-					{
-						<Divider
-							orientation="vertical"
-							flexItem
-							style={{ margin: "0 0.5rem" }}
-						/>
-					}
-					<div className={styles.breadcrumbs}>{breadcrumbItems}</div>
-					{!!bar && (
-						<>
-							<Toolbar
-								collapsable={true}
-								location={
-									isPhone || isTablet ? ["header", undefined] : undefined
-								}
+			<ToolbarTooltipContext.Provider value="bottom">
+				<div className={styles.row}>
+					<NoSsr>
+						{!!bar && (
+							<span>
+								<SidebarIcon />
+							</span>
+						)}
+						{
+							<Divider
+								orientation="vertical"
+								flexItem
+								style={{ margin: "0 0.5rem" }}
 							/>
-							{isDesktop && (
-								<Divider
-									orientation="vertical"
-									flexItem
-									style={{ margin: "0 0.5rem" }}
+						}
+						<div className={styles.breadcrumbs}>{breadcrumbItems}</div>
+						{!!bar && (
+							<>
+								<Toolbar
+									collapsable={true}
+									location={
+										isPhone || isTablet ? ["header", undefined] : undefined
+									}
 								/>
-							)}
-							{isDesktop && <Toolbar collapsable={true} location="header" />}
-						</>
-					)}
-				</NoSsr>
-			</div>
+								{isDesktop && (
+									<Divider
+										orientation="vertical"
+										flexItem
+										style={{ margin: "0 0.5rem" }}
+									/>
+								)}
+								{isDesktop && <Toolbar collapsable={true} location="header" />}
+							</>
+						)}
+					</NoSsr>
+				</div>
+			</ToolbarTooltipContext.Provider>
 		</div>
 	);
 }

@@ -1,7 +1,7 @@
 import devices from "@data/storage";
-import FolderIcon from "@icons/Folder";
-import InsertDriveFileIcon from "@icons/InsertDriveFile";
-import StorageIcon from "@icons/Storage";
+import FolderIcon from "@icons/svg/Folder.svg";
+import InsertDriveFileIcon from "@icons/svg/InsertDriveFile.svg";
+import StorageIcon from "@icons/svg/Storage.svg";
 import { useSync } from "@sync/sync";
 import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";

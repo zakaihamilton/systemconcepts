@@ -1,4 +1,4 @@
-import CloudSyncIcon from "@icons/CloudSync";
+import CloudSyncIcon from "@icons/svg/CloudSync.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
 import Box from "@ui/Box";

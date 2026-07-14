@@ -1,7 +1,7 @@
-import AddIcon from "@icons/Add";
-import CreateNewFolderIcon from "@icons/CreateNewFolder";
-import FolderIcon from "@icons/Folder";
-import InsertDriveFileIcon from "@icons/InsertDriveFile";
+import AddIcon from "@icons/svg/Add.svg";
+import CreateNewFolderIcon from "@icons/svg/CreateNewFolder.svg";
+import FolderIcon from "@icons/svg/Folder.svg";
+import InsertDriveFileIcon from "@icons/svg/InsertDriveFile.svg";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import { importData } from "@util/storage/importExport";

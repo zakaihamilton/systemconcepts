@@ -1,4 +1,4 @@
-import ArrowUpwardIcon from "@icons/ArrowUpward";
+import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
 import Box from "@ui/Box";
 import Fab from "@ui/Fab";
 import Zoom from "@ui/Zoom";

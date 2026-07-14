@@ -5,6 +5,8 @@ export default function CircularProgress({
 	className,
 	size = 40,
 	thickness = 3.6,
+	variant: _variant,
+	value: _value,
 	...props
 }) {
 	const radius = (size - thickness) / 2;

@@ -3,11 +3,19 @@ import { forwardRef } from "react";
 import styles from "./Checkbox.module.css";
 
 const Checkbox = forwardRef(function Checkbox(
-	{ className, color = "primary", checked, onChange, disabled, ...props },
+	{
+		className,
+		color = "primary",
+		checked,
+		onChange,
+		disabled,
+		classes = {},
+		...props
+	},
 	ref,
 ) {
 	return (
-		<span className={clsx(styles.root, className)}>
+		<span className={clsx(styles.root, classes.root, className)}>
 			<input
 				ref={ref}
 				type="checkbox"

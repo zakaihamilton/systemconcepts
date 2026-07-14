@@ -9,9 +9,15 @@ export function TableContainer({ children, className, ...props }) {
 	);
 }
 
-export function Table({ children, className, ...props }) {
+export function Table({
+	children,
+	className,
+	classes = {},
+	stickyHeader = false,
+	...props
+}) {
 	return (
-		<table className={clsx(styles.table, className)} {...props}>
+		<table className={clsx(styles.table, classes.root, className)} {...props}>
 			{children}
 		</table>
 	);
@@ -52,6 +58,7 @@ export function TableCell({
 	classes = {},
 	component: Component = "td",
 	stickyHeader = false,
+	sortDirection,
 	align,
 	padding,
 	...props

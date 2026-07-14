@@ -1,6 +1,6 @@
 import { MainStore } from "@components/Main";
-import ExpandLess from "@icons/ExpandLess";
-import ExpandMore from "@icons/ExpandMore";
+import ExpandLess from "@icons/svg/ExpandLess.svg";
+import ExpandMore from "@icons/svg/ExpandMore.svg";
 import Avatar from "@ui/Avatar";
 import Collapse from "@ui/Collapse";
 import Divider from "@ui/Divider";
@@ -119,7 +119,7 @@ export function ListItemWidget({
 			<ListItem
 				disablePadding
 				className={itemClassName}
-				divider={!!reverse && !!divider}
+				divider={!!reverse && !!divider ? true : undefined}
 			>
 				<ListItemButton
 					className={styles.itemButton}

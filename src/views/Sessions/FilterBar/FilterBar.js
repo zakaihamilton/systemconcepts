@@ -1,10 +1,10 @@
-import ArrowDropDownIcon from "@icons/ArrowDropDown";
 import AudioIcon from "@icons/Audio";
-import AutoAwesomeIcon from "@icons/AutoAwesome";
-import CloseIcon from "@icons/Close";
-import InsertPhotoOutlinedIcon from "@icons/InsertPhotoOutlined";
-import MovieIcon from "@icons/Movie";
-import MovieFilterIcon from "@icons/MovieFilter";
+import ArrowDropDownIcon from "@icons/svg/ArrowDropDown.svg";
+import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
+import CloseIcon from "@icons/svg/Close.svg";
+import InsertPhotoOutlinedIcon from "@icons/svg/InsertPhotoOutlined.svg";
+import MovieIcon from "@icons/svg/Movie.svg";
+import MovieFilterIcon from "@icons/svg/MovieFilter.svg";
 import { logger as structuredLogger } from "@util/api/logger";
 import { SessionsStore } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";

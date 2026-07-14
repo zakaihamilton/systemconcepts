@@ -94,39 +94,33 @@ describe("/api/wasabi", () => {
 	it.each([
 		["text", "?path=sessions%2Ftest%2Ffile.txt&type=file"],
 		["binary", "?path=sessions%2Ftest%2Ffile.mp4&binary=true"],
-	])(
-		"redirects authenticated %s file reads in production",
-		async (_, query) => {
-			const response = await GET(
-				request(query, "id=user; hash=secret", "systemconcepts.app"),
-			);
+	])("redirects authenticated %s file reads in production", async (_, query) => {
+		const response = await GET(
+			request(query, "id=user; hash=secret", "systemconcepts.app"),
+		);
 
-			expect(response.status).toBe(307);
-			expect(response.headers.get("Location")).toContain("s3.wasabisys.com");
-			expect(response.headers.get("Cache-Control")).toContain("no-store");
-			expect(getDownloadUrl).toHaveBeenCalledWith({
-				path: expect.stringMatching(/^sessions\/test\/file\./),
-			});
-			expect(handleRequest).not.toHaveBeenCalled();
-		},
-	);
+		expect(response.status).toBe(307);
+		expect(response.headers.get("Location")).toContain("s3.wasabisys.com");
+		expect(response.headers.get("Cache-Control")).toContain("no-store");
+		expect(getDownloadUrl).toHaveBeenCalledWith({
+			path: expect.stringMatching(/^sessions\/test\/file\./),
+		});
+		expect(handleRequest).not.toHaveBeenCalled();
+	});
 
 	it.each([
 		["text", "?path=sessions%2Ftest%2Ffile.txt&type=file"],
 		["binary", "?path=sessions%2Ftest%2Ffile.mp4&binary=true"],
-	])(
-		"proxies authenticated %s file reads outside production",
-		async (_, query) => {
-			const response = await GET(request(query));
+	])("proxies authenticated %s file reads outside production", async (_, query) => {
+		const response = await GET(request(query));
 
-			expect(response.status).toBe(200);
-			expect(handleRequest).toHaveBeenCalledWith({
-				req: expect.objectContaining({ method: "GET" }),
-				path: expect.stringMatching(/^sessions\/test\/file\./),
-			});
-			expect(getDownloadUrl).not.toHaveBeenCalled();
-		},
-	);
+		expect(response.status).toBe(200);
+		expect(handleRequest).toHaveBeenCalledWith({
+			req: expect.objectContaining({ method: "GET" }),
+			path: expect.stringMatching(/^sessions\/test\/file\./),
+		});
+		expect(getDownloadUrl).not.toHaveBeenCalled();
+	});
 
 	it("keeps directory listings in the API route", async () => {
 		handleRequest.mockResolvedValue([{ name: "file.txt", type: "file" }]);

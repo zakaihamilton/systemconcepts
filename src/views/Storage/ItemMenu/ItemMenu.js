@@ -1,8 +1,8 @@
 import ItemMenu from "@components/ItemMenu";
-import DeleteIcon from "@icons/Delete";
-import FileCopyIcon from "@icons/FileCopy";
-import GetAppIcon from "@icons/GetApp";
-import TrendingFlatIcon from "@icons/TrendingFlat";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import FileCopyIcon from "@icons/svg/FileCopy.svg";
+import GetAppIcon from "@icons/svg/GetApp.svg";
+import TrendingFlatIcon from "@icons/svg/TrendingFlat.svg";
 import { fileFolder, isBinaryFile, makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import { exportData } from "@util/storage/importExport";

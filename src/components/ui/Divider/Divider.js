@@ -3,6 +3,8 @@ import styles from "./Divider.module.css";
 
 export default function Divider({
 	className,
+	classes,
+	flexItem: _flexItem,
 	orientation = "horizontal",
 	variant,
 	style,
@@ -14,6 +16,7 @@ export default function Divider({
 				styles.root,
 				orientation === "vertical" && styles.vertical,
 				variant === "inset" && styles.inset,
+				classes?.root,
 				className,
 			)}
 			style={style}

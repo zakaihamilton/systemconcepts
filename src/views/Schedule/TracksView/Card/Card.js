@@ -1,4 +1,4 @@
-import EventIcon from "@icons/Event";
+import EventIcon from "@icons/svg/Event.svg";
 import Typography from "@ui/Typography";
 import { getContrastColor } from "@util/data/color";
 import { useDateFormatter } from "@util/data/locale";

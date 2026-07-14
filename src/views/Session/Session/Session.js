@@ -1,7 +1,7 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@icons/ArrowBack";
-import ArrowForwardIcon from "@icons/ArrowForward";
-import DownloadIcon from "@icons/Download";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
+import DownloadIcon from "@icons/svg/Download.svg";
 import Alert from "@ui/Alert";
 import Chip from "@ui/Chip";
 import Snackbar from "@ui/Snackbar";

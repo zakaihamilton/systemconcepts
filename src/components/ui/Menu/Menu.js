@@ -18,7 +18,7 @@ export default function Menu({
 	useEffect(() => {
 		if (!open) return;
 
-		const handleClick = (e) => {
+		const handleClickOutside = (e) => {
 			if (
 				menuRef.current &&
 				!menuRef.current.contains(e.target) &&
@@ -33,10 +33,14 @@ export default function Menu({
 			if (e.key === "Escape") onClose?.(e);
 		};
 
-		document.addEventListener("mousedown", handleClick);
-		document.addEventListener("keydown", handleKey);
+		const frame = window.setTimeout(() => {
+			document.addEventListener("click", handleClickOutside, true);
+			document.addEventListener("keydown", handleKey);
+		}, 0);
+
 		return () => {
-			document.removeEventListener("mousedown", handleClick);
+			window.clearTimeout(frame);
+			document.removeEventListener("click", handleClickOutside, true);
 			document.removeEventListener("keydown", handleKey);
 		};
 	}, [open, onClose, anchorEl]);

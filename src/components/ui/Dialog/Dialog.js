@@ -3,13 +3,23 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import styles from "../shared.module.css";
 
+const maxWidthMap = {
+	xs: 444,
+	sm: 600,
+	md: 900,
+	lg: 1200,
+	xl: 1536,
+};
+
 export default function Dialog({
 	open,
 	onClose,
 	children,
 	className,
 	fullScreen = false,
+	fullWidth = false,
 	maxWidth,
+	minWidth,
 	...props
 }) {
 	useEffect(() => {
@@ -31,7 +41,13 @@ export default function Dialog({
 					fullScreen && styles.fullScreen,
 					className,
 				)}
-				style={maxWidth ? { maxWidth } : undefined}
+				style={{
+					...(fullWidth && { width: "100%" }),
+					...(maxWidth != null && {
+						maxWidth: maxWidthMap[maxWidth] ?? maxWidth,
+					}),
+					...(minWidth != null && { minWidth }),
+				}}
 				onClick={(e) => e.stopPropagation()}
 				role="dialog"
 				aria-modal="true"

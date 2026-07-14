@@ -1,5 +1,5 @@
-import Visibility from "@icons/Visibility";
-import VisibilityOff from "@icons/VisibilityOff";
+import Visibility from "@icons/svg/Visibility.svg";
+import VisibilityOff from "@icons/svg/VisibilityOff.svg";
 import Autocomplete from "@ui/Autocomplete";
 import IconButton from "@ui/IconButton";
 import InputAdornment from "@ui/InputAdornment";

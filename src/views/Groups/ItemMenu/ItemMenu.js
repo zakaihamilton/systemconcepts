@@ -1,10 +1,10 @@
 import ItemMenu from "@components/ItemMenu";
-import CloudOffIcon from "@icons/CloudOff";
-import CloudQueueIcon from "@icons/CloudQueue";
-import DataUsageIcon from "@icons/DataUsage";
-import DescriptionIcon from "@icons/Description";
-import FolderIcon from "@icons/Folder";
-import UpdateIcon from "@icons/Update";
+import CloudOffIcon from "@icons/svg/CloudOff.svg";
+import CloudQueueIcon from "@icons/svg/CloudQueue.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
+import DescriptionIcon from "@icons/svg/Description.svg";
+import FolderIcon from "@icons/svg/Folder.svg";
+import UpdateIcon from "@icons/svg/Update.svg";
 import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 import Statistics from "../Statistics";

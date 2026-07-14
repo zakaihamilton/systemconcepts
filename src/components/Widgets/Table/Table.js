@@ -3,20 +3,20 @@ import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FixedSizeGrid from "@components/Virtualized/FixedSizeGrid";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
-import AccountTreeIcon from "@icons/AccountTree";
-import ArrowDownwardIcon from "@icons/ArrowDownward";
-import ArrowUpwardIcon from "@icons/ArrowUpward";
-import DataUsageIcon from "@icons/DataUsage";
-import GetAppIcon from "@icons/GetApp";
-import InfoIcon from "@icons/Info";
-import PublishIcon from "@icons/Publish";
-import RefreshIcon from "@icons/Refresh";
-import SortIcon from "@icons/Sort";
-import TableChartIcon from "@icons/TableChart";
-import ViewComfyIcon from "@icons/ViewComfy";
-import ViewListIcon from "@icons/ViewList";
-import ViewStreamIcon from "@icons/ViewStream";
-import ViewWeekIcon from "@icons/ViewWeek";
+import AccountTreeIcon from "@icons/svg/AccountTree.svg";
+import ArrowDownwardIcon from "@icons/svg/ArrowDownward.svg";
+import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
+import GetAppIcon from "@icons/svg/GetApp.svg";
+import InfoIcon from "@icons/svg/Info.svg";
+import PublishIcon from "@icons/svg/Publish.svg";
+import RefreshIcon from "@icons/svg/Refresh.svg";
+import SortIcon from "@icons/svg/Sort.svg";
+import TableChartIcon from "@icons/svg/TableChart.svg";
+import ViewComfyIcon from "@icons/svg/ViewComfy.svg";
+import ViewListIcon from "@icons/svg/ViewList.svg";
+import ViewStreamIcon from "@icons/svg/ViewStream.svg";
+import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
 import IconButton from "@ui/IconButton";
 import LinearProgress from "@ui/LinearProgress";
 import Table from "@ui/Table";
@@ -95,6 +95,7 @@ export default React.memo(function TableWidget(props) {
 		...otherProps
 	} = props;
 	const translations = useTranslations();
+	const isPhone = useDeviceType() === "phone";
 	const isMobile = useDeviceType() !== "desktop";
 	const statusBarIsActive = StatusBarStore.useState((s) => s.active);
 	columns = columns || [];
@@ -507,7 +508,7 @@ export default React.memo(function TableWidget(props) {
 			!!sortItems.length &&
 			showSort && {
 				id: "sort",
-				location: isMobile ? "mobile" : "header",
+				location: isPhone ? "mobile" : "header",
 				name: translations.SORT,
 				icon: <SortIcon />,
 				items: sortItems,
@@ -517,7 +518,7 @@ export default React.memo(function TableWidget(props) {
 			data &&
 			data.length >= 10 && {
 				id: "itemsPerPage",
-				location: isMobile ? "mobile" : "header",
+				location: isPhone ? "mobile" : "header",
 				name: translations.ROWS_PER_PAGE,
 				icon: <ViewStreamIcon />,
 				items: itemsPerPageItems,
@@ -864,6 +865,13 @@ export default React.memo(function TableWidget(props) {
 								stickyHeader
 								style={style}
 							>
+								{hideColumns && (
+									<colgroup>
+										{visibleColumns.map((column) => (
+											<col key={column.id} style={column.columnProps?.style} />
+										))}
+									</colgroup>
+								)}
 								{!hideColumns && (
 									<TableHead>
 										<TableRow>{tableColumns}</TableRow>

@@ -1,5 +1,5 @@
 import Select from "@components/Widgets/Select";
-import MoreVertIcon from "@icons/MoreVert";
+import MoreVertIcon from "@icons/svg/MoreVert.svg";
 import IconButton from "@ui/IconButton";
 import { useTranslations } from "@util/domain/translations";
 import Menu from "@widgets/Menu";

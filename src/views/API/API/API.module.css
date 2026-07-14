@@ -157,6 +157,7 @@
 	display: flex;
 	gap: 0.75rem;
 	align-items: center;
+	min-width: 0;
 	background: rgba(var(--primary-color-rgb), 0.05);
 	padding: 0.85rem;
 	border-radius: 14px;
@@ -169,8 +170,22 @@
 	border-color: rgba(var(--primary-color-rgb), 0.3);
 }
 
-.urlText {
+.urlTextWrap {
 	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.urlTextWrap > span {
+	display: block;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.urlText {
+	display: block;
+	width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -184,6 +199,7 @@
 	transition: all 0.2s ease;
 	direction: ltr;
 	text-align: left;
+	box-sizing: border-box;
 }
 
 :global([data-theme="dark"]) .urlText {
@@ -193,6 +209,7 @@
 }
 
 .copyButton {
+	flex-shrink: 0;
 	background: linear-gradient(
 		135deg,
 		var(--primary-600),
@@ -237,6 +254,17 @@
 	border-collapse: collapse;
 	text-align: left;
 	font-size: 0.9rem;
+	table-layout: fixed;
+}
+
+.paramsTable th:first-child,
+.paramsTable td:first-child {
+	width: 8rem;
+}
+
+.paramsTable th:nth-child(2),
+.paramsTable td:nth-child(2) {
+	width: 7rem;
 }
 
 .paramsTable th {

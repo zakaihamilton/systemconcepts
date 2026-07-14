@@ -1,10 +1,10 @@
 import { MainStore } from "@components/Main";
 import roles from "@data/roles";
-import AccountCircleIcon from "@icons/AccountCircle";
-import ArrowBackIcon from "@icons/ArrowBack";
-import EmailIcon from "@icons/Email";
-import RecentActorsIcon from "@icons/RecentActors";
-import VpnKeyIcon from "@icons/VpnKey";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import EmailIcon from "@icons/svg/Email.svg";
+import RecentActorsIcon from "@icons/svg/RecentActors.svg";
+import VpnKeyIcon from "@icons/svg/VpnKey.svg";
 import Button from "@ui/Button";
 import Grid from "@ui/Grid";
 import IconButton from "@ui/IconButton";

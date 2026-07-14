@@ -2,7 +2,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { handleRequest, getDownloadUrl } from "@util/storage/aws";
+import { getDownloadUrl, handleRequest } from "@util/storage/aws";
 import { shouldRedirectStorageFileRead } from "@util/storage/storageRedirect";
 import { NextResponse } from "next/server";
 

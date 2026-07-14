@@ -1,6 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import SyncIcon from "@icons/Sync";
-import SyncProblemIcon from "@icons/SyncProblem";
+import SyncIcon from "@icons/svg/Sync.svg";
+import SyncProblemIcon from "@icons/svg/SyncProblem.svg";
 import { useSyncFeature } from "@sync/sync";
 import Badge from "@ui/Badge";
 import { useStyles } from "@util/browser/styles";

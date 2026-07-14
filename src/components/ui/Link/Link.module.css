@@ -10,11 +10,20 @@
 	text-decoration: underline;
 }
 
+.noUnderline,
+.noUnderline:hover {
+	text-decoration: none;
+}
+
 .underlineAlways {
 	text-decoration: underline;
 }
 
 .inherit {
+	color: inherit;
+}
+
+.inherit:hover {
 	color: inherit;
 }
 

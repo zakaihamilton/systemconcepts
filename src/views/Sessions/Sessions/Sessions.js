@@ -1,8 +1,8 @@
-import AutoAwesomeIcon from "@icons/AutoAwesome";
-import ExpandLessIcon from "@icons/ExpandLess";
-import ExpandMoreIcon from "@icons/ExpandMore";
-import GraphicEqIcon from "@icons/GraphicEq";
-import MovieIcon from "@icons/Movie";
+import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
+import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
+import GraphicEqIcon from "@icons/svg/GraphicEq.svg";
+import MovieIcon from "@icons/svg/Movie.svg";
 import { SyncActiveStore } from "@sync/syncState";
 import Chip from "@ui/Chip";
 import { useLocalStorage } from "@util/browser/store";

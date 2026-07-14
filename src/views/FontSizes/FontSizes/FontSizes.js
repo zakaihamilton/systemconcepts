@@ -1,7 +1,7 @@
 import data from "@data/fontSizes";
-import DesktopMacIcon from "@icons/DesktopMac";
-import SmartphoneIcon from "@icons/Smartphone";
-import TabletIcon from "@icons/Tablet";
+import DesktopMacIcon from "@icons/svg/DesktopMac.svg";
+import SmartphoneIcon from "@icons/svg/Smartphone.svg";
+import TabletIcon from "@icons/svg/Tablet.svg";
 import { useTranslations } from "@util/domain/translations";
 import Label from "@widgets/Label";
 import Table from "@widgets/Table";

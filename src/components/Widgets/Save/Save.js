@@ -1,5 +1,5 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import SaveIcon from "@icons/Save";
+import SaveIcon from "@icons/svg/Save.svg";
 import { useTranslations } from "@util/domain/translations";
 import Progress from "@widgets/Progress";
 

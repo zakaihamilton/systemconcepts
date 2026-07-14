@@ -1,6 +1,6 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import FilterAltIcon from "@icons/FilterAlt";
-import GroupWorkIcon from "@icons/GroupWork";
+import FilterAltIcon from "@icons/svg/FilterAlt.svg";
+import GroupWorkIcon from "@icons/svg/GroupWork.svg";
 import { FILES_MANIFEST } from "@sync/constants";
 import { useSync } from "@sync/sync";
 import { logger as structuredLogger } from "@util/api/logger";
@@ -35,7 +35,7 @@ export const SessionsStore = new Store({
 });
 
 export function useSessions(depends = [], options = {}) {
-	const isMobile = useDeviceType() !== "desktop";
+	const isPhone = useDeviceType() === "phone";
 	const { filterSessions = true, skipSync = false, showToolbar } = options;
 	const [syncCounter] = useSync({ ...options, active: !skipSync });
 	const translations = useTranslations();
@@ -587,7 +587,7 @@ export function useSessions(depends = [], options = {}) {
 			name: translations.FILTER,
 			sortKey: 1,
 			icon: <FilterAltIcon />,
-			location: isMobile ? "mobile" : "header",
+			location: isPhone ? "mobile" : "header",
 			onClick: () => {
 				SessionsStore.update((s) => {
 					s.showFilterDialog = !s.showFilterDialog;
@@ -601,7 +601,7 @@ export function useSessions(depends = [], options = {}) {
 		id: "Sessions",
 		items: toolbarItems,
 		visible: showToolbar !== undefined ? showToolbar : filterSessions,
-		depends: [translations, groupsItems, showFilterDialog, isMobile],
+		depends: [translations, groupsItems, showFilterDialog, isPhone],
 	});
 
 	const filtered = useMemo(() => {

@@ -33,6 +33,29 @@ describe("ListItemButton", () => {
 		expect(ref.current).toBeInstanceOf(HTMLButtonElement);
 	});
 
+	it("forwards underline and color to custom components", () => {
+		const Link = ({ href, children, underline, color, ...props }) => (
+			<a href={href} data-underline={underline} data-color={color} {...props}>
+				{children}
+			</a>
+		);
+
+		const { getByRole } = render(
+			<ListItemButton
+				component={Link}
+				href="#library"
+				underline="none"
+				color="inherit"
+			>
+				Library
+			</ListItemButton>,
+		);
+
+		const link = getByRole("link", { name: "Library" });
+		expect(link).toHaveAttribute("data-underline", "none");
+		expect(link).toHaveAttribute("data-color", "inherit");
+	});
+
 	it("calls onClick when clicked", () => {
 		const handleClick = jest.fn();
 		const { getByRole } = render(

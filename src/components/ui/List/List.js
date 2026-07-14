@@ -6,13 +6,19 @@ export function List({
 	children,
 	className,
 	dense = false,
+	disablePadding = false,
 	component: Component = "ul",
 	style,
 	...props
 }) {
 	return (
 		<Component
-			className={clsx(styles.root, dense && styles.dense, className)}
+			className={clsx(
+				styles.root,
+				dense && styles.dense,
+				disablePadding && styles.noPadding,
+				className,
+			)}
 			style={style}
 			{...props}
 		>
@@ -25,6 +31,7 @@ export function ListItem({
 	children,
 	className,
 	disablePadding,
+	divider,
 	style,
 	...props
 }) {
@@ -33,6 +40,7 @@ export function ListItem({
 			className={clsx(
 				styles.item,
 				disablePadding && styles.noPadding,
+				divider && styles.withDivider,
 				className,
 			)}
 			style={style}
@@ -51,7 +59,8 @@ export const ListItemButton = forwardRef(function ListItemButton(
 		onClick,
 		component: Component,
 		href,
-		underline: _underline,
+		underline,
+		color,
 		style,
 		...props
 	},
@@ -70,6 +79,8 @@ export const ListItemButton = forwardRef(function ListItemButton(
 				className={classNames}
 				onClick={onClick}
 				href={href}
+				underline={underline}
+				color={color}
 				style={style}
 				{...props}
 			>

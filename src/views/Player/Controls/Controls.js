@@ -1,10 +1,10 @@
 import { MainStore } from "@components/Main";
-import Forward10Icon from "@icons/Forward10";
-import PauseIcon from "@icons/Pause";
-import PlayArrowIcon from "@icons/PlayArrow";
-import ReplayIcon from "@icons/Replay";
-import Replay10Icon from "@icons/Replay10";
-import StopIcon from "@icons/Stop";
+import Forward10Icon from "@icons/svg/Forward10.svg";
+import PauseIcon from "@icons/svg/Pause.svg";
+import PlayArrowIcon from "@icons/svg/PlayArrow.svg";
+import ReplayIcon from "@icons/svg/Replay.svg";
+import Replay10Icon from "@icons/svg/Replay10.svg";
+import StopIcon from "@icons/svg/Stop.svg";
 import MuiAlert from "@ui/Alert";
 import Button from "@ui/Button";
 import CircularProgress from "@ui/CircularProgress";

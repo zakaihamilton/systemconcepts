@@ -1,7 +1,7 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowDownwardIcon from "@icons/ArrowDownward";
-import ArrowUpwardIcon from "@icons/ArrowUpward";
-import SearchIcon from "@icons/Search";
+import ArrowDownwardIcon from "@icons/svg/ArrowDownward.svg";
+import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
+import SearchIcon from "@icons/svg/Search.svg";
 import InputBase from "@ui/InputBase";
 import { useDeviceType } from "@util/browser/styles";
 import { useTimeout } from "@util/browser/timers";

@@ -1,5 +1,5 @@
 import { ContentSize } from "@components/Page/Content";
-import ErrorIcon from "@icons/Error";
+import ErrorIcon from "@icons/svg/Error.svg";
 import { useSync } from "@sync/sync";
 import {
 	getStableFetchCacheOptions,

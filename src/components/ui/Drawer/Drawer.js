@@ -8,6 +8,9 @@ export default function Drawer({
 	children,
 	className,
 	variant,
+	ModalProps: _modalProps,
+	PaperProps: _paperProps,
+	SlideProps: _slideProps,
 	...props
 }) {
 	return (

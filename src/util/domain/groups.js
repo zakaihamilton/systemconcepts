@@ -10,6 +10,12 @@ export const GroupsStore = new Store({
 	busy: false,
 	counter: 0,
 	showDisabled: false,
+	itemsPerPage: 100,
+	order: "desc",
+	offset: 0,
+	orderBy: "name",
+	viewMode: "table",
+	scrollOffset: 0,
 });
 
 export function useGroups(depends = []) {

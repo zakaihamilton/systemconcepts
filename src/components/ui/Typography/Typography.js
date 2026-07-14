@@ -36,6 +36,9 @@ const Typography = forwardRef(function Typography(
 		color,
 		noWrap = false,
 		gutterBottom = false,
+		align,
+		fontWeight,
+		classes = {},
 		style,
 		...props
 	},
@@ -53,9 +56,14 @@ const Typography = forwardRef(function Typography(
 				colorClass,
 				noWrap && styles.noWrap,
 				gutterBottom && styles.gutterBottom,
+				classes.root,
 				className,
 			)}
-			style={style}
+			style={{
+				...(align && { textAlign: align }),
+				...(fontWeight && { fontWeight }),
+				...style,
+			}}
 			{...props}
 		>
 			{children}

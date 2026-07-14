@@ -1,16 +1,16 @@
 import { MainStore } from "@components/Main";
 import fontSizes from "@data/fontSizes";
 import languages from "@data/languages";
-import AutorenewIcon from "@icons/Autorenew";
-import BuildIcon from "@icons/Build";
-import DeleteForeverIcon from "@icons/DeleteForever";
-import FormatSizeIcon from "@icons/FormatSize";
-import ImportExportIcon from "@icons/ImportExport";
-import InvertColorsIcon from "@icons/InvertColors";
-import LanguageIcon from "@icons/Language";
-import SettingsBackupRestoreIcon from "@icons/SettingsBackupRestore";
-import SlowMotionVideoIcon from "@icons/SlowMotionVideo";
-import StorageIcon from "@icons/Storage";
+import AutorenewIcon from "@icons/svg/Autorenew.svg";
+import BuildIcon from "@icons/svg/Build.svg";
+import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
+import FormatSizeIcon from "@icons/svg/FormatSize.svg";
+import ImportExportIcon from "@icons/svg/ImportExport.svg";
+import InvertColorsIcon from "@icons/svg/InvertColors.svg";
+import LanguageIcon from "@icons/svg/Language.svg";
+import SettingsBackupRestoreIcon from "@icons/svg/SettingsBackupRestore.svg";
+import SlowMotionVideoIcon from "@icons/svg/SlowMotionVideo.svg";
+import StorageIcon from "@icons/svg/Storage.svg";
 import { SyncActiveStore } from "@sync/syncState";
 import Button from "@ui/Button";
 import { useStoreState } from "@util/browser/store";
@@ -66,11 +66,21 @@ export default function Settings() {
 				title: translations.NAME,
 				sortable: "name",
 				padding: false,
+				columnProps: {
+					style: {
+						width: "50%",
+					},
+				},
 			},
 			{
 				id: "widget",
 				title: translations.SETTING,
 				sortable: "value",
+				columnProps: {
+					style: {
+						width: "50%",
+					},
+				},
 			},
 		],
 		[translations],

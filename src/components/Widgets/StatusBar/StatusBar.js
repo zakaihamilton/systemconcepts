@@ -1,10 +1,10 @@
 import { SyncContext } from "@components/Sync";
 import ButtonSelector from "@components/Widgets/ButtonSelector";
-import CancelIcon from "@icons/Cancel";
-import CheckBoxIcon from "@icons/CheckBox";
-import CheckBoxOutlineBlankIcon from "@icons/CheckBoxOutlineBlank";
-import DeleteIcon from "@icons/Delete";
-import IndeterminateCheckBoxIcon from "@icons/IndeterminateCheckBox";
+import CancelIcon from "@icons/svg/Cancel.svg";
+import CheckBoxIcon from "@icons/svg/CheckBox.svg";
+import CheckBoxOutlineBlankIcon from "@icons/svg/CheckBoxOutlineBlank.svg";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import IndeterminateCheckBoxIcon from "@icons/svg/IndeterminateCheckBox.svg";
 import Button from "@ui/Button";
 import IconButton from "@ui/IconButton";
 import Typography from "@ui/Typography";

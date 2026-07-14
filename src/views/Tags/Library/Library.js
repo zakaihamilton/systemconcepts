@@ -1,10 +1,10 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import CloudSyncIcon from "@icons/CloudSync";
-import DeleteIcon from "@icons/Delete";
-import DeleteForeverIcon from "@icons/DeleteForever";
-import EditIcon from "@icons/Edit";
-import EditAttributesIcon from "@icons/EditAttributes";
-import MoreVertIcon from "@icons/MoreVert";
+import CloudSyncIcon from "@icons/svg/CloudSync.svg";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
+import EditIcon from "@icons/svg/Edit.svg";
+import EditAttributesIcon from "@icons/svg/EditAttributes.svg";
+import MoreVertIcon from "@icons/svg/MoreVert.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
 import Box from "@ui/Box";

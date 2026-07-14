@@ -1,8 +1,8 @@
 import roles from "@data/roles";
-import AccountCircleIcon from "@icons/AccountCircle";
-import EmailIcon from "@icons/Email";
-import RecentActorsIcon from "@icons/RecentActors";
-import TodayIcon from "@icons/Today";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import EmailIcon from "@icons/svg/Email.svg";
+import RecentActorsIcon from "@icons/svg/RecentActors.svg";
+import TodayIcon from "@icons/svg/Today.svg";
 import { fetchJSON, useFetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";

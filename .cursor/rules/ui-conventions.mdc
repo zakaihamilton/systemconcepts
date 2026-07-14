@@ -9,7 +9,7 @@ alwaysApply: false
 ## Imports
 
 - Use `@ui` / `@ui/*` for primitives (Button, TextField, Dialog, List, etc.)
-- Use `@icons/*` or `@icons` barrel for SVG icons
+- Use `@icons/svg/{Name}.svg` for SVG icons (import each icon separately)
 - Do **not** import from `@mui/*` or `@emotion/*`
 
 ## Styling
@@ -27,8 +27,11 @@ alwaysApply: false
 
 ## Icons
 
-- Regenerate icons after adding new `@icons` imports: `yarn generate-icons`
-- Icon source SVGs come from `@mui/icons-material` (devDependency only)
+- Source SVGs live in `src/components/Icons/svg/{Name}.svg`
+- Icons are compiled at build time via SVGR — no codegen step
+- To add a new icon:
+  1. Add `src/components/Icons/svg/NewIcon.svg` (e.g. from [Google Material Icons](https://fonts.google.com/icons))
+  2. `import NewIcon from "@icons/svg/NewIcon.svg"` in code
 
 ## TextField props
 

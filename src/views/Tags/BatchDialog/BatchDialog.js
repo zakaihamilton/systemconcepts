@@ -1,4 +1,4 @@
-import EditAttributesIcon from "@icons/EditAttributes";
+import EditAttributesIcon from "@icons/svg/EditAttributes.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
 import Box from "@ui/Box";

@@ -1,4 +1,4 @@
-import ErrorIcon from "@icons/Error";
+import ErrorIcon from "@icons/svg/Error.svg";
 import { useTranslations } from "@util/domain/translations";
 import Label from "@widgets/Label";
 import Tooltip from "@widgets/Tooltip";

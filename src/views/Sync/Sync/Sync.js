@@ -1,8 +1,8 @@
 import { SyncContext } from "@components/Sync";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import CachedIcon from "@icons/Cached";
-import ContentCopyIcon from "@icons/ContentCopy";
-import UpdateIcon from "@icons/Update";
+import CachedIcon from "@icons/svg/Cached.svg";
+import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
+import UpdateIcon from "@icons/svg/Update.svg";
 import { clearBundleCache, useSyncFeature } from "@sync/sync";
 import { SyncActiveStore } from "@sync/syncState";
 import Box from "@ui/Box";

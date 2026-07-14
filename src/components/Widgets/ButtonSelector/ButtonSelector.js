@@ -1,4 +1,4 @@
-import ArrowDropDownIcon from "@icons/ArrowDropDown";
+import ArrowDropDownIcon from "@icons/svg/ArrowDropDown.svg";
 import Button from "@ui/Button";
 import ButtonGroup from "@ui/ButtonGroup";
 import ClickAwayListener from "@ui/ClickAwayListener";

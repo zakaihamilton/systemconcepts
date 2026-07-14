@@ -3,9 +3,7 @@ import { useTranslations } from "@util/domain/translations";
 import SessionIcon from "./index.js";
 
 jest.mock("@util/domain/translations");
-jest.mock("@components/Icons/Audio", () => () => (
-	<div data-testid="audio-icon" />
-));
+jest.mock("@icons/Audio", () => () => <div data-testid="audio-icon" />);
 
 describe("SessionIcon Widget", () => {
 	beforeEach(() => {

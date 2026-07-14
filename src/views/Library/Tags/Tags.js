@@ -1,5 +1,5 @@
-import ClearIcon from "@icons/Clear";
-import FilterAltIcon from "@icons/FilterAlt";
+import ClearIcon from "@icons/svg/Clear.svg";
+import FilterAltIcon from "@icons/svg/FilterAlt.svg";
 import Box from "@ui/Box";
 import Drawer from "@ui/Drawer";
 import IconButton from "@ui/IconButton";

@@ -1,10 +1,10 @@
 import { MainStore } from "@components/Main";
 import languages from "@data/languages";
-import Brightness4Icon from "@icons/Brightness4";
-import Brightness7Icon from "@icons/Brightness7";
-import BuildIcon from "@icons/Build";
-import LanguageIcon from "@icons/Language";
-import ReplayIcon from "@icons/Replay";
+import Brightness4Icon from "@icons/svg/Brightness4.svg";
+import Brightness7Icon from "@icons/svg/Brightness7.svg";
+import BuildIcon from "@icons/svg/Build.svg";
+import LanguageIcon from "@icons/svg/Language.svg";
+import ReplayIcon from "@icons/svg/Replay.svg";
 import { Divider } from "@ui";
 import { useLanguage } from "@util/domain/language";
 import { useTranslations } from "@util/domain/translations";

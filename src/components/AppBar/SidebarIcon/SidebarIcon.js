@@ -1,4 +1,4 @@
-import MenuIcon from "@icons/Menu";
+import MenuIcon from "@icons/svg/Menu.svg";
 import IconButton from "@ui/IconButton";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";

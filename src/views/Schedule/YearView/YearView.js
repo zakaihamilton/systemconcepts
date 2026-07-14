@@ -1,9 +1,9 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@icons/ArrowBack";
-import ArrowForwardIcon from "@icons/ArrowForward";
-import ChevronLeftIcon from "@icons/ChevronLeft";
-import ChevronRightIcon from "@icons/ChevronRight";
-import TodayIcon from "@icons/Today";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
+import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import TodayIcon from "@icons/svg/Today.svg";
 import { useSwipe } from "@util/browser/touch";
 import { getYearNames } from "@util/data/date";
 import { useDirection } from "@util/data/direction";

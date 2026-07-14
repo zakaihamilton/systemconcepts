@@ -369,9 +369,11 @@ else:
 								</Typography>
 
 								<div className={styles.urlContainer}>
-									<Tooltip title={apiUrl}>
-										<div className={styles.urlText}>{apiUrl}</div>
-									</Tooltip>
+									<div className={styles.urlTextWrap}>
+										<Tooltip title={apiUrl}>
+											<div className={styles.urlText}>{apiUrl}</div>
+										</Tooltip>
+									</div>
 									<Button
 										variant="contained"
 										size="small"

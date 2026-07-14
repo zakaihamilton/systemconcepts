@@ -1,1 +1,1 @@
-export { createIcon, default } from "./Icon";
+export { createIcon, default, withIcon } from "./Icon";

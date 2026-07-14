@@ -1,6 +1,6 @@
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
-import ChevronLeftIcon from "@icons/ChevronLeft";
-import ChevronRightIcon from "@icons/ChevronRight";
+import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
 import IconButton from "@ui/IconButton";
 import Typography from "@ui/Typography";
 import { useDateFormatter } from "@util/data/locale";

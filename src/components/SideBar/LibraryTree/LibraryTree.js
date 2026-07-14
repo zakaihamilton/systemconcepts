@@ -1,5 +1,5 @@
-import ClearIcon from "@icons/Clear";
-import FilterAltIcon from "@icons/FilterAlt";
+import ClearIcon from "@icons/svg/Clear.svg";
+import FilterAltIcon from "@icons/svg/FilterAlt.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
 import Box from "@ui/Box";

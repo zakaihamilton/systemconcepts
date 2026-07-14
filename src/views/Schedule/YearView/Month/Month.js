@@ -1,4 +1,4 @@
-import ViewWeekIcon from "@icons/ViewWeek";
+import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
 import {
 	addDate,
 	getDateString,

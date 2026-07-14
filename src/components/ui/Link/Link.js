@@ -17,6 +17,7 @@ const Link = forwardRef(function Link(
 	const classNames = clsx(
 		styles.root,
 		underline === "always" && styles.underlineAlways,
+		underline === "none" && styles.noUnderline,
 		color === "inherit" && styles.inherit,
 		Component === "button" && styles.button,
 		className,

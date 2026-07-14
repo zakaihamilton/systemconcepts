@@ -10,7 +10,7 @@ export default function MenuItem({
 	value,
 	component: Component,
 	href,
-	underline,
+	underline: _underline,
 	...props
 }) {
 	const classNames = clsx(
@@ -19,6 +19,22 @@ export default function MenuItem({
 		disabled && styles.disabled,
 		className,
 	);
+
+	const isSelectOption =
+		value !== undefined && onClick == null && !Component && !href;
+
+	if (isSelectOption) {
+		return (
+			<option
+				value={value}
+				disabled={disabled}
+				className={className}
+				{...props}
+			>
+				{children}
+			</option>
+		);
+	}
 
 	if (Component) {
 		return (

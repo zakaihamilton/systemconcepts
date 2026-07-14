@@ -1,11 +1,11 @@
 import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import VariableSizeList from "@components/Virtualized/VariableSizeList";
-import ClearIcon from "@icons/Clear";
-import FormatListNumberedIcon from "@icons/FormatListNumbered";
-import PrintIcon from "@icons/Print";
-import RefreshIcon from "@icons/Refresh";
-import SearchIcon from "@icons/Search";
+import ClearIcon from "@icons/svg/Clear.svg";
+import FormatListNumberedIcon from "@icons/svg/FormatListNumbered.svg";
+import PrintIcon from "@icons/svg/Print.svg";
+import RefreshIcon from "@icons/svg/Refresh.svg";
+import SearchIcon from "@icons/svg/Search.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
 import Autocomplete from "@ui/Autocomplete";

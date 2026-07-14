@@ -1,9 +1,9 @@
 import { abbreviations } from "@data/abbreviations";
-import ExpandLessIcon from "@icons/ExpandLess";
-import ExpandMoreIcon from "@icons/ExpandMore";
+import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
 import Box from "@ui/Box";
+import Link from "@ui/Link";
 import List from "@ui/List";
-import ListItemButton from "@ui/ListItemButton";
 import ListItemText from "@ui/ListItemText";
 import Typography from "@ui/Typography";
 import Tooltip from "@widgets/Tooltip";
@@ -85,6 +85,7 @@ const TreeItem = memo(function TreeItem({
 		(e) => {
 			if (e) {
 				e.stopPropagation();
+				e.preventDefault();
 			}
 			LibraryStore.update((s) => {
 				s.clickedId = node.id;
@@ -154,77 +155,93 @@ const TreeItem = memo(function TreeItem({
 	);
 
 	const Icon = node.Icon;
+	const surfaceClassName = clsx(
+		styles.itemSurface,
+		level === 0 ? styles.itemSurfaceLevel0 : styles.itemSurfaceLevel,
+		isSelected && styles.selected,
+	);
+
+	const rowContent = (
+		<Box className={styles.contentWrapper}>
+			<Box
+				onClick={hasChildren ? (e) => handleToggle(e) : undefined}
+				className={clsx(styles.toggleIcon, !hasChildren && styles.toggleHidden)}
+			>
+				{open ? (
+					<ExpandLessIcon className={styles.expandIcon} />
+				) : (
+					<ExpandMoreIcon className={styles.expandIcon} />
+				)}
+			</Box>
+
+			{Icon && (
+				<Tooltip
+					title={
+						(node.type || "").charAt(0).toUpperCase() +
+						(node.type || "").slice(1)
+					}
+					enterDelay={500}
+					disableInteractive
+				>
+					<Box className={styles.iconWrapper}>
+						<Icon className={styles.typeIcon} />
+					</Box>
+				</Tooltip>
+			)}
+
+			{node.number && <Box className={styles.tagNumber}>{node.number}</Box>}
+			<Box className={styles.textArea}>
+				<Tooltip
+					title={isTruncated ? name : ""}
+					enterDelay={0}
+					disableHoverListener={!isTruncated}
+					disableInteractive
+					placement="bottom-start"
+				>
+					<ListItemText
+						className={styles.listItemText}
+						primary={
+							<Typography
+								ref={textRef}
+								variant="body2"
+								onMouseEnter={checkTruncation}
+								className={clsx(
+									styles.name,
+									hasChildren ? styles.parentName : styles.childName,
+								)}
+							>
+								{name}
+							</Typography>
+						}
+					/>
+				</Tooltip>
+			</Box>
+		</Box>
+	);
 
 	return (
 		<Box className={styles.treeItem}>
-			<ListItemButton
-				component={node._id ? "a" : "div"}
-				href={node._id ? `#library/id/${node._id}` : undefined}
-				ref={itemRef}
-				onClick={handleSelect}
-				selected={isSelected}
-				className={clsx(
-					styles.itemButton,
-					styles.itemButtonLink,
-					level === 0 ? styles.itemButtonLevel0 : styles.itemButtonLevel,
-					isSelected && styles.selected,
+			<Box className={styles.itemRow} ref={itemRef}>
+				{node._id ? (
+					<Link
+						href={`#library/id/${node._id}`}
+						color="inherit"
+						underline="none"
+						className={surfaceClassName}
+						onClick={handleSelect}
+					>
+						{rowContent}
+					</Link>
+				) : (
+					<button
+						type="button"
+						className={surfaceClassName}
+						onClick={handleSelect}
+					>
+						{rowContent}
+					</button>
 				)}
-			>
-				<Box className={styles.contentWrapper}>
-					<Box
-						onClick={hasChildren ? (e) => handleToggle(e) : undefined}
-						className={clsx(
-							styles.toggleIcon,
-							!hasChildren && styles.toggleHidden,
-						)}
-					>
-						{open ? (
-							<ExpandLessIcon className={styles.expandIcon} />
-						) : (
-							<ExpandMoreIcon className={styles.expandIcon} />
-						)}
-					</Box>
-
-					{Icon && (
-						<Tooltip
-							title={
-								(node.type || "").charAt(0).toUpperCase() +
-								(node.type || "").slice(1)
-							}
-							enterDelay={500}
-						>
-							<Box className={styles.iconWrapper}>
-								<Icon className={styles.typeIcon} />
-							</Box>
-						</Tooltip>
-					)}
-
-					{node.number && <Box className={styles.tagNumber}>{node.number}</Box>}
-					<Tooltip
-						title={isTruncated ? name : ""}
-						enterDelay={0}
-						disableHoverListener={!isTruncated}
-						placement="bottom-start"
-					>
-						<ListItemText
-							className={styles.listItemText}
-							primary={
-								<Typography
-									ref={textRef}
-									variant="body2"
-									onMouseEnter={checkTruncation}
-									className={clsx(
-										styles.name,
-										hasChildren ? styles.parentName : styles.childName,
-									)}
-								>
-									{name}
-								</Typography>
-							}
-						/>
-					</Tooltip>
-				</Box>
-			</ListItemButton>
+			</Box>
 			{hasChildren && open && (
 				<List
 					component="div"

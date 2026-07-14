@@ -1,5 +1,5 @@
 import { useSearch } from "@components/Search";
-import DeleteIcon from "@icons/Delete";
+import DeleteIcon from "@icons/svg/Delete.svg";
 import IconButton from "@ui/IconButton";
 import { diffDays, isDateToday } from "@util/data/date";
 import { useRecentHistory } from "@util/domain/history";

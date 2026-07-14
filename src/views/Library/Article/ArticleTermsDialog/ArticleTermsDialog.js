@@ -1,5 +1,5 @@
-import CloseIcon from "@icons/Close";
-import SearchIcon from "@icons/Search";
+import CloseIcon from "@icons/svg/Close.svg";
+import SearchIcon from "@icons/svg/Search.svg";
 import Button from "@ui/Button";
 import Dialog from "@ui/Dialog";
 import DialogActions from "@ui/DialogActions";

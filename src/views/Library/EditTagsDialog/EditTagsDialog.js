@@ -1,5 +1,5 @@
-import ContentCopyIcon from "@icons/ContentCopy";
-import DeleteIcon from "@icons/Delete";
+import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
+import DeleteIcon from "@icons/svg/Delete.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
 import Box from "@ui/Box";

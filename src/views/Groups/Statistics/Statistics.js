@@ -1,5 +1,5 @@
-import CancelIcon from "@icons/Cancel";
-import DataUsageIcon from "@icons/DataUsage";
+import CancelIcon from "@icons/svg/Cancel.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
 import { Divider } from "@ui";
 import Dialog from "@ui/Dialog";
 import DialogContent from "@ui/DialogContent";

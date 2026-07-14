@@ -1,8 +1,8 @@
-import AudioIcon from "@components/Icons/Audio";
-import AutoAwesomeIcon from "@icons/AutoAwesome";
-import InsertPhotoOutlinedIcon from "@icons/InsertPhotoOutlined";
-import MovieIcon from "@icons/Movie";
-import MovieFilterIcon from "@icons/MovieFilter";
+import AudioIcon from "@icons/Audio";
+import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
+import InsertPhotoOutlinedIcon from "@icons/svg/InsertPhotoOutlined.svg";
+import MovieIcon from "@icons/svg/Movie.svg";
+import MovieFilterIcon from "@icons/svg/MovieFilter.svg";
 import { useTranslations } from "@util/domain/translations";
 import Tooltip from "@widgets/Tooltip";
 export default function SessionIcon({ type }) {

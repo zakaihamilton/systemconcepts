@@ -1,4 +1,4 @@
-import CloseIcon from "@icons/Close";
+import CloseIcon from "@icons/svg/Close.svg";
 import AppBar from "@ui/AppBar";
 import Button from "@ui/Button";
 import Dialog from "@ui/Dialog";

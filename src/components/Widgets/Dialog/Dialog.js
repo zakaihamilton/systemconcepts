@@ -1,4 +1,4 @@
-import CancelIcon from "@icons/Cancel";
+import CancelIcon from "@icons/svg/Cancel.svg";
 import { IconButton } from "@ui";
 import Typography from "@ui/Typography";
 import { useTranslations } from "@util/domain/translations";
