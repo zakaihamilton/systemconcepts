@@ -2,7 +2,8 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
-import { handleRequest } from "@util/storage/aws";
+import { handleRequest, getDownloadUrl } from "@util/storage/aws";
+import { shouldRedirectStorageFileRead } from "@util/storage/storageRedirect";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +91,14 @@ async function handleAWS(request) {
 					throw "ACCESS_DENIED: Batch item unauthorized for path: " + itemPath;
 				}
 			}
+		}
+
+		if (shouldRedirectStorageFileRead(request, url.searchParams)) {
+			const downloadUrl = await getDownloadUrl({ path });
+			return NextResponse.redirect(downloadUrl, {
+				status: 307,
+				headers: NO_CACHE_HEADERS,
+			});
 		}
 
 		const req = {
