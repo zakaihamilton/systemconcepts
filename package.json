@@ -12,7 +12,7 @@
 		"test:watch": "jest --watch",
 		"test:e2e": "playwright test",
 		"test:coverage": "jest --coverage --coverageReporters=text-summary",
-		"audit:dependencies": "yarn audit --level high",
+		"audit:dependencies": "npm audit --omit=dev --audit-level=high --package-lock=false",
 		"db:indexes": "node scripts/db-indexes.mjs",
 		"verify": "yarn lint && yarn typecheck && yarn test --runInBand && yarn test:coverage && yarn build && yarn test:e2e",
 		"full-start": "next build --webpack && next start"
@@ -70,6 +70,16 @@
 	},
 	"overrides": {
 		"glob": "^13.0.0"
+	},
+	"resolutions": {
+		"@babel/plugin-transform-modules-systemjs": "7.29.4",
+		"fast-uri": "3.1.2",
+		"lodash": "4.18.1",
+		"lodash-es": "4.18.1",
+		"minimatch": "5.1.8",
+		"picomatch": "2.3.2",
+		"rollup": "2.80.0",
+		"@rollup/plugin-terser/serialize-javascript": "7.0.5"
 	},
 	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
