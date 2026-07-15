@@ -60,13 +60,27 @@ describe("Controls Component", () => {
 		expect(getByTestId("button-Stop")).toBeInTheDocument();
 	});
 
-	it("calls play when play button is clicked", () => {
-		const { getByTestId, getByRole } = render(
+	it("does not flash a loading indicator when playback starts immediately", () => {
+		const eventListeners = {};
+		mockPlayer.addEventListener.mockImplementation((event, cb) => {
+			eventListeners[event] = cb;
+		});
+		const { getByTestId, queryByRole } = render(
 			<Controls show={true} playerRef={mockPlayer} />,
 		);
 		fireEvent.click(getByTestId("button-Play"));
 		expect(mockPlayer.play).toHaveBeenCalled();
-		expect(getByRole("progressbar")).toHaveClass("loadingIndicator");
+		expect(queryByRole("progressbar")).not.toBeInTheDocument();
+
+		act(() => {
+			eventListeners.loadstart();
+		});
+		expect(queryByRole("progressbar")).not.toBeInTheDocument();
+
+		act(() => {
+			eventListeners.playing();
+		});
+		expect(queryByRole("progressbar")).not.toBeInTheDocument();
 	});
 
 	it("calls pause when pause button is clicked", () => {
