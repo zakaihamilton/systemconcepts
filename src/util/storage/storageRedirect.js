@@ -1,6 +1,8 @@
 const DEFAULT_PRODUCTION_SITE_URL = "https://systemconcepts.app";
 
 function getProductionHostnames() {
+	const defaultHostname = new URL(DEFAULT_PRODUCTION_SITE_URL).hostname;
+	const hostnames = new Set([defaultHostname, `www.${defaultHostname}`]);
 	const siteUrl =
 		process.env.SITE_URL ||
 		process.env.NEXT_PUBLIC_SITE_URL ||
@@ -8,10 +10,13 @@ function getProductionHostnames() {
 
 	try {
 		const hostname = new URL(siteUrl).hostname;
-		return new Set([hostname, `www.${hostname}`]);
+		hostnames.add(hostname);
+		hostnames.add(`www.${hostname}`);
 	} catch {
-		return new Set([new URL(DEFAULT_PRODUCTION_SITE_URL).hostname]);
+		// Keep the canonical production hostname available when configuration is invalid.
 	}
+
+	return hostnames;
 }
 
 export function isProductionDeployment(request) {

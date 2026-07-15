@@ -5,11 +5,9 @@ const compilerPath = path.join(__dirname, "jest.svgr-compile.cjs");
 
 module.exports = {
 	process(_sourceText, sourcePath) {
-		const code = execFileSync(
-			process.execPath,
-			[compilerPath, sourcePath],
-			{ encoding: "utf8" },
-		);
+		const code = execFileSync(process.execPath, [compilerPath, sourcePath], {
+			encoding: "utf8",
+		});
 
 		return { code };
 	},

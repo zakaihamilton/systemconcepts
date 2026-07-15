@@ -23,7 +23,10 @@ const customJestConfig = {
 		"^@sync/(.*)$": "<rootDir>/src/sync/$1",
 	},
 	transform: {
-		"^.+\\.svg$": "<rootDir>/jest.svgr-transformer.js",
+		"^.+\\.svg$": [
+			"<rootDir>/jest.svgr-transformer.js",
+			{ jsxRuntime: "automatic" },
+		],
 	},
 	transformIgnorePatterns: [
 		"/node_modules/(?!(p-limit|yocto-queue|react-markdown|remark-breaks|vfile|vfile-message|unist-util-.*|unified|bail|is-plain-obj|trough|decode-named-character-reference|character-entities|mdast-util-.*|micromark.*|property-information|hast-util-.*|space-separated-tokens|comma-separated-tokens|style-to-object|inline-style-parser|devlop)/)",

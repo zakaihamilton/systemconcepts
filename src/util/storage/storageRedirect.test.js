@@ -50,6 +50,12 @@ describe("storageRedirect", () => {
 		).toBe(true);
 	});
 
+	it("keeps the canonical production host when SITE_URL targets another environment", () => {
+		process.env.SITE_URL = "http://localhost:3000";
+
+		expect(isProductionDeployment(request())).toBe(true);
+	});
+
 	it("does not treat preview hosts as production", () => {
 		expect(
 			isProductionDeployment(
