@@ -1,5 +1,6 @@
 import "../src/css/app.css";
 import Script from "next/script";
+import ServiceWorker from "../src/components/ServiceWorker";
 
 export const metadata = {
 	title: "System Concepts",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
 			</head>
 			<body suppressHydrationWarning>
 				<Script src="/noflash.js" strategy="beforeInteractive" />
+				<ServiceWorker />
 				{children}
 			</body>
 		</html>

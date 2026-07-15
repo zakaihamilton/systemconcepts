@@ -51,7 +51,7 @@ AWS, Wasabi, MongoDB, and email integrations are optional in local development. 
 
 ## PWA and offline behavior
 
-`next-pwa` builds the service worker during production builds. Runtime caching rules live in `runtimeCaching.js`, and `/~offline` is the document fallback. Service workers are disabled during `yarn dev`; use a production build to test offline behavior.
+The repo-owned `public/sw.js` provides the offline fallback and runtime caching rules; `/~offline` is the document fallback. Service workers register only in production, so use a production build to test offline behavior.
 
 ```bash
 yarn build
