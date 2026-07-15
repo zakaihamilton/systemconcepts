@@ -32,8 +32,13 @@ export function shouldRedirectStorageFileRead(request, query = {}) {
 	if (request.method !== "GET") return false;
 	if (!isProductionDeployment(request)) return false;
 
-	const exists = query.exists || request.headers.get("exists");
-	const type = query.type || request.headers.get("type");
+	// App routes pass URLSearchParams, whereas direct callers and tests may pass
+	// a plain object. Reading properties from URLSearchParams always yields
+	// undefined, which previously made directory listings look like file reads.
+	const queryValue = (name) =>
+		typeof query?.get === "function" ? query.get(name) : query?.[name];
+	const exists = queryValue("exists") || request.headers.get("exists");
+	const type = queryValue("type") || request.headers.get("type");
 
 	return !exists && type !== "dir";
 }

@@ -122,10 +122,16 @@ describe("/api/wasabi", () => {
 		expect(getDownloadUrl).not.toHaveBeenCalled();
 	});
 
-	it("keeps directory listings in the API route", async () => {
+	it("keeps directory listings in the API route in production", async () => {
 		handleRequest.mockResolvedValue([{ name: "file.txt", type: "file" }]);
 
-		const response = await GET(request("?path=sessions%2Ftest&type=dir"));
+		const response = await GET(
+			request(
+				"?path=sessions%2Ftest&type=dir",
+				"id=user; hash=secret",
+				"systemconcepts.app",
+			),
+		);
 
 		expect(response.status).toBe(200);
 		await expect(response.json()).resolves.toEqual([

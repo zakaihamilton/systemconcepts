@@ -86,6 +86,17 @@ describe("storageRedirect", () => {
 		).toBe(false);
 	});
 
+	it("keeps directory listings in the API route when query is URLSearchParams", () => {
+		process.env.VERCEL_ENV = "production";
+
+		expect(
+			shouldRedirectStorageFileRead(
+				request(),
+				new URLSearchParams({ path: "american", type: "dir" }),
+			),
+		).toBe(false);
+	});
+
 	it("proxies file reads outside production", () => {
 		expect(
 			shouldRedirectStorageFileRead(
