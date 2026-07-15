@@ -2,6 +2,7 @@ import { webcrypto } from "node:crypto";
 import { TextEncoder } from "node:util";
 import {
 	createRssMediaToken,
+	isLegacyRssMediaRequest,
 	isPublicRssMediaPath,
 	verifyRssMediaToken,
 } from "./rssMediaToken";
@@ -62,12 +63,22 @@ describe("RSS media capabilities", () => {
 		).resolves.toBe(false);
 	});
 
-	it("rejects expired capabilities and non-public paths", async () => {
+	it("keeps capabilities valid for one year", async () => {
 		const token = await createRssMediaToken({
 			route: "media",
 			resource: "sessions/alpha/file.mp3",
 			now: 0,
 		});
+		expect(token.expiresAt).toBe(365 * 24 * 60 * 60);
+		await expect(
+			verifyRssMediaToken({
+				route: "media",
+				resource: "sessions/alpha/file.mp3",
+				expiresAt: token.expiresAt,
+				signature: token.signature,
+				now: token.expiresAt * 1000 - 1,
+			}),
+		).resolves.toBe(true);
 		await expect(
 			verifyRssMediaToken({
 				route: "media",
@@ -80,5 +91,20 @@ describe("RSS media capabilities", () => {
 		expect(isPublicRssMediaPath("personal/alice/private.mp3")).toBe(false);
 		expect(isPublicRssMediaPath("private/secret.mp3")).toBe(false);
 		expect(isPublicRssMediaPath("sessions/../personal/alice.mp3")).toBe(false);
+	});
+
+	it("only recognizes unsigned URLs as legacy when both capability fields are absent", () => {
+		expect(isLegacyRssMediaRequest({ expiresAt: null, signature: null })).toBe(
+			true,
+		);
+		expect(isLegacyRssMediaRequest({ expiresAt: "123", signature: null })).toBe(
+			false,
+		);
+		expect(isLegacyRssMediaRequest({ expiresAt: "", signature: "" })).toBe(
+			false,
+		);
+		expect(
+			isLegacyRssMediaRequest({ expiresAt: null, signature: "signature" }),
+		).toBe(false);
 	});
 });

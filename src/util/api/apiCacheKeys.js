@@ -5,6 +5,12 @@ const CACHE_EXTENSIONS = {
 	rss: "xml.gz",
 };
 
+// Bump this when the generated RSS document changes in a way that makes a
+// previously stored document unusable (for example, enclosure URL format).
+const CACHE_CONTENT_VERSIONS = {
+	rss: "media-url-v2",
+};
+
 const AUTH_PARAMS = new Set(["id", "token"]);
 
 function getPositiveInt(value, fallback, max) {
@@ -79,7 +85,12 @@ export function getContentParams(type, searchParams) {
 }
 
 export async function buildApiCacheKey(type, contentParams, fingerprint) {
-	const material = JSON.stringify({ type, contentParams, fingerprint });
+	const material = JSON.stringify({
+		type,
+		contentParams,
+		fingerprint,
+		contentVersion: CACHE_CONTENT_VERSIONS[type] || "v1",
+	});
 	const hashBuffer = await crypto.subtle.digest(
 		"SHA-256",
 		new TextEncoder().encode(material),
