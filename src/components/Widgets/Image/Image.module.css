@@ -42,10 +42,3 @@
 .img.hidden {
 	opacity: 0;
 }
-
-.alt {
-	overflow: hidden;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}

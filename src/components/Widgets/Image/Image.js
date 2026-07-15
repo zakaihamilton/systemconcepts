@@ -90,7 +90,6 @@ export default function ImageWidget({
 	const isExternalLoading =
 		(typeof loading === "boolean" && loading) || (needsSignedUrl && !data);
 
-	const showAlt = (!hasPath || !!error) && !isExternalLoading && !imageLoading;
 	const clickable = !!onClick;
 
 	return (
@@ -131,7 +130,6 @@ export default function ImageWidget({
 					alt={alt}
 				/>
 			)}
-			{showAlt && <div className={styles.alt}>{alt}</div>}
 		</Link>
 	);
 }

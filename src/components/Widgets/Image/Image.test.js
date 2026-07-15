@@ -59,8 +59,8 @@ describe("Image Widget", () => {
 		);
 	});
 
-	it("renders alt text when path is missing", () => {
-		const { getByText } = render(<ImageWidget alt="Alt Text" />);
-		expect(getByText("Alt Text")).toBeInTheDocument();
+	it("does not render alt text as visible fallback content", () => {
+		const { queryByText } = render(<ImageWidget alt="Post War Depression" />);
+		expect(queryByText("Post War Depression")).not.toBeInTheDocument();
 	});
 });
