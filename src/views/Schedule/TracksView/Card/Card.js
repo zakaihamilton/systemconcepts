@@ -42,6 +42,14 @@ const TrackCard = memo(function TrackCard({
 	);
 
 	const { thumbnail, name, duration, color, group, id } = session;
+	const numericDuration = Number(duration);
+	const hasKnownDuration =
+		session.type !== "image" &&
+		Number.isFinite(numericDuration) &&
+		numericDuration > 0;
+	const durationText = hasKnownDuration
+		? formatDuration(numericDuration * 1000, true)
+		: "";
 
 	const [showThumbnail, setShowThumbnail] = useState(
 		typeof thumbnail === "string",
@@ -122,9 +130,7 @@ const TrackCard = memo(function TrackCard({
 								</Typography>
 							</div>
 							<Typography variant="caption" className={styles.duration}>
-								{duration && session.type !== "image"
-									? formatDuration(duration * 1000, true)
-									: ""}
+								{durationText === "00:00:00" ? "" : durationText}
 							</Typography>
 						</div>
 					</div>

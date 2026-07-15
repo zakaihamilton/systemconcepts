@@ -30,7 +30,7 @@ describe("Toolbar Component", () => {
 
 	it("renders nothing if no items are present", () => {
 		const { container } = render(<Toolbar />);
-		expect(container.querySelector(".visible")).toBeNull();
+		expect(container).toBeEmptyDOMElement();
 	});
 
 	it("registers and displays toolbar items", () => {

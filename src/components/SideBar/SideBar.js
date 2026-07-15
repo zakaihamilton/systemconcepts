@@ -175,7 +175,12 @@ export default function SideBar() {
 				className={styles.mobileDrawer}
 				onClose={closeDrawer}
 			>
-				<List onClick={closeDrawer} items={mergedItems} state={state} />
+				<List
+					onClick={closeDrawer}
+					items={mergedItems}
+					state={state}
+					variant="sidebar"
+				/>
 				<QuickAccess closeDrawer={closeDrawer} state={state} />
 			</Drawer>
 		);
@@ -198,7 +203,7 @@ export default function SideBar() {
 			className={clsx(styles.root, direction === "rtl" && styles.rtl)}
 		>
 			<div className={styles.container}>
-				<List items={mergedItems} state={state} />
+				<List items={mergedItems} state={state} variant="sidebar" />
 				<QuickAccess
 					closeDrawer={closeDrawer}
 					state={state}

@@ -85,7 +85,12 @@ export default function QuickAccess({ closeDrawer, state, onScrollToBottom }) {
 		<>
 			<div style={{ flex: "1" }} />
 			<Divider className={styles.divider} />
-			<List items={quickAccessItems} onClick={closeDrawer} state={state} />
+			<List
+				items={quickAccessItems}
+				onClick={closeDrawer}
+				state={state}
+				variant="sidebar"
+			/>
 		</>
 	);
 }

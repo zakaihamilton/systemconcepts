@@ -180,12 +180,19 @@ export function ListItemWidget({
 	);
 }
 
-export default function ListWidget({ reverse, items, onClick, state }) {
+export default function ListWidget({
+	reverse,
+	items,
+	onClick,
+	state,
+	variant,
+}) {
 	const [selected, setSelected] = state || [];
 
 	const className = useStyles(styles, {
 		root: true,
 		reverse,
+		sidebar: variant === "sidebar",
 	});
 
 	const elements = (items || []).map((item) => {

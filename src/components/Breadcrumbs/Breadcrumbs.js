@@ -268,6 +268,7 @@ export default function BreadcrumbsWidget({
 						{!!bar && (
 							<>
 								<Toolbar
+									className={styles.headerToolbar}
 									collapsable={true}
 									location={
 										isPhone || isTablet ? ["header", undefined] : undefined
@@ -280,7 +281,13 @@ export default function BreadcrumbsWidget({
 										style={{ margin: "0 0.5rem" }}
 									/>
 								)}
-								{isDesktop && <Toolbar collapsable={true} location="header" />}
+								{isDesktop && (
+									<Toolbar
+										className={styles.headerToolbar}
+										collapsable={true}
+										location="header"
+									/>
+								)}
 							</>
 						)}
 					</NoSsr>

@@ -181,6 +181,10 @@ export default function Toolbar({
 		setMenuAnchorEl(null);
 	}, [hash]);
 
+	if (!toolbarVisible) {
+		return null;
+	}
+
 	return (
 		<ToolbarTooltipContext.Provider value={tooltipPlacement}>
 			<div
