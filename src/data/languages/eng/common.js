@@ -20,6 +20,22 @@ export default [
 		value: "Apps",
 	},
 	{
+		id: "CONTINUE_WATCHING",
+		value: "Continue watching",
+	},
+	{
+		id: "LATEST_SESSIONS",
+		value: "Latest sessions",
+	},
+	{
+		id: "ALL_SESSIONS",
+		value: "All sessions",
+	},
+	{
+		id: "NO_SESSIONS_YET",
+		value: "No sessions yet.",
+	},
+	{
 		id: "ALL",
 		value: "All",
 	},

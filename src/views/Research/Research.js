@@ -1,23 +1,23 @@
 import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import VariableSizeList from "@components/Virtualized/VariableSizeList";
-import ClearIcon from "@mui/icons-material/Clear";
-import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import PrintIcon from "@mui/icons-material/Print";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import SearchIcon from "@mui/icons-material/Search";
-import Autocomplete from "@mui/material/Autocomplete";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import LinearProgress from "@mui/material/LinearProgress";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import ClearIcon from "@icons/svg/Clear.svg";
+import FormatListNumberedIcon from "@icons/svg/FormatListNumbered.svg";
+import PrintIcon from "@icons/svg/Print.svg";
+import RefreshIcon from "@icons/svg/Refresh.svg";
+import SearchIcon from "@icons/svg/Search.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
+import Autocomplete from "@ui/Autocomplete";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import Chip from "@ui/Chip";
+import IconButton from "@ui/IconButton";
+import InputAdornment from "@ui/InputAdornment";
+import LinearProgress from "@ui/LinearProgress";
+import Paper from "@ui/Paper";
+import TextField from "@ui/TextField";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { useDeviceType } from "@util/browser/styles";
@@ -1107,22 +1107,20 @@ export default function Research() {
 							onKeyDown={onKeyDown}
 							variant="outlined"
 							className={styles.queryField}
-							slotProps={{
-								input: {
-									startAdornment: (
-										<InputAdornment position="start">
-											<SearchIcon />
-										</InputAdornment>
-									),
-									endAdornment: query && (
-										<InputAdornment position="end">
-											<IconButton onClick={handleClear} size="small">
-												<ClearIcon fontSize="small" />
-											</IconButton>
-										</InputAdornment>
-									),
-								},
-							}}
+							startAdornment={
+								<InputAdornment position="start">
+									<SearchIcon />
+								</InputAdornment>
+							}
+							endAdornment={
+								query ? (
+									<InputAdornment position="end">
+										<IconButton onClick={handleClear} size="small">
+											<ClearIcon fontSize="small" />
+										</IconButton>
+									</InputAdornment>
+								) : null
+							}
 						/>
 						<Button
 							variant="contained"
@@ -1180,15 +1178,7 @@ export default function Research() {
 										<li key={`${option.type}-${option.label}`} {...otherProps}>
 											<Typography
 												variant="caption"
-												sx={{
-													fontWeight: "bold",
-													mr: 1,
-													color: "text.secondary",
-													textTransform: "capitalize",
-													width: "85px",
-													display: "inline-block",
-													flexShrink: 0,
-												}}
+												className={styles.snippetLabel}
 											>
 												{translations[option.type.toUpperCase()] || option.type}
 											</Typography>
@@ -1212,26 +1202,11 @@ export default function Research() {
 												: translations[option.type.toUpperCase()] ||
 													option.type;
 										return (
-											<Box
-												key={key}
-												sx={{
-													display: "flex",
-													flexDirection: "column",
-													alignItems: "center",
-													mr: 0.5,
-													my: 0.5,
-												}}
-											>
+											<Box key={key} className={styles.tagGroup}>
 												{type && (
 													<Typography
 														variant="caption"
-														sx={{
-															fontSize: "0.65rem",
-															color: "text.secondary",
-															mt: 0.25,
-															textTransform: "capitalize",
-															fontWeight: "bold",
-														}}
+														className={styles.tagType}
 													>
 														{type}
 													</Typography>
@@ -1271,11 +1246,11 @@ export default function Research() {
 						<Typography variant="h6" gutterBottom>
 							{status || translations.INDEXING}
 						</Typography>
-						<Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-							<Box sx={{ width: "100%", mr: 2 }}>
+						<Box className={styles.indexProgressRow}>
+							<Box className={styles.indexProgressBar}>
 								<LinearProgress variant="determinate" value={progress} />
 							</Box>
-							<Box sx={{ minWidth: 45 }}>
+							<Box className={styles.indexProgressLabel}>
 								<Typography
 									variant="body2"
 									color="text.secondary"

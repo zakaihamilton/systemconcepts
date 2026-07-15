@@ -4,16 +4,21 @@
 	gap: 0.25rem;
 	height: 100%;
 	user-select: none;
+	position: relative;
+	z-index: 10;
+	flex-shrink: 0;
+	pointer-events: auto;
 }
 
 .menuButton {
-	border-radius: 8px;
+	border-radius: var(--radius-full);
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-	color: var(--text-color);
-	opacity: 0.75;
+	color: var(--icon-color);
+	opacity: 0.82;
 
 	&:hover {
-		background-color: var(--hover-background);
+		background-color: rgba(var(--primary-color-rgb), 0.11);
+		color: var(--primary-color);
 		opacity: 1;
 	}
 

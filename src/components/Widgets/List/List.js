@@ -1,22 +1,21 @@
 import { MainStore } from "@components/Main";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Avatar from "@mui/material/Avatar";
-import Collapse from "@mui/material/Collapse";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import Link from "@mui/material/Link";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
-import ListItemText from "@mui/material/ListItemText";
+import ExpandLess from "@icons/svg/ExpandLess.svg";
+import ExpandMore from "@icons/svg/ExpandMore.svg";
+import Avatar from "@ui/Avatar";
+import Collapse from "@ui/Collapse";
+import Divider from "@ui/Divider";
+import IconButton from "@ui/IconButton";
+import Link from "@ui/Link";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemAvatar from "@ui/ListItemAvatar";
+import ListItemButton from "@ui/ListItemButton";
+import ListItemIcon from "@ui/ListItemIcon";
+import ListItemSecondaryAction from "@ui/ListItemSecondaryAction";
+import ListItemText from "@ui/ListItemText";
 import { useStyles } from "@util/browser/styles";
 import { useState } from "react";
 import styles from "./List.module.css";
-
 export function ListItemWidget({
 	id,
 	divider,
@@ -120,9 +119,10 @@ export function ListItemWidget({
 			<ListItem
 				disablePadding
 				className={itemClassName}
-				divider={!!reverse && !!divider}
+				divider={!!reverse && !!divider ? true : undefined}
 			>
 				<ListItemButton
+					className={styles.itemButton}
 					style={style}
 					component={target ? Link : undefined}
 					underline="none"
@@ -143,6 +143,10 @@ export function ListItemWidget({
 					)}
 					<ListItemText
 						className={styles.itemLabel}
+						classes={{
+							primary: styles.primary,
+							secondary: styles.secondary,
+						}}
 						primary={name}
 						secondary={description}
 					/>
@@ -176,12 +180,19 @@ export function ListItemWidget({
 	);
 }
 
-export default function ListWidget({ reverse, items, onClick, state }) {
+export default function ListWidget({
+	reverse,
+	items,
+	onClick,
+	state,
+	variant,
+}) {
 	const [selected, setSelected] = state || [];
 
 	const className = useStyles(styles, {
 		root: true,
 		reverse,
+		sidebar: variant === "sidebar",
 	});
 
 	const elements = (items || []).map((item) => {

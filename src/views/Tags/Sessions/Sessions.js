@@ -1,4 +1,4 @@
-import Chip from "@mui/material/Chip";
+import Chip from "@ui/Chip";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import FilterBar from "@views/Sessions/FilterBar";

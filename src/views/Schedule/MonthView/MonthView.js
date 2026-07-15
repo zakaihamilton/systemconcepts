@@ -1,10 +1,9 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import TodayIcon from "@mui/icons-material/Today";
-import { useTheme } from "@mui/material/styles";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
+import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import TodayIcon from "@icons/svg/Today.svg";
 import { useDeviceType } from "@util/browser/styles";
 import { useSwipe } from "@util/browser/touch";
 import { getSessionTextColor } from "@util/data/colors";
@@ -37,7 +36,6 @@ export default function MonthView({ sessions, date, store, playingSession }) {
 	const direction = useDirection();
 	const { lastViewMode } = store.useState();
 	const translations = useTranslations();
-	const theme = useTheme();
 	const firstDay = getMonthViewStart(date);
 	const dayHeaderFormatter = useDateFormatter({
 		weekday: isPhone ? "narrow" : "short",
@@ -289,7 +287,7 @@ export default function MonthView({ sessions, date, store, playingSession }) {
 			type: item.type,
 			description: groupName,
 			backgroundColor: item.color,
-			style: { color: getSessionTextColor(item.color, theme) },
+			style: { color: getSessionTextColor(item.color) },
 			icon,
 			target: "#schedule/" + toPath(path),
 			onClick: () => addPath(path),

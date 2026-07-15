@@ -1,4 +1,4 @@
-import Fab from "@mui/material/Fab";
+import Fab from "@ui/Fab";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./Fab.module.css";

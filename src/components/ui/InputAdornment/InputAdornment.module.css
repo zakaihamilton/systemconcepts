@@ -1,0 +1,23 @@
+.root {
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+}
+
+.positionStart {
+	margin-right: 8px;
+}
+
+.positionEnd {
+	margin-left: 8px;
+}
+
+[dir="rtl"] .positionStart {
+	margin-right: 0;
+	margin-left: 8px;
+}
+
+[dir="rtl"] .positionEnd {
+	margin-left: 0;
+	margin-right: 8px;
+}

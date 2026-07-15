@@ -6,7 +6,7 @@ module.exports = {
 	moduleNameMapper: {
 		"^@components/(.*)$": "<rootDir>/src/components/$1",
 		"^@widgets/(.*)$": "<rootDir>/src/components/Widgets/$1",
-		"^@icons/(.*)$": "<rootDir>/src/components/Icons/$1",
+		"^@icons/Audio$": "<rootDir>/src/components/Icons/Audio.js",
 		"^@util/(.*)$": "<rootDir>/src/util/$1",
 		"^@data/(.*)$": "<rootDir>/src/data/$1",
 		"^@views/(.*)$": "<rootDir>/src/views/$1",

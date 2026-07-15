@@ -1,35 +1,20 @@
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import Box from "@mui/material/Box";
-import Fab from "@mui/material/Fab";
-import Zoom from "@mui/material/Zoom";
+import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
+import Box from "@ui/Box";
+import Fab from "@ui/Fab";
+import Zoom from "@ui/Zoom";
 import Tooltip from "@widgets/Tooltip";
+import styles from "./ScrollToTop.module.css";
 
 export default function ScrollToTop({ show, translations, onClick }) {
 	return (
 		<Zoom in={show}>
-			<Box
-				sx={{
-					position: "absolute",
-					top: 16,
-					left: 16,
-					zIndex: 1300,
-				}}
-			>
+			<Box className={styles.container}>
 				<Tooltip title={translations.SCROLL_TO_TOP} placement="right">
 					<Fab
 						size="small"
 						aria-label="scroll back to top"
 						onClick={onClick}
-						sx={{
-							opacity: 0.6,
-							backgroundColor: "var(--action-hover)",
-							color: "var(--text-secondary)",
-							boxShadow: 1,
-							"&:hover": {
-								opacity: 1,
-								backgroundColor: "var(--action-selected)",
-							},
-						}}
+						className={styles.fab}
 					>
 						<ArrowUpwardIcon fontSize="small" />
 					</Fab>

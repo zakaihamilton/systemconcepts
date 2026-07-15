@@ -1,0 +1,11 @@
+.titleBar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--app-bar-background);
+}
+
+.borderless td,
+.borderless th {
+	border: 0;
+}

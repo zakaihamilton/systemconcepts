@@ -1,13 +1,12 @@
 import data from "@data/languages";
-import FormatTextdirectionLToRIcon from "@mui/icons-material/FormatTextdirectionLToR";
-import FormatTextdirectionRToLIcon from "@mui/icons-material/FormatTextdirectionRToL";
+import FormatTextdirectionLToRIcon from "@icons/svg/FormatTextdirectionLToR.svg";
+import FormatTextdirectionRToLIcon from "@icons/svg/FormatTextdirectionRToL.svg";
 import { useTranslations } from "@util/domain/translations";
 import { addPath, toPath } from "@util/domain/views";
 import Label from "@widgets/Label";
 import Row from "@widgets/Row";
 import Table from "@widgets/Table";
 import { Store } from "pullstate";
-
 export const LanguagesStore = new Store({
 	order: "desc",
 	offset: 0,

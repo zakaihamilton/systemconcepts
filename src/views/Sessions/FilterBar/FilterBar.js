@@ -1,10 +1,10 @@
 import AudioIcon from "@icons/Audio";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import CloseIcon from "@mui/icons-material/Close";
-import InsertPhotoOutlinedIcon from "@mui/icons-material/InsertPhotoOutlined";
-import MovieIcon from "@mui/icons-material/Movie";
-import MovieFilterIcon from "@mui/icons-material/MovieFilter";
+import ArrowDropDownIcon from "@icons/svg/ArrowDropDown.svg";
+import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
+import CloseIcon from "@icons/svg/Close.svg";
+import InsertPhotoOutlinedIcon from "@icons/svg/InsertPhotoOutlined.svg";
+import MovieIcon from "@icons/svg/Movie.svg";
+import MovieFilterIcon from "@icons/svg/MovieFilter.svg";
 import { logger as structuredLogger } from "@util/api/logger";
 import { SessionsStore } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
@@ -13,7 +13,6 @@ import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import React, { useMemo } from "react";
 import styles from "./FilterBar.module.css";
-
 export default React.memo(function FilterBar({ hideYears = false }) {
 	const translations = useTranslations();
 	const typeFilter = SessionsStore.useState((s) => s.typeFilter);

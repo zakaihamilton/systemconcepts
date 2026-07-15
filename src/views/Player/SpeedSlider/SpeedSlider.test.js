@@ -15,7 +15,7 @@ jest.mock("@components/Main", () => ({
 	},
 }));
 jest.mock(
-	"@mui/material/Slider",
+	"@ui/Slider",
 	() =>
 		({ valueLabelFormat, valueLabelDisplay, step, marks, ...props }) => (
 			<div data-testid="slider" {...props} />

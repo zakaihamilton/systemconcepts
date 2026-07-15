@@ -1,0 +1,51 @@
+.root {
+	position: fixed;
+	z-index: 1300;
+	background: rgb(var(--bar-background-rgb));
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	box-shadow: var(--shadow-md);
+	padding: 4px 0;
+	max-height: 50vh;
+	overflow: auto;
+	min-width: 160px;
+}
+
+.item {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.6rem 1rem;
+	margin: 0.2rem 0.5rem;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 0.95rem;
+	font-weight: 500;
+	color: var(--text-color);
+	border: none;
+	background: transparent;
+	width: calc(100% - 1rem);
+	text-align: start;
+	font-family: inherit;
+	transition: background-color 0.2s ease;
+}
+
+.item:hover,
+.item:focus {
+	background-color: var(--hover-background);
+	outline: none;
+}
+
+.selected {
+	background-color: rgba(var(--primary-color-rgb), 0.08);
+	color: var(--primary-color);
+}
+
+.disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.divider {
+	margin: 4px 0;
+}

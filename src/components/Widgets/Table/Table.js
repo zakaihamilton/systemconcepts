@@ -3,27 +3,27 @@ import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import FixedSizeGrid from "@components/Virtualized/FixedSizeGrid";
 import FixedSizeList from "@components/Virtualized/FixedSizeList";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import GetAppIcon from "@mui/icons-material/GetApp";
-import InfoIcon from "@mui/icons-material/Info";
-import PublishIcon from "@mui/icons-material/Publish";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import SortIcon from "@mui/icons-material/Sort";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import ViewComfyIcon from "@mui/icons-material/ViewComfy";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewStreamIcon from "@mui/icons-material/ViewStream";
-import ViewWeekIcon from "@mui/icons-material/ViewWeek";
-import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import AccountTreeIcon from "@icons/svg/AccountTree.svg";
+import ArrowDownwardIcon from "@icons/svg/ArrowDownward.svg";
+import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
+import GetAppIcon from "@icons/svg/GetApp.svg";
+import InfoIcon from "@icons/svg/Info.svg";
+import PublishIcon from "@icons/svg/Publish.svg";
+import RefreshIcon from "@icons/svg/Refresh.svg";
+import SortIcon from "@icons/svg/Sort.svg";
+import TableChartIcon from "@icons/svg/TableChart.svg";
+import ViewComfyIcon from "@icons/svg/ViewComfy.svg";
+import ViewListIcon from "@icons/svg/ViewList.svg";
+import ViewStreamIcon from "@icons/svg/ViewStream.svg";
+import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
+import IconButton from "@ui/IconButton";
+import LinearProgress from "@ui/LinearProgress";
+import Table from "@ui/Table";
+import TableBody from "@ui/TableBody";
+import TableContainer from "@ui/TableContainer";
+import TableHead from "@ui/TableHead";
+import TableRow from "@ui/TableRow";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
 import { getComparator, stableSort } from "@util/data/sort";
@@ -95,6 +95,7 @@ export default React.memo(function TableWidget(props) {
 		...otherProps
 	} = props;
 	const translations = useTranslations();
+	const isPhone = useDeviceType() === "phone";
 	const isMobile = useDeviceType() !== "desktop";
 	const statusBarIsActive = StatusBarStore.useState((s) => s.active);
 	columns = columns || [];
@@ -507,7 +508,7 @@ export default React.memo(function TableWidget(props) {
 			!!sortItems.length &&
 			showSort && {
 				id: "sort",
-				location: isMobile ? "mobile" : "header",
+				location: isPhone ? "mobile" : "header",
 				name: translations.SORT,
 				icon: <SortIcon />,
 				items: sortItems,
@@ -517,7 +518,7 @@ export default React.memo(function TableWidget(props) {
 			data &&
 			data.length >= 10 && {
 				id: "itemsPerPage",
-				location: isMobile ? "mobile" : "header",
+				location: isPhone ? "mobile" : "header",
 				name: translations.ROWS_PER_PAGE,
 				icon: <ViewStreamIcon />,
 				items: itemsPerPageItems,
@@ -791,6 +792,7 @@ export default React.memo(function TableWidget(props) {
 						order={order}
 						orderBy={orderBy}
 						createSortHandler={createSortHandler}
+						stickyHeader
 					/>
 				);
 			});
@@ -863,6 +865,13 @@ export default React.memo(function TableWidget(props) {
 								stickyHeader
 								style={style}
 							>
+								{hideColumns && (
+									<colgroup>
+										{visibleColumns.map((column) => (
+											<col key={column.id} style={column.columnProps?.style} />
+										))}
+									</colgroup>
+								)}
 								{!hideColumns && (
 									<TableHead>
 										<TableRow>{tableColumns}</TableRow>

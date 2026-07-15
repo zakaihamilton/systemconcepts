@@ -1,14 +1,13 @@
-import AddIcon from "@mui/icons-material/Add";
-import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
-import FolderIcon from "@mui/icons-material/Folder";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import AddIcon from "@icons/svg/Add.svg";
+import CreateNewFolderIcon from "@icons/svg/CreateNewFolder.svg";
+import FolderIcon from "@icons/svg/Folder.svg";
+import InsertDriveFileIcon from "@icons/svg/InsertDriveFile.svg";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import { importData } from "@util/storage/importExport";
 import storage from "@util/storage/storage";
 import SpeedDial from "@widgets/SpeedDial";
 import { StorageStore } from "../Storage";
-
 export function useActions(data) {
 	const { mode, type } = StorageStore.useState();
 	if (mode === "create") {

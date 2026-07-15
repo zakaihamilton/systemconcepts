@@ -1,32 +1,30 @@
-import EditAttributesIcon from "@mui/icons-material/EditAttributes";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Collapse from "@mui/material/Collapse";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import EditAttributesIcon from "@icons/svg/EditAttributes.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import CircularProgress from "@ui/CircularProgress";
+import Collapse from "@ui/Collapse";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import Divider from "@ui/Divider";
+import IconButton from "@ui/IconButton";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemText from "@ui/ListItemText";
+import MenuItem from "@ui/MenuItem";
+import TextField from "@ui/TextField";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import React, { useEffect, useMemo, useState } from "react";
+import dialog from "../../../css/dialog-patterns.module.css";
 import styles from "./BatchDialog.module.css";
-
 export default function BatchDialog({ open, onClose, tags, loadTags }) {
 	const translations = useTranslations();
 	const [processing, setProcessing] = useState(false);
@@ -342,7 +340,7 @@ export default function BatchDialog({ open, onClose, tags, loadTags }) {
 					</div>
 				</div>
 
-				<Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+				<Box className={dialog.flexCenterMy2}>
 					<Button
 						variant="outlined"
 						onClick={handlePreview}
@@ -353,21 +351,13 @@ export default function BatchDialog({ open, onClose, tags, loadTags }) {
 				</Box>
 
 				{calculating && (
-					<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+					<Box className={dialog.flexCenterP2}>
 						<CircularProgress />
 					</Box>
 				)}
 
 				{previewData && (
-					<Box
-						sx={{
-							mt: 2,
-							bgcolor: "background.default",
-							borderRadius: 1,
-							border: "1px solid",
-							borderColor: "divider",
-						}}
-					>
+					<Box className={styles.previewContainer}>
 						<List dense>
 							{previewData.length === 0 ? (
 								<ListItem>
@@ -383,14 +373,7 @@ export default function BatchDialog({ open, onClose, tags, loadTags }) {
 							)}
 						</List>
 						{previewData.length > 0 && (
-							<Box
-								sx={{
-									p: 1,
-									borderTop: "1px solid",
-									borderColor: "divider",
-									textAlign: "right",
-								}}
-							>
+							<Box className={styles.previewFooter}>
 								<Typography variant="caption">
 									{translations.TOTAL_FILES}: {previewData.length} |
 									{translations.TOTAL_ITEMS}:{" "}
@@ -438,7 +421,7 @@ function PreviewItem({ item, translations }) {
 			<Collapse in={open} timeout="auto" unmountOnExit>
 				<List component="div" disablePadding dense>
 					{item.items.map((subItem, idx) => (
-						<ListItem key={idx} sx={{ pl: 4 }}>
+						<ListItem key={idx} className={styles.previewSubItem}>
 							<ListItemText primary={subItem} />
 						</ListItem>
 					))}

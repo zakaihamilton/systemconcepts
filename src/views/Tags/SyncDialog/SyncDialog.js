@@ -1,24 +1,25 @@
-import CloudSyncIcon from "@mui/icons-material/CloudSync";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Typography from "@mui/material/Typography";
+import CloudSyncIcon from "@icons/svg/CloudSync.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import CircularProgress from "@ui/CircularProgress";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import Divider from "@ui/Divider";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import React, { useCallback, useEffect, useState } from "react";
-
+import dialog from "../../../css/dialog-patterns.module.css";
+import styles from "./SyncDialog.module.css";
 export default function SyncDialog({ open, onClose, tags }) {
 	const translations = useTranslations();
 	const [processing, setProcessing] = useState(false);
@@ -191,35 +192,38 @@ export default function SyncDialog({ open, onClose, tags }) {
 			maxWidth="md"
 			fullWidth
 		>
-			<DialogTitle sx={{ fontWeight: 700 }}>
+			<DialogTitle className={dialog.titleBold}>
 				{translations.SYNC_ARTICLE_TAGS} -{" "}
 				{translations.REVIEW_CHANGES || "Review Changes"}
 			</DialogTitle>
 			<DialogContent dividers>
 				{calculating ? (
-					<Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+					<Box className={dialog.flexCenterP4}>
 						<CircularProgress />
 					</Box>
 				) : changes.length === 0 ? (
-					<Typography align="center" sx={{ p: 2 }}>
+					<Typography align="center" className={dialog.noChanges}>
 						{translations.NO_CHANGES_DETECTED ||
 							"No changes detected. Files are already in sync."}
 					</Typography>
 				) : (
-					<List sx={{ pt: 0 }}>
+					<List className={dialog.listFlush}>
 						{changes.map((file, idx) => (
 							<React.Fragment key={file.path}>
-								<ListItem disablePadding sx={{ display: "block", mb: 1 }}>
-									<Typography
-										variant="subtitle2"
-										sx={{ bgcolor: "action.hover", p: 1, borderRadius: 1 }}
-									>
+								<ListItem disablePadding className={dialog.listItemBlock}>
+									<Typography variant="subtitle2" className={dialog.pathLabel}>
 										{file.path}
 									</Typography>
-									<List disablePadding sx={{ pl: 2 }}>
+									<List disablePadding className={dialog.nestedList}>
 										{file.changes.map((change) => (
-											<ListItem key={change.id} sx={{ display: "block" }}>
-												<Typography variant="body2" fontWeight="bold">
+											<ListItem
+												key={change.id}
+												className={styles.listItemBlock}
+											>
+												<Typography
+													variant="body2"
+													className={styles.changeName}
+												>
 													{change.name}
 												</Typography>
 												{change.diffs.map((diff, i) => (
@@ -228,7 +232,7 @@ export default function SyncDialog({ open, onClose, tags }) {
 														variant="caption"
 														display="block"
 														color="text.secondary"
-														sx={{ ml: 1 }}
+														className={dialog.diffIndent}
 													>
 														{diff.key}: {JSON.stringify(diff.old)} &rarr;{" "}
 														{JSON.stringify(diff.new)}
@@ -238,13 +242,15 @@ export default function SyncDialog({ open, onClose, tags }) {
 										))}
 									</List>
 								</ListItem>
-								{idx < changes.length - 1 && <Divider sx={{ my: 1 }} />}
+								{idx < changes.length - 1 && (
+									<Divider className={dialog.dividerMy1} />
+								)}
 							</React.Fragment>
 						))}
 					</List>
 				)}
 			</DialogContent>
-			<DialogActions sx={{ p: 2 }}>
+			<DialogActions className={dialog.actionsPadded}>
 				<Button onClick={onClose} disabled={processing}>
 					{translations.CANCEL || "Cancel"}
 				</Button>

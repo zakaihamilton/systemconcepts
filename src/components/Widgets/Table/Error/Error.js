@@ -1,9 +1,8 @@
-import ErrorIcon from "@mui/icons-material/Error";
+import ErrorIcon from "@icons/svg/Error.svg";
 import { useTranslations } from "@util/domain/translations";
 import Label from "@widgets/Label";
 import Tooltip from "@widgets/Tooltip";
 import styles from "./Error.module.css";
-
 export default function Error({ error }) {
 	const translations = useTranslations();
 	const message = error?.message || error;

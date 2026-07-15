@@ -1,22 +1,21 @@
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import CloseIcon from "@icons/svg/Close.svg";
+import SearchIcon from "@icons/svg/Search.svg";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import Divider from "@ui/Divider";
+import IconButton from "@ui/IconButton";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemText from "@ui/ListItemText";
+import Typography from "@ui/Typography";
 import { useTranslations } from "@util/domain/translations";
 import Tooltip from "@widgets/Tooltip";
 import React, { useMemo, useState } from "react";
 import { getStyleInfo, PHASE_COLORS } from "../GlossaryUtils";
 import styles from "./ArticleTermsDialog.module.css";
-
 export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 	const translations = useTranslations();
 	const [search, setSearch] = useState("");
@@ -100,10 +99,7 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 			onClose={onClose}
 			maxWidth="sm"
 			fullWidth
-			scroll="paper"
-			slotProps={{
-				paper: { style: { height: "80vh" } },
-			}}
+			className={styles.dialogTall}
 		>
 			<DialogTitle disableTypography className={styles.titleContainer}>
 				<Typography variant="h6">
@@ -182,7 +178,7 @@ export default function ArticleTermsDialog({ open, onClose, terms, onJump }) {
 							return (
 								<React.Fragment key={index}>
 									<ListItem
-										sx={{ alignItems: "flex-start" }}
+										className={styles.termListItem}
 										id={isNewLetter ? `term-letter-${firstChar}` : undefined}
 									>
 										<ListItemText

@@ -20,6 +20,22 @@ export default [
 		value: "אפליקציות",
 	},
 	{
+		id: "CONTINUE_WATCHING",
+		value: "המשך צפייה",
+	},
+	{
+		id: "LATEST_SESSIONS",
+		value: "הפעלות אחרונות",
+	},
+	{
+		id: "ALL_SESSIONS",
+		value: "כל ההפעלות",
+	},
+	{
+		id: "NO_SESSIONS_YET",
+		value: "אין הפעלות עדיין.",
+	},
+	{
 		id: "ALL",
 		value: "הכל",
 	},

@@ -1,6 +1,6 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
+import Box from "@ui/Box";
+import CircularProgress from "@ui/CircularProgress";
+import Typography from "@ui/Typography";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import styles from "./Progress.module.css";
@@ -29,20 +29,9 @@ export default function Progress({
 			style={rootStyle}
 			{...props}
 		>
-			<Box sx={{ position: "relative", display: "flex" }}>
+			<Box className={styles.progressWrap}>
 				<CircularProgress size={size} value={value} variant={variant} />
-				<Box
-					sx={{
-						top: 0,
-						left: 0,
-						bottom: 0,
-						right: 0,
-						position: "absolute",
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-					}}
-				>
+				<Box className={styles.progressOverlay}>
 					{text && (
 						<Tooltip title={tooltip}>
 							<Typography

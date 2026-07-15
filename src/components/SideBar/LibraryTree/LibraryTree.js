@@ -1,12 +1,12 @@
-import ClearIcon from "@mui/icons-material/Clear";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import List from "@mui/material/List";
-import TextField from "@mui/material/TextField";
+import ClearIcon from "@icons/svg/Clear.svg";
+import FilterAltIcon from "@icons/svg/FilterAlt.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
+import Box from "@ui/Box";
+import IconButton from "@ui/IconButton";
+import InputAdornment from "@ui/InputAdornment";
+import List from "@ui/List";
+import TextField from "@ui/TextField";
 import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
@@ -18,7 +18,6 @@ import TreeItem from "@views/Library/TreeItem";
 import Tooltip from "@widgets/Tooltip";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./LibraryTree.module.css";
-
 export default function LibraryTree({ closeDrawer, isMobile }) {
 	const translations = useTranslations();
 	const [filterText, setFilterText] = useState("");
@@ -538,34 +537,32 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 					fullWidth
 					size="small"
 					className={styles.filterInput}
-					slotProps={{
-						input: {
-							startAdornment: (
-								<InputAdornment position="start">
-									<FilterAltIcon color="action" fontSize="small" />
-								</InputAdornment>
-							),
-							endAdornment: filterText ? (
-								<InputAdornment position="end">
-									<Tooltip title={translations.CLEAR_FILTER}>
-										<IconButton
-											size="small"
-											onClick={() => setFilterText("")}
-											edge="end"
-											sx={{ mr: -0.5 }}
-											aria-label={translations.CLEAR_FILTER}
-										>
-											<ClearIcon fontSize="small" />
-										</IconButton>
-									</Tooltip>
-								</InputAdornment>
-							) : null,
-						},
-					}}
+					startAdornment={
+						<InputAdornment position="start">
+							<FilterAltIcon color="action" fontSize="small" />
+						</InputAdornment>
+					}
+					endAdornment={
+						filterText ? (
+							<InputAdornment position="end">
+								<Tooltip title={translations.CLEAR_FILTER}>
+									<IconButton
+										size="small"
+										onClick={() => setFilterText("")}
+										edge="end"
+										className={styles.clearButton}
+										aria-label={translations.CLEAR_FILTER}
+									>
+										<ClearIcon fontSize="small" />
+									</IconButton>
+								</Tooltip>
+							</InputAdornment>
+						) : null
+					}
 				/>
 			</Box>
 			<Box className={styles.treeContainer} ref={treeContainerRef}>
-				<List component="nav" sx={{ py: 0.5, pl: 3 }}>
+				<List component="nav" className={styles.treeList}>
 					{tree.map((node) => (
 						<TreeItem
 							key={node.id}

@@ -1,8 +1,8 @@
 import { useBookmarks } from "@components/Bookmarks";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import Drawer from "@mui/material/Drawer";
-import LinearProgress from "@mui/material/LinearProgress";
+import BookmarkIcon from "@icons/svg/Bookmark.svg";
+import LibraryBooksIcon from "@icons/svg/LibraryBooks.svg";
+import Drawer from "@ui/Drawer";
+import LinearProgress from "@ui/LinearProgress";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, useActivePages, usePages } from "@util/domain/views";
@@ -15,7 +15,6 @@ import { MainStore } from "../Main";
 import LibraryTree from "./LibraryTree";
 import QuickAccess from "./QuickAccess";
 import styles from "./SideBar.module.css";
-
 export default function SideBar() {
 	const translations = useTranslations();
 	const isMobile = useDeviceType() !== "desktop";
@@ -174,14 +173,14 @@ export default function SideBar() {
 				anchor="left"
 				open={showSlider}
 				className={styles.mobileDrawer}
-				ModalProps={
-					{
-						// keepMounted: true // Removed to fix aria-hidden focus issue
-					}
-				}
 				onClose={closeDrawer}
 			>
-				<List onClick={closeDrawer} items={mergedItems} state={state} />
+				<List
+					onClick={closeDrawer}
+					items={mergedItems}
+					state={state}
+					variant="sidebar"
+				/>
 				<QuickAccess closeDrawer={closeDrawer} state={state} />
 			</Drawer>
 		);
@@ -204,7 +203,7 @@ export default function SideBar() {
 			className={clsx(styles.root, direction === "rtl" && styles.rtl)}
 		>
 			<div className={styles.container}>
-				<List items={mergedItems} state={state} />
+				<List items={mergedItems} state={state} variant="sidebar" />
 				<QuickAccess
 					closeDrawer={closeDrawer}
 					state={state}

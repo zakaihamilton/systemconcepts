@@ -1,11 +1,11 @@
 import { abbreviations } from "@data/abbreviations";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
+import Box from "@ui/Box";
+import Link from "@ui/Link";
+import List from "@ui/List";
+import ListItemText from "@ui/ListItemText";
+import Typography from "@ui/Typography";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -85,6 +85,7 @@ const TreeItem = memo(function TreeItem({
 		(e) => {
 			if (e) {
 				e.stopPropagation();
+				e.preventDefault();
 			}
 			LibraryStore.update((s) => {
 				s.clickedId = node.id;
@@ -154,105 +155,99 @@ const TreeItem = memo(function TreeItem({
 	);
 
 	const Icon = node.Icon;
+	const surfaceClassName = clsx(
+		styles.itemSurface,
+		level === 0 ? styles.itemSurfaceLevel0 : styles.itemSurfaceLevel,
+		isSelected && styles.selected,
+	);
+
+	const rowContent = (
+		<Box className={styles.contentWrapper}>
+			<Box
+				onClick={hasChildren ? (e) => handleToggle(e) : undefined}
+				className={clsx(styles.toggleIcon, !hasChildren && styles.toggleHidden)}
+			>
+				{open ? (
+					<ExpandLessIcon className={styles.expandIcon} />
+				) : (
+					<ExpandMoreIcon className={styles.expandIcon} />
+				)}
+			</Box>
+
+			{Icon && (
+				<Tooltip
+					title={
+						(node.type || "").charAt(0).toUpperCase() +
+						(node.type || "").slice(1)
+					}
+					enterDelay={500}
+					disableInteractive
+				>
+					<Box className={styles.iconWrapper}>
+						<Icon className={styles.typeIcon} />
+					</Box>
+				</Tooltip>
+			)}
+
+			{node.number && <Box className={styles.tagNumber}>{node.number}</Box>}
+			<Box className={styles.textArea}>
+				<Tooltip
+					title={isTruncated ? name : ""}
+					enterDelay={0}
+					disableHoverListener={!isTruncated}
+					disableInteractive
+					placement="bottom-start"
+				>
+					<ListItemText
+						className={styles.listItemText}
+						primary={
+							<Typography
+								ref={textRef}
+								variant="body2"
+								onMouseEnter={checkTruncation}
+								className={clsx(
+									styles.name,
+									hasChildren ? styles.parentName : styles.childName,
+								)}
+							>
+								{name}
+							</Typography>
+						}
+					/>
+				</Tooltip>
+			</Box>
+		</Box>
+	);
 
 	return (
-		<Box sx={{ display: "flex", flexDirection: "column" }}>
-			<ListItemButton
-				component={node._id ? "a" : "div"}
-				href={node._id ? `#library/id/${node._id}` : undefined}
-				ref={itemRef}
-				onClick={handleSelect}
-				selected={isSelected}
-				className={clsx(styles.itemButton, isSelected && styles.selected)}
-				sx={{
-					pl: level === 0 ? 1 : 1.5,
-					color: "inherit",
-					textDecoration: "none",
-				}}
-			>
-				<Box className={styles.contentWrapper}>
-					<Box
-						onClick={hasChildren ? (e) => handleToggle(e) : undefined}
-						className={styles.toggleIcon}
-						sx={{ visibility: hasChildren ? "visible" : "hidden" }}
+		<Box className={styles.treeItem}>
+			<Box className={styles.itemRow} ref={itemRef}>
+				{node._id ? (
+					<Link
+						href={`#library/id/${node._id}`}
+						color="inherit"
+						underline="none"
+						className={surfaceClassName}
+						onClick={handleSelect}
 					>
-						{open ? (
-							<ExpandLessIcon className={styles.expandIcon} />
-						) : (
-							<ExpandMoreIcon className={styles.expandIcon} />
-						)}
-					</Box>
-
-					{Icon && (
-						<Tooltip
-							title={
-								(node.type || "").charAt(0).toUpperCase() +
-								(node.type || "").slice(1)
-							}
-							enterDelay={500}
-						>
-							<Box className={styles.iconWrapper}>
-								<Icon sx={{ fontSize: "inherit" }} />
-							</Box>
-						</Tooltip>
-					)}
-
-					{node.number && <Box className={styles.tagNumber}>{node.number}</Box>}
-					<Tooltip
-						title={isTruncated ? name : ""}
-						enterDelay={0}
-						disableHoverListener={!isTruncated}
-						placement="bottom-start"
-						slotProps={{
-							popper: {
-								sx: {
-									pointerEvents: "none",
-								},
-								modifiers: [
-									{
-										name: "offset",
-										options: {
-											offset: [-9, -38],
-										},
-									},
-								],
-							},
-							tooltip: {
-								sx: {
-									maxWidth: 500,
-									fontSize: "0.85rem",
-									pointerEvents: "none",
-								},
-							},
-						}}
+						{rowContent}
+					</Link>
+				) : (
+					<button
+						type="button"
+						className={surfaceClassName}
+						onClick={handleSelect}
 					>
-						<ListItemText
-							primary={
-								<Typography
-									ref={textRef}
-									variant="body2"
-									onMouseEnter={checkTruncation}
-									className={clsx(
-										styles.name,
-										hasChildren ? styles.parentName : styles.childName,
-									)}
-								>
-									{name}
-								</Typography>
-							}
-							sx={{ minWidth: 0 }}
-						/>
-					</Tooltip>
-				</Box>
-			</ListItemButton>
+						{rowContent}
+					</button>
+				)}
+			</Box>
 			{hasChildren && open && (
 				<List
 					component="div"
 					disablePadding
 					className={styles.childList}
-					sx={{
-						ml: (level === 0 ? 1 : 1.5) + 1,
-					}}
+					style={{ marginLeft: `${(level === 0 ? 1 : 1.5) + 1}rem` }}
 				>
 					{node.children.map((child) => (
 						<TreeItem

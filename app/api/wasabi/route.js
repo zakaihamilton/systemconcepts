@@ -1,6 +1,7 @@
 import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
+import { shouldRedirectStorageFileRead } from "@util/storage/storageRedirect";
 import { getDownloadUrl, handleRequest } from "@util/storage/wasabi";
 import { NextResponse } from "next/server";
 
@@ -22,13 +23,7 @@ export async function GET(request) {
 		const user = await getSessionUser(request);
 		if (!user || !roleAuth(user.role, "student")) throw "ACCESS_DENIED";
 
-		const isDir =
-			url.searchParams.get("type") === "dir" ||
-			request.headers.get("type") === "dir";
-		const isExists =
-			url.searchParams.get("exists") || request.headers.get("exists");
-
-		if (!isDir && !isExists) {
+		if (shouldRedirectStorageFileRead(request, url.searchParams)) {
 			const downloadUrl = await getDownloadUrl({ path });
 			return NextResponse.redirect(downloadUrl, {
 				status: 307,

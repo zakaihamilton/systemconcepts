@@ -1,6 +1,6 @@
 import { glossary } from "@data/glossary";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import Box from "@mui/material/Box";
+import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
+import Box from "@ui/Box";
 import { useTranslations } from "@util/domain/translations";
 import { setPath } from "@util/domain/views";
 import Tooltip from "@widgets/Tooltip";
@@ -1017,7 +1017,6 @@ export default React.memo(function Markdown({
 				return (
 					<Box
 						className={styles.paragraph}
-						sx={{ marginBottom: "24px", lineHeight: 2.8 }}
 						data-paragraph-index={paragraphIndex}
 					>
 						<TextRenderer>{children}</TextRenderer>
@@ -1054,7 +1053,6 @@ export default React.memo(function Markdown({
 					{needsGap && <Box className={styles.gapSeparator}>•••</Box>}
 					<Box
 						className={`${styles.paragraph} ${paragraphSelected ? styles.selected : ""} ${hoveringNumber ? styles.suppressHover : ""}`}
-						sx={{ marginBottom: "24px", lineHeight: 2.8 }}
 						data-paragraph-index={paragraphIndex}
 						data-paragraph-text={paragraphText}
 					>
@@ -1147,14 +1145,7 @@ export default React.memo(function Markdown({
 						return null;
 				}
 				return (
-					<Box
-						sx={{
-							mb: 1,
-							lineHeight: 2.2,
-							position: "relative",
-							backgroundColor: "var(--background-paper)",
-						}}
-					>
+					<Box className={styles.listItem}>
 						<TextRenderer>{children}</TextRenderer>
 					</Box>
 				);

@@ -1,9 +1,9 @@
 import devices from "@data/storage";
-import FolderIcon from "@mui/icons-material/Folder";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import StorageIcon from "@mui/icons-material/Storage";
-import Typography from "@mui/material/Typography";
+import FolderIcon from "@icons/svg/Folder.svg";
+import InsertDriveFileIcon from "@icons/svg/InsertDriveFile.svg";
+import StorageIcon from "@icons/svg/Storage.svg";
 import { useSync } from "@sync/sync";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
@@ -24,7 +24,6 @@ import Destination from "../Destination";
 import Edit from "../Edit";
 import ItemMenu from "../ItemMenu";
 import styles from "./Storage.module.css";
-
 export const StorageStoreDefaults = {
 	mode: "",
 	type: "",

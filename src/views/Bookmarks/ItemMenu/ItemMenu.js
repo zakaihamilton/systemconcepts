@@ -1,8 +1,7 @@
 import { BookmarksStore as Bookmarks } from "@components/Bookmarks";
 import ItemMenu from "@components/ItemMenu";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteIcon from "@icons/svg/Delete.svg";
 import { useTranslations } from "@util/domain/translations";
-
 export default function ItemMenuWidget({ item, store }) {
 	const translations = useTranslations();
 

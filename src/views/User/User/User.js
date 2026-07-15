@@ -1,15 +1,15 @@
 import { MainStore } from "@components/Main";
 import roles from "@data/roles";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EmailIcon from "@mui/icons-material/Email";
-import RecentActorsIcon from "@mui/icons-material/RecentActors";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress";
-import Typography from "@mui/material/Typography";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import EmailIcon from "@icons/svg/Email.svg";
+import RecentActorsIcon from "@icons/svg/RecentActors.svg";
+import VpnKeyIcon from "@icons/svg/VpnKey.svg";
+import Button from "@ui/Button";
+import Grid from "@ui/Grid";
+import IconButton from "@ui/IconButton";
+import LinearProgress from "@ui/LinearProgress";
+import Typography from "@ui/Typography";
 import { fetchJSON, useFetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
@@ -19,7 +19,6 @@ import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { useState } from "react";
 import styles from "./User.module.css";
-
 export default function User({ path = "" }) {
 	const { direction } = MainStore.useState();
 	const translations = useTranslations();

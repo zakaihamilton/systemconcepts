@@ -1,7 +1,7 @@
 import { SyncContext } from "@components/Sync";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import { clearBundleCache } from "@sync/sync";
+import Button from "@ui/Button";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import { goBackPage, setPath } from "@util/domain/views";

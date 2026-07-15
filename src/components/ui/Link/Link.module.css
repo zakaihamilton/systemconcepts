@@ -1,0 +1,35 @@
+.root {
+	color: var(--primary-color);
+	text-decoration: none;
+	cursor: pointer;
+	transition: color 0.2s ease;
+}
+
+.root:hover {
+	color: var(--hover-text-color);
+	text-decoration: underline;
+}
+
+.noUnderline,
+.noUnderline:hover {
+	text-decoration: none;
+}
+
+.underlineAlways {
+	text-decoration: underline;
+}
+
+.inherit {
+	color: inherit;
+}
+
+.inherit:hover {
+	color: inherit;
+}
+
+.button {
+	background: none;
+	border: none;
+	padding: 0;
+	font: inherit;
+}

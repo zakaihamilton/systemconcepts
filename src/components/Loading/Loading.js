@@ -1,4 +1,4 @@
-import LinearProgress from "@mui/material/LinearProgress";
+import LinearProgress from "@ui/LinearProgress";
 import { logger as structuredLogger } from "@util/api/logger";
 import styles from "./Loading.module.css";
 

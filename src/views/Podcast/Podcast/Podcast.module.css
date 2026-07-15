@@ -2,78 +2,163 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	min-height: 80vh;
-	padding: 2rem 1rem;
+	width: 100%;
+	min-width: 0;
+	padding: 2.5rem 1rem;
+	box-sizing: border-box;
 }
 
 .card {
-	margin: auto;
-	background: rgba(var(--bar-background-rgb), 0.8);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
-	border-radius: 24px;
-	padding: 2.5rem;
-	padding-top: 2rem;
+	margin: 0 auto;
+	background: rgba(var(--bar-background-rgb), 0.7);
+	backdrop-filter: blur(25px);
+	-webkit-backdrop-filter: blur(25px);
+	border-radius: 28px;
+	padding: 3rem;
 	width: 100%;
-	max-width: 600px;
+	max-width: 1200px;
 	border: 1px solid var(--border-color);
-	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 	transition:
 		transform 0.3s ease,
 		box-shadow 0.3s ease;
 	position: relative;
-	overflow: auto;
-}
-
-.title {
-	font-size: 2rem;
-	font-weight: 800;
-	color: var(--primary-500);
-	margin-bottom: 2rem !important;
-	text-align: center;
-	letter-spacing: -0.02em;
-	background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
-	-webkit-background-clip: text;
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
-}
-
-.form {
-	width: 100%;
+	overflow: hidden;
 }
 
 .podcastTitle {
 	font-weight: 700 !important;
-	margin: 1rem 0 0.5rem !important;
-	font-size: 1.2rem !important;
-	opacity: 0.8;
+	margin: 0 0 0.5rem !important;
+	font-size: 1.3rem !important;
+	color: var(--primary-500);
+	opacity: 0.95;
 }
 
 .podcastDescription {
 	margin-bottom: 1.5rem !important;
-	opacity: 0.7;
+	opacity: 0.8;
 	font-size: 0.95rem !important;
+	line-height: 1.5 !important;
 }
 
-.podcastUrlContainer {
+.urlContainer {
 	display: flex;
 	gap: 0.75rem;
 	align-items: center;
-	background: rgba(var(--primary-color-rgb), 0.03);
-	padding: 0.75rem;
-	border-radius: 12px;
-	border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+	min-width: 0;
+	background: rgba(var(--primary-color-rgb), 0.05);
+	padding: 0.85rem;
+	border-radius: 14px;
+	border: 1px solid rgba(var(--primary-color-rgb), 0.15);
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+	transition: border-color 0.2s ease;
 }
 
-.podcastUrl {
+.urlContainer:hover {
+	border-color: rgba(var(--primary-color-rgb), 0.3);
+}
+
+.urlTextWrap {
 	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.urlTextWrap > span {
+	display: block;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.urlText {
+	display: block;
+	width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	font-family: monospace;
+	font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 	font-size: 0.9rem;
-	padding: 0.75rem;
-	background: rgba(0, 0, 0, 0.05);
-	border-radius: 8px;
-	color: var(--primary-600);
+	padding: 0.75rem 1rem;
+	background: rgba(var(--primary-color-rgb), 0.06);
+	border-radius: 10px;
+	color: var(--primary-700);
+	border: 1px solid rgba(var(--primary-color-rgb), 0.15);
+	transition: all 0.2s ease;
+	direction: ltr;
+	text-align: left;
+	box-sizing: border-box;
+}
+
+:global([data-theme="dark"]) .urlText {
+	background: rgba(0, 0, 0, 0.25);
+	color: var(--primary-400);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.copyButton {
+	flex-shrink: 0;
+	background: linear-gradient(
+		135deg,
+		var(--primary-600),
+		var(--primary-500)
+	) !important;
+	color: #fff !important;
+	font-weight: 600 !important;
+	text-transform: none !important;
+	border-radius: 10px !important;
+	padding: 0.65rem 1.25rem !important;
+	box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.3) !important;
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease,
+		opacity 0.2s ease !important;
+}
+
+.copyButton:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 15px rgba(var(--primary-color-rgb), 0.4) !important;
+}
+
+.copyButton:active {
+	transform: translateY(1px);
+}
+
+.accessDeniedTitle {
+	font-size: 2rem;
+	font-weight: 800;
+	margin-bottom: 1.5rem !important;
+	text-align: center;
+	letter-spacing: -0.02em;
+	color: var(--error-color);
+	background: none;
+	-webkit-text-fill-color: initial;
+}
+
+.accessDeniedDescription {
+	text-align: center;
+	font-size: 1.05rem !important;
+	opacity: 0.8;
+	line-height: 1.5 !important;
+}
+
+@media (max-width: 600px) {
+	.card {
+		padding: 1.5rem;
+		border-radius: 20px;
+	}
+
+	.podcastTitle {
+		font-size: 1.15rem !important;
+	}
+
+	.urlContainer {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.5rem;
+	}
+
+	.copyButton {
+		width: 100% !important;
+	}
 }

@@ -1,17 +1,20 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import TextField from "@ui/TextField";
 import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
+import clsx from "clsx";
 import { useEffect, useState } from "react";
+import dialog from "../../../css/dialog-patterns.module.css";
+import styles from "./EditContentDialog.module.css";
 
 export default function EditContentDialog({
 	open,
@@ -89,63 +92,29 @@ export default function EditContentDialog({
 			onClose={handleClose}
 			maxWidth="md"
 			fullWidth
-			slotProps={{
-				paper: {
-					sx: {
-						height: "80vh",
-						maxHeight: "80vh",
-					},
-				},
-			}}
+			className={dialog.dialogTall}
 		>
-			<DialogTitle sx={{ fontWeight: 700 }}>
+			<DialogTitle className={dialog.titleBold}>
 				{translations.EDIT_ARTICLE || "Edit Article"}
 			</DialogTitle>
-			<DialogContent sx={{ display: "flex", flexDirection: "column", p: 0 }}>
-				<Box
-					sx={{
-						flex: 1,
-						p: 2,
-						pt: 1,
-						display: "flex",
-						flexDirection: "column",
-					}}
-				>
+			<DialogContent className={dialog.contentColumn}>
+				<Box className={dialog.contentFlex}>
 					<TextField
 						value={editContent}
 						onChange={(e) => setEditContent(e.target.value)}
 						multiline
 						fullWidth
 						variant="outlined"
+						className={clsx(styles.contentField, dialog.contentField)}
+						inputClassName={dialog.contentTextarea}
 						placeholder={
 							translations.ARTICLE_CONTENT_PLACEHOLDER ||
 							"Enter article content..."
 						}
-						sx={{
-							flex: 1,
-							"& .MuiInputBase-root": {
-								flex: 1,
-								alignItems: "flex-start",
-								fontFamily: "inherit",
-								fontSize: "0.95rem",
-								lineHeight: 1.6,
-							},
-							"& .MuiInputBase-input": {
-								height: "100% !important",
-								overflow: "auto !important",
-							},
-						}}
-						slotProps={{
-							input: {
-								sx: {
-									height: "100%",
-								},
-							},
-						}}
 					/>
 				</Box>
 			</DialogContent>
-			<DialogActions sx={{ p: 2, pt: 0 }}>
+			<DialogActions className={dialog.actionsPaddedTight}>
 				<Button onClick={handleClose} disabled={saving}>
 					{translations.CANCEL || "Cancel"}
 				</Button>

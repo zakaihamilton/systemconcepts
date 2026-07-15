@@ -1,16 +1,15 @@
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Autocomplete from "@mui/material/Autocomplete";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
+import Visibility from "@icons/svg/Visibility.svg";
+import VisibilityOff from "@icons/svg/VisibilityOff.svg";
+import Autocomplete from "@ui/Autocomplete";
+import IconButton from "@ui/IconButton";
+import InputAdornment from "@ui/InputAdornment";
+import MenuItem from "@ui/MenuItem";
+import TextField from "@ui/TextField";
 import { useTranslations } from "@util/domain/translations";
 import Tooltip from "@widgets/Tooltip";
 import clsx from "clsx";
 import { forwardRef, useCallback, useEffect, useState } from "react";
 import styles from "./Input.module.css";
-
 export function arrayToMenuItems(list) {
 	return list.map(({ id, name }) => (
 		<MenuItem key={id} value={id}>
@@ -90,7 +89,34 @@ export default forwardRef(function InputWidget(
 	const inputType = type === "password" && showPassword ? "text" : type;
 
 	const textField = (params = {}) => {
-		const { slotProps: paramsSlotProps = {}, ...otherParams } = params;
+		const { InputProps = {}, ...otherParams } = params;
+
+		const startAdornment = icon ? (
+			<InputAdornment position="start" className={styles.icon}>
+				<Tooltip title={tooltip} arrow>
+					<span>{icon}</span>
+				</Tooltip>
+			</InputAdornment>
+		) : undefined;
+
+		const endAdornment =
+			type === "password" ? (
+				<InputAdornment position="end">
+					<IconButton
+						aria-label={
+							showPassword
+								? translations.HIDE_PASSWORD
+								: translations.SHOW_PASSWORD
+						}
+						onClick={handleClickShowPassword}
+						onMouseDown={handleMouseDownPassword}
+						edge="end"
+					>
+						{showPassword ? <VisibilityOff /> : <Visibility />}
+					</IconButton>
+				</InputAdornment>
+			) : undefined;
+
 		return (
 			<TextField
 				ref={ref}
@@ -108,70 +134,19 @@ export default forwardRef(function InputWidget(
 				variant="filled"
 				fullWidth={fullWidth}
 				type={inputType}
+				multiple={multiple}
+				renderValue={renderValue}
+				inputClassName={styles.input}
+				selectClassName={styles.select}
+				startAdornment={startAdornment}
+				endAdornment={endAdornment}
+				inputProps={{
+					readOnly: Boolean(readOnly),
+					onFocus: InputProps.onFocus,
+					onBlur: InputProps.onBlur,
+				}}
 				{...props}
 				{...otherParams}
-				slotProps={{
-					...props.slotProps,
-					...paramsSlotProps,
-					input: {
-						...(props.slotProps?.input || {}),
-						...(paramsSlotProps?.input || {}),
-						className: clsx(
-							styles.input,
-							props.slotProps?.input?.className,
-							paramsSlotProps?.input?.className,
-						),
-						...(icon && {
-							startAdornment: (
-								<InputAdornment position="start" className={styles.icon}>
-									<Tooltip title={tooltip} arrow>
-										<span>{icon}</span>
-									</Tooltip>
-								</InputAdornment>
-							),
-						}),
-						...(type === "password" && {
-							endAdornment: (
-								<InputAdornment position="end">
-									<IconButton
-										aria-label={
-											showPassword
-												? translations.HIDE_PASSWORD
-												: translations.SHOW_PASSWORD
-										}
-										onClick={handleClickShowPassword}
-										onMouseDown={handleMouseDownPassword}
-										edge="end"
-									>
-										{showPassword ? <VisibilityOff /> : <Visibility />}
-									</IconButton>
-								</InputAdornment>
-							),
-						}),
-						readOnly: Boolean(readOnly),
-					},
-					select: {
-						...(props.slotProps?.select || {}),
-						className: clsx(styles.select, props.slotProps?.select?.className),
-						multiple,
-						renderValue,
-						MenuProps: {
-							anchorOrigin: {
-								vertical: "bottom",
-								horizontal: "left",
-							},
-							transformOrigin: {
-								vertical: "top",
-								horizontal: "left",
-							},
-							slotProps: {
-								paper: {
-									className: styles.menuPaper,
-								},
-							},
-						},
-					},
-				}}
 			/>
 		);
 	};

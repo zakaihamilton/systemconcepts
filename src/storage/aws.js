@@ -107,7 +107,7 @@ async function readFile(path) {
 		.replace(/^aws\//, "");
 	const binary = isBinaryFile(path);
 	const encodedPath = encodeURIComponent(path.replace(/^\//, ""));
-	const url = `${fsEndPoint}?path=${encodedPath}`;
+	const url = `${fsEndPoint}?path=${encodedPath}${binary ? "&binary=true" : ""}`;
 
 	const res = await fetch(url, { method: "GET", cache: "no-store" });
 

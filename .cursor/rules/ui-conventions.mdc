@@ -1,0 +1,47 @@
+---
+description: Conventions for the custom @ui component library after MUI removal
+globs: src/components/ui/**,src/components/Widgets/**,src/components/Icons/**
+alwaysApply: false
+---
+
+# @ui Component Conventions
+
+## Imports
+
+- Use `@ui` / `@ui/*` for primitives (Button, TextField, Dialog, List, etc.)
+- Use `@icons/svg/{Name}.svg` for SVG icons (import each icon separately)
+- Do **not** import from `@mui/*` or `@emotion/*`
+
+## Styling
+
+- Use CSS Modules (`.module.css`) colocated with components
+- Use design tokens from `src/css/colors.css` via CSS variables (`var(--primary-color)`, etc.)
+- Do **not** use MUI `sx` props — use `className`, `style`, or module classes
+- Shared dialog layout patterns live in `src/css/dialog-patterns.module.css`
+
+## Architecture
+
+- **Views** (`src/views/`) import **widgets** (`@widgets/*`) for app-aware components
+- **Widgets** (`src/components/Widgets/`) wrap `@ui` primitives with business logic, validation, and app styling
+- Use `@ui` directly in views only when no widget exists and the primitive is sufficient
+
+## Icons
+
+- Source SVGs live in `src/components/Icons/svg/{Name}.svg`
+- Icons are compiled at build time via SVGR — no codegen step
+- To add a new icon:
+  1. Add `src/components/Icons/svg/NewIcon.svg` (e.g. from [Google Material Icons](https://fonts.google.com/icons))
+  2. `import NewIcon from "@icons/svg/NewIcon.svg"` in code
+
+## TextField props
+
+Use explicit props, not legacy MUI `slotProps`:
+
+- `inputClassName`, `selectClassName`
+- `startAdornment`, `endAdornment`
+- `inputProps`, `selectProps`
+
+## List navigation
+
+- Use `ListItemButton` with `component={Link}` and `href` for hash-routed sidebar links
+- `List` accepts `component` prop (default `"ul"`)

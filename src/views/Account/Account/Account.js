@@ -1,20 +1,8 @@
 import { MainStore } from "@components/Main";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FingerprintIcon from "@mui/icons-material/Fingerprint";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress";
-import Link from "@mui/material/Link";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import FingerprintIcon from "@icons/svg/Fingerprint.svg";
+import VpnKeyIcon from "@icons/svg/VpnKey.svg";
 import {
 	browserSupportsWebAuthn,
 	startAuthentication,
@@ -22,6 +10,18 @@ import {
 } from "@simplewebauthn/browser";
 import { clearBundleCache } from "@sync/sync";
 import { loadUserSyncState, UpdateSessionsStore } from "@sync/syncState";
+import Button from "@ui/Button";
+import Checkbox from "@ui/Checkbox";
+import FormControlLabel from "@ui/FormControlLabel";
+import Grid from "@ui/Grid";
+import IconButton from "@ui/IconButton";
+import LinearProgress from "@ui/LinearProgress";
+import Link from "@ui/Link";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemSecondaryAction from "@ui/ListItemSecondaryAction";
+import ListItemText from "@ui/ListItemText";
+import Typography from "@ui/Typography";
 import { fetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";

@@ -3,7 +3,7 @@
 	table-layout: fixed;
 	border-collapse: separate;
 
-	:global(.MuiTableCell-stickyHeader) {
+	:global(thead th) {
 		top: var(--filter-height, 0);
 	}
 }

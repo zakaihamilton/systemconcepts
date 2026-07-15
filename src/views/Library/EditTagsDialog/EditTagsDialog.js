@@ -1,24 +1,25 @@
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
+import DeleteIcon from "@icons/svg/Delete.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { bumpLibraryCounter } from "@sync/libraryCounter";
+import Box from "@ui/Box";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import TextField from "@ui/TextField";
+import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
 import Tooltip from "@widgets/Tooltip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import dialog from "../../../css/dialog-patterns.module.css";
 import { LibraryTagKeys } from "../Icons";
 import { LibraryStore } from "../Store";
-
+import styles from "./EditTagsDialog.module.css";
 export default function EditTagsDialog({
 	open,
 	onClose,
@@ -50,6 +51,12 @@ export default function EditTagsDialog({
 			setShowDeleteConfirm(false);
 		}
 	};
+
+	useEffect(() => {
+		if (open) {
+			initializeForm();
+		}
+	}, [open, selectedTag]);
 
 	const copyIdToClipboard = async () => {
 		if (selectedTag?._id) {
@@ -224,55 +231,18 @@ export default function EditTagsDialog({
 
 	return (
 		<>
-			<Dialog
-				open={open}
-				onClose={handleClose}
-				maxWidth="sm"
-				fullWidth
-				slotProps={{
-					transition: {
-						onEnter: initializeForm,
-					},
-				}}
-			>
-				<DialogTitle sx={{ fontWeight: 700 }}>
+			<Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+				<DialogTitle className={dialog.titleBold}>
 					{translations.EDIT_TAGS}
 				</DialogTitle>
 				<DialogContent>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+					<Box className={dialog.flexColumnGap2}>
 						{/* Article ID with copy button */}
-						<Box
-							onClick={copyIdToClipboard}
-							sx={{
-								display: "flex",
-								alignItems: "center",
-								gap: 1,
-								p: 1.5,
-								bgcolor: "action.hover",
-								borderRadius: 2,
-								cursor: "pointer",
-								transition: "all 0.2s",
-								"&:hover": {
-									bgcolor: "action.selected",
-								},
-							}}
-						>
-							<Typography
-								variant="caption"
-								sx={{ color: "text.secondary", fontWeight: 600 }}
-							>
+						<Box className={styles.idRow} onClick={copyIdToClipboard}>
+							<Typography variant="caption" className={styles.idLabel}>
 								ID:
 							</Typography>
-							<Typography
-								variant="body2"
-								sx={{
-									fontFamily: "monospace",
-									flex: 1,
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-							>
+							<Typography variant="body2" className={styles.idValue}>
 								{selectedTag?._id}
 							</Typography>
 							<Tooltip
@@ -283,11 +253,7 @@ export default function EditTagsDialog({
 								}
 							>
 								<ContentCopyIcon
-									sx={{
-										fontSize: 18,
-										color: idCopied ? "success.main" : "text.secondary",
-										transition: "color 0.2s",
-									}}
+									className={idCopied ? styles.copyIconCopied : styles.copyIcon}
 								/>
 							</Tooltip>
 						</Box>
@@ -336,7 +302,7 @@ export default function EditTagsDialog({
 						))}
 					</Box>
 				</DialogContent>
-				<DialogActions sx={{ p: 2, pt: 2, justifyContent: "space-between" }}>
+				<DialogActions className={dialog.actionsSpaced}>
 					<Button
 						onClick={() => setShowDeleteConfirm(true)}
 						color="error"
@@ -345,7 +311,7 @@ export default function EditTagsDialog({
 					>
 						{translations.DELETE || "Delete"}
 					</Button>
-					<Box sx={{ display: "flex", gap: 1 }}>
+					<Box className={dialog.flexRowGap1}>
 						<Button onClick={handleClose} disabled={saving || deleting}>
 							{translations.CANCEL || "Cancel"}
 						</Button>
@@ -368,7 +334,7 @@ export default function EditTagsDialog({
 				maxWidth="xs"
 				fullWidth
 			>
-				<DialogTitle sx={{ fontWeight: 700, color: "error.main" }}>
+				<DialogTitle className={dialog.titleError}>
 					{translations.DELETE_ARTICLE || "Delete Article"}
 				</DialogTitle>
 				<DialogContent>
@@ -377,8 +343,8 @@ export default function EditTagsDialog({
 							"Are you sure you want to delete this article? This action cannot be undone."}
 					</Typography>
 					{selectedTag && (
-						<Box sx={{ mt: 2, p: 2, bgcolor: "action.hover", borderRadius: 2 }}>
-							<Typography variant="body2" sx={{ fontWeight: 600 }}>
+						<Box className={dialog.highlightBoxSm}>
+							<Typography variant="body2" className={styles.confirmName}>
 								{[selectedTag.article, selectedTag.title]
 									.filter(Boolean)
 									.join(" - ")}
@@ -386,7 +352,7 @@ export default function EditTagsDialog({
 						</Box>
 					)}
 				</DialogContent>
-				<DialogActions sx={{ p: 2, pt: 0 }}>
+				<DialogActions className={dialog.actionsPaddedTight}>
 					<Button
 						onClick={() => setShowDeleteConfirm(false)}
 						disabled={deleting}

@@ -1,7 +1,7 @@
 import { registerToolbar } from "@components/Toolbar";
-import Box from "@mui/material/Box";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
+import Box from "@ui/Box";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { makePath } from "@util/data/path";

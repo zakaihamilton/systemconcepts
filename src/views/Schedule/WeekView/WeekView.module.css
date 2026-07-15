@@ -33,3 +33,19 @@
 	margin-left: 0em;
 	margin-right: 0em;
 }
+
+.weekInput {
+	min-width: 4em;
+}
+
+.monthInput {
+	min-width: 9em;
+}
+
+.monthInputPhone {
+	min-width: 5em;
+}
+
+.yearInput {
+	min-width: 6em;
+}

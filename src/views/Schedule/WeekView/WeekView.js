@@ -1,9 +1,9 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import TodayIcon from "@mui/icons-material/Today";
+import ArrowBackIcon from "@icons/svg/ArrowBack.svg";
+import ArrowForwardIcon from "@icons/svg/ArrowForward.svg";
+import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import TodayIcon from "@icons/svg/Today.svg";
 import { useDeviceType } from "@util/browser/styles";
 import {
 	addDate,
@@ -101,7 +101,7 @@ export default function WeekView({ sessions, date, store, playingSession }) {
 			fullWidth={false}
 			items={weekItems}
 			state={weekState}
-			sx={{ minWidth: "4em" }}
+			className={styles.weekInput}
 		/>
 	);
 
@@ -132,7 +132,7 @@ export default function WeekView({ sessions, date, store, playingSession }) {
 			fullWidth={false}
 			items={monthItems}
 			state={monthState}
-			sx={{ minWidth: isPhone ? "5em" : "9em" }}
+			className={clsx(styles.monthInput, isPhone && styles.monthInputPhone)}
 		/>
 	);
 
@@ -171,7 +171,7 @@ export default function WeekView({ sessions, date, store, playingSession }) {
 			fullWidth={false}
 			items={yearItems}
 			state={yearState}
-			sx={{ minWidth: "6em" }}
+			className={styles.yearInput}
 		/>
 	);
 

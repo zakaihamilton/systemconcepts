@@ -26,4 +26,19 @@ describe("Row Widget", () => {
 		fireEvent.click(getByText("Clickable Row"));
 		expect(handleClick).toHaveBeenCalled();
 	});
+
+	it("renders a link when href is provided", () => {
+		const { getByRole } = render(
+			<RowWidget href="#settings/languages">Language</RowWidget>,
+		);
+		expect(getByRole("link")).toHaveAttribute("href", "#settings/languages");
+	});
+
+	it("does not render a link for non-interactive rows", () => {
+		const { queryByRole, getByText } = render(
+			<RowWidget>Static Row</RowWidget>,
+		);
+		expect(queryByRole("link")).not.toBeInTheDocument();
+		expect(getByText("Static Row")).toBeInTheDocument();
+	});
 });

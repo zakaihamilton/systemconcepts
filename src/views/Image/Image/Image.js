@@ -1,5 +1,5 @@
 import { ContentSize } from "@components/Page/Content";
-import ErrorIcon from "@mui/icons-material/Error";
+import ErrorIcon from "@icons/svg/Error.svg";
 import { useSync } from "@sync/sync";
 import {
 	getStableFetchCacheOptions,

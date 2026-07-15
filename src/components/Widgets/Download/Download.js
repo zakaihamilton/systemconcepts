@@ -1,5 +1,5 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import GetAppIcon from "@mui/icons-material/GetApp";
+import GetAppIcon from "@icons/svg/GetApp.svg";
 import { useTranslations } from "@util/domain/translations";
 
 registerToolbar("Download");

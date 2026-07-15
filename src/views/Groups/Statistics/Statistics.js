@@ -1,21 +1,21 @@
-import CancelIcon from "@mui/icons-material/Cancel";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import { Divider } from "@mui/material";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableRow from "@mui/material/TableRow";
+import CancelIcon from "@icons/svg/Cancel.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
+import { Divider } from "@ui";
+import Dialog from "@ui/Dialog";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import IconButton from "@ui/IconButton";
+import Table from "@ui/Table";
+import TableBody from "@ui/TableBody";
+import TableCell from "@ui/TableCell";
+import TableContainer from "@ui/TableContainer";
+import TableRow from "@ui/TableRow";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useTranslations } from "@util/domain/translations";
 import Message from "@widgets/Message";
 import Tooltip from "@widgets/Tooltip";
 import { useEffect, useState } from "react";
-
+import styles from "./Statistics.module.css";
 export default function Statistics({ group, open, onClose, sessions }) {
 	const translations = useTranslations();
 	const [loading, setLoading] = useState(false);
@@ -69,14 +69,7 @@ export default function Statistics({ group, open, onClose, sessions }) {
 
 	return (
 		<Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-			<DialogTitle
-				sx={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "space-between",
-					background: "var(--app-bar-background)",
-				}}
-			>
+			<DialogTitle className={styles.titleBar}>
 				<b>{group.name[0].toUpperCase() + group.name.slice(1)}</b>{" "}
 				{translations.STATISTICS}
 				<Tooltip title={translations.CLOSE} arrow>
@@ -102,15 +95,15 @@ export default function Statistics({ group, open, onClose, sessions }) {
 									<TableCell>{translations.SESSIONS}</TableCell>
 									<TableCell align="right">{stats.total}</TableCell>
 								</TableRow>
-								<TableRow sx={{ "& td, & th": { border: 0 } }}>
+								<TableRow className={styles.borderless}>
 									<TableCell>Standard</TableCell>
 									<TableCell align="right">{stats.standard}</TableCell>
 								</TableRow>
-								<TableRow sx={{ "& td, & th": { border: 0 } }}>
+								<TableRow className={styles.borderless}>
 									<TableCell>Overview</TableCell>
 									<TableCell align="right">{stats.overviews}</TableCell>
 								</TableRow>
-								<TableRow sx={{ "& td, & th": { border: 0 } }}>
+								<TableRow className={styles.borderless}>
 									<TableCell>AI</TableCell>
 									<TableCell align="right">{stats.ai}</TableCell>
 								</TableRow>

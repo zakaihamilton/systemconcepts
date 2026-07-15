@@ -1,6 +1,29 @@
 import PageLoad from "@components/PageLoad";
-import AppsIcon from "@mui/icons-material/Apps";
-import PeopleIcon from "@mui/icons-material/People";
+import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
+import ApiIcon from "@icons/svg/Api.svg";
+import AppsIcon from "@icons/svg/Apps.svg";
+import BookmarkIcon from "@icons/svg/Bookmark.svg";
+import CreateIcon from "@icons/svg/Create.svg";
+import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
+import EditIcon from "@icons/svg/Edit.svg";
+import EventIcon from "@icons/svg/Event.svg";
+import FormatSizeIcon from "@icons/svg/FormatSize.svg";
+import GroupWorkIcon from "@icons/svg/GroupWork.svg";
+import ImageIcon from "@icons/svg/Image.svg";
+import LabelIcon from "@icons/svg/Label.svg";
+import LanguageIcon from "@icons/svg/Language.svg";
+import LibraryBooksIcon from "@icons/svg/LibraryBooks.svg";
+import PeopleIcon from "@icons/svg/People.svg";
+import PodcastsIcon from "@icons/svg/Podcasts.svg";
+import SearchIcon from "@icons/svg/Search.svg";
+import SettingsIcon from "@icons/svg/Settings.svg";
+import SettingsBackupRestoreIcon from "@icons/svg/SettingsBackupRestore.svg";
+import StorageIcon from "@icons/svg/Storage.svg";
+import SyncIcon from "@icons/svg/Sync.svg";
+import TranslateIcon from "@icons/svg/Translate.svg";
+import VideoLabelIcon from "@icons/svg/VideoLabel.svg";
+import VideoLibraryIcon from "@icons/svg/VideoLibrary.svg";
+import VpnKeyIcon from "@icons/svg/VpnKey.svg";
 import Apps from "@views/Apps/Apps";
 import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
@@ -13,40 +36,29 @@ const User = dynamic(() => import("@views/User/User"), {
 	loading: () => <PageLoad />,
 });
 
-import SettingsIcon from "@mui/icons-material/Settings";
 import { getUserSection } from "@views/User/Section";
 
 const Settings = dynamic(() => import("@views/Settings/Settings"), {
 	loading: () => <PageLoad />,
 });
 
-import LanguageIcon from "@mui/icons-material/Language";
-
 const Languages = dynamic(() => import("@views/Languages/Languages"), {
 	loading: () => <PageLoad />,
 });
-
-import TranslateIcon from "@mui/icons-material/Translate";
 
 const Translations = dynamic(() => import("@views/Translations/Translations"), {
 	loading: () => <PageLoad />,
 });
 
-import FormatSizeIcon from "@mui/icons-material/FormatSize";
-import { getTranslationsSection } from "@views/Translations/Section";
-
 const FontSizes = dynamic(() => import("@views/FontSizes/FontSizes"), {
 	loading: () => <PageLoad />,
 });
 
-import StorageIcon from "@mui/icons-material/Storage";
+import { getTranslationsSection } from "@views/Translations/Section";
 
 const Storage = dynamic(() => import("@views/Storage/Storage"), {
 	loading: () => <PageLoad />,
 });
-
-import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
-import { getStorageSection } from "@views/Storage/Section";
 
 const Reset = dynamic(() => import("@views/Settings/Reset"), {
 	loading: () => <PageLoad />,
@@ -55,33 +67,25 @@ const FullSync = dynamic(() => import("@views/Settings/FullSync"), {
 	loading: () => <PageLoad />,
 });
 
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { getStorageSection } from "@views/Storage/Section";
 
 const ClearStorage = dynamic(() => import("@views/Settings/ClearStorage"), {
 	loading: () => <PageLoad />,
 });
 
-import EditIcon from "@mui/icons-material/Edit";
-
 const Editor = dynamic(() => import("@views/Editor/Editor"), {
 	loading: () => <PageLoad />,
 });
-
-import ImageIcon from "@mui/icons-material/Image";
 
 const Image = dynamic(() => import("@views/Image/Image"), {
 	loading: () => <PageLoad />,
 });
 
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { getImageSection } from "@views/Image/Section";
-
 const Account = dynamic(() => import("@views/Account/Account"), {
 	loading: () => <PageLoad />,
 });
 
-import ApiIcon from "@mui/icons-material/Api";
-import PodcastsIcon from "@mui/icons-material/Podcasts";
+import { getImageSection } from "@views/Image/Section";
 
 const Podcast = dynamic(() => import("@views/Podcast/Podcast"), {
 	loading: () => <PageLoad />,
@@ -91,13 +95,9 @@ const API = dynamic(() => import("@views/API/API"), {
 	loading: () => <PageLoad />,
 });
 
-import CreateIcon from "@mui/icons-material/Create";
-
 const SignUp = dynamic(() => import("@views/SignUp/SignUp"), {
 	loading: () => <PageLoad />,
 });
-
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
 
 const ChangePassword = dynamic(
 	() => import("@views/ChangePassword/ChangePassword"),
@@ -109,14 +109,11 @@ const ResetPassword = dynamic(
 	{ loading: () => <PageLoad /> },
 );
 
-import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
-import { getResetSection } from "@views/ResetPassword/Section";
-
 const Sessions = dynamic(() => import("@views/Sessions/Sessions"), {
 	loading: () => <PageLoad />,
 });
 
-import VideoLabelIcon from "@mui/icons-material/VideoLabel";
+import { getResetSection } from "@views/ResetPassword/Section";
 
 const Player = dynamic(() => import("@views/Player/Player"), {
 	loading: () => <PageLoad />,
@@ -132,46 +129,34 @@ import { getSessionSection } from "@views/Session/Section";
 
 const SessionTabs = dynamic(() => import("@views/Session/Tabs"));
 
-import EventIcon from "@mui/icons-material/Event";
-
 const Schedule = dynamic(() => import("@views/Schedule/Schedule"), {
 	loading: () => <PageLoad />,
 });
-
-import GroupWorkIcon from "@mui/icons-material/GroupWork";
-import { getScheduleSection } from "@views/Schedule/Section";
 
 const Groups = dynamic(() => import("@views/Groups/Groups"), {
 	loading: () => <PageLoad />,
 });
 
-import LabelIcon from "@mui/icons-material/Label";
+import { getScheduleSection } from "@views/Schedule/Section";
 
 const Tags = dynamic(() => import("@views/Tags/Tags"), {
 	loading: () => <PageLoad />,
 });
 
-import SearchIcon from "@mui/icons-material/Search";
-
 const Research = dynamic(() => import("@views/Research"), {
 	loading: () => <PageLoad />,
 });
-
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
 const Library = dynamic(() => import("@views/Library/Library"), {
 	loading: () => <PageLoad />,
 });
 
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import { getLibrarySection } from "@views/Library/Section";
-import { getSessionsSection } from "@views/Sessions/Section";
-
 const Bookmarks = dynamic(() => import("@views/Bookmarks/Bookmarks"), {
 	loading: () => <PageLoad />,
 });
 
-import SyncIcon from "@mui/icons-material/Sync";
+import { getLibrarySection } from "@views/Library/Section";
+import { getSessionsSection } from "@views/Sessions/Section";
 
 const Sync = dynamic(() => import("@views/Sync/Sync"), {
 	loading: () => <PageLoad />,

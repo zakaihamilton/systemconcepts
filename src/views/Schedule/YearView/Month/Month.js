@@ -1,4 +1,4 @@
-import ViewWeekIcon from "@mui/icons-material/ViewWeek";
+import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
 import {
 	addDate,
 	getDateString,

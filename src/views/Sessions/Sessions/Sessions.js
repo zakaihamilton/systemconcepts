@@ -1,10 +1,10 @@
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import GraphicEqIcon from "@mui/icons-material/GraphicEq";
-import MovieIcon from "@mui/icons-material/Movie";
-import Chip from "@mui/material/Chip";
+import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
+import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
+import GraphicEqIcon from "@icons/svg/GraphicEq.svg";
+import MovieIcon from "@icons/svg/Movie.svg";
 import { SyncActiveStore } from "@sync/syncState";
+import Chip from "@ui/Chip";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { useDateFormatter } from "@util/data/locale";

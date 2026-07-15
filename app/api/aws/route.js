@@ -3,6 +3,7 @@ import { getSafeError } from "@util/api/safeError";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { getDownloadUrl, handleRequest } from "@util/storage/aws";
+import { shouldRedirectStorageFileRead } from "@util/storage/storageRedirect";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -92,18 +93,12 @@ async function handleAWS(request) {
 			}
 		}
 
-		if (request.method === "GET") {
-			const query = Object.fromEntries(url.searchParams.entries());
-			const exists = query.exists || request.headers.get("exists");
-			const type = query.type || request.headers.get("type");
-
-			if (!exists && type !== "dir") {
-				const downloadUrl = await getDownloadUrl({ path });
-				return NextResponse.redirect(downloadUrl, {
-					status: 307,
-					headers: NO_CACHE_HEADERS,
-				});
-			}
+		if (shouldRedirectStorageFileRead(request, url.searchParams)) {
+			const downloadUrl = await getDownloadUrl({ path });
+			return NextResponse.redirect(downloadUrl, {
+				status: 307,
+				headers: NO_CACHE_HEADERS,
+			});
 		}
 
 		const req = {

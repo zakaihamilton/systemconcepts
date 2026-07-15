@@ -9,6 +9,7 @@ import {
 	enforceRateLimitEdge,
 	scheduleApiCacheWrite,
 } from "@util/api/edgeApi";
+import { logger } from "@util/api/logger";
 import { getSessions, loadManifest } from "@util/domain/sessionFeedEdge";
 import { filterSessions } from "@util/domain/sessionsApiResponse";
 import { GET } from "./route";
@@ -86,6 +87,14 @@ jest.mock("@util/api/edgeApi", () => ({
 	enforceRateLimitEdge: jest.fn(),
 	getClientIp: jest.fn(() => "127.0.0.1"),
 	scheduleApiCacheWrite: jest.fn(),
+}));
+jest.mock("@util/api/logger", () => ({
+	logger: {
+		debug: jest.fn(),
+		error: jest.fn(),
+		info: jest.fn(),
+		warn: jest.fn(),
+	},
 }));
 
 jest.mock("@util/domain/sessionsApiResponse", () => ({
@@ -200,5 +209,9 @@ describe("/api/sessions", () => {
 
 		expect(response.status).toBe(500);
 		expect(response.headers.get("Cache-Control")).toContain("no-store");
+		expect(logger.error).toHaveBeenCalledWith(
+			"[API] Error generating session list:",
+			expect.any(Error),
+		);
 	});
 });

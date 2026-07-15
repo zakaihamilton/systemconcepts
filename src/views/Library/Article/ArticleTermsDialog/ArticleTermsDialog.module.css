@@ -1,3 +1,8 @@
+.dialogTall {
+	height: 80vh;
+	max-height: 80vh;
+}
+
 .dialogBody {
 	display: flex;
 	flex: 1;
@@ -119,6 +124,10 @@
 			pointer-events: none;
 		}
 	}
+}
+
+.termListItem.termListItem {
+	align-items: flex-start;
 }
 
 .termPrimary {

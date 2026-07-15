@@ -1,6 +1,6 @@
 .root {
 	box-sizing: border-box;
-	display: flex;
+	display: block;
 	position: relative;
 
 	[dir="ltr"] & {
@@ -15,20 +15,13 @@
 .root.fill {
 	width: 100%;
 	height: 100%;
+	min-height: 100%;
+	align-self: stretch;
 }
 
 .background {
 	position: absolute;
-
-	[dir="ltr"] & {
-		left: 0px;
-		padding-right: 0.5em;
-	}
-
-	[dir="rtl"] & {
-		right: 0px;
-		padding-left: 0.5em;
-	}
+	inset: 0;
 
 	display: flex;
 	align-items: center;
@@ -40,6 +33,7 @@
 
 .background.clickable {
 	user-select: none;
+	cursor: pointer;
 }
 
 .background.clickable:hover {
@@ -47,7 +41,10 @@
 }
 
 .icons {
-	position: relative;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	pointer-events: none;
 
 	[dir="ltr"] & {
 		left: 0px;
@@ -59,12 +56,11 @@
 
 	display: flex;
 	align-items: center;
-	height: 100%;
-	position: absolute;
 	background: transparent;
 }
 
 .icons > * {
+	pointer-events: auto;
 	margin-left: 0.3em;
 	margin-right: 0.3em;
 }

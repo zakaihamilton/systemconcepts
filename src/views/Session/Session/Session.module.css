@@ -201,6 +201,10 @@
 	}
 }
 
+.alertFullWidth {
+	width: 100%;
+}
+
 .state {
 	display: flex;
 	align-items: center;

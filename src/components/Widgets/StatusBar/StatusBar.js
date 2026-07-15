@@ -1,13 +1,13 @@
 import { SyncContext } from "@components/Sync";
 import ButtonSelector from "@components/Widgets/ButtonSelector";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import DeleteIcon from "@mui/icons-material/Delete";
-import IndeterminateCheckBoxIcon from "@mui/icons-material/IndeterminateCheckBox";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import CancelIcon from "@icons/svg/Cancel.svg";
+import CheckBoxIcon from "@icons/svg/CheckBox.svg";
+import CheckBoxOutlineBlankIcon from "@icons/svg/CheckBoxOutlineBlank.svg";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import IndeterminateCheckBoxIcon from "@icons/svg/IndeterminateCheckBox.svg";
+import Button from "@ui/Button";
+import IconButton from "@ui/IconButton";
+import Typography from "@ui/Typography";
 import { useTranslations } from "@util/domain/translations";
 import { setPath } from "@util/domain/views";
 import Tooltip from "@widgets/Tooltip";
@@ -15,7 +15,6 @@ import clsx from "clsx";
 import { Store } from "pullstate";
 import { useContext, useEffect, useState } from "react";
 import styles from "./StatusBar.module.css";
-
 export const StatusBarStore = new Store({ active: 0 });
 
 export default function StatusBar({ data, mapper, store }) {

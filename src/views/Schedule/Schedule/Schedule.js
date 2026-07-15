@@ -1,15 +1,15 @@
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import RestoreIcon from "@mui/icons-material/Restore";
-import ViewDayIcon from "@mui/icons-material/ViewDay";
-import ViewStreamIcon from "@mui/icons-material/ViewStream";
-import ViewWeekIcon from "@mui/icons-material/ViewWeek";
-import IconButton from "@mui/material/IconButton";
+import CalendarViewMonthIcon from "@icons/svg/CalendarViewMonth.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
+import DateRangeIcon from "@icons/svg/DateRange.svg";
+import FilterAltIcon from "@icons/svg/FilterAlt.svg";
+import RestoreIcon from "@icons/svg/Restore.svg";
+import ViewDayIcon from "@icons/svg/ViewDay.svg";
+import ViewStreamIcon from "@icons/svg/ViewStream.svg";
+import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
 import { SyncActiveStore } from "@sync/syncState";
+import IconButton from "@ui/IconButton";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
@@ -30,7 +30,6 @@ import TracksView from "../TracksView";
 import WeekView from "../WeekView";
 import YearView from "../YearView";
 import styles from "./Schedule.module.css";
-
 export const ScheduleStore = new Store({
 	date: null,
 	viewMode: "week",

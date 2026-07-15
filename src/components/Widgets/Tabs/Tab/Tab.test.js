@@ -1,5 +1,5 @@
-import Tabs from "@mui/material/Tabs";
 import { render } from "@testing-library/react";
+import Tabs from "@ui/Tabs";
 import { useDeviceType } from "@util/browser/styles";
 import TabWidget from "./Tab.js";
 

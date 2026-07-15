@@ -16,6 +16,39 @@
 	user-select: none;
 }
 
+@media (max-width: 599px) {
+	.sidebar {
+		display: none;
+	}
+}
+
+.sidebarOpen {
+	width: 450px;
+	opacity: 1;
+	margin-left: 0;
+}
+
+.sidebarClosed {
+	width: 0;
+	opacity: 0;
+	margin-left: -16px;
+}
+
+.treeList {
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.clearButton {
+	margin-right: -4px;
+}
+
+.mobileDrawer {
+	width: 85vw;
+	max-width: 350px;
+	height: 100%;
+}
+
 .sidebarInner {
 	max-width: 450px;
 	height: 100%;

@@ -1,4 +1,4 @@
-import Link from "@mui/material/Link";
+import Link from "@ui/Link";
 import { useDirection } from "@util/data/direction";
 import clsx from "clsx";
 import styles from "./Row.module.css";
@@ -21,22 +21,34 @@ export default function RowWidget({
 		[paddingDirection]: basePadding + iconPadding + "px",
 	};
 	const contentStyle = { [paddingDirection]: basePadding + "px" };
+	const isInteractive = Boolean(href || onClick);
+	const backgroundClassName = clsx(
+		styles.background,
+		isInteractive && styles.clickable,
+	);
+	const content = isInteractive ? (
+		<Link
+			href={href}
+			color="inherit"
+			underline="none"
+			className={backgroundClassName}
+			style={backgroundStyle}
+			onClick={onClick}
+		>
+			{children}
+		</Link>
+	) : (
+		<div className={backgroundClassName} style={backgroundStyle}>
+			{children}
+		</div>
+	);
 	return (
 		<div
 			className={clsx(styles.root, fill && styles.fill, className)}
 			style={style}
 			{...props}
 		>
-			<Link
-				href={href ? href : undefined}
-				color="inherit"
-				underline="none"
-				className={clsx(styles.background, onClick && styles.clickable)}
-				style={backgroundStyle}
-				onClick={onClick ? onClick : undefined}
-			>
-				{children}
-			</Link>
+			{content}
 			<div className={styles.icons} style={contentStyle}>
 				{icons}
 			</div>

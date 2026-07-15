@@ -1,6 +1,6 @@
 import { useSearch } from "@components/Search";
-import DeleteIcon from "@mui/icons-material/Delete";
-import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@icons/svg/Delete.svg";
+import IconButton from "@ui/IconButton";
 import { diffDays, isDateToday } from "@util/data/date";
 import { useRecentHistory } from "@util/domain/history";
 import { useLanguage } from "@util/domain/language";
@@ -12,7 +12,6 @@ import TrackCard from "@views/Schedule/TracksView/Card";
 import Tooltip from "@widgets/Tooltip";
 import { useCallback, useMemo } from "react";
 import styles from "./HistoryView.module.css";
-
 export default function HistoryView() {
 	const translations = useTranslations();
 	const language = useLanguage();

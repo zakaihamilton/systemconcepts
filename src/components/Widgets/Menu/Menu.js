@@ -1,59 +1,18 @@
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import Divider from "@mui/material/Divider";
-import Link from "@mui/material/Link";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { styled } from "@mui/material/styles";
+import CheckBoxIcon from "@icons/svg/CheckBox.svg";
+import CheckBoxOutlineBlankIcon from "@icons/svg/CheckBoxOutlineBlank.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
+import RadioButtonCheckedIcon from "@icons/svg/RadioButtonChecked.svg";
+import RadioButtonUncheckedIcon from "@icons/svg/RadioButtonUnchecked.svg";
+import Divider from "@ui/Divider";
+import Link from "@ui/Link";
+import ListItemIcon from "@ui/ListItemIcon";
+import ListItemText from "@ui/ListItemText";
+import Menu from "@ui/Menu";
+import MenuItem from "@ui/MenuItem";
 import clsx from "clsx";
-import { Children, cloneElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./Menu.module.css";
-
-const PREFIX = "Menu";
-
-const classes = {
-	paper: `${PREFIX}-paper`,
-};
-
-const StyledMenuRoot = styled(Menu)(({ theme: _theme }) => ({
-	[`& .${classes.paper}`]: {
-		borderRadius: 12,
-		marginTop: 8,
-		boxShadow:
-			"0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-		border: `1px solid var(--border-color)`,
-		backgroundColor: "rgba(var(--bar-background-rgb), 0.82)",
-		backdropFilter: "blur(18px) saturate(1.25)",
-		WebkitBackdropFilter: "blur(18px) saturate(1.25)",
-		maxHeight: "50vh",
-		overflow: "auto",
-		"& .MuiList-root": {
-			padding: "4px 0",
-		},
-	},
-}));
-
-const StyledMenu = (props) => (
-	<StyledMenuRoot
-		transitionDuration={150}
-		elevation={0}
-		anchorOrigin={{
-			vertical: "bottom",
-			horizontal: "left",
-		}}
-		transformOrigin={{
-			vertical: "top",
-			horizontal: "left",
-		}}
-		{...props}
-	/>
-);
 
 export default function MenuWidget({
 	hover,
@@ -62,13 +21,18 @@ export default function MenuWidget({
 	onClick,
 	selected: menuSelected,
 	onVisible,
+	open: openProp,
+	anchorEl: anchorElProp,
+	onClose: onCloseProp,
 	...props
 }) {
-	const [anchorEl, setAnchorEl] = useState(null);
-	const open = Boolean(anchorEl);
-	const clickEnabled = (items && items.length) || onClick;
+	const [anchorElInternal, setAnchorElInternal] = useState(null);
+	const isControlled = openProp !== undefined;
+	const anchorEl = isControlled ? anchorElProp : anchorElInternal;
+	const open = isControlled ? Boolean(openProp) : Boolean(anchorElInternal);
+	const clickEnabled = !isControlled && ((items && items.length) || onClick);
 	const hoverEnabled = clickEnabled && hover;
-	const [hoverRef, setHoverRef] = useState(null);
+	const [_hoverRef, setHoverRef] = useState(null);
 	const [expanded, setExpanded] = useState({});
 	const prevExpandedRef = useRef({});
 
@@ -98,21 +62,24 @@ export default function MenuWidget({
 		});
 	};
 
-	const handleClick = (event) => {
-		event && event.stopPropagation && event.stopPropagation();
+	const handleClose = () => {
+		onVisible && onVisible(false);
+		if (isControlled) {
+			onCloseProp?.();
+		} else {
+			setAnchorElInternal(null);
+		}
+		setHoverRef(null);
+		setExpanded({});
+	};
+
+	const openMenu = (event) => {
 		if (items && items.length) {
 			onVisible && onVisible(true);
-			setAnchorEl(event.currentTarget);
+			setAnchorElInternal(event.currentTarget);
 		} else if (onClick) {
 			onClick(event);
 		}
-	};
-
-	const handleClose = () => {
-		onVisible && onVisible(false);
-		setAnchorEl(null);
-		setHoverRef(null);
-		setExpanded({});
 	};
 
 	const checkListFeatures = (list) => {
@@ -152,7 +119,7 @@ export default function MenuWidget({
 				selected,
 				expanded: itemExpanded,
 				highlight,
-				...props
+				...itemProps
 			} = item;
 			const selectedItem =
 				typeof selected !== "undefined" ? selected : menuSelected;
@@ -171,6 +138,10 @@ export default function MenuWidget({
 
 			const handleClickItem = (event) => {
 				if (header && hasSubItems) {
+					handleToggleExpand(id);
+					return;
+				}
+				if (hasSubItems && !itemOnClick) {
 					handleToggleExpand(id);
 					return;
 				}
@@ -210,7 +181,7 @@ export default function MenuWidget({
 					underline="none"
 					href={target}
 					onClick={handleClickItem}
-					{...props}
+					{...itemProps}
 				>
 					<div className={styles.background} style={style} />
 					{!header && hasAnyIcon && (
@@ -259,7 +230,7 @@ export default function MenuWidget({
 				),
 			];
 
-			if (header && hasSubItems && isExpanded) {
+			if ((header || hasSubItems) && isExpanded) {
 				result.push(...renderItems(subItems));
 			}
 
@@ -269,52 +240,45 @@ export default function MenuWidget({
 
 	const menuItems = open && renderItems(items);
 
-	children = Children.map(children, (child) => {
-		if (!child) {
-			return null;
-		}
-		const childProps = {};
-		if (clickEnabled) {
-			childProps.onClick = handleClick;
-		}
-		if (hoverEnabled) {
-			childProps.onMouseEnter = (event) => {
-				setHoverRef(event.currentTarget);
-				handleClick(event);
-			};
-		}
-		const element = cloneElement(child, childProps);
-		return element;
-	});
+	const trigger = children && (
+		<span
+			className={styles.trigger}
+			onClick={
+				clickEnabled
+					? (event) => {
+							event.stopPropagation();
+							openMenu(event);
+						}
+					: undefined
+			}
+			onMouseEnter={
+				hoverEnabled
+					? (event) => {
+							setHoverRef(event.currentTarget);
+							openMenu(event);
+						}
+					: undefined
+			}
+		>
+			{children}
+		</span>
+	);
 
 	return (
 		<>
-			{children}
-			<StyledMenu
-				id="menu"
+			{!isControlled && trigger}
+			<Menu
 				anchorEl={anchorEl}
-				keepMounted
 				open={!!open}
 				onClose={handleClose}
-				slotProps={{
-					list:
-						hoverEnabled && hoverRef
-							? { onMouseLeave: handleClose }
-							: undefined,
-					paper: {
-						style: {
-							transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important",
-							minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
-						},
-					},
+				className={styles.menuPaper}
+				style={{
+					minWidth: anchorEl ? anchorEl.offsetWidth : undefined,
 				}}
 				{...props}
-				classes={{
-					paper: classes.paper,
-				}}
 			>
 				{menuItems}
-			</StyledMenu>
+			</Menu>
 		</>
 	);
 }

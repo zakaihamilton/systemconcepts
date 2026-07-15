@@ -1,5 +1,6 @@
 import { writeCompressedFile } from "@sync/bundle";
 import { addSyncLog } from "@sync/sync";
+import { logger } from "@util/api/logger";
 import { readBinary } from "@util/data/binary";
 import { blobToBase64, shrinkImage } from "@util/data/image";
 import storage from "@util/storage/storage";
@@ -24,6 +25,14 @@ jest.mock("@sync/manifest", () => ({
 }));
 jest.mock("@sync/sync", () => ({
 	addSyncLog: jest.fn(),
+}));
+jest.mock("@util/api/logger", () => ({
+	logger: {
+		debug: jest.fn(),
+		error: jest.fn(),
+		info: jest.fn(),
+		warn: jest.fn(),
+	},
 }));
 jest.mock("@util/data/binary", () => ({
 	readBinary: jest.fn(),
@@ -220,6 +229,10 @@ describe("updateGroupProcess", () => {
 		expect(loadDurations).toHaveBeenCalledTimes(1);
 		expect(loadSummaries).toHaveBeenCalledTimes(1);
 		expect(loadTranscriptions).toHaveBeenCalledTimes(1);
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("Aggregated metadata fetch failed"),
+			expect.any(Error),
+		);
 		const [, , sessions] = updateYearSync.mock.calls[0];
 		expect(sessions[0].tags).toEqual(["legacy"]);
 		expect(sessions[0].duration).toBe(456);
@@ -484,6 +497,9 @@ describe("updateGroupProcess", () => {
 			expect.stringContaining("omitted locally stored years (2022)"),
 			"warning",
 		);
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("omitted locally stored years (2022)"),
+		);
 	});
 
 	it("preserves older merged sessions when a full update omits their year", async () => {
@@ -518,6 +534,13 @@ describe("updateGroupProcess", () => {
 			expect.stringContaining("omitted locally stored years (2022)"),
 			"warning",
 		);
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("omitted locally stored years (2022)"),
+		);
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("Failed to update local manifest"),
+			expect.any(TypeError),
+		);
 	});
 
 	it("does not replace a bundled group when a year fetch fails", async () => {
@@ -550,5 +573,9 @@ describe("updateGroupProcess", () => {
 
 		expect(sessions).toBeUndefined();
 		expect(writeCompressedFile).not.toHaveBeenCalled();
+		expect(logger.error).toHaveBeenCalledWith(expect.any(Error));
+		expect(logger.error).toHaveBeenCalledWith(
+			expect.stringContaining("failed to process all years"),
+		);
 	});
 });

@@ -54,7 +54,7 @@ export function getLibrarySection({ id, path, translations }) {
 				if (tagById.number) {
 					label += ":" + tagById.number;
 				}
-				const icon = fieldKey ? LibraryIcons[fieldKey] : null;
+				const Icon = fieldKey ? LibraryIcons[fieldKey] : null;
 				return {
 					name,
 					label,
@@ -63,8 +63,8 @@ export function getLibrarySection({ id, path, translations }) {
 						? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)
 						: "",
 					static: true,
-					Icon: icon || null,
-					icon: icon ? <icon /> : null,
+					Icon: Icon || null,
+					icon: Icon ? <Icon /> : null,
 				};
 			}
 		}

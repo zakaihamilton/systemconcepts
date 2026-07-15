@@ -1,14 +1,13 @@
 import ItemMenu from "@components/ItemMenu";
-import CloudOffIcon from "@mui/icons-material/CloudOff";
-import CloudQueueIcon from "@mui/icons-material/CloudQueue";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import DescriptionIcon from "@mui/icons-material/Description";
-import FolderIcon from "@mui/icons-material/Folder";
-import UpdateIcon from "@mui/icons-material/Update";
+import CloudOffIcon from "@icons/svg/CloudOff.svg";
+import CloudQueueIcon from "@icons/svg/CloudQueue.svg";
+import DataUsageIcon from "@icons/svg/DataUsage.svg";
+import DescriptionIcon from "@icons/svg/Description.svg";
+import FolderIcon from "@icons/svg/Folder.svg";
+import UpdateIcon from "@icons/svg/Update.svg";
 import { useTranslations } from "@util/domain/translations";
 import { useState } from "react";
 import Statistics from "../Statistics";
-
 export default function ItemMenuWidget({
 	item,
 	updateGroup,
@@ -66,9 +65,11 @@ export default function ItemMenuWidget({
 				setGroups((groups) => {
 					groups = [...groups];
 					const index = groups.findIndex((group) => group.name === item.name);
-					const group = groups[index];
-					group.disabled = !group.disabled;
-					groups[index] = { ...groups[index] };
+					if (index === -1) return groups;
+					groups[index] = {
+						...groups[index],
+						disabled: !groups[index].disabled,
+					};
 					return groups;
 				});
 			},

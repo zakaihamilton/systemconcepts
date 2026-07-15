@@ -1,12 +1,13 @@
 import { MainStore } from "@components/Main";
 import Toolbar from "@components/Toolbar";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Divider, Menu, MenuItem } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import Link from "@mui/material/Link";
-import NoSsr from "@mui/material/NoSsr";
+import { ToolbarTooltipContext } from "@components/Toolbar/ToolbarContext";
+import MoreHorizIcon from "@icons/svg/MoreHoriz.svg";
+import NavigateBeforeIcon from "@icons/svg/NavigateBefore.svg";
+import NavigateNextIcon from "@icons/svg/NavigateNext.svg";
+import { Divider, Menu, MenuItem } from "@ui";
+import IconButton from "@ui/IconButton";
+import Link from "@ui/Link";
+import NoSsr from "@ui/NoSsr";
 import { useDeviceType } from "@util/browser/styles";
 import { setHash } from "@util/domain/views";
 import Tooltip from "@widgets/Tooltip";
@@ -14,7 +15,6 @@ import clsx from "clsx";
 import { useState } from "react";
 import SidebarIcon from "../AppBar/SidebarIcon";
 import styles from "./Breadcrumbs.module.css";
-
 export function BreadcrumbItem({
 	index,
 	count,
@@ -249,41 +249,50 @@ export default function BreadcrumbsWidget({
 				className,
 			)}
 		>
-			<div className={styles.row}>
-				<NoSsr>
-					{!!bar && (
-						<span>
-							<SidebarIcon />
-						</span>
-					)}
-					{
-						<Divider
-							orientation="vertical"
-							flexItem
-							style={{ margin: "0 0.5rem" }}
-						/>
-					}
-					<div className={styles.breadcrumbs}>{breadcrumbItems}</div>
-					{!!bar && (
-						<>
-							<Toolbar
-								collapsable={true}
-								location={
-									isPhone || isTablet ? ["header", undefined] : undefined
-								}
+			<ToolbarTooltipContext.Provider value="bottom">
+				<div className={styles.row}>
+					<NoSsr>
+						{!!bar && (
+							<span>
+								<SidebarIcon />
+							</span>
+						)}
+						{
+							<Divider
+								orientation="vertical"
+								flexItem
+								style={{ margin: "0 0.5rem" }}
 							/>
-							{isDesktop && (
-								<Divider
-									orientation="vertical"
-									flexItem
-									style={{ margin: "0 0.5rem" }}
+						}
+						<div className={styles.breadcrumbs}>{breadcrumbItems}</div>
+						{!!bar && (
+							<>
+								<Toolbar
+									className={styles.headerToolbar}
+									collapsable={true}
+									location={
+										isPhone || isTablet ? ["header", undefined] : undefined
+									}
 								/>
-							)}
-							{isDesktop && <Toolbar collapsable={true} location="header" />}
-						</>
-					)}
-				</NoSsr>
-			</div>
+								{isDesktop && (
+									<Divider
+										orientation="vertical"
+										flexItem
+										style={{ margin: "0 0.5rem" }}
+									/>
+								)}
+								{isDesktop && (
+									<Toolbar
+										className={styles.headerToolbar}
+										collapsable={true}
+										location="header"
+									/>
+								)}
+							</>
+						)}
+					</NoSsr>
+				</div>
+			</ToolbarTooltipContext.Provider>
 		</div>
 	);
 }

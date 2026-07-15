@@ -14,3 +14,20 @@
 .field {
 	width: 100%;
 }
+
+.previewContainer {
+	margin-top: 1rem;
+	background-color: var(--background-default);
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--divider);
+}
+
+.previewFooter {
+	padding: 0.5rem;
+	border-top: 1px solid var(--divider);
+	text-align: right;
+}
+
+.previewSubItem {
+	padding-left: 2rem;
+}

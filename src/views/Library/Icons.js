@@ -1,15 +1,14 @@
-import ArticleIcon from "@mui/icons-material/Article";
-import BookIcon from "@mui/icons-material/Book";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import EventIcon from "@mui/icons-material/Event";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PersonIcon from "@mui/icons-material/Person";
-import SegmentIcon from "@mui/icons-material/Segment";
-import SubjectIcon from "@mui/icons-material/Subject";
-import TitleIcon from "@mui/icons-material/Title";
-import ViewStreamIcon from "@mui/icons-material/ViewStream";
-
+import ArticleIcon from "@icons/svg/Article.svg";
+import BookIcon from "@icons/svg/Book.svg";
+import BookmarkIcon from "@icons/svg/Bookmark.svg";
+import EventIcon from "@icons/svg/Event.svg";
+import LibraryBooksIcon from "@icons/svg/LibraryBooks.svg";
+import MenuBookIcon from "@icons/svg/MenuBook.svg";
+import PersonIcon from "@icons/svg/Person.svg";
+import SegmentIcon from "@icons/svg/Segment.svg";
+import SubjectIcon from "@icons/svg/Subject.svg";
+import TitleIcon from "@icons/svg/Title.svg";
+import ViewStreamIcon from "@icons/svg/ViewStream.svg";
 export const LibraryIcons = {
 	library: LibraryBooksIcon,
 	author: PersonIcon,

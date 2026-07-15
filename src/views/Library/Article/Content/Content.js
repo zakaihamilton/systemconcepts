@@ -1,4 +1,4 @@
-import Box from "@mui/material/Box";
+import Box from "@ui/Box";
 import articleStyles from "../Article.module.css";
 import Markdown from "../Markdown";
 import styles from "./Content.module.css";

@@ -1,4 +1,4 @@
-import ClickAwayListener from "@mui/material/ClickAwayListener";
+import ClickAwayListener from "@ui/ClickAwayListener";
 import { useStoreState } from "@util/browser/store";
 import Input from "@widgets/Input";
 import { useCallback } from "react";

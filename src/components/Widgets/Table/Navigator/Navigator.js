@@ -1,10 +1,10 @@
 import { registerToolbar, useToolbar } from "@components/Toolbar";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import FirstPageIcon from "@mui/icons-material/FirstPage";
-import LastPageIcon from "@mui/icons-material/LastPage";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import ChevronLeftIcon from "@icons/svg/ChevronLeft.svg";
+import ChevronRightIcon from "@icons/svg/ChevronRight.svg";
+import FirstPageIcon from "@icons/svg/FirstPage.svg";
+import LastPageIcon from "@icons/svg/LastPage.svg";
+import TextField from "@ui/TextField";
+import Typography from "@ui/Typography";
 import { useDirection } from "@util/data/direction";
 import { useTranslations } from "@util/domain/translations";
 import DelayInput from "@widgets/DelayInput";
@@ -83,14 +83,9 @@ export default function Navigator({
 								<TextField
 									className={styles.pageIndex}
 									variant="standard"
-									slotProps={{
-										htmlInput: {
-											"aria-label": translations.PAGE_INDEX,
-											type: "number",
-											min: 1,
-											max: pageCount,
-										},
-									}}
+									aria-label={translations.PAGE_INDEX}
+									type="number"
+									inputProps={{ min: 1, max: pageCount }}
 								/>
 							</DelayInput>
 						</span>

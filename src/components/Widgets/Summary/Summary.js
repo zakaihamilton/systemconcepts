@@ -1,4 +1,4 @@
-import LinearProgress from "@mui/material/LinearProgress";
+import LinearProgress from "@ui/LinearProgress";
 import { useFetch } from "@util/api/fetch";
 import { preprocessMarkdown } from "@util/data/string";
 import { useTranslations } from "@util/domain/translations";

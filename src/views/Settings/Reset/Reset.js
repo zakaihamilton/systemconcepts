@@ -1,6 +1,6 @@
 import { MainStore, MainStoreDefaults } from "@components/Main";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import Button from "@ui/Button";
+import Typography from "@ui/Typography";
 import { useTranslations } from "@util/domain/translations";
 import { goBackPage } from "@util/domain/views";
 import Dialog from "@widgets/Dialog";

@@ -1,5 +1,3 @@
-import { getContrastRatio, useTheme } from "@mui/material/styles";
-
 export function hexToRgb(hex) {
 	if (!hex) {
 		return null;
@@ -12,6 +10,40 @@ export function hexToRgb(hex) {
 				b: parseInt(result[3], 16),
 			}
 		: null;
+}
+
+function getLuminance(rgb) {
+	const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((v) => {
+		const s = v / 255;
+		return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+	});
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function parseColor(color) {
+	if (!color) return null;
+	if (color.startsWith("#")) return hexToRgb(color);
+	const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+	if (rgbMatch) {
+		return {
+			r: parseInt(rgbMatch[1], 10),
+			g: parseInt(rgbMatch[2], 10),
+			b: parseInt(rgbMatch[3], 10),
+		};
+	}
+	return null;
+}
+
+export function getContrastRatio(color1, color2) {
+	const rgb1 = parseColor(color1);
+	const rgb2 = parseColor(color2);
+	if (!rgb1 || !rgb2) return 1;
+
+	const l1 = getLuminance(rgb1);
+	const l2 = getLuminance(rgb2);
+	const lighter = Math.max(l1, l2);
+	const darker = Math.min(l1, l2);
+	return (lighter + 0.05) / (darker + 0.05);
 }
 
 export function mixColors(color1, color2, weight) {
@@ -29,15 +61,31 @@ export function mixColors(color1, color2, weight) {
 	return `rgb(${r}, ${g}, ${b})`;
 }
 
+function getBackgroundColor() {
+	if (typeof window === "undefined") return "#fafafa";
+	return (
+		getComputedStyle(document.documentElement)
+			.getPropertyValue("--main-background")
+			.trim() || "#fafafa"
+	);
+}
+
+function getTextColor() {
+	if (typeof window === "undefined") return "#18181b";
+	return (
+		getComputedStyle(document.documentElement)
+			.getPropertyValue("--text-color")
+			.trim() || "#18181b"
+	);
+}
+
 export function useSessionTextColor(sessionColor) {
-	const theme = useTheme();
-	const backgroundColor = theme.palette.background.default;
+	const backgroundColor = getBackgroundColor();
 
 	if (!sessionColor) {
-		return theme.palette.text.primary;
+		return getTextColor();
 	}
 
-	// Session background is drawn with opacity 0.3 over the page background
 	const effectiveBackgroundColor = mixColors(
 		sessionColor,
 		backgroundColor,
@@ -51,10 +99,11 @@ export function useSessionTextColor(sessionColor) {
 }
 
 export function getSessionTextColor(sessionColor, theme) {
-	const backgroundColor = theme.palette.background.default;
+	const backgroundColor =
+		theme?.palette?.background?.default || getBackgroundColor();
 
 	if (!sessionColor) {
-		return theme.palette.text.primary;
+		return theme?.palette?.text?.primary || getTextColor();
 	}
 
 	const effectiveBackgroundColor = mixColors(

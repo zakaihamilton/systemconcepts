@@ -1,9 +1,9 @@
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Typography from "@mui/material/Typography";
+import Button from "@ui/Button";
+import Dialog from "@ui/Dialog";
+import DialogActions from "@ui/DialogActions";
+import DialogContent from "@ui/DialogContent";
+import DialogTitle from "@ui/DialogTitle";
+import Typography from "@ui/Typography";
 import { getColorName } from "@util/data/color";
 import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
@@ -54,11 +54,7 @@ export default function ColorPicker({
 				onClose={handleClose}
 				maxWidth="md"
 				fullWidth={false}
-				slotProps={{
-					paper: {
-						className: styles.dialogPaper,
-					},
-				}}
+				className={styles.dialogPaper}
 			>
 				<div className={styles.pickerContainer}>
 					<DialogTitle className={styles.dialogTitle}>

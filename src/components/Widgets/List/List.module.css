@@ -5,66 +5,113 @@
 	gap: 0.25rem;
 }
 
+.root.sidebar {
+	padding: 0.65rem !important;
+	gap: 0.35rem;
+}
+
+.root.sidebar .item {
+	overflow: visible;
+}
+
+.root.sidebar .itemButton {
+	min-height: 2.9rem;
+	padding: 0.7rem 0.85rem;
+	border: 1px solid transparent;
+	border-radius: var(--radius-md);
+}
+
+.root.sidebar .itemButton:hover {
+	background: rgba(var(--bar-background-rgb), 0.58);
+	border-color: rgba(var(--border-color-rgb), 0.72);
+	box-shadow: 0 5px 14px rgba(9, 9, 11, 0.05);
+	transform: translateX(2px);
+}
+
+.root.sidebar .item.selected .itemButton {
+	background: linear-gradient(
+		110deg,
+		rgba(var(--primary-color-rgb), 0.18),
+		rgba(var(--primary-color-rgb), 0.08)
+	) !important;
+	border-color: rgba(var(--primary-color-rgb), 0.22);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.16),
+		0 6px 16px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.root.sidebar .item.selected .itemButton::before {
+	left: -1px;
+	top: 22%;
+	height: 56%;
+	width: 3px;
+}
+
+:global([dir="rtl"]) .root.sidebar .itemButton:hover {
+	transform: translateX(-2px);
+}
+
 .item {
 	cursor: pointer;
 	user-select: none;
 	border-radius: var(--radius-sm);
 	overflow: hidden;
 	margin: 0 !important;
+}
 
-	:global(.MuiListItemButton-root) {
-		border-radius: var(--radius-sm);
-		padding: 0.65rem 1rem;
-		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-		color: var(--text-color);
-		opacity: 0.8;
-		position: relative;
+.itemButton {
+	border-radius: var(--radius-sm);
+	padding: 0.65rem 1rem;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-color);
+	opacity: 0.8;
+	position: relative;
+	width: 100%;
+}
 
-		&:hover {
-			background-color: var(--hover-color);
-			opacity: 1;
-			transform: translateX(4px);
-		}
+.itemButton:hover {
+	background-color: var(--hover-color);
+	opacity: 1;
+	transform: translateX(4px);
+}
 
-		:global([dir="rtl"]) &:hover {
-			transform: translateX(-4px);
-		}
+:global([dir="rtl"]) .itemButton:hover {
+	transform: translateX(-4px);
+}
 
-		&.Mui-selected {
-			background-color: rgba(var(--primary-color-rgb), 0.08) !important;
-			color: var(--primary-color);
-			opacity: 1;
-			font-weight: 600;
+.item.selected .itemButton {
+	background-color: rgba(var(--primary-color-rgb), 0.08) !important;
+	color: var(--primary-color);
+	opacity: 1;
+	font-weight: 600;
+}
 
-			&::before {
-				content: "";
-				position: absolute;
-				left: 0;
-				top: 20%;
-				height: 60%;
-				width: 3px;
-				background-color: var(--primary-color);
-				border-radius: 0 4px 4px 0;
-				transition: all 0.25s ease;
-			}
+.item.selected .itemButton::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 20%;
+	height: 60%;
+	width: 3px;
+	background-color: var(--primary-color);
+	border-radius: 0 4px 4px 0;
+	transition: all 0.25s ease;
+}
 
-			:global([dir="rtl"]) &::before {
-				left: auto;
-				right: 0;
-				border-radius: 4px 0 0 4px;
-			}
+:global([dir="rtl"]) .item.selected .itemButton::before {
+	left: auto;
+	right: 0;
+	border-radius: 4px 0 0 4px;
+}
 
-			&:hover {
-				background-color: rgba(var(--primary-color-rgb), 0.12) !important;
-				transform: translateX(0px); /* don't shift when already selected */
-			}
+.item.selected .itemButton:hover {
+	background-color: rgba(var(--primary-color-rgb), 0.12) !important;
+	transform: translateX(0px);
+}
 
-			.iconContainer {
-				color: var(--primary-color);
-				opacity: 1;
-			}
-		}
-	}
+.item.selected .iconContainer {
+	color: var(--primary-color);
+	opacity: 1;
 }
 
 .iconContainer {
@@ -85,21 +132,21 @@
 .itemLabel {
 	margin: 0 !important;
 
-	:global(.MuiListItemText-primary) {
-		font-size: 0.92rem;
-		font-weight: 500;
-		letter-spacing: -0.01em;
-	}
-
-	:global(.MuiListItemText-secondary) {
-		font-size: 0.78rem;
-		opacity: 0.6;
-		margin-top: 2px;
-	}
-
 	[dir="rtl"] & {
 		text-align: right;
 	}
+}
+
+.primary {
+	font-size: 0.92rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+}
+
+.secondary {
+	font-size: 0.78rem;
+	opacity: 0.6;
+	margin-top: 2px;
 }
 
 .expandIcon {

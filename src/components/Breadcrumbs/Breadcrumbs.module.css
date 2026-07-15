@@ -9,11 +9,18 @@
 }
 
 .root.bar {
-	background: var(--app-bar-background-gradient);
-	backdrop-filter: blur(16px);
-	border-bottom: 1px solid var(--border-color);
-	padding: 0 0.75rem;
-	box-shadow: var(--shadow-sm);
+	background:
+		linear-gradient(
+			115deg,
+			rgba(var(--bar-background-rgb), 0.9),
+			rgba(var(--bar-background-rgb), 0.64)
+		),
+		var(--app-bar-background-gradient);
+	backdrop-filter: blur(22px) saturate(1.35);
+	-webkit-backdrop-filter: blur(22px) saturate(1.35);
+	border-bottom: 1px solid rgba(var(--border-color-rgb), 0.72);
+	padding: 0 0.9rem;
+	box-shadow: 0 10px 28px rgba(9, 9, 11, 0.05);
 }
 
 .root.border {
@@ -25,6 +32,25 @@
 	align-items: center;
 	flex: 1;
 	height: 3.5rem;
+}
+
+.headerToolbar {
+	height: 2.5rem;
+	padding: 0.25rem;
+	gap: 0.15rem;
+	border: 1px solid rgba(var(--border-color-rgb), 0.75);
+	border-radius: var(--radius-full);
+	background: rgba(var(--bar-background-rgb), 0.5);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.18),
+		0 4px 14px rgba(9, 9, 11, 0.04);
+
+	@media (max-width: 600px) {
+		background: transparent;
+		border-color: transparent;
+		box-shadow: none;
+		padding: 0;
+	}
 }
 
 .headerInfo {
@@ -70,7 +96,7 @@
 	align-items: center;
 	height: 2.25rem;
 	padding: 0 0.5rem;
-	border-radius: 6px;
+	border-radius: var(--radius-md);
 	font-size: 0.9rem;
 	font-weight: 500;
 	color: var(--text-color);
@@ -78,7 +104,7 @@
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	white-space: nowrap;
 	cursor: pointer;
-	opacity: 0.75;
+	opacity: 0.78;
 	min-width: 0;
 
 	@media (min-width: 601px) {
@@ -86,7 +112,7 @@
 	}
 
 	&:hover {
-		background-color: var(--hover-background);
+		background-color: rgba(var(--primary-color-rgb), 0.09);
 		opacity: 1;
 	}
 
@@ -108,6 +134,7 @@
 .item:last-child {
 	opacity: 1;
 	font-weight: 600;
+	color: var(--text-color);
 
 	&:hover {
 		background-color: transparent;

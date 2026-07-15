@@ -21,9 +21,7 @@ describe("Summary Widget", () => {
 	it("renders loading state", () => {
 		useFetch.mockReturnValue([null, null, true]);
 		const { container } = render(<Summary path="test" />);
-		expect(
-			container.querySelector(".MuiLinearProgress-root"),
-		).toBeInTheDocument();
+		expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
 	});
 
 	it("renders markdown content", () => {

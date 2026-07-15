@@ -1,7 +1,5 @@
-import "@fontsource/roboto";
 import "../src/css/app.css";
 import Script from "next/script";
-import EmotionRegistry from "./EmotionRegistry";
 
 export const metadata = {
 	title: "System Concepts",
@@ -15,14 +13,14 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="en" suppressHydrationWarning data-theme="light">
 			<head>
 				<link rel="manifest" href="/manifest.json" />
 				<link rel="icon" type="image/png" href="/icon.png" />
 			</head>
 			<body suppressHydrationWarning>
 				<Script src="/noflash.js" strategy="beforeInteractive" />
-				<EmotionRegistry>{children}</EmotionRegistry>
+				{children}
 			</body>
 		</html>
 	);
