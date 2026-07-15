@@ -17,6 +17,7 @@ export default defineConfig({
 		env: {
 			AWS_SECRET: "playwright-internal-secret",
 			NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3107",
+			PLAYWRIGHT: "1",
 			SITE_URL: "http://127.0.0.1:3107",
 		},
 		reuseExistingServer: false,

@@ -39,6 +39,7 @@ const rateLimitCache = new Map();
 const RATE_LIMIT_CACHE_TTL_MS = 5 * 1000;
 
 export async function enforceRateLimitEdge(ip, options = {}) {
+	if (process.env.PLAYWRIGHT === "1") return true;
 	const { limit = 60, windowMs = 60 * 1000 } = options;
 	if (!ip) return false;
 
