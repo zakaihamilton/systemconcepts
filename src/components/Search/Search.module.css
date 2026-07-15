@@ -3,8 +3,10 @@
 	position: relative;
 	border-radius: 0.5em;
 	background-color: var(--main-background);
-	height: 3em;
+	/* The header toolbar provides the control chrome and its available height. */
+	height: 100%;
 	width: 3em;
+	min-width: 0;
 	transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	cursor: pointer;
 	overflow: hidden;
@@ -57,7 +59,9 @@
 	}
 }
 
-@media (max-width: 768px) {
+/* Keep the expanded search from crowding the header on tablets. This matches
+ * the tablet boundary used by useDeviceType(). */
+@media (max-width: 1024px) {
 	.searchExpanded {
 		width: 9em;
 	}

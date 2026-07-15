@@ -252,11 +252,11 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		...(!show && { maxHeight: "0px" }),
 	};
 
-	// Account for: header (4em), tabs (4em), speed slider (120px when visible), controls (~3em)
-	// Total: ~11em base + 120px for speed slider when visible + 2em for video margins
+	// Account for: header (4em), tabs (4em), speed toolbar (88px when visible), controls (~3em)
+	// Total: ~11em base + 88px for speed toolbar when visible + 2em for video margins
 	const baseEmSubtraction = 13; // Increased from 11 to account for 2em margins (top + bottom)
 	const isTranscript = mode === "transcript";
-	const speedSliderHeight = showSpeed ? 120 : 0;
+	const speedSliderHeight = showSpeed ? 88 : 0;
 	const mediaStyles = {
 		width: size.width + "px",
 		marginTop: "1em",
@@ -339,12 +339,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 				target={downloadUrl}
 			/>
 			{MediaComponent ? (
-				<MediaComponent
-					key={subtitles}
-					style={mediaStyles}
-					{...mediaProps}
-					elements={elements}
-				>
+				<MediaComponent style={mediaStyles} {...mediaProps} elements={elements}>
 					{mediaPath && <source src={mediaPath} type={mediaType} />}
 					{!isTranscript && subtitles && showSubtitles && (
 						<track

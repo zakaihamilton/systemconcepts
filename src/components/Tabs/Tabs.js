@@ -1,7 +1,7 @@
 import { MainStore } from "@components/Main";
 import { useActivePages } from "@util/domain/views";
 import TabsWidget from "@widgets/Tabs";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import styles from "./Tabs.module.css";
 
 export default function Tabs() {
@@ -14,18 +14,16 @@ export default function Tabs() {
 	const { hash } = MainStore.useState();
 	const activePages = useActivePages();
 	const page = [...activePages].reverse().find((page) => page.tabs);
+	const tabStateRef = useRef([hash, setHash]);
+	tabStateRef.current = [hash, setHash];
 
-	const Container = useCallback(
-		function Container({ children }) {
-			const pageState = [hash, setHash];
-			return (
-				<div className={styles.root}>
-					<TabsWidget state={pageState}>{children}</TabsWidget>
-				</div>
-			);
-		},
-		[hash, setHash],
-	);
+	const Container = useCallback(function Container({ children }) {
+		return (
+			<div className={styles.root}>
+				<TabsWidget state={tabStateRef.current}>{children}</TabsWidget>
+			</div>
+		);
+	}, []);
 
 	if (!page) {
 		return null;

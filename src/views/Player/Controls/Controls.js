@@ -21,6 +21,22 @@ import styles from "./Controls.module.css";
 
 const skipPoints = 10;
 
+function PlaybackIcon({ loading, paused, loadingLabel }) {
+	return (
+		<span className={clsx(styles.playbackIcon, loading && styles.isLoading)}>
+			<CircularProgress
+				className={styles.loadingIndicator}
+				size={24}
+				aria-label={loadingLabel}
+				aria-hidden={!loading}
+			/>
+			<span className={styles.playbackSymbol} aria-hidden={loading}>
+				{paused ? <PlayArrowIcon /> : <PauseIcon />}
+			</span>
+		</span>
+	);
+}
+
 export default function Controls({
 	show,
 	path,
@@ -47,6 +63,7 @@ export default function Controls({
 	const errorTimeoutRef = useRef(null);
 	const visible = usePageVisibility();
 	const [loading, setLoading] = useState(false);
+	const [playPending, setPlayPending] = useState(false);
 	const [loadedPath, setLoadedPath] = useState(() => {
 		if (playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0) {
 			return path;
@@ -56,7 +73,8 @@ export default function Controls({
 	const hasDuration =
 		playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0;
 	const showLoading =
-		!error && (loading || renewing || !hasDuration || loadedPath !== path);
+		!error &&
+		(playPending || loading || renewing || !hasDuration || loadedPath !== path);
 
 	// MediaSession API integration for iOS Bluetooth headset controls
 	// Capitalize first letter of artist name
@@ -128,19 +146,20 @@ export default function Controls({
 			} else if (
 				name === "playing" ||
 				name === "pause" ||
-				name === "canplay" ||
 				name === "seeked" ||
-				name === "error" ||
-				name === "loadedmetadata"
+				name === "error"
 			) {
 				setLoading(false);
-				if (
-					name === "playing" ||
-					name === "canplay" ||
-					name === "loadedmetadata"
-				) {
+				if (name === "playing") {
+					setPlayPending(false);
 					setLoadedPath(stateRef.current.path);
 				}
+				if (name === "error") {
+					setPlayPending(false);
+				}
+			}
+			if (name === "canplay" || name === "loadedmetadata") {
+				setLoadedPath(stateRef.current.path);
 			}
 			if (name === "loadedmetadata") {
 				if (!metadataKey) return; // Skip if metadataKey not ready
@@ -415,11 +434,23 @@ export default function Controls({
 		},
 	};
 	const play = () => {
+		// Starting playback can wait on a signed media URL or buffering before the
+		// browser dispatches its first media event. Reflect that wait immediately
+		// so the Play button does not appear unresponsive.
+		setLoading(true);
+		setPlayPending(true);
 		playerRef.play().catch((err) => {
+			setLoading(false);
+			setPlayPending(false);
 			structuredLogger.error(err);
 		});
 	};
+	const pause = () => {
+		setPlayPending(false);
+		playerRef.pause();
+	};
 	const stop = useCallback(() => {
+		setPlayPending(false);
 		playerRef.pause();
 		playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
 		setCurrentTime(0);
@@ -513,39 +544,23 @@ export default function Controls({
 							variant={variant}
 						/>
 					)}
-					{playerRef.paused && !error && (
+					{!error && (
 						<PlayerButton
 							icon={
-								showLoading ? (
-									<CircularProgress
-										size={24}
-										color="inherit"
-										style={{ display: "block" }}
-									/>
-								) : (
-									<PlayArrowIcon />
-								)
+								<PlaybackIcon
+									loading={showLoading}
+									paused={playerRef.paused}
+									loadingLabel={translations.LOADING}
+								/>
 							}
-							name={showLoading ? translations.LOADING : translations.PLAY}
-							onClick={play}
-							variant={variant}
-						/>
-					)}
-					{!playerRef.paused && !error && (
-						<PlayerButton
-							icon={
-								showLoading ? (
-									<CircularProgress
-										size={24}
-										color="inherit"
-										style={{ display: "block" }}
-									/>
-								) : (
-									<PauseIcon />
-								)
+							name={
+								showLoading
+									? translations.LOADING
+									: playerRef.paused
+										? translations.PLAY
+										: translations.PAUSE
 							}
-							name={showLoading ? translations.LOADING : translations.PAUSE}
-							onClick={() => playerRef.pause()}
+							onClick={playerRef.paused ? play : pause}
 							variant={variant}
 						/>
 					)}

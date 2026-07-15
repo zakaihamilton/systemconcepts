@@ -1,7 +1,8 @@
 import Tabs from "@ui/Tabs";
+import clsx from "clsx";
 import styles from "./Tabs.module.css";
 
-export default function TabsWidget({ state, children, ...props }) {
+export default function TabsWidget({ state, children, className, ...props }) {
 	const [value, setValue] = state;
 
 	const handleChange = (_event, newValue) => {
@@ -17,7 +18,7 @@ export default function TabsWidget({ state, children, ...props }) {
 	return (
 		<Tabs
 			value={foundValue ? value : false}
-			className={styles.root}
+			className={clsx(styles.root, className)}
 			onChange={handleChange}
 			{...props}
 		>

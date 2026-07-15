@@ -1,12 +1,22 @@
 .root {
 	min-width: auto !important;
 	max-width: auto !important;
+	border-radius: 0 !important;
 }
 
 .content {
 	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 	text-transform: none;
 	font-size: 100%;
+	line-height: 1.25;
+}
+
+.content :global(svg) {
+	width: 1.125em;
+	height: 1.125em;
+	flex: 0 0 auto;
 }
 
 .content.mobile {
@@ -15,15 +25,14 @@
 }
 
 .label {
-	margin-left: 0.5em;
-	margin-right: 0.5em;
+	margin: 0;
 }
 
 .label.mobile {
 	margin-left: 0em;
 	margin-right: 0em;
 	display: flex;
-	font-size: 50%;
-	margin-top: 0.5em;
+	font-size: 0.6875rem;
+	margin-top: 0.25em;
 	align-items: center;
 }

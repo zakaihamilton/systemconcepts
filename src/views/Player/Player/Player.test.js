@@ -84,4 +84,34 @@ describe("Player View", () => {
 		);
 		expect(getByTestId("video")).toBeInTheDocument();
 	});
+
+	it("keeps the audio player mounted when subtitle metadata arrives", () => {
+		const playerProps = {
+			show: true,
+			prefix: "sessions",
+			group: "test",
+			year: "2021",
+			date: "01-01",
+			name: "session.m4a",
+		};
+		const { getByTestId, rerender } = render(
+			<ContentSize.Provider value={mockSize}>
+				<PlayerPage {...playerProps} />
+			</ContentSize.Provider>,
+		);
+		const audio = getByTestId("audio");
+
+		useFetchJSON.mockReturnValue([
+			{ path: "test.mp4", subtitles: "signed-subtitles.vtt" },
+			false,
+			false,
+		]);
+		rerender(
+			<ContentSize.Provider value={mockSize}>
+				<PlayerPage {...playerProps} />
+			</ContentSize.Provider>,
+		);
+
+		expect(getByTestId("audio")).toBe(audio);
+	});
 });

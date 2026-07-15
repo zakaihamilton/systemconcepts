@@ -12,14 +12,54 @@ export default function Slider({
 	valueLabelDisplay,
 	valueLabelFormat,
 	className,
+	style,
 	"aria-label": ariaLabel,
 	...props
 }) {
 	const [showLabel, setShowLabel] = useState(false);
 	const sliderRef = useRef(null);
+	const discreteMarks =
+		step === null && marks?.length
+			? [...marks]
+					.sort((a, b) => a.value - b.value)
+					.filter(
+						(mark, index, sortedMarks) =>
+							index === 0 || mark.value !== sortedMarks[index - 1].value,
+					)
+			: null;
+	const selectedMarkIndex = discreteMarks
+		? Math.max(
+				0,
+				discreteMarks.findIndex((mark) => mark.value === value),
+			)
+		: null;
+	const inputValue = value;
+	const inputMin = min;
+	const inputMax = max;
+	const inputStep = discreteMarks
+		? Number(
+				Math.min(
+					...discreteMarks.slice(1).map((mark, index) => {
+						return mark.value - discreteMarks[index].value;
+					}),
+				).toFixed(10),
+			)
+		: step;
+	const progress =
+		inputMax === inputMin
+			? 0
+			: ((inputValue - inputMin) / (inputMax - inputMin)) * 100;
 
 	const handleChange = (e) => {
-		const newValue = Number(e.target.value);
+		const inputNumber = Number(e.target.value);
+		const newValue = discreteMarks
+			? discreteMarks.reduce((closestMark, mark) =>
+					Math.abs(mark.value - inputNumber) <
+					Math.abs(closestMark.value - inputNumber)
+						? mark
+						: closestMark,
+				).value
+			: inputNumber;
 		onChange?.(e, newValue);
 	};
 
@@ -34,24 +74,50 @@ export default function Slider({
 				ref={sliderRef}
 				type="range"
 				className={styles.slider}
-				value={value}
-				min={min}
-				max={max}
-				step={step}
+				value={inputValue}
+				min={inputMin}
+				max={inputMax}
+				step={inputStep}
+				style={{ "--slider-progress": `${progress}%`, ...style }}
 				onChange={handleChange}
 				onMouseDown={() => setShowLabel(true)}
 				onMouseUp={() => setShowLabel(false)}
 				aria-label={ariaLabel}
-				list={marks ? "slider-marks" : undefined}
+				aria-valuetext={valueLabelFormat ? displayValue : undefined}
+				list={!discreteMarks && marks ? "slider-marks" : undefined}
 				{...props}
 			/>
-			{marks && (
+			{discreteMarks ? (
+				<div className={styles.sliderMarks} aria-hidden="true">
+					{discreteMarks.map((mark, index) => {
+						const position =
+							inputMax === inputMin
+								? 0
+								: ((mark.value - inputMin) / (inputMax - inputMin)) * 100;
+						return (
+							<span
+								key={mark.value}
+								className={clsx(
+									styles.sliderMark,
+									index <= selectedMarkIndex && styles.sliderMarkActive,
+									index === selectedMarkIndex && styles.sliderMarkCurrent,
+								)}
+								style={{ left: `${position}%` }}
+							>
+								{mark.label && (
+									<span className={styles.sliderMarkLabel}>{mark.label}</span>
+								)}
+							</span>
+						);
+					})}
+				</div>
+			) : marks ? (
 				<datalist id="slider-marks">
 					{marks.map((m) => (
 						<option key={m.value} value={m.value} label={m.label} />
 					))}
 				</datalist>
-			)}
+			) : null}
 			{valueLabelDisplay === "auto" && showLabel && (
 				<div
 					style={{

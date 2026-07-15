@@ -61,11 +61,12 @@ describe("Controls Component", () => {
 	});
 
 	it("calls play when play button is clicked", () => {
-		const { getByTestId } = render(
+		const { getByTestId, getByRole } = render(
 			<Controls show={true} playerRef={mockPlayer} />,
 		);
 		fireEvent.click(getByTestId("button-Play"));
 		expect(mockPlayer.play).toHaveBeenCalled();
+		expect(getByRole("progressbar")).toHaveClass("loadingIndicator");
 	});
 
 	it("calls pause when pause button is clicked", () => {
@@ -114,7 +115,7 @@ describe("Controls Component", () => {
 			eventListeners[event] = cb;
 		});
 
-		const { getByTestId } = render(
+		const { getByTestId, getByRole } = render(
 			<Controls show={true} playerRef={mockPlayer} />,
 		);
 
@@ -125,13 +126,29 @@ describe("Controls Component", () => {
 
 		// Now it should show Loading button
 		expect(getByTestId("button-Loading")).toBeInTheDocument();
+		const spinner = getByRole("progressbar");
+
+		// Readiness can arrive before playback starts; do not reset the spinner.
+		act(() => {
+			eventListeners["canplay"]();
+		});
+		expect(getByTestId("button-Loading")).toBeInTheDocument();
+		expect(getByRole("progressbar")).toBe(spinner);
+
+		// The browser flips paused before playback is fully underway. Keep the
+		// same button and spinner mounted through that state change.
+		mockPlayer.paused = false;
+		act(() => {
+			eventListeners["play"]();
+		});
+		expect(getByRole("progressbar")).toBe(spinner);
 
 		// Trigger playing
 		act(() => {
 			eventListeners["playing"]();
 		});
 
-		// Now it should show Play button again since player.paused is true
-		expect(getByTestId("button-Play")).toBeInTheDocument();
+		// Now it should show Pause once playback has started.
+		expect(getByTestId("button-Pause")).toBeInTheDocument();
 	});
 });

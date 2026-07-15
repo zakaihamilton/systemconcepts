@@ -1,3 +1,4 @@
+import SpeedIcon from "@icons/svg/Speed.svg";
 import Slider from "@ui/Slider";
 import { useTranslations } from "@util/domain/translations";
 import clsx from "clsx";
@@ -49,16 +50,21 @@ export default function SpeedSlider() {
 		}))
 		.sort((a, b) => a.value - b.value);
 
-	const getSpeedName = (value) => {
+	const getSpeedLabel = (value) => {
 		const entry = Object.entries(rateItems).find(([, val]) => val === value);
 		if (entry) {
 			const [name] = entry;
 			const label = translations[name];
 			if (label) {
-				return `${label} (${value}x)`;
+				return label;
 			}
 		}
 		return value + "x";
+	};
+
+	const getSpeedName = (value) => {
+		const label = getSpeedLabel(value);
+		return label === `${value}x` ? label : `${label} (${value}x)`;
 	};
 
 	const handleSpeedChange = (_event, newValue) => {
@@ -66,24 +72,42 @@ export default function SpeedSlider() {
 		audio.playbackRate = newValue; // eslint-disable-line react-hooks/immutability
 	};
 
+	const currentRate = player.playbackRate || 1.0;
+	const currentSpeedLabel = getSpeedLabel(currentRate);
+	const hasCurrentSpeedLabel = currentSpeedLabel !== `${currentRate}x`;
 	const max = Math.max(...Object.values(rateItems));
 
 	return (
-		<div className={clsx(styles.root, styles[speedToolbar])}>
-			<div className={styles.sliderContainer}>
-				<Slider
-					aria-label={translations.SPEED}
-					value={player.playbackRate || 1.0}
-					valueLabelDisplay="auto"
-					valueLabelFormat={getSpeedName}
-					step={null}
-					marks={speedMarks}
-					min={0.5}
-					max={max}
-					onChange={handleSpeedChange}
-					className={styles.speedSlider}
-				/>
+		<section
+			className={clsx(styles.root, styles[speedToolbar])}
+			aria-label={translations.SPEED}
+		>
+			<div className={styles.panel}>
+				<div className={styles.header}>
+					<div className={styles.title}>
+						<SpeedIcon className={styles.icon} aria-hidden="true" />
+						<span>{translations.SPEED}</span>
+					</div>
+					<output className={styles.currentRate} aria-live="polite">
+						{hasCurrentSpeedLabel && <span>{currentSpeedLabel}</span>}
+						<strong>{currentRate}×</strong>
+					</output>
+				</div>
+				<div className={styles.sliderContainer}>
+					<Slider
+						aria-label={translations.SPEED}
+						value={currentRate}
+						valueLabelDisplay="auto"
+						valueLabelFormat={getSpeedName}
+						step={null}
+						marks={speedMarks}
+						min={0.5}
+						max={max}
+						onChange={handleSpeedChange}
+						className={styles.speedSlider}
+					/>
+				</div>
 			</div>
-		</div>
+		</section>
 	);
 }

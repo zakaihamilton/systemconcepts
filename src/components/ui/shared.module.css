@@ -317,6 +317,42 @@
 	accent-color: var(--primary-color);
 }
 
+.sliderMarks {
+	position: absolute;
+	top: calc(50% + var(--slider-mark-offset, 0px));
+	left: var(--slider-thumb-offset, 0);
+	right: var(--slider-thumb-offset, 0);
+	pointer-events: none;
+}
+
+.sliderMark {
+	position: absolute;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	border: 2px solid var(--main-background-alternative);
+	background: var(--neutral-300);
+	transform: translate(-50%, -50%);
+}
+
+.sliderMarkActive {
+	background: var(--primary-100);
+}
+
+.sliderMarkCurrent {
+	opacity: 0;
+}
+
+.sliderMarkLabel {
+	position: absolute;
+	top: 14px;
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	font-size: 0.75rem;
+	color: var(--text-color);
+}
+
 .collapse {
 	overflow: hidden;
 	transition:

@@ -52,4 +52,11 @@ describe("SpeedSlider Component", () => {
 		const { queryByTestId } = render(<SpeedSlider />);
 		expect(queryByTestId("slider")).not.toBeInTheDocument();
 	});
+
+	it("does not repeat an intermediate speed without a descriptive label", () => {
+		mockPlayer.playbackRate = 1.35;
+		const { getAllByText } = render(<SpeedSlider />);
+
+		expect(getAllByText("1.35×")).toHaveLength(1);
+	});
 });

@@ -150,6 +150,44 @@
 	flex-wrap: wrap;
 }
 
+.loadingIndicator {
+	display: block;
+	flex: 0 0 24px;
+	color: var(--text-color);
+	opacity: 0;
+	position: absolute;
+	inset: 0;
+}
+
+.video .loadingIndicator {
+	color: #f8fafc;
+}
+
+.playbackIcon {
+	display: grid;
+	width: 24px;
+	height: 24px;
+	position: relative;
+}
+
+.playbackIcon > * {
+	grid-area: 1 / 1;
+}
+
+.playbackSymbol {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.isLoading .loadingIndicator {
+	opacity: 1;
+}
+
+.isLoading .playbackSymbol {
+	opacity: 0;
+}
+
 .avatar {
 	font-size: 100% !important;
 	background: var(--hover-color) !important;
