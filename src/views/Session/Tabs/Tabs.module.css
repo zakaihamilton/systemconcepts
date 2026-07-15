@@ -1,0 +1,13 @@
+.root {
+	justify-content: center;
+}
+
+@media (max-width: 768px) {
+	.root {
+		justify-content: flex-start;
+	}
+
+	.root :global([role="tab"]) {
+		flex: 1 1 0;
+	}
+}

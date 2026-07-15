@@ -17,10 +17,12 @@ export default function Tabs() {
 	const tabStateRef = useRef([hash, setHash]);
 	tabStateRef.current = [hash, setHash];
 
-	const Container = useCallback(function Container({ children }) {
+	const Container = useCallback(function Container({ children, className }) {
 		return (
 			<div className={styles.root}>
-				<TabsWidget state={tabStateRef.current}>{children}</TabsWidget>
+				<TabsWidget className={className} state={tabStateRef.current}>
+					{children}
+				</TabsWidget>
 			</div>
 		);
 	}, []);

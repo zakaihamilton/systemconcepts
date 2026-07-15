@@ -7,6 +7,7 @@ import MovieIcon from "@icons/svg/Movie.svg";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { toPath, useParentParams, usePathItems } from "@util/domain/views";
+import styles from "./Tabs.module.css";
 export default function Tabs({ Container }) {
 	const translations = useTranslations();
 	const items = usePathItems();
@@ -79,5 +80,5 @@ export default function Tabs({ Container }) {
 			return <Tab key={item.label} {...item} />;
 		});
 
-	return <Container>{tabs}</Container>;
+	return <Container className={styles.root}>{tabs}</Container>;
 }

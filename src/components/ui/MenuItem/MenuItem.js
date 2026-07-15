@@ -11,6 +11,7 @@ export default function MenuItem({
 	component: Component,
 	href,
 	underline: _underline,
+	active: _active,
 	...props
 }) {
 	const classNames = clsx(

@@ -295,8 +295,8 @@
 	position: fixed;
 	z-index: 1500;
 	padding: 6px 12px;
-	background: var(--neutral-800);
-	color: white;
+	background: var(--inverse-main-background);
+	color: var(--inverse-text-color);
 	font-size: 0.75rem;
 	border-radius: 6px;
 	pointer-events: none;
@@ -308,7 +308,7 @@
 	position: absolute;
 	width: 8px;
 	height: 8px;
-	background: var(--neutral-800);
+	background: var(--inverse-main-background);
 	transform: rotate(45deg);
 }
 
