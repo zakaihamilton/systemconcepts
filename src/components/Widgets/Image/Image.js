@@ -1,9 +1,5 @@
 import Link from "@ui/Link";
-import {
-	getStableFetchCacheOptions,
-	SIGNED_URL_CACHE_TTL_MS,
-	useFetchJSON,
-} from "@util/api/fetch";
+import { useFetchJSON } from "@util/api/fetch";
 import Progress from "@widgets/Progress";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
@@ -29,7 +25,6 @@ export default function ImageWidget({
 		needsSignedUrl && "/api/player",
 		{
 			headers: { path: encodeURIComponent(path) },
-			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
 		},
 		[path],
 		needsSignedUrl,

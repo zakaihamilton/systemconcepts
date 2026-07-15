@@ -26,7 +26,9 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const component = "player";
-const PLAYER_CACHE_TTL_SECONDS = 2 * 60 * 60;
+// Signed object URLs expire after three hours. Keep the server cache much
+// shorter so a browser never receives an already-expired URL.
+const PLAYER_CACHE_TTL_SECONDS = 30 * 60;
 function getWasabiKey(path) {
 	let key = path.startsWith("/") ? path.substring(1) : path;
 	if (key.startsWith("aws/sessions/")) {

@@ -1,11 +1,7 @@
 import { ContentSize } from "@components/Page/Content";
 import ErrorIcon from "@icons/svg/Error.svg";
 import { useSync } from "@sync/sync";
-import {
-	getStableFetchCacheOptions,
-	SIGNED_URL_CACHE_TTL_MS,
-	useFetchJSON,
-} from "@util/api/fetch";
+import { useFetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { readBinary } from "@util/data/binary";
 import { makePath } from "@util/data/path";
@@ -47,7 +43,6 @@ function useImagePath(imageName = "", extension) {
 		"/api/player",
 		{
 			headers: { path: encodeURIComponent(path) },
-			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
 		},
 		[path],
 		path && group,

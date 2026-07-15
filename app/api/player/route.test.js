@@ -10,6 +10,7 @@ import {
 	getWasabi,
 	metadataInfo as wasabiMetadataInfo,
 } from "@util/storage/wasabi";
+import { unstable_cache } from "next/cache";
 import { GET } from "./route";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({ getSignedUrl: jest.fn() }));
@@ -97,6 +98,16 @@ describe("/api/player transcript URLs", () => {
 			responseContentDisposition:
 				'attachment; filename="2024-08-26 The Serpents.txt"',
 		});
+	});
+
+	it("caches signed metadata for only thirty minutes", async () => {
+		await GET(request());
+
+		expect(unstable_cache).toHaveBeenCalledWith(
+			expect.any(Function),
+			expect.any(Array),
+			{ revalidate: 30 * 60 },
+		);
 	});
 
 	it("signs the inferred same-name transcript against AWS", async () => {

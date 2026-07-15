@@ -5,11 +5,7 @@ import ClosedCaptionIcon from "@icons/svg/ClosedCaption.svg";
 import ClosedCaptionOffIcon from "@icons/svg/ClosedCaptionOff.svg";
 import InfoIcon from "@icons/svg/Info.svg";
 import VideoLabelIcon from "@icons/svg/VideoLabel.svg";
-import {
-	getStableFetchCacheOptions,
-	SIGNED_URL_CACHE_TTL_MS,
-	useFetchJSON,
-} from "@util/api/fetch";
+import { useFetchJSON } from "@util/api/fetch";
 import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";
 import {
@@ -105,7 +101,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		"/api/player",
 		{
 			headers: { path: encodeURIComponent(path) },
-			...getStableFetchCacheOptions(SIGNED_URL_CACHE_TTL_MS),
 		},
 		[path],
 		path && group,

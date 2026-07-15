@@ -1,6 +1,12 @@
 "use strict";
 
 module.exports = [
+	// Player metadata contains short-lived signed object URLs. It must always
+	// reach the server so Workbox cannot replay an expired URL while offline.
+	{
+		urlPattern: /\/api\/player$/i,
+		handler: "NetworkOnly",
+	},
 	{
 		urlPattern: /\/api\/sessions(?:\?.*)?$/i,
 		handler: "StaleWhileRevalidate",
