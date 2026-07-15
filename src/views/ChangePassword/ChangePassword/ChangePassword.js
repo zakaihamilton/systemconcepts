@@ -62,17 +62,16 @@ export default function ChangePassword() {
 	const onSubmit = () => {
 		setValidate(true);
 		if (!invalidFields && !inProgress) {
-			const [id] = idState;
 			const [oldPassword] = oldPasswordState;
 			const [newPassword] = newPasswordState;
 			setProgress(true);
 			fetchJSON("/api/login", {
-				method: "PUT",
-				headers: {
-					id,
-					oldpassword: encodeURIComponent(oldPassword),
-					newpassword: encodeURIComponent(newPassword),
-				},
+				method: "POST",
+				body: JSON.stringify({
+					action: "password-change",
+					oldPassword,
+					newPassword,
+				}),
 			})
 				.then(({ err }) => {
 					if (err) {

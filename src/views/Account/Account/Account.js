@@ -219,10 +219,8 @@ export default function Account({ redirect }) {
 				id = id.toLowerCase();
 				setProgress(true);
 				fetchJSON("/api/login", {
-					headers: {
-						id,
-						password: encodeURIComponent(password),
-					},
+					method: "POST",
+					body: JSON.stringify({ action: "login", id, password, remember }),
 				})
 					.then(async (data) => {
 						const { err } = data;

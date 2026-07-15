@@ -1,4 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
+import { verifyRssMediaToken } from "@util/api/rssMediaToken";
 import { NextResponse } from "next/server";
 import { MEDIA_CACHE_HEADERS, NO_STORE_HEADERS } from "../cache";
 
@@ -8,23 +9,6 @@ export const dynamic = "force-dynamic";
 const SIGNED_URL_TTL_MS = 23 * 60 * 60 * 1000;
 const importedHmacKeys = new Map();
 const signedUrlCache = new Map();
-
-function normalizePath(path) {
-	if (!path) return path;
-	return path.startsWith("/") ? path.substring(1) : path;
-}
-
-function validatePathAccess(path) {
-	if (!path) return;
-	const decoded = decodeURIComponent(path);
-	const normalized = normalizePath(decoded);
-	if (normalized.split("/").includes("..")) {
-		throw new Error("ACCESS_DENIED");
-	}
-	if (normalized.startsWith("private/") || normalized === "private") {
-		throw new Error("ACCESS_DENIED");
-	}
-}
 
 async function hmacSha256(key, data) {
 	let cryptoKey;
@@ -233,16 +217,25 @@ async function handleRequest(request) {
 				headers: NO_STORE_HEADERS,
 			});
 		}
-		try {
-			validatePathAccess(
-				path.startsWith("wasabi/") ? path.replace(/^wasabi\//, "") : path,
-			);
-		} catch (_err) {
+		const authorized = await verifyRssMediaToken({
+			route: "media",
+			resource: path,
+			expiresAt: searchParams.get("exp"),
+			signature: searchParams.get("sig"),
+		});
+		if (!authorized) {
 			return new NextResponse("Access Denied", {
 				status: 403,
 				headers: NO_STORE_HEADERS,
 			});
 		}
+		const capabilityTtlSeconds = Math.max(
+			1,
+			Math.min(
+				86400,
+				Number(searchParams.get("exp")) - Math.floor(Date.now() / 1000),
+			),
+		);
 
 		let s3Key = path;
 		let endpoint, region, bucket, accessKeyId, secretAccessKey;
@@ -278,7 +271,7 @@ async function handleRequest(request) {
 					key: s3Key,
 					accessKeyId,
 					secretAccessKey,
-					expiresIn: 86400,
+					expiresIn: capabilityTtlSeconds,
 					method: "HEAD",
 				});
 
@@ -327,7 +320,7 @@ async function handleRequest(request) {
 			key: s3Key,
 			accessKeyId,
 			secretAccessKey,
-			expiresIn: 86400,
+			expiresIn: capabilityTtlSeconds,
 			method: "GET",
 		});
 

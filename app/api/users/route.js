@@ -1,5 +1,6 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
+import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { findRecord, handleRequest } from "@util/storage/mongo";
@@ -13,6 +14,7 @@ const collectionName = "users";
 
 async function handleUsers(request) {
 	try {
+		if (request.method !== "GET") assertSameOrigin(request);
 		const user = await getSessionUser(request);
 		const id = user.id;
 		const queryId = request.headers.get("id");

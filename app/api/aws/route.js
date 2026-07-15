@@ -1,5 +1,6 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
+import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { roleAuth } from "@util/auth/roles";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { getDownloadUrl, handleRequest } from "@util/storage/aws";
@@ -16,6 +17,7 @@ const NO_CACHE_HEADERS = {
 
 async function handleAWS(request) {
 	try {
+		if (request.method !== "GET") assertSameOrigin(request);
 		let body = null;
 		if (request.method === "PUT" || request.method === "DELETE") {
 			try {

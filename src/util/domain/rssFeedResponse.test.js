@@ -6,8 +6,8 @@ jest.mock("@util/domain/sessionFeedEdge", () => ({
 }));
 
 describe("rssFeedResponse", () => {
-	it("uses the canonical self URL without auth params", () => {
-		const { rss } = buildRssFeed({
+	it("uses the canonical self URL without auth params", async () => {
+		const { rss } = await buildRssFeed({
 			sessions: [
 				{
 					id: "one",

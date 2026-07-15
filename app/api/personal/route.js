@@ -1,5 +1,6 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
+import { assertSameOrigin } from "@util/auth/requestSecurity";
 import { getAuthErrorStatus, getSessionUser } from "@util/auth/session";
 import { handleRequest } from "@util/storage/mongo";
 import { NextResponse } from "next/server";
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 async function handlePersonal(request) {
 	try {
+		if (request.method !== "GET") assertSameOrigin(request);
 		const user = await getSessionUser(request);
 		const id = user.id;
 

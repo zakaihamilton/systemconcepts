@@ -24,53 +24,56 @@ function escapeXml(unsafe) {
 	});
 }
 
-function buildRssItems(sessions, baseUrl) {
-	return sessions.map((session) => {
-		const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
-		const link = `${baseUrl}/#sessions/${sessionQuery}`;
-		const date = new Date(session.date).toUTCString().replace("GMT", "+0000");
-		const durationSeconds = session.duration ? Math.round(session.duration) : 0;
-		const categories = (session.tags || [])
-			.map((tag) => `<category>${escapeXml(tag)}</category>`)
-			.join("");
+async function buildRssItems(sessions, baseUrl) {
+	return Promise.all(
+		sessions.map(async (session) => {
+			const sessionQuery = `session?group=${encodeURIComponent(session.group)}&year=${encodeURIComponent(session.year)}&date=${encodeURIComponent(session.date)}&name=${encodeURIComponent(session.name)}`;
+			const link = `${baseUrl}/#sessions/${sessionQuery}`;
+			const date = new Date(session.date).toUTCString().replace("GMT", "+0000");
+			const durationSeconds = session.duration
+				? Math.round(session.duration)
+				: 0;
+			const categories = (session.tags || [])
+				.map((tag) => `<category>${escapeXml(tag)}</category>`)
+				.join("");
 
-		let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
-		if (durationSeconds > 0) {
-			description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
-		}
-		if (session.summaryText) {
-			description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
-		}
+			let description = `Group: ${escapeXml(session.group)}\nDate: ${escapeXml(session.date)}`;
+			if (durationSeconds > 0) {
+				description += `\nDuration: ${escapeXml(formatDuration(durationSeconds * 1000, true))}`;
+			}
+			if (session.summaryText) {
+				description += `\n\nSynopsis:\n${escapeXml(session.summaryText)}`;
+			}
 
-		const media = session.audio || session.video;
-		let enclosure = "";
-		if (media && media.path) {
-			const proxyUrl = getSProxyUrl(media.path, baseUrl);
-			const type = media.path.endsWith(".mp4")
-				? "video/mp4"
-				: media.path.endsWith(".m4a")
-					? "audio/x-m4a"
-					: "audio/mpeg";
-			enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
-		}
+			const media = session.audio || session.video;
+			let enclosure = "";
+			if (media && media.path) {
+				const proxyUrl = await getSProxyUrl(media.path, baseUrl);
+				const type = media.path.endsWith(".mp4")
+					? "video/mp4"
+					: media.path.endsWith(".m4a")
+						? "audio/x-m4a"
+						: "audio/mpeg";
+				enclosure = `<enclosure url="${escapeXml(proxyUrl)}" length="${media.size || 0}" type="${type}" />`;
+			}
 
-		const thumbnail = getSProxyUrl(session.image?.path, baseUrl);
-		const itemImage = `<itunes:image href="${escapeXml(thumbnail || baseUrl + "/images/rss-cover.jpg")}" />`;
+			const thumbnail = await getSProxyUrl(session.image?.path, baseUrl);
+			const itemImage = `<itunes:image href="${escapeXml(thumbnail || baseUrl + "/images/rss-cover.jpg")}" />`;
 
-		let transcriptTag = "";
-		const transcriptPath = session.subtitles?.path || session.transcriptPath;
-		const transcriptType = transcriptPath?.endsWith(".vtt")
-			? "text/vtt"
-			: "text/plain";
-		const transcriptUrl = getTranscriptProxyUrlFast(session, baseUrl);
-		if (transcriptUrl) {
-			transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
-		}
+			let transcriptTag = "";
+			const transcriptPath = session.subtitles?.path || session.transcriptPath;
+			const transcriptType = transcriptPath?.endsWith(".vtt")
+				? "text/vtt"
+				: "text/plain";
+			const transcriptUrl = await getTranscriptProxyUrlFast(session, baseUrl);
+			if (transcriptUrl) {
+				transcriptTag = `<podcast:transcript url="${escapeXml(transcriptUrl)}" type="${transcriptType}" />`;
+			}
 
-		const author = "info@systemconcepts.app (System Concepts)";
-		const itunesAuthor = "System Concepts";
+			const author = "info@systemconcepts.app (System Concepts)";
+			const itunesAuthor = "System Concepts";
 
-		return `
+			return `
     <item>
       <title>[${escapeXml(session.group?.toUpperCase()[0] + session.group?.slice(1))}] ${escapeXml(session.date + " " + session.name)}</title>
       <link>${escapeXml(link)}</link>
@@ -88,11 +91,17 @@ function buildRssItems(sessions, baseUrl) {
       <itunes:summary>${escapeXml(session.summaryText)}</itunes:summary>
       <itunes:explicit>true</itunes:explicit>
     </item>`;
-	});
+		}),
+	);
 }
 
-export function buildRssFeed({ sessions, group, baseUrl, canonicalSelfUrl }) {
-	const rssItems = buildRssItems(sessions, baseUrl);
+export async function buildRssFeed({
+	sessions,
+	group,
+	baseUrl,
+	canonicalSelfUrl,
+}) {
+	const rssItems = await buildRssItems(sessions, baseUrl);
 	const maxDate =
 		sessions.length > 0
 			? new Date(

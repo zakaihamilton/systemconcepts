@@ -8,6 +8,11 @@ import {
 	verifyPasskeyAuth,
 	verifyPasskeyRegistration,
 } from "@util/auth/passkey";
+import { checkRateLimit } from "@util/auth/rateLimit";
+import {
+	assertSameOrigin,
+	getTrustedClientIp,
+} from "@util/auth/requestSecurity";
 import {
 	createSession,
 	getSessionUser,
@@ -16,6 +21,21 @@ import {
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+async function limitPasskey(request, action, id) {
+	const ip = getTrustedClientIp(request);
+	await checkRateLimit(request, {
+		limit: 10,
+		windowMs: 15 * 60 * 1000,
+		key: `passkey:${action}:ip:${ip}`,
+	});
+	if (id)
+		await checkRateLimit(request, {
+			limit: 20,
+			windowMs: 15 * 60 * 1000,
+			key: `passkey:${action}:account:${id.toLowerCase()}`,
+		});
+}
 
 export async function GET(request) {
 	const host =
@@ -30,6 +50,7 @@ export async function GET(request) {
 	const last_name = url.searchParams.get("last_name");
 
 	try {
+		await limitPasskey(request, action || "unknown", id);
 		if (action === "register-options") {
 			let authenticated = false;
 			try {
@@ -69,6 +90,8 @@ export async function DELETE(request) {
 	const credentialId = url.searchParams.get("credentialId");
 
 	try {
+		assertSameOrigin(request);
+		await limitPasskey(request, "delete", id);
 		const user = await getSessionUser(request);
 		if (user.id !== id?.toLowerCase())
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -90,9 +113,10 @@ export async function POST(request) {
 	const url = new URL(request.url);
 	const action = url.searchParams.get("action");
 	const id = url.searchParams.get("id");
-	const response = await request.json();
-
 	try {
+		assertSameOrigin(request);
+		await limitPasskey(request, action || "unknown", id);
+		const response = await request.json();
 		if (action === "register-verify") {
 			let authenticated = false;
 			try {

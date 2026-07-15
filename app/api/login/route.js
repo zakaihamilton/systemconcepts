@@ -9,6 +9,10 @@ import {
 } from "@util/auth/login";
 import { checkRateLimit } from "@util/auth/rateLimit";
 import {
+	assertSameOrigin,
+	getTrustedClientIp,
+} from "@util/auth/requestSecurity";
+import {
 	clearSessionCookies,
 	createSession,
 	getAuthErrorStatus,
@@ -24,26 +28,7 @@ export async function GET(request) {
 	let error = null;
 	let params = {};
 	try {
-		const id = request.headers.get("id");
-		const password = request.headers.get("password");
-		const remember = request.headers.get("remember") !== "false";
-
-		if (password) {
-			// Build req-like object for rate limiter
-			const ip =
-				request.headers.get("x-forwarded-for") ||
-				request.headers.get("x-real-ip") ||
-				"";
-			await checkRateLimit({ headers: { "x-forwarded-for": ip } });
-			params = await login({
-				id,
-				password: decodeURIComponent(password),
-				api: "login",
-			});
-			params.session = await createSession(params.id, remember);
-		} else {
-			params = await getSessionUser(request);
-		}
+		params = await getSessionUser(request);
 	} catch (err) {
 		error = err;
 	}
@@ -85,28 +70,46 @@ export async function GET(request) {
 	return response;
 }
 
-export async function PUT(request) {
-	const headers = request.headers;
-	const reset = headers.get("reset");
-	const newpassword = headers.get("newpassword");
-	const code = headers.get("code");
-	const oldpassword = headers.get("oldpassword");
+async function limit(
+	request,
+	action,
+	id,
+	limit = 5,
+	windowMs = 15 * 60 * 1000,
+) {
+	const ip = getTrustedClientIp(request);
+	await checkRateLimit(request, { limit, windowMs, key: `${action}:ip:${ip}` });
+	if (id)
+		await checkRateLimit(request, {
+			limit: limit * 2,
+			windowMs,
+			key: `${action}:account:${String(id).toLowerCase()}`,
+		});
+}
 
-	if (reset) {
+export async function POST(request) {
+	let body;
+	try {
+		assertSameOrigin(request);
+		body = await request.json();
+	} catch (err) {
+		return NextResponse.json({ err: getSafeError(err) }, { status: 400 });
+	}
+	const {
+		action,
+		id,
+		password,
+		newPassword,
+		oldPassword,
+		code,
+		email,
+		firstName,
+		lastName,
+		remember = true,
+	} = body || {};
+	if (action === "reset-request") {
 		try {
-			const id = headers.get("id");
-			const ip =
-				request.headers.get("x-forwarded-for") ||
-				request.headers.get("x-real-ip") ||
-				"unknown";
-			await checkRateLimit(
-				{ headers: { "x-forwarded-for": ip } },
-				{ limit: 3, windowMs: 15 * 60 * 1000, key: `reset-ip:${ip}` },
-			);
-			await checkRateLimit(
-				{},
-				{ limit: 3, windowMs: 60 * 60 * 1000, key: `reset-user:${id}` },
-			);
+			await limit(request, "reset-request", id, 3);
 			await sendResetEmail({ id });
 			return NextResponse.json({ message: "RESET_REQUEST_ACCEPTED" });
 		} catch (err) {
@@ -116,18 +119,18 @@ export async function PUT(request) {
 			}
 			return NextResponse.json({ message: "RESET_REQUEST_ACCEPTED" });
 		}
-	} else if (newpassword && code) {
+	} else if (action === "reset-confirm") {
 		try {
-			const id = headers.get("id");
+			await limit(request, "reset-confirm", id, 5);
 			await resetPassword({
 				id,
 				code,
-				newPassword: decodeURIComponent(newpassword),
+				newPassword,
 				api: "login",
 			});
 			const user = await login({
 				id,
-				password: decodeURIComponent(newpassword),
+				password: newPassword,
 				api: "password-reset",
 			});
 			const session = await createSession(user.id);
@@ -136,47 +139,55 @@ export async function PUT(request) {
 			return response;
 		} catch (err) {
 			structuredLogger.error("login error: ", err);
-			return NextResponse.json({ err: getSafeError(err) });
+			return NextResponse.json(
+				{ err: getSafeError(err) },
+				{ status: err === "RATE_LIMIT_EXCEEDED" ? 429 : 400 },
+			);
 		}
-	} else if (oldpassword && newpassword) {
+	} else if (action === "password-change") {
 		try {
-			const id = headers.get("id");
+			const user = await getSessionUser(request);
+			await limit(request, "password-change", user.id, 5);
 			await changePassword({
-				id,
-				oldPassword: decodeURIComponent(oldpassword),
-				newPassword: decodeURIComponent(newpassword),
+				id: user.id,
+				oldPassword,
+				newPassword,
 				api: "login",
 			});
-			const user = await login({
-				id,
-				password: decodeURIComponent(newpassword),
+			const updatedUser = await login({
+				id: user.id,
+				password: newPassword,
 				api: "password-change",
 			});
-			const session = await createSession(user.id);
-			const response = NextResponse.json({ role: user.role || "visitor" });
-			setSessionCookies(response, session, user);
+			const session = await createSession(updatedUser.id);
+			const response = NextResponse.json({
+				role: updatedUser.role || "visitor",
+			});
+			setSessionCookies(response, session, updatedUser);
 			return response;
 		} catch (err) {
 			structuredLogger.error("login error: ", err);
-			return NextResponse.json({ err: getSafeError(err) });
+			return NextResponse.json(
+				{ err: getSafeError(err) },
+				{
+					status:
+						err === "RATE_LIMIT_EXCEEDED" ? 429 : getAuthErrorStatus(err, 400),
+				},
+			);
 		}
-	} else {
+	} else if (action === "register") {
 		try {
-			const id = headers.get("id");
-			const email = headers.get("email");
-			const first_name = headers.get("first_name");
-			const last_name = headers.get("last_name");
-			const password = headers.get("password");
+			await limit(request, "register", id, 3);
 			await register({
 				id,
 				email,
-				firstName: decodeURIComponent(first_name),
-				lastName: decodeURIComponent(last_name),
-				password: decodeURIComponent(password),
+				firstName,
+				lastName,
+				password,
 			});
 			const user = await login({
 				id,
-				password: decodeURIComponent(password),
+				password,
 				api: "register",
 			});
 			const session = await createSession(user.id);
@@ -185,12 +196,42 @@ export async function PUT(request) {
 			return response;
 		} catch (err) {
 			structuredLogger.error("login error: ", err);
-			return NextResponse.json({ err: getSafeError(err) });
+			return NextResponse.json(
+				{ err: getSafeError(err) },
+				{ status: err === "RATE_LIMIT_EXCEEDED" ? 429 : 400 },
+			);
+		}
+	} else if (action === "login") {
+		try {
+			await limit(request, "login", id, 5, 60 * 1000);
+			const user = await login({ id, password, api: "login" });
+			const session = await createSession(user.id, remember !== false);
+			const response = NextResponse.json({
+				id: user.id,
+				role: user.role || "visitor",
+				firstName: user.firstName,
+				lastName: user.lastName,
+				email: user.email,
+			});
+			setSessionCookies(response, session, user);
+			return response;
+		} catch (err) {
+			structuredLogger.error("login error: ", err);
+			return NextResponse.json(
+				{ err: getSafeError(err) },
+				{ status: err === "RATE_LIMIT_EXCEEDED" ? 429 : 401 },
+			);
 		}
 	}
+	return NextResponse.json({ err: "INVALID_ACTION" }, { status: 400 });
 }
 
 export async function DELETE(request) {
+	try {
+		assertSameOrigin(request);
+	} catch (err) {
+		return NextResponse.json({ err: getSafeError(err) }, { status: 403 });
+	}
 	await revokeSession(request);
 	const response = NextResponse.json({});
 	clearSessionCookies(response);

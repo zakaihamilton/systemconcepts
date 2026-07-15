@@ -1,4 +1,4 @@
-import { logger as structuredLogger } from "@util/api/logger";
+import { getTrustedClientIp } from "@util/auth/requestSecurity";
 import { getCollection } from "@util/storage/mongo";
 
 export async function checkRateLimit(
@@ -9,21 +9,8 @@ export async function checkRateLimit(
 	if (key) {
 		identifier = String(key);
 	} else {
-		const headers = req.headers || {};
-		const forwarded =
-			req.ip ||
-			(typeof headers.get === "function"
-				? headers.get("x-forwarded-for")
-				: headers["x-forwarded-for"]);
-		const remoteAddress = req.socket?.remoteAddress || "unknown";
-		identifier = forwarded
-			? String(forwarded).split(",")[0].trim()
-			: remoteAddress;
-
-		if (!identifier) {
-			structuredLogger.warn("Could not determine IP for rate limiting");
-			return;
-		}
+		if (req.headers?.get) identifier = getTrustedClientIp(req);
+		else identifier = "unknown";
 	}
 
 	const collectionName = "rate_limits";

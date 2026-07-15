@@ -1,4 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
+import { verifyRssMediaToken } from "@util/api/rssMediaToken";
 import { getZipTextEntryId } from "@util/domain/updateSessions/metadataParser";
 import { downloadData, validatePathAccess } from "@util/storage/aws";
 import JSZip from "jszip";
@@ -34,6 +35,18 @@ export async function GET(request) {
 		const { searchParams } = new URL(request.url);
 		const zipPath = decodeBase64Url(searchParams.get("p"));
 		const fileName = decodeBase64Url(searchParams.get("f"));
+		const resource = `${zipPath}\n${fileName}`;
+		const authorized = await verifyRssMediaToken({
+			route: "transcript",
+			resource,
+			expiresAt: searchParams.get("exp"),
+			signature: searchParams.get("sig"),
+		});
+		if (!authorized)
+			return new NextResponse("Not Found", {
+				status: 404,
+				headers: NO_STORE_HEADERS,
+			});
 
 		validatePathAccess(zipPath);
 		validatePathAccess(fileName);

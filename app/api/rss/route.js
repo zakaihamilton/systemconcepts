@@ -74,7 +74,7 @@ export async function GET(request) {
 				0,
 				count,
 			);
-			const built = buildRssFeed({
+			const built = await buildRssFeed({
 				sessions,
 				group,
 				baseUrl,

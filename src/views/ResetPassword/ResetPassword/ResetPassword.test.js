@@ -75,7 +75,7 @@ describe("ResetPassword View", () => {
 		expect(screen.getByTestId("input-newpassword")).toBeInTheDocument();
 	});
 
-	it("calls fetchJSON with reset:true when no code is provided", async () => {
+	it("requests a password reset with a JSON action", async () => {
 		fetchJSON.mockResolvedValue({});
 		render(<ResetPassword />);
 
@@ -88,13 +88,14 @@ describe("ResetPassword View", () => {
 			expect(fetchJSON).toHaveBeenCalledWith(
 				"/api/login",
 				expect.objectContaining({
-					headers: expect.objectContaining({ reset: true }),
+					method: "POST",
+					body: JSON.stringify({ action: "reset-request", id: "testuser" }),
 				}),
 			);
 		});
 	});
 
-	it("calls fetchJSON with code when code is provided", async () => {
+	it("confirms a password reset with a JSON action", async () => {
 		fetchJSON.mockResolvedValue({ hash: "newhash" });
 		render(<ResetPassword path="code123" />);
 
@@ -110,7 +111,13 @@ describe("ResetPassword View", () => {
 			expect(fetchJSON).toHaveBeenCalledWith(
 				"/api/login",
 				expect.objectContaining({
-					headers: expect.objectContaining({ code: "code123" }),
+					method: "POST",
+					body: JSON.stringify({
+						action: "reset-confirm",
+						id: "testuser",
+						newPassword: "password123",
+						code: "code123",
+					}),
 				}),
 			);
 		});

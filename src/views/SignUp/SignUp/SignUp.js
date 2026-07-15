@@ -100,14 +100,15 @@ export default function SignUp() {
 			const [password] = passwordState;
 			setProgress(true);
 			fetchJSON("/api/login", {
-				method: "PUT",
-				headers: {
+				method: "POST",
+				body: JSON.stringify({
+					action: "register",
 					id,
-					first_name: encodeURIComponent(firstName),
-					last_name: encodeURIComponent(lastName),
+					firstName,
+					lastName,
 					email,
-					password: encodeURIComponent(password),
-				},
+					password,
+				}),
 			})
 				.then(({ err }) => {
 					if (err) {

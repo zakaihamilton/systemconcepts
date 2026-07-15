@@ -98,7 +98,7 @@ describe("SignUp View", () => {
 			expect(fetchJSON).toHaveBeenCalledWith(
 				"/api/login",
 				expect.objectContaining({
-					method: "PUT",
+					method: "POST",
 				}),
 			);
 		});

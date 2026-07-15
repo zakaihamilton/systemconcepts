@@ -1,4 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
+import { createRssMediaUrl } from "@util/api/rssMediaToken";
 /**
  * Edge-compatible session feed utilities.
  * Mirrors the API of sessionFeed.js but uses only Web Platform APIs:
@@ -65,16 +66,6 @@ function matchesGroup(filePath, group) {
 
 function normalizeProxyPath(path) {
 	return path.replace(/^\//, "").replace(/^aws\//, "");
-}
-
-/**
- * Edge-compatible base64url encoding (no Buffer).
- * Encodes the string as UTF-8 then base64url.
- */
-function encodeBase64Url(str) {
-	const bytes = new TextEncoder().encode(str);
-	const binStr = Array.from(bytes, (b) => String.fromCharCode(b)).join("");
-	return btoa(binStr).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 function getMediaPath(session) {
@@ -179,12 +170,16 @@ export function sortSessions(sessions) {
 	});
 }
 
-export function getSProxyUrl(path, baseUrl) {
+export async function getSProxyUrl(path, baseUrl) {
 	if (!path) return null;
 	const cleanPath = normalizeProxyPath(path);
-	const b64 = encodeBase64Url(cleanPath);
 	const ext = path.split(".").pop() || "bin";
-	return `${baseUrl}/api/rss/s?p=${b64}&e=.${ext}`;
+	return createRssMediaUrl({
+		baseUrl,
+		route: "media",
+		path: cleanPath,
+		extension: `.${ext}`,
+	});
 }
 
 /**
@@ -192,7 +187,7 @@ export function getSProxyUrl(path, baseUrl) {
  * Resolves the best available transcript path from session metadata
  * WITHOUT issuing any S3 HeadObject calls.
  */
-export function getTranscriptProxyUrlFast(session, baseUrl) {
+export async function getTranscriptProxyUrlFast(session, baseUrl) {
 	if (!session) return null;
 
 	// Prefer explicitly declared paths (highest confidence)

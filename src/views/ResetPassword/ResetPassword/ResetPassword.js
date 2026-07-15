@@ -67,15 +67,12 @@ export default function ResetPassword({ path = "" }) {
 			const [newPassword] = newPasswordState;
 			setProgress(true);
 			fetchJSON("/api/login", {
-				method: "PUT",
-				headers: {
-					id,
-					...(!hasCode && { reset: true }),
-					...(hasCode && {
-						newpassword: encodeURIComponent(newPassword),
-						code,
-					}),
-				},
+				method: "POST",
+				body: JSON.stringify(
+					hasCode
+						? { action: "reset-confirm", id, newPassword, code }
+						: { action: "reset-request", id },
+				),
 			})
 				.then(({ err }) => {
 					if (err) {
