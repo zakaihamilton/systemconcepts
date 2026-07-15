@@ -20,6 +20,7 @@ import PlayerButton from "../Button";
 import styles from "./Controls.module.css";
 
 const skipPoints = 10;
+const PLAY_LOADING_DELAY_MS = 150;
 
 function PlaybackIcon({ loading, paused, loadingLabel }) {
 	return (
@@ -64,6 +65,16 @@ export default function Controls({
 	const visible = usePageVisibility();
 	const [loading, setLoading] = useState(false);
 	const [playPending, setPlayPending] = useState(false);
+	const playPendingTimeoutRef = useRef(null);
+	const playRequestedRef = useRef(false);
+	const clearPlayPending = useCallback(() => {
+		if (playPendingTimeoutRef.current) {
+			clearTimeout(playPendingTimeoutRef.current);
+			playPendingTimeoutRef.current = null;
+		}
+		playRequestedRef.current = false;
+		setPlayPending(false);
+	}, []);
 	const [loadedPath, setLoadedPath] = useState(() => {
 		if (playerRef && !isNaN(playerRef.duration) && playerRef.duration > 0) {
 			return path;
@@ -142,6 +153,12 @@ export default function Controls({
 				clearPendingError();
 			}
 			if (name === "loadstart" || name === "waiting" || name === "seeking") {
+				// A loadstart commonly follows a Play click even when playback starts
+				// immediately. Leave both the button and progress bar unchanged during
+				// the brief grace period managed by play().
+				if (playRequestedRef.current && name === "loadstart") {
+					return;
+				}
 				setLoading(true);
 			} else if (
 				name === "playing" ||
@@ -151,11 +168,11 @@ export default function Controls({
 			) {
 				setLoading(false);
 				if (name === "playing") {
-					setPlayPending(false);
+					clearPlayPending();
 					setLoadedPath(stateRef.current.path);
 				}
 				if (name === "error") {
-					setPlayPending(false);
+					clearPlayPending();
 				}
 			}
 			if (name === "canplay" || name === "loadedmetadata") {
@@ -222,11 +239,15 @@ export default function Controls({
 				clearTimeout(errorTimeoutRef.current);
 				errorTimeoutRef.current = null;
 			}
+			if (playPendingTimeoutRef.current) {
+				clearTimeout(playPendingTimeoutRef.current);
+				playPendingTimeoutRef.current = null;
+			}
 			listeners.map(({ name, callback }) =>
 				playerRef.removeEventListener(name, callback),
 			);
 		};
-	}, [playerRef, metadataKey, renewing]);
+	}, [playerRef, metadataKey, renewing, clearPlayPending]);
 
 	useEffect(() => {
 		if (renewing && errorTimeoutRef.current) {
@@ -441,27 +462,29 @@ export default function Controls({
 		},
 	};
 	const play = () => {
-		// Starting playback can wait on a signed media URL or buffering before the
-		// browser dispatches its first media event. Reflect that wait immediately
-		// so the Play button does not appear unresponsive.
-		setLoading(true);
-		setPlayPending(true);
+		// Do not flash a spinner for the usual immediate start. If playback has not
+		// started shortly, show the pending state so slower signed URLs/buffering
+		// still have clear feedback.
+		playRequestedRef.current = true;
+		playPendingTimeoutRef.current = setTimeout(() => {
+			playPendingTimeoutRef.current = null;
+			setPlayPending(true);
+		}, PLAY_LOADING_DELAY_MS);
 		playerRef.play().catch((err) => {
-			setLoading(false);
-			setPlayPending(false);
+			clearPlayPending();
 			structuredLogger.error(err);
 		});
 	};
 	const pause = () => {
-		setPlayPending(false);
+		clearPlayPending();
 		playerRef.pause();
 	};
 	const stop = useCallback(() => {
-		setPlayPending(false);
+		clearPlayPending();
 		playerRef.pause();
 		playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
 		setCurrentTime(0);
-	}, [playerRef]);
+	}, [playerRef, clearPlayPending]);
 
 	const prevPath = useRef(path);
 	useEffect(() => {
