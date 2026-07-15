@@ -8,7 +8,10 @@ const CACHE_EXTENSIONS = {
 // Bump this when the generated RSS document changes in a way that makes a
 // previously stored document unusable (for example, enclosure URL format).
 const CACHE_CONTENT_VERSIONS = {
-	rss: "media-url-v3",
+	// Force regeneration after media capabilities became mandatory. Cached v3
+	// documents may still contain legacy unsigned enclosure URLs, which the
+	// media proxy correctly rejects.
+	rss: "media-url-v4",
 };
 
 const AUTH_PARAMS = new Set(["id", "token"]);

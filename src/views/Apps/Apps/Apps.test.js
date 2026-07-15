@@ -41,6 +41,16 @@ describe("Apps View", () => {
 			apps: true,
 			Icon: () => <div data-testid="icon2" />,
 		},
+		{
+			id: "settings",
+			name: "Settings",
+			Icon: () => <div data-testid="settings-icon" />,
+		},
+		{
+			id: "account",
+			name: "Account",
+			Icon: () => <div data-testid="account-icon" />,
+		},
 		{ id: "page1", name: "Page 1", apps: false },
 	];
 	const mockSessions = [
@@ -103,9 +113,11 @@ describe("Apps View", () => {
 		const links = within(getByTestId("app-quick-access-items")).getAllByRole(
 			"link",
 		);
-		expect(links).toHaveLength(2);
+		expect(links).toHaveLength(4);
 		expect(links[0]).toHaveTextContent("App 2");
 		expect(links[1]).toHaveTextContent("App 1");
+		expect(links[2]).toHaveTextContent("Settings");
+		expect(links[3]).toHaveTextContent("Account");
 	});
 
 	it("places quick access before the session sections", () => {

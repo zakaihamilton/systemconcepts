@@ -4,6 +4,7 @@ import styles from "./Apps.module.css";
 
 const SESSION_LIMIT = 4;
 const LATEST_SESSION_LIMIT = SESSION_LIMIT * 2;
+const TRAILING_QUICK_ACCESS_PAGE_IDS = ["settings", "account"];
 
 function getSessionKey({ group, date, name }) {
 	return `${group || ""}::${date || ""}::${name || ""}`;
@@ -138,9 +139,19 @@ export default function Apps() {
 		setPath("schedule");
 	};
 
-	const appItems = pages
-		.filter((page) => page.apps && !page.category)
-		.sort((a, b) => b.name.localeCompare(a.name));
+	const appItems = [
+		...pages
+			.filter(
+				(page) =>
+					page.apps &&
+					!page.category &&
+					!TRAILING_QUICK_ACCESS_PAGE_IDS.includes(page.id),
+			)
+			.sort((a, b) => b.name.localeCompare(a.name)),
+		...TRAILING_QUICK_ACCESS_PAGE_IDS.map((id) =>
+			pages.find((page) => page.id === id),
+		).filter(Boolean),
+	];
 	const sessionsByKey = new Map(
 		(sessions || []).map((session) => [getSessionKey(session), session]),
 	);
@@ -175,7 +186,9 @@ export default function Apps() {
 								href={"#" + page.id}
 								underline="none"
 								key={page.id}
-								className={styles.appItem}
+								className={`${styles.appItem} ${
+									page.id === "settings" ? styles.trailingAppItem : ""
+								}`}
 								onClick={() => setPath(page.id)}
 							>
 								{Icon && <Icon className={styles.appIcon} />}

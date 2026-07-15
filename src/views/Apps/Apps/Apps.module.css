@@ -123,6 +123,18 @@
 	transform: translateY(-1px);
 }
 
+.trailingAppItem {
+	position: relative;
+}
+
+.trailingAppItem::before {
+	position: absolute;
+	content: "";
+	inset-block: 0.4rem;
+	inset-inline-start: -0.2rem;
+	border-inline-start: 1px solid rgba(var(--border-color-rgb), 0.72);
+}
+
 .appIcon {
 	font-size: 1.05rem !important;
 }
