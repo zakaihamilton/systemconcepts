@@ -1,33 +1,72 @@
 import clsx from "clsx";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 
 export default function Autocomplete({
 	options = [],
 	value,
 	onChange,
 	renderInput,
-	isOptionEqualToValue,
+	multiple = false,
+	inputValue,
+	onInputChange,
+	filterOptions,
+	isOptionEqualToValue = (option, selected) => option === selected,
+	getOptionLabel = (option) => String(option ?? ""),
+	renderOption,
+	renderValue,
 	className,
 	...props
 }) {
 	const [open, setOpen] = useState(false);
-	const [inputValue, setInputValue] = useState(value || "");
+	const [uncontrolledInputValue, setUncontrolledInputValue] = useState("");
 	const containerRef = useRef(null);
+	const selectedValues = multiple ? (Array.isArray(value) ? value : []) : value;
+	const currentInputValue = inputValue ?? uncontrolledInputValue;
 
-	const filtered = options.filter((opt) =>
-		String(opt).toLowerCase().includes(String(inputValue).toLowerCase()),
-	);
+	const filtered = filterOptions
+		? filterOptions(options, { inputValue: currentInputValue })
+		: options.filter((option) =>
+				getOptionLabel(option)
+					.toLowerCase()
+					.includes(String(currentInputValue).toLowerCase()),
+			);
+
+	const setCurrentInputValue = (event, nextValue) => {
+		setUncontrolledInputValue(nextValue);
+		onInputChange?.(event, nextValue);
+	};
 
 	const handleSelect = (option) => {
-		setInputValue(option);
-		setOpen(false);
-		onChange?.(null, option);
+		const nextValue = multiple
+			? [
+					...selectedValues.filter(
+						(selected) => !isOptionEqualToValue(option, selected),
+					),
+					option,
+				]
+			: option;
+		setCurrentInputValue(null, "");
+		setOpen(multiple);
+		onChange?.(null, nextValue);
 	};
 
 	const params = {
 		InputProps: {
 			onFocus: () => setOpen(true),
 			onBlur: () => setTimeout(() => setOpen(false), 150),
+			startAdornment:
+				renderValue && multiple
+					? renderValue(selectedValues, ({ index }) => ({
+							key: `${getOptionLabel(selectedValues[index])}-${index}`,
+							onDelete: () =>
+								onChange?.(
+									null,
+									selectedValues.filter(
+										(_, selectedIndex) => selectedIndex !== index,
+									),
+								),
+						}))
+					: undefined,
 		},
 	};
 
@@ -37,11 +76,11 @@ export default function Autocomplete({
 			className={clsx(className)}
 			style={{ position: "relative" }}
 		>
-			{renderInput({
+			{renderInput?.({
 				...params,
-				value: inputValue,
+				value: currentInputValue,
 				onChange: (e) => {
-					setInputValue(e.target.value);
+					setCurrentInputValue(e, e.target.value);
 					setOpen(true);
 				},
 			})}
@@ -64,20 +103,28 @@ export default function Autocomplete({
 						overflow: "auto",
 					}}
 				>
-					{filtered.map((option) => (
-						<li
-							key={option}
-							role="option"
-							onMouseDown={() => handleSelect(option)}
-							style={{
+					{filtered.map((option, index) => {
+						const optionProps = {
+							key: `${getOptionLabel(option)}-${index}`,
+							role: "option",
+							onMouseDown: () => handleSelect(option),
+							style: {
 								padding: "8px 12px",
 								cursor: "pointer",
 								borderRadius: 6,
-							}}
-						>
-							{option}
-						</li>
-					))}
+							},
+						};
+
+						if (renderOption) {
+							return (
+								<Fragment key={optionProps.key}>
+									{renderOption(optionProps, option)}
+								</Fragment>
+							);
+						}
+
+						return <li {...optionProps}>{getOptionLabel(option)}</li>;
+					})}
 				</ul>
 			)}
 		</div>

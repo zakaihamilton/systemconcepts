@@ -21,6 +21,20 @@
 	background-color: rgba(var(--text-color-rgb), 0.08);
 }
 
+.outlined {
+	background-color: var(--main-background-alternative);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md, 10px);
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease,
+		background-color 0.2s ease;
+}
+
+.outlined:hover {
+	border-color: rgba(var(--primary-color-rgb), 0.5);
+}
+
 .focused {
 	background-color: rgba(var(--primary-color-rgb), 0.05);
 	box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);

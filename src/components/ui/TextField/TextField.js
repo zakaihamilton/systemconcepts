@@ -62,6 +62,7 @@ const TextField = forwardRef(function TextField(
 		select && styles.select,
 		inputClassName,
 	);
+	const resolvedStartAdornment = InputProps?.startAdornment || startAdornment;
 
 	const displayValue =
 		select && renderValue && multiple
@@ -77,6 +78,7 @@ const TextField = forwardRef(function TextField(
 			<div
 				className={clsx(
 					variant === "filled" && styles.filled,
+					variant === "outlined" && styles.outlined,
 					focused && styles.focused,
 					error && styles.error,
 				)}
@@ -94,8 +96,10 @@ const TextField = forwardRef(function TextField(
 					</label>
 				)}
 				<div className={styles.inputWrapper}>
-					{startAdornment && (
-						<span className={styles.adornmentStart}>{startAdornment}</span>
+					{resolvedStartAdornment && (
+						<span className={styles.adornmentStart}>
+							{resolvedStartAdornment}
+						</span>
 					)}
 					{select ? (
 						<select
