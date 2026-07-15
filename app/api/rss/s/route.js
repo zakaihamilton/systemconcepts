@@ -1,9 +1,5 @@
 import { logger as structuredLogger } from "@util/api/logger";
-import {
-	isLegacyRssMediaRequest,
-	isPublicRssMediaPath,
-	verifyRssMediaToken,
-} from "@util/api/rssMediaToken";
+import { verifyRssMediaToken } from "@util/api/rssMediaToken";
 import { NextResponse } from "next/server";
 import { MEDIA_CACHE_HEADERS, NO_STORE_HEADERS } from "../cache";
 
@@ -221,29 +217,25 @@ async function handleRequest(request) {
 				headers: NO_STORE_HEADERS,
 			});
 		}
-		const expiresAt = searchParams.get("exp");
-		const signature = searchParams.get("sig");
 		const authorized = await verifyRssMediaToken({
 			route: "media",
 			resource: path,
-			expiresAt,
-			signature,
+			expiresAt: searchParams.get("exp"),
+			signature: searchParams.get("sig"),
 		});
-		const legacyPublicUrl =
-			isLegacyRssMediaRequest({ expiresAt, signature }) &&
-			isPublicRssMediaPath(path);
-		if (!authorized && !legacyPublicUrl) {
+		if (!authorized) {
 			return new NextResponse("Access Denied", {
 				status: 403,
 				headers: NO_STORE_HEADERS,
 			});
 		}
-		const capabilityTtlSeconds = authorized
-			? Math.max(
-					1,
-					Math.min(86400, Number(expiresAt) - Math.floor(Date.now() / 1000)),
-				)
-			: 86400;
+		const capabilityTtlSeconds = Math.max(
+			1,
+			Math.min(
+				86400,
+				Number(searchParams.get("exp")) - Math.floor(Date.now() / 1000),
+			),
+		);
 
 		let s3Key = path;
 		let endpoint, region, bucket, accessKeyId, secretAccessKey;

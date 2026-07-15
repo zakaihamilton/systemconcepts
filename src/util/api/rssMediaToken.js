@@ -1,8 +1,7 @@
-// Podcast clients keep an episode's enclosure URL and may not re-fetch the
-// feed before playing it again. Keep the capability valid for the life of a
-// normal podcast subscription; the media proxy still issues short-lived S3
-// redirects for each request.
-const TOKEN_TTL_SECONDS = 365 * 24 * 60 * 60;
+// A capability limits access after a user's role changes. The RSS cache is
+// rotated before this expires so active podcast clients receive a replacement
+// enclosure URL before the old one becomes invalid.
+const TOKEN_TTL_SECONDS = 24 * 60 * 60;
 
 function encode(value) {
 	return new TextEncoder().encode(value);
@@ -59,15 +58,6 @@ export function isPublicRssMediaPath(path) {
 	const normalized = path.replace(/^\//, "");
 	if (normalized.split("/").includes("..")) return false;
 	return normalized.startsWith("sessions/") || normalized.startsWith("wasabi/");
-}
-
-// Feeds cached before RSS media capabilities were introduced contain no
-// `exp`/`sig` parameters. Those URLs were already limited to public session
-// paths by the proxy, so accept only that exact legacy shape while old feed
-// and client caches drain. A partially supplied or invalid capability remains
-// denied.
-export function isLegacyRssMediaRequest({ expiresAt, signature }) {
-	return expiresAt === null && signature === null;
 }
 
 export async function createRssMediaToken({

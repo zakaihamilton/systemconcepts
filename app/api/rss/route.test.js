@@ -1,5 +1,5 @@
 import { readApiCacheEdge } from "@util/api/apiCacheEdge";
-import { buildCanonicalApiUrl } from "@util/api/apiCacheKeys";
+import { buildApiCacheKey, buildCanonicalApiUrl } from "@util/api/apiCacheKeys";
 import { authenticateEdge, scheduleApiCacheWrite } from "@util/api/edgeApi";
 import { logger } from "@util/api/logger";
 import { buildRssFeed } from "@util/domain/rssFeedResponse";
@@ -109,7 +109,7 @@ describe("/api/rss", () => {
 		process.env = originalEnv;
 	});
 
-	it("returns the feed with six-hour Vercel caching", async () => {
+	it("returns the feed with a one-hour Vercel cache", async () => {
 		const response = await GET(
 			makeRequest(
 				"https://systemconcepts.app/api/rss?id=user-a&token=token-a&group=a&count=10",
@@ -117,9 +117,9 @@ describe("/api/rss", () => {
 		);
 
 		expect(response.status).toBe(200);
-		expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
+		expect(response.headers.get("Cache-Control")).toBe("public, max-age=3600");
 		expect(response.headers.get("Vercel-CDN-Cache-Control")).toBe(
-			"public, max-age=21600, stale-while-revalidate=86400",
+			"public, max-age=3600, stale-while-revalidate=3600",
 		);
 		expect(response.headers.get("ETag")).toBe('"abc123"');
 		expect(buildCanonicalApiUrl).toHaveBeenCalled();
@@ -138,6 +138,21 @@ describe("/api/rss", () => {
 			expect.objectContaining({ sessions: expect.any(Array) }),
 		);
 		expect(buildRssFeed.mock.calls[0][0].sessions).toHaveLength(50);
+	});
+
+	it("rotates the stored feed before media capabilities expire", async () => {
+		jest.spyOn(Date, "now").mockReturnValue(22 * 60 * 60 * 1000);
+
+		await GET(
+			makeRequest("https://systemconcepts.app/api/rss?id=user-a&token=token-a"),
+		);
+
+		expect(buildApiCacheKey).toHaveBeenCalledWith(
+			"rss",
+			{ group: "a", count: 10, mediaUrlWindow: 1 },
+			"fingerprint",
+		);
+		jest.restoreAllMocks();
 	});
 
 	it("returns matching validators and cache policy for 304 responses", async () => {

@@ -26,6 +26,11 @@ import { FEED_CACHE_HEADERS, NO_STORE_HEADERS } from "./cache";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
+// Generated enclosure capabilities last 24 hours. Rotate the storage-backed
+// feed two hours earlier, leaving enough time for the one-hour CDN response
+// and stale window without publishing an expired enclosure URL.
+const RSS_MEDIA_URL_WINDOW_MS = 22 * 60 * 60 * 1000;
+
 function getPositiveInt(value, fallback, max) {
 	const parsed = Number.parseInt(value || "", 10);
 	const safe = Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -64,7 +69,10 @@ export async function GET(request) {
 		);
 		const manifest = await loadManifest();
 		const fingerprint = getManifestFingerprint(manifest, { group });
-		const contentParams = getContentParams("rss", searchParams);
+		const contentParams = {
+			...getContentParams("rss", searchParams),
+			mediaUrlWindow: Math.floor(Date.now() / RSS_MEDIA_URL_WINDOW_MS),
+		};
 		const cacheKey = await buildApiCacheKey("rss", contentParams, fingerprint);
 		let rss = await readApiCacheEdge("rss", cacheKey);
 		let maxDate;

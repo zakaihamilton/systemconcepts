@@ -8,9 +8,9 @@ import {
 describe("RSS cache policy", () => {
 	it("keeps feed clients fresh while caching at Vercel for one hour", () => {
 		expect(FEED_CACHE_HEADERS).toEqual({
-			"Cache-Control": "public, max-age=300",
+			"Cache-Control": "public, max-age=3600",
 			"Vercel-CDN-Cache-Control":
-				"public, max-age=21600, stale-while-revalidate=86400",
+				"public, max-age=3600, stale-while-revalidate=3600",
 		});
 	});
 

@@ -8,7 +8,7 @@ const CACHE_EXTENSIONS = {
 // Bump this when the generated RSS document changes in a way that makes a
 // previously stored document unusable (for example, enclosure URL format).
 const CACHE_CONTENT_VERSIONS = {
-	rss: "media-url-v2",
+	rss: "media-url-v3",
 };
 
 const AUTH_PARAMS = new Set(["id", "token"]);

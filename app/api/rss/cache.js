@@ -3,9 +3,9 @@ export const NO_STORE_HEADERS = {
 };
 
 export const FEED_CACHE_HEADERS = {
-	"Cache-Control": "public, max-age=300",
+	"Cache-Control": "public, max-age=3600",
 	"Vercel-CDN-Cache-Control":
-		"public, max-age=21600, stale-while-revalidate=86400",
+		"public, max-age=3600, stale-while-revalidate=3600",
 };
 
 export const MEDIA_CACHE_HEADERS = {
