@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { useOnline } from "@util/browser/online";
 import { useDeviceType } from "@util/browser/styles";
 import { useSessions } from "@util/domain/sessions";
@@ -21,7 +21,12 @@ jest.mock("@util/storage/storage", () => ({
 	exists: jest.fn(),
 	readFile: jest.fn(),
 }));
-jest.mock("@widgets/Table", () => () => <div data-testid="table" />);
+jest.mock("@widgets/Table", () => (props) => (
+	<div
+		data-testid="table"
+		data-columns={props.columns.map((column) => column?.id)}
+	/>
+));
 jest.mock("@widgets/Label", () => ({ name }) => (
 	<div data-testid="label">{name}</div>
 ));
@@ -60,5 +65,33 @@ describe("Groups View", () => {
 		const { getByTestId } = render(<Groups />);
 		expect(getByTestId("table")).toBeInTheDocument();
 		expect(getByTestId("progress-dialog")).toBeInTheDocument();
+	});
+
+	it("does not show a group-list progress indicator after its update completes", async () => {
+		const group = { name: "archive", disabled: false };
+		useSessions.mockReturnValue([[], false, [group]]);
+		useUpdateSessions.mockReturnValue({
+			status: [{ name: "archive", progress: 2, count: 2 }],
+			busy: false,
+			start: null,
+		});
+
+		const { getByTestId } = render(<Groups />);
+		await act(async () => {});
+		expect(getByTestId("table").dataset.columns).not.toContain("progress");
+	});
+
+	it("shows a group-list progress indicator while a group update is unfinished", async () => {
+		const group = { name: "archive", disabled: false };
+		useSessions.mockReturnValue([[], false, [group]]);
+		useUpdateSessions.mockReturnValue({
+			status: [{ name: "archive", progress: 1, count: 2 }],
+			busy: true,
+			start: Date.now(),
+		});
+
+		const { getByTestId } = render(<Groups />);
+		await act(async () => {});
+		expect(getByTestId("table").dataset.columns).toContain("progress");
 	});
 });
