@@ -161,6 +161,13 @@ export default function Controls({
 			if (name === "canplay" || name === "loadedmetadata") {
 				setLoadedPath(stateRef.current.path);
 			}
+			// `canplay` means the browser has enough media data to begin playback.
+			// Clear the load-start spinner here as well as on `playing`: otherwise a
+			// session that is ready but still paused remains labelled "Loading"
+			// forever, even though its Play button is usable.
+			if (name === "canplay") {
+				setLoading(false);
+			}
 			if (name === "loadedmetadata") {
 				if (!metadataKey) return; // Skip if metadataKey not ready
 				const currentMetadata = metadataKey

@@ -103,7 +103,7 @@ describe("Controls Component", () => {
 		expect(getByTestId("button-Loading")).toBeInTheDocument();
 	});
 
-	it("renders loading button when loadstart event is triggered and switches back on playing", () => {
+	it("returns to Play when media is ready without starting playback", () => {
 		useTranslations.mockReturnValue({
 			LOADING: "Loading",
 			PLAY: "Play",
@@ -115,7 +115,7 @@ describe("Controls Component", () => {
 			eventListeners[event] = cb;
 		});
 
-		const { getByTestId, getByRole } = render(
+		const { getByTestId, queryByRole } = render(
 			<Controls show={true} playerRef={mockPlayer} />,
 		);
 
@@ -126,22 +126,22 @@ describe("Controls Component", () => {
 
 		// Now it should show Loading button
 		expect(getByTestId("button-Loading")).toBeInTheDocument();
-		const spinner = getByRole("progressbar");
 
-		// Readiness can arrive before playback starts; do not reset the spinner.
+		// Readiness can arrive before playback starts. The player is now ready for
+		// the user to start, so stop presenting an indefinite Loading state.
 		act(() => {
 			eventListeners["canplay"]();
 		});
-		expect(getByTestId("button-Loading")).toBeInTheDocument();
-		expect(getByRole("progressbar")).toBe(spinner);
+		expect(getByTestId("button-Play")).toBeInTheDocument();
+		expect(queryByRole("progressbar")).not.toBeInTheDocument();
 
 		// The browser flips paused before playback is fully underway. Keep the
-		// same button and spinner mounted through that state change.
+		// Play button mounted through that state change.
 		mockPlayer.paused = false;
 		act(() => {
 			eventListeners["play"]();
 		});
-		expect(getByRole("progressbar")).toBe(spinner);
+		expect(getByTestId("button-Pause")).toBeInTheDocument();
 
 		// Trigger playing
 		act(() => {
