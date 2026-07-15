@@ -70,6 +70,10 @@ yarn test:e2e
 
 `yarn verify` runs the complete sequence. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
 
+`yarn test:coverage` reports the Jest coverage baseline and `yarn audit:dependencies` fails on high-severity dependency advisories. Before deploying a MongoDB-backed environment, run `yarn db:indexes` with `MONGO_URL` and `MONGO_DB` configured. It is idempotent and provisions the user/session/challenge/rate-limit uniqueness and expiry indexes.
+
+The production CSP allows only the configured site and storage origins. Set `AWS_ENDPOINT` and `WASABI_URL` to their real origins before deploying; broad third-party browser connections are intentionally not allowed.
+
 ## Deployment
 
 Deploy the production build to a Node-compatible platform such as Vercel. Configure only the environment variables required by enabled services. CI uses Node from `.nvmrc`, installs from `yarn.lock`, and runs lint, type checking, Jest, the production build, and deterministic Chromium smoke tests.

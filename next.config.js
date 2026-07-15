@@ -24,6 +24,19 @@ const iconSvgrOptions = {
 	template: iconSvgrTemplate,
 };
 const iconsSvgDir = path.join(__dirname, "src/components/Icons/svg");
+function configuredOrigin(value) {
+	try {
+		return value ? new URL(value).origin : null;
+	} catch {
+		return null;
+	}
+}
+const externalOrigins = [
+	configuredOrigin(process.env.AWS_ENDPOINT),
+	configuredOrigin(process.env.WASABI_URL),
+	configuredOrigin(process.env.SITE_URL),
+	configuredOrigin(process.env.NEXT_PUBLIC_SITE_URL),
+].filter(Boolean);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -123,14 +136,23 @@ const nextConfig = {
 								.filter(Boolean)
 								.join(" "),
 							"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-							"img-src 'self' data: blob: https:",
-							"media-src 'self' blob: https:",
+							["img-src 'self' data: blob:", ...externalOrigins].join(" "),
+							["media-src 'self' blob:", ...externalOrigins].join(" "),
 							"font-src 'self' data: https://fonts.gstatic.com",
-							"connect-src 'self' https: wss:",
+							[
+								"connect-src 'self'",
+								...externalOrigins,
+								"https://va.vercel-scripts.com",
+							].join(" "),
 							"worker-src 'self' blob:",
 							"manifest-src 'self'",
 							"upgrade-insecure-requests",
 						].join("; "),
+					},
+					{
+						key: "Permissions-Policy",
+						value:
+							"camera=(), geolocation=(), microphone=(), payment=(), usb=()",
 					},
 				],
 			},

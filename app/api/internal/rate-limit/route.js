@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { logger as structuredLogger } from "@util/api/logger";
+import { internalRateLimitRequestSchema, parseBody } from "@util/api/schemas";
 import { checkRateLimit } from "@util/auth/rateLimit";
 import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
@@ -40,11 +41,14 @@ export async function POST(request) {
 	}
 
 	try {
-		const body = await request.json();
-		const { ip, limit = 60, windowMs = 60 * 1000 } = body || {};
-		if (!ip) {
+		const body = parseBody(
+			internalRateLimitRequestSchema,
+			await request.json(),
+		);
+		if (!body) {
 			return NextResponse.json({ ok: false }, { headers: NO_STORE_HEADERS });
 		}
+		const { ip, limit = 60, windowMs = 60 * 1000 } = body;
 
 		const ok = await checkRateLimitCached({
 			ip: String(ip),

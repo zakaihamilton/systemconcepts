@@ -1,5 +1,6 @@
 import { writeApiCache } from "@util/api/apiCache";
 import { logger as structuredLogger } from "@util/api/logger";
+import { internalCacheRequestSchema, parseBody } from "@util/api/schemas";
 import { NextResponse } from "next/server";
 import { NO_STORE_HEADERS } from "../../rss/cache";
 
@@ -17,11 +18,11 @@ export async function POST(request) {
 	}
 
 	try {
-		const body = await request.json();
-		const { type, key, body: cacheBody } = body || {};
-		if (!type || !key || typeof cacheBody !== "string") {
+		const body = parseBody(internalCacheRequestSchema, await request.json());
+		if (!body) {
 			return NextResponse.json({ ok: false }, { headers: NO_STORE_HEADERS });
 		}
+		const { type, key, body: cacheBody } = body;
 
 		await writeApiCache(type, key, cacheBody);
 		return NextResponse.json({ ok: true }, { headers: NO_STORE_HEADERS });

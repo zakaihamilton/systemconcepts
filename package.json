@@ -11,7 +11,10 @@
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:e2e": "playwright test",
-		"verify": "yarn lint && yarn typecheck && yarn test --runInBand && yarn build && yarn test:e2e",
+		"test:coverage": "jest --coverage --coverageReporters=text-summary",
+		"audit:dependencies": "yarn audit --level high",
+		"db:indexes": "node scripts/db-indexes.mjs",
+		"verify": "yarn lint && yarn typecheck && yarn test --runInBand && yarn test:coverage && yarn build && yarn test:e2e",
 		"full-start": "next build --webpack && next start"
 	},
 	"dependencies": {
@@ -43,7 +46,8 @@
 		"remark-breaks": "^4.0.0",
 		"use-dark-mode": "^2.3.1",
 		"uuid": "^14.0.0",
-		"webpack": "^5.107.0"
+		"webpack": "^5.107.0",
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
