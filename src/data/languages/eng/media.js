@@ -273,6 +273,11 @@ export default [
 		value: "There was an error playing this media",
 	},
 	{
+		id: "SESSION_LOAD_ERROR",
+		value:
+			"We couldn't load this session. Please try again. If it keeps happening, contact Zakai and mention: {session}.",
+	},
+	{
 		id: "RELOAD",
 		value: "Reload",
 	},

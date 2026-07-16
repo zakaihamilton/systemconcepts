@@ -261,6 +261,11 @@ export default [
 		value: "Ocorreu um erro ao reproduzir esta mídia",
 	},
 	{
+		id: "SESSION_LOAD_ERROR",
+		value:
+			"Não foi possível carregar esta sessão. Tente novamente. Se o problema continuar, entre em contato com Zakai e mencione: {session}.",
+	},
+	{
 		id: "RELOAD",
 		value: "Recarregar",
 	},

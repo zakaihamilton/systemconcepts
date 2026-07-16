@@ -59,4 +59,24 @@ describe("StatusBar Widget", () => {
 		fireEvent.click(getByLabelText("Close"));
 		expect(mockStore.update).toHaveBeenCalled();
 	});
+
+	it("copies player load errors", async () => {
+		const writeText = jest.fn().mockResolvedValue();
+		Object.assign(navigator, { clipboard: { writeText } });
+		mockStore.useState.mockReturnValue({
+			select: null,
+			mode: "player",
+			severity: "error",
+			message: "Couldn't load the session",
+		});
+		const { getByLabelText } = render(
+			<SyncContext.Provider value={{}}>
+				<StatusBar store={mockStore} />
+			</SyncContext.Provider>,
+		);
+
+		fireEvent.click(getByLabelText("Copy"));
+
+		expect(writeText).toHaveBeenCalledWith("Couldn't load the session");
+	});
 });

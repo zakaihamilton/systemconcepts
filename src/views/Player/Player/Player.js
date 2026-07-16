@@ -25,7 +25,7 @@ import Download from "@widgets/Download";
 import StatusBar from "@widgets/StatusBar";
 import Cookies from "js-cookie";
 import { Store } from "pullstate";
-import { useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import Audio from "../Audio";
 import SpeedSlider from "../SpeedSlider";
 import Transcript from "../Transcript";
@@ -136,6 +136,13 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 	const mediaPath = data?.path || storeMediaPath;
 	const subtitles = data?.subtitles || storeSubtitles;
 	const shouldShowAccessError = !!error && !loading && !mediaPath;
+	const sessionLabel = [date, name].filter(Boolean).join(" ");
+	const sessionLoadError = useCallback(() => {
+		const template =
+			translations.SESSION_LOAD_ERROR ||
+			"We couldn't load this session. Please try again. If it keeps happening, contact Zakai and mention: {session}.";
+		return template.replace("{session}", sessionLabel || translations.SESSION);
+	}, [sessionLabel, translations]);
 
 	const isAudio = isAudioFile(path);
 	const isVideo = isVideoFile(path);
@@ -295,6 +302,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		isTranscript,
 		preload: "metadata",
 		crossOrigin: "anonymous",
+		onLoadError: sessionLoadError,
 	};
 	if (isAudio || (isVideo && isTranscript)) {
 		MediaComponent = Audio;
@@ -318,13 +326,15 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 				s.message = translations.REQUIRE_SIGNIN;
 			} else if (shouldShowAccessError) {
 				s.mode = "player";
-				s.message = translations.PLAY_NOT_ALLOWED;
+				s.message = sessionLoadError();
+				s.severity = "error";
 			} else {
 				s.mode = "";
 				s.message = "";
+				s.severity = "info";
 			}
 		});
-	}, [isSignedIn, translations, shouldShowAccessError]);
+	}, [isSignedIn, translations, shouldShowAccessError, sessionLoadError]);
 
 	const elements = isTranscript ? <Transcript show={show} /> : null;
 

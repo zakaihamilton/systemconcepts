@@ -13,6 +13,7 @@ export default function Video({
 	path,
 	renewUrl,
 	renewing,
+	onLoadError,
 	color,
 	group,
 	children,
@@ -26,6 +27,7 @@ export default function Video({
 	const [playerRef, setPlayerRef] = useState(null);
 	const [errorCount, setErrorCount] = useState(0);
 	const [recovering, setRecovering] = useState(false);
+	const reportedLoadError = useRef(false);
 
 	const onError = () => {
 		if (errorCount < 3) {
@@ -33,12 +35,16 @@ export default function Video({
 			setRecovering(true);
 			renewUrl();
 			setErrorCount((count) => count + 1);
+		} else if (!reportedLoadError.current) {
+			reportedLoadError.current = true;
+			onLoadError?.();
 		}
 	};
 
 	const clearRecovery = () => {
 		setRecovering(false);
 		setErrorCount(0);
+		reportedLoadError.current = false;
 	};
 
 	useEffect(() => {

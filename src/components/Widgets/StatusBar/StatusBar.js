@@ -3,6 +3,7 @@ import ButtonSelector from "@components/Widgets/ButtonSelector";
 import CancelIcon from "@icons/svg/Cancel.svg";
 import CheckBoxIcon from "@icons/svg/CheckBox.svg";
 import CheckBoxOutlineBlankIcon from "@icons/svg/CheckBoxOutlineBlank.svg";
+import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
 import DeleteIcon from "@icons/svg/Delete.svg";
 import IndeterminateCheckBoxIcon from "@icons/svg/IndeterminateCheckBox.svg";
 import Button from "@ui/Button";
@@ -22,6 +23,7 @@ export default function StatusBar({ data, mapper, store }) {
 	const translations = useTranslations();
 	const { mode, select, message, onDone, severity = "info" } = store.useState();
 	const [busy, setBusy] = useState(false);
+	const [copied, setCopied] = useState(false);
 
 	const open = !!(select || message);
 
@@ -87,6 +89,16 @@ export default function StatusBar({ data, mapper, store }) {
 	if (mode === "sync" && syncContext.error) {
 		messageText = translations.WAIT_FOR_APPROVAL;
 	}
+	const canCopyError = mode === "player" && severity === "error" && messageText;
+	const copyError = async () => {
+		try {
+			await navigator.clipboard?.writeText(messageText);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// Keep the original message visible when clipboard access is unavailable.
+		}
+	};
 
 	const selectTitle =
 		select && select.length
@@ -177,6 +189,29 @@ export default function StatusBar({ data, mapper, store }) {
 			)}
 			<Typography className={styles.message}>{messageText}</Typography>
 			<div style={{ flex: 1 }} />
+			{canCopyError && (
+				<Tooltip
+					title={
+						copied
+							? translations.COPIED || "Copied!"
+							: translations.COPY || "Copy"
+					}
+					arrow
+				>
+					<IconButton
+						aria-label={
+							copied
+								? translations.COPIED || "Copied!"
+								: translations.COPY || "Copy"
+						}
+						variant="contained"
+						onClick={copyError}
+						size="large"
+					>
+						<ContentCopyIcon />
+					</IconButton>
+				</Tooltip>
+			)}
 			{mode && mode === "signin" && (
 				<Button variant="contained" onClick={gotoAccount}>
 					{translations.ACCOUNT}

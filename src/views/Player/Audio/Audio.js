@@ -18,6 +18,7 @@ export default function Audio({
 	path,
 	renewUrl,
 	renewing,
+	onLoadError,
 	date,
 	group,
 	color,
@@ -34,6 +35,7 @@ export default function Audio({
 	const [errorCount, setErrorCount] = useState(0);
 	const [recovering, setRecovering] = useState(false);
 	const [loadedPath, setLoadedPath] = useState(null);
+	const reportedLoadError = useRef(false);
 
 	const onError = () => {
 		if (errorCount < 3) {
@@ -41,12 +43,16 @@ export default function Audio({
 			setRecovering(true);
 			renewUrl();
 			setErrorCount((count) => count + 1);
+		} else if (!reportedLoadError.current) {
+			reportedLoadError.current = true;
+			onLoadError?.();
 		}
 	};
 
 	const clearRecovery = () => {
 		setRecovering(false);
 		setErrorCount(0);
+		reportedLoadError.current = false;
 	};
 
 	useEffect(() => {

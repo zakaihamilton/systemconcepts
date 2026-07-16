@@ -1,12 +1,12 @@
 import { ContentSize } from "@components/Page/Content";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { useFetchJSON } from "@util/api/fetch";
 import { useRecentHistory } from "@util/domain/history";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { useParentParams } from "@util/domain/views";
 import Cookies from "js-cookie";
-import PlayerPage from "./index.js";
+import PlayerPage, { PlayerStore } from "./index.js";
 
 jest.mock("@util/domain/translations");
 jest.mock("@components/Main", () => ({
@@ -41,6 +41,8 @@ describe("Player View", () => {
 		useTranslations.mockReturnValue({
 			SUBTITLES: "Subtitles",
 			DETAILS: "Details",
+			SESSION_LOAD_ERROR:
+				"We couldn't load this session. Please contact Zakai and mention: {session}.",
 		});
 		useFetchJSON.mockReturnValue([{ path: "test.mp4" }, false, false]);
 		useSessions.mockReturnValue([[], false, []]);
@@ -51,6 +53,10 @@ describe("Player View", () => {
 			name: "session",
 		});
 		Cookies.get.mockReturnValue("test");
+		PlayerStore.update((state) => {
+			state.message = "";
+			state.severity = "info";
+		});
 	});
 
 	it("renders audio player for audio files", () => {
@@ -154,5 +160,30 @@ describe("Player View", () => {
 		);
 
 		expect(getByTestId("audio")).toBe(audio);
+	});
+
+	it("shows a reportable message when the session URL cannot be loaded", async () => {
+		useFetchJSON.mockReturnValue([null, false, false, 403]);
+
+		render(
+			<ContentSize.Provider value={mockSize}>
+				<PlayerPage
+					show={true}
+					prefix="sessions"
+					group="test"
+					year="2021"
+					date="01-01"
+					name="session.mp4"
+				/>
+			</ContentSize.Provider>,
+		);
+
+		await waitFor(() =>
+			expect(PlayerStore.getRawState()).toMatchObject({
+				severity: "error",
+				message:
+					"We couldn't load this session. Please contact Zakai and mention: 01-01 session.mp4.",
+			}),
+		);
 	});
 });
