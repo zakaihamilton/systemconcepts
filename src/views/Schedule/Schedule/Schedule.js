@@ -188,7 +188,9 @@ export default function SchedulePage() {
 		location: isMobile ? "mobile" : "header",
 		onClick: () => {
 			SessionsStore.update((s) => {
-				s.showFilterDialog = !s.showFilterDialog;
+				const showFilterDialog = !s.showFilterDialog;
+				s.showFilterDialog = showFilterDialog;
+				s.filterBarManuallyEnabled = showFilterDialog;
 			});
 		},
 		active: showFilterDialog,

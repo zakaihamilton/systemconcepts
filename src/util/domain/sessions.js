@@ -27,6 +27,7 @@ export const SessionsStore = new Store({
 	syncCounter: 0,
 	groupsHash: "",
 	showFilterDialog: false,
+	filterBarManuallyEnabled: false,
 	order: "asc",
 	orderBy: "date",
 	viewMode: "list",
@@ -53,12 +54,16 @@ export function useSessions(depends = [], options = {}) {
 	const savedSyncCounter = SessionsStore.useState((s) => s.syncCounter);
 	const groupsHash = SessionsStore.useState((s) => s.groupsHash);
 	const showFilterDialog = SessionsStore.useState((s) => s.showFilterDialog);
+	const filterBarManuallyEnabled = SessionsStore.useState(
+		(s) => s.filterBarManuallyEnabled,
+	);
 	const counter = SessionsStore.useState((s) => s.counter);
 	useLocalStorage("sessions", SessionsStore, [
 		"groupFilter",
 		"typeFilter",
 		"yearFilter",
 		"showFilterDialog",
+		"filterBarManuallyEnabled",
 	]);
 	const lastCounterRef = useRef(counter);
 	const updateSessions = useCallback(
@@ -550,6 +555,22 @@ export function useSessions(depends = [], options = {}) {
 		updateSessions,
 	]);
 
+	useEffect(() => {
+		const hasActiveFilter =
+			groupFilter.length > 0 || typeFilter.length > 0 || yearFilter.length > 0;
+		if (showFilterDialog && !filterBarManuallyEnabled && !hasActiveFilter) {
+			SessionsStore.update((s) => {
+				s.showFilterDialog = false;
+			});
+		}
+	}, [
+		filterBarManuallyEnabled,
+		groupFilter,
+		showFilterDialog,
+		typeFilter,
+		yearFilter,
+	]);
+
 	const groupsItems = useMemo(() => {
 		return groups.map((group) => {
 			const metadata =
@@ -587,7 +608,9 @@ export function useSessions(depends = [], options = {}) {
 			location: isPhone ? "mobile" : "header",
 			onClick: () => {
 				SessionsStore.update((s) => {
-					s.showFilterDialog = !s.showFilterDialog;
+					const showFilterDialog = !s.showFilterDialog;
+					s.showFilterDialog = showFilterDialog;
+					s.filterBarManuallyEnabled = showFilterDialog;
 				});
 			},
 			active: showFilterDialog,

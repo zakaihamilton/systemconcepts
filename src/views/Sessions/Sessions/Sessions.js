@@ -263,6 +263,7 @@ export default function SessionsPage() {
 							} else {
 								s.groupFilter = [...s.groupFilter, group];
 							}
+							s.showFilterDialog = true;
 							s.offset = 0;
 						}),
 					columnProps: {
@@ -305,6 +306,7 @@ export default function SessionsPage() {
 			} else {
 				s.typeFilter = [...s.typeFilter, itemType];
 			}
+			s.showFilterDialog = true;
 			s.offset = 0;
 		});
 	}, []);

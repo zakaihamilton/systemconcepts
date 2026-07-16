@@ -1,6 +1,6 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { useDeviceType } from "@util/browser/styles";
-import { useSessions } from "@util/domain/sessions";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import SessionsPage from "./index.js";
 
@@ -41,8 +41,29 @@ jest.mock("@views/Player/Player", () => ({
 jest.mock("@util/domain/history", () => ({
 	useRecentHistory: jest.fn().mockReturnValue([[]]),
 }));
-jest.mock("@widgets/Table", () => ({ statusBar }) => (
-	<div data-testid="table">{statusBar}</div>
+jest.mock("@widgets/Table", () => ({ columns, renderColumn, statusBar }) => (
+	<div data-testid="table">
+		{statusBar}
+		<button
+			onClick={() =>
+				columns
+					.find((column) => column.id === "groupWidget")
+					.onClick({ group: "test" })
+			}
+		>
+			Filter group
+		</button>
+		<button
+			onClick={() =>
+				renderColumn("nameWidget", {
+					type: "audio",
+					name: "Test session",
+				}).props.icons.props.onClick()
+			}
+		>
+			Filter type
+		</button>
+	</div>
 ));
 jest.mock("@views/Sessions/FilterBar", () => () => (
 	<div data-testid="filter-bar" />
@@ -82,5 +103,24 @@ describe("Sessions View", () => {
 		expect(getByTestId("table")).toBeInTheDocument();
 		expect(getByTestId("filter-bar")).toBeInTheDocument();
 		expect(getByTestId("status-bar")).toBeInTheDocument();
+	});
+
+	it.each([
+		["group", "Filter group"],
+		["type", "Filter type"],
+	])("shows the filter bar when filtering by %s from the session list", (_, label) => {
+		const { getByRole } = render(<SessionsPage />);
+
+		fireEvent.click(getByRole("button", { name: label }));
+		const update = SessionsStore.update.mock.calls.at(-1)[0];
+		const state = {
+			groupFilter: [],
+			typeFilter: [],
+			showFilterDialog: false,
+		};
+
+		update(state);
+
+		expect(state.showFilterDialog).toBe(true);
 	});
 });
