@@ -8,6 +8,7 @@ export const GroupsStore = new Store({
 	groups: [],
 	settings: {},
 	busy: false,
+	loaded: false,
 	counter: 0,
 	showDisabled: false,
 	itemsPerPage: 100,
@@ -19,9 +20,8 @@ export const GroupsStore = new Store({
 });
 
 export function useGroups(depends = []) {
-	const { busy, groups } = GroupsStore.useState();
+	const { busy, groups, loaded } = GroupsStore.useState();
 	const [syncCounter, setSyncCounter] = useState(0);
-	const [hasLoaded, setHasLoaded] = useState(false);
 
 	const loadGroups = useCallback(async () => {
 		let isBusy = false;
@@ -61,7 +61,9 @@ export function useGroups(depends = []) {
 				s.busy = false;
 			});
 		} finally {
-			setHasLoaded(true);
+			GroupsStore.update((s) => {
+				s.loaded = true;
+			});
 		}
 	}, []);
 
@@ -127,6 +129,6 @@ export function useGroups(depends = []) {
 		}
 	}, []);
 
-	const isLoading = !hasLoaded || (busy && (!groups || groups.length === 0));
+	const isLoading = !loaded || (busy && (!groups || groups.length === 0));
 	return [groups, isLoading, updateGroups];
 }
