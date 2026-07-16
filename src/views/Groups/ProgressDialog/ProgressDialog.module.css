@@ -626,6 +626,14 @@
 	color: var(--primary-color, #40c4ff);
 }
 
+.copySyncLogButton {
+	color: var(--text-color-secondary) !important;
+}
+
+.copySyncLogButton:hover {
+	color: var(--primary-color, #40c4ff) !important;
+}
+
 .syncChip {
 	background: color-mix(
 		in srgb,
