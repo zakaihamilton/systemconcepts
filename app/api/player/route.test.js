@@ -51,10 +51,20 @@ jest.mock("next/server", () => ({
 	},
 }));
 
-function request(path = "wasabi/american/2024/2024-08-26 The Serpents.mp4") {
+function request(
+	path = "wasabi/american/2024/2024-08-26 The Serpents.mp4",
+	url = "https://systemconcepts.app/api/player",
+) {
+	const host = new URL(url).host;
 	return {
-		url: "https://systemconcepts.app/api/player",
-		headers: { get: (name) => (name === "path" ? path : null) },
+		url,
+		headers: {
+			get: (name) => {
+				if (name === "path") return path;
+				if (name === "host") return host;
+				return null;
+			},
+		},
 	};
 }
 
@@ -88,11 +98,11 @@ describe("/api/player transcript URLs", () => {
 		const response = await GET(request());
 
 		expect(await response.json()).toMatchObject({
-			path: expect.stringContaining("/api/player/media?path="),
+			path: "https://wasabi.example/download",
 			downloadUrl: "https://wasabi.example/download",
 			transcriptionUrl: "https://aws.example/transcript",
 		});
-		expect(getSignedUrl).toHaveBeenCalledTimes(1);
+		expect(getSignedUrl).toHaveBeenCalledTimes(2);
 		expect(getAwsDownloadUrl).toHaveBeenCalledWith({
 			path: "sessions/american/2024/2024-08-26 The Serpents.txt",
 			expiresIn: 10800,
@@ -109,6 +119,17 @@ describe("/api/player transcript URLs", () => {
 			expect.any(Array),
 			{ revalidate: 30 * 60 },
 		);
+	});
+
+	it("streams media through the local function instead of exposing a signed URL", async () => {
+		const localRequest = request(undefined, "http://localhost:3000/api/player");
+
+		const response = await GET(localRequest);
+
+		expect((await response.json()).path).toBe(
+			"http://localhost:3000/api/player/media?path=wasabi%2Famerican%2F2024%2F2024-08-26%20The%20Serpents.mp4",
+		);
+		expect(getSignedUrl).toHaveBeenCalledTimes(1);
 	});
 
 	it("signs the inferred same-name transcript against AWS", async () => {
@@ -133,7 +154,7 @@ describe("/api/player transcript URLs", () => {
 
 		expect((await response.json()).transcriptionUrl).toBeNull();
 		expect(getAwsDownloadUrl).not.toHaveBeenCalled();
-		expect(getSignedUrl).toHaveBeenCalledTimes(1);
+		expect(getSignedUrl).toHaveBeenCalledTimes(2);
 	});
 
 	it("signs images on Wasabi without looking up or signing a transcript", async () => {
@@ -142,12 +163,12 @@ describe("/api/player transcript URLs", () => {
 		);
 
 		expect(await response.json()).toMatchObject({
-			path: expect.stringContaining("/api/player/media?path="),
+			path: "https://wasabi.example/download",
 			downloadUrl: "https://wasabi.example/download",
 			subtitles: null,
 			transcriptionUrl: null,
 		});
-		expect(getSignedUrl).toHaveBeenCalledTimes(1);
+		expect(getSignedUrl).toHaveBeenCalledTimes(2);
 		expect(getSessions).not.toHaveBeenCalled();
 		expect(awsMetadataInfo).not.toHaveBeenCalled();
 		expect(wasabiMetadataInfo).toHaveBeenCalledWith({
@@ -166,7 +187,7 @@ describe("/api/player transcript URLs", () => {
 		);
 
 		expect(await response.json()).toMatchObject({
-			path: expect.stringContaining("/api/player/media?path="),
+			path: "https://aws.example/download",
 			downloadUrl: "https://aws.example/download",
 			transcriptionUrl: null,
 		});
@@ -176,6 +197,11 @@ describe("/api/player transcript URLs", () => {
 			path: "sessions/will/2026/2026-06-30 Beastly.png",
 		});
 		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(1, {
+			path: "sessions/will/2026/2026-06-30 Beastly.png",
+			expiresIn: 10800,
+			responseContentDisposition: "inline",
+		});
+		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(2, {
 			path: "sessions/will/2026/2026-06-30 Beastly.png",
 			expiresIn: 10800,
 			responseContentDisposition:
@@ -191,13 +217,18 @@ describe("/api/player transcript URLs", () => {
 		);
 
 		expect(await response.json()).toMatchObject({
-			path: expect.stringContaining("/api/player/media?path="),
+			path: "https://aws.example/download",
 			downloadUrl: "https://aws.example/download",
 			transcriptionUrl: null,
 		});
 		expect(getWasabi).not.toHaveBeenCalled();
 		expect(getSignedUrl).not.toHaveBeenCalled();
 		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(1, {
+			path: "sessions/will/2026/2026-06-30 Beastly.png",
+			expiresIn: 10800,
+			responseContentDisposition: "inline",
+		});
+		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(2, {
 			path: "sessions/will/2026/2026-06-30 Beastly.png",
 			expiresIn: 10800,
 			responseContentDisposition:

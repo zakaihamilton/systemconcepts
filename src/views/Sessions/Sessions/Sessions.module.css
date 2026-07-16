@@ -658,10 +658,12 @@
 		var(--group-color, var(--playing-color)) 8%,
 		var(--main-background-alternative)
 	) !important;
-	color: var(--group-color, var(--playing-color)) !important;
+	/* Keep the accent on the playback affordance, not the row text. Group
+	 * colors can be intentionally light, which made the active row illegible. */
+	color: var(--text-color) !important;
 
 	.labelText {
-		color: var(--group-color, var(--playing-color)) !important;
+		color: var(--text-color) !important;
 		font-weight: 600 !important;
 	}
 
@@ -684,7 +686,7 @@
 	) !important;
 
 	.labelText {
-		color: var(--group-color, var(--playing-color)) !important;
+		color: var(--text-color) !important;
 	}
 }
 

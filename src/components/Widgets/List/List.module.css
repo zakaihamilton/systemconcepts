@@ -35,6 +35,8 @@
 		rgba(var(--primary-color-rgb), 0.08)
 	) !important;
 	border-color: rgba(var(--primary-color-rgb), 0.22);
+	/* The indigo accent is too low-contrast for text on the dark sidebar. */
+	color: var(--text-color);
 	box-shadow:
 		inset 0 1px 0 rgba(255, 255, 255, 0.16),
 		0 6px 16px rgba(var(--primary-color-rgb), 0.1);
@@ -45,6 +47,10 @@
 	top: 22%;
 	height: 56%;
 	width: 3px;
+}
+
+.root.sidebar .item.selected .iconContainer {
+	color: var(--text-color);
 }
 
 :global([dir="rtl"]) .root.sidebar .itemButton:hover {

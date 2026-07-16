@@ -16,6 +16,7 @@ import {
 	getDownloadUrl as getAwsDownloadUrl,
 	validatePathAccess,
 } from "@util/storage/aws";
+import { isProductionDeployment } from "@util/storage/storageRedirect";
 import {
 	getWasabi,
 	metadataInfo as wasabiMetadataInfo,
@@ -77,6 +78,7 @@ export async function GET(request) {
 		const decodedPath = decodeURIComponent(path);
 		validatePathAccess(decodedPath);
 		const isAwsPath = decodedPath.replace(/^\//, "").startsWith("aws/");
+		const streamThroughFunction = !isProductionDeployment(request);
 		const loadPlayerMetadata = unstable_cache(
 			async () => {
 				let s3Key = getWasabiKey(decodedPath);
@@ -94,10 +96,16 @@ export async function GET(request) {
 				const fileName = s3Key.split("/").pop();
 				let playerUrl;
 				let downloadUrl;
-				const playerStreamUrl = new URL("/api/player/media", request.url);
-				playerStreamUrl.searchParams.set("path", decodedPath);
 				if (useAwsPrimary) {
 					const awsPath = `sessions/${s3Key}`;
+					playerUrl = streamThroughFunction
+						? new URL("/api/player/media", request.url).toString() +
+							`?path=${encodeURIComponent(decodedPath)}`
+						: await getAwsDownloadUrl({
+								path: awsPath,
+								expiresIn: 10800,
+								responseContentDisposition: "inline",
+							});
 					downloadUrl = await getAwsDownloadUrl({
 						path: awsPath,
 						expiresIn: 10800,
@@ -106,6 +114,18 @@ export async function GET(request) {
 				} else {
 					const { client: wasabiClient, bucket: BUCKET_NAME } =
 						await getWasabi();
+					playerUrl = streamThroughFunction
+						? new URL("/api/player/media", request.url).toString() +
+							`?path=${encodeURIComponent(decodedPath)}`
+						: await getSignedUrl(
+								wasabiClient,
+								new GetObjectCommand({
+									Bucket: BUCKET_NAME,
+									Key: s3Key,
+									ResponseContentDisposition: "inline",
+								}),
+								{ expiresIn: 10800 },
+							);
 					const downloadCommand = new GetObjectCommand({
 						Bucket: BUCKET_NAME,
 						Key: s3Key,
@@ -115,7 +135,6 @@ export async function GET(request) {
 						expiresIn: 10800,
 					});
 				}
-				playerUrl = playerStreamUrl.toString();
 
 				let subtitles = null;
 				let transcriptionUrl = null;
@@ -149,7 +168,11 @@ export async function GET(request) {
 				}
 				return { path: playerUrl, downloadUrl, subtitles, transcriptionUrl };
 			},
-			["player-metadata", decodedPath],
+			[
+				"player-metadata",
+				decodedPath,
+				streamThroughFunction ? "proxy" : "direct",
+			],
 			{
 				revalidate: PLAYER_CACHE_TTL_SECONDS,
 			},
