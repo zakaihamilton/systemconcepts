@@ -1,6 +1,7 @@
 import Dialog from "@components/Widgets/Dialog";
 import AutorenewIcon from "@icons/svg/Autorenew.svg";
 import CheckIcon from "@icons/svg/Check.svg";
+import ContentCopyIcon from "@icons/svg/ContentCopy.svg";
 import DescriptionIcon from "@icons/svg/Description.svg";
 import ErrorIcon from "@icons/svg/Error.svg";
 import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
@@ -13,7 +14,7 @@ import Chip from "@ui/Chip";
 import LinearProgress from "@ui/LinearProgress";
 import Tab from "@ui/Tab";
 import { logger as structuredLogger } from "@util/api/logger";
-import { formatDuration } from "@util/data/string";
+import { copyToClipboard, formatDuration } from "@util/data/string";
 import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { useUpdateSessions } from "@util/domain/updateSessions";
@@ -161,6 +162,7 @@ export default function ProgressDialog() {
 	const [isListExpanded, setListExpanded] = useState(true);
 	const [activeTab, setActiveTab] = useState("updates");
 	const [activeSyncingSessionId, setActiveSyncingSessionId] = useState(null);
+	const [syncLogCopied, setSyncLogCopied] = useState(false);
 
 	const last50 = useMemo(() => {
 		return [...(allSessions || [])]
@@ -281,6 +283,13 @@ export default function ProgressDialog() {
 		setExpandedItems(newSet);
 	};
 
+	const handleCopySyncLog = () => {
+		const logText = (syncLogs || []).map((log) => log.message).join("\n");
+		if (!logText || !copyToClipboard(logText)) return;
+		setSyncLogCopied(true);
+		setTimeout(() => setSyncLogCopied(false), 1500);
+	};
+
 	return (
 		<Dialog
 			onClose={handleClose}
@@ -384,6 +393,24 @@ export default function ProgressDialog() {
 										<span style={{ flex: 1 }}>
 											{translations.CLOUD_SYNC || "Cloud Sync"}
 										</span>
+										{syncLogs?.length > 0 && (
+											<IconButton
+												onClick={handleCopySyncLog}
+												className={styles.copySyncLogButton}
+												title={
+													syncLogCopied
+														? translations.LOG_COPIED || "Copied"
+														: translations.COPY_LOG || "Copy log"
+												}
+												aria-label={translations.COPY_LOG || "Copy log"}
+											>
+												{syncLogCopied ? (
+													<CheckIcon fontSize="small" />
+												) : (
+													<ContentCopyIcon fontSize="small" />
+												)}
+											</IconButton>
+										)}
 										{syncing && (
 											<Chip
 												label={translations.SYNCING}

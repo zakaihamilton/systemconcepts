@@ -1,21 +1,20 @@
-import { logger as structuredLogger } from "@util/api/logger";
-import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
-import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "../constants";
+import { LOCAL_SYNC_PATH } from "../constants";
 import { addSyncLog } from "../logs";
-import { SyncActiveStore } from "../syncState";
 
 /**
- * Step: Remove local files that no longer exist on remote
- * This ensures local storage stays in sync with the server
+ * Step: Report local files absent from the remote manifest.
+ *
+ * Remote-manifest absence is not a safe deletion signal: manifests can be
+ * stale or incomplete, and deleting here runs before writable clients can
+ * re-upload the local file. Explicit local deletions are handled by the
+ * tombstone flow in deleteRemoteFiles instead.
  */
 export async function removeDeletedFiles(
 	localManifest,
 	remoteManifest,
 	localPath = LOCAL_SYNC_PATH,
-	readOnly = false,
+	_readOnly = false,
 ) {
-	const start = performance.now();
 	addSyncLog("Checking for deleted files...", "info");
 
 	try {
@@ -37,69 +36,21 @@ export async function removeDeletedFiles(
 		}
 
 		const remotePathsSet = new Set((remoteManifest || []).map((f) => f.path));
+		const absentFromRemote = localManifest.filter(
+			(file) => !remotePathsSet.has(file.path),
+		);
 
-		// Only delete files that were previously synced (version > 1)
-		// Don't delete new files (version = 1) that haven't been uploaded yet
-		// UNLESS we are in read-only mode, in which case we enforce a strict mirror
-		const toDelete = localManifest.filter((f) => {
-			if (remotePathsSet.has(f.path)) return false;
-
-			// If read-only, everything local but not remote is "garbage" to be removed
-			if (readOnly) return true;
-
-			const version = parseInt(f.version || "1");
-			return version > 1;
-		});
-
-		if (toDelete.length === 0) {
+		if (absentFromRemote.length === 0) {
 			addSyncLog("✓ No deleted files to remove", "info");
 			return { manifest: localManifest, hasChanges: false };
 		}
 
-		addSyncLog(`Removing ${toDelete.length} deleted file(s)...`, "info");
-
-		// Delete files
-		const deletedPaths = new Set();
-		for (const file of toDelete) {
-			// Check for cancellation
-			if (SyncActiveStore.getRawState().stopping) {
-				addSyncLog("Cleanup stopped by user", "warning");
-				break;
-			}
-			try {
-				const filePath = makePath(localPath, file.path);
-				if (await storage.exists(filePath)) {
-					await storage.deleteFile(filePath);
-					addSyncLog(`Removed: ${filePath}`, "info");
-					deletedPaths.add(file.path);
-				}
-			} catch (err) {
-				structuredLogger.error(`[Sync] Failed to delete ${file.path}:`, err);
-				addSyncLog(`Failed to remove: ${file.path}`, "error");
-			}
-		}
-
-		// Update manifest to remove ONLY files that were actually deleted
-		const updatedManifest = localManifest.filter(
-			(f) => !deletedPaths.has(f.path),
-		);
-
-		// Write updated manifest
-		const manifestPath = makePath(localPath, FILES_MANIFEST);
-		await storage.writeFile(
-			manifestPath,
-			JSON.stringify(updatedManifest, null, 4),
-		);
-
-		const duration = ((performance.now() - start) / 1000).toFixed(1);
 		addSyncLog(
-			`✓ Removed ${toDelete.length} file(s) in ${duration}s`,
-			"success",
+			`Keeping ${absentFromRemote.length} local file(s) absent from the remote manifest for reconciliation`,
+			"warning",
 		);
-
-		return { manifest: updatedManifest, hasChanges: toDelete.length > 0 };
+		return { manifest: localManifest, hasChanges: false };
 	} catch (err) {
-		structuredLogger.error("[Sync] Remove deleted files failed:", err);
 		addSyncLog(`Remove deleted files failed: ${err.message}`, "error");
 		throw err;
 	}
