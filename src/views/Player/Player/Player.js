@@ -301,7 +301,6 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		showDetails,
 		isTranscript,
 		preload: "metadata",
-		crossOrigin: "anonymous",
 		onLoadError: sessionLoadError,
 	};
 	if (isAudio || (isVideo && isTranscript)) {
