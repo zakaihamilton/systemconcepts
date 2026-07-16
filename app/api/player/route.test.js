@@ -52,7 +52,10 @@ jest.mock("next/server", () => ({
 }));
 
 function request(path = "wasabi/american/2024/2024-08-26 The Serpents.mp4") {
-	return { headers: { get: (name) => (name === "path" ? path : null) } };
+	return {
+		url: "https://systemconcepts.app/api/player",
+		headers: { get: (name) => (name === "path" ? path : null) },
+	};
 }
 
 describe("/api/player transcript URLs", () => {
@@ -61,9 +64,7 @@ describe("/api/player transcript URLs", () => {
 		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
 		roleAuth.mockReturnValue(true);
 		getWasabi.mockResolvedValue({ client: {}, bucket: "media" });
-		getSignedUrl
-			.mockResolvedValueOnce("https://wasabi.example/player")
-			.mockResolvedValueOnce("https://wasabi.example/download");
+		getSignedUrl.mockResolvedValue("https://wasabi.example/download");
 		getAwsDownloadUrl.mockResolvedValue("https://aws.example/transcript");
 		awsMetadataInfo.mockResolvedValue(null);
 		wasabiMetadataInfo.mockResolvedValue({ type: "image/jpeg" });
@@ -87,11 +88,11 @@ describe("/api/player transcript URLs", () => {
 		const response = await GET(request());
 
 		expect(await response.json()).toMatchObject({
-			path: "https://wasabi.example/player",
+			path: expect.stringContaining("/api/player/media?path="),
 			downloadUrl: "https://wasabi.example/download",
 			transcriptionUrl: "https://aws.example/transcript",
 		});
-		expect(getSignedUrl).toHaveBeenCalledTimes(2);
+		expect(getSignedUrl).toHaveBeenCalledTimes(1);
 		expect(getAwsDownloadUrl).toHaveBeenCalledWith({
 			path: "sessions/american/2024/2024-08-26 The Serpents.txt",
 			expiresIn: 10800,
@@ -132,7 +133,7 @@ describe("/api/player transcript URLs", () => {
 
 		expect((await response.json()).transcriptionUrl).toBeNull();
 		expect(getAwsDownloadUrl).not.toHaveBeenCalled();
-		expect(getSignedUrl).toHaveBeenCalledTimes(2);
+		expect(getSignedUrl).toHaveBeenCalledTimes(1);
 	});
 
 	it("signs images on Wasabi without looking up or signing a transcript", async () => {
@@ -141,12 +142,12 @@ describe("/api/player transcript URLs", () => {
 		);
 
 		expect(await response.json()).toMatchObject({
-			path: "https://wasabi.example/player",
+			path: expect.stringContaining("/api/player/media?path="),
 			downloadUrl: "https://wasabi.example/download",
 			subtitles: null,
 			transcriptionUrl: null,
 		});
-		expect(getSignedUrl).toHaveBeenCalledTimes(2);
+		expect(getSignedUrl).toHaveBeenCalledTimes(1);
 		expect(getSessions).not.toHaveBeenCalled();
 		expect(awsMetadataInfo).not.toHaveBeenCalled();
 		expect(wasabiMetadataInfo).toHaveBeenCalledWith({
@@ -158,16 +159,14 @@ describe("/api/player transcript URLs", () => {
 	it("falls back to AWS when stale metadata points an image at Wasabi", async () => {
 		wasabiMetadataInfo.mockResolvedValue(null);
 		awsMetadataInfo.mockResolvedValue({ type: "image/png" });
-		getAwsDownloadUrl
-			.mockResolvedValueOnce("https://aws.example/image")
-			.mockResolvedValueOnce("https://aws.example/download");
+		getAwsDownloadUrl.mockResolvedValue("https://aws.example/download");
 
 		const response = await GET(
 			request("wasabi/will/2026/2026-06-30 Beastly.png"),
 		);
 
 		expect(await response.json()).toMatchObject({
-			path: "https://aws.example/image",
+			path: expect.stringContaining("/api/player/media?path="),
 			downloadUrl: "https://aws.example/download",
 			transcriptionUrl: null,
 		});
@@ -179,32 +178,26 @@ describe("/api/player transcript URLs", () => {
 		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(1, {
 			path: "sessions/will/2026/2026-06-30 Beastly.png",
 			expiresIn: 10800,
-			responseContentDisposition: "inline",
+			responseContentDisposition:
+				'attachment; filename="2026-06-30 Beastly.png"',
 		});
 	});
 
 	it("signs AWS images against AWS without using Wasabi", async () => {
-		getAwsDownloadUrl
-			.mockResolvedValueOnce("https://aws.example/image")
-			.mockResolvedValueOnce("https://aws.example/download");
+		getAwsDownloadUrl.mockResolvedValue("https://aws.example/download");
 
 		const response = await GET(
 			request("/aws/sessions/will/2026/2026-06-30 Beastly.png"),
 		);
 
 		expect(await response.json()).toMatchObject({
-			path: "https://aws.example/image",
+			path: expect.stringContaining("/api/player/media?path="),
 			downloadUrl: "https://aws.example/download",
 			transcriptionUrl: null,
 		});
 		expect(getWasabi).not.toHaveBeenCalled();
 		expect(getSignedUrl).not.toHaveBeenCalled();
 		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(1, {
-			path: "sessions/will/2026/2026-06-30 Beastly.png",
-			expiresIn: 10800,
-			responseContentDisposition: "inline",
-		});
-		expect(getAwsDownloadUrl).toHaveBeenNthCalledWith(2, {
 			path: "sessions/will/2026/2026-06-30 Beastly.png",
 			expiresIn: 10800,
 			responseContentDisposition:

@@ -94,38 +94,28 @@ export async function GET(request) {
 				const fileName = s3Key.split("/").pop();
 				let playerUrl;
 				let downloadUrl;
+				const playerStreamUrl = new URL("/api/player/media", request.url);
+				playerStreamUrl.searchParams.set("path", decodedPath);
 				if (useAwsPrimary) {
 					const awsPath = `sessions/${s3Key}`;
-					[playerUrl, downloadUrl] = await Promise.all([
-						getAwsDownloadUrl({
-							path: awsPath,
-							expiresIn: 10800,
-							responseContentDisposition: "inline",
-						}),
-						getAwsDownloadUrl({
-							path: awsPath,
-							expiresIn: 10800,
-							responseContentDisposition: `attachment; filename="${fileName}"`,
-						}),
-					]);
+					downloadUrl = await getAwsDownloadUrl({
+						path: awsPath,
+						expiresIn: 10800,
+						responseContentDisposition: `attachment; filename="${fileName}"`,
+					});
 				} else {
 					const { client: wasabiClient, bucket: BUCKET_NAME } =
 						await getWasabi();
-					const playerCommand = new GetObjectCommand({
-						Bucket: BUCKET_NAME,
-						Key: s3Key,
-						ResponseContentDisposition: "inline",
-					});
 					const downloadCommand = new GetObjectCommand({
 						Bucket: BUCKET_NAME,
 						Key: s3Key,
 						ResponseContentDisposition: `attachment; filename="${fileName}"`,
 					});
-					[playerUrl, downloadUrl] = await Promise.all([
-						getSignedUrl(wasabiClient, playerCommand, { expiresIn: 10800 }),
-						getSignedUrl(wasabiClient, downloadCommand, { expiresIn: 10800 }),
-					]);
+					downloadUrl = await getSignedUrl(wasabiClient, downloadCommand, {
+						expiresIn: 10800,
+					});
 				}
+				playerUrl = playerStreamUrl.toString();
 
 				let subtitles = null;
 				let transcriptionUrl = null;
