@@ -1,6 +1,8 @@
-import { fireEvent, render, within } from "@testing-library/react";
+import { useSyncFeature } from "@sync/sync";
+import { SyncActiveStore } from "@sync/syncState";
+import { act, fireEvent, render, within } from "@testing-library/react";
 import { useRecentHistory } from "@util/domain/history";
-import { useSessions } from "@util/domain/sessions";
+import { SessionsStore, useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { setPath, usePages } from "@util/domain/views";
 import { ScheduleStore } from "@views/Schedule/Schedule";
@@ -9,6 +11,7 @@ import Apps from "./index.js";
 
 jest.mock("@util/domain/history");
 jest.mock("@util/domain/sessions");
+jest.mock("@sync/sync");
 jest.mock("@util/domain/translations");
 jest.mock("@util/domain/views");
 jest.mock("@views/Schedule/Schedule", () => ({
@@ -83,6 +86,7 @@ describe("Apps View", () => {
 		usePages.mockReturnValue(mockPages);
 		useSessions.mockReturnValue([mockSessions, false]);
 		useRecentHistory.mockReturnValue([[mockSessions[0]]]);
+		useSyncFeature.mockReturnValue({ sync: jest.fn(), busy: false });
 		useTranslations.mockReturnValue({
 			APPS: "Apps",
 			SESSIONS: "Sessions",
@@ -93,12 +97,15 @@ describe("Apps View", () => {
 			LOADING: "Loading",
 			REQUIRE_SIGNIN: "Login to your account",
 			SIGN_IN: "Sign In",
+			START_SYNC: "Start sync",
+			SYNCING: "Syncing",
 		});
 	});
 
 	afterEach(() => {
 		Cookies.remove("id");
 		Cookies.remove("hash");
+		jest.useRealTimers();
 	});
 
 	it("shows a sign-in panel without loading session data when signed out", () => {
@@ -135,6 +142,45 @@ describe("Apps View", () => {
 		expect(getByText("Earlier session")).toBeInTheDocument();
 		expect(getByTestId("icon1")).toBeInTheDocument();
 		expect(getByTestId("icon2")).toBeInTheDocument();
+	});
+
+	it("reloads sessions when a sync completes on the main page", () => {
+		SyncActiveStore.update((state) => {
+			state.needsSessionReload = true;
+		});
+
+		render(<Apps />);
+
+		expect(SessionsStore.update).toHaveBeenCalled();
+		const sessionState = { sessions: mockSessions, busy: true };
+		SessionsStore.update.mock.calls[0][0](sessionState);
+		expect(sessionState).toMatchObject({ sessions: null, busy: false });
+		expect(SyncActiveStore.getRawState().needsSessionReload).toBe(false);
+	});
+
+	it("prompts signed-in users to start a sync when no sessions are available", () => {
+		const sync = jest.fn();
+		useSessions.mockReturnValue([[], false]);
+		useRecentHistory.mockReturnValue([[], false]);
+		useSyncFeature.mockReturnValue({ sync, busy: false, percentage: 0 });
+
+		const { getByRole, getByText, queryByText, rerender } = render(<Apps />);
+
+		expect(getByText("No sessions yet.")).toBeInTheDocument();
+		expect(queryByText("Continue watching")).not.toBeInTheDocument();
+		expect(queryByText("Latest sessions")).not.toBeInTheDocument();
+		fireEvent.click(getByRole("button", { name: "Start sync" }));
+		expect(sync).toHaveBeenCalledTimes(1);
+
+		useSyncFeature.mockReturnValue({ sync, busy: true, percentage: 42 });
+		rerender(<Apps />);
+		expect(getByText("Syncing")).toBeInTheDocument();
+		expect(getByText("42%")).toBeInTheDocument();
+		expect(queryByText("No sessions yet.")).not.toBeInTheDocument();
+		expect(getByRole("progressbar", { name: "Syncing" })).toHaveAttribute(
+			"aria-valuenow",
+			"42",
+		);
 	});
 
 	it("sorts quick access apps", () => {
@@ -197,15 +243,23 @@ describe("Apps View", () => {
 	});
 
 	it("omits stale history entries and renders the empty state", () => {
-		useSessions.mockReturnValue([[], false]);
-		useRecentHistory.mockReturnValue([[mockSessions[0]]]);
+		useRecentHistory.mockReturnValue([
+			[{ ...mockSessions[0], name: "Removed" }],
+		]);
 		const { getAllByText } = render(<Apps />);
-		expect(getAllByText("No sessions yet.")).toHaveLength(2);
+		expect(getAllByText("No sessions yet.")).toHaveLength(1);
 	});
 
 	it("uses track-card skeletons while sessions load", () => {
+		jest.useFakeTimers();
 		useSessions.mockReturnValue([[], true]);
-		const { getAllByTestId } = render(<Apps />);
+		const { getAllByTestId, queryAllByTestId, queryByText } = render(<Apps />);
+		expect(queryAllByTestId("session-skeletons")).toHaveLength(0);
+		expect(queryByText("Continue watching")).not.toBeInTheDocument();
+		expect(queryByText("Latest sessions")).not.toBeInTheDocument();
+		act(() => {
+			jest.advanceTimersByTime(300);
+		});
 		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
 	});
 
@@ -225,8 +279,13 @@ describe("Apps View", () => {
 	});
 
 	it("keeps skeletons visible while the session store initializes", () => {
+		jest.useFakeTimers();
 		useSessions.mockReturnValue([null, false]);
-		const { getAllByTestId } = render(<Apps />);
+		const { getAllByTestId, queryAllByTestId } = render(<Apps />);
+		expect(queryAllByTestId("session-skeletons")).toHaveLength(0);
+		act(() => {
+			jest.advanceTimersByTime(300);
+		});
 		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
 	});
 });

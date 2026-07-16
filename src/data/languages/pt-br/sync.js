@@ -4,6 +4,10 @@ export default [
 		value: "Sincronizar",
 	},
 	{
+		id: "START_SYNC",
+		value: "Iniciar sincronização",
+	},
+	{
 		id: "FULL_SYNC",
 		value: "Sincronizar Todas as Sessões",
 	},

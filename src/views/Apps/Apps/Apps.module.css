@@ -84,7 +84,8 @@
 	background: rgba(var(--bar-background-rgb), 0.26);
 }
 
-.signInPrompt {
+.signInPrompt,
+.syncPrompt {
 	display: flex;
 	min-height: 8.5rem;
 	flex-direction: column;
@@ -98,8 +99,22 @@
 	text-align: center;
 }
 
-.signInPrompt p {
+.signInPrompt p,
+.syncPrompt p {
 	margin: 0;
+}
+
+.syncProgress {
+	width: min(100%, 22rem);
+}
+
+.syncProgressStatus {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 0.45rem;
+	font-size: 0.9rem;
+	font-weight: 650;
+	color: var(--text-color);
 }
 
 .signInLink {

@@ -1,11 +1,31 @@
+import Button from "@ui/Button";
+import LinearProgress from "@ui/LinearProgress";
 import Link from "@ui/Link";
 import { setPath, usePages } from "@util/domain/views";
 import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
 import styles from "./Apps.module.css";
 
 const SESSION_LIMIT = 4;
 const LATEST_SESSION_LIMIT = SESSION_LIMIT * 2;
 const TRAILING_QUICK_ACCESS_PAGE_IDS = ["settings", "account"];
+const SKELETON_DELAY = 300;
+
+function useDelayedLoading(loading) {
+	const [showLoading, setShowLoading] = useState(false);
+
+	useEffect(() => {
+		if (!loading) {
+			setShowLoading(false);
+			return;
+		}
+
+		const timer = setTimeout(() => setShowLoading(true), SKELETON_DELAY);
+		return () => clearTimeout(timer);
+	}, [loading]);
+
+	return showLoading;
+}
 
 function getSessionKey({ group, date, name }) {
 	return `${group || ""}::${date || ""}::${name || ""}`;
@@ -102,14 +122,43 @@ function SessionContent({ translations }) {
 	// Lazy-load these hooks because Apps is part of the root page registry that the
 	// session domain reaches through shared language/page state.
 	const { useRecentHistory } = require("@util/domain/history");
-	const { useSessions } = require("@util/domain/sessions");
+	const { SessionsStore, useSessions } = require("@util/domain/sessions");
+	const { useSyncFeature } = require("@sync/sync");
+	const { SyncActiveStore } = require("@sync/syncState");
 	const [sessions, loading] = useSessions([], {
 		filterSessions: false,
 		showToolbar: false,
 	});
 	const [history, , historyLoading] = useRecentHistory();
+	const {
+		sync,
+		busy: syncBusy,
+		percentage: syncPercentage = 0,
+	} = useSyncFeature();
+	const needsSessionReload = SyncActiveStore.useState(
+		(state) => state.needsSessionReload,
+	);
 	const sessionsLoading = loading || sessions === null;
 	const continueWatchingLoading = sessionsLoading || historyLoading;
+	const delayedSessionLoading = useDelayedLoading(sessionsLoading);
+	const delayedContinueWatchingLoading = useDelayedLoading(
+		continueWatchingLoading,
+	);
+	const showSessionSkeletons = sessionsLoading && delayedSessionLoading;
+	const showContinueWatchingSkeletons =
+		continueWatchingLoading && delayedContinueWatchingLoading;
+
+	useEffect(() => {
+		if (!needsSessionReload || syncBusy) return;
+
+		SessionsStore.update((state) => {
+			state.sessions = null;
+			state.busy = false;
+		});
+		SyncActiveStore.update((state) => {
+			state.needsSessionReload = false;
+		});
+	}, [needsSessionReload, syncBusy]);
 	const openScheduleView = (viewMode) => {
 		const { ScheduleStore } = require("@views/Schedule/Schedule");
 		if (typeof window !== "undefined") {
@@ -158,33 +207,51 @@ function SessionContent({ translations }) {
 				(b.name || "").localeCompare(a.name || ""),
 		)
 		.slice(0, LATEST_SESSION_LIMIT);
+	const hasSessions = sessions?.length > 0;
+
+	if (!hasSessions && (syncBusy || !sessionsLoading)) {
+		return (
+			<SyncPrompt
+				translations={translations}
+				onStart={sync}
+				busy={syncBusy}
+				percentage={syncPercentage}
+			/>
+		);
+	}
+
+	if (sessionsLoading && !showSessionSkeletons) {
+		return null;
+	}
 
 	return (
 		<>
-			<SessionSection
-				title={translations.CONTINUE_WATCHING}
-				href="#schedule"
-				onClick={() => openScheduleView("history")}
-			>
-				{continueWatchingLoading ? (
-					<SessionSkeletons />
-				) : continueWatching.length ? (
-					<div className={styles.sessionGrid}>
-						{continueWatching.map((session) => (
-							<SessionCard key={getSessionKey(session)} session={session} />
-						))}
-					</div>
-				) : (
-					<div className={styles.state}>{translations.NO_SESSIONS_YET}</div>
-				)}
-			</SessionSection>
+			{(!continueWatchingLoading || showContinueWatchingSkeletons) && (
+				<SessionSection
+					title={translations.CONTINUE_WATCHING}
+					href="#schedule"
+					onClick={() => openScheduleView("history")}
+				>
+					{showContinueWatchingSkeletons ? (
+						<SessionSkeletons />
+					) : continueWatching.length ? (
+						<div className={styles.sessionGrid}>
+							{continueWatching.map((session) => (
+								<SessionCard key={getSessionKey(session)} session={session} />
+							))}
+						</div>
+					) : (
+						<div className={styles.state}>{translations.NO_SESSIONS_YET}</div>
+					)}
+				</SessionSection>
+			)}
 
 			<SessionSection
 				title={translations.LATEST_SESSIONS}
 				href="#schedule"
 				onClick={() => openScheduleView("week")}
 			>
-				{sessionsLoading ? (
+				{showSessionSkeletons ? (
 					<SessionSkeletons count={LATEST_SESSION_LIMIT} />
 				) : latestSessions.length ? (
 					<div className={styles.sessionGrid}>
@@ -258,6 +325,31 @@ function SignInPrompt({ translations }) {
 			>
 				{translations.SIGN_IN}
 			</Link>
+		</section>
+	);
+}
+
+function SyncPrompt({ translations, onStart, busy, percentage }) {
+	return (
+		<section className={styles.syncPrompt} aria-label={translations.START_SYNC}>
+			{!busy && <p>{translations.NO_SESSIONS_YET}</p>}
+			{busy ? (
+				<div className={styles.syncProgress} aria-live="polite">
+					<div className={styles.syncProgressStatus}>
+						<span>{translations.SYNCING}</span>
+						<span>{percentage}%</span>
+					</div>
+					<LinearProgress
+						variant="determinate"
+						value={percentage}
+						aria-label={translations.SYNCING}
+					/>
+				</div>
+			) : (
+				<Button variant="contained" onClick={onStart}>
+					{translations.START_SYNC}
+				</Button>
+			)}
 		</section>
 	);
 }

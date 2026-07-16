@@ -42,15 +42,15 @@
 	background-color: transparent !important;
 }
 
-.input input,
-.input select {
-	padding: 8px 12px !important;
+.input {
+	padding: 6px 0 !important;
 	font-size: 0.95rem;
 	font-weight: 500;
 	color: var(--text-color);
+	line-height: 1.5;
 }
 
-.select select {
+.select {
 	padding-right: 32px !important;
 	display: flex;
 	align-items: center;

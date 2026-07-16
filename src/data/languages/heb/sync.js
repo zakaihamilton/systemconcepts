@@ -4,6 +4,10 @@ export default [
 		value: "סינכרון",
 	},
 	{
+		id: "START_SYNC",
+		value: "התחל סנכרון",
+	},
+	{
 		id: "FULL_SYNC",
 		value: "סנכרון כל השיעורים",
 	},

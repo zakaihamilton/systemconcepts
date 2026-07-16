@@ -171,7 +171,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 	const [, addToHistory, loadingHistory] = useRecentHistory();
 
 	useEffect(() => {
-		if (group && date && name && !loadingHistory) {
+		if (group && date && name && loadingHistory === false) {
 			PlayerStore.update((s) => {
 				const session = { group, date, name };
 				structuredLogger.debug("sesion playing", session);

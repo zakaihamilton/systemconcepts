@@ -67,7 +67,8 @@
 }
 
 .labelFloating {
-	transform: translateY(-14px) scale(0.7);
+	/* Keep the filled-field label inside its reserved top padding. */
+	transform: translateY(-4px) scale(0.85);
 	color: var(--primary-color);
 }
 
@@ -78,7 +79,7 @@
 .inputWrapper {
 	display: flex;
 	align-items: center;
-	padding: 8px 12px;
+	padding: 3px 12px 4px;
 	min-height: 1.5rem;
 }
 
