@@ -32,6 +32,13 @@ export function shouldRedirectStorageFileRead(request, query = {}) {
 	if (request.method !== "GET") return false;
 	if (!isProductionDeployment(request)) return false;
 
+	// JavaScript reads (including sync manifests) use CORS fetch mode. Keeping
+	// these requests on the application origin avoids relying on storage-provider
+	// CORS headers and lets authenticated API errors reach the client normally.
+	// Native media and download navigations use a different fetch mode and may
+	// still redirect directly to the signed object URL.
+	if (request.headers.get("sec-fetch-mode") === "cors") return false;
+
 	// App routes pass URLSearchParams, whereas direct callers and tests may pass
 	// a plain object. Reading properties from URLSearchParams always yields
 	// undefined, which previously made directory listings look like file reads.

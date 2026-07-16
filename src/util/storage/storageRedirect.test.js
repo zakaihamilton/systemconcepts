@@ -86,6 +86,17 @@ describe("storageRedirect", () => {
 		).toBe(false);
 	});
 
+	it("proxies CORS-mode file reads in production", () => {
+		process.env.VERCEL_ENV = "production";
+
+		expect(
+			shouldRedirectStorageFileRead(
+				request({ headers: { "sec-fetch-mode": "cors" } }),
+				{ path: "sync/files.json.gz" },
+			),
+		).toBe(false);
+	});
+
 	it("keeps directory listings in the API route when query is URLSearchParams", () => {
 		process.env.VERCEL_ENV = "production";
 
