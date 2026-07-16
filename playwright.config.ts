@@ -8,6 +8,9 @@ export default defineConfig({
 	reporter: process.env.CI ? "github" : "list",
 	use: {
 		baseURL: "http://127.0.0.1:3107",
+		// Keep browser-level request mocks deterministic; Playwright routes do not
+		// intercept requests that a registered service worker handles.
+		serviceWorkers: "block",
 		screenshot: "only-on-failure",
 		trace: "retain-on-failure",
 	},
