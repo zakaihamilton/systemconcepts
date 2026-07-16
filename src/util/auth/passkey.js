@@ -14,6 +14,18 @@ import { hash } from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 
 const rpName = "App"; // Should be configurable
+const CHALLENGE_TTL_MS = 15 * 60 * 1000;
+
+function requireCurrentChallenge(challengeRecord) {
+	if (!challengeRecord) throw "CHALLENGE_NOT_FOUND";
+	if (
+		Date.now() - new Date(challengeRecord.createdAt).getTime() >
+		CHALLENGE_TTL_MS
+	) {
+		throw "CHALLENGE_EXPIRED";
+	}
+	return challengeRecord;
+}
 
 export async function getPasskeyRegistrationOptions({
 	id,
@@ -99,9 +111,7 @@ export async function verifyPasskeyRegistration({
 		query: { userId: id, type: "register" },
 	});
 
-	if (!challengeRecord) {
-		throw "CHALLENGE_NOT_FOUND";
-	}
+	requireCurrentChallenge(challengeRecord);
 
 	const verification = await verifyRegistrationResponse({
 		response,
@@ -304,9 +314,7 @@ export async function verifyPasskeyAuth({ id, response, origin, rpID }) {
 		query: { userId: id, type: "auth" },
 	});
 
-	if (!challengeRecord) {
-		throw "CHALLENGE_NOT_FOUND";
-	}
+	requireCurrentChallenge(challengeRecord);
 
 	const user = await findRecord({ collectionName: "users", query: { id } });
 	if (!user) {

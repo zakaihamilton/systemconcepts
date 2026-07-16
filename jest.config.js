@@ -31,6 +31,14 @@ const customJestConfig = {
 	transformIgnorePatterns: [
 		"/node_modules/(?!(p-limit|yocto-queue|react-markdown|remark-breaks|vfile|vfile-message|unist-util-.*|unified|bail|is-plain-obj|trough|decode-named-character-reference|character-entities|mdast-util-.*|micromark.*|property-information|hast-util-.*|space-separated-tokens|comma-separated-tokens|style-to-object|inline-style-parser|devlop)/)",
 	],
+	coverageThreshold: {
+		global: {
+			statements: 49,
+			branches: 40,
+			functions: 34,
+			lines: 49,
+		},
+	},
 };
 
 module.exports = async () => {

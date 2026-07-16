@@ -8,12 +8,21 @@ export default defineConfig({
 	reporter: process.env.CI ? "github" : "list",
 	use: {
 		baseURL: "http://127.0.0.1:3107",
+		// Keep browser-level request mocks deterministic; Playwright routes do not
+		// intercept requests that a registered service worker handles.
+		serviceWorkers: "block",
 		screenshot: "only-on-failure",
 		trace: "retain-on-failure",
 	},
 	webServer: {
 		command: "yarn start -H 127.0.0.1 -p 3107",
 		url: "http://127.0.0.1:3107",
+		env: {
+			AWS_SECRET: "playwright-internal-secret",
+			NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3107",
+			PLAYWRIGHT: "1",
+			SITE_URL: "http://127.0.0.1:3107",
+		},
 		reuseExistingServer: false,
 		timeout: 120_000,
 	},

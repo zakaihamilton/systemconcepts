@@ -1,5 +1,6 @@
 import { logger as structuredLogger } from "@util/api/logger";
 import { getSafeError } from "@util/api/safeError";
+import { loginRequestSchema, parseBody } from "@util/api/schemas";
 import {
 	changePassword,
 	login,
@@ -95,6 +96,9 @@ export async function POST(request) {
 	} catch (err) {
 		return NextResponse.json({ err: getSafeError(err) }, { status: 400 });
 	}
+	const validated = parseBody(loginRequestSchema, body);
+	if (!validated)
+		return NextResponse.json({ err: "INVALID_REQUEST" }, { status: 400 });
 	const {
 		action,
 		id,
@@ -106,7 +110,7 @@ export async function POST(request) {
 		firstName,
 		lastName,
 		remember = true,
-	} = body || {};
+	} = validated;
 	if (action === "reset-request") {
 		try {
 			await limit(request, "reset-request", id, 3);

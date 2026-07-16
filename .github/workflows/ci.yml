@@ -30,7 +30,9 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn typecheck
+      - run: yarn audit:dependencies
       - run: yarn test --runInBand
+      - run: yarn test:coverage
       - run: yarn build
       - run: npx playwright install --with-deps chromium
       - run: yarn test:e2e

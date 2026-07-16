@@ -51,7 +51,7 @@ AWS, Wasabi, MongoDB, and email integrations are optional in local development. 
 
 ## PWA and offline behavior
 
-`next-pwa` builds the service worker during production builds. Runtime caching rules live in `runtimeCaching.js`, and `/~offline` is the document fallback. Service workers are disabled during `yarn dev`; use a production build to test offline behavior.
+The repo-owned `public/sw.js` provides the offline fallback and runtime caching rules; `/~offline` is the document fallback. Service workers register only in production, so use a production build to test offline behavior.
 
 ```bash
 yarn build
@@ -69,6 +69,10 @@ yarn test:e2e
 ```
 
 `yarn verify` runs the complete sequence. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
+
+`yarn test:coverage` reports the Jest coverage baseline and `yarn audit:dependencies` fails on high-severity dependency advisories. Before deploying a MongoDB-backed environment, run `yarn db:indexes` with `MONGO_URL` and `MONGO_DB` configured. It is idempotent and provisions the user/session/challenge/rate-limit uniqueness and expiry indexes.
+
+The production CSP allows only the configured site and storage origins. Set `AWS_ENDPOINT` and `WASABI_URL` to their real origins before deploying; broad third-party browser connections are intentionally not allowed.
 
 ## Deployment
 

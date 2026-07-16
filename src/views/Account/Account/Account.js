@@ -50,7 +50,7 @@ export default function Account({ redirect }) {
 	const userId = Cookies.get("id");
 	const isSignedIn = userId && Cookies.get("hash");
 
-	const changeRemember = (event) => setRemember(event.target.value);
+	const changeRemember = (event) => setRemember(event.target.checked);
 	const changeCreatePasskey = (event) => setCreatePasskey(event.target.checked);
 
 	useEffect(() => {
@@ -341,7 +341,7 @@ export default function Account({ redirect }) {
 									control={
 										<Checkbox
 											color="primary"
-											value={remember}
+											checked={remember}
 											onChange={changeRemember}
 										/>
 									}

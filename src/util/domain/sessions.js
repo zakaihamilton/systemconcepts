@@ -515,17 +515,14 @@ export function useSessions(depends = [], options = {}) {
 	);
 
 	useEffect(() => {
-		if (groupMetadata && groupMetadata.length && !loading) {
+		if (groupMetadata && !loading) {
 			const currentHash = JSON.stringify({
 				metadata: groupMetadata,
 				settings: groupsSettings,
 			});
 			const groupsChanged = currentHash !== groupsHash;
 			const noSessions = sessions === null;
-			// Only reload on sync if we had data before (savedSyncCounter > 0)
-			// Ignore the initial 0→1 transition which happens on first page load
-			const syncChanged =
-				syncCounter !== savedSyncCounter && savedSyncCounter > 0;
+			const syncChanged = syncCounter !== savedSyncCounter;
 			const counterChanged = counter !== lastCounterRef.current;
 
 			if (counterChanged) {

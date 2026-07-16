@@ -9,8 +9,7 @@ export async function checkRateLimit(
 	if (key) {
 		identifier = String(key);
 	} else {
-		if (req.headers?.get) identifier = getTrustedClientIp(req);
-		else identifier = "unknown";
+		identifier = getTrustedClientIp(req);
 	}
 
 	const collectionName = "rate_limits";
@@ -46,7 +45,8 @@ export async function checkRateLimit(
 				count: 1,
 				resetTime: now + windowMs,
 			});
-		} catch (_err) {
+		} catch (err) {
+			if (err?.code !== 11000) throw err;
 			await checkRateLimit(req, { limit, windowMs, key });
 		}
 		return;

@@ -4,6 +4,10 @@ export default [
 		value: "Sync",
 	},
 	{
+		id: "START_SYNC",
+		value: "Start sync",
+	},
+	{
 		id: "SYNC_FAILED",
 		value: "Sync Failed",
 	},

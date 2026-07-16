@@ -1,5 +1,6 @@
 import { enforceRateLimit } from "@util/api/api";
 import { handle } from "@util/api/logger";
+import { clientLogRequestSchema, parseBody } from "@util/api/schemas";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,8 @@ export async function POST(request) {
 	} catch (_err) {
 		return NextResponse.json({ err: "Invalid JSON" }, { status: 400 });
 	}
-	if (!body || typeof body !== "object" || Array.isArray(body)) {
+	body = parseBody(clientLogRequestSchema, body);
+	if (!body) {
 		return NextResponse.json({ err: "Invalid payload" }, { status: 400 });
 	}
 	handle({

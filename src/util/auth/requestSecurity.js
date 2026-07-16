@@ -1,5 +1,6 @@
 export function getTrustedClientIp(request) {
-	return request.headers.get("x-vercel-forwarded-for") || "unknown";
+	if (request?.ip) return String(request.ip);
+	return request?.headers?.get("x-vercel-forwarded-for") || "unknown";
 }
 
 export function assertSameOrigin(request) {

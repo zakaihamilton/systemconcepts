@@ -1,6 +1,7 @@
 import { ContentSize } from "@components/Page/Content";
 import { render } from "@testing-library/react";
 import { useFetchJSON } from "@util/api/fetch";
+import { useRecentHistory } from "@util/domain/history";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { useParentParams } from "@util/domain/views";
@@ -83,6 +84,46 @@ describe("Player View", () => {
 			</ContentSize.Provider>,
 		);
 		expect(getByTestId("video")).toBeInTheDocument();
+	});
+
+	it("waits for history to load before recording the current session", () => {
+		const addToHistory = jest.fn();
+		useRecentHistory.mockReturnValue([[], addToHistory, undefined]);
+
+		const { rerender } = render(
+			<ContentSize.Provider value={mockSize}>
+				<PlayerPage
+					show={true}
+					prefix="sessions"
+					group="test"
+					year="2021"
+					date="01-01"
+					name="session.mp4"
+				/>
+			</ContentSize.Provider>,
+		);
+
+		expect(addToHistory).not.toHaveBeenCalled();
+
+		useRecentHistory.mockReturnValue([[], addToHistory, false]);
+		rerender(
+			<ContentSize.Provider value={mockSize}>
+				<PlayerPage
+					show={true}
+					prefix="sessions"
+					group="test"
+					year="2021"
+					date="01-01"
+					name="session.mp4"
+				/>
+			</ContentSize.Provider>,
+		);
+
+		expect(addToHistory).toHaveBeenCalledWith({
+			group: "test",
+			date: "01-01",
+			name: "session.mp4",
+		});
 	});
 
 	it("keeps the audio player mounted when subtitle metadata arrives", () => {
