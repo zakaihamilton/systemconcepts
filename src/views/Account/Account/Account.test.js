@@ -1,5 +1,6 @@
 import { MainStore } from "@components/Main";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
@@ -30,6 +31,7 @@ describe("Account View", () => {
 		SIGNED_IN: "Signed In",
 		ID: "ID",
 		PASSWORD: "Password",
+		REMEMBER_ME: "Remember me",
 		SIGN_OUT: "Sign Out",
 	};
 
@@ -61,5 +63,26 @@ describe("Account View", () => {
 		render(<Account />);
 		expect(await screen.findByText("Signed In")).toBeInTheDocument();
 		expect(await screen.findByText("My Passkey")).toBeInTheDocument();
+	});
+
+	it("submits a boolean remember value after it is toggled", async () => {
+		const user = userEvent.setup();
+		fetchJSON.mockResolvedValue({ role: "visitor" });
+		render(<Account />);
+
+		await user.type(screen.getByLabelText("ID"), "person@example.com");
+		await user.type(screen.getByLabelText("Password"), "password");
+		await user.click(screen.getByLabelText("Remember me"));
+		await user.click(screen.getByRole("button", { name: "Sign In" }));
+
+		expect(fetchJSON).toHaveBeenCalledWith("/api/login", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "login",
+				id: "person@example.com",
+				password: "password",
+				remember: false,
+			}),
+		});
 	});
 });

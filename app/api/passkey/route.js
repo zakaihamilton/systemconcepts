@@ -15,6 +15,7 @@ import {
 } from "@util/auth/requestSecurity";
 import {
 	createSession,
+	getAuthErrorStatus,
 	getSessionUser,
 	setSessionCookies,
 } from "@util/auth/session";
@@ -80,7 +81,10 @@ export async function GET(request) {
 		}
 	} catch (err) {
 		structuredLogger.error("passkey error: ", err);
-		return NextResponse.json({ err: getSafeError(err) }, { status: 500 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err, 500) },
+		);
 	}
 }
 
@@ -99,7 +103,10 @@ export async function DELETE(request) {
 		return NextResponse.json({ success: true });
 	} catch (err) {
 		structuredLogger.error("passkey error: ", err);
-		return NextResponse.json({ err: getSafeError(err) }, { status: 500 });
+		return NextResponse.json(
+			{ err: getSafeError(err) },
+			{ status: getAuthErrorStatus(err, 500) },
+		);
 	}
 }
 

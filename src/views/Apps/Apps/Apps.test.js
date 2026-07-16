@@ -4,6 +4,7 @@ import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { setPath, usePages } from "@util/domain/views";
 import { ScheduleStore } from "@views/Schedule/Schedule";
+import Cookies from "js-cookie";
 import Apps from "./index.js";
 
 jest.mock("@util/domain/history");
@@ -77,6 +78,8 @@ describe("Apps View", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		window.localStorage.clear();
+		Cookies.set("id", "test-user");
+		Cookies.set("hash", "test-hash");
 		usePages.mockReturnValue(mockPages);
 		useSessions.mockReturnValue([mockSessions, false]);
 		useRecentHistory.mockReturnValue([[mockSessions[0]]]);
@@ -88,7 +91,33 @@ describe("Apps View", () => {
 			ALL_SESSIONS: "All sessions",
 			NO_SESSIONS_YET: "No sessions yet.",
 			LOADING: "Loading",
+			REQUIRE_SIGNIN: "Login to your account",
+			SIGN_IN: "Sign In",
 		});
+	});
+
+	afterEach(() => {
+		Cookies.remove("id");
+		Cookies.remove("hash");
+	});
+
+	it("shows a sign-in panel without loading session data when signed out", () => {
+		Cookies.remove("id");
+		Cookies.remove("hash");
+
+		const { getByRole, getByTestId, getByText, queryByTestId, queryByText } =
+			render(<Apps />);
+
+		expect(getByText("Login to your account")).toBeInTheDocument();
+		expect(getByTestId("app-quick-access-items")).toBeInTheDocument();
+		expect(queryByText("Continue watching")).not.toBeInTheDocument();
+		expect(queryByText("Latest sessions")).not.toBeInTheDocument();
+		expect(queryByTestId("session-skeletons")).not.toBeInTheDocument();
+		expect(useSessions).not.toHaveBeenCalled();
+		expect(useRecentHistory).not.toHaveBeenCalled();
+
+		fireEvent.click(getByRole("link", { name: "Sign In" }));
+		expect(setPath).toHaveBeenCalledWith("account");
 	});
 
 	it("renders continue watching, latest sessions, and app shortcuts", () => {
