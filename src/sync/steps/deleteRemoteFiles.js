@@ -1,60 +1,69 @@
 import { logger as structuredLogger } from "@util/api/logger";
-import { makePath } from "@util/data/path";
-import storage from "@util/storage/storage";
 import { addSyncLog } from "../logs";
+import { moveFileToTrash } from "../trash";
 
 /**
- * Step: Delete files from remote that are marked as deleted in local manifest
+ * Move remote files with committed tombstones into recoverable trash.
  * @param {Array} localManifest - The local manifest
  * @param {string} remotePath - The remote path to sync to
- * @returns {Array} List of paths that were successfully deleted from remote
+ * @returns {Promise<Object>} Structured move result
  */
-export async function deleteRemoteFiles(localManifest, remotePath) {
+export async function deleteRemoteFiles(localManifest, remotePath, syncId) {
 	const start = performance.now();
 	const toDelete = localManifest.filter((f) => f.deleted);
 
 	if (toDelete.length === 0) {
-		return [];
+		return {
+			complete: true,
+			movedPaths: [],
+			counts: { attempted: 0, succeeded: 0, failed: 0 },
+		};
 	}
 
 	addSyncLog(
-		`Step: Deleting ${toDelete.length} file(s) from remote...`,
+		`Moving ${toDelete.length} deleted file(s) to remote trash...`,
 		"info",
 	);
-	const deletedPaths = [];
+	const movedPaths = [];
+	let failed = 0;
 
 	for (const file of toDelete) {
 		try {
-			const remoteFilePath = makePath(remotePath, file.path);
-			const remoteFilePathGz = makePath(remotePath, file.path + ".gz");
-
-			// Try to delete both original and compressed versions
-			await storage.deleteFile(remoteFilePath);
-			try {
-				// If it fails (e.g. doesn't exist), we don't care much, but we try both
-				await storage.deleteFile(remoteFilePathGz);
-			} catch {
-				// Ignore gz delete error
+			const original = await moveFileToTrash(remotePath, syncId, file.path);
+			const compressed = await moveFileToTrash(
+				remotePath,
+				syncId,
+				`${file.path}.gz`,
+			);
+			if (original.moved || compressed.moved) {
+				addSyncLog(`Moved to remote trash: ${file.path}`, "info");
 			}
-
-			addSyncLog(`Deleted from remote: ${file.path}`, "info");
-			deletedPaths.push(file.path);
+			movedPaths.push(file.path);
 		} catch (err) {
+			failed++;
 			structuredLogger.error(
-				`[Sync] Failed to delete remote file ${file.path}:`,
+				`[Sync] Failed to move remote file ${file.path} to trash:`,
 				err,
 			);
-			addSyncLog(`Failed to delete from remote: ${file.path}`, "error");
+			addSyncLog(`Failed to move to remote trash: ${file.path}`, "error");
 		}
 	}
 
 	const duration = ((performance.now() - start) / 1000).toFixed(1);
-	if (deletedPaths.length > 0) {
+	if (movedPaths.length > 0) {
 		addSyncLog(
-			`✓ Deleted ${deletedPaths.length} file(s) from remote in ${duration}s`,
+			`✓ Moved ${movedPaths.length} file(s) to remote trash in ${duration}s`,
 			"success",
 		);
 	}
 
-	return deletedPaths;
+	return {
+		complete: failed === 0,
+		movedPaths,
+		counts: {
+			attempted: toDelete.length,
+			succeeded: movedPaths.length,
+			failed,
+		},
+	};
 }

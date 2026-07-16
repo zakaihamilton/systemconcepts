@@ -2,6 +2,7 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
 import pako from "pako";
+import { readFileIfExists } from "./storageReads";
 
 /**
  * Compress JSON data to gzip format
@@ -29,18 +30,12 @@ export function decompressJSON(buffer) {
  * @param {string} path - Path to the file
  * @returns {string|null} - Raw string content or null if file doesn't exist
  */
-export async function readCompressedFileRaw(path) {
+export async function readCompressedFileRaw(path, options = {}) {
+	const { strict = false } = options;
 	path = makePath(path);
 	try {
 		// structuredLogger.debug("Reading file", path);
-		const data = await storage.readFile(path).catch((err) => {
-			// treat missing file as null without logging error
-			const errorStr = (err.message || String(err)).toLowerCase();
-			if (errorStr.includes("no such key") || errorStr.includes("enoent")) {
-				return null;
-			}
-			throw err;
-		});
+		const data = await readFileIfExists(storage, path);
 
 		if (data === undefined || data === null || data === "") {
 			return null;
@@ -94,6 +89,7 @@ export async function readCompressedFileRaw(path) {
 		try {
 			return pako.ungzip(buffer, { to: "string" });
 		} catch (e) {
+			if (strict) throw e;
 			try {
 				const text = new TextDecoder("utf-8").decode(buffer);
 				return text;
@@ -105,6 +101,7 @@ export async function readCompressedFileRaw(path) {
 			}
 		}
 	} catch (err) {
+		if (strict) throw err;
 		// Only log errors that aren't "Not Found"
 		structuredLogger.error(`[Bundle] Error reading file ${path}:`, err);
 		return null;
@@ -116,12 +113,14 @@ export async function readCompressedFileRaw(path) {
  * @param {string} path - Path to the file
  * @returns {Object|null} - Parsed JSON data or null if file doesn't exist
  */
-export async function readCompressedFile(path) {
-	const content = await readCompressedFileRaw(path);
+export async function readCompressedFile(path, options = {}) {
+	const { strict = false } = options;
+	const content = await readCompressedFileRaw(path, options);
 	if (content === null) return null;
 	try {
 		return JSON.parse(content);
 	} catch (e) {
+		if (strict) throw e;
 		structuredLogger.error(
 			`[Bundle] Failed to parse JSON for ${path}:`,
 			e.message,

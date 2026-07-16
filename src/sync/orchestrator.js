@@ -96,9 +96,13 @@ export function createSyncOrchestrator(overrides = {}) {
 			const startTime = performance.now();
 			let currentOffset = 0;
 			let hasAnyChanges = false;
+			let allComplete = true;
+			let stopped = false;
 
 			for (const config of dependencies.configs) {
 				if (SyncActiveStore.getRawState().stopping) {
+					stopped = true;
+					allComplete = false;
 					dependencies.addSyncLog("Sync stopped by user", "warning");
 					break;
 				}
@@ -131,6 +135,7 @@ export function createSyncOrchestrator(overrides = {}) {
 				);
 				currentOffset = result.newOffset;
 				hasAnyChanges ||= result.hasChanges;
+				allComplete &&= result.complete;
 				if (result.complete) {
 					dependencies.persistManifestSignature(freshness);
 				} else {
@@ -148,7 +153,10 @@ export function createSyncOrchestrator(overrides = {}) {
 			}
 
 			const duration = ((performance.now() - startTime) / 1000).toFixed(1);
-			dependencies.addSyncLog(`Total sync time: ${duration}s`, "success");
+			dependencies.addSyncLog(
+				`Total sync time: ${duration}s`,
+				allComplete ? "success" : "warning",
+			);
 			if (hasAnyChanges || forceReload) {
 				SyncActiveStore.update((state) => {
 					state.needsSessionReload = true;
@@ -162,6 +170,15 @@ export function createSyncOrchestrator(overrides = {}) {
 				UpdateSessionsStore.update((state) => {
 					state.busy = false;
 				});
+			}
+			if (!allComplete) {
+				return {
+					completed: false,
+					reason:
+						stopped || SyncActiveStore.getRawState().stopping
+							? "stopped"
+							: "incomplete",
+				};
 			}
 			return { completed: true };
 		} catch (error) {

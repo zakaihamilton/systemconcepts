@@ -72,8 +72,9 @@ describe("sync orchestration recovery", () => {
 			}),
 		});
 
-		await createSyncOrchestrator(dependencies)(false);
+		const result = await createSyncOrchestrator(dependencies)(false);
 
+		expect(result).toEqual({ completed: false, reason: "incomplete" });
 		expect(dependencies.persistManifestSignature).not.toHaveBeenCalled();
 		expect(dependencies.addSyncLog).toHaveBeenCalledWith(
 			expect.stringContaining("sync incomplete"),

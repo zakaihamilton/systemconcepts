@@ -7,12 +7,13 @@ import { isBinaryFile, makePath } from "@util/data/path";
 const fs = process.browser && new FS("systemconcepts-fs");
 
 async function getListing(path, options = {}) {
-	const { useCount } = options;
+	const { useCount, strict = false } = options;
 	let listing = [];
 	let names = [];
 	try {
 		names = await fs.promises.readdir(path);
-	} catch {
+	} catch (error) {
+		if (strict && error?.code !== "ENOENT") throw error;
 		return [];
 	}
 	for (const name of names) {
@@ -50,6 +51,7 @@ async function getListing(path, options = {}) {
 			item.name = name;
 			listing.push(item);
 		} catch (err) {
+			if (strict) throw err;
 			structuredLogger.error(err);
 		}
 	}
@@ -218,15 +220,15 @@ export async function clear() {
 	});
 }
 
-async function getRecursiveList(path) {
+async function getRecursiveList(path, options = {}) {
 	let listing = [];
-	const items = await getListing(path);
+	const items = await getListing(path, options);
 	for (const item of items) {
 		if (item.type === "dir") {
 			// item.path is in format "/local/sync/subfolder"
 			// We need to pass just the filesystem path: "/sync/subfolder" (keep leading /)
 			const pathWithoutDevice = item.path.replace(/^\/local/, "");
-			const children = await getRecursiveList(pathWithoutDevice);
+			const children = await getRecursiveList(pathWithoutDevice, options);
 			listing.push(...children);
 		} else {
 			listing.push(item);

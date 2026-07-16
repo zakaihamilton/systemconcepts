@@ -9,7 +9,7 @@ import { readFileIfExists } from "./storageReads";
 export async function updateManifestEntry(manifestPath, entry) {
 	let manifest = [];
 	if (manifestPath.endsWith(".gz")) {
-		manifest = (await readCompressedFile(manifestPath)) || [];
+		manifest = (await readCompressedFile(manifestPath, { strict: true })) || [];
 	} else {
 		const content = await readFileIfExists(storage, manifestPath);
 		if (content) {

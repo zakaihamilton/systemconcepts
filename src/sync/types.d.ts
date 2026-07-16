@@ -10,6 +10,7 @@ export interface SyncConfig {
 	migration?: boolean;
 	restoreMissingFiles?: boolean;
 	useChangeCounter?: boolean;
+	excludeNames?: string[];
 }
 
 export interface ManifestEntry {
@@ -24,6 +25,7 @@ export interface ManifestEntry {
 
 export interface Manifest extends Array<ManifestEntry> {
 	loadedFromManifest?: boolean;
+	authoritative?: boolean;
 }
 
 export interface ManifestFreshness {
@@ -41,7 +43,7 @@ export interface PipelineResult {
 
 export interface SyncResult {
 	completed: boolean;
-	reason?: "unauthorized";
+	reason?: "unauthorized" | "incomplete" | "stopped";
 }
 
 export interface SyncProgress {

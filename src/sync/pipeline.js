@@ -11,7 +11,9 @@ import {
 	saveLibraryCounter,
 } from "./libraryCounter";
 import { addSyncLog } from "./logs";
+import { applyManifestUpdates } from "./manifest";
 import { SyncProgressTracker } from "./progressTracker";
+import { applyRemoteTombstones } from "./steps/applyRemoteTombstones";
 import { deleteRemoteFiles } from "./steps/deleteRemoteFiles";
 import { downloadUpdates } from "./steps/downloadUpdates";
 import { getLocalFiles } from "./steps/getLocalFiles";
@@ -24,6 +26,7 @@ import { uploadNewFiles } from "./steps/uploadNewFiles";
 import { uploadUpdates } from "./steps/uploadUpdates";
 import { readFileIfExists } from "./storageReads";
 import { SyncActiveStore } from "./syncState";
+import { createSyncTrashId } from "./trash";
 
 const defaultDependencies = {
 	storage,
@@ -43,7 +46,9 @@ const defaultDependencies = {
 	uploadUpdates,
 	uploadNewFiles,
 	deleteRemoteFiles,
+	applyRemoteTombstones,
 	uploadManifest,
+	createSyncTrashId,
 };
 
 /** @typedef {{
@@ -64,7 +69,9 @@ const defaultDependencies = {
  * uploadUpdates: (...args: any[]) => Promise<any>,
  * uploadNewFiles: (...args: any[]) => Promise<any>,
  * deleteRemoteFiles: (...args: any[]) => any,
- * uploadManifest: (...args: any[]) => Promise<any>
+ * applyRemoteTombstones: (...args: any[]) => Promise<any>,
+ * uploadManifest: (...args: any[]) => Promise<any>,
+ * createSyncTrashId: () => string
  * }} PipelineDependencies */
 
 /**
@@ -162,6 +169,8 @@ export function createSyncPipeline(overrides = {}) {
 		);
 		if (migration) progress.usePersonalWeights();
 		let hasChanges = false;
+		let phaseComplete = true;
+		const syncId = dependencies.createSyncTrashId();
 		const isLocked = SyncActiveStore.getRawState().locked;
 		const resolvedRemotePath = remotePath.replace("{userid}", userId);
 		const canUpload =
@@ -204,9 +213,11 @@ export function createSyncPipeline(overrides = {}) {
 			!!migration,
 		);
 		const loadedFromManifest = !!remoteManifest.loadedFromManifest;
+		const remoteManifestAuthoritative = !!remoteManifest.authoritative;
 		progress.completeStep("syncManifest");
 
 		let migrationOccurred = false;
+		let migrationComplete = true;
 		if (migration) {
 			progress.updateProgress("migrateFromMongoDB", {
 				processed: 0,
@@ -254,6 +265,7 @@ export function createSyncPipeline(overrides = {}) {
 					skipHashing = false;
 				}
 			} catch (error) {
+				migrationComplete = false;
 				const message = error instanceof Error ? error.message : String(error);
 				dependencies.logger.error(`[${name}] Migration failed:`, error);
 				dependencies.addSyncLog(`Migration failed: ${message}`, "error");
@@ -283,6 +295,7 @@ export function createSyncPipeline(overrides = {}) {
 		localManifest = downloadResult.manifest;
 		remoteManifest = downloadResult.cleanedRemoteManifest || remoteManifest;
 		hasChanges ||= downloadResult.hasChanges;
+		phaseComplete &&= downloadResult.complete !== false;
 		progress.completeStep("downloadUpdates");
 
 		progress.updateProgress("removeDeletedFiles", { processed: 0, total: 1 });
@@ -307,6 +320,7 @@ export function createSyncPipeline(overrides = {}) {
 			);
 			remoteManifest = updateResult.manifest;
 			hasChanges ||= updateResult.hasChanges;
+			phaseComplete &&= updateResult.complete !== false;
 			progress.completeStep("uploadUpdates");
 
 			progress.updateProgress("uploadNewFiles", { processed: 0, total: 1 });
@@ -319,40 +333,62 @@ export function createSyncPipeline(overrides = {}) {
 			);
 			remoteManifest = newResult.manifest;
 			hasChanges ||= newResult.hasChanges;
+			phaseComplete &&= newResult.complete !== false;
 			progress.completeStep("uploadNewFiles");
 
-			progress.updateProgress("deleteRemoteFiles", { processed: 0, total: 1 });
-			const deletedPaths = await dependencies.deleteRemoteFiles(
-				localManifest,
-				resolvedRemotePath,
+			progress.updateProgress("uploadManifest", { processed: 0, total: 1 });
+			const deletionSafe =
+				phaseComplete &&
+				migrationComplete &&
+				remoteManifestAuthoritative &&
+				!SyncActiveStore.getRawState().stopping;
+			const localTombstones = localManifest.filter(
+				(/** @type {import("./types").ManifestEntry} */ entry) => entry.deleted,
 			);
-			if (deletedPaths.length > 0) {
+			if (deletionSafe && localTombstones.length > 0) {
+				remoteManifest = await applyManifestUpdates(
+					remoteManifest,
+					localTombstones,
+				);
 				hasChanges = true;
-				const deleted = new Set(deletedPaths);
-				localManifest = localManifest.filter(
-					(/** @type {import("./types").ManifestEntry} */ entry) =>
-						!entry.deleted || !deleted.has(entry.path),
-				);
-				remoteManifest = remoteManifest.filter(
-					(/** @type {import("./types").ManifestEntry} */ entry) =>
-						!deleted.has(entry.path),
-				);
-				await dependencies.storage.writeFile(
-					makePath(localPath, FILES_MANIFEST),
-					JSON.stringify(localManifest, null, 4),
+			} else if (!deletionSafe && localTombstones.length > 0) {
+				dependencies.addSyncLog(
+					`Deletion blocked for ${name}: sync phase is incomplete`,
+					"warning",
 				);
 			}
-			progress.completeStep("deleteRemoteFiles");
-
-			progress.updateProgress("uploadManifest", { processed: 0, total: 1 });
-			if (hasChanges || !loadedFromManifest || migrationOccurred) {
+			if (
+				phaseComplete &&
+				(hasChanges || !loadedFromManifest || migrationOccurred)
+			) {
 				await dependencies.uploadManifest(remoteManifest, resolvedRemotePath);
-			} else {
+			} else if (phaseComplete) {
 				dependencies.logger.debug(
 					"[Sync] Skipping manifest upload (no changes and manifest unchanged)",
 				);
+			} else {
+				dependencies.addSyncLog(
+					`Manifest publication blocked for ${name}: sync phase is incomplete`,
+					"warning",
+				);
 			}
 			progress.completeStep("uploadManifest");
+
+			progress.updateProgress("deleteRemoteFiles", { processed: 0, total: 1 });
+			if (deletionSafe && localTombstones.length > 0) {
+				const trashResult = await dependencies.deleteRemoteFiles(
+					localManifest,
+					resolvedRemotePath,
+					syncId,
+				);
+				phaseComplete &&= trashResult.complete !== false;
+			} else if (localTombstones.length > 0) {
+				dependencies.addSyncLog(
+					"Remote files retained because deletion safety checks did not pass",
+					"warning",
+				);
+			}
+			progress.completeStep("deleteRemoteFiles");
 		} else {
 			for (const step of [
 				"uploadUpdates",
@@ -364,11 +400,39 @@ export function createSyncPipeline(overrides = {}) {
 			}
 		}
 
+		const localDeletionSafe =
+			phaseComplete &&
+			migrationComplete &&
+			remoteManifestAuthoritative &&
+			!SyncActiveStore.getRawState().stopping;
+		const remoteTombstoneCount = remoteManifest.filter(
+			(/** @type {import("./types").ManifestEntry} */ entry) => entry.deleted,
+		).length;
+		if (localDeletionSafe && remoteTombstoneCount > 0) {
+			const localTrashResult = await dependencies.applyRemoteTombstones(
+				localManifest,
+				remoteManifest,
+				localPath,
+				canUpload,
+				syncId,
+			);
+			localManifest = localTrashResult.manifest;
+			hasChanges ||= localTrashResult.hasChanges;
+			phaseComplete &&= localTrashResult.complete !== false;
+		} else if (remoteTombstoneCount > 0) {
+			dependencies.addSyncLog(
+				"Local files retained because deletion safety checks did not pass",
+				"warning",
+			);
+		}
+
 		progress.setComplete();
 		const duration = ((performance.now() - start) / 1000).toFixed(1);
 		dependencies.addSyncLog(
-			`✓ ${name} sync complete (${remoteManifest.length} files) in ${duration}s`,
-			"success",
+			phaseComplete
+				? `✓ ${name} sync complete (${remoteManifest.length} files) in ${duration}s`
+				: `${name} sync incomplete; no destructive cleanup was performed`,
+			phaseComplete ? "success" : "warning",
 		);
 		if (config.useChangeCounter) {
 			const finalCounter = await dependencies.readLibraryCounter();
@@ -381,7 +445,7 @@ export function createSyncPipeline(overrides = {}) {
 		}
 		return {
 			hasChanges,
-			complete: downloadResult.complete,
+			complete: phaseComplete && migrationComplete,
 			newOffset: progress.getCurrentOffset(),
 		};
 	};

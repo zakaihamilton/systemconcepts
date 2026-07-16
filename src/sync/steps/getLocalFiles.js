@@ -17,13 +17,14 @@ export async function getLocalFiles(localPath = LOCAL_SYNC_PATH, config = {}) {
 	addSyncLog("Step 1: Reading local files...", "info");
 
 	try {
-		const listing = await storage.getRecursiveList(localPath);
+		const listing = await storage.getRecursiveList(localPath, { strict: true });
 		const files = listing
 			.filter(
 				(item) =>
 					item.type !== "dir" &&
 					item.name !== FILES_MANIFEST &&
 					item.name !== LIBRARY_COUNTER_FILE &&
+					!item.path.includes(".sync-trash") &&
 					!item.path.includes(".group-update-cache") &&
 					!(config.excludeNames || []).includes(item.name) &&
 					!item.name.endsWith(".DS_Store") &&
