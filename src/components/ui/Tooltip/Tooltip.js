@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import styles from "../shared.module.css";
 import { getTooltipPosition } from "./positioning";
 
+const TOUCH_ENTER_DELAY = 1000;
+
 function partitionProps(props) {
 	const anchorProps = {};
 	const tooltipProps = {};
@@ -35,6 +37,10 @@ export default function Tooltip({
 		onMouseLeave: onMouseLeaveProp,
 		onFocus: onFocusProp,
 		onBlur: onBlurProp,
+		onTouchStart: onTouchStartProp,
+		onTouchEnd: onTouchEndProp,
+		onTouchCancel: onTouchCancelProp,
+		onTouchMove: onTouchMoveProp,
 		...otherAnchorProps
 	} = anchorProps;
 	const [open, setOpen] = useState(false);
@@ -57,10 +63,10 @@ export default function Tooltip({
 
 	useEffect(() => () => clearTimers(), []);
 
-	const show = () => {
+	const show = (delay = enterDelay) => {
 		clearTimers();
-		if (enterDelay > 0) {
-			enterTimerRef.current = setTimeout(() => setOpen(true), enterDelay);
+		if (delay > 0) {
+			enterTimerRef.current = setTimeout(() => setOpen(true), delay);
 		} else {
 			setOpen(true);
 		}
@@ -85,6 +91,14 @@ export default function Tooltip({
 		if (!disableHoverListener) {
 			hide();
 		}
+	};
+
+	const handleTouchStart = () => {
+		show(TOUCH_ENTER_DELAY);
+	};
+
+	const handleTouchEnd = () => {
+		hide();
 	};
 
 	useLayoutEffect(() => {
@@ -133,6 +147,22 @@ export default function Tooltip({
 				onBlur={(event) => {
 					hide();
 					onBlurProp?.(event);
+				}}
+				onTouchStart={(event) => {
+					handleTouchStart();
+					onTouchStartProp?.(event);
+				}}
+				onTouchEnd={(event) => {
+					handleTouchEnd();
+					onTouchEndProp?.(event);
+				}}
+				onTouchCancel={(event) => {
+					handleTouchEnd();
+					onTouchCancelProp?.(event);
+				}}
+				onTouchMove={(event) => {
+					handleTouchEnd();
+					onTouchMoveProp?.(event);
 				}}
 				style={{ display: "inline-flex", maxWidth: "100%", minWidth: 0 }}
 				{...otherAnchorProps}
