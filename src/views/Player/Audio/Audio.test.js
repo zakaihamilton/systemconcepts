@@ -53,4 +53,22 @@ describe("Audio Component", () => {
 		const card = container.querySelector(".card");
 		expect(card).toHaveClass("loading");
 	});
+
+	it("loads the media when its source path becomes available", () => {
+		const load = jest
+			.spyOn(HTMLMediaElement.prototype, "load")
+			.mockImplementation(() => {});
+
+		render(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a"
+			/>,
+		);
+
+		expect(load).toHaveBeenCalledTimes(1);
+		load.mockRestore();
+	});
 });

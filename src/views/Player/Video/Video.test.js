@@ -17,4 +17,23 @@ describe("Video Component", () => {
 		expect(getByTestId("controls")).toBeInTheDocument();
 		expect(getByTestId("toolbar")).toBeInTheDocument();
 	});
+
+	it("loads the media when its source path becomes available", () => {
+		const load = jest
+			.spyOn(HTMLMediaElement.prototype, "load")
+			.mockImplementation(() => {});
+
+		render(
+			<Video
+				show={true}
+				name="Test Video"
+				group="testgroup"
+				color="blue"
+				path="https://media.example/test.mp4"
+			/>,
+		);
+
+		expect(load).toHaveBeenCalledTimes(1);
+		load.mockRestore();
+	});
 });

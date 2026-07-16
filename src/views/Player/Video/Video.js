@@ -58,6 +58,14 @@ export default function Video({
 			s.player = playerRef;
 		});
 	}, [playerRef]);
+	// React can add or replace the <source> after the media element has mounted.
+	// Browsers do not automatically reload in that case, leaving the player in
+	// NETWORK_EMPTY with no currentSrc.
+	useEffect(() => {
+		if (ref.current && path) {
+			ref.current.load();
+		}
+	}, [path]);
 	return (
 		<div className={styles.root} style={style}>
 			<video
