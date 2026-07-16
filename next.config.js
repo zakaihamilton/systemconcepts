@@ -27,6 +27,7 @@ const externalOrigins = [
 	configuredOrigin(
 		process.env.AWS_ENDPOINT || "https://sfo3.digitaloceanspaces.com",
 	),
+	"https://s3.wasabisys.com",
 	configuredOrigin(process.env.WASABI_URL),
 	configuredOrigin(process.env.SITE_URL),
 	configuredOrigin(process.env.NEXT_PUBLIC_SITE_URL),
