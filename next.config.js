@@ -14,13 +14,19 @@ const iconSvgrOptions = {
 const iconsSvgDir = path.join(__dirname, "src/components/Icons/svg");
 function configuredOrigin(value) {
 	try {
-		return value ? new URL(value).origin : null;
+		if (!value) return null;
+		const endpoint = value.trim();
+		return new URL(
+			/^https?:\/\//i.test(endpoint) ? endpoint : `https://${endpoint}`,
+		).origin;
 	} catch {
 		return null;
 	}
 }
 const externalOrigins = [
-	configuredOrigin(process.env.AWS_ENDPOINT),
+	configuredOrigin(
+		process.env.AWS_ENDPOINT || "https://sfo3.digitaloceanspaces.com",
+	),
 	configuredOrigin(process.env.WASABI_URL),
 	configuredOrigin(process.env.SITE_URL),
 	configuredOrigin(process.env.NEXT_PUBLIC_SITE_URL),
