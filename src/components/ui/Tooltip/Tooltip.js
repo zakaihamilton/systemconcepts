@@ -49,6 +49,10 @@ export default function Tooltip({
 	const tooltipRef = useRef(null);
 	const enterTimerRef = useRef(null);
 	const leaveTimerRef = useRef(null);
+	const lastTouchStartRef = useRef(0);
+
+	const isRecentTouch = () =>
+		Date.now() - lastTouchStartRef.current < TOUCH_ENTER_DELAY;
 
 	const clearTimers = () => {
 		if (enterTimerRef.current) {
@@ -82,7 +86,7 @@ export default function Tooltip({
 	};
 
 	const handleMouseEnter = () => {
-		if (!disableHoverListener) {
+		if (!disableHoverListener && !isRecentTouch()) {
 			show();
 		}
 	};
@@ -94,6 +98,7 @@ export default function Tooltip({
 	};
 
 	const handleTouchStart = () => {
+		lastTouchStartRef.current = Date.now();
 		show(TOUCH_ENTER_DELAY);
 	};
 
@@ -141,7 +146,9 @@ export default function Tooltip({
 					onMouseLeaveProp?.(event);
 				}}
 				onFocus={(event) => {
-					show();
+					if (!isRecentTouch()) {
+						show();
+					}
 					onFocusProp?.(event);
 				}}
 				onBlur={(event) => {
