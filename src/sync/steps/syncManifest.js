@@ -8,6 +8,7 @@ import {
 	SYNC_BASE_PATH,
 } from "../constants";
 import { addSyncLog } from "../logs";
+import { readFileIfExists } from "../storageReads";
 
 /**
  * Normalize a file path to ensure it starts with a leading slash
@@ -76,12 +77,15 @@ export async function syncManifest(
 	try {
 		let remoteManifest = [];
 		let loadedFromManifest = false;
+		let authoritative = false;
 
 		// 1. Try files.gz
 		try {
-			const rawManifest =
-				(await readCompressedFile(remoteManifestPathGz)) || [];
-			if (rawManifest && rawManifest.length > 0) {
+			const rawManifest = await readCompressedFile(remoteManifestPathGz, {
+				strict: true,
+			});
+			if (Array.isArray(rawManifest)) {
+				authoritative = true;
 				// structuredLogger.debug(`[Sync] Raw Manifest Sample (first 5 of ${rawManifest.length}):`, JSON.stringify(rawManifest.slice(0, 5)));
 				remoteManifest = normalizeManifest(rawManifest);
 				const deduped = rawManifest.length - remoteManifest.length;
@@ -115,35 +119,49 @@ export async function syncManifest(
 				}
 
 				loadedFromManifest = true;
+			} else if (rawManifest !== null) {
+				throw new Error(
+					`Invalid remote sync manifest at ${remoteManifestPathGz}`,
+				);
 			}
 		} catch (err) {
 			structuredLogger.warn(
 				`[Sync] Failed to read compressed manifest ${remoteManifestPathGz}:`,
 				err.message || err,
 			);
-			// Fall through to try JSON or directory listing
+			throw err;
 		}
 
 		// 2. Try files.json
-		if (remoteManifest.length === 0) {
-			const content = await storage.readFile(remoteManifestPathJson);
+		if (!loadedFromManifest && remoteManifest.length === 0) {
+			const content = await readFileIfExists(storage, remoteManifestPathJson);
 			if (content) {
 				try {
 					const rawManifest = JSON.parse(content);
+					if (!Array.isArray(rawManifest)) {
+						throw new Error("Remote manifest must be an array");
+					}
 					remoteManifest = normalizeManifest(rawManifest);
 					const deduped = rawManifest.length - remoteManifest.length;
 					structuredLogger.debug(
 						`[Sync] Found ${remoteManifestPathJson}, count: ${rawManifest.length}${deduped > 0 ? ` (removed ${deduped} duplicates)` : ""}`,
 					);
 					loadedFromManifest = true;
+					authoritative = true;
 				} catch (e) {
 					structuredLogger.error("[Sync] Error parsing remote manifest", e);
+					throw new Error(
+						`Invalid remote sync manifest at ${remoteManifestPathJson}`,
+						{
+							cause: e,
+						},
+					);
 				}
 			}
 		}
 
 		// 3. Fallback: Generate from listing if still empty
-		if (remoteManifest.length === 0) {
+		if (!loadedFromManifest && remoteManifest.length === 0) {
 			if (skipScan) {
 				structuredLogger.debug(
 					`[Sync] Manifest empty or missing, skipping scan for ${remotePath} (skipScan: true)`,
@@ -152,7 +170,9 @@ export async function syncManifest(
 				structuredLogger.debug(
 					`[Sync] Manifest empty or missing, checking ${remotePath} for files...`,
 				);
-				const listing = await storage.getRecursiveList(remotePath);
+				const listing = await storage.getRecursiveList(remotePath, {
+					strict: true,
+				});
 				structuredLogger.debug(
 					`[Sync] Recursive listing found ${listing.length} items in ${remotePath}`,
 				);
@@ -173,7 +193,8 @@ export async function syncManifest(
 						const isManifest =
 							item.name === FILES_MANIFEST || item.name === FILES_MANIFEST_GZ;
 						const isDSStore = item.name.endsWith(".DS_Store");
-						const include = !isDir && !isManifest && !isDSStore;
+						const isTrash = item.path.includes(".sync-trash");
+						const include = !isDir && !isManifest && !isDSStore && !isTrash;
 						if (!include && !isManifest && !isDSStore) {
 							structuredLogger.debug(
 								`[Sync] Filtering out: ${item.name} (isDir=${isDir})`,
@@ -203,6 +224,7 @@ export async function syncManifest(
 				structuredLogger.debug(
 					`[Sync] After filtering, remoteManifest has ${remoteManifest.length} files`,
 				);
+				authoritative = true;
 			}
 		}
 
@@ -215,6 +237,7 @@ export async function syncManifest(
 		// Attach flag to indicate if manifest was loaded from file vs generated/empty
 		// This is crucial for preventing mass deletion when remote is missing/corrupted
 		remoteManifest.loadedFromManifest = loadedFromManifest;
+		remoteManifest.authoritative = authoritative;
 
 		// If we generated the manifest (and it's not empty), save it to speed up next time
 		if (!loadedFromManifest && remoteManifest.length > 0) {

@@ -30,10 +30,13 @@ describe("uploadManifest", () => {
 		expect(purgeApiCacheFromStorage).toHaveBeenCalledTimes(1);
 	});
 
-	it("does not purge when manifest upload is skipped", async () => {
+	it("publishes an authoritative empty manifest and purges the API cache", async () => {
 		await uploadManifest([]);
 
-		expect(writeCompressedFile).not.toHaveBeenCalled();
-		expect(purgeApiCacheFromStorage).not.toHaveBeenCalled();
+		expect(writeCompressedFile).toHaveBeenCalledWith(
+			"/aws/sync/files.json.gz",
+			[],
+		);
+		expect(purgeApiCacheFromStorage).toHaveBeenCalled();
 	});
 });

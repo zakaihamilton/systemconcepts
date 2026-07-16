@@ -68,6 +68,7 @@ export async function uploadNewFiles(
 
 		// Collect new files
 		for (const localFile of localManifest) {
+			if (localFile.deleted) continue;
 			if (!remoteMap.has(localFile.path)) {
 				toUpload.push(localFile);
 			}
@@ -75,7 +76,12 @@ export async function uploadNewFiles(
 
 		if (toUpload.length === 0) {
 			addSyncLog("✓ No new files to upload", "info");
-			return { manifest: remoteManifest, hasChanges: false };
+			return {
+				manifest: remoteManifest,
+				hasChanges: false,
+				complete: true,
+				counts: { attempted: 0, succeeded: 0, failed: 0 },
+			};
 		}
 
 		addSyncLog(`Uploading ${toUpload.length} new file(s)...`, "info");
@@ -130,7 +136,18 @@ export async function uploadNewFiles(
 			updates.length > 0 ? "success" : "info",
 		);
 
-		return { manifest: updatedManifest, hasChanges: updates.length > 0 };
+		return {
+			manifest: updatedManifest,
+			hasChanges: updates.length > 0,
+			complete:
+				updates.length === toUpload.length &&
+				!SyncActiveStore.getRawState().stopping,
+			counts: {
+				attempted: toUpload.length,
+				succeeded: updates.length,
+				failed: toUpload.length - updates.length,
+			},
+		};
 	} catch (err) {
 		if (
 			err.status === 403 ||
@@ -146,7 +163,12 @@ export async function uploadNewFiles(
 			} else {
 				addSyncLog("Skipping new files upload (read-only access)", "warning");
 			}
-			return { manifest: remoteManifest, hasChanges: false };
+			return {
+				manifest: remoteManifest,
+				hasChanges: false,
+				complete: false,
+				counts: { attempted: 0, succeeded: 0, failed: 1 },
+			};
 		}
 		structuredLogger.error("[Sync] Upload new files failed:", err);
 		addSyncLog(`Upload new files failed: ${err.message}`, "error");

@@ -2,10 +2,9 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { stringToBinary } from "@util/data/binary";
 import { isBinaryFile, makePath } from "@util/data/path";
 import storage from "@util/storage/storage";
-import { readCompressedFileRaw, writeCompressedFile } from "../bundle";
+import { readCompressedFileRaw } from "../bundle";
 import {
 	FILES_MANIFEST,
-	FILES_MANIFEST_GZ,
 	LOCAL_SYNC_PATH,
 	SYNC_BASE_PATH,
 	SYNC_BATCH_SIZE,
@@ -15,6 +14,7 @@ import { addSyncLog } from "../logs";
 import { applyManifestUpdates } from "../manifest";
 import { lockMutex } from "../mutex";
 import { SyncActiveStore } from "../syncState";
+import { createSyncTrashId, moveFolderToTrash } from "../trash";
 
 /**
  * Helper function to download a single file
@@ -44,15 +44,15 @@ async function downloadFile(
 			if (content === null) {
 				// Legacy: try with .gz extension for backwards compatibility
 				remoteFilePath = makePath(remotePath, `${fileBasename}.gz`);
-				content = await readCompressedFileRaw(remoteFilePath);
+				content = await readCompressedFileRaw(remoteFilePath, { strict: true });
 			}
 		} else {
 			// Non-binary files: read through compressed file handler
-			content = await readCompressedFileRaw(remoteFilePath);
+			content = await readCompressedFileRaw(remoteFilePath, { strict: true });
 			if (content === null) {
 				// Try without .gz extension
 				remoteFilePath = makePath(remotePath, fileBasename);
-				content = await readCompressedFileRaw(remoteFilePath);
+				content = await readCompressedFileRaw(remoteFilePath, { strict: true });
 			}
 		}
 
@@ -207,9 +207,9 @@ async function downloadFile(
 				const errorStr = (err.message || String(err)).toLowerCase();
 				if (errorStr.includes("eisdir")) {
 					structuredLogger.warn(
-						`[Sync] Path ${localFilePath} is a directory, removing to write file.`,
+						`[Sync] Path ${localFilePath} is a directory, moving it to trash before writing the file.`,
 					);
-					await storage.deleteFolder(localFilePath);
+					await moveFolderToTrash(localPath, createSyncTrashId(), fileBasename);
 					await storage.writeFile(localFilePath, contentToWrite);
 				} else {
 					throw err;
@@ -258,9 +258,11 @@ export async function downloadUpdates(
 		const missingOnRemote = [];
 		const failedDownloads = [];
 		const updates = [];
+		let processedDownloads = 0;
 
 		// Collect files that need downloading
 		for (const remoteFile of remoteManifest) {
+			if (remoteFile.deleted) continue;
 			const localFile = localMap.get(remoteFile.path);
 			const remoteVer = parseInt(remoteFile.version) || 0;
 			const localVer = localFile ? parseInt(localFile.version) || 0 : 0;
@@ -334,6 +336,7 @@ export async function downloadUpdates(
 				manifest: updatedManifest,
 				hasChanges: false,
 				complete: true,
+				counts: { attempted: 0, succeeded: 0, failed: 0 },
 				cleanedRemoteManifest: remoteManifest,
 			};
 		}
@@ -389,6 +392,7 @@ export async function downloadUpdates(
 					return result;
 				}),
 			);
+			processedDownloads += batch.length;
 
 			updates.push(...results.filter((result) => result && !result.failed));
 		}
@@ -414,25 +418,16 @@ export async function downloadUpdates(
 				);
 			});
 
-			// Upload the cleaned manifest only if uploads are allowed
-			if (canUpload) {
-				const manifestPath = makePath(remotePath, FILES_MANIFEST_GZ);
-				await writeCompressedFile(manifestPath, cleanedRemoteManifest);
-				addSyncLog(
-					`✓ Cleaned remote manifest (removed ${missingOnRemote.length} missing files)`,
-					"success",
-				);
-			} else {
-				addSyncLog(
-					`Manifest cleaning skipped (${missingOnRemote.length} missing files) - Sync is Locked`,
-					"warning",
-				);
-			}
+			addSyncLog(
+				"Remote manifest cleanup deferred because missing files make the phase incomplete",
+				"warning",
+			);
 		}
 
 		// Apply all updates in a single operation
 		const updatedManifest = await applyManifestUpdates(localManifest, updates);
 		const failedCount = missingOnRemote.length + failedDownloads.length;
+		const unprocessedCount = toDownload.length - processedDownloads;
 
 		// Write updated manifest to disk
 		const manifestPath = makePath(localPath, FILES_MANIFEST);
@@ -451,9 +446,9 @@ export async function downloadUpdates(
 			`✓ Downloaded ${updates.length} file(s) in ${duration}s`,
 			updates.length > 0 ? "success" : "info",
 		);
-		if (failedCount > 0) {
+		if (failedCount + unprocessedCount > 0) {
 			addSyncLog(
-				`${failedCount} file(s) were not downloaded and will be retried`,
+				`${failedCount + unprocessedCount} file(s) were not downloaded and will be retried`,
 				"warning",
 			);
 		}
@@ -461,7 +456,15 @@ export async function downloadUpdates(
 		return {
 			manifest: updatedManifest,
 			hasChanges: updates.length > 0,
-			complete: failedCount === 0,
+			complete:
+				failedCount === 0 &&
+				unprocessedCount === 0 &&
+				!SyncActiveStore.getRawState().stopping,
+			counts: {
+				attempted: processedDownloads,
+				succeeded: processedDownloads - failedCount,
+				failed: failedCount + unprocessedCount,
+			},
 			cleanedRemoteManifest,
 		};
 	} catch (err) {

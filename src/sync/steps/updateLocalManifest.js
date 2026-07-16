@@ -28,7 +28,7 @@ async function computeFileInfo(file) {
 		return { file, info };
 	} catch (err) {
 		structuredLogger.error(`[Sync] Error reading ${file.path}:`, err);
-		return null;
+		throw err;
 	}
 }
 
@@ -60,10 +60,10 @@ export async function updateLocalManifest(
 			try {
 				manifest = JSON.parse(existingManifestContent);
 			} catch (err) {
-				structuredLogger.error(
-					"[Sync] Failed to parse manifest, starting fresh",
-					err,
-				);
+				structuredLogger.error("[Sync] Failed to parse local manifest", err);
+				throw new Error(`Invalid local sync manifest at ${localManifestPath}`, {
+					cause: err,
+				});
 			}
 		}
 
@@ -121,6 +121,11 @@ export async function updateLocalManifest(
 
 			fileInfos.push(...results.filter(Boolean));
 		}
+		if (SyncActiveStore.getRawState().stopping) {
+			const error = new Error("Sync stopped during hashing");
+			error.code = "SYNC_STOPPED";
+			throw error;
+		}
 
 		let changed = false;
 
@@ -174,6 +179,12 @@ export async function updateLocalManifest(
 					structuredLogger.debug(
 						`[Sync] Marking missing file as deleted in manifest: ${f.path}`,
 					);
+					const localVer = parseInt(f.version) || 0;
+					const remoteEntry = remoteManifestMap.get(f.path);
+					const remoteVer = remoteEntry
+						? parseInt(remoteEntry.version) || 0
+						: 0;
+					f.version = String(Math.max(localVer, remoteVer) + 1);
 					f.deleted = true;
 					changed = true;
 				}

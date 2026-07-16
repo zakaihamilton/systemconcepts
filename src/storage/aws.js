@@ -121,26 +121,25 @@ async function readFile(path) {
 	const contentType = res.headers.get("content-type") || "";
 	if (contentType.includes("application/json")) {
 		const text = await res.text();
+		let parsed = null;
 		try {
-			const parsed = JSON.parse(text);
-			if (parsed?.signedUrl) {
-				const signedRes = await fetch(parsed.signedUrl);
-				if (!signedRes.ok) {
-					throw new Error(
-						`Failed to fetch from signed URL: ${signedRes.status}`,
-					);
-				}
-				if (binary) {
-					const blob = await signedRes.blob();
-					return binaryToString(blob);
-				}
-				return await signedRes.text();
+			parsed = JSON.parse(text);
+		} catch {
+			// The response may be the requested JSON file rather than an API envelope.
+		}
+		if (parsed?.signedUrl) {
+			const signedRes = await fetch(parsed.signedUrl);
+			if (!signedRes.ok) {
+				throw new Error(`Failed to fetch from signed URL: ${signedRes.status}`);
 			}
-			if (Array.isArray(parsed)) {
-				throw new Error(`Cannot read directory as file: ${path}`);
+			if (binary) {
+				const blob = await signedRes.blob();
+				return binaryToString(blob);
 			}
-		} catch (e) {
-			if (e.message?.startsWith("Cannot read directory")) throw e;
+			return await signedRes.text();
+		}
+		if (Array.isArray(parsed)) {
+			throw new Error(`Cannot read directory as file: ${path}`);
 		}
 	}
 
@@ -300,8 +299,9 @@ async function writeFiles(prefix, files) {
 	);
 }
 
-async function getRecursiveList(path) {
+async function getRecursiveList(path, options = {}) {
 	path = makePath(path);
+	const { strict = false } = options;
 
 	const listing = [];
 	const visitedPaths = new Set();
@@ -310,7 +310,9 @@ async function getRecursiveList(path) {
 
 	const addListing = async (dirPath, depth = 0) => {
 		if (depth > MAX_DEPTH) {
-			structuredLogger.warn(`[AWS Storage] Max depth exceeded for: ${dirPath}`);
+			const error = new Error(`AWS listing depth exceeded for: ${dirPath}`);
+			if (strict) throw error;
+			structuredLogger.warn(error.message);
 			return;
 		}
 
@@ -335,6 +337,11 @@ async function getRecursiveList(path) {
 			for (const item of items) {
 				// Validate item path belongs to this directory
 				if (!item.path || !item.path.startsWith(expectedPrefix)) {
+					if (strict) {
+						throw new Error(
+							`AWS returned an invalid listing entry for ${dirPath}`,
+						);
+					}
 					structuredLogger.warn(
 						`[AWS Storage] Skipping invalid item: ${item.path} (expected prefix: ${expectedPrefix})`,
 					);
@@ -356,6 +363,7 @@ async function getRecursiveList(path) {
 				}
 			}
 		} catch (err) {
+			if (strict) throw err;
 			structuredLogger.warn(
 				`[AWS Storage] Failed to list ${dirPath}:`,
 				err.message || err,

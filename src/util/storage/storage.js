@@ -201,8 +201,8 @@ const storageMethods = Object.fromEntries(
 	}),
 );
 
-storageMethods.getRecursiveList = async (path) => {
-	return callMethod({ name: "getRecursiveList" }, path);
+storageMethods.getRecursiveList = async (path, options = {}) => {
+	return callMethod({ name: "getRecursiveList" }, path, options);
 };
 
 export function useListing(url, depends = [], options) {
@@ -370,10 +370,11 @@ export function useFile(urlArgument, depends = [], mapping) {
 	return [data, loading, error, write];
 }
 
-async function getRecursiveList(path) {
+async function getRecursiveList(path, options = {}) {
+	const { strict = false } = options;
 	// Try to use the storage method if available (optimized)
 	try {
-		const result = await storageMethods.getRecursiveList(path);
+		const result = await storageMethods.getRecursiveList(path, options);
 		if (result) {
 			return result;
 		}
@@ -381,6 +382,7 @@ async function getRecursiveList(path) {
 			`[Storage] Device method returned null/undefined for: ${path}, using fallback`,
 		);
 	} catch (err) {
+		if (strict) throw err;
 		// Fallback to manual recursion if method not supported or fails
 		structuredLogger.warn(
 			`[Storage] Device method failed for ${path}:`,
@@ -396,7 +398,9 @@ async function getRecursiveList(path) {
 	const addListing = async (dirPath, depth = 0) => {
 		// Prevent runaway recursion
 		if (depth > MAX_DEPTH) {
-			structuredLogger.warn(`[Storage] Max depth exceeded for: ${dirPath}`);
+			const error = new Error(`Storage listing depth exceeded for: ${dirPath}`);
+			if (strict) throw error;
+			structuredLogger.warn(error.message);
 			return;
 		}
 
@@ -407,7 +411,17 @@ async function getRecursiveList(path) {
 		}
 		visitedPaths.add(normalizedPath);
 
-		const items = await limit(() => storageMethods.getListing(dirPath));
+		let items;
+		try {
+			items = await limit(() => storageMethods.getListing(dirPath, options));
+		} catch (error) {
+			if (strict) throw error;
+			structuredLogger.warn(
+				`[Storage] Failed to list ${dirPath}:`,
+				error?.message || error,
+			);
+			return;
+		}
 		if (!items || !Array.isArray(items) || items.length === 0) {
 			return;
 		}
@@ -422,8 +436,14 @@ async function getRecursiveList(path) {
 				itemPath === normalizedPath + "/" + item.name
 			);
 		});
+		if (strict && validItems.length !== items.length) {
+			throw new Error(`Storage returned invalid entries for: ${dirPath}`);
+		}
 
 		if (validItems.length === 0 && items.length > 0) {
+			if (strict) {
+				throw new Error(`Storage returned invalid entries for: ${dirPath}`);
+			}
 			structuredLogger.warn(
 				`[Storage] Skipping ${dirPath} - ${items.length} items don't match expected path prefix`,
 			);
