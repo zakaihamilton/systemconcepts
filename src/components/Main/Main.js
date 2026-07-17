@@ -1,3 +1,4 @@
+import { useSync } from "@sync/sync";
 import { useResize } from "@util/browser/size";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
@@ -27,6 +28,8 @@ export const MainStoreDefaults = {
 export const MainStore = new Store(MainStoreDefaults);
 
 export default function Main() {
+	// Keep automatic sync alive independently of the currently open route.
+	useSync({ schedule: true });
 	const _counter = useResize();
 	const language = useLanguage();
 	const isMobile = useDeviceType() !== "desktop";

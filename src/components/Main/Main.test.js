@@ -1,3 +1,4 @@
+import { useSync } from "@sync/sync";
 import { render } from "@testing-library/react";
 import { useResize } from "@util/browser/size";
 import { useDeviceType } from "@util/browser/styles";
@@ -8,6 +9,9 @@ jest.mock("@util/browser/size");
 jest.mock("@util/domain/language");
 jest.mock("@util/browser/styles");
 jest.mock("@util/browser/store");
+jest.mock("@sync/sync", () => ({
+	useSync: jest.fn().mockReturnValue([0, false]),
+}));
 jest.mock("../SideBar", () => () => <div data-testid="sidebar" />);
 jest.mock("../Page", () => () => <div data-testid="page" />);
 jest.mock("../Sync", () => ({ children }) => (
@@ -38,6 +42,11 @@ describe("Main Component", () => {
 		expect(getByTestId("head")).toBeInTheDocument();
 		expect(getByTestId("bookmarks")).toBeInTheDocument();
 		expect(getByTestId("title")).toBeInTheDocument();
+	});
+
+	it("starts the app-wide auto-sync scheduler", () => {
+		render(<Main />);
+		expect(useSync).toHaveBeenCalledWith({ schedule: true });
 	});
 
 	it("sets html dir attribute based on language", () => {
