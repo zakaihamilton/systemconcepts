@@ -68,11 +68,10 @@ export default function SchedulePage() {
 	useEffect(() => {
 		// Only reload after sync completes (not during)
 		if (needsSessionReload && !syncBusy) {
-			// Force session reload by clearing sessions and marking as not busy
-			// This will trigger the useSessions hook to reload data
+			// Trigger a refresh while retaining the current list, so navigating to
+			// another view does not briefly render an empty page.
 			SessionsStore.update((s) => {
-				s.sessions = null;
-				s.busy = false;
+				s.counter++;
 			});
 			// Clear the flag to acknowledge the reload
 			SyncActiveStore.update((s) => {

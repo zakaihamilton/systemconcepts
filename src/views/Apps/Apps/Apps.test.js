@@ -144,7 +144,7 @@ describe("Apps View", () => {
 		expect(getByTestId("icon2")).toBeInTheDocument();
 	});
 
-	it("reloads sessions when a sync completes on the main page", () => {
+	it("reloads sessions without clearing the home page when a sync completes", () => {
 		SyncActiveStore.update((state) => {
 			state.needsSessionReload = true;
 		});
@@ -152,9 +152,13 @@ describe("Apps View", () => {
 		render(<Apps />);
 
 		expect(SessionsStore.update).toHaveBeenCalled();
-		const sessionState = { sessions: mockSessions, busy: true };
+		const sessionState = { sessions: mockSessions, busy: true, counter: 4 };
 		SessionsStore.update.mock.calls[0][0](sessionState);
-		expect(sessionState).toMatchObject({ sessions: null, busy: false });
+		expect(sessionState).toMatchObject({
+			sessions: mockSessions,
+			busy: true,
+			counter: 5,
+		});
 		expect(SyncActiveStore.getRawState().needsSessionReload).toBe(false);
 	});
 
@@ -273,6 +277,25 @@ describe("Apps View", () => {
 			jest.advanceTimersByTime(300);
 		});
 		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
+	});
+
+	it("loads both session sections together when history is still loading", () => {
+		jest.useFakeTimers();
+		useRecentHistory.mockReturnValue([[mockSessions[0]], jest.fn(), true]);
+
+		const { getAllByTestId, queryByText, rerender } = render(<Apps />);
+		expect(queryByText("Continue watching")).not.toBeInTheDocument();
+		expect(queryByText("Latest sessions")).not.toBeInTheDocument();
+
+		act(() => {
+			jest.advanceTimersByTime(300);
+		});
+		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
+
+		useRecentHistory.mockReturnValue([[mockSessions[0]], jest.fn(), false]);
+		rerender(<Apps />);
+		expect(queryByText("Continue watching")).toBeInTheDocument();
+		expect(queryByText("Latest sessions")).toBeInTheDocument();
 	});
 
 	it("shows two desktop rows of latest sessions", () => {

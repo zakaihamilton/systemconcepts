@@ -156,8 +156,10 @@ function SessionContent({ translations }) {
 		if (!needsSessionReload || syncBusy) return;
 
 		SessionsStore.update((state) => {
-			state.sessions = null;
-			state.busy = false;
+			// Keep the current cards visible while useSessions refreshes the data.
+			// Clearing sessions here briefly renders the home page empty whenever a
+			// completed sync is acknowledged during navigation.
+			state.counter++;
 		});
 		SyncActiveStore.update((state) => {
 			state.needsSessionReload = false;
@@ -231,7 +233,10 @@ function SessionContent({ translations }) {
 		);
 	}
 
-	if (sessionsLoading && !showSessionSkeletons) {
+	// Both sections depend on the same initial data set: sessions for their
+	// cards and history for Continue watching. Hold the pair until both are
+	// ready, so Latest sessions cannot appear ahead of Continue watching.
+	if (continueWatchingLoading && !showContinueWatchingSkeletons) {
 		return null;
 	}
 
@@ -265,7 +270,7 @@ function SessionContent({ translations }) {
 				href="#schedule"
 				onClick={() => openScheduleView("week")}
 			>
-				{showSessionSkeletons ? (
+				{showSessionSkeletons || showContinueWatchingSkeletons ? (
 					<SessionSkeletons count={LATEST_SESSION_LIMIT} />
 				) : latestSessions.length ? (
 					<div className={styles.sessionGrid}>
