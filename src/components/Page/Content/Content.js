@@ -1,4 +1,5 @@
 import { MainStore } from "@components/Main";
+import ViewTransition from "@components/ViewTransition";
 import pages from "@data/views";
 import { useSize } from "@util/browser/size";
 import { useActivePages, useParentParams } from "@util/domain/views";
@@ -52,7 +53,11 @@ export default function Content() {
 						{playerPage && (
 							<Player key={playerPage.url} show={showPlayer} {...playerPage} />
 						)}
-						{showPage && <Component {...activePage} />}
+						{showPage && (
+							<ViewTransition transitionKey={activePage.url || activePage.id}>
+								<Component {...activePage} />
+							</ViewTransition>
+						)}
 					</main>
 				</div>
 			</div>

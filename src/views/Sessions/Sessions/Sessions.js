@@ -1,3 +1,4 @@
+import ViewTransition from "@components/ViewTransition";
 import AutoAwesomeIcon from "@icons/svg/AutoAwesome.svg";
 import ExpandLessIcon from "@icons/svg/ExpandLess.svg";
 import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
@@ -822,37 +823,39 @@ export default function SessionsPage() {
 	return (
 		<>
 			{!isMobile && <FilterBar />}
-			<Table
-				cellWidth={isMobile ? "11em" : "16em"}
-				cellHeight={isMobile ? "11.5em" : "15.8em"}
-				className={styles.sessionsTable}
-				name={translations.SESSIONS}
-				store={SessionsStore}
-				data={sessions}
-				loading={loading}
-				depends={tableDeps}
-				hover
-				columns={columns}
-				mapper={mapper}
-				viewModes={viewModes}
-				statusBar={statusBar}
-				treeGroup={treeGroup}
-				expandedTreeGroups={expandedTreeGroups}
-				resetScrollDeps={resetScrollDeps}
-				getSeparator={getSeparator}
-				renderColumn={renderColumn}
-				rowClassName={(item) => {
-					const classes = [];
-					if (item.isPlaying) classes.push(styles.playing);
-					if (item.isExpanded || item.isTreeChild)
-						classes.push(styles.expandedGroupHighlight);
-					if (item.isTreeChild) classes.push(styles.treeChild);
-					return classes.join(" ");
-				}}
-				emptyLabel={
-					syncBusy ? translations.SYNCING + "..." : translations.NO_ITEMS
-				}
-			/>
+			<ViewTransition transitionKey={viewMode}>
+				<Table
+					cellWidth={isMobile ? "11em" : "16em"}
+					cellHeight={isMobile ? "11.5em" : "15.8em"}
+					className={styles.sessionsTable}
+					name={translations.SESSIONS}
+					store={SessionsStore}
+					data={sessions}
+					loading={loading}
+					depends={tableDeps}
+					hover
+					columns={columns}
+					mapper={mapper}
+					viewModes={viewModes}
+					statusBar={statusBar}
+					treeGroup={treeGroup}
+					expandedTreeGroups={expandedTreeGroups}
+					resetScrollDeps={resetScrollDeps}
+					getSeparator={getSeparator}
+					renderColumn={renderColumn}
+					rowClassName={(item) => {
+						const classes = [];
+						if (item.isPlaying) classes.push(styles.playing);
+						if (item.isExpanded || item.isTreeChild)
+							classes.push(styles.expandedGroupHighlight);
+						if (item.isTreeChild) classes.push(styles.treeChild);
+						return classes.join(" ");
+					}}
+					emptyLabel={
+						syncBusy ? translations.SYNCING + "..." : translations.NO_ITEMS
+					}
+				/>
+			</ViewTransition>
 
 			{!!isMobile && <FilterBar />}
 		</>

@@ -1,5 +1,6 @@
 import { useSearch } from "@components/Search";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
+import ViewTransition from "@components/ViewTransition";
 import CalendarViewMonthIcon from "@icons/svg/CalendarViewMonth.svg";
 import DataUsageIcon from "@icons/svg/DataUsage.svg";
 import DateRangeIcon from "@icons/svg/DateRange.svg";
@@ -252,50 +253,52 @@ export default function SchedulePage() {
 					viewMode === "tracks" && styles.noScroll,
 				)}
 			>
-				{!loading && viewMode === "year" && (
-					<YearView
-						sessions={items}
-						date={date}
-						store={ScheduleStore}
-						playingSession={playingSession}
-					/>
-				)}
-				{!loading && viewMode === "month" && (
-					<MonthView
-						sessions={items}
-						date={date}
-						store={ScheduleStore}
-						playingSession={playingSession}
-					/>
-				)}
-				{!loading && viewMode === "week" && (
-					<WeekView
-						sessions={items}
-						date={date}
-						store={ScheduleStore}
-						playingSession={playingSession}
-					/>
-				)}
-				{!loading && viewMode === "day" && (
-					<DayView
-						sessions={items}
-						date={date}
-						store={ScheduleStore}
-						playingSession={playingSession}
-					/>
-				)}
-				{!loading && viewMode === "tracks" && (
-					<TracksView
-						sessions={items}
-						loading={loading}
-						store={ScheduleStore}
-						translations={translations}
-						viewModes={{ tracks: {} }}
-						playingSession={playingSession}
-					/>
-				)}
-				{!loading && viewMode === "history" && <HistoryView />}
-				{!!loading && loadingElement}
+				<ViewTransition transitionKey={viewMode}>
+					{!loading && viewMode === "year" && (
+						<YearView
+							sessions={items}
+							date={date}
+							store={ScheduleStore}
+							playingSession={playingSession}
+						/>
+					)}
+					{!loading && viewMode === "month" && (
+						<MonthView
+							sessions={items}
+							date={date}
+							store={ScheduleStore}
+							playingSession={playingSession}
+						/>
+					)}
+					{!loading && viewMode === "week" && (
+						<WeekView
+							sessions={items}
+							date={date}
+							store={ScheduleStore}
+							playingSession={playingSession}
+						/>
+					)}
+					{!loading && viewMode === "day" && (
+						<DayView
+							sessions={items}
+							date={date}
+							store={ScheduleStore}
+							playingSession={playingSession}
+						/>
+					)}
+					{!loading && viewMode === "tracks" && (
+						<TracksView
+							sessions={items}
+							loading={loading}
+							store={ScheduleStore}
+							translations={translations}
+							viewModes={{ tracks: {} }}
+							playingSession={playingSession}
+						/>
+					)}
+					{!loading && viewMode === "history" && <HistoryView />}
+					{!!loading && loadingElement}
+				</ViewTransition>
 			</div>
 			{!!isMobile && (
 				<FilterBar
