@@ -268,6 +268,10 @@ export default [
 		value: "Update Metadata (Current Year)",
 	},
 	{
+		id: "UPDATE_RECENT_SESSIONS",
+		value: "Update Recent Sessions (Last 30 Days)",
+	},
+	{
 		id: "PERSONAL_SYNC",
 		value: "Personal Sync",
 	},

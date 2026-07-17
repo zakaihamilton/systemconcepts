@@ -39,6 +39,7 @@ export default function Groups() {
 		updateSessions,
 		updateAllSessions,
 		updateAllMetadataCurrentYear,
+		updateRecentSessions,
 		updateGroup,
 	} = useUpdateSessions(groups);
 	const isSignedIn = Cookies.get("id") && Cookies.get("hash");
@@ -145,6 +146,10 @@ export default function Groups() {
 
 	const updateAllMetadataCurrentYearWithSync = async () => {
 		await updateAllMetadataCurrentYear(showDisabled);
+	};
+
+	const updateRecentSessionsWithSync = async () => {
+		await updateRecentSessions(showDisabled);
 	};
 
 	const [currentTime, setCurrentTime] = useState(new Date().getTime());
@@ -268,6 +273,15 @@ export default function Groups() {
 				name: translations.SYNC_ALL_SESSIONS,
 				icon: <UpdateIcon className={animatedClassName} />,
 				onClick: updateAllSessionsWithSync,
+				location: "header",
+				menu: true,
+			},
+		!busy &&
+			syncEnabled && {
+				id: "update_recent_sessions",
+				name: translations.UPDATE_RECENT_SESSIONS,
+				icon: <UpdateIcon className={animatedClassName} />,
+				onClick: updateRecentSessionsWithSync,
 				location: "header",
 				menu: true,
 			},

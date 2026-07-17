@@ -221,6 +221,24 @@ function getSessionYear(session) {
 	return match?.[1] || null;
 }
 
+function getSessionDate(id) {
+	const match = String(id || "").match(/^(\d{4}-\d{2}-\d{2})(?:\s|$)/);
+	return match?.[1] || null;
+}
+
+function mergeSessionsById(existingSessions, updatedSessions) {
+	const sessions = new Map();
+	for (const session of existingSessions || []) {
+		sessions.set(session.id || session.name, session);
+	}
+	for (const session of updatedSessions || []) {
+		sessions.set(session.id || session.name, session);
+	}
+	return Array.from(sessions.values()).sort((a, b) =>
+		(a.id || a.name).localeCompare(b.id || b.name),
+	);
+}
+
 async function loadCachedYearSessions(
 	groupName,
 	yearName,
@@ -422,6 +440,7 @@ export async function updateGroupProcess(
 	isMerged = false,
 	isBundled = false,
 	targetSessionId = null,
+	recentDays = null,
 ) {
 	const path = prefix + name;
 	let itemIndex = 0;
@@ -550,7 +569,19 @@ export async function updateGroupProcess(
 		}
 	}
 
-	if (!updateAll) {
+	const recentCutoff =
+		typeof recentDays === "number" && recentDays > 0
+			? new Date(Date.now() - recentDays * 24 * 60 * 60 * 1000)
+					.toISOString()
+					.slice(0, 10)
+			: null;
+	if (recentCutoff) {
+		const cutoffYear = recentCutoff.slice(0, 4);
+		const currentYear = String(new Date().getFullYear());
+		years = years.filter(
+			(year) => year.name >= cutoffYear && year.name <= currentYear,
+		);
+	} else if (!updateAll) {
 		const currentYear = new Date().getFullYear();
 		years = years.filter((year) => {
 			const yearName = parseInt(year.name);
@@ -655,6 +686,21 @@ export async function updateGroupProcess(
 						),
 					]),
 				).sort((a, b) => a.localeCompare(b));
+				const shouldRefreshOnlyRecentSessions =
+					recentCutoff && cachedYearSessions && cachedYearSessions.length > 0;
+				const sessionIds = shouldRefreshOnlyRecentSessions
+					? sortedIds.filter((id) => {
+							const sessionDate = getSessionDate(id);
+							return sessionDate && sessionDate >= recentCutoff;
+						})
+					: sortedIds;
+
+				if (recentCutoff && !shouldRefreshOnlyRecentSessions) {
+					addSyncLog(
+						`[${name}/${year.name}] No local year cache; refreshing the full year.`,
+						"info",
+					);
+				}
 
 				// Load existing sessions for the current year to preserve thumbnails
 				const existingThumbnails = {};
@@ -703,7 +749,7 @@ export async function updateGroupProcess(
 				const yearSessionsLimit = pLimit(10);
 				const yearSessions = (
 					await Promise.all(
-						sortedIds.map((id) =>
+						sessionIds.map((id) =>
 							yearSessionsLimit(async () => {
 								if (targetSessionId && id !== targetSessionId) {
 									const cachedSession = (cachedYearSessions || []).find(
@@ -905,16 +951,22 @@ export async function updateGroupProcess(
 					);
 				await Promise.all(thumbnailPromises);
 
+				const sessionsToPersist = shouldRefreshOnlyRecentSessions
+					? mergeSessionsById(cachedYearSessions, yearSessions)
+					: yearSessions;
+
 				if (isMerged || isBundled) {
 					allSessions.push(...yearSessions);
 				} else {
 					const { counter, newCount, newSessions } = await updateYearSync(
 						name,
 						year.name,
-						yearSessions,
+						sessionsToPersist,
 					);
 					// Track sessions for total count regardless of whether file was updated
-					yearSessions.forEach((session) => allSessionNames.add(session.id));
+					sessionsToPersist.forEach((session) =>
+						allSessionNames.add(session.id),
+					);
 
 					if (counter > 0) {
 						UpdateSessionsStore.update((s) => {

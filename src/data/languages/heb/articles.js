@@ -220,6 +220,10 @@ export default [
 		value: "עדכון מידע (שנה נוכחית)",
 	},
 	{
+		id: "UPDATE_RECENT_SESSIONS",
+		value: "עדכון שיעורים אחרונים (30 ימים)",
+	},
+	{
 		id: "PERSONAL_SYNC",
 		value: "הסנכרון האישי",
 	},

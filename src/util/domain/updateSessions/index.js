@@ -169,6 +169,61 @@ export function useUpdateSessions(groups) {
 		[groups, prefix],
 	);
 
+	const updateRecentSessions = useCallback(
+		async (includeDisabled) => {
+			UpdateSessionsStore.update((s) => {
+				s.busy = true;
+				s.start = new Date().getTime();
+			});
+			try {
+				let items = [];
+				try {
+					items = await getListing(prefix);
+				} catch (err) {
+					structuredLogger.error(err);
+				}
+				if (!items) return;
+
+				const limit = pLimit(4);
+				const results = await Promise.all(
+					items
+						.map((item) => {
+							const groupInfo = groups.find(
+								(group) => group.name === item.name,
+							);
+							if (!groupInfo || (!includeDisabled && groupInfo.disabled)) {
+								return null;
+							}
+							return limit(() =>
+								updateGroupProcess(
+									item.name,
+									false,
+									true,
+									groupInfo.merged ?? groupInfo.disabled,
+									groupInfo.bundled,
+									null,
+									30,
+								),
+							);
+						})
+						.filter(Boolean),
+				);
+				const bundledSessions = results
+					.filter((result) => Array.isArray(result))
+					.flat();
+				if (bundledSessions.length > 0) {
+					await updateBundleFile(bundledSessions);
+				}
+				return results;
+			} finally {
+				UpdateSessionsStore.update((s) => {
+					s.busy = false;
+				});
+			}
+		},
+		[groups, prefix],
+	);
+
 	const updateSpecificGroup = useCallback(
 		async (name, updateAll, forceUpdate, targetSessionId = null) => {
 			UpdateSessionsStore.update((s) => {
@@ -208,6 +263,7 @@ export function useUpdateSessions(groups) {
 			updateSessions: !busy && updateSessions,
 			updateAllSessions: !busy && updateAllSessions,
 			updateAllMetadataCurrentYear: !busy && updateAllMetadataCurrentYear,
+			updateRecentSessions: !busy && updateRecentSessions,
 			updateGroup: !busy && updateSpecificGroup,
 		}),
 		[
@@ -217,6 +273,7 @@ export function useUpdateSessions(groups) {
 			updateSessions,
 			updateAllSessions,
 			updateAllMetadataCurrentYear,
+			updateRecentSessions,
 			updateSpecificGroup,
 		],
 	);

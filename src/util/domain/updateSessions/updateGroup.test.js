@@ -480,6 +480,69 @@ describe("updateGroupProcess", () => {
 		expect(fetchSessionMetadata).toHaveBeenCalledTimes(1);
 	});
 
+	it("updates only recent sessions while preserving cached sessions from the same year", async () => {
+		const currentYear = String(new Date().getFullYear());
+		const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
+			.toISOString()
+			.slice(0, 10);
+		const oldSession = {
+			id: `${currentYear}-01-01 Historical Session`,
+			name: `${currentYear}-01-01 Historical Session`,
+			group: "test",
+			year: currentYear,
+			tags: ["preserve"],
+		};
+		const recentId = `${recentDate} Recent Session`;
+		const localYearPath = `/local/sync/test/${currentYear}.json`;
+
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [
+					{
+						name: currentYear,
+						type: "dir",
+						path: `wasabi/test/${currentYear}`,
+					},
+				];
+			}
+			if (path === `wasabi/test/${currentYear}`) {
+				return [
+					file(
+						`${oldSession.id}.mp4`,
+						`wasabi/test/${currentYear}/${oldSession.id}.mp4`,
+					),
+					file(`${recentId}.mp4`, `wasabi/test/${currentYear}/${recentId}.mp4`),
+				];
+			}
+			return [];
+		});
+		storage.exists.mockImplementation(async (path) => path === localYearPath);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path === localYearPath)
+				return JSON.stringify({ sessions: [oldSession] });
+			return "";
+		});
+		fetchSessionMetadata.mockResolvedValue({
+			items: [],
+			tags: { [recentId]: ["recent"] },
+			durations: {},
+			summaries: {},
+			transcriptions: {},
+		});
+
+		await updateGroupProcess("test", false, true, false, false, null, 30);
+
+		const [, year, sessions] = updateYearSync.mock.calls[0];
+		expect(year).toBe(currentYear);
+		expect(sessions).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: oldSession.id, tags: ["preserve"] }),
+				expect.objectContaining({ id: recentId, tags: ["recent"] }),
+			]),
+		);
+		expect(sessions).toHaveLength(2);
+	});
+
 	it("preserves older bundled sessions when a full update omits their year", async () => {
 		const oldSession = {
 			id: "2022-01-01 Historical Session",

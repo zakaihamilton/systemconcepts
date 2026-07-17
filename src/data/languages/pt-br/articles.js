@@ -220,6 +220,10 @@ export default [
 		value: "Atualizar metadados (ano atual)",
 	},
 	{
+		id: "UPDATE_RECENT_SESSIONS",
+		value: "Atualizar sessões recentes (últimos 30 dias)",
+	},
+	{
 		id: "PERSONAL_SYNC",
 		value: "Arquivos Pessoais",
 	},
