@@ -1280,7 +1280,6 @@ export default function Research() {
 						} // Adjust for header/search bar
 						itemCount={filteredResults.length}
 						itemSize={getItemSize}
-						estimatedItemSize={500}
 						width={size.width - 32} // Account for root padding
 						ref={listRef}
 						outerRef={outerRef}

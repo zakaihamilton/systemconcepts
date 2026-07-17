@@ -18,6 +18,7 @@ const VariableSizeList = forwardRef(
 			width,
 			itemData,
 			onScroll,
+			onItemsRendered,
 			overscanCount = 2,
 			outerRef: externalOuterRef,
 			style: externalStyle,
@@ -107,11 +108,30 @@ const VariableSizeList = forwardRef(
 			return 0;
 		};
 
-		const startIndex = Math.max(0, findIndex(scrollTop) - overscanCount);
-		const stopIndex = Math.min(
+		const visibleStartIndex = findIndex(scrollTop);
+		const visibleStopIndex = Math.min(
 			itemCount - 1,
-			findIndex(scrollTop + height) + overscanCount,
+			findIndex(scrollTop + height),
 		);
+		const startIndex = Math.max(0, visibleStartIndex - overscanCount);
+		const stopIndex = Math.min(itemCount - 1, visibleStopIndex + overscanCount);
+
+		useEffect(() => {
+			if (onItemsRendered) {
+				onItemsRendered({
+					visibleStartIndex,
+					visibleStopIndex,
+					overscanStartIndex: startIndex,
+					overscanStopIndex: stopIndex,
+				});
+			}
+		}, [
+			onItemsRendered,
+			visibleStartIndex,
+			visibleStopIndex,
+			startIndex,
+			stopIndex,
+		]);
 
 		const items = [];
 		for (let i = startIndex; i <= stopIndex; i++) {

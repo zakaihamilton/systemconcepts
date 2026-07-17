@@ -14,6 +14,7 @@ describe("VariableSizeList Component", () => {
 
 	it("renders variable height items", () => {
 		const onScroll = jest.fn();
+		const onItemsRendered = jest.fn();
 		const { getByTestId } = render(
 			<VariableSizeList
 				height={150}
@@ -23,6 +24,7 @@ describe("VariableSizeList Component", () => {
 				itemData={itemData}
 				overscanCount={1}
 				onScroll={onScroll}
+				onItemsRendered={onItemsRendered}
 			>
 				{Row}
 			</VariableSizeList>,
@@ -31,6 +33,12 @@ describe("VariableSizeList Component", () => {
 		expect(getByTestId("item-0")).toBeInTheDocument();
 		expect(getByTestId("item-1")).toBeInTheDocument();
 		expect(getByTestId("item-2")).toBeInTheDocument();
+		expect(onItemsRendered).toHaveBeenLastCalledWith({
+			visibleStartIndex: 0,
+			visibleStopIndex: 2,
+			overscanStartIndex: 0,
+			overscanStopIndex: 3,
+		});
 	});
 
 	it("supports scrolling and imperative refs", () => {
