@@ -20,6 +20,14 @@
 	grid-template-columns: 1fr 6em 6em 6em 6em;
 }
 
+.listItemWithColor {
+	grid-template-columns: 1fr 6em 6em 6em 6em;
+}
+
+.listItemWithProgressAndColor {
+	grid-template-columns: 1fr 6em 6em 6em 6em 6em;
+}
+
 .disabled {
 	opacity: 0.5;
 }

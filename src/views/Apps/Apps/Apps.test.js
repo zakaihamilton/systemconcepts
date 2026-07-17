@@ -250,6 +250,18 @@ describe("Apps View", () => {
 		expect(getAllByText("No sessions yet.")).toHaveLength(1);
 	});
 
+	it("shows each session only once in Continue watching", () => {
+		useRecentHistory.mockReturnValue([
+			[mockSessions[0], { ...mockSessions[0], position: 40 }],
+		]);
+
+		const { getByLabelText } = render(<Apps />);
+
+		expect(
+			within(getByLabelText("Continue watching")).getAllByTestId("track-card"),
+		).toHaveLength(1);
+	});
+
 	it("uses track-card skeletons while sessions load", () => {
 		jest.useFakeTimers();
 		useSessions.mockReturnValue([[], true]);
@@ -276,6 +288,22 @@ describe("Apps View", () => {
 		expect(
 			within(getByLabelText("Latest sessions")).getAllByTestId("track-card"),
 		).toHaveLength(8);
+	});
+
+	it("renders duplicate session metadata without duplicate React keys", () => {
+		const consoleError = jest
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		useSessions.mockReturnValue([
+			[mockSessions[0], { ...mockSessions[0], id: "duplicate-session" }],
+			false,
+		]);
+		useRecentHistory.mockReturnValue([[]]);
+
+		render(<Apps />);
+
+		expect(consoleError).not.toHaveBeenCalled();
+		consoleError.mockRestore();
 	});
 
 	it("keeps skeletons visible while the session store initializes", () => {

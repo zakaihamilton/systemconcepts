@@ -31,6 +31,10 @@ function getSessionKey({ group, date, name }) {
 	return `${group || ""}::${date || ""}::${name || ""}`;
 }
 
+function getSessionCardKey(session, index) {
+	return `${getSessionKey(session)}::${session.id || session.key || index}::${index}`;
+}
+
 function getSessionPath({ group, year, date, name }) {
 	return `session?group=${group}&year=${year}&date=${date}&name=${encodeURIComponent(name)}`;
 }
@@ -188,6 +192,7 @@ function SessionContent({ translations }) {
 	const sessionsByKey = new Map(
 		(sessions || []).map((session) => [getSessionKey(session), session]),
 	);
+	const seenContinueWatchingSessions = new Set();
 	const continueWatching = (history || [])
 		.map((historyItem) => {
 			const session = sessionsByKey.get(getSessionKey(historyItem));
@@ -199,6 +204,12 @@ function SessionContent({ translations }) {
 			);
 		})
 		.filter(Boolean)
+		.filter((session) => {
+			const key = getSessionKey(session);
+			if (seenContinueWatchingSessions.has(key)) return false;
+			seenContinueWatchingSessions.add(key);
+			return true;
+		})
 		.slice(0, SESSION_LIMIT);
 	const latestSessions = [...(sessions || [])]
 		.sort(
@@ -236,8 +247,11 @@ function SessionContent({ translations }) {
 						<SessionSkeletons />
 					) : continueWatching.length ? (
 						<div className={styles.sessionGrid}>
-							{continueWatching.map((session) => (
-								<SessionCard key={getSessionKey(session)} session={session} />
+							{continueWatching.map((session, index) => (
+								<SessionCard
+									key={getSessionCardKey(session, index)}
+									session={session}
+								/>
 							))}
 						</div>
 					) : (
@@ -255,8 +269,11 @@ function SessionContent({ translations }) {
 					<SessionSkeletons count={LATEST_SESSION_LIMIT} />
 				) : latestSessions.length ? (
 					<div className={styles.sessionGrid}>
-						{latestSessions.map((session) => (
-							<SessionCard key={getSessionKey(session)} session={session} />
+						{latestSessions.map((session, index) => (
+							<SessionCard
+								key={getSessionCardKey(session, index)}
+								session={session}
+							/>
 						))}
 					</div>
 				) : (

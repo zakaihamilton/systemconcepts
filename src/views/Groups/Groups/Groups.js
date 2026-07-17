@@ -475,10 +475,13 @@ export default function Groups() {
 				}}
 				viewModes={{
 					list: {
-						className:
-							withProgress && !busy
+						className: busy
+							? withProgress
 								? styles.listItemWithProgress
-								: styles.listItem,
+								: styles.listItem
+							: withProgress
+								? styles.listItemWithProgressAndColor
+								: styles.listItemWithColor,
 					},
 					table: null,
 				}}

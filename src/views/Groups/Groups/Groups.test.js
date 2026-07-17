@@ -25,6 +25,7 @@ jest.mock("@widgets/Table", () => (props) => (
 	<div
 		data-testid="table"
 		data-columns={props.columns.map((column) => column?.id)}
+		data-list-class={props.viewModes.list.className}
 	/>
 ));
 jest.mock("@widgets/Label", () => ({ name }) => (
@@ -93,5 +94,27 @@ describe("Groups View", () => {
 		const { getByTestId } = render(<Groups />);
 		await act(async () => {});
 		expect(getByTestId("table").dataset.columns).toContain("progress");
+	});
+
+	it("keeps the color swatch in its own list column", () => {
+		const { getByTestId } = render(<Groups />);
+
+		expect(getByTestId("table").dataset.listClass).toContain(
+			"listItemWithColor",
+		);
+	});
+
+	it("allocates a list column for both progress and color", () => {
+		useUpdateSessions.mockReturnValue({
+			status: [{ name: "archive", progress: 1, count: 2 }],
+			busy: false,
+			start: Date.now(),
+		});
+
+		const { getByTestId } = render(<Groups />);
+
+		expect(getByTestId("table").dataset.listClass).toContain(
+			"listItemWithProgressAndColor",
+		);
 	});
 });
