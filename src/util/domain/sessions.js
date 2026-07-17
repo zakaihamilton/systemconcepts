@@ -7,8 +7,8 @@ import { logger as structuredLogger } from "@util/api/logger";
 import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { makePath } from "@util/data/path";
-import { formatDuration } from "@util/data/string";
 import { GroupsStore, useGroups } from "@util/domain/groups";
+import { toSessionListItem } from "@util/domain/sessionListItem";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
 import { Store } from "pullstate";
@@ -328,57 +328,20 @@ export function useSessions(depends = [], options = {}) {
 					}
 				}
 
-				// Enrich bundled sessions once (instead of filtering per group)
-				if (bundledSessions.length > 0) {
-					for (let i = 0; i < bundledSessions.length; i++) {
-						const session = bundledSessions[i];
+				// Project bundled sessions immediately so parsed source files can be
+				// collected instead of becoming the long-lived global catalogue.
+				bundledSessions = bundledSessions
+					.filter((session) => bundledGroups.has(session.group))
+					.map((session) => {
 						const groupInfo = groupInfoMap.get(session.group);
-
-						// Skip if group is not actually bundled
-						if (!bundledGroups.has(session.group)) continue;
-
-						if (
-							session.image?.path?.startsWith("wasabi/") ||
-							session.image?.path?.startsWith("/aws/") ||
-							session.image?.path?.startsWith("aws/")
-						) {
-							session.imagePath = session.image.path;
-						} else if (session.image && cdn.url) {
-							session.imagePath =
-								cdn.url + encodeURI(session.image.path.replace("/aws", ""));
-
-							if (!session.thumbnail || session.thumbnail === true) {
-								session.thumbnail = session.imagePath;
-							}
-						}
-
-						if (groupInfo?.color && !session.color) {
-							session.color = groupInfo.color;
-						}
-
-						// Merge personal metadata (position/duration)
 						const isMerged = groupInfo?.merged ?? groupInfo?.disabled;
 						const personalKey = `${session.group}/${(isMerged || groupInfo?.bundled) && session.year ? session.year + "/" : ""}${session.date} ${session.name}`;
-						const personal = personalMetadata[personalKey];
-						if (personal) {
-							session.position = personal.position;
-							if (personal.duration) {
-								session.duration = Math.max(
-									session.duration || 0,
-									personal.duration,
-								);
-							}
-						}
-
-						session.isHebrew = /[\u0590-\u05FF]/.test(session.name);
-						session.hasDuration = parseInt(session.duration) > 1;
-						session.tagsString = (session.tags || []).join(" ");
-						session.durationStr =
-							session.duration > 1
-								? formatDuration(session.duration * 1000, true)
-								: null;
-					}
-				}
+						return toSessionListItem(session, {
+							cdn,
+							groupInfo,
+							personal: personalMetadata[personalKey],
+						});
+					});
 
 				// Process year files in chunks
 				const YEAR_CHUNK_SIZE = 5;
@@ -414,58 +377,15 @@ export function useSessions(depends = [], options = {}) {
 								}
 
 								const groupInfo = groupInfoMap.get(group.name);
-								const groupColor = groupInfo?.color;
-
-								// Mutate sessions in-place instead of creating new objects
-								for (let i = 0; i < dataSessions.length; i++) {
-									const session = dataSessions[i];
-
-									// Update thumbnail if CDN URL exists
-									if (
-										session.image?.path?.startsWith("wasabi/") ||
-										session.image?.path?.startsWith("/aws/") ||
-										session.image?.path?.startsWith("aws/")
-									) {
-										session.imagePath = session.image.path;
-									} else if (session.image && cdn.url) {
-										session.imagePath =
-											cdn.url +
-											encodeURI(session.image.path.replace("/aws", ""));
-
-										if (!session.thumbnail || session.thumbnail === true) {
-											session.thumbnail = session.imagePath;
-										}
-									}
-
-									// Add color if available and not already set
-									if (groupColor && !session.color) {
-										session.color = groupColor;
-									}
-
-									// Merge personal metadata (position/duration)
-									const isMerged = groupInfo?.merged;
+								const isMerged = groupInfo?.merged;
+								return dataSessions.map((session) => {
 									const personalKey = `${session.group}/${(isMerged || groupInfo?.bundled) && session.year ? session.year + "/" : ""}${session.date} ${session.name}`;
-									const personal = personalMetadata[personalKey];
-									if (personal) {
-										session.position = personal.position;
-										if (personal.duration) {
-											session.duration = Math.max(
-												session.duration || 0,
-												personal.duration,
-											);
-										}
-									}
-
-									session.isHebrew = /[\u0590-\u05FF]/.test(session.name);
-									session.hasDuration = parseInt(session.duration) > 1;
-									session.tagsString = (session.tags || []).join(" ");
-									session.durationStr =
-										session.duration > 1
-											? formatDuration(session.duration * 1000, true)
-											: null;
-								}
-
-								return dataSessions;
+									return toSessionListItem(session, {
+										cdn,
+										groupInfo,
+										personal: personalMetadata[personalKey],
+									});
+								});
 							} catch (err) {
 								structuredLogger.error(
 									"Error reading sessions file",

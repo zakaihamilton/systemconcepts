@@ -367,7 +367,9 @@ async function getYearMetadata(
 		yearCache,
 		metadataFingerprint,
 	);
-	if (cachedFromYearCache) {
+	// Manual metadata refreshes must bypass the persistent year cache. Otherwise
+	// the UI reports a forced update while silently reusing stale metadata.
+	if (cachedFromYearCache && !forceUpdate) {
 		return cachedFromYearCache;
 	}
 

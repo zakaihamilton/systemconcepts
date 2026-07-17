@@ -424,20 +424,22 @@ export default React.memo(function TableWidget(props) {
 		return sorted;
 	}, [purelySortedData, viewMode, treeGroup, expandedTreeGroups]);
 
-	const { items, rawItems } = useMemo(() => {
-		const res = {
-			items: sortedData.map((p) => p.mapped),
-			rawItems: sortedData.map((p) => p.raw),
-		};
-		return res;
-	}, [sortedData]);
+	const items = useMemo(
+		() => sortedData.map((item) => item.mapped),
+		[sortedData],
+	);
+	// Only export-capable tables need a second full-catalog array of raw data.
+	const rawItems = useMemo(
+		() => (onExport || onImport ? sortedData.map((item) => item.raw) : null),
+		[onExport, onImport, sortedData],
+	);
 
 	const registryId = useMemo(() => {
 		const id = ++tableRegistryCounter;
 		return id;
 	}, []);
 
-	tableDataRegistry.set(registryId, { items, rawItems });
+	tableDataRegistry.set(registryId, { items });
 
 	useEffect(() => {
 		return () => tableDataRegistry.delete(registryId);

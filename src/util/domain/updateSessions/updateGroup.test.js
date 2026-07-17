@@ -369,7 +369,7 @@ describe("updateGroupProcess", () => {
 		expect(sessions[0].summaryText).toBe("Cached summary");
 	});
 
-	it("skips remote metadata fetch on forceUpdate when metadata fingerprint is unchanged", async () => {
+	it("fetches remote metadata on forceUpdate when metadata fingerprint is unchanged", async () => {
 		const metadataFingerprint = [
 			{ name: "2024.tags", type: "", size: 100, mtimeMs: 1 },
 			{ name: "2024.duration", type: "", size: 100, mtimeMs: 1 },
@@ -416,13 +416,25 @@ describe("updateGroupProcess", () => {
 			}
 			return "";
 		});
+		fetchSessionMetadata.mockResolvedValueOnce({
+			items: [],
+			tags: { "2024-05-05 Test Session": ["fresh"] },
+			durations: { "2024-05-05 Test Session": 123 },
+			summaries: {},
+			transcriptions: {},
+		});
 
 		await updateGroupProcess("test", true, true);
 
-		expect(fetchSessionMetadata).not.toHaveBeenCalled();
+		expect(fetchSessionMetadata).toHaveBeenCalledWith(
+			"test",
+			"2024",
+			expect.any(Array),
+			true,
+		);
 		const [, , sessions] = updateYearSync.mock.calls[0];
-		expect(sessions[0].tags).toEqual(["forced-cache"]);
-		expect(sessions[0].duration).toBe(555);
+		expect(sessions[0].tags).toEqual(["fresh"]);
+		expect(sessions[0].duration).toBe(123);
 	});
 
 	it("fetches remote metadata when metadata fingerprint changes", async () => {
