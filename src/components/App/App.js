@@ -7,6 +7,10 @@ import Main from "../Main";
 import Theme from "../Theme";
 
 export default function App() {
+	React.useEffect(() => {
+		document.getElementById("app-splash")?.remove();
+	}, []);
+
 	return (
 		<React.StrictMode>
 			<SpeedInsights />
