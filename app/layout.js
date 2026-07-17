@@ -13,6 +13,7 @@ export const viewport = {
 };
 
 const splashStyles = `
+.app-splash { display: none; }
 @media (max-width: 767px) {
   .app-splash {
     position: fixed; z-index: 2147483647; inset: 0; display: flex;
