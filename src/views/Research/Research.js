@@ -2,25 +2,31 @@ import { ContentSize } from "@components/Page/Content";
 import { registerToolbar, useToolbar } from "@components/Toolbar";
 import VariableSizeList from "@components/Virtualized/VariableSizeList";
 import ClearIcon from "@icons/svg/Clear.svg";
+import ExpandMoreIcon from "@icons/svg/ExpandMore.svg";
+import FilterAltIcon from "@icons/svg/FilterAlt.svg";
 import FormatListNumberedIcon from "@icons/svg/FormatListNumbered.svg";
 import PrintIcon from "@icons/svg/Print.svg";
 import RefreshIcon from "@icons/svg/Refresh.svg";
 import SearchIcon from "@icons/svg/Search.svg";
 import { LIBRARY_LOCAL_PATH } from "@sync/constants";
 import { SyncActiveStore } from "@sync/syncState";
-import Autocomplete from "@ui/Autocomplete";
+import Badge from "@ui/Badge";
 import Box from "@ui/Box";
 import Button from "@ui/Button";
 import Chip from "@ui/Chip";
+import ClickAwayListener from "@ui/ClickAwayListener";
+import Drawer from "@ui/Drawer";
 import IconButton from "@ui/IconButton";
 import InputAdornment from "@ui/InputAdornment";
 import LinearProgress from "@ui/LinearProgress";
 import Paper from "@ui/Paper";
+import { Tab, Tabs } from "@ui/Tabs";
 import TextField from "@ui/TextField";
 import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
 import { useDeviceType } from "@util/browser/styles";
+import { useSize } from "@util/browser/size";
 import { makePath } from "@util/data/path";
 import { decodeBinaryIndex } from "@util/data/searchIndexBinary";
 import { normalizeContent } from "@util/data/string";
@@ -35,6 +41,8 @@ import ScrollToTop from "@views/Library/Article/ScrollToTop";
 import { LibraryTagKeys } from "@views/Library/Icons";
 import { LibraryStore } from "@views/Library/Store";
 import { ResearchStore } from "@views/ResearchStore/ResearchStore";
+import Tooltip from "@widgets/Tooltip";
+import clsx from "clsx";
 import Cookies from "js-cookie";
 import {
 	useCallback,
@@ -49,6 +57,13 @@ import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";
 import SearchResultItem from "./SearchResultItem";
 import { filterResearchResults } from "./searchFilters";
+import {
+	clauseMatchesText,
+	getResearchSuggestions,
+	getSearchTerms,
+	parseResearchQuery,
+	rankResearchResults,
+} from "./searchQuery";
 
 const INDEX_FILE = "search_index.bin";
 const LEGACY_INDEX_FILE = "search_index.json";
@@ -68,6 +83,7 @@ export default function Research() {
 		progress,
 		status,
 		indexTimestamp,
+		source = "all",
 	} = ResearchStore.useState();
 	const [sessions] = useSessions([], { filterSessions: false, skipSync: true });
 	const [indexData, setIndexData] = useState(null);
@@ -79,9 +95,11 @@ export default function Research() {
 	const [searchProgress, setSearchProgress] = useState(0);
 	const [showProgress, setShowProgress] = useState(false);
 	const searchTimer = useRef(null);
+	const progressHideTimer = useRef(null);
 	const isMounted = useRef(true);
 	const size = useContext(ContentSize);
 	const listRef = useRef();
+	const listContainerRef = useRef(null);
 	const rowHeights = useRef({});
 	const deviceType = useDeviceType();
 	const isMobile = deviceType !== "desktop";
@@ -96,11 +114,16 @@ export default function Research() {
 		hasSearched ? filterTags : [],
 	);
 	const [searchCollapsed, setSearchCollapsed] = useState(false);
+	const listSize = useSize(listContainerRef, [searchCollapsed, hasSearched]);
 	const [jumpOpen, setJumpOpen] = useState(false);
 	const [printing, setPrinting] = useState(false);
 	const [showScrollTop, setShowScrollTop] = useState(false);
 	const [printRoot, setPrintRoot] = useState(null);
-	const [filterInput, setFilterInput] = useState("");
+	const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+	const [filterListQuery, setFilterListQuery] = useState("");
+	const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+	const [activeSuggestion, setActiveSuggestion] = useState(-1);
+	const searchRequestId = useRef(0);
 	const isJumping = useRef(false);
 	const jumpTimeout = useRef(null);
 	const resetTimer = useRef(null);
@@ -164,6 +187,9 @@ export default function Research() {
 		isMounted.current = true;
 		return () => {
 			isMounted.current = false;
+			if (progressHideTimer.current) {
+				clearTimeout(progressHideTimer.current);
+			}
 		};
 	}, []);
 
@@ -182,6 +208,12 @@ export default function Research() {
 	const setResults = useCallback((val) => {
 		ResearchStore.update((s) => {
 			s.results = val;
+		});
+	}, []);
+
+	const setSource = useCallback((value) => {
+		ResearchStore.update((s) => {
+			s.source = value;
 		});
 	}, []);
 
@@ -340,8 +372,36 @@ export default function Research() {
 		}, new Map());
 	}, [sessions]);
 
+	const indexedTerms = useMemo(() => {
+		const dictionary = indexData?.t || indexData?.tokens || {};
+		return Object.keys(dictionary).slice(0, 5000);
+	}, [indexData]);
+
+	const suggestionTitles = useMemo(() => {
+		const libraryTitles = (LibraryStore.getRawState().tags || []).map(
+			(tag) => tag.title,
+		);
+		const sessionTitles = (sessions || []).map((session) => session.name);
+		return [...new Set([...libraryTitles, ...sessionTitles].filter(Boolean))];
+	}, [sessions, availableFilters]);
+
+	const suggestions = useMemo(
+		() =>
+			getResearchSuggestions({
+				query,
+				filters: availableFilters,
+				titles: suggestionTitles,
+				terms: indexedTerms,
+			}),
+		[query, availableFilters, suggestionTitles, indexedTerms],
+	);
+
 	const handleSearch = useCallback(
-		async (isRestoring = false) => {
+		async (isRestoring = false, queryOverride) => {
+			const requestId = ++searchRequestId.current;
+			const searchQuery = queryOverride ?? query;
+			setSuggestionsOpen(false);
+			setActiveSuggestion(-1);
 			// const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
 			// const currentSearch = { query, filterTags };
 			// setLastSearch(currentSearch);
@@ -349,7 +409,7 @@ export default function Research() {
 				// Debug logs removed
 			}
 			setAppliedFilterTags(filterTags);
-			if (!indexData || (!query.trim() && !filterTags.length)) {
+			if (!indexData || (!searchQuery.trim() && !filterTags.length)) {
 				setResults([]);
 				ResearchStore.update((s) => {
 					s.hasSearched = true;
@@ -360,6 +420,10 @@ export default function Research() {
 			setSearching(true);
 			setSearchProgress(0);
 			setShowProgress(false);
+			if (progressHideTimer.current) {
+				clearTimeout(progressHideTimer.current);
+				progressHideTimer.current = null;
+			}
 
 			if (searchTimer.current) clearTimeout(searchTimer.current);
 			searchTimer.current = setTimeout(() => {
@@ -370,45 +434,29 @@ export default function Research() {
 			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			try {
-				const orGroups = query
-					.split(/\s+OR\s+/)
-					.map((g) => g.trim())
-					.filter(Boolean);
-				const searchTerms = [];
+				const orGroups = parseResearchQuery(searchQuery);
+				const searchTerms = getSearchTerms(searchQuery);
 				let finalRefs = new Set();
+				const paragraphCache = new Map();
 
 				const isV2 = indexData.v === 2;
 				const isV3 = indexData.v === 3;
 				const isV4 = indexData.v === 4;
 				const isV5 = indexData.v >= 5;
 
-				if (!query.trim()) {
+				if (!searchQuery.trim()) {
 					if (indexData.f) {
 						for (let i = 0; i < indexData.f.length; i++) {
 							finalRefs.add(`${i}:0`);
 						}
 					}
 				} else {
-					for (const orGroup of orGroups) {
-						const andClauses = orGroup
-							.split(/\s+AND\s+/)
-							.map((c) => c.trim())
-							.filter(Boolean);
-						if (andClauses.length === 0) continue;
-
-						const parsedAndClauses = andClauses.map((clause) => {
-							const terms = clause
-								.toLowerCase()
-								.split(/[^a-z0-9\u0590-\u05FF]+/)
-								.filter(Boolean);
-							return { raw: clause, terms };
-						});
+					for (const parsedAndClauses of orGroups) {
+						if (parsedAndClauses.length === 0) continue;
 
 						const allTokensInGroup = [
 							...new Set(parsedAndClauses.flatMap((c) => c.terms)),
 						];
-						searchTerms.push(...parsedAndClauses.map((c) => c.raw));
-
 						let groupRefs = null;
 
 						for (const token of allTokensInGroup) {
@@ -455,8 +503,6 @@ export default function Research() {
 
 						if (groupRefs) {
 							// For v5 indexes, we need to load paragraphs on-demand
-							const paragraphCache = new Map(); // fileId -> paragraphs array
-
 							// Load paragraphs for all unique files in this group
 							if (isV5) {
 								const uniqueFileIndices = new Set();
@@ -472,15 +518,20 @@ export default function Research() {
 								// Load files with progress tracking
 								await Promise.all(
 									fileIndicesArray.map(async (fileIndex) => {
-										const fileId = indexData.f[fileIndex];
-										const paragraphs = await loadParagraphsForFile(
-											fileId,
-											sessionsById,
-										);
-										paragraphCache.set(fileIndex, paragraphs);
+										if (!paragraphCache.has(fileIndex)) {
+											const fileId = indexData.f[fileIndex];
+											const paragraphs = await loadParagraphsForFile(
+												fileId,
+												sessionsById,
+											);
+											paragraphCache.set(fileIndex, paragraphs);
+										}
 
 										loadedCount++;
-										if (isMounted.current) {
+										if (
+											isMounted.current &&
+											requestId === searchRequestId.current
+										) {
 											setSearchProgress(
 												Math.floor((loadedCount / totalFiles) * 50),
 											); // 0-50% for loading
@@ -489,7 +540,10 @@ export default function Research() {
 								);
 
 								// Ensure we show 50% after verification loading completes
-								if (isMounted.current) {
+								if (
+									isMounted.current &&
+									requestId === searchRequestId.current
+								) {
 									setSearchProgress(50);
 								}
 							}
@@ -512,29 +566,9 @@ export default function Research() {
 								}
 
 								if (paragraph) {
-									const paraText = paragraph.toLowerCase();
-									const isMatch = parsedAndClauses.every((clause) => {
-										if (clause.terms.length === 0) return true;
-										if (clause.terms.length === 1) {
-											const term = clause.terms[0];
-											if (/^[a-z0-9]+$/i.test(term)) {
-												const regex = new RegExp(`\\b${term}\\b`, "i");
-												return regex.test(paraText);
-											}
-											return paraText.includes(term);
-										} else {
-											// Phrase adjacency check
-											// Escape terms for regex and join with anything non-alphanumeric
-											const phraseRegexStr = clause.terms
-												.map((t) => {
-													return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-												})
-												.join("[^a-z0-9\u0590-\u05FF]+");
-
-											const regex = new RegExp(`\\b${phraseRegexStr}\\b`, "i");
-											return regex.test(paraText);
-										}
-									});
+									const isMatch = parsedAndClauses.every((clause) =>
+										clauseMatchesText(clause, paragraph),
+									);
 
 									if (isMatch) {
 										finalRefs.add(ref);
@@ -557,44 +591,36 @@ export default function Research() {
 					return str.charAt(0).toUpperCase() + str.slice(1);
 				};
 
-				// For v5, load paragraphs for all matched files
-				const paragraphsMap = new Map(); // fileIndex -> paragraphs array
-
+				// Query searches load paragraphs while verifying candidates. Filter-only
+				// searches have no candidates to verify, so load only their result files.
 				if (isV5) {
-					const uniqueFileIndices = new Set();
-					[...finalRefs].forEach((ref) => {
-						const [docId] = ref.split(":");
-						uniqueFileIndices.add(parseInt(docId, 10));
-					});
-
-					const fileIndicesArray = [...uniqueFileIndices];
+					const missingFileIndices = [
+						...new Set(
+							[...finalRefs]
+								.map((ref) => parseInt(ref.split(":")[0], 10))
+								.filter((fileIndex) => !paragraphCache.has(fileIndex)),
+						),
+					];
 					let loadedCount = 0;
-					const totalFiles = fileIndicesArray.length;
-
-					// Load files with progress tracking (50-100%)
 					await Promise.all(
-						fileIndicesArray.map(async (fileIndex) => {
-							const fileId = indexData.f[fileIndex];
+						missingFileIndices.map(async (fileIndex) => {
 							const paragraphs = await loadParagraphsForFile(
-								fileId,
+								indexData.f[fileIndex],
 								sessionsById,
 							);
-							paragraphsMap.set(fileIndex, paragraphs);
-
+							paragraphCache.set(fileIndex, paragraphs);
 							loadedCount++;
-							if (isMounted.current) {
+							if (isMounted.current && requestId === searchRequestId.current) {
 								setSearchProgress(
-									50 + Math.floor((loadedCount / totalFiles) * 50),
-								); // 50-100% for results
+									50 +
+										Math.floor((loadedCount / missingFileIndices.length) * 50),
+								);
 							}
 						}),
 					);
-
-					// Ensure we show 100% after all loading completes
-					if (isMounted.current) {
-						setSearchProgress(100);
-					}
 				}
+
+				const paragraphsMap = paragraphCache;
 
 				[...finalRefs].forEach((ref) => {
 					const [docId, paraIndex] = ref.split(":");
@@ -609,27 +635,28 @@ export default function Research() {
 								: indexData.d[fileIndex];
 
 							if (tagId.startsWith("session|")) {
-								if (sessions) {
-									const parts = tagId.split("|");
-									if (parts.length >= 5) {
-										const session = sessionsById.get(tagId);
-										if (session) {
-											doc = {
-												...session,
-												docId: tagId,
-												isSession: true,
-												customTags: [
-													{ label: "Group", value: capitalize(session.group) },
-													{ label: "Year", value: session.year },
-													{ label: "Date", value: session.date },
-													{ label: "Type", value: capitalize(session.type) },
-												],
-												tag: { title: session.name, _id: tagId },
-												paragraphs,
-												matches: [],
-											};
-										}
-									}
+								const parts = tagId.split("|");
+								if (parts.length >= 5) {
+									const session = sessionsById.get(tagId) || {
+										group: parts[1],
+										year: parts[2],
+										date: parts[3],
+										name: parts.slice(4).join("|"),
+									};
+									doc = {
+										...session,
+										docId: tagId,
+										isSession: true,
+										customTags: [
+											{ label: "Group", value: capitalize(session.group) },
+											{ label: "Year", value: session.year },
+											{ label: "Date", value: session.date },
+											{ label: "Type", value: capitalize(session.type) },
+										],
+										tag: { title: session.name, _id: tagId },
+										paragraphs,
+										matches: [],
+									};
 								}
 							} else {
 								const tag = libraryTags.find((t) => t._id === tagId);
@@ -660,7 +687,7 @@ export default function Research() {
 
 					if (groupedResults[docId]) {
 						// Logic to handle empty query cases (filter only) where we want to show a summary
-						if (!query.trim() && groupedResults[docId].isSession) {
+						if (!searchQuery.trim() && groupedResults[docId].isSession) {
 							if (groupedResults[docId].matches.length === 0) {
 								let summaryText =
 									groupedResults[docId].summary ||
@@ -804,12 +831,13 @@ export default function Research() {
 				});
 
 				// Filter out documents with no matches
-				const filteredResults = Object.values(groupedResults).filter(
-					(doc) => doc.matches.length > 0,
+				const filteredResults = rankResearchResults(
+					Object.values(groupedResults).filter((doc) => doc.matches.length > 0),
+					searchQuery,
 				);
 
-				if (isMounted.current) {
-					const uniqueTerms = [...new Set(searchTerms)];
+				if (isMounted.current && requestId === searchRequestId.current) {
+					const uniqueTerms = searchTerms;
 					ResearchStore.update((s) => {
 						s.results = filteredResults;
 						s.highlight = uniqueTerms;
@@ -822,14 +850,15 @@ export default function Research() {
 			} catch (err) {
 				structuredLogger.error("Search failed:", err);
 			} finally {
-				if (isMounted.current) {
+				if (isMounted.current && requestId === searchRequestId.current) {
 					setSearching(false);
 					setSearchProgress(100);
 					// Keep progress bar visible briefly to show 100% completion
-					setTimeout(() => {
-						if (isMounted.current) {
+					progressHideTimer.current = setTimeout(() => {
+						if (isMounted.current && requestId === searchRequestId.current) {
 							setShowProgress(false);
 						}
+						progressHideTimer.current = null;
 					}, 500);
 					if (searchTimer.current) {
 						clearTimeout(searchTimer.current);
@@ -884,19 +913,112 @@ export default function Research() {
 		filterTags.length,
 	]);
 
+	const closeSuggestions = useCallback(() => {
+		setSuggestionsOpen(false);
+		setActiveSuggestion(-1);
+	}, []);
+
 	const handleClear = useCallback(() => {
 		setQuery("");
 		setFilterTags([]);
-		setFilterInput("");
+		setSource("all");
+		setSuggestionsOpen(false);
+		setActiveSuggestion(-1);
 		ResearchStore.update((s) => {
 			s.results = [];
 			s.highlight = [];
 			s.hasSearched = false;
 		});
 		setAppliedFilterTags([]);
-	}, [setQuery, setFilterTags, setFilterInput, setAppliedFilterTags]);
+	}, [setQuery, setFilterTags, setSource, setAppliedFilterTags]);
+
+	const handleSuggestionSelect = useCallback(
+		(suggestion) => {
+			if (suggestion.kind === "filter") {
+				if (
+					!filterTags.some(
+						(tag) =>
+							tag.label === suggestion.filter.label &&
+							tag.type === suggestion.filter.type,
+					)
+				) {
+					setFilterTags([...filterTags, suggestion.filter]);
+				}
+			} else {
+				setQuery(suggestion.value);
+				handleSearch(false, suggestion.value);
+			}
+			setActiveSuggestion(-1);
+			setSuggestionsOpen(false);
+		},
+		[filterTags, setFilterTags, setQuery, handleSearch],
+	);
+
+	const filterGroups = useMemo(() => {
+		return availableFilters.reduce((groups, filter) => {
+			(groups[filter.type] ||= []).push(filter);
+			return groups;
+		}, {});
+	}, [availableFilters]);
+
+	const visibleFilterGroups = useMemo(() => {
+		const needle = filterListQuery.trim().toLowerCase();
+		if (!needle) return filterGroups;
+		return Object.fromEntries(
+			Object.entries(filterGroups)
+				.map(([type, filters]) => [
+					type,
+					filters.filter((filter) =>
+						filter.label.toLowerCase().includes(needle),
+					),
+				])
+				.filter(([, filters]) => filters.length > 0),
+		);
+	}, [filterGroups, filterListQuery]);
+
+	const closeFilterDrawer = useCallback(() => {
+		setFilterDrawerOpen(false);
+		setFilterListQuery("");
+	}, []);
+
+	const toggleFilter = useCallback(
+		(filter) => {
+			const selected = filterTags.some(
+				(tag) => tag.label === filter.label && tag.type === filter.type,
+			);
+			setFilterTags(
+				selected
+					? filterTags.filter(
+							(tag) => tag.label !== filter.label || tag.type !== filter.type,
+						)
+					: [...filterTags, filter],
+			);
+		},
+		[filterTags, setFilterTags],
+	);
 
 	const onKeyDown = (e) => {
+		if (suggestionsOpen && suggestions.length) {
+			if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+				e.preventDefault();
+				setActiveSuggestion((current) => {
+					const direction = e.key === "ArrowDown" ? 1 : -1;
+					return (
+						(current + direction + suggestions.length) % suggestions.length
+					);
+				});
+				return;
+			}
+			if (e.key === "Escape") {
+				closeSuggestions();
+				return;
+			}
+			if (e.key === "Enter" && activeSuggestion >= 0) {
+				e.preventDefault();
+				handleSuggestionSelect(suggestions[activeSuggestion]);
+				return;
+			}
+		}
 		if (e.key === "Enter") {
 			handleSearch();
 		}
@@ -924,8 +1046,13 @@ export default function Research() {
 	}, []);
 
 	const filteredResults = useMemo(() => {
-		return filterResearchResults(results, appliedFilterTags, translations);
-	}, [results, appliedFilterTags, translations]);
+		const scoped = results.filter((doc) => {
+			if (source === "articles") return !doc.isSession;
+			if (source === "sessions") return doc.isSession;
+			return true;
+		});
+		return filterResearchResults(scoped, appliedFilterTags, translations);
+	}, [results, appliedFilterTags, translations, source]);
 
 	const pathItems = usePathItems();
 
@@ -1045,8 +1172,16 @@ export default function Research() {
 			setRowHeight,
 			listRef,
 			highlight,
+			translations,
 		}),
-		[filteredResults, gotoArticle, setRowHeight, listRef, highlight],
+		[
+			filteredResults,
+			gotoArticle,
+			setRowHeight,
+			listRef,
+			highlight,
+			translations,
+		],
 	);
 
 	const toolbarItems = useMemo(
@@ -1089,39 +1224,183 @@ export default function Research() {
 
 	useToolbar({ id: "Research", items: toolbarItems, depends: [toolbarItems] });
 
+	const panelToggleLabel = searchCollapsed
+		? translations.SHOW_SEARCH || "Show Search"
+		: translations.HIDE_SEARCH || "Hide Search";
+
+	const collapsedSearchSummary = [
+		query.trim() || translations.RESEARCH || "Research",
+		filterTags.length
+			? `${filterTags.length} ${translations.FILTERS || "Filters"}`
+			: null,
+	]
+		.filter(Boolean)
+		.join(" · ");
+
 	return (
 		<Box className={styles.root}>
-			{!searchCollapsed && (
-				<Paper
-					className={[
-						styles.searchPaper,
-						isMobile && searchCollapsed && styles.searchPaperCollapsed,
-					].join(" ")}
-				>
+			{searchCollapsed ? (
+				<Paper className={styles.searchPaperCollapsed}>
+					<Box className={styles.collapsedSearchBar}>
+						<Typography
+							variant="body2"
+							className={styles.collapsedSearchSummary}
+							noWrap
+						>
+							{collapsedSearchSummary}
+						</Typography>
+						<Tooltip title={panelToggleLabel}>
+							<IconButton
+								size="small"
+								className={styles.panelToggle}
+								onClick={() => setSearchCollapsed(false)}
+								aria-expanded={false}
+								aria-label={panelToggleLabel}
+							>
+								<ExpandMoreIcon />
+							</IconButton>
+						</Tooltip>
+					</Box>
+				</Paper>
+			) : (
+				<Paper className={styles.searchPaper}>
+					<Box className={styles.searchIntro}>
+						<Box className={styles.searchIntroText}>
+							<Typography variant="h5">
+								{translations.RESEARCH || "Research"}
+							</Typography>
+							<Typography variant="body2" color="text.secondary">
+								{translations.RESEARCH_HELP ||
+									"Search your articles, sessions, summaries, and transcriptions."}
+							</Typography>
+						</Box>
+						<Tooltip title={panelToggleLabel}>
+							<IconButton
+								size="small"
+								className={clsx(
+									styles.panelToggle,
+									styles.panelToggleExpanded,
+								)}
+								onClick={() => setSearchCollapsed(true)}
+								aria-expanded={true}
+								aria-label={panelToggleLabel}
+							>
+								<ExpandMoreIcon />
+							</IconButton>
+						</Tooltip>
+					</Box>
+					<Tabs
+						value={source}
+						onChange={(_event, value) => setSource(value)}
+						className={styles.sourceTabs}
+					>
+						<Tab value="all" label={translations.ALL || "All"} />
+						<Tab value="articles" label={translations.ARTICLES || "Articles"} />
+						<Tab value="sessions" label={translations.SESSIONS || "Sessions"} />
+					</Tabs>
 					<Box className={styles.searchHeader}>
-						<TextField
-							fullWidth
-							placeholder={translations.SEARCH_ARTICLES}
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-							onKeyDown={onKeyDown}
-							variant="outlined"
-							className={styles.queryField}
-							startAdornment={
-								<InputAdornment position="start">
-									<SearchIcon />
-								</InputAdornment>
-							}
-							endAdornment={
-								query ? (
-									<InputAdornment position="end">
-										<IconButton onClick={handleClear} size="small">
-											<ClearIcon fontSize="small" />
-										</IconButton>
-									</InputAdornment>
-								) : null
-							}
-						/>
+						<ClickAwayListener
+							className={styles.queryWrap}
+							onClickAway={closeSuggestions}
+						>
+							<div data-research-query className={styles.queryField}>
+								<TextField
+									fullWidth
+									placeholder={translations.SEARCH_ARTICLES}
+									value={query}
+									onChange={(e) => {
+										setQuery(e.target.value);
+										setSuggestionsOpen(true);
+										setActiveSuggestion(-1);
+									}}
+									onFocus={() => setSuggestionsOpen(true)}
+									onBlur={(event) => {
+										const wrap = event.currentTarget.closest(
+											"[data-research-query]",
+										);
+										if (wrap?.contains(event.relatedTarget)) {
+											return;
+										}
+										closeSuggestions();
+									}}
+									onKeyDown={onKeyDown}
+									variant="outlined"
+									inputProps={{
+										role: "combobox",
+										"aria-autocomplete": "list",
+										"aria-controls":
+											suggestionsOpen && suggestions.length > 0
+												? "research-suggestions"
+												: undefined,
+										"aria-expanded": suggestionsOpen && suggestions.length > 0,
+										"aria-activedescendant":
+											activeSuggestion >= 0
+												? `research-suggestion-${activeSuggestion}`
+												: undefined,
+									}}
+									startAdornment={
+										<InputAdornment position="start">
+											<SearchIcon />
+										</InputAdornment>
+									}
+									endAdornment={
+										query ? (
+											<InputAdornment position="end">
+												<IconButton
+													aria-label={translations.CLEAR || "Clear search"}
+													onClick={handleClear}
+													size="small"
+												>
+													<ClearIcon fontSize="small" />
+												</IconButton>
+											</InputAdornment>
+										) : null
+									}
+								/>
+								{suggestionsOpen && suggestions.length > 0 && (
+									<Paper
+										id="research-suggestions"
+										className={styles.suggestions}
+										role="listbox"
+									>
+										{suggestions.map((suggestion, index) => (
+											<Button
+												id={`research-suggestion-${index}`}
+												key={`${suggestion.kind}-${suggestion.label}`}
+												role="option"
+												aria-selected={activeSuggestion === index}
+												tabIndex={-1}
+												className={
+													activeSuggestion === index
+														? styles.suggestionActive
+														: styles.suggestion
+												}
+												variant="text"
+												onMouseDown={(event) => event.preventDefault()}
+												onClick={() => handleSuggestionSelect(suggestion)}
+											>
+												<Typography variant="caption">
+													{translations[
+														`SUGGESTION_${suggestion.kind.toUpperCase()}`
+													] || suggestion.kind}
+												</Typography>
+												{suggestion.label}
+											</Button>
+										))}
+									</Paper>
+								)}
+							</div>
+						</ClickAwayListener>
+						<Badge variant="dot" invisible={!filterTags.length}>
+							<Button
+								variant="outlined"
+								onClick={() => setFilterDrawerOpen(true)}
+								className={styles.filterButton}
+								startIcon={<FilterAltIcon />}
+							>
+								{`${translations.FILTERS || "Filters"}${filterTags.length ? ` (${filterTags.length})` : ""}`}
+							</Button>
+						</Badge>
 						<Button
 							variant="contained"
 							onClick={handleSearch}
@@ -1131,109 +1410,118 @@ export default function Research() {
 							{translations.SEARCH}
 						</Button>
 					</Box>
-
-					{!searchCollapsed && (
-						<Box className={styles.filterContainer}>
-							<Autocomplete
-								multiple
-								className={styles.autocomplete}
-								options={availableFilters.filter(
-									(option) =>
-										!filterTags.some(
-											(tag) =>
-												tag.label === option.label && tag.type === option.type,
-										),
-								)}
-								inputValue={filterInput}
-								onInputChange={(_event, newInputValue) => {
-									setFilterInput(newInputValue);
-								}}
-								filterOptions={(options, { inputValue }) => {
-									const lowerInput = inputValue.toLowerCase().trim();
-									if (!lowerInput) return options;
-									return options.filter((option) => {
-										const label = (option.label || "").toLowerCase();
-										const type = (option.type || "").toLowerCase();
-										const translatedType = (
-											translations[option.type?.toUpperCase()] || ""
-										).toLowerCase();
-										return (
-											label.includes(lowerInput) ||
-											type.includes(lowerInput) ||
-											translatedType.includes(lowerInput)
-										);
-									});
-								}}
-								isOptionEqualToValue={(option, value) => {
-									return (
-										option.label === value.label && option.type === value.type
-									);
-								}}
-								getOptionLabel={(option) =>
-									typeof option === "string" ? option : option.label
-								}
-								renderOption={(props, option) => {
-									const { key: _key, ...otherProps } = props;
-									return (
-										<li key={`${option.type}-${option.label}`} {...otherProps}>
-											<Typography
-												variant="caption"
-												className={styles.snippetLabel}
-											>
-												{translations[option.type.toUpperCase()] || option.type}
-											</Typography>
-											{option.label}
-										</li>
-									);
-								}}
-								value={filterTags}
-								onChange={(_event, newValue) => {
-									setFilterTags(newValue);
-									setFilterInput("");
-								}}
-								renderValue={(value, getItemProps) =>
-									value.map((option, index) => {
-										const { key, ...tagProps } = getItemProps({ index });
-										const label =
-											typeof option === "string" ? option : option.label;
-										const type =
-											typeof option === "string"
-												? ""
-												: translations[option.type.toUpperCase()] ||
-													option.type;
-										return (
-											<Box key={key} className={styles.tagGroup}>
-												{type && (
-													<Typography
-														variant="caption"
-														className={styles.tagType}
-													>
-														{type}
-													</Typography>
-												)}
-												<Chip
-													variant="outlined"
-													label={label}
-													size="small"
-													{...tagProps}
-												/>
-											</Box>
-										);
-									})
-								}
-								renderInput={(params) => (
-									<TextField
-										{...params}
-										variant="outlined"
-										placeholder={translations.TAG}
-										size="small"
-									/>
-								)}
-							/>
+					<Typography variant="caption" className={styles.searchHint}>
+						{translations.SEARCH_HINT ||
+							"Use quotes for a phrase; use AND or OR to refine a search."}
+					</Typography>
+					{filterTags.length > 0 && (
+						<Box className={styles.activeFilters}>
+							{filterTags.map((tag) => (
+								<Chip
+									key={`${tag.type}-${tag.label}`}
+									label={`${translations[tag.type?.toUpperCase()] || tag.type}: ${tag.label}`}
+									onDelete={() => toggleFilter(tag)}
+									size="small"
+								/>
+							))}
+							<Button variant="text" onClick={() => setFilterTags([])}>
+								{translations.CLEAR_ALL || "Clear all"}
+							</Button>
 						</Box>
 					)}
 				</Paper>
 			)}
+			<Drawer
+				open={filterDrawerOpen}
+				onClose={closeFilterDrawer}
+				anchor="right"
+				className={styles.filterDrawer}
+			>
+				<Box className={styles.drawerContent}>
+					<Box className={styles.drawerHeader}>
+						<Typography variant="h6">
+							{translations.FILTERS || "Filters"}
+						</Typography>
+						<IconButton
+							aria-label={translations.CLOSE || "Close"}
+							onClick={closeFilterDrawer}
+						>
+							<ClearIcon />
+						</IconButton>
+					</Box>
+					<TextField
+						fullWidth
+						variant="outlined"
+						className={styles.filterSearch}
+						placeholder={
+							translations.SEARCH_FILTERS || "Search filters..."
+						}
+						value={filterListQuery}
+						onChange={(e) => setFilterListQuery(e.target.value)}
+						startAdornment={
+							<InputAdornment position="start">
+								<SearchIcon />
+							</InputAdornment>
+						}
+						endAdornment={
+							filterListQuery ? (
+								<InputAdornment position="end">
+									<IconButton
+										aria-label={translations.CLEAR || "Clear search"}
+										onClick={() => setFilterListQuery("")}
+										size="small"
+									>
+										<ClearIcon fontSize="small" />
+									</IconButton>
+								</InputAdornment>
+							) : null
+						}
+					/>
+					{Object.entries(visibleFilterGroups).map(([type, filters]) => (
+						<Box key={type} className={styles.filterGroup}>
+							<Typography variant="caption" className={styles.filterGroupTitle}>
+								{translations[type.toUpperCase()] || type}
+							</Typography>
+							<Box className={styles.filterChoices}>
+								{filters.map((filter) => (
+									<Tooltip
+										key={`${filter.type}-${filter.label}`}
+										title={filter.label}
+									>
+										<Chip
+											label={filter.label}
+											className={styles.filterChip}
+											variant={
+												filterTags.some(
+													(tag) =>
+														tag.label === filter.label &&
+														tag.type === filter.type,
+												)
+													? "filled"
+													: "outlined"
+											}
+											pressed={filterTags.some(
+												(tag) =>
+													tag.label === filter.label &&
+													tag.type === filter.type,
+											)}
+											onClick={() => toggleFilter(filter)}
+										/>
+									</Tooltip>
+								))}
+							</Box>
+						</Box>
+					))}
+					<Box className={styles.drawerActions}>
+						<Button variant="text" onClick={() => setFilterTags([])}>
+							{translations.CLEAR_ALL || "Clear all"}
+						</Button>
+						<Button variant="contained" onClick={closeFilterDrawer}>
+							{translations.DONE || "Done"}
+						</Button>
+					</Box>
+				</Box>
+			</Drawer>
 			{showProgress && (
 				<Box className={styles.progressContainer}>
 					<Typography variant="caption">{translations.SEARCHING}</Typography>
@@ -1260,68 +1548,95 @@ export default function Research() {
 					</Paper>
 				</Box>
 			)}
+			{!hasSearched && !indexing && !indexData && (
+				<Box className={styles.noResults}>
+					<Typography variant="h6">
+						{translations.RESEARCH_PREPARING || "Preparing Research"}
+					</Typography>
+					<Typography variant="body2">
+						{translations.RESEARCH_INDEX_HELP ||
+							"Your local library index is being prepared. Search will be available when it is ready."}
+					</Typography>
+				</Box>
+			)}
+			{!hasSearched && !indexing && indexData && (
+				<Box className={styles.noResults}>
+					<Typography variant="h6">
+						{translations.RESEARCH_START || "Find ideas across your library"}
+					</Typography>
+					<Typography variant="body2">
+						{translations.RESEARCH_START_HELP ||
+							"Search by a word, a phrase, or use filters to narrow your research."}
+					</Typography>
+				</Box>
+			)}
 			{hasSearched && filteredResults.length === 0 && !indexing && (
 				<Box className={styles.noResults}>
-					<Typography>{translations.NO_RESULTS}</Typography>
+					<Typography variant="h6">{translations.NO_RESULTS}</Typography>
+					<Typography variant="body2">
+						{translations.NO_RESULTS_HELP ||
+							"Try a different word, remove a filter, or search a shorter phrase."}
+					</Typography>
+					{filterTags.length > 0 && (
+						<Button variant="text" onClick={() => setFilterTags([])}>
+							{translations.CLEAR_FILTERS || "Clear filters"}
+						</Button>
+					)}
 				</Box>
 			)}
 			{hasSearched && filteredResults.length > 0 && (
 				<Box className={styles.resultsWrapper}>
-					<VariableSizeList
-						height={
-							size.height -
-							(isMobile
-								? searchCollapsed
-									? 40
-									: 180
-								: searchCollapsed
-									? 50
-									: 200)
-						} // Adjust for header/search bar
-						itemCount={filteredResults.length}
-						itemSize={getItemSize}
-						width={size.width - 32} // Account for root padding
-						ref={listRef}
-						outerRef={outerRef}
-						onItemsRendered={({ visibleStartIndex }) => {
-							const page = visibleStartIndex + 1;
-							const count = filteredResults.length;
-							setScrollPages((prev) => {
+					<Box className={styles.resultsSummary}>
+						<Typography variant="body2">{`${filteredResults.length} ${filteredResults.length === 1 ? translations.RESULT || "result" : translations.RESULTS || "results"} · ${totalMatches} ${translations.MATCH || "matches"}`}</Typography>
+					</Box>
+					<Box ref={listContainerRef} className={styles.listContainer}>
+						<VariableSizeList
+							height={Math.max(1, listSize.height)}
+							itemCount={filteredResults.length}
+							itemSize={getItemSize}
+							width={Math.max(1, listSize.width || size.width - 32)}
+							ref={listRef}
+							outerRef={outerRef}
+							onItemsRendered={({ visibleStartIndex }) => {
+								const page = visibleStartIndex + 1;
+								const count = filteredResults.length;
+								setScrollPages((prev) => {
+									if (
+										prev.page === page &&
+										prev.count === count &&
+										prev.visible === true
+									)
+										return prev;
+									return { ...prev, page, count, visible: true };
+								});
+
+								const currentPath = `research:${page}`;
 								if (
-									prev.page === page &&
-									prev.count === count &&
-									prev.visible === true
-								)
-									return prev;
-								return { ...prev, page, count, visible: true };
-							});
+									!isJumping.current &&
+									pathItems[0] !== currentPath &&
+									initialUrlHandled.current
+								) {
+									pendingPathRef.current = currentPath;
+									setPath(currentPath);
+								}
 
-							const currentPath = `research:${page}`;
-							if (
-								!isJumping.current &&
-								pathItems[0] !== currentPath &&
-								initialUrlHandled.current
-							) {
-								pendingPathRef.current = currentPath;
-								setPath(currentPath);
-							}
+								if (scrollTimeoutRef.current) {
+									clearTimeout(scrollTimeoutRef.current);
+								}
+								scrollTimeoutRef.current = setTimeout(() => {
+									setScrollPages((prev) => ({ ...prev, visible: false }));
+								}, 1500);
 
-							if (scrollTimeoutRef.current) {
-								clearTimeout(scrollTimeoutRef.current);
-							}
-							scrollTimeoutRef.current = setTimeout(() => {
-								setScrollPages((prev) => ({ ...prev, visible: false }));
-							}, 1500);
-
-							if (isMobile) {
-								setSearchCollapsed(visibleStartIndex > 0);
-							}
-							setShowScrollTop(visibleStartIndex > 0);
-						}}
-						itemData={itemData}
-					>
-						{SearchResultItem}
-					</VariableSizeList>
+								if (isMobile) {
+									setSearchCollapsed(visibleStartIndex > 0);
+								}
+								setShowScrollTop(visibleStartIndex > 0);
+							}}
+							itemData={itemData}
+						>
+							{SearchResultItem}
+						</VariableSizeList>
+					</Box>
 					<ScrollToTop
 						show={showScrollTop}
 						onClick={scrollToTop}

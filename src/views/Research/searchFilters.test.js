@@ -24,4 +24,23 @@ describe("research filters", () => {
 			),
 		).toEqual([results[0]]);
 	});
+
+	it("uses OR within one filter category and AND across categories", () => {
+		const results = [
+			{ isSession: true, group: "ai", year: "2024" },
+			{ isSession: true, group: "study", year: "2024" },
+			{ isSession: true, group: "ai", year: "2023" },
+		];
+		expect(
+			filterResearchResults(
+				results,
+				[
+					{ type: "group", label: "AI" },
+					{ type: "group", label: "Study" },
+					{ type: "year", label: "2024" },
+				],
+				translations,
+			),
+		).toEqual([results[0], results[1]]);
+	});
 });

@@ -22,17 +22,21 @@ export default function Drawer({
 					style={{ zIndex: 1199 }}
 				/>
 			)}
-			<aside
-				className={clsx(
-					styles.drawer,
-					anchor === "right" ? styles.drawerRight : styles.drawerLeft,
-					!open && styles.drawerClosed,
-					className,
-				)}
-				{...props}
-			>
-				{children}
-			</aside>
+			{(open || variant === "persistent") && (
+				<aside
+					aria-hidden={!open}
+					inert={!open}
+					className={clsx(
+						styles.drawer,
+						anchor === "right" ? styles.drawerRight : styles.drawerLeft,
+						!open && styles.drawerClosed,
+						className,
+					)}
+					{...props}
+				>
+					{children}
+				</aside>
+			)}
 		</>
 	);
 }

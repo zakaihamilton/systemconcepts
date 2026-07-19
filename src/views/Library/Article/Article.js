@@ -74,6 +74,7 @@ function Article({
 	embedded,
 	hidePlayer,
 	hideHeader,
+	hideContent,
 	highlight,
 	customTags,
 }) {
@@ -674,17 +675,19 @@ function Article({
 							/>
 						),
 					)}
-				<Content
-					showMarkdown={showMarkdown}
-					search={search}
-					currentParagraphIndex={currentParagraphIndex}
-					selectedTag={selectedTag}
-					processedContent={processedContent}
-					filteredParagraphs={filteredParagraphs}
-					highlight={highlight}
-					disableGlossary={embedded}
-				/>
-				{content && showMarkdown && !hidePlayer && (
+				{!hideContent && (
+					<Content
+						showMarkdown={showMarkdown}
+						search={search}
+						currentParagraphIndex={currentParagraphIndex}
+						selectedTag={selectedTag}
+						processedContent={processedContent}
+						filteredParagraphs={filteredParagraphs}
+						highlight={highlight}
+						disableGlossary={embedded}
+					/>
+				)}
+				{content && showMarkdown && !hidePlayer && !hideContent && (
 					<Player
 						contentRef={contentRef}
 						onParagraphChange={setCurrentParagraphIndex}

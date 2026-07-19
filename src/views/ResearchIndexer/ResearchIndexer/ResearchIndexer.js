@@ -208,7 +208,11 @@ export default function ResearchIndexer() {
 	const { indexing } = ResearchStore.useState();
 	const isMounted = useRef(true);
 	const inProgress = useRef(false);
-	useLocalStorage("ResearchStore", ResearchStore, ["query", "filterTags"]);
+	useLocalStorage("ResearchStore", ResearchStore, [
+		"query",
+		"filterTags",
+		"source",
+	]);
 
 	useEffect(() => {
 		isMounted.current = true;

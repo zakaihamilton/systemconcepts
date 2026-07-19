@@ -98,12 +98,45 @@
 .chip {
 	display: inline-flex;
 	align-items: center;
+	max-width: 100%;
+	min-width: 0;
+	border: 1px solid transparent;
 	padding: 4px 12px;
 	border-radius: 16px;
 	font-size: 0.8125rem;
 	font-weight: 500;
 	background: rgba(var(--primary-color-rgb), 0.1);
 	color: var(--primary-color);
+}
+
+.chipLabel {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.chipOutlined {
+	background: transparent;
+	border-color: rgba(var(--primary-color-rgb), 0.35);
+	cursor: pointer;
+}
+
+.chipFilled {
+	background: var(--primary-color);
+	border-color: var(--primary-color);
+	color: var(--primary-contrast-text);
+	cursor: pointer;
+}
+
+.chipOutlined:hover,
+.chipOutlined:focus-visible {
+	background: rgba(var(--primary-color-rgb), 0.14);
+}
+
+.chip:focus-visible {
+	outline: var(--border-focus);
+	outline-offset: 2px;
 }
 
 .chipDelete {

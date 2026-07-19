@@ -39,6 +39,45 @@ export default [
 		id: "NO_RESULTS",
 		value: "Nenhum resultado encontrado.",
 	},
+	{ id: "ALL", value: "Todos" },
+	{ id: "FILTERS", value: "Filtros" },
+	{ id: "SEARCH_FILTERS", value: "Pesquisar filtros..." },
+	{ id: "CLEAR_ALL", value: "Limpar tudo" },
+	{ id: "CLEAR_FILTERS", value: "Limpar filtros" },
+	{ id: "CLEAR", value: "Limpar pesquisa" },
+	{ id: "CLOSE", value: "Fechar" },
+	{ id: "MATCH", value: "correspondências" },
+	{ id: "COLLAPSE_ARTICLE", value: "Recolher artigo" },
+	{ id: "EXPAND_ARTICLE", value: "Expandir artigo" },
+	{ id: "COLLAPSE_SESSION", value: "Recolher sessão" },
+	{ id: "EXPAND_SESSION", value: "Expandir sessão" },
+	{
+		id: "RESEARCH_HELP",
+		value: "Pesquise seus artigos, sessões, resumos e transcrições.",
+	},
+	{
+		id: "SEARCH_HINT",
+		value: "Use aspas para uma frase e AND ou OR para refinar a pesquisa.",
+	},
+	{ id: "RESEARCH_START", value: "Encontre ideias em sua biblioteca" },
+	{
+		id: "RESEARCH_START_HELP",
+		value:
+			"Pesquise uma palavra, uma frase ou use filtros para refinar sua pesquisa.",
+	},
+	{ id: "RESEARCH_PREPARING", value: "Preparando a pesquisa" },
+	{
+		id: "RESEARCH_INDEX_HELP",
+		value:
+			"O índice local da sua biblioteca está sendo preparado. A pesquisa ficará disponível quando estiver pronta.",
+	},
+	{
+		id: "NO_RESULTS_HELP",
+		value: "Tente outra palavra, remova um filtro ou pesquise uma frase menor.",
+	},
+	{ id: "SUGGESTION_TITLE", value: "Título" },
+	{ id: "SUGGESTION_FILTER", value: "Filtro" },
+	{ id: "SUGGESTION_TERM", value: "Termo" },
 	{
 		id: "RESULT",
 		value: "resultado",

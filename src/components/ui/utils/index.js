@@ -26,7 +26,7 @@ export function Popper({
 	);
 }
 
-export function ClickAwayListener({ children, onClickAway }) {
+export function ClickAwayListener({ children, onClickAway, className }) {
 	const ref = useRef(null);
 
 	useEffect(() => {
@@ -39,7 +39,11 @@ export function ClickAwayListener({ children, onClickAway }) {
 		return () => document.removeEventListener("mousedown", handleClick);
 	}, [onClickAway]);
 
-	return <div ref={ref}>{children}</div>;
+	return (
+		<div ref={ref} className={className}>
+			{children}
+		</div>
+	);
 }
 
 export function NoSsr({ children }) {

@@ -3,6 +3,7 @@ import { Store } from "pullstate";
 export const ResearchStore = new Store({
 	query: "",
 	filterTags: [],
+	source: "all",
 	results: [],
 	highlight: [],
 	hasSearched: false,

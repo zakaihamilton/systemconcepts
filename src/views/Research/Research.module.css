@@ -11,7 +11,102 @@
 	display: flex;
 	align-items: center;
 	gap: 1em;
-	margin-bottom: 0.5em;
+}
+
+.searchIntro {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-bottom: 1.25rem;
+}
+
+.searchIntroText {
+	display: grid;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.panelToggle {
+	flex-shrink: 0;
+	color: var(--text-secondary);
+}
+
+.panelToggle svg {
+	width: 1.35rem;
+	height: 1.35rem;
+	transition: transform 0.18s ease;
+}
+
+.panelToggleExpanded svg {
+	transform: rotate(180deg);
+}
+
+.searchPaperCollapsed {
+	padding: 0.65rem 1rem;
+	margin-bottom: 0.75rem;
+	box-shadow: var(--shadow-sm);
+	border: 1px solid var(--divider);
+}
+
+.collapsedSearchBar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.collapsedSearchSummary {
+	min-width: 0;
+	color: var(--text-secondary);
+	font-weight: 600;
+}
+
+.sourceTabs {
+	margin-bottom: 1rem;
+	max-width: max-content;
+}
+
+.queryWrap {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+}
+
+.queryField {
+	width: 100%;
+	min-width: 0;
+}
+
+.suggestions {
+	position: absolute;
+	top: calc(100% + 0.4rem);
+	left: 0;
+	right: 0;
+	z-index: 20;
+	padding: 0.35rem;
+	box-shadow: var(--shadow-lg);
+}
+
+.suggestion,
+.suggestionActive {
+	width: 100%;
+	justify-content: flex-start;
+	gap: 0.75rem;
+	text-align: left;
+	text-transform: none;
+}
+
+.suggestionActive {
+	background: var(--selected-color);
+}
+
+.suggestion :global(.Typography_root),
+.suggestionActive :global(.Typography_root) {
+	min-width: 4.5rem;
+	color: var(--secondary-color);
+	text-transform: capitalize;
 }
 
 .overlay {
@@ -90,6 +185,83 @@
 	justify-content: center;
 }
 
+.filterButton {
+	white-space: nowrap;
+	align-self: center;
+}
+
+.searchHint {
+	display: block;
+	margin-top: 0.65rem;
+	color: var(--text-secondary);
+}
+
+.activeFilters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+.filterDrawer {
+	width: min(360px, 92vw);
+	padding: 0;
+	background: var(--main-background-alternative);
+	overflow: auto;
+}
+
+.drawerContent {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1.25rem;
+}
+
+.drawerHeader,
+.drawerActions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.filterSearch {
+	flex-shrink: 0;
+	align-self: stretch;
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.filterGroup {
+	display: grid;
+	gap: 0.6rem;
+}
+
+.filterGroupTitle {
+	font-weight: 700;
+	color: var(--secondary-color);
+	text-transform: capitalize;
+}
+
+.filterChoices {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.filterChip {
+	max-width: 100%;
+}
+
+.drawerActions {
+	margin-top: auto;
+	padding-top: 1rem;
+	border-top: 1px solid var(--divider);
+}
+
 .autocomplete input {
 	height: 3em;
 	overflow-y: hidden !important;
@@ -139,28 +311,47 @@
 }
 
 .searchPaper {
-	padding: 1em;
+	padding: clamp(1rem, 2vw, 1.5rem);
 	margin-bottom: 1em;
-}
-
-.queryField {
-	flex: 1;
+	box-shadow: var(--shadow-md);
+	border: 1px solid var(--divider);
 }
 
 .searchButton {
-	height: 56px;
 	min-width: 100px;
+	align-self: center;
 }
 
 .noResults {
-	padding: 2em;
+	padding: 3em 2em;
 	text-align: center;
 	color: var(--text-secondary);
+	border: 1px dashed var(--divider);
+	border-radius: var(--radius-lg);
+	background: var(--main-background-alternative);
 }
 
 .resultsWrapper {
 	position: relative;
 	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.listContainer {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+}
+
+.resultsSummary {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	min-height: 2rem;
+	padding: 0 0.25rem 0.5rem;
+	color: var(--text-secondary);
 }
 
 .printItem {
@@ -196,6 +387,40 @@
 
 .printContainer {
 	display: none;
+}
+
+@media (max-width: 768px) {
+	.root {
+		padding: 0.75rem;
+	}
+
+	.searchIntro {
+		margin-bottom: 1rem;
+	}
+
+	.searchHeader {
+		align-items: stretch;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+	}
+
+	.queryWrap {
+		flex-basis: 100%;
+	}
+
+	.filterButton,
+	.searchButton {
+		flex: 1;
+	}
+
+	.sourceTabs {
+		max-width: 100%;
+		overflow-x: auto;
+	}
+
+	.filterDrawer {
+		width: min(100%, 420px);
+	}
 }
 
 @media print {

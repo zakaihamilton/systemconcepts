@@ -27,6 +27,45 @@ export default [
 		id: "NO_RESULTS",
 		value: "No results found.",
 	},
+	{ id: "ALL", value: "All" },
+	{ id: "FILTERS", value: "Filters" },
+	{ id: "SEARCH_FILTERS", value: "Search filters..." },
+	{ id: "CLEAR_ALL", value: "Clear all" },
+	{ id: "CLEAR_FILTERS", value: "Clear filters" },
+	{ id: "CLEAR", value: "Clear search" },
+	{ id: "CLOSE", value: "Close" },
+	{ id: "MATCH", value: "matches" },
+	{ id: "COLLAPSE_ARTICLE", value: "Collapse article" },
+	{ id: "EXPAND_ARTICLE", value: "Expand article" },
+	{ id: "COLLAPSE_SESSION", value: "Collapse session" },
+	{ id: "EXPAND_SESSION", value: "Expand session" },
+	{
+		id: "RESEARCH_HELP",
+		value: "Search your articles, sessions, summaries, and transcriptions.",
+	},
+	{
+		id: "SEARCH_HINT",
+		value: "Use quotes for a phrase; use AND or OR to refine a search.",
+	},
+	{ id: "RESEARCH_START", value: "Find ideas across your library" },
+	{
+		id: "RESEARCH_START_HELP",
+		value:
+			"Search by a word, a phrase, or use filters to narrow your research.",
+	},
+	{ id: "RESEARCH_PREPARING", value: "Preparing Research" },
+	{
+		id: "RESEARCH_INDEX_HELP",
+		value:
+			"Your local library index is being prepared. Search will be available when it is ready.",
+	},
+	{
+		id: "NO_RESULTS_HELP",
+		value: "Try a different word, remove a filter, or search a shorter phrase.",
+	},
+	{ id: "SUGGESTION_TITLE", value: "Title" },
+	{ id: "SUGGESTION_FILTER", value: "Filter" },
+	{ id: "SUGGESTION_TERM", value: "Term" },
 	{
 		id: "RESULT",
 		value: "result",
