@@ -54,22 +54,36 @@ const VariableSizeList = forwardRef(
 			},
 			scrollTo: (offset) => {
 				if (outerRef.current) {
-					outerRef.current.scrollTop = offset;
+					const next = Math.max(0, offset);
+					outerRef.current.scrollTop = next;
+					setScrollTop(next);
 				}
 			},
-			scrollToItem: (index) => {
-				if (outerRef.current && offsets[index] !== undefined) {
-					const offset = offsets[index];
-					const viewSize = height;
-					const currentScroll = outerRef.current.scrollTop;
-					const itemSize = getItemSize(index);
+			scrollToItem: (index, align = "auto") => {
+				if (!outerRef.current || offsets[index] === undefined) return;
 
-					if (offset < currentScroll) {
-						outerRef.current.scrollTop = offset;
-					} else if (offset + itemSize > currentScroll + viewSize) {
-						outerRef.current.scrollTop = offset - viewSize + itemSize;
-					}
+				const offset = offsets[index];
+				const viewSize = height;
+				const currentScroll = outerRef.current.scrollTop;
+				const itemSize = getItemSize(index);
+				const maxScroll = Math.max(0, totalHeight - viewSize);
+
+				let targetOffset = currentScroll;
+				if (align === "start") {
+					targetOffset = offset;
+				} else if (align === "end") {
+					targetOffset = offset - viewSize + itemSize;
+				} else if (align === "center") {
+					targetOffset = offset - viewSize / 2 + itemSize / 2;
+				} else if (offset < currentScroll) {
+					targetOffset = offset;
+				} else if (offset + itemSize > currentScroll + viewSize) {
+					targetOffset = offset - viewSize + itemSize;
 				}
+
+				targetOffset = Math.max(0, Math.min(targetOffset, maxScroll));
+				outerRef.current.scrollTop = targetOffset;
+				setScrollTop(targetOffset);
 			},
 		}));
 

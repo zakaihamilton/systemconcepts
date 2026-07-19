@@ -87,6 +87,10 @@ export default [
 		value: "resultados",
 	},
 	{
+		id: "RESULTS_LIST",
+		value: "Lista de resultados",
+	},
+	{
 		id: "DOWNLOAD_TRANSCRIPT",
 		value: "Baixar Transcrição",
 	},

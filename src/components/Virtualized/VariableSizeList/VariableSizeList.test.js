@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { createRef } from "react";
 import VariableSizeList from "./VariableSizeList.js";
 
@@ -64,5 +64,42 @@ describe("VariableSizeList Component", () => {
 
 		const scrollContainer = container.firstChild;
 		fireEvent.scroll(scrollContainer, { target: { scrollTop: 100 } });
+	});
+
+	it("scrollToItem with start align jumps to the item top", () => {
+		const ref = createRef();
+		const { container } = render(
+			<VariableSizeList
+				ref={ref}
+				height={150}
+				width={100}
+				itemCount={itemData.length}
+				itemSize={getItemSize}
+				itemData={itemData}
+				overscanCount={1}
+			>
+				{Row}
+			</VariableSizeList>,
+		);
+
+		const scrollContainer = container.firstChild;
+		Object.defineProperty(scrollContainer, "scrollTop", {
+			configurable: true,
+			writable: true,
+			value: 0,
+		});
+
+		// Item sizes: 50, 100, 50, 100 → item 2 starts at 150
+		act(() => {
+			ref.current.scrollToItem(2, "start");
+		});
+		expect(scrollContainer.scrollTop).toBe(150);
+
+		// Already near the item; start align should still pin to top
+		scrollContainer.scrollTop = 140;
+		act(() => {
+			ref.current.scrollToItem(2, "start");
+		});
+		expect(scrollContainer.scrollTop).toBe(150);
 	});
 });

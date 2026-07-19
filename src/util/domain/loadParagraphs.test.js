@@ -121,8 +121,8 @@ describe("loadParagraphsForFile sessions", () => {
 			new Map([[fileId, withPath]]),
 		);
 
-		expect(paragraphs.some((p) => p.includes("Summary from markdown file"))).toBe(
-			true,
-		);
+		expect(
+			paragraphs.some((p) => p.includes("Summary from markdown file")),
+		).toBe(true);
 	});
 });

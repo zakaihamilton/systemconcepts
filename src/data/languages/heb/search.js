@@ -70,6 +70,10 @@ export default [
 		value: "תוצאות",
 	},
 	{
+		id: "RESULTS_LIST",
+		value: "רשימת תוצאות",
+	},
+	{
 		id: "DOWNLOAD_TRANSCRIPT",
 		value: "הורדת תמליל",
 	},

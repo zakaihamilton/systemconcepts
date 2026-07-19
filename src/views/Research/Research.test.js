@@ -44,10 +44,46 @@ jest.mock("@util/domain/views", () => ({
 	setPath: jest.fn(),
 	usePathItems: jest.fn().mockReturnValue([]),
 }));
-jest.mock("@components/Virtualized/VariableSizeList", () => () => (
-	<div data-testid="virtual-list" />
-));
-jest.mock("./PageIndicator", () => () => <div data-testid="page-indicator" />);
+jest.mock("@components/Virtualized/VariableSizeList", () => {
+	const React = require("react");
+	return React.forwardRef(function MockList(props, ref) {
+		React.useImperativeHandle(ref, () => ({
+			scrollToItem: jest.fn(),
+			resetAfterIndex: jest.fn(),
+		}));
+		return <div data-testid="virtual-list" />;
+	});
+});
+jest.mock(
+	"./PageIndicator",
+	() =>
+		({ current, total, visible, label, onClick }) =>
+			visible ? (
+				<button type="button" onClick={onClick} aria-haspopup="menu">
+					{label} {current} / {total}
+				</button>
+			) : null,
+);
+jest.mock(
+	"./ResultsOutline",
+	() =>
+		({ open, results, onSelect, currentIndex }) =>
+			open ? (
+				<div role="menu" aria-label="Results list">
+					{results.map((doc, index) => (
+						<button
+							key={doc.docId || index}
+							type="button"
+							role="menuitem"
+							aria-current={index === currentIndex ? "true" : undefined}
+							onClick={() => onSelect(index)}
+						>
+							{doc.tag?.title || doc.name}
+						</button>
+					))}
+				</div>
+			) : null,
+);
 jest.mock("./SearchResultItem", () => () => (
 	<div data-testid="search-result-item" />
 ));
@@ -108,6 +144,9 @@ describe("Research View", () => {
 			SUGGESTION_TITLE: "Title",
 			SUGGESTION_FILTER: "Filter",
 			SUGGESTION_TERM: "Term",
+			ARTICLE: "Article",
+			RESULTS_LIST: "Results list",
+			MATCH: "matches",
 		});
 		useSessions.mockReturnValue([
 			[{ name: "Grace in practice", group: "ai", year: "2024" }],
@@ -153,6 +192,25 @@ describe("Research View", () => {
 		renderResearch();
 		fireEvent.click(screen.getByRole("tab", { name: "Articles" }));
 		expect(mockResearchState.source).toBe("articles");
+	});
+
+	it("opens a results outline from the article number indicator", async () => {
+		mockResearchState.results = [
+			{ docId: "1", tag: { title: "Grace" }, matches: [{ index: 0 }] },
+			{ docId: "2", tag: { title: "Hope" }, matches: [{ index: 1 }] },
+		];
+		renderResearch();
+
+		const indicator = await screen.findByRole("button", {
+			name: /Article 1 \/ 1/,
+		});
+		fireEvent.click(indicator);
+
+		expect(
+			screen.getByRole("menu", { name: "Results list" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("menuitem", { name: "Grace" })).toBeInTheDocument();
+		expect(screen.getByRole("menuitem", { name: "Hope" })).toBeInTheDocument();
 	});
 
 	it("opens the structured filter drawer", () => {

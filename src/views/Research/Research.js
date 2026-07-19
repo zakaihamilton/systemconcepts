@@ -25,8 +25,8 @@ import TextField from "@ui/TextField";
 import Typography from "@ui/Typography";
 import { logger as structuredLogger } from "@util/api/logger";
 import { roleAuth } from "@util/auth/roles";
-import { useDeviceType } from "@util/browser/styles";
 import { useSize } from "@util/browser/size";
+import { useDeviceType } from "@util/browser/styles";
 import { makePath } from "@util/data/path";
 import { decodeBinaryIndex } from "@util/data/searchIndexBinary";
 import { normalizeContent } from "@util/data/string";
@@ -55,6 +55,7 @@ import {
 import { createPortal } from "react-dom";
 import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";
+import ResultsOutline from "./ResultsOutline";
 import SearchResultItem from "./SearchResultItem";
 import { filterResearchResults } from "./searchFilters";
 import {
@@ -123,6 +124,9 @@ export default function Research() {
 	const [filterListQuery, setFilterListQuery] = useState("");
 	const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 	const [activeSuggestion, setActiveSuggestion] = useState(-1);
+	const [resultsOutlineOpen, setResultsOutlineOpen] = useState(false);
+	const [resultsOutlineAnchor, setResultsOutlineAnchor] = useState(null);
+	const resultsOutlineOpenRef = useRef(false);
 	const searchRequestId = useRef(0);
 	const isJumping = useRef(false);
 	const jumpTimeout = useRef(null);
@@ -1165,6 +1169,47 @@ export default function Research() {
 		}
 	}, [listRef]);
 
+	const closeResultsOutline = useCallback(() => {
+		resultsOutlineOpenRef.current = false;
+		setResultsOutlineOpen(false);
+		setResultsOutlineAnchor(null);
+	}, []);
+
+	const openResultsOutline = useCallback((event) => {
+		if (scrollTimeoutRef.current) {
+			clearTimeout(scrollTimeoutRef.current);
+			scrollTimeoutRef.current = null;
+		}
+		resultsOutlineOpenRef.current = true;
+		setResultsOutlineAnchor(event.currentTarget);
+		setResultsOutlineOpen(true);
+		setScrollPages((prev) => ({ ...prev, visible: true }));
+	}, []);
+
+	const handleResultsOutlineSelect = useCallback(
+		(index) => {
+			closeResultsOutline();
+			isJumping.current = true;
+			if (jumpTimeout.current) clearTimeout(jumpTimeout.current);
+
+			const scrollToResult = () => {
+				if (listRef.current && index >= 0) {
+					listRef.current.scrollToItem(index, "start");
+				}
+			};
+
+			// Align immediately, then again after measured heights settle.
+			scrollToResult();
+			requestAnimationFrame(scrollToResult);
+			const realignTimer = setTimeout(scrollToResult, 250);
+			jumpTimeout.current = setTimeout(() => {
+				clearTimeout(realignTimer);
+				isJumping.current = false;
+			}, 1000);
+		},
+		[closeResultsOutline],
+	);
+
 	const itemData = useMemo(
 		() => ({
 			results: filteredResults,
@@ -1277,10 +1322,7 @@ export default function Research() {
 						<Tooltip title={panelToggleLabel}>
 							<IconButton
 								size="small"
-								className={clsx(
-									styles.panelToggle,
-									styles.panelToggleExpanded,
-								)}
+								className={clsx(styles.panelToggle, styles.panelToggleExpanded)}
 								onClick={() => setSearchCollapsed(true)}
 								aria-expanded={true}
 								aria-label={panelToggleLabel}
@@ -1453,9 +1495,7 @@ export default function Research() {
 						fullWidth
 						variant="outlined"
 						className={styles.filterSearch}
-						placeholder={
-							translations.SEARCH_FILTERS || "Search filters..."
-						}
+						placeholder={translations.SEARCH_FILTERS || "Search filters..."}
 						value={filterListQuery}
 						onChange={(e) => setFilterListQuery(e.target.value)}
 						startAdornment={
@@ -1624,6 +1664,7 @@ export default function Research() {
 									clearTimeout(scrollTimeoutRef.current);
 								}
 								scrollTimeoutRef.current = setTimeout(() => {
+									if (resultsOutlineOpenRef.current) return;
 									setScrollPages((prev) => ({ ...prev, visible: false }));
 								}, 1500);
 
@@ -1645,9 +1686,21 @@ export default function Research() {
 					<PageIndicator
 						current={scrollPages.page}
 						total={scrollPages.count}
-						visible={scrollPages.visible}
+						visible={scrollPages.visible || resultsOutlineOpen}
 						translations={translations}
 						label={translations.ARTICLE}
+						onClick={
+							filteredResults.length > 0 ? openResultsOutline : undefined
+						}
+					/>
+					<ResultsOutline
+						open={resultsOutlineOpen}
+						anchorEl={resultsOutlineAnchor}
+						onClose={closeResultsOutline}
+						results={filteredResults}
+						currentIndex={Math.max(0, scrollPages.page - 1)}
+						onSelect={handleResultsOutlineSelect}
+						translations={translations}
 					/>
 				</Box>
 			)}
@@ -1658,6 +1711,7 @@ export default function Research() {
 						clearTimeout(scrollTimeoutRef.current);
 					}
 					scrollTimeoutRef.current = setTimeout(() => {
+						if (resultsOutlineOpenRef.current) return;
 						setScrollPages((prev) => ({ ...prev, visible: false }));
 					}, 1500);
 				}

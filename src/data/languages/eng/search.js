@@ -75,6 +75,10 @@ export default [
 		value: "results",
 	},
 	{
+		id: "RESULTS_LIST",
+		value: "Results list",
+	},
+	{
 		id: "DOWNLOAD_TRANSCRIPT",
 		value: "Download Transcript",
 	},
