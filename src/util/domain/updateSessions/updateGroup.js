@@ -9,8 +9,6 @@ import { updateManifestEntry } from "@sync/manifest";
 import { addSyncLog } from "@sync/sync";
 import { SyncActiveStore, UpdateSessionsStore } from "@sync/syncState";
 import { logger as structuredLogger } from "@util/api/logger";
-import { readBinary } from "@util/data/binary";
-import { blobToBase64, shrinkImage } from "@util/data/image";
 import pLimit from "@util/data/p-limit";
 import {
 	fileFolder,
@@ -702,50 +700,6 @@ export async function updateGroupProcess(
 					);
 				}
 
-				// Load existing sessions for the current year to preserve thumbnails
-				const existingThumbnails = {};
-				if (!isMerged && !isBundled) {
-					const existingYearPath = makePath(
-						LOCAL_SYNC_PATH,
-						name,
-						year.name + ".json",
-					);
-					if (await storage.exists(existingYearPath)) {
-						try {
-							const content = await storage.readFile(existingYearPath);
-							const data = JSON.parse(content);
-							if (data && Array.isArray(data.sessions)) {
-								data.sessions.forEach((session) => {
-									if (
-										session.id &&
-										session.thumbnail &&
-										typeof session.thumbnail === "string" &&
-										!session.thumbnail.startsWith("http")
-									) {
-										existingThumbnails[session.id] = session.thumbnail;
-									}
-								});
-							}
-						} catch (err) {
-							structuredLogger.warn(
-								`[Sync] Failed to read existing year file for thumbnails: ${existingYearPath}`,
-								err,
-							);
-						}
-					}
-				} else if (existingSessions.length > 0) {
-					existingSessions.forEach((session) => {
-						if (
-							session.id &&
-							session.thumbnail &&
-							typeof session.thumbnail === "string" &&
-							!session.thumbnail.startsWith("http")
-						) {
-							existingThumbnails[session.id] = session.thumbnail;
-						}
-					});
-				}
-
 				const yearSessionsLimit = pLimit(10);
 				const yearSessions = (
 					await Promise.all(
@@ -921,35 +875,6 @@ export async function updateGroupProcess(
 						),
 					)
 				).filter(Boolean);
-
-				// Generate thumbnails for sessions that have images but no thumbnail data yet
-				const thumbnailLimit = pLimit(4);
-				const thumbnailPromises = yearSessions
-					.filter((session) => session.thumbnail === true && session.image)
-					.map((session) =>
-						thumbnailLimit(async () => {
-							if (existingThumbnails[session.id] && !forceUpdate) {
-								session.thumbnail = existingThumbnails[session.id];
-							} else {
-								try {
-									const blob = await readBinary(session.image.path);
-									if (blob) {
-										const thumbnailBlob = await shrinkImage(blob);
-										const base64String = await blobToBase64(thumbnailBlob);
-										session.thumbnail = base64String;
-									}
-								} catch (err) {
-									structuredLogger.error(
-										`[Sync] Error generating thumbnail for ${session.id}:`,
-										err,
-									);
-									// If we fail, remove thumbnail flag so UI doesn't try to load "true"
-									delete session.thumbnail;
-								}
-							}
-						}),
-					);
-				await Promise.all(thumbnailPromises);
 
 				const sessionsToPersist = shouldRefreshOnlyRecentSessions
 					? mergeSessionsById(cachedYearSessions, yearSessions)

@@ -22,12 +22,17 @@ export function toSessionListItem(
 			? cdn.url + encodeURI(imagePath.replace("/aws", ""))
 			: null;
 	const duration = Math.max(session.duration || 0, personal?.duration || 0);
+	const hasLegacyThumbnail =
+		typeof session.thumbnail === "string" &&
+		session.thumbnail.startsWith("data:image/");
 	const thumbnail =
-		typeof session.thumbnail === "string"
+		typeof session.thumbnail === "string" && !hasLegacyThumbnail
 			? session.thumbnail
 			: session.thumbnail === true
 				? cdnImagePath || storedImagePath
-				: cdnImagePath || session.thumbnail || null;
+				: hasLegacyThumbnail
+					? cdnImagePath || storedImagePath || null
+					: cdnImagePath || session.thumbnail || null;
 
 	return {
 		id: session.id,

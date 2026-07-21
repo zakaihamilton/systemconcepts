@@ -8,6 +8,7 @@ import { useLocalStorage } from "@util/browser/store";
 import { useDeviceType } from "@util/browser/styles";
 import { makePath } from "@util/data/path";
 import { GroupsStore, useGroups } from "@util/domain/groups";
+import { compactLegacySessionThumbnails } from "@util/domain/sessionCompaction";
 import { toSessionListItem } from "@util/domain/sessionListItem";
 import { useTranslations } from "@util/domain/translations";
 import storage from "@util/storage/storage";
@@ -88,6 +89,14 @@ export function useSessions(depends = [], options = {}) {
 				new Promise((resolve) => setTimeout(resolve, 0));
 
 			try {
+				try {
+					await compactLegacySessionThumbnails();
+				} catch (err) {
+					structuredLogger.warn(
+						"[Sessions] Legacy thumbnail compaction failed; continuing with session load.",
+						err,
+					);
+				}
 				const [groupsSyncData, filesManifest] = await Promise.all([
 					(async () => {
 						const path = makePath("local/sync/groups.json");

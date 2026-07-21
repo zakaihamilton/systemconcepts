@@ -34,4 +34,16 @@ describe("toSessionListItem", () => {
 		expect(item).not.toHaveProperty("description");
 		expect(item).not.toHaveProperty("summaryText");
 	});
+
+	it("drops legacy base64 thumbnails and uses the source image path", () => {
+		const item = toSessionListItem({
+			id: "session-1",
+			name: "Session",
+			image: { path: "/aws/sessions/group/2026/session.jpg" },
+			thumbnail: "data:image/webp;base64,large-thumbnail",
+		});
+
+		expect(item.thumbnail).toBe("/aws/sessions/group/2026/session.jpg");
+		expect(item.thumbnail).not.toContain("data:image");
+	});
 });

@@ -1,8 +1,6 @@
 import { writeCompressedFile } from "@sync/bundle";
 import { addSyncLog } from "@sync/sync";
 import { logger } from "@util/api/logger";
-import { readBinary } from "@util/data/binary";
-import { blobToBase64, shrinkImage } from "@util/data/image";
 import storage from "@util/storage/storage";
 import {
 	loadDurations,
@@ -33,13 +31,6 @@ jest.mock("@util/api/logger", () => ({
 		info: jest.fn(),
 		warn: jest.fn(),
 	},
-}));
-jest.mock("@util/data/binary", () => ({
-	readBinary: jest.fn(),
-}));
-jest.mock("@util/data/image", () => ({
-	blobToBase64: jest.fn(),
-	shrinkImage: jest.fn(),
 }));
 jest.mock("@util/storage/storage", () => ({
 	createFolderPath: jest.fn(),
@@ -82,10 +73,6 @@ describe("updateGroupProcess", () => {
 			if (path.endsWith(".tags")) return JSON.stringify(["ai", "sync"]);
 			return "";
 		});
-		readBinary.mockResolvedValue(new Blob(["image"]));
-		shrinkImage.mockImplementation(async (blob) => blob);
-		blobToBase64.mockResolvedValue("thumbnail");
-
 		loadTags.mockResolvedValue({});
 		loadDurations.mockResolvedValue({});
 		loadSummaries.mockResolvedValue({});
@@ -209,7 +196,7 @@ describe("updateGroupProcess", () => {
 		expect(session.subtitles.path).toBe(
 			"/aws/sessions/test/2024/2024-05-05 Test Session.en.vtt",
 		);
-		expect(session.thumbnail).toBe("thumbnail");
+		expect(session.thumbnail).toBe(true);
 	});
 
 	it("falls back to legacy metadata loaders when aggregated metadata fails", async () => {
