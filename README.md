@@ -25,6 +25,7 @@ Open [http://localhost:3000](http://localhost:3000). The public shell and local/
 - `src/sync/` contains manifest-based synchronization and migration orchestration.
 - `src/util/` contains browser, API, domain, data, authentication, and storage utilities.
 - `src/data/languages/` contains per-language copy and content metadata.
+- `src/types/` contains shared TypeScript types.
 
 Client navigation uses hash routes for compatibility with installed/offline deployments. Do not change route names, storage paths, or manifest shapes without a migration plan.
 
@@ -39,6 +40,7 @@ Copy `.env.example` to `.env.local` and fill only the services needed for the wo
 | `MONGO_URL`, `MONGO_DB` | Accounts and MongoDB-backed personal data | Authentication/personal data |
 | `AWS_ENDPOINT`, `AWS_BUCKET`, `AWS_ID`, `AWS_SECRET` | S3-compatible storage | AWS storage |
 | `WASABI_URL` | Wasabi media/proxy URL | Wasabi storage |
+| `RSS_MEDIA_SECRET` | Authorizes public RSS media and transcript links | Production RSS |
 | `GMAIL_USER`, `GMAIL_PASSWORD`, `GMAIL_FROM` | Password-reset email | Email delivery |
 
 Never commit real credentials. Logging redacts common credential and token fields, but secrets should still not be passed as diagnostic context.
@@ -60,20 +62,23 @@ yarn start
 
 ## Verification
 
+Linting uses Biome (`biome check .`). Type checking uses `tsc --noEmit`.
+
 ```bash
 yarn lint
 yarn typecheck
 yarn test --runInBand
+yarn test:coverage
 yarn build
 yarn test:e2e
 ```
 
-`yarn verify` runs the complete sequence. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
+`yarn verify` runs the complete sequence. Jest enforces a global coverage gate of **80%** for statements, branches, functions, and lines. Playwright tests use intercepted requests and seeded browser state; they must not depend on production databases, storage accounts, email, or user credentials.
 
-`yarn test:coverage` reports the Jest coverage baseline and `yarn audit:dependencies` fails on high-severity dependency advisories. Before deploying a MongoDB-backed environment, run `yarn db:indexes` with `MONGO_URL` and `MONGO_DB` configured. It is idempotent and provisions the user/session/challenge/rate-limit uniqueness and expiry indexes.
+`yarn audit:dependencies` fails on high-severity dependency advisories. Before deploying a MongoDB-backed environment, run `yarn db:indexes` with `MONGO_URL` and `MONGO_DB` configured. It is idempotent and provisions the user/session/challenge/rate-limit uniqueness and expiry indexes.
 
 The production CSP allows only the configured site and storage origins. Set `AWS_ENDPOINT` and `WASABI_URL` to their real origins before deploying; broad third-party browser connections are intentionally not allowed.
 
 ## Deployment
 
-Deploy the production build to a Node-compatible platform such as Vercel. Configure only the environment variables required by enabled services. CI uses Node from `.nvmrc`, installs from `yarn.lock`, and runs lint, type checking, Jest, the production build, and deterministic Chromium smoke tests.
+Deploy the production build to a Node-compatible platform such as Vercel. Configure only the environment variables required by enabled services. CI uses Node from `.nvmrc`, installs from `yarn.lock`, and runs lint, dependency audit, type checking, Jest (including the coverage gate), the production build, and deterministic Chromium smoke tests.
