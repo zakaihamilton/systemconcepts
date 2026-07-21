@@ -1,6 +1,13 @@
 import clsx from "clsx";
 import styles from "../shared.module.css";
 
+const ANCHOR_CLASS = {
+	left: styles.drawerLeft,
+	right: styles.drawerRight,
+	top: styles.drawerTop,
+	bottom: styles.drawerBottom,
+};
+
 export default function Drawer({
 	open,
 	onClose,
@@ -28,7 +35,7 @@ export default function Drawer({
 					inert={!open}
 					className={clsx(
 						styles.drawer,
-						anchor === "right" ? styles.drawerRight : styles.drawerLeft,
+						ANCHOR_CLASS[anchor] || styles.drawerLeft,
 						!open && styles.drawerClosed,
 						className,
 					)}

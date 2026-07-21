@@ -19,6 +19,10 @@ import Drawer from "@ui/Drawer";
 import IconButton from "@ui/IconButton";
 import InputAdornment from "@ui/InputAdornment";
 import LinearProgress from "@ui/LinearProgress";
+import List from "@ui/List";
+import ListItem from "@ui/ListItem";
+import ListItemButton from "@ui/ListItemButton";
+import ListItemText from "@ui/ListItemText";
 import Paper from "@ui/Paper";
 import { Tab, Tabs } from "@ui/Tabs";
 import TextField from "@ui/TextField";
@@ -1150,34 +1154,28 @@ export default function Research() {
 							<Typography variant="caption" className={styles.filterGroupTitle}>
 								{translations[type.toUpperCase()] || type}
 							</Typography>
-							<Box className={styles.filterChoices}>
-								{filters.map((filter) => (
-									<Tooltip
-										key={`${filter.type}-${filter.label}`}
-										title={filter.label}
-									>
-										<Chip
-											label={filter.label}
-											className={styles.filterChip}
-											variant={
-												filterTags.some(
-													(tag) =>
-														tag.label === filter.label &&
-														tag.type === filter.type,
-												)
-													? "filled"
-													: "outlined"
-											}
-											pressed={filterTags.some(
-												(tag) =>
-													tag.label === filter.label &&
-													tag.type === filter.type,
-											)}
-											onClick={() => toggleFilter(filter)}
-										/>
-									</Tooltip>
-								))}
-							</Box>
+							<List disablePadding className={styles.filterChoices}>
+								{filters.map((filter) => {
+									const selected = filterTags.some(
+										(tag) =>
+											tag.label === filter.label &&
+											tag.type === filter.type,
+									);
+									return (
+										<ListItem
+											key={`${filter.type}-${filter.label}`}
+											disablePadding
+										>
+											<ListItemButton
+												selected={selected}
+												onClick={() => toggleFilter(filter)}
+											>
+												<ListItemText primary={filter.label} />
+											</ListItemButton>
+										</ListItem>
+									);
+								})}
+							</List>
 						</Box>
 					))}
 					<Box className={styles.drawerActions}>

@@ -248,12 +248,15 @@
 
 .filterChoices {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
+	flex-direction: column;
+	width: 100%;
+	border: 1px solid var(--divider);
+	border-radius: var(--radius-md, 8px);
+	overflow: hidden;
 }
 
-.filterChip {
-	max-width: 100%;
+.filterChoices li + li {
+	border-top: 1px solid var(--divider);
 }
 
 .drawerActions {

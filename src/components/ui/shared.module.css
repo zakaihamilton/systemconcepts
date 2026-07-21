@@ -72,12 +72,39 @@
 	right: 0;
 }
 
+.drawerTop,
+.drawerBottom {
+	left: 0;
+	right: 0;
+	bottom: auto;
+	border-right: none;
+	max-height: min(80vh, 640px);
+}
+
+.drawerTop {
+	border-bottom: 1px solid var(--divider, var(--border-color));
+}
+
+.drawerBottom {
+	top: auto;
+	bottom: 0;
+	border-top: 1px solid var(--divider, var(--border-color));
+}
+
 .drawerClosed {
 	transform: translateX(-100%);
 }
 
 .drawerRight.drawerClosed {
 	transform: translateX(100%);
+}
+
+.drawerTop.drawerClosed {
+	transform: translateY(-100%);
+}
+
+.drawerBottom.drawerClosed {
+	transform: translateY(100%);
 }
 
 .paperSurface {

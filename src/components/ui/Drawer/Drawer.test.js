@@ -12,4 +12,14 @@ describe("Drawer", () => {
 		expect(drawer).toHaveAttribute("aria-hidden", "true");
 		expect(drawer).toHaveAttribute("inert", "");
 	});
+
+	it("supports a top anchor", () => {
+		render(
+			<Drawer open anchor="top">
+				<button type="button">Top action</button>
+			</Drawer>,
+		);
+		expect(screen.getByRole("complementary")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Top action" })).toBeInTheDocument();
+	});
 });
