@@ -605,7 +605,7 @@ function Article({
 		);
 	}
 
-	if (!content && showPlaceholder) {
+	if (!selectedTag && !content && showPlaceholder) {
 		return (
 			<Box component="main" className={clsx(styles.root, styles.centeredState)}>
 				<Box className={styles.placeholder}>

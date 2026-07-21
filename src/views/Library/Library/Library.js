@@ -21,7 +21,23 @@ const fileCache = new Map();
 registerToolbar("Library");
 
 export default function Library() {
-	const [tags, setTags] = useState([]);
+	// Prefer LibraryStore.tags so we stay in sync with LibraryTree/breadcrumbs when
+	// the sidebar loads tags first (or this view's local read is still empty).
+	const storeTags = LibraryStore.useState((s) => s.tags);
+	const [localTags, setLocalTags] = useState([]);
+	const tags = storeTags?.length ? storeTags : localTags;
+	const setTags = useCallback(
+		(nextTags) => {
+			const base = storeTags?.length ? storeTags : localTags;
+			const resolved =
+				typeof nextTags === "function" ? nextTags(base) : nextTags;
+			setLocalTags(resolved);
+			LibraryStore.update((s) => {
+				s.tags = resolved;
+			});
+		},
+		[storeTags, localTags],
+	);
 	const [content, setContent] = useState(null);
 	const [selectedTag, setSelectedTag] = useState(null);
 	const [loading, setLoading] = useState(false);
@@ -60,9 +76,10 @@ export default function Library() {
 			// Remember the last viewed article
 			LibraryStore.update((s) => {
 				s.lastViewedArticle = tag;
+				s.selectedId = tag?._id ?? null;
 			});
 		},
-		[getTagHierarchy, selectedTag],
+		[selectedTag],
 	);
 
 	useEffect(() => {
@@ -147,6 +164,7 @@ export default function Library() {
 				// Remember the last viewed article
 				LibraryStore.update((s) => {
 					s.lastViewedArticle = tag;
+					s.selectedId = tag._id;
 					if (paragraphId) {
 						s.scrollToParagraph = paragraphId;
 					}
@@ -180,15 +198,12 @@ export default function Library() {
 			if (await storage.exists(tagsPath)) {
 				const fileContents = await storage.readFile(tagsPath);
 				const data = JSON.parse(fileContents);
-				setTags(data);
-				LibraryStore.update((s) => {
-					s.tags = data;
-				});
+				setTags(Array.isArray(data) ? data : []);
 			}
 		} catch (err) {
 			structuredLogger.error("Failed to load library tags:", err);
 		}
-	}, []);
+	}, [setTags]);
 
 	const loadCustomOrder = useCallback(async () => {
 		try {
