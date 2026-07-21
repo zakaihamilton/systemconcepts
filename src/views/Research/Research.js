@@ -33,6 +33,7 @@ import { useSize } from "@util/browser/size";
 import { useDeviceType } from "@util/browser/styles";
 import { makePath } from "@util/data/path";
 import { decodeBinaryIndex } from "@util/data/searchIndexBinary";
+import { collator } from "@util/data/sort";
 import { normalizeContent } from "@util/data/string";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
@@ -299,7 +300,7 @@ export default function Research() {
 
 				if (isMounted.current) {
 					const filters = Array.from(unique).map((s) => JSON.parse(s));
-					filters.sort((a, b) => a.label.localeCompare(b.label));
+					filters.sort((a, b) => collator.compare(a.label, b.label));
 					setAvailableFilters(filters);
 					LibraryStore.update((s) => {
 						s.tags = tags;

@@ -264,6 +264,35 @@ describe("Research View", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("sorts numbered filter labels numerically", async () => {
+		const storage = require("@util/storage/storage");
+		storage.exists.mockImplementation((path) =>
+			Promise.resolve(path.endsWith("tags.json")),
+		);
+		storage.readFile.mockResolvedValue(
+			JSON.stringify([
+				{ article: "10. Later" },
+				{ article: "2. Middle" },
+				{ article: "1. First" },
+			]),
+		);
+
+		renderResearch();
+		fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole("button", { name: "1. First" }),
+			).toBeInTheDocument();
+		});
+
+		const labels = screen
+			.getAllByRole("button")
+			.map((button) => button.textContent)
+			.filter((label) => /^\d+\./.test(label));
+		expect(labels).toEqual(["1. First", "2. Middle", "10. Later"]);
+	});
+
 	it("shows the initial research guidance", () => {
 		mockResearchState.hasSearched = false;
 		renderResearch();
