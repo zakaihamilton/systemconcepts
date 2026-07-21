@@ -43,7 +43,7 @@ export default function ToolbarItem({
 
 	return (
 		<>
-			{item.element}
+			{item.element && <div className={styles.element}>{item.element}</div>}
 			{!item.element && (
 				<>
 					{!!item.label ? (
