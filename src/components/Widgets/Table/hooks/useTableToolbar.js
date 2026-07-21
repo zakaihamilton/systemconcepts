@@ -198,7 +198,14 @@ export function useTableToolbar({
 	useToolbar({
 		id: "Table",
 		items: toolbarItems,
-		depends: [rawItems, name, translations, viewMode, sortItems, itemsPerPageItems],
+		depends: [
+			rawItems,
+			name,
+			translations,
+			viewMode,
+			sortItems,
+			itemsPerPageItems,
+		],
 	});
 
 	useEffect(() => {

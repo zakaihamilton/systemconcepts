@@ -1,22 +1,7 @@
-import VariableSizeList from "@components/Virtualized/VariableSizeList";
 import { useSize } from "@util/browser/size";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
-import JumpDialog from "@views/Library/Article/JumpDialog";
-import ScrollToTop from "@views/Library/Article/ScrollToTop";
 import { LibraryStore } from "@views/Library/Store";
-import Box from "@ui/Box";
-import Typography from "@ui/Typography";
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
-import PageIndicator from "../PageIndicator";
-import styles from "../Research.module.css";
-import ResultsOutline from "../ResultsOutline";
-import SearchResultItem from "../SearchResultItem";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function useResearchResultsList({
 	filteredResults,
@@ -61,24 +46,27 @@ export function useResearchResultsList({
 		currentPageRef.current = scrollPages.page;
 	}, [scrollPages.page]);
 
-	const setRowHeight = useCallback((index, height) => {
-		if (Math.abs((rowHeights.current[index] || 0) - height) > 5) {
-			rowHeights.current[index] = height;
-			minResetIndex.current = Math.min(minResetIndex.current, index);
-			if (listRef.current) {
-				if (resetTimer.current) {
-					clearTimeout(resetTimer.current);
-				}
-				resetTimer.current = setTimeout(() => {
-					if (listRef.current) {
-						listRef.current.resetAfterIndex(minResetIndex.current);
-						minResetIndex.current = Infinity;
+	const setRowHeight = useCallback(
+		(index, height) => {
+			if (Math.abs((rowHeights.current[index] || 0) - height) > 5) {
+				rowHeights.current[index] = height;
+				minResetIndex.current = Math.min(minResetIndex.current, index);
+				if (listRef.current) {
+					if (resetTimer.current) {
+						clearTimeout(resetTimer.current);
 					}
-					resetTimer.current = null;
-				}, 200);
+					resetTimer.current = setTimeout(() => {
+						if (listRef.current) {
+							listRef.current.resetAfterIndex(minResetIndex.current);
+							minResetIndex.current = Infinity;
+						}
+						resetTimer.current = null;
+					}, 200);
+				}
 			}
-		}
-	}, [listRef]);
+		},
+		[listRef],
+	);
 
 	const gotoArticle = useCallback((tag, paragraphId) => {
 		if (tag._id && tag._id.startsWith("session|")) {
@@ -271,11 +259,7 @@ export function useResearchResultsList({
 			const page = visibleStartIndex + 1;
 			const count = filteredResults.length;
 			setScrollPages((prev) => {
-				if (
-					prev.page === page &&
-					prev.count === count &&
-					prev.visible === true
-				)
+				if (prev.page === page && prev.count === count && prev.visible === true)
 					return prev;
 				return { ...prev, page, count, visible: true };
 			});

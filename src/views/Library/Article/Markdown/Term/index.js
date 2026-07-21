@@ -1,2 +1,1 @@
-export { default } from "./Term";
-export { default as Term } from "./Term";
+export { default, default as Term } from "./Term";

@@ -26,10 +26,10 @@ import {
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
+import styles from "./Research.module.css";
 import ResearchFilterDrawer from "./ResearchFilterDrawer";
 import ResearchResultsList from "./ResearchResultsList";
 import ResearchSearchPanel from "./ResearchSearchPanel";
-import styles from "./Research.module.css";
 import {
 	filterResearchResults,
 	sanitizeResearchFilterTags,

@@ -254,7 +254,6 @@ export function useGlossaryTextRenderer({
 						}
 					}
 
-
 					parts.push(
 						<ReferenceLink
 							key={`ref-${idx}`}

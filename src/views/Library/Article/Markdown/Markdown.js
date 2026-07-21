@@ -12,9 +12,8 @@ import React, {
 } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
-
-import Zoom from "../Zoom";
 import { termPattern } from "../GlossaryUtils";
+import Zoom from "../Zoom";
 import { normalizeMarkdownContent } from "./content";
 import { useGlossaryTextRenderer } from "./GlossaryTextRenderer";
 import styles from "./Markdown.module.css";

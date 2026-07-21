@@ -1,7 +1,7 @@
 import ArrowDownwardIcon from "@icons/svg/ArrowDownward.svg";
 import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
 import { getComparator, stableSort } from "@util/data/sort";
-import React, { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export function useTableData({
 	columns,

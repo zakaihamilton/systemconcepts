@@ -31,22 +31,20 @@ const tags = [
 
 describe("findArticleByReference", () => {
 	it("matches section and word chapter name", () => {
-		const result = findArticleByReference(
-			tags,
-			"Inner Reflection",
-			"Nine",
-			{ book: "Book A", section: "Inner Reflection", part: "Part 1" },
-		);
+		const result = findArticleByReference(tags, "Inner Reflection", "Nine", {
+			book: "Book A",
+			section: "Inner Reflection",
+			part: "Part 1",
+		});
 		expect(result?._id).toBe("book-a-inner-ref-ch9");
 	});
 
 	it("matches numeric chapter when tag uses word form", () => {
-		const result = findArticleByReference(
-			tags,
-			"Inner Reflection",
-			"3",
-			{ book: "Book A", section: "Inner Reflection", part: "Part 1" },
-		);
+		const result = findArticleByReference(tags, "Inner Reflection", "3", {
+			book: "Book A",
+			section: "Inner Reflection",
+			part: "Part 1",
+		});
 		expect(result?._id).toBe("book-a-inner-ref-ch3");
 	});
 
@@ -60,12 +58,10 @@ describe("findArticleByReference", () => {
 	});
 
 	it("rejects matches from a different book", () => {
-		const result = findArticleByReference(
-			tags,
-			"Inner Reflection",
-			"Nine",
-			{ book: "Book A", section: "Inner Reflection" },
-		);
+		const result = findArticleByReference(tags, "Inner Reflection", "Nine", {
+			book: "Book A",
+			section: "Inner Reflection",
+		});
 		expect(result?._id).toBe("book-a-inner-ref-ch9");
 		expect(
 			findArticleByReference(tags, "Inner Reflection", "Nine", {
@@ -76,12 +72,10 @@ describe("findArticleByReference", () => {
 	});
 
 	it("returns null when section does not match", () => {
-		const result = findArticleByReference(
-			tags,
-			"Inner Reflection",
-			"Two",
-			{ book: "Book A", section: "Inner Reflection" },
-		);
+		const result = findArticleByReference(tags, "Inner Reflection", "Two", {
+			book: "Book A",
+			section: "Inner Reflection",
+		});
 		expect(result).toBeUndefined();
 	});
 

@@ -10,10 +10,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useTableData } from "./hooks/useTableData";
 import { useTableScroll } from "./hooks/useTableScroll";
 import { useTableToolbar } from "./hooks/useTableToolbar";
-import {
-	allocateRegistryId,
-	tableDataRegistry,
-} from "./tableDataRegistry";
+import { allocateRegistryId, tableDataRegistry } from "./tableDataRegistry";
 import TableTableView from "./views/TableTableView";
 import { TableGridView, TableListView } from "./views/TableVirtualizedView";
 
