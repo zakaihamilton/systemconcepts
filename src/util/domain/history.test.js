@@ -1,3 +1,4 @@
+import { SyncActiveStore } from "@sync/syncState";
 import { act, render, waitFor } from "@testing-library/react";
 import { useFile } from "@util/storage/storage";
 import { useRecentHistory } from "./history";
@@ -39,14 +40,31 @@ describe("useRecentHistory", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		latestResult = null;
+		SyncActiveStore.update((state) => {
+			state.personalUpdateCounter = 0;
+		});
 	});
 
-	it("calls useFile with the history file path and a JSON-parsing mapping", () => {
+	it("calls useFile with the history path, sync revision depends, and JSON mapping", () => {
 		setup();
-		const [, , mapping] = useFile.mock.calls[0];
+		const [, depends, mapping] = useFile.mock.calls[0];
 		expect(useFile.mock.calls[0][0]).toBe("local/personal/history.json");
+		expect(depends).toEqual([0]);
 		expect(mapping(null)).toEqual([]);
 		expect(mapping(JSON.stringify([{ id: 1 }]))).toEqual([{ id: 1 }]);
+	});
+
+	it("reloads history when personalUpdateCounter increments after sync", () => {
+		setup();
+		expect(useFile.mock.calls[0][1]).toEqual([0]);
+
+		act(() => {
+			SyncActiveStore.update((state) => {
+				state.personalUpdateCounter = 2;
+			});
+		});
+
+		expect(useFile.mock.calls.at(-1)[1]).toEqual([2]);
 	});
 
 	it("adds a new session to the front of the history with a timestamp", async () => {

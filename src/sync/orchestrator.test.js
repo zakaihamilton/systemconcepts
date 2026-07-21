@@ -17,6 +17,7 @@ function resetStores() {
 		state.phase = null;
 		state.needsSessionReload = false;
 		state.libraryUpdateCounter = 0;
+		state.personalUpdateCounter = 0;
 		state.logs = [];
 	});
 	UpdateSessionsStore.update((state) => {
@@ -172,6 +173,7 @@ describe("sync orchestration recovery", () => {
 
 		expect(SyncActiveStore.getRawState().needsSessionReload).toBe(true);
 		expect(SyncActiveStore.getRawState().libraryUpdateCounter).toBe(1);
+		expect(SyncActiveStore.getRawState().personalUpdateCounter).toBe(1);
 	});
 
 	it("refreshes role from the API when cookies lack a role", async () => {

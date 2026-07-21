@@ -160,6 +160,7 @@ export function createSyncOrchestrator(overrides = {}) {
 			if (hasAnyChanges || forceReload) {
 				SyncActiveStore.update((state) => {
 					state.needsSessionReload = true;
+					state.personalUpdateCounter = (state.personalUpdateCounter || 0) + 1;
 				});
 				dependencies.addSyncLog(
 					"Changes detected - reloading sessions",
