@@ -16,8 +16,8 @@ export default [
 		value: "עקרונות המערכת",
 	},
 	{
-		id: "APPS",
-		value: "אפליקציות",
+		id: "HOME",
+		value: "בית",
 	},
 	{
 		id: "CONTINUE_WATCHING",

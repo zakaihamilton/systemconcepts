@@ -4,7 +4,7 @@ import Link from "@ui/Link";
 import { setPath, usePages } from "@util/domain/views";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import styles from "./Apps.module.css";
+import styles from "./Home.module.css";
 
 const SESSION_LIMIT = 4;
 const LATEST_SESSION_LIMIT = SESSION_LIMIT * 2;
@@ -123,7 +123,7 @@ function SessionSkeletons({ count = SESSION_LIMIT }) {
 }
 
 function SessionContent({ translations }) {
-	// Lazy-load these hooks because Apps is part of the root page registry that the
+	// Lazy-load these hooks because Home is part of the root page registry that the
 	// session domain reaches through shared language/page state.
 	const { useRecentHistory } = require("@util/domain/history");
 	const { SessionsStore, useSessions } = require("@util/domain/sessions");
@@ -305,7 +305,7 @@ function QuickAccess({ pages, translations }) {
 	];
 
 	return (
-		<section className={styles.quickAccess} aria-label={translations.APPS}>
+		<section className={styles.quickAccess} aria-label={translations.HOME}>
 			<div className={styles.appItems} data-testid="app-quick-access-items">
 				{appItems.map((page) => {
 					const { Icon } = page;
@@ -376,7 +376,7 @@ function SyncPrompt({ translations, onStart, busy, percentage }) {
 	);
 }
 
-export default function Apps() {
+export default function Home() {
 	const { useTranslations } = require("@util/domain/translations");
 	const pages = usePages();
 	const translations = useTranslations();

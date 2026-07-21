@@ -5,8 +5,8 @@ import styles from "./ViewTransition.module.css";
 describe("ViewTransition", () => {
 	it("adds the enter animation class", () => {
 		const { getByTestId } = render(
-			<ViewTransition transitionKey="apps">
-				<div>Apps</div>
+			<ViewTransition transitionKey="home">
+				<div>Home</div>
 			</ViewTransition>,
 		);
 
@@ -15,8 +15,8 @@ describe("ViewTransition", () => {
 
 	it("keeps its boundary mounted when the view key changes", () => {
 		const { getByTestId, rerender } = render(
-			<ViewTransition transitionKey="apps">
-				<div>Apps</div>
+			<ViewTransition transitionKey="home">
+				<div>Home</div>
 			</ViewTransition>,
 		);
 		const previousBoundary = getByTestId("view-transition");
@@ -36,14 +36,14 @@ describe("ViewTransition", () => {
 
 	it("does not replace its boundary for unchanged view keys", () => {
 		const { getByTestId, rerender } = render(
-			<ViewTransition transitionKey="apps">
+			<ViewTransition transitionKey="home">
 				<div>Loading</div>
 			</ViewTransition>,
 		);
 		const previousBoundary = getByTestId("view-transition");
 
 		rerender(
-			<ViewTransition transitionKey="apps">
+			<ViewTransition transitionKey="home">
 				<div>Loaded</div>
 			</ViewTransition>,
 		);
@@ -51,7 +51,7 @@ describe("ViewTransition", () => {
 		expect(getByTestId("view-transition")).toBe(previousBoundary);
 		expect(getByTestId("view-transition")).toHaveAttribute(
 			"data-transition-key",
-			"apps",
+			"home",
 		);
 	});
 });

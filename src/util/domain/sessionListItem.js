@@ -1,7 +1,7 @@
 import { formatDuration } from "@util/data/string";
 
 /**
- * The session catalogue is shared by the list, schedule, Apps, and detail
+ * The session catalogue is shared by the list, schedule, Home, and detail
  * routes. Keep only the fields those views actually use so parsing a synced
  * session file cannot retain its transcript, descriptions, and media metadata
  * for every session in the browser heap.

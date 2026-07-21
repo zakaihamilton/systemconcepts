@@ -1,7 +1,7 @@
 import PageLoad from "@components/PageLoad";
 import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
 import ApiIcon from "@icons/svg/Api.svg";
-import AppsIcon from "@icons/svg/Apps.svg";
+import HomeIcon from "@icons/svg/Home.svg";
 import BookmarkIcon from "@icons/svg/Bookmark.svg";
 import CreateIcon from "@icons/svg/Create.svg";
 import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
@@ -24,7 +24,7 @@ import TranslateIcon from "@icons/svg/Translate.svg";
 import VideoLabelIcon from "@icons/svg/VideoLabel.svg";
 import VideoLibraryIcon from "@icons/svg/VideoLibrary.svg";
 import VpnKeyIcon from "@icons/svg/VpnKey.svg";
-import Apps from "@views/Apps/Apps";
+import Home from "@views/Home/Home";
 import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
 
@@ -173,11 +173,11 @@ export default [
 		category: "tools",
 	},
 	{
-		id: "apps",
-		name: "APPS",
+		id: "home",
+		name: "HOME",
 		root: true,
-		Icon: AppsIcon,
-		Component: Apps,
+		Icon: HomeIcon,
+		Component: Home,
 		divider: true,
 	},
 	{

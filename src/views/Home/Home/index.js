@@ -1,2 +1,2 @@
-export * from "./Apps";
-export { default } from "./Apps";
+export * from "./Home";
+export { default } from "./Home";

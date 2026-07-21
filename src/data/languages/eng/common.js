@@ -16,8 +16,8 @@ export default [
 		value: "System Concepts",
 	},
 	{
-		id: "APPS",
-		value: "Apps",
+		id: "HOME",
+		value: "Home",
 	},
 	{
 		id: "CONTINUE_WATCHING",

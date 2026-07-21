@@ -7,7 +7,7 @@ import { useTranslations } from "@util/domain/translations";
 import { setPath, usePages } from "@util/domain/views";
 import { ScheduleStore } from "@views/Schedule/Schedule";
 import Cookies from "js-cookie";
-import Apps from "./index.js";
+import Home from "./index.js";
 
 jest.mock("@util/domain/history");
 jest.mock("@util/domain/sessions");
@@ -31,7 +31,7 @@ jest.mock(
 		),
 );
 
-describe("Apps View", () => {
+describe("Home View", () => {
 	const mockPages = [
 		{
 			id: "app1",
@@ -88,7 +88,7 @@ describe("Apps View", () => {
 		useRecentHistory.mockReturnValue([[mockSessions[0]]]);
 		useSyncFeature.mockReturnValue({ sync: jest.fn(), busy: false });
 		useTranslations.mockReturnValue({
-			APPS: "Apps",
+			HOME: "Home",
 			SESSIONS: "Sessions",
 			CONTINUE_WATCHING: "Continue watching",
 			LATEST_SESSIONS: "Latest sessions",
@@ -113,7 +113,7 @@ describe("Apps View", () => {
 		Cookies.remove("hash");
 
 		const { getByRole, getByTestId, getByText, queryByTestId, queryByText } =
-			render(<Apps />);
+			render(<Home />);
 
 		expect(getByText("Login to your account")).toBeInTheDocument();
 		expect(getByTestId("app-quick-access-items")).toBeInTheDocument();
@@ -129,7 +129,7 @@ describe("Apps View", () => {
 
 	it("renders continue watching, latest sessions, and app shortcuts", () => {
 		const { getByText, getAllByText, getAllByTestId, getByTestId } = render(
-			<Apps />,
+			<Home />,
 		);
 		expect(getByText("Continue watching")).toBeInTheDocument();
 		expect(getByText("Latest sessions")).toBeInTheDocument();
@@ -149,7 +149,7 @@ describe("Apps View", () => {
 			state.needsSessionReload = true;
 		});
 
-		render(<Apps />);
+		render(<Home />);
 
 		expect(SessionsStore.update).toHaveBeenCalled();
 		const sessionState = { sessions: mockSessions, busy: true, counter: 4 };
@@ -168,7 +168,7 @@ describe("Apps View", () => {
 		useRecentHistory.mockReturnValue([[], false]);
 		useSyncFeature.mockReturnValue({ sync, busy: false, percentage: 0 });
 
-		const { getByRole, getByText, queryByText, rerender } = render(<Apps />);
+		const { getByRole, getByText, queryByText, rerender } = render(<Home />);
 
 		expect(getByText("No sessions yet.")).toBeInTheDocument();
 		expect(queryByText("Continue watching")).not.toBeInTheDocument();
@@ -177,7 +177,7 @@ describe("Apps View", () => {
 		expect(sync).toHaveBeenCalledTimes(1);
 
 		useSyncFeature.mockReturnValue({ sync, busy: true, percentage: 42 });
-		rerender(<Apps />);
+		rerender(<Home />);
 		expect(getByText("Syncing")).toBeInTheDocument();
 		expect(getByText("42%")).toBeInTheDocument();
 		expect(queryByText("No sessions yet.")).not.toBeInTheDocument();
@@ -188,7 +188,7 @@ describe("Apps View", () => {
 	});
 
 	it("sorts quick access apps", () => {
-		const { getByTestId } = render(<Apps />);
+		const { getByTestId } = render(<Home />);
 		const links = within(getByTestId("app-quick-access-items")).getAllByRole(
 			"link",
 		);
@@ -200,7 +200,7 @@ describe("Apps View", () => {
 	});
 
 	it("places quick access before the session sections", () => {
-		const { getByTestId, getByText } = render(<Apps />);
+		const { getByTestId, getByText } = render(<Home />);
 		const quickAccess = getByTestId("app-quick-access-items");
 		const continueWatching = getByText("Continue watching");
 		expect(
@@ -210,7 +210,7 @@ describe("Apps View", () => {
 	});
 
 	it("opens a session detail and links section titles to schedule views", () => {
-		const { getAllByText, getByText } = render(<Apps />);
+		const { getAllByText, getByText } = render(<Home />);
 		fireEvent.click(getAllByText("Latest session")[0]);
 		expect(setPath).toHaveBeenCalledWith(
 			"sessions",
@@ -250,7 +250,7 @@ describe("Apps View", () => {
 		useRecentHistory.mockReturnValue([
 			[{ ...mockSessions[0], name: "Removed" }],
 		]);
-		const { getAllByText } = render(<Apps />);
+		const { getAllByText } = render(<Home />);
 		expect(getAllByText("No sessions yet.")).toHaveLength(1);
 	});
 
@@ -259,7 +259,7 @@ describe("Apps View", () => {
 			[mockSessions[0], { ...mockSessions[0], position: 40 }],
 		]);
 
-		const { getByLabelText } = render(<Apps />);
+		const { getByLabelText } = render(<Home />);
 
 		expect(
 			within(getByLabelText("Continue watching")).getAllByTestId("track-card"),
@@ -269,7 +269,7 @@ describe("Apps View", () => {
 	it("uses track-card skeletons while sessions load", () => {
 		jest.useFakeTimers();
 		useSessions.mockReturnValue([[], true]);
-		const { getAllByTestId, queryAllByTestId, queryByText } = render(<Apps />);
+		const { getAllByTestId, queryAllByTestId, queryByText } = render(<Home />);
 		expect(queryAllByTestId("session-skeletons")).toHaveLength(0);
 		expect(queryByText("Continue watching")).not.toBeInTheDocument();
 		expect(queryByText("Latest sessions")).not.toBeInTheDocument();
@@ -283,7 +283,7 @@ describe("Apps View", () => {
 		jest.useFakeTimers();
 		useRecentHistory.mockReturnValue([[mockSessions[0]], jest.fn(), true]);
 
-		const { getAllByTestId, queryByText, rerender } = render(<Apps />);
+		const { getAllByTestId, queryByText, rerender } = render(<Home />);
 		expect(queryByText("Continue watching")).not.toBeInTheDocument();
 		expect(queryByText("Latest sessions")).not.toBeInTheDocument();
 
@@ -293,7 +293,7 @@ describe("Apps View", () => {
 		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
 
 		useRecentHistory.mockReturnValue([[mockSessions[0]], jest.fn(), false]);
-		rerender(<Apps />);
+		rerender(<Home />);
 		expect(queryByText("Continue watching")).toBeInTheDocument();
 		expect(queryByText("Latest sessions")).toBeInTheDocument();
 	});
@@ -307,7 +307,7 @@ describe("Apps View", () => {
 		useSessions.mockReturnValue([sessions, false]);
 		useRecentHistory.mockReturnValue([[]]);
 
-		const { getByLabelText } = render(<Apps />);
+		const { getByLabelText } = render(<Home />);
 		expect(
 			within(getByLabelText("Latest sessions")).getAllByTestId("track-card"),
 		).toHaveLength(8);
@@ -323,7 +323,7 @@ describe("Apps View", () => {
 		]);
 		useRecentHistory.mockReturnValue([[]]);
 
-		render(<Apps />);
+		render(<Home />);
 
 		expect(consoleError).not.toHaveBeenCalled();
 		consoleError.mockRestore();
@@ -332,7 +332,7 @@ describe("Apps View", () => {
 	it("keeps skeletons visible while the session store initializes", () => {
 		jest.useFakeTimers();
 		useSessions.mockReturnValue([null, false]);
-		const { getAllByTestId, queryAllByTestId } = render(<Apps />);
+		const { getAllByTestId, queryAllByTestId } = render(<Home />);
 		expect(queryAllByTestId("session-skeletons")).toHaveLength(0);
 		act(() => {
 			jest.advanceTimersByTime(300);
