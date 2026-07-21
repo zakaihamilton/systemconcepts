@@ -74,4 +74,70 @@ describe("ResultsOutline", () => {
 		fireEvent.click(screen.getByRole("menuitem", { name: /Grace/ }));
 		expect(onSelect).toHaveBeenCalledWith(0);
 	});
+
+	it("uses fallback labels and scrolls the current item into view", () => {
+		const scrollIntoView = jest.fn();
+		Element.prototype.scrollIntoView = scrollIntoView;
+
+		render(
+			<ResultsOutline
+				open
+				anchorEl={document.createElement("button")}
+				results={[
+					{ isSession: true, matches: [] },
+					{ name: "Only name", matches: null },
+				]}
+				currentIndex={0}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("menu", { name: "Results list" }),
+		).toBeInTheDocument();
+		expect(screen.getByText(/Session · 0 matches/)).toBeInTheDocument();
+		expect(screen.getByText("Only name")).toBeInTheDocument();
+		expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
+	});
+
+	it("does not scroll when closed", () => {
+		const scrollIntoView = jest.fn();
+		Element.prototype.scrollIntoView = scrollIntoView;
+		render(
+			<ResultsOutline
+				open={false}
+				anchorEl={document.createElement("button")}
+				results={results}
+				currentIndex={0}
+			/>,
+		);
+		expect(scrollIntoView).not.toHaveBeenCalled();
+	});
+
+	it("tolerates missing onSelect", () => {
+		render(
+			<ResultsOutline
+				open
+				anchorEl={document.createElement("button")}
+				results={[{ tag: { title: "X" }, matches: [{}] }]}
+			/>,
+		);
+		fireEvent.click(screen.getByRole("menuitem"));
+	});
+
+	it("renders nothing for the default empty results list", () => {
+		render(<ResultsOutline open anchorEl={document.createElement("button")} />);
+		expect(screen.getByRole("menu")).toBeInTheDocument();
+		expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+	});
+
+	it("uses doc.name when tag title is missing", () => {
+		render(
+			<ResultsOutline
+				open
+				anchorEl={document.createElement("button")}
+				results={[{ docId: "n1", name: "Named only", matches: [] }]}
+			/>,
+		);
+		expect(screen.getByText("Named only")).toBeInTheDocument();
+	});
 });

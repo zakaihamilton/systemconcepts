@@ -58,7 +58,13 @@ describe("FixedSizeList Component", () => {
 		);
 
 		const scrollContainer = container.firstChild;
-		fireEvent.scroll(scrollContainer, { target: { scrollTop: 50 } });
+		Object.defineProperty(scrollContainer, "scrollTop", {
+			configurable: true,
+			value: 50,
+		});
+		fireEvent.scroll(scrollContainer, {
+			currentTarget: { scrollTop: 50, scrollLeft: 0 },
+		});
 
 		expect(onScroll).toHaveBeenCalledWith({
 			scrollOffset: 50,
@@ -66,9 +72,9 @@ describe("FixedSizeList Component", () => {
 		});
 	});
 
-	it("supports imperative ref scrollTo and scrollToItem", () => {
+	it("supports imperative vertical scrollTo and scrollToItem alignments", () => {
 		const ref = createRef();
-		render(
+		const { container } = render(
 			<FixedSizeList
 				ref={ref}
 				height={100}
@@ -82,8 +88,102 @@ describe("FixedSizeList Component", () => {
 			</FixedSizeList>,
 		);
 
-		expect(ref.current).toBeDefined();
-		expect(typeof ref.current.scrollTo).toBe("function");
-		expect(typeof ref.current.scrollToItem).toBe("function");
+		const el = container.firstChild;
+		Object.defineProperty(el, "scrollTop", {
+			configurable: true,
+			writable: true,
+			value: 0,
+		});
+
+		ref.current.scrollTo(75);
+		expect(el.scrollTop).toBe(75);
+
+		ref.current.scrollToItem(2, "start");
+		expect(el.scrollTop).toBe(100);
+
+		ref.current.scrollToItem(2, "end");
+		expect(el.scrollTop).toBe(50);
+
+		ref.current.scrollToItem(2, "center");
+		expect(el.scrollTop).toBe(75);
+
+		el.scrollTop = 0;
+		ref.current.scrollToItem(3, "auto");
+		expect(el.scrollTop).toBe(100);
+
+		el.scrollTop = 200;
+		ref.current.scrollToItem(0, "auto");
+		expect(el.scrollTop).toBe(0);
+
+		el.scrollTop = 50;
+		ref.current.scrollToItem(1, "auto");
+		expect(el.scrollTop).toBe(50);
+	});
+
+	it("supports horizontal layout, external outerRef, and initialScrollOffset", () => {
+		const onScroll = jest.fn();
+		const onItemsRendered = jest.fn();
+		const outerRef = { current: null };
+		const ref = createRef();
+		const { container } = render(
+			<FixedSizeList
+				ref={ref}
+				layout="horizontal"
+				height={50}
+				width={100}
+				itemCount={itemData.length}
+				itemSize={40}
+				itemData={itemData}
+				overscanCount={0}
+				initialScrollOffset={40}
+				outerRef={outerRef}
+				onScroll={onScroll}
+				onItemsRendered={onItemsRendered}
+				className="list"
+				style={{ border: "1px solid red" }}
+				innerElementType="section"
+			>
+				{Row}
+			</FixedSizeList>,
+		);
+
+		expect(outerRef.current).toBe(container.firstChild);
+		Object.defineProperty(outerRef.current, "scrollLeft", {
+			configurable: true,
+			writable: true,
+			value: 0,
+		});
+
+		ref.current.scrollTo(80);
+		expect(outerRef.current.scrollLeft).toBe(80);
+
+		ref.current.scrollToItem(1, "start");
+		expect(outerRef.current.scrollLeft).toBe(40);
+
+		fireEvent.scroll(outerRef.current, {
+			currentTarget: { scrollTop: 0, scrollLeft: 40 },
+		});
+		expect(onScroll).toHaveBeenCalledWith({
+			scrollOffset: 40,
+			scrollUpdateWasRequested: false,
+		});
+	});
+
+	it("works without onScroll and onItemsRendered", () => {
+		const { container } = render(
+			<FixedSizeList
+				height={100}
+				width={100}
+				itemCount={2}
+				itemSize={50}
+				itemData={itemData}
+			>
+				{Row}
+			</FixedSizeList>,
+		);
+		fireEvent.scroll(container.firstChild, {
+			currentTarget: { scrollTop: 10, scrollLeft: 0 },
+		});
+		expect(container.firstChild).toBeTruthy();
 	});
 });

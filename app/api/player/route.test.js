@@ -6,6 +6,7 @@ import {
 	metadataInfo as awsMetadataInfo,
 	getDownloadUrl as getAwsDownloadUrl,
 } from "@util/storage/aws";
+import { isProductionDeployment } from "@util/storage/storageRedirect";
 import {
 	getWasabi,
 	metadataInfo as wasabiMetadataInfo,
@@ -40,6 +41,9 @@ jest.mock("@util/storage/wasabi", () => ({
 	getWasabi: jest.fn(),
 	metadataInfo: jest.fn(),
 }));
+jest.mock("@util/storage/storageRedirect", () => ({
+	isProductionDeployment: jest.fn(),
+}));
 jest.mock("next/server", () => ({
 	NextResponse: {
 		json: (body, init = {}) => ({
@@ -71,6 +75,7 @@ function request(
 describe("/api/player transcript URLs", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		isProductionDeployment.mockReturnValue(true);
 		getSessionUser.mockResolvedValue({ id: "user", role: "student" });
 		roleAuth.mockReturnValue(true);
 		getWasabi.mockResolvedValue({ client: {}, bucket: "media" });
@@ -122,6 +127,7 @@ describe("/api/player transcript URLs", () => {
 	});
 
 	it("streams media through the local function instead of exposing a signed URL", async () => {
+		isProductionDeployment.mockReturnValue(false);
 		const localRequest = request(undefined, "http://localhost:3000/api/player");
 
 		const response = await GET(localRequest);
@@ -234,5 +240,133 @@ describe("/api/player transcript URLs", () => {
 			responseContentDisposition:
 				'attachment; filename="2026-06-30 Beastly.png"',
 		});
+	});
+
+	it("returns subtitles when a matching VTT exists on AWS", async () => {
+		awsMetadataInfo.mockImplementation(async ({ path }) => {
+			if (path.endsWith(".vtt")) return { type: "text/vtt" };
+			return null;
+		});
+		const response = await GET(request());
+		expect((await response.json()).subtitles).toBe(
+			"/api/subtitle?path=" +
+				encodeURIComponent(
+					"sessions/american/2024/2024-08-26 The Serpents.vtt",
+				),
+		);
+	});
+
+	it("strips resolution suffixes when resolving transcript metadata", async () => {
+		getSessions.mockResolvedValue([
+			{
+				group: "american",
+				year: "2024",
+				id: "2024-08-26 The Serpents",
+				transcriptPath:
+					"/aws/sessions/american/2024/2024-08-26 The Serpents.txt",
+			},
+		]);
+		awsMetadataInfo.mockImplementation(async ({ path }) =>
+			path.endsWith(".txt") ? { type: "text/plain" } : null,
+		);
+		await GET(
+			request("sessions/american/2024/2024-08-26 The Serpents_1280x720.mp4"),
+		);
+		expect(getSessions).toHaveBeenCalledWith({ group: "american" });
+	});
+
+	it("warns and continues when session transcript lookup fails", async () => {
+		const { logger } = require("@util/api/logger");
+		getSessions.mockRejectedValue(new Error("feed down"));
+		await GET(request());
+		expect(logger.warn).toHaveBeenCalled();
+	});
+
+	it("returns an auth error when the user is not allowed", async () => {
+		getSessionUser.mockResolvedValue(null);
+		const response = await GET(request());
+		expect(response.status).toBe(403);
+		expect(await response.json()).toEqual({ err: "ACCESS_DENIED" });
+	});
+
+	it("uses signed Wasabi URLs in production instead of proxying media", async () => {
+		isProductionDeployment.mockReturnValue(true);
+
+		const response = await GET(
+			request(undefined, "https://systemconcepts.app/api/player"),
+		);
+
+		expect((await response.json()).path).toBe(
+			"https://wasabi.example/download",
+		);
+		expect(getSignedUrl).toHaveBeenCalledTimes(2);
+	});
+
+	it("uses explicit session subtitle paths ending in .vtt", async () => {
+		getSessions.mockResolvedValue([
+			{
+				group: "american",
+				year: "2024",
+				id: "2024-08-26 The Serpents",
+				subtitles: {
+					path: "/aws/sessions/american/2024/2024-08-26 The Serpents.vtt",
+				},
+			},
+		]);
+		awsMetadataInfo.mockImplementation(async ({ path }) =>
+			path.endsWith(".vtt") ? { type: "text/vtt" } : null,
+		);
+
+		const response = await GET(request());
+
+		expect((await response.json()).subtitles).toBe(
+			"/api/subtitle?path=" +
+				encodeURIComponent(
+					"sessions/american/2024/2024-08-26 The Serpents.vtt",
+				),
+		);
+	});
+
+	it("uses explicit session transcript paths ending in .txt", async () => {
+		getSessions.mockResolvedValue([
+			{
+				group: "american",
+				year: "2024",
+				id: "2024-08-26 The Serpents",
+				transcriptPath: "wasabi/american/2024/2024-08-26 The Serpents.txt",
+			},
+		]);
+		awsMetadataInfo.mockImplementation(async ({ path }) =>
+			path.endsWith(".txt") ? { type: "text/plain" } : null,
+		);
+
+		const response = await GET(request());
+
+		expect((await response.json()).transcriptionUrl).toBe(
+			"https://aws.example/transcript",
+		);
+	});
+
+	it("returns no transcript metadata when the session lookup finds no match", async () => {
+		getSessions.mockResolvedValue([
+			{
+				group: "american",
+				year: "2024",
+				id: "other-session",
+				transcriptPath: "/aws/sessions/american/2024/other.txt",
+			},
+		]);
+
+		const response = await GET(request());
+
+		expect((await response.json()).transcriptionUrl).toBeNull();
+	});
+
+	it("returns an auth error when session lookup is rejected", async () => {
+		getSessionUser.mockRejectedValue("AUTHENTICATION_REQUIRED");
+
+		const response = await GET(request());
+
+		expect(response.status).toBe(403);
 	});
 });

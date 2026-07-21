@@ -58,6 +58,10 @@ export function clearFetchCache() {
 	responseCache.clear();
 }
 
+export function __resetReloginGuardForTests() {
+	reloginRedirectStarted = false;
+}
+
 export function getStableFetchCacheOptions(ttl = DEFAULT_CACHE_TTL_MS) {
 	return {
 		cacheResponse: true,

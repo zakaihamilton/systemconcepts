@@ -1,0 +1,87 @@
+import * as ui from "./index.js";
+
+describe("ui index exports", () => {
+	const expected = [
+		"Alert",
+		"AppBar",
+		"Toolbar",
+		"Autocomplete",
+		"Avatar",
+		"Badge",
+		"Box",
+		"Button",
+		"Card",
+		"CardContent",
+		"Checkbox",
+		"Chip",
+		"CircularProgress",
+		"Dialog",
+		"DialogActions",
+		"DialogContent",
+		"DialogTitle",
+		"Divider",
+		"Drawer",
+		"Fab",
+		"FormControl",
+		"InputLabel",
+		"Select",
+		"FormControlLabel",
+		"Grid",
+		"createIcon",
+		"IconButton",
+		"InputAdornment",
+		"InputBase",
+		"LinearProgress",
+		"Link",
+		"List",
+		"ListItem",
+		"ListItemAvatar",
+		"ListItemButton",
+		"ListItemIcon",
+		"ListItemSecondaryAction",
+		"ListItemText",
+		"Menu",
+		"MenuItem",
+		"Paper",
+		"Slider",
+		"Snackbar",
+		"SpeedDial",
+		"SpeedDialAction",
+		"SpeedDialIcon",
+		"Table",
+		"TableBody",
+		"TableCell",
+		"TableContainer",
+		"TableHead",
+		"TableRow",
+		"TableSortLabel",
+		"Tabs",
+		"Tab",
+		"TextField",
+		"ToggleButtonGroup",
+		"ToggleButton",
+		"Tooltip",
+		"Typography",
+		"ButtonGroup",
+		"ClickAwayListener",
+		"Collapse",
+		"CssBaseline",
+		"Fade",
+		"Grow",
+		"MenuList",
+		"NoSsr",
+		"Popper",
+		"Slide",
+		"Zoom",
+	];
+
+	it("re-exports every public UI primitive", () => {
+		for (const name of expected) {
+			expect(ui[name]).toBeDefined();
+		}
+	});
+
+	it("exports createIcon as a function", () => {
+		expect(typeof ui.createIcon).toBe("function");
+	});
+});

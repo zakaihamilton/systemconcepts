@@ -78,4 +78,26 @@ describe("POST /api/internal/rate-limit", () => {
 
 		expect(await response.json()).toEqual({ ok: false });
 	});
+
+	it("rejects requests with a missing or invalid internal key", async () => {
+		const response = await POST(request({ ip: "203.0.113.8" }, "wrong-key"));
+
+		expect(response.status).toBe(403);
+		expect(checkRateLimit).not.toHaveBeenCalled();
+	});
+
+	it("rejects malformed request bodies", async () => {
+		const response = await POST(request({}));
+
+		expect(await response.json()).toEqual({ ok: false });
+		expect(checkRateLimit).not.toHaveBeenCalled();
+	});
+
+	it("returns ok false for unexpected rate-limit errors", async () => {
+		checkRateLimit.mockRejectedValue(new Error("database unavailable"));
+
+		const response = await POST(request({ ip: "203.0.113.8" }));
+
+		expect(await response.json()).toEqual({ ok: false });
+	});
 });
