@@ -1,7 +1,6 @@
 import PageLoad from "@components/PageLoad";
 import AccountCircleIcon from "@icons/svg/AccountCircle.svg";
 import ApiIcon from "@icons/svg/Api.svg";
-import HomeIcon from "@icons/svg/Home.svg";
 import BookmarkIcon from "@icons/svg/Bookmark.svg";
 import CreateIcon from "@icons/svg/Create.svg";
 import DeleteForeverIcon from "@icons/svg/DeleteForever.svg";
@@ -9,6 +8,7 @@ import EditIcon from "@icons/svg/Edit.svg";
 import EventIcon from "@icons/svg/Event.svg";
 import FormatSizeIcon from "@icons/svg/FormatSize.svg";
 import GroupWorkIcon from "@icons/svg/GroupWork.svg";
+import HomeIcon from "@icons/svg/Home.svg";
 import ImageIcon from "@icons/svg/Image.svg";
 import LabelIcon from "@icons/svg/Label.svg";
 import LanguageIcon from "@icons/svg/Language.svg";

@@ -20,7 +20,9 @@ describe("Drawer", () => {
 			</Drawer>,
 		);
 		expect(screen.getByRole("complementary")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Top action" })).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Top action" }),
+		).toBeInTheDocument();
 	});
 
 	it("raises overlay z-index with the drawer", () => {

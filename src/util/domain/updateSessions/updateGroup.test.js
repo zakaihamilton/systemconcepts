@@ -295,10 +295,7 @@ describe("updateGroupProcess", () => {
 		const existingId = `${currentYear}-07-17 Overview - Kabbalah & Suffering`;
 		const newId = `${currentYear}-07-20 Overview - The Grip & Shells`;
 		const yearItems = [
-			file(
-				`${existingId}.mp4`,
-				`wasabi/test/${currentYear}/${existingId}.mp4`,
-			),
+			file(`${existingId}.mp4`, `wasabi/test/${currentYear}/${existingId}.mp4`),
 			file(`${newId}.mp4`, `wasabi/test/${currentYear}/${newId}.mp4`),
 		];
 		const metadataFingerprint = [null, null, null, null];

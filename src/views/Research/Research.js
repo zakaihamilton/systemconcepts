@@ -1160,8 +1160,7 @@ export default function Research() {
 								{filters.map((filter) => {
 									const selected = filterTags.some(
 										(tag) =>
-											tag.label === filter.label &&
-											tag.type === filter.type,
+											tag.label === filter.label && tag.type === filter.type,
 									);
 									return (
 										<ListItem
@@ -1315,8 +1314,7 @@ export default function Research() {
 						current={scrollPages.page}
 						total={scrollPages.count}
 						visible={
-							!filterDrawerOpen &&
-							(scrollPages.visible || resultsOutlineOpen)
+							!filterDrawerOpen && (scrollPages.visible || resultsOutlineOpen)
 						}
 						translations={translations}
 						label={translations.ARTICLE}
