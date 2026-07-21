@@ -16,6 +16,7 @@ export const SyncActiveStore = new Store({
 	needsSessionReload: false, // Signal that sessions should be reloaded
 	phase: null, // Track current sync phase (main, library, personal)
 	libraryUpdateCounter: 0, // Signal that library content changed
+	personalUpdateCounter: 0, // Signal that personal files (e.g. history) changed
 	personalSyncBusy: false, // Track personal sync status
 	personalSyncError: null,
 	locked: false, // Track if sync upload is locked

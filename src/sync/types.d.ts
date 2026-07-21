@@ -65,6 +65,7 @@ export interface SyncState {
 	needsSessionReload: boolean;
 	phase: string | null;
 	libraryUpdateCounter: number;
+	personalUpdateCounter: number;
 	personalSyncBusy: boolean;
 	personalSyncError: unknown;
 	locked: boolean;

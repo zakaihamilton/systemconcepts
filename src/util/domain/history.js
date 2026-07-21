@@ -1,10 +1,16 @@
+import { SyncActiveStore } from "@sync/syncState";
 import { useFile } from "@util/storage/storage";
 import { useCallback } from "react";
 
 export function useRecentHistory() {
+	// Re-read after sync writes personal files (e.g. first login), so Home
+	// Continue watching updates without navigating away and back.
+	const personalUpdateCounter = SyncActiveStore.useState(
+		(state) => state.personalUpdateCounter || 0,
+	);
 	const [history, loadingHistory, errorHistory, writeHistory] = useFile(
 		"local/personal/history.json",
-		[],
+		[personalUpdateCounter],
 		(data) => {
 			return data ? JSON.parse(data) : [];
 		},
