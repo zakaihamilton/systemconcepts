@@ -410,10 +410,6 @@ describe("Article Component", () => {
 
 	it("exports markdown when not showing markdown", async () => {
 		const { exportData } = require("@util/storage/importExport");
-		let showMarkdown = true;
-		const _setShowMarkdown = (fn) => {
-			showMarkdown = typeof fn === "function" ? fn(showMarkdown) : fn;
-		};
 		// toggleMarkdown flips showMarkdown via useState — exercise via toolbar
 		render(
 			<Article
