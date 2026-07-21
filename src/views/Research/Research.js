@@ -30,7 +30,6 @@ import { useDeviceType } from "@util/browser/styles";
 import { makePath } from "@util/data/path";
 import { decodeBinaryIndex } from "@util/data/searchIndexBinary";
 import { normalizeContent } from "@util/data/string";
-import { loadParagraphsForFile } from "@util/domain/loadParagraphs";
 import { useSessions } from "@util/domain/sessions";
 import { useTranslations } from "@util/domain/translations";
 import { setHash, setPath, usePathItems } from "@util/domain/views";
@@ -56,15 +55,13 @@ import { createPortal } from "react-dom";
 import PageIndicator from "./PageIndicator";
 import styles from "./Research.module.css";
 import ResultsOutline from "./ResultsOutline";
+import { runResearchSearch } from "./runResearchSearch";
 import SearchResultItem from "./SearchResultItem";
-import { filterResearchResults } from "./searchFilters";
 import {
-	clauseMatchesText,
-	getResearchSuggestions,
-	getSearchTerms,
-	parseResearchQuery,
-	rankResearchResults,
-} from "./searchQuery";
+	filterResearchResults,
+	sanitizeResearchFilterTags,
+} from "./searchFilters";
+import { getResearchSuggestions } from "./searchQuery";
 
 const INDEX_FILE = "search_index.bin";
 const LEGACY_INDEX_FILE = "search_index.json";
@@ -209,6 +206,17 @@ export default function Research() {
 		});
 	}, []);
 
+	// Drop retired Transcriptions filters restored from localStorage.
+	useEffect(() => {
+		if (!_loaded) return;
+		const cleaned = sanitizeResearchFilterTags(filterTags, translations);
+		if (cleaned.length === filterTags.length) return;
+		setFilterTags(cleaned);
+		setAppliedFilterTags((prev) =>
+			sanitizeResearchFilterTags(prev, translations),
+		);
+	}, [_loaded, filterTags, translations, setFilterTags]);
+
 	const setResults = useCallback((val) => {
 		ResearchStore.update((s) => {
 			s.results = val;
@@ -282,13 +290,6 @@ export default function Research() {
 						label: translations.SUMMARIES,
 						type: "source",
 						id: "SUMMARIES",
-					}),
-				);
-				unique.add(
-					JSON.stringify({
-						label: translations.TRANSCRIPTIONS,
-						type: "source",
-						id: "TRANSCRIPTIONS",
 					}),
 				);
 
@@ -406,12 +407,6 @@ export default function Research() {
 			const searchQuery = queryOverride ?? query;
 			setSuggestionsOpen(false);
 			setActiveSuggestion(-1);
-			// const isDifferentSearch = query !== lastSearch.query || JSON.stringify(filterTags) !== JSON.stringify(lastSearch.filterTags);
-			// const currentSearch = { query, filterTags };
-			// setLastSearch(currentSearch);
-			if (filterTags.length > 0) {
-				// Debug logs removed
-			}
 			setAppliedFilterTags(filterTags);
 			if (!indexData || (!searchQuery.trim() && !filterTags.length)) {
 				setResults([]);
@@ -438,418 +433,39 @@ export default function Research() {
 			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			try {
-				const orGroups = parseResearchQuery(searchQuery);
-				const searchTerms = getSearchTerms(searchQuery);
-				let finalRefs = new Set();
-				const paragraphCache = new Map();
-
-				const isV2 = indexData.v === 2;
-				const isV3 = indexData.v === 3;
-				const isV4 = indexData.v === 4;
-				const isV5 = indexData.v >= 5;
-
-				if (!searchQuery.trim()) {
-					if (indexData.f) {
-						for (let i = 0; i < indexData.f.length; i++) {
-							finalRefs.add(`${i}:0`);
-						}
-					}
-				} else {
-					for (const parsedAndClauses of orGroups) {
-						if (parsedAndClauses.length === 0) continue;
-
-						const allTokensInGroup = [
-							...new Set(parsedAndClauses.flatMap((c) => c.terms)),
-						];
-						let groupRefs = null;
-
-						for (const token of allTokensInGroup) {
-							if (!isMounted.current) return;
-
-							const matchingTokens = Object.keys(
-								indexData.t || indexData.tokens || {},
-							).filter((k) => k.includes(token));
-							let tokenRefs = new Set();
-							matchingTokens.forEach((k) => {
-								const refs =
-									isV2 || isV3 || isV4 || isV5
-										? indexData.t[k]
-										: indexData.tokens[k];
-								if (isV4 || isV5) {
-									let currentFileIndex = -1;
-									for (let i = 0; i < refs.length; i++) {
-										const val = refs[i];
-										if (val < 0) {
-											currentFileIndex = -val - 1;
-										} else {
-											if (currentFileIndex !== -1) {
-												tokenRefs.add(`${currentFileIndex}:${val}`);
-											}
-										}
-									}
-								} else if (isV3) {
-									for (let i = 0; i < refs.length; i += 2) {
-										tokenRefs.add(`${refs[i]}:${refs[i + 1]}`);
-									}
-								} else {
-									refs.forEach((ref) => tokenRefs.add(ref));
-								}
-							});
-
-							if (groupRefs === null) {
-								groupRefs = tokenRefs;
-							} else {
-								groupRefs = new Set(
-									[...groupRefs].filter((x) => tokenRefs.has(x)),
-								);
-							}
-						}
-
-						if (groupRefs) {
-							// For v5 indexes, we need to load paragraphs on-demand
-							// Load paragraphs for all unique files in this group
-							if (isV5) {
-								const uniqueFileIndices = new Set();
-								[...groupRefs].forEach((ref) => {
-									const [docId] = ref.split(":");
-									uniqueFileIndices.add(parseInt(docId, 10));
-								});
-
-								const fileIndicesArray = [...uniqueFileIndices];
-								let loadedCount = 0;
-								const totalFiles = fileIndicesArray.length;
-
-								// Load files with progress tracking
-								await Promise.all(
-									fileIndicesArray.map(async (fileIndex) => {
-										if (!paragraphCache.has(fileIndex)) {
-											const fileId = indexData.f[fileIndex];
-											const paragraphs = await loadParagraphsForFile(
-												fileId,
-												sessionsById,
-											);
-											paragraphCache.set(fileIndex, paragraphs);
-										}
-
-										loadedCount++;
-										if (
-											isMounted.current &&
-											requestId === searchRequestId.current
-										) {
-											setSearchProgress(
-												Math.floor((loadedCount / totalFiles) * 50),
-											); // 0-50% for loading
-										}
-									}),
-								);
-
-								// Ensure we show 50% after verification loading completes
-								if (
-									isMounted.current &&
-									requestId === searchRequestId.current
-								) {
-									setSearchProgress(50);
-								}
-							}
-
-							// Final verification: ensure the matching paragraph actually contains all of the search terms
-							// and phrases are adjacent
-							[...groupRefs].forEach((ref) => {
-								const [docId, paraIndex] = ref.split(":");
-								let paragraph = null;
-								if (isV5) {
-									const fileIndex = parseInt(docId, 10);
-									const paragraphs = paragraphCache.get(fileIndex);
-									paragraph = paragraphs?.[parseInt(paraIndex, 10)];
-								} else if (isV3 || isV2 || isV4) {
-									const fileIndex = parseInt(docId, 10);
-									paragraph = indexData.d[fileIndex]?.[parseInt(paraIndex, 10)];
-								} else {
-									const doc = indexData.files[docId];
-									paragraph = doc?.paragraphs?.[parseInt(paraIndex, 10)];
-								}
-
-								if (paragraph) {
-									const isMatch = parsedAndClauses.every((clause) =>
-										clauseMatchesText(clause, paragraph),
-									);
-
-									if (isMatch) {
-										finalRefs.add(ref);
-									}
-								}
-							});
-						}
-					}
-				}
-
-				// Group by doc
-				const groupedResults = {};
-				const libraryTags = LibraryStore.getRawState().tags;
-
-				// Helper for capitalization
-				const capitalize = (s) => {
-					if (!s) return "";
-					const str = String(s);
-					if (str.toLowerCase() === "ai") return "AI";
-					return str.charAt(0).toUpperCase() + str.slice(1);
-				};
-
-				// Query searches load paragraphs while verifying candidates. Filter-only
-				// searches have no candidates to verify, so load only their result files.
-				if (isV5) {
-					const missingFileIndices = [
-						...new Set(
-							[...finalRefs]
-								.map((ref) => parseInt(ref.split(":")[0], 10))
-								.filter((fileIndex) => !paragraphCache.has(fileIndex)),
-						),
-					];
-					let loadedCount = 0;
-					await Promise.all(
-						missingFileIndices.map(async (fileIndex) => {
-							const paragraphs = await loadParagraphsForFile(
-								indexData.f[fileIndex],
-								sessionsById,
-							);
-							paragraphCache.set(fileIndex, paragraphs);
-							loadedCount++;
-							if (isMounted.current && requestId === searchRequestId.current) {
-								setSearchProgress(
-									50 +
-										Math.floor((loadedCount / missingFileIndices.length) * 50),
-								);
-							}
-						}),
-					);
-				}
-
-				const paragraphsMap = paragraphCache;
-
-				[...finalRefs].forEach((ref) => {
-					const [docId, paraIndex] = ref.split(":");
-
-					if (!groupedResults[docId]) {
-						let doc = null;
-						if (isV3 || isV2 || isV4 || isV5) {
-							const fileIndex = parseInt(docId, 10);
-							const tagId = indexData.f[fileIndex];
-							const paragraphs = isV5
-								? paragraphsMap.get(fileIndex)
-								: indexData.d[fileIndex];
-
-							if (tagId.startsWith("session|")) {
-								const parts = tagId.split("|");
-								if (parts.length >= 5) {
-									const session = sessionsById.get(tagId) || {
-										group: parts[1],
-										year: parts[2],
-										date: parts[3],
-										name: parts.slice(4).join("|"),
-									};
-									doc = {
-										...session,
-										docId: tagId,
-										isSession: true,
-										customTags: [
-											{ label: "Group", value: capitalize(session.group) },
-											{ label: "Year", value: session.year },
-											{ label: "Date", value: session.date },
-											{ label: "Type", value: capitalize(session.type) },
-										],
-										tag: { title: session.name, _id: tagId },
-										paragraphs,
-										matches: [],
-									};
-								}
-							} else {
-								const tag = libraryTags.find((t) => t._id === tagId);
-								if (tag) {
-									doc = {
-										docId: tagId,
-										tag,
-										paragraphs,
-										matches: [],
-									};
-								}
-							}
-						} else {
-							const v1Doc = indexData.files[docId];
-							if (v1Doc) {
-								doc = {
-									...v1Doc,
-									docId,
-									matches: [],
-								};
-							}
-						}
-
-						if (doc) {
-							groupedResults[docId] = doc;
-						}
-					}
-
-					if (groupedResults[docId]) {
-						// Logic to handle empty query cases (filter only) where we want to show a summary
-						if (!searchQuery.trim() && groupedResults[docId].isSession) {
-							if (groupedResults[docId].matches.length === 0) {
-								let summaryText =
-									groupedResults[docId].summary ||
-									groupedResults[docId].description;
-
-								// If we have no summary, or the summary matches the title, try to find a better one from paragraphs
-								const normalize = (s) =>
-									String(s)
-										.toLowerCase()
-										.replace(/[^a-z0-9]/g, "");
-								let useParagraphs = !summaryText;
-
-								if (summaryText && groupedResults[docId].tag) {
-									const pText = normalize(summaryText);
-									const tText = normalize(groupedResults[docId].tag.title);
-									// Check for match or substring (e.g. title "Foo", content "Foo - description")
-									if (
-										pText === tText ||
-										pText.includes(tText) ||
-										tText.includes(pText)
-									) {
-										useParagraphs = true;
-									}
-								}
-
-								if (
-									useParagraphs &&
-									groupedResults[docId].paragraphs &&
-									groupedResults[docId].paragraphs.length > 0
-								) {
-									let found = false;
-									if (groupedResults[docId].tag) {
-										const tText = normalize(groupedResults[docId].tag.title);
-										for (const para of groupedResults[docId].paragraphs) {
-											const pText = normalize(para);
-											// Ignore empty paragraphs or paragraphs that are nearly identical to title
-											if (
-												pText &&
-												pText !== tText &&
-												!pText.includes(tText) &&
-												!tText.includes(pText)
-											) {
-												summaryText = para;
-												found = true;
-												break;
-											}
-											// RELAXED CHECK: If paragraph contains title but has significantly more content
-											if (
-												pText &&
-												pText.includes(tText) &&
-												pText.length > tText.length + 10
-											) {
-												summaryText = para;
-												found = true;
-												break;
-											}
-										}
-									}
-									if (!found) {
-										if (
-											!summaryText &&
-											groupedResults[docId].paragraphs.length > 0
-										) {
-											const p0 = groupedResults[docId].paragraphs[0];
-											const tText = groupedResults[docId].tag
-												? normalize(groupedResults[docId].tag.title)
-												: "";
-											const p0Norm = normalize(p0);
-											if (p0Norm !== tText && !p0Norm.includes(tText)) {
-												summaryText = p0;
-											}
-										}
-									}
-								}
-
-								summaryText = summaryText || "";
-
-								// Set matches to this summary
-								groupedResults[docId].paragraphs = [summaryText];
-								groupedResults[docId].matches.push({
-									index: 0,
-									text: summaryText,
-								});
-							}
-						} else {
-							// Standard search: add specific paragraph match
-							const idx = parseInt(paraIndex, 10);
-							if (
-								groupedResults[docId].paragraphs &&
-								groupedResults[docId].paragraphs[idx]
-							) {
-								groupedResults[docId].matches.push({
-									index: idx,
-									text: groupedResults[docId].paragraphs[idx],
-								});
-							}
-						}
-					}
-				});
-
-				// Sort paragraphs within docs
-				const normalize = (s) =>
-					String(s)
-						.toLowerCase()
-						.replace(/[^a-z0-9]/g, "");
-
-				Object.values(groupedResults).forEach((doc) => {
-					doc.matches.sort((a, b) => a.index - b.index);
-
-					// Post-processing for Sessions:
-					// 1. Remove match if it is just the Title (redundant)
-					// 2. Adjust remaining indices if we removed top one, so it looks nice (starts from 1)
-					if (doc.isSession && doc.tag && doc.matches.length > 0) {
-						const tText = normalize(doc.tag.title);
-						// Check first match (usually Title is index 0)
-						const m0 = doc.matches[0];
-						if (m0.index === 0) {
-							const pText = normalize(m0.text);
-							// If first match IS the title (or subset), remove it
-							if (
-								pText === tText ||
-								pText.includes(tText) ||
-								tText.includes(pText)
-							) {
-								doc.matches.shift();
-
-								// If we removed all matches, add a fallback match using next paragraph
-								if (
-									doc.matches.length === 0 &&
-									doc.paragraphs &&
-									doc.paragraphs.length > 1
-								) {
-									doc.matches.push({
-										index: 1,
-										text: doc.paragraphs[1],
-									});
-								}
-							}
-						}
-					}
-				});
-
-				// Filter out documents with no matches
-				const filteredResults = rankResearchResults(
-					Object.values(groupedResults).filter((doc) => doc.matches.length > 0),
+				const {
+					results: searchResults,
+					highlight,
+					cancelled,
+				} = await runResearchSearch({
+					indexData,
 					searchQuery,
-				);
+					sessionsById,
+					libraryTags: LibraryStore.getRawState().tags,
+					isCancelled: () =>
+						!isMounted.current || requestId !== searchRequestId.current,
+					onProgress: (progress) => {
+						if (isMounted.current && requestId === searchRequestId.current) {
+							setSearchProgress(progress);
+						}
+					},
+				});
 
-				if (isMounted.current && requestId === searchRequestId.current) {
-					const uniqueTerms = searchTerms;
-					ResearchStore.update((s) => {
-						s.results = filteredResults;
-						s.highlight = uniqueTerms;
-						s.hasSearched = true;
-					});
-					if (!isRestoring && listRef.current) {
-						listRef.current.scrollToItem(0, "start");
-					}
+				if (
+					cancelled ||
+					!isMounted.current ||
+					requestId !== searchRequestId.current
+				) {
+					return;
+				}
+
+				ResearchStore.update((s) => {
+					s.results = searchResults;
+					s.highlight = highlight;
+					s.hasSearched = true;
+				});
+				if (!isRestoring && listRef.current) {
+					listRef.current.scrollToItem(0, "start");
 				}
 			} catch (err) {
 				structuredLogger.error("Search failed:", err);
@@ -857,7 +473,6 @@ export default function Research() {
 				if (isMounted.current && requestId === searchRequestId.current) {
 					setSearching(false);
 					setSearchProgress(100);
-					// Keep progress bar visible briefly to show 100% completion
 					progressHideTimer.current = setTimeout(() => {
 						if (isMounted.current && requestId === searchRequestId.current) {
 							setShowProgress(false);
@@ -871,7 +486,7 @@ export default function Research() {
 				}
 			}
 		},
-		[indexData, query, setResults, filterTags, sessions, sessionsById],
+		[indexData, query, setResults, filterTags, sessionsById],
 	);
 
 	// Only auto-search on initial page load if there's a saved query from localStorage
@@ -1163,6 +778,19 @@ export default function Research() {
 		}
 	}, [filteredResults]);
 
+	useEffect(() => {
+		if (hasSearched && filteredResults.length > 0) {
+			setScrollPages((prev) => ({ ...prev, visible: true }));
+			if (scrollTimeoutRef.current) {
+				clearTimeout(scrollTimeoutRef.current);
+			}
+			scrollTimeoutRef.current = setTimeout(() => {
+				if (resultsOutlineOpenRef.current) return;
+				setScrollPages((prev) => ({ ...prev, visible: false }));
+			}, 1500);
+		}
+	}, [hasSearched, filteredResults]);
+
 	const scrollToTop = useCallback(() => {
 		if (listRef.current) {
 			listRef.current.scrollToItem(0, "start");
@@ -1316,7 +944,7 @@ export default function Research() {
 							</Typography>
 							<Typography variant="body2" color="text.secondary">
 								{translations.RESEARCH_HELP ||
-									"Search your articles, sessions, summaries, and transcriptions."}
+									"Search your articles, sessions, and summaries."}
 							</Typography>
 						</Box>
 						<Tooltip title={panelToggleLabel}>
@@ -1704,18 +1332,6 @@ export default function Research() {
 					/>
 				</Box>
 			)}
-			{useEffect(() => {
-				if (hasSearched && filteredResults.length > 0) {
-					setScrollPages((prev) => ({ ...prev, visible: true }));
-					if (scrollTimeoutRef.current) {
-						clearTimeout(scrollTimeoutRef.current);
-					}
-					scrollTimeoutRef.current = setTimeout(() => {
-						if (resultsOutlineOpenRef.current) return;
-						setScrollPages((prev) => ({ ...prev, visible: false }));
-					}, 1500);
-				}
-			}, [hasSearched, filteredResults]) || null}
 			<JumpDialog
 				open={jumpOpen}
 				onClose={() => setJumpOpen(false)}

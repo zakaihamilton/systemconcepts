@@ -1,12 +1,41 @@
 import { LibraryTagKeys } from "@views/Library/Icons";
 
+const FALLBACK_TRANSCRIPTION_LABELS = [
+	"transcriptions",
+	"תמלולים",
+	"transcrições",
+];
+
+function isRemovedTranscriptionsFilter(filter, transcriptionLabels) {
+	if (typeof filter === "string") {
+		return transcriptionLabels.has(filter.toLowerCase());
+	}
+	if (filter?.id === "TRANSCRIPTIONS") return true;
+	return (
+		filter?.type === "source" &&
+		transcriptionLabels.has(String(filter.label || "").toLowerCase())
+	);
+}
+
+/** Drop retired Transcriptions source filters from persisted Research state. */
+export function sanitizeResearchFilterTags(filterTags = [], translations = {}) {
+	const transcriptionLabels = new Set(FALLBACK_TRANSCRIPTION_LABELS);
+	if (translations.TRANSCRIPTIONS) {
+		transcriptionLabels.add(String(translations.TRANSCRIPTIONS).toLowerCase());
+	}
+	return filterTags.filter(
+		(filter) => !isRemovedTranscriptionsFilter(filter, transcriptionLabels),
+	);
+}
+
 export function filterResearchResults(
 	results,
 	appliedFilterTags,
 	translations,
 ) {
-	if (!appliedFilterTags.length) return results;
-	const groups = appliedFilterTags.reduce((result, filter) => {
+	const tags = sanitizeResearchFilterTags(appliedFilterTags, translations);
+	if (!tags.length) return results;
+	const groups = tags.reduce((result, filter) => {
 		const type =
 			typeof filter === "string" ? "legacy" : filter.type || "legacy";
 		(result[type] ||= []).push(filter);
@@ -23,8 +52,6 @@ export function filterResearchResults(
 					if (filterLabel === translations.ARTICLES) return !doc.isSession;
 					if (filterLabel === translations.SUMMARIES)
 						return doc.isSession && Boolean(doc.summaryText || doc.summary);
-					if (filterLabel === translations.TRANSCRIPTIONS)
-						return doc.isSession && Boolean(doc.transcription);
 				}
 
 				if (doc.isSession) {

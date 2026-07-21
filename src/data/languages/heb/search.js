@@ -20,6 +20,10 @@ export default [
 		value: "מחפש...",
 	},
 	{
+		id: "INDEXING",
+		value: "מאנדקס...",
+	},
+	{
 		id: "NO_RESULTS",
 		value: "לא נמצאו תוצאות.",
 	},
@@ -37,7 +41,7 @@ export default [
 	{ id: "EXPAND_SESSION", value: "הרחב מפגש" },
 	{
 		id: "RESEARCH_HELP",
-		value: "חפשו במאמרים, במפגשים, בתקצירים ובתמלולים שלכם.",
+		value: "חפשו במאמרים, במפגשים ובתקצירים שלכם.",
 	},
 	{
 		id: "SEARCH_HINT",

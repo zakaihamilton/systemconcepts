@@ -24,6 +24,10 @@ export default [
 		value: "Searching...",
 	},
 	{
+		id: "INDEXING",
+		value: "Indexing...",
+	},
+	{
 		id: "NO_RESULTS",
 		value: "No results found.",
 	},
@@ -41,7 +45,7 @@ export default [
 	{ id: "EXPAND_SESSION", value: "Expand session" },
 	{
 		id: "RESEARCH_HELP",
-		value: "Search your articles, sessions, summaries, and transcriptions.",
+		value: "Search your articles, sessions, and summaries.",
 	},
 	{
 		id: "SEARCH_HINT",

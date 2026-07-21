@@ -123,7 +123,7 @@ describe("Research View", () => {
 			SESSIONS: "Sessions",
 			ARTICLES: "Articles",
 			SUMMARIES: "Summaries",
-			TRANSCRIPTIONS: "Transcriptions",
+			INDEXING: "Indexing...",
 			SEARCH: "Search",
 			SEARCH_ARTICLES: "Search...",
 			ALL: "All",

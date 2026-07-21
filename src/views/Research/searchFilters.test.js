@@ -1,4 +1,7 @@
-import { filterResearchResults } from "./searchFilters";
+import {
+	filterResearchResults,
+	sanitizeResearchFilterTags,
+} from "./searchFilters";
 
 const translations = {
 	SESSIONS: "Sessions",
@@ -42,5 +45,32 @@ describe("research filters", () => {
 				translations,
 			),
 		).toEqual([results[0], results[1]]);
+	});
+
+	it("ignores retired Transcriptions source filters", () => {
+		const results = [
+			{ isSession: true, group: "ai", summaryText: "summary" },
+			{ isSession: false, tag: { group: "ai" } },
+		];
+		expect(
+			filterResearchResults(
+				results,
+				[{ type: "source", label: "Transcriptions", id: "TRANSCRIPTIONS" }],
+				translations,
+			),
+		).toEqual(results);
+	});
+
+	it("sanitizeResearchFilterTags strips Transcriptions chips", () => {
+		expect(
+			sanitizeResearchFilterTags(
+				[
+					{ type: "source", label: "Sessions", id: "SESSIONS" },
+					{ type: "source", label: "Transcriptions", id: "TRANSCRIPTIONS" },
+					{ type: "source", label: "Transcrições" },
+				],
+				translations,
+			),
+		).toEqual([{ type: "source", label: "Sessions", id: "SESSIONS" }]);
 	});
 });
