@@ -1,61 +1,23 @@
 import { ContentSize } from "@components/Page/Content";
 import { useSearch } from "@components/Search";
-import { registerToolbar, useToolbar } from "@components/Toolbar";
-import FixedSizeGrid from "@components/Virtualized/FixedSizeGrid";
-import FixedSizeList from "@components/Virtualized/FixedSizeList";
-import AccountTreeIcon from "@icons/svg/AccountTree.svg";
-import ArrowDownwardIcon from "@icons/svg/ArrowDownward.svg";
-import ArrowUpwardIcon from "@icons/svg/ArrowUpward.svg";
 import DataUsageIcon from "@icons/svg/DataUsage.svg";
-import GetAppIcon from "@icons/svg/GetApp.svg";
 import InfoIcon from "@icons/svg/Info.svg";
-import PublishIcon from "@icons/svg/Publish.svg";
-import RefreshIcon from "@icons/svg/Refresh.svg";
-import SortIcon from "@icons/svg/Sort.svg";
-import TableChartIcon from "@icons/svg/TableChart.svg";
-import ViewComfyIcon from "@icons/svg/ViewComfy.svg";
-import ViewListIcon from "@icons/svg/ViewList.svg";
-import ViewStreamIcon from "@icons/svg/ViewStream.svg";
-import ViewWeekIcon from "@icons/svg/ViewWeek.svg";
-import IconButton from "@ui/IconButton";
-import LinearProgress from "@ui/LinearProgress";
-import Table from "@ui/Table";
-import TableBody from "@ui/TableBody";
-import TableContainer from "@ui/TableContainer";
-import TableHead from "@ui/TableHead";
-import TableRow from "@ui/TableRow";
-import { logger as structuredLogger } from "@util/api/logger";
 import { useDeviceType } from "@util/browser/styles";
-import { getComparator, stableSort } from "@util/data/sort";
 import { useTranslations } from "@util/domain/translations";
-import { exportData, importData } from "@util/storage/importExport";
 import Message from "@widgets/Message";
 import { StatusBarStore } from "@widgets/StatusBar";
-import Tooltip from "@widgets/Tooltip";
-import clsx from "clsx";
-import React, {
-	forwardRef,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
-import Error from "./Error";
-import Item from "./Item";
-import ListColumns from "./ListColumns";
-import Navigator from "./Navigator";
-import Row from "./Row";
-import styles from "./Table.module.css";
-import TableColumn from "./TableColumn";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useTableData } from "./hooks/useTableData";
+import { useTableScroll } from "./hooks/useTableScroll";
+import { useTableToolbar } from "./hooks/useTableToolbar";
+import {
+	allocateRegistryId,
+	tableDataRegistry,
+} from "./tableDataRegistry";
+import TableTableView from "./views/TableTableView";
+import { TableGridView, TableListView } from "./views/TableVirtualizedView";
 
-// Stable empty array to prevent unnecessary re-renders
 const EMPTY_ARRAY = [];
-
-registerToolbar("Table", 100);
-
-const tableDataRegistry = new Map();
-let tableRegistryCounter = 0;
 
 export default React.memo(function TableWidget(props) {
 	let {
@@ -108,82 +70,12 @@ export default React.memo(function TableWidget(props) {
 		orderBy = defaultSort,
 		viewMode = "table",
 	} = store.useState();
-	const { scrollOffset = 0 } = store.useState((s) => ({
-		scrollOffset: s.scrollOffset,
-	}));
-	const listRef = React.useRef();
-	const gridRef = React.useRef();
-	const hasRestoredScrollRef = React.useRef(false);
-	const lastResetDepsRef = React.useRef(resetScrollDeps);
 
-	// Handle scroll position restoration after component mounts or data loads
-	useEffect(() => {
-		if (!loading && scrollOffset > 0 && !hasRestoredScrollRef.current) {
-			// Restore scroll position after a brief delay to ensure DOM is ready
-			const timer = setTimeout(() => {
-				if (listRef.current) {
-					listRef.current.scrollTo(scrollOffset);
-				}
-				if (gridRef.current) {
-					gridRef.current.scrollTo({ scrollTop: scrollOffset });
-				}
-				hasRestoredScrollRef.current = true;
-			}, 50);
-			return () => clearTimeout(timer);
-		}
-	}, [loading, scrollOffset]);
-
-	// Reset scroll position when filters change
-	useEffect(() => {
-		// Check if resetScrollDeps actually changed (deep comparison)
-		const depsChanged =
-			JSON.stringify(lastResetDepsRef.current) !==
-			JSON.stringify(resetScrollDeps);
-		lastResetDepsRef.current = resetScrollDeps;
-
-		if (depsChanged && resetScrollDeps.length > 0 && !loading) {
-			// Reset scroll position
-			if (listRef.current) {
-				listRef.current.scrollTo(0);
-			}
-			if (gridRef.current) {
-				gridRef.current.scrollTo({ scrollTop: 0 });
-			}
-			// Update store
-			store.update((s) => {
-				s.scrollOffset = 0;
-			});
-			hasRestoredScrollRef.current = true; // Prevent restoration after reset
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [...resetScrollDeps, loading]);
-
-	// Save scroll position on user scroll (debounced)
-	const saveScrollPosition = React.useCallback(
-		(offset) => {
-			store.update((s) => {
-				s.scrollOffset = offset;
-			});
-		},
-		[store],
-	);
-
-	const debouncedSaveScroll = React.useMemo(() => {
-		let timeoutId;
-		return (offset) => {
-			clearTimeout(timeoutId);
-			timeoutId = setTimeout(() => saveScrollPosition(offset), 300);
-		};
-	}, [saveScrollPosition]);
-
-	// Handle scroll state for performance optimization
-	const handleScrollState = React.useCallback(
-		(offset) => {
-			// Save scroll position
-			debouncedSaveScroll(offset);
-		},
-		[debouncedSaveScroll],
-	);
+	const { listRef, gridRef, scrollOffset, handleScrollState } = useTableScroll({
+		store,
+		loading,
+		resetScrollDeps,
+	});
 
 	const pageSize = useContext(ContentSize);
 	const search = useSearch(name, () => {
@@ -193,251 +85,32 @@ export default React.memo(function TableWidget(props) {
 	});
 	size = size || pageSize;
 
-	const viewModesList = [
-		{
-			id: "table",
-			icon: <TableChartIcon />,
-			name: translations.TABLE_VIEW,
-		},
-		{
-			id: "list",
-			icon: <ViewListIcon />,
-			name: translations.LIST_VIEW,
-		},
-		{
-			id: "grid",
-			icon: <ViewComfyIcon />,
-			name: translations.GRID_VIEW,
-		},
-		{
-			id: "tree",
-			icon: <AccountTreeIcon />,
-			name: translations.TREE_VIEW,
-		},
-		{
-			id: "tracks",
-			icon: <ViewWeekIcon />,
-			name: translations.TRACKS_VIEW,
-		},
-	].filter((item) => viewModes.hasOwnProperty(item.id));
+	const {
+		visibleColumns,
+		createSortHandler,
+		sortItems,
+		itemsPerPageItems,
+		items,
+		rawItems,
+	} = useTableData({
+		columns,
+		store,
+		viewMode,
+		data,
+		filter,
+		mapper,
+		depends,
+		search,
+		treeGroup,
+		expandedTreeGroups,
+		onExport,
+		onImport,
+		order,
+		orderBy,
+		itemsPerPage,
+	});
 
-	const visibleColumns = useMemo(
-		() =>
-			columns.filter((column) => {
-				if (!column) {
-					return false;
-				}
-				if (typeof column.visible !== "undefined" && !column.visible) {
-					return false;
-				}
-				if (column.viewModes) {
-					return column.viewModes.hasOwnProperty(viewMode);
-				}
-				return true;
-			}),
-		[columns, viewMode],
-	);
-
-	const createSortHandler = useCallback(
-		(property) => () => {
-			const isDesc = orderBy === property && order === "desc";
-			store.update((s) => {
-				s.order = isDesc ? "asc" : "desc";
-				s.orderBy = property;
-			});
-		},
-		[order, orderBy, store],
-	);
-
-	const sortItems = useMemo(() => {
-		return (columns || [])
-			.filter((column) => column.sortable)
-			.map((column) => {
-				const { sortable, id, title } = column;
-				const sortId = typeof sortable === "string" ? sortable : id;
-				return {
-					id: id,
-					name: title,
-					icon:
-						orderBy === sortId ? (
-							order === "asc" ? (
-								<ArrowUpwardIcon />
-							) : (
-								<ArrowDownwardIcon />
-							)
-						) : null,
-					selected: orderBy === sortId,
-					onClick: createSortHandler(sortId),
-				};
-			});
-	}, [columns, orderBy, order, createSortHandler]);
-
-	const itemsPerPageItems = useMemo(() => {
-		return [10, 25, 50, 75, 100].map((num) => {
-			return {
-				id: num,
-				name: num,
-				icon: null,
-				selected: itemsPerPage,
-				onClick: () =>
-					store.update((s) => {
-						s.itemsPerPage = num;
-					}),
-			};
-		});
-	}, [itemsPerPage, store]);
-
-	const searchKeys = useMemo(() => {
-		return columns
-			.filter(
-				(item) => typeof item.searchable === "undefined" || item.searchable,
-			)
-			.map((item) => {
-				if (typeof item.searchable === "string") {
-					return item.searchable;
-				}
-				if (typeof item.sortable === "string") {
-					return item.sortable;
-				}
-				return item.id;
-			});
-	}, [columns]);
-
-	const mappedData = useMemo(() => {
-		let raw = data || [];
-		if (filter) {
-			raw = raw.filter(filter);
-		}
-
-		return raw.map((item) => {
-			const mapped = mapper ? mapper(item) : item;
-			// Pre-compute searchable text
-			const searchableText = searchKeys
-				.map((key) => {
-					const val = mapped[key];
-					return typeof val === "string" ? val.toLowerCase() : "";
-				})
-				.join("\0"); // Use null character as separator to prevent boundary matches
-
-			return {
-				raw: item,
-				mapped,
-				searchableText,
-			};
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [data, filter, mapper, searchKeys, ...depends]);
-
-	const filteredData = useMemo(() => {
-		if (!search) {
-			return mappedData;
-		}
-
-		// Handle special search prefixes
-		if (search.toLowerCase() === "@doublespace") {
-			return mappedData.filter(({ mapped }) => {
-				// Check if name has double (or more) consecutive spaces
-				const nameHasDoubleSpace = mapped.name && /  /.test(mapped.name);
-				// Check if there's a double space between date and name
-				const fullName = `${mapped.date || ""} ${mapped.name || ""}`;
-				const fullNameHasDoubleSpace = /  /.test(fullName);
-				return nameHasDoubleSpace || fullNameHasDoubleSpace;
-			});
-		}
-
-		// Parse search query with AND/OR support
-		// Split by OR first (case insensitive), then by AND within each group
-		// Spaces between terms without explicit operators are treated as AND
-		// Quoted strings are treated as a single term
-		const parseSearchQuery = (query) => {
-			// Helper to extract terms from a string, respecting quotes
-			const extractTerms = (str) => {
-				const terms = [];
-				const regex = /"([^"]+)"|'([^']+)'|(\S+)/g;
-				let match;
-				while ((match = regex.exec(str)) !== null) {
-					// match[1] is double-quoted, match[2] is single-quoted, match[3] is unquoted
-					const term = match[1] || match[2] || match[3];
-					if (term && term.toLowerCase() !== "and") {
-						terms.push(term);
-					}
-				}
-				return terms;
-			};
-
-			// Split by " OR " (case insensitive), but not within quotes
-			// First, temporarily replace quoted strings with placeholders
-			const quotedStrings = [];
-			let processedQuery = query.replace(/"[^"]+"|'[^']+'/g, (match) => {
-				quotedStrings.push(match);
-				return `__QUOTED_${quotedStrings.length - 1}__`;
-			});
-
-			// Split by OR
-			const orParts = processedQuery.split(/\s+or\s+/i);
-
-			return orParts
-				.map((part) => {
-					// Restore quoted strings
-					let restored = part;
-					quotedStrings.forEach((qs, idx) => {
-						restored = restored.replace(`__QUOTED_${idx}__`, qs);
-					});
-					return extractTerms(restored);
-				})
-				.filter((group) => group.length > 0);
-		};
-
-		// Check if an item matches a single search term
-		const matchesTerm = (itemWrapper, term) => {
-			const lowerTerm = term.toLowerCase();
-			return itemWrapper.searchableText.includes(lowerTerm);
-		};
-
-		// Check if an item matches the parsed query
-		// orGroups is an array of AND-groups, where each AND-group is an array of terms
-		// An item matches if ANY OR-group matches, and an OR-group matches if ALL its terms match
-		const matchesQuery = (itemWrapper, orGroups) => {
-			return orGroups.some((andTerms) =>
-				andTerms.every((term) => matchesTerm(itemWrapper, term)),
-			);
-		};
-
-		const orGroups = parseSearchQuery(search);
-
-		return mappedData.filter((itemWrapper) =>
-			matchesQuery(itemWrapper, orGroups),
-		);
-	}, [mappedData, search]);
-
-	const purelySortedData = useMemo(() => {
-		return stableSort(filteredData || [], (a, b) =>
-			getComparator(order, orderBy)(a.mapped, b.mapped),
-		);
-	}, [filteredData, order, orderBy]);
-
-	const sortedData = useMemo(() => {
-		let sorted = purelySortedData;
-		if (viewMode === "tree" && treeGroup) {
-			sorted = treeGroup(purelySortedData, expandedTreeGroups || []);
-		}
-		return sorted;
-	}, [purelySortedData, viewMode, treeGroup, expandedTreeGroups]);
-
-	const items = useMemo(
-		() => sortedData.map((item) => item.mapped),
-		[sortedData],
-	);
-	// Only export-capable tables need a second full-catalog array of raw data.
-	const rawItems = useMemo(
-		() => (onExport || onImport ? sortedData.map((item) => item.raw) : null),
-		[onExport, onImport, sortedData],
-	);
-
-	const registryId = useMemo(() => {
-		const id = ++tableRegistryCounter;
-		return id;
-	}, []);
+	const registryId = useMemo(() => allocateRegistryId(), []);
 
 	tableDataRegistry.set(registryId, { items });
 
@@ -445,146 +118,26 @@ export default React.memo(function TableWidget(props) {
 		return () => tableDataRegistry.delete(registryId);
 	}, [registryId]);
 
-	const toolbarItems = [
-		data &&
-			name &&
-			onImport && {
-				id: "import",
-				name: translations.IMPORT,
-				icon: <PublishIcon />,
-				onClick: async () => {
-					let body = "";
-					try {
-						({ body } = await importData());
-					} catch (err) {
-						if (err) {
-							structuredLogger.error(err);
-						}
-						return;
-					}
-					try {
-						await onImport(JSON.parse(body));
-					} catch (err) {
-						structuredLogger.error(err);
-					}
-				},
-				location: "header",
-				menu: "true",
-			},
-		!isMobile &&
-			data &&
-			name && {
-				id: "export",
-				name: translations.EXPORT,
-				icon: <GetAppIcon />,
-				onClick: async () => {
-					let body = null;
-					let type = "application/json";
-					let filename = name;
-					if (onExport) {
-						const result = await onExport();
-						if (result && typeof result === "object" && result.data) {
-							body = result.data;
-							if (result.type) type = result.type;
-							if (result.name) filename = result.name;
-						} else {
-							body = result;
-						}
-					} else {
-						body = JSON.stringify({ [name]: rawItems }, null, 4);
-					}
-					exportData(body, filename, type);
-				},
-				location: "header",
-				menu: "true",
-			},
-		refresh && {
-			id: "refresh",
-			name: translations.REFRESH,
-			icon: <RefreshIcon />,
-			onClick: refresh,
-			location: "header",
-			menu: "true",
-		},
-		viewMode !== "table" &&
-			!!sortItems.length &&
-			showSort && {
-				id: "sort",
-				location: isPhone ? "mobile" : "header",
-				name: translations.SORT,
-				icon: <SortIcon />,
-				items: sortItems,
-				divider: true,
-			},
-		viewMode === "table" &&
-			data &&
-			data.length >= 10 && {
-				id: "itemsPerPage",
-				location: isPhone ? "mobile" : "header",
-				name: translations.ROWS_PER_PAGE,
-				icon: <ViewStreamIcon />,
-				items: itemsPerPageItems,
-				divider: true,
-			},
-	].filter(Boolean);
-
-	const viewOptions = viewModesList.map((item) => ({
-		...item,
-		onClick: () => {
-			store.update((s) => {
-				s.viewMode = item.id;
-			});
-		},
-	}));
-
-	if (viewOptions.length > 1) {
-		if (!isMobile) {
-			const viewGroup = (
-				<div className={styles.viewGroup}>
-					{viewOptions.map((item) => {
-						const isSelected = viewMode === item.id;
-						return (
-							<Tooltip title={item.name} key={item.id}>
-								<IconButton
-									onClick={item.onClick}
-									className={clsx(
-										styles.viewGroupButton,
-										isSelected && styles.selected,
-									)}
-									size="small"
-									aria-label={item.name}
-								>
-									{item.icon}
-								</IconButton>
-							</Tooltip>
-						);
-					})}
-				</div>
-			);
-			toolbarItems.push({
-				id: "viewGroup",
-				element: viewGroup,
-				location: "header",
-			});
-		}
-	}
-
-	useToolbar({
-		id: "Table",
-		items: toolbarItems,
-		depends: [rawItems, name, translations, viewMode, sortItems, itemsPerPage],
+	useTableToolbar({
+		data,
+		name,
+		onImport,
+		onExport,
+		refresh,
+		isMobile,
+		isPhone,
+		translations,
+		viewMode,
+		sortItems,
+		showSort,
+		itemsPerPageItems,
+		viewModes,
+		store,
+		rawItems,
+		visibleColumns,
+		orderBy,
+		defaultSort,
 	});
-
-	useEffect(() => {
-		const hasColumn = visibleColumns.some(
-			(column) => column.id === orderBy || column.sortable === orderBy,
-		);
-		if (!hasColumn) {
-			store.update((s) => {
-				s.orderBy = defaultSort;
-			});
-		}
-	}, [visibleColumns, orderBy, defaultSort, store]);
 
 	const sizeToPixels = (text) => {
 		const number = parseFloat(text);
@@ -599,7 +152,6 @@ export default React.memo(function TableWidget(props) {
 	const cellHeightInPixels = sizeToPixels(cellHeight);
 	const cellWidthInPixels = sizeToPixels(cellWidth);
 
-	// Memoize expensive grid calculations
 	const gridLayout = useMemo(() => {
 		const columnCount =
 			size && size.width
@@ -612,7 +164,6 @@ export default React.memo(function TableWidget(props) {
 			size && size.width
 				? (size.width - columnCount * cellWidthInPixels) / 2
 				: 0;
-		return { columnCount, rowCount, sidePadding };
 		return { columnCount, rowCount, sidePadding };
 	}, [size, cellWidthInPixels, items]);
 
@@ -653,52 +204,6 @@ export default React.memo(function TableWidget(props) {
 		],
 	);
 
-	const innerElementType = useMemo(() => {
-		const Inner = forwardRef(({ children, ...rest }, ref) => {
-			const {
-				style: itemStyles,
-				columnStyles: _columnStyles,
-				...props
-			} = viewModes[viewMode] || {};
-			const style = {
-				top: 0,
-				left: 0,
-				width: "100%",
-				height: itemHeightInPixels + "px",
-			};
-			return (
-				<div ref={ref} {...rest}>
-					{!hideColumns && (
-						<ListColumns
-							key={0}
-							columns={visibleColumns}
-							style={{ ...style, ...itemStyles }}
-							{...props}
-							order={order}
-							orderBy={orderBy}
-							onSort={createSortHandler}
-							showSort={showSort}
-						/>
-					)}
-					{children}
-				</div>
-			);
-		});
-		Inner.displayName = "innerElementType";
-		return Inner;
-	}, [
-		viewMode,
-		viewModes,
-		itemHeightInPixels,
-		hideColumns,
-		visibleColumns,
-		order,
-		orderBy,
-		createSortHandler,
-		showSort,
-	]);
-
-	// Delay showing "Loading" to prevent flicker on quick loads
 	const [showLoading, setShowLoading] = useState(false);
 	useEffect(() => {
 		if (loading) {
@@ -709,7 +214,6 @@ export default React.memo(function TableWidget(props) {
 		}
 	}, [loading]);
 
-	// Delay showing "No Items" to prevent flicker on initial load
 	const isEmpty = !items || !items.length;
 	const [showEmpty, setShowEmpty] = useState(false);
 	useEffect(() => {
@@ -733,8 +237,6 @@ export default React.memo(function TableWidget(props) {
 		maxWidth: size.width + "px",
 	};
 
-	const numItems = items && items.length;
-
 	const loadingElement = (
 		<Message
 			animated={true}
@@ -745,297 +247,87 @@ export default React.memo(function TableWidget(props) {
 	const emptyElement = (
 		<Message Icon={InfoIcon} label={emptyLabel || translations.NO_ITEMS} />
 	);
-	const loader = (
-		<div className={clsx(styles.loader, loading && styles.loading)}>
-			<LinearProgress />
-		</div>
-	);
+
+	const sharedViewProps = {
+		items,
+		loading,
+		error,
+		statusBarVisible,
+		statusBar,
+		showLoading,
+		showEmpty,
+		loadingElement,
+		emptyElement,
+	};
 
 	if (viewMode === "list" || viewMode === "tree") {
-		const itemCount = hideColumns ? numItems : numItems + 1;
-
 		return (
-			<>
-				{!!showLoading && !numItems && loadingElement}
-				{!!showEmpty && !loading && emptyElement}
-				{!!statusBarVisible && statusBar}
-				{loader}
-				{!!numItems && !error && (
-					<FixedSizeList
-						className={clsx(styles.tableList, loading && styles.loading)}
-						ref={listRef}
-						height={height}
-						innerElementType={innerElementType}
-						itemCount={itemCount}
-						itemSize={itemHeightInPixels}
-						width={size.width}
-						overscanCount={1}
-						initialScrollOffset={scrollOffset}
-						onScroll={({ scrollOffset }) => {
-							handleScrollState(scrollOffset);
-						}}
-						itemData={itemData}
-					>
-						{TableListRow}
-					</FixedSizeList>
-				)}
-				{!!error && <Error error={error} />}
-			</>
-		);
-	} else if (viewMode === "table") {
-		const tableColumns =
-			!hideColumns &&
-			(visibleColumns || []).map((item, idx) => {
-				return (
-					<TableColumn
-						key={item.id || idx}
-						item={item}
-						showSort={showSort}
-						order={order}
-						orderBy={orderBy}
-						createSortHandler={createSortHandler}
-						stickyHeader
-					/>
-				);
-			});
-
-		const pageCount = Math.ceil(numItems / itemsPerPage);
-		const startIdx = offset;
-		const endIdx = startIdx + itemsPerPage;
-		const pageIndex = Math.ceil(startIdx / itemsPerPage);
-
-		const setPageIndex = (index) => {
-			const offset = index * itemsPerPage;
-			store.update((s) => {
-				s.offset = offset;
-			});
-		};
-
-		const itemsOnPage = items.slice(startIdx, endIdx);
-
-		const tableRows = itemsOnPage.map((item, idx) => {
-			const { style, ...props } = viewModes[viewMode] || {};
-			const { id, key } = item;
-			const selected = selectedRow && selectedRow(item);
-			const itemIndex = startIdx + idx;
-			let separator = false;
-			if (getSeparator && itemIndex > 0) {
-				const prevItem = items[itemIndex - 1];
-				if (item && prevItem) {
-					separator = getSeparator(item, prevItem, orderBy, viewMode);
-				}
-			}
-			const className = rowClassName ? rowClassName(item) : "";
-			return (
-				<Row
-					key={key || id || idx}
-					index={idx}
-					rowHeight={rowHeight}
-					columns={visibleColumns}
-					rowClick={rowClick}
-					item={item}
-					viewMode={viewMode}
-					style={style}
-					selected={selected}
-					separator={separator}
-					renderColumn={renderColumn}
-					className={clsx(props.className, className)}
-					{...props}
-				/>
-			);
-		});
-
-		return (
-			<>
-				{!!showLoading && !numItems && loadingElement}
-				{!!showEmpty && !loading && emptyElement}
-				{!!numItems && (
-					<TableContainer
-						className={clsx(
-							styles.tableContainer,
-							className,
-							loading && styles.loading,
-						)}
-						style={style}
-						{...otherProps}
-					>
-						{!!statusBarVisible && statusBar}
-						{loader}
-						{!error && (
-							<Table
-								classes={{ root: styles.table }}
-								stickyHeader
-								style={style}
-							>
-								{hideColumns && (
-									<colgroup>
-										{visibleColumns.map((column) => (
-											<col key={column.id} style={column.columnProps?.style} />
-										))}
-									</colgroup>
-								)}
-								{!hideColumns && (
-									<TableHead>
-										<TableRow>{tableColumns}</TableRow>
-									</TableHead>
-								)}
-								<TableBody>{tableRows}</TableBody>
-							</Table>
-						)}
-					</TableContainer>
-				)}
-				{!!error && <Error error={error} />}
-				{!loading && !!numItems && (
-					<Navigator
-						pageIndex={pageIndex}
-						setPageIndex={setPageIndex}
-						pageCount={pageCount}
-						numItems={numItems}
-					/>
-				)}
-			</>
-		);
-	} else if (viewMode === "grid") {
-		return (
-			<>
-				{!!showLoading && !numItems && loadingElement}
-				{!!showEmpty && !loading && emptyElement}
-				{!!statusBarVisible && statusBar}
-				{loader}
-				{!!numItems && !error && (
-					<FixedSizeGrid
-						className={clsx(styles.grid, loading && styles.loading)}
-						ref={gridRef}
-						columnCount={columnCount}
-						columnWidth={cellWidthInPixels}
-						rowCount={rowCount}
-						rowHeight={cellHeightInPixels}
-						height={height}
-						width={size.width}
-						overscanRowCount={1}
-						overscanColumnCount={0}
-						initialScrollTop={scrollOffset}
-						onScroll={({ scrollTop }) => {
-							handleScrollState(scrollTop);
-						}}
-						itemData={itemData}
-					>
-						{TableGridCell}
-					</FixedSizeGrid>
-				)}
-				{!!error && <Error error={error} />}
-			</>
-		);
-	} else {
-		return null;
-	}
-});
-
-const TableListRow = React.memo(({ index, style, data }) => {
-	const {
-		registryId,
-		hideColumns,
-		viewModes,
-		viewMode,
-		selectedRow,
-		visibleColumns,
-		rowClick,
-		orderBy,
-		getSeparator,
-		renderColumn,
-		rowClassName,
-	} = data;
-	const { items } = tableDataRegistry.get(registryId) || {};
-	const itemIndex = hideColumns ? index : index - 1;
-	const item = items?.[itemIndex];
-
-	if (!item) return null;
-
-	const { id, key } = item;
-	const {
-		style: itemStyles,
-		columnStyles: _columnStyles,
-		...props
-	} = viewModes[viewMode] || {};
-	const selected = index && selectedRow && selectedRow(item);
-	const className = rowClassName ? rowClassName(item) : "";
-
-	if (!hideColumns && !index) {
-		return null;
-	}
-
-	let separator = false;
-	if (getSeparator && itemIndex > 0) {
-		const prevItem = items[itemIndex - 1];
-		if (item && prevItem) {
-			separator = getSeparator(item, prevItem, orderBy, viewMode);
-		}
-	}
-
-	return (
-		<>
-			<Item
-				key={key || id || itemIndex}
-				style={{ ...style, ...itemStyles }}
-				{...props}
-				className={clsx(props.className, className)}
-				columns={visibleColumns}
-				rowClick={rowClick}
-				item={item}
-				index={itemIndex}
+			<TableListView
+				{...sharedViewProps}
+				hideColumns={hideColumns}
+				viewModes={viewModes}
 				viewMode={viewMode}
-				selected={selected}
-				separator={separator}
-				renderColumn={renderColumn}
+				visibleColumns={visibleColumns}
+				order={order}
+				orderBy={orderBy}
+				createSortHandler={createSortHandler}
+				showSort={showSort}
+				itemHeightInPixels={itemHeightInPixels}
+				listRef={listRef}
+				height={height}
+				size={size}
+				scrollOffset={scrollOffset}
+				handleScrollState={handleScrollState}
+				itemData={itemData}
 			/>
-		</>
-	);
-});
-
-TableListRow.displayName = "TableListRow";
-
-const TableGridCell = React.memo(({ columnIndex, rowIndex, style, data }) => {
-	const {
-		registryId,
-		columnCount,
-		viewModes,
-		viewMode,
-		selectedRow,
-		sidePadding,
-		visibleColumns,
-		rowClick,
-		renderColumn,
-		rowClassName,
-	} = data;
-	const { items } = tableDataRegistry.get(registryId) || {};
-	const index = rowIndex * columnCount + columnIndex;
-	const item = items?.[index];
-	if (!item) {
-		return null;
+		);
 	}
-	const { id, key } = item;
-	const { style: itemStyles, ...props } = viewModes[viewMode] || {};
-	const selected = selectedRow && selectedRow(item);
-	const className = rowClassName ? rowClassName(item) : "";
 
-	const finalStyle = { ...style };
-	finalStyle.left += sidePadding;
+	if (viewMode === "table") {
+		return (
+			<TableTableView
+				{...sharedViewProps}
+				visibleColumns={visibleColumns}
+				hideColumns={hideColumns}
+				showSort={showSort}
+				order={order}
+				orderBy={orderBy}
+				createSortHandler={createSortHandler}
+				itemsPerPage={itemsPerPage}
+				offset={offset}
+				store={store}
+				viewModes={viewModes}
+				viewMode={viewMode}
+				selectedRow={selectedRow}
+				rowClick={rowClick}
+				getSeparator={getSeparator}
+				renderColumn={renderColumn}
+				rowClassName={rowClassName}
+				rowHeight={rowHeight}
+				className={className}
+				style={style}
+				otherProps={otherProps}
+			/>
+		);
+	}
 
-	return (
-		<Item
-			key={id || key || index}
-			style={{ ...finalStyle, ...itemStyles }}
-			{...props}
-			className={clsx(props.className, className)}
-			columns={visibleColumns}
-			rowClick={rowClick}
-			item={item}
-			index={index}
-			viewMode={viewMode}
-			selected={selected}
-			renderColumn={renderColumn}
-		/>
-	);
+	if (viewMode === "grid") {
+		return (
+			<TableGridView
+				{...sharedViewProps}
+				columnCount={columnCount}
+				rowCount={rowCount}
+				cellWidthInPixels={cellWidthInPixels}
+				cellHeightInPixels={cellHeightInPixels}
+				gridRef={gridRef}
+				height={height}
+				size={size}
+				scrollOffset={scrollOffset}
+				handleScrollState={handleScrollState}
+				itemData={itemData}
+			/>
+		);
+	}
+
+	return null;
 });
-
-TableGridCell.displayName = "TableGridCell";
