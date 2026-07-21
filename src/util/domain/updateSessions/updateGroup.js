@@ -102,6 +102,37 @@ function groupFilesBySessionId(files, yearName) {
 	return map;
 }
 
+function isCandidateSessionId(id) {
+	return /^\d{4}-\d{2}-\d{2} /.test(String(id || ""));
+}
+
+function listingHasMissingSessions(yearItems, cachedYearSessions, yearName) {
+	const wasabiFilesMap = groupFilesBySessionId(yearItems, yearName);
+	const cachedIds = new Set(
+		(cachedYearSessions || [])
+			.map((session) => session.id || session.name)
+			.filter(Boolean),
+	);
+	for (const [id, files] of Object.entries(wasabiFilesMap)) {
+		if (!isCandidateSessionId(id)) {
+			continue;
+		}
+		const hasMedia = (files || []).some(
+			(file) =>
+				isAudioFile(file.name) ||
+				isVideoFile(file.name) ||
+				isImageFile(file.name),
+		);
+		if (!hasMedia) {
+			continue;
+		}
+		if (!cachedIds.has(id)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function hasImageFile(files) {
 	return (files || []).some((file) => isImageFile(file.name));
 }
@@ -637,10 +668,16 @@ export async function updateGroupProcess(
 						(s) => s.id === targetSessionId || s.name === targetSessionId,
 					);
 
+				const hasMissingSessions = listingHasMissingSessions(
+					yearItems,
+					cachedYearSessions,
+					year.name,
+				);
 				if (
 					!forceUpdate &&
 					!isTargetInThisYear &&
-					cachedYear?.fingerprint === yearFingerprint
+					cachedYear?.fingerprint === yearFingerprint &&
+					!hasMissingSessions
 				) {
 					if (cachedYearSessions && cachedYearSessions.length > 0) {
 						if (isMerged || isBundled) {

@@ -2,6 +2,7 @@ import { writeCompressedFile } from "@sync/bundle";
 import { addSyncLog } from "@sync/sync";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
+import { getCombinedYearFingerprint } from "./fingerprints";
 import {
 	loadDurations,
 	loadSummaries,
@@ -287,6 +288,99 @@ describe("updateGroupProcess", () => {
 		expect(sessions[0].duration).toBe(321);
 		expect(sessions[0].summaryText).toBe("Cached summary");
 		expect(sessions[0].transcription).toBe(true);
+	});
+
+	it("does not skip year when fingerprint matches but local sessions miss listing media", async () => {
+		const currentYear = String(new Date().getFullYear());
+		const existingId = `${currentYear}-07-17 Overview - Kabbalah & Suffering`;
+		const newId = `${currentYear}-07-20 Overview - The Grip & Shells`;
+		const yearItems = [
+			file(
+				`${existingId}.mp4`,
+				`wasabi/test/${currentYear}/${existingId}.mp4`,
+			),
+			file(`${newId}.mp4`, `wasabi/test/${currentYear}/${newId}.mp4`),
+		];
+		const metadataFingerprint = [null, null, null, null];
+		const yearFingerprint = getCombinedYearFingerprint(
+			yearItems,
+			metadataFingerprint,
+		);
+		const localYearPath = `/local/sync/test/${currentYear}.json`;
+
+		getListing.mockImplementation(async (path) => {
+			if (path === "wasabi/test") {
+				return [
+					{
+						name: currentYear,
+						type: "dir",
+						path: `wasabi/test/${currentYear}`,
+					},
+				];
+			}
+			if (path === `wasabi/test/${currentYear}`) {
+				return yearItems;
+			}
+			if (path === "/aws/sessions/test") {
+				return [];
+			}
+			return [];
+		});
+
+		storage.exists.mockImplementation(async (path) => path === localYearPath);
+		storage.readFile.mockImplementation(async (path) => {
+			if (path.includes(`.group-update-cache/test/${currentYear}.json`)) {
+				return JSON.stringify({
+					fingerprint: yearFingerprint,
+					metadataFingerprint: JSON.stringify(metadataFingerprint),
+					metadata: {
+						items: [],
+						tags: {},
+						durations: {},
+						summaries: {},
+						transcriptions: {},
+					},
+				});
+			}
+			if (path === localYearPath) {
+				return JSON.stringify({
+					sessions: [
+						{
+							id: existingId,
+							name: existingId,
+							group: "test",
+							year: currentYear,
+						},
+					],
+				});
+			}
+			return "";
+		});
+		fetchSessionMetadata.mockResolvedValue({
+			items: [],
+			tags: {},
+			durations: {},
+			summaries: {},
+			transcriptions: {},
+		});
+		updateYearSync.mockResolvedValue({
+			counter: 1,
+			newCount: 1,
+			newSessions: [{ id: newId }],
+		});
+
+		await updateGroupProcess("test", false, false);
+
+		expect(addSyncLog).not.toHaveBeenCalledWith(
+			expect.stringContaining("Skipped unchanged year"),
+			expect.anything(),
+		);
+		expect(updateYearSync).toHaveBeenCalledTimes(1);
+		const [, year, sessions] = updateYearSync.mock.calls[0];
+		expect(year).toBe(currentYear);
+		expect(sessions.map((session) => session.id)).toEqual(
+			expect.arrayContaining([existingId, newId]),
+		);
 	});
 
 	it("skips remote metadata fetch when year cache metadata fingerprint is unchanged", async () => {
