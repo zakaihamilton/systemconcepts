@@ -50,4 +50,38 @@ describe("Grid", () => {
 		expect(container.firstChild).not.toHaveAttribute("spacing");
 		expect(container.lastChild).not.toHaveAttribute("size");
 	});
+
+	it("sets custom column templates when container xs is not 12", () => {
+		const { container } = render(
+			<Grid container xs={4} style={{ color: "red" }}>
+				item
+			</Grid>,
+		);
+		expect(container.firstChild.style.gridTemplateColumns).toBe(
+			"repeat(3, minmax(0, 1fr))",
+		);
+		expect(container.firstChild.style.color).toBe("red");
+	});
+
+	it("merges size object overrides with legacy breakpoint props", () => {
+		const { container } = render(
+			<Grid size={{ xs: 6 }} sm={4} md={3}>
+				cell
+			</Grid>,
+		);
+		const el = container.firstChild;
+		expect(el.className).toMatch(/spanXs6/);
+		expect(el.className).toMatch(/spanSm4/);
+		expect(el.className).toMatch(/spanMd3/);
+	});
+
+	it("ignores falsy span values", () => {
+		const { container } = render(<Grid item xs={0} sm={null} md={undefined} />);
+		expect(container.firstChild.className).toMatch(/item/);
+	});
+
+	it("renders a plain div when neither container nor item props apply", () => {
+		const { container } = render(<Grid className="plain">x</Grid>);
+		expect(container.firstChild).toHaveClass("plain");
+	});
 });

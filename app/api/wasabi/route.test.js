@@ -177,4 +177,13 @@ describe("/api/wasabi", () => {
 		expect(handleRequest).not.toHaveBeenCalled();
 		expect(getDownloadUrl).not.toHaveBeenCalled();
 	});
+
+	it("returns plain text responses for non-object results", async () => {
+		handleRequest.mockResolvedValue("plain-text");
+
+		const response = await GET(request("?path=sessions%2Ftest%2Ffile.txt"));
+
+		expect(response.status).toBe(200);
+		expect(response.body).toBe("plain-text");
+	});
 });

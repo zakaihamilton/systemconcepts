@@ -339,4 +339,138 @@ describe("Home View", () => {
 		});
 		expect(getAllByTestId("session-skeletons")).toHaveLength(2);
 	});
+
+	it("opens a session from keyboard activation on the card", () => {
+		const { getAllByTestId } = render(<Home />);
+		const card = getAllByTestId("track-card")[0].parentElement;
+		fireEvent.keyDown(card, { key: "Enter" });
+		expect(setPath).toHaveBeenCalledWith(
+			"sessions",
+			expect.stringContaining("session?group=alpha"),
+		);
+		fireEvent.keyDown(card, { key: " " });
+		expect(setPath).toHaveBeenCalledTimes(2);
+	});
+
+	it("uses alternate image path fallbacks for session thumbnails", () => {
+		useSessions.mockReturnValue([
+			[
+				{
+					group: "alpha",
+					year: "2025",
+					date: "2025-01-01",
+					name: "Aws session",
+					image: { path: "/aws/sessions/a.jpg" },
+				},
+				{
+					group: "alpha",
+					year: "2025",
+					date: "2025-01-02",
+					name: "Path session",
+					imagePath: "custom/path.jpg",
+				},
+				{
+					group: "alpha",
+					year: "2025",
+					date: "2025-01-03",
+					name: "Thumb session",
+					thumbnail: "thumb.jpg",
+				},
+			],
+			false,
+		]);
+		useRecentHistory.mockReturnValue([[]]);
+
+		const { getAllByTestId } = render(<Home />);
+		const cards = getAllByTestId("track-card");
+		const byName = Object.fromEntries(
+			cards.map((card) => [card.textContent, card]),
+		);
+		expect(byName["Aws session"]).toHaveAttribute(
+			"data-thumbnail",
+			"/aws/sessions/a.jpg",
+		);
+		expect(byName["Path session"]).toHaveAttribute(
+			"data-thumbnail",
+			"custom/path.jpg",
+		);
+		expect(byName["Thumb session"]).toHaveAttribute(
+			"data-thumbnail",
+			"thumb.jpg",
+		);
+	});
+
+	it("navigates quick access links and applies trailing settings styling", () => {
+		const { getByTestId, container } = render(<Home />);
+		const links = getByTestId("app-quick-access-items").querySelectorAll("a");
+		fireEvent.click(links[2]);
+		expect(setPath).toHaveBeenCalledWith("settings");
+		expect(
+			container.querySelector('[class*="trailingAppItem"]'),
+		).toBeInTheDocument();
+	});
+
+	it("ignores invalid saved schedule state when opening schedule views", () => {
+		window.localStorage.setItem("ScheduleStore", "{not json");
+		const { getByText } = render(<Home />);
+		fireEvent.click(getByText("Latest sessions"));
+		expect(ScheduleStore.update).toHaveBeenCalled();
+		expect(setPath).toHaveBeenCalledWith("schedule");
+	});
+
+	it("does not reload sessions while sync is still busy", () => {
+		SyncActiveStore.update((state) => {
+			state.needsSessionReload = true;
+		});
+		useSyncFeature.mockReturnValue({ sync: jest.fn(), busy: true });
+		render(<Home />);
+		expect(SessionsStore.update).not.toHaveBeenCalled();
+	});
+
+	it("merges continue-watching positions from history entries", () => {
+		useRecentHistory.mockReturnValue([[{ ...mockSessions[0], position: 99 }]]);
+
+		const { getByLabelText } = render(<Home />);
+		expect(
+			within(getByLabelText("Continue watching")).getByTestId("track-card"),
+		).toBeInTheDocument();
+	});
+
+	it("sorts latest sessions by date descending", () => {
+		useSessions.mockReturnValue([
+			[
+				{ ...mockSessions[0], date: "2025-01-01", name: "Older" },
+				{ ...mockSessions[1], date: "2025-03-01", name: "Newer" },
+			],
+			false,
+		]);
+		useRecentHistory.mockReturnValue([[], false]);
+
+		const { getByLabelText } = render(<Home />);
+		const cards = within(getByLabelText("Latest sessions")).getAllByTestId(
+			"track-card",
+		);
+		expect(cards[0]).toHaveTextContent("Newer");
+		expect(cards[1]).toHaveTextContent("Older");
+	});
+
+	it("supports aws-prefixed image paths without a leading slash", () => {
+		useSessions.mockReturnValue([
+			[
+				{
+					...mockSessions[0],
+					name: "Aws relative",
+					image: { path: "aws/sessions/relative.jpg" },
+				},
+			],
+			false,
+		]);
+		useRecentHistory.mockReturnValue([[]]);
+
+		const { getByTestId } = render(<Home />);
+		expect(getByTestId("track-card")).toHaveAttribute(
+			"data-thumbnail",
+			"aws/sessions/relative.jpg",
+		);
+	});
 });

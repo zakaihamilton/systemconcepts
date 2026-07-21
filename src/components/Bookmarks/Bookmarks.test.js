@@ -75,6 +75,83 @@ describe("Bookmarks Component", () => {
 
 		expect(BookmarksStore.getRawState().bookmarks).toHaveLength(1);
 	});
+
+	it("loads bookmarks from storage when the file exists", async () => {
+		storage.exists.mockResolvedValue(true);
+		storage.readFile.mockResolvedValue(
+			JSON.stringify({
+				bookmarks: [{ id: "#saved", name: "Saved", pageId: "p1" }],
+			}),
+		);
+
+		render(<Bookmarks />);
+		await waitFor(() =>
+			expect(BookmarksStore.getRawState().bookmarks).toHaveLength(1),
+		);
+		expect(BookmarksStore.getRawState().bookmarks[0].name).toBe("Saved");
+	});
+
+	it("migrates legacy localStorage bookmarks into storage", async () => {
+		window.localStorage.setItem(
+			"bookmarks",
+			JSON.stringify({
+				bookmarks: [{ id: "#legacy", name: "Legacy", pageId: "p2" }],
+			}),
+		);
+
+		render(<Bookmarks />);
+		await waitFor(() =>
+			expect(BookmarksStore.getRawState().bookmarks).toHaveLength(1),
+		);
+		expect(storage.writeFile).toHaveBeenCalled();
+		expect(window.localStorage.getItem("bookmarks")).toBeNull();
+	});
+
+	it("removes an existing bookmark when toggled again", async () => {
+		BookmarksStore.update((s) => {
+			s.bookmarks = [{ id: "#test", name: "Existing", pageId: "test-page" }];
+			s._loaded = true;
+		});
+		let toolbarItems = [];
+		useToolbar.mockImplementation(({ items }) => {
+			toolbarItems = items;
+		});
+		useActivePages.mockReturnValue([
+			{
+				id: "test-page",
+				name: "Test Page",
+				label: "Test Label",
+				sidebar: false,
+			},
+		]);
+
+		render(<Bookmarks />);
+		await waitFor(() => expect(toolbarItems.length).toBeGreaterThan(0));
+		expect(toolbarItems[0].active).toEqual(
+			expect.objectContaining({ id: "#test", name: "Existing" }),
+		);
+
+		await React.act(async () => {
+			toolbarItems[0].onClick({ stopPropagation: () => {} });
+		});
+		expect(BookmarksStore.getRawState().bookmarks).toHaveLength(0);
+	});
+
+	it("hides the bookmark action on sidebar pages", async () => {
+		useActivePages.mockReturnValue([
+			{ id: "sidebar-page", sidebar: true, root: false },
+		]);
+		let toolbarItems = [];
+		useToolbar.mockImplementation(({ items }) => {
+			toolbarItems = items;
+		});
+
+		render(<Bookmarks />);
+		await waitFor(() =>
+			expect(BookmarksStore.getRawState()._loaded).toBe(true),
+		);
+		expect(toolbarItems).toEqual([]);
+	});
 });
 
 describe("useBookmarks hook", () => {

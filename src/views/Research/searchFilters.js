@@ -58,8 +58,7 @@ function matchSingleResearchFilter(doc, filter, translations) {
 			return String(doc.group).toLowerCase() === label;
 		if (filterType === "year") return String(doc.year) === filterLabel;
 		if (filterType === "date") return doc.date === filterLabel;
-		if (filterType === "type")
-			return String(doc.type).toLowerCase() === label;
+		if (filterType === "type") return String(doc.type).toLowerCase() === label;
 		return false;
 	}
 
@@ -73,8 +72,7 @@ function matchSingleResearchFilter(doc, filter, translations) {
 		const value = doc.tag?.[key];
 		return (
 			value &&
-			String(value).trim().toLowerCase() ===
-				String(filterLabel).toLowerCase()
+			String(value).trim().toLowerCase() === String(filterLabel).toLowerCase()
 		);
 	});
 }

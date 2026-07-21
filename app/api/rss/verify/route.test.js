@@ -97,4 +97,42 @@ describe("POST /api/rss/verify", () => {
 		expect(response.headers.get("Cache-Control")).toBe("no-store");
 		expect(unstable_cache).not.toHaveBeenCalled();
 	});
+
+	it("returns ok false when id or token is missing", async () => {
+		const response = await POST(
+			makeRequest({
+				internalKey: "internal-secret",
+				body: { id: "user-1" },
+			}),
+		);
+
+		expect(await response.json()).toEqual({ ok: false });
+		expect(authenticateTokenRequest).not.toHaveBeenCalled();
+	});
+
+	it("returns ok false when token verification fails", async () => {
+		authenticateTokenRequest.mockResolvedValue(false);
+
+		const response = await POST(
+			makeRequest({
+				internalKey: "internal-secret",
+				body: { id: "user-1", token: "bad-token" },
+			}),
+		);
+
+		expect(await response.json()).toEqual({ ok: false });
+	});
+
+	it("returns ok false for unexpected verification errors", async () => {
+		authenticateTokenRequest.mockRejectedValue(new Error("db down"));
+
+		const response = await POST(
+			makeRequest({
+				internalKey: "internal-secret",
+				body: { id: "user-1", token: "raw-token" },
+			}),
+		);
+
+		expect(await response.json()).toEqual({ ok: false });
+	});
 });

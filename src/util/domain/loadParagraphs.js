@@ -198,6 +198,8 @@ export function clearParagraphCaches() {
 	paragraphCacheResetTime = 0;
 	sessionRecordCache.clear();
 	sessionRecordCacheResetTime = 0;
+	tagsCache = null;
+	tagsCacheTime = 0;
 }
 
 // Cache for library tags to avoid repeated loads

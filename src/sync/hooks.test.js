@@ -111,4 +111,93 @@ describe("useSync automatic scheduler", () => {
 		view.rerender(<Scheduler />);
 		expect(requestSync).not.toHaveBeenCalled();
 	});
+
+	it("does not schedule when schedule is false", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		function Idle() {
+			useSync({ schedule: false });
+			return null;
+		}
+		render(<Idle />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+
+	it("does not sync when active is false", () => {
+		jest.spyOn(Date, "now").mockReturnValue(12 * 60 * 1000);
+		function Idle() {
+			useSync({ schedule: true, active: false });
+			return null;
+		}
+		render(<Idle />);
+		expect(requestSync).not.toHaveBeenCalled();
+	});
+});
+
+describe("useSyncFeature", () => {
+	const { useSyncFeature } = require("./hooks");
+	const { stopSync } = require("./requests");
+
+	function FeatureProbe({ onReady }) {
+		const feature = useSyncFeature();
+		onReady(feature);
+		return null;
+	}
+
+	it("exposes sync controls and caps percentage while syncing", () => {
+		SyncActiveStore.useState.mockImplementation((selector) =>
+			selector({
+				busy: true,
+				lastSynced: 1,
+				logs: ["a"],
+				lastDuration: 2,
+				startTime: 3,
+				progress: { processed: 10, total: 10 },
+				personalSyncBusy: false,
+				personalSyncError: null,
+				phase: "download",
+			}),
+		);
+		let feature;
+		render(
+			<FeatureProbe
+				onReady={(value) => {
+					feature = value;
+				}}
+			/>,
+		);
+		expect(feature.percentage).toBe(99);
+		expect(feature.busy).toBe(true);
+		expect(feature.phase).toBe("download");
+		feature.sync();
+		expect(requestSync).toHaveBeenCalledWith(true);
+		feature.stop();
+		expect(stopSync).toHaveBeenCalled();
+	});
+
+	it("reports zero percentage when progress is missing", () => {
+		SyncActiveStore.useState.mockImplementation((selector) =>
+			selector({
+				busy: false,
+				lastSynced: null,
+				logs: [],
+				lastDuration: 0,
+				startTime: null,
+				progress: null,
+				personalSyncBusy: true,
+				personalSyncError: "err",
+				phase: null,
+			}),
+		);
+		let feature;
+		render(
+			<FeatureProbe
+				onReady={(value) => {
+					feature = value;
+				}}
+			/>,
+		);
+		expect(feature.percentage).toBe(0);
+		expect(feature.personalSyncBusy).toBe(true);
+		expect(feature.personalSyncError).toBe("err");
+	});
 });

@@ -1,4 +1,10 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
 import Cookies from "js-cookie";
@@ -176,5 +182,294 @@ describe("API View", () => {
 			"true",
 		);
 		expect(window.location.hash).toBe("#api");
+	});
+
+	it("denies access when rssToken is missing", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			role: "user",
+		});
+
+		const { getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getByText("Acess Denied")).toBeInTheDocument();
+		});
+	});
+
+	it("keeps loading when user fetch fails", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockRejectedValue(new Error("network"));
+
+		const { getByTestId } = render(<API />);
+		expect(getByTestId("page-load")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(fetchJSON).toHaveBeenCalled();
+		});
+		expect(getByTestId("page-load")).toBeInTheDocument();
+	});
+
+	it("allows admin role access", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "admin";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "admin",
+			rssToken: "tok",
+			role: "admin",
+		});
+
+		const { getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getByText("Sessions API")).toBeInTheDocument();
+		});
+	});
+
+	it("denies access when user fetch returns err", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({ err: "not found" });
+
+		const { getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getByText("Acess Denied")).toBeInTheDocument();
+		});
+	});
+
+	it("renders query parameters table and JSON schema sections", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+
+		const { getAllByText, getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getAllByText("Query Parameters").length).toBeGreaterThan(0);
+			expect(getByText("group")).toBeInTheDocument();
+			expect(getByText("tag")).toBeInTheDocument();
+			expect(getAllByText("JSON Response Schema").length).toBeGreaterThan(0);
+			expect(getByText(/SessionsResponse/)).toBeInTheDocument();
+		});
+	});
+
+	it("copies code example when Copy Code is clicked", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+
+		const mockWriteText = jest.fn();
+		Object.assign(navigator, { clipboard: { writeText: mockWriteText } });
+
+		const { getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getByText("Copy Code")).toBeInTheDocument();
+		});
+
+		fireEvent.click(getByText("Copy Code"));
+		expect(mockWriteText).toHaveBeenCalledWith(
+			expect.stringContaining('curl -X GET "http://localhost/api/sessions'),
+		);
+	});
+
+	it("shows copied feedback after copying URL then resets", async () => {
+		jest.useFakeTimers();
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+		useTranslations.mockReturnValue({
+			...mockTranslations,
+			API_COPIED: "Copied!",
+			API_COPY_CODE: "Copy Code",
+			API_COPIED_CODE: "Copied Code!",
+		});
+
+		const mockWriteText = jest.fn();
+		Object.assign(navigator, { clipboard: { writeText: mockWriteText } });
+
+		const { getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getByText("Copy URL")).toBeInTheDocument();
+		});
+
+		fireEvent.click(getByText("Copy URL"));
+		expect(getByText("Copied!")).toBeInTheDocument();
+
+		act(() => {
+			jest.advanceTimersByTime(2000);
+		});
+		expect(getByText("Copy URL")).toBeInTheDocument();
+		jest.useRealTimers();
+	});
+
+	it("pins section nav on scroll and updates active section", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+
+		const scrollParent = {
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn(),
+		};
+		jest.spyOn(document, "querySelector").mockReturnValue(scrollParent);
+
+		const originalGetBoundingClientRect =
+			HTMLElement.prototype.getBoundingClientRect;
+		HTMLElement.prototype.getBoundingClientRect = jest.fn(function () {
+			if (this.id === "api-sessions-parameters") {
+				return { top: 90, bottom: 200, left: 0, width: 400, height: 40 };
+			}
+			if (this.id === "api-sessions-endpoint") {
+				return { top: 200, bottom: 300, left: 0, width: 400, height: 40 };
+			}
+			return { top: 0, bottom: 50, left: 10, width: 300, height: 40 };
+		});
+
+		global.ResizeObserver = jest.fn().mockImplementation(() => ({
+			observe: jest.fn(),
+			disconnect: jest.fn(),
+		}));
+
+		const { getByRole } = render(<API />);
+		await waitFor(() => {
+			expect(getByRole("button", { name: "Endpoint" })).toBeInTheDocument();
+		});
+
+		fireEvent.scroll(window);
+		await waitFor(() => {
+			expect(getByRole("button", { name: "Query Parameters" })).toHaveAttribute(
+				"aria-current",
+				"true",
+			);
+		});
+
+		fireEvent(window, new Event("transitionrun", { bubbles: true }));
+		fireEvent(window, new Event("transitionstart", { bubbles: true }));
+		fireEvent(window, new Event("resize"));
+
+		HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+		document.querySelector.mockRestore();
+	});
+
+	it("renders fixed section nav in a portal when pinned", async () => {
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+
+		const scrollParent = {
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn(),
+		};
+		jest.spyOn(document, "querySelector").mockReturnValue(scrollParent);
+
+		const originalGetBoundingClientRect =
+			HTMLElement.prototype.getBoundingClientRect;
+		HTMLElement.prototype.getBoundingClientRect = jest.fn(function () {
+			return { top: 0, bottom: 48, left: 12, width: 320, height: 48 };
+		});
+
+		global.ResizeObserver = jest.fn().mockImplementation(() => ({
+			observe: jest.fn(),
+			disconnect: jest.fn(),
+		}));
+
+		render(<API />);
+		await waitFor(() => {
+			expect(
+				screen.getByRole("button", { name: "Endpoint" }),
+			).toBeInTheDocument();
+		});
+
+		fireEvent.scroll(window);
+		await waitFor(() => {
+			expect(
+				document.body.querySelector('[class*="sectionNavFixed"]'),
+			).toBeTruthy();
+		});
+
+		HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+		document.querySelector.mockRestore();
+	});
+
+	it("shows copied feedback after copying code", async () => {
+		jest.useFakeTimers();
+		Cookies.get.mockImplementation((key) => {
+			if (key === "id") return "testuser";
+			if (key === "hash") return "testhash";
+			return null;
+		});
+		fetchJSON.mockResolvedValue({
+			id: "testuser",
+			rssToken: "token123",
+			role: "user",
+		});
+		useTranslations.mockReturnValue({
+			...mockTranslations,
+			API_COPY_CODE: "Copy Code",
+			API_COPIED_CODE: "Copied Code!",
+		});
+
+		const mockWriteText = jest.fn();
+		Object.assign(navigator, { clipboard: { writeText: mockWriteText } });
+
+		const { getByText } = render(<API />);
+		await waitFor(() => {
+			expect(getByText("Copy Code")).toBeInTheDocument();
+		});
+
+		fireEvent.click(getByText("Copy Code"));
+		expect(getByText("Copied Code!")).toBeInTheDocument();
+
+		act(() => {
+			jest.advanceTimersByTime(2000);
+		});
+		expect(getByText("Copy Code")).toBeInTheDocument();
+		jest.useRealTimers();
 	});
 });

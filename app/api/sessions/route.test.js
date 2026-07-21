@@ -214,4 +214,21 @@ describe("/api/sessions", () => {
 			expect.any(Error),
 		);
 	});
+
+	it("uses NEXT_PUBLIC_SITE_URL when SITE_URL is unset", async () => {
+		const originalSiteUrl = process.env.SITE_URL;
+		const originalPublicUrl = process.env.NEXT_PUBLIC_SITE_URL;
+		delete process.env.SITE_URL;
+		process.env.NEXT_PUBLIC_SITE_URL = "https://public.example";
+
+		await GET(makeRequest("?id=user&token=token&group=alpha"));
+
+		const { buildSessionsJson } = require("@util/domain/sessionsApiResponse");
+		expect(buildSessionsJson).toHaveBeenCalledWith(
+			expect.objectContaining({ baseUrl: "https://public.example" }),
+		);
+
+		process.env.SITE_URL = originalSiteUrl;
+		process.env.NEXT_PUBLIC_SITE_URL = originalPublicUrl;
+	});
 });

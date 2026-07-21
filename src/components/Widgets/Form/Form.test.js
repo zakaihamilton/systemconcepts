@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import Form, { FormGroup } from "./index.js";
 
 describe("Form Widget", () => {
@@ -43,5 +43,69 @@ describe("Form Widget", () => {
 
 		fireEvent.change(input, { target: { value: "New Name" } });
 		expect(setRecord).toHaveBeenCalled();
+		const updater = setRecord.mock.calls[0][0];
+		expect(updater({ name: "Initial" })).toEqual({ name: "New Name" });
+	});
+
+	it("FormGroup supports nested field paths and skips falsy children", () => {
+		const setRecord = jest.fn((fn) => fn({ user: { name: "Ada" } }));
+		const NestedInput = ({ state }) => {
+			const [value, setValue] = state;
+			return (
+				<input
+					data-testid="nested"
+					value={value || ""}
+					onChange={(e) => setValue(e.target.value)}
+				/>
+			);
+		};
+		const { getByTestId } = render(
+			<FormGroup
+				record={{ user: { name: "Ada" } }}
+				setRecord={setRecord}
+				validate
+			>
+				{null}
+				{false}
+				<NestedInput id="user" field="name" />
+			</FormGroup>,
+		);
+		fireEvent.change(getByTestId("nested"), { target: { value: "Bob" } });
+		expect(setRecord).toHaveBeenCalled();
+		const updater = setRecord.mock.calls[0][0];
+		expect(updater({ user: { name: "Ada" } })).toEqual({
+			user: { name: "Bob" },
+		});
+	});
+
+	it("Form skips falsy children and hides the form without data", () => {
+		const { queryByText, rerender } = render(
+			<Form actions={<button type="button">Go</button>}>
+				{null}
+				<div>Child</div>
+			</Form>,
+		);
+		expect(queryByText("Child")).not.toBeInTheDocument();
+		expect(queryByText("Go")).toBeInTheDocument();
+
+		rerender(
+			<Form data={{}} validate actions={<button type="button">Go</button>}>
+				{null}
+				<div>Child</div>
+			</Form>,
+		);
+		expect(queryByText("Child")).toBeInTheDocument();
+	});
+
+	it("passes validate to cloned Form children", () => {
+		const Child = ({ validate }) => (
+			<div data-testid="validated">{validate ? "yes" : "no"}</div>
+		);
+		render(
+			<Form data={{}} validate>
+				<Child />
+			</Form>,
+		);
+		expect(screen.getByTestId("validated")).toHaveTextContent("yes");
 	});
 });

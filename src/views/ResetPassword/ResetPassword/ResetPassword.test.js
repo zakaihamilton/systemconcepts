@@ -2,10 +2,14 @@ import { MainStore } from "@components/Main";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { fetchJSON } from "@util/api/fetch";
 import { useTranslations } from "@util/domain/translations";
+import { setHash, setPath } from "@util/domain/views";
 import Cookies from "js-cookie";
 import ResetPassword from "./index.js";
 
 jest.mock("@util/domain/translations");
+jest.mock("@util/api/logger", () => ({
+	logger: { error: jest.fn() },
+}));
 jest.mock("@components/Main", () => ({
 	MainStore: {
 		useState: jest.fn(),
@@ -52,6 +56,11 @@ describe("ResetPassword View", () => {
 		NEW_PASSWORD: "New Password",
 		REMEMBER_ME: "Remember Me",
 		RESET_EMAIL_SENT: "Reset email sent",
+		EMPTY_PASSWORD: "Empty password",
+		PASSWORD_TOO_SHORT: "Password too short",
+		PASSWORD_TOO_LONG: "Password too long",
+		EMPTY_FIELD: "Empty field",
+		ACCESS_DENIED: "Access denied",
 	};
 
 	beforeEach(() => {
@@ -121,5 +130,86 @@ describe("ResetPassword View", () => {
 				}),
 			);
 		});
+	});
+
+	it("shows reset email confirmation after a successful request", async () => {
+		fetchJSON.mockResolvedValue({});
+		render(<ResetPassword />);
+		fireEvent.change(screen.getByTestId("input-userid"), {
+			target: { value: "testuser" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
+		await waitFor(() => {
+			expect(screen.getByText("Reset email sent")).toBeInTheDocument();
+		});
+		expect(
+			screen.getByRole("button", { name: /Reset Password/i }),
+		).toBeDisabled();
+	});
+
+	it("blocks confirm when the new password is invalid", () => {
+		render(<ResetPassword path="code123" />);
+		fireEvent.change(screen.getByTestId("input-userid"), {
+			target: { value: "testuser" },
+		});
+		fireEvent.change(screen.getByTestId("input-newpassword"), {
+			target: { value: "short" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /Change Password/i }));
+		expect(fetchJSON).not.toHaveBeenCalled();
+	});
+
+	it("submits confirm on Enter and navigates home on success", async () => {
+		fetchJSON.mockResolvedValue({});
+		render(<ResetPassword path="code123" />);
+		fireEvent.change(screen.getByTestId("input-userid"), {
+			target: { value: "testuser" },
+		});
+		fireEvent.change(screen.getByTestId("input-newpassword"), {
+			target: { value: "password123" },
+		});
+		fireEvent.keyDown(screen.getByTestId("input-newpassword"), {
+			keyCode: 13,
+		});
+		await waitFor(() => {
+			expect(setPath).toHaveBeenCalledWith("");
+		});
+	});
+
+	it("shows translated errors from the API response", async () => {
+		fetchJSON.mockResolvedValue({ err: "ACCESS_DENIED" });
+		render(<ResetPassword />);
+		fireEvent.change(screen.getByTestId("input-userid"), {
+			target: { value: "testuser" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
+		await waitFor(() => {
+			expect(screen.getByText("Access denied")).toBeInTheDocument();
+		});
+	});
+
+	it("renders RTL layout with remember-me when a code is present", () => {
+		MainStore.useState.mockReturnValue({ direction: "rtl" });
+		render(<ResetPassword path="code123" />);
+		fireEvent.click(screen.getByRole("checkbox"));
+		expect(screen.getByTestId("input-newpassword")).toBeInTheDocument();
+	});
+
+	it("rejects an overlong password during confirm", () => {
+		render(<ResetPassword path="code123" />);
+		fireEvent.change(screen.getByTestId("input-userid"), {
+			target: { value: "testuser" },
+		});
+		fireEvent.change(screen.getByTestId("input-newpassword"), {
+			target: { value: "x".repeat(73) },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /Change Password/i }));
+		expect(fetchJSON).not.toHaveBeenCalled();
+	});
+
+	it('calls setHash("account") when back button is clicked', () => {
+		render(<ResetPassword />);
+		fireEvent.click(screen.getByRole("button", { name: /Back/i }));
+		expect(setHash).toHaveBeenCalledWith("account");
 	});
 });

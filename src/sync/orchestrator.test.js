@@ -173,4 +173,102 @@ describe("sync orchestration recovery", () => {
 		expect(SyncActiveStore.getRawState().needsSessionReload).toBe(true);
 		expect(SyncActiveStore.getRawState().libraryUpdateCounter).toBe(1);
 	});
+
+	it("refreshes role from the API when cookies lack a role", async () => {
+		const dependencies = makeDependencies({
+			cookies: {
+				get: jest.fn((name) => {
+					if (name === "id") return "user-1";
+					if (name === "hash") return "hash";
+				}),
+				set: jest.fn(),
+			},
+			fetchJSON: jest.fn().mockResolvedValue({ role: "student" }),
+		});
+
+		await createSyncOrchestrator(dependencies)(false);
+
+		expect(dependencies.fetchJSON).toHaveBeenCalledWith("/api/login");
+		expect(dependencies.cookies.set).toHaveBeenCalledWith("role", "student", {
+			expires: 60,
+		});
+	});
+
+	it("logs and keeps the prior role when refresh fails", async () => {
+		const dependencies = makeDependencies({
+			cookies: {
+				get: jest.fn((name) => {
+					if (name === "role") return "visitor";
+					if (name === "id") return "user-1";
+					if (name === "hash") return "hash";
+				}),
+				set: jest.fn(),
+			},
+			roleAuth: jest.fn((role, required) => {
+				if (required === "student") return role === "student";
+				return role === "admin";
+			}),
+			fetchJSON: jest.fn().mockRejectedValue(new Error("network")),
+		});
+
+		const result = await createSyncOrchestrator(dependencies)(false);
+
+		expect(result).toEqual({ completed: false, reason: "unauthorized" });
+		expect(dependencies.addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Role refresh failed"),
+			"error",
+		);
+	});
+
+	it("clears a stuck mutex lock in the finally block", async () => {
+		const lock = { _locks: 1, _locking: Promise.resolve() };
+		const dependencies = makeDependencies({
+			isMutexLocked: jest.fn().mockReturnValue(true),
+			getMutex: jest.fn().mockReturnValue(lock),
+		});
+
+		await createSyncOrchestrator(dependencies)(false);
+
+		expect(lock._locks).toBe(0);
+		expect(SyncActiveStore.getRawState().busy).toBe(false);
+	});
+
+	it("persists manifest signature after a complete read-only sync", async () => {
+		const freshness = { fresh: false, storageKey: "key", signature: "sig" };
+		const dependencies = makeDependencies({
+			configs: [{ ...mainConfig, direction: "pull", uploadsRole: "admin" }],
+			getReadOnlyManifestFreshness: jest.fn().mockResolvedValue(freshness),
+		});
+
+		await createSyncOrchestrator(dependencies)(false);
+
+		expect(dependencies.persistManifestSignature).toHaveBeenCalledWith(
+			freshness,
+		);
+	});
+
+	it("reports no changes when sync completes without modifications", async () => {
+		const dependencies = makeDependencies();
+
+		const result = await createSyncOrchestrator(dependencies)(false);
+
+		expect(result).toEqual({ completed: true });
+		expect(dependencies.addSyncLog).toHaveBeenCalledWith(
+			"No changes detected",
+			"info",
+		);
+		expect(UpdateSessionsStore.getRawState().busy).toBe(false);
+	});
+
+	it("maps 401 errors to a login prompt in the sync log", async () => {
+		const dependencies = makeDependencies({
+			executeSyncPipeline: jest.fn().mockRejectedValue(401),
+		});
+
+		await expect(createSyncOrchestrator(dependencies)(false)).rejects.toBe(401);
+		expect(dependencies.addSyncLog).toHaveBeenCalledWith(
+			"Sync failed: Please login to sync",
+			"error",
+		);
+	});
 });

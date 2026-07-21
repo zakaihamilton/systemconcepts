@@ -105,4 +105,30 @@ describe("/api/aws_download", () => {
 		expect(response.status).toBe(403);
 		expect(list).not.toHaveBeenCalled();
 	});
+
+	it("returns null metadata URLs when presigning fails", async () => {
+		getSignedUrl.mockRejectedValue(new Error("presign failed"));
+
+		const response = await GET(
+			request("http://localhost/api/aws_download?group=test&year=2024"),
+		);
+		const body = await response.json();
+
+		expect(response.status).toBe(200);
+		expect(body.urls).toEqual({
+			tags: null,
+			duration: null,
+			md: null,
+			zip: null,
+		});
+	});
+
+	it("rejects invalid group and year parameters", async () => {
+		const response = await GET(
+			request("http://localhost/api/aws_download?group=&year=bad"),
+		);
+
+		expect(response.status).toBe(403);
+		expect(list).not.toHaveBeenCalled();
+	});
 });
