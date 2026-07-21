@@ -290,9 +290,7 @@ export async function runResearchSearch({
 							loadedCount++;
 							if (!isCancelled()) {
 								onProgress(
-									totalFiles
-										? Math.floor((loadedCount / totalFiles) * 50)
-										: 50,
+									totalFiles ? Math.floor((loadedCount / totalFiles) * 50) : 50,
 								);
 							}
 						}),

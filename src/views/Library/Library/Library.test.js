@@ -75,10 +75,7 @@ jest.mock("../EditContentDialog", () => (props) => (
 		<button type="button" onClick={props.onClose}>
 			close-edit-content
 		</button>
-		<button
-			type="button"
-			onClick={() => props.setContent?.("Updated body")}
-		>
+		<button type="button" onClick={() => props.setContent?.("Updated body")}>
 			set-content
 		</button>
 	</div>
@@ -139,9 +136,7 @@ describe("Library View", () => {
 			expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 		});
 		expect(screen.queryByTestId("edit-tags-dialog")).not.toBeInTheDocument();
-		expect(
-			screen.queryByTestId("edit-content-dialog"),
-		).not.toBeInTheDocument();
+		expect(screen.queryByTestId("edit-content-dialog")).not.toBeInTheDocument();
 	});
 
 	describe("as an admin", () => {
@@ -232,9 +227,7 @@ describe("Library View", () => {
 			});
 
 			fireEvent.click(screen.getByRole("button", { name: "open-edit-tags" }));
-			fireEvent.click(
-				screen.getByRole("button", { name: "close-edit-tags" }),
-			);
+			fireEvent.click(screen.getByRole("button", { name: "close-edit-tags" }));
 			await waitFor(() => {
 				expect(screen.getByTestId("edit-tags-dialog")).toHaveAttribute(
 					"data-open",
@@ -245,9 +238,7 @@ describe("Library View", () => {
 			fireEvent.click(
 				screen.getByRole("button", { name: "open-edit-content" }),
 			);
-			fireEvent.click(
-				screen.getByRole("button", { name: "set-content" }),
-			);
+			fireEvent.click(screen.getByRole("button", { name: "set-content" }));
 			await waitFor(() => {
 				expect(screen.getByTestId("article-content")).toHaveTextContent(
 					"Updated body",
@@ -448,13 +439,9 @@ describe("Library View", () => {
 			usePathItems.mockReturnValue(["library", "id", "t2"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t2",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t2");
 			});
-			expect(screen.getByTestId("article-prev-name")).toHaveTextContent(
-				"One",
-			);
+			expect(screen.getByTestId("article-prev-name")).toHaveTextContent("One");
 			expect(screen.getByTestId("article-next-name")).toHaveTextContent(
 				"Three",
 			);
@@ -464,9 +451,7 @@ describe("Library View", () => {
 			usePathItems.mockReturnValue(["library", "id", "t1"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t1",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
 			expect(screen.getByTestId("article-prev-name")).toHaveTextContent("");
 		});
@@ -475,9 +460,7 @@ describe("Library View", () => {
 			usePathItems.mockReturnValue(["library", "id", "t3"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t3",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t3");
 			});
 			expect(screen.getByTestId("article-next-name")).toHaveTextContent("");
 		});
@@ -486,9 +469,7 @@ describe("Library View", () => {
 			usePathItems.mockReturnValue(["library", "id", "t1"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t1",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
 
 			fireEvent.click(screen.getByRole("button", { name: "goto-next" }));
@@ -525,9 +506,7 @@ describe("Library View", () => {
 			]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t1",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
 		});
 
@@ -540,9 +519,7 @@ describe("Library View", () => {
 			]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t1",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
 		});
 
@@ -554,9 +531,7 @@ describe("Library View", () => {
 			usePathItems.mockReturnValue(["library"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t1",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
 		});
 
@@ -564,9 +539,7 @@ describe("Library View", () => {
 			usePathItems.mockReturnValue(["library", "id", "t1:5"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t1",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
 		});
 
@@ -596,9 +569,7 @@ describe("Library View", () => {
 			);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article-selected")).toHaveTextContent(
-					"t2",
-				);
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t2");
 			});
 			fireEvent.click(screen.getByRole("button", { name: "goto-prev" }));
 			expect(setPath).toHaveBeenCalledWith("library", "id", "t1");
@@ -926,7 +897,9 @@ describe("Library View", () => {
 	});
 
 	it("appends tag number to hierarchy when present", async () => {
-		const tags = [{ _id: "t1", book: "Book", chapter: "Intro", number: 3, path: "p1" }];
+		const tags = [
+			{ _id: "t1", book: "Book", chapter: "Intro", number: 3, path: "p1" },
+		];
 		storage.exists.mockResolvedValue(true);
 		storage.readFile.mockImplementation((path) =>
 			Promise.resolve(tagsToJson(path, tags)),
@@ -990,7 +963,9 @@ describe("Library View", () => {
 		usePathItems.mockReturnValue(["library", "id", "t1"]);
 		render(<Library />);
 		await waitFor(() => {
-			expect(screen.getByTestId("article-prev-name")).toHaveTextContent("alpha");
+			expect(screen.getByTestId("article-prev-name")).toHaveTextContent(
+				"alpha",
+			);
 		});
 	});
 

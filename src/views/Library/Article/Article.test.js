@@ -1,13 +1,19 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useSearch } from "@components/Search";
+import { useToolbar } from "@components/Toolbar";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
+import { roleAuth } from "@util/auth/roles";
+import { useLocalStorage } from "@util/browser/hooks";
 import { useDeviceType } from "@util/browser/styles";
 import { useTranslations } from "@util/domain/translations";
-import { useLocalStorage } from "@util/browser/hooks";
-import { roleAuth } from "@util/auth/roles";
-import { useToolbar } from "@components/Toolbar";
 import Cookies from "js-cookie";
-import Article from "./index.js";
 import { LibraryStore } from "../Store";
+import Article from "./index.js";
 
 jest.mock("@util/domain/translations");
 jest.mock("@components/Search", () => ({ useSearch: jest.fn() }));
@@ -51,24 +57,35 @@ jest.mock("./Header", () => (props) => (
 			: props.title || ""}
 	</div>
 ));
-jest.mock("./PageIndicator", () => (props) =>
-	props.visible ? (
-		<button type="button" data-testid="page-indicator" onClick={props.onClick}>
-			{props.current}/{props.total}
-		</button>
-	) : (
-		<div data-testid="page-indicator-hidden" />
-	),
+jest.mock(
+	"./PageIndicator",
+	() => (props) =>
+		props.visible ? (
+			<button
+				type="button"
+				data-testid="page-indicator"
+				onClick={props.onClick}
+			>
+				{props.current}/{props.total}
+			</button>
+		) : (
+			<div data-testid="page-indicator-hidden" />
+		),
 );
-jest.mock("./ScrollToTop", () => (props) =>
-	props.show ? (
-		<button type="button" data-testid="scroll-to-top" onClick={props.onClick}>
-			top
-		</button>
-	) : null,
+jest.mock(
+	"./ScrollToTop",
+	() => (props) =>
+		props.show ? (
+			<button type="button" data-testid="scroll-to-top" onClick={props.onClick}>
+				top
+			</button>
+		) : null,
 );
 jest.mock("./Content", () => (props) => (
-	<div data-testid="article-content" data-markdown={String(!!props.showMarkdown)}>
+	<div
+		data-testid="article-content"
+		data-markdown={String(!!props.showMarkdown)}
+	>
 		<a href="#link" data-testid="content-link">
 			link
 		</a>
@@ -80,36 +97,40 @@ jest.mock("./Content", () => (props) => (
 	</div>
 ));
 jest.mock("./Player", () => () => <div data-testid="article-player" />);
-jest.mock("./JumpDialog", () => (props) =>
-	props.open ? (
-		<div data-testid="jump-dialog">
-			<button type="button" onClick={() => props.onSubmit("paragraph", 1)}>
-				jump-para
-			</button>
-			<button type="button" onClick={() => props.onSubmit("paragraph", 4)}>
-				jump-span
-			</button>
-			<button type="button" onClick={() => props.onSubmit("page", 2)}>
-				jump-page
-			</button>
-			<button type="button" onClick={props.onClose}>
-				close-jump
-			</button>
-		</div>
-	) : null,
+jest.mock(
+	"./JumpDialog",
+	() => (props) =>
+		props.open ? (
+			<div data-testid="jump-dialog">
+				<button type="button" onClick={() => props.onSubmit("paragraph", 1)}>
+					jump-para
+				</button>
+				<button type="button" onClick={() => props.onSubmit("paragraph", 4)}>
+					jump-span
+				</button>
+				<button type="button" onClick={() => props.onSubmit("page", 2)}>
+					jump-page
+				</button>
+				<button type="button" onClick={props.onClose}>
+					close-jump
+				</button>
+			</div>
+		) : null,
 );
-jest.mock("./ArticleTermsDialog", () => (props) =>
-	props.open ? (
-		<div data-testid="terms-dialog">
-			<button type="button" onClick={props.onClose}>
-				close-terms
-			</button>
-			<button type="button" onClick={() => props.onJump?.(3)}>
-				jump-term
-			</button>
-			{props.terms?.map((t) => t.term).join(",")}
-		</div>
-	) : null,
+jest.mock(
+	"./ArticleTermsDialog",
+	() => (props) =>
+		props.open ? (
+			<div data-testid="terms-dialog">
+				<button type="button" onClick={props.onClose}>
+					close-terms
+				</button>
+				<button type="button" onClick={() => props.onJump?.(3)}>
+					jump-term
+				</button>
+				{props.terms?.map((t) => t.term).join(",")}
+			</div>
+		) : null,
 );
 
 describe("Article Component", () => {
@@ -286,9 +307,7 @@ describe("Article Component", () => {
 	});
 
 	it("toggles abbreviations and square brackets from toolbar", () => {
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		toolbarItems.find((i) => i.id === "toggleAbbreviations").onClick();
 		expect(setShowAbbreviations).toHaveBeenCalled();
 		toolbarItems.find((i) => i.id === "toggleSquareBrackets").onClick();
@@ -297,7 +316,10 @@ describe("Article Component", () => {
 
 	it("opens jump and terms dialogs from toolbar", async () => {
 		render(
-			<Article content="Body with grace" selectedTag={{ _id: "1", title: "T" }} />,
+			<Article
+				content="Body with grace"
+				selectedTag={{ _id: "1", title: "T" }}
+			/>,
 		);
 		act(() => {
 			toolbarItems.find((i) => i.id === "jumpToParagraph").onClick();
@@ -342,18 +364,14 @@ describe("Article Component", () => {
 
 	it("updates hash when a paragraph is clicked", () => {
 		window.history.replaceState(null, null, "#library/id/t1");
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		fireEvent.click(screen.getByText("Para one"));
 		expect(window.location.hash).toContain(":1");
 	});
 
 	it("replaces an existing paragraph suffix in the hash", () => {
 		window.history.replaceState(null, null, "#library/id/t1:9");
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		fireEvent.click(screen.getByText("Para one"));
 		expect(window.location.hash).toMatch(/:1$/);
 	});
@@ -374,30 +392,24 @@ describe("Article Component", () => {
 			handleScrollUpdate: jest.fn(),
 			scrollToTop,
 		});
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		fireEvent.click(screen.getByTestId("scroll-to-top"));
 		expect(scrollToTop).toHaveBeenCalled();
 	});
 
 	it("shows loading indicator when loading", () => {
 		render(
-			<Article
-				content=""
-				selectedTag={{ _id: "1", title: "T" }}
-				loading
-			/>,
+			<Article content="" selectedTag={{ _id: "1", title: "T" }} loading />,
 		);
-		expect(document.querySelector("[role='progressbar'], .MuiCircularProgress-root, svg")).toBeTruthy();
+		expect(
+			document.querySelector(
+				"[role='progressbar'], .MuiCircularProgress-root, svg",
+			),
+		).toBeTruthy();
 	});
 
 	it("exports markdown when not showing markdown", async () => {
 		const { exportData } = require("@util/storage/importExport");
-		let showMarkdown = true;
-		const setShowMarkdown = (fn) => {
-			showMarkdown = typeof fn === "function" ? fn(showMarkdown) : fn;
-		};
 		// toggleMarkdown flips showMarkdown via useState — exercise via toolbar
 		render(
 			<Article
@@ -428,9 +440,7 @@ describe("Article Component", () => {
 
 	it("uses phone layout for match toolbar locations", () => {
 		useDeviceType.mockReturnValue("phone");
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		const prevMatch = toolbarItems.find((i) => i.id === "prevMatch");
 		expect(prevMatch?.location).toBe("header");
 	});
@@ -439,9 +449,7 @@ describe("Article Component", () => {
 		LibraryStore.update((s) => {
 			s.scrollToParagraph = 1;
 		});
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		act(() => {
 			jest.advanceTimersByTime(600);
 		});
@@ -449,9 +457,7 @@ describe("Article Component", () => {
 	});
 
 	it("hides the header after scrolling down far enough", () => {
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		act(() => {
 			handleScrollUpdate({ target: { scrollTop: 200 } });
 		});
@@ -462,9 +468,7 @@ describe("Article Component", () => {
 		const scrollIntoView = jest.fn();
 		Element.prototype.scrollIntoView = scrollIntoView;
 
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		act(() => {
 			toolbarItems.find((i) => i.id === "jumpToParagraph").onClick();
 		});
@@ -519,10 +523,7 @@ describe("Article Component", () => {
 			return [def, jest.fn()];
 		});
 		render(
-			<Article
-				content="Body [note]"
-				selectedTag={{ _id: "1", title: "T" }}
-			/>,
+			<Article content="Body [note]" selectedTag={{ _id: "1", title: "T" }} />,
 		);
 		expect(screen.getByTestId("article-content").textContent).not.toContain(
 			"[note]",
@@ -531,18 +532,14 @@ describe("Article Component", () => {
 
 	it("does not update hash when clicking a link inside content", () => {
 		window.history.replaceState(null, null, "#library/id/t1");
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		fireEvent.click(screen.getByTestId("content-link"));
 		expect(window.location.hash).toBe("#library/id/t1");
 	});
 
 	it("appends paragraph index when hash suffix is not numeric", () => {
 		window.history.replaceState(null, null, "#library/id/t1:foo");
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		fireEvent.click(screen.getByText("Para one"));
 		expect(window.location.hash).toContain(":1");
 	});
@@ -594,9 +591,7 @@ describe("Article Component", () => {
 			return originalCreateElement(tag);
 		});
 
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		act(() => {
 			toolbarItems.find((i) => i.id === "export").onClick();
 		});
@@ -616,7 +611,10 @@ describe("Article Component", () => {
 		Element.prototype.scrollIntoView = scrollIntoView;
 
 		render(
-			<Article content="Body with grace" selectedTag={{ _id: "1", title: "T" }} />,
+			<Article
+				content="Body with grace"
+				selectedTag={{ _id: "1", title: "T" }}
+			/>,
 		);
 		act(() => {
 			toolbarItems.find((i) => i.id === "articleTerms").onClick();
@@ -635,18 +633,16 @@ describe("Article Component", () => {
 			remove: jest.fn(),
 		};
 		Element.prototype.scrollIntoView = scrollIntoView;
-		jest.spyOn(Element.prototype, "querySelector").mockImplementation(
-			function querySelector(sel) {
+		jest
+			.spyOn(Element.prototype, "querySelector")
+			.mockImplementation(function querySelector(sel) {
 				if (sel === '[data-paragraph-index="1"]') {
 					return { scrollIntoView, classList };
 				}
 				return null;
-			},
-		);
+			});
 
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		act(() => {
 			toolbarItems.find((i) => i.id === "jumpToParagraph").onClick();
 		});
@@ -686,9 +682,7 @@ describe("Article Component", () => {
 			return originalCreateElement(tag);
 		});
 
-		render(
-			<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />,
-		);
+		render(<Article content="Body" selectedTag={{ _id: "1", title: "T" }} />);
 		act(() => {
 			toolbarItems.find((i) => i.id === "export").onClick();
 		});
@@ -701,7 +695,10 @@ describe("Article Component", () => {
 
 	it("closes the terms dialog", () => {
 		render(
-			<Article content="Body with grace" selectedTag={{ _id: "1", title: "T" }} />,
+			<Article
+				content="Body with grace"
+				selectedTag={{ _id: "1", title: "T" }}
+			/>,
 		);
 		act(() => {
 			toolbarItems.find((i) => i.id === "articleTerms").onClick();
@@ -720,8 +717,6 @@ describe("Article Component", () => {
 				openEditContentDialog={jest.fn()}
 			/>,
 		);
-		expect(
-			toolbarItems.some((item) => item?.id === "editArticle"),
-		).toBe(true);
+		expect(toolbarItems.some((item) => item?.id === "editArticle")).toBe(true);
 	});
 });
