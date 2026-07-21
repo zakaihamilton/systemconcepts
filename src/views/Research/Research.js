@@ -447,6 +447,8 @@ export default function Research() {
 					searchQuery,
 					sessionsById,
 					libraryTags: LibraryStore.getRawState().tags,
+					filterTags,
+					translations,
 					isCancelled: () =>
 						!isMounted.current || requestId !== searchRequestId.current,
 					onProgress: (progress) => {
@@ -491,7 +493,7 @@ export default function Research() {
 				}
 			}
 		},
-		[indexData, query, setResults, filterTags, sessionsById],
+		[indexData, query, setResults, filterTags, sessionsById, translations],
 	);
 
 	// Only auto-search on initial page load if there's a saved query from localStorage

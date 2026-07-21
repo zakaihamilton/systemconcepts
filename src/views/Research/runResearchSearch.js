@@ -1,4 +1,5 @@
 import { loadParagraphsForFile as defaultLoadParagraphs } from "@util/domain/loadParagraphs";
+import { getAllowedResearchFileIndices } from "./searchFilters";
 import {
 	clauseMatchesText,
 	getSearchTerms,
@@ -192,6 +193,8 @@ export async function runResearchSearch({
 	searchQuery = "",
 	sessionsById = new Map(),
 	libraryTags = [],
+	filterTags = [],
+	translations = {},
 	loadParagraphsForFile = defaultLoadParagraphs,
 	isCancelled = () => false,
 	onProgress = () => {},
@@ -211,10 +214,20 @@ export async function runResearchSearch({
 	const isV5 = indexData.v >= 5;
 	const versions = { isV2, isV3, isV4, isV5 };
 
+	// Narrow candidates by filter metadata before any paragraph I/O.
+	const allowedFileIndices = getAllowedResearchFileIndices(
+		indexData,
+		filterTags,
+		translations,
+		{ libraryTags, sessionsById },
+	);
+	const isFileAllowed = (fileIndex) =>
+		!allowedFileIndices || allowedFileIndices.has(fileIndex);
+
 	if (!searchQuery.trim()) {
 		if (indexData.f) {
 			for (let i = 0; i < indexData.f.length; i++) {
-				finalRefs.add(`${i}:0`);
+				if (isFileAllowed(i)) finalRefs.add(`${i}:0`);
 			}
 		}
 	} else {
@@ -238,7 +251,10 @@ export async function runResearchSearch({
 				matchingTokens.forEach((k) => {
 					const refs =
 						isV2 || isV3 || isV4 || isV5 ? indexData.t[k] : indexData.tokens[k];
-					expandTokenRefs(refs, versions).forEach((ref) => tokenRefs.add(ref));
+					expandTokenRefs(refs, versions).forEach((ref) => {
+						const fileIndex = parseInt(ref.split(":")[0], 10);
+						if (isFileAllowed(fileIndex)) tokenRefs.add(ref);
+					});
 				});
 
 				if (groupRefs === null) {
@@ -273,7 +289,11 @@ export async function runResearchSearch({
 
 							loadedCount++;
 							if (!isCancelled()) {
-								onProgress(Math.floor((loadedCount / totalFiles) * 50));
+								onProgress(
+									totalFiles
+										? Math.floor((loadedCount / totalFiles) * 50)
+										: 50,
+								);
 							}
 						}),
 					);
@@ -314,10 +334,14 @@ export async function runResearchSearch({
 			...new Set(
 				[...finalRefs]
 					.map((ref) => parseInt(ref.split(":")[0], 10))
-					.filter((fileIndex) => !paragraphCache.has(fileIndex)),
+					.filter(
+						(fileIndex) =>
+							isFileAllowed(fileIndex) && !paragraphCache.has(fileIndex),
+					),
 			),
 		];
 		let loadedCount = 0;
+		const totalMissing = missingFileIndices.length;
 		await Promise.all(
 			missingFileIndices.map(async (fileIndex) => {
 				const paragraphs = await loadParagraphsForFile(
@@ -328,11 +352,15 @@ export async function runResearchSearch({
 				loadedCount++;
 				if (!isCancelled()) {
 					onProgress(
-						50 + Math.floor((loadedCount / missingFileIndices.length) * 50),
+						50 +
+							(totalMissing
+								? Math.floor((loadedCount / totalMissing) * 50)
+								: 50),
 					);
 				}
 			}),
 		);
+		if (!totalMissing && !isCancelled()) onProgress(100);
 	}
 
 	if (isCancelled()) return { results: [], highlight: [], cancelled: true };
