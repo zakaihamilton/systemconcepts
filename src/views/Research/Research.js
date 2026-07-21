@@ -1110,6 +1110,7 @@ export default function Research() {
 				onClose={closeFilterDrawer}
 				anchor="right"
 				className={styles.filterDrawer}
+				style={{ zIndex: 1500 }}
 			>
 				<Box className={styles.drawerContent}>
 					<Box className={styles.drawerHeader}>
@@ -1312,7 +1313,10 @@ export default function Research() {
 					<PageIndicator
 						current={scrollPages.page}
 						total={scrollPages.count}
-						visible={scrollPages.visible || resultsOutlineOpen}
+						visible={
+							!filterDrawerOpen &&
+							(scrollPages.visible || resultsOutlineOpen)
+						}
 						translations={translations}
 						label={translations.ARTICLE}
 						onClick={

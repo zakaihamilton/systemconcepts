@@ -22,4 +22,15 @@ describe("Drawer", () => {
 		expect(screen.getByRole("complementary")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Top action" })).toBeInTheDocument();
 	});
+
+	it("raises overlay z-index with the drawer", () => {
+		const { container } = render(
+			<Drawer open style={{ zIndex: 1500 }}>
+				<button type="button">Raised</button>
+			</Drawer>,
+		);
+		const overlay = container.querySelector("[class*='overlay']");
+		expect(overlay).toHaveStyle({ zIndex: "1499" });
+		expect(screen.getByRole("complementary")).toHaveStyle({ zIndex: "1500" });
+	});
 });

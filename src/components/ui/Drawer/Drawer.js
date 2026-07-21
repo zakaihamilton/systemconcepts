@@ -15,18 +15,23 @@ export default function Drawer({
 	children,
 	className,
 	variant,
+	style,
 	ModalProps: _modalProps,
 	PaperProps: _paperProps,
 	SlideProps: _slideProps,
 	...props
 }) {
+	const drawerZIndex = style?.zIndex ?? 1200;
+	const overlayZIndex =
+		typeof drawerZIndex === "number" ? drawerZIndex - 1 : 1199;
+
 	return (
 		<>
 			{open && variant !== "persistent" && (
 				<div
 					className={styles.overlay}
 					onClick={onClose}
-					style={{ zIndex: 1199 }}
+					style={{ zIndex: overlayZIndex }}
 				/>
 			)}
 			{(open || variant === "persistent") && (
@@ -39,6 +44,7 @@ export default function Drawer({
 						!open && styles.drawerClosed,
 						className,
 					)}
+					style={style}
 					{...props}
 				>
 					{children}
