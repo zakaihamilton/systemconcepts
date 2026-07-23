@@ -60,3 +60,21 @@ export function getTooltipPosition(
 		viewport,
 	);
 }
+
+/**
+ * Prefer a visible child box when the trigger wrapper collapses
+ * (e.g. child is position:absolute and removed from flow).
+ */
+export function getAnchorRect(anchor) {
+	const anchorRect = anchor.getBoundingClientRect();
+	if (anchorRect.width > 0 || anchorRect.height > 0) {
+		return anchorRect;
+	}
+
+	const child = anchor.firstElementChild;
+	if (!child) {
+		return anchorRect;
+	}
+
+	return child.getBoundingClientRect();
+}

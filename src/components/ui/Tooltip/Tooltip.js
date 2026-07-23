@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "../shared.module.css";
-import { getTooltipPosition } from "./positioning";
+import { getAnchorRect, getTooltipPosition } from "./positioning";
 
 const TOUCH_ENTER_DELAY = 1000;
 
@@ -114,7 +114,7 @@ export default function Tooltip({
 
 			setPos(
 				getTooltipPosition(
-					anchorRef.current.getBoundingClientRect(),
+					getAnchorRect(anchorRef.current),
 					tooltipRef.current.getBoundingClientRect(),
 					placement,
 				),
