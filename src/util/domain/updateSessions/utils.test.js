@@ -43,6 +43,7 @@ jest.mock("@util/storage/storage", () => ({
 	writeFile: jest.fn(),
 	deleteFile: jest.fn(),
 	createFolderPath: jest.fn(),
+	rename: jest.fn(),
 }));
 
 describe("getListing", () => {
@@ -104,6 +105,7 @@ describe("updateYearSync", () => {
 		storage.createFolderPath.mockResolvedValue(undefined);
 		storage.writeFile.mockResolvedValue(undefined);
 		storage.deleteFile.mockResolvedValue(undefined);
+		storage.rename.mockResolvedValue(undefined);
 		writeCompressedFile.mockResolvedValue(undefined);
 		updateManifestEntry.mockResolvedValue(undefined);
 	});
@@ -114,7 +116,7 @@ describe("updateYearSync", () => {
 		expect(storage.writeFile).not.toHaveBeenCalled();
 	});
 
-	it("writes via storage.writeFile and logs progress", async () => {
+	it("writes via temp file then renames without deleting the live file first", async () => {
 		const result = await updateYearSync("test", "2024", [
 			{ id: "b-session" },
 			{ id: "a-session" },
@@ -125,8 +127,16 @@ describe("updateYearSync", () => {
 			true,
 		);
 		expect(storage.writeFile).toHaveBeenCalledWith(
-			"/local/sync/test/2024.json",
+			"/local/sync/test/2024.json.tmp",
 			expect.any(String),
+		);
+		expect(storage.rename).toHaveBeenCalledWith(
+			"/local/sync/test/2024.json.tmp",
+			"/local/sync/test/2024.json",
+		);
+		// Must never delete the live year file before the new one is ready.
+		expect(storage.deleteFile).not.toHaveBeenCalledWith(
+			"/local/sync/test/2024.json",
 		);
 		const [, jsonString] = storage.writeFile.mock.calls[0];
 		const data = JSON.parse(jsonString);
@@ -136,24 +146,25 @@ describe("updateYearSync", () => {
 		]);
 		expect(result.newCount).toBe(2);
 		expect(addSyncLog).toHaveBeenCalledWith(
-			expect.stringContaining("Settling local storage"),
-			"info",
-		);
-		expect(addSyncLog).toHaveBeenCalledWith(
 			expect.stringContaining("✓ Saved"),
 			"success",
 		);
 	});
 
-	it("deletes a previous year file before writing", async () => {
-		storage.exists.mockResolvedValue(true);
+	it("leaves the live year file intact when the temp write fails", async () => {
+		storage.writeFile.mockRejectedValue(new Error("write failed"));
 
-		await updateYearSync("test", "2024", [{ id: "a-session" }]);
+		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
 
-		expect(storage.deleteFile).toHaveBeenCalledWith(
+		expect(result).toEqual({ counter: 0, newCount: 0, newSessions: [] });
+		expect(storage.deleteFile).not.toHaveBeenCalledWith(
 			"/local/sync/test/2024.json",
 		);
-		expect(storage.writeFile).toHaveBeenCalled();
+		expect(storage.rename).not.toHaveBeenCalled();
+		expect(addSyncLog).toHaveBeenCalledWith(
+			expect.stringContaining("Save failed"),
+			"error",
+		);
 	});
 
 	it("uses previousSessions for new-count", async () => {
@@ -166,18 +177,6 @@ describe("updateYearSync", () => {
 
 		expect(result.newCount).toBe(1);
 		expect(result.newSessions.map((s) => s.name)).toEqual(["b-session"]);
-	});
-
-	it("returns zero counters and logs when writing fails", async () => {
-		storage.writeFile.mockRejectedValueOnce(new Error("write failed"));
-
-		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
-
-		expect(result).toEqual({ counter: 0, newCount: 0, newSessions: [] });
-		expect(addSyncLog).toHaveBeenCalledWith(
-			expect.stringContaining("Save failed"),
-			"error",
-		);
 	});
 });
 

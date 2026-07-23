@@ -150,4 +150,7 @@ export default {
 	writeFile,
 	writeFiles,
 	exists,
+	async rename() {
+		/* local-only */
+	},
 };

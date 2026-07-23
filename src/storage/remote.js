@@ -324,5 +324,8 @@ export default function remoteStorage({ fsEndPoint, deviceId }) {
 		writeFile,
 		writeFiles,
 		exists,
+		async rename() {
+			/* local-only */
+		},
 	};
 }

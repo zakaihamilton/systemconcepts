@@ -59,6 +59,7 @@ describe("no-op operations", () => {
 		["createFolderPath"],
 		["deleteFolder"],
 		["deleteFile"],
+		["rename"],
 		["readFiles"],
 		["writeFile"],
 		["writeFiles"],

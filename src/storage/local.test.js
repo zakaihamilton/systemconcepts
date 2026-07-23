@@ -10,6 +10,7 @@ const mockFsPromises = {
 	mkdir: jest.fn(),
 	rmdir: jest.fn(),
 	unlink: jest.fn(),
+	rename: jest.fn(),
 	readFile: jest.fn(),
 	writeFile: jest.fn(),
 };
@@ -351,6 +352,19 @@ describe("deleteFile", () => {
 		await localStorage.deleteFile("root/file.txt");
 
 		expect(mockFsPromises.unlink).toHaveBeenCalledWith("/root/file.txt");
+	});
+});
+
+describe("rename", () => {
+	it("renames via fs.promises.rename", async () => {
+		mockFsPromises.rename.mockResolvedValue(undefined);
+
+		await localStorage.rename("root/old.txt", "root/new.txt");
+
+		expect(mockFsPromises.rename).toHaveBeenCalledWith(
+			"/root/old.txt",
+			"/root/new.txt",
+		);
 	});
 });
 

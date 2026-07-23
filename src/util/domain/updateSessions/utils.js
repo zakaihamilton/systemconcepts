@@ -36,7 +36,8 @@ function withTimeout(promise, ms, message) {
 }
 
 async function settleLocalFs(ms = FS_SETTLE_MS) {
-	await new Promise((resolve) => setTimeout(resolve, ms));
+	const wait = process.env.NODE_ENV === "test" ? 0 : ms;
+	await new Promise((resolve) => setTimeout(resolve, wait));
 }
 
 export async function getListing(path) {
@@ -140,14 +141,16 @@ async function updateLocalManifestForSyncFile(localPath, content) {
 }
 
 /**
- * Write a year JSON file in a lightning-fs-friendly way:
- * settle → ensure parent dir → delete oversized previous file → write.
+ * Write a year JSON file without deleting the live file first.
+ * Writes to a temp path, then renames over the destination so a failed
+ * update never leaves the group without sessions for the next sync.
  */
 async function writeLocalYearFile(localPath, jsonString, logPrefix) {
 	const parentPath = localPath.substring(0, localPath.lastIndexOf("/"));
+	const tempPath = `${localPath}.tmp`;
 
 	addSyncLog(`${logPrefix} Settling local storage…`, "info");
-	await settleLocalFs();
+	await settleLocalFs(1500);
 
 	addSyncLog(`${logPrefix} Ensuring folder ${parentPath}…`, "verbose");
 	await withTimeout(
@@ -156,32 +159,58 @@ async function writeLocalYearFile(localPath, jsonString, logPrefix) {
 		`Timed out creating folder ${parentPath}`,
 	);
 
-	// Replacing a multi-MB pretty-printed year file in place often stalls
-	// lightning-fs/IndexedDB. Delete first so the write is a fresh inode.
+	// Clean up a leftover temp from a previous interrupted save (not the live file).
 	try {
-		if (await storage.exists(localPath)) {
-			addSyncLog(`${logPrefix} Removing previous year file…`, "info");
-			await withTimeout(
-				storage.deleteFile(localPath),
-				WRITE_TIMEOUT_MS,
-				`Timed out deleting ${localPath}`,
-			);
+		if (await storage.exists(tempPath)) {
+			await storage.deleteFile(tempPath);
 			await settleLocalFs();
 		}
 	} catch (err) {
-		structuredLogger.warn(
-			`[Sync] Could not remove previous year file ${localPath}`,
-			err,
-		);
+		structuredLogger.warn(`[Sync] Could not clear temp file ${tempPath}`, err);
 	}
 
-	addSyncLog(`${logPrefix} Writing file…`, "info");
-	await settleLocalFs(FS_SETTLE_MS);
-	await withTimeout(
-		storage.writeFile(localPath, jsonString),
-		WRITE_TIMEOUT_MS,
-		`Timed out writing ${localPath}`,
-	);
+	const attempts = 3;
+	let lastError = null;
+	for (let attempt = 1; attempt <= attempts; attempt++) {
+		try {
+			addSyncLog(
+				`${logPrefix} Writing temp file (attempt ${attempt}/${attempts})…`,
+				"info",
+			);
+			await settleLocalFs(attempt === 1 ? 500 : 1000 * attempt);
+			await withTimeout(
+				storage.writeFile(tempPath, jsonString),
+				WRITE_TIMEOUT_MS,
+				`Timed out writing temp ${tempPath} (attempt ${attempt})`,
+			);
+
+			addSyncLog(`${logPrefix} Promoting temp file…`, "info");
+			await settleLocalFs();
+			await withTimeout(
+				storage.rename(tempPath, localPath),
+				WRITE_TIMEOUT_MS,
+				`Timed out renaming ${tempPath} → ${localPath}`,
+			);
+			return;
+		} catch (err) {
+			lastError = err;
+			addSyncLog(
+				`${logPrefix} Write attempt ${attempt} failed: ${err.message || err}`,
+				attempt === attempts ? "error" : "warning",
+			);
+			try {
+				if (await storage.exists(tempPath)) {
+					await storage.deleteFile(tempPath);
+				}
+			} catch {
+				// Best-effort temp cleanup; live year file is untouched.
+			}
+			if (attempt < attempts) {
+				await settleLocalFs(2000 * attempt);
+			}
+		}
+	}
+	throw lastError || new Error(`Failed to write ${localPath}`);
 }
 
 /**

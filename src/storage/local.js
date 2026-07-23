@@ -161,6 +161,12 @@ async function deleteFile(path) {
 	await fs.promises.unlink(path);
 }
 
+async function rename(from, to) {
+	from = makePath(from);
+	to = makePath(to);
+	await fs.promises.rename(from, to);
+}
+
 async function readFile(path) {
 	path = makePath(path);
 	try {
@@ -244,6 +250,7 @@ export default {
 	createFolderPath,
 	deleteFolder,
 	deleteFile,
+	rename,
 	readFile,
 	readFiles,
 	writeFile,
