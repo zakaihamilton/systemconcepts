@@ -57,10 +57,15 @@ async function downloadFile(
 		}
 
 		if (content === null) return null;
+		addSyncLog(
+			`[${fileBasename}] Remote content ready (${Math.round((content.length || 0) / 1024)}KB).`,
+			"verbose",
+		);
 
 		if (createdFolders) {
 			const folder = localFilePath.substring(0, localFilePath.lastIndexOf("/"));
 			if (!createdFolders.has(folder)) {
+				addSyncLog(`[${fileBasename}] Preparing local path…`, "verbose");
 				await storage.createFolderPath(localFilePath);
 				createdFolders.add(folder);
 			}
@@ -164,6 +169,7 @@ async function downloadFile(
 
 		const unlock = await lockMutex({ id: localFilePath });
 		try {
+			addSyncLog(`[${fileBasename}] Writing local file…`, "verbose");
 			// Check if file has changed locally since sync started
 			// This prevents overwriting newer local changes with older remote files
 			if (await storage.exists(localFilePath)) {
@@ -203,6 +209,7 @@ async function downloadFile(
 
 			try {
 				await storage.writeFile(localFilePath, contentToWrite);
+				addSyncLog(`[${fileBasename}] Local file written.`, "verbose");
 			} catch (err) {
 				const errorStr = (err.message || String(err)).toLowerCase();
 				if (errorStr.includes("eisdir")) {
@@ -211,6 +218,10 @@ async function downloadFile(
 					);
 					await moveFolderToTrash(localPath, createSyncTrashId(), fileBasename);
 					await storage.writeFile(localFilePath, contentToWrite);
+					addSyncLog(
+						`[${fileBasename}] Local file written after recovery.`,
+						"verbose",
+					);
 				} else {
 					throw err;
 				}

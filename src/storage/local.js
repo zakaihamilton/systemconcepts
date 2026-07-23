@@ -2,17 +2,6 @@ import { logger as structuredLogger } from "@util/api/logger";
 
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
 
-import {
-	clearSyncYearFilesDb,
-	idbDeleteSyncYearFile,
-	idbExistsSyncYearFile,
-	idbListSyncYearFilesInDir,
-	idbListSyncYearGroups,
-	idbReadSyncYearFile,
-	idbRenameSyncYearFile,
-	idbWriteSyncYearFile,
-	isSyncYearFilePath,
-} from "@storage/syncYearFiles";
 import { isBinaryFile, makePath } from "@util/data/path";
 
 const fs = process.browser && new FS("systemconcepts-fs");
@@ -25,9 +14,7 @@ async function getListing(path, options = {}) {
 		names = await fs.promises.readdir(path);
 	} catch (error) {
 		if (strict && error?.code !== "ENOENT") throw error;
-		// Continue with an empty lightning-fs listing so IDB year files can still
-		// appear when the group folder only exists in the dedicated store.
-		names = [];
+		return [];
 	}
 	for (const name of names) {
 		const item = {};
@@ -69,40 +56,6 @@ async function getListing(path, options = {}) {
 		}
 	}
 
-	// Split-group year JSON lives in a dedicated IDB store (not lightning-fs).
-	try {
-		if (makePath(path) === "/sync") {
-			const existing = new Set(listing.map((item) => item.name));
-			for (const name of await idbListSyncYearGroups()) {
-				if (existing.has(name)) continue;
-				const itemPath = makePath(path, name);
-				listing.push({
-					type: "dir",
-					name,
-					mtimeMs: 0,
-					id: makePath("local", itemPath),
-					path: makePath("local", itemPath),
-				});
-			}
-		}
-		const yearNames = await idbListSyncYearFilesInDir(path);
-		const existing = new Set(listing.map((item) => item.name));
-		for (const name of yearNames) {
-			if (existing.has(name)) continue;
-			const itemPath = makePath(path, name);
-			listing.push({
-				type: "file",
-				name,
-				mtimeMs: 0,
-				id: makePath("local", itemPath),
-				path: makePath("local", itemPath),
-			});
-		}
-	} catch (err) {
-		if (strict) throw err;
-		structuredLogger.error(err);
-	}
-
 	return listing;
 }
 
@@ -127,10 +80,6 @@ async function createFolders(prefix, folders) {
 
 async function createFolderPath(path, isFolder = false) {
 	path = makePath(path);
-	// Split year files live in the dedicated OPFS/IndexedDB store.  Do not
-	// create their parent folders in lightning-fs: a wedged lightning-fs
-	// transaction would otherwise block sync before the dedicated writer runs.
-	if (isSyncYearFilePath(path)) return;
 	const parts = path.split("/");
 	let partIndex = parts.length - 1;
 	for (; partIndex > 1; partIndex--) {
@@ -210,40 +159,17 @@ async function deleteFolder(root) {
 
 async function deleteFile(path) {
 	path = makePath(path);
-	if (isSyncYearFilePath(path)) {
-		await idbDeleteSyncYearFile(path);
-		return;
-	}
 	await fs.promises.unlink(path);
 }
 
 async function rename(from, to) {
 	from = makePath(from);
 	to = makePath(to);
-	if (isSyncYearFilePath(from) || isSyncYearFilePath(to)) {
-		await idbRenameSyncYearFile(from, to);
-		return;
-	}
 	await fs.promises.rename(from, to);
 }
 
 async function readFile(path) {
 	path = makePath(path);
-	if (isSyncYearFilePath(path)) {
-		const fromYearStore = await idbReadSyncYearFile(path);
-		if (fromYearStore != null) return fromYearStore;
-		// Legacy lightning-fs copy only — never block forever if FS is wedged.
-		try {
-			return await Promise.race([
-				fs.promises.readFile(path, "utf8"),
-				new Promise((_, reject) =>
-					setTimeout(() => reject(new Error("legacy year read timeout")), 3000),
-				),
-			]);
-		} catch {
-			return null;
-		}
-	}
 	try {
 		if (isBinaryFile(path)) {
 			return await fs.promises.readFile(path);
@@ -267,9 +193,6 @@ async function readFiles(prefix, files) {
 
 async function writeFile(path, body) {
 	path = makePath(path);
-	if (isSyncYearFilePath(path)) {
-		return await idbWriteSyncYearFile(path, body);
-	}
 	if (isBinaryFile(path)) {
 		return await fs.promises.writeFile(path, body);
 	}
@@ -284,10 +207,6 @@ async function writeFiles(prefix, files) {
 
 async function exists(path) {
 	path = makePath(path);
-	if (isSyncYearFilePath(path)) {
-		// Do not probe lightning-fs for year files — it can hang when wedged.
-		return await idbExistsSyncYearFile(path);
-	}
 	let exists = false;
 	try {
 		const stat = await fs.promises.stat(path);
@@ -300,7 +219,6 @@ export async function clear() {
 	if (typeof indexedDB === "undefined") {
 		return;
 	}
-	await clearSyncYearFilesDb();
 	return new Promise((resolve, reject) => {
 		const req = indexedDB.deleteDatabase("systemconcepts-fs");
 		req.onsuccess = () => resolve();
