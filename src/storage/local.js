@@ -193,12 +193,6 @@ async function deleteFile(path) {
 	path = makePath(path);
 	if (isSyncYearFilePath(path)) {
 		await idbDeleteSyncYearFile(path);
-		// Best-effort cleanup of a legacy lightning-fs copy.
-		try {
-			await fs.promises.unlink(path);
-		} catch {
-			/* ignore */
-		}
 		return;
 	}
 	await fs.promises.unlink(path);
@@ -217,9 +211,19 @@ async function rename(from, to) {
 async function readFile(path) {
 	path = makePath(path);
 	if (isSyncYearFilePath(path)) {
-		const fromIdb = await idbReadSyncYearFile(path);
-		if (fromIdb != null) return fromIdb;
-		// Fall through to lightning-fs for pre-migration year files.
+		const fromYearStore = await idbReadSyncYearFile(path);
+		if (fromYearStore != null) return fromYearStore;
+		// Legacy lightning-fs copy only — never block forever if FS is wedged.
+		try {
+			return await Promise.race([
+				fs.promises.readFile(path, "utf8"),
+				new Promise((_, reject) =>
+					setTimeout(() => reject(new Error("legacy year read timeout")), 3000),
+				),
+			]);
+		} catch {
+			return null;
+		}
 	}
 	try {
 		if (isBinaryFile(path)) {
@@ -262,8 +266,8 @@ async function writeFiles(prefix, files) {
 async function exists(path) {
 	path = makePath(path);
 	if (isSyncYearFilePath(path)) {
-		if (await idbExistsSyncYearFile(path)) return true;
-		// Fall through for legacy lightning-fs copies.
+		// Do not probe lightning-fs for year files — it can hang when wedged.
+		return await idbExistsSyncYearFile(path);
 	}
 	let exists = false;
 	try {

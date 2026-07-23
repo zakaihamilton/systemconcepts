@@ -45,6 +45,9 @@ jest.mock("@util/storage/storage", () => ({
 	createFolderPath: jest.fn(),
 	rename: jest.fn(),
 }));
+jest.mock("@storage/syncYearFiles", () => ({
+	lastYearFileBackend: "opfs",
+}));
 
 describe("getListing", () => {
 	beforeEach(() => {

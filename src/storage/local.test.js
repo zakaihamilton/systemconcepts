@@ -400,16 +400,12 @@ describe("deleteFile", () => {
 	});
 
 	it("deletes sync year files via the dedicated IDB store", async () => {
-		mockFsPromises.unlink.mockResolvedValue(undefined);
-
 		await localStorage.deleteFile("/sync/american/2026.json");
 
 		expect(mockSyncYearFiles.idbDeleteSyncYearFile).toHaveBeenCalledWith(
 			"/sync/american/2026.json",
 		);
-		expect(mockFsPromises.unlink).toHaveBeenCalledWith(
-			"/sync/american/2026.json",
-		);
+		expect(mockFsPromises.unlink).not.toHaveBeenCalled();
 	});
 });
 

@@ -1,3 +1,4 @@
+import { lastYearFileBackend } from "@storage/syncYearFiles";
 import { writeCompressedFile } from "@sync/bundle";
 import { FILES_MANIFEST, LOCAL_SYNC_PATH } from "@sync/constants";
 import { getFileInfo } from "@sync/hash";
@@ -156,12 +157,20 @@ async function writeLocalYearFile(localPath, jsonString, logPrefix) {
 		WRITE_TIMEOUT_MS,
 		`Timed out writing temp ${tempPath}`,
 	);
+	addSyncLog(
+		`${logPrefix} Temp written (${lastYearFileBackend || "storage"})…`,
+		"verbose",
+	);
 
 	addSyncLog(`${logPrefix} Promoting temp file…`, "info");
 	await withTimeout(
 		storage.rename(tempPath, localPath),
 		WRITE_TIMEOUT_MS,
 		`Timed out renaming ${tempPath} → ${localPath}`,
+	);
+	addSyncLog(
+		`${logPrefix} Promoted (${lastYearFileBackend || "storage"})…`,
+		"verbose",
 	);
 }
 

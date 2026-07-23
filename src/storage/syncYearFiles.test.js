@@ -32,14 +32,6 @@ function createMemoryIndexedDB() {
 			});
 			return req;
 		}
-		getKey(key) {
-			const req = new MemoryRequest();
-			asap(() => {
-				req.result = this.data.has(key) ? key : undefined;
-				req.onsuccess?.({ target: req });
-			});
-			return req;
-		}
 		getAllKeys() {
 			const req = new MemoryRequest();
 			asap(() => {
@@ -74,7 +66,6 @@ function createMemoryIndexedDB() {
 			this.oncomplete = null;
 			this.onerror = null;
 			this.onabort = null;
-			// Complete after request callbacks scheduled in this turn have run.
 			asap(() => asap(() => this.oncomplete?.()));
 		}
 		objectStore() {
@@ -89,6 +80,7 @@ function createMemoryIndexedDB() {
 		constructor(data) {
 			this.data = data;
 			this.objectStoreNames = { contains: (s) => s === "files" };
+			this.onclose = null;
 		}
 		transaction() {
 			return new MemoryTransaction(this);
@@ -133,6 +125,11 @@ describe("syncYearFiles", () => {
 	beforeEach(() => {
 		jest.resetModules();
 		global.indexedDB = createMemoryIndexedDB();
+		// Force IDB path in tests (jsdom has no OPFS).
+		Object.defineProperty(global.navigator, "storage", {
+			configurable: true,
+			value: {},
+		});
 		// eslint-disable-next-line global-require
 		api = require("@storage/syncYearFiles");
 	});
@@ -144,11 +141,12 @@ describe("syncYearFiles", () => {
 		expect(api.isSyncYearFilePath("/sync/american/sub/2026.json")).toBe(false);
 	});
 
-	it("writes, reads, exists, renames, lists, and deletes year files", async () => {
+	it("writes, reads, exists, renames, lists, and deletes year files via IDB", async () => {
 		const live = "/sync/american/2026.json";
 		const temp = "/sync/american/2026.json.tmp";
 
 		await api.idbWriteSyncYearFile(temp, '{"sessions":[1]}');
+		expect(api.lastYearFileBackend).toBe("idb");
 		expect(await api.idbExistsSyncYearFile(temp)).toBe(true);
 		expect(await api.idbReadSyncYearFile(temp)).toBe('{"sessions":[1]}');
 
@@ -161,5 +159,97 @@ describe("syncYearFiles", () => {
 
 		await api.idbDeleteSyncYearFile(live);
 		expect(await api.idbExistsSyncYearFile(live)).toBe(false);
+	});
+
+	it("uses OPFS when getDirectory is available", async () => {
+		const files = new Map();
+		const groupDir = {
+			kind: "directory",
+			async getFileHandle(name, opts) {
+				if (!files.has(name) && !opts?.create) {
+					const err = new Error("missing");
+					err.name = "NotFoundError";
+					throw err;
+				}
+				if (!files.has(name)) files.set(name, "");
+				return {
+					async createWritable() {
+						let data = "";
+						return {
+							async write(chunk) {
+								data = chunk;
+							},
+							async close() {
+								files.set(name, data);
+							},
+						};
+					},
+					async getFile() {
+						return {
+							async text() {
+								return files.get(name);
+							},
+						};
+					},
+				};
+			},
+			async removeEntry(name) {
+				files.delete(name);
+			},
+			async *entries() {
+				for (const [name] of files) {
+					if (!name.endsWith(".tmp")) {
+						yield [name, { kind: "file" }];
+					}
+				}
+			},
+		};
+		const yearsRoot = {
+			async getDirectoryHandle(group, opts) {
+				if (group === "american") return groupDir;
+				if (!opts?.create) {
+					const err = new Error("missing");
+					err.name = "NotFoundError";
+					throw err;
+				}
+				return groupDir;
+			},
+			async removeEntry() {},
+		};
+		Object.defineProperty(global.navigator, "storage", {
+			configurable: true,
+			value: {
+				async getDirectory() {
+					return {
+						async getDirectoryHandle(name, opts) {
+							if (name === "sync-years") return yearsRoot;
+							if (!opts?.create) {
+								const err = new Error("missing");
+								err.name = "NotFoundError";
+								throw err;
+							}
+							return yearsRoot;
+						},
+						async removeEntry() {},
+					};
+				},
+			},
+		});
+		jest.resetModules();
+		// eslint-disable-next-line global-require
+		api = require("@storage/syncYearFiles");
+
+		await api.idbWriteSyncYearFile("/sync/american/2026.json.tmp", '{"a":1}');
+		expect(api.lastYearFileBackend).toBe("opfs");
+		await api.idbRenameSyncYearFile(
+			"/sync/american/2026.json.tmp",
+			"/sync/american/2026.json",
+		);
+		expect(await api.idbReadSyncYearFile("/sync/american/2026.json")).toBe(
+			'{"a":1}',
+		);
+		expect(await api.idbListSyncYearFilesInDir("/sync/american")).toEqual([
+			"2026.json",
+		]);
 	});
 });
