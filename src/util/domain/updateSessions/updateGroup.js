@@ -324,12 +324,25 @@ async function writeYearCache(
 		const path = getYearCachePath(groupName, yearName);
 		await storage.createFolderPath(path);
 		await yieldToMain();
+		// Slim listing items — full aws/wasabi dir entries bloat the cache and
+		// can hang IndexedDB writes after "Saving sessions…".
+		const slimItems = (metadata?.items || []).map((item) => ({
+			name: item.name,
+			path: item.path,
+			type: item.type || item.stat?.type,
+		}));
 		await storage.writeFile(
 			path,
 			JSON.stringify({
 				fingerprint,
 				metadataFingerprint: serializeMetadataFingerprint(metadataFingerprint),
-				metadata: normalizeMetadataPayload(metadata),
+				metadata: normalizeMetadataPayload({
+					items: slimItems,
+					tags: metadata?.tags,
+					durations: metadata?.durations,
+					summaries: metadata?.summaries,
+					transcriptions: metadata?.transcriptions,
+				}),
 				sessionFingerprints: sessionFingerprints || {},
 				updatedAt: Date.now(),
 			}),
@@ -1137,6 +1150,7 @@ export async function updateGroupProcess(
 						name,
 						year.name,
 						sessionsToPersist,
+						cachedYearSessions,
 					);
 					// Track sessions for total count regardless of whether file was updated
 					sessionsToPersist.forEach((session) =>
@@ -1164,7 +1178,8 @@ export async function updateGroupProcess(
 						});
 					}
 				}
-				await writeYearCache(
+				// Year cache is an optimization — never block year completion on it.
+				void writeYearCache(
 					name,
 					year.name,
 					yearFingerprint,

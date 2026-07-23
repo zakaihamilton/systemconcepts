@@ -4,7 +4,12 @@ import { updateManifestEntry } from "@sync/manifest";
 import { lockMutex } from "@sync/mutex";
 import { logger } from "@util/api/logger";
 import storage from "@util/storage/storage";
-import { getListing, updateBundleFile, updateYearSync } from "./utils";
+import {
+	getListing,
+	slimSessionForPersist,
+	updateBundleFile,
+	updateYearSync,
+} from "./utils";
 
 jest.mock("@sync/bundle", () => ({
 	writeCompressedFile: jest.fn(),
@@ -53,6 +58,25 @@ describe("getListing", () => {
 	});
 });
 
+describe("slimSessionForPersist", () => {
+	it("keeps only name/path on media refs", () => {
+		const slim = slimSessionForPersist({
+			id: "2024-01-01 Talk",
+			audio: {
+				name: "a.m4a",
+				path: "wasabi/g/a.m4a",
+				mtimeMs: 1,
+				size: 99,
+			},
+			image: { name: "a.jpg", path: "wasabi/g/a.jpg", mode: 0o644 },
+			summary: { name: "a.md", path: "aws/a.md", extra: true },
+		});
+		expect(slim.audio).toEqual({ name: "a.m4a", path: "wasabi/g/a.m4a" });
+		expect(slim.image).toEqual({ name: "a.jpg", path: "wasabi/g/a.jpg" });
+		expect(slim.summary).toEqual({ name: "a.md", path: "aws/a.md" });
+	});
+});
+
 describe("updateYearSync", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -68,9 +92,7 @@ describe("updateYearSync", () => {
 		expect(writeCompressedFile).not.toHaveBeenCalled();
 	});
 
-	it("writes a fresh compact year file when none exists and reports all sessions as new", async () => {
-		storage.exists.mockResolvedValue(false);
-
+	it("writes a fresh compact year file and reports all sessions as new", async () => {
 		const sessions = [{ id: "b-session" }, { id: "a-session" }];
 		const result = await updateYearSync("test", "2024", sessions);
 
@@ -83,7 +105,6 @@ describe("updateYearSync", () => {
 		const data = JSON.parse(jsonString);
 		expect(data).toEqual(
 			expect.objectContaining({
-				version: 1,
 				group: "test",
 				year: "2024",
 			}),
@@ -100,67 +121,24 @@ describe("updateYearSync", () => {
 			expect.objectContaining({ path: "/test/2024.json", hash: "hash1" }),
 		);
 		expect(storage.readFile).not.toHaveBeenCalled();
+		expect(storage.exists).not.toHaveBeenCalled();
 	});
 
-	it("increments the version when a previous file exists", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
-			JSON.stringify({ version: 3, group: "test", sessions: [] }),
+	it("uses previousSessions for new-count without re-reading disk", async () => {
+		const result = await updateYearSync(
+			"test",
+			"2024",
+			[{ id: "a-session" }, { id: "b-session" }],
+			[{ id: "a-session", name: "a-session" }],
 		);
-
-		await updateYearSync("test", "2024", [{ id: "a-session" }]);
-
-		const [, jsonString] = writeCompressedFile.mock.calls[0];
-		expect(JSON.parse(jsonString).version).toBe(4);
-	});
-
-	it("returns unchanged when the serialized sessions match the existing file", async () => {
-		const existingSessions = [{ name: "a-session", id: "a-session" }];
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
-			JSON.stringify({
-				version: 1,
-				group: "test",
-				sessions: existingSessions,
-			}),
-		);
-
-		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
-
-		expect(result).toEqual({ counter: 0, newCount: 0, newSessions: [] });
-		expect(writeCompressedFile).not.toHaveBeenCalled();
-	});
-
-	it("identifies only the new sessions when existing content differs", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue(
-			JSON.stringify({
-				version: 1,
-				group: "test",
-				sessions: [{ name: "a-session", id: "a-session" }],
-			}),
-		);
-
-		const result = await updateYearSync("test", "2024", [
-			{ id: "a-session" },
-			{ id: "b-session" },
-		]);
 
 		expect(result.newCount).toBe(1);
 		expect(result.newSessions.map((s) => s.name)).toEqual(["b-session"]);
-	});
-
-	it("treats all sessions as new when the existing file fails to parse", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("not json");
-
-		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
-
-		expect(result.newCount).toBe(1);
+		expect(storage.readFile).not.toHaveBeenCalled();
+		expect(writeCompressedFile).toHaveBeenCalled();
 	});
 
 	it("returns zero counters and logs an error when writing fails", async () => {
-		storage.exists.mockResolvedValue(false);
 		writeCompressedFile.mockRejectedValueOnce(new Error("write failed"));
 
 		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
@@ -173,7 +151,6 @@ describe("updateYearSync", () => {
 	});
 
 	it("warns but does not fail when updating the manifest after write fails", async () => {
-		storage.exists.mockResolvedValue(false);
 		updateManifestEntry.mockRejectedValueOnce(new Error("manifest failed"));
 
 		const result = await updateYearSync("test", "2024", [{ id: "a-session" }]);
@@ -187,7 +164,6 @@ describe("updateYearSync", () => {
 	});
 
 	it("locks the year file and manifest while persisting", async () => {
-		storage.exists.mockResolvedValue(false);
 		const yearUnlock = jest.fn();
 		const manifestUnlock = jest.fn();
 		lockMutex
@@ -204,14 +180,25 @@ describe("updateYearSync", () => {
 		expect(manifestUnlock).toHaveBeenCalled();
 	});
 
-	it("starts at version 1 when the existing file cannot be parsed for versioning", async () => {
-		storage.exists.mockResolvedValue(true);
-		storage.readFile.mockResolvedValue("not json");
-
-		await updateYearSync("test", "2024", [{ id: "a-session" }]);
+	it("slims media refs in the persisted payload", async () => {
+		await updateYearSync("test", "2024", [
+			{
+				id: "a-session",
+				audio: {
+					name: "a.m4a",
+					path: "wasabi/a.m4a",
+					mtimeMs: 123,
+					size: 456,
+				},
+			},
+		]);
 
 		const [, jsonString] = writeCompressedFile.mock.calls[0];
-		expect(JSON.parse(jsonString).version).toBe(1);
+		const data = JSON.parse(jsonString);
+		expect(data.sessions[0].audio).toEqual({
+			name: "a.m4a",
+			path: "wasabi/a.m4a",
+		});
 	});
 });
 

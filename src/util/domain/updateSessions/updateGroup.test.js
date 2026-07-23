@@ -2055,6 +2055,7 @@ describe("updateGroupProcess", () => {
 			"test",
 			"2024",
 			expect.any(Array),
+			expect.anything(),
 		);
 	});
 
