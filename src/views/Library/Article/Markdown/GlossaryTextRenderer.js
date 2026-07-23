@@ -1,24 +1,19 @@
 import { glossary } from "@data/glossary";
 import React, { useCallback } from "react";
 
-import { termPattern } from "../GlossaryUtils";
+import {
+	hasConfirmingGlossaryParenthetical,
+	shouldSkipGlossaryTerm,
+	termPattern,
+} from "../GlossaryUtils";
 import styles from "./Markdown.module.css";
 import { referencePattern } from "./referenceUtils";
 import Term from "./Term";
 
 function extendTermEndForParenthetical(text, end, term, glossaryEntry) {
-	const textAfter = text.slice(end);
-	const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(textAfter);
-	if (parentheticalMatch) {
-		const content = parentheticalMatch[1].trim().toLowerCase();
-		const mainText = (
-			glossaryEntry?.en ||
-			glossaryEntry?.trans ||
-			term
-		).toLowerCase();
-		if (content === mainText || content === term.toLowerCase()) {
-			return end + parentheticalMatch[0].length;
-		}
+	if (hasConfirmingGlossaryParenthetical(text, end, term, glossaryEntry)) {
+		const parentheticalMatch = /^\s*\(([^)]+)\)/.exec(text.slice(end));
+		return end + parentheticalMatch[0].length;
 	}
 	return end;
 }
@@ -30,6 +25,9 @@ function collectGlossarySpans(text) {
 	for (const match of matches) {
 		const term = match[0];
 		const start = match.index;
+		if (shouldSkipGlossaryTerm(term, text, start)) {
+			continue;
+		}
 		let end = start + term.length;
 		const glossaryEntry = glossary[term.toLowerCase()];
 		end = extendTermEndForParenthetical(text, end, term, glossaryEntry);
@@ -37,18 +35,6 @@ function collectGlossarySpans(text) {
 	}
 
 	return spans;
-}
-
-function shouldSkipGlossaryTerm(term, text, start) {
-	if (term === "or") {
-		return true;
-	}
-	if (term === "Or") {
-		const isStartOfSentence =
-			start === 0 || /[\.!\?]\s+$/.test(text.slice(0, start));
-		return isStartOfSentence;
-	}
-	return false;
 }
 
 export function Highlight({ search, children }) {
@@ -198,11 +184,6 @@ export function useGlossaryTextRenderer({
 									{text.slice(lastIndex, start)}
 								</Highlight>,
 							);
-						}
-
-						if (shouldSkipGlossaryTerm(term, text, start)) {
-							lastIndex = start;
-							continue;
 						}
 
 						parts.push(
