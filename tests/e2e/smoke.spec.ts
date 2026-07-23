@@ -110,3 +110,73 @@ test("preserves library article deep-link hashes on load", async ({ page }) => {
 	const hash = await page.evaluate(() => window.location.hash);
 	expect(hash).toBe("#library/id/5c665fb30551dbb6a6615a92");
 });
+
+test("loads a library article from a deep link when local tags exist", async ({
+	page,
+}) => {
+	await page.addInitScript(() => {
+		window.localStorage.setItem(
+			"MainStore",
+			JSON.stringify({
+				hash: "#library",
+				fontSize: "16",
+				showSideBar: true,
+			}),
+		);
+	});
+
+	await page.goto("/");
+	await page.addScriptTag({
+		path: require("node:path").join(
+			process.cwd(),
+			"node_modules/@isomorphic-git/lightning-fs/dist/lightning-fs.min.js",
+		),
+	});
+	await page.evaluate(async () => {
+		const LightningFS = window.LightningFS;
+		const fs = new LightningFS("systemconcepts-fs");
+		const pfs = fs.promises;
+		const ensureDir = async (dirPath) => {
+			const parts = dirPath.split("/").filter(Boolean);
+			let cur = "";
+			for (const part of parts) {
+				cur += `/${part}`;
+				try {
+					await pfs.mkdir(cur);
+				} catch {
+					// exists
+				}
+			}
+		};
+		const articleId = "5c665fb30551dbb6a6615a92";
+		await ensureDir("/library/articles");
+		await pfs.writeFile(
+			"/library/tags.json",
+			JSON.stringify([
+				{
+					_id: articleId,
+					book: "Test Book",
+					chapter: "Chapter One",
+					article: "Deep Link Article",
+					number: 1,
+					path: "articles/test.json",
+				},
+			]),
+		);
+		await pfs.writeFile(
+			"/library/articles/test.json",
+			JSON.stringify([
+				{
+					_id: articleId,
+					text: "Hello from deep-linked article body.",
+				},
+			]),
+		);
+	});
+
+	await page.goto("/#library/id/5c665fb30551dbb6a6615a92");
+	await expect(page).toHaveURL(/#library\/id\/5c665fb30551dbb6a6615a92$/);
+	await expect(
+		page.getByText("Hello from deep-linked article body."),
+	).toBeVisible({ timeout: 15000 });
+});

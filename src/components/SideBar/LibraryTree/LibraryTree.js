@@ -132,7 +132,7 @@ export default function LibraryTree({ closeDrawer, isMobile }) {
 					if (possibleParagraph && !isNaN(parseInt(possibleParagraph, 10))) {
 						paragraphId = parseInt(possibleParagraph, 10);
 					}
-					tag = tags.find((t) => t._id === id);
+					tag = tags.find((t) => String(t._id) === String(id));
 					if (tag) {
 						urlPath = getTagHierarchy(tag).join("|");
 					}

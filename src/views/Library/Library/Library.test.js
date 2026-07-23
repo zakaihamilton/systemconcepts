@@ -14,6 +14,12 @@ jest.mock("@util/domain/views", () => ({
 	setPath: jest.fn(),
 	usePathItems: jest.fn(),
 }));
+jest.mock("@components/Main", () => {
+	const { Store } = require("pullstate");
+	return {
+		MainStore: new Store({ hash: "" }),
+	};
+});
 jest.mock("@sync/syncState", () => ({
 	SyncActiveStore: {
 		useState: jest.fn((selector) =>
@@ -551,20 +557,114 @@ describe("Library View", () => {
 		it("does not restore lastViewedArticle when the live URL is a deep link", async () => {
 			const { LibraryStore } = require("../Store");
 			LibraryStore.getRawState.mockReturnValue({
-				lastViewedArticle: { _id: "t1" },
+				lastViewedArticle: { _id: "other" },
 			});
-			// Stale path items (e.g. from a briefly restored store hash) while the
-			// address bar still points at a specific article.
-			window.location.hash = "#library/id/5c665fb30551dbb6a6615a92";
+			// Stale path items while the address bar points at t1 — select from URL.
+			window.location.hash = "#library/id/t1";
 			usePathItems.mockReturnValue(["library"]);
 			render(<Library />);
 			await waitFor(() => {
-				expect(screen.getByTestId("article")).toBeInTheDocument();
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("t1");
 			});
-			// Allow any deferred onSelect timers to run if the guard failed.
-			await new Promise((resolve) => setTimeout(resolve, 0));
-			expect(screen.getByTestId("article-selected")).toHaveTextContent("");
 			expect(setPath).not.toHaveBeenCalled();
+		});
+
+		it("selects a deep-linked article from the window hash when path items lag", async () => {
+			window.location.hash = "#library/id/5c665fb30551dbb6a6615a92";
+			usePathItems.mockReturnValue(["library"]);
+			const deepTags = [
+				{
+					_id: "5c665fb30551dbb6a6615a92",
+					book: "Test Book",
+					chapter: "One",
+					path: "articles/test",
+				},
+			];
+			storage.exists.mockResolvedValue(true);
+			storage.readFile.mockImplementation((path) => {
+				if (path.endsWith("tags.json")) {
+					return Promise.resolve(JSON.stringify(deepTags));
+				}
+				if (path.includes("articles/test")) {
+					return Promise.resolve(
+						JSON.stringify([
+							{
+								_id: "5c665fb30551dbb6a6615a92",
+								text: "Hello from deep link",
+							},
+						]),
+					);
+				}
+				return Promise.resolve("{}");
+			});
+			render(<Library />);
+			await waitFor(() => {
+				expect(screen.getByTestId("article-selected")).toHaveTextContent(
+					"5c665fb30551dbb6a6615a92",
+				);
+			});
+			await waitFor(() => {
+				expect(screen.getByTestId("article-content")).toHaveTextContent(
+					"Hello from deep link",
+				);
+			});
+		});
+
+		it("matches article ids coercively when tag ids are non-strings", async () => {
+			usePathItems.mockReturnValue(["library", "id", "42"]);
+			const numericTags = [
+				{ _id: 42, book: "Numbers", chapter: "One", path: "numeric-unique" },
+			];
+			storage.exists.mockResolvedValue(true);
+			storage.readFile.mockImplementation((path) => {
+				if (path.endsWith("tags.json")) {
+					return Promise.resolve(JSON.stringify(numericTags));
+				}
+				return Promise.resolve(
+					JSON.stringify([{ _id: 42, text: "Numeric id content" }]),
+				);
+			});
+			render(<Library />);
+			await waitFor(() => {
+				expect(screen.getByTestId("article-selected")).toHaveTextContent("42");
+			});
+			await waitFor(() => {
+				expect(screen.getByTestId("article-content")).toHaveTextContent(
+					"Numeric id content",
+				);
+			});
+		});
+
+		it("mirrors LibraryStore.selectedId into the article pane", async () => {
+			const { LibraryStore } = require("../Store");
+			LibraryStore.__state.tags = [
+				{ _id: "store-sel", book: "Book", chapter: "One", path: "path-sel" },
+			];
+			LibraryStore.__state.selectedId = "store-sel";
+			storage.exists.mockResolvedValue(true);
+			storage.readFile.mockImplementation((path) => {
+				if (path.endsWith("tags.json")) {
+					return Promise.resolve("[]");
+				}
+				if (path.includes("path-sel")) {
+					return Promise.resolve(
+						JSON.stringify([{ _id: "store-sel", text: "From selectedId" }]),
+					);
+				}
+				return Promise.resolve("{}");
+			});
+			usePathItems.mockReturnValue(["library"]);
+			render(<Library />);
+			await waitFor(() => {
+				expect(screen.getByTestId("article-selected")).toHaveTextContent(
+					"store-sel",
+				);
+			});
+			await waitFor(() => {
+				expect(screen.getByTestId("article-content")).toHaveTextContent(
+					"From selectedId",
+				);
+			});
 		});
 
 		it("handles paragraph suffix on an id path", async () => {

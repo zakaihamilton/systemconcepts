@@ -224,7 +224,10 @@ describe("Article Component", () => {
 			jest.advanceTimersByTime(300);
 		});
 		expect(screen.queryByText("Select an item")).not.toBeInTheDocument();
-		expect(container.querySelector("main")).toBeNull();
+		// Keep the article shell visible so deep links don't look blank while
+		// content is still resolving or empty.
+		expect(container.querySelector("main")).not.toBeNull();
+		expect(screen.getByTestId("article-header")).toBeInTheDocument();
 	});
 
 	it("renders content when provided", () => {
