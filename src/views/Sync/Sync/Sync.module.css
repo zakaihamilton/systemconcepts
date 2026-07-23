@@ -76,6 +76,7 @@
 	line-height: 1.4 !important;
 	display: block;
 	word-break: break-all;
+	color: #d4d4d4;
 
 	&[data-type="success"] {
 		color: #4caf50;
@@ -90,7 +91,11 @@
 	}
 
 	&[data-type="info"] {
-		color: #2196f3;
+		color: #d4d4d4;
+	}
+
+	&[data-type="verbose"] {
+		color: #9e9e9e;
 	}
 }
 

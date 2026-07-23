@@ -103,6 +103,32 @@ describe("downloadUpdates", () => {
 		);
 	});
 
+	it("serializes local writes while downloads are processed in parallel", async () => {
+		readCompressedFileRaw.mockResolvedValue('{"sessions":[]}');
+		let releaseFirstWrite;
+		const firstWrite = new Promise((resolve) => {
+			releaseFirstWrite = resolve;
+		});
+		storage.writeFile.mockImplementationOnce(() => firstWrite);
+
+		const sync = downloadUpdates(
+			[],
+			[
+				{ path: "/american/2025.json", version: "1" },
+				{ path: "/american/2026.json", version: "1" },
+			],
+			"local/sync",
+			"aws/sync",
+		);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(storage.writeFile).toHaveBeenCalledTimes(1);
+		releaseFirstWrite();
+		await sync;
+
+		expect(storage.writeFile).toHaveBeenCalledTimes(3);
+	});
+
 	it("treats a confirmed 404 as missing and cleans it out of the remote manifest", async () => {
 		readCompressedFileRaw.mockResolvedValue(null);
 

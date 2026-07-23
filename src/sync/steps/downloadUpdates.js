@@ -16,6 +16,35 @@ import { lockMutex } from "../mutex";
 import { SyncActiveStore } from "../syncState";
 import { createSyncTrashId, moveFolderToTrash } from "../trash";
 
+const LOCAL_WRITE_TIMEOUT_MS = 30_000;
+const LOCAL_WRITE_MUTEX_ID = "sync_lightningfs_write";
+
+function withTimeout(promise, ms, message) {
+	let timeoutId;
+	const timeout = new Promise((_, reject) => {
+		timeoutId = setTimeout(() => reject(new Error(message)), ms);
+	});
+	return Promise.race([promise, timeout]).finally(() =>
+		clearTimeout(timeoutId),
+	);
+}
+
+async function writeLocalFile(localFilePath, contentToWrite, fileBasename) {
+	addSyncLog(`[${fileBasename}] Waiting for local write slot…`, "verbose");
+	const unlock = await lockMutex({ id: LOCAL_WRITE_MUTEX_ID });
+	try {
+		addSyncLog(`[${fileBasename}] Writing local file…`, "verbose");
+		await withTimeout(
+			storage.writeFile(localFilePath, contentToWrite),
+			LOCAL_WRITE_TIMEOUT_MS,
+			`[${fileBasename}] Local write timed out after ${LOCAL_WRITE_TIMEOUT_MS / 1000}s`,
+		);
+		addSyncLog(`[${fileBasename}] Local file written.`, "verbose");
+	} finally {
+		unlock();
+	}
+}
+
 /**
  * Helper function to download a single file
  */
@@ -85,7 +114,7 @@ async function downloadFile(
 					const blob = stringToBinary(content);
 					binaryContent = new Uint8Array(await blob.arrayBuffer());
 				}
-				await storage.writeFile(localFilePath, binaryContent);
+				await writeLocalFile(localFilePath, binaryContent, fileBasename);
 			} finally {
 				unlock();
 			}
@@ -169,7 +198,6 @@ async function downloadFile(
 
 		const unlock = await lockMutex({ id: localFilePath });
 		try {
-			addSyncLog(`[${fileBasename}] Writing local file…`, "verbose");
 			// Check if file has changed locally since sync started
 			// This prevents overwriting newer local changes with older remote files
 			if (await storage.exists(localFilePath)) {
@@ -208,8 +236,7 @@ async function downloadFile(
 			}
 
 			try {
-				await storage.writeFile(localFilePath, contentToWrite);
-				addSyncLog(`[${fileBasename}] Local file written.`, "verbose");
+				await writeLocalFile(localFilePath, contentToWrite, fileBasename);
 			} catch (err) {
 				const errorStr = (err.message || String(err)).toLowerCase();
 				if (errorStr.includes("eisdir")) {
@@ -217,11 +244,8 @@ async function downloadFile(
 						`[Sync] Path ${localFilePath} is a directory, moving it to trash before writing the file.`,
 					);
 					await moveFolderToTrash(localPath, createSyncTrashId(), fileBasename);
-					await storage.writeFile(localFilePath, contentToWrite);
-					addSyncLog(
-						`[${fileBasename}] Local file written after recovery.`,
-						"verbose",
-					);
+					await writeLocalFile(localFilePath, contentToWrite, fileBasename);
+					addSyncLog(`[${fileBasename}] Local path recovered.`, "verbose");
 				} else {
 					throw err;
 				}
