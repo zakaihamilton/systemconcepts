@@ -32,6 +32,7 @@ export const abbreviationPattern = new RegExp(
 export const AMBIGUOUS_ENGLISH_GLOSSARY_KEYS = new Set([
 	"over",
 	"or",
+	"av", // also the Hebrew month (e.g. "9th of Av"), not "Coarse"
 	"al",
 	"ha",
 	"ve",
