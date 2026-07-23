@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import Video from "./index.js";
 
 jest.mock("../Controls", () => () => <div data-testid="controls" />);
@@ -38,7 +38,6 @@ describe("Video Component", () => {
 	});
 
 	it("renews the url on media errors and reports a load failure after three attempts", () => {
-		const { fireEvent } = require("@testing-library/react");
 		const renewUrl = jest.fn();
 		const onLoadError = jest.fn();
 		const load = jest

@@ -224,11 +224,7 @@ export default function Controls({
 			}
 			if (name === "loadedmetadata") {
 				const resume = pendingResumeRef.current;
-				if (
-					resume &&
-					Number.isFinite(resume.position) &&
-					resume.position > 0
-				) {
+				if (resume && Number.isFinite(resume.position) && resume.position > 0) {
 					playerRef.currentTime = resume.position; // eslint-disable-line react-hooks/immutability
 					setCurrentTime(resume.position);
 					currentTimeRef.current = resume.position;
@@ -586,11 +582,7 @@ export default function Controls({
 					variant="filled"
 					severity="error"
 					action={
-						<Button
-							variant="contained"
-							onClick={reloadMedia}
-							size="small"
-						>
+						<Button variant="contained" onClick={reloadMedia} size="small">
 							{translations.RELOAD}
 						</Button>
 					}
