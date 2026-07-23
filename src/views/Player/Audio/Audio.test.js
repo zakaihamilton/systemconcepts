@@ -169,6 +169,7 @@ describe("Audio Component", () => {
 				name="Test Audio"
 				group="testgroup"
 				path="https://media.example/test.m4a"
+				sessionKey="session-a"
 				renewUrl={renewUrl}
 			/>,
 		);
@@ -179,6 +180,63 @@ describe("Audio Component", () => {
 
 		fireEvent.error(video);
 		expect(renewUrl).toHaveBeenCalledTimes(2);
+	});
+
+	it("clears recovering when a renew fetch finishes without a new URL", () => {
+		const renewUrl = jest.fn();
+		const { container, rerender } = render(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				path="https://media.example/test.m4a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+				renewing={false}
+			/>,
+		);
+		const video = container.querySelector("video");
+		Object.defineProperty(video, "duration", {
+			configurable: true,
+			value: 125,
+		});
+		act(() => {
+			fireEvent.durationChange(video);
+		});
+
+		fireEvent.error(video);
+		expect(container.querySelector(".card")).toHaveClass("loading");
+
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				path="https://media.example/test.m4a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+				renewing={true}
+			/>,
+		);
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				path="https://media.example/test.m4a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+				renewing={false}
+			/>,
+		);
+
+		expect(container.querySelector(".card")).not.toHaveClass("loading");
 	});
 
 	it("updates PlayerStore with the media element reference", () => {

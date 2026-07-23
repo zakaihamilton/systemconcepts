@@ -50,6 +50,7 @@ export default function Controls({
 	sessionName,
 	groupName,
 	sessionDate,
+	sessionKey,
 	renewing,
 	renewUrl,
 	variant,
@@ -72,6 +73,10 @@ export default function Controls({
 	// instead of treating the new URL as a brand-new session.
 	const pendingResumeRef = useRef(null);
 	const currentTimeRef = useRef(0);
+	// Tracks whether the user intends playback to be running. Media errors and
+	// load() often pause the element; this ref survives those so renew/resume
+	// only autoplays when playback was actually wanted.
+	const wantPlayingRef = useRef(false);
 	const clearPlayPending = useCallback(() => {
 		if (playPendingTimeoutRef.current) {
 			clearTimeout(playPendingTimeoutRef.current);
@@ -137,6 +142,7 @@ export default function Controls({
 			clearTimeout(playPendingTimeoutRef.current);
 			playPendingTimeoutRef.current = null;
 		}
+		wantPlayingRef.current = true;
 		playRequestedRef.current = true;
 		playPendingTimeoutRef.current = setTimeout(() => {
 			playPendingTimeoutRef.current = null;
@@ -147,6 +153,12 @@ export default function Controls({
 			structuredLogger.error(err);
 		});
 	}, [playerRef, clearPlayPending]);
+
+	useEffect(() => {
+		// Switching sessions must not resume the previous session's play intent.
+		pendingResumeRef.current = null;
+		wantPlayingRef.current = false;
+	}, [sessionKey]);
 
 	useEffect(() => {
 		const clearPendingError = () => {
@@ -199,6 +211,13 @@ export default function Controls({
 					clearPlayPending();
 					setLoadedPath(stateRef.current.path);
 					pendingResumeRef.current = null;
+					wantPlayingRef.current = true;
+				}
+				if (name === "pause") {
+					// load()/errors pause the element; keep play intent during renew.
+					if (!renewing && !pendingResumeRef.current) {
+						wantPlayingRef.current = false;
+					}
 				}
 				if (name === "error") {
 					clearPlayPending();
@@ -509,10 +528,12 @@ export default function Controls({
 		beginPlay();
 	};
 	const pause = () => {
+		wantPlayingRef.current = false;
 		clearPlayPending();
 		playerRef.pause();
 	};
 	const stop = useCallback(() => {
+		wantPlayingRef.current = false;
 		clearPlayPending();
 		pendingResumeRef.current = null;
 		playerRef.pause();
@@ -527,7 +548,7 @@ export default function Controls({
 				: currentTimeRef.current;
 		pendingResumeRef.current = {
 			position: position > 0 ? position : 0,
-			shouldPlay: true,
+			shouldPlay: wantPlayingRef.current,
 		};
 		setError(null);
 		if (renewUrl) {
@@ -546,7 +567,7 @@ export default function Controls({
 		prevPath.current = path;
 
 		// A new signed URL for the same session arrives while renewing/recovering.
-		// Preserve position and resume instead of stopping at 0.
+		// Preserve position and optionally resume — Audio/Video own load().
 		if (hadPreviousPath && path && (renewing || pendingResumeRef.current)) {
 			const position =
 				Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
@@ -560,16 +581,15 @@ export default function Controls({
 						: position > 0
 							? position
 							: 0,
-				shouldPlay: pendingResumeRef.current?.shouldPlay ?? true,
+				shouldPlay:
+					pendingResumeRef.current?.shouldPlay ?? wantPlayingRef.current,
 			};
-			playerRef.load();
 			setLoadedPath(null);
 			return;
 		}
 
 		pendingResumeRef.current = null;
 		stop();
-		playerRef.load();
 		setLoadedPath(null);
 	}, [path, playerRef, stop, renewing]);
 

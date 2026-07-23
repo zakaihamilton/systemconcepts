@@ -297,6 +297,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		metadataPath,
 		metadataKey: activeMetadataKey,
 		path: mediaPath,
+		sessionKey: path,
 		renewUrl: reload,
 		renewing: loading,
 		date,

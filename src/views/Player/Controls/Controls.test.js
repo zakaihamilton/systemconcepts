@@ -371,11 +371,12 @@ describe("Controls Component", () => {
 			<Controls show playerRef={mockPlayer} path="/a.mp3" />,
 		);
 		rerender(<Controls show playerRef={mockPlayer} path="/b.mp3" />);
-		expect(mockPlayer.load).toHaveBeenCalled();
+		// Session/path changes stop playback; Audio/Video own load().
 		expect(mockPlayer.pause).toHaveBeenCalled();
+		expect(mockPlayer.currentTime).toBe(0);
 	});
 
-	it("preserves position and resumes when the signed URL renews", () => {
+	it("preserves position and resumes when the signed URL renews while playing", () => {
 		mockPlayer.currentTime = 42;
 		mockPlayer.paused = false;
 		const { rerender } = render(
@@ -383,9 +384,13 @@ describe("Controls Component", () => {
 				show
 				playerRef={mockPlayer}
 				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
 				renewing
 			/>,
 		);
+		act(() => {
+			eventListeners.playing();
+		});
 		mockPlayer.pause.mockClear();
 		mockPlayer.load.mockClear();
 		mockPlayer.play.mockClear();
@@ -395,14 +400,15 @@ describe("Controls Component", () => {
 				show
 				playerRef={mockPlayer}
 				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
 				renewing
 			/>,
 		);
 
-		expect(mockPlayer.load).toHaveBeenCalled();
-		// Must not treat URL renew as a session stop/restart.
-		expect(mockPlayer.currentTime).toBe(42);
+		// Audio/Video own load(); Controls must not stop/restart the session.
+		expect(mockPlayer.load).not.toHaveBeenCalled();
 		expect(mockPlayer.pause).not.toHaveBeenCalled();
+		expect(mockPlayer.currentTime).toBe(42);
 
 		act(() => {
 			eventListeners.loadedmetadata();
@@ -415,7 +421,41 @@ describe("Controls Component", () => {
 		expect(mockPlayer.play).toHaveBeenCalled();
 	});
 
-	it("reloads via renewUrl and resumes after a playback error", () => {
+	it("preserves position without autoplay when renewing while paused", () => {
+		mockPlayer.currentTime = 42;
+		mockPlayer.paused = true;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.timeupdate();
+		});
+		mockPlayer.play.mockClear();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(42);
+		expect(mockPlayer.play).not.toHaveBeenCalled();
+	});
+
+	it("reloads via renewUrl and resumes after a playback error while playing", () => {
 		jest.useFakeTimers();
 		const renewUrl = jest.fn();
 		mockPlayer.currentTime = 55;
@@ -424,10 +464,13 @@ describe("Controls Component", () => {
 				show
 				playerRef={mockPlayer}
 				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
 				renewUrl={renewUrl}
 			/>,
 		);
+		fireEvent.click(screen.getByTestId("button-Play"));
 		act(() => {
+			eventListeners.playing();
 			eventListeners.timeupdate();
 			eventListeners.error();
 			jest.advanceTimersByTime(2000);
@@ -440,6 +483,7 @@ describe("Controls Component", () => {
 				show
 				playerRef={mockPlayer}
 				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
 				renewUrl={renewUrl}
 			/>,
 		);
@@ -449,6 +493,39 @@ describe("Controls Component", () => {
 		});
 		expect(mockPlayer.currentTime).toBe(55);
 		expect(mockPlayer.play).toHaveBeenCalled();
+	});
+
+	it("clears resume intent when the session changes", () => {
+		mockPlayer.currentTime = 40;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.playing();
+		});
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/b?sig=1"
+				sessionKey="session-b"
+				renewing={false}
+			/>,
+		);
+		expect(mockPlayer.pause).toHaveBeenCalled();
+		expect(mockPlayer.currentTime).toBe(0);
+		mockPlayer.play.mockClear();
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.play).not.toHaveBeenCalled();
 	});
 
 	it("handles play rejection", async () => {

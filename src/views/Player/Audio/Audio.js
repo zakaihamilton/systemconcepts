@@ -8,9 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import Controls from "../Controls";
 import { PlayerStore } from "../Player";
 import Toolbar from "../Toolbar";
+import { useMediaUrlRenewal } from "../useMediaUrlRenewal";
 import styles from "./Audio.module.css";
-
-const MAX_RENEW_ATTEMPTS = 3;
 
 export default function Audio({
 	show,
@@ -21,6 +20,7 @@ export default function Audio({
 	renewUrl,
 	renewing,
 	onLoadError,
+	sessionKey,
 	date,
 	group,
 	color,
@@ -34,47 +34,15 @@ export default function Audio({
 	const ref = useRef();
 	const [playerRef, setPlayerRef] = useState(null);
 	const [duration, setDuration] = useState(0);
-	const [recovering, setRecovering] = useState(false);
 	const [loadedPath, setLoadedPath] = useState(null);
-	const errorCountRef = useRef(0);
-	const renewInFlightRef = useRef(false);
-	const reportedLoadError = useRef(false);
-
-	const onError = () => {
-		// Ignore duplicate errors from the dying source while a renew is in flight.
-		if (renewInFlightRef.current || renewing) {
-			return;
-		}
-		if (errorCountRef.current < MAX_RENEW_ATTEMPTS) {
-			structuredLogger.debug("Audio error, renewing URL...");
-			renewInFlightRef.current = true;
-			setRecovering(true);
-			errorCountRef.current += 1;
-			renewUrl?.();
-		} else if (!reportedLoadError.current) {
-			reportedLoadError.current = true;
-			setRecovering(false);
-			onLoadError?.();
-		}
-	};
-
-	const clearRecovery = () => {
-		renewInFlightRef.current = false;
-		setRecovering(false);
-		errorCountRef.current = 0;
-		reportedLoadError.current = false;
-	};
-
-	useEffect(() => {
-		// A new signed URL arrived — allow subsequent errors to renew again.
-		renewInFlightRef.current = false;
-	}, [path]);
-
-	useEffect(() => {
-		if (!renewing) {
-			renewInFlightRef.current = false;
-		}
-	}, [renewing]);
+	const { recovering, onError, clearRecovery } = useMediaUrlRenewal({
+		path,
+		renewUrl,
+		renewing,
+		onLoadError,
+		sessionKey,
+		label: "Audio",
+	});
 
 	useEffect(() => {
 		setPlayerRef(ref.current);
@@ -95,7 +63,8 @@ export default function Audio({
 
 	// React can add or replace the <source> after the media element has mounted.
 	// Browsers do not automatically reload in that case, leaving the player in
-	// NETWORK_EMPTY with no currentSrc.
+	// NETWORK_EMPTY with no currentSrc. Controls relies on this as the single
+	// load() owner for path changes.
 	useEffect(() => {
 		if (ref.current && path) {
 			ref.current.load();
@@ -198,6 +167,7 @@ export default function Audio({
 					metadataPath={metadataPath}
 					metadataKey={metadataKey}
 					path={path}
+					sessionKey={sessionKey}
 					show={show}
 					zIndex={1}
 					sessionName={name}
