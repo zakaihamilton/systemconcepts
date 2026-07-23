@@ -579,6 +579,47 @@ describe("Controls Component", () => {
 		expect(mockPlayer.play).not.toHaveBeenCalled();
 	});
 
+	it("does not restore metadata bookmark when renew resume position is zero", () => {
+		useFile.mockReturnValue([
+			{ key1: { position: 77 } },
+			false,
+			false,
+			setMetadata,
+		]);
+		mockPlayer.currentTime = 0;
+		mockPlayer.readyState = 1;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				metadataPath="/meta.json"
+				metadataKey="key1"
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		act(() => {
+			eventListeners.playing();
+			eventListeners.error();
+		});
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				metadataPath="/meta.json"
+				metadataKey="key1"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+		});
+		expect(mockPlayer.currentTime).toBe(0);
+	});
+
 	it("wires MediaSession pause/stop through Controls play-intent handlers", () => {
 		const { useMediaSession } = require("@util/browser/mediaSession");
 		render(

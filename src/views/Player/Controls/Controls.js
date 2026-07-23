@@ -257,10 +257,14 @@ export default function Controls({
 			}
 			if (name === "loadedmetadata") {
 				const resume = pendingResumeRef.current;
-				if (resume && Number.isFinite(resume.position) && resume.position > 0) {
-					playerRef.currentTime = resume.position; // eslint-disable-line react-hooks/immutability
-					setCurrentTime(resume.position);
-					currentTimeRef.current = resume.position;
+				// A stashed renew resume (including position 0) must win over the
+				// normal metadata bookmark restore.
+				if (resume && Number.isFinite(resume.position)) {
+					if (resume.position > 0) {
+						playerRef.currentTime = resume.position; // eslint-disable-line react-hooks/immutability
+						setCurrentTime(resume.position);
+						currentTimeRef.current = resume.position;
+					}
 					return;
 				}
 				if (!metadataKey) return; // Skip if metadataKey not ready
@@ -343,6 +347,8 @@ export default function Controls({
 		});
 
 		if (!metadataKey) return; // Skip if metadataKey not ready
+		// A pending signed-URL renew owns position restore; don't apply bookmarks.
+		if (pendingResumeRef.current) return;
 		if (metadata && playerRef && playerRef.readyState >= 1) {
 			const currentMetadata = metadataKey
 				? metadata?.[metadataKey] || {}
