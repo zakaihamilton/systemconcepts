@@ -15,9 +15,13 @@ const iconsSvgDir = path.join(__dirname, "src/components/Icons/svg");
 function configuredOrigin(value) {
 	try {
 		if (!value) return null;
-		const endpoint = value.trim();
+		// WASABI_URL may use s3://user:pass@host/bucket. Treat that like https
+		// so we keep the real host in CSP instead of origin "https://s3".
+		const endpoint = value.trim().replace(/^s3:\/\//i, "https://");
 		return new URL(
-			/^https?:\/\//i.test(endpoint) ? endpoint : `https://${endpoint}`,
+			/^[a-z][a-z0-9+.-]*:\/\//i.test(endpoint)
+				? endpoint
+				: `https://${endpoint}`,
 		).origin;
 	} catch {
 		return null;
