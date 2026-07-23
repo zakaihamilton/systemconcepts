@@ -4,6 +4,21 @@ jest.mock("@util/api/logger", () => ({
 	logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
 }));
 
+jest.mock("@storage/syncYearFiles", () => ({
+	isSyncYearFilePath: jest.fn((path) =>
+		/^\/sync\/[^/]+\/\d{4}\.json(\.tmp)?$/.test(path),
+	),
+	idbReadSyncYearFile: jest.fn().mockResolvedValue(null),
+	idbWriteSyncYearFile: jest.fn().mockResolvedValue(undefined),
+	idbDeleteSyncYearFile: jest.fn().mockResolvedValue(undefined),
+	idbExistsSyncYearFile: jest.fn().mockResolvedValue(false),
+	idbRenameSyncYearFile: jest.fn().mockResolvedValue(undefined),
+	idbListSyncYearFilesInDir: jest.fn().mockResolvedValue([]),
+	clearSyncYearFilesDb: jest.fn().mockResolvedValue(undefined),
+}));
+
+const mockSyncYearFiles = require("@storage/syncYearFiles");
+
 const mockFsPromises = {
 	readdir: jest.fn(),
 	stat: jest.fn(),
@@ -38,6 +53,19 @@ afterAll(() => {
 beforeEach(() => {
 	jest.clearAllMocks();
 	Object.values(mockFsPromises).forEach((fn) => fn.mockReset());
+	Object.values(mockSyncYearFiles).forEach((fn) => {
+		if (typeof fn.mockReset === "function") fn.mockReset();
+	});
+	mockSyncYearFiles.isSyncYearFilePath.mockImplementation((path) =>
+		/^\/sync\/[^/]+\/\d{4}\.json(\.tmp)?$/.test(path),
+	);
+	mockSyncYearFiles.idbReadSyncYearFile.mockResolvedValue(null);
+	mockSyncYearFiles.idbWriteSyncYearFile.mockResolvedValue(undefined);
+	mockSyncYearFiles.idbDeleteSyncYearFile.mockResolvedValue(undefined);
+	mockSyncYearFiles.idbExistsSyncYearFile.mockResolvedValue(false);
+	mockSyncYearFiles.idbRenameSyncYearFile.mockResolvedValue(undefined);
+	mockSyncYearFiles.idbListSyncYearFilesInDir.mockResolvedValue([]);
+	mockSyncYearFiles.clearSyncYearFilesDb.mockResolvedValue(undefined);
 });
 
 describe("getListing", () => {
@@ -56,6 +84,23 @@ describe("getListing", () => {
 		await expect(
 			localStorage.getListing("/root", { strict: true }),
 		).rejects.toBe(err);
+	});
+
+	it("merges dedicated sync-year IDB files into the listing", async () => {
+		mockFsPromises.readdir.mockResolvedValueOnce([]);
+		mockSyncYearFiles.idbListSyncYearFilesInDir.mockResolvedValueOnce([
+			"2026.json",
+		]);
+
+		const items = await localStorage.getListing("/sync/american");
+
+		expect(items).toEqual([
+			expect.objectContaining({
+				type: "file",
+				name: "2026.json",
+				path: "/local/sync/american/2026.json",
+			}),
+		]);
 	});
 
 	it("lists files and directories with normalized stats", async () => {
@@ -353,6 +398,19 @@ describe("deleteFile", () => {
 
 		expect(mockFsPromises.unlink).toHaveBeenCalledWith("/root/file.txt");
 	});
+
+	it("deletes sync year files via the dedicated IDB store", async () => {
+		mockFsPromises.unlink.mockResolvedValue(undefined);
+
+		await localStorage.deleteFile("/sync/american/2026.json");
+
+		expect(mockSyncYearFiles.idbDeleteSyncYearFile).toHaveBeenCalledWith(
+			"/sync/american/2026.json",
+		);
+		expect(mockFsPromises.unlink).toHaveBeenCalledWith(
+			"/sync/american/2026.json",
+		);
+	});
 });
 
 describe("rename", () => {
@@ -365,6 +423,19 @@ describe("rename", () => {
 			"/root/old.txt",
 			"/root/new.txt",
 		);
+	});
+
+	it("renames sync year files via the dedicated IDB store", async () => {
+		await localStorage.rename(
+			"/sync/american/2026.json.tmp",
+			"/sync/american/2026.json",
+		);
+
+		expect(mockSyncYearFiles.idbRenameSyncYearFile).toHaveBeenCalledWith(
+			"/sync/american/2026.json.tmp",
+			"/sync/american/2026.json",
+		);
+		expect(mockFsPromises.rename).not.toHaveBeenCalled();
 	});
 });
 
@@ -403,6 +474,15 @@ describe("readFile", () => {
 
 		await expect(localStorage.readFile("root/file.txt")).rejects.toBe(err);
 	});
+
+	it("reads sync year files from the dedicated IDB store first", async () => {
+		mockSyncYearFiles.idbReadSyncYearFile.mockResolvedValueOnce('{"ok":true}');
+
+		const result = await localStorage.readFile("/sync/american/2026.json");
+
+		expect(result).toBe('{"ok":true}');
+		expect(mockFsPromises.readFile).not.toHaveBeenCalled();
+	});
 });
 
 describe("readFiles", () => {
@@ -439,6 +519,16 @@ describe("writeFile", () => {
 			"utf8",
 		);
 	});
+
+	it("writes sync year files to the dedicated IDB store", async () => {
+		await localStorage.writeFile("/sync/american/2026.json", '{"sessions":[]}');
+
+		expect(mockSyncYearFiles.idbWriteSyncYearFile).toHaveBeenCalledWith(
+			"/sync/american/2026.json",
+			'{"sessions":[]}',
+		);
+		expect(mockFsPromises.writeFile).not.toHaveBeenCalled();
+	});
 });
 
 describe("writeFiles", () => {
@@ -472,6 +562,15 @@ describe("exists", () => {
 		mockFsPromises.stat.mockRejectedValue(new Error("missing"));
 
 		await expect(localStorage.exists("root/missing.txt")).resolves.toBe(false);
+	});
+
+	it("resolves true for sync year files present in IDB", async () => {
+		mockSyncYearFiles.idbExistsSyncYearFile.mockResolvedValueOnce(true);
+
+		await expect(localStorage.exists("/sync/american/2026.json")).resolves.toBe(
+			true,
+		);
+		expect(mockFsPromises.stat).not.toHaveBeenCalled();
 	});
 });
 
@@ -543,13 +642,15 @@ describe("clear", () => {
 		global.indexedDB = original;
 	});
 
-	it("resolves when the delete request succeeds", async () => {
+	it("clears the sync-year store then lightning-fs", async () => {
 		const request = {};
 		global.indexedDB = {
 			deleteDatabase: jest.fn(() => request),
 		};
 
 		const promise = clear();
+		await Promise.resolve();
+		expect(mockSyncYearFiles.clearSyncYearFilesDb).toHaveBeenCalled();
 		request.onsuccess();
 		await expect(promise).resolves.toBeUndefined();
 	});
@@ -561,6 +662,7 @@ describe("clear", () => {
 		};
 
 		const promise = clear();
+		await Promise.resolve();
 		request.onerror();
 		await expect(promise).rejects.toBe(request.error);
 	});
@@ -572,6 +674,7 @@ describe("clear", () => {
 		};
 
 		const promise = clear();
+		await Promise.resolve();
 		request.onblocked();
 		await expect(promise).resolves.toBeUndefined();
 	});

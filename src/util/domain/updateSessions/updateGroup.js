@@ -823,8 +823,7 @@ export async function updateGroupProcess(
 					cachedYearSessions,
 					year.name,
 				);
-				const fingerprintMatches =
-					cachedYear?.fingerprint === yearFingerprint;
+				const fingerprintMatches = cachedYear?.fingerprint === yearFingerprint;
 				const hasCachedSessions =
 					cachedYearSessions && cachedYearSessions.length > 0;
 				if (
@@ -1184,8 +1183,8 @@ export async function updateGroupProcess(
 						});
 					}
 				}
-				// Year cache is an optimization — wait for local FS to settle after
-				// the year write so lightning-fs is not contended.
+				// Year cache is an optimization — defer so it does not contend with
+				// other local FS work during the persist phase.
 				void (async () => {
 					try {
 						await new Promise((resolve) => setTimeout(resolve, 800));

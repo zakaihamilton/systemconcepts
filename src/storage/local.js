@@ -2,6 +2,16 @@ import { logger as structuredLogger } from "@util/api/logger";
 
 const FS = process.browser && require("@isomorphic-git/lightning-fs");
 
+import {
+	clearSyncYearFilesDb,
+	idbDeleteSyncYearFile,
+	idbExistsSyncYearFile,
+	idbListSyncYearFilesInDir,
+	idbReadSyncYearFile,
+	idbRenameSyncYearFile,
+	idbWriteSyncYearFile,
+	isSyncYearFilePath,
+} from "@storage/syncYearFiles";
 import { isBinaryFile, makePath } from "@util/data/path";
 
 const fs = process.browser && new FS("systemconcepts-fs");
@@ -14,7 +24,9 @@ async function getListing(path, options = {}) {
 		names = await fs.promises.readdir(path);
 	} catch (error) {
 		if (strict && error?.code !== "ENOENT") throw error;
-		return [];
+		// Continue with an empty lightning-fs listing so IDB year files can still
+		// appear when the group folder only exists in the dedicated store.
+		names = [];
 	}
 	for (const name of names) {
 		const item = {};
@@ -55,6 +67,27 @@ async function getListing(path, options = {}) {
 			structuredLogger.error(err);
 		}
 	}
+
+	// Split-group year JSON lives in a dedicated IDB store (not lightning-fs).
+	try {
+		const yearNames = await idbListSyncYearFilesInDir(path);
+		const existing = new Set(listing.map((item) => item.name));
+		for (const name of yearNames) {
+			if (existing.has(name)) continue;
+			const itemPath = makePath(path, name);
+			listing.push({
+				type: "file",
+				name,
+				mtimeMs: 0,
+				id: makePath("local", itemPath),
+				path: makePath("local", itemPath),
+			});
+		}
+	} catch (err) {
+		if (strict) throw err;
+		structuredLogger.error(err);
+	}
+
 	return listing;
 }
 
@@ -158,17 +191,36 @@ async function deleteFolder(root) {
 
 async function deleteFile(path) {
 	path = makePath(path);
+	if (isSyncYearFilePath(path)) {
+		await idbDeleteSyncYearFile(path);
+		// Best-effort cleanup of a legacy lightning-fs copy.
+		try {
+			await fs.promises.unlink(path);
+		} catch {
+			/* ignore */
+		}
+		return;
+	}
 	await fs.promises.unlink(path);
 }
 
 async function rename(from, to) {
 	from = makePath(from);
 	to = makePath(to);
+	if (isSyncYearFilePath(from) || isSyncYearFilePath(to)) {
+		await idbRenameSyncYearFile(from, to);
+		return;
+	}
 	await fs.promises.rename(from, to);
 }
 
 async function readFile(path) {
 	path = makePath(path);
+	if (isSyncYearFilePath(path)) {
+		const fromIdb = await idbReadSyncYearFile(path);
+		if (fromIdb != null) return fromIdb;
+		// Fall through to lightning-fs for pre-migration year files.
+	}
 	try {
 		if (isBinaryFile(path)) {
 			return await fs.promises.readFile(path);
@@ -192,6 +244,9 @@ async function readFiles(prefix, files) {
 
 async function writeFile(path, body) {
 	path = makePath(path);
+	if (isSyncYearFilePath(path)) {
+		return await idbWriteSyncYearFile(path, body);
+	}
 	if (isBinaryFile(path)) {
 		return await fs.promises.writeFile(path, body);
 	}
@@ -206,6 +261,10 @@ async function writeFiles(prefix, files) {
 
 async function exists(path) {
 	path = makePath(path);
+	if (isSyncYearFilePath(path)) {
+		if (await idbExistsSyncYearFile(path)) return true;
+		// Fall through for legacy lightning-fs copies.
+	}
 	let exists = false;
 	try {
 		const stat = await fs.promises.stat(path);
@@ -218,6 +277,7 @@ export async function clear() {
 	if (typeof indexedDB === "undefined") {
 		return;
 	}
+	await clearSyncYearFilesDb();
 	return new Promise((resolve, reject) => {
 		const req = indexedDB.deleteDatabase("systemconcepts-fs");
 		req.onsuccess = () => resolve();

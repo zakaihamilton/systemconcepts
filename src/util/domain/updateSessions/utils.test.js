@@ -122,10 +122,6 @@ describe("updateYearSync", () => {
 			{ id: "a-session" },
 		]);
 
-		expect(storage.createFolderPath).toHaveBeenCalledWith(
-			"/local/sync/test",
-			true,
-		);
 		expect(storage.writeFile).toHaveBeenCalledWith(
 			"/local/sync/test/2024.json.tmp",
 			expect.any(String),

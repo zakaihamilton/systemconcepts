@@ -17,10 +17,6 @@ const EMPTY_YEAR_SYNC_RESULT = Object.freeze({
 const WRITE_TIMEOUT_MS = 20_000;
 const LOCK_TIMEOUT_MS = 10_000;
 const STRINGIFY_CHUNK = 25;
-// lightning-fs persists to IndexedDB on a 500ms debounce and holds a global
-// mutex while doing so. Continuous FS activity during Update Sessions can leave
-// writeFile stuck until that mutex frees — allow the FS to go idle first.
-const FS_SETTLE_MS = process.env.NODE_ENV === "test" ? 0 : 750;
 
 /** Let React paint status updates before heavy sync work blocks the main thread. */
 export function yieldToMain() {
@@ -32,12 +28,9 @@ function withTimeout(promise, ms, message) {
 	const timeout = new Promise((_, reject) => {
 		timeoutId = setTimeout(() => reject(new Error(message)), ms);
 	});
-	return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
-}
-
-async function settleLocalFs(ms = FS_SETTLE_MS) {
-	const wait = process.env.NODE_ENV === "test" ? 0 : ms;
-	await new Promise((resolve) => setTimeout(resolve, wait));
+	return Promise.race([promise, timeout]).finally(() =>
+		clearTimeout(timeoutId),
+	);
 }
 
 export async function getListing(path) {
@@ -127,7 +120,6 @@ async function updateLocalManifestForSyncFile(localPath, content) {
 		size: info.size,
 		version: Date.now().toString(),
 	};
-	await settleLocalFs();
 	const unlock = await withTimeout(
 		lockMutex({ id: manifestPath }),
 		LOCK_TIMEOUT_MS,
@@ -142,75 +134,35 @@ async function updateLocalManifestForSyncFile(localPath, content) {
 
 /**
  * Write a year JSON file without deleting the live file first.
- * Writes to a temp path, then renames over the destination so a failed
- * update never leaves the group without sessions for the next sync.
+ * Year files use a dedicated IndexedDB store (not lightning-fs). Writes go to
+ * a temp key, then rename over the destination so a failed update never leaves
+ * the group without sessions for the next sync.
  */
 async function writeLocalYearFile(localPath, jsonString, logPrefix) {
-	const parentPath = localPath.substring(0, localPath.lastIndexOf("/"));
 	const tempPath = `${localPath}.tmp`;
-
-	addSyncLog(`${logPrefix} Settling local storage…`, "info");
-	await settleLocalFs(1500);
-
-	addSyncLog(`${logPrefix} Ensuring folder ${parentPath}…`, "verbose");
-	await withTimeout(
-		storage.createFolderPath(parentPath, true),
-		WRITE_TIMEOUT_MS,
-		`Timed out creating folder ${parentPath}`,
-	);
 
 	// Clean up a leftover temp from a previous interrupted save (not the live file).
 	try {
 		if (await storage.exists(tempPath)) {
 			await storage.deleteFile(tempPath);
-			await settleLocalFs();
 		}
 	} catch (err) {
 		structuredLogger.warn(`[Sync] Could not clear temp file ${tempPath}`, err);
 	}
 
-	const attempts = 3;
-	let lastError = null;
-	for (let attempt = 1; attempt <= attempts; attempt++) {
-		try {
-			addSyncLog(
-				`${logPrefix} Writing temp file (attempt ${attempt}/${attempts})…`,
-				"info",
-			);
-			await settleLocalFs(attempt === 1 ? 500 : 1000 * attempt);
-			await withTimeout(
-				storage.writeFile(tempPath, jsonString),
-				WRITE_TIMEOUT_MS,
-				`Timed out writing temp ${tempPath} (attempt ${attempt})`,
-			);
+	addSyncLog(`${logPrefix} Writing temp file…`, "info");
+	await withTimeout(
+		storage.writeFile(tempPath, jsonString),
+		WRITE_TIMEOUT_MS,
+		`Timed out writing temp ${tempPath}`,
+	);
 
-			addSyncLog(`${logPrefix} Promoting temp file…`, "info");
-			await settleLocalFs();
-			await withTimeout(
-				storage.rename(tempPath, localPath),
-				WRITE_TIMEOUT_MS,
-				`Timed out renaming ${tempPath} → ${localPath}`,
-			);
-			return;
-		} catch (err) {
-			lastError = err;
-			addSyncLog(
-				`${logPrefix} Write attempt ${attempt} failed: ${err.message || err}`,
-				attempt === attempts ? "error" : "warning",
-			);
-			try {
-				if (await storage.exists(tempPath)) {
-					await storage.deleteFile(tempPath);
-				}
-			} catch {
-				// Best-effort temp cleanup; live year file is untouched.
-			}
-			if (attempt < attempts) {
-				await settleLocalFs(2000 * attempt);
-			}
-		}
-	}
-	throw lastError || new Error(`Failed to write ${localPath}`);
+	addSyncLog(`${logPrefix} Promoting temp file…`, "info");
+	await withTimeout(
+		storage.rename(tempPath, localPath),
+		WRITE_TIMEOUT_MS,
+		`Timed out renaming ${tempPath} → ${localPath}`,
+	);
 }
 
 /**
@@ -333,7 +285,6 @@ export async function updateBundleFile(newSessions) {
 			date: Date.now(),
 			sessions: allSessions,
 		};
-		await settleLocalFs();
 		const jsonString = JSON.stringify(bundleData);
 		await withTimeout(
 			writeCompressedFile(bundlePath, jsonString),
