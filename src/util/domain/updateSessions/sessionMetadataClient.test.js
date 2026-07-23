@@ -5,6 +5,9 @@ import {
 	fetchSessionMetadata,
 } from "./sessionMetadataClient";
 
+jest.mock("@sync/sync", () => ({
+	addSyncLog: jest.fn(),
+}));
 jest.mock("@util/api/fetch", () => ({
 	fetchJSON: jest.fn(),
 }));

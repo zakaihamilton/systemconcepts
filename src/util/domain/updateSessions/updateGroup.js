@@ -519,7 +519,9 @@ async function getYearMetadata(
 	isBundled,
 	metadataFingerprint,
 ) {
+	const started = Date.now();
 	const awsPath = makePath("aws/sessions", name);
+	addSyncLog(`[${name}/${year.name}] Resolving year metadata…`, "info");
 	const yearCache = await readYearCache(name, year.name);
 	const cachedFromYearCache = getMetadataFromYearCache(
 		yearCache,
@@ -528,6 +530,10 @@ async function getYearMetadata(
 	// Manual metadata refreshes must bypass the persistent year cache. Otherwise
 	// the UI reports a forced update while silently reusing stale metadata.
 	if (cachedFromYearCache && !forceUpdate) {
+		addSyncLog(
+			`[${name}/${year.name}] Metadata from year cache (${Date.now() - started}ms)`,
+			"info",
+		);
 		return cachedFromYearCache;
 	}
 
@@ -537,6 +543,10 @@ async function getYearMetadata(
 
 	if (!forceUpdate) {
 		if (!yearCache || yearCacheFingerprintMatches) {
+			addSyncLog(
+				`[${name}/${year.name}] Trying metadata from local sessions…`,
+				"info",
+			);
 			const cached = await loadCachedYearMetadata(
 				name,
 				year.name,
@@ -544,17 +554,39 @@ async function getYearMetadata(
 				isBundled,
 			);
 			if (cached) {
+				addSyncLog(
+					`[${name}/${year.name}] Metadata from local sessions (${Date.now() - started}ms)`,
+					"info",
+				);
 				return cached;
 			}
+		} else {
+			addSyncLog(
+				`[${name}/${year.name}] Year-cache metadata fingerprint changed; fetching remote`,
+				"info",
+			);
 		}
+	} else {
+		addSyncLog(
+			`[${name}/${year.name}] Force update; fetching remote metadata`,
+			"info",
+		);
 	}
 
 	try {
+		addSyncLog(
+			`[${name}/${year.name}] Fetching aggregated remote metadata…`,
+			"info",
+		);
 		const metadata = await fetchSessionMetadata(
 			name,
 			year.name,
 			metadataFingerprint,
 			forceUpdate,
+		);
+		addSyncLog(
+			`[${name}/${year.name}] Remote metadata ready (${Date.now() - started}ms)`,
+			"info",
 		);
 		return normalizeMetadataPayload(metadata);
 	} catch (err) {
@@ -567,9 +599,17 @@ async function getYearMetadata(
 			}`,
 			err,
 		);
+		addSyncLog(
+			`[${name}/${year.name}] Remote metadata failed after ${Date.now() - started}ms: ${err?.message || err}`,
+			"warning",
+		);
 		if (timedOut) {
 			// Legacy reads (especially zip) have no timeouts and can hang forever
 			// after a metadata timeout — prefer cached/empty metadata instead.
+			addSyncLog(
+				`[${name}/${year.name}] Skipping legacy fallback after timeout`,
+				"warning",
+			);
 			const cached = await loadCachedYearMetadata(
 				name,
 				year.name,
@@ -578,7 +618,12 @@ async function getYearMetadata(
 			);
 			return cached || normalizeMetadataPayload({});
 		}
-		return await getLegacyMetadata(
+		addSyncLog(
+			`[${name}/${year.name}] Starting legacy metadata reads…`,
+			"warning",
+		);
+		const legacyStarted = Date.now();
+		const legacy = await getLegacyMetadata(
 			year,
 			name,
 			awsPath,
@@ -586,6 +631,11 @@ async function getYearMetadata(
 			isMerged,
 			isBundled,
 		);
+		addSyncLog(
+			`[${name}/${year.name}] Legacy metadata ready (${Date.now() - legacyStarted}ms)`,
+			"info",
+		);
+		return legacy;
 	}
 }
 
@@ -762,12 +812,15 @@ export async function updateGroupProcess(
 			});
 
 			try {
-				structuredLogger.debug(
-					`[UpdateGroup] Fetching items for year: ${year.name}, path: ${year.path}`,
+				const yearStarted = Date.now();
+				addSyncLog(
+					`[${name}/${year.name}] Listing remote year folder…`,
+					"info",
 				);
 				const yearItems = await getListing(year.path);
-				structuredLogger.debug(
-					`[UpdateGroup] Year ${year.name} has ${yearItems?.length || 0} items`,
+				addSyncLog(
+					`[${name}/${year.name}] Listed ${yearItems?.length || 0} files (${Date.now() - yearStarted}ms)`,
+					"info",
 				);
 				yearItems.sort((a, b) => a.name.localeCompare(b.name));
 				const metadataFingerprint = getMetadataFingerprint(
@@ -777,6 +830,11 @@ export async function updateGroupProcess(
 				const yearFingerprint = getCombinedYearFingerprint(
 					yearItems,
 					metadataFingerprint,
+				);
+				const cacheStarted = Date.now();
+				addSyncLog(
+					`[${name}/${year.name}] Reading local year cache…`,
+					"info",
 				);
 				const cachedYear = await readYearCache(name, year.name);
 				const cachedYearSessions =
@@ -788,6 +846,12 @@ export async function updateGroupProcess(
 								isMerged,
 								isBundled,
 							);
+				addSyncLog(
+					`[${name}/${year.name}] Local cache: ${cachedYearSessions?.length || 0} sessions, fingerprint ${
+						cachedYear?.fingerprint === yearFingerprint ? "match" : "changed"
+					} (${Date.now() - cacheStarted}ms)`,
+					"info",
+				);
 
 				const isTargetInThisYear =
 					targetSessionId &&
@@ -811,6 +875,12 @@ export async function updateGroupProcess(
 					cachedYear?.fingerprint === yearFingerprint;
 				const hasCachedSessions =
 					cachedYearSessions && cachedYearSessions.length > 0;
+				addSyncLog(
+					`[${name}/${year.name}] Listing sessions=${listingSessionIds.length}, missing=${missingSessionIds.length}, force=${!!forceUpdate}, incrementalEligible=${
+						!forceUpdate && !isTargetInThisYear && !recentCutoff && hasCachedSessions
+					}`,
+					"info",
+				);
 				if (
 					!forceUpdate &&
 					!isTargetInThisYear &&
@@ -906,6 +976,11 @@ export async function updateGroupProcess(
 						`[${name}/${year.name}] No local year cache; refreshing the full year.`,
 						"info",
 					);
+				} else {
+					addSyncLog(
+						`[${name}/${year.name}] Materializing ${sessionIds.length} session(s) (full year path).`,
+						"info",
+					);
 				}
 
 				UpdateSessionsStore.update((s) => {
@@ -915,6 +990,7 @@ export async function updateGroupProcess(
 					s.status = [...s.status];
 				});
 
+				const sessionsStarted = Date.now();
 				let completedSessions = 0;
 				const yearSessionsLimit = pLimit(10);
 				const yearSessions = (
@@ -1101,12 +1177,20 @@ export async function updateGroupProcess(
 											s.status[itemIndex].sessionCount = sessionIds.length;
 											s.status = [...s.status];
 										});
+										addSyncLog(
+											`[${name}/${year.name}] Session progress ${completedSessions}/${sessionIds.length} (${Date.now() - sessionsStarted}ms)`,
+											"info",
+										);
 									}
 								}
 							}),
 						),
 					)
 				).filter(Boolean);
+				addSyncLog(
+					`[${name}/${year.name}] Materialized ${yearSessions.length} session(s) (${Date.now() - sessionsStarted}ms)`,
+					"info",
+				);
 
 				const sessionsToPersist =
 					shouldRefreshOnlyRecentSessions || shouldRefreshIncrementally
@@ -1124,10 +1208,19 @@ export async function updateGroupProcess(
 					// refreshes only process a subset, so push the merged result.
 					allSessions.push(...sessionsToPersist);
 				} else {
+					addSyncLog(
+						`[${name}/${year.name}] Writing year sync (${sessionsToPersist.length} sessions)…`,
+						"info",
+					);
+					const persistStarted = Date.now();
 					const { counter, newCount, newSessions } = await updateYearSync(
 						name,
 						year.name,
 						sessionsToPersist,
+					);
+					addSyncLog(
+						`[${name}/${year.name}] Year sync write done (added=${newCount}, ${Date.now() - persistStarted}ms)`,
+						"info",
 					);
 					// Track sessions for total count regardless of whether file was updated
 					sessionsToPersist.forEach((session) =>
@@ -1169,8 +1262,16 @@ export async function updateGroupProcess(
 					},
 					listingSessionFingerprints,
 				);
+				addSyncLog(
+					`[${name}/${year.name}] ✓ Year complete (${Date.now() - yearStarted}ms)`,
+					"success",
+				);
 			} catch (err) {
 				structuredLogger.error(err);
+				addSyncLog(
+					`[${name}/${year.name}] ✗ Year failed: ${err?.message || err}`,
+					"error",
+				);
 				UpdateSessionsStore.update((s) => {
 					s.status[itemIndex].errors.push(err.message || String(err));
 					s.status = [...s.status];
