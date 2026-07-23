@@ -537,6 +537,66 @@ describe("Controls Component", () => {
 		expect(mockPlayer.play).not.toHaveBeenCalled();
 	});
 
+	it("cancels renew autoplay when pause fires after the media error clears", () => {
+		mockPlayer.currentTime = 30;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		act(() => {
+			eventListeners.playing();
+			eventListeners.timeupdate();
+		});
+		mockPlayer.error = { code: 2 };
+		act(() => {
+			eventListeners.error();
+			eventListeners.pause();
+		});
+		// Renew completed: error cleared, not renewing — headset pause must cancel.
+		mockPlayer.error = null;
+		mockPlayer.play.mockClear();
+		act(() => {
+			eventListeners.pause();
+		});
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(30);
+		expect(mockPlayer.play).not.toHaveBeenCalled();
+	});
+
+	it("wires MediaSession pause/stop through Controls play-intent handlers", () => {
+		const { useMediaSession } = require("@util/browser/mediaSession");
+		render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+			/>,
+		);
+		expect(useMediaSession).toHaveBeenCalledWith(
+			expect.objectContaining({
+				onPause: expect.any(Function),
+				onStop: expect.any(Function),
+			}),
+		);
+	});
+
 	it("reloads via renewUrl and resumes after a playback error while playing", () => {
 		jest.useFakeTimers();
 		const renewUrl = jest.fn();

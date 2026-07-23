@@ -109,12 +109,6 @@ export default function Controls({
 	const sessionTitle = formattedDate
 		? `${formattedDate} ${sessionName || "Session"}`
 		: sessionName || "Session";
-	useMediaSession({
-		playerRef,
-		title: sessionTitle,
-		artist: capitalizedArtist,
-		enabled: show && !!playerRef,
-	});
 	const [metadata, , , setMetadata] = useFile(
 		metadataPath,
 		[metadataPath, metadataKey],
@@ -226,10 +220,17 @@ export default function Controls({
 					wantPlayingRef.current = true;
 				}
 				if (name === "pause") {
-					// load()/errors pause the element; keep play intent during renew
-					// or when a resume was already stashed from an error event.
-					if (!renewing && !pendingResumeRef.current && !playerRef.error) {
+					// Error-induced and renew/load pauses must not cancel resume.
+					// Any other pause (in-app, headset/MediaSession, keyboard, etc.)
+					// cancels play intent including a pending renew.
+					if (!renewing && !playerRef.error) {
 						wantPlayingRef.current = false;
+						if (pendingResumeRef.current) {
+							pendingResumeRef.current = {
+								...pendingResumeRef.current,
+								shouldPlay: false,
+							};
+						}
 					}
 				}
 				if (name === "error") {
@@ -559,6 +560,15 @@ export default function Controls({
 		playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
 		setCurrentTime(0);
 	}, [playerRef, clearPlayPending]);
+
+	useMediaSession({
+		playerRef,
+		title: sessionTitle,
+		artist: capitalizedArtist,
+		enabled: show && !!playerRef,
+		onPause: pause,
+		onStop: stop,
+	});
 
 	const reloadMedia = useCallback(() => {
 		const position =

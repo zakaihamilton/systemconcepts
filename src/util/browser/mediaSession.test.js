@@ -244,6 +244,28 @@ describe("useMediaSession", () => {
 			expect(player.pause).toHaveBeenCalled();
 		});
 
+		it("prefers onPause over pausing the element directly", () => {
+			const player = createFakePlayer();
+			const onPause = jest.fn();
+			renderHook(() =>
+				useMediaSession({ playerRef: player, enabled: true, onPause }),
+			);
+			getHandler(mediaSessionMock, "pause")();
+			expect(onPause).toHaveBeenCalled();
+			expect(player.pause).not.toHaveBeenCalled();
+		});
+
+		it("prefers onStop over pausing the element directly", () => {
+			const player = createFakePlayer();
+			const onStop = jest.fn();
+			renderHook(() =>
+				useMediaSession({ playerRef: player, enabled: true, onStop }),
+			);
+			getHandler(mediaSessionMock, "stop")();
+			expect(onStop).toHaveBeenCalled();
+			expect(player.pause).not.toHaveBeenCalled();
+		});
+
 		it("seeks forward by the default offset and clamps to duration", () => {
 			const player = createFakePlayer({ currentTime: 95, duration: 100 });
 			renderHook(() => useMediaSession({ playerRef: player, enabled: true }));
