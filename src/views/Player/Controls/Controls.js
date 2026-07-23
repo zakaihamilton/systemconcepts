@@ -50,7 +50,9 @@ export default function Controls({
 	sessionName,
 	groupName,
 	sessionDate,
+	sessionKey,
 	renewing,
+	renewUrl,
 	variant,
 }) {
 	const progressRef = useRef(null);
@@ -67,6 +69,14 @@ export default function Controls({
 	const [playPending, setPlayPending] = useState(false);
 	const playPendingTimeoutRef = useRef(null);
 	const playRequestedRef = useRef(false);
+	// When a signed playing URL is renewed, preserve position + resume playback
+	// instead of treating the new URL as a brand-new session.
+	const pendingResumeRef = useRef(null);
+	const currentTimeRef = useRef(0);
+	// Tracks whether the user intends playback to be running. Media errors and
+	// load() often pause the element; this ref survives those so renew/resume
+	// only autoplays when playback was actually wanted.
+	const wantPlayingRef = useRef(false);
 	const clearPlayPending = useCallback(() => {
 		if (playPendingTimeoutRef.current) {
 			clearTimeout(playPendingTimeoutRef.current);
@@ -99,12 +109,6 @@ export default function Controls({
 	const sessionTitle = formattedDate
 		? `${formattedDate} ${sessionName || "Session"}`
 		: sessionName || "Session";
-	useMediaSession({
-		playerRef,
-		title: sessionTitle,
-		artist: capitalizedArtist,
-		enabled: show && !!playerRef,
-	});
 	const [metadata, , , setMetadata] = useFile(
 		metadataPath,
 		[metadataPath, metadataKey],
@@ -118,7 +122,37 @@ export default function Controls({
 		stateRef.current = { visible, show, metadata, path };
 	}, [visible, show, metadata, path]);
 
+	useEffect(() => {
+		currentTimeRef.current = currentTime;
+	}, [currentTime]);
+
 	const lastUpdateTimeRef = useRef(0);
+
+	const beginPlay = useCallback(() => {
+		// Do not flash a spinner for the usual immediate start. If playback has not
+		// started shortly, show the pending state so slower signed URLs/buffering
+		// still have clear feedback.
+		if (playPendingTimeoutRef.current) {
+			clearTimeout(playPendingTimeoutRef.current);
+			playPendingTimeoutRef.current = null;
+		}
+		wantPlayingRef.current = true;
+		playRequestedRef.current = true;
+		playPendingTimeoutRef.current = setTimeout(() => {
+			playPendingTimeoutRef.current = null;
+			setPlayPending(true);
+		}, PLAY_LOADING_DELAY_MS);
+		playerRef.play().catch((err) => {
+			clearPlayPending();
+			structuredLogger.error(err);
+		});
+	}, [playerRef, clearPlayPending]);
+
+	useEffect(() => {
+		// Switching sessions must not resume the previous session's play intent.
+		pendingResumeRef.current = null;
+		wantPlayingRef.current = false;
+	}, [sessionKey]);
 
 	useEffect(() => {
 		const clearPendingError = () => {
@@ -133,6 +167,18 @@ export default function Controls({
 				if (renewing) {
 					clearPendingError();
 					return;
+				}
+				// Media errors often emit pause next. Stash resume intent now so that
+				// pause cannot clear wantPlaying before URL renew/path change runs.
+				if (!pendingResumeRef.current) {
+					const position =
+						Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
+							? playerRef.currentTime
+							: currentTimeRef.current;
+					pendingResumeRef.current = {
+						position: position > 0 ? position : 0,
+						shouldPlay: wantPlayingRef.current,
+					};
 				}
 				if (errorTimeoutRef.current) {
 					clearTimeout(errorTimeoutRef.current);
@@ -170,6 +216,22 @@ export default function Controls({
 				if (name === "playing") {
 					clearPlayPending();
 					setLoadedPath(stateRef.current.path);
+					pendingResumeRef.current = null;
+					wantPlayingRef.current = true;
+				}
+				if (name === "pause") {
+					// Error-induced and renew/load pauses must not cancel resume.
+					// Any other pause (in-app, headset/MediaSession, keyboard, etc.)
+					// cancels play intent including a pending renew.
+					if (!renewing && !playerRef.error) {
+						wantPlayingRef.current = false;
+						if (pendingResumeRef.current) {
+							pendingResumeRef.current = {
+								...pendingResumeRef.current,
+								shouldPlay: false,
+							};
+						}
+					}
 				}
 				if (name === "error") {
 					clearPlayPending();
@@ -184,8 +246,27 @@ export default function Controls({
 			// forever, even though its Play button is usable.
 			if (name === "canplay") {
 				setLoading(false);
+				const resume = pendingResumeRef.current;
+				if (resume?.shouldPlay) {
+					pendingResumeRef.current = {
+						...resume,
+						shouldPlay: false,
+					};
+					beginPlay();
+				}
 			}
 			if (name === "loadedmetadata") {
+				const resume = pendingResumeRef.current;
+				// A stashed renew resume (including position 0) must win over the
+				// normal metadata bookmark restore.
+				if (resume && Number.isFinite(resume.position)) {
+					if (resume.position > 0) {
+						playerRef.currentTime = resume.position; // eslint-disable-line react-hooks/immutability
+						setCurrentTime(resume.position);
+						currentTimeRef.current = resume.position;
+					}
+					return;
+				}
 				if (!metadataKey) return; // Skip if metadataKey not ready
 				const currentMetadata = metadataKey
 					? stateRef.current.metadata?.[metadataKey] || {}
@@ -247,7 +328,7 @@ export default function Controls({
 				playerRef.removeEventListener(name, callback),
 			);
 		};
-	}, [playerRef, metadataKey, renewing, clearPlayPending]);
+	}, [playerRef, metadataKey, renewing, clearPlayPending, beginPlay]);
 
 	useEffect(() => {
 		if (renewing && errorTimeoutRef.current) {
@@ -266,6 +347,8 @@ export default function Controls({
 		});
 
 		if (!metadataKey) return; // Skip if metadataKey not ready
+		// A pending signed-URL renew owns position restore; don't apply bookmarks.
+		if (pendingResumeRef.current) return;
 		if (metadata && playerRef && playerRef.readyState >= 1) {
 			const currentMetadata = metadataKey
 				? metadata?.[metadataKey] || {}
@@ -462,40 +545,88 @@ export default function Controls({
 		},
 	};
 	const play = () => {
-		// Do not flash a spinner for the usual immediate start. If playback has not
-		// started shortly, show the pending state so slower signed URLs/buffering
-		// still have clear feedback.
-		playRequestedRef.current = true;
-		playPendingTimeoutRef.current = setTimeout(() => {
-			playPendingTimeoutRef.current = null;
-			setPlayPending(true);
-		}, PLAY_LOADING_DELAY_MS);
-		playerRef.play().catch((err) => {
-			clearPlayPending();
-			structuredLogger.error(err);
-		});
+		beginPlay();
 	};
 	const pause = () => {
+		wantPlayingRef.current = false;
+		if (pendingResumeRef.current) {
+			pendingResumeRef.current = {
+				...pendingResumeRef.current,
+				shouldPlay: false,
+			};
+		}
 		clearPlayPending();
 		playerRef.pause();
 	};
 	const stop = useCallback(() => {
+		wantPlayingRef.current = false;
 		clearPlayPending();
+		pendingResumeRef.current = null;
 		playerRef.pause();
 		playerRef.currentTime = 0; // eslint-disable-line react-hooks/immutability
 		setCurrentTime(0);
 	}, [playerRef, clearPlayPending]);
+
+	useMediaSession({
+		playerRef,
+		title: sessionTitle,
+		artist: capitalizedArtist,
+		enabled: show && !!playerRef,
+		onPause: pause,
+		onStop: stop,
+	});
+
+	const reloadMedia = useCallback(() => {
+		const position =
+			Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
+				? playerRef.currentTime
+				: currentTimeRef.current;
+		pendingResumeRef.current = {
+			position: position > 0 ? position : 0,
+			shouldPlay: wantPlayingRef.current,
+		};
+		setError(null);
+		if (renewUrl) {
+			renewUrl();
+			return;
+		}
+		playerRef.load();
+	}, [playerRef, renewUrl]);
 
 	const prevPath = useRef(path);
 	useEffect(() => {
 		if (prevPath.current === path) {
 			return;
 		}
+		const hadPreviousPath = !!prevPath.current;
 		prevPath.current = path;
+
+		// A new signed URL for the same session arrives while renewing/recovering.
+		// Preserve position and optionally resume — Audio/Video own load().
+		if (hadPreviousPath && path && (renewing || pendingResumeRef.current)) {
+			const position =
+				Number.isFinite(playerRef.currentTime) && playerRef.currentTime > 0
+					? playerRef.currentTime
+					: currentTimeRef.current;
+			const stashed = pendingResumeRef.current?.position;
+			pendingResumeRef.current = {
+				position:
+					Number.isFinite(stashed) && stashed > 0
+						? stashed
+						: position > 0
+							? position
+							: 0,
+				shouldPlay:
+					pendingResumeRef.current?.shouldPlay ?? wantPlayingRef.current,
+			};
+			setLoadedPath(null);
+			return;
+		}
+
+		pendingResumeRef.current = null;
 		stop();
-		playerRef.load();
 		setLoadedPath(null);
-	}, [path, playerRef, stop]);
+	}, [path, playerRef, stop, renewing]);
 
 	return (
 		<>
@@ -506,11 +637,7 @@ export default function Controls({
 					variant="filled"
 					severity="error"
 					action={
-						<Button
-							variant="contained"
-							onClick={() => playerRef.load()}
-							size="small"
-						>
+						<Button variant="contained" onClick={reloadMedia} size="small">
 							{translations.RELOAD}
 						</Button>
 					}
@@ -570,7 +697,7 @@ export default function Controls({
 						<PlayerButton
 							icon={<ReplayIcon />}
 							name={translations.RELOAD}
-							onClick={() => playerRef.load()}
+							onClick={reloadMedia}
 							variant={variant}
 						/>
 					)}

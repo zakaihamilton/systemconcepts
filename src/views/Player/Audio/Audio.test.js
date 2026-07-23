@@ -89,12 +89,12 @@ describe("Audio Component", () => {
 	it("renews the url on media errors and reports a load failure after three attempts", () => {
 		const renewUrl = jest.fn();
 		const onLoadError = jest.fn();
-		const { container } = render(
+		const { container, rerender } = render(
 			<Audio
 				show={true}
 				name="Test Audio"
 				group="testgroup"
-				path="https://media.example/test.m4a"
+				path="https://media.example/test.m4a?sig=1"
 				renewUrl={renewUrl}
 				onLoadError={onLoadError}
 			/>,
@@ -102,15 +102,46 @@ describe("Audio Component", () => {
 		const video = container.querySelector("video");
 
 		fireEvent.error(video);
+		// Simulate a renewed signed URL arriving between attempts.
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a?sig=2"
+				renewUrl={renewUrl}
+				onLoadError={onLoadError}
+			/>,
+		);
 		fireEvent.error(video);
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a?sig=3"
+				renewUrl={renewUrl}
+				onLoadError={onLoadError}
+			/>,
+		);
 		fireEvent.error(video);
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a?sig=4"
+				renewUrl={renewUrl}
+				onLoadError={onLoadError}
+			/>,
+		);
 		fireEvent.error(video);
 
 		expect(renewUrl).toHaveBeenCalledTimes(3);
 		expect(onLoadError).toHaveBeenCalledTimes(1);
 	});
 
-	it("clears recovery state after metadata loads", () => {
+	it("ignores duplicate errors while a renew is already in flight", () => {
 		const renewUrl = jest.fn();
 		const { container } = render(
 			<Audio
@@ -124,10 +155,88 @@ describe("Audio Component", () => {
 		const video = container.querySelector("video");
 
 		fireEvent.error(video);
+		fireEvent.error(video);
+		fireEvent.error(video);
+
+		expect(renewUrl).toHaveBeenCalledTimes(1);
+	});
+
+	it("clears recovery state after metadata loads", () => {
+		const renewUrl = jest.fn();
+		const { container } = render(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				path="https://media.example/test.m4a"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+			/>,
+		);
+		const video = container.querySelector("video");
+
+		fireEvent.error(video);
 		fireEvent.loadedMetadata(video);
 
 		fireEvent.error(video);
 		expect(renewUrl).toHaveBeenCalledTimes(2);
+	});
+
+	it("clears recovering when a renew fetch finishes without a new URL", () => {
+		const renewUrl = jest.fn();
+		const { container, rerender } = render(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				path="https://media.example/test.m4a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+				renewing={false}
+			/>,
+		);
+		const video = container.querySelector("video");
+		Object.defineProperty(video, "duration", {
+			configurable: true,
+			value: 125,
+		});
+		act(() => {
+			fireEvent.durationChange(video);
+		});
+
+		fireEvent.error(video);
+		expect(container.querySelector(".card")).toHaveClass("loading");
+
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				path="https://media.example/test.m4a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+				renewing={true}
+			/>,
+		);
+		rerender(
+			<Audio
+				show={true}
+				name="Test Audio"
+				group="testgroup"
+				color="red"
+				date="2021-01-01"
+				path="https://media.example/test.m4a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+				renewing={false}
+			/>,
+		);
+
+		expect(container.querySelector(".card")).not.toHaveClass("loading");
 	});
 
 	it("updates PlayerStore with the media element reference", () => {

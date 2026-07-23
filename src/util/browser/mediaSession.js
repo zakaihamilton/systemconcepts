@@ -23,11 +23,17 @@ export function useMediaSession({
 	artist,
 	artworkUrl,
 	enabled = true,
+	onPause,
+	onStop,
 }) {
 	// Track if we were playing before an interruption
 	const wasPlayingRef = useRef(false);
 	// Track the last known playback state
 	const lastPlayStateRef = useRef(false);
+	const onPauseRef = useRef(onPause);
+	const onStopRef = useRef(onStop);
+	onPauseRef.current = onPause;
+	onStopRef.current = onStop;
 
 	// Safely play with error handling
 	const safePlay = useCallback(async () => {
@@ -66,6 +72,12 @@ export function useMediaSession({
 			},
 			pause: () => {
 				structuredLogger.debug("[MediaSession] pause action received");
+				// Prefer the player Controls pause path so renew/resume play intent
+				// is cancelled the same way as the in-app Pause button.
+				if (onPauseRef.current) {
+					onPauseRef.current();
+					return;
+				}
 				if (playerRef) {
 					playerRef.pause();
 				}
@@ -98,6 +110,10 @@ export function useMediaSession({
 			},
 			stop: () => {
 				structuredLogger.debug("[MediaSession] stop action received");
+				if (onStopRef.current) {
+					onStopRef.current();
+					return;
+				}
 				if (playerRef) {
 					playerRef.pause();
 					playerRef.currentTime = 0;

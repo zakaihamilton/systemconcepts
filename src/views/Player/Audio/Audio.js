@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import Controls from "../Controls";
 import { PlayerStore } from "../Player";
 import Toolbar from "../Toolbar";
+import { useMediaUrlRenewal } from "../useMediaUrlRenewal";
 import styles from "./Audio.module.css";
 
 export default function Audio({
@@ -19,6 +20,7 @@ export default function Audio({
 	renewUrl,
 	renewing,
 	onLoadError,
+	sessionKey,
 	date,
 	group,
 	color,
@@ -32,28 +34,15 @@ export default function Audio({
 	const ref = useRef();
 	const [playerRef, setPlayerRef] = useState(null);
 	const [duration, setDuration] = useState(0);
-	const [errorCount, setErrorCount] = useState(0);
-	const [recovering, setRecovering] = useState(false);
 	const [loadedPath, setLoadedPath] = useState(null);
-	const reportedLoadError = useRef(false);
-
-	const onError = () => {
-		if (errorCount < 3) {
-			structuredLogger.debug("Audio error, renewing URL...");
-			setRecovering(true);
-			renewUrl();
-			setErrorCount((count) => count + 1);
-		} else if (!reportedLoadError.current) {
-			reportedLoadError.current = true;
-			onLoadError?.();
-		}
-	};
-
-	const clearRecovery = () => {
-		setRecovering(false);
-		setErrorCount(0);
-		reportedLoadError.current = false;
-	};
+	const { recovering, onError, clearRecovery } = useMediaUrlRenewal({
+		path,
+		renewUrl,
+		renewing,
+		onLoadError,
+		sessionKey,
+		label: "Audio",
+	});
 
 	useEffect(() => {
 		setPlayerRef(ref.current);
@@ -74,7 +63,8 @@ export default function Audio({
 
 	// React can add or replace the <source> after the media element has mounted.
 	// Browsers do not automatically reload in that case, leaving the player in
-	// NETWORK_EMPTY with no currentSrc.
+	// NETWORK_EMPTY with no currentSrc. Controls relies on this as the single
+	// load() owner for path changes.
 	useEffect(() => {
 		if (ref.current && path) {
 			ref.current.load();
@@ -136,7 +126,8 @@ export default function Audio({
 				<div
 					className={clsx(
 						styles.card,
-						(renewing || !duration || loadedPath !== path) && styles.loading,
+						(renewing || recovering || !duration || loadedPath !== path) &&
+							styles.loading,
 					)}
 					style={{ "--group-color": color }}
 				>
@@ -176,12 +167,14 @@ export default function Audio({
 					metadataPath={metadataPath}
 					metadataKey={metadataKey}
 					path={path}
+					sessionKey={sessionKey}
 					show={show}
 					zIndex={1}
 					sessionName={name}
 					groupName={group}
 					sessionDate={date}
 					renewing={renewing || recovering}
+					renewUrl={renewUrl}
 				/>
 			)}
 			{playerRef && (

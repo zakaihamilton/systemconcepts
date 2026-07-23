@@ -1,8 +1,8 @@
-import { logger as structuredLogger } from "@util/api/logger";
 import { useEffect, useRef, useState } from "react";
 import Controls from "../Controls";
 import { PlayerStore } from "../Player";
 import Toolbar from "../Toolbar";
+import { useMediaUrlRenewal } from "../useMediaUrlRenewal";
 import styles from "./Video.module.css";
 
 export default function Video({
@@ -14,6 +14,7 @@ export default function Video({
 	renewUrl,
 	renewing,
 	onLoadError,
+	sessionKey,
 	color,
 	group,
 	children,
@@ -25,27 +26,14 @@ export default function Video({
 	const ref = useRef();
 	const { style, className, ...videoProps } = props;
 	const [playerRef, setPlayerRef] = useState(null);
-	const [errorCount, setErrorCount] = useState(0);
-	const [recovering, setRecovering] = useState(false);
-	const reportedLoadError = useRef(false);
-
-	const onError = () => {
-		if (errorCount < 3) {
-			structuredLogger.debug("Video error, renewing URL...");
-			setRecovering(true);
-			renewUrl();
-			setErrorCount((count) => count + 1);
-		} else if (!reportedLoadError.current) {
-			reportedLoadError.current = true;
-			onLoadError?.();
-		}
-	};
-
-	const clearRecovery = () => {
-		setRecovering(false);
-		setErrorCount(0);
-		reportedLoadError.current = false;
-	};
+	const { recovering, onError, clearRecovery } = useMediaUrlRenewal({
+		path,
+		renewUrl,
+		renewing,
+		onLoadError,
+		sessionKey,
+		label: "Video",
+	});
 
 	useEffect(() => {
 		setPlayerRef(ref.current);
@@ -60,7 +48,8 @@ export default function Video({
 	}, [playerRef]);
 	// React can add or replace the <source> after the media element has mounted.
 	// Browsers do not automatically reload in that case, leaving the player in
-	// NETWORK_EMPTY with no currentSrc.
+	// NETWORK_EMPTY with no currentSrc. Controls relies on this as the single
+	// load() owner for path changes.
 	useEffect(() => {
 		if (ref.current && path) {
 			ref.current.load();
@@ -88,10 +77,12 @@ export default function Video({
 						metadataPath={metadataPath}
 						metadataKey={metadataKey}
 						path={path}
+						sessionKey={sessionKey}
 						show={show}
 						sessionName={name}
 						groupName={group}
 						renewing={renewing || recovering}
+						renewUrl={renewUrl}
 						variant="video"
 					/>
 				)}

@@ -67,6 +67,7 @@ describe("Controls Component", () => {
 			duration: 100,
 			paused: true,
 			readyState: 4,
+			error: null,
 		};
 	});
 
@@ -263,12 +264,25 @@ describe("Controls Component", () => {
 
 	it("shows error alert after delayed error event and allows reload", () => {
 		jest.useFakeTimers();
-		render(<Controls show playerRef={mockPlayer} />);
+		const renewUrl = jest.fn();
+		render(<Controls show playerRef={mockPlayer} renewUrl={renewUrl} />);
 		act(() => {
 			eventListeners.error();
 			jest.advanceTimersByTime(2000);
 		});
 		expect(screen.getByText("Playback error")).toBeInTheDocument();
+		fireEvent.click(screen.getByTestId("button-Reload"));
+		expect(renewUrl).toHaveBeenCalled();
+		expect(mockPlayer.load).not.toHaveBeenCalled();
+	});
+
+	it("falls back to load when reload has no renewUrl", () => {
+		jest.useFakeTimers();
+		render(<Controls show playerRef={mockPlayer} />);
+		act(() => {
+			eventListeners.error();
+			jest.advanceTimersByTime(2000);
+		});
 		fireEvent.click(screen.getByTestId("button-Reload"));
 		expect(mockPlayer.load).toHaveBeenCalled();
 	});
@@ -358,8 +372,346 @@ describe("Controls Component", () => {
 			<Controls show playerRef={mockPlayer} path="/a.mp3" />,
 		);
 		rerender(<Controls show playerRef={mockPlayer} path="/b.mp3" />);
-		expect(mockPlayer.load).toHaveBeenCalled();
+		// Session/path changes stop playback; Audio/Video own load().
 		expect(mockPlayer.pause).toHaveBeenCalled();
+		expect(mockPlayer.currentTime).toBe(0);
+	});
+
+	it("preserves position and resumes when the signed URL renews while playing", () => {
+		mockPlayer.currentTime = 42;
+		mockPlayer.paused = false;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.playing();
+		});
+		mockPlayer.pause.mockClear();
+		mockPlayer.load.mockClear();
+		mockPlayer.play.mockClear();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+
+		// Audio/Video own load(); Controls must not stop/restart the session.
+		expect(mockPlayer.load).not.toHaveBeenCalled();
+		expect(mockPlayer.pause).not.toHaveBeenCalled();
+		expect(mockPlayer.currentTime).toBe(42);
+
+		act(() => {
+			eventListeners.loadedmetadata();
+		});
+		expect(mockPlayer.currentTime).toBe(42);
+
+		act(() => {
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.play).toHaveBeenCalled();
+	});
+
+	it("preserves position without autoplay when renewing while paused", () => {
+		mockPlayer.currentTime = 42;
+		mockPlayer.paused = true;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.timeupdate();
+		});
+		mockPlayer.play.mockClear();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(42);
+		expect(mockPlayer.play).not.toHaveBeenCalled();
+	});
+
+	it("keeps play intent when error is followed by pause before renew", () => {
+		mockPlayer.currentTime = 48;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		act(() => {
+			eventListeners.playing();
+			eventListeners.timeupdate();
+		});
+		mockPlayer.play.mockClear();
+		mockPlayer.error = { code: 2 };
+
+		// Expiry typically emits error then pause while renewing is still false.
+		act(() => {
+			eventListeners.error();
+			eventListeners.pause();
+		});
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(48);
+		expect(mockPlayer.play).toHaveBeenCalled();
+	});
+
+	it("does not autoplay after the user pauses during a pending renew", () => {
+		const renewUrl = jest.fn();
+		mockPlayer.currentTime = 30;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		mockPlayer.paused = false;
+		act(() => {
+			eventListeners.playing();
+			eventListeners.timeupdate();
+			eventListeners.error();
+		});
+		// User explicitly pauses while waiting for a fresh URL.
+		fireEvent.click(screen.getByTestId("button-Pause"));
+		mockPlayer.play.mockClear();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(30);
+		expect(mockPlayer.play).not.toHaveBeenCalled();
+	});
+
+	it("cancels renew autoplay when pause fires after the media error clears", () => {
+		mockPlayer.currentTime = 30;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		act(() => {
+			eventListeners.playing();
+			eventListeners.timeupdate();
+		});
+		mockPlayer.error = { code: 2 };
+		act(() => {
+			eventListeners.error();
+			eventListeners.pause();
+		});
+		// Renew completed: error cleared, not renewing — headset pause must cancel.
+		mockPlayer.error = null;
+		mockPlayer.play.mockClear();
+		act(() => {
+			eventListeners.pause();
+		});
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(30);
+		expect(mockPlayer.play).not.toHaveBeenCalled();
+	});
+
+	it("does not restore metadata bookmark when renew resume position is zero", () => {
+		useFile.mockReturnValue([
+			{ key1: { position: 77 } },
+			false,
+			false,
+			setMetadata,
+		]);
+		mockPlayer.currentTime = 0;
+		// Avoid the metadata effect seeking to the bookmark before renew starts.
+		mockPlayer.readyState = 0;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				metadataPath="/meta.json"
+				metadataKey="key1"
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		act(() => {
+			eventListeners.playing();
+			eventListeners.error();
+		});
+		expect(mockPlayer.currentTime).toBe(0);
+		mockPlayer.readyState = 1;
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				metadataPath="/meta.json"
+				metadataKey="key1"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+		});
+		expect(mockPlayer.currentTime).toBe(0);
+	});
+
+	it("wires MediaSession pause/stop through Controls play-intent handlers", () => {
+		const { useMediaSession } = require("@util/browser/mediaSession");
+		render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+			/>,
+		);
+		expect(useMediaSession).toHaveBeenCalledWith(
+			expect.objectContaining({
+				onPause: expect.any(Function),
+				onStop: expect.any(Function),
+			}),
+		);
+	});
+
+	it("reloads via renewUrl and resumes after a playback error while playing", () => {
+		jest.useFakeTimers();
+		const renewUrl = jest.fn();
+		mockPlayer.currentTime = 55;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+			/>,
+		);
+		fireEvent.click(screen.getByTestId("button-Play"));
+		act(() => {
+			eventListeners.playing();
+			eventListeners.timeupdate();
+			eventListeners.error();
+			jest.advanceTimersByTime(2000);
+		});
+		fireEvent.click(screen.getByTestId("button-Reload"));
+		expect(renewUrl).toHaveBeenCalled();
+
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=2"
+				sessionKey="session-a"
+				renewUrl={renewUrl}
+			/>,
+		);
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.currentTime).toBe(55);
+		expect(mockPlayer.play).toHaveBeenCalled();
+	});
+
+	it("clears resume intent when the session changes", () => {
+		mockPlayer.currentTime = 40;
+		const { rerender } = render(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/a?sig=1"
+				sessionKey="session-a"
+				renewing
+			/>,
+		);
+		act(() => {
+			eventListeners.playing();
+		});
+		rerender(
+			<Controls
+				show
+				playerRef={mockPlayer}
+				path="https://media.example/b?sig=1"
+				sessionKey="session-b"
+				renewing={false}
+			/>,
+		);
+		expect(mockPlayer.pause).toHaveBeenCalled();
+		expect(mockPlayer.currentTime).toBe(0);
+		mockPlayer.play.mockClear();
+		act(() => {
+			eventListeners.loadedmetadata();
+			eventListeners.canplay();
+		});
+		expect(mockPlayer.play).not.toHaveBeenCalled();
 	});
 
 	it("handles play rejection", async () => {

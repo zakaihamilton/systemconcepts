@@ -143,6 +143,13 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 			"We couldn't load this session. Please try again. If it keeps happening, contact Zakai and mention: {session}.";
 		return template.replace("{session}", sessionLabel || translations.SESSION);
 	}, [sessionLabel, translations]);
+	const handleLoadError = useCallback(() => {
+		PlayerStore.update((s) => {
+			s.mode = "player";
+			s.message = sessionLoadError();
+			s.severity = "error";
+		});
+	}, [sessionLoadError]);
 
 	const isAudio = isAudioFile(path);
 	const isVideo = isVideoFile(path);
@@ -290,6 +297,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		metadataPath,
 		metadataKey: activeMetadataKey,
 		path: mediaPath,
+		sessionKey: path,
 		renewUrl: reload,
 		renewing: loading,
 		date,
@@ -301,7 +309,7 @@ export default function PlayerPage({ show = false, suffix, mode, ...props }) {
 		showDetails,
 		isTranscript,
 		preload: "metadata",
-		onLoadError: sessionLoadError,
+		onLoadError: handleLoadError,
 	};
 	if (isAudio || (isVideo && isTranscript)) {
 		MediaComponent = Audio;
