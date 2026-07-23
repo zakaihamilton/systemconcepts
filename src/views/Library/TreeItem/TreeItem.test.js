@@ -156,7 +156,9 @@ describe("TreeItem", () => {
 				/>
 			</div>,
 		);
-		const scrollParent = container.querySelector('[data-testid="scroll-parent"]');
+		const scrollParent = container.querySelector(
+			'[data-testid="scroll-parent"]',
+		);
 		Object.defineProperty(scrollParent, "scrollTo", { value: scrollTo });
 		jest.spyOn(window, "getComputedStyle").mockImplementation((el) => {
 			if (el === scrollParent) {

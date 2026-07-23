@@ -689,10 +689,7 @@ function getItemProgressLabel(item, translations) {
 	}
 	if (item.phase === "persisting") {
 		const yearPrefix = item.year ? `${item.year} - ` : "";
-		return (
-			yearPrefix +
-			(translations.SAVING_SESSIONS || "Saving sessions…")
-		);
+		return yearPrefix + (translations.SAVING_SESSIONS || "Saving sessions…");
 	}
 	if (item.sessionCount > 0 && item.progress < item.count) {
 		const yearPrefix = item.year ? `${item.year} - ` : "";

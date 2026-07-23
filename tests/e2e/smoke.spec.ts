@@ -133,7 +133,9 @@ test("loads a library article from a deep link when local tags exist", async ({
 		),
 	});
 	await page.evaluate(async () => {
-		type LightningFSConstructor = new (name: string) => {
+		type LightningFSConstructor = new (
+			name: string,
+		) => {
 			promises: {
 				mkdir: (path: string) => Promise<void>;
 				writeFile: (path: string, data: string) => Promise<void>;

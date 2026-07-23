@@ -16,7 +16,9 @@ function withTimeout(promise, ms, message) {
 	const timeout = new Promise((_, reject) => {
 		timeoutId = setTimeout(() => reject(new Error(message)), ms);
 	});
-	return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+	return Promise.race([promise, timeout]).finally(() =>
+		clearTimeout(timeoutId),
+	);
 }
 
 export function clearSessionMetadataCache() {
